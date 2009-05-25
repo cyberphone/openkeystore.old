@@ -1,0 +1,248 @@
+package org.webpki.wasp.prof.pdf;
+
+import java.io.IOException;
+
+import java.util.GregorianCalendar;
+import java.util.Vector;
+
+import java.security.cert.X509Certificate;
+
+import org.webpki.pdf.PDFVerifier;
+
+import org.webpki.util.ArrayUtil;
+
+import org.webpki.xml.XMLObjectWrapper;
+import org.webpki.xml.DOMReaderHelper;
+import org.webpki.xml.DOMWriterHelper;
+import org.webpki.xml.DOMAttributeReaderHelper;
+import org.webpki.xml.ServerCookie;
+
+import org.webpki.wasp.DocumentSignatures;
+import org.webpki.wasp.DocumentReferences;
+import org.webpki.wasp.DocumentData;
+import org.webpki.wasp.SignatureProfileResponseDecoder;
+import org.webpki.wasp.SignatureProfileEncoder;
+
+import org.webpki.crypto.VerifierInterface;
+import org.webpki.crypto.CertificateFilter;
+
+import static org.webpki.wasp.WASPConstants.*;
+import static org.webpki.wasp.prof.pdf.PDFProfileConstants.*;
+
+
+public class PDFProfileResponseDecoder extends XMLObjectWrapper implements SignatureProfileResponseDecoder
+  {
+
+    // Attributes
+    private String submit_url;
+
+    private String request_url;
+
+    private GregorianCalendar client_time;                      // Optional
+
+    private GregorianCalendar server_time;                      // Optional
+
+    private String id;
+
+    private byte[] server_certificate_sha1;                     // Optional
+
+    private String[] unreferenced_attachments;                  // Optional
+
+    // Elements
+    private DocumentReferences doc_refs;
+
+    private DocumentSignatures doc_signs;
+
+    private byte[] signed_pdf;
+
+    private PDFVerifier ds;
+
+    private X509Certificate[] signer_certpath;
+
+
+
+    protected boolean hasQualifiedElements ()
+      {
+        return true;
+      }
+
+
+    public byte[] getSignedPDF ()
+      {
+        return signed_pdf;
+      }
+
+
+    public void init () throws IOException
+      {
+        addSchema (XML_SCHEMA_FILE);
+      }
+
+
+    public String namespace ()
+      {
+        return XML_SCHEMA_NAMESPACE;
+      }
+
+
+    public String element ()
+      {
+        return RESPONSE_ELEM;
+      }
+
+    public String[] getUnreferencedAttachments ()
+    {
+      return unreferenced_attachments;
+    }
+
+  
+  public byte[] getServerCertificateSHA1 ()
+    {
+      return server_certificate_sha1;
+    }
+
+  
+  public String getRequestURL ()
+    {
+      return request_url;
+    }
+
+  
+  public String getSubmitURL ()
+    {
+      return submit_url;
+    }
+
+  
+  public String getID ()
+    {
+      return id;
+    }
+
+  
+  public GregorianCalendar getServerTime ()
+    {
+      return server_time;
+    }
+
+  
+  public GregorianCalendar getClientTime ()
+    {
+      return client_time;
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // XML Reader
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected void fromXML (DOMReaderHelper rd) throws IOException
+      {
+        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+        //////////////////////////////////////////////////////////////////////////
+        // Get the top-level attributes
+        //////////////////////////////////////////////////////////////////////////
+        submit_url = ah.getString (SUBMIT_URL_ATTR);
+        request_url = ah.getString (REQUEST_URL_ATTR);
+        client_time = ah.getDateTimeConditional (CLIENT_TIME_ATTR);
+        server_time = ah.getDateTimeConditional (SERVER_TIME_ATTR);
+        id = ah.getString (ID_ATTR);
+        server_certificate_sha1 = ah.getBinaryConditional (SERVER_CERT_SHA1_ATTR);
+
+        rd.getChild();
+
+        //////////////////////////////////////////////////////////////////////////
+        // Get the child elements
+        //////////////////////////////////////////////////////////////////////////
+        doc_refs = DocumentReferences.read (rd);
+        doc_signs = DocumentSignatures.read (rd);
+        signed_pdf = rd.getBinary ("SignedPDF");
+      }
+
+    protected void toXML (DOMWriterHelper helper) throws IOException
+      {
+        throw new IOException ("Should NEVER be called");
+      }
+
+    public void verifySignature (VerifierInterface verifier) throws IOException
+      {
+        ds = new PDFVerifier (verifier);
+        ds.verifyDocumentSignature (signed_pdf);
+        signer_certpath = verifier.getSignerCertificatePath ();
+      }
+
+
+    private void bad (String what) throws IOException
+      {
+        throw new IOException (what);
+      }
+
+
+    public boolean match (SignatureProfileEncoder spreenc,
+                          DocumentData doc_data,
+                          DocumentReferences doc_refs,
+                          ServerCookie server_cookie,
+                          Vector<CertificateFilter> cert_filters,
+                          String id,
+                          byte[] expected_sha1)
+    throws IOException
+      {
+        // Is this the same profile?
+        if (!(spreenc instanceof PDFProfileRequestEncoder))
+          {
+            return false;
+          }
+
+        // Yes, it was!
+        PDFProfileRequestEncoder enc = (PDFProfileRequestEncoder) spreenc;
+
+        // Check that the ID attribute is OK
+        if (!id.equals (id))
+          {
+            bad ("Non-matching ID attribute");
+          }
+
+        // Check that the document references are OK
+        this.doc_refs.check (doc_refs);
+
+        // Check that the document hashes are OK
+        if (!(new DocumentSignatures (enc.digest_algorithm, enc.document_canonicalization_algorithm, doc_data).equals (doc_signs)))
+          {
+            return false;
+          }
+
+        if (expected_sha1 != null &&
+            (server_certificate_sha1 == null || !ArrayUtil.compare (server_certificate_sha1, expected_sha1)))
+          {
+            bad ("Server certificate SHA1");
+          }
+
+        if (cert_filters.size () > 0 && signer_certpath != null)
+          {
+            for (CertificateFilter cf : cert_filters)
+              {
+                if (cf.matches (signer_certpath, null, null))
+                  {
+                    return true;
+                  }
+              }
+            bad ("Certificates does not match filter(s)");
+          }
+/*
+        if (enc.digest_algorithm != ds.getDigestAlgorithm ())
+          {
+            bad ("Wrong digest algorithm.  Requested: " + enc.digest_algorithm.getURI () +
+                                   ".  Got: " + ds.getDigestAlgorithm ().getURI ());
+          }
+
+        if (enc.signature_algorithm != ds.getSignatureAlgorithm ())
+          {
+            bad ("Wrong signature algorithm.  Requested: " + enc.signature_algorithm.getURI () +
+                                   ".  Got: " + ds.getSignatureAlgorithm ().getURI ());
+          }
+*/
+        // Success!
+        return true;
+      }
+
+  }

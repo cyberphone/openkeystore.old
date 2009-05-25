@@ -1,0 +1,106 @@
+<project name="WEBPKI.ORG library" default="compile" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="src_dir" value="../src" />
+  <property name="temp_dir" value="../.tmp" />
+  <property name="dist_dir"  value="../dist" />
+  <property name="webpki-libext" value="webpki.org-libext-1.00.jar" />
+  <property name="webpki-webutil" value="webpki.org-webutil-1.00.jar" />
+  <property name="doc_dir"  value="../.doc" />
+  <property name="debug"  value="on"/>
+  <property environment="env"/>
+  <condition property="java_root_set">
+    <isset property="env.JAVA_HOME"/>
+  </condition>
+  <fail message="JAVA_HOME must be set to environment!" unless="java_root_set"/>
+  <property name="catalina.home" value="${env.CATALINA_HOME}"/>
+
+  <path id="compile.classpath">
+    <fileset dir="${catalina.home}/lib">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="help">
+    <echo message="Available targets are help, dist, clean, deploy, compile and doc."/>
+  </target>
+
+  <target name="compile">
+    <fixcrlf srcdir="${src_dir}"
+       tab="remove"
+       tablength="4"
+       eol="lf"
+       eof="remove"
+       includes="**/*.java, **/*.xsd"/>
+    <!-- Compile the java code from ${src_dir} into ${temp_dir} -->
+    <mkdir dir="${temp_dir}" />
+    <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}" classpathref="compile.classpath">
+      <compilerarg value="-Xlint"/>
+    </javac>
+  </target>
+
+  <target name="doc">
+    <!-- Create the distribution directory -->
+    <mkdir dir="${doc_dir}" />
+
+    <!-- Make documentation -->
+    <javadoc destdir="${doc_dir}"
+             author="true"
+             version="true"
+             Package="false"
+             Use="false"
+             nodeprecated="true"
+             nodeprecatedlist="true"
+             classpathref="compile.classpath"
+             windowtitle="WebPKI.org Support">
+      <packageset dir="${src_dir}">
+        <include name="org/**"/>
+        <exclude name="org/**/test/**"/>
+      </packageset>
+      <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="${env.JAVA_HOME}\docs\api"/>
+      <link offline="true" href="http://tomcat.apache.org/tomcat-5.5-doc/servletapi" packagelistLoc="${env.JAVA_HOME}\eedocs\docs\api"/>
+      <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
+      <bottom><![CDATA[<i>2005-2009 WebPKI.org.</i>]]></bottom>
+    </javadoc>
+  </target>
+
+  <target name="dist" depends="compile">    
+    <!-- Copy all files except .java  -->
+    <copy todir="${temp_dir}" preservelastmodified="true">
+      <fileset dir="${src_dir}">
+        <include name="org/**/*"/>
+        <exclude name="org/**/*.java"/>
+        <exclude name="org/**/package.html"/>
+        <exclude name="org/**/doc-files/*"/>
+      </fileset>
+    </copy>
+
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist_dir}" />
+
+    <!-- Put everything from ${temp_dir} into the two jar files -->
+    <jar jarfile="${dist_dir}/${webpki-libext}">
+      <fileset dir="${temp_dir}">
+        <exclude name="org/webpki/webutil/**"/>
+      </fileset>
+    </jar>
+    <jar jarfile="${dist_dir}/${webpki-webutil}">
+      <fileset dir="${temp_dir}">
+        <include name="org/webpki/webutil/**"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="clean">
+    <delete dir="${temp_dir}"/>
+    <delete file="${dist_dir}/${webpki-libext}"/>
+    <delete file="${dist_dir}/${webpki-webutil}"/>
+  </target>
+
+  <target name="deploy" depends="clean,dist">
+    <copy file="${dist_dir}/${webpki-libext}" todir="${env.JAVA_HOME}/jre/lib/ext" preservelastmodified="true"/>
+    <copy file="${dist_dir}/${webpki-webutil}" todir="${catalina.home}/lib" preservelastmodified="true"/>
+  </target>
+
+</project>
+

@@ -1,0 +1,131 @@
+<project name="WEBPKI.ORG library for Android" default="build" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="src_dir" value="../src" />
+  <property name="android_dir" value="../.android.src.out" />
+  <property name="xerces_hacked_for_android_dir" value="../xerces.src.hacked.for.android" />
+
+  <target name="help">
+    <echo message="Available targets are help, clean, build, compile."/>
+  </target>
+
+  <target name="build" depends="clean">
+    <!-- Create the android src directory -->
+    <mkdir dir="${android_dir}" />
+    <!-- Copy all files except .java  -->
+    <copy todir="${android_dir}" preservelastmodified="true">
+      <fileset dir="${src_dir}">
+        <include name="org/**/*"/>
+        <exclude name="org/**/*.html"/>
+        <exclude name="org/**/doc-files/*"/>
+        <exclude name="org/**/pdf/**"/>
+<!--
+        <exclude name="org/**/test/**"/>
+        <exclude name="org/**/ca/**"/>
+        <exclude name="org/**/pkcs7/**"/>
+-->
+        <exclude name="org/webpki/webutil/**"/>
+     </fileset>
+    </copy>
+    <java failonerror="true" classname="org.webpki.tools.JKS2BKSConverter">
+      <arg line="${android_dir}/org/webpki/crypto/test/example.ks -same testing testing"/>
+    </java>
+    <java failonerror="true" classname="org.webpki.tools.JKS2BKSConverter">
+      <arg line="${android_dir}/org/webpki/crypto/test/marion.ks -same testing testing"/>
+    </java>
+    <java failonerror="true" classname="org.webpki.tools.JKS2BKSConverter">
+      <arg line="${android_dir}/org/webpki/crypto/test/mybank.ks -same testing testing"/>
+    </java>
+    <java failonerror="true" classname="org.webpki.tools.JKS2BKSConverter">
+      <arg line="${android_dir}/org/webpki/crypto/test/root.ks -same testing testing"/>
+    </java>
+    <java failonerror="true" classname="org.webpki.tools.JKS2BKSConverter">
+      <arg line="${android_dir}/org/webpki/crypto/test/subca.ks -same testing testing"/>
+    </java>
+    <java failonerror="true" classname="org.webpki.tools.JKS2BKSConverter">
+      <arg line="${android_dir}/org/webpki/keygen2/test/tpmcert.ks -same testing thetpm"/>
+    </java>
+    <java failonerror="true" classname="org.webpki.tools.JKS2BKSConverter">
+      <arg line="${android_dir}/org/webpki/keygen2/test/tpmroot.ks -same testing thetpm"/>
+    </java>
+    <replaceregexp
+        flags="gs"
+        match="&lt;\!\-\-.*?\-\-&gt;"
+        replace=""
+        byline="false">
+        <fileset dir="${android_dir}" includes="**/*.xsd"/>
+    </replaceregexp>
+    <replaceregexp file="${android_dir}/org/webpki/keygen2/keygen2.xsd"
+        flags="s"
+        match="&lt;xs\:element name=&quot;KeyOperationResponse&quot;&gt;.*?\n   &lt;\/xs\:element&gt;"
+        replace=""
+        byline="false"/>
+    <replaceregexp file="${android_dir}/org/webpki/keygen2/keygen2.xsd"
+        flags="s"
+        match="&lt;xs\:element name=&quot;PlatformNegotiationResponse&quot;&gt;.*?\n   &lt;\/xs\:element&gt;"
+        replace=""
+        byline="false"/>
+    <replaceregexp file="${android_dir}/org/webpki/keygen2/keygen2.xsd"
+        flags="s"
+        match="&lt;xs\:element name=&quot;GeneratedPublicKey&quot;&gt;.*?\n   &lt;\/xs\:element&gt;"
+        replace=""
+        byline="false"/>
+    <replaceregexp file="${android_dir}/org/webpki/keygen2/keygen2.xsd"
+        flags="s"
+        match="&lt;xs\:element name=&quot;CredentialDeploymentResponse&quot;&gt;.*?\n   &lt;\/xs\:element&gt;"
+        replace=""
+        byline="false"/>
+    <replaceregexp file="${android_dir}/org/webpki/keygen2/keygen2.xsd"
+        flags="s"
+        match="&lt;xs\:element name=&quot;ClientErrorReponse&quot;&gt;.*?\n   &lt;\/xs\:element&gt;"
+        replace=""
+        byline="false"/>
+    <replaceregexp
+        flags="gs"
+        match="(\n)(\s*)"
+        replace="\1"
+        byline="false">
+        <fileset dir="${android_dir}" includes="**/*.xsd"/>
+    </replaceregexp>
+    <replace summary="true" dir="${android_dir}" value='"BKS"'>
+       <include name="**/*.java"/>
+       <replacetoken><![CDATA["JKS"]]></replacetoken>
+     </replace>
+     <replace summary="true" dir="${android_dir}" value='sep + "etc" + sep + "security" + sep + "cacerts.bks"'>
+       <include name="**/*.java"/>
+       <replacetoken><![CDATA[sep + "lib" + sep + "security" + sep + "cacerts"]]></replacetoken>
+     </replace>
+    <copy todir="${android_dir}/org/webpki/internal" preservelastmodified="true">
+      <fileset dir="${xerces_hacked_for_android_dir}">
+        <include name="**/*"/>
+        <exclude name="**/*.html"/>
+        <exclude name="**/doc-files/*"/>
+     </fileset>
+    </copy>
+    <replace summary="true" dir="${android_dir}" value="org.webpki.internal.org.w3c.">
+       <include name="**/*.java"/>
+       <replacetoken><![CDATA[org.w3c.]]></replacetoken>
+     </replace>
+    <replace summary="true" dir="${android_dir}" value="org.webpki.internal.javax.xml">
+       <include name="**/*.java"/>
+       <replacetoken><![CDATA[javax.xml]]></replacetoken>
+     </replace>
+    <replace summary="true" dir="${android_dir}" value="org.webpki.internal.org.apache.">
+       <include name="**/*.java"/>
+       <replacetoken><![CDATA[org.apache.]]></replacetoken>
+     </replace>
+    <replace summary="true" dir="${android_dir}" value="else /* Android patch... */ ((HttpsURLConnection)conn).setHostnameVerifier (new org.apache.http.conn.ssl.StrictHostnameVerifier ());">
+       <include name="org/webpki/net/HttpsWrapper.java"/>
+       <replacetoken><![CDATA[// ANDROID PATCH HERE]]></replacetoken>
+     </replace>
+  </target>
+
+  <target name="clean">
+    <delete dir="${android_dir}"/>
+  </target>
+
+  <target name="compile" depends="build">
+    <javac debug="${debug}" srcdir="${android_dir}" destdir="${android_dir}"/>
+  </target>  
+</project>
+

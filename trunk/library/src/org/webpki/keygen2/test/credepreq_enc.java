@@ -1,0 +1,76 @@
+package org.webpki.keygen2.test;
+
+import java.util.Date;
+
+import java.security.cert.X509Certificate;
+
+import org.webpki.util.ArrayUtil;
+import org.webpki.util.ImageData;
+
+import org.webpki.xml.DOMReaderHelper;
+import org.webpki.xml.XMLObjectWrapper;
+
+import org.webpki.wasp.test.BankLogo;
+ 
+import org.webpki.crypto.test.DemoKeyStore;
+
+import org.webpki.crypto.JKSSignCertStore;
+
+import org.webpki.keygen2.CredentialDeploymentRequestEncoder;
+import org.webpki.keygen2.KeyGen2URIs;
+
+public class credepreq_enc
+  {
+
+    static int key_count;
+    private static void show ()
+      {
+        System.out.println ("credepreq_enc out_file\n");
+        System.exit (3);
+      }
+
+    public static void main (String args[]) throws Exception
+      {
+        if (args.length < 1) show ();
+
+        Date server_time = DOMReaderHelper.parseDateTime (Constants.SERVER_TIME).getTime ();
+
+        CredentialDeploymentRequestEncoder cde = 
+                                   new CredentialDeploymentRequestEncoder ("https://ca.example.com/keygenres",
+                                                                           server_time, null, null);
+
+        cde.addCertifiedPublicKey ("Key.1",
+                   (X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey"));
+
+        X509Certificate[] two = new X509Certificate[] {(X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey"),
+                                                       (X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificateChain ("mykey")[1]};
+        cde.addCertifiedPublicKey ("Key.2", two).
+                    setFriendlyName ("My Key").
+                    setRenewalServiceData (14, new String[] {"http://ca.mybank.com/update"}, null).
+                    addLogotype (new ImageData (BankLogo.getGIFImage (), "image/gif"), KeyGen2URIs.LOGOTYPES.APPLICATION);
+        cde.addCertifiedPublicKey ("Key.3",
+                   (X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey")).
+                    setSymmetricKey (new byte[]{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},
+                                     new String[]{"http://www.w3.org/2000/09/xmldsig#hmac-sha1"}).addPropertyBag ("urn:otpstd:spec").
+                    addProperty ("login", "janedoe", false).
+                    addProperty ("digits", "8", false).
+                    addProperty ("counter", "456", true);
+        XMLObjectWrapper xml_ext = new CustomExt ();
+        cde.addCertifiedPublicKey ("Key.4",
+                   (X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey")).
+                         addExtension (xml_ext.writeXML (), xml_ext.namespace ());
+
+        JKSSignCertStore ksigner = new JKSSignCertStore (DemoKeyStore.getSubCAKeyStore (), null);
+        ksigner.setKey (null, DemoKeyStore.getSignerPassword ());
+        cde.addCertifiedPublicKey ("Key.5",
+                   (X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey")).
+                         addExtension (new byte[]{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}, "http://java.com/bytecode").
+                         signCertifiedPublicKey (ksigner);
+
+        JKSSignCertStore rsigner = new JKSSignCertStore (DemoKeyStore.getExampleDotComKeyStore (), null);
+        rsigner.setKey (null, DemoKeyStore.getSignerPassword ());
+//        cde.signRequest (rsigner);
+
+        ArrayUtil.writeFile (args[0], cde.writeXML());
+      }
+  }

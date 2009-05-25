@@ -1,0 +1,4 @@
+This project creates the client/server library as well as a web library
+Note: it can only be built using ANT build.xml in the /build directory
+
+Dependencies: none
