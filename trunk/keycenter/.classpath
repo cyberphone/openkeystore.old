@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/apache-tomcat-6.0.18/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="C:/apache-tomcat-6.0.18/lib/webpki.org-webutil-1.00.jar"/>
+	<classpathentry kind="lib" path="C:/apache-tomcat-6.0.18/lib/mail.jar"/>
+	<classpathentry kind="lib" path="C:/webpki.org/jce/dist/webpki.org-phonejce-1.00.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
