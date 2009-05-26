@@ -48,7 +48,7 @@
         <exclude name="org/webpki/webutil/**"/>
       </fileset>
     </jar>
-    <signjar jar="${dist_dir}/${phonejce}" alias="jcesign" storepass="foo123" keypass="foo123" keystore="../../resources/jce-certificates/signer-pw-foo123.jks"/>
+    <signjar jar="${dist_dir}/${phonejce}" alias="jcesign" storepass="foo123" keypass="foo123" keystore="../../non-public/jce-certificates/signer-pw-foo123.jks"/>
   </target>
 
   <target name="doc">
