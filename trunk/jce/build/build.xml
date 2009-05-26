@@ -1,0 +1,82 @@
+<project name="WEBPKI.ORG phonejce" default="compile" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="src_dir" value="../src" />
+  <property name="temp_dir" value="../.tmp" />
+  <property name="dist_dir"  value="../dist" />
+  <property name="phonejce" value="webpki.org-phonejce-1.00.jar" />
+  <property name="doc_dir"  value="../doc" />
+  <property name="debug"  value="on"/>
+  <property environment="env"/>
+  <condition property="java_root_set">
+    <isset property="env.JAVA_HOME"/>
+  </condition>
+  <fail message="JAVA_HOME must be set to environment!" unless="java_root_set"/>
+
+  <target name="help">
+    <echo message="Available targets are help, clean, compile and doc."/>
+  </target>
+
+  <target name="compile">
+    <fixcrlf srcdir="${src_dir}"
+       tab="remove"
+       tablength="4"
+       eol="lf"
+       eof="remove"
+       includes="**/*.java, **/*.xsd"/>
+    <!-- Compile the java code from ${src_dir} into ${temp_dir} -->
+    <mkdir dir="${temp_dir}" />
+    <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}">
+      <compilerarg value="-Xlint"/>
+    </javac>
+    <!-- Copy all files except .java  -->
+    <copy todir="${temp_dir}" preservelastmodified="true">
+      <fileset dir="${src_dir}">
+        <include name="org/**/*"/>
+        <exclude name="org/**/*.java"/>
+        <exclude name="org/**/package.html"/>
+        <exclude name="org/**/doc-files/*"/>
+      </fileset>
+    </copy>
+
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist_dir}" />
+
+    <!-- Put everything from ${temp_dir} into the two jar files -->
+    <jar jarfile="${dist_dir}/${phonejce}">
+      <fileset dir="${temp_dir}">
+        <exclude name="org/webpki/webutil/**"/>
+      </fileset>
+    </jar>
+    <signjar jar="${dist_dir}/${phonejce}" alias="jcesign" storepass="foo123" keypass="foo123" keystore="../../resources/jce-certificates/signer-pw-foo123.jks"/>
+  </target>
+
+  <target name="doc">
+    <!-- Create the distribution directory -->
+    <mkdir dir="${doc_dir}" />
+
+    <!-- Make documentation -->
+    <javadoc destdir="${doc_dir}"
+             author="true"
+             version="true"
+             Package="false"
+             Use="false"
+             nodeprecated="true"
+             nodeprecatedlist="true"
+             windowtitle="WebPKI.org Phone JCE">
+      <packageset dir="${src_dir}">
+        <include name="org/**"/>
+        <exclude name="org/**/test/**"/>
+      </packageset>
+      <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="${env.JAVA_HOME}\docs\api"/>
+      <doctitle><![CDATA[<h1>WebPKI.org Phone JCE</h1>]]></doctitle>
+      <bottom><![CDATA[<i>2006-2009 WebPKI.org</i>]]></bottom>
+    </javadoc>
+  </target>
+
+  <target name="clean">
+    <delete dir="${temp_dir}"/>
+    <delete file="${dist_dir}/${phonejce}"/>
+  </target>
+
+</project>

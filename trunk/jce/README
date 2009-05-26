@@ -1,0 +1,4 @@
+This project creates a JCE provider for use with the web emulator
+Note: it can only be built using ANT build.xml in the /build directory
+
+Dependencies: library
