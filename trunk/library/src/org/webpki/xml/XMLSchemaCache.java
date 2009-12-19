@@ -176,7 +176,6 @@ public class XMLSchemaCache
 
     public void addSchema (InputStream is, String fname) throws IOException
       {
-
         addSchema (ArrayUtil.getByteArrayFromInputStream (is), fname);
       }
 

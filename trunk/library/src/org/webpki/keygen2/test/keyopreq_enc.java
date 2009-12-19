@@ -40,8 +40,7 @@ public class keyopreq_enc
                            new KeyOperationRequestEncoder (Constants.SESSION_ID,
                                                            Constants.REQUEST_ID,
                                                            "https://ca.example.com/keygenres",
-                                                           server_time,
-                                                           new ImageData (new byte[]{0,6,7,8}, "image/gif"));
+                                                           server_time);
 
  //      kre.setAES256Mode (true);
 

@@ -2,6 +2,9 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.security.interfaces.RSAPublicKey;
+
+import org.webpki.util.ImageData;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
@@ -19,6 +22,10 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
     private String server_session_id;
 
     private String submit_url;
+    
+    private RSAPublicKey issuer_key_exchange_key;
+
+    private ImageData issuer_logotype;      // Optional
 
     BasicCapabilities basic_capabilities;
 
@@ -45,6 +52,12 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
       }
 
 
+    public ImageData getIssuerLogotype ()
+    {
+      return issuer_logotype;
+    }
+
+
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
         new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);
@@ -57,6 +70,12 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
       }
 
 
+    public RSAPublicKey getIssuerKeyExchangeKey ()
+      {
+        return issuer_key_exchange_key;
+      }
+
+    
     public BasicCapabilities getBasicCapabilities ()
       {
         return basic_capabilities;
@@ -76,6 +95,27 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
         submit_url = ah.getString (SUBMIT_URL_ATTR);
 
         rd.getChild ();
+        
+        rd.getNext (ISSUER_KEY_EXCHANGE_KEY_ELEM);
+        rd.getChild ();
+        rd.getNext (XMLSignatureWrapper.KEY_INFO_ELEM);
+        if (ah.getStringConditional (ID_ATTR) != null)
+          {
+            throw new IOException ("Unexpexted \"Id\" attribute on \"KeyInfo\"");
+          }
+        rd.getChild ();
+        rd.getNext (XMLSignatureWrapper.KEY_VALUE_ELEM);
+        rd.getChild ();
+        issuer_key_exchange_key = (RSAPublicKey) XMLSignatureWrapper.readPublicKey (rd);
+        rd.getParent ();
+        if (rd.hasNext ()) throw new IOException ("Only one element allowed to \"KeyInfo\"");
+        rd.getParent ();
+        rd.getParent ();
+
+        if (rd.hasNext (ISSUER_LOGOTYPE_ELEM))
+          {
+            issuer_logotype = new ImageData (rd.getBinary (ISSUER_LOGOTYPE_ELEM), ah.getString (MIME_TYPE_ATTR));
+          }
 
         basic_capabilities = BasicCapabilities.read (rd);
 

@@ -11,7 +11,7 @@ public class WrappedException extends RuntimeException
     static final long serialVersionUID = 10000000000L;
 
     /**
-     * Takes an existing exception and create a new one while keeping the stack intact.
+     * Takes an existing exception and creates a new one while keeping the stack intact.
      * @param wrapped_exception The exception.
      */
     public WrappedException (Exception wrapped_exception)

@@ -48,10 +48,6 @@ public class keyopreq_dec
         XMLSchemaCache cache = new XMLSchemaCache ();
         cache.addWrapper (KeyOperationRequestDecoder.class);
         KeyOperationRequestDecoder kgrd = (KeyOperationRequestDecoder)cache.parse (ArrayUtil.readFile (args[0]));
-        if (kgrd.getIssuerLogotype () != null)
-          {
-            System.out.println ("Logotype!");
-          }
         for (KeyOperationRequestDecoder.RequestObjects ro : kgrd.getRequestObjects ())
           {
             System.out.println ();

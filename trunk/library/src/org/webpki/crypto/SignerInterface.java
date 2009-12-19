@@ -16,16 +16,24 @@ public interface SignerInterface
     /**
      * Returns the certificate path associated with the key.
      */
-    X509Certificate[] prepareSigning (boolean fullpath) throws IOException;
+    public X509Certificate[] prepareSigning (boolean fullpath) throws IOException;
 
     /**
      * Signs data using the key.
      */
-    byte[] signData (byte[] data, SignatureAlgorithms algorithm) throws IOException;
+    public byte[] signData (byte[] data, SignatureAlgorithms algorithm) throws IOException;
 
     /**
      * Returns a descriptor of the signer certificate.
      */
-    CertificateInfo getSignerCertificateInfo () throws IOException;
+    public CertificateInfo getSignerCertificateInfo () throws IOException;
+    
+    /**
+     * Tests if a signature operation failed due to authorization errors.
+     * 
+     * @return true if the key wasn't authorized (wrong PIN)
+     * @throws IOException
+     */
+    public boolean authorizationFailed () throws IOException;
 
   }

@@ -10,13 +10,14 @@ import java.security.KeyStore;
 import java.security.Signature;
 import java.security.PrivateKey;
 import java.security.GeneralSecurityException;
+import java.security.UnrecoverableKeyException;
 
 
 public class JKSSignCertStore implements SignerInterface, CertificateSelectorSpi
   {
     private PrivateKey private_key;
 
-    private boolean did_fail;
+    private boolean authorization_failed;
 
     private KeyStore signer_cert_keystore;
 
@@ -33,7 +34,6 @@ public class JKSSignCertStore implements SignerInterface, CertificateSelectorSpi
       {
         if (!signer_cert_keystore.isKeyEntry (key_alias))
           {
-            did_fail = true;
             throw new IOException ("Specified certficate does not have a private key: " + key_alias);
           }
       }
@@ -120,7 +120,6 @@ public class JKSSignCertStore implements SignerInterface, CertificateSelectorSpi
           }
         catch (GeneralSecurityException e)
           {
-            did_fail = true;
             throw new IOException (e.getMessage ());
           }
       }
@@ -143,7 +142,7 @@ public class JKSSignCertStore implements SignerInterface, CertificateSelectorSpi
           }
         catch (GeneralSecurityException e)
           {
-            did_fail = true;
+            authorization_failed = true;
             throw new IOException (e.getMessage ());
           }
       }
@@ -156,16 +155,15 @@ public class JKSSignCertStore implements SignerInterface, CertificateSelectorSpi
       }
 
 
-    public boolean failed ()
+    public boolean authorizationFailed ()
       {
-        return did_fail;
+        return authorization_failed;
       }
 
 
-    public boolean setKey (String in_key_alias, String password) throws IOException
+    public void setKey (String in_key_alias, String password) throws IOException
       {
         key_alias = in_key_alias;
-        did_fail = false;
         try
           {
             if (key_alias == null)
@@ -180,7 +178,7 @@ public class JKSSignCertStore implements SignerInterface, CertificateSelectorSpi
                       {
                         if (key_alias != null)
                           {
-                            did_fail = true;
+                            authorization_failed = true;
                             throw new IOException ("Missing certificate alias and multiple matches");
                           }
                         key_alias = new_key;
@@ -188,7 +186,6 @@ public class JKSSignCertStore implements SignerInterface, CertificateSelectorSpi
                   }
                 if (key_alias == null)
                   {
-                    did_fail = true;
                     throw new IOException ("No matching certificate");
                   }
               }
@@ -199,12 +196,15 @@ public class JKSSignCertStore implements SignerInterface, CertificateSelectorSpi
             private_key = (PrivateKey)signer_cert_keystore.getKey (key_alias, 
                                                                    password == null ? null : password.toCharArray ());
           }
-        catch (GeneralSecurityException e)
+        catch (UnrecoverableKeyException e)
           {
-            did_fail = true;
+            authorization_failed = true;
             throw new IOException (e.getMessage ());
           }
-        return true;
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e.getMessage ());
+          }
       }
 
 

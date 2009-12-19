@@ -14,8 +14,6 @@ import org.w3c.dom.Element;
 
 import java.security.cert.X509Certificate;
 
-import org.webpki.util.MimeTypedObject;
-
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.XMLObjectWrapper;
@@ -910,8 +908,6 @@ public class KeyOperationRequestEncoder extends KeyOperationRequest implements S
 
     String submit_url;
 
-    MimeTypedObject issuer_logotype;
-
     int next_personal_code = 1;
 
     String key_prefix = "Key.";
@@ -946,14 +942,12 @@ public class KeyOperationRequestEncoder extends KeyOperationRequest implements S
     public KeyOperationRequestEncoder (String client_session_id,
                                        String server_session_id,
                                        String submit_url,
-                                       Date server_time,
-                                       MimeTypedObject issuer_logotype) throws IOException
+                                       Date server_time) throws IOException
       {
         super.client_session_id = client_session_id;
         super.server_session_id = server_session_id;
         this.submit_url = submit_url;
         this.server_time = server_time;
-        this.issuer_logotype = issuer_logotype;
       }
 
 
@@ -1110,12 +1104,6 @@ public class KeyOperationRequestEncoder extends KeyOperationRequest implements S
         if (manage_objects.isEmpty () && requested_keys.isEmpty ())
           {
             bad ("Empty request not allowed!");
-          }
-
-        if (issuer_logotype != null)
-          {
-            wr.addBinary (ISSUER_LOGOTYPE_ELEM, issuer_logotype.getData ());
-            wr.setStringAttribute (MIME_TYPE_ATTR, issuer_logotype.getMimeType ());
           }
 
         ////////////////////////////////////////////////////////////////////////

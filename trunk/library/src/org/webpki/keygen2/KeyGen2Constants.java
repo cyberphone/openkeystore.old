@@ -149,6 +149,8 @@ public interface KeyGen2Constants
        
     // Sub elements
 
+    String ISSUER_KEY_EXCHANGE_KEY_ELEM      = "IssuerKeyExchangeKey";
+
     String PRIVATE_KEY_ARCHIVAL_KEY_ELEM     = "PrivateKeyArchivalKey";
 
     String EXTENSION_ELEM                    = "Extension";

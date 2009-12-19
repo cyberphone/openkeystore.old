@@ -14,7 +14,6 @@ import java.security.cert.X509Certificate;
 
 import org.w3c.dom.Element;
 
-import org.webpki.util.ImageData;
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMReaderHelper;
@@ -887,8 +886,6 @@ public class KeyOperationRequestDecoder extends KeyOperationRequest implements S
 
     private String submit_url;
 
-    private ImageData issuer_logotype;      // Optional
-
     private ServerCookie server_cookie;     // Optional
 
     private boolean deferred_certification;
@@ -906,12 +903,6 @@ public class KeyOperationRequestDecoder extends KeyOperationRequest implements S
     public String getServerSessionID ()
       {
         return server_session_id;
-      }
-
-
-    public ImageData getIssuerLogotype ()
-      {
-        return issuer_logotype;
       }
 
 
@@ -976,11 +967,6 @@ public class KeyOperationRequestDecoder extends KeyOperationRequest implements S
         deferred_certification = ah.getBooleanConditional (DEFERRED_CERTIFICATION_ATTR);
 
         rd.getChild ();
-
-        if (rd.hasNext (ISSUER_LOGOTYPE_ELEM))
-          {
-            issuer_logotype = new ImageData (rd.getBinary (ISSUER_LOGOTYPE_ELEM), ah.getString (MIME_TYPE_ATTR));
-          }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the request and management elements [1..n]
