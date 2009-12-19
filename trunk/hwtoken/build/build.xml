@@ -1,0 +1,44 @@
+<project name="testing" default="compile" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="mingw" value="c:/mingw/bin"/>
+  <property name="bin_dir" value="../bin"/>
+  <property name="java_src_dir" value="../java"/>
+  <property name="cpp_dir" value="../cpp"/>
+  <property name="debug"  value="on"/>
+  <property environment="env"/>
+  <condition property="java_root_set">
+    <isset property="env.JAVA_HOME"/>
+  </condition>
+  <fail message="JAVA_HOME must be set to environment!" unless="java_root_set"/>
+  <property name="catalina.home" value="${env.CATALINA_HOME}"/>
+
+  <target name="help">
+    <echo message="Available targets are help, dist, clean, deploy, compile and doc."/>
+  </target>
+
+  <target name="cpp">
+  	<exec dir="${bin_dir}" executable="${mingw}/g++.exe">
+  	  <arg line="-O0 -g3 -shared -Wl,--add-stdcall-alias -I&quot;${env.JAVA_HOME}\include&quot; -I&quot;${env.JAVA_HOME}\include\win32&quot; -o jni-crypto.dll -Wall -fmessage-length=0 ${cpp_dir}\webpki\*.cpp ${cpp_dir}\jni-crypto.cpp"/>
+  	</exec>
+  </target>
+
+  <target name="jni">
+	  <javah outputFile="${cpp_dir}/jni-crypto.h" classpath="${bin_dir}" force="yes">
+	    <class name="org.webpki.sks.testclib.AESProvider"/>
+	  </javah>
+   </target>
+	
+  <target name="compile">
+    <javac debug="${debug}" srcdir="${java_src_dir}" destdir="${bin_dir}">
+      <compilerarg value="-Xlint"/>
+    </javac>
+  </target>
+
+  <target name="run">
+  	<java fork="true" classpath="${bin_dir}" classname="org.webpki.sks.testclib.Test">
+  	  <jvmarg value="-Djava.library.path=${bin_dir}"/>
+  	</java>
+  </target>
+
+</project>
