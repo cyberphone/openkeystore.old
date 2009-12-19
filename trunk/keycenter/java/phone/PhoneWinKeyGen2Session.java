@@ -8,15 +8,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.webutil.ServletUtil;
 
-import org.webpki.keygen2.PlatformNegotiationRequestDecoder;
-import org.webpki.keygen2.PlatformNegotiationResponseEncoder;
+import org.webpki.keygen2.KeyOperationRequestDecoder;
 import org.webpki.keygen2.PassphraseFormats;
 
-import org.webpki.sks.Provisioning;
+import org.webpki.sks.PINProvisioning;
 
 
 @SuppressWarnings("serial")
-public class PhoneWinKeyGen2Init extends PhoneWinKeyGen2Base
+public class PhoneWinKeyGen2Session extends PhoneWinKeyGen2Base
   {
 
     public void protectedPost (HttpServletRequest request, HttpServletResponse response, HttpSession session) throws IOException, ServletException
@@ -68,7 +67,7 @@ public class PhoneWinKeyGen2Init extends PhoneWinKeyGen2Base
             addPINDialog (s, ps.pin_provisioning.getFormat (), error, true);
 
             /*======================================================*/
-            /* In this aplication we always show a logotype.        */
+            /* In this application we always show a logotype.       */
             /*======================================================*/
             addLogotypeAndFooter (s, session, ps.platform_decoder);
 
@@ -96,32 +95,16 @@ public class PhoneWinKeyGen2Init extends PhoneWinKeyGen2Base
 
     public void protectedGet (HttpServletRequest request, HttpServletResponse response, HttpSession session) throws IOException, ServletException
       {
-        ProvisioningState ps = new ProvisioningState ();
-        PhoneUtil.setDeferredCertificationHandler (session, null);        PlatformNegotiationRequestDecoder platform_decoder = (PlatformNegotiationRequestDecoder)PhoneUtil.getXMLObject (session);        PlatformNegotiationResponseEncoder platform_encoder = new Provisioning (getSKS (session)).negotiate (platform_decoder);
+        ProvisioningState ps = getProvisioningState (session);
+        if (PhoneUtil.writeXMLObject (session, request, response, ps.platform_encoder, ps.platform_decoder.getSubmitURL ()))
+          {
+            System.out.println ("There was presumably a KG2 platform error");
+            return;
+          }
+        KeyOperationRequestDecoder keyopreq_decoder = (KeyOperationRequestDecoder)PhoneUtil.getXMLObject (session);
         ps.keyopreq_server_certificate = PhoneUtil.getServerCertificate (session);
-        ps.platform_decoder = platform_decoder;
-        ps.platform_encoder = platform_encoder;
-        session.setAttribute (PROV_STATE, ps);
-
-        StringBuffer s = createHeader ("Key Generation - Init").
-          append ("<form name=\"shoot\" method=\"GET\" action=\"").
-          append (ServletUtil.getContextURL (request)).
-          append ("/phonewinkg2session\">").
-
-          append (divSection (160, SCREEN_HEIGHT)).
-          append ("<table align=\"center\" cellpadding=\"5\" cellspacing=\"0\">" +
-                  "<tr><td>The provider above wants to issue a new key or update keys that it has " +
-                  "previously issued.</td></tr>" +
-                  "<tr><td height=\"5\"></td></tr>" +
-                  "<tr><td align=\"center\"><input type=\"button\" value=\"" +
-                  "Continue\" onclick=\"this.disabled=true;document.forms.shoot.submit()\"></td></tr></table></div>");
-
-        /*======================================================*/
-        /* In this application we always show a logotype.       */
-        /*======================================================*/
-        addLogotypeAndFooter (s, session, platform_decoder);
-
-        setHTMLMode (response);
-        response.getOutputStream ().print (s.toString ());
+        ps.keyopreq_decoder = keyopreq_decoder;
+        ps.pin_provisioning = new PINProvisioning (keyopreq_decoder);
+        protectedPost (request, response, session);
       }
   }

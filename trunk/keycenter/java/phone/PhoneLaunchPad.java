@@ -44,48 +44,22 @@ import org.webpki.util.WrappedException;
 import misc.ProtectedServlet;
 import misc.KeyCenterCommands;
 
-import org.webpki.jce.SignatureProvider;
-import org.webpki.jce.SymKeyEncryptionProvider;
-import org.webpki.jce.AsymKeyEncryptionProvider;
-import org.webpki.jce.HmacProvider;
-import org.webpki.jce.KeyDescriptor;
-import org.webpki.jce.KeyMetadataProvider;
-import org.webpki.jce.InformationCardProvider;
-import org.webpki.jce.SelectedCertificate;
-import org.webpki.jce.PropertyBag;
-import org.webpki.jce.Provisioning;
-
-import org.webpki.jce.crypto.CryptoDriver;
+import org.webpki.sks.SecureKeyStore;
+import org.webpki.sks.SignatureProvider;
+import org.webpki.sks.SymKeyEncryptionProvider;
+import org.webpki.sks.AsymKeyEncryptionProvider;
+import org.webpki.sks.HmacProvider;
+import org.webpki.sks.KeyDescriptor;
+import org.webpki.sks.KeyMetadataProvider;
+import org.webpki.sks.InformationCardProvider;
+import org.webpki.sks.SelectedCertificate;
+import org.webpki.sks.PropertyBag;
+import org.webpki.sks.Provisioning;
 
 
 @SuppressWarnings("serial")
 public class PhoneLaunchPad extends ProtectedServlet
   {
-    class CASignature implements AsymKeySignerInterface
-      {
-        KeyStore ks;
-        ServletContext context;
-
-        CASignature (ServletContext context) throws IOException
-          {
-            this.context = context;
-            this.ks = getDeviceCAKeyStore (context);
-          }
-
-        public byte[] signData (byte[] data, SignatureAlgorithms sign_alg) throws IOException, GeneralSecurityException
-          {
-            Signature s = Signature.getInstance (sign_alg.getJCEName ());
-            s.initSign ((PrivateKey)ks.getKey ("mykey", context.getInitParameter ("devicecakeypass").toCharArray ()));
-            s.update (data);
-            return s.sign ();
-          }
-
-        public PublicKey getPublicKey () throws IOException, GeneralSecurityException
-          {
-            return ks.getCertificate ("mykey").getPublicKey ();
-          }
-      }
-
 
     private String getCertificateInfo (X509Certificate certificate) throws IOException
       {
@@ -93,74 +67,45 @@ public class PhoneLaunchPad extends ProtectedServlet
       }
 
 
-    String createDeviceCertificate (int user_id) throws SQLException, IOException, GeneralSecurityException
-      {
-        ServletContext context = getServletContext ();
-        CertSpec cert_spec = new CertSpec ();
-        cert_spec.setEndEntityConstraint ();
-        cert_spec.setSubject ("CN=Device Type 1AK4,serialNumber=" + user_id + ",dc=webpki,dc=org");
-
-        GregorianCalendar start = new GregorianCalendar ();
-        GregorianCalendar end = (GregorianCalendar) start.clone ();
-        end.set (GregorianCalendar.YEAR, end.get (GregorianCalendar.YEAR) + 25);
-
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
-        kpg.initialize (2048);
-        KeyPair key_pair = kpg.generateKeyPair ();
-
-        X509Certificate device_cert = 
-            new CA ().createCert (cert_spec,
-                                  DistinguishedName.subjectDN ((X509Certificate) getDeviceCAKeyStore (context).getCertificate ("mykey")),
-                                  new BigInteger (String.valueOf (new Date ().getTime ())),
-                                  start.getTime (), end.getTime (), 
-                                  SignatureAlgorithms.RSA_SHA1,
-                                  new CASignature (context),
-                                  key_pair.getPublic ());
-
-        Provisioning.storeDeviceCertificatePathAndKey (new X509Certificate[] {device_cert}, key_pair.getPrivate (), user_id);
-
-        return "\n" + getCertificateInfo (device_cert) + "\n";
-      }
-
     void signTest (SignatureProvider uc, KeyDescriptor[] kds, SignatureAlgorithms algorithm, HttpSession session) throws IOException, GeneralSecurityException, SQLException
       {
-        if (uc.open (kds[1].getKeyID (), "1234"))
-          {
-            byte[] raw_data = new byte[]{6,7};
-            byte[] sign_data = uc.signData (raw_data, algorithm);
-            PhoneDebugWin.setDebugEvent (session, "Succeed signing l=" + sign_data.length + " Alg=" + algorithm.toString ());
-            java.security.Signature verifier = Signature.getInstance (algorithm.getJCEName ());
-            verifier.initVerify (kds[1].getCertificatePath ()[0].getPublicKey ());
-            verifier.update (raw_data);
-            PhoneDebugWin.setDebugEvent (session, verifier.verify (sign_data) ? "Successful verify" : "Bad verify");
-          }
-        else
-          {
-            PhoneDebugWin.setDebugEvent (session, "Bad password");
-          }
+        uc.open (kds[1].getKeyID (), "1234");
+        byte[] raw_data = new byte[]{6,7};
+        byte[] sign_data = uc.signData (raw_data, algorithm);
+        PhoneDebugWin.setDebugEvent (session, "Succeed signing l=" + sign_data.length + " Alg=" + algorithm.toString ());
+        java.security.Signature verifier = Signature.getInstance (algorithm.getJCEName ());
+        verifier.initVerify (kds[1].getCertificatePath ()[0].getPublicKey ());
+        verifier.update (raw_data);
+        PhoneDebugWin.setDebugEvent (session, verifier.verify (sign_data) ? "Successful verify" : "Bad verify");
       }
 
-    void testRound (int user_id, HttpSession session) throws IOException, GeneralSecurityException, SQLException
+    void testRound (SecureKeyStore sks, HttpSession session) throws IOException, GeneralSecurityException, SQLException
       {
-        org.webpki.jce.BlahKS.createBlahData (user_id);
+//        org.webpki.sks.BlahKS.createBlahData (user_id);
 
-        SignatureProvider uc = new SignatureProvider (user_id);
+        SignatureProvider uc = new SignatureProvider (sks);
         for (SelectedCertificate cert : uc.getCertificateSelection (new CertificateFilter[]{new CertificateFilter ().setSubjectRegEx (".*CN=John Doe(,.*|$)")}, null))
           {
             KeyDescriptor kd = cert.getKeyDescriptor ();
             PhoneDebugWin.setDebugEvent (session, "Matching cert: " + kd.getKeyID () + " PIN=" + kd.isPINProtected () +
                                    "\n" + getCertificateInfo (cert.getCertificate ()).toString ());
           }
-        KeyMetadataProvider md = new KeyMetadataProvider (user_id);
+        KeyMetadataProvider md = new KeyMetadataProvider (sks);
         KeyDescriptor[] kds = md.getKeyDescriptors ();
         for (KeyDescriptor kd : kds)
           {
             PhoneDebugWin.setDebugEvent (session, kd.toString ());
           }
-        
-        uc.open (kds[1].getKeyID (), "0000");  // One bad attempt
-        uc.open (kds[1].getKeyID (), "0000");  // One bad attempt
-        uc.open (kds[1].getKeyID (), "0000");  // One bad attempt
+        try
+          {
+            uc.open (kds[1].getKeyID (), "0000");  // One bad attempt
+            uc.open (kds[1].getKeyID (), "0000");  // One bad attempt
+            uc.open (kds[1].getKeyID (), "0000");  // One bad attempt
+          }
+        catch (IOException iox)
+          {
+            
+          }
         PhoneDebugWin.setDebugEvent (session, (kds[1] = md.getKeyDescriptor (kds[1].getKeyID ())).toString ());
         kds[1].unlockKey ("01234567890123456");
         PhoneDebugWin.setDebugEvent (session, kds[1].toString ());
@@ -169,108 +114,60 @@ public class PhoneLaunchPad extends ProtectedServlet
         signTest (uc, kds, SignatureAlgorithms.RSA_SHA1, session);
         signTest (uc, kds, SignatureAlgorithms.RSA_SHA256, session);
         signTest (uc, kds, SignatureAlgorithms.RSA_SHA512, session);
-        HmacProvider hmac = new HmacProvider (user_id);
-        if (hmac.open (kds[2].getKeyID (), "1234"))
+        HmacProvider hmac = new HmacProvider (sks);
+        hmac.open (kds[2].getKeyID (), "1234");
+        PhoneDebugWin.setDebugEvent (session, "Succeed hmac l=" + hmac.mac (new byte[]{6,7}, MacAlgorithms.HMAC_SHA1).length);
+        SymKeyEncryptionProvider sk = new SymKeyEncryptionProvider (sks);
+        sk.open (kds[2].getKeyID (), "1234");
+        String s = "The quick brown fox jumped over the lazy bear";
+        byte[] res = sk.encrypt (s.getBytes ("UTF-8"), SymEncryptionAlgorithms.AES128_CBC);
+        sk.open (kds[2].getKeyID (), "1234");
+        PhoneDebugWin.setDebugEvent (session, new String (sk.decrypt (res, SymEncryptionAlgorithms.AES128_CBC), "UTF-8") + " [AES128_CBC]");
+        sk.open (kds[2].getKeyID (), "1234");
+        res = sk.encrypt (s.getBytes ("UTF-8"), SymEncryptionAlgorithms.AES_ECB_P5);
+        sk.open (kds[2].getKeyID (), "1234");
+        PhoneDebugWin.setDebugEvent (session, new String (sk.decrypt (res, SymEncryptionAlgorithms.AES_ECB_P5), "UTF-8") + " [AES128_ECB_P5]");
+        if (wantStrongCrypto (getServletContext ()))
           {
-            PhoneDebugWin.setDebugEvent (session, "Succeed opening sym key ");
-            hmac.mac (new byte[]{6,7}, MacAlgorithms.HMAC_SHA1);
-          }
-        else
-          {
-            PhoneDebugWin.setDebugEvent (session, "Bad password");
-          }
-        SymKeyEncryptionProvider sk = new SymKeyEncryptionProvider (user_id);
-        if (sk.open (kds[2].getKeyID (), "1234"))
-          {
-            String s = "The quick brown fox jumped over the lazy bear";
-            byte[] res = sk.encrypt (s.getBytes ("UTF-8"), SymEncryptionAlgorithms.AES128_CBC);
-            sk.open (kds[2].getKeyID (), "1234");
-            PhoneDebugWin.setDebugEvent (session, new String (sk.decrypt (res, SymEncryptionAlgorithms.AES128_CBC), "UTF-8") + " [AES128_CBC]");
-            sk.open (kds[2].getKeyID (), "1234");
+            sk.open (kds[3].getKeyID (), "1234");
             res = sk.encrypt (s.getBytes ("UTF-8"), SymEncryptionAlgorithms.AES_ECB_P5);
-            sk.open (kds[2].getKeyID (), "1234");
-            PhoneDebugWin.setDebugEvent (session, new String (sk.decrypt (res, SymEncryptionAlgorithms.AES_ECB_P5), "UTF-8") + " [AES128_ECB_P5]");
-            if (wantStrongCrypto (getServletContext ()))
-              {
-                sk.open (kds[3].getKeyID (), "1234");
-                res = sk.encrypt (s.getBytes ("UTF-8"), SymEncryptionAlgorithms.AES_ECB_P5);
-                sk.open (kds[3].getKeyID (), "1234");
-                PhoneDebugWin.setDebugEvent (session, new String (sk.decrypt (res, SymEncryptionAlgorithms.AES_ECB_P5), "UTF-8") + " [AES256_ECB_P5]");
-                sk.open (kds[3].getKeyID (), "1234");
-                res = sk.encrypt (s.getBytes ("UTF-8"), SymEncryptionAlgorithms.AES256_CBC);
-                sk.open (kds[3].getKeyID (), "1234");
-                PhoneDebugWin.setDebugEvent (session, new String (sk.decrypt (res, SymEncryptionAlgorithms.AES256_CBC), "UTF-8") + " [AES256_CBC]");
-              }
-            PropertyBag prop_bag = kds[4].getPropertyBag (org.webpki.keygen2.KeyGen2URIs.OTPPROVIDERS.IETF_HOTP);
-            if (prop_bag == null)
-              {
-                PhoneDebugWin.setDebugEvent (session, "MISSING PROPERTYBAG!");
-              }
-            else
-              {
-                PhoneDebugWin.setDebugEvent (session, "HAS PROPERTYBAG! Counter=" + prop_bag.getString ("Counter") + " LoginID.w=" + prop_bag.isWritable ("LoginID"));
+            sk.open (kds[3].getKeyID (), "1234");
+            PhoneDebugWin.setDebugEvent (session, new String (sk.decrypt (res, SymEncryptionAlgorithms.AES_ECB_P5), "UTF-8") + " [AES256_ECB_P5]");
+            sk.open (kds[3].getKeyID (), "1234");
+            res = sk.encrypt (s.getBytes ("UTF-8"), SymEncryptionAlgorithms.AES256_CBC);
+            sk.open (kds[3].getKeyID (), "1234");
+            PhoneDebugWin.setDebugEvent (session, new String (sk.decrypt (res, SymEncryptionAlgorithms.AES256_CBC), "UTF-8") + " [AES256_CBC]");
+          }
+        PropertyBag prop_bag = kds[4].getPropertyBag (org.webpki.keygen2.KeyGen2URIs.OTPPROVIDERS.IETF_HOTP);
+        if (prop_bag == null)
+          {
+            PhoneDebugWin.setDebugEvent (session, "MISSING PROPERTYBAG!");
+          }
+        else
+          {
+            PhoneDebugWin.setDebugEvent (session, "HAS PROPERTYBAG! Counter=" + prop_bag.getString ("Counter") + " LoginID.w=" + prop_bag.isWritable ("LoginID"));
 //                prop_bag.setInteger ("Counter", prop_bag.getInteger ("Counter") + 1);
-              }
-            sk.open (kds[2].getKeyID (), "1234");
-            s = "01234567";
-            res = sk.encrypt (s.getBytes ("UTF-8"), SymEncryptionAlgorithms.KW_AES128);
-            sk.open (kds[2].getKeyID (), "1234");
-            PhoneDebugWin.setDebugEvent (session, new String (sk.decrypt (res, SymEncryptionAlgorithms.KW_AES128), "UTF-8") + " [KW-128]");
           }
-        else
-          {
-            PhoneDebugWin.setDebugEvent (session, "Bad password");
-          }
-        AsymKeyEncryptionProvider asye = new AsymKeyEncryptionProvider (user_id);
-        if (asye.open (kds[1].getKeyID (), "1234"))
-          {
-            String s = "The quick brown fox jumped over the lazy bear [PKI]";
-            byte[] res = asye.encrypt (s.getBytes ("UTF-8"), kds[1].getKeyID (), AsymEncryptionAlgorithms.RSA_PKCS_1);
-            PhoneDebugWin.setDebugEvent (session, new String (asye.decrypt (res, AsymEncryptionAlgorithms.RSA_PKCS_1), "UTF-8"));
-          }
-        else
-          {
-            PhoneDebugWin.setDebugEvent (session, "Bad password");
-          }
-        InformationCardProvider.InformationCard[] ics = InformationCardProvider.getInformationCards (user_id);
+        sk.open (kds[2].getKeyID (), "1234");
+        s = "01234567";
+        res = sk.encrypt (s.getBytes ("UTF-8"), SymEncryptionAlgorithms.KW_AES128);
+        sk.open (kds[2].getKeyID (), "1234");
+        PhoneDebugWin.setDebugEvent (session, new String (sk.decrypt (res, SymEncryptionAlgorithms.KW_AES128), "UTF-8") + " [KW-128]");
+        AsymKeyEncryptionProvider asye = new AsymKeyEncryptionProvider (sks);
+        s = "The quick brown fox jumped over the lazy bear [PKI]";
+        asye.open (kds[1].getKeyID (), "1234");
+        res = asye.encrypt (s.getBytes ("UTF-8"), kds[1].getKeyID (), AsymEncryptionAlgorithms.RSA_PKCS_1);
+        PhoneDebugWin.setDebugEvent (session, new String (asye.decrypt (res, AsymEncryptionAlgorithms.RSA_PKCS_1), "UTF-8"));
+        InformationCardProvider.InformationCard[] ics = InformationCardProvider.getInformationCards (sks);
         PhoneDebugWin.setDebugEvent (session, "InfoCards=" + (ics == null ? 0 : ics.length));
       }
 
     void initPhone (HttpSession session) throws IOException
       {
-        int user_id = getUserID (session);
-        try
-          {
-            X509Certificate[] device_cert_path = null;
-            try
-              {
-                device_cert_path = new CryptoDriver (user_id).getDeviceCertificatePath ();
-              }
-            catch (IOException iox)
-              {
-System.out.println (iox.getMessage ());
-              }
-            if (device_cert_path == null)
-              {
-                PhoneDebugWin.setDebugEvent (session, "Device certificate creation begin...");
-                PhoneDebugWin.setDebugEvent (session, createDeviceCertificate (user_id));
-                PhoneDebugWin.setDebugEvent (session, "Device certificate creation finished!");
-                testRound (user_id, session);
-              }
-            else
-              {
-                PhoneDebugWin.setDebugEvent (session, "Device certificate:\n" + getCertificateInfo (device_cert_path[0]));
-              }
-          }
-        catch (SQLException iox)
-          {
-            throw new WrappedException (iox);
-          }
-        catch (GeneralSecurityException gse)
-          {
-            throw new WrappedException (gse);
-          }
-      }
+        SecureKeyStore sks = PhoneWinServlet.getSKS (session);
+        PhoneDebugWin.setDebugEvent (session, "Device certificate:\n" + getCertificateInfo (sks.getDeviceCertificatePath ()[0]));
+//        testRound (sks, session);
+     }
 
 
     protected KeyCenterCommands getCommand ()

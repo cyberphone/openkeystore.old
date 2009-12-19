@@ -15,8 +15,8 @@ import org.webpki.util.DebugFormatter;
 
 import org.webpki.crypto.CertificateInfo;
 
-import org.webpki.jce.crypto.CryptoDriver;
-import org.webpki.jce.KeyUtil;
+import org.webpki.sks.KeyUtil;
+import org.webpki.sks.SecureKeyStore;
 
 
 @SuppressWarnings("serial")
@@ -85,10 +85,11 @@ public class PhoneWinSEProperties extends PhoneWinServlet
           append (divSectionSelection ()).
           append ("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">"+
                   "<tr><td align=\"left\">");
+        SecureKeyStore crypto_driver = getSKS (session);
         switch (SE_PROPERTIES.valueOf (property))
           {
             case NAME:
-              byte[] cert_hash = new CertificateInfo (new CryptoDriver (getUserID (session)).getDeviceCertificatePath ()[0]).getCertificateHash ();
+              byte[] cert_hash = new CertificateInfo (crypto_driver.getDeviceCertificatePath ()[0]).getCertificateHash ();
               String dev_id = ArrayUtil.toHexString (cert_hash, 0, -1, true, ' ');
               String string_rep = new StringBuffer ().
                 append (dev_id.substring (0, 29)).
@@ -96,7 +97,7 @@ public class PhoneWinSEProperties extends PhoneWinServlet
                 append (dev_id.substring (30)).
                 append ("\n#").
                 append (DebugFormatter.getHexString (KeyUtil.getCRC16 (cert_hash))).toString ();
-              s.append (CryptoDriver.getDeviceName ());
+              s.append (crypto_driver.getDeviceName ());
               s.append ("</td></tr><tr><td height=\"15\"></td></tr><tr><td align=\"center\">" +
                         "<table cellpadding=\"0\" cellspacing=\"0\">" +
                         "<tr>" +
@@ -114,7 +115,7 @@ public class PhoneWinSEProperties extends PhoneWinServlet
               break;
 
             case ALGORITHMS:
-              printURIs (s, CryptoDriver.getSupportedAlgorithms ());
+              printURIs (s, crypto_driver.getSupportedAlgorithms ());
               break;
 
             case CERTIFICATE:

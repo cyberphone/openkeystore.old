@@ -50,7 +50,7 @@ public class MiscResources extends ProtectedServlet
         doclink (s, baseurl + "/keygen2-short-presentation.pdf", "Short Presentation", false);
         doclink (s, baseurl + "/schemaviewer/" + DebugFormatter.getHexString (KeyGen2Constants.KEYGEN2_NS.getBytes ("UTF-8")), "KeyGen2 XML Schema", restricted);
         doclink (s, baseurl + "/javadoc/library", "WebPKI.org Java Library", false);
-        doclink (s, baseurl + "/javadoc/keystore/org/webpki/jce/crypto/VirtualSE.html", "Virtual Security Element", false);
+        doclink (s, baseurl + "/javadoc/keystore/org/webpki/sks/dbemulator/VirtualSE.html", "Virtual Security Element", false);
         doclink (s, baseurl + "/universal-keystore-database.pdf", "Core Database Schema", false);
         s.append ("</table></td></tr></table>").append (createFooter ());
 

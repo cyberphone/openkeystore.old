@@ -279,6 +279,8 @@ CREATE TABLE PROVISIONINGS
     ProvisionID   INT            NOT NULL  AUTO_INCREMENT,                 -- Each provisioning gets a unique ID
     UserID        INT            NOT NULL,                                 -- Owner of this particular provisioning
     Created       TIMESTAMP      NOT NULL  DEFAULT CURRENT_TIMESTAMP,      -- Nice to know when created
+    
+    IssuerURI     VARCHAR (256)  NOT NULL,                                 -- Defined by the issuer 
     ClientSession VARCHAR (256)  NOT NULL,                                 -- The ID of the client session
     ServerSession VARCHAR (256)  NOT NULL,                                 -- The ID of the server session
     SavedRequest  BLOB           NULL,                                     -- Serialized KeyOperationRequestDecoder

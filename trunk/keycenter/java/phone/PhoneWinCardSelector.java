@@ -17,9 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.keygen2.KeyGen2URIs;
 
-import org.webpki.jce.OTPProvider;
-import org.webpki.jce.KeyDescriptor;
-import org.webpki.jce.Logotype;
+import org.webpki.sks.OTPProvider;
+import org.webpki.sks.KeyDescriptor;
+import org.webpki.sks.Logotype;
 
 @SuppressWarnings("serial")
 public class PhoneWinCardSelector extends PhoneWinServlet

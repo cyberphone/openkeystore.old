@@ -14,11 +14,11 @@ import org.webpki.keygen2.CredentialDeploymentResponseEncoder;
 
 import user.UserResetAccount;
 
-import org.webpki.jce.Provisioning;
+import org.webpki.sks.Provisioning;
 
 
 @SuppressWarnings("serial")
-public class PhoneWinKeyGen2Generate extends PhoneWinServlet
+public class PhoneWinKeyGen2Generate extends PhoneWinKeyGen2Base
   {
     class LocalDebug implements Provisioning.DebugCallback
       {
@@ -92,8 +92,8 @@ public class PhoneWinKeyGen2Generate extends PhoneWinServlet
 
     public void protectedGet (HttpServletRequest request, HttpServletResponse response, HttpSession session) throws IOException, ServletException
       {
-        Provisioning provisioning = new Provisioning (getUserID (session), new LocalDebug (session));
-        PhoneWinKeyGen2Init.ProvisioningState ps = PhoneWinKeyGen2Init.getProvisioningState (session);
+        Provisioning provisioning = new Provisioning (getSKS(session), new LocalDebug (session));
+        ProvisioningState ps = getProvisioningState (session);
 
         try
           {

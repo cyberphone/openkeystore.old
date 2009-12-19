@@ -26,7 +26,7 @@
 
   <context-param>
 	<param-name>devicecakeystore</param-name>
-	<param-value>deviceca.ks</param-value>
+	<param-value>deviceca.jks</param-value>
   </context-param>
 
   <context-param>
@@ -147,6 +147,16 @@
   <context-param>
 	<param-name>restricted-mode</param-name>
 	<param-value>false</param-value>
+  </context-param>
+  
+  <context-param>
+    <param-name>serial-port</param-name>
+    <param-value>COM3</param-value>
+  </context-param>
+  
+  <context-param>
+    <param-name>baudrate</param-name>
+    <param-value>115200</param-value>
   </context-param>
 
 <!-- Database.  There are two options, non-pooled and pooled
@@ -425,6 +435,11 @@
     <servlet>
 	    <servlet-name>PhoneWinKeyGen2Init</servlet-name>
         <servlet-class>phone.PhoneWinKeyGen2Init</servlet-class>
+    </servlet>
+
+    <servlet>
+	    <servlet-name>PhoneWinKeyGen2Session</servlet-name>
+        <servlet-class>phone.PhoneWinKeyGen2Session</servlet-class>
     </servlet>
 
     <servlet>
@@ -732,6 +747,11 @@
     <servlet-mapping>
         <servlet-name>PhoneWinKeyGen2Init</servlet-name>
         <url-pattern>/phonewinkg2init</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>PhoneWinKeyGen2Session</servlet-name>
+        <url-pattern>/phonewinkg2session</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

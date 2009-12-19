@@ -77,6 +77,7 @@ public class UserLogin extends ProtectedServlet
                     Cookie c = new Cookie (USER_COOKIE, email);
                     c.setMaxAge (60 * 60 * 24 * 100); // 100 days
                     c.setPath (request.getContextPath () + "/" + KeyCenterCommands.LOGIN.getServletName ());
+                    c.setSecure (request.isSecure ());
                     response.addCookie (c);
                     setLoginSession (request, userid, name, email, is_admin);
                     String target_url = request.getParameter ("url");

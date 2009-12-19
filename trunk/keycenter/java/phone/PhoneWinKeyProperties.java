@@ -9,8 +9,8 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.jce.KeyMetadataProvider;
-import org.webpki.jce.KeyDescriptor;
+import org.webpki.sks.KeyMetadataProvider;
+import org.webpki.sks.KeyDescriptor;
 
 import org.webpki.webutil.ServletUtil;
 
@@ -65,7 +65,7 @@ public class PhoneWinKeyProperties extends PhoneWinServlet
     public void protectedGet (HttpServletRequest request, HttpServletResponse response, HttpSession session) throws IOException, ServletException
       {
         String key_id = request.getParameter ("keyid");
-        KeyDescriptor kd = new KeyMetadataProvider (getUserID (session)).getKeyDescriptor (Integer.valueOf (key_id));
+        KeyDescriptor kd = new KeyMetadataProvider (getSKS (session)).getKeyDescriptor (Integer.valueOf (key_id));
         if (request.getParameter ("delete") != null)
           {
             kd.deleteKey ();

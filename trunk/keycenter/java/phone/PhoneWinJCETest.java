@@ -31,7 +31,7 @@ public class PhoneWinJCETest extends PhoneWinServlet
         KeyStore ks = null;
         try
           {
-            ks = KeyStore.getInstance ("VSE");
+            ks = KeyStore.getInstance ("WebPKI");
             ks.load (null, String.valueOf (getUserID (session)).toCharArray ());
             aliases = ks.aliases ();
           }
@@ -59,7 +59,7 @@ public class PhoneWinJCETest extends PhoneWinServlet
             verifier.initVerify (ks.getCertificate (asym));
             verifier.update (data);
             s.append (verifier.verify (sign_data)? "SIGN_OK": "****").append ("<br>");
-            Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA1.getJCEName (), "VSE");
+            Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA1.getJCEName (), ks.getProvider ());
             mac.init (ks.getKey (sym, "1345".toCharArray ()));
             s.append (mac.doFinal (data).length);
           }

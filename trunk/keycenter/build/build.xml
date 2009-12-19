@@ -4,10 +4,11 @@
   <property name="application" value="keycenter"/>
   <property name="hostname" value="arxp"/>
   <property name="src_dir" value="../java"/>
+  <property name="temp_dir" value="../.tmp"/>
   <property name="debug" value="on"/>
   <property environment="env"/>
   <property name="library_dir" value="../../library"/>
-  <property name="phonejce_dir" value="../../jce"/>
+  <property name="phonesks_dir" value="../../sks"/>
   <property name="library_doc_url" value="http://arxp/webpki/keycenter/javadoc/library"/>
   <property name="catalina.home" value="${env.CATALINA_HOME}"/>
 
@@ -15,7 +16,7 @@
     <fileset dir="${catalina.home}/lib">
       <include name="*.jar"/>
     </fileset>
-    <fileset dir="${phonejce_dir}/dist">
+    <fileset dir="${phonesks_dir}/dist">
       <include name="*.jar"/>
     </fileset>
   </path>
@@ -27,52 +28,22 @@
     </condition>
     <fail message="CATALINA_HOME must be set to environment!" unless="tomcat_app_root_set"/>
 
-    <!-- Set path to application. Note: remove /webpki -->
-    <property name="app_path" value="${env.CATALINA_HOME}/webpki/${application}"/>
+    <!-- Set path to application.  -->
+    <property name="app_path" value="${env.CATALINA_HOME}/webpki/${application}.war"/>
    </target>
 
-  <target name="copy" depends="init">
-    <copy file="../../resources/SSLcerts/${hostname}.ks" todir="${app_path}/WEB-INF/classes" preservelastmodified="true"/>
-    <copy file="../../resources/keygen2-certificates/deviceca.ks" todir="${app_path}/WEB-INF/classes" preservelastmodified="true"/>
-    <copy file="../../resources/keygen2-certificates/mybankca.ks" todir="${app_path}/WEB-INF/classes" preservelastmodified="true"/>
-    <copy file="../../resources/keygen2-certificates/archivalkey.jks" todir="${app_path}/WEB-INF/classes" preservelastmodified="true"/>
-    <copy file="../../resources/keygen2-certificates/mybanksubca1.cer" todir="${app_path}" preservelastmodified="true"/>
-    <copy todir="${app_path}" preservelastmodified="true">
-      <fileset dir="../web">
-        <include name="**/*"/>
-        <exclude name="**/*.java"/>
-        <exclude name="**/*.class"/>
-        <exclude name="**/*.sql"/>
-        <exclude name="**/*.psd"/>
-        <exclude name="**/*.ist"/>
-        <exclude name="**/*.psd"/>
-        <exclude name="**/*.doc"/>
-        <exclude name="**/*.vjp"/>
-        <exclude name="**/*.suo"/>
-        <exclude name="**/*.sln"/>
-        <exclude name="**/*.dat"/>
-        <exclude name="**/*.bat"/>
-        <exclude name="**/*.SRG"/>
-        <exclude name="**/*.sh"/>
-        <exclude name="**/CVS"/>
-        <exclude name="build.xml"/>
-      </fileset>
-    </copy>
-    <copy file="${phonejce_dir}/dist/webpki.org-phonejce-1.00.jar" todir="${app_path}/WEB-INF/lib" preservelastmodified="true"/>
-  </target>
-
-  <target name="doc" depends="init">
+  <target name="doc" depends="compile">
     <!-- Create the distribution directories -->
-    <mkdir dir="${app_path}/javadoc/keystore"/>
-    <mkdir dir="${app_path}/javadoc/library"/>
+    <mkdir dir="${temp_dir}/javadoc/keystore"/>
+    <mkdir dir="${temp_dir}/javadoc/library"/>
     
     <ant antfile="${library_dir}/build/build.xml" target="doc">
-      <property name="doc_dir" value="${app_path}/javadoc/library"/>
+      <property name="doc_dir" value="${temp_dir}/javadoc/library"/>
       <property name="src_dir" value="${library_dir}/src"/>
     </ant>
 
     <!-- Make documentation -->
-    <javadoc destdir="${app_path}/javadoc/keystore"
+    <javadoc destdir="${temp_dir}/javadoc/keystore"
              author="true"
              version="true"
              Package="false"
@@ -81,36 +52,79 @@
              nodeprecatedlist="true"
              classpathref="compile.classpath"
              windowtitle="KeyGen2 JCE and Utilities"
-             sourcepath="${phonejce_dir}/src">
+             sourcepath="${phonesks_dir}/src">
       <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="${env.JAVA_HOME}/docs/api"/>
       <link offline="true" href="http://tomcat.apache.org/tomcat-5.5-doc/servletapi" packagelistLoc="${env.JAVA_HOME}/eedocs/docs/api"/>
-      <link offline="true" href="${library_doc_url}" packagelistLoc="${app_path}/javadoc/library"/>
+      <link offline="true" href="${library_doc_url}" packagelistLoc="${temp_dir}/javadoc/library"/>
       <doctitle><![CDATA[<h1>KeyGen2 JCE and Utilities</h1>]]></doctitle>
       <bottom><![CDATA[<i>Created 2006-2009 by WebPKI.org</i>]]></bottom>
     </javadoc>
 
-    <copy file="../../resources/docs/javadoc-tpm-picture.png" todir="${app_path}/javadoc/keystore/org/webpki/jce/crypto" preservelastmodified="true"/>
-    <copy file="../../resources/docs/keygen2-key-attestation-1.pdf" todir="${app_path}/javadoc/keystore/org/webpki/jce/crypto" preservelastmodified="true"/>
-    <copy file="../../resources/docs/keygen2-key-archival.pdf" todir="${app_path}/javadoc/keystore/org/webpki/jce/crypto" preservelastmodified="true"/>
-    <copy file="../../resources/docs/keygen2-short-presentation.pdf" todir="${app_path}" preservelastmodified="true"/>
-    <copy file="../../resources/docs/universal-keystore-database.pdf" todir="${app_path}" preservelastmodified="true"/>
-    <copy file="../web/images/vshaddow.gif" todir="${app_path}/javadoc/keystore/org/webpki/jce/crypto" preservelastmodified="true"/>
-    <copy file="../web/images/hshaddow.gif" todir="${app_path}/javadoc/keystore/org/webpki/jce/crypto" preservelastmodified="true"/>
-
+  <copy file="../../resources/docs/javadoc-tpm-picture.png" todir="${temp_dir}/javadoc/keystore/org/webpki/sks/dbemulator" preservelastmodified="true"/>
+  <copy file="../../resources/docs/keygen2-key-attestation-1.pdf" todir="${temp_dir}/javadoc/keystore/org/webpki/sks/dbemulator" preservelastmodified="true"/>
+  <copy file="../../resources/docs/keygen2-key-archival.pdf" todir="${temp_dir}/javadoc/keystore/org/webpki/sks/dbemulator" preservelastmodified="true"/>
+  <copy file="../../resources/docs/keygen2-short-presentation.pdf" todir="${temp_dir}" preservelastmodified="true"/>
+  <copy file="../../resources/docs/universal-keystore-database.pdf" todir="${temp_dir}" preservelastmodified="true"/>
+  <copy file="../web/images/vshaddow.gif" todir="${temp_dir}/javadoc/keystore/org/webpki/sks/dbemulator" preservelastmodified="true"/>
+  <copy file="../web/images/hshaddow.gif" todir="${temp_dir}/javadoc/keystore/org/webpki/sks/dbemulator" preservelastmodified="true"/>
+  <copy file="../../resources/SSLcerts/${hostname}.ks" todir="${temp_dir}/WEB-INF/classes/misc" preservelastmodified="true"/>
+  <copy file="../../resources/keygen2-certificates/deviceca.jks" todir="${temp_dir}/WEB-INF/classes/misc" preservelastmodified="true"/>
+  <copy file="../../resources/keygen2-certificates/mybankca.ks" todir="${temp_dir}/WEB-INF/classes/misc" preservelastmodified="true"/>
+  <copy file="../../resources/keygen2-certificates/archivalkey.jks" todir="${temp_dir}/WEB-INF/classes/misc" preservelastmodified="true"/>
+  <copy file="../../resources/keygen2-certificates/mybanksubca1.cer" todir="${temp_dir}" preservelastmodified="true"/>
+  <copy todir="${temp_dir}" preservelastmodified="true">
+<fileset dir="../web">
+  <include name="**/*"/>
+  <exclude name="**/*.java"/>
+  <exclude name="**/*.class"/>
+  <exclude name="**/*.sql"/>
+  <exclude name="**/*.psd"/>
+  <exclude name="**/*.ist"/>
+  <exclude name="**/*.psd"/>
+  <exclude name="**/*.doc"/>
+  <exclude name="**/*.vjp"/>
+  <exclude name="**/*.suo"/>
+  <exclude name="**/*.sln"/>
+  <exclude name="**/*.dat"/>
+  <exclude name="**/*.bat"/>
+  <exclude name="**/*.SRG"/>
+  <exclude name="**/*.sh"/>
+  <exclude name="**/CVS"/>
+  <exclude name="build.xml"/>
+</fileset>
+  </copy>
   </target>
 
-  <target name="compile" depends="copy">
-    <javac debug="${debug}" srcdir="${src_dir}" destdir="${app_path}/WEB-INF/classes" classpathref="compile.classpath">
+  <target name="compile" depends="init">
+    <mkdir dir="${temp_dir}/WEB-INF/classes"/>
+    <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}/WEB-INF/classes" classpathref="compile.classpath">
        <compilerarg value="-Xlint"/>
     </javac>
   </target>
 
   <target name="clean" depends="init">
-     <delete includeEmptyDirs="true" failonerror="false">
-       <fileset dir="${app_path}" includes="**/*"/>
-     </delete>
+     <delete dir="${temp_dir}"/>
   </target>
   
-  <target name="deploy" depends="clean,compile,doc"/>
+  <target name="deploy" depends="clean,doc">
+      <mkdir dir="${temp_dir}/WEB-INF/lib"/>
+      <jar destfile="${temp_dir}/WEB-INF/lib/localservices.jar">
+          <fileset dir="${temp_dir}/WEB-INF/classes">
+              <include name="localservices/*"/>
+          </fileset>
+      	<service type="org.webpki.sks.DatabaseService" provider="localservices.DatabaseServiceImpl"/>
+      	<service type="org.webpki.sks.SerialPortService" provider="localservices.SerialPortServiceImpl"/>
+      </jar>
+      <war destfile="${app_path}">
+          <fileset dir="${temp_dir}">
+              <exclude name="**/localservices/*"/>
+          </fileset>
+          <lib file="${phonesks_dir}/dist/webpki.org-phonesks-1.00.jar"/>
+<!--
+      	<lib file="${phonesks_dir}/dist/webpki.org-sks-dbemulator-1.00.jar"/>
+-->
+        <lib file="${phonesks_dir}/dist/webpki.org-sks-hwdevice-1.00.jar"/>
+      </war>
+  </target>
 
 </project>

@@ -7,11 +7,11 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.jce.OTPProvider;
-import org.webpki.jce.ExtensionProvider;
-import org.webpki.jce.InformationCardProvider;
-import org.webpki.jce.KeyMetadataProvider;
-import org.webpki.jce.KeyDescriptor;
+import org.webpki.sks.OTPProvider;
+import org.webpki.sks.ExtensionProvider;
+import org.webpki.sks.InformationCardProvider;
+import org.webpki.sks.KeyMetadataProvider;
+import org.webpki.sks.KeyDescriptor;
 
 
 @SuppressWarnings("serial")
@@ -38,7 +38,7 @@ public class PhoneWinKeyExplorer extends PhoneWinServlet
 
     public void protectedGet (HttpServletRequest request, HttpServletResponse response, HttpSession session) throws IOException, ServletException
       {
-        KeyDescriptor[] kds = new KeyMetadataProvider (getUserID (session)).getKeyDescriptors ();
+        KeyDescriptor[] kds = new KeyMetadataProvider (getSKS (session)).getKeyDescriptors ();
         StringBuffer s = createHeader ("Key Explorer").
           append (divSection ()).
           append ("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tr>" +
@@ -70,11 +70,11 @@ public class PhoneWinKeyExplorer extends PhoneWinServlet
               append (td1);
             if (kd.isSymmetric ())
               {
-                s.append (OTPProvider.getOTPProvider (kd.getKeyID (), getUserID (session)) == null  ? "&nbsp;" : "OTP");
+                s.append (OTPProvider.getOTPProvider (kd.getKeyID (), getSKS (session)) == null  ? "&nbsp;" : "OTP");
               }
             else
               {
-                ExtensionProvider ep = ExtensionProvider.getExtensionProvider (kd.getKeyID (), getUserID (session));
+                ExtensionProvider ep = ExtensionProvider.getExtensionProvider (kd.getKeyID (), getSKS (session));
                 if (ep != null && ep instanceof InformationCardProvider)
                   {
                     s.append ("InfoCard");

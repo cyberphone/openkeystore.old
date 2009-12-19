@@ -5,17 +5,21 @@ import java.io.IOException;
 import java.security.Security;
 import java.security.Provider;
 
+import java.util.ServiceLoader;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.webpki.jce.KeyDescriptor;
+import org.webpki.sks.KeyDescriptor;
 
 import org.webpki.keygen2.PassphraseFormats;
 
-import org.webpki.jce.Registry;
-import org.webpki.jce.JCEProvider;
+import org.webpki.sks.Registry;
+import org.webpki.sks.JCEProvider;
+import org.webpki.sks.SecureKeyStore;
+import org.webpki.sks.SetupProperties;
 
 import misc.ProtectedServlet;
 
@@ -25,6 +29,7 @@ import misc.KeyCenterCommands;
 public abstract class PhoneWinServlet extends ProtectedServlet
   {
     static final String UNSPECIFIED = "&lt;unspecified&gt;";
+    
     static final int SCREEN_WIDTH = 240;
 
     static final int SCREEN_HEIGHT = 320;
@@ -35,6 +40,10 @@ public abstract class PhoneWinServlet extends ProtectedServlet
 
     static final String QUICK_RUN = "QUICK_RUN";
 
+    public static String serial_port;
+    
+    public static int baud_rate;
+    
     protected KeyCenterCommands getCommand ()
       {
         return null;
@@ -391,8 +400,28 @@ public abstract class PhoneWinServlet extends ProtectedServlet
       }
 
 
+    public static SecureKeyStore getSKS (HttpSession session) throws IOException
+      {
+        SecureKeyStore sks = ServiceLoader.load (SecureKeyStore.class).iterator ().next ();
+        if (sks instanceof SetupProperties)
+          {
+            SetupProperties setup = (SetupProperties) sks;
+            for (String prop : setup.getProperties ())
+              {
+                if (prop.equalsIgnoreCase ("userid"))
+                  {
+                    setup.setProperty (prop, String.valueOf (getUserID (session)));
+                  }
+              }
+            setup.init ();
+          }
+        return sks;
+      }
+
     public static void initPhone (ServletContext context) throws IOException
       {
+        serial_port = context.getInitParameter ("serial-port");
+        baud_rate = Integer.parseInt (context.getInitParameter ("baudrate"));
         Registry.fakeinit ();
         if (internalApps (context))
           {

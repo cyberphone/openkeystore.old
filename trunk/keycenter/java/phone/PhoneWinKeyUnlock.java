@@ -7,8 +7,8 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.jce.KeyMetadataProvider;
-import org.webpki.jce.KeyDescriptor;
+import org.webpki.sks.KeyMetadataProvider;
+import org.webpki.sks.KeyDescriptor;
 
 import org.webpki.webutil.ServletUtil;
 
@@ -21,7 +21,7 @@ public class PhoneWinKeyUnlock extends PhoneWinServlet
       {
         String key_id = request.getParameter ("keyid");
         String disp = request.getParameter ("disp");
-        KeyDescriptor kd = new KeyMetadataProvider (getUserID (session)).getKeyDescriptor (new Integer (key_id));
+        KeyDescriptor kd = new KeyMetadataProvider (getSKS (session)).getKeyDescriptor (new Integer (key_id));
         String puk = request.getParameter ("puk");
         if (puk != null && kd.unlockKey (puk))
           {

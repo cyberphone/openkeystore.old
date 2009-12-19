@@ -9,8 +9,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.SecureRandom;
+
+import java.security.interfaces.RSAPublicKey;
+
 import org.webpki.crypto.SymEncryptionAlgorithms;
+
+import org.webpki.util.URLDereferencer;
 
 import org.webpki.keygen2.PlatformNegotiationRequestEncoder;
 
@@ -26,9 +33,22 @@ public class PlatformNegotiationRequestServlet extends KeyGenServlet
         session.setAttribute (SRV_PROV_STATE, prov_state);
         prov_state.server_session_id = server_session_id;        prov_state.user_name = (String) session.getAttribute (SESS_NAME);        prov_state.email_address = getEmailAddress (request);
 
+        KeyStore ks = getKeyArchivalKeyKeyStore (getServletContext ());
+        RSAPublicKey issuer_key_exchange_key = null;
+        try
+          {
+            issuer_key_exchange_key = (RSAPublicKey) ks.getCertificate (ks.aliases ().nextElement ()).getPublicKey();
+          }
+        catch (GeneralSecurityException gse)
+          {
+            
+          }
         PlatformNegotiationRequestEncoder encoder =
            new PlatformNegotiationRequestEncoder (server_session_id,
-                                                  genApplicationURL (request, "kg2_generate"));
+                                                  genApplicationURL (request, "kg2_generate"),
+                                                  new URLDereferencer (genApplicationURL (request, "images/mini_banklogo.gif")),
+                                                  issuer_key_exchange_key);
+
         if (!wantStrongCrypto (getServletContext ()))          {
             encoder.getBasicCapabilities ()
                 .addSymmetricKeyEncryptionAlgorithm (SymEncryptionAlgorithms.AES128_CBC)

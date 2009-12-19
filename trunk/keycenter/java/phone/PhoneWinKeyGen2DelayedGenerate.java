@@ -7,7 +7,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.jce.Provisioning;
+import org.webpki.sks.Provisioning;
 
 
 @SuppressWarnings("serial")
@@ -20,7 +20,7 @@ public class PhoneWinKeyGen2DelayedGenerate extends PhoneWinKeyGen2Generate
             deployAndFinish (request,
                              response,
                              session,
-                             new Provisioning (getUserID (session), new LocalDebug (session)),                             null);
+                             new Provisioning (getSKS (session), new LocalDebug (session)),                             null);
           }
         catch (Exception e)
           {

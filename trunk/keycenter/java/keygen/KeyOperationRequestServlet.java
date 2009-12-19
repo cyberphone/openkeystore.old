@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
-import org.webpki.util.URLDereferencer;
 import org.webpki.util.WrappedException;
 
 import org.webpki.keygen2.KeyOperationRequestEncoder;
@@ -73,8 +72,7 @@ public class KeyOperationRequestServlet extends KeyGenServlet
             new KeyOperationRequestEncoder (decoder.getClientSessionID (),
                                             decoder.getServerSessionID (),
                                             genApplicationURL (request, "kg2_deploy"),
-                                            new Date (),
-                                            new URLDereferencer (genApplicationURL (request, "images/mini_banklogo.gif")));        // Not real line...  Cookies should be tested, used, etc.        encoder.setServerCookie (decoder.getServerCookie ());
+                                            new Date ());        // Not real line...  Cookies should be tested, used, etc.        encoder.setServerCookie (decoder.getServerCookie ());
 
         prov_state.key_op_req_enc = encoder;        KeyOperationRequestEncoder.PUKPolicy puk =
                    encoder.createPUKPolicy ("01234567890123456789",
@@ -95,11 +93,11 @@ public class KeyOperationRequestServlet extends KeyGenServlet
         if (wantEncryptedKey (context))
           {
             try              {                KeyStore ks = getKeyArchivalKeyKeyStore (context);
-//                key_creator.create (KeyGen2KeyUsage.ENCRYPTION, 1024).setPrivateKeyArchivalKey ((X509Certificate) ks.getCertificate (ks.aliases ().nextElement ()));                key_creator.create (KeyGen2KeyUsage.ENCRYPTION, new KeyOperationRequestEncoder.KeyAlgorithmData.ECC (ECCDomains.P_256)).setPrivateKeyArchivalKey ((X509Certificate) ks.getCertificate (ks.aliases ().nextElement ()));              }            catch (GeneralSecurityException gse)              {
+                key_creator.create (KeyGen2KeyUsage.ENCRYPTION, 1024).setPrivateKeyArchivalKey ((X509Certificate) ks.getCertificate (ks.aliases ().nextElement ()));//                key_creator.create (KeyGen2KeyUsage.ENCRYPTION, new KeyOperationRequestEncoder.KeyAlgorithmData.ECC (ECCDomains.P_256)).setPrivateKeyArchivalKey ((X509Certificate) ks.getCertificate (ks.aliases ().nextElement ()));              }            catch (GeneralSecurityException gse)              {
                 throw new WrappedException (gse);              }
           }
 
-//        key_creator.create (KeyGen2KeyUsage.AUTHENTICATION, 2048);        key_creator.create (KeyGen2KeyUsage.AUTHENTICATION, new KeyOperationRequestEncoder.KeyAlgorithmData.ECC (ECCDomains.P_256));
+        key_creator.create (KeyGen2KeyUsage.AUTHENTICATION, 2048);//        key_creator.create (KeyGen2KeyUsage.AUTHENTICATION, new KeyOperationRequestEncoder.KeyAlgorithmData.ECC (ECCDomains.P_256));
 
         key_creator.create (KeyGen2KeyUsage.PIGGYBACKED_SYMMETRIC_KEY, 1024);
 

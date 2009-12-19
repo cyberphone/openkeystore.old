@@ -17,9 +17,8 @@ import org.webpki.util.Base64;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
 
-import org.webpki.jce.KeyMetadataProvider;
-
-import org.webpki.jce.crypto.CryptoDriver;
+import org.webpki.sks.KeyMetadataProvider;
+import org.webpki.sks.SecureKeyStore;
 
 
 @SuppressWarnings("serial")
@@ -80,11 +79,12 @@ public class PhoneWinCertificateProperties extends PhoneWinServlet
         String disp = request.getParameter ("disp");
         String device = request.getParameter ("device");
         boolean dev_flag = new Boolean (device);
+        SecureKeyStore sks = getSKS (session);
         CertificateInfo cert_info = new CertificateInfo ((
            dev_flag ?
-             new CryptoDriver (getUserID (session)).getDeviceCertificatePath ()
+             sks.getDeviceCertificatePath ()
                     :
-             new KeyMetadataProvider (getUserID (session)).getKeyDescriptor (Integer.valueOf (key_id)).getCertificatePath ()
+             new KeyMetadataProvider (sks).getKeyDescriptor (Integer.valueOf (key_id)).getCertificatePath ()
                                                         )[Integer.valueOf (cert)]);
         String property = request.getParameter ("property");
         if (property == null)

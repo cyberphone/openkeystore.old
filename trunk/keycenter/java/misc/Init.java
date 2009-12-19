@@ -21,8 +21,8 @@ import org.webpki.keygen2.KeyOperationRequestDecoder;
 
 import org.webpki.xml.XMLSchemaCache;
 
-import org.webpki.jce.KeyStoreDatabaseConnection;
-import org.webpki.jce.KeyUtil;
+import org.webpki.sks.KeyStoreDatabaseConnection;
+import org.webpki.sks.KeyUtil;
 
 import admin.AdminSetAvailability;
 
@@ -114,11 +114,9 @@ public class Init implements ServletContextListener, HttpSessionListener, KeySto
             schema_cache.addWrapper (KeyOperationRequestDecoder.class);
 
             ProtectedServlet.initDatabaseParameters (context);
-
-            KeyUtil.key_store_database_connection = this;
             PhoneWinServlet.initPhone (context);
 
-            System.out.println ("Database started: " + AdminSetAvailability.resetServer ());
+            System.out.println ("Keycenter Database started: " + AdminSetAvailability.resetServer ());
           }
         catch (Exception e)
           { 

@@ -2,6 +2,7 @@ package misc;
 
 import java.io.IOException;
 import java.io.FileInputStream;
+import java.io.InputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletContext;
@@ -909,11 +910,19 @@ public abstract class ProtectedServlet extends HttpServlet
       }
 
 
+    private static InputStream getStream (String resource_name) throws IOException
+      {
+        if (resource_name.matches(".*[\\/].*"))
+          {
+            return new FileInputStream (resource_name);
+          }
+        return ProtectedServlet.class.getResourceAsStream (resource_name);
+      }
+
     public static X509Certificate getNextCA (ServletContext context) throws IOException, GeneralSecurityException
       {
         return CertificateUtil.getCertificateFromBlob (
-                 ArrayUtil.readFile (context.getRealPath ("WEB-INF/classes/" +
-                                     context.getInitParameter ("nextcacertfile"))));
+                 ArrayUtil.getByteArrayFromInputStream (getStream (context.getInitParameter ("nextcacertfile"))));
       }
 
 
@@ -924,8 +933,7 @@ public abstract class ProtectedServlet extends HttpServlet
             String filename = context.getInitParameter (store);
             String password = context.getInitParameter (storepass);
             KeyStore ks = KeyStore.getInstance (context.getInitParameter (storetype));
-            ks.load (filename == null ? null : new FileInputStream (
-               context.getRealPath ("WEB-INF/classes/" + filename)),
+            ks.load (filename == null ? null : getStream (filename),
                      password == null ? null : password.toCharArray ());
             return ks;
           }

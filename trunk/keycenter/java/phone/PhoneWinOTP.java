@@ -13,9 +13,9 @@ import org.webpki.keygen2.KeyGen2URIs;
 
 import org.webpki.webutil.ServletUtil;
 
-import org.webpki.jce.OTPProvider;
-import org.webpki.jce.KeyDescriptor;
-import org.webpki.jce.Logotype;
+import org.webpki.sks.OTPProvider;
+import org.webpki.sks.KeyDescriptor;
+import org.webpki.sks.Logotype;
 
 import misc.ProtectedServlet;
 
@@ -41,7 +41,7 @@ public class PhoneWinOTP extends PhoneWinServlet
 
     static OTPProvider getOTPProvider (HttpSession session) throws IOException
       {
-        OTPProvider[] otps = OTPProvider.getOTPProviders (getUserID (session), null, OTPProvider.OTP_TYPES.EVENT);
+        OTPProvider[] otps = OTPProvider.getOTPProviders (getSKS (session), null, OTPProvider.OTP_TYPES.EVENT);
         return otps == null ? null : otps[0];
       }
 
@@ -102,17 +102,14 @@ public class PhoneWinOTP extends PhoneWinServlet
                 (pin = (String) session.getAttribute (OTP_PIN)) != null)
               {
                 pin = pin.trim ();
-                if (otp_prov.open (pin))
-                  {
-                    session.setAttribute (OTP_PIN, pin);
-                  }
-                else
-                  {
-                    kd = otp_prov.getKeyDescriptor ();
-                    pin_failure = true;
-                    pin = null;
-                  }
+                session.setAttribute (OTP_PIN, pin);
               }
+            else
+              {
+                kd = otp_prov.getKeyDescriptor ();
+                pin_failure = true;
+              }
+// TODO not ready all, open removed...
 
             /*======================================================*/
             /* If there was no PIN or it didn't work we present a   */
