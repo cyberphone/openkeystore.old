@@ -12,8 +12,10 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <limits.h>
 
+#include "crypto.h"
+
+typedef unsigned char CRYPTO_U8;
 
 #if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64))
 # define SWAP(x) (_lrotl(x, 8) & 0x00ff00ff | _lrotr(x, 8) & 0xff00ff00)
@@ -24,12 +26,8 @@
 # define PUTU32(ct, st) { (ct)[0] = (CRYPTO_U8)((st) >> 24); (ct)[1] = (CRYPTO_U8)((st) >> 16); (ct)[2] = (CRYPTO_U8)((st) >>  8); (ct)[3] = (CRYPTO_U8)(st); }
 #endif
 
-typedef unsigned char CRYPTO_U8;
-
 /* This controls loop-unrolling  */
 #undef FULL_UNROLL
-
-#include "crypto.h"
 
 static const CRYPTO_U32 Te0[256] =
   {
