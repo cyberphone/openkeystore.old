@@ -15,49 +15,53 @@
 
 #include <limits.h>
 
-#define AES_MAXNR 14
-
-#define AES_BLOCK_SIZE 16
+#if INT_MAX == 32767
+typedef unsigned long CRYPTO_U32;
+#else
+typedef unsigned int CRYPTO_U32;
+#endif
 
 namespace webpki
   {
-    class AESProvider
+
+	class AESProvider
       {
         public:
 
           AESProvider ();
 
-          void setKey (const unsigned char *raw_key, int key_length, bool encrypt);
+          static const int AES_BLOCK_SIZE = 16;
 
-          const char *encrypt (unsigned char *out, int& in_out_len, const unsigned char *in, const unsigned char *iv, bool pad);
+          void setKey (const unsigned char* raw_key, int key_length, bool encrypt);
+
+          const char* encrypt (unsigned char* out, int& in_out_len, const unsigned char* in, const unsigned char* iv, bool pad);
 
         private:
 
-          void AES_cbc_ecb_encrypt (const unsigned char *in, unsigned char *out, const unsigned long length, const unsigned char *iv);
+          void AES_cbc_ecb_encrypt (const unsigned char* in, unsigned char* out, int length, const unsigned char* iv);
 
-          void AES_set_encrypt_key (const unsigned char *raw_key);
+          void AES_set_encrypt_key (const unsigned char* raw_key);
 
-          void AES_set_decrypt_key (const unsigned char *raw_key);
+          void AES_set_decrypt_key (const unsigned char* raw_key);
 
-          void AES_decrypt (const unsigned char *in, unsigned char *out);
+          void AES_decrypt (const unsigned char* in, unsigned char* out);
 
-          void AES_encrypt (const unsigned char *in, unsigned char *out);
+          void AES_encrypt (const unsigned char* in, unsigned char* out);
+
+		  static const int AES_MAXNR = 14;
 
           struct
             {
-          #if INT_MAX == 32767
-              unsigned long rd_key[4 *(AES_MAXNR + 1)];
-          #else
-              unsigned int rd_key[4 *(AES_MAXNR + 1)];
-          #endif
+              CRYPTO_U32 rd_key[4 * (AES_MAXNR + 1)];
               int rounds;
               int length_in_bytes;
             } m_the_key;
 
           bool m_encrypt;
 
-          const char *m_error;
+          const char* m_error;
       };
-  }
+
+  }  /* namespace */
 
 #endif /* _WEBPKI_CRYPTO_H_ */

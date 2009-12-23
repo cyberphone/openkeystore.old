@@ -58,7 +58,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_webpki_sks_testclib_AESProvider_encrypt (J
       {
         c_iv = env->GetByteArrayElements (j_iv, NULL);
       }
-    unsigned char *out = new unsigned char[length_data + 16];
+    unsigned char *out = new unsigned char[length_data + AESProvider::AES_BLOCK_SIZE];
     int in_out_len = length_data;
     const char *error = reinterpret_cast<AESProvider *>(ptr)->encrypt (out, in_out_len, (unsigned char *) c_data, (unsigned char *)c_iv, pad);
     env->ReleaseByteArrayElements (j_data, c_data, 0);

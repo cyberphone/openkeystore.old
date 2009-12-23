@@ -17,27 +17,21 @@
 
 #if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64))
 # define SWAP(x) (_lrotl(x, 8) & 0x00ff00ff | _lrotr(x, 8) & 0xff00ff00)
-# define GETU32(p) SWAP(*((u32 *)(p)))
-# define PUTU32(ct, st) { *((u32 *)(ct)) = SWAP((st)); }
+# define GETU32(p) SWAP(*((CRYPTO_U32 *)(p)))
+# define PUTU32(ct, st) { *((CRYPTO_U32 *)(ct)) = SWAP((st)); }
 #else
-# define GETU32(pt) (((u32)(pt)[0] << 24) ^ ((u32)(pt)[1] << 16) ^ ((u32)(pt)[2] <<  8) ^ ((u32)(pt)[3]))
-# define PUTU32(ct, st) { (ct)[0] = (u8)((st) >> 24); (ct)[1] = (u8)((st) >> 16); (ct)[2] = (u8)((st) >>  8); (ct)[3] = (u8)(st); }
+# define GETU32(pt) (((CRYPTO_U32)(pt)[0] << 24) ^ ((CRYPTO_U32)(pt)[1] << 16) ^ ((CRYPTO_U32)(pt)[2] <<  8) ^ ((CRYPTO_U32)(pt)[3]))
+# define PUTU32(ct, st) { (ct)[0] = (CRYPTO_U8)((st) >> 24); (ct)[1] = (CRYPTO_U8)((st) >> 16); (ct)[2] = (CRYPTO_U8)((st) >>  8); (ct)[3] = (CRYPTO_U8)(st); }
 #endif
 
-#if INT_MAX == 32767
-typedef unsigned long u32;
-#else
-typedef unsigned int u32;
-#endif
-typedef unsigned short u16;
-typedef unsigned char u8;
+typedef unsigned char CRYPTO_U8;
 
 /* This controls loop-unrolling  */
 #undef FULL_UNROLL
 
 #include "crypto.h"
 
-static const u32 Te0[256] =
+static const CRYPTO_U32 Te0[256] =
   {
     0xc66363a5U, 0xf87c7c84U, 0xee777799U, 0xf67b7b8dU,
     0xfff2f20dU, 0xd66b6bbdU, 0xde6f6fb1U, 0x91c5c554U,
@@ -105,7 +99,7 @@ static const u32 Te0[256] =
     0x7bb0b0cbU, 0xa85454fcU, 0x6dbbbbd6U, 0x2c16163aU,
   };
 
-static const u32 Te1[256] =
+static const CRYPTO_U32 Te1[256] =
   {
     0xa5c66363U, 0x84f87c7cU, 0x99ee7777U, 0x8df67b7bU,
     0x0dfff2f2U, 0xbdd66b6bU, 0xb1de6f6fU, 0x5491c5c5U,
@@ -173,7 +167,7 @@ static const u32 Te1[256] =
     0xcb7bb0b0U, 0xfca85454U, 0xd66dbbbbU, 0x3a2c1616U,
   };
 
-static const u32 Te2[256] =
+static const CRYPTO_U32 Te2[256] =
   {
     0x63a5c663U, 0x7c84f87cU, 0x7799ee77U, 0x7b8df67bU,
     0xf20dfff2U, 0x6bbdd66bU, 0x6fb1de6fU, 0xc55491c5U,
@@ -241,7 +235,7 @@ static const u32 Te2[256] =
     0xb0cb7bb0U, 0x54fca854U, 0xbbd66dbbU, 0x163a2c16U,
   };
 
-static const u32 Te3[256] =
+static const CRYPTO_U32 Te3[256] =
   {
     0x6363a5c6U, 0x7c7c84f8U, 0x777799eeU, 0x7b7b8df6U,
     0xf2f20dffU, 0x6b6bbdd6U, 0x6f6fb1deU, 0xc5c55491U,
@@ -309,7 +303,7 @@ static const u32 Te3[256] =
     0xb0b0cb7bU, 0x5454fca8U, 0xbbbbd66dU, 0x16163a2cU,
   };
 
-static const u32 Td0[256] =
+static const CRYPTO_U32 Td0[256] =
   {
     0x51f4a750U, 0x7e416553U, 0x1a17a4c3U, 0x3a275e96U,
     0x3bab6bcbU, 0x1f9d45f1U, 0xacfa58abU, 0x4be30393U,
@@ -377,7 +371,7 @@ static const u32 Td0[256] =
     0x7bcb8461U, 0xd532b670U, 0x486c5c74U, 0xd0b85742U,
   };
 
-static const u32 Td1[256] =
+static const CRYPTO_U32 Td1[256] =
   {
     0x5051f4a7U, 0x537e4165U, 0xc31a17a4U, 0x963a275eU,
     0xcb3bab6bU, 0xf11f9d45U, 0xabacfa58U, 0x934be303U,
@@ -445,7 +439,7 @@ static const u32 Td1[256] =
     0x617bcb84U, 0x70d532b6U, 0x74486c5cU, 0x42d0b857U,
   };
 
-static const u32 Td2[256] =
+static const CRYPTO_U32 Td2[256] =
   {
     0xa75051f4U, 0x65537e41U, 0xa4c31a17U, 0x5e963a27U,
     0x6bcb3babU, 0x45f11f9dU, 0x58abacfaU, 0x03934be3U,
@@ -513,7 +507,7 @@ static const u32 Td2[256] =
     0x84617bcbU, 0xb670d532U, 0x5c74486cU, 0x5742d0b8U,
   };
 
-static const u32 Td3[256] =
+static const CRYPTO_U32 Td3[256] =
   {
     0xf4a75051U, 0x4165537eU, 0x17a4c31aU, 0x275e963aU,
     0xab6bcb3bU, 0x9d45f11fU, 0xfa58abacU, 0xe303934bU,
@@ -581,7 +575,7 @@ static const u32 Td3[256] =
     0xcb84617bU, 0x32b670d5U, 0x6c5c7448U, 0xb85742d0U,
   };
 
-static const u8 Td4[256] =
+static const CRYPTO_U8 Td4[256] =
   {
     0x52U, 0x09U, 0x6aU, 0xd5U, 0x30U, 0x36U, 0xa5U, 0x38U,
     0xbfU, 0x40U, 0xa3U, 0x9eU, 0x81U, 0xf3U, 0xd7U, 0xfbU,
@@ -617,7 +611,7 @@ static const u8 Td4[256] =
     0xe1U, 0x69U, 0x14U, 0x63U, 0x55U, 0x21U, 0x0cU, 0x7dU,
   };
 
-static const u32 rcon[] =
+static const CRYPTO_U32 rcon[] =
   {
     0x01000000, 0x02000000, 0x04000000, 0x08000000,
     0x10000000, 0x20000000, 0x40000000, 0x80000000,
@@ -634,8 +628,8 @@ namespace webpki
 void AESProvider::AES_encrypt (const unsigned char *in, unsigned char *out)
   {
 
-    const u32 *rk;
-    u32 s0, s1, s2, s3, t0, t1, t2, t3;
+    const CRYPTO_U32 *rk;
+    CRYPTO_U32 s0, s1, s2, s3, t0, t1, t2, t3;
 #ifndef FULL_UNROLL
     int r;
 #endif /* ?FULL_UNROLL */
@@ -827,8 +821,8 @@ void AESProvider::AES_encrypt (const unsigned char *in, unsigned char *out)
  */
 void AESProvider::AES_decrypt (const unsigned char *in, unsigned char *out)
   {
-    const u32 *rk;
-    u32 s0, s1, s2, s3, t0, t1, t2, t3;
+    const CRYPTO_U32 *rk;
+    CRYPTO_U32 s0, s1, s2, s3, t0, t1, t2, t3;
 #ifndef FULL_UNROLL
     int r;
 #endif /* ?FULL_UNROLL */
@@ -1015,7 +1009,7 @@ void AESProvider::AES_decrypt (const unsigned char *in, unsigned char *out)
   }
 
 
-void AESProvider::AES_cbc_ecb_encrypt (const unsigned char *in, unsigned char *out, unsigned long length, const unsigned char *iv)
+void AESProvider::AES_cbc_ecb_encrypt (const unsigned char* in, unsigned char* out, int length, const unsigned char* iv)
   {
     if (m_encrypt)
       {
@@ -1070,11 +1064,11 @@ void AESProvider::AES_cbc_ecb_encrypt (const unsigned char *in, unsigned char *o
   /**
    * Expand the cipher key into the encryption key schedule.
    */
-void AESProvider::AES_set_encrypt_key (const unsigned char *raw_key)
+void AESProvider::AES_set_encrypt_key (const unsigned char* raw_key)
   {
-    u32 *rk;
+    CRYPTO_U32 *rk;
     int i = 0;
-    u32 temp;
+    CRYPTO_U32 temp;
 
     rk = m_the_key.rd_key;
     if (m_the_key.length_in_bytes == 16)
@@ -1179,11 +1173,11 @@ void AESProvider::AES_set_encrypt_key (const unsigned char *raw_key)
 /**
  * Expand the cipher key into the decryption key schedule.
  */
-void AESProvider::AES_set_decrypt_key (const unsigned char *raw_key)
+void AESProvider::AES_set_decrypt_key (const unsigned char* raw_key)
   {
-    u32 *rk;
+    CRYPTO_U32 *rk;
     int i, j;
-    u32 temp;
+    CRYPTO_U32 temp;
 
     /* first, start with an encryption schedule */
     AES_set_encrypt_key (raw_key);
@@ -1226,12 +1220,18 @@ void AESProvider::AES_set_decrypt_key (const unsigned char *raw_key)
   }
 
 
+const int AESProvider::AES_BLOCK_SIZE;
+
+const int AESProvider::AES_MAXNR;
+
+
 AESProvider::AESProvider ()
   {
     m_error = NULL;
   }
 
-void AESProvider::setKey (const unsigned char *raw_key, int key_length, bool encrypt)
+
+void AESProvider::setKey (const unsigned char* raw_key, int key_length, bool encrypt)
   {
     m_error = NULL;
     m_the_key.length_in_bytes = key_length;
@@ -1253,7 +1253,7 @@ void AESProvider::setKey (const unsigned char *raw_key, int key_length, bool enc
   }
 
 
-const char *AESProvider::encrypt (unsigned char *out, int& in_out_len, const unsigned char *in, const unsigned char *iv, bool pad)
+const char* AESProvider::encrypt (unsigned char* out, int& in_out_len, const unsigned char* in, const unsigned char* iv, bool pad)
   {
     if (m_error)
       {
@@ -1295,7 +1295,7 @@ const char *AESProvider::encrypt (unsigned char *out, int& in_out_len, const uns
               }
           }
       }
-    return NULL;
+    return m_error;
   }
 
 }
