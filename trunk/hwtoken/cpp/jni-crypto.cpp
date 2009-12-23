@@ -8,7 +8,6 @@ static void throwException (JNIEnv *env, const char *error)
     jclass newExcCls = env->FindClass ("java/lang/RuntimeException");
     env->ThrowNew (newExcCls, error);
     env->DeleteLocalRef (newExcCls);
-
   }
 
 /*
