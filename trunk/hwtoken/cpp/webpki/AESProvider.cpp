@@ -1235,7 +1235,7 @@ void AESProvider::setKey (const unsigned char* raw_key, int key_length, bool enc
     m_the_key.length_in_bytes = key_length;
     if (key_length == 16 || key_length == 24 || key_length == 32)
       {
-        if (m_encrypt = encrypt)
+        if ((m_encrypt = encrypt))
           {
             AES_set_encrypt_key (raw_key);
           }
