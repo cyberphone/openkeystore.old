@@ -40,13 +40,9 @@ public class Test
           }
         byte[] jenc = crypt.doFinal (msg);
 
-        if (ArrayUtil.compare (res, msg) && ArrayUtil.compare (enc, jenc))
+        if (!ArrayUtil.compare (res, msg) || !ArrayUtil.compare (enc, jenc))
           {
-            System.out.println ("Passed " + mode); 
-          }
-        else
-          {
-            System.out.println ("Failed AES msg.length=" + msg.length + " pad=" + pad);
+            System.out.println ("Failed AES msg.length=" + msg.length + " mode=" + mode);
             System.out.println ("In=\n" + DebugFormatter.getHexDebugData (msg) +
                                 "\njEnc=\n" + DebugFormatter.getHexDebugData (jenc) +
                                 "\nEnc=\n" + DebugFormatter.getHexDebugData (enc) +
@@ -60,6 +56,7 @@ public class Test
 
     private void testAES () throws Exception
       {
+        System.out.println ("AES Testing Begins");
         for (int i = 0; i < passes; i++)
           {
             int key_len = (i & 1) * 16 + 16;
@@ -99,6 +96,7 @@ public class Test
             singleAES (raw_key, null, msg_16, false);
             singleAES (raw_key, null, msg_32, false);
           }
+        System.out.println ("AES Testing Passed!");
       }
 
     public static void main (String[] argc) throws Exception
