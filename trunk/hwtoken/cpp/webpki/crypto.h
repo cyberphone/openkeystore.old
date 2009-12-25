@@ -62,6 +62,41 @@ namespace webpki
           const char* m_error;
       };
 
+	class SHA256Provider
+	  {
+	    public:
+
+	      SHA256Provider ();
+
+	      static const int DIGEST_LENGTH = 32;
+
+	      void update (const unsigned char* data, int length);
+
+	      const char* doFinal (unsigned char* digest);
+
+	    private:
+
+	      void init ();
+
+	      void hash_block_data_order (const unsigned char* data, int num);
+
+	      static const int SHA_LBLOCK = 16;
+
+	      static const int SHA_CBLOCK = (SHA_LBLOCK * 4);
+
+	      struct
+	        {
+	          CRYPTO_U32 h[8];
+	          CRYPTO_U32 Nl, Nh;
+	          CRYPTO_U32 data[SHA_LBLOCK];
+	          unsigned int num, md_len;
+	        } m_sha256_ctx;
+
+          const char* m_error;
+
+          bool m_needs_init;
+	  };
+
   }  /* namespace */
 
 #endif /* _WEBPKI_CRYPTO_H_ */

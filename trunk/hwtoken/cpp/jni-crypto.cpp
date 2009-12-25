@@ -76,3 +76,56 @@ JNIEXPORT jbyteArray JNICALL Java_org_webpki_sks_testclib_AESProvider_encrypt (J
     delete out;
     return j_result;
   }
+
+/*
+ * Class:     org_webpki_sks_testclib_SHA256Provider
+ * Method:    createSHA256Provider
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_org_webpki_sks_testclib_SHA256Provider_createSHA256Provider (JNIEnv *env, jobject jobj)
+  {
+    return reinterpret_cast<jlong>(new SHA256Provider ());
+  }
+
+/*
+ * Class:     org_webpki_sks_testclib_SHA256Provider
+ * Method:    deleteSHA256Provider
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_org_webpki_sks_testclib_SHA256Provider_deleteSHA256Provider (JNIEnv *env, jobject jobj, jlong ptr)
+  {
+    delete reinterpret_cast<SHA256Provider *>(ptr);
+  }
+
+/*
+ * Class:     org_webpki_sks_testclib_SHA256Provider
+ * Method:    update
+ * Signature: (J[B)V
+ */
+JNIEXPORT void JNICALL Java_org_webpki_sks_testclib_SHA256Provider_update (JNIEnv *env, jobject jobj, jlong ptr, jbyteArray j_data)
+  {
+    jbyte *c_data = env->GetByteArrayElements (j_data, NULL);
+    jsize length_data = env->GetArrayLength (j_data);
+    reinterpret_cast<SHA256Provider *>(ptr)->update ((unsigned char *)c_data, length_data);
+    env->ReleaseByteArrayElements (j_data, c_data, 0);
+  }
+
+/*
+ * Class:     org_webpki_sks_testclib_SHA256Provider
+ * Method:    doFinal
+ * Signature: (J)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_org_webpki_sks_testclib_SHA256Provider_doFinal (JNIEnv *env, jobject jobj, jlong ptr)
+  {
+    unsigned char out[SHA256Provider::DIGEST_LENGTH];
+    const char *error = reinterpret_cast<SHA256Provider *>(ptr)->doFinal (out);
+    if (error)
+      {
+        throwException (env, error);
+        return NULL;
+      }
+    jbyteArray j_result = env->NewByteArray (SHA256Provider::DIGEST_LENGTH);
+    env->SetByteArrayRegion (j_result, 0, SHA256Provider::DIGEST_LENGTH, (jbyte *)out);
+    return j_result;
+  }
+

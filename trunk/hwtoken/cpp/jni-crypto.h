@@ -43,3 +43,46 @@ JNIEXPORT jbyteArray JNICALL Java_org_webpki_sks_testclib_AESProvider_encrypt
 }
 #endif
 #endif
+/* Header for class org_webpki_sks_testclib_SHA256Provider */
+
+#ifndef _Included_org_webpki_sks_testclib_SHA256Provider
+#define _Included_org_webpki_sks_testclib_SHA256Provider
+#ifdef __cplusplus
+extern "C" {
+#endif
+/*
+ * Class:     org_webpki_sks_testclib_SHA256Provider
+ * Method:    createSHA256Provider
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_org_webpki_sks_testclib_SHA256Provider_createSHA256Provider
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_webpki_sks_testclib_SHA256Provider
+ * Method:    deleteSHA256Provider
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_org_webpki_sks_testclib_SHA256Provider_deleteSHA256Provider
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     org_webpki_sks_testclib_SHA256Provider
+ * Method:    update
+ * Signature: (J[B)V
+ */
+JNIEXPORT void JNICALL Java_org_webpki_sks_testclib_SHA256Provider_update
+  (JNIEnv *, jobject, jlong, jbyteArray);
+
+/*
+ * Class:     org_webpki_sks_testclib_SHA256Provider
+ * Method:    doFinal
+ * Signature: (J)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_org_webpki_sks_testclib_SHA256Provider_doFinal
+  (JNIEnv *, jobject, jlong);
+
+#ifdef __cplusplus
+}
+#endif
+#endif

@@ -20,16 +20,17 @@
  	<delete dir="${bin_dir}"/>
  	<mkdir dir="${bin_dir}"/>
   	<exec dir="${bin_dir}" executable="g++" failonerror="true" osfamily="unix">
-   	  <arg line="-O0 -g3 -shared -fPIC -I${env.JAVA_HOME}/include -I${env.JAVA_HOME}/include/linux -o libjni-crypto.so -Wall -fmessage-length=0 ${cpp_dir}/webpki/AESProvider.cpp ${cpp_dir}/jni-crypto.cpp"/>
+   	  <arg line="-O0 -g3 -shared -fPIC -I${env.JAVA_HOME}/include -I${env.JAVA_HOME}/include/linux -o libjni-crypto.so -Wall -fmessage-length=0 ${cpp_dir}/webpki/AESProvider.cpp ${cpp_dir}/webpki/SHA256Provider.cpp ${cpp_dir}/jni-crypto.cpp"/>
   	</exec>
   	<exec dir="${bin_dir}" executable="c:/mingw/bin/g++.exe" failonerror="true" osfamily="windows">
-   	  <arg line="-O0 -g3 -shared -Wl,--add-stdcall-alias -I&quot;${env.JAVA_HOME}\include&quot; -I&quot;${env.JAVA_HOME}\include\win32&quot; -o jni-crypto.dll -Wall -fmessage-length=0 ${cpp_dir}\webpki\AESProvider.cpp ${cpp_dir}\jni-crypto.cpp"/>
+   	  <arg line="-O0 -g3 -shared -Wl,--add-stdcall-alias -I&quot;${env.JAVA_HOME}\include&quot; -I&quot;${env.JAVA_HOME}\include\win32&quot; -o jni-crypto.dll -Wall -fmessage-length=0 ${cpp_dir}\webpki\AESProvider.cpp ${cpp_dir}\webpki\SHA256Provider.cpp ${cpp_dir}\jni-crypto.cpp"/>
   	</exec>
   </target>
 
   <target name="jni">
     <javah outputFile="${cpp_dir}/jni-crypto.h" classpath="${bin_dir}" force="yes">
-	  <class name="org.webpki.sks.testclib.AESProvider"/>
+  	  <class name="org.webpki.sks.testclib.AESProvider"/>
+  	  <class name="org.webpki.sks.testclib.SHA256Provider"/>
     </javah>
   </target>
 	
