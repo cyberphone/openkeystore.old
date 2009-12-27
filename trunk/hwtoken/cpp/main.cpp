@@ -41,7 +41,7 @@ int hex2 (int c)
 	return c - 'A' + 10;
 }
 
-void init (char *hex)
+void init (const char *hex)
 {
 	init_hex_len = 0;
 	while (*hex)
