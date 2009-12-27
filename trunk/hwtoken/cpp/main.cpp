@@ -27,7 +27,29 @@ unsigned char app_b3[SHA256Provider::DIGEST_LENGTH] = {
 
 #define BIG_TEST_SIZE 240
 
+unsigned char init_hex_data[500];
+int init_hex_len;
+
 HexDump dumper;
+
+int hex2 (int c)
+{
+	if (c >= '0' && c <= '9')
+		return c - '0';
+	if (c >= 'a')
+		return c - 'a' + 10;
+	return c - 'A' + 10;
+}
+
+void init (char *hex)
+{
+	init_hex_len = 0;
+	while (*hex)
+	{
+		int i = hex2 (*hex++) << 4;
+		init_hex_data[init_hex_len++] = (unsigned char) i + hex2 (*hex++);
+	}
+}
 
 static void dumpdata (const char *title, const unsigned char *data, int length)
   {
@@ -107,9 +129,67 @@ int main ()
     printf(" passed.\n");
 
     HMAC_SHA256Provider hmac256;
-    hmac256.init ((unsigned char*)"abc", 3);
-    hmac256.update ((unsigned char*)"abc", 3);
+    init ("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "aaaaaa");
+    hmac256.init (init_hex_data, init_hex_len);
+    init ("54657374205573696e67204c61726765"
+          "72205468616e20426c6f636b2d53697a"
+          "65204b6579202d2048617368204b6579"
+          "204669727374");
+    hmac256.update (init_hex_data, init_hex_len);
+    init ("60e431591ee0b67f0d8a26aacbf5b77f"
+          "8e0bc6213728c5140546040f0ee37f54");
     hmac256.doFinal (md);
-    printf("HMAC passed.\n");
+    if (memcmp(md,init_hex_data,sizeof (md)))
+    {
+    printf("\nHMAC TEST 1 failed.\n");
+    return 1;
+    }
+    else
+    printf(".");
+    init ("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+           "aaaaaaaa");
+    hmac256.init (init_hex_data, init_hex_len);
+    init ("dddddddddddddddddddddddddddddddd"
+          "dddddddddddddddddddddddddddddddd"
+          "dddddddddddddddddddddddddddddddd"
+          "dddd");
+    hmac256.update (init_hex_data, init_hex_len);
+    init ("773ea91e36800e46854db8ebd09181a7"
+          "2959098b3ef8c122d9635514ced565fe");
+    hmac256.doFinal (md);
+    if (memcmp(md,init_hex_data,sizeof (md)))
+    {
+    printf("\nHMAC TEST 2 failed.\n");
+    return 1;
+    }
+    else
+    printf(".");
+    init ("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+           "aaaaaaaa");
+    hmac256.init (init_hex_data, init_hex_len);
+    init ("dddddddddddddddddddddddddddddddd"
+          "dddddddddddddddddd");
+    hmac256.update (init_hex_data, init_hex_len);
+    init ("dddddddddddddddddddddddddddddddd"
+          "dddddddddddddddddd");
+    hmac256.update (init_hex_data, init_hex_len);
+    init ("773ea91e36800e46854db8ebd09181a7"
+          "2959098b3ef8c122d9635514ced565fe");
+    hmac256.doFinal (md);
+    if (memcmp(md,init_hex_data,sizeof (md)))
+    {
+    printf("\nHMAC TEST 3 failed.\n");
+    return 1;
+    }
+    else
+    printf(".");
 
   }
