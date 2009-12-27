@@ -210,16 +210,16 @@ static const CRYPTO_U32 K256[64] =
 namespace webpki
 {
 
-const int SHA256Provider::DIGEST_LENGTH;
+const int SHA1Provider::DIGEST_LENGTH;
 
 
-SHA256Provider::SHA256Provider ()
+SHA1Provider::SHA1Provider ()
   {
-    _init ();
+	_init ();
   }
 
 
-void SHA256Provider::_init ()
+void SHA1Provider::_init ()
   {
     m_error = NULL;
 	m_needs_init = false;
@@ -234,7 +234,7 @@ void SHA256Provider::_init ()
   }
 
 
-void SHA256Provider::hash_block_data_order (const unsigned char* data, int num)
+void SHA1Provider::hash_block_data_order (const unsigned char* data, int num)
   {
     CRYPTO_U32 a, b, c, d, e, f, g, h, s0, s1, T1;
     CRYPTO_U32 X[16];
@@ -309,7 +309,7 @@ void SHA256Provider::hash_block_data_order (const unsigned char* data, int num)
   }
 
 
-void SHA256Provider::update (const unsigned char* data, int data_length)
+void SHA1Provider::update (const unsigned char* data, int data_length)
   {
     unsigned char *p;
     CRYPTO_U32 l;
@@ -373,7 +373,7 @@ void SHA256Provider::update (const unsigned char* data, int data_length)
   }
 
 
-const char* SHA256Provider::doFinal (unsigned char* out)
+const char* SHA1Provider::doFinal (unsigned char* out)
   {
     m_needs_init = true;
     if (m_error)

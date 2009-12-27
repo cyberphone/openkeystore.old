@@ -15,15 +15,8 @@
 namespace webpki
 {
 
-const int SHACore::SHA_LBLOCK;
-
-const int SHACore::SHA_CBLOCK;
-
-
-const char* SHACore::doFinal (unsigned char* digest, const unsigned char* data, int length)
+HMAC_SHA1Provider::HMAC_SHA1Provider () : HMACCore (m_outer, m_inner, SHA1Provider::DIGEST_LENGTH)
   {
-    update (data, length);
-    return doFinal (digest);
   }
 
 }

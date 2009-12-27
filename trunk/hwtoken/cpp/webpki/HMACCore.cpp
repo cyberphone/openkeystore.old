@@ -15,25 +15,23 @@
 
 #include "crypto.h"
 
-#define MAX_BLOCK_SIZE 64 // SHA256 in this library
 
 namespace webpki
 {
 
-HMACCore::HMACCore (SHACore& outer, SHACore& inner, int digest_length, int block_size)
+HMACCore::HMACCore (SHACore& outer, SHACore& inner, int digest_length)
   {
 	m_outer_save = &outer;
 	m_inner_save = &inner;
 	m_digest_length = digest_length;
-	m_block_size = block_size;
 	m_error = NULL;
   }
 
 
 void HMACCore::init (const unsigned char* key, int key_length)
   {
-	unsigned char padded_key[MAX_BLOCK_SIZE];
-	if (key_length > m_block_size)
+	unsigned char padded_key[SHACore::SHA_CBLOCK];
+	if (key_length > SHACore::SHA_CBLOCK)
 	  {
 		m_inner_save->doFinal (padded_key, key, key_length);
 		key_length = m_digest_length;
@@ -42,16 +40,16 @@ void HMACCore::init (const unsigned char* key, int key_length)
 	  {
 		memcpy (padded_key, key, key_length);
 	  }
-	for (int i = 0; i < m_block_size; i++)
+	for (int i = 0; i < SHACore::SHA_CBLOCK; i++)
 	  {
 		padded_key[i] = i < key_length ? padded_key[i] ^ 0x36 : 0x36;
 	  }
-	m_inner_save->update (padded_key, m_block_size);
-	for (int i = 0; i < m_block_size; i++)
+	m_inner_save->update (padded_key, SHACore::SHA_CBLOCK);
+	for (int i = 0; i < SHACore::SHA_CBLOCK; i++)
 	  {
 		padded_key[i] = i < key_length ? padded_key[i] ^ (0x36 ^ 0x5c) : 0x5c;
 	  }
-	m_outer_save->update (padded_key, m_block_size);
+	m_outer_save->update (padded_key, SHACore::SHA_CBLOCK);
   }
 
 
@@ -63,7 +61,7 @@ void HMACCore::update (const unsigned char* data, int length)
 
 const char* HMACCore::doFinal (unsigned char* digest)
   {
-	unsigned char inner_digest[MAX_BLOCK_SIZE];
+	unsigned char inner_digest[SHACore::SHA_CBLOCK];
 	m_inner_save->doFinal (inner_digest);
 	return m_outer_save->doFinal (digest, inner_digest, m_digest_length);
   }

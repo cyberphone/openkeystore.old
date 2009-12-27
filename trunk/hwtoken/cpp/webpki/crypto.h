@@ -72,6 +72,46 @@ namespace webpki
 	      virtual const char* doFinal (unsigned char* digest) = 0;
 
 	      const char* doFinal (unsigned char* digest, const unsigned char* data, int length);
+
+        protected:
+
+          friend class HMACCore;
+
+	      static const int SHA_LBLOCK = 16;                // SHA1 & SHA256 share these
+
+	      static const int SHA_CBLOCK = (SHA_LBLOCK * 4);  // SHA1 & SHA256 share these
+
+	      const char* m_error;
+
+          bool m_needs_init;
+	  };
+
+
+	class SHA1Provider : public SHACore
+	  {
+	    public:
+
+          virtual void update (const unsigned char* data, int length);
+
+	      virtual const char* doFinal (unsigned char* digest);
+
+	      static const int DIGEST_LENGTH = 20;
+
+	    private:
+
+          friend class HMAC_SHA256Provider;
+
+	      void _init ();
+
+	      void hash_block_data_order (const unsigned char* data, int num);
+
+	      struct
+	        {
+	          CRYPTO_U32 h[8];
+	          CRYPTO_U32 Nl, Nh;
+	          CRYPTO_U32 data[SHA_LBLOCK];
+	          unsigned int num, md_len;
+	        } m_sha256_ctx;
 	  };
 
 
@@ -79,9 +119,9 @@ namespace webpki
 	  {
 	    public:
 
-	      SHA256Provider ();
+		  SHA256Provider ();
 
-          virtual void update (const unsigned char* data, int length);
+		  virtual void update (const unsigned char* data, int length);
 
 	      virtual const char* doFinal (unsigned char* digest);
 
@@ -95,10 +135,6 @@ namespace webpki
 
 	      void hash_block_data_order (const unsigned char* data, int num);
 
-	      static const int SHA_LBLOCK = 16;
-
-	      static const int SHA_CBLOCK = (SHA_LBLOCK * 4);
-
 	      struct
 	        {
 	          CRYPTO_U32 h[8];
@@ -106,10 +142,6 @@ namespace webpki
 	          CRYPTO_U32 data[SHA_LBLOCK];
 	          unsigned int num, md_len;
 	        } m_sha256_ctx;
-
-          const char* m_error;
-
-          bool m_needs_init;
 	  };
 
 
@@ -127,7 +159,7 @@ namespace webpki
 
 	    protected:
 
-	      HMACCore (SHACore& outer, SHACore& inner, int digest_length, int block_size);
+	      HMACCore (SHACore& outer, SHACore& inner, int digest_length);
 
         private:
 
@@ -137,10 +169,22 @@ namespace webpki
 
           int m_digest_length;
 
-          int m_block_size;
-
           char* m_error;
 	  };
+
+
+	class HMAC_SHA1Provider : public HMACCore
+      {
+        public:
+
+          HMAC_SHA1Provider ();
+
+        private:
+
+          SHA1Provider m_outer;
+
+          SHA1Provider m_inner;
+      };
 
 
 	class HMAC_SHA256Provider : public HMACCore
