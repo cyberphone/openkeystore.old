@@ -126,7 +126,7 @@ int main ()
     }
     else
     printf(".");
-    printf(" passed.\n");
+    printf(" SHA passed.\n");
 
     HMAC_SHA256Provider hmac256;
     init ("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -190,6 +190,6 @@ int main ()
     return 1;
     }
     else
-    printf(".");
+    printf(". HMAC passed.\n");
 
   }
