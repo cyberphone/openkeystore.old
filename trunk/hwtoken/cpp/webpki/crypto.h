@@ -62,21 +62,36 @@ namespace webpki
           const char* m_error;
       };
 
-	class SHA256Provider
+
+	class SHACore
+	  {
+        public:
+
+          virtual void update (const unsigned char* data, int length) = 0;
+
+	      virtual const char* doFinal (unsigned char* digest) = 0;
+
+	      const char* doFinal (unsigned char* digest, const unsigned char* data, int length);
+	  };
+
+
+	class SHA256Provider : public SHACore
 	  {
 	    public:
 
 	      SHA256Provider ();
 
+          virtual void update (const unsigned char* data, int length);
+
+	      virtual const char* doFinal (unsigned char* digest);
+
 	      static const int DIGEST_LENGTH = 32;
-
-	      void update (const unsigned char* data, int length);
-
-	      const char* doFinal (unsigned char* digest);
 
 	    private:
 
-	      void init ();
+          friend class HMAC_SHA256Provider;
+
+	      void _init ();
 
 	      void hash_block_data_order (const unsigned char* data, int num);
 
@@ -96,6 +111,50 @@ namespace webpki
 
           bool m_needs_init;
 	  };
+
+
+	class HMACCore
+	  {
+	    public:
+
+          void init (const unsigned char* key, int key_length);
+
+          void update (const unsigned char* data, int length);
+
+		  const char* doFinal (unsigned char* digest);
+
+		  const char* doFinal (unsigned char* digest, const unsigned char* data, int length);
+
+	    protected:
+
+	      HMACCore (SHACore& outer, SHACore& inner, int digest_length, int block_size);
+
+        private:
+
+          SHACore* m_outer_save;
+
+          SHACore* m_inner_save;
+
+          int m_digest_length;
+
+          int m_block_size;
+
+          char* m_error;
+	  };
+
+
+	class HMAC_SHA256Provider : public HMACCore
+      {
+        public:
+
+          HMAC_SHA256Provider ();
+
+        private:
+
+          SHA256Provider m_outer;
+
+          SHA256Provider m_inner;
+      };
 
   }  /* namespace */
 

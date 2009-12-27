@@ -106,4 +106,10 @@ int main ()
     printf(".");
     printf(" passed.\n");
 
+    HMAC_SHA256Provider hmac256;
+    hmac256.init ((unsigned char*)"abc", 3);
+    hmac256.update ((unsigned char*)"abc", 3);
+    hmac256.doFinal (md);
+    printf("HMAC passed.\n");
+
   }

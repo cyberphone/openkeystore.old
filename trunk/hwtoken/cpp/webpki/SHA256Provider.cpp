@@ -219,11 +219,11 @@ const int SHA256Provider::SHA_CBLOCK;
 
 SHA256Provider::SHA256Provider ()
   {
-    init ();
+    _init ();
   }
 
 
-void SHA256Provider::init ()
+void SHA256Provider::_init ()
   {
     m_error = NULL;
 
@@ -311,7 +311,6 @@ void SHA256Provider::hash_block_data_order (const unsigned char* data, int num)
 
         m_sha256_ctx.h[0] += a; m_sha256_ctx.h[1] += b; m_sha256_ctx.h[2] += c; m_sha256_ctx.h[3] += d;
         m_sha256_ctx.h[4] += e; m_sha256_ctx.h[5] += f; m_sha256_ctx.h[6] += g; m_sha256_ctx.h[7] += h;
-
       }
   }
 
@@ -324,7 +323,7 @@ void SHA256Provider::update (const unsigned char* data, int data_length)
 
     if (m_needs_init)
       {
-        init ();
+        _init ();
       }
 
     if (data_length == 0) return;
