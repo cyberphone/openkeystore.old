@@ -91,7 +91,9 @@ namespace webpki
 	  {
 	    public:
 
-          virtual void update (const unsigned char* data, int length);
+	      SHA1Provider ();
+
+		  virtual void update (const unsigned char* data, int length);
 
 	      virtual const char* doFinal (unsigned char* digest);
 
@@ -99,7 +101,7 @@ namespace webpki
 
 	    private:
 
-          friend class HMAC_SHA256Provider;
+          friend class HMAC_SHA1Provider;
 
 	      void _init ();
 
@@ -107,11 +109,11 @@ namespace webpki
 
 	      struct
 	        {
-	          CRYPTO_U32 h[8];
-	          CRYPTO_U32 Nl, Nh;
-	          CRYPTO_U32 data[SHA_LBLOCK];
-	          unsigned int num, md_len;
-	        } m_sha256_ctx;
+	    	  CRYPTO_U32 h0, h1, h2, h3, h4;
+	    	  CRYPTO_U32 Nl, Nh;
+	    	  CRYPTO_U32 data[SHA_LBLOCK];
+	    	  unsigned int num;
+	        } m_sha1_ctx;
 	  };
 
 
@@ -140,7 +142,7 @@ namespace webpki
 	          CRYPTO_U32 h[8];
 	          CRYPTO_U32 Nl, Nh;
 	          CRYPTO_U32 data[SHA_LBLOCK];
-	          unsigned int num, md_len;
+	          unsigned int num;
 	        } m_sha256_ctx;
 	  };
 
