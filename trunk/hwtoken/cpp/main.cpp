@@ -128,6 +128,18 @@ int main ()
     printf(".");
     printf(" SHA passed.\n");
 
+    SHA1Provider sha1;
+    sha1.update((unsigned char*)"Test vector from febooti.com", 28);
+    init ("a7631795f6d59cd6d14ebd0058a6394a4b93d868");
+    sha1.doFinal (md);
+    if (memcmp(md,init_hex_data,20))
+    {
+    printf("\nSHA TEST 1 failed.\n");
+    return 1;
+    }
+    else
+    printf(".SHA1 passed\n");
+
     HMAC_SHA256Provider hmac256;
     init ("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
           "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"

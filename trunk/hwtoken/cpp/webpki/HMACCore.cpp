@@ -19,11 +19,10 @@
 namespace webpki
 {
 
-HMACCore::HMACCore (SHACore& outer, SHACore& inner, int digest_length)
+HMACCore::HMACCore (SHACore& outer, SHACore& inner)
   {
 	m_outer_save = &outer;
 	m_inner_save = &inner;
-	m_digest_length = digest_length;
 	m_error = NULL;
   }
 
@@ -34,7 +33,7 @@ void HMACCore::init (const unsigned char* key, int key_length)
 	if (key_length > SHACore::SHA_CBLOCK)
 	  {
 		m_inner_save->doFinal (padded_key, key, key_length);
-		key_length = m_digest_length;
+		key_length = m_inner_save->m_sha_ctx.digest_length;
 	  }
 	else
 	  {
@@ -61,9 +60,9 @@ void HMACCore::update (const unsigned char* data, int length)
 
 const char* HMACCore::doFinal (unsigned char* digest)
   {
-	unsigned char inner_digest[SHACore::SHA_CBLOCK];
+	unsigned char inner_digest[SHA256Provider::DIGEST_LENGTH];
 	m_inner_save->doFinal (inner_digest);
-	return m_outer_save->doFinal (digest, inner_digest, m_digest_length);
+	return m_outer_save->doFinal (digest, inner_digest, m_inner_save->m_sha_ctx.digest_length);
   }
 
 

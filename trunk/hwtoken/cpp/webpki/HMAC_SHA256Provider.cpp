@@ -15,7 +15,7 @@
 namespace webpki
 {
 
-HMAC_SHA256Provider::HMAC_SHA256Provider () : HMACCore (m_outer, m_inner, SHA256Provider::DIGEST_LENGTH)
+HMAC_SHA256Provider::HMAC_SHA256Provider () : HMACCore (m_outer, m_inner)
   {
   }
 

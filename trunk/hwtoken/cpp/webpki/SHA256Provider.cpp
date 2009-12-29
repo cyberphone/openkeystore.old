@@ -41,13 +41,6 @@
     T1 = X[(i) & 0x0f] += s0 + s1 + X[(i+9) & 0x0f];    \
     ROUND_00_15(i,a,b,c,d,e,f,g,h);     } while (0)
 
-#define HASH_MAKE_STRING(s)   do {    \
-    unsigned long ll;       \
-    unsigned int  xn;       \
-    for (xn = 0; xn < DIGEST_LENGTH/4; xn++)   \
-      {   ll = m_sha256_ctx.h[xn]; HOST_l2c(ll,(s));   }  \
-    } while (0)
-
 static const CRYPTO_U32 K256[64] =
   {
     0x428a2f98UL,0x71374491UL,0xb5c0fbcfUL,0xe9b5dba5UL,
@@ -85,13 +78,14 @@ void SHA256Provider::_init ()
   {
     m_error = NULL;
 	m_needs_init = false;
-    m_sha256_ctx.h[0] = 0x6a09e667UL;   m_sha256_ctx.h[1] = 0xbb67ae85UL;
-    m_sha256_ctx.h[2] = 0x3c6ef372UL;   m_sha256_ctx.h[3] = 0xa54ff53aUL;
-    m_sha256_ctx.h[4] = 0x510e527fUL;   m_sha256_ctx.h[5] = 0x9b05688cUL;
-    m_sha256_ctx.h[6] = 0x1f83d9abUL;   m_sha256_ctx.h[7] = 0x5be0cd19UL;
-    m_sha256_ctx.Nl = 0;
-    m_sha256_ctx.Nh = 0;
-    m_sha256_ctx.num = 0;
+    m_sha_ctx.h[0] = 0x6a09e667UL;   m_sha_ctx.h[1] = 0xbb67ae85UL;
+    m_sha_ctx.h[2] = 0x3c6ef372UL;   m_sha_ctx.h[3] = 0xa54ff53aUL;
+    m_sha_ctx.h[4] = 0x510e527fUL;   m_sha_ctx.h[5] = 0x9b05688cUL;
+    m_sha_ctx.h[6] = 0x1f83d9abUL;   m_sha_ctx.h[7] = 0x5be0cd19UL;
+    m_sha_ctx.Nl = 0;
+    m_sha_ctx.Nh = 0;
+    m_sha_ctx.num = 0;
+	m_sha_ctx.digest_length = DIGEST_LENGTH;
   }
 
 
@@ -104,8 +98,8 @@ void SHA256Provider::hash_block_data_order (const unsigned char* data, int num)
 
     while (num--)
       {
-        a = m_sha256_ctx.h[0];  b = m_sha256_ctx.h[1];  c = m_sha256_ctx.h[2];  d = m_sha256_ctx.h[3];
-        e = m_sha256_ctx.h[4];  f = m_sha256_ctx.h[5];  g = m_sha256_ctx.h[6];  h = m_sha256_ctx.h[7];
+        a = m_sha_ctx.h[0];  b = m_sha_ctx.h[1];  c = m_sha_ctx.h[2];  d = m_sha_ctx.h[3];
+        e = m_sha_ctx.h[4];  f = m_sha_ctx.h[5];  g = m_sha_ctx.h[6];  h = m_sha_ctx.h[7];
 
         if (!is_endian.little && sizeof(CRYPTO_U32)==4 && ((size_t)data%4)==0)
           {
@@ -164,116 +158,10 @@ void SHA256Provider::hash_block_data_order (const unsigned char* data, int num)
             ROUND_16_63(i+7,b,c,d,e,f,g,h,a,X);
           }
 
-        m_sha256_ctx.h[0] += a; m_sha256_ctx.h[1] += b; m_sha256_ctx.h[2] += c; m_sha256_ctx.h[3] += d;
-        m_sha256_ctx.h[4] += e; m_sha256_ctx.h[5] += f; m_sha256_ctx.h[6] += g; m_sha256_ctx.h[7] += h;
+        m_sha_ctx.h[0] += a; m_sha_ctx.h[1] += b; m_sha_ctx.h[2] += c; m_sha_ctx.h[3] += d;
+        m_sha_ctx.h[4] += e; m_sha_ctx.h[5] += f; m_sha_ctx.h[6] += g; m_sha_ctx.h[7] += h;
       }
   }
 
-
-void SHA256Provider::update (const unsigned char* data, int data_length)
-  {
-    unsigned char *p;
-    CRYPTO_U32 l;
-    int n;
-
-    if (m_needs_init)
-      {
-        _init ();
-      }
-
-    if (data_length == 0) return;
-
-    l = (m_sha256_ctx.Nl + (((CRYPTO_U32)data_length)<<3))&0xffffffffUL;
-    /* 95-05-24 eay Fixed a bug with the overflow handling, thanks to
-     * Wei Dai <weidai@eskimo.com> for pointing it out. */
-    if (l < m_sha256_ctx.Nl) /* overflow */
-      {
-        m_sha256_ctx.Nh++;
-      }
-    m_sha256_ctx.Nh += (data_length >> 29);   /* might cause compiler warning on 16-bit */
-    m_sha256_ctx.Nl = l;
-
-    n = m_sha256_ctx.num;
-    if (n != 0)
-      {
-        p = (unsigned char*) m_sha256_ctx.data;
-
-        if (data_length >= SHA_CBLOCK || data_length + n >= SHA_CBLOCK)
-          {
-            memcpy (p + n, data, SHA_CBLOCK - n);
-            hash_block_data_order (p, 1);
-            n      = SHA_CBLOCK-n;
-            data  += n;
-            data_length   -= n;
-            m_sha256_ctx.num = 0;
-            memset (p, 0, SHA_CBLOCK);   /* keep it zeroed */
-          }
-        else
-          {
-            memcpy (p+n, data, data_length);
-            m_sha256_ctx.num += (unsigned int)data_length;
-            return;
-          }
-      }
-
-    n = data_length / SHA_CBLOCK;
-    if (n > 0)
-      {
-        hash_block_data_order (data, n);
-        n    *= SHA_CBLOCK;
-        data += n;
-        data_length  -= n;
-      }
-
-    if (data_length)
-      {
-        p = (unsigned char *)m_sha256_ctx.data;
-        m_sha256_ctx.num = data_length;
-        memcpy (p, data, data_length);
-      }
-  }
-
-
-const char* SHA256Provider::doFinal (unsigned char* out)
-  {
-    m_needs_init = true;
-    if (m_error)
-      {
-        return m_error;
-      }
-    unsigned char *p = (unsigned char *)m_sha256_ctx.data;
-    int n = m_sha256_ctx.num;
-
-    p[n] = 0x80; /* there is always room for one */
-    n++;
-
-    if (n > (SHA_CBLOCK-8))
-      {
-        memset (p+n, 0, SHA_CBLOCK - n);
-        n = 0;
-        hash_block_data_order (p,1);
-      }
-    memset (p+n, 0, SHA_CBLOCK - 8 - n);
-
-    p += SHA_CBLOCK - 8;
-#if   defined(DATA_ORDER_IS_BIG_ENDIAN)
-    (void)HOST_l2c(m_sha256_ctx.Nh, p);
-    (void)HOST_l2c(m_sha256_ctx.Nl, p);
-#elif defined(DATA_ORDER_IS_LITTLE_ENDIAN)
-    (void)HOST_l2c(m_sha256_ctx.Nl, p);
-    (void)HOST_l2c(m_sha256_ctx.Nh, p);
-#endif
-    p -= SHA_CBLOCK;
-    hash_block_data_order (p,1);
-    m_sha256_ctx.num = 0;
-    memset (p, 0,SHA_CBLOCK);
-
-#ifndef HASH_MAKE_STRING
-#error "HASH_MAKE_STRING must be defined!"
-#else
-    HASH_MAKE_STRING(out);
-#endif
-    return m_error;
-  }
 
 }

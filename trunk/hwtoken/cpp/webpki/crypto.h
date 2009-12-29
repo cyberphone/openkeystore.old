@@ -67,15 +67,19 @@ namespace webpki
 	  {
         public:
 
-          virtual void update (const unsigned char* data, int length) = 0;
+          void update (const unsigned char* data, int length);
 
-	      virtual const char* doFinal (unsigned char* digest) = 0;
+	      const char* doFinal (unsigned char* digest);
 
 	      const char* doFinal (unsigned char* digest, const unsigned char* data, int length);
 
         protected:
 
-          friend class HMACCore;
+  	      virtual void _init () = 0;
+
+	      virtual void hash_block_data_order (const unsigned char* data, int num) = 0;
+
+	      friend class HMACCore;
 
 	      static const int SHA_LBLOCK = 16;                // SHA1 & SHA256 share these
 
@@ -84,6 +88,15 @@ namespace webpki
 	      const char* m_error;
 
           bool m_needs_init;
+
+          struct
+	        {
+	          CRYPTO_U32 h[8];
+	          CRYPTO_U32 Nl, Nh;
+	          CRYPTO_U32 data[SHA_LBLOCK];
+	          unsigned int num;
+	          int digest_length;
+	        } m_sha_ctx;
 	  };
 
 
@@ -93,27 +106,15 @@ namespace webpki
 
 	      SHA1Provider ();
 
-		  virtual void update (const unsigned char* data, int length);
-
-	      virtual const char* doFinal (unsigned char* digest);
-
 	      static const int DIGEST_LENGTH = 20;
 
 	    private:
 
           friend class HMAC_SHA1Provider;
 
-	      void _init ();
+	      virtual void _init ();
 
-	      void hash_block_data_order (const unsigned char* data, int num);
-
-	      struct
-	        {
-	    	  CRYPTO_U32 h0, h1, h2, h3, h4;
-	    	  CRYPTO_U32 Nl, Nh;
-	    	  CRYPTO_U32 data[SHA_LBLOCK];
-	    	  unsigned int num;
-	        } m_sha1_ctx;
+	      virtual void hash_block_data_order (const unsigned char* data, int num);
 	  };
 
 
@@ -123,27 +124,15 @@ namespace webpki
 
 		  SHA256Provider ();
 
-		  virtual void update (const unsigned char* data, int length);
-
-	      virtual const char* doFinal (unsigned char* digest);
-
 	      static const int DIGEST_LENGTH = 32;
 
 	    private:
 
           friend class HMAC_SHA256Provider;
 
-	      void _init ();
+	      virtual void _init ();
 
-	      void hash_block_data_order (const unsigned char* data, int num);
-
-	      struct
-	        {
-	          CRYPTO_U32 h[8];
-	          CRYPTO_U32 Nl, Nh;
-	          CRYPTO_U32 data[SHA_LBLOCK];
-	          unsigned int num;
-	        } m_sha256_ctx;
+	      virtual void hash_block_data_order (const unsigned char* data, int num);
 	  };
 
 
@@ -161,15 +150,13 @@ namespace webpki
 
 	    protected:
 
-	      HMACCore (SHACore& outer, SHACore& inner, int digest_length);
+	      HMACCore (SHACore& outer, SHACore& inner);
 
         private:
 
           SHACore* m_outer_save;
 
           SHACore* m_inner_save;
-
-          int m_digest_length;
 
           char* m_error;
 	  };
