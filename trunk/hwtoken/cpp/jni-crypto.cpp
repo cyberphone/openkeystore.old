@@ -129,3 +129,55 @@ JNIEXPORT jbyteArray JNICALL Java_org_webpki_sks_testclib_SHA256Provider_doFinal
     return j_result;
   }
 
+/*
+ * Class:     org_webpki_sks_testclib_SHA1Provider
+ * Method:    createSHA1Provider
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_org_webpki_sks_testclib_SHA1Provider_createSHA1Provider (JNIEnv *env, jobject jobj)
+  {
+    return reinterpret_cast<jlong>(new SHA1Provider ());
+  }
+
+/*
+ * Class:     org_webpki_sks_testclib_SHA1Provider
+ * Method:    deleteSHA1Provider
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_org_webpki_sks_testclib_SHA1Provider_deleteSHA1Provider (JNIEnv *env, jobject jobj, jlong ptr)
+  {
+    delete reinterpret_cast<SHA1Provider *>(ptr);
+  }
+
+/*
+ * Class:     org_webpki_sks_testclib_SHA1Provider
+ * Method:    update
+ * Signature: (J[B)V
+ */
+JNIEXPORT void JNICALL Java_org_webpki_sks_testclib_SHA1Provider_update (JNIEnv *env, jobject jobj, jlong ptr, jbyteArray j_data)
+  {
+    jbyte *c_data = env->GetByteArrayElements (j_data, NULL);
+    jsize length_data = env->GetArrayLength (j_data);
+    reinterpret_cast<SHA1Provider *>(ptr)->update ((unsigned char *)c_data, length_data);
+    env->ReleaseByteArrayElements (j_data, c_data, 0);
+  }
+
+/*
+ * Class:     org_webpki_sks_testclib_SHA1Provider
+ * Method:    doFinal
+ * Signature: (J)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_org_webpki_sks_testclib_SHA1Provider_doFinal (JNIEnv *env, jobject jobj, jlong ptr)
+  {
+    unsigned char out[SHA1Provider::DIGEST_LENGTH];
+    const char *error = reinterpret_cast<SHA1Provider *>(ptr)->doFinal (out);
+    if (error)
+      {
+        throwException (env, error);
+        return NULL;
+      }
+    jbyteArray j_result = env->NewByteArray (SHA1Provider::DIGEST_LENGTH);
+    env->SetByteArrayRegion (j_result, 0, SHA1Provider::DIGEST_LENGTH, (jbyte *)out);
+    return j_result;
+  }
+

@@ -103,45 +103,109 @@ public class Test
         return DebugFormatter.getHexDebugData (value);
       }
     
-    private void singleSHA256 (byte[] a, byte[] b, byte[] c, byte[] d) throws Exception
+  private void singleSHA256 (byte[] a, byte[] b, byte[] c, byte[] d) throws Exception
+    {
+      SHA256Provider sha256 = new SHA256Provider ();
+      MessageDigest md = MessageDigest.getInstance ("SHA-256");
+      sha256.update (a);
+      md.update (a);
+      if (b != null)
+        {
+          sha256.update (b);
+          md.update (b);
+        }
+      if (c != null)
+        {
+          sha256.update (c);
+          md.update (c);
+        }
+      if (d != null)
+        {
+          sha256.update (d);
+          md.update (d);
+        }
+      byte[] res = sha256.doFinal ();
+      byte[] jres = md.digest ();
+      
+      if (!ArrayUtil.compare (res, jres))
+        {
+          System.out.println ("Failed SHA256");
+          System.out.println ("a=\n" + toHexCond (a) +
+                            "\nb=\n" + toHexCond (b) +
+                            "\nc=\n" + toHexCond (c) +
+                            "\nd=\n" + toHexCond (d));
+          System.exit (-3);
+        }
+      sha256.dispose ();
+    }
+
+  private void testSHA256 () throws Exception
+    {
+      System.out.println ("SHA256 Testing Begins");
+      for (int i = 0; i < passes; i++)
+        {
+          int key_len = (i & 1) * 32 + 3;
+          SecureRandom random = new SecureRandom();
+          byte[] raw_key = new byte[key_len];
+          random.nextBytes (raw_key);
+          byte[] msg_3 = new byte[3];
+          random.nextBytes (msg_3);
+          byte[] msg_16 = new byte[16];
+          random.nextBytes (msg_16);
+          byte[] msg_32 = new byte[32];
+          random.nextBytes (msg_32);
+          byte[] msg_35 = new byte[35];
+          random.nextBytes (msg_35);
+          byte[] msg_300 = new byte[300];
+          random.nextBytes (msg_300);
+
+          singleSHA256 (raw_key, null, null, null);
+          singleSHA256 (msg_3,   null, null, null);
+          singleSHA256 (msg_3,   raw_key, null, null);
+          singleSHA256 (msg_3,   raw_key, msg_300, null);
+        }
+      System.out.println ("SHA256 Testing Passed!");
+    }
+
+    private void singleSHA1 (byte[] a, byte[] b, byte[] c, byte[] d) throws Exception
       {
-        SHA256Provider sha256 = new SHA256Provider ();
-        MessageDigest md = MessageDigest.getInstance ("SHA-256");
-        sha256.update (a);
+        SHA1Provider sha1 = new SHA1Provider ();
+        MessageDigest md = MessageDigest.getInstance ("SHA-1");
+        sha1.update (a);
         md.update (a);
         if (b != null)
           {
-            sha256.update (b);
+            sha1.update (b);
             md.update (b);
           }
         if (c != null)
           {
-            sha256.update (c);
+            sha1.update (c);
             md.update (c);
           }
         if (d != null)
           {
-            sha256.update (d);
+            sha1.update (d);
             md.update (d);
           }
-        byte[] res = sha256.doFinal ();
+        byte[] res = sha1.doFinal ();
         byte[] jres = md.digest ();
         
         if (!ArrayUtil.compare (res, jres))
           {
-            System.out.println ("Failed SHA256");
+            System.out.println ("Failed SHA1");
             System.out.println ("a=\n" + toHexCond (a) +
                               "\nb=\n" + toHexCond (b) +
                               "\nc=\n" + toHexCond (c) +
                               "\nd=\n" + toHexCond (d));
             System.exit (-3);
           }
-        sha256.dispose ();
+        sha1.dispose ();
       }
 
-    private void testSHA256 () throws Exception
+    private void testSHA1 () throws Exception
       {
-        System.out.println ("SHA256 Testing Begins");
+        System.out.println ("SHA1 Testing Begins");
         for (int i = 0; i < passes; i++)
           {
             int key_len = (i & 1) * 32 + 3;
@@ -158,19 +222,20 @@ public class Test
             random.nextBytes (msg_35);
             byte[] msg_300 = new byte[300];
             random.nextBytes (msg_300);
-
-            singleSHA256 (raw_key, null, null, null);
-            singleSHA256 (msg_3,   null, null, null);
-            singleSHA256 (msg_3,   raw_key, null, null);
-            singleSHA256 (msg_3,   raw_key, msg_300, null);
+    
+            singleSHA1 (raw_key, null, null, null);
+            singleSHA1 (msg_3,   null, null, null);
+            singleSHA1 (msg_3,   raw_key, null, null);
+            singleSHA1 (msg_3,   raw_key, msg_300, null);
           }
-        System.out.println ("SHA256 Testing Passed!");
+        System.out.println ("SHA1 Testing Passed!");
       }
-
+    
     public static void main (String[] argc) throws Exception
       {
         Test t = new Test (1000);
         t.testAES ();
         t.testSHA256 ();
+        t.testSHA1 ();
       }
   }
