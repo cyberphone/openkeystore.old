@@ -1,0 +1,414 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 2.4  (Unix)">
+	<META NAME="AUTHOR" CONTENT="anders">
+	<META NAME="CREATED" CONTENT="20090601;17274700">
+	<META NAME="CHANGEDBY" CONTENT="anders">
+	<META NAME="CHANGED" CONTENT="20100102;9340200">
+	<STYLE TYPE="text/css">
+	<!--
+		@page { size: 21.59cm 27.94cm; margin: 2cm }
+		P { margin-bottom: 0.21cm }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-GB" DIR="LTR">
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><FONT SIZE=5>Air-tight
+Provisioning and Keystore  API for the SKS</FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">SKS = Secure Key Store; a
+smart card that offers end-to-end secured key-provisioning and
+key-management.</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">General:</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">There is a not shown  2-byte
+status code returned by all methods.  In case the status is &lt;&gt;
+0 there is an error and the succeeding values MUST NOT be read as
+they are not available.  Instead there is a second return value
+containing an UTF-8 encoded description in English to be used for
+logging and debugging purposes.</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm; font-weight: medium"><FONT SIZE=4 STYLE="font-size: 16pt">Provisioning
+Session Management</FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">encrypted_K, 
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">attested_K,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">client_session_id =
+<B>createProvisioningSession</B> (server_session_id, session_uri,
+server_public_key, life_time_in_seconds)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">attested_provisioning_report
+= <B>closeProvisioningSession</B> (secure_provisioning_handle,
+assumed_result, mac)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>This method SHOULD commit
+all accumulated provisioned data if the assumed_result matches the
+actual state.  The attested_provisioning_report is simply the
+MAC-signed value of the word “Success” if the operation is
+successful, otherwise the method returns an error code + string.  In
+case there is a problem all associated provisioned data SHOULD be
+removed (roll-backed).</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>abortProvisioningSession</B>
+(secure_provisioning_handle)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Note: if the provisioning
+handle is valid, all session data will be deleted.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">secure_provisioning_handle =
+<B>getProvisioningSession</B> (client_session_id, server_session_id,
+session_initiation_uri)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Note: this method is only
+allowed on a session that is still open.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">enum_handle,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">provisioning_data =
+<B>enumerateProvisioningSessions</B> (enum_handle)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Note: this method
+enumerates both closed and open provisioning sessions.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>setTime</B>
+(milliseconds_since_epoch)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>This method SHOULD be
+issued before any other method for a newly created SKS instance.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm; font-weight: medium"><FONT SIZE=4 STYLE="font-size: 16pt">Provisioning
+Session Object Creation</FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm; font-weight: medium"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">PUK_index = <B>createPUKPolicy</B>
+(secure_provisioning_handle, puk_policy_data...TBD, encrypted_PUK,
+hash_of_sorted_enclosing_key_ids)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>A PUK with RetryLimit = 0
+means it never expires but always introduces a 1-10 second delay
+before each usage (correct or incorrect)</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">PIN_index = <B>createPINPolicy</B>
+(secure_provisioning_handle, PUK_index, pin_policy_data...TBD,
+hash_of_sorted_enclosing_key_ids)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>PUK_index = 0 means
+device PUK.  Device PUKs may not be available on all keystores and in
+that case PUK_index = 0 means no PUK.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">{encrypted_private_key,}</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">local_key_index,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">public_key</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">key_attestation =
+<B>createKeyPair</B> (secure_provisioning_handle, PIN_index,
+group_PIN_index, key_id, key_usage, algorithm_data, migratable,
+delete_protected, import_private_key, export_private_key, updatable,
+{encrypted_PIN | plain_text_PIN})</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>If PIN_index points to a
+PIN policy the last argument MUST either contain an encrypted PIN
+(preset policy) or a user-defined clear-text PIN, otherwise it must
+be null.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm; font-weight: medium"><FONT SIZE=4 STYLE="font-size: 16pt">Setting
+Data to Current Provisioning Session Created Objects</FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm; font-weight: medium"><FONT SIZE=3><I>The
+mac is a TBD combination of the operation, the session key, the
+target key data, and the argument data.</I></FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>setCertificatePath</B>
+(secure_provisioning_handle, local_key_index, mac, certificate_path
+{,friendly_name})</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Note: the SKS MUST NOT
+verify that the certificate_path and the public key match for keys
+having the </I><SPAN STYLE="font-style: normal">“import_private_key”</SPAN><I>
+flag set  because that would disable the </I><SPAN STYLE="font-style: normal"><B>restorePrivateKey</B></SPAN><I>
+method.  For other keys, the SKS MAY perform such a test (although it
+is redundant since the mac is assumed to cater for the binding
+between certificate data and the generated public key).  I.e. a
+conforming SKS MAY always treat </I><SPAN STYLE="font-style: normal">certificate_path</SPAN><I>
+data as an array of “blobs”.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>The</I><SPAN STYLE="font-style: normal">
+certificate_path</SPAN><I> argument must be represented in such a way
+that the SKS can identify the individual certificates as well as
+being sorted with the EE-certificate at the beginning of the
+structure.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>A conforming SKS MUST
+verify that exactly one such operation is performed towards each
+created key in a session.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>A conforming SKS MUST
+verify that this is the first operation that modifies the created key
+in a session because the mac of possible succeeding operations is
+built on the EE-certificate, not the public key.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>addExtension</B>
+(secure_provisioning_handle, local_key_index, mac, extension_data,
+URI)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Note: in order to verify
+integrity of the provisioning session Extension objects MUST be
+locally provisioned in the same order as the issuer created them
+because the mac also includes the mac of the preceding item with an
+array of zero bytes as an initial (dummy) value.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>addLogotype</B>
+(secure_provisioning_handle, local_key_index, mac, image_data,
+MIME_type, URI)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Note: in order to verify
+integrity of the provisioning session Logotype objects MUST be
+locally provisioned in the same order as the issuer created them
+because the mac also includes the mac of the preceding item with an
+array of zero bytes as an initial (dummy) value.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>setPiggybackedSymmetricKey</B>
+(secure_provisioning_handle, encrypted_symmetric_key, mac,
+local_key_index, endorsed_algorithms_in_local_notation[])</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Note: a conforming SKS
+SHOULD verify that only one such operation is optionally performed
+towards a specific local_</I><SPAN STYLE="font-style: normal">key_index</SPAN><I>
+in a session.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>restorePrivateKey</B>
+(secure_provisioning_handle, encrypted_private_key, mac,
+local_key_index)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Note:</I>
+import_private_key <I>MUST be set in </I><B>createKeyPair</B><I><SPAN STYLE="font-weight: medium">
+otherwise an error will occur</SPAN></I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Note: a conforming SKS
+SHOULD verify that only one such operation is optionally performed
+towards a specific </I><SPAN STYLE="font-style: normal">local_key_index</SPAN><I>
+in a session.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><FONT SIZE=4 STYLE="font-size: 16pt">Updating
+Objects Created in an Earlier Provisioning Session</FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><FONT SIZE=3><I>Note:</I>
+updatable <I>MUST have been set in the original session.</I></FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><FONT SIZE=3><I>The mac is a
+TBD combination of the operation, the old session key, the old key
+data, and the current session key.</I></FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>updatePINValue</B>
+(secure_provisioning_handle, encrypted_PIN, mac, local_key_index)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>updatePUKValueAndUnlockKeys</B>
+(secure_provisioning_handle, encrypted_PUK, mac, local_key_index)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>deleteKey</B>
+(secure_provisioning_handle, mac, local_key_index)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><FONT SIZE=4 STYLE="font-size: 16pt">Combining
+Objects Created in the Current Provisioning Session with Objects
+Created in an Earlier Provisioning Session</FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><FONT SIZE=3><I>Note:</I>
+updatable <I>MUST have been set in the original session</I></FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><FONT SIZE=3><I>The mac is a
+TBD combination of the operation, the old session key, the old key
+data, and the current session key.</I></FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>cloneKey</B>
+(secure_provisioning_handle, mac, local_key_index_master,
+local_key_index_copy)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Restrictions on
+local_key_index_master: </I>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>MUST be PIN-protected.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>MUST have PIN grouping =
+“shared”.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Restrictions on
+local_key_index_copy:</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>MUST be fully
+provisioned.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>MUST NOT be
+PIN-protected.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>replaceKey</B>
+(secure_provisioning_handle, mac, local_key_index_original,
+local_key_index_new)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Restrictions on
+local_key_index_new:</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>MUST be fully
+provisioned.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>MUST NOT be
+PIN-protected.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">Device Enquiries</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">API_version,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">vendor_designation,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">rsa_capabilities,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">ecc_capabilities,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">device_PUK_available,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">device_PIN_available =
+<B>getCoreDeviceData</B> ()</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">Note: device_PIN_available
+presumes device_PUK_available</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">algorithm_handle,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">algorithm_URI =
+<B>enumerateSupportedAlgorithms</B> (algorithm_handle)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">certificate =
+<B>getDeviceCertficate</B> ()</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><FONT SIZE=4 STYLE="font-size: 16pt">Local
+Keystore Enquiries</FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Note: Semi-provisioned
+data MUST be available all the time.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">enum_handle,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">local_key_index =
+<B>enumerateKeys</B> (enum_handle)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">key_id,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">provisioning_data =
+<B>getKeyProvisioningSessionData</B> (local_key_index)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">certificate_path,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">attributes...TBD =
+<B>getKeyAttributes</B> (local_key_index)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">attributes...TBD =
+<B>getKeyProtectionStatus</B> (local_key_index)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">attributes...TBD =
+<B>getExtendedKeyAttributes</B> (local_key_index)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">list_of_images =
+<B>getAssociatedLogotypes</B> (local_key_index)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">URI,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">image = <B>getLogotype</B>
+(image_pointer)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">list_of_extensions =
+<B>getAssociatedExtensions</B> (local_key_index)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">URI,</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm">extension = <B>getExtension</B>
+(extension_pointer)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><FONT SIZE=4 STYLE="font-size: 16pt">Local
+Key Management</FONT></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><I>Note: It is an ERROR
+launching these methods for keys belonging to a not yet finished
+provisioning session.</I></P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>resetPIN</B>
+(local_key_index, clear_text_PUK_value, {new_clear_text_PIN_value})</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>changePIN</B>
+(local_key_index, old_clear_text_PIN_value, new_clear_text_PIN_value)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>deleteKey</B>
+(local_key_index, {clear_text_PUK_value})</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><B>unlockKey</B>
+(local_key_index, clear_text_PUK_value)</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P ALIGN=LEFT STYLE="margin-bottom: 0cm"><BR>
+</P>
+</BODY>
+</HTML>
