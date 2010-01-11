@@ -1064,11 +1064,10 @@ void AESProvider::AES_cbc_ecb_encrypt (const unsigned char* in, unsigned char* o
    */
 void AESProvider::AES_set_encrypt_key (const unsigned char* raw_key)
   {
-    CRYPTO_U32 *rk;
     int i = 0;
     CRYPTO_U32 temp;
 
-    rk = m_the_key.rd_key;
+    CRYPTO_U32 *rk = m_the_key.rd_key;
     if (m_the_key.length_in_bytes == 16)
       {
         m_the_key.rounds = 10;
@@ -1173,25 +1172,22 @@ void AESProvider::AES_set_encrypt_key (const unsigned char* raw_key)
  */
 void AESProvider::AES_set_decrypt_key (const unsigned char* raw_key)
   {
-    CRYPTO_U32 *rk;
-    int i, j;
-    CRYPTO_U32 temp;
-
     /* first, start with an encryption schedule */
     AES_set_encrypt_key (raw_key);
 
-    rk = m_the_key.rd_key;
+    CRYPTO_U32 *rk = m_the_key.rd_key;
 
     /* invert the order of the round keys: */
-    for (i = 0, j = 4*(m_the_key.rounds); i < j; i += 4, j -= 4)
+    for (int i = 0, j = 4 * m_the_key.rounds; i < j; i += 4, j -= 4)
       {
+        CRYPTO_U32 temp;
         temp = rk[i    ]; rk[i    ] = rk[j    ]; rk[j    ] = temp;
         temp = rk[i + 1]; rk[i + 1] = rk[j + 1]; rk[j + 1] = temp;
         temp = rk[i + 2]; rk[i + 2] = rk[j + 2]; rk[j + 2] = temp;
         temp = rk[i + 3]; rk[i + 3] = rk[j + 3]; rk[j + 3] = temp;
       }
     /* apply the inverse MixColumn transform to all round keys but the first and the last: */
-    for (i = 1; i < (m_the_key.rounds); i++)
+    for (int i = 1; i < m_the_key.rounds; i++)
       {
         rk += 4;
         rk[0] =
