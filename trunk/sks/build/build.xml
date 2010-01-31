@@ -1,4 +1,4 @@
-<project name="WEBPKI.ORG phonejce" default="compile" basedir=".">
+<project name="WEBPKI.ORG SKS" default="dist" basedir=".">
 
   <!-- set global properties for this build -->
   <property name="src_dir" value="../src" />

@@ -152,11 +152,12 @@ abstract class HighLevelKeyStore
 
 
     /**
-     * Opens a key (key handle) for cryptographic operations.
-     * @param key_id The internal database id of the key.
-     * @param pin A PIN or password value needed for opening the key.  For keys that
+     * Sets the user/application authentication for a key (key handle) for cryptographic operations.
+     * Note: this is a passive operation; the value isn't used until a cryptographic
+     * operation to be performed using the SKS architecture.
+     * @param key_id The id of the key.
+     * @param pin A PIN or password value needed for using the key.  For keys that
      * are not PIN or password protected this value should be <code>null</code>.
-     * @return <code>true</code> if successful else <code>false</code>.
      * @throws IOException if there are hard errors.
      */
     public void open (int key_id, String pin) throws IOException

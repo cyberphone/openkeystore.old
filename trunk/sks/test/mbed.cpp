@@ -1,6 +1,8 @@
 #include "mbed.h"
 
+#ifdef STANDARD_LIB
 Serial pc(USBTX, USBRX); // tx, rx
+#endif
 
 DigitalOut myled_4(LED4);
 DigitalOut myled_3(LED3);
@@ -11,7 +13,9 @@ Timer serial_timeout;
 
 const int MAX_DELAY_BETWEEN_CHARCTERS_IN_MS = 2000;
 
+#ifdef STANDARD_LIB
 const int BAUD_RATE = 460800;
+#endif
 
 const int CAPACITY_COMMAND       = 1;
 const int MISSING_DATA_COMMAND   = 2;
@@ -27,7 +31,11 @@ static bool buffer_full;
 static int readCharTimed ()
   {
     serial_timeout.reset ();
+#ifdef STANDARD_LIB
     while (!pc.readable ())
+#else
+    while ((LPC_UART0->LSR & 1) == 0)
+#endif
       {
         if (serial_timeout.read_ms () > MAX_DELAY_BETWEEN_CHARCTERS_IN_MS)
           {
@@ -35,7 +43,11 @@ static int readCharTimed ()
             return -1;
           }
       }
+#ifdef STANDARD_LIB
     return pc.getc ();
+#else
+    return LPC_UART0->RBR;
+#endif
   }
 
 int getCommand (int first_char)
@@ -63,10 +75,21 @@ void putByte (int c)
         serial_timeout.start ();
         while (true)
           {
+#ifdef STANDARD_LIB
             if (pc.writeable ())
+#else
+            if (LPC_UART0->LSR & 0x20)
+#endif
               {
 #endif
+#ifdef STANDARD_LIB
                 pc.putc (c);
+#else
+                while ((LPC_UART0->LSR & 0x20) == 0)
+                  ;
+                LPC_UART0->THR = (char) c;
+#endif
+
 #ifdef OUTPUT_TIMED
                 break;
               }
@@ -108,7 +131,7 @@ void putString (char *string)
     putShort (len);
     for (int i = 0; i < len; i++)
       {
-        pc.putc (string[i]);
+        putByte (string[i]);
       }
   }
 
@@ -130,11 +153,41 @@ int getShort ()
 
 int main()
   {
+#ifdef STANDARD_LIB
     pc.baud (BAUD_RATE);
+#else
+    /* Enable power for UART0. */
+    LPC_SC->PCONP |= 0x00000008;
+
+    /* Set UART0 PCLK = CCLK. */
+    LPC_SC->PCLKSEL0 &= 0xffffff3f;
+    LPC_SC->PCLKSEL0 |= 0x00000040;
+
+    /* Configure P0.2 and P0.3 to be UART0. */
+    LPC_PINCON->PINSEL0 &= 0xffffff0f;
+    LPC_PINCON->PINSEL0 |= 0x00000050;
+
+    /* Set 921600 baud @ PCLK = 96MHz. Set format to N81. */
+    LPC_UART0->LCR = 0x80;
+    LPC_UART0->DLL = 0x06;
+    LPC_UART0->DLM = 0x00;
+    LPC_UART0->FDR = 0xc1;
+    LPC_UART0->LCR = 0x03;
+
+    /* Flush FIFOs. */
+    LPC_UART0->FCR = 0x07;
+#endif
+
     while (1)
       {
         counter++;
+#ifdef STANDARD_LIB
         switch (getCommand (pc.getc ()))
+#else
+        while ((LPC_UART0->LSR & 1) == 0)
+          ;
+        switch (getCommand (LPC_UART0->RBR))
+#endif
           {
             case CAPACITY_COMMAND:
               int out_buffer_size;
@@ -150,7 +203,7 @@ int main()
               while (out_buffer_size-- > 0)
                 {
                   putByte (0);
-                }    
+                }
               break;
 
             case MISSING_DATA_COMMAND:
@@ -162,7 +215,7 @@ int main()
               wait (30);
               putSuccessStatus ();
               break;
-              
+
             default:
               myled_2 = 1;
               pc.putc (7);

@@ -19,11 +19,11 @@ import gnu.io.SerialPort;
  */
 public abstract class SerialDeviceDriver
   {
-    private static final int DEVICE_INPUT_BUFFER_LENGTH = 40000;
+    private static final int DEVICE_INPUT_BUFFER_LENGTH = 100000;
     
     private static final int STANDARD_COMMAND_TIMEOUT = 10000;
     
-    private static final int CHARACTER_BY_CHARACTER_TIMEOUT = 100;
+    private static final int CHARACTER_BY_CHARACTER_TIMEOUT = 10000;
     
     private static final int RETURN_STATUS_OK = 0;
 
@@ -138,8 +138,6 @@ public abstract class SerialDeviceDriver
                      _serial_device_driver._serial_in = _serial_device_driver._serial_port.getInputStream ();
                     input._serial_device_driver = _serial_device_driver;
                     _serial_device_driver._serial_out = _serial_device_driver._serial_port.getOutputStream ();
-                    _serial_device_driver._serial_out.write (length >> 8);
-                    _serial_device_driver._serial_out.write (length & 0xFF);
                     if (make_output_too_short)
                       {
                         length--;
@@ -257,30 +255,39 @@ public abstract class SerialDeviceDriver
           }
 
         
-        public byte readChar () throws IOException
+        public int readChar () throws IOException
           {
+/*
+             try
+              {
+                Thread.sleep (1);
+              }
+            catch (InterruptedException e)
+              {
+              }
+*/
             int i = _serial_device_driver._serial_in.read ();
             if (i < 0)
               {
                 throw new IOException ("Read timeout on serial port");
               }
-            return (byte) i;
+            return i & 0xFF;
           }
  
-        
+       
         public int readShort () throws IOException
           {
-            return (readChar () << 8) + (readChar () & 0xFF);
+            return (readChar () << 8) + readChar ();
           }
         
         
         public byte[] readArray () throws IOException
           {
-            int len = readShort () & 0xFFFF;
+            int len = readShort ();
             byte b[] = new byte[len];
             for (int i = 0; i < len; i++)
               {
-                b[i] = readChar ();
+                b[i] = (byte)readChar ();
               }
             return b;
           }
@@ -379,9 +386,9 @@ public abstract class SerialDeviceDriver
         void capacityCommand (int in_buffer_size, int out_buffer_size) throws IOException
           {
             byte[] in_buffer = new byte[in_buffer_size];
-            for (int i = 0; i < in_buffer_size; i++)
+            for (int i = 0, j = in_buffer_size; i < in_buffer_size; i++)
               {
-                in_buffer[i] = (byte) i;
+                in_buffer[i] = (byte) j--;
               }
             byte[] result = ((ByteArrayReturn) new OutputBuffer (this)
                                                    .putByte (CAPACITY_COMMAND)
@@ -391,6 +398,14 @@ public abstract class SerialDeviceDriver
             if (result.length != out_buffer_size)
               {
                 throw new IOException ("Returned buffer size error:" + result.length);
+              }
+            int i = 0;
+            while (out_buffer_size != 0)
+              {
+                if (result[i++] != (byte)(out_buffer_size-- & 0xFF))
+                  {
+                    throw new IOException ("Output buffer error char");
+                  }
               }
           }
 

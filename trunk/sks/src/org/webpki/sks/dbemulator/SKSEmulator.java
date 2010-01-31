@@ -68,7 +68,6 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
     PrivateKey device_private_key = null;
 
     X509Certificate device_certificate = null;
-
     
     private static DatabaseService database_service = ServiceLoader.load (DatabaseService.class).iterator ().next ();
     
@@ -122,45 +121,6 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
 
     static LinkedHashMap<String,String> supported_ecc_curves = new LinkedHashMap<String,String> ();
 
-    static
-      {
-        try
-          {
-            byte alg_id = (byte) 0xff;
-            while (true)
-              {
-                InputBuffer input = new InputBuffer (VirtualSE.getNextAlgorithm (
-                        new OutputBuffer ()
-                           .putByte (alg_id)
-                           .getBuffer ()));
-                byte[] alg_uri = input.getArray ();
-                if (alg_uri.length == 0)
-                  {
-                    break;
-                  }
-                alg_id = input.getByte ();
-                supported_algorithms.put (new String (alg_uri, "UTF-8"), alg_id);
-              }
-            InputBuffer input = new InputBuffer (VirtualSE.getDeviceInformation ());
-            device_name = new String (input.getArray (), "UTF-8");
-            for (int rsa_caps = input.getByte (); rsa_caps > 0; rsa_caps--)
-              {
-                @SuppressWarnings("unused")
-                int cap = input.getShort ();
-              }
-            for (int ecc_caps = input.getByte (); ecc_caps > 0; ecc_caps--)
-              {
-                @SuppressWarnings("unused")
-                byte[] curve = input.getArray ();
-              }
-          }
-        catch (Exception e)
-          {
-            System.out.println ("What?" + e.getMessage ());
-          }
-      }
-
-
 
     static byte[] createDBCertificatePath(X509Certificate[] sorted_cert_path)
         throws IOException, GeneralSecurityException
@@ -197,179 +157,6 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
     public boolean isSupported (String algorithm)
       {
         return supported_algorithms.containsKey (algorithm);
-      }
-
-
-    private static class OutputBuffer
-      {
-        byte[] buffer;
-        int length;
-
-        OutputBuffer ()
-          {
-            buffer = new byte[se_buffer_length];
-          }
-
-        private OutputBuffer add (byte[] parameter) throws IOException
-          {
-            if (length + parameter.length >= se_buffer_length)
-              {
-                throw new IOException ("SE input buffer exceeded!");
-              }
-            System.arraycopy (parameter, 0, buffer, length, parameter.length);
-            length += parameter.length;
-            return this;
-          }
- 
-        byte[] getBuffer ()
-          {
-            byte[] actual = new byte[length];
-            System.arraycopy (buffer, 0, actual, 0, length);
-            return actual;
-          }
-
-        OutputBuffer putByte (byte value) throws IOException
-          {
-            return add (new byte[] {(byte) 1, value});
-          }
-
-        OutputBuffer putByte (boolean value) throws IOException
-          {
-            return add (new byte[] {(byte) 1, value ? (byte)1 : (byte)0});
-          }
-
-        OutputBuffer putArray (byte[] array) throws IOException
-          {
-            if (array.length >= 0xff)
-              {
-                add (new byte[] {(byte) 0xff, (byte) ((array.length >> 8) & 0xff), (byte) (array.length & 0xff)});
-              }
-            else
-              {
-                add (new byte[] {(byte) array.length});
-              }
-           return add (array);
-          }
-
-
-        OutputBuffer putShort (int value) throws IOException
-          {
-            return add (new byte[] {(byte) 0x02, (byte) ((value >> 8) & 0xff), (byte) (value & 0xff)});
-          }
-
-
-        OutputBuffer putBigInteger (BigInteger big) throws IOException
-          {
-            if (big == null)
-              {
-                return add (new byte[]{0});
-              }
-            return putArray (big.toByteArray ());
-          }
-     }
-
-
-    private static class InputBuffer
-      {
-        byte[] buffer;
-        int curr_pos;
-        int tag_size;
-
-        InputBuffer (byte[] buffer) throws IOException
-          {
-            this.buffer = buffer;
-            if (buffer.length > 0 && buffer[0] == 0)
-              {
-                curr_pos++;
-              }
-            else
-              {
-                String msg = "Couldn't get SE error message!";
-                if (buffer.length > 3)
-                  {
-                    int length = (buffer[1] << 8) + (buffer[2] & 0xff);
-                    if (length > 0 && length < 1000)
-                    try
-                      {
-                        byte[] err = new byte[length];
-                        System.arraycopy (buffer, 3, err, 0, length);
-                        msg = new String (err, "UTF-8");
-                      }
-                    catch (IOException iox)
-                      {
-                      }
-                  }
-                throw new IOException ("SE reported: " + msg);
-              }
-          }
-
-        private void check (int position) throws IOException
-          {
-            if (position >= buffer.length)
-              {
-                throw new IOException ("Input buffer underrun");
-              }
-          }
-
-        private int getLength () throws IOException 
-          {
-            check (curr_pos);
-            tag_size = 1;
-            int length = buffer[curr_pos] & 0xff;
-            if (length == 0xff)
-              {
-                check (curr_pos + 2);
-                length = (buffer[curr_pos + 1] << 8) | (buffer[curr_pos + 2] & 0xFF);
-                tag_size = 3;
-              }
-            return length;
-          }
-
-        private byte[] getItem (int length) throws IOException
-          {
-            check (curr_pos + tag_size + length);
-            byte[] result = new byte[length];
-            System.arraycopy (buffer, curr_pos + tag_size, result, 0, length);
-            curr_pos += tag_size + length;
-            return result;
-          }
-
-        private byte[] getData (int length_constraint) throws IOException
-          {
-            int length = getLength ();
-            if (length_constraint != length)
-              {
-                throw new IOException ("Tag length error");
-              }
-            return getItem (length);
-          }
-        
-        private byte[] getData () throws IOException
-          {
-            return getItem (getLength ());
-          }
-        
-        int getShort () throws IOException
-          {
-            byte[] b = getData (2);
-            return (b[0] * 8) + (b[1] & 0xff);
-          }
-
-        byte getByte () throws IOException
-          {
-            return getData (1)[0];
-          }
-
-        byte[] getArray () throws IOException
-          {
-            return getData ();
-          }
-      }
-
-
-    private static byte[] singleArrayReturn (byte[] return_block) throws IOException
-      {
-        return new InputBuffer (return_block).getArray ();
       }
 
 
@@ -466,65 +253,22 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
                                                     AsymEncryptionAlgorithms key_wrap_algorithm)
     throws IOException
       {
-        OutputBuffer input = new OutputBuffer ();
-        if (key_alg instanceof KeyOperationRequestDecoder.RSA)
-          {
-            input.putByte ((byte)0)
-                 .putShort (((KeyOperationRequestDecoder.RSA) key_alg).getKeySize ())
-                 .putBigInteger (((KeyOperationRequestDecoder.RSA) key_alg).getFixedExponent ());
-          }
-        else
-          {
-            input.putByte ((byte)1)
-                 .putArray (((KeyOperationRequestDecoder.ECC) key_alg).getNamedCurve ().getOID ().getBytes ("UTF-8"));
-          }
-        input.putByte (getSEAlgorithmIDFromURI (attestation_algorithm))
-             .putByte (exportable)
-             .putByte ((byte)key_usage.ordinal ())
-             .putArray (nonce);
-        if (opt_archival_public_key != null)
-          {
-            input.putArray (opt_archival_public_key);
-            input.putByte (getSEAlgorithmIDFromURI (private_key_format_uri));
-            input.putByte (getSEAlgorithmIDFromURI (encrytion_algorithm.getURI ()));
-            input.putByte (getSEAlgorithmIDFromURI (key_wrap_algorithm.getURI ()));
-          }
-        InputBuffer result =
-             new InputBuffer (virtual_se.generateAttestedKeyPair (input.getBuffer ()));
-        LocalAttestedKeyPair key_pair = new LocalAttestedKeyPair ();
-        key_pair.public_key = getPublicKey (result.getArray ());
-        key_pair.private_key_handle = result.getArray ();
-        key_pair.attest_signature = result.getArray ();
-        if (opt_archival_public_key != null)
-          {
-            key_pair.encrypted_private_key = result.getArray ();
-            key_pair.wrapped_encryption_key = result.getArray ();
-          }
-        return key_pair;
+        // TODO Auto-generated method stub
+        return null;
       }
 
 
     public byte[] deviceKeyDecrypt (byte[] data, AsymEncryptionAlgorithms algorithm) throws IOException
       {
-        return singleArrayReturn (virtual_se.deviceKeyDecrypt
-          (
-            new OutputBuffer ()
-                .putArray (data)
-                .putByte (getSEAlgorithmIDFromURI (algorithm.getURI ()))
-                .getBuffer ()
-          ));
+        // TODO Auto-generated method stub
+        return null;
       }
   
 
     public byte[] deviceKeyDigestSign (byte[] digest, SignatureAlgorithms algorithm) throws IOException
       {
-        return singleArrayReturn (virtual_se.deviceKeyDigestSign
-          (
-            new OutputBuffer ()
-                .putArray (digest)
-                .putByte (getSEAlgorithmIDFromURI (algorithm.getURI ()))
-                .getBuffer ()
-          ));
+        // TODO Auto-generated method stub
+        return null;
       }
 
 
@@ -541,14 +285,8 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
                                     KeyAuthorizationCallback key_auth_callback)
     throws IOException
       {
-        return singleArrayReturn (VirtualSE.symmetricKeyHMAC
-          (
-            new OutputBuffer ()
-                .putArray (data)
-                .putArray (secret_key_handle)
-                .putByte (getSEAlgorithmIDFromURI (algorithm.getURI ()))
-                .getBuffer ()
-          ));
+        // TODO Auto-generated method stub
+        return null;
       }
 
     public byte[] privateKeyDigestSign (byte[] digest,
@@ -557,14 +295,8 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
                                         byte[] optional_pin)
     throws IOException
       {
-        return singleArrayReturn (VirtualSE.privateKeyDigestSign
-          (
-            new OutputBuffer ()
-                .putArray (digest)
-                .putArray (private_key_handle)
-                .putByte (getSEAlgorithmIDFromURI (algorithm.getURI ()))
-                .getBuffer ()
-          ));
+        // TODO Auto-generated method stub
+        return null;
       }
 
 
@@ -576,16 +308,8 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
                                        byte[] optional_pin)
     throws IOException
       {
-        return singleArrayReturn (VirtualSE.symmetricKeyEncrypt
-          (
-            new OutputBuffer ()
-                .putByte (encrypt_flag)
-                .putArray (data)
-                .putArray (secret_key_handle)
-                .putByte (getSEAlgorithmIDFromURI (algorithm.getURI ()))
-                .putArray (optional_iv == null ? new byte[0] : optional_iv)
-                .getBuffer ()
-          ));
+        // TODO Auto-generated method stub
+        return null;
       }
 
     public byte[] privateKeyDecrypt (byte[] data,
@@ -594,54 +318,25 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
                                      byte[] optional_pin)
     throws IOException
       {
-        return singleArrayReturn (VirtualSE.privateKeyDecrypt
-          (
-            new OutputBuffer ()
-                .putArray (data)
-                .putArray (private_key_handle)
-                .putByte (getSEAlgorithmIDFromURI (algorithm.getURI ()))
-                .getBuffer ()
-          ));
+        // TODO Auto-generated method stub
+        return null;
       }
 
     public byte[] sealPrivateKey (PrivateKey device_private_key,
                                   boolean exportable,
                                   KeyGen2KeyUsage key_usage) throws IOException
       {
-        return singleArrayReturn (VirtualSE.sealPrivateKey
-          (
-            new OutputBuffer ()
-                .putArray (device_private_key.getEncoded ())
-                .putByte (exportable)
-                .putByte ((byte)key_usage.ordinal ())
-                .getBuffer ()
-          ));
+        // TODO Auto-generated method stub
+        return null;
       }
 
-    private static byte[] getAlgorithmsFromURIs (String[] algorithm_uris)
-    throws IOException
-      {
-        byte[] algorithms_local = new byte[algorithm_uris.length];
-        int i = 0;
-        for (String alg_uri : algorithm_uris)
-          {
-            algorithms_local[i++] = getSEAlgorithmIDFromURI (alg_uri);
-          }
-        return algorithms_local;
-      }
 
     public byte[] sealSecretKey (byte[] secret_key,
                                  boolean exportable,
                                  String[] endorsed_algorithms) throws IOException
       {
-        return singleArrayReturn (VirtualSE.sealSecretKey
-          (
-            new OutputBuffer ()
-                .putArray (secret_key)
-                .putByte (exportable)
-                .putArray (getAlgorithmsFromURIs (endorsed_algorithms))
-                .getBuffer ()
-           ));
+        // TODO Auto-generated method stub
+        return null;
       }
 
 
@@ -678,30 +373,20 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
                                                     byte[] nonce)
     throws IOException
       {
-        return singleArrayReturn (VirtualSE.provisionPiggybackedSymmetricKey
-          (
-            new OutputBuffer ()
-                .putByte (getSEAlgorithmIDFromURI (piggyback_mac_algorithm))
-                .putByte (getSEAlgorithmIDFromURI (encryption_algorithm.getURI ()))
-                .putArray (encrypted_symmetric_key)
-                .putArray (private_key_handle)
-                .putArray (getAlgorithmsFromURIs (endorsed_algorithms))
-                .putArray (declared_mac)
-                .putArray (nonce)
-                .getBuffer ()
-           ));
+        // TODO Auto-generated method stub
+        return null;
       }
 
 
     @Override
-    public String[] getProperties()
+    public String[] getProperties ()
       {
         return new String[]{USER_ID_PROPERTY};
       }
 
 
     @Override
-    public void init() throws IOException
+    public void init () throws IOException
       {
         if (user_id < 1)
           {
@@ -821,10 +506,11 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
 
 
     @Override
-    public byte[] symmetricKeyEncrypt(boolean encrypt_flag, byte[] data,
-        int key_id, SymEncryptionAlgorithms algorithm, byte[] optional_iv,
-        byte[] optional_pin, KeyAuthorizationCallback key_auth_callback)
-        throws IOException
+    public byte[] symmetricKeyEncrypt (boolean encrypt_flag,
+                                       byte[] data, 
+                                       int key_id, 
+                                       SymEncryptionAlgorithms algorithm, byte[] optional_iv, byte[] optional_pin, 
+                                       KeyAuthorizationCallback key_auth_callback) throws IOException
       {
         // TODO Auto-generated method stub
         return null;
@@ -832,13 +518,14 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
 
 
     @Override
-    public byte[] symmetricKeyHMAC(byte[] data, int key_id,
-        MacAlgorithms algorithm, byte[] optional_pin,
-        KeyAuthorizationCallback key_auth_callback) throws IOException
+    public byte[] symmetricKeyHMAC (byte[] data, 
+                                    int key_id,
+                                    MacAlgorithms algorithm,
+                                    byte[] optional_pin,
+                                    KeyAuthorizationCallback key_auth_callback) throws IOException
       {
         // TODO Auto-generated method stub
         return null;
       }
  
-
   }

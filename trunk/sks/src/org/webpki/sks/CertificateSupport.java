@@ -160,7 +160,7 @@ abstract class CertificateSupport extends HighLevelKeyStore
     /**
      * Opens a key (key handle) for cryptographic operations.
      * @param selected_certificate High-level certificate selector.
-     * @param pin A PIN or password value needed for opening the key.  For keys that
+     * @param optional_pin An optional PIN or password value needed for opening the key.  For keys that
      * are not PIN or password protected this value should be <code>null</code>.
      * @throws IOException if there are hard errors.
      */
