@@ -16,6 +16,7 @@ import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 
+
 abstract class XMLVerifierCore
   {
     private SignedKeyInfoSpecifier KeyInfo_requirements = SignedKeyInfoSpecifier.FORBID_SIGNED_KEY_INFO;
@@ -81,17 +82,34 @@ abstract class XMLVerifierCore
 
     void core_verify (XMLSignatureWrapper signature, PublicKey public_key) throws IOException, GeneralSecurityException
       {
-        // Check signature
-        signature_algorithm = signature.signedinfo_object.signature_alg;
-        Signature verifier = Signature.getInstance (signature.signedinfo_object.signature_alg.getJCEName ());
-
-        verifier.initVerify (public_key);
         byte[] sign_cn = XPathCanonicalizer.serializeSubset (signature.signedinfo_object.element, signature.signedinfo_object.cn_alg);
-        verifier.update (sign_cn);
-
-        if (!verifier.verify (signature.signedinfo_object.signature_val))
+        if (this instanceof XMLSymKeyVerifier)
           {
-            throw new IOException ("Incorrect signature for element: " + signature.reference_object_1.element.getNodeName ());
+            XMLSymKeyVerifier xmlsym = (XMLSymKeyVerifier) this;
+            if (xmlsym.optional_required_algorithm != null &&
+                xmlsym.optional_required_algorithm != signature.signedinfo_object.sym_signature_alg)
+              {
+                throw new IOException ("Wrong HMAC algorithm: " + signature.signedinfo_object.sym_signature_alg.getURI ());
+              }
+            byte[] hmac = signature.signedinfo_object.sym_signature_alg.digest (xmlsym.symmetric_key, sign_cn);
+            if (!ArrayUtil.compare (hmac, signature.signedinfo_object.signature_val))
+              {
+                throw new IOException ("Incorrect signature for element: " + signature.reference_object_1.element.getNodeName ());
+              }
+          }
+        else
+          {
+            // Check signature
+            signature_algorithm = signature.signedinfo_object.asym_signature_alg;
+            Signature verifier = Signature.getInstance (signature.signedinfo_object.asym_signature_alg.getJCEName ());
+    
+            verifier.initVerify (public_key);
+            verifier.update (sign_cn);
+    
+            if (!verifier.verify (signature.signedinfo_object.signature_val))
+              {
+                throw new IOException ("Incorrect signature for element: " + signature.reference_object_1.element.getNodeName ());
+              }
           }
       }
     

@@ -11,6 +11,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64;
 
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.XMLSchemaCache;
@@ -20,6 +21,7 @@ import org.webpki.xml.DOMAttributeReaderHelper;
 
 import org.webpki.crypto.JKSSignCertStore;
 import org.webpki.crypto.JKSCAVerifier;
+import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 
@@ -28,6 +30,8 @@ import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.xmldsig.XMLEnvelopedInput;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSigner;
+import org.webpki.xmldsig.XMLSymKeySigner;
+import org.webpki.xmldsig.XMLSymKeyVerifier;
 import org.webpki.xmldsig.XMLVerifier;
 import org.webpki.xmldsig.XMLAsymKeySigner;
 import org.webpki.xmldsig.XMLAsymKeyVerifier;
@@ -70,6 +74,7 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
     String value;
 
     XMLSignatureWrapper signature;
+    
 
     public Document getEnvelopeRoot () throws IOException
       {
@@ -155,11 +160,12 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
 
     public static void main (String args[]) throws Exception
       {
+        byte[] symkey = new Base64 ().getBase64BinaryFromUnicode ("sBeVJTrHwIETmlgRlvswfSjnYD34V2PdiEQadrnG8ko=");
         if (args.length != 3 ||
-            !(args[0].equals ("-rsa") || args[0].equals ("-x509")) ||
+            !(args[0].equals ("-rsa") || args[0].equals ("-x509") || args[0].equals ("-sym")) ||
             !(args[1].equals ("-sign") || args[1].equals ("-verify")))
           {
-            System.out.println ("xmlobject -(rsa|x509) -(sign|verify) xmlfile");
+            System.out.println ("xmlobject -(rsa|x509|sym) -(sign|verify) xmlfile");
             System.exit (3);
           }
         if (args[1].equals ("-sign"))
@@ -175,11 +181,16 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
                 XMLAsymKeySigner xmls = new XMLAsymKeySigner (new rsaKey (private_key, public_key));
                 xmls.createEnvelopedSignature (o);
               }
-            else
+            else if (args[0].equals ("-x509"))
               {
                 JKSSignCertStore signer = new JKSSignCertStore (DemoKeyStore.getMarionKeyStore (), null);
                 signer.setKey (null, DemoKeyStore.getSignerPassword ());
                 XMLSigner xmls = new XMLSigner (signer);
+                xmls.createEnvelopedSignature (o);
+              }
+            else
+              {
+                XMLSymKeySigner xmls = new XMLSymKeySigner (symkey, MacAlgorithms.HMAC_SHA256);
                 xmls.createEnvelopedSignature (o);
               }
             ArrayUtil.writeFile (args[2], o.writeXML ());
@@ -200,9 +211,14 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
                     throw new Exception ("Bad public key");
                   }
               }
-            else
+            else if (args[0].equals ("-x509"))
               {
                 XMLVerifier verifier = new XMLVerifier (new JKSCAVerifier (DemoKeyStore.getMarionKeyStore ()));
+                verifier.validateEnvelopedSignature (o);
+              }
+            else
+              {
+                XMLSymKeyVerifier verifier = new XMLSymKeyVerifier (symkey, null);
                 verifier.validateEnvelopedSignature (o);
               }
           }

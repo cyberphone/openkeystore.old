@@ -4,9 +4,10 @@
   <property name="src_dir" value="../src" />
   <property name="temp_dir" value="../.tmp" />
   <property name="dist_dir"  value="../dist" />
+  <property name="ext.jar"  value="../../resources/third-party-jars"/>
   <property name="webpki-libext" value="webpki.org-libext-1.00.jar" />
   <property name="webpki-webutil" value="webpki.org-webutil-1.00.jar" />
-  <property name="doc_dir"  value="../.doc" />
+  <property name="doc_dir"  value="../doc" />
   <property name="debug"  value="on"/>
   <property environment="env"/>
   <condition property="java_root_set">
@@ -15,11 +16,23 @@
   <fail message="JAVA_HOME must be set to environment!" unless="java_root_set"/>
   <property name="catalina.home" value="${env.CATALINA_HOME}"/>
 
-  <path id="compile.classpath">
-    <fileset dir="${catalina.home}/lib">
-      <include name="*.jar"/>
-    </fileset>
-  </path>
+	  <path id="compile.classpath">
+	    <fileset dir="${catalina.home}/lib">
+	      <include name="*.jar"/>
+	    </fileset>
+	    <fileset dir="${ext.jar}">
+	      <include name="*.jar"/>
+	    </fileset>
+	  </path>
+
+	<path id="junit.classpath">
+	    <fileset dir="${dist_dir}">
+	      <include name="${webpki-libext}"/>
+	    </fileset>
+	    <fileset dir="${ext.jar}">
+	      <include name="*.jar"/>
+	    </fileset>
+	  </path>
 
   <target name="help">
     <echo message="Available targets are help, dist, clean, deploy, compile and doc."/>
@@ -60,7 +73,7 @@
       <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="${env.JAVA_HOME}\docs\api"/>
       <link offline="true" href="http://tomcat.apache.org/tomcat-5.5-doc/servletapi" packagelistLoc="${env.JAVA_HOME}\eedocs\docs\api"/>
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
-      <bottom><![CDATA[<i>2005-2009 WebPKI.org.</i>]]></bottom>
+      <bottom><![CDATA[<i>2005-2010 WebPKI.org.</i>]]></bottom>
     </javadoc>
   </target>
 
@@ -97,9 +110,14 @@
     <delete file="${dist_dir}/${webpki-webutil}"/>
   </target>
 
-  <target name="deploy" depends="clean,dist">
-    <copy file="${dist_dir}/${webpki-libext}" todir="${env.JAVA_HOME}/jre/lib/ext" preservelastmodified="true"/>
-    <copy file="${dist_dir}/${webpki-webutil}" todir="${catalina.home}/lib" preservelastmodified="true"/>
+  <target name="deploy" depends="clean,dist"/>
+	
+  <target name="test">
+    <junit fork="yes" haltonfailure="yes">
+      <test name="org.webpki.keygen2.test.KeyGen2Test" />
+      <formatter type="plain" usefile="false" />
+      <classpath refid="junit.classpath" />
+    </junit>
   </target>
 
 </project>

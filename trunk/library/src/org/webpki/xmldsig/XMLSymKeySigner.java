@@ -5,32 +5,35 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
+import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
-import org.webpki.crypto.AsymKeySignerInterface;
 
 
-public class XMLAsymKeySigner extends XMLSignerCore
+public class XMLSymKeySigner extends XMLSignerCore
   {
+    byte[] symmetric_key;
 
-    AsymKeySignerInterface signer_impl;
+    MacAlgorithms hmac_algorithm;
+
 
     PublicKey populateKeys (XMLSignatureWrapper r) throws GeneralSecurityException, IOException
       {
-        return r.public_key = signer_impl.getPublicKey ();
+        return null;
       }
 
     byte[] getSignatureBlob (byte[] data, SignatureAlgorithms sig_alg) throws GeneralSecurityException, IOException
       {
-        return signer_impl.signData (data, sig_alg);
+        return hmac_algorithm.digest (symmetric_key, data);
       }
 
 
     /**
-     * Creates an XMLAsymKeySigner.
+     * Creates an XMLSymKeySigner.
      */
-    public XMLAsymKeySigner (AsymKeySignerInterface signer_impl)
+    public XMLSymKeySigner (byte[] symmetric_key, MacAlgorithms hmac_algorithm)
       {
-        this.signer_impl = signer_impl;
+        this.symmetric_key = symmetric_key;
+        this.hmac_algorithm = hmac_algorithm;
       }
 
   }

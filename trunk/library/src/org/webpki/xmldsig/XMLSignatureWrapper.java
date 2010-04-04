@@ -37,6 +37,7 @@ import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.XMLObjectWrapper;
 
 import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.CertificateUtil;
 
@@ -84,13 +85,17 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
     XMLObjectWrapper wrappedData;
 
+    // It is a PKI signature
     String x509IssuerName, x509SubjectName;
 
     BigInteger x509SerialNumber;
 
     X509Certificate[] certificates;
 
+    // It is an asymmetric key signature 
     PublicKey public_key;
+    
+    // It is a symmetric key signature
 
     // Return only
 
@@ -131,7 +136,8 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
         Element element;
         CanonicalizationAlgorithms cn_alg;
-        SignatureAlgorithms signature_alg;
+        SignatureAlgorithms asym_signature_alg;
+        MacAlgorithms sym_signature_alg;
         byte[] signature_val;
       }
 
@@ -147,7 +153,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
     CanonicalizationAlgorithms canonicalization_algorithm;
 
-    SignatureAlgorithms signature_algorithm;
+    String signature_algorithm;
 
     CanonicalizationAlgorithms transform_algorithm;
 
@@ -360,7 +366,15 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         rd.getParent();
         
         rd.getNext (SIGNATURE_METHOD_ELEM);
-        signedinfo_object.signature_alg = SignatureAlgorithms.getAlgorithmFromURI (aHelper.getString (ALGORITHM_ATTR));
+        String signature_alg = aHelper.getString (ALGORITHM_ATTR);
+        if  (SignatureAlgorithms.testAlgorithmURI (signature_alg))
+          {
+            signedinfo_object.asym_signature_alg = SignatureAlgorithms.getAlgorithmFromURI (signature_alg);
+          }
+        else
+          {
+            signedinfo_object.sym_signature_alg = MacAlgorithms.getAlgorithmFromURI (signature_alg);
+          }
         rd.getChild ();
         if (rd.hasNext ()) throw new IOException ("No \"SignatureMethod\" elements allowed");
         rd.getParent ();
@@ -402,12 +416,16 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
           {
             certificates = readSortedX509Data (rd, this);
           }
-        else
+        else if (rd.hasNext (KEY_VALUE_ELEM))
           {
             rd.getNext (KEY_VALUE_ELEM);
             rd.getChild ();
             public_key = readPublicKey (rd);
             rd.getParent ();
+          }
+        else
+          {
+            rd.getString (KEY_NAME_ELEM);  // We don't care about the name...
           }
         if (rd.hasNext ()) throw new IOException ("Only one element allowed to \"KeyInfo\"");
         rd.getParent ();
@@ -554,7 +572,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         wr.setStringAttribute (ALGORITHM_ATTR, canonicalization_algorithm.getURI ());
 
         wr.addEmptyElement (SIGNATURE_METHOD_ELEM);
-        wr.setStringAttribute (ALGORITHM_ATTR, signature_algorithm.getURI ());
+        wr.setStringAttribute (ALGORITHM_ATTR, signature_algorithm);
         object_id = object_id == null ? ("O." + base_id) : object_id;
         SignedElement_Reference_node = envelope_id == null ?
                      createOneReference (wr, object_id, false)
@@ -577,15 +595,19 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
             wr.setStringAttribute (ID_ATTR, key_id);
           }
         
-        if (public_key == null)
+        if (certificates != null)
           {
             writeX509Data (wr, this, certificates);
           }
-        else
+        else if (public_key != null)
           {
             wr.addChildElement (KEY_VALUE_ELEM);
             writePublicKey (wr, public_key);
             wr.getParent();
+          }
+        else
+          {
+            wr.addString (KEY_NAME_ELEM, "session-derived");
           }
         
         wr.getParent();

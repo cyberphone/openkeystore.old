@@ -115,21 +115,28 @@ abstract class XMLSignerCore
         dsig_wrapper = new XMLSignatureWrapper ();
         dsig_wrapper.pretty_printing = pretty_printing;
         dsig_wrapper.KeyInfo_Reference_create = write_keyinfo_ref_flag;
-        PublicKey public_key = populateKeys (dsig_wrapper);
-        if (signature_algorithm == null)
+        if (this instanceof XMLSymKeySigner)
           {
-            signature_algorithm = public_key instanceof RSAPublicKey 
-                                         ?
-                              SignatureAlgorithms.RSA_SHA256
-                                         :
-                              ECCDomains.getRecommendedSignatureAlgorithm ((ECPublicKey)public_key);
+            dsig_wrapper.signature_algorithm =  ((XMLSymKeySigner)this).hmac_algorithm.getURI ();
+          }
+        else
+          {
+            PublicKey public_key = populateKeys (dsig_wrapper);
+            if (signature_algorithm == null)
+              {
+                signature_algorithm = public_key instanceof RSAPublicKey 
+                                             ?
+                                  SignatureAlgorithms.RSA_SHA256
+                                             :
+                                  ECCDomains.getRecommendedSignatureAlgorithm ((ECPublicKey)public_key);
+              }
+            dsig_wrapper.signature_algorithm = signature_algorithm.getURI ();
           }
 
         // Setup all declared algorithms
         dsig_wrapper.canonicalization_algorithm = canonicalization_algorithm;
         dsig_wrapper.transform_algorithm = transform_algorithm;
         dsig_wrapper.digest_algorithm = digest_algorithm;
-        dsig_wrapper.signature_algorithm = signature_algorithm;
       }
 
     private XMLSignatureWrapper createSignature (XMLSignatureWrapper dsig_wrapper, Element root_to_sign)
@@ -150,7 +157,7 @@ abstract class XMLSignerCore
           }
         // Sign the Reference (SignedInfo)
         byte[] data = XPathCanonicalizer.serializeSubset (dsig_wrapper.SignedInfo_element, dsig_wrapper.canonicalization_algorithm);
-        updateBase64Field (dsig_wrapper.SignatureValue_node, getSignatureBlob (data, dsig_wrapper.signature_algorithm));
+        updateBase64Field (dsig_wrapper.SignatureValue_node, getSignatureBlob (data, signature_algorithm));
 
         if (remove_xml_ns)
           {

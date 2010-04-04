@@ -2,6 +2,11 @@ package org.webpki.crypto;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
 
 public enum MacAlgorithms
   {
@@ -33,6 +38,23 @@ public enum MacAlgorithms
       }
 
     
+    public byte[] digest (byte[] key, byte[] data) throws IOException
+      {
+        try
+          {
+            Mac mac = Mac.getInstance (getJCEName ());
+            mac.init (new SecretKeySpec (key, "RAW"));  // Note: any length is OK in HMAC
+            return mac.doFinal (data);
+          }
+        catch (GeneralSecurityException gse)
+          {
+            IOException iox = new IOException ();
+            iox.initCause (gse.getCause ());
+            throw iox;
+          }
+      }
+
+
     public static boolean testAlgorithmURI (String uri)
       {
         for (MacAlgorithms alg : MacAlgorithms.values ())
