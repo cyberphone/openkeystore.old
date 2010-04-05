@@ -17,7 +17,7 @@ import org.webpki.io.serial.SerialDeviceDriver.ByteArrayReturn;
 import org.webpki.io.serial.SerialDeviceDriver.OutputBuffer;
 
 import org.webpki.keygen2.KeyGen2KeyUsage;
-import org.webpki.keygen2.KeyOperationRequestDecoder.KeyAlgorithmData;
+import org.webpki.keygen2.KeyInitializationRequestDecoder.KeyAlgorithmData;
 
 import org.webpki.sks.KeyAuthorizationCallback;
 import org.webpki.sks.SecureKeyStore;

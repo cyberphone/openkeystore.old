@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import java.util.Vector;
 
-import org.webpki.keygen2.KeyOperationRequestDecoder;
+import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.PassphraseFormats;
 import org.webpki.keygen2.PINGrouping;
 import org.webpki.keygen2.PatternRestrictions;
@@ -14,7 +14,7 @@ public class PINProvisioning
   {
     class PINEntry
       {
-        KeyOperationRequestDecoder.PINPolicy pin_policy;
+        KeyInitializationRequestDecoder.PINPolicy pin_policy;
 
         boolean preset;
 
@@ -25,13 +25,13 @@ public class PINProvisioning
 
     int index;
 
-    public PINProvisioning (KeyOperationRequestDecoder decoder) throws IOException
+    public PINProvisioning (KeyInitializationRequestDecoder decoder) throws IOException
       {
-        for (KeyOperationRequestDecoder.RequestObjects ro : decoder.getRequestObjects ())
+        for (KeyInitializationRequestDecoder.RequestObjects ro : decoder.getRequestObjects ())
           {
-            if (ro instanceof KeyOperationRequestDecoder.CreateKey)
+            if (ro instanceof KeyInitializationRequestDecoder.CreateKey)
               {
-                KeyOperationRequestDecoder.CreateKey rk = (KeyOperationRequestDecoder.CreateKey) ro;
+                KeyInitializationRequestDecoder.CreateKey rk = (KeyInitializationRequestDecoder.CreateKey) ro;
                 if (rk.isStartOfPINPolicy ())
                   {
                     PINEntry pe = new PINEntry ();
@@ -185,7 +185,7 @@ public class PINProvisioning
         return null;
       }
 
-    String getValue (KeyOperationRequestDecoder.PINPolicy pin_policy) throws IOException
+    String getValue (KeyInitializationRequestDecoder.PINPolicy pin_policy) throws IOException
       {
         for (PINEntry pe : pin_entries)
           {

@@ -51,7 +51,7 @@ import org.webpki.crypto.MacAlgorithms;
 
 
 import org.webpki.keygen2.KeyGen2KeyUsage;
-import org.webpki.keygen2.KeyOperationRequestDecoder;
+import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.PassphraseFormats;
 
 
@@ -242,7 +242,7 @@ public class SKSEmulator implements SecureKeyStore, SetupProperties
       }
 
 
-    public AttestedKeyPair generateAttestedKeyPair (KeyOperationRequestDecoder.KeyAlgorithmData key_alg,
+    public AttestedKeyPair generateAttestedKeyPair (KeyInitializationRequestDecoder.KeyAlgorithmData key_alg,
                                                     String attestation_algorithm,
                                                     boolean exportable,
                                                     KeyGen2KeyUsage key_usage,

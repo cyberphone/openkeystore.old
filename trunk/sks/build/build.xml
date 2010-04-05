@@ -4,6 +4,7 @@
   <property name="src_dir" value="../src" />
   <property name="temp_dir" value="../.tmp" />
   <property name="dist_dir"  value="../dist" />
+  <property name="library_dir" value="../../library"/>
   <property name="phone_sks" value="webpki.org-phonesks-1.00.jar" />
   <property name="sks_dbemulator" value="webpki.org-sks-dbemulator-1.00.jar" />
   <property name="sks_hwdevice" value="webpki.org-sks-hwdevice-1.00.jar" />
@@ -14,6 +15,12 @@
     <isset property="env.JAVA_HOME"/>
   </condition>
   <fail message="JAVA_HOME must be set to environment!" unless="java_root_set"/>
+
+  <path id="compile.classpath">
+    <fileset dir="${library_dir}/dist">
+      <include name="webpki.org-libext*.jar"/>
+    </fileset>
+  </path>
 
   <target name="help">
     <echo message="Available targets are help, clean, compile and doc."/>
@@ -28,7 +35,7 @@
        includes="**/*.java, **/*.xsd"/>
     <!-- Compile the java code from ${src_dir} into ${temp_dir} -->
     <mkdir dir="${temp_dir}" />
-    <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}">
+    <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}" classpathref="compile.classpath">
       <compilerarg value="-Xlint"/>
     </javac>
     <!-- Copy all files except .java  -->

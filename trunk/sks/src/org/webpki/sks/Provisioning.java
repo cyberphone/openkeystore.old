@@ -38,8 +38,8 @@ import org.webpki.crypto.SignerInterface;
 import org.webpki.keygen2.CredentialDeploymentRequestDecoder;
 import org.webpki.keygen2.PlatformNegotiationRequestDecoder;
 import org.webpki.keygen2.PlatformNegotiationResponseEncoder;
-import org.webpki.keygen2.KeyOperationResponseEncoder;
-import org.webpki.keygen2.KeyOperationRequestDecoder;
+import org.webpki.keygen2.KeyInitializationResponseEncoder;
+import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.PassphraseFormats;
 import org.webpki.keygen2.PINGrouping;
 import org.webpki.keygen2.InputMethods;
@@ -168,15 +168,15 @@ public class Provisioning
   
 
 
-    void createUserKey (KeyOperationRequestDecoder decoder,
-                        KeyOperationRequestDecoder.CreateKey key_properties,
+    void createUserKey (KeyInitializationRequestDecoder decoder,
+                        KeyInitializationRequestDecoder.CreateKey key_properties,
                         String pin_value,
-                        KeyOperationResponseEncoder encoder,
+                        KeyInitializationResponseEncoder encoder,
                         BasicCapabilities capabilities,
                         int provision_id,
                         String replace_key_id) throws IOException, SQLException, GeneralSecurityException
       {
-        KeyOperationRequestDecoder.KeyAlgorithmData key_alg = key_properties.getKeyAlgorithmData ();
+        KeyInitializationRequestDecoder.KeyAlgorithmData key_alg = key_properties.getKeyAlgorithmData ();
         SecureKeyStore.AttestedKeyPair key_pair = null;
         X509Certificate archival_key = key_properties.getPrivateKeyArchivalKey ();
             byte[] nonce = KeyAttestationUtil.createKA1Nonce (key_properties.getID (),
@@ -207,7 +207,7 @@ public class Provisioning
                                     (key_pair).getAttestSignature (),
                                     key_properties.getID (),
                                     archival_key == null ? null : 
-                                      new KeyOperationResponseEncoder.KeyArchivalData
+                                      new KeyInitializationResponseEncoder.KeyArchivalData
                                          (key_pair.getEncryptedPrivateKey (),
                                           key_pair.getWrappedEncryptionKey (),
                                           encrytion_algorithm,
@@ -219,7 +219,7 @@ public class Provisioning
         boolean preset_pin_flag = false;
         if (key_properties.getPINPolicy () != null)
           {
-            KeyOperationRequestDecoder.PINPolicy pin_policy = key_properties.getPINPolicy ();
+            KeyInitializationRequestDecoder.PINPolicy pin_policy = key_properties.getPINPolicy ();
             pin_policy_id = (String) pin_policy.getUserData ();
             if (key_properties.getPresetPIN () == null)
               {
@@ -268,9 +268,9 @@ public class Provisioning
           {
             key_properties.getPresetPIN ().setLocalReferenceObject (key_id);
           }
-        debugOutput ((key_alg instanceof KeyOperationRequestDecoder.RSA ?
-                 "RSA keypair with size " + ((KeyOperationRequestDecoder.RSA)key_alg).getKeySize () :
-                 "ECC keypair with curve "+ ((KeyOperationRequestDecoder.ECC)key_alg).getNamedCurve ().getOID ()) +
+        debugOutput ((key_alg instanceof KeyInitializationRequestDecoder.RSA ?
+                 "RSA keypair with size " + ((KeyInitializationRequestDecoder.RSA)key_alg).getKeySize () :
+                 "ECC keypair with curve "+ ((KeyInitializationRequestDecoder.ECC)key_alg).getNamedCurve ().getOID ()) +
                     " and KEY_ID=" + key_id + " created" +
                      (archival_key == null ? "" : " with archival option"));
         if (pin_blob != null)
@@ -362,15 +362,15 @@ public class Provisioning
       }
 
 
-    public KeyOperationResponseEncoder initializeProvisioning (KeyOperationRequestDecoder keyopreq_decoder,
+    public KeyInitializationResponseEncoder initializeProvisioning (KeyInitializationRequestDecoder keyopreq_decoder,
                                                                PlatformNegotiationRequestDecoder platform_decoder,
                                                                PlatformNegotiationResponseEncoder platform_encoder,
                                                                PINProvisioning pin_provisioning,
                                                                X509Certificate optional_server_certificate)
     throws IOException, SQLException, GeneralSecurityException
       {
-        KeyOperationResponseEncoder encoder = 
-            new KeyOperationResponseEncoder (keyopreq_decoder.getClientSessionID (),
+        KeyInitializationResponseEncoder encoder = 
+            new KeyInitializationResponseEncoder (keyopreq_decoder.getClientSessionID (),
                                              keyopreq_decoder.getServerSessionID (),
                                              platform_decoder.getSubmitURL (),
                                              keyopreq_decoder.getSubmitURL (),
@@ -389,26 +389,26 @@ public class Provisioning
 
         String pin_value = null;
 
-        for (KeyOperationRequestDecoder.RequestObjects ro : keyopreq_decoder.getRequestObjects ())
+        for (KeyInitializationRequestDecoder.RequestObjects ro : keyopreq_decoder.getRequestObjects ())
           {
-            if (ro instanceof KeyOperationRequestDecoder.CreateKey)
+            if (ro instanceof KeyInitializationRequestDecoder.CreateKey)
               {
 
                 // Standard key generation request
 
-                KeyOperationRequestDecoder.CreateKey rk = (KeyOperationRequestDecoder.CreateKey) ro;
+                KeyInitializationRequestDecoder.CreateKey rk = (KeyInitializationRequestDecoder.CreateKey) ro;
                 if (rk.isStartOfPUKPolicy ())
                   {
-                    KeyOperationRequestDecoder.PUKPolicy puk_policy = rk.getPUKPolicy ();
+                    KeyInitializationRequestDecoder.PUKPolicy puk_policy = rk.getPUKPolicy ();
                     int puk_policy_id = createPUKPolicy (puk_policy.getRetryLimit (), puk_policy.getFormat ());
                     puk_policy.setUserData (puk_policy_id);
                     puk_policy.setLocalReferenceObject (puk_policy_id);
                   }
                 if (rk.isStartOfPINPolicy ())
                   {
-                    KeyOperationRequestDecoder.PINPolicy pin_policy = rk.getPINPolicy ();
+                    KeyInitializationRequestDecoder.PINPolicy pin_policy = rk.getPINPolicy ();
                     pin_value = pin_provisioning.getValue (pin_policy);
-                    KeyOperationRequestDecoder.PUKPolicy puk_policy = rk.getPUKPolicy ();
+                    KeyInitializationRequestDecoder.PUKPolicy puk_policy = rk.getPUKPolicy ();
                     int puk_policy_id = puk_policy.getUserData () == null ?
                         getDevicePUKPolicyID () : (Integer)puk_policy.getUserData ();
                     pin_policy.setUserData (
@@ -433,12 +433,12 @@ public class Provisioning
      
                 // This MUST be a key management operation..
 
-                X509Certificate ca_cert = ((KeyOperationRequestDecoder.ManageObject) ro).getCACertificate ();
+                X509Certificate ca_cert = ((KeyInitializationRequestDecoder.ManageObject) ro).getCACertificate ();
                 Integer selected_single_key = null;
-                if (ro instanceof KeyOperationRequestDecoder.CertificateReference)
+                if (ro instanceof KeyInitializationRequestDecoder.CertificateReference)
                   {
                     Integer[] keys = new ProvCertSel (sks, ca_cert).getFilteredAndCertified (
-                             new CertificateFilter (((KeyOperationRequestDecoder.CertificateReference) ro).getCertificateSHA1 () /* byte[] sha1 */ , 
+                             new CertificateFilter (((KeyInitializationRequestDecoder.CertificateReference) ro).getCertificateSHA1 () /* byte[] sha1 */ , 
                                                     null /* String issuer_regex */,
                                                     null /* String subject_regex */,
                                                     null /* String email_address */,
@@ -449,12 +449,12 @@ public class Provisioning
                                                     null /* String ext_key_usage_oid */));
                     if (keys.length == 0)
                       {
-                        if (ro instanceof KeyOperationRequestDecoder.DeleteKey &&
-                            ((KeyOperationRequestDecoder.DeleteKey) ro).isConditional ())
+                        if (ro instanceof KeyInitializationRequestDecoder.DeleteKey &&
+                            ((KeyInitializationRequestDecoder.DeleteKey) ro).isConditional ())
                           {
                             continue;
                           }
-                        throw new IOException ("Missing key: " + DebugFormatter.getHexString (((KeyOperationRequestDecoder.CertificateReference) ro).getCertificateSHA1 ()));
+                        throw new IOException ("Missing key: " + DebugFormatter.getHexString (((KeyInitializationRequestDecoder.CertificateReference) ro).getCertificateSHA1 ()));
                       }
                     selected_single_key = keys[0];
                   }
@@ -462,13 +462,13 @@ public class Provisioning
 
                 // "Execute" key management ops...
 
-                if (ro instanceof KeyOperationRequestDecoder.DeleteKey)
+                if (ro instanceof KeyInitializationRequestDecoder.DeleteKey)
                   {
                     deleteKeys (new Integer[]{selected_single_key}, provision_id);
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.DeleteKeysByContent)
+                else if (ro instanceof KeyInitializationRequestDecoder.DeleteKeysByContent)
                   {
-                    KeyOperationRequestDecoder.DeleteKeysByContent dkbc = (KeyOperationRequestDecoder.DeleteKeysByContent) ro;
+                    KeyInitializationRequestDecoder.DeleteKeysByContent dkbc = (KeyInitializationRequestDecoder.DeleteKeysByContent) ro;
                     deleteKeys (new ProvCertSel (sks, ca_cert).getFilteredAndCertified (
                              new CertificateFilter (null /* byte[] sha1 */ , 
                                                     null /* String issuer_regex */,
@@ -481,40 +481,40 @@ public class Provisioning
                                                     null /* String ext_key_usage_oid */)),
                                 provision_id);
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.CloneKey)
+                else if (ro instanceof KeyInitializationRequestDecoder.CloneKey)
                   {
 /*
                     s.append ("CK=" + ca_name);
-                    getBaseKeyData (s, ((KeyOperationRequestDecoder.CloneKey) ro).getCreateKeyProperties ());
+                    getBaseKeyData (s, ((KeyInitializationRequestDecoder.CloneKey) ro).getCreateKeyProperties ());
 */
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.ReplaceKey)
+                else if (ro instanceof KeyInitializationRequestDecoder.ReplaceKey)
                   {
 /*
                     s.append ("RK=" + ca_name);
-                    getBaseKeyData (s, ((KeyOperationRequestDecoder.ReplaceKey) ro).getCreateKeyProperties ());
+                    getBaseKeyData (s, ((KeyInitializationRequestDecoder.ReplaceKey) ro).getCreateKeyProperties ());
 */
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.UpdatePINPolicy)
+                else if (ro instanceof KeyInitializationRequestDecoder.UpdatePINPolicy)
                   {
 /*
-                    KeyOperationRequestDecoder.UpdatePINPolicy upg = (KeyOperationRequestDecoder.UpdatePINPolicy) ro;
+                    KeyInitializationRequestDecoder.UpdatePINPolicy upg = (KeyInitializationRequestDecoder.UpdatePINPolicy) ro;
                     s.append ("UPIN=" + ca_name);
                     s.append (" PIN Group=" + upg.getPINPolicy ().getFormat ());
 */
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.UpdatePUKPolicy)
+                else if (ro instanceof KeyInitializationRequestDecoder.UpdatePUKPolicy)
                   {
 /*
-                    KeyOperationRequestDecoder.UpdatePUKPolicy upg = (KeyOperationRequestDecoder.UpdatePUKPolicy) ro;
+                    KeyInitializationRequestDecoder.UpdatePUKPolicy upg = (KeyInitializationRequestDecoder.UpdatePUKPolicy) ro;
                     s.append ("UPUK=" + ca_name);
                     s.append (" PUK Group=" + upg.getPUKPolicy ().getFormat () + " V=" + upg.getPUKPolicy ().getValue ());
 */
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.UpdatePresetPIN)
+                else if (ro instanceof KeyInitializationRequestDecoder.UpdatePresetPIN)
                   {
 /*
-                    KeyOperationRequestDecoder.UpdatePresetPIN upg = (KeyOperationRequestDecoder.UpdatePresetPIN) ro;
+                    KeyInitializationRequestDecoder.UpdatePresetPIN upg = (KeyInitializationRequestDecoder.UpdatePresetPIN) ro;
                     s.append ("UPPRSET=" + ca_name);
                     s.append (" V=" + upg.getPresetPIN ().getValue ());
 */
@@ -643,7 +643,7 @@ public class Provisioning
 
 
     public void finalizeProvisioning (CredentialDeploymentRequestDecoder credep_decoder,
-                                      KeyOperationRequestDecoder keyopreq_decoder)
+                                      KeyInitializationRequestDecoder keyopreq_decoder)
     throws IOException, SQLException, GeneralSecurityException, ClassNotFoundException
       {
         if (keyopreq_decoder == null)
@@ -671,7 +671,7 @@ public class Provisioning
                                        " and " +
                                        credep_decoder.getClientSessionID ());
               }
-            keyopreq_decoder = (KeyOperationRequestDecoder) new ObjectInputStream (new ByteArrayInputStream (blob)).readObject ();
+            keyopreq_decoder = (KeyInitializationRequestDecoder) new ObjectInputStream (new ByteArrayInputStream (blob)).readObject ();
           }
         credep_decoder.setDecrypter (new DeviceDecrypter ());
         credep_decoder.setKeyOperationRequestDecoder (keyopreq_decoder);
@@ -772,7 +772,7 @@ public class Provisioning
       }
 
 
-    public void cleanupFailedProvisioning (KeyOperationRequestDecoder keyopreq_decoder)
+    public void cleanupFailedProvisioning (KeyInitializationRequestDecoder keyopreq_decoder)
       {
         try
           {
