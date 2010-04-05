@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+    
+  <context-param>
+    <param-name>cakeystore</param-name>
+    <param-value>root.ks</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>userkeystore</param-name>
+    <param-value>marion.ks</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>storepass</param-name>
+    <param-value>testing</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>keypass</param-name>
+    <param-value>testing</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>locale</param-name>
+    <param-value>eng</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>aia_support</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+  <listener>
+    <listener-class>Init</listener-class>
+  </listener>
+   
+    <!-- *************************** -->
+
+    <servlet>
+        <servlet-name>VotingResults</servlet-name>
+        <servlet-class>VotingResults</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>TrafficRegisterDetail</servlet-name>
+        <servlet-class>TrafficRegisterDetail</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Home</servlet-name>
+        <servlet-class>Home</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Intro</servlet-name>
+        <servlet-class>Intro</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Login</servlet-name>
+        <servlet-class>Login</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Voting</servlet-name>
+        <servlet-class>Voting</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>TrafficRegister</servlet-name>
+        <servlet-class>TrafficRegister</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>IncomeDeclaration</servlet-name>
+        <servlet-class>IncomeDeclaration</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SignDeclaration</servlet-name>
+        <servlet-class>SignDeclaration</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SignedReceipt</servlet-name>
+        <servlet-class>SignedReceipt</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>RecommendedPost</servlet-name>
+        <servlet-class>RecommendedPost</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SignPlainText</servlet-name>
+        <servlet-class>SignPlainText</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SignUsingStrongerCrypto</servlet-name>
+        <servlet-class>SignUsingStrongerCrypto</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SignNativePDF</servlet-name>
+        <servlet-class>SignNativePDF</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ShowSignedPDF</servlet-name>
+        <servlet-class>ShowSignedPDF</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SignXMLandXSL</servlet-name>
+        <servlet-class>SignXMLandXSL</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>BuildingPermit</servlet-name>
+        <servlet-class>BuildingPermit</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>BuildingPermitAddAttachment1</servlet-name>
+        <servlet-class>BuildingPermitAddAttachment1</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>BuildingPermitAddAttachment2</servlet-name>
+        <servlet-class>BuildingPermitAddAttachment2</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>BuildingPermitReadCachedAttachment</servlet-name>
+        <servlet-class>BuildingPermitReadCachedAttachment</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>BuildingPermitReady</servlet-name>
+        <servlet-class>BuildingPermitReady</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SignBuildingPermit</servlet-name>
+        <servlet-class>SignBuildingPermit</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Logout</servlet-name>
+        <servlet-class>Logout</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>AuthenticationDialog</servlet-name>
+        <servlet-class>AuthenticationDialog</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>CachedEmbeddedResource</servlet-name>
+        <servlet-class>CachedEmbeddedResource</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ListDocuments2Sign</servlet-name>
+        <servlet-class>ListDocuments2Sign</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>MyGovInbox</servlet-name>
+        <servlet-class>MyGovInbox</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ViewGovMessage</servlet-name>
+        <servlet-class>ViewGovMessage</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SendGovMessage</servlet-name>
+        <servlet-class>SendGovMessage</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SignGovMessage</servlet-name>
+        <servlet-class>SignGovMessage</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SignaturePinDialog</servlet-name>
+        <servlet-class>SignaturePinDialog</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>SchemaViewer</servlet-name>
+        <servlet-class>SchemaViewer</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>XMLViewer</servlet-name>
+        <servlet-class>XMLViewer</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Configure</servlet-name>
+        <servlet-class>org.webpki.webutil.locale.Configure</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Upload</servlet-name>
+        <servlet-class>Upload</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>mozkeygen</servlet-name>
+        <servlet-class>mozkeygen</servlet-class>
+    </servlet>
+
+    <!-- *************************** -->
+
+    <servlet-mapping>
+        <servlet-name>VotingResults</servlet-name>
+        <url-pattern>/VotingResults</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>TrafficRegisterDetail</servlet-name>
+        <url-pattern>/TrafficRegisterDetail</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Home</servlet-name>
+        <url-pattern>/Home</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>Intro</servlet-name>
+        <url-pattern>/Intro</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>Login</servlet-name>
+        <url-pattern>/Login</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>Voting</servlet-name>
+        <url-pattern>/Voting</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>TrafficRegister</servlet-name>
+        <url-pattern>/TrafficRegister</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>IncomeDeclaration</servlet-name>
+        <url-pattern>/IncomeDeclaration</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>SignDeclaration</servlet-name>
+        <url-pattern>/SignDeclaration</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SignedReceipt</servlet-name>
+        <url-pattern>/SignedReceipt/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>RecommendedPost</servlet-name>
+        <url-pattern>/RecommendedPost</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SignPlainText</servlet-name>
+        <url-pattern>/SignPlainText</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SignUsingStrongerCrypto</servlet-name>
+        <url-pattern>/SignUsingStrongerCrypto</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SignNativePDF</servlet-name>
+        <url-pattern>/SignNativePDF</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ShowSignedPDF</servlet-name>
+        <url-pattern>/ShowSignedPDF/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SignXMLandXSL</servlet-name>
+        <url-pattern>/SignXMLandXSL</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BuildingPermit</servlet-name>
+        <url-pattern>/BuildingPermit</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BuildingPermitAddAttachment1</servlet-name>
+        <url-pattern>/BuildingPermitAddAttachment1</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BuildingPermitAddAttachment2</servlet-name>
+        <url-pattern>/BuildingPermitAddAttachment2</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BuildingPermitReadCachedAttachment</servlet-name>
+        <url-pattern>/BuildingPermitReadCachedAttachment</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BuildingPermitReady</servlet-name>
+        <url-pattern>/BuildingPermitReady</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SignBuildingPermit</servlet-name>
+        <url-pattern>/SignBuildingPermit</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Logout</servlet-name>
+        <url-pattern>/Logout</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AuthenticationDialog</servlet-name>
+        <url-pattern>/AuthenticationDialog</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>CachedEmbeddedResource</servlet-name>
+        <url-pattern>/CachedEmbeddedResource/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ListDocuments2Sign</servlet-name>
+        <url-pattern>/ListDocuments2Sign</url-pattern>
+    </servlet-mapping>
+ 
+    <servlet-mapping>
+        <servlet-name>MyGovInbox</servlet-name>
+        <url-pattern>/MyGovInbox</url-pattern>
+    </servlet-mapping>
+ 
+    <servlet-mapping>
+        <servlet-name>ViewGovMessage</servlet-name>
+        <url-pattern>/ViewGovMessage</url-pattern>
+    </servlet-mapping>
+ 
+    <servlet-mapping>
+        <servlet-name>SendGovMessage</servlet-name>
+        <url-pattern>/SendGovMessage</url-pattern>
+    </servlet-mapping>
+ 
+    <servlet-mapping>
+        <servlet-name>SignGovMessage</servlet-name>
+        <url-pattern>/SignGovMessage</url-pattern>
+    </servlet-mapping>
+ 
+    <servlet-mapping>
+        <servlet-name>SignaturePinDialog</servlet-name>
+        <url-pattern>/SignaturePinDialog</url-pattern>
+    </servlet-mapping>
+ 
+    <servlet-mapping>
+        <servlet-name>SchemaViewer</servlet-name>
+        <url-pattern>/SchemaViewer/*</url-pattern>
+    </servlet-mapping>
+ 
+    <servlet-mapping>
+        <servlet-name>XMLViewer</servlet-name>
+        <url-pattern>/XMLViewer/*</url-pattern>
+    </servlet-mapping>
+ 
+    <servlet-mapping>
+        <servlet-name>Configure</servlet-name>
+        <url-pattern>/Configure</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Upload</servlet-name>
+        <url-pattern>/Upload</url-pattern>
+    </servlet-mapping>
+ 
+    <servlet-mapping>
+        <servlet-name>mozkeygen</servlet-name>
+        <url-pattern>/mozkeygen</url-pattern>
+    </servlet-mapping>
+ 
+</web-app>
