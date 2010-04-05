@@ -14,7 +14,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.crypto.JKSCAVerifier;
 import org.webpki.crypto.CertificateInfo;
 
-import org.webpki.keygen2.KeyOperationRequestDecoder;
+import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.PatternRestrictions;
 
 public class keyopreq_dec
@@ -27,9 +27,9 @@ public class keyopreq_dec
       }
 
 
-    static void getBaseKeyData (StringBuffer s, KeyOperationRequestDecoder.KeyProperties rk) throws IOException
+    static void getBaseKeyData (StringBuffer s, KeyInitializationRequestDecoder.KeyProperties rk) throws IOException
       {
-        KeyOperationRequestDecoder.RSA rsa = (KeyOperationRequestDecoder.RSA) rk.getKeyAlgorithmData ();
+        KeyInitializationRequestDecoder.RSA rsa = (KeyInitializationRequestDecoder.RSA) rk.getKeyAlgorithmData ();
         s.append (" RSA=").append (rsa.getKeySize ());
         if (rsa.getFixedExponent () != null)
           {
@@ -46,18 +46,18 @@ public class keyopreq_dec
       {
         if (args.length < 1) show ();
         XMLSchemaCache cache = new XMLSchemaCache ();
-        cache.addWrapper (KeyOperationRequestDecoder.class);
-        KeyOperationRequestDecoder kgrd = (KeyOperationRequestDecoder)cache.parse (ArrayUtil.readFile (args[0]));
-        for (KeyOperationRequestDecoder.RequestObjects ro : kgrd.getRequestObjects ())
+        cache.addWrapper (KeyInitializationRequestDecoder.class);
+        KeyInitializationRequestDecoder kgrd = (KeyInitializationRequestDecoder)cache.parse (ArrayUtil.readFile (args[0]));
+        for (KeyInitializationRequestDecoder.RequestObjects ro : kgrd.getRequestObjects ())
           {
             System.out.println ();
             StringBuffer s = new StringBuffer ();
-            if (ro instanceof KeyOperationRequestDecoder.CreateKey)
+            if (ro instanceof KeyInitializationRequestDecoder.CreateKey)
               {
 
                 // Standard key generation request
 
-                KeyOperationRequestDecoder.CreateKey rk = (KeyOperationRequestDecoder.CreateKey) ro;
+                KeyInitializationRequestDecoder.CreateKey rk = (KeyInitializationRequestDecoder.CreateKey) ro;
                 if (rk.isStartOfPUKPolicy ())
                   {
                     s.append ("PUK Group=").append ('\n');
@@ -84,53 +84,53 @@ public class keyopreq_dec
  
                 // This MUST be a key management operation..
 
-                X509Certificate ca = ((KeyOperationRequestDecoder.ManageObject) ro).getCACertificate ();
+                X509Certificate ca = ((KeyInitializationRequestDecoder.ManageObject) ro).getCACertificate ();
                 String ca_name = "\"" + new CertificateInfo (ca).getSubject () + "\"";
-                if (ro instanceof KeyOperationRequestDecoder.CertificateReference)
+                if (ro instanceof KeyInitializationRequestDecoder.CertificateReference)
                   {
 
                     // Implement this...
 
                     s.append ("\nLooking for a certificate with SHA1=" +
-                                        DebugFormatter.getHexString (((KeyOperationRequestDecoder.CertificateReference)ro).getCertificateSHA1 ()) +
+                                        DebugFormatter.getHexString (((KeyInitializationRequestDecoder.CertificateReference)ro).getCertificateSHA1 ()) +
                                         " matching the CA-certificate\n");
                   }
 
                 // "Execute" key management ops...
 
-                if (ro instanceof KeyOperationRequestDecoder.DeleteKey)
+                if (ro instanceof KeyInitializationRequestDecoder.DeleteKey)
                   {
-                    KeyOperationRequestDecoder.DeleteKey delk = (KeyOperationRequestDecoder.DeleteKey) ro;
+                    KeyInitializationRequestDecoder.DeleteKey delk = (KeyInitializationRequestDecoder.DeleteKey) ro;
                     s.append ("DK=" + ca_name  + (delk.isConditional () ? " [conditionally]":""));
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.DeleteKeysByContent)
+                else if (ro instanceof KeyInitializationRequestDecoder.DeleteKeysByContent)
                   {
-                    KeyOperationRequestDecoder.DeleteKeysByContent dkbc = (KeyOperationRequestDecoder.DeleteKeysByContent) ro;
+                    KeyInitializationRequestDecoder.DeleteKeysByContent dkbc = (KeyInitializationRequestDecoder.DeleteKeysByContent) ro;
                     s.append ("DKBC=" + ca_name + " Email=" + dkbc.getEmailAddress ());
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.CloneKey)
+                else if (ro instanceof KeyInitializationRequestDecoder.CloneKey)
                   {
                     s.append ("CK=" + ca_name);
-                    getBaseKeyData (s, ((KeyOperationRequestDecoder.CloneKey) ro).getCreateKeyProperties ());
+                    getBaseKeyData (s, ((KeyInitializationRequestDecoder.CloneKey) ro).getCreateKeyProperties ());
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.ReplaceKey)
+                else if (ro instanceof KeyInitializationRequestDecoder.ReplaceKey)
                   {
                     s.append ("RK=" + ca_name);
-                    getBaseKeyData (s, ((KeyOperationRequestDecoder.ReplaceKey) ro).getCreateKeyProperties ());
+                    getBaseKeyData (s, ((KeyInitializationRequestDecoder.ReplaceKey) ro).getCreateKeyProperties ());
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.UpdatePINPolicy)
+                else if (ro instanceof KeyInitializationRequestDecoder.UpdatePINPolicy)
                   {
-                    KeyOperationRequestDecoder.UpdatePINPolicy upg = (KeyOperationRequestDecoder.UpdatePINPolicy) ro;
+                    KeyInitializationRequestDecoder.UpdatePINPolicy upg = (KeyInitializationRequestDecoder.UpdatePINPolicy) ro;
                     s.append ("UPIN=" + ca_name);
                     s.append (" PIN Group=" + upg.getPINPolicy ().getFormat ());
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.UpdatePUKPolicy)
+                else if (ro instanceof KeyInitializationRequestDecoder.UpdatePUKPolicy)
                   {
-                    KeyOperationRequestDecoder.UpdatePUKPolicy upg = (KeyOperationRequestDecoder.UpdatePUKPolicy) ro;
+                    KeyInitializationRequestDecoder.UpdatePUKPolicy upg = (KeyInitializationRequestDecoder.UpdatePUKPolicy) ro;
                     s.append ("UPUK=" + ca_name);
                     s.append (" PUK Group=" + upg.getPUKPolicy ().getFormat () + " V=");
                   }
-                else if (ro instanceof KeyOperationRequestDecoder.UpdatePresetPIN)
+                else if (ro instanceof KeyInitializationRequestDecoder.UpdatePresetPIN)
                   {
       //              KeyOperationRequestDecoder.UpdatePresetPIN upg = (KeyOperationRequestDecoder.UpdatePresetPIN) ro;
                     s.append ("UPPRSET=" + ca_name);

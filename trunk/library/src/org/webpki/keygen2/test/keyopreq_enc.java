@@ -15,7 +15,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.crypto.JKSSignCertStore;
 
-import org.webpki.keygen2.KeyOperationRequestEncoder;
+import org.webpki.keygen2.KeyInitializationRequestEncoder;
 import org.webpki.keygen2.KeyGen2KeyUsage;
 import org.webpki.keygen2.PassphraseFormats;
 import org.webpki.keygen2.PINGrouping;
@@ -31,22 +31,22 @@ public class keyopreq_enc
         System.exit (3);
       }
 
-    static KeyOperationRequestEncoder create () throws Exception
+    static KeyInitializationRequestEncoder create () throws Exception
       {
         Date server_time = DOMReaderHelper.parseDateTime (Constants.SERVER_TIME).getTime ();
 
 
-        KeyOperationRequestEncoder kre =
-                           new KeyOperationRequestEncoder (Constants.SESSION_ID,
+        KeyInitializationRequestEncoder kre =
+                           new KeyInitializationRequestEncoder (Constants.SESSION_ID,
                                                            Constants.REQUEST_ID,
                                                            "https://ca.example.com/keygenres",
                                                            server_time);
 
  //      kre.setAES256Mode (true);
 
-       KeyOperationRequestEncoder.PUKPolicy puk = kre.createPUKPolicy ("123456", PassphraseFormats.NUMERIC, 3, true);
+       KeyInitializationRequestEncoder.PUKPolicy puk = kre.createPUKPolicy ("123456", PassphraseFormats.NUMERIC, 3, true);
 
-       KeyOperationRequestEncoder.PINPolicy pin = kre.createPINPolicy (PassphraseFormats.NUMERIC,
+       KeyInitializationRequestEncoder.PINPolicy pin = kre.createPINPolicy (PassphraseFormats.NUMERIC,
                                                            5,
                                                            8,
                                                            3).
@@ -56,26 +56,26 @@ public class keyopreq_enc
                                                               PatternRestrictions.SEQUENCE});
 
         kre.createKey (KeyGen2KeyUsage.AUTHENTICATION,
-                       new KeyOperationRequestEncoder.KeyAlgorithmData.RSA (2048),
+                       new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (2048),
                        null, null).setExportable (true);
 
         kre.createKey (KeyGen2KeyUsage.AUTHENTICATION,
-                       new KeyOperationRequestEncoder.KeyAlgorithmData.RSA (2048),
+                       new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (2048),
                        pin,
                        puk);
 
         kre.createKey (KeyGen2KeyUsage.PIGGYBACKED_SYMMETRIC_KEY,
-                       new KeyOperationRequestEncoder.KeyAlgorithmData.RSA (1024),
+                       new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (1024),
                        pin,
                        puk);
 
         kre.createKey (KeyGen2KeyUsage.SIGNATURE,
-                       new KeyOperationRequestEncoder.KeyAlgorithmData.RSA (2048, BigInteger.valueOf (3)),
+                       new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (2048, BigInteger.valueOf (3)),
                        pin,
                        puk);
                                                            
         kre.createKeyWithPresetPIN (KeyGen2KeyUsage.UNIVERSAL,
-                                    new KeyOperationRequestEncoder.KeyAlgorithmData.RSA (1024),
+                                    new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (1024),
                                     kre.createPINPolicy (PassphraseFormats.NUMERIC,
                                                                               6,
                                                                               6,
@@ -86,20 +86,20 @@ public class keyopreq_enc
                                     true);
 
         kre.createDevicePINProtectedKey (KeyGen2KeyUsage.AUTHENTICATION,
-                                         new KeyOperationRequestEncoder.KeyAlgorithmData.RSA (2048));
+                                         new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (2048));
 
         kre.createKey (KeyGen2KeyUsage.AUTHENTICATION,
-                        new KeyOperationRequestEncoder.KeyAlgorithmData.RSA (1024),
+                        new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (1024),
                         null, null);
 
-        KeyOperationRequestEncoder.ManageObject kmc = kre.createManageObject ();
+        KeyInitializationRequestEncoder.ManageObject kmc = kre.createManageObject ();
         kmc.deleteKey ((X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey"), true);
         kmc.cloneKey ((X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey"),
                       KeyGen2KeyUsage.AUTHENTICATION,
-                      new KeyOperationRequestEncoder.KeyAlgorithmData.RSA (2048));
+                      new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (2048));
         kmc.replaceKey ((X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey"),
                         KeyGen2KeyUsage.UNIVERSAL,
-                        new KeyOperationRequestEncoder.KeyAlgorithmData.RSA (512));
+                        new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (512));
         kmc.updatePINPolicy ((X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey"),
             kre.createPINPolicy (PassphraseFormats.ALPHANUMERIC,
                                                            6,

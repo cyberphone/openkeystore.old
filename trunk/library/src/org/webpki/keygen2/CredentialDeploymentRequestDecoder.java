@@ -513,7 +513,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
     private Vector<PresetValue> preset_values = new Vector<PresetValue> ();
 
-    private KeyOperationRequestDecoder key_operation_request_decoder;
+    private KeyInitializationRequestDecoder key_operation_request_decoder;
 
 
     public String getServerSessionID ()
@@ -564,7 +564,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
       }
 
 
-    public void setKeyOperationRequestDecoder (KeyOperationRequestDecoder key_operation_request_decoder)
+    public void setKeyOperationRequestDecoder (KeyInitializationRequestDecoder key_operation_request_decoder)
       {
         this.key_operation_request_decoder = key_operation_request_decoder;
       }
@@ -582,7 +582,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
           {
             bad ("You must call \"setKeyOperationRequestDecoder\" first");
           }
-        for (KeyOperationRequestDecoder.PresetValueReference pvr : key_operation_request_decoder.preset_value_references)
+        for (KeyInitializationRequestDecoder.PresetValueReference pvr : key_operation_request_decoder.preset_value_references)
           {
             PresetValue pv = new PresetValue ();
             if ((pv.encrypted_value = encrypted_preset_values.get (pvr.name)) == null)
@@ -590,7 +590,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
                 bad ("Missing data for: " + pvr.name);
               }
 
-            pv.is_puk = pvr instanceof KeyOperationRequestDecoder.PUKPolicy;
+            pv.is_puk = pvr instanceof KeyInitializationRequestDecoder.PUKPolicy;
             pv.local_reference_object = pvr.local_reference_object;
             pv.hidden = pvr.hidden;
             preset_values.add (pv);

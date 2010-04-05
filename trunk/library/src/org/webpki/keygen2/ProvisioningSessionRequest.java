@@ -1,9 +1,13 @@
-// This is the base class which is extended by "KeyOperationResponse" Encoder and Decoder
+// This is the base class which is extended by "KeyOperationRequest" Encoder and Decoder
 package org.webpki.keygen2;
 
 import java.io.IOException;
 import java.io.Serializable;
 
+import java.security.interfaces.ECPublicKey;
+import java.util.Date;
+
+import org.webpki.xml.ServerCookie;
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
@@ -13,11 +17,30 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-abstract class KeyOperationResponse extends XMLObjectWrapper implements Serializable
+abstract class ProvisioningSessionRequest extends XMLObjectWrapper implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    KeyOperationResponse () {}
+    ProvisioningSessionRequest () {}
+
+    String server_session_id;
+
+    Date server_time;
+
+    String submit_url;
+    
+    ECPublicKey server_ephemeral_key;
+
+    int session_life_time;
+
+    int session_key_limit;
+
+    ServerCookie server_cookie;
+
+    boolean session_updatable_flag = false;
+
+    String session_key_algorithm = KeyGen2URIs.ALGORITHMS.SESSION_KEY_1;
+
 
     public void init () throws IOException
       {
@@ -41,7 +64,7 @@ abstract class KeyOperationResponse extends XMLObjectWrapper implements Serializ
     
     public String element ()
       {
-        return "KeyOperationResponse";
+        return "ProvisioningSessionRequest";
       }
 
 

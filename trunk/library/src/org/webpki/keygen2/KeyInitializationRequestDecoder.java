@@ -30,7 +30,7 @@ import org.webpki.crypto.ECCDomains;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class KeyOperationRequestDecoder extends KeyOperationRequest implements Serializable
+public class KeyInitializationRequestDecoder extends KeyInitializationRequest implements Serializable
   {
     private static final long serialVersionUID = 1L;
 

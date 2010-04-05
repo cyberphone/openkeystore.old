@@ -31,7 +31,7 @@ import org.webpki.crypto.EncryptionAlgorithms;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class KeyOperationResponseDecoder extends KeyOperationResponse implements Serializable
+public class KeyInitializationResponseDecoder extends KeyInitializationResponse implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
@@ -220,7 +220,7 @@ public class KeyOperationResponseDecoder extends KeyOperationResponse implements
 
 
     public void verifyEndorsementKeySignature (VerifierInterface verifier,
-                                               KeyOperationRequestEncoder keyopreq) throws IOException
+                                               KeyInitializationRequestEncoder keyopreq) throws IOException
       {
         XMLVerifier ds = new XMLVerifier (verifier);
         ds.setSignedKeyInfo (SignedKeyInfoSpecifier.ALLOW_SIGNED_KEY_INFO);
@@ -248,7 +248,7 @@ public class KeyOperationResponseDecoder extends KeyOperationResponse implements
                 for (GeneratedPublicKey gk : generated_keys)
                   {
                     key_id = gk.id;
-                    KeyOperationRequestEncoder.KeyProperties rk = keyopreq.requested_keys.get (gk.id);
+                    KeyInitializationRequestEncoder.KeyProperties rk = keyopreq.requested_keys.get (gk.id);
                     if (rk == null)
                       {
                         throw new GeneralSecurityException ("Response key missing");

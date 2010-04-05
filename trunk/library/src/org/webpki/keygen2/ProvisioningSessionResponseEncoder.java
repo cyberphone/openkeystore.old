@@ -34,7 +34,7 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
 @SuppressWarnings("serial")
-public class KeyOperationResponseEncoder extends KeyOperationResponse
+public class ProvisioningSessionResponseEncoder extends ProvisioningSessionResponse
   {
     public static class KeyArchivalData
       {
@@ -269,10 +269,10 @@ public class KeyOperationResponseEncoder extends KeyOperationResponse
 
 
     @SuppressWarnings("unused")
-    private KeyOperationResponseEncoder () {}
+    private ProvisioningSessionResponseEncoder () {}
 
 
-    public KeyOperationResponseEncoder (String client_session_id, String server_session_id, String request_url, String submit_url, String server_time, Date client_time, X509Certificate optional_server_certificate) throws IOException
+    public ProvisioningSessionResponseEncoder (String client_session_id, String server_session_id, String request_url, String submit_url, String server_time, Date client_time, X509Certificate optional_server_certificate) throws IOException
       {
         this.client_session_id = client_session_id;
         this.server_session_id = server_session_id;

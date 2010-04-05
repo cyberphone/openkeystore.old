@@ -4,7 +4,7 @@ package org.webpki.keygen2;
 public interface KeyGen2Constants
   {
 
-    String KEYGEN2_NS                  = "http://xmlns.webpki.org/keygen2/beta/20090301#";
+    String KEYGEN2_NS                  = "http://xmlns.webpki.org/keygen2/beta/20100402#";
 
     String XML_ENC_NS                  = "http://www.w3.org/2001/04/xmlenc#";
 
@@ -41,11 +41,19 @@ public interface KeyGen2Constants
 
     String SERVER_TIME_ATTR                  = "ServerTime";
 
+    String CLIENT_TIME_ATTR                  = "ClientTime";
+
+    String SESSION_KEY_LIMIT_ATTR            = "SessionKeyLimit";
+
+    String SESSION_KEY_ALGORITHM_ATTR        = "SessionKeyAlgorithm";
+
+    String SESSION_LIFE_TIME_ATTR            = "SessionLifeTime";
+
+    String UPDATABLE_ATTR                    = "Updatable";
+
     String EXPORTABLE_ATTR                   = "Exportable";
 
     String NAMED_CURVE_ATTR                  = "NamedCurve";
-
-    String CLIENT_TIME_ATTR                  = "ClientTime";
 
     String LANGUAGES_ATTR                    = "Languages";
 
@@ -53,8 +61,10 @@ public interface KeyGen2Constants
 
     String SERVER_CERT_FP_ATTR               = "ServerCertificateFingerprint";
 
+// TODO
     String CERTIFICATE_SHA1_ATTR             = "CertificateSHA1";
 
+// TODO
     String VALUE_REFERENCE_ID_ATTR           = "ValueReferenceID";
 
     String MIME_TYPE_ATTR                    = "MimeType";
@@ -67,10 +77,12 @@ public interface KeyGen2Constants
 
     String KEY_ATTESTATION_ALGORITHM_ATTR    = "KeyAttestationAlgorithm";
 
+// TODO
     String CONDITIONAL_ATTR                  = "Conditional";
 
     String KEY_ATTESTATION_ATTR              = "KeyAttestation";
 
+// TODO
     String MAC_ALGORITHM_ATTR                = "MACAlgorithm";
 
     String KEY_SIZE_ATTR                     = "KeySize";
@@ -89,6 +101,7 @@ public interface KeyGen2Constants
 
     String INPUT_METHOD_ATTR                 = "InputMethod";
 
+// TODO
     String HIDDEN_ATTR                       = "Hidden";
 
     String USER_MODIFIABLE_ATTR              = "UserModifiable";
@@ -123,13 +136,25 @@ public interface KeyGen2Constants
 
     // Top elements
 
+    String SERVER_EPHEMERAL_KEY_ELEM         = "ServerEphemeralKey";
+
+    String CLIENT_EPHEMERAL_KEY_ELEM         = "ClientEphemeralKey";
+
     String GENERATED_PUBLIC_KEY_ELEM         = "GeneratedPublicKey";
+
+    String CERTIFIED_PUBLIC_KEY_ELEM         = "CertifiedPublicKey";
 
     String PRESET_VALUES_ELEM                = "PresetValues";
 
+    String SYMMETRIC_KEY_ELEM                = "SymmetricKey";
+
+    // TODO
     String PIGGYBACKED_SYMMETRIC_KEY_ELEM    = "PiggybackedSymmetricKey";
 
+    // TODO
     String ENCRYPTED_PRIVATE_KEY_ELEM        = "EncryptedPrivateKey";
+
+    String PRIVATE_KEY_ELEM                  = "PrivateKey";
 
     String KEY_PAIR_ELEM                     = "KeyPair";       
 
@@ -145,12 +170,13 @@ public interface KeyGen2Constants
        
     String DEVICE_SYNCHRONIZED_PIN_ELEM      = "DeviceSynchronizedPIN";
 
-    String CERTIFIED_PUBLIC_KEY_ELEM         = "CertifiedPublicKey";
        
     // Sub elements
 
+// TODO
     String ISSUER_KEY_EXCHANGE_KEY_ELEM      = "IssuerKeyExchangeKey";
 
+// TODO
     String PRIVATE_KEY_ARCHIVAL_KEY_ELEM     = "PrivateKeyArchivalKey";
 
     String EXTENSION_ELEM                    = "Extension";

@@ -32,7 +32,7 @@ import org.webpki.crypto.SignatureAlgorithms;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
-import org.webpki.keygen2.KeyOperationResponseEncoder;
+import org.webpki.keygen2.KeyInitializationResponseEncoder;
 import org.webpki.keygen2.KeyAttestationUtil;
 import org.webpki.keygen2.KeyGen2KeyUsage;
 
@@ -128,8 +128,8 @@ public class keyopres_enc
         if (args.length < 1 || args.length > 2 || (args.length == 2 && !args[1].equals ("-selfsigned"))) show ();
         Date client_time = DOMReaderHelper.parseDateTime (Constants.CLIENT_TIME).getTime ();
 
-        KeyOperationResponseEncoder kre = 
-              new KeyOperationResponseEncoder (Constants.SESSION_ID,
+        KeyInitializationResponseEncoder kre = 
+              new KeyInitializationResponseEncoder (Constants.SESSION_ID,
                                                Constants.REQUEST_ID,
                                                "https://example.com/keygenres",
                                                "https://example.com/keygenreq",

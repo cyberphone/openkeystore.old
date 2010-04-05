@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
     KeyGen2 XML schema.  The primary purpose of KeyGen2 is usage as a
-    browser-based protocol for on-line provisioning and management of PKI
-    user-keys with TPMs (Trusted Platform Modules) and enhanced smart cards
-    as the ultimate targets.
+    browser-based protocol for on-line provisioning and management of
+    PKI-based user-keys stored in containers compatible with the SKS
+    (Secure Key Store) specification.
 
     In addition to PKI, KeyGen2 also supports OTP (One Time Password) "seeds"
     and similar symmetric keys.  By "piggybacking" symmetric keys on PKI, the
@@ -13,22 +13,30 @@
     downloadable code and InformationCards tied to specific keys can be
     issued and maintained without changing the core protocol engine.
 
+    Historical note: KeyGen2 started its life as a 4-pass stand-alone
+    key-provisioning protocol back in 2007 but ended up as a KeyGen2/SKS
+    10-pass "combo" three years later.  Properly implemented the current
+    incarnation provides full end-to-end security.
+
     "Perfection is achieved, not when there is nothing more to add, but when
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 01-Mar-2009 
+    Revised: 02-April-2010 
     Author: Anders Rundgren, WebPKI.org 
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20090301#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20100402#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+           xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
            xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
-           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20090301#"
+           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20100402#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
+
+   <xs:import namespace="http://www.w3.org/2009/xmldsig11#"/>
 
    <xs:import namespace="http://www.w3.org/2001/04/xmlenc#"/>
 
@@ -39,19 +47,6 @@
    <xs:element name="PlatformNegotiationRequest">
       <xs:complexType>
          <xs:sequence>
-
-            <!-- The following element is holding the key that is used for
-                 encrypting "K" (the shared session key) -->
-            <xs:element name="IssuerKeyExchangeKey">
-               <xs:complexType>
-                  <xs:sequence>
-
-                     <!-- MUST contain an RSA public key -->
-                     <xs:element ref="ds:KeyInfo"/>
-
-                  </xs:sequence>
-               </xs:complexType>
-            </xs:element>
 
             <!-- Optional logotype that MAY be shown in the provisioning GUI
                  as "branding" and hint.  See the "Logotype" element for
@@ -87,12 +82,11 @@
          <!-- This mandatory server-generated item MUST be unique between
               key provisioning sessions but MUST remain constant among
               requests within a specific session. -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
-         <!-- Where to HTTP POST the platform negotiation response.  Note
-              that applicable session cookies MUST be submitted in the
-              request as well. SubmitURL also serves as the IssuerURI
-              in SKS-based provisionings -->
+         <!-- Where to HTTP POST the platform negotiation response.
+              Note that applicable session cookies MUST be submitted
+              in the request as well.  -->
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
       </xs:complexType>
@@ -129,14 +123,9 @@
 
          </xs:sequence>
 
-         <!-- A client-generated unique and cryptographically strong
-              random key-provisioning session-ID which MUST remain
-              static during a provisioning session. -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
-
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session. -->
-         <xs:attribute name="ServerSessionID" type="xs:string" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kgen:sksID" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -147,31 +136,25 @@
 
 
    <!--==========================================================================================
-                      The primary (top-level) key operation request object
+                   The primary (top-level) provisioning session request object
    ===========================================================================================-->
 
-   <xs:element name="KeyOperationRequest">
+   <xs:element name="ProvisioningSessionRequest">
       <xs:complexType>
          <xs:sequence>
 
-            <xs:choice maxOccurs="unbounded">
+            <!-- The following element holds an ephemeral key for creating
+                 an SKS "SessionKey" (shared session key) -->
+            <xs:element name="ServerEphemeralKey">
+               <xs:complexType>
+                  <xs:sequence>
 
-               <!-- In the case the issuer wants to create user-keys including
-                    optional PIN/PUK objects the following element is to be used. -->
-               <xs:element ref="kgen:CreateObject"/>
+                     <!-- MUST contain an ECDH public key -->
+                     <xs:element ref="ds11:ECKeyValue"/>
 
-               <!-- In the case the issuer wants to manage existing user-keys
-                    and/or PIN/PUK objects the following element is to be used.
-
-                    Note: To simplify implementation of an "atomic" provisioning
-                    process where either all operations or none pass, you MUST NOT
-                    combine delete operations with other operations on the same
-                    key.  As a consequence, object management operations can be
-                    executed in any order regardless of their sequence order in
-                    the request.  -->
-               <xs:element ref="kgen:ManageObject"/>
-
-            </xs:choice> 
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
 
             <!-- See "ServerCookie" definition. -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
@@ -181,28 +164,52 @@
 
          </xs:sequence> 
 
-         <!-- A KeyGen2 provisioning process MAY [in a controlled way] be
-              temporarily interrupted and then be resumed at a later stage
-              like required by some certification schemes.  The attribute
-              below informs the client software if the current process is
-              to be terminated after the "KeyOperationResponse" message has
-              been sent.  Default:  false. -->
-         <xs:attribute name="DeferredCertification" type="xs:boolean" use="optional"/>
-
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session. -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
-         <!-- MUST be equal to"PlatformNegotiationResponse/@ID"
-              within a specific session. -->
-         <xs:attribute name="ClientSessionID" type="xs:string" use="required"/>
-
-         <!-- A mandatory time-stamp indicating when the request was issued. -->
+         <!-- Mandatory time-stamp indicating when the request was issued.
+              The provisioning middleware MAY check it for "sanity". -->
          <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
 
-         <!-- Where to HTTP POST the key operation response.  Note that
-              applicable session cookies MUST be submitted in the request
-              as well. -->
+         <!-- "SessionLifeTime" specifies the lifetime of the
+              "SessionKey" in seconds. -->
+         <xs:attribute name="SessionLifeTime" use="required">
+            <xs:simpleType>
+               <xs:restriction base="xs:positiveInteger">
+                  <xs:minInclusive value="10"/>
+                  <xs:maxInclusive value="10000000"/>
+               </xs:restriction>
+            </xs:simpleType>
+         </xs:attribute>
+
+         <!-- "SessionKeyLimit" specifies how many "SessionKey"
+              operations the SKS should permit. -->
+         <xs:attribute name="SessionKeyLimit" use="required">
+            <xs:simpleType>
+               <xs:restriction base="xs:positiveInteger">
+                  <xs:minInclusive value="1"/>
+                  <xs:maxInclusive value="65535"/>
+               </xs:restriction>
+            </xs:simpleType>
+         </xs:attribute>
+
+         <!-- "SessionKeyAlgorithm" specifies the algorithm to use for
+              creating an SKS "SessionKey".  Currently the only known URI is:
+
+              "http://xmlns.webpki.org/keygen2/1.0#algorithm.sk1". -->
+         <xs:attribute name="SessionKeyAlgorithm" type="xs:anyURI" use="required"/>
+
+         <!-- "Updatable" tells SKS if the provisioning session may
+              be referred to in post-provisioning sessions or not.
+              Default: false. -->
+         <xs:attribute name="Updatable" type="xs:boolean" use="optional"/>
+
+         <!-- Where to HTTP POST the provisioning session response.
+              Note that applicable session cookies MUST be submitted
+              in the request as well.
+
+              This instance of "SubmitURL" is equivalent to SKS' "IssuerURI".  -->
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
       </xs:complexType>
@@ -210,15 +217,15 @@
    </xs:element>
 
    <!--==========================================================================================
-                        End of key operation request object definition
+                     End of provisioning session request object definition
    ===========================================================================================-->
 
 
    <!--==========================================================================================
-                      The primary (top-level) key operation response object
+                   The primary (top-level) provisioning session response object
    ===========================================================================================-->
 
-   <xs:element name="KeyOperationResponse">
+   <xs:element name="ProvisioningSessionResponse">
       <xs:complexType>
          <xs:sequence>
 
@@ -316,7 +323,181 @@
    </xs:element>
 
    <!--==========================================================================================
-                         End of key operation response object definition
+                     End of provisioning session response object definition
+   ===========================================================================================-->
+
+
+   <!--==========================================================================================
+                    The primary (top-level) key initialization request object
+   ===========================================================================================-->
+
+   <xs:element name="KeyInitializationRequest">
+      <xs:complexType>
+         <xs:sequence>
+
+            <xs:choice maxOccurs="unbounded">
+
+               <!-- In the case the issuer wants to create user-keys including
+                    optional PIN/PUK objects the following element is to be used. -->
+               <xs:element ref="kgen:CreateObject"/>
+
+               <!-- In the case the issuer wants to manage existing user-keys
+                    and/or PIN/PUK objects the following element is to be used.
+
+                    Note: To simplify implementation of an "atomic" provisioning
+                    process where either all operations or none pass, you MUST NOT
+                    combine delete operations with other operations on the same
+                    key.  As a consequence, object management operations can be
+                    executed in any order regardless of their sequence order in
+                    the request.  -->
+               <xs:element ref="kgen:ManageObject"/>
+
+            </xs:choice> 
+
+            <!-- See "ServerCookie" definition. -->
+            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+
+            <!-- See "PlatformNegotiationRequest/Signature". -->
+            <xs:element ref="ds:Signature" minOccurs="0"/>
+
+         </xs:sequence> 
+
+         <!-- A KeyGen2 provisioning process MAY [in a controlled way] be
+              temporarily interrupted and then be resumed at a later stage
+              like required by some certification schemes.  The attribute
+              below informs the client software if the current process is
+              to be terminated after the "KeyInitializationResponse" message
+              has been sent.  Default:  false. -->
+         <xs:attribute name="DeferredCertification" type="xs:boolean" use="optional"/>
+
+         <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
+              within a specific session. -->
+         <xs:attribute name="ID" type="xs:ID" use="required"/>
+
+         <!-- MUST be equal to"PlatformNegotiationResponse/@ID"
+              within a specific session. -->
+         <xs:attribute name="ClientSessionID" type="xs:string" use="required"/>
+
+         <!-- A mandatory time-stamp indicating when the request was issued. -->
+         <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
+
+         <!-- Where to HTTP POST the key operation response.  Note that
+              applicable session cookies MUST be submitted in the request
+              as well. -->
+         <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
+
+      </xs:complexType>
+
+   </xs:element>
+
+   <!--==========================================================================================
+                      End of key initialization request object definition
+   ===========================================================================================-->
+
+
+   <!--==========================================================================================
+                    The primary (top-level) key initialization response object
+   ===========================================================================================-->
+
+   <xs:element name="KeyInitializationResponse">
+      <xs:complexType>
+         <xs:sequence>
+
+            <!-- The keys to be certified. -->
+            <xs:element ref="kgen:GeneratedPublicKey" maxOccurs="unbounded"/>
+
+            <!-- If preset PIN and PUK codes have been specified, the following
+                 element MUST also be emitted for for devices having dedicated
+                 encryption keys.  Note: using the KeyGen2 DIAS scheme, this
+                 element is redundant because the "EndorsementKey" is used for
+                 encryption of non-cryptographic data as well. -->
+            <xs:element name="DeviceEncryptionKey" minOccurs="0">
+               <xs:complexType>
+                  <xs:sequence>
+                     <!-- A certificate path does not need to be ordered or
+                          complete but it MUST NOT contain any "holes". -->
+                     <xs:element ref="ds:X509Data"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+
+            <!-- If Subject "KeyAttestation" attributes have been specified,
+                 the following element MUST also be emitted for attestation
+                 algorithms having dedicated key-certifying keys.  Note:
+                 using the KeyGen2 DIAS scheme, this element is redundant
+                 because the "EndorsementKey" is used for key-attestations
+                 as well. -->
+            <xs:element name="DeviceKeyAttestationKey" minOccurs="0">
+               <xs:complexType>
+                  <xs:sequence>
+                     <!-- A certificate path does not need to be ordered or
+                          complete but it MUST NOT contain any "holes". -->
+                     <xs:element ref="ds:X509Data"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+
+            <!-- In case the requested information would include data that could
+                 affect personal integrity (like a machine ID), the client software
+                 MAY warn the user, and offer an option to decline. -->
+            <xs:element name="EndorsementKey">
+               <xs:complexType>
+                  <xs:sequence>
+
+                     <!-- If the TPM container endorsement key is requested (and
+                          is available) an enveloped signature over the entire
+                          response object MUST be emitted. -->
+                     <xs:element ref="ds:Signature"/>
+
+                  </xs:sequence>
+
+                  <!-- If Subject "KeyAttestation" attributes have been specified,
+                       the actual attestation algorithm/method needs to be known in
+                       order to facilitate attestation signature blob processing.
+                       Conforming KeyGen2 clients MUST as a minimum support the
+                       "http://xmlns.webpki.org/keygen2/1.0#algorithm.key-attestation-1"
+                       key attestation algorithm which is also the default.
+                       See "PlatformNegotiationRequest"  -->
+                  <xs:attribute name="KeyAttestationAlgorithm" type="xs:anyURI" use="optional"/>
+
+               </xs:complexType>
+            </xs:element>
+
+            <!-- See "ServerCookie" definition. -->
+            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+
+         </xs:sequence>
+
+         <!-- MUST be equal to "PlatformNegotiationResponse/@ID"
+              within a specific session. -->
+         <xs:attribute name="ID" type="xs:ID" use="required"/>
+
+         <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
+              within a specific session. -->
+         <xs:attribute name="ServerSessionID" type="xs:string" use="required"/>
+
+         <!-- Copy of "KeyOperationRequest/@ServerTime". -->
+         <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
+
+         <!-- Copy of "KeyOperationRequest/@SubmitURL". -->
+         <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
+
+         <!-- The http URL that invoked the key operation request. -->
+         <xs:attribute name="RequestURL" type="kgen:httpURI" use="required"/>
+
+         <!-- The client's local clock is a mandatory item. -->
+         <xs:attribute name="ClientTime" type="xs:dateTime" use="required"/>
+
+         <!-- The "ServerCertificateFingerprint" attribute MUST be populated with
+              the SHA256 hash of the associated server certificate if the
+              KeyOperationRequest was invoked over HTTPS. -->
+         <xs:attribute name="ServerCertificateFingerprint" type="xs:base64Binary" use="optional"/>
+
+      </xs:complexType>
+   </xs:element>
+
+   <!--==========================================================================================
+                       End of key initialization response object definition
    ===========================================================================================-->
 
 
@@ -1338,6 +1519,17 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      IDs flowing between the SKS and the issuers MUST be 1-32 bytes.
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+   <xs:simpleType name="sksID">
+      <xs:restriction base="xs:ID">
+         <xs:maxLength value="32"/>
+         <xs:minLength value="1"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       The "ServerCookie" object is intended for passing arbitrary data between a
       request and a response.  It can be used to enable "statelessness" between
       requests and responses, by for example holding a HMAC authentication of the
@@ -1379,7 +1571,7 @@
          <xs:enumeration value="encryption"/>
          <xs:enumeration value="universal"/>
          <xs:enumeration value="transport"/>
-         <xs:enumeration value="piggybacked-symmetric-key"/>
+         <xs:enumeration value="symmetric-key"/>
       </xs:restriction>
    </xs:simpleType>
 
@@ -1389,7 +1581,7 @@
 
    <xs:simpleType name="pinLength">
       <xs:restriction base="xs:positiveInteger">
-         <xs:maxInclusive value="32"/>
+         <xs:maxInclusive value="100"/>
       </xs:restriction>
    </xs:simpleType>
 

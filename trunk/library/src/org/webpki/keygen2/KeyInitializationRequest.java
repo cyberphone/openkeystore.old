@@ -15,11 +15,11 @@ import org.webpki.crypto.HashAlgorithms;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-abstract class KeyOperationRequest extends XMLObjectWrapper implements Serializable
+abstract class KeyInitializationRequest extends XMLObjectWrapper implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    KeyOperationRequest () {}
+    KeyInitializationRequest () {}
 
     String server_session_id;
 

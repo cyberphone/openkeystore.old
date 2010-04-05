@@ -472,11 +472,11 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
 
     boolean xml_enc;
 
-    KeyOperationRequestEncoder key_op_req_enc;
+    KeyInitializationRequestEncoder key_op_req_enc;
 
     PresetValueSecurity preset_value_security;
 
-    Vector<KeyOperationRequestEncoder.PresetValue> preset_values;
+    Vector<KeyInitializationRequestEncoder.PresetValue> preset_values;
 
     boolean output_encryption_certificate;
 
@@ -492,7 +492,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
     public CredentialDeploymentRequestEncoder (String submit_url,
                                                Date server_time,
                                                PresetValueSecurity preset_value_security,
-                                               KeyOperationRequestEncoder key_op_req_enc) throws IOException
+                                               KeyInitializationRequestEncoder key_op_req_enc) throws IOException
       {
         this.submit_url = submit_url;
         this.server_time = server_time;
@@ -621,7 +621,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 preset_value_mac.init (new SecretKeySpec (session_hash, "RAW"));
                 preset_value_mac.update (encoder_key_value);
 
-                for (KeyOperationRequestEncoder.PresetValue ps : preset_values)
+                for (KeyInitializationRequestEncoder.PresetValue ps : preset_values)
                   {
                     byte[] iv = new byte[16];
                     SecureRandom.getInstance ("SHA1PRNG").nextBytes (iv);
@@ -657,7 +657,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
 
             wr.getParent ();
 
-            for (KeyOperationRequestEncoder.PresetValue ps : preset_values)
+            for (KeyInitializationRequestEncoder.PresetValue ps : preset_values)
               {
                 wr.addChildElementNS (XML_ENC_NS, ENCRYPTED_DATA_ELEM);
                 wr.setStringAttribute (XMLSignatureWrapper.ID_ATTR, ps.name);

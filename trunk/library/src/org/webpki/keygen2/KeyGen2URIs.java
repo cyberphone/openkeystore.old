@@ -14,7 +14,9 @@ public interface KeyGen2URIs
       {
         String ANY                         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.any";
 
-        String KEY_ATTESTATION_1           = "http://xmlns.webpki.org/keygen2/1.0#algorithm.key-attestation-1";
+        String KEY_ATTESTATION_1           = "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1";
+
+        String SESSION_KEY_1               = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sk1";
 
         String MAC_PIGGYBACK_1             = "http://xmlns.webpki.org/keygen2/1.0#algorithm.mac-piggyback-1";
 

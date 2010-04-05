@@ -6,7 +6,7 @@ import org.webpki.xml.XMLSchemaCache;
 
 import org.webpki.crypto.JKSCAVerifier;
 
-import org.webpki.keygen2.KeyOperationResponseDecoder;
+import org.webpki.keygen2.KeyInitializationResponseDecoder;
 
 public class keyopres_dec
   {
@@ -22,9 +22,9 @@ public class keyopres_dec
       {
         if (args.length < 1) show ();
         XMLSchemaCache cache = new XMLSchemaCache ();
-        cache.addWrapper (KeyOperationResponseDecoder.class);
-        KeyOperationResponseDecoder kgrd = (KeyOperationResponseDecoder)cache.parse (ArrayUtil.readFile (args[0]));
-        for (KeyOperationResponseDecoder.GeneratedPublicKey k : kgrd.getGeneratedPublicKeys ())
+        cache.addWrapper (KeyInitializationResponseDecoder.class);
+        KeyInitializationResponseDecoder kgrd = (KeyInitializationResponseDecoder)cache.parse (ArrayUtil.readFile (args[0]));
+        for (KeyInitializationResponseDecoder.GeneratedPublicKey k : kgrd.getGeneratedPublicKeys ())
           {
             System.out.println ("ID=" + k.getID () + " PublicKey=" + k.getPublicKey ());
           }

@@ -30,7 +30,7 @@ import org.webpki.crypto.ECCDomains;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class KeyOperationRequestEncoder extends KeyOperationRequest implements Serializable
+public class KeyInitializationRequestEncoder extends KeyInitializationRequest implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
@@ -308,7 +308,7 @@ public class KeyOperationRequestEncoder extends KeyOperationRequest implements S
 
         X509Certificate certificate;
 
-        KeyOperationRequestEncoder key_gen_req_enc;
+        KeyInitializationRequestEncoder key_gen_req_enc;
 
         abstract void write (DOMWriterHelper wr) throws IOException;
 
@@ -597,7 +597,7 @@ public class KeyOperationRequestEncoder extends KeyOperationRequest implements S
 
         Vector<ManageObjectOperation> manage_objects = new Vector<ManageObjectOperation> ();
 
-        KeyOperationRequestEncoder key_gen_req_enc;
+        KeyInitializationRequestEncoder key_gen_req_enc;
 
         boolean signed;
 
@@ -924,7 +924,7 @@ public class KeyOperationRequestEncoder extends KeyOperationRequest implements S
 
     String prefix;  // Default: no prefix
 
-    TreeMap<String,KeyOperationRequestEncoder.KeyProperties> requested_keys = new TreeMap<String,KeyOperationRequestEncoder.KeyProperties> ();
+    TreeMap<String,KeyInitializationRequestEncoder.KeyProperties> requested_keys = new TreeMap<String,KeyInitializationRequestEncoder.KeyProperties> ();
 
     Vector<ManageObject> manage_objects = new Vector<ManageObject> ();
 
@@ -936,10 +936,10 @@ public class KeyOperationRequestEncoder extends KeyOperationRequest implements S
     // Constructors
 
     @SuppressWarnings("unused")
-    private KeyOperationRequestEncoder () {}
+    private KeyInitializationRequestEncoder () {}
 
 
-    public KeyOperationRequestEncoder (String client_session_id,
+    public KeyInitializationRequestEncoder (String client_session_id,
                                        String server_session_id,
                                        String submit_url,
                                        Date server_time) throws IOException
