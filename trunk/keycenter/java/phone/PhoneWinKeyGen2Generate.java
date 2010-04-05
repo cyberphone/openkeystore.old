@@ -7,8 +7,8 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.keygen2.KeyOperationResponseEncoder;
-import org.webpki.keygen2.KeyOperationRequestDecoder;
+import org.webpki.keygen2.KeyInitializationResponseEncoder;
+import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.CredentialDeploymentRequestDecoder;
 import org.webpki.keygen2.CredentialDeploymentResponseEncoder;
 
@@ -46,7 +46,7 @@ public class PhoneWinKeyGen2Generate extends PhoneWinKeyGen2Base
           append ("\"></td></tr>");
       }
 
-    void deployAndFinish (HttpServletRequest request,                          HttpServletResponse response,                          HttpSession session,                          Provisioning provisioning,                          KeyOperationRequestDecoder keyopreq_decoder)
+    void deployAndFinish (HttpServletRequest request,                          HttpServletResponse response,                          HttpSession session,                          Provisioning provisioning,                          KeyInitializationRequestDecoder keyopreq_decoder)
     throws Exception      {        CredentialDeploymentRequestDecoder credep_decoder = (CredentialDeploymentRequestDecoder)PhoneUtil.getXMLObject (session);
         provisioning.finalizeProvisioning (credep_decoder, keyopreq_decoder);        CredentialDeploymentResponseEncoder success_encoder = 
                     new CredentialDeploymentResponseEncoder (credep_decoder.getClientSessionID (),
@@ -97,7 +97,7 @@ public class PhoneWinKeyGen2Generate extends PhoneWinKeyGen2Base
 
         try
           {
-            KeyOperationResponseEncoder encoder =
+            KeyInitializationResponseEncoder encoder =
                 provisioning.initializeProvisioning (ps.keyopreq_decoder,
                                                      ps.platform_decoder,                                                     ps.platform_encoder,
                                                      ps.pin_provisioning,

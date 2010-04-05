@@ -25,8 +25,8 @@ import org.webpki.xml.XMLSchemaCache;
 import org.webpki.keygen2.CredentialDeploymentResponseDecoder;
 import org.webpki.keygen2.CredentialDeploymentRequestEncoder;
 import org.webpki.keygen2.PlatformNegotiationResponseDecoder;
-import org.webpki.keygen2.KeyOperationResponseDecoder;
-import org.webpki.keygen2.KeyOperationRequestEncoder;
+import org.webpki.keygen2.KeyInitializationResponseDecoder;
+import org.webpki.keygen2.KeyInitializationRequestEncoder;
 import org.webpki.keygen2.KeyGen2KeyUsage;
 import org.webpki.keygen2.BasicCapabilities;
 
@@ -80,13 +80,13 @@ public abstract class KeyGenServlet extends ProtectedServlet
 
         String client_session_id;
 
-        KeyOperationRequestEncoder key_op_req_enc;
+        KeyInitializationRequestEncoder key_op_req_enc;
 
-        KeyOperationResponseDecoder key_op_res_dec;
+        KeyInitializationResponseDecoder key_op_res_dec;
 
-        HashMap<String,KeyOperationRequestEncoder.KeyProperties> key_props = new HashMap<String,KeyOperationRequestEncoder.KeyProperties> ();        PlatformNegotiationResponseDecoder platform_dec;
+        HashMap<String,KeyInitializationRequestEncoder.KeyProperties> key_props = new HashMap<String,KeyInitializationRequestEncoder.KeyProperties> ();        PlatformNegotiationResponseDecoder platform_dec;
 
-        KeyOperationRequestEncoder.KeyProperties add (KeyOperationRequestEncoder.KeyProperties key)
+        KeyInitializationRequestEncoder.KeyProperties add (KeyInitializationRequestEncoder.KeyProperties key)
           {
             if (exportable_keys)
               {
@@ -96,9 +96,9 @@ public abstract class KeyGenServlet extends ProtectedServlet
             return key;
           }
 
-        KeyOperationRequestEncoder.KeyProperties get (String key) throws IOException
+        KeyInitializationRequestEncoder.KeyProperties get (String key) throws IOException
           {
-            KeyOperationRequestEncoder.KeyProperties found_key_props = key_props.get (key);
+            KeyInitializationRequestEncoder.KeyProperties found_key_props = key_props.get (key);
             if (found_key_props == null)
               {
                 bad ("Missing key: " + key + " in message");
@@ -115,7 +115,7 @@ public abstract class KeyGenServlet extends ProtectedServlet
           {
             schema_cache = new XMLSchemaCache ();
             schema_cache.addWrapper (PlatformNegotiationResponseDecoder.class);
-            schema_cache.addWrapper (KeyOperationResponseDecoder.class);
+            schema_cache.addWrapper (KeyInitializationResponseDecoder.class);
             schema_cache.addWrapper (CredentialDeploymentResponseDecoder.class);
           }
         catch (Exception e)
@@ -196,9 +196,9 @@ public abstract class KeyGenServlet extends ProtectedServlet
 
         GenCardLogo card_logo = new GenCardLogo (prov_state.user_name);
 
-        for (KeyOperationResponseDecoder.GeneratedPublicKey key : prov_state.key_op_res_dec.getGeneratedPublicKeys ())
+        for (KeyInitializationResponseDecoder.GeneratedPublicKey key : prov_state.key_op_res_dec.getGeneratedPublicKeys ())
           {
-            KeyOperationRequestEncoder.KeyProperties key_prop = prov_state.get (key.getID ());
+            KeyInitializationRequestEncoder.KeyProperties key_prop = prov_state.get (key.getID ());
             boolean otp = key_prop.getKeyUsage () == KeyGen2KeyUsage.PIGGYBACKED_SYMMETRIC_KEY;
             boolean auth = key_prop.getKeyUsage () == KeyGen2KeyUsage.AUTHENTICATION;
             CertSpec cert_spec = new CertSpec ();

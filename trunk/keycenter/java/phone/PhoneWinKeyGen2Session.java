@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.webutil.ServletUtil;
 
-import org.webpki.keygen2.KeyOperationRequestDecoder;
+import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.PassphraseFormats;
 
 import org.webpki.sks.PINProvisioning;
@@ -101,7 +101,7 @@ public class PhoneWinKeyGen2Session extends PhoneWinKeyGen2Base
             System.out.println ("There was presumably a KG2 platform error");
             return;
           }
-        KeyOperationRequestDecoder keyopreq_decoder = (KeyOperationRequestDecoder)PhoneUtil.getXMLObject (session);
+        KeyInitializationRequestDecoder keyopreq_decoder = (KeyInitializationRequestDecoder)PhoneUtil.getXMLObject (session);
         ps.keyopreq_server_certificate = PhoneUtil.getServerCertificate (session);
         ps.keyopreq_decoder = keyopreq_decoder;
         ps.pin_provisioning = new PINProvisioning (keyopreq_decoder);

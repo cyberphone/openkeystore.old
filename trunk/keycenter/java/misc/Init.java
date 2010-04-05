@@ -16,8 +16,8 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionListener;
 import javax.servlet.http.HttpSessionEvent;
 
-import org.webpki.keygen2.KeyOperationResponseDecoder;
-import org.webpki.keygen2.KeyOperationRequestDecoder;
+import org.webpki.keygen2.KeyInitializationResponseDecoder;
+import org.webpki.keygen2.KeyInitializationRequestDecoder;
 
 import org.webpki.xml.XMLSchemaCache;
 
@@ -110,8 +110,8 @@ public class Init implements ServletContextListener, HttpSessionListener, KeySto
           {
             XMLSchemaCache schema_cache = new XMLSchemaCache ();
             context.setAttribute (ProtectedServlet.APP_SCOPE, schema_cache);
-            schema_cache.addWrapper (KeyOperationResponseDecoder.class);
-            schema_cache.addWrapper (KeyOperationRequestDecoder.class);
+            schema_cache.addWrapper (KeyInitializationResponseDecoder.class);
+            schema_cache.addWrapper (KeyInitializationRequestDecoder.class);
 
             ProtectedServlet.initDatabaseParameters (context);
             PhoneWinServlet.initPhone (context);

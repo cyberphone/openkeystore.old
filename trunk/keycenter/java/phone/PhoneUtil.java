@@ -26,7 +26,7 @@ import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.wasp.SignatureRequestDecoder;
 import org.webpki.wasp.AuthenticationRequestDecoder;
 
-import org.webpki.keygen2.KeyOperationRequestDecoder;
+import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.CredentialDeploymentRequestDecoder;
 import org.webpki.keygen2.PlatformNegotiationRequestDecoder;
 
@@ -55,7 +55,7 @@ public class PhoneUtil
             initCache (SignatureRequestDecoder.class, "phonewinsignreq");
             initCache (AuthenticationRequestDecoder.class, "phonewinauthreq");
             initCache (PlatformNegotiationRequestDecoder.class, "phonewinkg2init");
-            initCache (KeyOperationRequestDecoder.class, null);
+            initCache (KeyInitializationRequestDecoder.class, null);
             initCache (CredentialDeploymentRequestDecoder.class, null);
           }
         catch (Exception e)

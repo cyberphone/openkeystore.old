@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import org.webpki.util.ImageData;
 import org.webpki.keygen2.PlatformNegotiationRequestDecoder;
-import org.webpki.keygen2.KeyOperationRequestDecoder;
+import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.PlatformNegotiationResponseEncoder;
 import org.webpki.keygen2.KeyGen2URIs;
 
@@ -22,7 +22,7 @@ public abstract class PhoneWinKeyGen2Base extends PhoneWinServlet
     static class ProvisioningState
       {
         PINProvisioning pin_provisioning;
-        KeyOperationRequestDecoder keyopreq_decoder;
+        KeyInitializationRequestDecoder keyopreq_decoder;
         X509Certificate keyopreq_server_certificate;
         PlatformNegotiationRequestDecoder platform_decoder;        PlatformNegotiationResponseEncoder platform_encoder;      }
 

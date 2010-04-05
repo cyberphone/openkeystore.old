@@ -19,6 +19,9 @@
     <fileset dir="${phonesks_dir}/dist">
       <include name="*.jar"/>
     </fileset>
+    <fileset dir="${library_dir}/dist">
+      <include name="*.jar"/>
+    </fileset>
   </path>
 
   <target name="init" unless="app_path">
@@ -67,7 +70,7 @@
   <copy file="../../resources/docs/universal-keystore-database.pdf" todir="${temp_dir}" preservelastmodified="true"/>
   <copy file="../web/images/vshaddow.gif" todir="${temp_dir}/javadoc/keystore/org/webpki/sks/dbemulator" preservelastmodified="true"/>
   <copy file="../web/images/hshaddow.gif" todir="${temp_dir}/javadoc/keystore/org/webpki/sks/dbemulator" preservelastmodified="true"/>
-  <copy file="../../resources/SSLcerts/${hostname}.ks" todir="${temp_dir}/WEB-INF/classes/misc" preservelastmodified="true"/>
+  <copy file="../../resources/SSLcerts/${hostname}.jks" todir="${temp_dir}/WEB-INF/classes/misc" preservelastmodified="true"/>
   <copy file="../../resources/keygen2-certificates/deviceca.jks" todir="${temp_dir}/WEB-INF/classes/misc" preservelastmodified="true"/>
   <copy file="../../resources/keygen2-certificates/mybankca.ks" todir="${temp_dir}/WEB-INF/classes/misc" preservelastmodified="true"/>
   <copy file="../../resources/keygen2-certificates/archivalkey.jks" todir="${temp_dir}/WEB-INF/classes/misc" preservelastmodified="true"/>
@@ -106,7 +109,7 @@
      <delete dir="${temp_dir}"/>
   </target>
   
-  <target name="deploy" depends="clean,doc">
+  <target name="_internal_deploy" depends="clean,doc">
       <mkdir dir="${temp_dir}/WEB-INF/lib"/>
       <jar destfile="${temp_dir}/WEB-INF/lib/localservices.jar">
           <fileset dir="${temp_dir}/WEB-INF/classes">
@@ -119,12 +122,23 @@
           <fileset dir="${temp_dir}">
               <exclude name="**/localservices/*"/>
           </fileset>
-          <lib file="${phonesks_dir}/dist/webpki.org-phonesks-1.00.jar"/>
-<!--
-      	<lib file="${phonesks_dir}/dist/webpki.org-sks-dbemulator-1.00.jar"/>
--->
-        <lib file="${phonesks_dir}/dist/webpki.org-sks-hwdevice-1.00.jar"/>
+        <lib file="${library_dir}/dist/webpki.org-libext-1.00.jar"/>
+        <lib file="${library_dir}/dist/webpki.org-webutil-1.00.jar"/>
+        <lib file="${phonesks_dir}/dist/webpki.org-phonesks-1.00.jar"/>
+        <lib file="${phonesks_dir}/dist/${sks_type}"/>
       </war>
   </target>
+
+	<target name="deploy-db">
+	  <antcall target="_internal_deploy">
+	    <param name="sks_type" value="webpki.org-sks-dbemulator-1.00.jar"/>
+	  </antcall>
+	</target>
+
+	<target name="deploy-hw">
+	  <antcall target="_internal_deploy">
+	    <param name="sks_type" value="webpki.org-sks-hwdevice-1.00.jar"/>
+	  </antcall>
+	</target>
 
 </project>

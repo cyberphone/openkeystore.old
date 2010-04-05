@@ -35,7 +35,7 @@ import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.JKSCAVerifier;
 
-import org.webpki.keygen2.KeyOperationResponseDecoder;import misc.Init;
+import org.webpki.keygen2.KeyInitializationResponseDecoder;import misc.Init;
 
 @SuppressWarnings("serial")
 public class CredentialDeploymentRequestServlet extends KeyGenServlet
@@ -52,7 +52,7 @@ public class CredentialDeploymentRequestServlet extends KeyGenServlet
             ServletContext context = getServletContext ();
 
             ProvisioningState prov_state = getProvisioningState (session);
-            prov_state.key_op_res_dec = (KeyOperationResponseDecoder) getXMLObject (request);            JKSCAVerifier verifier = new JKSCAVerifier (getDeviceCAKeyStore (context));
+            prov_state.key_op_res_dec = (KeyInitializationResponseDecoder) getXMLObject (request);            JKSCAVerifier verifier = new JKSCAVerifier (getDeviceCAKeyStore (context));
             verifier.setTrustedRequired (false);
             prov_state.key_op_res_dec.verifyEndorsementKeySignature (verifier, prov_state.key_op_req_enc);
 
@@ -65,11 +65,11 @@ public class CredentialDeploymentRequestServlet extends KeyGenServlet
                     bad ("Non-matching server cert hash");
                   }
               }            // Key ecsrow code
-            for (KeyOperationResponseDecoder.GeneratedPublicKey key : prov_state.key_op_res_dec.getGeneratedPublicKeys ())
+            for (KeyInitializationResponseDecoder.GeneratedPublicKey key : prov_state.key_op_res_dec.getGeneratedPublicKeys ())
               {
                 if (key.getKeyArchivalData () != null)
                   {
-                    KeyOperationResponseDecoder.KeyArchivalData key_archival_data = key.getKeyArchivalData ();                    Cipher crypt = Cipher.getInstance (key_archival_data.getKeyWrapAlgorithm ().getJCEName ());
+                    KeyInitializationResponseDecoder.KeyArchivalData key_archival_data = key.getKeyArchivalData ();                    Cipher crypt = Cipher.getInstance (key_archival_data.getKeyWrapAlgorithm ().getJCEName ());
                     crypt.init (Cipher.DECRYPT_MODE, getKeyArchivalPrivateKey (context));
                     byte[] encryption_key = crypt.doFinal (key_archival_data.getWrappedEncryptionKey ());
                     byte[] encrypted_private_key = key_archival_data.getEncryptedPrivateKey ();
