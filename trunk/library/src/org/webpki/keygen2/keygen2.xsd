@@ -992,13 +992,11 @@
 
             <xs:choice>
 
-               <!-- The public key and an enveloped signature for the associated
-                    "GeneratedPublicKey" object. The signature MUST reference the proper
-                    "GeneratedPublicKey/@ID" -->
-               <xs:element ref="ds:Signature"/>
-
                <!-- MUST contain a public key element -->
-               <xs:element ref="ds:KeyInfo"/>
+
+               <xs:element ref="ds11:ECKeyValue"/>
+
+               <xs:element ref="ds:RSAKeyValue"/>
 
             </xs:choice>
 
@@ -1064,12 +1062,12 @@
                   </xs:complexType>
                </xs:element>
 
-               <xs:element name="ECC">
+               <xs:element name="EC">
                   <xs:complexType>
 
-                     <!-- Tentative. The OID of the requested ECC curve.
-                          Conforming implementations MAY support ECC. -->
-                     <xs:attribute name="NamedCurve" type="kgen:oidValue" use="required"/>
+                     <!-- Tentative. The OID of the requested EC curve.
+                          Conforming implementations MAY support EC. -->
+                     <xs:attribute name="NamedCurve" type="xs:anyURI" use="required"/>
 
                   </xs:complexType>
                </xs:element>

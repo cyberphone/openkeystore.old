@@ -19,7 +19,7 @@ import org.webpki.xml.XMLObjectWrapper;
 
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.ECCDomains;
+import org.webpki.crypto.ECDomains;
 
 
 abstract class XMLSignerCore
@@ -128,7 +128,7 @@ abstract class XMLSignerCore
                                              ?
                                   SignatureAlgorithms.RSA_SHA256
                                              :
-                                  ECCDomains.getRecommendedSignatureAlgorithm ((ECPublicKey)public_key);
+                                  ECDomains.getRecommendedSignatureAlgorithm ((ECPublicKey)public_key);
               }
             dsig_wrapper.signature_algorithm = signature_algorithm.getURI ();
           }

@@ -61,7 +61,7 @@ abstract class KeyInitializationRequest extends XMLObjectWrapper implements Seri
     
     public String element ()
       {
-        return "KeyOperationRequest";
+        return "KeyInitializationRequest";
       }
 
 

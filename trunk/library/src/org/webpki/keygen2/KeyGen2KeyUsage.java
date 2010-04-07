@@ -10,7 +10,7 @@ public enum KeyGen2KeyUsage
     ENCRYPTION                 ("encryption"),
     UNIVERSAL                  ("universal"),
     TRANSPORT                  ("transport"),
-    PIGGYBACKED_SYMMETRIC_KEY  ("piggybacked-symmetric-key");
+    SYMMETRIC_KEY              ("symmetric-key");
 
     private final String xml_name;       // As expressed in XML
 

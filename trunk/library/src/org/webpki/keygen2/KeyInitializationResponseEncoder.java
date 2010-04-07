@@ -137,13 +137,7 @@ public class KeyInitializationResponseEncoder extends KeyInitializationResponse
             if (attested_public_key != null)
               {
                 wr.setBinaryAttribute (KEY_ATTESTATION_ATTR, attest_signature);
-                wr.pushPrefix (XMLSignatureWrapper.XML_DSIG_NS_PREFIX);
-                wr.addChildElementNS (XMLSignatureWrapper.XML_DSIG_NS, XMLSignatureWrapper.KEY_INFO_ELEM);
-                wr.addChildElement (XMLSignatureWrapper.KEY_VALUE_ELEM);
                 XMLSignatureWrapper.writePublicKey (wr, attested_public_key);
-                wr.getParent();
-                wr.getParent();
-                wr.popPrefix ();
 
                 if (archival_data != null)
                   {

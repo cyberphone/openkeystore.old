@@ -13,6 +13,7 @@ import org.webpki.xml.DOMReaderHelper;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
+import org.webpki.crypto.ECDomains;
 import org.webpki.crypto.JKSSignCertStore;
 
 import org.webpki.keygen2.KeyInitializationRequestEncoder;
@@ -60,11 +61,11 @@ public class keyopreq_enc
                        null, null).setExportable (true);
 
         kre.createKey (KeyGen2KeyUsage.AUTHENTICATION,
-                       new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (2048),
+                       new KeyInitializationRequestEncoder.KeyAlgorithmData.EC (ECDomains.P_256),
                        pin,
                        puk);
 
-        kre.createKey (KeyGen2KeyUsage.PIGGYBACKED_SYMMETRIC_KEY,
+        kre.createKey (KeyGen2KeyUsage.SYMMETRIC_KEY,
                        new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (1024),
                        pin,
                        puk);

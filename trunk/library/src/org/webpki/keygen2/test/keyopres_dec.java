@@ -1,5 +1,7 @@
 package org.webpki.keygen2.test;
 
+import java.security.Security;
+
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.XMLSchemaCache;
@@ -21,6 +23,7 @@ public class keyopres_dec
     public static void main (String args[]) throws Exception
       {
         if (args.length < 1) show ();
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         XMLSchemaCache cache = new XMLSchemaCache ();
         cache.addWrapper (KeyInitializationResponseDecoder.class);
         KeyInitializationResponseDecoder kgrd = (KeyInitializationResponseDecoder)cache.parse (ArrayUtil.readFile (args[0]));
@@ -28,6 +31,7 @@ public class keyopres_dec
           {
             System.out.println ("ID=" + k.getID () + " PublicKey=" + k.getPublicKey ());
           }
+/*
         if (kgrd.hasEndorsementKeySignature ())
           {
             JKSCAVerifier verifier = new JKSCAVerifier (TPMKeyStore.getCAKeyStore ());
@@ -36,5 +40,6 @@ public class keyopres_dec
   //          kgrd.verifyEndorsementKeySignature (verifier, false, KeyGen2KeyUsage.AUTHENTICATION);
             System.out.println ("\nTPM SIGNATURE VERIFIED\n" + verifier.getSignerCertificateInfo ().toString ());
           }
+*/
       }
   }

@@ -8,7 +8,7 @@ import org.webpki.asn1.DerDecoder;
 import org.webpki.asn1.ParseUtil;
 
 
-public enum ECCDomains
+public enum ECDomains
   {
     B_163   ("1.3.132.0.15",        "B-163", 163, SignatureAlgorithms.ECDSA_SHA1),
     B_233   ("1.3.132.0.27",        "B-233", 233, SignatureAlgorithms.ECDSA_SHA256),
@@ -22,7 +22,7 @@ public enum ECCDomains
     private final int length_in_bits;
     private final SignatureAlgorithms pref_alg;
 
-    private ECCDomains (String oid, String jcename, int length_in_bits, SignatureAlgorithms pref_alg)
+    private ECDomains (String oid, String jcename, int length_in_bits, SignatureAlgorithms pref_alg)
       {
         this.oid = oid;
         this.jcename = jcename;
@@ -34,6 +34,12 @@ public enum ECCDomains
     public String getOID ()
       {
         return oid;
+      }
+
+    
+    public String getURI ()
+      {
+        return "urn:oid:" + getOID ();
       }
 
 
@@ -55,9 +61,9 @@ public enum ECCDomains
       }
  
 
-    public static ECCDomains getECCDomainFromOID (String oid) throws IOException
+    public static ECDomains getECDomainFromOID (String oid) throws IOException
       {
-        for (ECCDomains alg : values ())
+        for (ECDomains alg : values ())
           {
             if (oid.equals (alg.oid))
               {
@@ -68,9 +74,9 @@ public enum ECCDomains
       }
 
 
-    public static ECCDomains getECCDomain (ECPublicKey public_key) throws IOException
+    public static ECDomains getECDomain (ECPublicKey public_key) throws IOException
       {
-        return getECCDomainFromOID (ParseUtil.oid (
+        return getECDomainFromOID (ParseUtil.oid (
                                       ParseUtil.sequence (
                                          ParseUtil.sequence (
                                             DerDecoder.decode (public_key.getEncoded ()), 2).get(0), 2).get (1)).oid ());
@@ -79,7 +85,7 @@ public enum ECCDomains
 
     public static SignatureAlgorithms getRecommendedSignatureAlgorithm (ECPublicKey public_key) throws IOException
       {
-        return getECCDomain (public_key).getRecommendedSignatureAlgorithm ();
+        return getECDomain (public_key).getRecommendedSignatureAlgorithm ();
       }
 
   }

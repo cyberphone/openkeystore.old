@@ -329,18 +329,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse 
                }
             else
               {
-                rd.getNext (XMLSignatureWrapper.KEY_INFO_ELEM);
-                if (ah.getStringConditional (ID_ATTR) != null)
-                  {
-                    throw new IOException ("Unexpexted \"Id\" attribute on \"KeyInfo\"");
-                  }
-                rd.getChild ();
-                rd.getNext (XMLSignatureWrapper.KEY_VALUE_ELEM);
-                rd.getChild ();
                 gk.public_key = XMLSignatureWrapper.readPublicKey (rd);
-                rd.getParent ();
-                if (rd.hasNext ()) throw new IOException ("Only one element allowed to \"KeyInfo\"");
-                rd.getParent ();
               }
             if (rd.hasNext ())
               {

@@ -25,7 +25,7 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import org.webpki.crypto.SignerInterface;
 import org.webpki.crypto.CertificateUtil;
-import org.webpki.crypto.ECCDomains;
+import org.webpki.crypto.ECDomains;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -214,17 +214,17 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
 
         private KeyAlgorithmData () {}
 
-        public static final class ECC extends KeyAlgorithmData implements Serializable
+        public static final class EC extends KeyAlgorithmData implements Serializable
           {
 
             private static final long serialVersionUID = 1L;
 
-            ECCDomains named_curve;
+            ECDomains named_curve;
 
             @SuppressWarnings("unused")
-            private ECC () {}
+            private EC () {}
 
-            public ECC (ECCDomains named_curve)
+            public EC (ECDomains named_curve)
               {
                 this.named_curve = named_curve;
               }
@@ -232,8 +232,8 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
 
             void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException
               {
-                wr.addChildElement (ECC_ELEM);
-                wr.setStringAttribute (NAMED_CURVE_ATTR, named_curve.getOID ());
+                wr.addChildElement (EC_ELEM);
+                wr.setStringAttribute (NAMED_CURVE_ATTR, named_curve.getURI ());
                 wr.getParent ();
               }
           }

@@ -29,11 +29,18 @@ public class keyopreq_dec
 
     static void getBaseKeyData (StringBuffer s, KeyInitializationRequestDecoder.KeyProperties rk) throws IOException
       {
-        KeyInitializationRequestDecoder.RSA rsa = (KeyInitializationRequestDecoder.RSA) rk.getKeyAlgorithmData ();
-        s.append (" RSA=").append (rsa.getKeySize ());
-        if (rsa.getFixedExponent () != null)
+        if (rk.getKeyAlgorithmData () instanceof KeyInitializationRequestDecoder.RSA)
           {
-            s.append ("/").append (rsa.getFixedExponent ());
+            KeyInitializationRequestDecoder.RSA rsa = (KeyInitializationRequestDecoder.RSA) rk.getKeyAlgorithmData ();
+            s.append (" RSA=").append (rsa.getKeySize ());
+            if (rsa.getFixedExponent () != null)
+              {
+                s.append ("/").append (rsa.getFixedExponent ());
+              }
+          }
+        else
+          {
+            s.append (" ECC=").append (((KeyInitializationRequestDecoder.EC) rk.getKeyAlgorithmData ()).getNamedCurve ());
           }
         s.append (" USAGE=").append (rk.getKeyUsage ());
         if (rk.isExportable ())

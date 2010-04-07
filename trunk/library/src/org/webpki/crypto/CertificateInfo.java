@@ -361,7 +361,7 @@ public class CertificateInfo
             byte[] arr = ((RSAPublicKey) certificate.getPublicKey ()).getModulus ().toByteArray ();
             return (arr[0] == 0 ? arr.length - 1 : arr.length) * 8;
           }
-        return ECCDomains.getECCDomain ((ECPublicKey)certificate.getPublicKey ()).getPublicKeySizeInBits ();
+        return ECDomains.getECDomain ((ECPublicKey)certificate.getPublicKey ()).getPublicKeySizeInBits ();
       }
 
 

@@ -41,7 +41,7 @@ abstract class KeyInitializationResponse extends XMLObjectWrapper implements Ser
     
     public String element ()
       {
-        return "KeyOperationResponse";
+        return "KeyInitializationResponse";
       }
 
 

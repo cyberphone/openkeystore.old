@@ -28,7 +28,7 @@ import java.security.cert.X509Certificate;
 import org.webpki.asn1.cert.DistinguishedName;
 
 import org.webpki.crypto.SignatureAlgorithms;
-import org.webpki.crypto.ECCDomains;
+import org.webpki.crypto.ECDomains;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.KeyUsageBits;
 
@@ -113,9 +113,9 @@ public class CommandLineCA
             return SignatureAlgorithms.valueOf (getString ());
           }
 
-        ECCDomains getECCDomain () throws IOException
+        ECDomains getECCDomain () throws IOException
           {
-            return ECCDomains.valueOf (getString ());
+            return ECDomains.valueOf (getString ());
           }
 
         BigInteger getBigInteger () throws IOException
@@ -424,7 +424,7 @@ public class CommandLineCA
       {
         StringBuffer s = new StringBuffer ();
         boolean comma = false;
-        for (ECCDomains curve : ECCDomains.values ())
+        for (ECDomains curve : ECDomains.values ())
           {
             if (comma)
               {

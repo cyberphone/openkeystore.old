@@ -213,7 +213,7 @@ public interface KeyGen2Constants
 
     String RSA_ELEM                          = "RSA";
 
-    String ECC_ELEM                          = "ECC";
+    String EC_ELEM                           = "EC";
 
     String URL_ELEM                          = "URL";
 

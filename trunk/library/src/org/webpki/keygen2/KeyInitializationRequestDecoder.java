@@ -25,7 +25,7 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import org.webpki.crypto.VerifierInterface;
 import org.webpki.crypto.CertificateInfo;
-import org.webpki.crypto.ECCDomains;
+import org.webpki.crypto.ECDomains;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -278,20 +278,20 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
       }
 
 
-    public class ECC implements KeyAlgorithmData, Serializable
+    public class EC implements KeyAlgorithmData, Serializable
       {
 
         private static final long serialVersionUID = 1L;
 
-        ECCDomains named_curve;
+        ECDomains named_curve;
 
-        ECC (ECCDomains named_curve)
+        EC (ECDomains named_curve)
           {
             this.named_curve = named_curve;
           }
 
 
-        public ECCDomains getNamedCurve ()
+        public ECDomains getNamedCurve ()
           {
             return named_curve;
           }
@@ -373,8 +373,16 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
               }
             else
               {
-                rd.getNext (ECC_ELEM);
-                key_algorithm_data = new ECC (ECCDomains.getECCDomainFromOID (ah.getString (NAMED_CURVE_ATTR)));
+                rd.getNext (EC_ELEM);
+                String ec_uri = ah.getString (NAMED_CURVE_ATTR);
+                if (ec_uri.startsWith ("urn:oid:"))
+                  {
+                    key_algorithm_data = new EC (ECDomains.getECDomainFromOID (ec_uri.substring (8)));
+                  }
+                else
+                  {
+                    bad ("urn:oid: expected");
+                  }
               }
             if (rd.hasNext ())
               {

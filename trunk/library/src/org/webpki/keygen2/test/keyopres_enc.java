@@ -14,10 +14,12 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 
 import java.security.Signature;
 
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
 import java.security.interfaces.RSAKey;
@@ -52,44 +54,73 @@ public class keyopres_enc
 
 
     static class rsaKey implements AsymKeySignerInterface
+    {
+      PrivateKey priv_key;
+      PublicKey pub_key;
+
+      rsaKey (int size) throws Exception
+        {
+          KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
+          kpg.initialize (size);
+          KeyPair key_pair = kpg.generateKeyPair ();
+          priv_key = key_pair.getPrivate ();
+          pub_key = key_pair.getPublic ();
+        }
+
+      rsaKey (int size, int exponent) throws Exception
+        {
+          KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
+          kpg.initialize (new RSAKeyGenParameterSpec (size, BigInteger.valueOf (exponent)));
+          KeyPair key_pair = kpg.generateKeyPair ();
+          priv_key = key_pair.getPrivate ();
+          pub_key = key_pair.getPublic ();
+        }
+
+      public byte[] signData (byte[] data, SignatureAlgorithms sign_alg) throws IOException, GeneralSecurityException
+        {
+          Signature s = Signature.getInstance (sign_alg.getJCEName ());
+          s.initSign (priv_key);
+          s.update (data);
+          return s.sign ();
+        }
+
+      public PublicKey getPublicKey () throws IOException, GeneralSecurityException
       {
-        PrivateKey priv_key;
-        PublicKey pub_key;
-
-        rsaKey (int size) throws Exception
-          {
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
-            kpg.initialize (size);
-            KeyPair key_pair = kpg.generateKeyPair ();
-            priv_key = key_pair.getPrivate ();
-            pub_key = key_pair.getPublic ();
-          }
-
-        rsaKey (int size, int exponent) throws Exception
-          {
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
-            kpg.initialize (new RSAKeyGenParameterSpec (size, BigInteger.valueOf (exponent)));
-            KeyPair key_pair = kpg.generateKeyPair ();
-            priv_key = key_pair.getPrivate ();
-            pub_key = key_pair.getPublic ();
-          }
-
-        public byte[] signData (byte[] data, SignatureAlgorithms sign_alg) throws IOException, GeneralSecurityException
-          {
-            Signature s = Signature.getInstance (sign_alg.getJCEName ());
-            s.initSign (priv_key);
-            s.update (data);
-            return s.sign ();
-          }
-
-        public PublicKey getPublicKey () throws IOException, GeneralSecurityException
-          {
-            return pub_key;
-          }
-       
+        return pub_key;
+      }
       }
 
-    static PublicKey nonceGen(rsaKey k) throws Exception
+    static class ecKey implements AsymKeySignerInterface
+    {
+      PrivateKey priv_key;
+      PublicKey pub_key;
+
+      ecKey () throws Exception
+        {
+          KeyPairGenerator kpg = KeyPairGenerator.getInstance ("EC");
+          ECGenParameterSpec eccgen = new ECGenParameterSpec ("P-256");
+          kpg.initialize(eccgen);
+          KeyPair key_pair = kpg.generateKeyPair ();
+          priv_key = key_pair.getPrivate ();
+          pub_key = key_pair.getPublic ();
+        }
+
+      public byte[] signData (byte[] data, SignatureAlgorithms sign_alg) throws IOException, GeneralSecurityException
+        {
+          Signature s = Signature.getInstance (sign_alg.getJCEName ());
+          s.initSign (priv_key);
+          s.update (data);
+          return s.sign ();
+        }
+      public PublicKey getPublicKey () throws IOException, GeneralSecurityException
+      {
+        return pub_key;
+      }
+      
+    }
+
+     
+    static PublicKey nonceGen(PublicKey k) throws Exception
       {
         last_key = getKey ();
         byte[] nonce = KeyAttestationUtil.createKA1Nonce (last_key, Constants.SESSION_ID, Constants.REQUEST_ID);
@@ -100,21 +131,25 @@ public class keyopres_enc
         PrivateKey priv = (PrivateKey) ks.getKey (key_alias, signpassword.toCharArray ());
         cipher.init (Cipher.DECRYPT_MODE, priv);
         last_signature = cipher.doFinal (KeyAttestationUtil.createKA1Package ((RSAKey)priv,
-                                                                              k.getPublicKey (),
+                                                                              k,
                                                                               false,
                                                                               KeyGen2KeyUsage.AUTHENTICATION,
                                                                               nonce,
                                                                               null));
-        return k.getPublicKey ();
+        return k;
       }
 
     static PublicKey rsaAttestedKey (int size) throws Exception
-      {
-        return nonceGen (new rsaKey (size));
-      }
+    {
+      return nonceGen (new rsaKey (size).getPublicKey ());
+    }
+    static PublicKey ecAttestedKey () throws Exception
+    {
+      return nonceGen (new ecKey ().getPublicKey ());
+    }
     static PublicKey rsaAttestedKey (int size, int exponent) throws Exception
       {
-        return nonceGen (new rsaKey (size, exponent));
+        return nonceGen (new rsaKey (size, exponent).getPublicKey ());
       }
 
     static String getKey ()
@@ -127,6 +162,9 @@ public class keyopres_enc
       {
         if (args.length < 1 || args.length > 2 || (args.length == 2 && !args[1].equals ("-selfsigned"))) show ();
         Date client_time = DOMReaderHelper.parseDateTime (Constants.CLIENT_TIME).getTime ();
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
+
 
         KeyInitializationResponseEncoder kre = 
               new KeyInitializationResponseEncoder (Constants.SESSION_ID,
@@ -155,7 +193,7 @@ public class keyopres_enc
 
             kre.addAttestedKey (rsaAttestedKey (2048), last_signature, last_key, null);
 
-            kre.addAttestedKey (rsaAttestedKey (1024), last_signature, last_key, null);
+            kre.addAttestedKey (ecAttestedKey (), last_signature, last_key, null);
           }
 
         KeyStore ks = TPMKeyStore.getTPMKeyStore ();
