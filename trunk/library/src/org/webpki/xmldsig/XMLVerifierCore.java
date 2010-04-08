@@ -83,19 +83,13 @@ abstract class XMLVerifierCore
     void core_verify (XMLSignatureWrapper signature, PublicKey public_key) throws IOException, GeneralSecurityException
       {
         byte[] sign_cn = XPathCanonicalizer.serializeSubset (signature.signedinfo_object.element, signature.signedinfo_object.cn_alg);
+        boolean success;
         if (this instanceof XMLSymKeyVerifier)
           {
-            XMLSymKeyVerifier xmlsym = (XMLSymKeyVerifier) this;
-            if (xmlsym.optional_required_algorithm != null &&
-                xmlsym.optional_required_algorithm != signature.signedinfo_object.sym_signature_alg)
-              {
-                throw new IOException ("Wrong HMAC algorithm: " + signature.signedinfo_object.sym_signature_alg.getURI ());
-              }
-            byte[] hmac = signature.signedinfo_object.sym_signature_alg.digest (xmlsym.symmetric_key, sign_cn);
-            if (!ArrayUtil.compare (hmac, signature.signedinfo_object.signature_val))
-              {
-                throw new IOException ("Incorrect signature for element: " + signature.reference_object_1.element.getNodeName ());
-              }
+            success = ((XMLSymKeyVerifier) this).
+                              sym_verifier.verifyData (sign_cn,
+                                                       signature.signedinfo_object.signature_val,
+                                                       signature.signedinfo_object.sym_signature_alg);
           }
         else
           {
@@ -106,10 +100,11 @@ abstract class XMLVerifierCore
             verifier.initVerify (public_key);
             verifier.update (sign_cn);
     
-            if (!verifier.verify (signature.signedinfo_object.signature_val))
-              {
-                throw new IOException ("Incorrect signature for element: " + signature.reference_object_1.element.getNodeName ());
-              }
+            success = verifier.verify (signature.signedinfo_object.signature_val);
+          }
+        if (!success)
+          {
+            throw new IOException ("Incorrect signature for element: " + signature.reference_object_1.element.getNodeName ());
           }
       }
     

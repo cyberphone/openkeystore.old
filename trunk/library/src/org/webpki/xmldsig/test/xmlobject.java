@@ -24,6 +24,8 @@ import org.webpki.crypto.JKSCAVerifier;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
+import org.webpki.crypto.SymKeySignerInterface;
+import org.webpki.crypto.SymKeyVerifierInterface;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -39,6 +41,18 @@ import org.webpki.xmldsig.XMLAsymKeyVerifier;
 
 public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
   {
+    static byte[] symkey;
+
+    static 
+      {
+        try
+          {
+            symkey = new Base64 ().getBase64BinaryFromUnicode ("sBeVJTrHwIETmlgRlvswfSjnYD34V2PdiEQadrnG8ko=");
+          }
+        catch (Exception e)
+          {
+          }
+      }
 
     static class rsaKey implements AsymKeySignerInterface
       {
@@ -160,7 +174,6 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
 
     public static void main (String args[]) throws Exception
       {
-        byte[] symkey = new Base64 ().getBase64BinaryFromUnicode ("sBeVJTrHwIETmlgRlvswfSjnYD34V2PdiEQadrnG8ko=");
         if (args.length != 3 ||
             !(args[0].equals ("-rsa") || args[0].equals ("-x509") || args[0].equals ("-sym")) ||
             !(args[1].equals ("-sign") || args[1].equals ("-verify")))
@@ -190,7 +203,20 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
               }
             else
               {
-                XMLSymKeySigner xmls = new XMLSymKeySigner (symkey, MacAlgorithms.HMAC_SHA256);
+                XMLSymKeySigner xmls = new XMLSymKeySigner (new SymKeySignerInterface ()
+                  {
+
+                    public MacAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
+                      {
+                        return MacAlgorithms.HMAC_SHA256;
+                      }
+
+                    public byte[] signData (byte[] data) throws IOException, GeneralSecurityException
+                      {
+                        return MacAlgorithms.HMAC_SHA256.digest (symkey, data);
+                      }
+                    
+                  });
                 xmls.createEnvelopedSignature (o);
               }
             ArrayUtil.writeFile (args[2], o.writeXML ());
@@ -218,7 +244,17 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
               }
             else
               {
-                XMLSymKeyVerifier verifier = new XMLSymKeyVerifier (symkey, null);
+                XMLSymKeyVerifier verifier = new XMLSymKeyVerifier (new SymKeyVerifierInterface ()
+                  {
+                    public boolean verifyData (byte[] data, byte[] digest, MacAlgorithms algorithm) throws IOException, GeneralSecurityException
+                      {
+                        if (algorithm != MacAlgorithms.HMAC_SHA256)
+                          {
+                            throw new GeneralSecurityException ("Bad sym ALG");
+                          }
+                        return ArrayUtil.compare (digest, MacAlgorithms.HMAC_SHA256.digest (symkey, data));
+                      }
+                  });
                 verifier.validateEnvelopedSignature (o);
               }
           }

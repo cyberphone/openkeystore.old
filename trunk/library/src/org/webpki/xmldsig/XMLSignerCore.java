@@ -117,7 +117,7 @@ abstract class XMLSignerCore
         dsig_wrapper.KeyInfo_Reference_create = write_keyinfo_ref_flag;
         if (this instanceof XMLSymKeySigner)
           {
-            dsig_wrapper.signature_algorithm =  ((XMLSymKeySigner)this).hmac_algorithm.getURI ();
+            dsig_wrapper.signature_algorithm =  ((XMLSymKeySigner)this).sym_signer.getMacAlgorithm ().getURI ();
           }
         else
           {

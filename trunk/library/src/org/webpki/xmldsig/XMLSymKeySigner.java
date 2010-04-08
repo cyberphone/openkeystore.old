@@ -7,14 +7,12 @@ import java.security.PublicKey;
 
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.SymKeySignerInterface;
 
 
 public class XMLSymKeySigner extends XMLSignerCore
   {
-    byte[] symmetric_key;
-
-    MacAlgorithms hmac_algorithm;
-
+    SymKeySignerInterface sym_signer;
 
     PublicKey populateKeys (XMLSignatureWrapper r) throws GeneralSecurityException, IOException
       {
@@ -23,17 +21,16 @@ public class XMLSymKeySigner extends XMLSignerCore
 
     byte[] getSignatureBlob (byte[] data, SignatureAlgorithms sig_alg) throws GeneralSecurityException, IOException
       {
-        return hmac_algorithm.digest (symmetric_key, data);
+        return sym_signer.signData (data);
       }
 
 
     /**
      * Creates an XMLSymKeySigner.
      */
-    public XMLSymKeySigner (byte[] symmetric_key, MacAlgorithms hmac_algorithm)
+    public XMLSymKeySigner (SymKeySignerInterface sym_signer)
       {
-        this.symmetric_key = symmetric_key;
-        this.hmac_algorithm = hmac_algorithm;
+        this.sym_signer = sym_signer;
       }
 
   }

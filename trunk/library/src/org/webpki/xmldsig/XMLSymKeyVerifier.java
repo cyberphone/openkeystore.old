@@ -4,15 +4,12 @@ import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 
-import org.webpki.crypto.MacAlgorithms;
+import org.webpki.crypto.SymKeyVerifierInterface;
 
 
 public class XMLSymKeyVerifier extends XMLVerifierCore
   {
-    byte[] symmetric_key;
-
-    MacAlgorithms optional_required_algorithm;
-
+    SymKeyVerifierInterface sym_verifier;
 
     void verify (XMLSignatureWrapper signature) throws IOException, GeneralSecurityException
       {
@@ -27,10 +24,9 @@ public class XMLSymKeyVerifier extends XMLVerifierCore
       }
 
 
-    public XMLSymKeyVerifier (byte[] symmetric_key, MacAlgorithms optional_required_algorithm)
+    public XMLSymKeyVerifier (SymKeyVerifierInterface sym_verifier)
       {
-        this.symmetric_key = symmetric_key;
-        this.optional_required_algorithm = optional_required_algorithm;
+        this.sym_verifier = sym_verifier;
       }
 
   }

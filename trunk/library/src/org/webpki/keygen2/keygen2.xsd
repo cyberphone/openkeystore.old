@@ -143,8 +143,8 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- The following element holds an ephemeral key for creating
-                 an SKS "SessionKey" (shared session key) -->
+            <!-- "ServerEphemeralKey" holds a server-generated ephemeral key
+                 for creating an SKS "SessionKey" (shared session key). -->
             <xs:element name="ServerEphemeralKey">
                <xs:complexType>
                   <xs:sequence>
@@ -229,94 +229,61 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- The keys to be certified. -->
-            <xs:element ref="kgen:GeneratedPublicKey" maxOccurs="unbounded"/>
-
-            <!-- If preset PIN and PUK codes have been specified, the following
-                 element MUST also be emitted for for devices having dedicated
-                 encryption keys.  Note: using the KeyGen2 DIAS scheme, this
-                 element is redundant because the "EndorsementKey" is used for
-                 encryption of non-cryptographic data as well. -->
-            <xs:element name="DeviceEncryptionKey" minOccurs="0">
+            <!-- "ClientEphemeralKey" holds an SKS-generated ephemeral key
+                 for creating an SKS "SessionKey" (shared session key). -->
+            <xs:element name="ClientEphemeralKey">
                <xs:complexType>
                   <xs:sequence>
-                     <!-- A certificate path does not need to be ordered or
-                          complete but it MUST NOT contain any "holes". -->
-                     <xs:element ref="ds:X509Data"/>
+
+                     <!-- MUST contain an ECDH public key using the same
+                          elliptic curve as "ServerEphemeralKey". -->
+                     <xs:element ref="ds11:ECKeyValue"/>
+
                   </xs:sequence>
                </xs:complexType>
             </xs:element>
 
-            <!-- If Subject "KeyAttestation" attributes have been specified,
-                 the following element MUST also be emitted for attestation
-                 algorithms having dedicated key-certifying keys.  Note:
-                 using the KeyGen2 DIAS scheme, this element is redundant
-                 because the "EndorsementKey" is used for key-attestations
-                 as well. -->
-            <xs:element name="DeviceKeyAttestationKey" minOccurs="0">
+            <!-- "DeviceCertificate" holds the SKS device certificate. -->
+            <xs:element name="DeviceCertificate">
                <xs:complexType>
                   <xs:sequence>
-                     <!-- A certificate path does not need to be ordered or
-                          complete but it MUST NOT contain any "holes". -->
+
+                     <!-- MUST contain a valid X509 certificate path[1..n] -->
                      <xs:element ref="ds:X509Data"/>
-                  </xs:sequence>
-               </xs:complexType>
-            </xs:element>
-
-            <!-- In case the requested information would include data that could
-                 affect personal integrity (like a machine ID), the client software
-                 MAY warn the user, and offer an option to decline. -->
-            <xs:element name="EndorsementKey">
-               <xs:complexType>
-                  <xs:sequence>
-
-                     <!-- If the TPM container endorsement key is requested (and
-                          is available) an enveloped signature over the entire
-                          response object MUST be emitted. -->
-                     <xs:element ref="ds:Signature"/>
 
                   </xs:sequence>
-
-                  <!-- If Subject "KeyAttestation" attributes have been specified,
-                       the actual attestation algorithm/method needs to be known in
-                       order to facilitate attestation signature blob processing.
-                       Conforming KeyGen2 clients MUST as a minimum support the
-                       "http://xmlns.webpki.org/keygen2/1.0#algorithm.key-attestation-1"
-                       key attestation algorithm which is also the default.
-                       See "PlatformNegotiationRequest"  -->
-                  <xs:attribute name="KeyAttestationAlgorithm" type="xs:anyURI" use="optional"/>
-
                </xs:complexType>
             </xs:element>
 
             <!-- See "ServerCookie" definition. -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
-         </xs:sequence>
+            <!-- MUST hold an enveloped XML symmetric-key signature created
+                 by the SKS "signProvisioningSessionData" method and use "ID"
+                 as the "Reference" URI attribute. -->
+            <xs:element ref="ds:Signature"/>
 
-         <!-- MUST be equal to "PlatformNegotiationResponse/@ID"
-              within a specific session. -->
+         </xs:sequence> 
+
+         <!-- "ID" holds the SKS-generated ClientSessionID. -->
          <xs:attribute name="ID" type="xs:ID" use="required"/>
 
-         <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
-              within a specific session. -->
+         <!-- MUST be equal to "ProvisioningSessionRequest/@ID". -->
          <xs:attribute name="ServerSessionID" type="xs:string" use="required"/>
 
-         <!-- Copy of "KeyOperationRequest/@ServerTime". -->
+         <!-- Copy of "ProvisioningSessionRequest/@ServerTime". -->
          <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
 
-         <!-- Copy of "KeyOperationRequest/@SubmitURL". -->
-         <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
-
-         <!-- The http URL that invoked the key operation request. -->
-         <xs:attribute name="RequestURL" type="kgen:httpURI" use="required"/>
-
-         <!-- The client's local clock is a mandatory item. -->
+         <!-- The provisioning client's local clock is a mandatory item. -->
          <xs:attribute name="ClientTime" type="xs:dateTime" use="required"/>
+
+         <!-- The "SessionAttestation" attribute holds the output from
+              the SKS "createProvisioningSession" method. -->
+         <xs:attribute name="SessionAttestation" type="xs:base64Binary" use="required"/>
 
          <!-- The "ServerCertificateFingerprint" attribute MUST be populated with
               the SHA256 hash of the associated server certificate if the
-              KeyOperationRequest was invoked over HTTPS. -->
+              "ProvisioningSessionResponse" was invoked over HTTPS. -->
          <xs:attribute name="ServerCertificateFingerprint" type="xs:base64Binary" use="optional"/>
 
       </xs:complexType>
