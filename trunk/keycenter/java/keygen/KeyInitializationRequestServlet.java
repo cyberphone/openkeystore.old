@@ -21,7 +21,7 @@ import org.webpki.keygen2.KeyGen2KeyUsage;
 import org.webpki.keygen2.PassphraseFormats;
 import org.webpki.keygen2.PINGrouping;
 import org.webpki.keygen2.PatternRestrictions;
-import org.webpki.crypto.ECCDomains;
+import org.webpki.crypto.ECDomains;
 
 
 @SuppressWarnings("serial")
@@ -99,7 +99,7 @@ public class KeyInitializationRequestServlet extends KeyGenServlet
 
         key_creator.create (KeyGen2KeyUsage.AUTHENTICATION, 2048);//        key_creator.create (KeyGen2KeyUsage.AUTHENTICATION, new KeyInitializationRequestEncoder.KeyAlgorithmData.ECC (ECCDomains.P_256));
 
-        key_creator.create (KeyGen2KeyUsage.PIGGYBACKED_SYMMETRIC_KEY, 1024);
+        key_creator.create (KeyGen2KeyUsage.SYMMETRIC_KEY, 1024);
 
         KeyInitializationRequestEncoder.ManageObject kmc = encoder.createManageObject ();
         kmc.deleteKeysByContent ().setEmailAddress (getEmailAddress (request));

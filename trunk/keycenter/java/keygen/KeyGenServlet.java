@@ -199,7 +199,7 @@ public abstract class KeyGenServlet extends ProtectedServlet
         for (KeyInitializationResponseDecoder.GeneratedPublicKey key : prov_state.key_op_res_dec.getGeneratedPublicKeys ())
           {
             KeyInitializationRequestEncoder.KeyProperties key_prop = prov_state.get (key.getID ());
-            boolean otp = key_prop.getKeyUsage () == KeyGen2KeyUsage.PIGGYBACKED_SYMMETRIC_KEY;
+            boolean otp = key_prop.getKeyUsage () == KeyGen2KeyUsage.SYMMETRIC_KEY;
             boolean auth = key_prop.getKeyUsage () == KeyGen2KeyUsage.AUTHENTICATION;
             CertSpec cert_spec = new CertSpec ();
             if (!otp)
