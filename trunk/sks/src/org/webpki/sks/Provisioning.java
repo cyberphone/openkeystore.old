@@ -270,7 +270,7 @@ public class Provisioning
           }
         debugOutput ((key_alg instanceof KeyInitializationRequestDecoder.RSA ?
                  "RSA keypair with size " + ((KeyInitializationRequestDecoder.RSA)key_alg).getKeySize () :
-                 "ECC keypair with curve "+ ((KeyInitializationRequestDecoder.ECC)key_alg).getNamedCurve ().getOID ()) +
+                 "ECC keypair with curve "+ ((KeyInitializationRequestDecoder.EC)key_alg).getNamedCurve ().getOID ()) +
                     " and KEY_ID=" + key_id + " created" +
                      (archival_key == null ? "" : " with archival option"));
         if (pin_blob != null)
@@ -695,7 +695,7 @@ public class Provisioning
               {
                 throw new IOException ("Missing key: " + cred.getID ());
               }
-            if ((pk.key_usage == KeyGen2KeyUsage.PIGGYBACKED_SYMMETRIC_KEY) != cred.hasSymmetricKey ())
+            if ((pk.key_usage == KeyGen2KeyUsage.SYMMETRIC_KEY) != cred.hasSymmetricKey ())
               {
                 throw new IOException ("Wrong usage of " + pk.key_usage.toString () + " with resp. to piggy-back-symmetric key: " + cred.getID ());
               }
