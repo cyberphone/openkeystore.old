@@ -91,17 +91,17 @@
 
   <context-param>
 	<param-name>mailserver</param-name>
-	<param-value>mail1.telia.com</param-value>
+	<param-value>@mail.server@</param-value>
   </context-param>
 
   <context-param>
 	<param-name>mailuid</param-name>
-	<param-value>u18116613</param-value>
+	<param-value>@mail.user@</param-value>
   </context-param>
 
   <context-param>
 	<param-name>mailpwd</param-name>
-	<param-value>Bjj3EqEG</param-value>
+	<param-value>@mail.pwd@</param-value>
   </context-param>
 
   <context-param>
