@@ -11,6 +11,8 @@
   <property name="doc_dir"  value="../doc" />
   <property name="debug"  value="on"/>
   <property environment="env"/>
+  <property name="secret.file" location="../../non-public/mysys.prop"/>
+  <property file="${secret.file}"/>
   <condition property="java_root_set">
     <isset property="env.JAVA_HOME"/>
   </condition>
@@ -59,7 +61,7 @@
 		    <exclude name="org/webpki/io/**"/>
 		</fileset>
 	</jar>
-	<signjar jar="${dist_dir}/${phone_sks}" alias="jcesign" storepass="foo123" keypass="foo123" keystore="../../non-public/jce-certificates/signer-pw-foo123.jks"/>
+	<signjar jar="${dist_dir}/${phone_sks}" alias="jcesign" storepass="${sign.pwd}" keypass="${sign.pwd}" keystore="${sign.cert}"/>
     <jar jarfile="${dist_dir}/${sks_dbemulator}">
       <fileset dir="${temp_dir}">
           <include name="org/webpki/sks/dbemulator/**"/>
@@ -104,9 +106,9 @@
   
   <target name="clean">
 	    <delete dir="${temp_dir}"/>
-	    <delete file="${dist_dir}/${phone_sks}"/>
-        <delete file="${dist_dir}/${sks_dbemulator}"/>
-        <delete file="${dist_dir}/${sks_hwdevice}"/>
+	    <delete file="${dist_dir}/${phone_sks}" failonerror="false"/>
+        <delete file="${dist_dir}/${sks_dbemulator}" failonerror="false"/>
+        <delete file="${dist_dir}/${sks_hwdevice}" failonerror="false"/>
   </target>
 	
   <target name="dist" depends="clean,compile"/>
