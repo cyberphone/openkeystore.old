@@ -22,6 +22,11 @@ public class DemoKeyStore
         return new DemoKeyStore ().getKeyStore ("marion.ks");
       }
 
+    public static KeyStore getECDSAStore () throws IOException
+      {
+        return new DemoKeyStore ().getKeyStore ("ecdsa.jks");
+      }
+
     public static KeyStore getExampleDotComKeyStore () throws IOException
       {
         return new DemoKeyStore ().getKeyStore ("example.ks");

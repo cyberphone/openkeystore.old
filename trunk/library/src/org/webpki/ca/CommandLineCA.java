@@ -13,6 +13,7 @@ import java.util.TimeZone;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.Signature;
 import java.security.PublicKey;
 import java.security.KeyPair;
@@ -982,6 +983,7 @@ public class CommandLineCA
       {
         try
           {
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             CommandLineCA clca = new CommandLineCA ();
             clca.decodeCommandLine (argv);
             clca.certify ();
