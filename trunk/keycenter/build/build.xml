@@ -116,6 +116,7 @@
   </target>
 	
   <target name="tomcatupdate">
+    <copy file="${resources_dir}/third-party-jars/mysql-connector-java-5.1.6-bin.jar" todir="${env.CATALINA_HOME}/lib"  preservelastmodified="true"/>
   </target>
   
   <target name="_internal_deploy" depends="clean,doc">
@@ -144,7 +145,6 @@
               <exclude name="**/localservices/*"/>
           </fileset>
         <lib file="${resources_dir}/third-party-jars/xercesImpl.jar"/>
-        <lib file="${resources_dir}/third-party-jars/mysql-connector-java-5.1.6-bin.jar"/>
         <lib file="${resources_dir}/third-party-jars/mail.jar"/>
         <lib file="${library_dir}/dist/webpki.org-libext-1.00.jar"/>
         <lib file="${library_dir}/dist/webpki.org-webutil-1.00.jar"/>
