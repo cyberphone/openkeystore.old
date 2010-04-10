@@ -3,7 +3,10 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.security.interfaces.ECPublicKey;
+import java.util.Date;
 
+import org.webpki.xml.ServerCookie;
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
@@ -19,10 +22,25 @@ abstract class ProvisioningSessionResponse extends XMLObjectWrapper implements S
 
     ProvisioningSessionResponse () {}
 
+    String server_session_id;
+    
+    String client_session_id;
+
+    Date server_time;
+    
+    Date client_time;
+    
+    ECPublicKey client_ephemeral_key;
+
+    int session_life_time;
+
+    int session_key_limit;
+
+    ServerCookie server_cookie;
+
     public void init () throws IOException
       {
         addWrapper (XMLSignatureWrapper.class);
-        addSchema (REDUCED_XML_ENC_SCHEMA_FILE);
         addSchema (KEYGEN2_SCHEMA_FILE);
       }
 
@@ -41,7 +59,7 @@ abstract class ProvisioningSessionResponse extends XMLObjectWrapper implements S
     
     public String element ()
       {
-        return "KeyOperationResponse";
+        return "ProvisioningSessionResponse";
       }
 
 

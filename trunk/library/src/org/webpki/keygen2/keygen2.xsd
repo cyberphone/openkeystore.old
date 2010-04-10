@@ -30,15 +30,12 @@
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:xenc="http://www.w3.org/2001/04/xmlenc#"
            xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20100402#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
 
    <xs:import namespace="http://www.w3.org/2009/xmldsig11#"/>
-
-   <xs:import namespace="http://www.w3.org/2001/04/xmlenc#"/>
 
    <!--==========================================================================================
                    The primary (top-level) platform negotiation request object

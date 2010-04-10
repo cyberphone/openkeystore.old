@@ -95,8 +95,10 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
         submit_url = ah.getString (SUBMIT_URL_ATTR);
 
         rd.getChild ();
-        
+// TODO
+/*
         rd.getNext (ISSUER_KEY_EXCHANGE_KEY_ELEM);
+*/
         rd.getChild ();
         rd.getNext (XMLSignatureWrapper.KEY_INFO_ELEM);
         if (ah.getStringConditional (ID_ATTR) != null)

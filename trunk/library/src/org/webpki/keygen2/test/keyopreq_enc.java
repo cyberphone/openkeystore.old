@@ -42,7 +42,7 @@ public class keyopreq_enc
                                                            Constants.REQUEST_ID,
                                                            "https://ca.example.com/keygenres",
                                                            server_time);
-
+        /* 
  //      kre.setAES256Mode (true);
 
        KeyInitializationRequestEncoder.PUKPolicy puk = kre.createPUKPolicy ("123456", PassphraseFormats.NUMERIC, 3, true);
@@ -125,7 +125,7 @@ public class keyopreq_enc
         signer2.setKey (null, DemoKeyStore.getSignerPassword ());
         kmc.signManageObject (signer2);
 //        kre.setOutputEncryptionCertificate (true);
-/*                                                           
+                                                          
         SignerInterface signer3 = new JKSSignCertStore (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer3.setKey (null, DemoKeyStore.getSignerPassword ());
         kre.signRequest (signer3);

@@ -10,21 +10,14 @@ import java.util.Date;
 import java.util.TreeMap;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import java.security.cert.X509Certificate;
 
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.DOMReaderHelper;
-import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSigner;
-import org.webpki.xmldsig.XMLEnvelopedInput;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import org.webpki.crypto.SignerInterface;
-import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.ECDomains;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -38,28 +31,16 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
       {
         private static final long serialVersionUID = 1L;
 
-        String value;
+        byte[] value;
 
-        byte[] encrypted_value;
-
-        String name;
-
-        PresetValue (String value) throws IOException
+        PresetValue (byte[] value) throws IOException
           {
             this.value = value;
-            name = "Value." + next_personal_code++;
-            preset_values.add (this);
           }
-
-        boolean hidden;
 
         void write (DOMWriterHelper wr) throws IOException
           {
-            if (hidden)
-              {
-                wr.setBooleanAttribute (HIDDEN_ATTR, hidden);
-              }
-            wr.setStringAttribute (VALUE_REFERENCE_ID_ATTR, name);
+            wr.setBinaryAttribute (VALUE_ATTR, value);
           }
       }
 
@@ -70,10 +51,9 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
 
         boolean user_modifiable;
 
-        PresetPIN (String value, boolean hidden, boolean user_modifiable) throws IOException
+        PresetPIN (byte[] value, boolean user_modifiable) throws IOException
           {
             super (value);
-            this.hidden = hidden;
             this.user_modifiable = user_modifiable;
           }
 
@@ -98,10 +78,9 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
 
         int retry_limit;
 
-        PUKPolicy (String value, PassphraseFormats format, int retry_limit, boolean hidden) throws IOException
+        PUKPolicy (byte[] value, PassphraseFormats format, int retry_limit) throws IOException
           {
             super (value);
-            super.hidden = hidden;
             this.format = format;
             this.retry_limit = retry_limit;
           }
@@ -124,7 +103,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
 
         boolean not_first;
 
-        String preset_test;
+        byte[] preset_test;
 
         // Actual data
 
@@ -301,484 +280,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
 
       }
 
-
-    private abstract class ManageObjectOperation implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        X509Certificate certificate;
-
-        KeyInitializationRequestEncoder key_gen_req_enc;
-
-        abstract void write (DOMWriterHelper wr) throws IOException;
-
-        void writeCert (DOMWriterHelper wr) throws IOException
-          {
-            wr.setBinaryAttribute (CERTIFICATE_SHA1_ATTR, CertificateUtil.getCertificateSHA1 (certificate));
-          }
-
-        ManageObjectOperation (X509Certificate certificate)
-          {
-            this.certificate = certificate;
-          }
-      }
-
-
-    private class DeleteKey extends ManageObjectOperation implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        boolean conditional;
-
-        void write (DOMWriterHelper wr) throws IOException
-          {
-            wr.addChildElement (DELETE_KEY_ELEM);
-            if (conditional)
-              {
-                wr.setBooleanAttribute (CONDITIONAL_ATTR, conditional);
-              }
-            writeCert (wr);
-            wr.getParent ();
-          }
-
-        DeleteKey (X509Certificate certificate, boolean conditional)
-          {
-            super (certificate);
-            this.conditional = conditional;
-          }
-      }
-
-
-    public class DeleteKeysByContent extends ManageObjectOperation implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        String subject;
-
-        BigInteger serial;
-
-        String email_address;
-
-        String policy;
-
-        Date issued_before;
-
-        Date issued_after;
-
-        String[] excluded_policies;
-
-        void write (DOMWriterHelper wr) throws IOException
-          {
-            wr.addChildElement (DELETE_KEYS_BY_CONTENT_ELEM);
-            if (subject == null && serial == null && email_address == null &&
-                policy == null && issued_before == null && issued_after == null &&
-                excluded_policies == null)
-              {
-                bad ("At least one element must be defined for \"DeleteKeysByContent\"");
-              }
-
-            if (subject != null)
-              {
-                wr.setStringAttribute (SUBJECT_ATTR, subject);
-              }
-
-            if (serial != null)
-              {
-                wr.setBigIntegerAttribute (SERIAL_ATTR, serial);
-              }
-
-            if (email_address != null)
-              {
-                wr.setStringAttribute (EMAIL_ATTR, email_address);
-              }
-
-            if (policy != null)
-              {
-                wr.setStringAttribute (POLICY_ATTR, policy);
-              }
-
-            if (issued_before != null)
-              {
-                wr.setDateTimeAttribute (ISSUED_BEFORE_ATTR, issued_before);
-              }
-
-            if (issued_after != null)
-              {
-                wr.setDateTimeAttribute (ISSUED_AFTER_ATTR, issued_after);
-              }
-
-            if (excluded_policies != null)
-              {
-                wr.setListAttribute (EXCLUDED_POLICIES_ATTR, excluded_policies);
-              }
-
-            wr.getParent ();
-          }
-
-        DeleteKeysByContent ()
-          {
-            super (null);
-          }
-
-
-        public DeleteKeysByContent setSubject (String subject)
-          {
-            this.subject = subject;
-            return this;
-          }
-
-
-        public DeleteKeysByContent setSerial (BigInteger serial)
-          {
-            this.serial = serial;
-            return this;
-          }
-
-
-        public DeleteKeysByContent setEmailAddress (String address)
-          {
-            this.email_address = address;
-            return this;
-          }
-
-
-        public DeleteKeysByContent setPolicy (String policy)
-          {
-            this.policy = policy;
-            return this;
-          }
-
-
-        public DeleteKeysByContent setExcludedPolicies (String[] policies)
-          {
-            this.excluded_policies = policies;
-            return this;
-          }
-
-
-        public DeleteKeysByContent setIssuedBeforeDate (Date date)
-          {
-            this.issued_before = date;
-            return this;
-          }
-
-
-        public DeleteKeysByContent setIssuedAfterDate (Date date)
-          {
-            this.issued_after = date;
-            return this;
-          }
-
-      }
-
-
-    private class CloneKey extends ManageObjectOperation implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        KeyProperties requested_key;
-
-        void write (DOMWriterHelper wr) throws IOException
-          {
-            wr.addChildElement (CLONE_KEY_ELEM);
-            writeCert (wr);
-            requested_key.writeRequest (wr);
-            wr.getParent ();
-          }
-
-        CloneKey (X509Certificate certificate, KeyGen2KeyUsage key_usage, KeyAlgorithmData key_alg_data) throws IOException
-          {
-            super (certificate);
-            requested_key = new KeyProperties (key_usage, key_alg_data, null, null, null, false);
-          }
-      }
-
-
-    private class ReplaceKey extends ManageObjectOperation implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        KeyProperties requested_key;
-
-        void write (DOMWriterHelper wr) throws IOException
-          {
-            wr.addChildElement (REPLACE_KEY_ELEM);
-            writeCert (wr);
-            requested_key.writeRequest (wr);
-            wr.getParent ();
-          }
-
-        ReplaceKey (X509Certificate certificate, KeyGen2KeyUsage key_usage, KeyAlgorithmData key_alg_data) throws IOException
-          {
-            super (certificate);
-            requested_key = new KeyProperties (key_usage, key_alg_data, null, null, null, false);
-          }
-      }
-
-
-    private class UpdatePINPolicy extends ManageObjectOperation implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        PINPolicy pin_policy;
-
-        boolean force_new_pin;
-
-        void write (DOMWriterHelper wr) throws IOException
-          {
-            wr.addChildElement (UPDATE_PIN_POLICY_ELEM);
-            writeCert (wr);
-            pin_policy.writePolicy (wr);
-            if (force_new_pin)
-              {
-                wr.setBooleanAttribute (FORCE_NEW_PIN_ATTR, force_new_pin);
-              }
-            wr.getParent ();
-          }
-
-        UpdatePINPolicy (X509Certificate certificate, PINPolicy pin_policy, boolean force_new_pin) throws IOException
-          {
-            super (certificate);
-            this.pin_policy = pin_policy;
-            this.force_new_pin = force_new_pin;
-          }
-      }
-
-
-    private class UpdatePUKPolicy extends ManageObjectOperation implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        PUKPolicy puk_policy;
-
-        void write (DOMWriterHelper wr) throws IOException
-          {
-            wr.addChildElement (UPDATE_PUK_POLICY_ELEM);
-            writeCert (wr);
-            puk_policy.writePolicy (wr);
-            wr.getParent ();
-          }
-
-        UpdatePUKPolicy (X509Certificate certificate, PUKPolicy puk_policy) throws IOException
-          {
-            super (certificate);
-            this.puk_policy = puk_policy;
-          }
-      }
-
-
-    private class UpdatePresetPIN extends ManageObjectOperation implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        PresetPIN preset_pin;
-
-        void write (DOMWriterHelper wr) throws IOException
-          {
-            wr.addChildElement (UPDATE_PRESET_PIN_ELEM);
-            writeCert (wr);
-            preset_pin.writePINValue (wr);
-            wr.getParent ();
-          }
-
-        UpdatePresetPIN (X509Certificate certificate, PresetPIN preset_pin) throws IOException
-          {
-            super (certificate);
-            this.preset_pin = preset_pin;
-          }
-      }
-
-
-    public class ManageObject implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        String id;
-
-        Vector<ManageObjectOperation> manage_objects = new Vector<ManageObjectOperation> ();
-
-        KeyInitializationRequestEncoder key_gen_req_enc;
-
-        boolean signed;
-
-        OutputManageObject omo = new OutputManageObject ();
-
-        private class OutputManageObject extends XMLObjectWrapper implements XMLEnvelopedInput, Serializable
-          {
-            private static final long serialVersionUID = 1L;
-
-            public String getReferenceURI ()
-              {
-                return id; 
-              }
-
-
-            public Element getInsertElem ()
-              {
-                return null;
-              }
-
-
-            public XMLSignatureWrapper getSignature ()
-              {
-                return null;
-              }
-
-
-            protected void toXML (DOMWriterHelper wr) throws IOException
-              {
-                wr.initializeRootObject (prefix);
-
-                wr.setStringAttribute (ID_ATTR, id);
-                wr.setBinaryAttribute (NONCE_ATTR, getSessionHash ());
-
-                for (ManageObjectOperation kmo : manage_objects)
-                  {
-                    kmo.write (wr);
-                  }
-              }
-
-
-            public void init () throws IOException
-              {
-              }
-
-
-            public Document getEnvelopeRoot () throws IOException
-              {
-                return getRootDocument ();
-              }
-
-
-            public Element getTargetElem () throws IOException
-              {
-                return null;
-              }
-
-
-            protected boolean hasQualifiedElements ()
-              {
-                return true;
-              }
-
-
-            public String namespace ()
-              {
-                return KEYGEN2_NS;
-              }
-
-    
-            public String element ()
-              {
-                return MANAGE_OBJECT_ELEM;
-              }
-
-
-            protected void fromXML (DOMReaderHelper helper) throws IOException
-              {
-                bad ("Should have been implemented in derived class");
-              }
-
-           }
-
-
-        private XMLObjectWrapper getOutputManageObect ()
-          {
-            return omo;
-          }
-
-
-        private ManageObject () {}
-
-
-        public void signManageObject (SignerInterface signer_interface) throws IOException
-          {
-            if (signed)
-              {
-                bad ("ManageObject is already signed!");
-              }
-            if (manage_objects.isEmpty ())
-              {
-                bad ("Empty ManageObject!");
-              }
-            omo.forcedDOMRewrite ();
-            XMLSigner signer = new XMLSigner (signer_interface);
-            signer.removeXMLSignatureNS ();
-            signer.createEnvelopedSignature (omo);
-            omo.getRootElement ().removeAttributeNS ("http://www.w3.org/2000/xmlns/", prefix == null ? "xmlns" : prefix);
-            signed = true;
-          }
-
-
-        private void addKMOp (ManageObjectOperation kmo) throws IOException
-          {
-            kmo.key_gen_req_enc = key_gen_req_enc;
-            if (signed)
-              {
-                bad ("You cannot add key management operations after signing!");
-              }
-            manage_objects.add (kmo);
-          }
-
-
-        public void deleteKey (X509Certificate certificate, boolean conditional) throws IOException
-          {
-            addKMOp (new DeleteKey (certificate, conditional));
-          }
-
-
-        public KeyProperties cloneKey (X509Certificate certificate,
-                                       KeyGen2KeyUsage key_usage,
-                                       KeyAlgorithmData key_alg_data) throws IOException
-          {
-            CloneKey ck = new CloneKey (certificate, key_usage, key_alg_data);
-            addKMOp (ck);
-            return ck.requested_key;
-          }
-
-
-        public KeyProperties replaceKey (X509Certificate certificate,
-                                         KeyGen2KeyUsage key_usage,
-                                         KeyAlgorithmData key_alg_data) throws IOException
-          {
-            ReplaceKey rk = new ReplaceKey (certificate, key_usage, key_alg_data);
-            addKMOp (rk);
-            return rk.requested_key;
-          }
-
-
-        public DeleteKeysByContent deleteKeysByContent () throws IOException
-          {
-            DeleteKeysByContent dkbc = new DeleteKeysByContent ();
-            addKMOp (dkbc);
-            return dkbc;
-          }
-
-
-        public void updatePINPolicy (X509Certificate certificate,
-                                    PINPolicy pin_policy,
-                                    boolean force_new_pin) throws IOException
-          {
-            addKMOp (new UpdatePINPolicy (certificate, pin_policy, force_new_pin));
-          }
-
-
-        public void updatePUKPolicy (X509Certificate certificate,
-                                     PUKPolicy puk_policy) throws IOException
-          {
-            addKMOp (new UpdatePUKPolicy (certificate, puk_policy));
-          }
-
-
-        public void updatePresetPIN (X509Certificate certificate,
-                                     String pin_value, boolean hidden, boolean user_modifiable) throws IOException
-          {
-            addKMOp (new UpdatePresetPIN (certificate, new PresetPIN (pin_value, hidden, user_modifiable)));
-          }
-
-      }
-
-
+ 
     public class KeyProperties implements Serializable
       {
         private static final long serialVersionUID = 1L;
@@ -807,17 +309,6 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
             return key_usage;
           }
 
-
-        X509Certificate archival_key;
-
-        public void setPrivateKeyArchivalKey (X509Certificate archival_key) throws IOException
-          {
-            this.archival_key = archival_key;
-            if (key_usage != KeyGen2KeyUsage.ENCRYPTION)
-              {
-                bad ("Key archival is only permitted for encryption keys!");
-              }
-          }
 
 
         KeyAlgorithmData key_alg_data;
@@ -850,12 +341,10 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
                   {
                     if (pin_policy.group == PINGrouping.SHARED &&
                         ((pin_policy.preset_test == null && preset_pin != null) ||
-                         (pin_policy.preset_test != null && preset_pin == null) ||
-                         (pin_policy.preset_test != null && preset_pin != null &&
-                             !preset_pin.value.equals (pin_policy.preset_test))))
+                         (pin_policy.preset_test != null && preset_pin == null)))
                       {
                         bad ("\"shared\" PIN keys must either have no \"preset_pin\" " +
-                             "value or the same value for each requested key");
+                             "value or all be preset");
                       }
                   }
                 else
@@ -888,13 +377,6 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
 
             key_alg_data.writeKeyAlgorithmData (wr);
 
-            if (archival_key != null)
-              {
-                wr.addChildElement (PRIVATE_KEY_ARCHIVAL_KEY_ELEM);
-                XMLSignatureWrapper.writeX509DataSubset (wr, new X509Certificate[]{archival_key});
-                wr.getParent ();
-              }
-
             wr.getParent ();
 
             if (device_pin_protected || preset_pin != null)
@@ -925,8 +407,6 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
     String prefix;  // Default: no prefix
 
     TreeMap<String,KeyInitializationRequestEncoder.KeyProperties> requested_keys = new TreeMap<String,KeyInitializationRequestEncoder.KeyProperties> ();
-
-    Vector<ManageObject> manage_objects = new Vector<ManageObject> ();
 
     Vector<PresetValue> preset_values = new Vector<PresetValue> ();
 
@@ -979,12 +459,12 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
       }
 
 
-    public PUKPolicy createPUKPolicy (String value,
+    public PUKPolicy createPUKPolicy (byte[] value,
                                       PassphraseFormats format,
                                       int retry_limit,
                                       boolean hidden) throws IOException
       {
-        return new PUKPolicy (value, format, retry_limit, hidden);
+        return new PUKPolicy (value, format, retry_limit);
       }
 
 
@@ -1015,13 +495,13 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
                                                  KeyAlgorithmData key_alg_data,
                                                  PINPolicy pin_policy,
                                                  PUKPolicy puk_policy,
-                                                 String pin_value, boolean hidden, boolean user_modifiable) throws IOException
+                                                 byte[] pin_value, boolean hidden, boolean user_modifiable) throws IOException
       {
         if (pin_policy == null)
           {
             bad ("PresetPIN without PINPolicy is not allowed");
           }
-        return addKeyProperties (key_usage, key_alg_data, pin_policy, puk_policy, new PresetPIN (pin_value, hidden, user_modifiable), false);
+        return addKeyProperties (key_usage, key_alg_data, pin_policy, puk_policy, new PresetPIN (pin_value, user_modifiable), false);
       }
 
 
@@ -1038,17 +518,6 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
                                                       KeyAlgorithmData key_alg_data) throws IOException
       {
         return addKeyProperties (key_usage, key_alg_data, null, null, null, true);
-      }
-
-
-    public ManageObject createManageObject ()
-      {
-        need_signature_ns = true;
-        ManageObject kmc = new  ManageObject ();
-        kmc.key_gen_req_enc = this;
-        kmc.id = key_man_prefix + ++next_key_man_suffix;
-        manage_objects.add (kmc);
-        return kmc;
       }
 
 
@@ -1099,11 +568,6 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
         if (deferred_certification)
           {
             wr.setBooleanAttribute (DEFERRED_CERTIFICATION_ATTR, deferred_certification);
-          }
-
-        if (manage_objects.isEmpty () && requested_keys.isEmpty ())
-          {
-            bad ("Empty request not allowed!");
           }
 
         ////////////////////////////////////////////////////////////////////////
@@ -1171,17 +635,6 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
             wr.getParent ();
           }
 
-        ////////////////////////////////////////////////////////////////////////
-        // Key management operations are in this implementation output lastly
-        ////////////////////////////////////////////////////////////////////////
-        for (ManageObject kmc : manage_objects)
-          {
-            if (!kmc.signed)
-              {
-                bad ("ManageObject wasn't signed!");
-              }
-            wr.addWrapped (kmc.getOutputManageObect ());
-          }
 
         ////////////////////////////////////////////////////////////////////////
         // Optional ServerCookie

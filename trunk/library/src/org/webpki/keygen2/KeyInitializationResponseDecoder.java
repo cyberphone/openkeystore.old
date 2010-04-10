@@ -257,6 +257,8 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse 
                       {
                         throw new GeneralSecurityException ("Missing attestation on key");
                       }
+// TODO
+/*
                     byte[] nonce = KeyAttestationUtil.createKA1Nonce (gk.id,
                                                                       client_session_id,
                                                                       server_session_id);
@@ -267,6 +269,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse 
                                                            rk.key_usage,
                                                            nonce,
                                                            rk.archival_key == null ? null : rk.archival_key.getPublicKey ());
+*/
                   }
               }
             catch (GeneralSecurityException gse)
@@ -295,8 +298,6 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse 
         server_time = ah.getDateTime (SERVER_TIME_ATTR);
 
         submit_url = ah.getString (SUBMIT_URL_ATTR);
-
-        request_url = ah.getString (REQUEST_URL_ATTR);
 
         client_time = ah.getDateTime (CLIENT_TIME_ATTR);
 
@@ -334,19 +335,22 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse 
             if (rd.hasNext ())
               {
                 gk.archival_data = new KeyArchivalData ();
-                rd.getNext (ENCRYPTED_PRIVATE_KEY_ELEM);
+                rd.getNext (PRIVATE_KEY_ELEM);
                 rd.getChild ();
 
+/*
                 rd.getNext (ENCRYPTED_KEY_ELEM);
                 rd.getChild ();
                 gk.archival_data.encryption_algorithm =
                    (SymEncryptionAlgorithms)XMLEncUtil.getEncryptionMethod (rd,
                                                                             new EncryptionAlgorithms[]{SymEncryptionAlgorithms.AES128_CBC,
                                                                                                          SymEncryptionAlgorithms.AES256_CBC});
+*/
                 rd.getNext (XMLSignatureWrapper.KEY_INFO_ELEM);
                 rd.getChild ();
                 String key_name = rd.getString (XMLSignatureWrapper.KEY_NAME_ELEM);
                 rd.getParent ();
+/*
                 gk.archival_data.encrypted_private_key = XMLEncUtil.getCipherValue (rd);
                 rd.getParent ();
 
@@ -359,6 +363,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse 
                   {
                     throw new IOException ("Unexpected symmetric key name: " + key_name);
                   }
+*/
                 rd.getParent ();
 
                 rd.getParent ();
@@ -368,10 +373,11 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse 
           }
         while (rd.hasNext (GENERATED_PUBLIC_KEY_ELEM));
 
+/*
         device_encryption_key = conditionalKeyInput (rd, DEVICE_ENCRYPTION_KEY_ELEM);
 
         device_key_attestation_key = conditionalKeyInput (rd, DEVICE_KEY_ATTESTATION_KEY_ELEM);
-
+*/
         rd.getNext (ENDORSEMENT_KEY_ELEM);
         key_attestation_algorithm = ah.getStringConditional (KEY_ATTESTATION_ALGORITHM_ATTR,
                                                              KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1);

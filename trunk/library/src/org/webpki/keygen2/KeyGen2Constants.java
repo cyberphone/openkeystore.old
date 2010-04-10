@@ -6,13 +6,7 @@ public interface KeyGen2Constants
 
     String KEYGEN2_NS                  = "http://xmlns.webpki.org/keygen2/beta/20100402#";
 
-    String XML_ENC_NS                  = "http://www.w3.org/2001/04/xmlenc#";
-
     String KEYGEN2_SCHEMA_FILE         = "keygen2.xsd";
-
-    String REDUCED_XML_ENC_SCHEMA_FILE = "reduced-xenc-schema.xsd";
-
-    String XML_ENC_NS_PREFIX           = "xenc";
 
 
     // Various global XML attributes
@@ -32,8 +26,6 @@ public interface KeyGen2Constants
     String CLIENT_SESSION_ID_ATTR            = "ClientSessionID";
 
     String SUBMIT_URL_ATTR                   = "SubmitURL";
-
-    String REQUEST_URL_ATTR                  = "RequestURL";
 
     String ERROR_URL_ATTR                    = "ErrorURL";
 
@@ -61,11 +53,7 @@ public interface KeyGen2Constants
 
     String SERVER_CERT_FP_ATTR               = "ServerCertificateFingerprint";
 
-// TODO
-    String CERTIFICATE_SHA1_ATTR             = "CertificateSHA1";
-
-// TODO
-    String VALUE_REFERENCE_ID_ATTR           = "ValueReferenceID";
+    String CERTIFICATE_FINGERPRINT_ATTR      = "CertificateFingerprint";
 
     String MIME_TYPE_ATTR                    = "MimeType";
 
@@ -77,13 +65,7 @@ public interface KeyGen2Constants
 
     String KEY_ATTESTATION_ALGORITHM_ATTR    = "KeyAttestationAlgorithm";
 
-// TODO
-    String CONDITIONAL_ATTR                  = "Conditional";
-
     String KEY_ATTESTATION_ATTR              = "KeyAttestation";
-
-// TODO
-    String MAC_ALGORITHM_ATTR                = "MACAlgorithm";
 
     String KEY_SIZE_ATTR                     = "KeySize";
 
@@ -100,9 +82,6 @@ public interface KeyGen2Constants
     String CACHING_SUPPORT_ATTR              = "CachingSupport";
 
     String INPUT_METHOD_ATTR                 = "InputMethod";
-
-// TODO
-    String HIDDEN_ATTR                       = "Hidden";
 
     String USER_MODIFIABLE_ATTR              = "UserModifiable";
 
@@ -148,12 +127,6 @@ public interface KeyGen2Constants
 
     String SYMMETRIC_KEY_ELEM                = "SymmetricKey";
 
-    // TODO
-    String PIGGYBACKED_SYMMETRIC_KEY_ELEM    = "PiggybackedSymmetricKey";
-
-    // TODO
-    String ENCRYPTED_PRIVATE_KEY_ELEM        = "EncryptedPrivateKey";
-
     String PRIVATE_KEY_ELEM                  = "PrivateKey";
 
     String KEY_PAIR_ELEM                     = "KeyPair";       
@@ -173,17 +146,7 @@ public interface KeyGen2Constants
        
     // Sub elements
 
-// TODO
-    String ISSUER_KEY_EXCHANGE_KEY_ELEM      = "IssuerKeyExchangeKey";
-
-// TODO
-    String PRIVATE_KEY_ARCHIVAL_KEY_ELEM     = "PrivateKeyArchivalKey";
-
     String EXTENSION_ELEM                    = "Extension";
-
-    String DEVICE_ENCRYPTION_KEY_ELEM        = "DeviceEncryptionKey";
-
-    String DEVICE_KEY_ATTESTATION_KEY_ELEM   = "DeviceKeyAttestationKey";
 
     String LOGO_TYPE_ELEM                    = "Logotype";
 
@@ -219,18 +182,5 @@ public interface KeyGen2Constants
 
     String DNS_LOOKUP_ELEM                   = "DNSLookup";
 
-    // XML Encryption
-
-    String ENCRYPTED_KEY_ELEM                = "EncryptedKey";
-
-    String ENCRYPTED_DATA_ELEM               = "EncryptedData";
-
-    String ENCRYPTION_METHOD_ELEM            = "EncryptionMethod";
-
-    String CARRIED_KEY_NAME_ELEM             = "CarriedKeyName";
-
-    String CIPHER_DATA_ELEM                  = "CipherData";
-
-    String CIPHER_VALUE_ELEM                 = "CipherValue";
 
   }

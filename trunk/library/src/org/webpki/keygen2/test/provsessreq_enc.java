@@ -1,7 +1,5 @@
 package org.webpki.keygen2.test;
 
-import java.math.BigInteger;
-
 import java.util.Date;
 
 import org.webpki.util.ArrayUtil;
@@ -11,11 +9,6 @@ import org.webpki.xml.DOMReaderHelper;
 import org.webpki.crypto.test.ECKeys;
 
 import org.webpki.keygen2.ProvisioningSessionRequestEncoder;
-import org.webpki.keygen2.KeyGen2KeyUsage;
-import org.webpki.keygen2.PassphraseFormats;
-import org.webpki.keygen2.PINGrouping;
-import org.webpki.keygen2.InputMethods;
-import org.webpki.keygen2.PatternRestrictions;
 
 public class provsessreq_enc
   {

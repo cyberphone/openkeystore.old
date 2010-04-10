@@ -97,7 +97,10 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         ////////////////////////////////////////////////////////////////////////
         // Issuer key exchange key
         ////////////////////////////////////////////////////////////////////////
+// TODO
+/*
         wr.addChildElement (ISSUER_KEY_EXCHANGE_KEY_ELEM);
+*/
         wr.pushPrefix (XMLSignatureWrapper.XML_DSIG_NS_PREFIX);
         wr.addChildElementNS (XMLSignatureWrapper.XML_DSIG_NS, XMLSignatureWrapper.KEY_INFO_ELEM);
         wr.addChildElement (XMLSignatureWrapper.KEY_VALUE_ELEM);

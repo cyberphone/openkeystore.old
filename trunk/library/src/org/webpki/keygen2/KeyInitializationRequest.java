@@ -10,8 +10,6 @@ import org.webpki.xml.DOMWriterHelper;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
-import org.webpki.crypto.HashAlgorithms;
-
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
@@ -25,24 +23,10 @@ abstract class KeyInitializationRequest extends XMLObjectWrapper implements Seri
 
     String client_session_id;
 
-    private byte[] session_nonce;
-
-    byte[] getSessionHash () throws IOException
-      {
-        if (session_nonce == null)
-          {
-            session_nonce = HashAlgorithms.SHA256.digest (
-                               new StringBuffer (client_session_id).append ('\0').
-                                         append (server_session_id).append ('\0').toString ().getBytes ("UTF-8")
-                                                       );
-          }
-        return session_nonce;
-      }
 
     public void init () throws IOException
       {
         addWrapper (XMLSignatureWrapper.class);
-        addSchema (REDUCED_XML_ENC_SCHEMA_FILE);
         addSchema (KEYGEN2_SCHEMA_FILE);
       }
 

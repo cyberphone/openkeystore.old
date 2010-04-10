@@ -88,7 +88,9 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
                           }
                         encoder_key = master_key_decrypter.decrypt (encrypted_encoder_key, encryption_certificate);
                         Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
+/*
                         mac.init (new SecretKeySpec (key_operation_request_decoder.getSessionHash (), "RAW"));
+*/
                         mac.update (encoder_key);
                         for (byte[] enc_val : encrypted_preset_values.values ())
                           {
@@ -252,23 +254,25 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
             certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);
 
-            if (rd.hasNext (PIGGYBACKED_SYMMETRIC_KEY_ELEM))
+            if (rd.hasNext (SYMMETRIC_KEY_ELEM))
               {
-                rd.getNext (PIGGYBACKED_SYMMETRIC_KEY_ELEM);
+                rd.getNext (SYMMETRIC_KEY_ELEM);
                 mac = ah.getBinary (MAC_ATTR);
                 endorsed_algorithms = getSortedAlgorithms (ah.getList (ENDORSED_ALGORITHMS_ATTR));
+/*
                 piggyback_mac_algorithm = ah.getStringConditional (MAC_ALGORITHM_ATTR,
                                                                    KeyGen2URIs.ALGORITHMS.MAC_PIGGYBACK_1);
+*/
  
                 rd.getChild ();
-
+/*
                 rd.getNext (ENCRYPTED_KEY_ELEM);
                 rd.getChild ();
 
                 XMLEncUtil.getEncryptionMethod (rd, new EncryptionAlgorithms[]{AsymEncryptionAlgorithms.RSA_PKCS_1});
 
                 encrypted_symmetric_key = XMLEncUtil.getCipherValue (rd);
-
+*/
                 rd.getParent ();
 
                 rd.getParent ();
@@ -362,10 +366,12 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
             try
               {
                 symmetric_key = symmetric_key_decrypter.decrypt (encrypted_symmetric_key, certificate_path[0]);
+/*
                 if (!ArrayUtil.compare (mac, getAlgorithmsMac (symmetric_key, id, client_session_id, server_session_id, endorsed_algorithms)))
                   {
                     throw new IOException ("Symmetric key MAC error");
                   }
+*/
               }
             catch (GeneralSecurityException gse)
               {
@@ -582,12 +588,13 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
           {
             bad ("You must call \"setKeyOperationRequestDecoder\" first");
           }
+/*
         for (KeyInitializationRequestDecoder.PresetValueReference pvr : key_operation_request_decoder.preset_value_references)
           {
             PresetValue pv = new PresetValue ();
-            if ((pv.encrypted_value = encrypted_preset_values.get (pvr.name)) == null)
+            if ((pv.encrypted_value = encrypted_preset_values.get (pvr.data)) == null)
               {
-                bad ("Missing data for: " + pvr.name);
+                bad ("Missing data for: " + pvr.data);
               }
 
             pv.is_puk = pvr instanceof KeyInitializationRequestDecoder.PUKPolicy;
@@ -595,6 +602,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
             pv.hidden = pvr.hidden;
             preset_values.add (pv);
           }
+*/
         return preset_values.toArray (new PresetValue[0]);
       }
 
@@ -635,9 +643,11 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
             mac_key = ah.getBinary (MAC_ATTR);
             rd.getChild ();
 
+/*
             rd.getNext (ENCRYPTED_KEY_ELEM);
             rd.getChild ();
             XMLEncUtil.getEncryptionMethod (rd, new EncryptionAlgorithms[]{AsymEncryptionAlgorithms.RSA_PKCS_1});
+
             if (rd.hasNext (XMLSignatureWrapper.KEY_INFO_ELEM))
               {
                 rd.getNext (XMLSignatureWrapper.KEY_INFO_ELEM);
@@ -672,6 +682,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
                 rd.getParent ();
               }
             rd.getParent ();
+*/
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

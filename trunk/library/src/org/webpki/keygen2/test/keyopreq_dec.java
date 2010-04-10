@@ -27,7 +27,7 @@ public class keyopreq_dec
       }
 
 
-    static void getBaseKeyData (StringBuffer s, KeyInitializationRequestDecoder.KeyProperties rk) throws IOException
+    static void getBaseKeyData (StringBuffer s, KeyInitializationRequestDecoder.KeyObject rk) throws IOException
       {
         if (rk.getKeyAlgorithmData () instanceof KeyInitializationRequestDecoder.RSA)
           {
@@ -55,6 +55,8 @@ public class keyopreq_dec
         XMLSchemaCache cache = new XMLSchemaCache ();
         cache.addWrapper (KeyInitializationRequestDecoder.class);
         KeyInitializationRequestDecoder kgrd = (KeyInitializationRequestDecoder)cache.parse (ArrayUtil.readFile (args[0]));
+// TODO
+/*
         for (KeyInitializationRequestDecoder.RequestObjects ro : kgrd.getRequestObjects ())
           {
             System.out.println ();
@@ -146,7 +148,7 @@ public class keyopreq_dec
               }
             System.out.println (s);
           }
-
+*/
         if (kgrd.isSigned ())
           {
             JKSCAVerifier verifier = new JKSCAVerifier (DemoKeyStore.getCAKeyStore ());

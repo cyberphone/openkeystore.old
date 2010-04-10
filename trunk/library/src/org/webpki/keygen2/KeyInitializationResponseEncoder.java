@@ -142,9 +142,10 @@ public class KeyInitializationResponseEncoder extends KeyInitializationResponse
                 if (archival_data != null)
                   {
                     String key_name = id + ".Private";
-                    wr.addChildElement (ENCRYPTED_PRIVATE_KEY_ELEM);
+                    wr.addChildElement (PRIVATE_KEY_ELEM);
                     wr.setStringAttribute (FORMAT_ATTR, KeyGen2URIs.FORMATS.PKCS8_PRIVATE_KEY_INFO);
-
+// TODO
+/*
                     wr.pushPrefix (XML_ENC_NS_PREFIX);
 
                     wr.addChildElementNS (XML_ENC_NS, ENCRYPTED_KEY_ELEM);
@@ -166,6 +167,7 @@ public class KeyInitializationResponseEncoder extends KeyInitializationResponse
                     wr.popPrefix ();
 
                     wr.getParent ();
+*/
                   }
               }
           }
@@ -330,20 +332,13 @@ public class KeyInitializationResponseEncoder extends KeyInitializationResponse
             XMLSignatureWrapper.addXMLSignature11NS (wr);
           }
 
-        if (need_xenc_namespace)
-          {
-            XMLEncUtil.addXMLEncNS (wr);
-          }
-
-        wr.setStringAttribute (ID_ATTR, client_session_id);
+         wr.setStringAttribute (ID_ATTR, client_session_id);
 
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
 
         wr.setStringAttribute (SERVER_TIME_ATTR, server_time);
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
-
-        wr.setStringAttribute (REQUEST_URL_ATTR, request_url);
 
         wr.setDateTimeAttribute (CLIENT_TIME_ATTR, client_time);
 
@@ -369,10 +364,11 @@ public class KeyInitializationResponseEncoder extends KeyInitializationResponse
             wr.addWrapped (gk);
           }
 
+/*
         conditionalKeyOutput (wr, device_encryption_key, DEVICE_ENCRYPTION_KEY_ELEM);
 
         conditionalKeyOutput (wr, device_key_attestation_key, DEVICE_KEY_ATTESTATION_KEY_ELEM);
-
+*/
         insert_elem = wr.addChildElement (ENDORSEMENT_KEY_ELEM);
         if (attest_key_needed)
           {

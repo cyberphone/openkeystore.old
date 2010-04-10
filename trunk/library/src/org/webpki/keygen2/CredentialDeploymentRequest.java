@@ -56,22 +56,6 @@ abstract class CredentialDeploymentRequest extends XMLObjectWrapper
       }
 
 
-    byte[] getAlgorithmsMac (byte[] the_key,
-                             String key_id, String client_session_id, String server_session_id,
-                             String[] algorithms) throws IOException, GeneralSecurityException
-      {
-        Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
-        mac.init (new SecretKeySpec (KeyAttestationUtil.createKA1Nonce (key_id, client_session_id, server_session_id), "RAW"));  // Note: any length is OK in HMACSHA*
-        for (String s : getSortedAlgorithms (algorithms))
-          {
-            mac.update (s.getBytes ("UTF-8"));
-            mac.update ((byte)0);
-          }
-        mac.update (the_key);
-        return mac.doFinal ();
-      }
-
-
     static void checkCertificateOrder (X509Certificate[] eepath, X509Certificate[] capath) throws IOException
       {
         if (!eepath[0].equals (CertificateUtil.getSortedPath (new X509Certificate[]{eepath[0], capath[0]})[0]))
@@ -84,7 +68,6 @@ abstract class CredentialDeploymentRequest extends XMLObjectWrapper
     public void init () throws IOException
       {
         addWrapper (XMLSignatureWrapper.class);
-        addSchema (REDUCED_XML_ENC_SCHEMA_FILE);
         addSchema (KEYGEN2_SCHEMA_FILE);
       }
 

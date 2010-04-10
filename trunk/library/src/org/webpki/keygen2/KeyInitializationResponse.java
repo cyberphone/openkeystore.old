@@ -22,7 +22,6 @@ abstract class KeyInitializationResponse extends XMLObjectWrapper implements Ser
     public void init () throws IOException
       {
         addWrapper (XMLSignatureWrapper.class);
-        addSchema (REDUCED_XML_ENC_SCHEMA_FILE);
         addSchema (KEYGEN2_SCHEMA_FILE);
       }
 

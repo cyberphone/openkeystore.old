@@ -7,14 +7,7 @@ import java.math.BigInteger;
 
 import java.util.Vector;
 import java.util.Set;
-import java.util.GregorianCalendar;
 import java.util.EnumSet;
-
-import java.security.cert.X509Certificate;
-
-import org.w3c.dom.Element;
-
-import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
@@ -24,7 +17,6 @@ import org.webpki.xmldsig.XMLVerifier;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import org.webpki.crypto.VerifierInterface;
-import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.ECDomains;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -34,30 +26,33 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
   {
     private static final long serialVersionUID = 1L;
 
-    class PresetValueReference implements Serializable
+    abstract class PresetValueReference extends IDObject implements Serializable
       {
         private static final long serialVersionUID = 1L;
+        
 
-        boolean hidden;
-
-        Object local_reference_object;
-
-        String name;
+        byte[] value;
 
         PresetValueReference (DOMReaderHelper rd) throws IOException
           {
-            name = rd.getAttributeHelper ().getString (VALUE_REFERENCE_ID_ATTR);
-            hidden = rd.getAttributeHelper ().getBooleanConditional (HIDDEN_ATTR);
-            preset_value_references.add (this);
-          }
-
-
-        public void setLocalReferenceObject (Object object)
-          {
-            this.local_reference_object = object;
+            super (rd);
+            value = rd.getAttributeHelper ().getBinary (VALUE_ATTR);
           }
 
       }
+
+    abstract class IDObject implements Serializable
+      {
+        private static final long serialVersionUID = 1L;
+  
+        String id;
+  
+        IDObject (DOMReaderHelper rd) throws IOException
+          {
+            id = rd.getAttributeHelper ().getString (ID_ATTR);
+          }
+  
+    }
 
 
     public class PresetPIN extends PresetValueReference implements Serializable
@@ -124,7 +119,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
       }
 
 
-    public class PINPolicy implements Serializable
+    public class PINPolicy extends IDObject implements Serializable
       {
         private static final long serialVersionUID = 1L;
 
@@ -148,6 +143,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
 
         PINPolicy (DOMReaderHelper rd) throws IOException
           {
+            super (rd);
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
 
             min_length = ah.getInt (MIN_LENGTH_ATTR);
@@ -230,6 +226,12 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
           }
 
 
+        public String getID ()
+          {
+            return id;
+          }
+
+
         public void setUserData (Object user_data)
           {
             this.user_data = user_data;
@@ -299,25 +301,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
       }
 
 
-    public interface RequestObjects
-      {
-      }
-
-
-    public interface KeyProperties
-      {
-        public KeyAlgorithmData getKeyAlgorithmData ();
-
-        public KeyGen2KeyUsage getKeyUsage ();
-
-        public boolean isExportable ();
-
-        public String getID ();
-
-      }
-
-
-    public class CreateKey implements KeyProperties, RequestObjects, Serializable
+    public class KeyObject extends IDObject implements Serializable
       {
         private static final long serialVersionUID = 1L;
 
@@ -333,22 +317,19 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
 
         boolean device_pin_protected;
 
-        String id;
-
         KeyGen2KeyUsage key_usage;
 
         KeyAlgorithmData key_algorithm_data;
 
         boolean exportable;
 
-        X509Certificate archival_key;
-
-        CreateKey (DOMReaderHelper rd, 
+        KeyObject (DOMReaderHelper rd, 
                    PINPolicy pin_policy,
                    boolean start_of_pin_group, 
                    PresetPIN preset_pin,
                    boolean device_pin_protected) throws IOException
           {
+            super (rd);
             this.pin_policy = pin_policy;
             this.start_of_pin_group = start_of_pin_group;
             this.preset_pin = preset_pin;
@@ -357,7 +338,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
             rd.getNext (KEY_PAIR_ELEM);
 
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-            id = ah.getString (ID_ATTR);
             key_usage = KeyGen2KeyUsage.getKeyUsageFromString (ah.getString (KEY_USAGE_ATTR));
             exportable = ah.getBooleanConditional (EXPORTABLE_ATTR);
 
@@ -384,14 +364,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
                     bad ("urn:oid: expected");
                   }
               }
-            if (rd.hasNext ())
-              {
-                rd.getNext (PRIVATE_KEY_ARCHIVAL_KEY_ELEM);
-                rd.getChild ();
-                archival_key = XMLSignatureWrapper.readSortedX509DataSubset (rd)[0];
-                rd.getParent ();
-              }
-
             rd.getParent ();
           }
 
@@ -455,384 +427,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
             return id;
           }
 
-
-        public X509Certificate getPrivateKeyArchivalKey ()
-          {
-            return archival_key;
-          }
-
-      }
-
-
-    public interface ManageObject
-      {
-        public X509Certificate getCACertificate ();
-      }
-
-
-    abstract class CAReference implements ManageObject, RequestObjects, Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        X509Certificate ca_certificate;
-
-        private CAReference () {}
-
-        public X509Certificate getCACertificate ()
-          {
-            return ca_certificate;
-          }
-      }
-
-    
-    public class CertificateReference extends CAReference implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        byte[] certificate_sha1;
-
-        CertificateReference () {}
-
-        CertificateReference (byte[] certificate_sha1)
-          {
-            this.certificate_sha1 = certificate_sha1;
-          }
-
-
-        public byte[] getCertificateSHA1 () throws IOException
-          {
-            return certificate_sha1;
-          }
-      }
-
-
-    public class DeleteKey extends CertificateReference implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        boolean conditional;
-
-        DeleteKey (boolean conditional, byte[] certificate_sha1)
-          {
-            super (certificate_sha1);
-            this.conditional = conditional;
-          }
-
-
-        public boolean isConditional ()
-          {
-            return conditional;
-          }
-      }
-
-
-    public class CloneKey extends CertificateReference implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        CreateKey req_key;
-
-        CloneKey (CreateKey req_key, byte[] certificate_sha1)
-          {
-            super (certificate_sha1);
-            this.req_key = req_key;
-          }
-
-
-        public KeyProperties getCreateKeyProperties ()
-          {
-            return (KeyProperties) req_key;
-          }
-      }
-
-
-    public class ReplaceKey extends CertificateReference implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        CreateKey req_key;
-
-        ReplaceKey (CreateKey req_key, byte[] certificate_sha1)
-          {
-            super (certificate_sha1);
-            this.req_key = req_key;
-          }
-
-
-        public KeyProperties getCreateKeyProperties ()
-          {
-            return (KeyProperties) req_key;
-          }
-      }
-
-
-    public class DeleteKeysByContent extends CAReference implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        String subject;
-
-        BigInteger serial;
-
-        String email_address;
-
-        String policy;
-
-        GregorianCalendar issued_before;
-
-        GregorianCalendar issued_after;
-
-        String[] excluded_policies;
-
-        DeleteKeysByContent (String subject,
-                             BigInteger serial,
-                             String email_address,
-                             String policy,
-                             GregorianCalendar issued_before,
-                             GregorianCalendar issued_after,
-                             String[] excluded_policies) throws IOException
-          {
-            if (subject == null && serial == null && email_address == null &&
-                policy == null && issued_before == null && issued_after == null &&
-                excluded_policies == null)
-              {
-                bad ("At least one element must be defined for \"DeleteKeysByContent\"");
-              }
-            this.subject = subject;
-            this.serial = serial;
-            this.email_address = email_address;
-            this.policy = policy;
-            this.issued_before = issued_before;
-            this.issued_after = issued_after;
-            this.excluded_policies = excluded_policies;
-          }
-
-
-        public String getSubject ()
-          {
-            return subject;
-          }
-
-
-        public BigInteger getSerial ()
-          {
-            return serial;
-          }
-
-
-        public String getEmailAddress ()
-          {
-            return email_address;
-          }
-
-
-        public String getPolicy ()
-          {
-            return policy;
-          }
-
-
-        public GregorianCalendar getIssuedBeforeDate ()
-          {
-            return issued_before;
-          }
-
-
-        public GregorianCalendar getIssuedAfterDate ()
-          {
-            return issued_after;
-          }
-
-
-        public String[] getExcludedPolicies ()
-          {
-            return excluded_policies;
-          }
-      }
-
-
-    public class UpdatePINPolicy extends CertificateReference implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        PINPolicy pin_policy;
-
-        boolean force_new_pin;
-
-        UpdatePINPolicy (PINPolicy pin_policy, byte[] certificate_sha1, boolean force_new_pin)
-          {
-            super (certificate_sha1);
-            this.pin_policy = pin_policy;
-            this.force_new_pin = force_new_pin;
-          }
-
-
-        public PINPolicy getPINPolicy ()
-          {
-            return pin_policy;
-          }
-
-
-        public boolean getForceNewPIN ()
-          {
-            return force_new_pin;
-          }
-      }
-
-
-    public class UpdatePUKPolicy extends CertificateReference implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        PUKPolicy puk_policy;
-
-        UpdatePUKPolicy (PUKPolicy puk_policy, byte[] certificate_sha1)
-          {
-            super (certificate_sha1);
-            this.puk_policy = puk_policy;
-          }
-
-
-        public PUKPolicy getPUKPolicy ()
-          {
-            return puk_policy;
-          }
-
-      }
-
-
-    public class UpdatePresetPIN extends CertificateReference implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        PresetPIN preset_pin;
-
-        UpdatePresetPIN (PresetPIN preset_pin, byte[] certificate_sha1)
-          {
-            super (certificate_sha1);
-            this.preset_pin = preset_pin;
-          }
-
-
-        public PresetPIN getPresetPIN ()
-          {
-            return preset_pin;
-          }
-
-      }
-
-
-    private class FakeVerifier implements VerifierInterface, Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        X509Certificate certificate;
-
-        public void setTrustedRequired (boolean flag) throws IOException
-          {
-          }
-
-        public boolean verifyCertificatePath (X509Certificate[] certpath) throws IOException
-          {
-            certificate = certpath[0];
-            return true;
-          }
-
-        public X509Certificate[] getSignerCertificatePath () throws IOException
-          {
-            return null;
-          }
-
-        public CertificateInfo getSignerCertificateInfo () throws IOException
-          {
-            return null;
-          }
-      }
-
-
-    private byte[] readSHA1 (DOMAttributeReaderHelper ah) throws IOException
-      {
-        return ah.getBinary (CERTIFICATE_SHA1_ATTR);
-      }
-
-
-    private void readManageObject (DOMReaderHelper rd) throws IOException
-      {
-        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-        Vector<CAReference> kms = new Vector<CAReference> ();
-        Element top_elem = rd.getNext (MANAGE_OBJECT_ELEM);
-        String id = ah.getString (ID_ATTR);
-        if (!ArrayUtil.compare (ah.getBinary (NONCE_ATTR), getSessionHash ()))
-          {
-            bad ("Nonce error in " + MANAGE_OBJECT_ELEM);
-          }
-        XMLSignatureWrapper signature = null;
-        rd.getChild ();
-        do
-          {
-            if (rd.hasNext (DELETE_KEY_ELEM))
-              {
-                rd.getNext (DELETE_KEY_ELEM);
-                kms.add (new DeleteKey (ah.getBooleanConditional (CONDITIONAL_ATTR, false), readSHA1 (ah)));
-              }
-            else if (rd.hasNext (CLONE_KEY_ELEM))
-              {
-                rd.getNext (CLONE_KEY_ELEM);
-                byte[] sha1 = readSHA1 (ah);
-                rd.getChild ();
-                CreateKey rk = new CreateKey (rd, null, false, null, false); 
-                rd.getParent ();
-                kms.add (new CloneKey (rk, sha1));
-              }
-            else if (rd.hasNext (REPLACE_KEY_ELEM))
-              {
-                rd.getNext (REPLACE_KEY_ELEM);
-                byte[] sha1 = readSHA1 (ah);
-                rd.getChild ();
-                CreateKey rk = new CreateKey (rd, null, false, null, false); 
-                rd.getParent ();
-                kms.add (new ReplaceKey (rk, sha1));
-              }
-            else if (rd.hasNext (DELETE_KEYS_BY_CONTENT_ELEM))
-              {
-                rd.getNext (DELETE_KEYS_BY_CONTENT_ELEM);
-                kms.add (new DeleteKeysByContent (ah.getStringConditional (SUBJECT_ATTR),
-                                                  ah.getBigIntegerConditional (SERIAL_ATTR),
-                                                  ah.getStringConditional (EMAIL_ATTR),
-                                                  ah.getStringConditional (POLICY_ATTR),
-                                                  ah.getDateTimeConditional (ISSUED_BEFORE_ATTR),
-                                                  ah.getDateTimeConditional (ISSUED_AFTER_ATTR),
-                                                  ah.getListConditional (EXCLUDED_POLICIES_ATTR)));
-              }
-            else if (rd.hasNext (UPDATE_PIN_POLICY_ELEM))
-              {
-                rd.getNext (UPDATE_PIN_POLICY_ELEM);
-                kms.add (new UpdatePINPolicy (new PINPolicy (rd), readSHA1 (ah), ah.getBooleanConditional (FORCE_NEW_PIN_ATTR)));
-              }
-            else if (rd.hasNext (UPDATE_PUK_POLICY_ELEM))
-              {
-                rd.getNext (UPDATE_PUK_POLICY_ELEM);
-                kms.add (new UpdatePUKPolicy (new PUKPolicy (rd), readSHA1 (ah)));
-              }
-            else if (rd.hasNext (UPDATE_PRESET_PIN_ELEM))
-              {
-                rd.getNext (UPDATE_PRESET_PIN_ELEM);
-                kms.add (new UpdatePresetPIN (new PresetPIN (rd), readSHA1 (ah)));
-              }
-            else
-              {
-                signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
-              }
-          }
-        while (rd.hasNext ());
-        rd.getParent ();
-        FakeVerifier fv = new FakeVerifier ();
-        new XMLVerifier (fv).validateEnvelopedSignature (this, top_elem, signature, id);
-        for (CAReference km : kms)
-          {
-            km.ca_certificate = fv.certificate;
-            request_objects.add (km);
-          }
       }
 
 
@@ -842,22 +436,22 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
       }
 
 
-    private CreateKey readKeyProperties (DOMReaderHelper rd,
+    private KeyObject readKeyProperties (DOMReaderHelper rd,
                                          PINPolicy pin_policy,
                                          boolean start_of_pin_group) throws IOException
       {
-        CreateKey rk;
+        KeyObject rk;
         if (rd.hasNext (PRESET_PIN_ELEM))
           {
             rd.getNext (PRESET_PIN_ELEM);
             PresetPIN preset = new PresetPIN (rd);
             rd.getChild ();
-            request_objects.add (rk = new CreateKey (rd, pin_policy, start_of_pin_group, preset, false));
+            request_objects.add (rk = new KeyObject (rd, pin_policy, start_of_pin_group, preset, false));
             rd.getParent ();
           }
         else
           {
-            request_objects.add (rk = new CreateKey (rd, pin_policy, start_of_pin_group, null, false));
+            request_objects.add (rk = new KeyObject (rd, pin_policy, start_of_pin_group, null, false));
           }
         return rk;
       }
@@ -865,7 +459,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
 
     private void readKeyProperties (DOMReaderHelper rd, boolean device_pin_protected) throws IOException
       {
-        request_objects.add (new CreateKey (rd, null, false, null, device_pin_protected));
+        request_objects.add (new KeyObject (rd, null, false, null, device_pin_protected));
       }
 
 
@@ -877,7 +471,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
         rd.getChild ();
         do
           {
-            CreateKey rk = readKeyProperties (rd, upp, start);
+            KeyObject rk = readKeyProperties (rd, upp, start);
             rk.puk_policy = puk_policy;
             rk.start_of_puk_group = puk_start;
             puk_start = false;
@@ -888,7 +482,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
       }
 
 
-    private Vector<RequestObjects> request_objects = new Vector<RequestObjects> ();
+    private Vector<KeyObject> request_objects = new Vector<KeyObject> ();
       
     private String server_time;
 
@@ -900,7 +494,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
 
     private XMLSignatureWrapper signature;  // Optional
 
-    Vector<PresetValueReference> preset_value_references = new Vector<PresetValueReference> ();
 
     public String getClientSessionID ()
       {
@@ -950,9 +543,9 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
       }
 
 
-    public RequestObjects[] getRequestObjects () throws IOException
+    public KeyObject[] getRequestedKeyObjects () throws IOException
       {
-        return request_objects.toArray (new RequestObjects[0]);
+        return request_objects.toArray (new KeyObject[0]);
       }
 
 
@@ -981,51 +574,44 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
         /////////////////////////////////////////////////////////////////////////////////////////
         do
           {
-            if (rd.hasNext (MANAGE_OBJECT_ELEM))
+            rd.getNext (CREATE_OBJECT_ELEM);
+            rd.getChild ();
+            do
               {
-                readManageObject (rd);
-              }
-            else
-              {
-                rd.getNext (CREATE_OBJECT_ELEM);
-                rd.getChild ();
-                do
+                if (rd.hasNext (KEY_PAIR_ELEM))
                   {
-                    if (rd.hasNext (KEY_PAIR_ELEM))
-                      {
-                        readKeyProperties (rd, false);
-                      }
-                    else if (rd.hasNext (PUK_POLICY_ELEM))
-                      {
-                        boolean start = true;
-                        rd.getNext (PUK_POLICY_ELEM);
-                        PUKPolicy pk = new PUKPolicy (rd);
-                        rd.getChild ();
-                        do
-                          {
-                            readPINPolicy (rd, start, pk);
-                            start = false;
-                          }
-                        while (rd.hasNext ());
-                        rd.getParent ();
-                      }
-                    else if (rd.hasNext (PIN_POLICY_ELEM))
-                      {
-                        readPINPolicy (rd, false, null);
-                      }
-                    else
-                      {
-                        rd.getNext (DEVICE_SYNCHRONIZED_PIN_ELEM);
-                        rd.getChild ();
-                        readKeyProperties (rd, true);
-                        rd.getParent ();
-                      }
+                    readKeyProperties (rd, false);
                   }
-                while (rd.hasNext ());
-                rd.getParent ();
+                else if (rd.hasNext (PUK_POLICY_ELEM))
+                  {
+                    boolean start = true;
+                    rd.getNext (PUK_POLICY_ELEM);
+                    PUKPolicy pk = new PUKPolicy (rd);
+                    rd.getChild ();
+                    do
+                      {
+                        readPINPolicy (rd, start, pk);
+                        start = false;
+                      }
+                    while (rd.hasNext ());
+                    rd.getParent ();
+                  }
+                else if (rd.hasNext (PIN_POLICY_ELEM))
+                  {
+                    readPINPolicy (rd, false, null);
+                  }
+                else
+                  {
+                    rd.getNext (DEVICE_SYNCHRONIZED_PIN_ELEM);
+                    rd.getChild ();
+                    readKeyProperties (rd, true);
+                    rd.getParent ();
+                  }
               }
+            while (rd.hasNext ());
+            rd.getParent ();
           }
-        while (rd.hasNext (MANAGE_OBJECT_ELEM) || rd.hasNext (CREATE_OBJECT_ELEM));
+        while (rd.hasNext (CREATE_OBJECT_ELEM));
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional server cookie

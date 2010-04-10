@@ -23,7 +23,6 @@ abstract class PlatformNegotiationResponse extends XMLObjectWrapper implements S
     public void init () throws IOException
       {
         addWrapper (XMLSignatureWrapper.class);
-        addSchema (REDUCED_XML_ENC_SCHEMA_FILE);
         addSchema (KEYGEN2_SCHEMA_FILE);
       }
 

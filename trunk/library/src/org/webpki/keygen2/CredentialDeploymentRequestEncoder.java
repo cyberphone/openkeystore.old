@@ -296,10 +296,10 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
 
             void writeEncryptedKey (DOMWriterHelper wr, X509Certificate certificate, String key_id) throws IOException
               {
-                try
-                  {
-                    wr.addChildElement (PIGGYBACKED_SYMMETRIC_KEY_ELEM);
+                    wr.addChildElement (SYMMETRIC_KEY_ELEM);
                     wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, endorsed_algorithms);
+                  //TODO
+                    /*
                     wr.setBinaryAttribute (MAC_ATTR, getAlgorithmsMac (symmetric_key, key_id, client_session_id, server_session_id, endorsed_algorithms));
                     if (piggyback_mac_algorithm != null)
                       {
@@ -316,17 +316,12 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                     crypt.init (Cipher.ENCRYPT_MODE, certificate.getPublicKey ());
 
                     XMLEncUtil.setCipherData (wr, crypt.doFinal (symmetric_key));
-
+*/
                     wr.getParent ();
 
                     wr.popPrefix ();
 
                     wr.getParent ();
-                  }
-                catch (GeneralSecurityException gse)
-                  {
-                    throw new IOException (gse.getMessage ());
-                  }
               }
 
 
@@ -500,7 +495,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
         this.server_session_id = key_op_req_enc.server_session_id;
         this.preset_value_security = preset_value_security;
         this.preset_values = key_op_req_enc.preset_values;
-        this.session_hash = key_op_req_enc.getSessionHash ();
+//        this.session_hash = key_op_req_enc.getSessionHash ();
       }
 
 
@@ -580,11 +575,13 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
 
         XMLSignatureWrapper.addXMLSignatureNS (wr);
 
+// TODO
+/*
         if (xml_enc || !preset_values.isEmpty ())
           {
             XMLEncUtil.addXMLEncNS (wr);
           }
-
+*/
         if (certified_keys.isEmpty ())
           {
             throw new IOException ("Empty request not allowed!");
@@ -627,8 +624,11 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                     SecureRandom.getInstance ("SHA1PRNG").nextBytes (iv);
                     Cipher crypt = Cipher.getInstance (preset_value_security.encryption_algorithm.getJCEName ());
                     crypt.init (Cipher.ENCRYPT_MODE, encoder_key, new IvParameterSpec (iv));
+// TODO
+/*
                     ps.encrypted_value = ArrayUtil.add (iv, crypt.doFinal (ps.value.getBytes ("UTF-8")));
                     preset_value_mac.update (ps.encrypted_value);
+*/
                   }
               }
             catch (GeneralSecurityException gse)
@@ -638,19 +638,22 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
             wr.addChildElement (PRESET_VALUES_ELEM);
             wr.setBinaryAttribute (MAC_ATTR, preset_value_mac.doFinal ());
 
+/*
             wr.pushPrefix (XML_ENC_NS_PREFIX);
 
             wr.addChildElementNS (XML_ENC_NS, ENCRYPTED_KEY_ELEM);
 
             XMLEncUtil.setEncryptionMethod (wr, preset_value_security.key_wrap_algorithm);
-
+*/
+            
             if (output_encryption_certificate)
               {
                 beginKeyInfo (wr);
                 XMLSignatureWrapper.writeX509DataSubset (wr, new X509Certificate[]{preset_value_security.encryption_certificate});
                 endKeyInfo (wr);
               }
-
+//TODO
+/*
             XMLEncUtil.setCipherData (wr, encrypted_encoder_key);
 
             wr.addString (CARRIED_KEY_NAME_ELEM, PRESET_VALUE_KEY_NAME);
@@ -672,6 +675,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
 
                 wr.getParent ();
               }
+*/
 
             wr.popPrefix ();
             wr.getParent ();
