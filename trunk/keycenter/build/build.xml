@@ -12,8 +12,9 @@
   <property name="phonesks_dir" value="../../sks"/>
   <property name="library_doc_url" value="http://arxp/webpki/keycenter/javadoc/library"/>
   <property name="catalina.home" value="${env.CATALINA_HOME}"/>
-  <property name="secret.file" location="../../non-public/mysys.prop"/>
-  <property file="${secret.file}"/>
+  <property name="secret.dir" location="../../non-public"/>
+  <property file="${secret.dir}/mysys.prop"/>
+  <available file="${secret.dir}/tomcat" type="dir" property="tomcat.update.present"/>
 
   <path id="compile.classpath">
     <fileset dir="${catalina.home}/lib">
@@ -115,7 +116,13 @@
      <delete dir="${temp_dir}"/>
   </target>
 	
-  <target name="tomcatupdate">
+  <target name="tomcatserverupdate" if="tomcat.update.present">
+    <copy todir="${env.CATALINA_HOME}" overwrite="true" preservelastmodified="true">
+      <fileset dir="${secret.dir}/tomcat"/>
+    </copy>
+  </target>
+
+  <target name="tomcatupdate" depends="tomcatserverupdate">
     <copy file="${resources_dir}/third-party-jars/mysql-connector-java-5.1.6-bin.jar" todir="${env.CATALINA_HOME}/lib"  preservelastmodified="true"/>
   </target>
   
