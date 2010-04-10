@@ -25,6 +25,9 @@
     <fileset dir="${library_dir}/dist">
       <include name="*.jar"/>
     </fileset>
+    <fileset dir="${resources_dir}/third-party-jars">
+      <include name="*.jar"/>
+    </fileset>
   </path>
 
   <target name="init" unless="app_path">
@@ -113,8 +116,6 @@
   </target>
 	
   <target name="tomcatupdate">
-    <copy file="${resources_dir}/third-party-jars/xercesImpl.jar" todir="${env.CATALINA_HOME}/lib"  preservelastmodified="true"/>
-    <copy file="${resources_dir}/third-party-jars/mysql-connector-java-5.1.6-bin.jar" todir="${env.CATALINA_HOME}/lib"  preservelastmodified="true"/>
   </target>
   
   <target name="_internal_deploy" depends="clean,doc">
@@ -142,6 +143,9 @@
           <fileset dir="${temp_dir}">
               <exclude name="**/localservices/*"/>
           </fileset>
+        <lib file="${resources_dir}/third-party-jars/xercesImpl.jar"/>
+        <lib file="${resources_dir}/third-party-jars/mysql-connector-java-5.1.6-bin.jar"/>
+        <lib file="${resources_dir}/third-party-jars/mail.jar"/>
         <lib file="${library_dir}/dist/webpki.org-libext-1.00.jar"/>
         <lib file="${library_dir}/dist/webpki.org-webutil-1.00.jar"/>
         <lib file="${phonesks_dir}/dist/webpki.org-phonesks-1.00.jar"/>
