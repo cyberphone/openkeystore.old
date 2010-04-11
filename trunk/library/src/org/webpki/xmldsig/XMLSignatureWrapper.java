@@ -148,6 +148,8 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
     String envelope_id;
 
     String object_id;
+    
+    String symmetric_key_name;
 
     HashAlgorithms digest_algorithm;
 
@@ -607,7 +609,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
           }
         else
           {
-            wr.addString (KEY_NAME_ELEM, "session-derived");
+            wr.addString (KEY_NAME_ELEM, symmetric_key_name);
           }
         
         wr.getParent();

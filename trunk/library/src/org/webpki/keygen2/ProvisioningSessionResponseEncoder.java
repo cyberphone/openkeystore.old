@@ -64,9 +64,10 @@ public class ProvisioningSessionResponseEncoder extends ProvisioningSessionRespo
     public void signRequest (SymKeySignerInterface signer) throws IOException
       {
         XMLSymKeySigner ds = new XMLSymKeySigner (signer);
+        ds.SetKeyName ("derived-session-key");
         ds.removeXMLSignatureNS ();
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_session_id);
+        ds.createEnvelopedSignature (doc, client_session_id);
       }
 
 

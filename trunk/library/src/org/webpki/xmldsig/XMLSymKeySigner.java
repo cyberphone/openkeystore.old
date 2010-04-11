@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
-import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 
@@ -13,6 +12,8 @@ import org.webpki.crypto.SymKeySignerInterface;
 public class XMLSymKeySigner extends XMLSignerCore
   {
     SymKeySignerInterface sym_signer;
+    
+    String key_name = "symmetric-key";
 
     PublicKey populateKeys (XMLSignatureWrapper r) throws GeneralSecurityException, IOException
       {
@@ -32,5 +33,10 @@ public class XMLSymKeySigner extends XMLSignerCore
       {
         this.sym_signer = sym_signer;
       }
-
+    
+    public void SetKeyName (String key_name)
+      {
+        this.key_name = key_name;
+      }
+ 
   }

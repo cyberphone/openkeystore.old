@@ -61,12 +61,6 @@ public class provsessres_dec
           {
             throw new RuntimeException ("Bad time");
           }
-        java.util.GregorianCalendar gc = new java.util.GregorianCalendar ();
-        java.util.Date dt = new java.util.Date ();
-        gc.setTimeInMillis (dt.getTime ());
-        
-        System.out.println ("time=" +gc.get (java.util.Calendar.DST_OFFSET) + " " +
-            gc.get (java.util.Calendar.ZONE_OFFSET));
- 
+
       }
   }

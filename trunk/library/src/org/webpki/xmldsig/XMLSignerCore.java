@@ -118,6 +118,7 @@ abstract class XMLSignerCore
         if (this instanceof XMLSymKeySigner)
           {
             dsig_wrapper.signature_algorithm =  ((XMLSymKeySigner)this).sym_signer.getMacAlgorithm ().getURI ();
+            dsig_wrapper.symmetric_key_name = ((XMLSymKeySigner)this).key_name;
           }
         else
           {
