@@ -1,11 +1,8 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import java.util.Date;
-
-import java.security.GeneralSecurityException;
 
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
@@ -22,10 +19,8 @@ import org.webpki.crypto.SymKeyVerifierInterface;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class ProvisioningSessionResponseDecoder extends ProvisioningSessionResponse implements Serializable
+public class ProvisioningSessionResponseDecoder extends ProvisioningSessionResponse
   {
-    private static final long serialVersionUID = 1L;
-
     private XMLSignatureWrapper signature;  // Optional
 
 
@@ -34,12 +29,23 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
         return server_session_id;
       }
 
+    
+    public String getClientSessionID ()
+      {
+        return client_session_id;
+      }
+
 
     public Date getServerTime ()
       {
         return server_time;
       }
 
+    
+    public Date getClientTime ()
+      {
+        return client_time;
+      }
 
     
     public ECPublicKey getClientEphemeralKey ()
@@ -54,15 +60,15 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
       }
 
 
-    public int getSessionLifeTime ()
+    public byte[] getSessionAttestation ()
       {
-        return session_life_time;
+        return session_attestation;
       }
 
-    
-    public int getSessionKeyLimit ()
+
+    public X509Certificate[] getDeviceCertificatePath ()
       {
-        return session_key_limit;
+        return device_certificate_path;
       }
 
 
@@ -72,13 +78,7 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
       }
 
 
-    public boolean isSigned ()
-      {
-        return signature != null;
-      }
-
-
-    protected void fromXML (DOMReaderHelper rd) throws IOException
+     protected void fromXML (DOMReaderHelper rd) throws IOException
       {
         DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
 
@@ -86,27 +86,36 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
         // Read the top level attributes
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        server_session_id = ah.getString (ID_ATTR);
+        client_session_id = ah.getString (ID_ATTR);
+
+        server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
 
         server_time = ah.getDateTime (SERVER_TIME_ATTR).getTime ();
 
-        session_key_limit = ah.getInt (SESSION_KEY_LIMIT_ATTR);
+        client_time = ah.getDateTime (CLIENT_TIME_ATTR).getTime ();
+
+        session_attestation = ah.getBinary (SESSION_ATTESTATION_ATTR);
         
-        session_life_time = ah.getInt (SESSION_LIFE_TIME_ATTR);
-
         rd.getChild ();
-
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the client key
         /////////////////////////////////////////////////////////////////////////////////////////
-        rd.getNext (SERVER_EPHEMERAL_KEY_ELEM);
+        rd.getNext (CLIENT_EPHEMERAL_KEY_ELEM);
         rd.getChild ();
         client_ephemeral_key = (ECPublicKey) XMLSignatureWrapper.readPublicKey (rd);
         rd.getParent ();
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the optional server cookie
+        // Get the device certificate path
+        /////////////////////////////////////////////////////////////////////////////////////////
+        rd.getNext (DEVICE_CERTIFICATE_ELEM);
+        rd.getChild ();
+        device_certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);
+        rd.getParent ();
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Get the optional ServerCookie
         /////////////////////////////////////////////////////////////////////////////////////////
         if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
           {

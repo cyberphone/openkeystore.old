@@ -442,17 +442,17 @@ public class DOMWriterHelper
         
         StringBuffer s = new StringBuffer (new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss").format (t));
         
-        int tzo = - (gc.get(Calendar.ZONE_OFFSET) + gc.get(Calendar.DST_OFFSET)) / (60 * 1000);
+        int tzo = (gc.get(Calendar.ZONE_OFFSET) + gc.get(Calendar.DST_OFFSET)) / (60 * 1000);
         
         if (tzo > 0)
           {
             int tzh = tzo / 60, tzm = tzo % 60;
-            s.append (tzh < 10 ? "-0" : "-").append(tzh).append(tzm < 10 ? ":0" : ":").append(tzm);
+            s.append (tzh < 10 ? "+0" : "+").append(tzh).append(tzm < 10 ? ":0" : ":").append(tzm);
           }
         else if (tzo < 0)
           {
             int tzh = (-tzo) / 60, tzm = (-tzo) % 60;
-            s.append (tzh < 10 ? "+0" : "+").append(tzh).append(tzm < 10 ? ":0" : ":").append(tzm);
+            s.append (tzh < 10 ? "-0" : "-").append(tzh).append(tzm < 10 ? ":0" : ":").append(tzm);
           }
         else
           {

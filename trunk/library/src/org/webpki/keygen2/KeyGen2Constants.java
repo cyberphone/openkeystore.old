@@ -67,6 +67,8 @@ public interface KeyGen2Constants
 
     String KEY_ATTESTATION_ATTR              = "KeyAttestation";
 
+    String SESSION_ATTESTATION_ATTR          = "SessionAttestation";
+
     String KEY_SIZE_ATTR                     = "KeySize";
 
     String MAX_LENGTH_ATTR                   = "MaxLength";
@@ -116,6 +118,8 @@ public interface KeyGen2Constants
     // Top elements
 
     String SERVER_EPHEMERAL_KEY_ELEM         = "ServerEphemeralKey";
+
+    String DEVICE_CERTIFICATE_ELEM           = "DeviceCertificate";
 
     String CLIENT_EPHEMERAL_KEY_ELEM         = "ClientEphemeralKey";
 

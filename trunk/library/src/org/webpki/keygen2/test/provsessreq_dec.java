@@ -16,7 +16,7 @@ public class provsessreq_dec
     
     private static void show ()
       {
-        System.out.println ("keyopreq_dec in_file\n");
+        System.out.println ("provsessreq_dec in_file\n");
         System.exit (3);
       }
 

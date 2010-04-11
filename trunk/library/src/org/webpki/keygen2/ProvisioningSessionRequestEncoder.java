@@ -1,7 +1,6 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import java.security.interfaces.ECPublicKey;
 
@@ -20,10 +19,8 @@ import org.webpki.crypto.SignerInterface;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class ProvisioningSessionRequestEncoder extends ProvisioningSessionRequest implements Serializable
+public class ProvisioningSessionRequestEncoder extends ProvisioningSessionRequest
   {
-    private static final long serialVersionUID = 1L;
-
     String prefix;  // Default: no prefix
     
     private boolean did_set_session_updatable;
@@ -118,7 +115,7 @@ public class ProvisioningSessionRequestEncoder extends ProvisioningSessionReques
         wr.setStringAttribute (SESSION_KEY_ALGORITHM_ATTR, session_key_algorithm);
 
         ////////////////////////////////////////////////////////////////////////
-        // Server Ephemeral Key
+        // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////
         wr.addChildElement (SERVER_EPHEMERAL_KEY_ELEM);
         XMLSignatureWrapper.writePublicKey (wr, server_ephemeral_key);

@@ -2,8 +2,10 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.Serializable;
+
+import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
+
 import java.util.Date;
 
 import org.webpki.xml.ServerCookie;
@@ -16,10 +18,8 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-abstract class ProvisioningSessionResponse extends XMLObjectWrapper implements Serializable
+abstract class ProvisioningSessionResponse extends XMLObjectWrapper
   {
-    private static final long serialVersionUID = 1L;
-
     ProvisioningSessionResponse () {}
 
     String server_session_id;
@@ -32,11 +32,11 @@ abstract class ProvisioningSessionResponse extends XMLObjectWrapper implements S
     
     ECPublicKey client_ephemeral_key;
 
-    int session_life_time;
-
-    int session_key_limit;
-
+    byte[] session_attestation;
+    
     ServerCookie server_cookie;
+    
+    X509Certificate[] device_certificate_path;
 
     public void init () throws IOException
       {

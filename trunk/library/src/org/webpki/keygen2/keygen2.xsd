@@ -486,11 +486,6 @@
                <xs:complexType>
                   <xs:sequence>
 
-                     <!-- The master-key -->
-                     <xs:element ref="xenc:EncryptedKey"/>
-
-                     <!-- The individual encrypted preset values -->
-                     <xs:element ref="xenc:EncryptedData" maxOccurs="unbounded"/>
 
                   </xs:sequence>
 
@@ -546,16 +541,6 @@
                 Constraints (that can be enforced by schema-directed validation).
        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-      <!-- Encrypted data objects MUST refer to the master-key. -->
-      <xs:key name="KeyDefinition">
-         <xs:selector xpath="kgen:PresetValues/xenc:EncryptedKey"/>
-         <xs:field xpath="xenc:CarriedKeyName"/>
-      </xs:key>
-
-      <xs:keyref name="KeyReference" refer="kgen:KeyDefinition">
-         <xs:selector xpath="kgen:PresetValues/xenc:EncryptedData/ds:KeyInfo"/>
-         <xs:field xpath="ds:KeyName"/>
-      </xs:keyref>
 
    </xs:element>
 
@@ -728,9 +713,7 @@
                <xs:complexType>
                   <xs:sequence>
 
-                     <!-- Presumably self-explanatory... -->
-                     <xs:element ref="xenc:EncryptedKey"/>
-
+ 
                   </xs:sequence>
 
                   <!-- "EndorsedAlgorithms" holds a non-empty list of
@@ -967,15 +950,6 @@
             <xs:element name="EncryptedPrivateKey" minOccurs="0">
                <xs:complexType>
                   <xs:sequence>
-
-                     <!-- The encrypted private key.  AES256-CBC encryption
-                          is the default for the key-attestation-1 algorithm -->
-                     <xs:element ref="xenc:EncryptedKey"/>
-
-                     <!-- The wrapped encryption key.  RSA PKCS #1 encryption
-                          of a 256-bit random AES key is the default for the
-                          key-attestation-1 algorithm -->
-                     <xs:element ref="xenc:EncryptedKey"/>
 
                   </xs:sequence>
 

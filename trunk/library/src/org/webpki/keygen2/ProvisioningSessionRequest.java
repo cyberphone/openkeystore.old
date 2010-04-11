@@ -2,7 +2,6 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import java.security.interfaces.ECPublicKey;
 import java.util.Date;
@@ -17,10 +16,8 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-abstract class ProvisioningSessionRequest extends XMLObjectWrapper implements Serializable
+abstract class ProvisioningSessionRequest extends XMLObjectWrapper
   {
-    private static final long serialVersionUID = 1L;
-
     ProvisioningSessionRequest () {}
 
     String server_session_id;

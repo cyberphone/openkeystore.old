@@ -1,7 +1,6 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import java.util.Date;
 
@@ -19,10 +18,8 @@ import org.webpki.crypto.VerifierInterface;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class ProvisioningSessionRequestDecoder extends ProvisioningSessionRequest implements Serializable
+public class ProvisioningSessionRequestDecoder extends ProvisioningSessionRequest
   {
-    private static final long serialVersionUID = 1L;
-
     private XMLSignatureWrapper signature;  // Optional
 
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import java.util.Date;
 
+import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 
 import org.w3c.dom.Document;
@@ -18,32 +19,32 @@ import org.webpki.crypto.SymKeySignerInterface;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-@SuppressWarnings("serial")
 public class ProvisioningSessionResponseEncoder extends ProvisioningSessionResponse
   {
-    private static final long serialVersionUID = 1L;
 
     String prefix;  // Default: no prefix
     
-    private boolean did_set_session_updatable;
-
-
-    // Constructors
+     // Constructors
 
     @SuppressWarnings("unused")
     private ProvisioningSessionResponseEncoder () {}
 
 
     public ProvisioningSessionResponseEncoder (ECPublicKey client_ephemeral_key,
-                                              String server_session_id,
-                                              String submit_url,
-                                              int session_life_time,
-                                              int session_key_limit)  throws IOException
+                                               String server_session_id,
+                                               String client_session_id,
+                                               Date server_time,
+                                               Date client_time,
+                                               byte[] session_attestation,
+                                               X509Certificate[] device_certificate_path)  throws IOException
       {
         super.client_ephemeral_key = client_ephemeral_key;
         super.server_session_id = server_session_id;
-        super.session_life_time = session_life_time;
-        super.session_key_limit = session_key_limit;
+        super.client_session_id = client_session_id;
+        super.server_time = server_time;
+        super.client_time = client_time;
+        super.session_attestation = session_attestation;
+        super.device_certificate_path = device_certificate_path;
       }
 
 
@@ -52,11 +53,6 @@ public class ProvisioningSessionResponseEncoder extends ProvisioningSessionRespo
         return super.server_cookie = server_cookie;
       }
 
-
-    public void setServerTime (Date server_time)
-      {
-        super.server_time = server_time;
-      }
 
 
     public void setPrefix (String prefix)
@@ -68,6 +64,7 @@ public class ProvisioningSessionResponseEncoder extends ProvisioningSessionRespo
     public void signRequest (SymKeySignerInterface signer) throws IOException
       {
         XMLSymKeySigner ds = new XMLSymKeySigner (signer);
+        ds.removeXMLSignatureNS ();
         Document doc = getRootDocument ();
         ds.createEnvelopedSignature (doc, server_session_id);
       }
@@ -78,30 +75,33 @@ public class ProvisioningSessionResponseEncoder extends ProvisioningSessionRespo
         wr.initializeRootObject (prefix);
 
         XMLSignatureWrapper.addXMLSignature11NS (wr);
+        XMLSignatureWrapper.addXMLSignatureNS (wr);
 
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, server_session_id);
+        wr.setStringAttribute (ID_ATTR, client_session_id);
 
-         if (server_time == null)
-          {
-            server_time = new Date ();
-          }
+        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
+
         wr.setDateTimeAttribute (SERVER_TIME_ATTR, server_time);
 
+        wr.setDateTimeAttribute (CLIENT_TIME_ATTR, client_time);
         
-        wr.setIntAttribute (SESSION_LIFE_TIME_ATTR, session_life_time);
-
-        wr.setIntAttribute (SESSION_KEY_LIMIT_ATTR, session_key_limit);
-
-//        wr.setStringAttribute (SESSION_KEY_ALGORITHM_ATTR, session_key_algorithm);
+        wr.setBinaryAttribute (SESSION_ATTESTATION_ATTR, session_attestation);
 
         ////////////////////////////////////////////////////////////////////////
-        // Server Ephemeral Key
+        // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////
-        wr.addChildElement (SERVER_EPHEMERAL_KEY_ELEM);
+        wr.addChildElement (CLIENT_EPHEMERAL_KEY_ELEM);
         XMLSignatureWrapper.writePublicKey (wr, client_ephemeral_key);
+        wr.getParent();
+
+        ////////////////////////////////////////////////////////////////////////
+        // Device certificate path
+        ////////////////////////////////////////////////////////////////////////
+        wr.addChildElement (DEVICE_CERTIFICATE_ELEM);
+        XMLSignatureWrapper.writeX509DataSubset (wr, device_certificate_path);
         wr.getParent();
 
         ////////////////////////////////////////////////////////////////////////
