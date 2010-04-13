@@ -137,8 +137,6 @@ public interface KeyGen2Constants
 
     String MANAGE_OBJECT_ELEM                = "ManageObject";       
 
-    String CREATE_OBJECT_ELEM                = "CreateObject";       
-
     String PIN_POLICY_ELEM                   = "PINPolicy";       
 
     String PUK_POLICY_ELEM                   = "PUKPolicy";       

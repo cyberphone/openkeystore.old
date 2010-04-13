@@ -572,47 +572,40 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the request and management elements [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        do
+         while (true)
           {
-            rd.getNext (CREATE_OBJECT_ELEM);
-            rd.getChild ();
-            do
+            if (rd.hasNext (KEY_PAIR_ELEM))
               {
-                if (rd.hasNext (KEY_PAIR_ELEM))
-                  {
-                    readKeyProperties (rd, false);
-                  }
-                else if (rd.hasNext (PUK_POLICY_ELEM))
-                  {
-                    boolean start = true;
-                    rd.getNext (PUK_POLICY_ELEM);
-                    PUKPolicy pk = new PUKPolicy (rd);
-                    rd.getChild ();
-                    do
-                      {
-                        readPINPolicy (rd, start, pk);
-                        start = false;
-                      }
-                    while (rd.hasNext ());
-                    rd.getParent ();
-                  }
-                else if (rd.hasNext (PIN_POLICY_ELEM))
-                  {
-                    readPINPolicy (rd, false, null);
-                  }
-                else
-                  {
-                    rd.getNext (DEVICE_SYNCHRONIZED_PIN_ELEM);
-                    rd.getChild ();
-                    readKeyProperties (rd, true);
-                    rd.getParent ();
-                  }
+                readKeyProperties (rd, false);
               }
-            while (rd.hasNext ());
-            rd.getParent ();
+            else if (rd.hasNext (PUK_POLICY_ELEM))
+              {
+                boolean start = true;
+                rd.getNext (PUK_POLICY_ELEM);
+                PUKPolicy pk = new PUKPolicy (rd);
+                rd.getChild ();
+                do
+                  {
+                    readPINPolicy (rd, start, pk);
+                    start = false;
+                  }
+                while (rd.hasNext ());
+                rd.getParent ();
+              }
+            else if (rd.hasNext (PIN_POLICY_ELEM))
+              {
+                readPINPolicy (rd, false, null);
+              }
+            else if (rd.hasNext (DEVICE_SYNCHRONIZED_PIN_ELEM))
+              {
+                rd.getNext (DEVICE_SYNCHRONIZED_PIN_ELEM);
+                rd.getChild ();
+                readKeyProperties (rd, true);
+                rd.getParent ();
+              }
+            else break;
           }
-        while (rd.hasNext (CREATE_OBJECT_ELEM));
-
+ 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional server cookie
         /////////////////////////////////////////////////////////////////////////////////////////

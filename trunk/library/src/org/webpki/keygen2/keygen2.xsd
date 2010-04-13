@@ -301,22 +301,28 @@
 
             <xs:choice maxOccurs="unbounded">
 
-               <!-- In the case the issuer wants to create user-keys including
-                    optional PIN/PUK objects the following element is to be used. -->
-               <xs:element ref="kgen:CreateObject"/>
+               <!-- A key that requires no PIN code. -->
+               <xs:element ref="kgen:KeyPair"/>
 
-               <!-- In the case the issuer wants to manage existing user-keys
-                    and/or PIN/PUK objects the following element is to be used.
+               <!-- One or more keys that are protected by PINs that can be
+                    defined (or updated) by the user governed by a specific
+                    PIN policy.  In addition to the PIN there is a master
+                    PUK code that can unlock keys that have been locked due
+                    to the use of erroneous PIN codes. -->
+               <xs:element ref="kgen:PUKPolicy"/>
 
-                    Note: To simplify implementation of an "atomic" provisioning
-                    process where either all operations or none pass, you MUST NOT
-                    combine delete operations with other operations on the same
-                    key.  As a consequence, object management operations can be
-                    executed in any order regardless of their sequence order in
-                    the request.  -->
-               <xs:element ref="kgen:ManageObject"/>
+               <!-- One or more keys that are protected by PINs that can be
+                    defined (or updated) by the user governed by a specific
+                    PIN policy. -->
+               <xs:element ref="kgen:PINPolicy"/>
 
-            </xs:choice> 
+               <!-- A key that is protected by the same PIN as the device.
+                    This option (which MAY be supported by the device), is
+                    mainly intended for keys belonging to an organization
+                    that manages the device. -->
+               <xs:element ref="kgen:DeviceSynchronizedPIN"/>
+
+           </xs:choice>
 
             <!-- See "ServerCookie" definition. -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
@@ -1222,41 +1228,6 @@
       </xs:complexType>
    </xs:element>
 
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                 Create container object encapsulating create sub-objects.
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:element name="CreateObject">
-      <xs:complexType>
-         <xs:sequence>
-
-            <xs:choice maxOccurs="unbounded">
-
-               <!-- A key that requires no PIN code. -->
-               <xs:element ref="kgen:KeyPair"/>
-
-               <!-- One or more keys that are protected by PINs that can be
-                    defined (or updated) by the user governed by a specific
-                    PIN policy.  In addition to the PIN there is a master
-                    PUK code that can unlock keys that have been locked due
-                    to the use of erroneous PIN codes. -->
-               <xs:element ref="kgen:PUKPolicy"/>
-
-               <!-- One or more keys that are protected by PINs that can be
-                    defined (or updated) by the user governed by a specific
-                    PIN policy. -->
-               <xs:element ref="kgen:PINPolicy"/>
-
-               <!-- A key that is protected by the same PIN as the device.
-                    This option (which MAY be supported by the device), is
-                    mainly intended for keys belonging to an organization
-                    that manages the device. -->
-               <xs:element ref="kgen:DeviceSynchronizedPIN"/>
-
-           </xs:choice>
-         </xs:sequence>
-      </xs:complexType>
-   </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         Management container object encapsulating mangement sub-objects.

@@ -571,67 +571,66 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
           }
 
         ////////////////////////////////////////////////////////////////////////
-        // There MAY indeed be zero create objects...
+        // There MUST not be zero keys to initialize...
         ////////////////////////////////////////////////////////////////////////
-        if (!requested_keys.isEmpty ())
+        if (requested_keys.isEmpty ())
           {
-            wr.addChildElement (CREATE_OBJECT_ELEM);
-            KeyProperties last_req_key = null;
-            for (KeyProperties req_key : requested_keys.values ())
-              {
-                if (last_req_key != null && last_req_key.puk_policy != null &&
-                    last_req_key.puk_policy != req_key.puk_policy)
-                  {
-                    wr.getParent ();
-                  }
-                if (last_req_key != null && last_req_key.pin_policy != null &&
-                    last_req_key.pin_policy != req_key.pin_policy)
-                  {
-                    wr.getParent ();
-                  }
-                if (req_key.puk_policy != null)
-                  {
-                    if (req_key.puk_policy.written)
-                      {
-                        if (last_req_key.puk_policy != req_key.puk_policy)
-                          {
-                            bad ("PUK grouping error");
-                          }
-                      }
-                    else
-                      {
-                        wr.addChildElement (PUK_POLICY_ELEM);
-                        req_key.puk_policy.writePolicy (wr);
-                        req_key.puk_policy.written = true;
-                      }
-                  }
-                if (req_key.pin_policy != null)
-                  {
-                    if (req_key.pin_policy.written)
-                      {
-                        if (last_req_key.pin_policy != req_key.pin_policy)
-                          {
-                            bad ("PIN grouping error");
-                          }
-                      }
-                    else
-                      {
-                        wr.addChildElement (PIN_POLICY_ELEM);
-                        req_key.pin_policy.writePolicy (wr);
-                        req_key.pin_policy.written = true;
-                      }
-                  }
-                req_key.writeRequest (wr);
-                last_req_key = req_key;
-              }
-            if (last_req_key != null && last_req_key.pin_policy != null)
+            bad ("Empty request not allowd!");
+          }
+        KeyProperties last_req_key = null;
+        for (KeyProperties req_key : requested_keys.values ())
+          {
+            if (last_req_key != null && last_req_key.puk_policy != null &&
+                last_req_key.puk_policy != req_key.puk_policy)
               {
                 wr.getParent ();
               }
-            if (last_req_key != null && last_req_key.puk_policy != null)
+            if (last_req_key != null && last_req_key.pin_policy != null &&
+                last_req_key.pin_policy != req_key.pin_policy)
               {
                 wr.getParent ();
               }
+            if (req_key.puk_policy != null)
+              {
+                if (req_key.puk_policy.written)
+                  {
+                    if (last_req_key.puk_policy != req_key.puk_policy)
+                      {
+                        bad ("PUK grouping error");
+                      }
+                  }
+                else
+                  {
+                    wr.addChildElement (PUK_POLICY_ELEM);
+                    req_key.puk_policy.writePolicy (wr);
+                    req_key.puk_policy.written = true;
+                  }
+              }
+            if (req_key.pin_policy != null)
+              {
+                if (req_key.pin_policy.written)
+                  {
+                    if (last_req_key.pin_policy != req_key.pin_policy)
+                      {
+                        bad ("PIN grouping error");
+                      }
+                  }
+                else
+                  {
+                    wr.addChildElement (PIN_POLICY_ELEM);
+                    req_key.pin_policy.writePolicy (wr);
+                    req_key.pin_policy.written = true;
+                  }
+              }
+            req_key.writeRequest (wr);
+            last_req_key = req_key;
+          }
+        if (last_req_key != null && last_req_key.pin_policy != null)
+          {
+            wr.getParent ();
+          }
+        if (last_req_key != null && last_req_key.puk_policy != null)
+          {
             wr.getParent ();
           }
 
