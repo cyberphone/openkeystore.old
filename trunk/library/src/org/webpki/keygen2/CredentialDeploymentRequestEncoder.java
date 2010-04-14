@@ -494,7 +494,8 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
         this.client_session_id = key_op_req_enc.client_session_id;
         this.server_session_id = key_op_req_enc.server_session_id;
         this.preset_value_security = preset_value_security;
-        this.preset_values = key_op_req_enc.preset_values;
+//TODO
+//        this.preset_values = key_op_req_enc.preset_values;
 //        this.session_hash = key_op_req_enc.getSessionHash ();
       }
 

@@ -1,13 +1,12 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import java.math.BigInteger;
 
 import java.util.Vector;
 import java.util.Date;
-import java.util.TreeMap;
+import java.util.LinkedHashMap;
 
 import org.w3c.dom.Document;
 
@@ -23,14 +22,11 @@ import org.webpki.crypto.ECDomains;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class KeyInitializationRequestEncoder extends KeyInitializationRequest implements Serializable
+public class KeyInitializationRequestEncoder extends KeyInitializationRequest
   {
-    private static final long serialVersionUID = 1L;
 
-    class PresetValue implements Serializable
+    class PresetValue
       {
-        private static final long serialVersionUID = 1L;
-
         byte[] value;
 
         PresetValue (byte[] value) throws IOException
@@ -45,10 +41,8 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
       }
 
 
-    private class PresetPIN extends PresetValue implements Serializable
+    private class PresetPIN extends PresetValue
       {
-        private static final long serialVersionUID = 1L;
-
         boolean user_modifiable;
 
         PresetPIN (byte[] value, boolean user_modifiable) throws IOException
@@ -68,11 +62,11 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
       }
 
 
-    public class PUKPolicy extends PresetValue implements Serializable
+    public class PUKPolicy extends PresetValue
       {
-        private static final long serialVersionUID = 1L;
-
         boolean written;
+        
+        String id;
 
         PassphraseFormats format;
 
@@ -81,6 +75,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
         PUKPolicy (byte[] value, PassphraseFormats format, int retry_limit) throws IOException
           {
             super (value);
+            this.id = puk_prefix + ++next_puk_id_suffix;
             this.format = format;
             this.retry_limit = retry_limit;
           }
@@ -89,16 +84,15 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
         void writePolicy (DOMWriterHelper wr) throws IOException
           {
             super.write (wr);
+            wr.setStringAttribute (ID_ATTR, id);
             wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
             wr.setStringAttribute (FORMAT_ATTR, format.getXMLName ());
           }
       }
 
 
-    public class PINPolicy implements Serializable
+    public class PINPolicy
       {
-        private static final long serialVersionUID = 1L;
-
         boolean written;
 
         boolean not_first;
@@ -106,6 +100,8 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
         byte[] preset_test;
 
         // Actual data
+        
+        PUKPolicy puk_policy;  // Optional
 
         PassphraseFormats format;
 
@@ -122,11 +118,17 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
         boolean caching_support;  // Optional
 
         InputMethods input_method;  // Optional
+        
+        String id;
 
-        private PINPolicy () {}
+        private PINPolicy ()
+          {
+             this.id = pin_prefix + ++next_pin_id_suffix;
+           }
 
         void writePolicy (DOMWriterHelper wr) throws IOException
           {
+            wr.setStringAttribute (ID_ATTR, id);
             wr.setIntAttribute (MAX_LENGTH_ATTR, max_length);
             wr.setIntAttribute (MIN_LENGTH_ATTR, min_length);
             wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
@@ -185,19 +187,14 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
       }
 
 
-    public static abstract class KeyAlgorithmData implements Serializable
+    public static abstract class KeyAlgorithmData
       {
-        private static final long serialVersionUID = 1L;
-
         abstract void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException;
 
         private KeyAlgorithmData () {}
 
-        public static final class EC extends KeyAlgorithmData implements Serializable
+        public static final class EC extends KeyAlgorithmData
           {
-
-            private static final long serialVersionUID = 1L;
-
             ECDomains named_curve;
 
             @SuppressWarnings("unused")
@@ -218,11 +215,8 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
           }
 
 
-        public static final class RSA extends KeyAlgorithmData implements Serializable
+        public static final class RSA extends KeyAlgorithmData
           {
-
-            private static final long serialVersionUID = 1L;
-
             int key_size;
 
             BigInteger fixed_exponent;
@@ -257,10 +251,8 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
           }
 
 
-        public static final class DSA extends KeyAlgorithmData implements Serializable
+        public static final class DSA extends KeyAlgorithmData
           {
-            private static final long serialVersionUID = 1L;
-
             int key_size;
 
             @SuppressWarnings("unused")
@@ -281,10 +273,8 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
       }
 
  
-    public class KeyProperties implements Serializable
+    public class KeyProperties
       {
-        private static final long serialVersionUID = 1L;
-
         boolean exportable;
  
         public KeyProperties setExportable (boolean flag)
@@ -314,7 +304,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
         KeyAlgorithmData key_alg_data;
 
         PINPolicy pin_policy;
-
+        
         PUKPolicy puk_policy;
 
         PresetPIN preset_pin;
@@ -324,7 +314,6 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
         KeyProperties (KeyGen2KeyUsage key_usage,
                        KeyAlgorithmData key_alg_data,
                        PINPolicy pin_policy,
-                       PUKPolicy puk_policy,
                        PresetPIN preset_pin,
                        boolean device_pin_protected) throws IOException
           {
@@ -332,7 +321,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
             this.key_usage = key_usage;
             this.key_alg_data = key_alg_data;
             this.pin_policy = pin_policy;
-            this.puk_policy = puk_policy;
+            this.puk_policy = pin_policy == null ? null : pin_policy.puk_policy;
             this.preset_pin = preset_pin;
             this.device_pin_protected = device_pin_protected;
             if (pin_policy != null)
@@ -394,11 +383,15 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
 
     String key_prefix = "Key.";
 
-    String key_man_prefix = "Section.";
-
     int next_key_id_suffix = 0;
 
-    int next_key_man_suffix = 0;
+    String pin_prefix = "PIN.";
+
+    int next_pin_id_suffix = 0;
+
+    String puk_prefix = "PUK.";
+
+    int next_puk_id_suffix = 0;
 
     boolean need_signature_ns;
 
@@ -406,9 +399,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
 
     String prefix;  // Default: no prefix
 
-    TreeMap<String,KeyInitializationRequestEncoder.KeyProperties> requested_keys = new TreeMap<String,KeyInitializationRequestEncoder.KeyProperties> ();
-
-    Vector<PresetValue> preset_values = new Vector<PresetValue> ();
+    LinkedHashMap<String,KeyInitializationRequestEncoder.KeyProperties> requested_keys = new LinkedHashMap<String,KeyInitializationRequestEncoder.KeyProperties> ();
 
     ServerCookie server_cookie;
 
@@ -440,13 +431,15 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
     public PINPolicy createPINPolicy (PassphraseFormats format,
                                       int min_length,
                                       int max_length,
-                                      int retry_limit) throws IOException
+                                      int retry_limit,
+                                      PUKPolicy puk_policy) throws IOException
       {
         PINPolicy pin_policy = new PINPolicy ();
         pin_policy.format = format;
         pin_policy.min_length = min_length;
         pin_policy.max_length = max_length;
         pin_policy.retry_limit = retry_limit;
+        pin_policy.puk_policy = puk_policy;
         if (format == null)
           {
             bad ("PassphraseFormats must not be null");
@@ -461,8 +454,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
 
     public PUKPolicy createPUKPolicy (byte[] value,
                                       PassphraseFormats format,
-                                      int retry_limit,
-                                      boolean hidden) throws IOException
+                                      int retry_limit) throws IOException
       {
         return new PUKPolicy (value, format, retry_limit);
       }
@@ -471,15 +463,10 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
     private KeyProperties addKeyProperties (KeyGen2KeyUsage key_usage,
                                             KeyAlgorithmData key_alg_data,
                                             PINPolicy pin_policy,
-                                            PUKPolicy puk_policy,
                                             PresetPIN preset_pin,
                                             boolean device_pin_protected) throws IOException
       {
-        if (!device_pin_protected && puk_policy != null && pin_policy == null)
-          {
-            bad ("A PUKPolicy always requires a PINPolicy object as well");
-          }
-        KeyProperties rk = new KeyProperties (key_usage, key_alg_data, pin_policy, puk_policy, preset_pin, device_pin_protected);
+        KeyProperties rk = new KeyProperties (key_usage, key_alg_data, pin_policy, preset_pin, device_pin_protected);
         requested_keys.put (rk.getID (), rk);
         return rk;
       }
@@ -494,30 +481,28 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
     public KeyProperties createKeyWithPresetPIN (KeyGen2KeyUsage key_usage,
                                                  KeyAlgorithmData key_alg_data,
                                                  PINPolicy pin_policy,
-                                                 PUKPolicy puk_policy,
                                                  byte[] pin_value, boolean hidden, boolean user_modifiable) throws IOException
       {
         if (pin_policy == null)
           {
             bad ("PresetPIN without PINPolicy is not allowed");
           }
-        return addKeyProperties (key_usage, key_alg_data, pin_policy, puk_policy, new PresetPIN (pin_value, user_modifiable), false);
+        return addKeyProperties (key_usage, key_alg_data, pin_policy, new PresetPIN (pin_value, user_modifiable), false);
       }
 
 
     public KeyProperties createKey (KeyGen2KeyUsage key_usage,
                                     KeyAlgorithmData key_alg_data,
-                                    PINPolicy pin_policy,
-                                    PUKPolicy puk_policy) throws IOException
+                                    PINPolicy pin_policy) throws IOException
       {
-        return addKeyProperties (key_usage, key_alg_data, pin_policy,  puk_policy, null, false);
+        return addKeyProperties (key_usage, key_alg_data, pin_policy, null, false);
       }
 
 
     public KeyProperties createDevicePINProtectedKey (KeyGen2KeyUsage key_usage,
                                                       KeyAlgorithmData key_alg_data) throws IOException
       {
-        return addKeyProperties (key_usage, key_alg_data, null, null, null, true);
+        return addKeyProperties (key_usage, key_alg_data, null, null, true);
       }
 
 
@@ -536,6 +521,8 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
     public void signRequest (SignerInterface signer) throws IOException
       {
         XMLSigner ds = new XMLSigner (signer);
+        ds.removeXMLSignatureNS ();
+        need_signature_ns = true;
         Document doc = getRootDocument ();
         ds.createEnvelopedSignature (doc, server_session_id);
       }
@@ -633,7 +620,6 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest im
           {
             wr.getParent ();
           }
-
 
         ////////////////////////////////////////////////////////////////////////
         // Optional ServerCookie

@@ -1,7 +1,6 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import java.math.BigInteger;
 
@@ -22,43 +21,27 @@ import org.webpki.crypto.ECDomains;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class KeyInitializationRequestDecoder extends KeyInitializationRequest implements Serializable
+public class KeyInitializationRequestDecoder extends KeyInitializationRequest
   {
-    private static final long serialVersionUID = 1L;
-
-    abstract class PresetValueReference extends IDObject implements Serializable
+    abstract class PresetValueReference
       {
-        private static final long serialVersionUID = 1L;
-        
-
         byte[] value;
 
         PresetValueReference (DOMReaderHelper rd) throws IOException
           {
-            super (rd);
             value = rd.getAttributeHelper ().getBinary (VALUE_ATTR);
+          }
+        
+        public byte[] getValue ()
+          {
+            return value;
           }
 
       }
 
-    abstract class IDObject implements Serializable
+
+    public class PresetPIN extends PresetValueReference
       {
-        private static final long serialVersionUID = 1L;
-  
-        String id;
-  
-        IDObject (DOMReaderHelper rd) throws IOException
-          {
-            id = rd.getAttributeHelper ().getString (ID_ATTR);
-          }
-  
-    }
-
-
-    public class PresetPIN extends PresetValueReference implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
         boolean user_modifiable;
 
         PresetPIN (DOMReaderHelper rd) throws IOException
@@ -76,20 +59,21 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
       }
 
 
-    public class PUKPolicy extends PresetValueReference implements Serializable
+    public class PUKPolicy extends PresetValueReference
       {
-        private static final long serialVersionUID = 1L;
-
         Object user_data;
 
         PassphraseFormats format;
 
         int retry_limit;
-
+        
+        String id;
+ 
         PUKPolicy (DOMReaderHelper rd) throws IOException
           {
             super (rd);
             retry_limit = rd.getAttributeHelper ().getInt (RETRY_LIMIT_ATTR);
+            id = rd.getAttributeHelper ().getString (ID_ATTR);
             format = PassphraseFormats.getPassphraseFormatFromString (rd.getAttributeHelper ().getString (FORMAT_ATTR));
           }
 
@@ -116,13 +100,21 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
           {
             return user_data;
           }
+
+        
+        public String getID ()
+          {
+            return id;
+          }
       }
 
 
-    public class PINPolicy extends IDObject implements Serializable
+    public class PINPolicy
       {
-        private static final long serialVersionUID = 1L;
-
+        String id;
+        
+        PUKPolicy puk_policy;
+        
         Object user_data;
 
         PassphraseFormats format;
@@ -143,8 +135,9 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
 
         PINPolicy (DOMReaderHelper rd) throws IOException
           {
-            super (rd);
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+            
+            id = ah.getString (ID_ATTR);
 
             min_length = ah.getInt (MIN_LENGTH_ATTR);
 
@@ -178,9 +171,9 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
           }
 
 
-        public PatternRestrictions[] getPatternRestrictions ()
+        public Set<PatternRestrictions> getPatternRestrictions ()
           {
-            return pattern_restrictions == null ? null : pattern_restrictions.toArray (new PatternRestrictions[0]);
+            return pattern_restrictions;
           }
 
 
@@ -242,19 +235,23 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
           {
             return user_data;
           }
+
+        
+        public PUKPolicy getPUKPolicy ()
+          {
+            return puk_policy;
+          }
+
       }
 
 
-    public interface KeyAlgorithmData
+    public abstract class KeyAlgorithmData
       {
       }
 
 
-    public class RSA implements KeyAlgorithmData, Serializable
+    public class RSA extends KeyAlgorithmData
       {
-
-        private static final long serialVersionUID = 1L;
-
         int key_size;
 
         BigInteger fixed_exponent;  // May be null
@@ -280,11 +277,8 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
       }
 
 
-    public class EC implements KeyAlgorithmData, Serializable
+    public class EC extends KeyAlgorithmData
       {
-
-        private static final long serialVersionUID = 1L;
-
         ECDomains named_curve;
 
         EC (ECDomains named_curve)
@@ -301,17 +295,15 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
       }
 
 
-    public class KeyObject extends IDObject implements Serializable
+    public class KeyObject
       {
-        private static final long serialVersionUID = 1L;
-
+        String id;
+        
         boolean start_of_puk_group;
 
         boolean start_of_pin_group;
 
         PINPolicy pin_policy;
-
-        PUKPolicy puk_policy;
 
         PresetPIN preset_pin;
 
@@ -329,15 +321,14 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
                    PresetPIN preset_pin,
                    boolean device_pin_protected) throws IOException
           {
-            super (rd);
+            rd.getNext (KEY_PAIR_ELEM);
             this.pin_policy = pin_policy;
             this.start_of_pin_group = start_of_pin_group;
             this.preset_pin = preset_pin;
             this.device_pin_protected = device_pin_protected;
 
-            rd.getNext (KEY_PAIR_ELEM);
-
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+            id = ah.getString (ID_ATTR);
             key_usage = KeyGen2KeyUsage.getKeyUsageFromString (ah.getString (KEY_USAGE_ATTR));
             exportable = ah.getBooleanConditional (EXPORTABLE_ATTR);
 
@@ -371,12 +362,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
         public PINPolicy getPINPolicy ()
           {
             return pin_policy;
-          }
-
-
-        public PUKPolicy getPUKPolicy ()
-          {
-            return puk_policy;
           }
 
 
@@ -468,11 +453,11 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
         boolean start = true;
         rd.getNext (PIN_POLICY_ELEM);
         PINPolicy upp = new PINPolicy (rd);
+        upp.puk_policy = puk_policy;
         rd.getChild ();
         do
           {
             KeyObject rk = readKeyProperties (rd, upp, start);
-            rk.puk_policy = puk_policy;
             rk.start_of_puk_group = puk_start;
             puk_start = false;
             start = false;
@@ -484,8 +469,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
 
     private Vector<KeyObject> request_objects = new Vector<KeyObject> ();
       
-    private String server_time;
-
     private String submit_url;
 
     private ServerCookie server_cookie;     // Optional
@@ -504,12 +487,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
     public String getServerSessionID ()
       {
         return server_session_id;
-      }
-
-
-    public String getServerTime ()
-      {
-        return server_time;
       }
 
 
@@ -543,7 +520,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
       }
 
 
-    public KeyObject[] getRequestedKeyObjects () throws IOException
+    public KeyObject[] getKeyObjects () throws IOException
       {
         return request_objects.toArray (new KeyObject[0]);
       }
@@ -560,8 +537,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest im
         server_session_id = ah.getString (ID_ATTR);
 
         client_session_id = ah.getString (CLIENT_SESSION_ID_ATTR);
-
-        server_time = ah.getString (SERVER_TIME_ATTR);
 
         submit_url = ah.getString (SUBMIT_URL_ATTR);
 

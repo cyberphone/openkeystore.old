@@ -1144,17 +1144,8 @@
 
    <xs:attributeGroup name="encryptedPinOrPuk">
 
-      <!-- Reference to an encrypted PIN (or PUK) code stored in
-           "PresetValues".  The encrypted value is supposed to be
-           an UTF-8 string. -->
-      <xs:attribute name="ValueReferenceID" type="xs:string" use="required"/>
-
-      <!-- True if the received value is to be hidden from the user
-           who is supposed to get this value through some OOB method.
-           If not hidden the GUI is typically displaying the (decrypted)
-           value and giving the user a chance to write it down.
-           Default: false. -->
-      <xs:attribute name="Hidden" type="xs:boolean" use="optional"/>
+      <!-- Encrypted PIN (or PUK) code. -->
+      <xs:attribute name="Value" type="xs:base64Binary" use="required"/>
 
    </xs:attributeGroup>
    
@@ -1176,6 +1167,10 @@
            That is, a limit of three allows two bad PINs, while the third
            MUST be correct.  -->
       <xs:attribute name="RetryLimit" type="xs:unsignedShort" use="required"/>
+
+      <!-- This mandatory server-generated item MUST be unique within
+           a request but MAY stay constant between requests. -->
+      <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
    </xs:attributeGroup>
 

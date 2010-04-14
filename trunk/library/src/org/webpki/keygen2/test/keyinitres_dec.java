@@ -10,12 +10,12 @@ import org.webpki.crypto.JKSCAVerifier;
 
 import org.webpki.keygen2.KeyInitializationResponseDecoder;
 
-public class keyopres_dec
+public class keyinitres_dec
   {
 
     private static void show ()
       {
-        System.out.println ("keyopres_dec in_file\n");
+        System.out.println ("keyinitres_dec in_file\n");
         System.exit (3);
       }
 

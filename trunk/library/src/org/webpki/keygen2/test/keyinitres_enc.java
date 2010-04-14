@@ -38,7 +38,7 @@ import org.webpki.keygen2.KeyInitializationResponseEncoder;
 import org.webpki.keygen2.KeyAttestationUtil;
 import org.webpki.keygen2.KeyGen2KeyUsage;
 
-public class keyopres_enc
+public class keyinitres_enc
   {
     static final String UNFORMATTED_RSA  = "RSA/ECB/NoPadding";
 
@@ -48,7 +48,7 @@ public class keyopres_enc
     static String last_key;
     private static void show ()
       {
-        System.out.println ("keyopres_enc out_file [-selfsigned]\n");
+        System.out.println ("keyinitres_enc out_file [-selfsigned]\n");
         System.exit (3);
       }
 

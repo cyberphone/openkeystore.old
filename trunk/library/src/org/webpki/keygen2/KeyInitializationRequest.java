@@ -2,7 +2,6 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
@@ -13,10 +12,8 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-abstract class KeyInitializationRequest extends XMLObjectWrapper implements Serializable
+abstract class KeyInitializationRequest extends XMLObjectWrapper
   {
-    private static final long serialVersionUID = 1L;
-
     KeyInitializationRequest () {}
 
     String server_session_id;
