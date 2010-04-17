@@ -74,11 +74,11 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
 
     public void verifySignature (SymKeyVerifierInterface verifier) throws IOException
       {
-        new XMLSymKeyVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);
+        new XMLSymKeyVerifier (verifier).validateEnvelopedSignature (this, null, signature, client_session_id);
       }
 
 
-     protected void fromXML (DOMReaderHelper rd) throws IOException
+    protected void fromXML (DOMReaderHelper rd) throws IOException
       {
         DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
 
@@ -99,7 +99,7 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
         rd.getChild ();
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the client key
+        // Get the ephemeral client key
         /////////////////////////////////////////////////////////////////////////////////////////
         rd.getNext (CLIENT_EPHEMERAL_KEY_ELEM);
         rd.getChild ();

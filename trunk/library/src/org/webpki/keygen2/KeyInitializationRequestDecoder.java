@@ -477,6 +477,9 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
     private XMLSignatureWrapper signature;  // Optional
 
+    private String server_session_id;
+
+    private String client_session_id;
 
     public String getClientSessionID ()
       {

@@ -150,21 +150,15 @@ public interface KeyGen2Constants
 
     String EXTENSION_ELEM                    = "Extension";
 
-    String LOGO_TYPE_ELEM                    = "Logotype";
+    String ENCRYPTED_EXTENSION_ELEM          = "EncryptedExtension";
+
+    String LOGOTYPE_ELEM                     = "Logotype";
 
     String CLONE_KEY_ELEM                    = "CloneKey";
 
     String REPLACE_KEY_ELEM                  = "ReplaceKey";
 
     String DELETE_KEY_ELEM                   = "DeleteKey";
-
-    String DELETE_KEYS_BY_CONTENT_ELEM       = "DeleteKeysByContent";
-
-    String UPDATE_PIN_POLICY_ELEM            = "UpdatePINPolicy";
-
-    String UPDATE_PUK_POLICY_ELEM            = "UpdatePUKPolicy";
-
-    String UPDATE_PRESET_PIN_ELEM            = "UpdatePresetPIN";
 
     String ISSUER_LOGOTYPE_ELEM              = "IssuerLogotype";       
 
@@ -173,8 +167,6 @@ public interface KeyGen2Constants
     String PROPERTY_BAG_ELEM                 = "PropertyBag";       
 
     String RENEWAL_SERVICE_ELEM              = "RenewalService";
-
-    String ENDORSEMENT_KEY_ELEM              = "EndorsementKey";
 
     String RSA_ELEM                          = "RSA";
 

@@ -2,12 +2,7 @@ package org.webpki.keygen2.test;
 
 import java.math.BigInteger;
 
-import java.util.Date;
-
-
 import org.webpki.util.ArrayUtil;
-
-import org.webpki.xml.DOMReaderHelper;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -15,6 +10,7 @@ import org.webpki.crypto.ECDomains;
 import org.webpki.crypto.JKSSignCertStore;
 
 import org.webpki.keygen2.KeyInitializationRequestEncoder;
+import org.webpki.keygen2.IssuerCredentialStore;
 import org.webpki.keygen2.KeyGen2KeyUsage;
 import org.webpki.keygen2.PassphraseFormats;
 import org.webpki.keygen2.PINGrouping;
@@ -32,19 +28,12 @@ public class keyinitreq_enc
 
     static KeyInitializationRequestEncoder create () throws Exception
       {
-        Date server_time = DOMReaderHelper.parseDateTime (Constants.SERVER_TIME).getTime ();
+        IssuerCredentialStore ics = new  IssuerCredentialStore (Constants.SESSION_ID,
+                                                                Constants.REQUEST_ID);
 
+        IssuerCredentialStore.PUKPolicy puk = ics.createPUKPolicy (new byte[]{4,6,8,9}, PassphraseFormats.NUMERIC, 3);
 
-        KeyInitializationRequestEncoder kre =
-                           new KeyInitializationRequestEncoder (Constants.SESSION_ID,
-                                                           Constants.REQUEST_ID,
-                                                           "https://ca.example.com/keygenres",
-                                                           server_time);
- //      kre.setAES256Mode (true);
-
-       KeyInitializationRequestEncoder.PUKPolicy puk = kre.createPUKPolicy (new byte[]{4,6,8,9}, PassphraseFormats.NUMERIC, 3);
-
-       KeyInitializationRequestEncoder.PINPolicy pin = kre.createPINPolicy (PassphraseFormats.NUMERIC,
+        IssuerCredentialStore.PINPolicy pin = ics.createPINPolicy (PassphraseFormats.NUMERIC,
                                                            5,
                                                            8,
                                                            3,
@@ -54,41 +43,42 @@ public class keyinitreq_enc
                                                              {PatternRestrictions.THREE_IN_A_ROW,
                                                               PatternRestrictions.SEQUENCE});
 
-        kre.createKey (KeyGen2KeyUsage.AUTHENTICATION,
-                       new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (2048),
+        ics.createKey (KeyGen2KeyUsage.AUTHENTICATION,
+                       new IssuerCredentialStore.KeyAlgorithmData.RSA (2048),
                        null).setExportable (true);
 
-        kre.createKey (KeyGen2KeyUsage.AUTHENTICATION,
-                       new KeyInitializationRequestEncoder.KeyAlgorithmData.EC (ECDomains.P_256),
+        ics.createKey (KeyGen2KeyUsage.AUTHENTICATION,
+                       new IssuerCredentialStore.KeyAlgorithmData.EC (ECDomains.P_256),
                        pin);
 
-        kre.createKey (KeyGen2KeyUsage.SYMMETRIC_KEY,
-                       new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (1024),
+        ics.createKey (KeyGen2KeyUsage.SYMMETRIC_KEY,
+                       new IssuerCredentialStore.KeyAlgorithmData.RSA (1024),
                        pin);
 
-        kre.createKey (KeyGen2KeyUsage.SIGNATURE,
-                       new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (2048, BigInteger.valueOf (3)),
+        ics.createKey (KeyGen2KeyUsage.SIGNATURE,
+                       new IssuerCredentialStore.KeyAlgorithmData.RSA (2048, BigInteger.valueOf (3)),
                        pin);
                                                            
-        kre.createKeyWithPresetPIN (KeyGen2KeyUsage.UNIVERSAL,
-                                    new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (1024),
-                                    kre.createPINPolicy (PassphraseFormats.NUMERIC,
-                                                                              6,
-                                                                              6,
-                                                                              3,
-                                                                              puk).setGrouping (PINGrouping.SHARED),
-                                                                              new byte[]{4,6,8,9},
-                                    true,
+        ics.createKeyWithPresetPIN (KeyGen2KeyUsage.UNIVERSAL,
+                                    new IssuerCredentialStore.KeyAlgorithmData.RSA (1024),
+                                    ics.createPINPolicy (PassphraseFormats.NUMERIC,
+                                                         6,
+                                                         6,
+                                                         3,
+                                                         puk).setGrouping (PINGrouping.SHARED),
+                                    new byte[]{4,6,8,9},
                                     true);
 
-        kre.createDevicePINProtectedKey (KeyGen2KeyUsage.AUTHENTICATION,
-                                         new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (2048));
+        ics.createDevicePINProtectedKey (KeyGen2KeyUsage.AUTHENTICATION,
+                                         new IssuerCredentialStore.KeyAlgorithmData.RSA (2048));
 
-        kre.createKey (KeyGen2KeyUsage.AUTHENTICATION,
-                        new KeyInitializationRequestEncoder.KeyAlgorithmData.RSA (1024),
+        ics.createKey (KeyGen2KeyUsage.AUTHENTICATION,
+                        new IssuerCredentialStore.KeyAlgorithmData.RSA (1024),
                         null);
 
-//        kre.setOutputEncryptionCertificate (true);
+        KeyInitializationRequestEncoder kre =
+          new KeyInitializationRequestEncoder ("https://ca.example.com/keygenres",
+                                          ics);
                                                           
         JKSSignCertStore signer3 = new JKSSignCertStore (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer3.setKey (null, DemoKeyStore.getSignerPassword ());

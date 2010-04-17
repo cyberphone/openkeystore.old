@@ -16,10 +16,6 @@ abstract class KeyInitializationRequest extends XMLObjectWrapper
   {
     KeyInitializationRequest () {}
 
-    String server_session_id;
-
-    String client_session_id;
-
 
     public void init () throws IOException
       {

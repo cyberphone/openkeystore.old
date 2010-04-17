@@ -28,7 +28,7 @@ abstract class CredentialDeploymentRequest extends XMLObjectWrapper
     CredentialDeploymentRequest () {}
 
 
-    public static String[] getSortedAlgorithms (String[] algorithms) throws IOException
+    static String[] getSortedAlgorithms (String[] algorithms) throws IOException
       {
         int i = 0;
         while (true)

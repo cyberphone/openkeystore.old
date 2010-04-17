@@ -2,11 +2,7 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.math.BigInteger;
-
 import java.util.Vector;
-import java.util.Date;
-import java.util.LinkedHashMap;
 
 import org.w3c.dom.Document;
 
@@ -17,391 +13,27 @@ import org.webpki.xmldsig.XMLSigner;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import org.webpki.crypto.SignerInterface;
-import org.webpki.crypto.ECDomains;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
 public class KeyInitializationRequestEncoder extends KeyInitializationRequest
   {
-
-    class PresetValue
-      {
-        byte[] value;
-
-        PresetValue (byte[] value) throws IOException
-          {
-            this.value = value;
-          }
-
-        void write (DOMWriterHelper wr) throws IOException
-          {
-            wr.setBinaryAttribute (VALUE_ATTR, value);
-          }
-      }
-
-
-    private class PresetPIN extends PresetValue
-      {
-        boolean user_modifiable;
-
-        PresetPIN (byte[] value, boolean user_modifiable) throws IOException
-          {
-            super (value);
-            this.user_modifiable = user_modifiable;
-          }
-
-        void writePINValue (DOMWriterHelper wr) throws IOException
-          {
-            super.write (wr);
-            if (user_modifiable)
-              {
-                wr.setBooleanAttribute (USER_MODIFIABLE_ATTR, user_modifiable);
-              }
-          }
-      }
-
-
-    public class PUKPolicy extends PresetValue
-      {
-        boolean written;
-        
-        String id;
-
-        PassphraseFormats format;
-
-        int retry_limit;
-
-        PUKPolicy (byte[] value, PassphraseFormats format, int retry_limit) throws IOException
-          {
-            super (value);
-            this.id = puk_prefix + ++next_puk_id_suffix;
-            this.format = format;
-            this.retry_limit = retry_limit;
-          }
-
-
-        void writePolicy (DOMWriterHelper wr) throws IOException
-          {
-            super.write (wr);
-            wr.setStringAttribute (ID_ATTR, id);
-            wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
-            wr.setStringAttribute (FORMAT_ATTR, format.getXMLName ());
-          }
-      }
-
-
-    public class PINPolicy
-      {
-        boolean written;
-
-        boolean not_first;
-
-        byte[] preset_test;
-
-        // Actual data
-        
-        PUKPolicy puk_policy;  // Optional
-
-        PassphraseFormats format;
-
-        int min_length;
-
-        int max_length;
-
-        int retry_limit;
-
-        PINGrouping group;  // Optional
-
-        PatternRestrictions[] pattern_restrictions; // Optional
-
-        boolean caching_support;  // Optional
-
-        InputMethods input_method;  // Optional
-        
-        String id;
-
-        private PINPolicy ()
-          {
-             this.id = pin_prefix + ++next_pin_id_suffix;
-           }
-
-        void writePolicy (DOMWriterHelper wr) throws IOException
-          {
-            wr.setStringAttribute (ID_ATTR, id);
-            wr.setIntAttribute (MAX_LENGTH_ATTR, max_length);
-            wr.setIntAttribute (MIN_LENGTH_ATTR, min_length);
-            wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
-            if (group != null)
-              {
-                wr.setStringAttribute (GROUPING_ATTR, group.getXMLName ());
-              }
-            wr.setStringAttribute (FORMAT_ATTR, format.getXMLName ());
-            if (pattern_restrictions != null)
-              {
-                Vector<String> prs = new Vector<String> ();
-                for (PatternRestrictions pr : pattern_restrictions)
-                  {
-                    prs.add (pr.getXMLName ());
-                  }
-                wr.setListAttribute (PATTERN_RESTRICTIONS_ATTR, prs.toArray (new String[0]));
-              }
-            if (caching_support)
-              {
-                wr.setBooleanAttribute (CACHING_SUPPORT_ATTR, caching_support);
-              }
-            if (input_method != null)
-              {
-                wr.setStringAttribute (INPUT_METHOD_ATTR, input_method.getXMLName ());
-              }
-          }
-
-
-        public PINPolicy setInputMethod (InputMethods input_method)
-          {
-            this.input_method = input_method;
-            return this;
-          }
-
-
-        public PINPolicy setGrouping (PINGrouping group)
-          {
-            this.group = group;
-            return this;
-          }
-
-
-        public PINPolicy setCachingSupport (boolean flag)
-          {
-            this.caching_support = flag;
-            return this;
-          }
-
-
-        public PINPolicy setPatternRestrictions (PatternRestrictions[] patterns)
-          {
-            this.pattern_restrictions = patterns;
-            return this;
-          }
-
-      }
-
-
-    public static abstract class KeyAlgorithmData
-      {
-        abstract void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException;
-
-        private KeyAlgorithmData () {}
-
-        public static final class EC extends KeyAlgorithmData
-          {
-            ECDomains named_curve;
-
-            @SuppressWarnings("unused")
-            private EC () {}
-
-            public EC (ECDomains named_curve)
-              {
-                this.named_curve = named_curve;
-              }
-
-
-            void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException
-              {
-                wr.addChildElement (EC_ELEM);
-                wr.setStringAttribute (NAMED_CURVE_ATTR, named_curve.getURI ());
-                wr.getParent ();
-              }
-          }
-
-
-        public static final class RSA extends KeyAlgorithmData
-          {
-            int key_size;
-
-            BigInteger fixed_exponent;
-
-            @SuppressWarnings("unused")
-            private RSA () {}
-
-
-            public RSA (int key_size)
-              {
-                this.key_size = key_size;
-              }
-
-
-            public RSA (int key_size, BigInteger fixed_exponent)
-              {
-                this (key_size);
-                this.fixed_exponent = fixed_exponent;
-              }
-
-
-            void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException
-              {
-                wr.addChildElement (RSA_ELEM);
-                wr.setIntAttribute (KEY_SIZE_ATTR, key_size);
-                if (fixed_exponent != null)
-                  {
-                    wr.setBinaryAttribute (FIXED_EXPONENT_ATTR, fixed_exponent.toByteArray ());
-                  }
-                wr.getParent ();
-              }
-          }
-
-
-        public static final class DSA extends KeyAlgorithmData
-          {
-            int key_size;
-
-            @SuppressWarnings("unused")
-            private DSA () {}
-
-            public DSA (int key_size)
-              {
-                this.key_size = key_size;
-              }
-
-
-            void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException
-              {
-                bad ("DSA not implemented!");
-              }
-          }
-
-      }
-
- 
-    public class KeyProperties
-      {
-        boolean exportable;
- 
-        public KeyProperties setExportable (boolean flag)
-          {
-            exportable = flag;
-            return this;
-          }
-
-
-        String id;
-
-        public String getID ()
-          {
-            return id;
-          }
-
-
-        KeyGen2KeyUsage key_usage;
-
-        public KeyGen2KeyUsage getKeyUsage ()
-          {
-            return key_usage;
-          }
-
-
-
-        KeyAlgorithmData key_alg_data;
-
-        PINPolicy pin_policy;
-        
-        PUKPolicy puk_policy;
-
-        PresetPIN preset_pin;
-
-        boolean device_pin_protected;
-
-        KeyProperties (KeyGen2KeyUsage key_usage,
-                       KeyAlgorithmData key_alg_data,
-                       PINPolicy pin_policy,
-                       PresetPIN preset_pin,
-                       boolean device_pin_protected) throws IOException
-          {
-            this.id = key_prefix + ++next_key_id_suffix;
-            this.key_usage = key_usage;
-            this.key_alg_data = key_alg_data;
-            this.pin_policy = pin_policy;
-            this.puk_policy = pin_policy == null ? null : pin_policy.puk_policy;
-            this.preset_pin = preset_pin;
-            this.device_pin_protected = device_pin_protected;
-            if (pin_policy != null)
-              {
-                if (pin_policy.not_first)
-                  {
-                    if (pin_policy.group == PINGrouping.SHARED &&
-                        ((pin_policy.preset_test == null && preset_pin != null) ||
-                         (pin_policy.preset_test != null && preset_pin == null)))
-                      {
-                        bad ("\"shared\" PIN keys must either have no \"preset_pin\" " +
-                             "value or all be preset");
-                      }
-                  }
-                else
-                  {
-                    pin_policy.not_first = true;
-                    pin_policy.preset_test = preset_pin == null ? null : preset_pin.value;
-                  }
-              }
-          }
-
-        void writeRequest (DOMWriterHelper wr) throws IOException
-          {
-            if (device_pin_protected)
-              {
-                wr.addChildElement (DEVICE_SYNCHRONIZED_PIN_ELEM);
-              }
-            if (preset_pin != null)
-              {
-                wr.addChildElement (PRESET_PIN_ELEM);
-                preset_pin.writePINValue (wr);
-              }
-            wr.addChildElement (KEY_PAIR_ELEM);
-            wr.setStringAttribute (ID_ATTR, id);
-            wr.setStringAttribute (KEY_USAGE_ATTR, key_usage.getXMLName ());
-
-            if (exportable)
-              {
-                wr.setBooleanAttribute (EXPORTABLE_ATTR, exportable);
-              }
-
-            key_alg_data.writeKeyAlgorithmData (wr);
-
-            wr.getParent ();
-
-            if (device_pin_protected || preset_pin != null)
-              {
-                wr.getParent ();
-              }
-          }
-      }
-
-    Date server_time;
-
     String submit_url;
-
-    int next_personal_code = 1;
-
-    String key_prefix = "Key.";
-
-    int next_key_id_suffix = 0;
-
-    String pin_prefix = "PIN.";
-
-    int next_pin_id_suffix = 0;
-
-    String puk_prefix = "PUK.";
-
-    int next_puk_id_suffix = 0;
-
-    boolean need_signature_ns;
 
     boolean deferred_certification;
 
     String prefix;  // Default: no prefix
 
-    LinkedHashMap<String,KeyInitializationRequestEncoder.KeyProperties> requested_keys = new LinkedHashMap<String,KeyInitializationRequestEncoder.KeyProperties> ();
-
     ServerCookie server_cookie;
+    
+    IssuerCredentialStore ics;
+    
+    private boolean need_signature_ns;
+    
+    Vector<String> written_pin = new Vector<String> ();
+
+    Vector<String> written_puk = new Vector<String> ();
 
 
     // Constructors
@@ -410,15 +42,11 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
     private KeyInitializationRequestEncoder () {}
 
 
-    public KeyInitializationRequestEncoder (String client_session_id,
-                                       String server_session_id,
-                                       String submit_url,
-                                       Date server_time) throws IOException
+    public KeyInitializationRequestEncoder (String submit_url,
+                                            IssuerCredentialStore ics) throws IOException
       {
-        super.client_session_id = client_session_id;
-        super.server_session_id = server_session_id;
         this.submit_url = submit_url;
-        this.server_time = server_time;
+        this.ics = ics;
       }
 
 
@@ -428,81 +56,9 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
       }
 
 
-    public PINPolicy createPINPolicy (PassphraseFormats format,
-                                      int min_length,
-                                      int max_length,
-                                      int retry_limit,
-                                      PUKPolicy puk_policy) throws IOException
-      {
-        PINPolicy pin_policy = new PINPolicy ();
-        pin_policy.format = format;
-        pin_policy.min_length = min_length;
-        pin_policy.max_length = max_length;
-        pin_policy.retry_limit = retry_limit;
-        pin_policy.puk_policy = puk_policy;
-        if (format == null)
-          {
-            bad ("PassphraseFormats must not be null");
-          }
-        if (min_length > max_length)
-          {
-            bad ("min_length > max_length");
-          }
-        return pin_policy;
-      }
-
-
-    public PUKPolicy createPUKPolicy (byte[] value,
-                                      PassphraseFormats format,
-                                      int retry_limit) throws IOException
-      {
-        return new PUKPolicy (value, format, retry_limit);
-      }
-
-
-    private KeyProperties addKeyProperties (KeyGen2KeyUsage key_usage,
-                                            KeyAlgorithmData key_alg_data,
-                                            PINPolicy pin_policy,
-                                            PresetPIN preset_pin,
-                                            boolean device_pin_protected) throws IOException
-      {
-        KeyProperties rk = new KeyProperties (key_usage, key_alg_data, pin_policy, preset_pin, device_pin_protected);
-        requested_keys.put (rk.getID (), rk);
-        return rk;
-      }
-
-
     public void setDeferredCertification (boolean flag)
       {
         deferred_certification = flag;
-      }
-
-
-    public KeyProperties createKeyWithPresetPIN (KeyGen2KeyUsage key_usage,
-                                                 KeyAlgorithmData key_alg_data,
-                                                 PINPolicy pin_policy,
-                                                 byte[] pin_value, boolean hidden, boolean user_modifiable) throws IOException
-      {
-        if (pin_policy == null)
-          {
-            bad ("PresetPIN without PINPolicy is not allowed");
-          }
-        return addKeyProperties (key_usage, key_alg_data, pin_policy, new PresetPIN (pin_value, user_modifiable), false);
-      }
-
-
-    public KeyProperties createKey (KeyGen2KeyUsage key_usage,
-                                    KeyAlgorithmData key_alg_data,
-                                    PINPolicy pin_policy) throws IOException
-      {
-        return addKeyProperties (key_usage, key_alg_data, pin_policy, null, false);
-      }
-
-
-    public KeyProperties createDevicePINProtectedKey (KeyGen2KeyUsage key_usage,
-                                                      KeyAlgorithmData key_alg_data) throws IOException
-      {
-        return addKeyProperties (key_usage, key_alg_data, null, null, true);
       }
 
 
@@ -524,7 +80,13 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
         ds.removeXMLSignatureNS ();
         need_signature_ns = true;
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_session_id);
+        ds.createEnvelopedSignature (doc, ics.server_session_id);
+      }
+    
+    
+    private IssuerCredentialStore.PUKPolicy getPUKPolicy (IssuerCredentialStore.KeyProperties kp)
+      {
+        return kp.pin_policy == null ? null : kp.pin_policy.puk_policy;
       }
 
 
@@ -540,15 +102,9 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, server_session_id);
+        wr.setStringAttribute (ID_ATTR, ics.server_session_id);
 
-        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, client_session_id);
-
-        if (server_time == null)
-          {
-            server_time = new Date ();
-          }
-        wr.setDateTimeAttribute (SERVER_TIME_ATTR, server_time);
+        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, ics.client_session_id);
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
 
@@ -560,15 +116,15 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
         ////////////////////////////////////////////////////////////////////////
         // There MUST not be zero keys to initialize...
         ////////////////////////////////////////////////////////////////////////
-        if (requested_keys.isEmpty ())
+        if (ics.requested_keys.isEmpty ())
           {
             bad ("Empty request not allowd!");
           }
-        KeyProperties last_req_key = null;
-        for (KeyProperties req_key : requested_keys.values ())
+        IssuerCredentialStore.KeyProperties last_req_key = null;
+        for (IssuerCredentialStore.KeyProperties req_key : ics.requested_keys.values ())
           {
-            if (last_req_key != null && last_req_key.puk_policy != null &&
-                last_req_key.puk_policy != req_key.puk_policy)
+            if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
+                getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
               {
                 wr.getParent ();
               }
@@ -577,25 +133,24 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
               {
                 wr.getParent ();
               }
-            if (req_key.puk_policy != null)
+            if (getPUKPolicy (req_key) != null)
               {
-                if (req_key.puk_policy.written)
+                if (written_puk.contains (getPUKPolicy (req_key).id))
                   {
-                    if (last_req_key.puk_policy != req_key.puk_policy)
+                    if (getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
                       {
                         bad ("PUK grouping error");
                       }
                   }
                 else
                   {
-                    wr.addChildElement (PUK_POLICY_ELEM);
-                    req_key.puk_policy.writePolicy (wr);
-                    req_key.puk_policy.written = true;
+                    getPUKPolicy (req_key).writePolicy (wr);
+                    written_puk.add (getPUKPolicy (req_key).id);
                   }
               }
             if (req_key.pin_policy != null)
               {
-                if (req_key.pin_policy.written)
+                if (written_pin.contains (req_key.pin_policy.id))
                   {
                     if (last_req_key.pin_policy != req_key.pin_policy)
                       {
@@ -604,9 +159,8 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
                   }
                 else
                   {
-                    wr.addChildElement (PIN_POLICY_ELEM);
                     req_key.pin_policy.writePolicy (wr);
-                    req_key.pin_policy.written = true;
+                    written_pin.add (req_key.pin_policy.id);
                   }
               }
             req_key.writeRequest (wr);
@@ -616,7 +170,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
           {
             wr.getParent ();
           }
-        if (last_req_key != null && last_req_key.puk_policy != null)
+        if (last_req_key != null && getPUKPolicy (last_req_key) != null)
           {
             wr.getParent ();
           }

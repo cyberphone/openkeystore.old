@@ -4,51 +4,40 @@ import java.io.IOException;
 
 import java.math.BigInteger;
 
-import javax.crypto.Cipher;
-
 import java.util.Date;
 
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
 import java.security.PrivateKey;
 import java.security.Security;
-import java.security.cert.X509Certificate;
 
 import java.security.Signature;
 
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
-import java.security.interfaces.RSAKey;
-
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMReaderHelper;
 
-import org.webpki.crypto.JKSSignCertStore;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.SignatureAlgorithms;
 
-import org.webpki.crypto.test.DemoKeyStore;
-
 import org.webpki.keygen2.KeyInitializationResponseEncoder;
-import org.webpki.keygen2.KeyAttestationUtil;
-import org.webpki.keygen2.KeyGen2KeyUsage;
 
 public class keyinitres_enc
   {
     static final String UNFORMATTED_RSA  = "RSA/ECB/NoPadding";
 
     static int key_count;
-    static byte[] last_signature;
+    
+    static byte[] key_attestation = new byte[]{0,5,7,};
 
-    static String last_key;
     private static void show ()
       {
-        System.out.println ("keyinitres_enc out_file [-selfsigned]\n");
+        System.out.println ("keyinitres_enc out_file\n");
         System.exit (3);
       }
 
@@ -122,20 +111,6 @@ public class keyinitres_enc
      
     static PublicKey nonceGen(PublicKey k) throws Exception
       {
-        last_key = getKey ();
-        byte[] nonce = KeyAttestationUtil.createKA1Nonce (last_key, Constants.SESSION_ID, Constants.REQUEST_ID);
-        KeyStore ks = TPMKeyStore.getTPMKeyStore ();
-        String signpassword = TPMKeyStore.getSignerPassword ();
-        String key_alias = "mykey";
-        Cipher cipher = Cipher.getInstance (UNFORMATTED_RSA);
-        PrivateKey priv = (PrivateKey) ks.getKey (key_alias, signpassword.toCharArray ());
-        cipher.init (Cipher.DECRYPT_MODE, priv);
-        last_signature = cipher.doFinal (KeyAttestationUtil.createKA1Package ((RSAKey)priv,
-                                                                              k,
-                                                                              false,
-                                                                              KeyGen2KeyUsage.AUTHENTICATION,
-                                                                              nonce,
-                                                                              null));
         return k;
       }
 
@@ -160,49 +135,24 @@ public class keyinitres_enc
 
     public static void main (String args[]) throws Exception
       {
-        if (args.length < 1 || args.length > 2 || (args.length == 2 && !args[1].equals ("-selfsigned"))) show ();
+        if (args.length != 1) show ();
         Date client_time = DOMReaderHelper.parseDateTime (Constants.CLIENT_TIME).getTime ();
+        Date server_time = DOMReaderHelper.parseDateTime (Constants.SERVER_TIME).getTime ();
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-
-
 
         KeyInitializationResponseEncoder kre = 
               new KeyInitializationResponseEncoder (Constants.SESSION_ID,
-                                               Constants.REQUEST_ID,
-                                               "https://example.com/keygenres",
-                                               "https://example.com/keygenreq",
-                                               Constants.SERVER_TIME,
-                                               client_time,
-                                               (X509Certificate)DemoKeyStore.getExampleDotComKeyStore ().getCertificate ("mykey"));
+                                                    Constants.REQUEST_ID,
+                                                    server_time,
+                                                    client_time);
 
-        if (args.length == 2)
-          {
-            kre.addSelfSignedKey (new rsaKey (1024), getKey ());
+        kre.addPublicKey (rsaAttestedKey (1024), key_attestation, getKey (), null);
 
-            kre.addSelfSignedKey (new rsaKey (1024, 3), getKey ());
+        kre.addPublicKey (rsaAttestedKey (1024, 3), key_attestation, getKey (), null);
 
-            kre.addSelfSignedKey (new rsaKey (2048), getKey ());
+        kre.addPublicKey (rsaAttestedKey (2048), key_attestation, getKey (), new byte[]{3,6,8,9,9});
 
-            kre.addSelfSignedKey (new rsaKey (1024), getKey ());
-          }
-        else
-          {
-            kre.addAttestedKey (rsaAttestedKey (1024), last_signature, last_key, null);
-
-            kre.addAttestedKey (rsaAttestedKey (1024, 3), last_signature, last_key, null);
-
-            kre.addAttestedKey (rsaAttestedKey (2048), last_signature, last_key, null);
-
-            kre.addAttestedKey (ecAttestedKey (), last_signature, last_key, null);
-          }
-
-        KeyStore ks = TPMKeyStore.getTPMKeyStore ();
-        String signpassword = TPMKeyStore.getSignerPassword ();
-        String key_alias = "mykey";
-        JKSSignCertStore signer = new JKSSignCertStore (ks, null);
-        signer.setKey (key_alias, signpassword);
-
-        kre.createEndorsementKeySignature (signer);
+        kre.addPublicKey (ecAttestedKey (), key_attestation, getKey (), null);
 
         ArrayUtil.writeFile (args[0], kre.writeXML());
       }

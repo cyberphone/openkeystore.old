@@ -2,6 +2,9 @@ package org.webpki.keygen2.test;
 
 import java.util.Date;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 
 import org.webpki.util.ArrayUtil;
@@ -17,7 +20,11 @@ import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.crypto.JKSSignCertStore;
 
 import org.webpki.keygen2.CredentialDeploymentRequestEncoder;
+import org.webpki.keygen2.IssuerCredentialStore;
+import org.webpki.keygen2.KeyGen2KeyUsage;
 import org.webpki.keygen2.KeyGen2URIs;
+import org.webpki.keygen2.KeyInitializationRequestEncoder;
+import org.webpki.keygen2.MACInterface;
 
 public class credepreq_enc
   {
@@ -32,20 +39,46 @@ public class credepreq_enc
     public static void main (String args[]) throws Exception
       {
         if (args.length < 1) show ();
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
-        Date server_time = DOMReaderHelper.parseDateTime (Constants.SERVER_TIME).getTime ();
+        IssuerCredentialStore ics = new  IssuerCredentialStore (Constants.SESSION_ID,
+                                                                Constants.REQUEST_ID);
+        IssuerCredentialStore.KeyProperties kp = ics.createKey (KeyGen2KeyUsage.AUTHENTICATION,
+            new IssuerCredentialStore.KeyAlgorithmData.RSA (2048),
+            null).setExportable (true).setSymmetricKey (new byte[]{3,4,5}, new String[]{"http://host/fdfdf"});
+        
+        kp.setCertificatePath (new X509Certificate[] {(X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey"),
+            (X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificateChain ("mykey")[1]}).
+            addExtension ("http://ext/hhh", new byte[]{3,3,3,3,3,3,3,3,3,3,3}).
+            addLogotype (KeyGen2URIs.LOGOTYPES.APPLICATION, new ImageData (BankLogo.getGIFImage (), "image/gif")).
+            addEncryptedExtension ("http://ext/hhh1", new byte[]{3,3,3,3,3,3,3,3,3,3,3}).
+            addPropertyBag ("http://hhj/prop").
+            addProperty ("digits", "1234", true).
+            addProperty ("hug", "lame", false);
+ 
+
 
         CredentialDeploymentRequestEncoder cde = 
                                    new CredentialDeploymentRequestEncoder ("https://ca.example.com/keygenres",
-                                                                           server_time, null, null);
+                                       ics,
+                                       new MACInterface ()
+                                   {
 
+                                    @Override
+                                    public byte[] getMac (byte[] data) throws IOException, GeneralSecurityException
+                                      {
+                                         return new byte[]{0,1,2,4};
+                                      }
+                                     
+                                   });
+/*
+        
         cde.addCertifiedPublicKey ("Key.1",
                    (X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey"));
 
         X509Certificate[] two = new X509Certificate[] {(X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey"),
                                                        (X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificateChain ("mykey")[1]};
         cde.addCertifiedPublicKey ("Key.2", two).
-                    setFriendlyName ("My Key").
                     setRenewalServiceData (14, new String[] {"http://ca.mybank.com/update"}, null).
                     addLogotype (new ImageData (BankLogo.getGIFImage (), "image/gif"), KeyGen2URIs.LOGOTYPES.APPLICATION);
         cde.addCertifiedPublicKey ("Key.3",
@@ -70,6 +103,8 @@ public class credepreq_enc
         JKSSignCertStore rsigner = new JKSSignCertStore (DemoKeyStore.getExampleDotComKeyStore (), null);
         rsigner.setKey (null, DemoKeyStore.getSignerPassword ());
 //        cde.signRequest (rsigner);
+
+ */
 
         ArrayUtil.writeFile (args[0], cde.writeXML());
       }

@@ -348,9 +348,6 @@
               within a specific session. -->
          <xs:attribute name="ClientSessionID" type="xs:string" use="required"/>
 
-         <!-- A mandatory time-stamp indicating when the request was issued. -->
-         <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
-
          <!-- Where to HTTP POST the key operation response.  Note that
               applicable session cookies MUST be submitted in the request
               as well. -->
@@ -376,63 +373,6 @@
             <!-- The keys to be certified. -->
             <xs:element ref="kgen:GeneratedPublicKey" maxOccurs="unbounded"/>
 
-            <!-- If preset PIN and PUK codes have been specified, the following
-                 element MUST also be emitted for for devices having dedicated
-                 encryption keys.  Note: using the KeyGen2 DIAS scheme, this
-                 element is redundant because the "EndorsementKey" is used for
-                 encryption of non-cryptographic data as well. -->
-            <xs:element name="DeviceEncryptionKey" minOccurs="0">
-               <xs:complexType>
-                  <xs:sequence>
-                     <!-- A certificate path does not need to be ordered or
-                          complete but it MUST NOT contain any "holes". -->
-                     <xs:element ref="ds:X509Data"/>
-                  </xs:sequence>
-               </xs:complexType>
-            </xs:element>
-
-            <!-- If Subject "KeyAttestation" attributes have been specified,
-                 the following element MUST also be emitted for attestation
-                 algorithms having dedicated key-certifying keys.  Note:
-                 using the KeyGen2 DIAS scheme, this element is redundant
-                 because the "EndorsementKey" is used for key-attestations
-                 as well. -->
-            <xs:element name="DeviceKeyAttestationKey" minOccurs="0">
-               <xs:complexType>
-                  <xs:sequence>
-                     <!-- A certificate path does not need to be ordered or
-                          complete but it MUST NOT contain any "holes". -->
-                     <xs:element ref="ds:X509Data"/>
-                  </xs:sequence>
-               </xs:complexType>
-            </xs:element>
-
-            <!-- In case the requested information would include data that could
-                 affect personal integrity (like a machine ID), the client software
-                 MAY warn the user, and offer an option to decline. -->
-            <xs:element name="EndorsementKey">
-               <xs:complexType>
-                  <xs:sequence>
-
-                     <!-- If the TPM container endorsement key is requested (and
-                          is available) an enveloped signature over the entire
-                          response object MUST be emitted. -->
-                     <xs:element ref="ds:Signature"/>
-
-                  </xs:sequence>
-
-                  <!-- If Subject "KeyAttestation" attributes have been specified,
-                       the actual attestation algorithm/method needs to be known in
-                       order to facilitate attestation signature blob processing.
-                       Conforming KeyGen2 clients MUST as a minimum support the
-                       "http://xmlns.webpki.org/keygen2/1.0#algorithm.key-attestation-1"
-                       key attestation algorithm which is also the default.
-                       See "PlatformNegotiationRequest"  -->
-                  <xs:attribute name="KeyAttestationAlgorithm" type="xs:anyURI" use="optional"/>
-
-               </xs:complexType>
-            </xs:element>
-
             <!-- See "ServerCookie" definition. -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
@@ -446,22 +386,15 @@
               within a specific session. -->
          <xs:attribute name="ServerSessionID" type="xs:string" use="required"/>
 
-         <!-- Copy of "KeyOperationRequest/@ServerTime". -->
+         <!-- Copy of "KeyInitializationRequest/@ServerTime". -->
          <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
-
-         <!-- Copy of "KeyOperationRequest/@SubmitURL". -->
-         <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
-
-         <!-- The http URL that invoked the key operation request. -->
-         <xs:attribute name="RequestURL" type="kgen:httpURI" use="required"/>
 
          <!-- The client's local clock is a mandatory item. -->
          <xs:attribute name="ClientTime" type="xs:dateTime" use="required"/>
 
-         <!-- The "ServerCertificateFingerprint" attribute MUST be populated with
-              the SHA256 hash of the associated server certificate if the
-              KeyOperationRequest was invoked over HTTPS. -->
-         <xs:attribute name="ServerCertificateFingerprint" type="xs:base64Binary" use="optional"/>
+         <!-- "KeyAttestationAlgorithm" is mandatory.  Currently the only known is:
+              "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1". -->
+         <xs:attribute name="KeyAttestationAlgorithm" type="xs:anyURI" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -488,36 +421,6 @@
                  The XML encryption is using a profiled (but true), subset of
                  the original W3C schema.  The profile is published in a
                  separate document.  -->
-            <xs:element name="PresetValues" minOccurs="0">
-               <xs:complexType>
-                  <xs:sequence>
-
-
-                  </xs:sequence>
-
-                  <!-- To support verification that the data has been properly
-                       received the requester MUST create an HMAC-SHA256 of the
-                       unencrypted master key followed by the concatenated encrypted
-                       value items (in the order they occur in the request document),
-                       using a "session hash" as the HMAC input key.  A session
-                       hash is created by running SHA256 over the UTF-8 encoded
-                       attributes
-
-                              "KeyOperationRequest/@ClientSessionID" 
-                              "KeyOperationRequest/@ID"
-
-                       where each attribute also has been augmented by a '\0'
-                       character. -->
-                  <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
-
-                  <!-- "MACAlgorithm" holds the MAC algorithm to use.
-                       A conforming client MUST as a minimum support (the default)
-                       "http://xmlns.webpki.org/keygen2/1.0#algorithm.mac-preset-values-1"
-                       algorithm which is described above. -->
-                  <xs:attribute name="MACAlgorithm" type="xs:anyURI" use="optional"/>
-
-               </xs:complexType>
-            </xs:element>
 
             <!-- See "ServerCookie" definition. -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
@@ -537,9 +440,6 @@
 
          <!-- Where to POST the response. -->
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
-
-         <!-- Actual issuance time of the request. -->
-         <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
 
       </xs:complexType>
 
@@ -715,51 +615,46 @@
                  to play the role as a universal key ID for all key types.
                  The private key MAY be disabled after the provisioning
                  since it does not have any [legitimate] use anymore. -->
-            <xs:element name="PiggybackedSymmetricKey" minOccurs="0">
+            <xs:element name="SymmetricKey" minOccurs="0">
                <xs:complexType>
-                  <xs:sequence>
-
+                  <xs:simpleContent>
+                      <xs:extension base="xs:base64Binary">
  
-                  </xs:sequence>
-
-                  <!-- "EndorsedAlgorithms" holds a non-empty list of
-                       algorithms endorsed by the issuer for usage with
-                       the provisioned symmetric key.  If there is no
-                       particular restriction on the algorithm to use, the
-                       issuer SHOULD indicate that with the KeyGen2-specific
-                       algorithm URI:
-                       "http://xmlns.webpki.org/keygen2/1.0#algorithm.any" -->
-                  <xs:attribute name="EndorsedAlgorithms" type="kgen:uriList" use="required"/>
-
-                  <!-- "MAC" holds the HMAC-SHA256 value of the UTF-8 encoded
-                       string of "EndorsedAlgorithms" with the whitespace removed,
-                       where the algorithm URIs have been sorted in lexical order
-                       and where each algorithm URI has been appended by a '\0'
-                       character, then followed by the unencrypted key, and using
-                       a nonce as the HMAC input key. The nonce is created by
-                       running SHA256 over the UTF-8 encoded attributes
-
-                           "CredentialDeploymentRequest/CertifiedPublicKey/@ID" 
-                           "CredentialDeploymentRequest/@ClientSessionID" 
-                           "CredentialDeploymentRequest/@ID"
-
-                       where each attribute also has been augmented by a '\0'
-                       character. -->
-                  <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
-
-                  <!-- "MACAlgorithm" holds the piggyback MAC algorithm to use.
-                       A conforming client MUST as a minimum support (the default)
-                       "http://xmlns.webpki.org/keygen2/1.0#algorithm.mac-piggyback-1"
-                       algorithm which is described above. -->
-                  <xs:attribute name="MACAlgorithm" type="xs:anyURI" use="optional"/>
-
+                          <!-- "EndorsedAlgorithms" holds a non-empty list of
+                               algorithms endorsed by the issuer for usage with
+                               the provisioned symmetric key.  If there is no
+                               particular restriction on the algorithm to use, the
+                               issuer SHOULD indicate that with the KeyGen2-specific
+                               algorithm URI:
+                               "http://xmlns.webpki.org/keygen2/1.0#algorithm.any" -->
+                          <xs:attribute name="EndorsedAlgorithms" type="kgen:uriList" use="required"/>
+        
+                          <!-- "MAC" holds the HMAC-SHA256 value of the UTF-8 encoded
+                               string of "EndorsedAlgorithms" with the whitespace removed,
+                               where the algorithm URIs have been sorted in lexical order
+                               and where each algorithm URI has been appended by a '\0'
+                               character, then followed by the unencrypted key, and using
+                               a nonce as the HMAC input key. The nonce is created by
+                               running SHA256 over the UTF-8 encoded attributes
+        
+                                   "CredentialDeploymentRequest/CertifiedPublicKey/@ID" 
+                                   "CredentialDeploymentRequest/@ClientSessionID" 
+                                   "CredentialDeploymentRequest/@ID"
+        
+                               where each attribute also has been augmented by a '\0'
+                               character. -->
+                          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
+                     </xs:extension>
+                  </xs:simpleContent>
                </xs:complexType>
-            </xs:element>
+           </xs:element>
+
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
 
             <!-- Some credentials like OTP seeds need additional attributes
                  to work.  These are supplied as typed "PropertyBags" holding
                  "Property" name-value elements. -->
-            <xs:element ref="kgen:PropertyBag" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="kgen:PropertyBag"/>
 
             <!-- Optional logotypes that can be used in various GUIs.
                  The "Type" URI indicates a logotype's usage and SHOULD
@@ -790,44 +685,13 @@
                  accommodate white to light grey backgrounds.  If there are
                  shadows that should migrate with the background, PNG files
                  with alpha channels are recommended. -->
-            <xs:element name="Logotype" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Logotype">
                <xs:complexType>
                   <xs:simpleContent>
                      <xs:extension base="kgen:imageType">
-                        <xs:attribute name="Type" type="xs:anyURI" use="required"/>
+                 <xs:attributeGroup ref="kgen:extensionAttrs"/>
                      </xs:extension>
                   </xs:simpleContent>
-               </xs:complexType>
-            </xs:element>
-
-            <!-- A key-store MAY support user-notifications about key-expiry.
-                 The following object can be used to automatically direct a
-                 user to the proper renewal service (after the user accepting
-                 the request). -->
-            <xs:element name="RenewalService" minOccurs="0">
-               <xs:complexType>
-                  <xs:sequence maxOccurs="unbounded">
-                     <xs:choice>
-
-                        <!-- URL to browse to. -->
-                        <xs:element name="URL" type="kgen:httpURI"/>
-
-                        <!-- A DNS TXT lookup for URLs.  T.B.D. -->
-                        <xs:element name="DNSLookup" type="xs:string"/>
-
-                     </xs:choice>
-                  </xs:sequence>
-
-                  <!-- A compliant KeyGen2 implementation SHOULD support a
-                       background process that checks expiry. -->
-                  <xs:attribute name="NotifyDaysBeforeExpiry" use="required">
-                     <xs:simpleType>
-                        <xs:restriction base="xs:positiveInteger">
-                           <xs:maxInclusive value="100"/>
-                        </xs:restriction>
-                     </xs:simpleType>
-                  </xs:attribute>
-
                </xs:complexType>
             </xs:element>
 
@@ -837,31 +701,33 @@
                  supposed to be delivered in the following optional object.
                  To not interfere with core KeyGen2 XML schema validation,
                  extension data including XML ditto MUST be Base64-encoded. -->
-            <xs:element name="Extension" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="Extension">
                <xs:complexType>
                   <xs:simpleContent>
                      <xs:extension base="xs:base64Binary">
 
                         <!-- Mandatory extension type attribute. -->
-                        <xs:attribute name="Type" type="xs:anyURI" use="required"/>
+                         <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
                      </xs:extension>
                   </xs:simpleContent>
                </xs:complexType>
             </xs:element>
 
-            <!-- If extension data needs to be cryptographically bound to
-                 the issuer of a key it MAY be signed.  A use-case for
-                 signed extension data is for example when an "Extension"
-                 object contains executable code that is trusted for usage
-                 with the target key but not necessarily by the platform
-                 where it is to be executed.  Note: This still requires
-                 that the code is not able to go outside of a sandbox!
-                 A signature of this kind MUST have the same issuer as
-                 the lowest member of the "CertifiedPublicKey" object.
-                 A signature MUST be enveloped and reference the associated
-                 "CertifiedPublicKey/@ID" attribute. -->
-            <xs:element ref="ds:Signature" minOccurs="0"/>
+            <xs:element name="EncryptedExtension">
+               <xs:complexType>
+                  <xs:simpleContent>
+                     <xs:extension base="xs:base64Binary">
+
+                        <!-- Mandatory extension type attribute. -->
+                         <xs:attributeGroup ref="kgen:extensionAttrs"/>
+
+                     </xs:extension>
+                  </xs:simpleContent>
+               </xs:complexType>
+            </xs:element>
+
+           </xs:choice>
 
          </xs:sequence>
 
@@ -869,8 +735,7 @@
               "KeyOperationResponse/GeneratedPublicKey/@ID". -->
          <xs:attribute name="ID" type="xs:ID" use="required"/>
 
-         <!-- An issuer's optional suggestion on how to name the credential. -->
-         <xs:attribute name="FriendlyName" type="xs:string" use="optional"/>
+         <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
       </xs:complexType>
 
@@ -911,7 +776,7 @@
          </xs:sequence>
 
          <!-- The type of a PropertyBag tells where its Properties belong. -->
-         <xs:attribute name="Type" type="xs:anyURI" use="required"/>
+         <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
       </xs:complexType>
 
@@ -928,24 +793,16 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      Base-object for representing a created public key with proof-of-possession (PoP)
-      data for the associated private key, or subject key-attestation data using a
-      key-certifying key.  Archived private key data may also be a part of the latter.
+      Base-object for representing a created public key.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <xs:element name="GeneratedPublicKey">
       <xs:complexType>
          <xs:sequence>
 
-            <!-- There are two different methods for key proofs; the traditional
-                 Proof-of-Possession (PoP) using self-signed public keys, and a
-                 method where the crypto container itself signs attestations for
-                 each public key.  A client MUST NOT mix these methods in the same
-                 provisioning session.  Also see "PlatformNegotiationRequest". -->
-
+            <!-- MUST contain a public key element -->
+ 
             <xs:choice>
-
-               <!-- MUST contain a public key element -->
 
                <xs:element ref="ds11:ECKeyValue"/>
 
@@ -953,31 +810,19 @@
 
             </xs:choice>
 
-            <xs:element name="EncryptedPrivateKey" minOccurs="0">
-               <xs:complexType>
-                  <xs:sequence>
-
-                  </xs:sequence>
-
-                  <!-- Format of the private key blob.  PKCS #8 PrivateKeyInfo
-                       is the default for the key-attestation-1 algorithmn which
-                       is indicated by the URI: 
-                       "http://xmlns.webpki.org/keygen2/1.0#format.pkcs8" -->
-                  <xs:attribute name="Format" type="xs:anyURI" use="required"/>
-
-               </xs:complexType>
-            </xs:element>
-
+            <!-- Optional private key wrapped by SKS. -->
+ 
+            <xs:element name="PrivateKey" type="xs:base64Binary" minOccurs="0"/>
+ 
          </xs:sequence>
 
-         <!-- Contains a signature vouching for the public key
-              as being generated in a specific environment together
-              with its private key counterpart.  Also see:
-              "KeyAttestationKey" and "KeyAttestationAlgorithm". -->
+         <!-- SKS attestation vouching for the public key as being generated in 
+              a specific environment together with its private key counterpart.
+              Also see: "KeyAttestationAlgorithm". -->
          <xs:attribute name="KeyAttestation" type="xs:base64Binary" use="optional"/>
 
          <!-- A unique key-ID which MUST match a "KeyPair/@ID"
-              in the corresponding "KeyOperationRequest". -->
+              in the corresponding "KeyInitializationRequest". -->
          <xs:attribute name="ID" type="xs:ID" use="required"/>
 
       </xs:complexType>
@@ -1068,6 +913,9 @@
               of the symmetric key that is denoted.  Default: false. -->
          <xs:attribute name="Exportable" type="xs:boolean" use="optional"/>
 
+         <!-- An issuer's optional suggestion on how to name the credential. -->
+         <xs:attribute name="FriendlyName" type="xs:string" use="optional"/>
+
       </xs:complexType>
    </xs:element>
 
@@ -1119,6 +967,16 @@
            2. Confined to a "Trusted GUI" of the key-store system 
            Default: "any". -->
       <xs:attribute name="InputMethod" type="kgen:pinInput" use="optional"/>
+
+   </xs:attributeGroup>
+
+   <xs:attributeGroup name="extensionAttrs">
+
+      <!-- Minimum length of a PIN code. -->
+      <xs:attribute name="Type" type="xs:anyURI" use="required"/>
+
+      <!-- Maximum length of a PIN code. -->
+      <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
    </xs:attributeGroup>
 

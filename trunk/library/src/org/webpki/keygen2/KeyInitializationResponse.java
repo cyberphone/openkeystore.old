@@ -2,8 +2,8 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.Serializable;
 
+import org.webpki.xml.ServerCookie;
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
@@ -13,10 +13,16 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-abstract class KeyInitializationResponse extends XMLObjectWrapper implements Serializable
+abstract class KeyInitializationResponse extends XMLObjectWrapper
   {
-    private static final long serialVersionUID = 1L;
+    String client_session_id;
 
+    String server_session_id;
+
+    ServerCookie server_cookie;                         // Optional
+
+    String key_attestation_algorithm;
+ 
     KeyInitializationResponse () {}
 
     public void init () throws IOException

@@ -297,9 +297,9 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
                 rd.getParent ();
               }
 
-            while (rd.hasNext (LOGO_TYPE_ELEM))
+            while (rd.hasNext (LOGOTYPE_ELEM))
               {
-                logotypes.add (new Logotype (rd.getBinary (LOGO_TYPE_ELEM),
+                logotypes.add (new Logotype (rd.getBinary (LOGOTYPE_ELEM),
                                              ah.getString (MIME_TYPE_ATTR),
                                              ah.getString (TYPE_ATTR)));
               }
@@ -618,8 +618,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         client_session_id = ah.getString (CLIENT_SESSION_ID_ATTR);
 
         server_session_id = ah.getString (ID_ATTR);
-
-        server_time = ah.getString (SERVER_TIME_ATTR);
 
         submit_url = ah.getString (SUBMIT_URL_ATTR);
 
