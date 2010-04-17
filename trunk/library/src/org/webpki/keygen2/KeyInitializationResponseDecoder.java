@@ -45,14 +45,14 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
         kire.ics.checkSession (client_session_id, server_session_id);
         if (generated_keys.size () != kire.ics.requested_keys.size ())
           {
-            IssuerCredentialStore.bad ("Different number of requested and received keys");
+            ServerCredentialStore.bad ("Different number of requested and received keys");
           }
         for (GeneratedPublicKey gpk : generated_keys.values ())
           {
-            IssuerCredentialStore.KeyProperties kp = kire.ics.requested_keys.get (gpk.id);
+            ServerCredentialStore.KeyProperties kp = kire.ics.requested_keys.get (gpk.id);
             if (kp == null)
               {
-                IssuerCredentialStore.bad ("Missing id:" + gpk.id);
+                ServerCredentialStore.bad ("Missing id:" + gpk.id);
               }
             kp.public_key = gpk.public_key;
             kp.encrypted_private_key = gpk.encrypted_private_key;
@@ -102,7 +102,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
             rd.getParent ();
             if (generated_keys.put (gk.id, gk) != null)
               {
-                IssuerCredentialStore.bad ("Duplicate key id:" + gk.id);
+                ServerCredentialStore.bad ("Duplicate key id:" + gk.id);
               }
           }
         while (rd.hasNext (GENERATED_PUBLIC_KEY_ELEM));

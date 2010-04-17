@@ -20,7 +20,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.crypto.JKSSignCertStore;
 
 import org.webpki.keygen2.CredentialDeploymentRequestEncoder;
-import org.webpki.keygen2.IssuerCredentialStore;
+import org.webpki.keygen2.ServerCredentialStore;
 import org.webpki.keygen2.KeyGen2KeyUsage;
 import org.webpki.keygen2.KeyGen2URIs;
 import org.webpki.keygen2.KeyInitializationRequestEncoder;
@@ -41,10 +41,10 @@ public class credepreq_enc
         if (args.length < 1) show ();
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
-        IssuerCredentialStore ics = new  IssuerCredentialStore (Constants.SESSION_ID,
+        ServerCredentialStore ics = new  ServerCredentialStore (Constants.SESSION_ID,
                                                                 Constants.REQUEST_ID);
-        IssuerCredentialStore.KeyProperties kp = ics.createKey (KeyGen2KeyUsage.AUTHENTICATION,
-            new IssuerCredentialStore.KeyAlgorithmData.RSA (2048),
+        ServerCredentialStore.KeyProperties kp = ics.createKey (KeyGen2KeyUsage.AUTHENTICATION,
+            new ServerCredentialStore.KeyAlgorithmData.RSA (2048),
             null).setExportable (true).setSymmetricKey (new byte[]{3,4,5}, new String[]{"http://host/fdfdf"});
         
         kp.setCertificatePath (new X509Certificate[] {(X509Certificate)DemoKeyStore.getMarionKeyStore ().getCertificate ("mykey"),

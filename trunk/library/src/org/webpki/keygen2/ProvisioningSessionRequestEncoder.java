@@ -28,10 +28,6 @@ public class ProvisioningSessionRequestEncoder extends ProvisioningSessionReques
 
     // Constructors
 
-    @SuppressWarnings("unused")
-    private ProvisioningSessionRequestEncoder () {}
-
-
     public ProvisioningSessionRequestEncoder (ECPublicKey server_ephemeral_key,
                                               String server_session_id,
                                               String submit_url,

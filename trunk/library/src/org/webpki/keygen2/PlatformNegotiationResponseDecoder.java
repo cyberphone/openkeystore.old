@@ -1,7 +1,6 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
@@ -10,13 +9,9 @@ import org.webpki.xml.ServerCookie;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class PlatformNegotiationResponseDecoder extends PlatformNegotiationResponse implements Serializable
+public class PlatformNegotiationResponseDecoder extends PlatformNegotiationResponse
   {
-    private static final long serialVersionUID = 1L;
-
     private String server_session_id;
-
-    private String client_session_id;
 
     BasicCapabilities basic_capabilities;
 
@@ -26,12 +21,6 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
     public String getServerSessionID ()
       {
         return server_session_id;
-      }
-
-
-    public String getClientSessionID ()
-      {
-        return client_session_id;
       }
 
 
@@ -59,8 +48,6 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
         //////////////////////////////////////////////////////////////////////////
         // Get the top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        client_session_id = ah.getString (ID_ATTR);
-
         server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
 
         rd.getChild ();

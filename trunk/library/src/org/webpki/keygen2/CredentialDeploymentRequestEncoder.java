@@ -23,31 +23,20 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequest
   {
-
-
     String submit_url;
 
     private String prefix;  // Default: no prefix
 
     ServerCookie server_cookie;
 
-    boolean xml_enc;
-
-    IssuerCredentialStore ics;
+    ServerCredentialStore ics;
     
     MACInterface mac_interface;
     
-    byte[] session_hash;
-
-
     // Constructors
 
-    @SuppressWarnings("unused")
-    private CredentialDeploymentRequestEncoder () {}
-
-
     public CredentialDeploymentRequestEncoder (String submit_url, 
-                                               IssuerCredentialStore ics,
+                                               ServerCredentialStore ics,
                                                MACInterface mac_interface) throws IOException
       {
         this.submit_url = submit_url;
@@ -108,7 +97,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
         ////////////////////////////////////////////////////////////////////////
         try
           {
-            for (IssuerCredentialStore.KeyProperties certified_key : ics.getKeyProperties ())
+            for (ServerCredentialStore.KeyProperties certified_key : ics.getKeyProperties ())
               {
                 wr.addChildElement (CERTIFIED_PUBLIC_KEY_ELEM);
                 wr.setStringAttribute (ID_ATTR, certified_key.id);
@@ -140,7 +129,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 ////////////////////////////////////////////////////////////////////////
                 // Optional: property bags, extensions, and logotypes
                 ////////////////////////////////////////////////////////////////////////
-                for (IssuerCredentialStore.ExtensionInterface ei : certified_key.extensions.values ())
+                for (ServerCredentialStore.ExtensionInterface ei : certified_key.extensions.values ())
                   {
                     byte[] mac_data = 
                            mac_interface.getMac (

@@ -87,10 +87,6 @@ public class KeyInitializationResponseEncoder extends KeyInitializationResponse
       }
 
 
-    @SuppressWarnings("unused")
-    private KeyInitializationResponseEncoder () {}
-
-
     public KeyInitializationResponseEncoder (String client_session_id, String server_session_id, Date server_time, Date client_time) throws IOException
       {
         this.client_session_id = client_session_id;

@@ -415,13 +415,6 @@
             <!-- The now certified keys. -->
             <xs:element ref="kgen:CertifiedPublicKey" maxOccurs="unbounded"/>
 
-            <!-- PUK and predefined PIN values are always encrypted using a
-                 master 256-bit AES key which in turn is encrypted by a public
-                 key given by the client in the "KeyOperationResponse" message.
-                 The XML encryption is using a profiled (but true), subset of
-                 the original W3C schema.  The profile is published in a
-                 separate document.  -->
-
             <!-- See "ServerCookie" definition. -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
@@ -775,7 +768,7 @@
             </xs:element>
          </xs:sequence>
 
-         <!-- The type of a PropertyBag tells where its Properties belong. -->
+         <!-- Mandatory extension attributes. -->
          <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
       </xs:complexType>

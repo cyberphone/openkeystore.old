@@ -8,7 +8,7 @@ import org.webpki.xml.XMLSchemaCache;
 
 import org.webpki.crypto.JKSCAVerifier;
 
-import org.webpki.keygen2.IssuerCredentialStore;
+import org.webpki.keygen2.ServerCredentialStore;
 import org.webpki.keygen2.KeyInitializationRequestEncoder;
 import org.webpki.keygen2.KeyInitializationResponseDecoder;
 import org.webpki.keygen2.KeyInitializationResponseEncoder;
@@ -31,9 +31,9 @@ public class keyinitres_dec
         cache.addWrapper (KeyInitializationResponseDecoder.class);
         KeyInitializationResponseDecoder kgrd = (KeyInitializationResponseDecoder)cache.parse (ArrayUtil.readFile (args[0]));
         KeyInitializationRequestEncoder kgre = null;
-        IssuerCredentialStore ics = null;
+        ServerCredentialStore ics = null;
         kgrd.validateAndPopulate (kgre, null);
-        for (IssuerCredentialStore.KeyProperties k : ics.getKeyProperties ())
+        for (ServerCredentialStore.KeyProperties k : ics.getKeyProperties ())
           {
             System.out.println ("ID=" + k.getID () + " PublicKey=" + k.getPublicKey () +
                 (k.getEncryptedPrivateKey () == null ? "" : "\n PRIVATE KEY"));

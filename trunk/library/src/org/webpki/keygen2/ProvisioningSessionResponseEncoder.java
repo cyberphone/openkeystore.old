@@ -26,10 +26,6 @@ public class ProvisioningSessionResponseEncoder extends ProvisioningSessionRespo
     
      // Constructors
 
-    @SuppressWarnings("unused")
-    private ProvisioningSessionResponseEncoder () {}
-
-
     public ProvisioningSessionResponseEncoder (ECPublicKey client_ephemeral_key,
                                                String server_session_id,
                                                String client_session_id,

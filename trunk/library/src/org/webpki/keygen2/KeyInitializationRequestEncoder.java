@@ -27,7 +27,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
 
     ServerCookie server_cookie;
     
-    IssuerCredentialStore ics;
+    ServerCredentialStore ics;
     
     private boolean need_signature_ns;
     
@@ -38,12 +38,8 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
 
     // Constructors
 
-    @SuppressWarnings("unused")
-    private KeyInitializationRequestEncoder () {}
-
-
     public KeyInitializationRequestEncoder (String submit_url,
-                                            IssuerCredentialStore ics) throws IOException
+                                            ServerCredentialStore ics) throws IOException
       {
         this.submit_url = submit_url;
         this.ics = ics;
@@ -84,7 +80,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
       }
     
     
-    private IssuerCredentialStore.PUKPolicy getPUKPolicy (IssuerCredentialStore.KeyProperties kp)
+    private ServerCredentialStore.PUKPolicy getPUKPolicy (ServerCredentialStore.KeyProperties kp)
       {
         return kp.pin_policy == null ? null : kp.pin_policy.puk_policy;
       }
@@ -120,8 +116,8 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
           {
             bad ("Empty request not allowd!");
           }
-        IssuerCredentialStore.KeyProperties last_req_key = null;
-        for (IssuerCredentialStore.KeyProperties req_key : ics.requested_keys.values ())
+        ServerCredentialStore.KeyProperties last_req_key = null;
+        for (ServerCredentialStore.KeyProperties req_key : ics.requested_keys.values ())
           {
             if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
                 getPUKPolicy (last_req_key) != getPUKPolicy (req_key))

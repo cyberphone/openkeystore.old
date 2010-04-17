@@ -17,7 +17,7 @@ import org.webpki.util.ArrayUtil;
 import org.webpki.util.MimeTypedObject;
 import org.webpki.xml.DOMWriterHelper;
 
-public class IssuerCredentialStore implements Serializable
+public class ServerCredentialStore implements Serializable
   {
     private static final long serialVersionUID = 1L;
     
@@ -191,14 +191,20 @@ public class IssuerCredentialStore implements Serializable
             return (byte)0x02;
           }
         
+        private byte[] stringToByteArray (String string) throws IOException
+          {
+            byte[] raw = string.getBytes ("UTF-8");
+            return ArrayUtil.add (new byte[]{(byte)(raw.length >>> 8), (byte)(raw.length & 0xFF)}, raw);
+          }
+        
         public byte[] getExtensionData () throws IOException
           {
             byte[] data = new byte[0];
             for (Property prop : properties.values ())
               {
                 data = ArrayUtil.add (data, 
-                                      ArrayUtil.add (prop.name.getBytes ("UTF-8"),
-                                                     ArrayUtil.add (new byte[]{(byte)(prop.writable ? 0x01 : 0x00)} , prop.value.getBytes ("UTF-8"))));
+                                      ArrayUtil.add (stringToByteArray (prop.name),
+                                                     ArrayUtil.add (new byte[]{(byte)(prop.writable ? 0x01 : 0x00)} , stringToByteArray (prop.value))));
               }
             return data;
           }
@@ -750,7 +756,7 @@ public class IssuerCredentialStore implements Serializable
 
     // Constructors
 
-    public IssuerCredentialStore (String client_session_id, String server_session_id) throws IOException
+    public ServerCredentialStore (String client_session_id, String server_session_id) throws IOException
       {
         this.client_session_id = client_session_id;
         this.server_session_id = server_session_id;

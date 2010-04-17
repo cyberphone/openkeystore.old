@@ -23,10 +23,6 @@ public class CredentialDeploymentResponseEncoder extends CredentialDeploymentRes
 
     // Constructors
 
-    @SuppressWarnings("unused")
-    private CredentialDeploymentResponseEncoder () {}
-
-
     public CredentialDeploymentResponseEncoder (String client_session_id, String server_session_id)
       {
         this.client_session_id = client_session_id;
