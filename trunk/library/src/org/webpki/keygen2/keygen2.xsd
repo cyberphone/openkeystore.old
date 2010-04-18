@@ -434,6 +434,8 @@
          <!-- Where to POST the response. -->
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
+         <!-- "closeProvisioningSession" MAC. -->
+         <xs:attribute name="SessionMAC" type="xs:base64Binary" use="required"/>
       </xs:complexType>
 
       <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

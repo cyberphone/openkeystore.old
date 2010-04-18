@@ -4,11 +4,13 @@ import java.io.IOException;
 
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.ServerCookie;
 
@@ -66,15 +68,21 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
       }
     
     
+    private byte[] mac (byte[] data) throws IOException, GeneralSecurityException
+      {
+        return mac_interface.getMac (data, ics.mac_sequence_counter++);
+      }
+    
+    
     private void mac (DOMWriterHelper wr, byte[] data) throws IOException, GeneralSecurityException
       {
-        wr.setBinaryAttribute (MAC_ATTR, mac_interface.getMac (data));
+        wr.setBinaryAttribute (MAC_ATTR, mac (data));
       }
 
 
     protected void toXML (DOMWriterHelper wr) throws IOException
       {
-        wr.initializeRootObject (prefix);
+        Element top = wr.initializeRootObject (prefix);
 
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
@@ -131,13 +139,11 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 ////////////////////////////////////////////////////////////////////////
                 for (ServerCredentialStore.ExtensionInterface ei : certified_key.extensions.values ())
                   {
-                    byte[] mac_data = 
-                           mac_interface.getMac (
-                                ArrayUtil.add (ee_cert, 
-                                     ArrayUtil.add (
-                                          ArrayUtil.add (new byte[]{ei.getBaseType ()}, ei.getQualifier ()),
-                                               ArrayUtil.add (ei.type.getBytes ("UTF-8"), ei.getExtensionData ()))));
-                    ei.writeExtension (wr, mac_data);
+                    ei.writeExtension (wr,
+                                       mac (ArrayUtil.add (ee_cert, 
+                                                 ArrayUtil.add (
+                                                      ArrayUtil.add (new byte[]{ei.getBaseType ()}, ei.getQualifier ()),
+                                                           ArrayUtil.add (ei.type.getBytes ("UTF-8"), ei.getExtensionData ())))));
                   }
                 wr.getParent ();
              }
@@ -155,6 +161,10 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
             server_cookie.write (wr);
           }
 
+        ////////////////////////////////////////////////////////////////////////
+        // Finally, set the "closeProvisioningSession" MAC
+        ////////////////////////////////////////////////////////////////////////
+        top.setAttribute (SESSION_MAC_ATTR, new Base64 ().getBase64StringFromBinary (new byte[]{5,6}));
       }
 
   }

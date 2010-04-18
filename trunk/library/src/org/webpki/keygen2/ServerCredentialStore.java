@@ -732,7 +732,7 @@ public class ServerCredentialStore implements Serializable
 
     int next_puk_id_suffix = 0;
 
-    boolean need_signature_ns;
+    short mac_sequence_counter;
 
     LinkedHashMap<String,KeyProperties> requested_keys = new LinkedHashMap<String,KeyProperties> ();
     

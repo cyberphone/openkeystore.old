@@ -59,6 +59,8 @@ public interface KeyGen2Constants
 
     String MAC_ATTR                          = "MAC";
 
+    String SESSION_MAC_ATTR                  = "SessionMAC";
+
     String DEFERRED_CERTIFICATION_ATTR       = "DeferredCertification";
 
     String ENDORSED_ALGORITHMS_ATTR          = "EndorsedAlgorithms";

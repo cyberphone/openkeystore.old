@@ -65,7 +65,7 @@ public class credepreq_enc
                                    {
 
                                     @Override
-                                    public byte[] getMac (byte[] data) throws IOException, GeneralSecurityException
+                                    public byte[] getMac (byte[] data, short bla) throws IOException, GeneralSecurityException
                                       {
                                          return new byte[]{0,1,2,4};
                                       }
