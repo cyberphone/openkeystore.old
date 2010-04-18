@@ -18,6 +18,7 @@ import org.webpki.wasp.test.BankLogo;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.crypto.JKSSignCertStore;
+import org.webpki.crypto.MacAlgorithms;
 
 import org.webpki.keygen2.CredentialDeploymentRequestEncoder;
 import org.webpki.keygen2.ServerCredentialStore;
@@ -42,7 +43,8 @@ public class credepreq_enc
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
         ServerCredentialStore ics = new  ServerCredentialStore (Constants.SESSION_ID,
-                                                                Constants.REQUEST_ID);
+                                                                Constants.REQUEST_ID,
+                                                                "http://host/req");
         ServerCredentialStore.KeyProperties kp = ics.createKey (KeyGen2KeyUsage.AUTHENTICATION,
             new ServerCredentialStore.KeyAlgorithmData.RSA (2048),
             null).setExportable (true).setSymmetricKey (new byte[]{3,4,5}, new String[]{"http://host/fdfdf"});
@@ -65,9 +67,9 @@ public class credepreq_enc
                                    {
 
                                     @Override
-                                    public byte[] getMac (byte[] data, short bla) throws IOException, GeneralSecurityException
+                                    public byte[] getMac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException
                                       {
-                                         return new byte[]{0,1,2,4};
+                                        return MacAlgorithms.HMAC_SHA256.digest (ArrayUtil.add (Constants.SESSION_KEY, key_modifier), data);
                                       }
                                      
                                    });

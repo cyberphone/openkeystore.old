@@ -5,5 +5,5 @@ import java.security.GeneralSecurityException;
 
 public interface MACInterface
   {
-    public byte[] getMac (byte[] data, short mac_sequence_counter) throws IOException, GeneralSecurityException;
+    public byte[] getMac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException;
   }

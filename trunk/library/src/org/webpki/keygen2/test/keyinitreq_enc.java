@@ -29,7 +29,8 @@ public class keyinitreq_enc
     static KeyInitializationRequestEncoder create () throws Exception
       {
         ServerCredentialStore ics = new  ServerCredentialStore (Constants.SESSION_ID,
-                                                                Constants.REQUEST_ID);
+                                                                Constants.REQUEST_ID,
+                                                                "http://host/req");
 
         ServerCredentialStore.PUKPolicy puk = ics.createPUKPolicy (new byte[]{4,6,8,9}, PassphraseFormats.NUMERIC, 3);
 

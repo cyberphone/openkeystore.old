@@ -745,6 +745,8 @@ public class ServerCredentialStore implements Serializable
 
     String client_session_id;
     
+    String issuer_uri;
+    
     void checkSession (String client_session_id, String server_session_id) throws IOException
       {
         if (!this.client_session_id.equals (client_session_id) || !this.server_session_id.equals (server_session_id))
@@ -756,10 +758,11 @@ public class ServerCredentialStore implements Serializable
 
     // Constructors
 
-    public ServerCredentialStore (String client_session_id, String server_session_id) throws IOException
+    public ServerCredentialStore (String client_session_id, String server_session_id, String issuer_uri) throws IOException
       {
         this.client_session_id = client_session_id;
         this.server_session_id = server_session_id;
+        this.issuer_uri = issuer_uri;
       }
 
     static void bad (String error_msg) throws IOException

@@ -68,15 +68,17 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
       }
     
     
-    private byte[] mac (byte[] data) throws IOException, GeneralSecurityException
+    private byte[] mac (byte[] data, APIDescriptors method) throws IOException, GeneralSecurityException
       {
-        return mac_interface.getMac (data, ics.mac_sequence_counter++);
+        int q = ics.mac_sequence_counter++;
+        return mac_interface.getMac (data, 
+                                     ArrayUtil.add (method.getBinary (), new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)}));
       }
     
     
-    private void mac (DOMWriterHelper wr, byte[] data) throws IOException, GeneralSecurityException
+    private void mac (DOMWriterHelper wr, byte[] data, APIDescriptors method) throws IOException, GeneralSecurityException
       {
-        wr.setBinaryAttribute (MAC_ATTR, mac (data));
+        wr.setBinaryAttribute (MAC_ATTR, mac (data, method));
       }
 
 
@@ -105,48 +107,63 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
         ////////////////////////////////////////////////////////////////////////
         try
           {
-            for (ServerCredentialStore.KeyProperties certified_key : ics.getKeyProperties ())
+            for (ServerCredentialStore.KeyProperties key : ics.getKeyProperties ())
               {
                 wr.addChildElement (CERTIFIED_PUBLIC_KEY_ELEM);
-                wr.setStringAttribute (ID_ATTR, certified_key.id);
+                wr.setStringAttribute (ID_ATTR, key.id);
 
                 ////////////////////////////////////////////////////////////////////////
                 // Always: the X509 Certificate
                 ////////////////////////////////////////////////////////////////////////
-                X509Certificate[] certificate_path = CertificateUtil.getSortedPath (certified_key.certificate_path);
+                X509Certificate[] certificate_path = CertificateUtil.getSortedPath (key.certificate_path);
                 byte[] ee_cert = certificate_path[0].getEncoded ();
-                mac (wr, ArrayUtil.add (certified_key.public_key.getEncoded (),
-                                        ArrayUtil.add (certified_key.id.getBytes ("UTF-8"), ee_cert)));
+                mac (wr,
+                     ArrayUtil.add (key.public_key.getEncoded (), ArrayUtil.add (key.id.getBytes ("UTF-8"), ee_cert)),
+                     APIDescriptors.SET_CERTIFICATE_PATH);
                 XMLSignatureWrapper.writeX509DataSubset (wr, certificate_path);
 
                 ////////////////////////////////////////////////////////////////////////
                 // Optional: "piggybacked" symmetric key
                 ////////////////////////////////////////////////////////////////////////
-                if (certified_key.encrypted_symmetric_key != null)
+                if (key.encrypted_symmetric_key != null)
                   {
-                    wr.addBinary (SYMMETRIC_KEY_ELEM, certified_key.encrypted_symmetric_key);
+                    wr.addBinary (SYMMETRIC_KEY_ELEM, key.encrypted_symmetric_key);
                     byte[] endorsed_algorithms = new byte[0];
-                    for (String algorithm : getSortedAlgorithms (certified_key.endorsed_algorithms))
+                    for (String algorithm : getSortedAlgorithms (key.endorsed_algorithms))
                       {
                         endorsed_algorithms = ArrayUtil.add (endorsed_algorithms, algorithm.getBytes ("UTF-8"));
                       }
-                    mac (wr, ArrayUtil.add (ee_cert, ArrayUtil.add (certified_key.encrypted_symmetric_key, endorsed_algorithms)));
-                    wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, certified_key.endorsed_algorithms);
+                    mac (wr,
+                         ArrayUtil.add (ee_cert, ArrayUtil.add (key.encrypted_symmetric_key, endorsed_algorithms)),
+                         APIDescriptors.SET_SYMMETRIC_KEY);
+                    wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, key.endorsed_algorithms);
                   }
  
                 ////////////////////////////////////////////////////////////////////////
                 // Optional: property bags, extensions, and logotypes
                 ////////////////////////////////////////////////////////////////////////
-                for (ServerCredentialStore.ExtensionInterface ei : certified_key.extensions.values ())
+                for (ServerCredentialStore.ExtensionInterface ei : key.extensions.values ())
                   {
                     ei.writeExtension (wr,
                                        mac (ArrayUtil.add (ee_cert, 
                                                  ArrayUtil.add (
                                                       ArrayUtil.add (new byte[]{ei.getBaseType ()}, ei.getQualifier ()),
-                                                           ArrayUtil.add (ei.type.getBytes ("UTF-8"), ei.getExtensionData ())))));
+                                                           ArrayUtil.add (ei.type.getBytes ("UTF-8"), ei.getExtensionData ()))),
+                                            APIDescriptors.ADD_EXTENSION)
+                                       );
                   }
                 wr.getParent ();
-             }
+              }
+
+            ////////////////////////////////////////////////////////////////////////
+            // Done with the crypto, now set the "closeProvisioningSession" MAC
+            ////////////////////////////////////////////////////////////////////////
+            top.setAttribute (SESSION_MAC_ATTR,
+                              new Base64 ().getBase64StringFromBinary (
+                                         mac (new StringBuffer ().append (ics.client_session_id)
+                                                                 .append (ics.server_session_id)
+                                                                 .append (ics.issuer_uri).toString ().getBytes ("UTF-8"),
+                                              APIDescriptors.CLOSE_SESSION)));
           }
         catch (GeneralSecurityException e)
           {
@@ -160,11 +177,6 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
           {
             server_cookie.write (wr);
           }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Finally, set the "closeProvisioningSession" MAC
-        ////////////////////////////////////////////////////////////////////////
-        top.setAttribute (SESSION_MAC_ATTR, new Base64 ().getBase64StringFromBinary (new byte[]{5,6}));
       }
 
   }
