@@ -1,0 +1,64 @@
+<project name="WEBPKI.ORG library for Android" default="build" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="src_dir" value="../src" />
+  <property name="android_dir" value="../.android.src.out" />
+  <property name="xerces_hacked_for_android_dir" value="../xerces.src.hacked.for.android" />
+
+  <target name="help">
+    <echo message="Available targets are help, clean, build, compile."/>
+  </target>
+
+  <target name="build" depends="clean">
+    <!-- Create the android src directory -->
+    <mkdir dir="${android_dir}" />
+    <!-- Copy all files except .java  -->
+    <copy todir="${android_dir}" preservelastmodified="true">
+      <fileset dir="${src_dir}">
+        <include name="org/**/*"/>
+        <exclude name="org/**/*.html"/>
+        <exclude name="org/**/doc-files/*"/>
+        <exclude name="org/**/pdf/**"/>
+<!--
+        <exclude name="org/**/test/**"/>
+        <exclude name="org/**/ca/**"/>
+        <exclude name="org/**/pkcs7/**"/>
+-->
+        <exclude name="org/webpki/webutil/**"/>
+     </fileset>
+    </copy>
+
+    <copy todir="${android_dir}/org/webpki/internal" preservelastmodified="true">
+      <fileset dir="${xerces_hacked_for_android_dir}">
+        <include name="**/*"/>
+        <exclude name="**/*.html"/>
+        <exclude name="**/doc-files/*"/>
+     </fileset>
+    </copy>
+    <replace summary="true" dir="${android_dir}" value="org.webpki.internal.org.w3c.">
+       <include name="**/*.java"/>
+       <replacetoken><![CDATA[org.w3c.]]></replacetoken>
+     </replace>
+    <replace summary="true" dir="${android_dir}" value="org.webpki.internal.javax.xml">
+       <include name="**/*.java"/>
+       <replacetoken><![CDATA[javax.xml]]></replacetoken>
+     </replace>
+    <replace summary="true" dir="${android_dir}" value="org.webpki.internal.org.apache.">
+       <include name="**/*.java"/>
+       <replacetoken><![CDATA[org.apache.]]></replacetoken>
+     </replace>
+    <replace summary="true" dir="${android_dir}" value="else /* Android patch... */ ((HttpsURLConnection)conn).setHostnameVerifier (new org.apache.http.conn.ssl.StrictHostnameVerifier ());">
+       <include name="org/webpki/net/HttpsWrapper.java"/>
+       <replacetoken><![CDATA[// ANDROID PATCH HERE]]></replacetoken>
+     </replace>
+  </target>
+
+  <target name="clean">
+    <delete dir="${android_dir}"/>
+  </target>
+
+  <target name="compile" depends="build">
+    <javac debug="${debug}" srcdir="${android_dir}" destdir="${android_dir}"/>
+  </target>  
+</project>
+
