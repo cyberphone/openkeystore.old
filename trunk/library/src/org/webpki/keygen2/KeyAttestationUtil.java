@@ -11,7 +11,7 @@ import java.security.PublicKey;
 import java.security.interfaces.RSAKey;
 
 import org.webpki.keygen2.KeyGen2URIs;
-import org.webpki.keygen2.KeyGen2KeyUsage;
+import org.webpki.keygen2.KeyUsage;
 
 import org.webpki.util.ArrayUtil;
 
@@ -45,7 +45,7 @@ public class KeyAttestationUtil
     public static byte[] createKA1Package (RSAKey attesting_key,
                                            PublicKey attested_public_key,
                                            boolean exportable,
-                                           KeyGen2KeyUsage key_usage,
+                                           KeyUsage key_usage,
                                            byte[] nonce,
                                            PublicKey opt_archival_key)
     throws GeneralSecurityException
@@ -107,7 +107,7 @@ public class KeyAttestationUtil
                                            PublicKey attesting_public_key,
                                            PublicKey attested_public_key,
                                            boolean exportable,
-                                           KeyGen2KeyUsage key_usage,
+                                           KeyUsage key_usage,
                                            byte[] nonce,
                                            PublicKey opt_archival_key)
     throws GeneralSecurityException

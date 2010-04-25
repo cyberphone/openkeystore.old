@@ -2,7 +2,6 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.util.Date;
 import java.util.Vector;
 
 import java.security.PublicKey;
@@ -19,15 +18,9 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class KeyInitializationResponseEncoder extends KeyInitializationResponse
   {
-    private Date client_time;
-
-    private Date server_time;
-
     private Vector<GeneratedPublicKey> generated_keys = new Vector<GeneratedPublicKey> ();
 
     private String prefix;  // Default: no prefix
-
-    private String key_attestation_algorithm = KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1;
 
     private boolean need_ds11_namespace;
 
@@ -87,18 +80,10 @@ public class KeyInitializationResponseEncoder extends KeyInitializationResponse
       }
 
 
-    public KeyInitializationResponseEncoder (String client_session_id, String server_session_id, Date server_time, Date client_time) throws IOException
+    public KeyInitializationResponseEncoder (KeyInitializationRequestDecoder key_init_req) throws IOException
       {
-        this.client_session_id = client_session_id;
-        this.server_session_id = server_session_id;
-        this.server_time = server_time;
-        this.client_time = client_time;
-      }
-
-
-    public void setKeyAttestationAlgorithm (String key_attestation_algorithm_uri)
-      {
-        this.key_attestation_algorithm = key_attestation_algorithm_uri;
+        client_session_id = key_init_req.getClientSessionID ();
+        server_session_id = key_init_req.getServerSessionID ();
       }
 
 
@@ -116,13 +101,7 @@ public class KeyInitializationResponseEncoder extends KeyInitializationResponse
         wr.setStringAttribute (ID_ATTR, client_session_id);
 
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
-
-        wr.setDateTimeAttribute (SERVER_TIME_ATTR, server_time);
-
-        wr.setDateTimeAttribute (CLIENT_TIME_ATTR, client_time);
-        
-        wr.setStringAttribute (KEY_ATTESTATION_ALGORITHM_ATTR, key_attestation_algorithm);
-
+      
         for (GeneratedPublicKey gk : generated_keys)
           {
             wr.addChildElement (GENERATED_PUBLIC_KEY_ELEM);

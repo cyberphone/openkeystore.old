@@ -305,6 +305,23 @@ public class ServerCredentialStore implements Serializable
           }
 
 
+        boolean user_modifiable;
+        
+        boolean user_modifiable_set;
+        
+        public boolean getUserModifiable ()
+          {
+            return user_modifiable;
+          }
+
+        public PINPolicy setUserModifiable (boolean flag)
+          {
+            user_modifiable = flag;
+            user_modifiable_set = true;
+            return this;
+          }
+
+
         PassphraseFormats format;
 
         int min_length;
@@ -342,6 +359,10 @@ public class ServerCredentialStore implements Serializable
             wr.setIntAttribute (MAX_LENGTH_ATTR, max_length);
             wr.setIntAttribute (MIN_LENGTH_ATTR, min_length);
             wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
+            if (user_modifiable_set)
+              {
+                wr.setBooleanAttribute (USER_MODIFIABLE_ATTR, user_modifiable);
+              }
             if (group != null)
               {
                 wr.setStringAttribute (GROUPING_ATTR, group.getXMLName ());
@@ -398,20 +419,11 @@ public class ServerCredentialStore implements Serializable
 
         abstract void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException;
 
-        private KeyAlgorithmData ()
-          {
-          }
-
         public static final class EC extends KeyAlgorithmData implements Serializable
           {
             private static final long serialVersionUID = 1L;
 
             ECDomains named_curve;
-
-            @SuppressWarnings("unused")
-            private EC ()
-              {
-              }
 
             public EC (ECDomains named_curve)
               {
@@ -433,11 +445,6 @@ public class ServerCredentialStore implements Serializable
             int key_size;
 
             BigInteger fixed_exponent;
-
-            @SuppressWarnings("unused")
-            private RSA ()
-              {
-              }
 
             public RSA (int key_size)
               {
@@ -467,11 +474,6 @@ public class ServerCredentialStore implements Serializable
             private static final long serialVersionUID = 1L;
 
             int key_size;
-
-            @SuppressWarnings("unused")
-            private DSA ()
-              {
-              }
 
             public DSA (int key_size)
               {
@@ -618,9 +620,9 @@ public class ServerCredentialStore implements Serializable
           }
         
 
-        KeyGen2KeyUsage key_usage;
+        KeyUsage key_usage;
 
-        public KeyGen2KeyUsage getKeyUsage ()
+        public KeyUsage getKeyUsage ()
           {
             return key_usage;
           }
@@ -643,14 +645,6 @@ public class ServerCredentialStore implements Serializable
           }
         
 
-        boolean user_modifiable;
-        
-        public boolean getUserModifiable ()
-          {
-            return user_modifiable;
-          }
-
-
         boolean device_pin_protected;
 
         public boolean getDevicePINProtected ()
@@ -658,7 +652,7 @@ public class ServerCredentialStore implements Serializable
             return device_pin_protected;
           }
 
-        KeyProperties (KeyGen2KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protected) throws IOException
+        KeyProperties (KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protected) throws IOException
           {
             this.id = key_prefix + ++next_key_id_suffix;
             this.key_usage = key_usage;
@@ -666,8 +660,6 @@ public class ServerCredentialStore implements Serializable
             this.pin_policy = pin_policy;
             this.preset_pin = preset_pin;
             this.device_pin_protected = device_pin_protected;
-// TODO
-            this.public_key = org.webpki.crypto.test.ECKeys.PUBLIC_KEY1;
             if (pin_policy != null)
               {
                 if (pin_policy.not_first)
@@ -683,7 +675,6 @@ public class ServerCredentialStore implements Serializable
                     pin_policy.preset_test = preset_pin == null ? null : preset_pin.encrypted_value;
                   }
               }
-            this.user_modifiable = !device_pin_protected;
           }
 
         void writeRequest (DOMWriterHelper wr) throws IOException
@@ -796,33 +787,36 @@ public class ServerCredentialStore implements Serializable
       }
 
 
-    private KeyProperties addKeyProperties (KeyGen2KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protected) throws IOException
+    private KeyProperties addKeyProperties (KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protected) throws IOException
       {
-        KeyProperties rk = new KeyProperties (key_usage, key_alg_data, pin_policy, preset_pin, device_pin_protected);
-        requested_keys.put (rk.getID (), rk);
-        return rk;
+        KeyProperties key = new KeyProperties (key_usage, key_alg_data, pin_policy, preset_pin, device_pin_protected);
+        requested_keys.put (key.getID (), key);
+        return key;
       }
 
 
-    public KeyProperties createKeyWithPresetPIN (KeyGen2KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, byte[] encrypted_pin, boolean user_modifiable) throws IOException
+    public KeyProperties createKeyWithPresetPIN (KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, byte[] encrypted_pin) throws IOException
       {
         if (pin_policy == null)
           {
             bad ("PresetPIN without PINPolicy is not allowed");
           }
-        KeyProperties key = addKeyProperties (key_usage, key_alg_data, pin_policy, new PresetValue (encrypted_pin), false);
-        key.user_modifiable = user_modifiable;
+        return addKeyProperties (key_usage, key_alg_data, pin_policy, new PresetValue (encrypted_pin), false);
+      }
+
+
+    public KeyProperties createKey (KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy) throws IOException
+      {
+        KeyProperties key = addKeyProperties (key_usage, key_alg_data, pin_policy, null, false);
+        if (pin_policy != null)
+          {
+            pin_policy.user_modifiable = true;
+          }
         return key;
       }
 
 
-    public KeyProperties createKey (KeyGen2KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy) throws IOException
-      {
-        return addKeyProperties (key_usage, key_alg_data, pin_policy, null, false);
-      }
-
-
-    public KeyProperties createDevicePINProtectedKey (KeyGen2KeyUsage key_usage, KeyAlgorithmData key_alg_data) throws IOException
+    public KeyProperties createDevicePINProtectedKey (KeyUsage key_usage, KeyAlgorithmData key_alg_data) throws IOException
       {
         return addKeyProperties (key_usage, key_alg_data, null, null, true);
       }

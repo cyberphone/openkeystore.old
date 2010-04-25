@@ -76,12 +76,6 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
 
         server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
 
-        key_attestation_algorithm = ah.getString (KEY_ATTESTATION_ALGORITHM_ATTR);
-        if (!key_attestation_algorithm.equals (KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1))
-          {
-            throw new IOException ("Unknow algorithm: " + key_attestation_algorithm);
-          }
-
         rd.getChild ();
 
         //////////////////////////////////////////////////////////////////////////

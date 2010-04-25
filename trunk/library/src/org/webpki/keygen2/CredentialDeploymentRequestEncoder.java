@@ -158,7 +158,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
             ////////////////////////////////////////////////////////////////////////
             // Done with the crypto, now set the "closeProvisioningSession" MAC
             ////////////////////////////////////////////////////////////////////////
-            top.setAttribute (SESSION_MAC_ATTR,
+            top.setAttribute (CLOSE_SESSION_MAC_ATTR,
                               new Base64 ().getBase64StringFromBinary (
                                          mac (new StringBuffer ().append (ics.client_session_id)
                                                                  .append (ics.server_session_id)

@@ -122,7 +122,7 @@
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session. -->
-         <xs:attribute name="ServerSessionID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -169,8 +169,8 @@
               The provisioning middleware MAY check it for "sanity". -->
          <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
 
-         <!-- "SessionLifeTime" specifies the lifetime of the
-              "SessionKey" in seconds. -->
+         <!-- "SessionLifeTime" specifies the lifetime of the SKS
+              provisioning session in seconds. -->
          <xs:attribute name="SessionLifeTime" use="required">
             <xs:simpleType>
                <xs:restriction base="xs:positiveInteger">
@@ -263,10 +263,10 @@
          </xs:sequence> 
 
          <!-- "ID" holds the SKS-generated ClientSessionID. -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- MUST be equal to "ProvisioningSessionRequest/@ID". -->
-         <xs:attribute name="ServerSessionID" type="xs:string" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
          <!-- Copy of "ProvisioningSessionRequest/@ServerTime". -->
          <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
@@ -304,16 +304,13 @@
                <!-- A key that requires no PIN code. -->
                <xs:element ref="kgen:KeyPair"/>
 
-               <!-- One or more keys that are protected by PINs that can be
-                    defined (or updated) by the user governed by a specific
-                    PIN policy.  In addition to the PIN there is a master
-                    PUK code that can unlock keys that have been locked due
-                    to the use of erroneous PIN codes. -->
+               <!-- One or more keys that are protected by a specific PIN policy.
+                    In addition to the PIN there is a master PUK code that can
+                    unlock keys that have been locked due to the use of erroneous
+                    PIN codes. -->
                <xs:element ref="kgen:PUKPolicy"/>
 
-               <!-- One or more keys that are protected by PINs that can be
-                    defined (or updated) by the user governed by a specific
-                    PIN policy. -->
+               <!-- One or more keys that are protected by a specific PIN policy. -->
                <xs:element ref="kgen:PINPolicy"/>
 
                <!-- A key that is protected by the same PIN as the device.
@@ -342,16 +339,24 @@
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session. -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
-         <!-- MUST be equal to"PlatformNegotiationResponse/@ID"
+         <!-- MUST be equal to"ProvisioningSessionResponse/@ID"
               within a specific session. -->
-         <xs:attribute name="ClientSessionID" type="xs:string" use="required"/>
+         <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
 
          <!-- Where to HTTP POST the key operation response.  Note that
               applicable session cookies MUST be submitted in the request
               as well. -->
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
+
+         <!-- "KeyAttestationAlgorithm" is mandatory.  Currently the only known is:
+              "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1". -->
+         <xs:attribute name="KeyAttestationAlgorithm" type="xs:anyURI" use="required"/>
+
+         <!-- "ServerSeeed" is an optional random number input to SKS.  If not
+               specified a string of 32 bytes of zeroes will be used. -->
+         <xs:attribute name="ServerSeeed" type="xs:base64Binary" use="optional"/>
 
       </xs:complexType>
 
@@ -380,21 +385,11 @@
 
          <!-- MUST be equal to "PlatformNegotiationResponse/@ID"
               within a specific session. -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session. -->
-         <xs:attribute name="ServerSessionID" type="xs:string" use="required"/>
-
-         <!-- Copy of "KeyInitializationRequest/@ServerTime". -->
-         <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
-
-         <!-- The client's local clock is a mandatory item. -->
-         <xs:attribute name="ClientTime" type="xs:dateTime" use="required"/>
-
-         <!-- "KeyAttestationAlgorithm" is mandatory.  Currently the only known is:
-              "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1". -->
-         <xs:attribute name="KeyAttestationAlgorithm" type="xs:anyURI" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -423,19 +418,19 @@
 
          </xs:sequence>
 
-         <!-- MUST be equal to "PlatformNegotiationResponse/@ID"
+         <!-- MUST be equal to "ProvisioningSessionResponse/@ID"
               within a specific session. -->
-         <xs:attribute name="ClientSessionID" type="xs:string" use="required"/>
+         <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session. -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- Where to POST the response. -->
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
          <!-- "closeProvisioningSession" MAC. -->
-         <xs:attribute name="SessionMAC" type="xs:base64Binary" use="required"/>
+         <xs:attribute name="CloseSessionMAC" type="xs:base64Binary" use="required"/>
       </xs:complexType>
 
       <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -465,11 +460,14 @@
 
          <!-- MUST be equal to "PlatformNegotiationResponse/@ID"
               within a specific session. -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session. -->
-         <xs:attribute name="ServerSessionID" type="xs:string" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
+
+         <!-- "closeProvisioningSession" attestation. -->
+         <xs:attribute name="CloseSessionAttestation" type="xs:base64Binary" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -599,17 +597,7 @@
                  be rejected. -->
             <xs:element ref="ds:X509Data"/>
 
-            <!-- In the case the target key is actually a symmetric key
-                 ("piggybacking" on PKI), the object below holds the key
-                 value encrypted by the public key of the certificate above.
-                 During provisioning the corresponding private key is used
-                 for decryption before the key is finally stored. To benefit
-                 from KeyGen2's object management capabilities, a "link" of
-                 some kind is needed between the symmetric key and the
-                 provisioning certificate since the latter is also intended
-                 to play the role as a universal key ID for all key types.
-                 The private key MAY be disabled after the provisioning
-                 since it does not have any [legitimate] use anymore. -->
+            <!-- Optional: "piggybacked" symmetric key. -->
             <xs:element name="SymmetricKey" minOccurs="0">
                <xs:complexType>
                   <xs:simpleContent>
@@ -624,20 +612,7 @@
                                "http://xmlns.webpki.org/keygen2/1.0#algorithm.any" -->
                           <xs:attribute name="EndorsedAlgorithms" type="kgen:uriList" use="required"/>
         
-                          <!-- "MAC" holds the HMAC-SHA256 value of the UTF-8 encoded
-                               string of "EndorsedAlgorithms" with the whitespace removed,
-                               where the algorithm URIs have been sorted in lexical order
-                               and where each algorithm URI has been appended by a '\0'
-                               character, then followed by the unencrypted key, and using
-                               a nonce as the HMAC input key. The nonce is created by
-                               running SHA256 over the UTF-8 encoded attributes
-        
-                                   "CredentialDeploymentRequest/CertifiedPublicKey/@ID" 
-                                   "CredentialDeploymentRequest/@ClientSessionID" 
-                                   "CredentialDeploymentRequest/@ID"
-        
-                               where each attribute also has been augmented by a '\0'
-                               character. -->
+                          <!-- Mandatory MAC (Message Authentication Code). -->
                           <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
                      </xs:extension>
                   </xs:simpleContent>
@@ -709,6 +684,7 @@
                </xs:complexType>
             </xs:element>
 
+            <!-- Encrypted version of "Extension". -->
             <xs:element name="EncryptedExtension">
                <xs:complexType>
                   <xs:simpleContent>
@@ -727,8 +703,8 @@
          </xs:sequence>
 
          <!-- A unique key-ID which MUST match the corresponding
-              "KeyOperationResponse/GeneratedPublicKey/@ID". -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
+              "KeyInitializationResponse/GeneratedPublicKey/@ID". -->
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
@@ -738,9 +714,9 @@
                 Constraints (that can be enforced by schema-directed validation).
        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-      <!-- All PropertyBags for a key MUST be a unique. -->
-      <xs:unique name="PropertyBagUnique">
-         <xs:selector xpath="kgen:PropertyBag"/>
+      <!-- All Extension type URIs for a key MUST be a unique. -->
+      <xs:unique name="ExtensionTypeUnique">
+         <xs:selector xpath="*"/>
          <xs:field xpath="@Type"/>
       </xs:unique>
 
@@ -818,7 +794,7 @@
 
          <!-- A unique key-ID which MUST match a "KeyPair/@ID"
               in the corresponding "KeyInitializationRequest". -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -892,7 +868,7 @@
          </xs:sequence>
 
          <!-- A unique key-ID. -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- A key usage type. Two of the key usage types have a specific
               meaning during the provisioning phase: 
@@ -1121,7 +1097,7 @@
          </xs:sequence>
 
          <!-- A unque management object ID. -->
-         <xs:attribute name="ID" type="xs:ID" use="required"/>
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- To maintain strictness, a nonce created exactly like
               the "session hash" for the "PresetValues/@MAC" attribute
@@ -1279,6 +1255,13 @@
 
    <xs:simpleType name="sksID">
       <xs:restriction base="xs:ID">
+         <xs:maxLength value="32"/>
+         <xs:minLength value="1"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="sksNCName">
+      <xs:restriction base="xs:NCName">
          <xs:maxLength value="32"/>
          <xs:minLength value="1"/>
       </xs:restriction>

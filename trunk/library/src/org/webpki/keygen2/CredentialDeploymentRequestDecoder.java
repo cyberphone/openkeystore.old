@@ -2,8 +2,6 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import org.w3c.dom.Element;
-
 import java.util.Vector;
 import java.util.LinkedHashMap;
 
@@ -27,10 +25,7 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLVerifier;
 
 import org.webpki.crypto.VerifierInterface;
-import org.webpki.crypto.JKSCAVerifier;
 import org.webpki.crypto.MacAlgorithms;
-import org.webpki.crypto.EncryptionAlgorithms;
-import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -221,25 +216,19 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
         String id;
 
-        String friendly_name;
-
-        RenewalService renewal_service;
-
         Vector<PropertyBag> property_bags = new Vector<PropertyBag> ();
 
         byte[] encrypted_symmetric_key;
+
+        byte[] symmetric_key_mac;
 
         byte[] mac;
 
         String[] endorsed_algorithms;
 
-        String piggyback_mac_algorithm;
-
         Vector<Logotype> logotypes = new Vector<Logotype> ();
 
         Vector<Extension> extension_objects = new Vector<Extension> ();
-
-        XMLSignatureWrapper cpk_signature;
 
         CertifiedPublicKey () { }
 
@@ -247,9 +236,9 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         CertifiedPublicKey (DOMReaderHelper rd) throws IOException
           {
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-            Element root = rd.getNext (CERTIFIED_PUBLIC_KEY_ELEM);
+            rd.getNext (CERTIFIED_PUBLIC_KEY_ELEM);
             id = ah.getString (ID_ATTR);
-            friendly_name = ah.getStringConditional (FRIENDLY_NAME_ATTR, null);
+            mac = ah.getBinary (MAC_ATTR);
             rd.getChild ();
 
             certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);
@@ -257,95 +246,44 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
             if (rd.hasNext (SYMMETRIC_KEY_ELEM))
               {
                 rd.getNext (SYMMETRIC_KEY_ELEM);
-                mac = ah.getBinary (MAC_ATTR);
+                symmetric_key_mac = ah.getBinary (MAC_ATTR);
                 endorsed_algorithms = getSortedAlgorithms (ah.getList (ENDORSED_ALGORITHMS_ATTR));
-/*
-                piggyback_mac_algorithm = ah.getStringConditional (MAC_ALGORITHM_ATTR,
-                                                                   KeyGen2URIs.ALGORITHMS.MAC_PIGGYBACK_1);
-*/
- 
-                rd.getChild ();
-/*
-                rd.getNext (ENCRYPTED_KEY_ELEM);
-                rd.getChild ();
-
-                XMLEncUtil.getEncryptionMethod (rd, new EncryptionAlgorithms[]{AsymEncryptionAlgorithms.RSA_PKCS_1});
-
-                encrypted_symmetric_key = XMLEncUtil.getCipherValue (rd);
-*/
-                rd.getParent ();
-
-                rd.getParent ();
               }
 
-            while (rd.hasNext (PROPERTY_BAG_ELEM))
+            while (rd.hasNext ())
               {
-                rd.getNext (PROPERTY_BAG_ELEM);
-                PropertyBag property_bag = new PropertyBag ();
-                property_bag.type = ah.getString (TYPE_ATTR);
-                rd.getChild ();
-                while (rd.hasNext (PROPERTY_ELEM))
+                if (rd.hasNext (PROPERTY_BAG_ELEM))
                   {
-                    rd.getNext (PROPERTY_ELEM);
-                    Property property = new Property ();
-                    property.name = ah.getString (NAME_ATTR);
-                    property.value = ah.getString (VALUE_ATTR);
-                    property.writable = ah.getBooleanConditional (WRITABLE_ATTR);
-                    property_bag.properties.add (property);
+                    rd.getNext (PROPERTY_BAG_ELEM);
+                    PropertyBag property_bag = new PropertyBag ();
+                    property_bag.type = ah.getString (TYPE_ATTR);
+                    rd.getChild ();
+                    while (rd.hasNext (PROPERTY_ELEM))
+                      {
+                        rd.getNext (PROPERTY_ELEM);
+                        Property property = new Property ();
+                        property.name = ah.getString (NAME_ATTR);
+                        property.value = ah.getString (VALUE_ATTR);
+                        property.writable = ah.getBooleanConditional (WRITABLE_ATTR);
+                        property_bag.properties.add (property);
+                      }
+                    property_bags.add (property_bag);
+                    rd.getParent ();
                   }
-                property_bags.add (property_bag);
-                rd.getParent ();
-              }
-
-            while (rd.hasNext (LOGOTYPE_ELEM))
-              {
-                logotypes.add (new Logotype (rd.getBinary (LOGOTYPE_ELEM),
-                                             ah.getString (MIME_TYPE_ATTR),
-                                             ah.getString (TYPE_ATTR)));
-              }
-
-            if (rd.hasNext (RENEWAL_SERVICE_ELEM))
-              {
-                rd.getNext (RENEWAL_SERVICE_ELEM);
-                renewal_service = new RenewalService ();
-                renewal_service.notify_days_before_expiry = ah.getInt (NOTIFY_DAYS_BEFORE_EXPIRY_ATTR);
-                Vector<String> renewal_urls = new Vector<String> ();
-                Vector<String> renewal_dnss = new Vector<String> ();
-                rd.getChild ();
-                do
+                else if (rd.hasNext (LOGOTYPE_ELEM))
                   {
-                    if (rd.hasNext (URL_ELEM))
-                      {
-                        renewal_urls.add (rd.getString (URL_ELEM));
-                      }
-                    else
-                      {
-                        renewal_dnss.add (rd.getString (DNS_LOOKUP_ELEM));
-                      }
+                    logotypes.add (new Logotype (rd.getBinary (LOGOTYPE_ELEM),
+                                                 ah.getString (MIME_TYPE_ATTR),
+                                                 ah.getString (TYPE_ATTR)));
                   }
-                while (rd.hasNext ());
-                rd.getParent ();
-                renewal_service.renewal_urls = renewal_urls.toArray (new String[0]);
-                renewal_service.renewal_dnss = renewal_dnss.toArray (new String[0]);
+                else
+                  {
+                    Extension ext = new Extension ();
+                    ext.data = rd.getBinary (EXTENSION_ELEM);
+                    ext.type = ah.getString (TYPE_ATTR);
+                    extension_objects.add (ext);
+                  }
               }
-
-            while (rd.hasNext (EXTENSION_ELEM))
-              {
-                Extension ext = new Extension ();
-                ext.data = rd.getBinary (EXTENSION_ELEM);
-                ext.type = ah.getString (TYPE_ATTR);
-                extension_objects.add (ext);
-              }
-
-            if (rd.hasNext ())
-              {
-                cpk_signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
-                JKSCAVerifier verifier = new JKSCAVerifier ();
-                new XMLVerifier (verifier).validateEnvelopedSignature (null, root, cpk_signature, id);
-                CredentialDeploymentRequest.checkCertificateOrder (certificate_path,
-                                                                   verifier.getSignerCertificatePath ());
-              }
-
             rd.getParent ();
           }
 
@@ -353,37 +291,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         public X509Certificate[] getCertificatePath ()
           {
             return certificate_path;
-          }
-
-
-        public byte[] getSymmetricKey (SymmetricKeyDecrypter symmetric_key_decrypter) throws IOException
-          {
-            if (encrypted_symmetric_key == null)
-              {
-                throw new IOException ("No symmetric key available");
-              }
-            byte[] symmetric_key = null;
-            try
-              {
-                symmetric_key = symmetric_key_decrypter.decrypt (encrypted_symmetric_key, certificate_path[0]);
-/*
-                if (!ArrayUtil.compare (mac, getAlgorithmsMac (symmetric_key, id, client_session_id, server_session_id, endorsed_algorithms)))
-                  {
-                    throw new IOException ("Symmetric key MAC error");
-                  }
-*/
-              }
-            catch (GeneralSecurityException gse)
-              {
-                throw new IOException (gse.getMessage ());
-              }
-            return symmetric_key;
-          }
-
-
-        public boolean hasSymmetricKey ()
-          {
-            return encrypted_symmetric_key != null;
           }
 
 
@@ -395,7 +302,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
         public byte[] getSymmetricKeyMac ()
           {
-            return mac;
+            return symmetric_key_mac;
           }
 
 
@@ -405,33 +312,14 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
           }
 
 
-        public String getPiggybackMACAlgorithm ()
-          {
-            return piggyback_mac_algorithm;
-          }
-
-
-        public boolean isSigned ()
-          {
-            return cpk_signature != null;
-          }
-
-
         public String getID ()
           {
             return id;
           }
 
-
-        public String getFriendlyName ()
+        public byte[] getMAC ()
           {
-            return friendly_name;
-          }
-
-
-        public RenewalService getRenewalService ()
-          {
-            return renewal_service;
+            return mac;
           }
 
 

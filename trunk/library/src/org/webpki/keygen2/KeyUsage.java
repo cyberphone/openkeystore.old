@@ -3,7 +3,7 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 
-public enum KeyGen2KeyUsage
+public enum KeyUsage
   {
     SIGNATURE                  ("signature"),
     AUTHENTICATION             ("authentication"),
@@ -14,7 +14,7 @@ public enum KeyGen2KeyUsage
 
     private final String xml_name;       // As expressed in XML
 
-    private KeyGen2KeyUsage (String xml_name)
+    private KeyUsage (String xml_name)
       {
         this.xml_name = xml_name;
       }
@@ -26,9 +26,9 @@ public enum KeyGen2KeyUsage
       }
 
 
-    public static KeyGen2KeyUsage getKeyUsageFromString (String xml_name) throws IOException
+    public static KeyUsage getKeyUsageFromString (String xml_name) throws IOException
       {
-        for (KeyGen2KeyUsage key_type : KeyGen2KeyUsage.values ())
+        for (KeyUsage key_type : KeyUsage.values ())
           {
             if (xml_name.equals (key_type.xml_name))
               {

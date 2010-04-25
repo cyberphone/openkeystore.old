@@ -46,6 +46,12 @@ public class ProvisioningSessionRequestDecoder extends ProvisioningSessionReques
         return server_ephemeral_key;
       }
 
+    
+    public String getSessionKeyAlgorithm ()
+      {
+        return session_key_algorithm;
+      }
+
 
     public ServerCookie getServerCookie ()
       {

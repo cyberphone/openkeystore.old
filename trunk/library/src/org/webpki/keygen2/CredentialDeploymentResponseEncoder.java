@@ -17,16 +17,20 @@ public class CredentialDeploymentResponseEncoder extends CredentialDeploymentRes
     String server_session_id;
 
     ServerCookie server_cookie;
+    
+    byte[] close_session_attestation;
 
     String prefix;
 
 
     // Constructors
 
-    public CredentialDeploymentResponseEncoder (String client_session_id, String server_session_id)
+    public CredentialDeploymentResponseEncoder (CredentialDeploymentRequestDecoder cre_dep_dec,
+                                                byte[] close_session_attestation)
       {
-        this.client_session_id = client_session_id;
-        this.server_session_id = server_session_id;
+        client_session_id = cre_dep_dec.getClientSessionID ();
+        server_session_id = cre_dep_dec.getServerSessionID ();
+        this.close_session_attestation = close_session_attestation;
       }
 
 
@@ -53,10 +57,8 @@ public class CredentialDeploymentResponseEncoder extends CredentialDeploymentRes
 
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
 
-        wr.addComment ("\n" +
-                       "    This message is still TBD.\n\n" +
-                       "    Here the client will return a success signature\n  ",
-                       true);
+        wr.setBinaryAttribute (CLOSE_SESSION_ATTESTATION_ATTR, close_session_attestation);
+
         ////////////////////////////////////////////////////////////////////////
         // Optional ServerCookie
         ////////////////////////////////////////////////////////////////////////

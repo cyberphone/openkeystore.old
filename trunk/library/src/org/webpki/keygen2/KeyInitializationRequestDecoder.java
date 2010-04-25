@@ -309,7 +309,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
         boolean device_pin_protected;
 
-        KeyGen2KeyUsage key_usage;
+        KeyUsage key_usage;
 
         KeyAlgorithmData key_algorithm_data;
 
@@ -329,7 +329,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
             id = ah.getString (ID_ATTR);
-            key_usage = KeyGen2KeyUsage.getKeyUsageFromString (ah.getString (KEY_USAGE_ATTR));
+            key_usage = KeyUsage.getKeyUsageFromString (ah.getString (KEY_USAGE_ATTR));
             exportable = ah.getBooleanConditional (EXPORTABLE_ATTR);
 
             rd.getChild ();
@@ -395,7 +395,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
 
 
-        public KeyGen2KeyUsage getKeyUsage ()
+        public KeyUsage getKeyUsage ()
           {
             return key_usage;
           }
@@ -410,6 +410,86 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
         public String getID ()
           {
             return id;
+          }
+        
+
+     // TODO        
+        byte[] server_seed;
+        
+        public byte[] getServerSeed ()
+          {
+            return server_seed;
+          }
+        
+     // TODO        
+        byte biometric_protection;
+
+        public byte getBiometricProtection ()
+          {
+            return biometric_protection;
+          }
+
+        
+     // TODO        
+        boolean private_key_backup_flag;
+        
+        public boolean getPrivateKeyBackupFlag ()
+          {
+            return private_key_backup_flag;
+          }
+        
+
+     // TODO        
+        byte export_policy;
+        
+        public byte getExportPolicy ()
+          {
+            return export_policy;
+          }
+
+        
+     // TODO        
+        boolean updatable_flag;
+        
+        public boolean getUpdatableFlag ()
+          {
+            return updatable_flag;
+          }
+
+
+     // TODO        
+        byte delete_policy;
+        
+        public byte getDeletePolicy ()
+          {
+            return delete_policy;
+          }
+
+        
+     // TODO        
+        boolean enable_pin_caching_flag;
+        
+        public boolean getEnablePINCachingFlag ()
+          {
+            return enable_pin_caching_flag;
+          }
+
+        
+     // TODO        
+        boolean import_private_key_flag;
+        
+        public boolean getImportPrivateKeyFlag ()
+          {
+            return import_private_key_flag;
+          }
+
+        
+     // TODO        
+        String friendly_name;
+        
+        public String getFriendlyName ()
+          {
+            return friendly_name;
           }
 
       }
@@ -503,6 +583,13 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
       {
         return server_cookie;
       }
+    
+    String key_attestation_algorithm;
+    
+    public String getKeyAttestationAlgorithm ()
+      {
+        return key_attestation_algorithm;
+      }
 
 
     public void verifySignature (VerifierInterface verifier) throws IOException
@@ -544,6 +631,8 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
         submit_url = ah.getString (SUBMIT_URL_ATTR);
 
         deferred_certification = ah.getBooleanConditional (DEFERRED_CERTIFICATION_ATTR);
+
+        key_attestation_algorithm = ah.getString (KEY_ATTESTATION_ALGORITHM_ATTR);
 
         rd.getChild ();
 

@@ -21,8 +21,6 @@ abstract class KeyInitializationResponse extends XMLObjectWrapper
 
     ServerCookie server_cookie;                         // Optional
 
-    String key_attestation_algorithm;
- 
     KeyInitializationResponse () {}
 
     public void init () throws IOException

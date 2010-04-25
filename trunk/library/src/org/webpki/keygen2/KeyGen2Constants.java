@@ -59,7 +59,7 @@ public interface KeyGen2Constants
 
     String MAC_ATTR                          = "MAC";
 
-    String SESSION_MAC_ATTR                  = "SessionMAC";
+    String CLOSE_SESSION_MAC_ATTR            = "CloseSessionMAC";
 
     String DEFERRED_CERTIFICATION_ATTR       = "DeferredCertification";
 
@@ -70,6 +70,8 @@ public interface KeyGen2Constants
     String KEY_ATTESTATION_ATTR              = "KeyAttestation";
 
     String SESSION_ATTESTATION_ATTR          = "SessionAttestation";
+
+    String CLOSE_SESSION_ATTESTATION_ATTR    = "CloseSessionAttestation";
 
     String KEY_SIZE_ATTR                     = "KeySize";
 
