@@ -145,6 +145,32 @@ public class XMLSchemaCache
       }
     
 
+    //
+    // Parser error handler
+    //
+    private static void parseError (String domain, String key, XMLParseException exception) throws XNIException
+      {
+        System.out.println ("baj");
+        throw exception;
+      }
+
+    private static XMLErrorHandler simpleErrorHandler = new XMLErrorHandler ()
+      {
+        public void error (String domain, String key, XMLParseException exception) throws XNIException
+          {
+            parseError (domain, key, exception);
+          }
+        public void fatalError (String domain, String key, XMLParseException exception) throws XNIException
+          {
+            parseError (domain, key, exception);
+          }
+        public void warning (String domain, String key, XMLParseException exception) throws XNIException
+          {
+            parseError (domain, key, exception);
+          }
+      };
+
+
    public XMLSchemaCache () throws IOException
       {
         symtab = new SymbolTable (BIG_PRIME);
@@ -157,6 +183,7 @@ public class XMLSchemaCache
         // We set schema features just in case...
         preparser.setFeature (SCHEMA_VALIDATION_FEATURE_ID, true);
         preparser.setFeature (SCHEMA_FULL_CHECKING_FEATURE_ID, true);
+        preparser.setErrorHandler (simpleErrorHandler);
 
         parserConfiguration = new IntegratedParserConfiguration (symtab, grammarPool);
         parserConfiguration.setFeature (NAMESPACES_FEATURE_ID, true);
@@ -439,31 +466,6 @@ public class XMLSchemaCache
       {
         return wrap (validate (is));
       }
-
-
-    //
-    // Parser error handler
-    //
-    private static void parseError (String domain, String key, XMLParseException exception) throws XNIException
-      {
-        throw exception;
-      }
-
-    private static XMLErrorHandler simpleErrorHandler = new XMLErrorHandler ()
-      {
-        public void error (String domain, String key, XMLParseException exception) throws XNIException
-          {
-            parseError (domain, key, exception);
-          }
-        public void fatalError (String domain, String key, XMLParseException exception) throws XNIException
-          {
-            parseError (domain, key, exception);
-          }
-        public void warning (String domain, String key, XMLParseException exception) throws XNIException
-          {
-            parseError (domain, key, exception);
-          }
-      };
 
 
     public static void main (String argv[]) throws IOException
