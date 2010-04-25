@@ -426,28 +426,38 @@ public class KeyGen2Test
         XMLSchemaCache xmlschemas = new XMLSchemaCache ();
         int pass;
         
+        private void write (byte[] data) throws Exception
+          {
+            if (fos != null)
+              {
+                fos.write (data);
+              }
+          }
+        
+        private void write (int b) throws Exception
+          {
+            write (new byte[]{(byte)b}); 
+          }
+        
         private void writeString (String message) throws Exception
           {
-            fos.write (message.getBytes ("UTF-8"));
+            write (message.getBytes ("UTF-8"));
           }
         
         byte[] fileLogger (byte[] xmldata) throws Exception
           {
             XMLObjectWrapper xo = xmlschemas.parse (xmldata);
-            if (fos != null)
-              {
-                String element = "#" + (++pass) + ": " + xo.element ();
-                fos.write ('\n');
-                for (int i = 0; i < element.length (); i++) fos.write ('-');
-                fos.write ('\n');
-                writeString (element);
-                fos.write ('\n');
-                for (int i = 0; i < element.length (); i++) fos.write ('-');
-                fos.write ('\n');
-                fos.write ('\n');
-                fos.write (xmldata);
-                fos.write ('\n');
-              }
+            String element = "#" + (++pass) + ": " + xo.element ();
+            write ('\n');
+            for (int i = 0; i < element.length (); i++) write ('-');
+            write ('\n');
+            writeString (element);
+            write ('\n');
+            for (int i = 0; i < element.length (); i++) write ('-');
+            write ('\n');
+            write ('\n');
+            write (xmldata);
+            write ('\n');
             return xmldata;
           }
 
