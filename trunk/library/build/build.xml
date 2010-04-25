@@ -1,8 +1,10 @@
 <project name="WEBPKI.ORG library" default="compile" basedir=".">
 
   <!-- set global properties for this build -->
+  <property name="test.sks.implementation" value="org.webpki.keygen2.test.SKSTestImplementation"/>
   <property name="src_dir" value="../src" />
   <property name="temp_dir" value="../.tmp" />
+  <property name="test_dir" value="../test" />
   <property name="dist_dir"  value="../dist" />
   <property name="ext.jar"  value="../../resources/third-party-jars"/>
   <property name="webpki-libext" value="webpki.org-libext-1.00.jar" />
@@ -112,9 +114,20 @@
 
   <target name="deploy" depends="clean,dist"/>
 	
-  <target name="test">
+  <target name="testoutputsetup1" if="test.out.file">
+  	<property name="test.dir.path" location="${test_dir}"/>
+    <mkdir dir="${test_dir}"/>
+  </target>
+	
+  <target name="testoutputsetup2" unless="test.out.file">
+	<property name="test.dir.path" value=""/>
+  </target>
+	
+  <target name="testkg2" depends="testoutputsetup1,testoutputsetup2">
     <junit fork="yes" haltonfailure="yes">
       <test name="org.webpki.keygen2.test.KeyGen2Test" />
+    	<sysproperty key="sks.implementation" value="${test.sks.implementation}"/>
+    	<sysproperty key="test.dir" value="${test.dir.path}"/>
       <formatter type="plain" usefile="false" />
       <classpath refid="junit.classpath" />
     </junit>
