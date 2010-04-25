@@ -34,6 +34,7 @@ import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.KeyAttributes;
 import org.webpki.sks.KeyPairResult;
 import org.webpki.sks.ProvisioningSessionResult;
 import org.webpki.sks.SKSException;
@@ -136,6 +137,20 @@ public class SKSTestImplementation implements SecureKeyStore
           }
         return kd;
       }
+
+    private KeyData getStdKey (int key_handle) throws SKSException
+      {
+        KeyData kd = keys.get (key_handle);
+        if (kd == null)
+          {
+            throw new SKSException ("Key not found:" + key_handle, SKSException.ERROR_NO_KEY);
+          }
+        if (kd.owner.open)
+          {
+            throw new SKSException ("Key:" + key_handle + " still in provisioning", SKSException.ERROR_NO_KEY);
+          }
+        return kd;
+      }
     
     private void abort (int provisioning_handle, String message) throws SKSException
       {
@@ -150,10 +165,10 @@ public class SKSTestImplementation implements SecureKeyStore
             KeyData kd = iter.next ();
             if (kd.owner.open == provisioning_state)
               {
-                return new EnumeratedKey (kd.key_handle, kd.id, kd.owner.provisioning_handle, kd.certificate_path);
+                return new EnumeratedKey (kd.key_handle, kd.id, kd.owner.provisioning_handle);
               }
           }
-        return new EnumeratedKey (0xFFFFFFFF, null, 0, null);
+        return new EnumeratedKey (EnumeratedKey.EXIT, null, 0);
       }
 
     private EnumeratedProvisioningSession getProvisioning (Iterator<Provisioning> iter, boolean provisioning_state)
@@ -166,7 +181,7 @@ public class SKSTestImplementation implements SecureKeyStore
                 return new EnumeratedProvisioningSession (prov.provisioning_handle, prov.client_session_id, prov.server_session_id);
               }
           }
-        return new EnumeratedProvisioningSession (0xFFFFFFFF, null, null);
+        return new EnumeratedProvisioningSession (EnumeratedProvisioningSession.EXIT, null, null);
       }
    
     @Override
@@ -274,7 +289,7 @@ public class SKSTestImplementation implements SecureKeyStore
     @Override
     public EnumeratedKey enumerateKeys (int key_handle, boolean provisioning_state) throws SKSException
       {
-        if (key_handle == 0xFFFFFFFF)
+        if (key_handle == EnumeratedKey.INIT)
           {
             return getKey (keys.values ().iterator (), provisioning_state);
           }
@@ -289,7 +304,7 @@ public class SKSTestImplementation implements SecureKeyStore
                   }
               }
           }
-        return new EnumeratedKey (0xFFFFFFFF, null, 0, null);
+        return new EnumeratedKey (EnumeratedKey.EXIT, null, 0);
       }
 
     @Override
@@ -353,7 +368,7 @@ public class SKSTestImplementation implements SecureKeyStore
     public EnumeratedProvisioningSession enumerateProvisioningSessions (int provisioning_handle,
                                                                         boolean provisioning_state) throws SKSException
       {
-        if (provisioning_handle == 0xFFFFFFFF)
+        if (provisioning_handle == EnumeratedProvisioningSession.INIT)
           {
             return getProvisioning (provisionings.values ().iterator (), provisioning_state);
           }
@@ -368,7 +383,13 @@ public class SKSTestImplementation implements SecureKeyStore
                   }
               }
           }
-        return new EnumeratedProvisioningSession (0xFFFFFFFF, null, null);
+        return new EnumeratedProvisioningSession (EnumeratedProvisioningSession.EXIT, null, null);
+      }
+
+    @Override
+    public KeyAttributes getKeyAttributes (int key_handle) throws SKSException
+      {
+        return new KeyAttributes (getStdKey (key_handle).certificate_path);
       }
 
   }

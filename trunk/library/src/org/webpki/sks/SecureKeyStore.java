@@ -51,6 +51,7 @@ public interface SecureKeyStore
     
     public EnumeratedProvisioningSession enumerateProvisioningSessions (int provisioning_handle,
                                                                         boolean provisioning_state) throws SKSException;
-    
- 
+
+    public KeyAttributes getKeyAttributes (int key_handle) throws SKSException;
+   
   }

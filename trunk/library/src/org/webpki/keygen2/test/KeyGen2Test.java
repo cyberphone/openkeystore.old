@@ -11,6 +11,8 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -56,9 +58,11 @@ import org.webpki.keygen2.ProvisioningSessionRequestEncoder;
 import org.webpki.keygen2.ProvisioningSessionResponseDecoder;
 import org.webpki.keygen2.ProvisioningSessionResponseEncoder;
 import org.webpki.keygen2.ServerCredentialStore;
+import org.webpki.keygen2.ServerSessionKeyInterface;
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.KeyAttributes;
 import org.webpki.sks.KeyPairResult;
 import org.webpki.sks.ProvisioningSessionResult;
 import org.webpki.sks.SKSException;
@@ -204,7 +208,7 @@ public class KeyGen2Test
           {
             CredentialDeploymentRequestDecoder cred_dep_request =
                            (CredentialDeploymentRequestDecoder) client_xml_cache.parse (xmldata);
-            provisioning_handle = 0xFFFFFFFF;
+            provisioning_handle = EnumeratedProvisioningSession.INIT;
             EnumeratedProvisioningSession eps;
             while ((provisioning_handle = (eps = sks.enumerateProvisioningSessions (provisioning_handle, true)).getProvisioningHandle ()) != 0xFFFFFFFF)
               {
@@ -214,7 +218,7 @@ public class KeyGen2Test
                     break;
                   }
               }
-            if (provisioning_handle == 0xFFFFFFFF)
+            if (provisioning_handle == EnumeratedProvisioningSession.EXIT)
               {
                 abort ("Provisioning session not found:" + 
                         cred_dep_request.getClientSessionID () + "/" +
@@ -222,9 +226,9 @@ public class KeyGen2Test
               }
             HashMap<String,Integer> keys = new HashMap<String,Integer> ();
             // Find open keys to this provisioning session
-            int key_handle = 0xFFFFFFFF;
+            int key_handle = EnumeratedKey.INIT;
             EnumeratedKey ek;
-            while ((key_handle = (ek = sks.enumerateKeys (key_handle, true)).getKeyHandle ()) != 0xFFFFFFFF)
+            while ((key_handle = (ek = sks.enumerateKeys (key_handle, true)).getKeyHandle ()) != EnumeratedKey.EXIT)
               {
                 if (ek.getProvisioningHandle () == provisioning_handle)
                   {
@@ -268,6 +272,30 @@ public class KeyGen2Test
         KeyInitializationRequestEncoder key_init_request;
 
         ServerCredentialStore server_credential_store;
+        
+        class SessionKey implements ServerSessionKeyInterface
+          {
+            ECPrivateKey ec_private_key;
+            
+            byte[] session_key;
+  
+            @Override
+            public ECPublicKey generateEphemeralKey () throws IOException
+              {
+                ec_private_key = ECKeys.PRIVATE_KEY1;
+                return ECKeys.PUBLIC_KEY1;
+              }
+
+            @Override
+            public byte[] generateSessionKey (ECPublicKey client_ephemeral_key) throws IOException
+              {
+                // TODO Auto-generated method stub
+                return null;
+              }
+            
+          }
+        
+        SessionKey server_sess_key = new SessionKey ();
 
         Server () throws Exception
           {
@@ -282,7 +310,7 @@ public class KeyGen2Test
         byte[] provSessRequest () throws Exception
           {
             ProvisioningSessionRequestEncoder prov_sess_req =
-                new ProvisioningSessionRequestEncoder (ECKeys.PUBLIC_KEY1,
+                new ProvisioningSessionRequestEncoder (server_sess_key.generateEphemeralKey (),
                                                        Constants.SERVER_SESSION_ID,
                                                        ISSUER_URI,
                                                        10000,
@@ -486,13 +514,14 @@ public class KeyGen2Test
             xml = fileLogger (server.creDepRequest (xml));
             xml = fileLogger (client.creDepResponse (xml));
             writeString ("\n\n");
-            int key_handle = 0xFFFFFFFF;
+            int key_handle = EnumeratedKey.INIT;
             EnumeratedKey ek;
-            while ((key_handle = (ek = client.sks.enumerateKeys (key_handle, false)).getKeyHandle ()) != 0xFFFFFFFF)
+            while ((key_handle = (ek = client.sks.enumerateKeys (key_handle, false)).getKeyHandle ()) != EnumeratedKey.EXIT)
               {
                 if (ek.getProvisioningHandle () == client.provisioning_handle)
                   {
-                    writeString ("Deployed key[" + key_handle + "] " + CertificateUtil.convertRFC2253ToLegacy (ek.getCertificatePath ()[0].getSubjectX500Principal ().getName ()) + "\n");
+                    KeyAttributes ka = client.sks.getKeyAttributes (key_handle);
+                    writeString ("Deployed key[" + key_handle + "] " + CertificateUtil.convertRFC2253ToLegacy (ka.getCertificatePath ()[0].getSubjectX500Principal ().getName ()) + "\n");
                   }
               }
             writeString ("\n\n");

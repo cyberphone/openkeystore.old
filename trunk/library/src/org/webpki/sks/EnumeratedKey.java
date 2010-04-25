@@ -1,9 +1,10 @@
 package org.webpki.sks;
 
-import java.security.cert.X509Certificate;
-
 public class EnumeratedKey
   {
+    public static final int INIT = 0xFFFFFFFF;
+    public static final int EXIT = 0xFFFFFFFF;
+    
     int key_handle;
     
     public int getKeyHandle ()
@@ -24,23 +25,15 @@ public class EnumeratedKey
         return id;
       }
     
-    X509Certificate[] certificate_path;
-    
-    public X509Certificate[] getCertificatePath ()
-      {
-        return certificate_path;
-      }
     // TODO - a LOT!!!!
     
     public EnumeratedKey (int key_handle, 
                           String id,
-                          int provisioning_handle,
-                          X509Certificate[] certificate_path)
+                          int provisioning_handle)
       {
         this.key_handle = key_handle;
         this.id = id;
         this.provisioning_handle = provisioning_handle;
-        this.certificate_path = certificate_path;
       }
 
   }

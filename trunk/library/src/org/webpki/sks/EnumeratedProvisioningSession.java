@@ -2,6 +2,9 @@ package org.webpki.sks;
 
 public class EnumeratedProvisioningSession
   {
+    public static final int INIT = 0xFFFFFFFF;
+    public static final int EXIT = 0xFFFFFFFF;
+
     int provisioning_handle;
     
     public int getProvisioningHandle ()
