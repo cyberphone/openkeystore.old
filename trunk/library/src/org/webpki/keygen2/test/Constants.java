@@ -7,9 +7,9 @@ public interface Constants
 
     String CLIENT_TIME           = "2010-04-02T21:04:01Z";
 
-    String REQUEST_ID            = "I.535100037738";
+    String SERVER_SESSION_ID            = "I.535100037738";
 
-    String SESSION_ID            = "S.395428043255";
+    String CLIENT_SESSION_ID            = "S.395428043255";
     
     byte[] SESSION_DATA          = new byte[]{4,7,20,6};
     
