@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public enum APIDescriptors
   {
-    SET_CERTIFICATE_PATH  ("setCerttificatePath"),
+    SET_CERTIFICATE_PATH  ("setCertificatePath"),
     SET_SYMMETRIC_KEY     ("setSymmetricKey"),
     CLOSE_SESSION         ("closeProvisioningSession"),
     ADD_EXTENSION         ("addExtension");

@@ -1,8 +1,10 @@
 package org.webpki.keygen2.test;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -21,12 +23,16 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
+
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.webpki.crypto.ECDomains;
-import org.webpki.crypto.test.ECKeys;
+import org.webpki.crypto.MacAlgorithms;
+
+import org.webpki.keygen2.APIDescriptors;
 import org.webpki.keygen2.KeyGen2URIs;
 import org.webpki.keygen2.KeyUsage;
 import org.webpki.keygen2.KeyInitializationRequestDecoder;
@@ -39,6 +45,8 @@ import org.webpki.sks.KeyPairResult;
 import org.webpki.sks.ProvisioningSessionResult;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
+import org.webpki.sks.SessionKeyOperations;
+
 import org.webpki.util.ArrayUtil;
 
 public class SKSTestImplementation implements SecureKeyStore
@@ -76,39 +84,57 @@ public class SKSTestImplementation implements SecureKeyStore
         byte[] session_key;
         int provisioning_handle;
         boolean open = true;
+        int mac_sequence_counter;
+        
+        byte[] mac (byte[] data, byte[] key_modifier) throws SKSException
+          {
+            try
+              {
+                Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
+                mac.init (new SecretKeySpec (ArrayUtil.add (session_key, key_modifier), "RAW"));
+                return mac.doFinal (data);
+              }
+            catch (GeneralSecurityException e)
+              {
+              }
+            abort (provisioning_handle, "MAC error");
+            return null;  // For compiler only..
+          }
+        
+        byte[] seqCounter2 ()
+          {
+            int q = mac_sequence_counter++;
+            return new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
+          }
+        
+        void testMac (byte[] data, APIDescriptors method, byte[] claimed_mac) throws SKSException
+          {
+            if (ArrayUtil.compare (mac (data, ArrayUtil.add (method.getBinary (), seqCounter2 ())),  claimed_mac))
+              {
+                return;
+              }
+            abort (provisioning_handle, "MAC error");
+          }
+        
+        byte[] attest (byte[] data) throws SKSException
+          {
+            return mac (data, SessionKeyOperations.ATTEST_MODIFIER);
+          }
+
+        byte[] encrypt (byte[] data) throws SKSException, GeneralSecurityException
+          {
+            byte[] key = mac (new byte[0], SessionKeyOperations.ENCRYPTION_MODIFIER);
+            Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+            byte[] iv = new byte[16];
+            SecureRandom.getInstance ("SHA1PRNG").nextBytes (iv);
+            crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (iv));
+            return ArrayUtil.add (iv, crypt.doFinal (data));
+          }
       }
     
     LinkedHashMap<Integer,KeyData> keys = new LinkedHashMap<Integer,KeyData> ();
     LinkedHashMap<Integer,Provisioning> provisionings = new LinkedHashMap<Integer,Provisioning> ();
-    
-    private static final byte[] ENCRYPTION = new byte[]{'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
-    private static final byte[] ATTESTATION = new byte[]{'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
-    
-    private byte[] FAKE_session_key = new byte[]{0,2,5,3,3,3,8,2,3,12,2,4,4,5};
-    
-    private byte[] mac (byte[] key_add, byte[] data) throws GeneralSecurityException
-      {
-        Mac mac = Mac.getInstance ("HmacSHA256");
-        byte[] key = ArrayUtil.add (FAKE_session_key, key_add);
-        mac.init (new SecretKeySpec (key, "RAW"));  // Note: any length is OK in HMAC
-        return mac.doFinal (data);
-      }
-
-    private byte[] attest (byte[] data) throws GeneralSecurityException
-      {
-        return mac (ATTESTATION, data);
-      }
-
-    private byte[] encrypt (byte[] data) throws GeneralSecurityException
-      {
-        byte[] key = mac (new byte[0], ENCRYPTION);
-        Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
-        byte[] iv = new byte[16];
-        SecureRandom.getInstance ("SHA1PRNG").nextBytes (iv);
-        crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (iv));
-        return ArrayUtil.add (iv, crypt.doFinal (data));
-      }
-    
+   
     private Provisioning getOpenProvisioning (int provisioning_handle) throws SKSException
       {
         Provisioning prov = provisionings.get (provisioning_handle);
@@ -123,17 +149,16 @@ public class SKSTestImplementation implements SecureKeyStore
         return prov;
       }
     
-    private KeyData getOpenKey (int provisioning_handle, int key_handle) throws SKSException
+    private KeyData getOpenKey (int key_handle) throws SKSException
       {
-        Provisioning prov = getOpenProvisioning (provisioning_handle);
         KeyData kd = keys.get (key_handle);
         if (kd == null)
           {
             throw new SKSException ("Key not found:" + key_handle, SKSException.ERROR_NO_KEY);
           }
-        if (kd.owner != prov)
+        if (!kd.owner.open)
           {
-            throw new SKSException ("Key:" + key_handle + " not owned by sess:" + provisioning_handle, SKSException.ERROR_NO_KEY);
+            throw new SKSException ("Key:" + key_handle + " not beloning to open sess:" + kd.owner.provisioning_handle, SKSException.ERROR_NO_KEY);
           }
         return kd;
       }
@@ -263,8 +288,8 @@ public class SKSTestImplementation implements SecureKeyStore
             kd.public_key = key_pair.getPublic ();   
             kd.private_key = key_pair.getPrivate ();
             return new KeyPairResult (kd.public_key,
-                                      attest (new byte[]{4,5}),
-                                      private_key_backup ? encrypt (kd.private_key.getEncoded ()) : null);
+                                      prov.attest (new byte[]{4,5}),
+                                      private_key_backup ? prov.encrypt (kd.private_key.getEncoded ()) : null);
           }
         catch (GeneralSecurityException e)
           {
@@ -277,11 +302,13 @@ public class SKSTestImplementation implements SecureKeyStore
       {
         Provisioning prov = getOpenProvisioning (provisioning_handle);
         provisionings.remove (provisioning_handle);
-        for (KeyData kd : keys.values ())
+        Iterator<KeyData> list = keys.values ().iterator ();
+        while (list.hasNext ())
           {
+            KeyData kd = list.next ();
             if (kd.owner == prov)
               {
-                keys.remove (kd.key_handle);
+                list.remove ();
               }
           }
       }
@@ -308,24 +335,45 @@ public class SKSTestImplementation implements SecureKeyStore
       }
 
     @Override
-    public void setCertificatePath (int provisioning_handle, int key_handle, X509Certificate[] certificate_path, byte[] mac) throws SKSException
+    public void setCertificatePath (int key_handle, X509Certificate[] certificate_path, byte[] mac) throws SKSException
       {
-        KeyData kd = getOpenKey (provisioning_handle, key_handle);
-        // TODO MAC
+        KeyData kd = getOpenKey (key_handle);
+        byte[] data = null;
         if (kd.certificate_path != null)
           {
             throw new SKSException ("Multiple cert insert:" + key_handle, SKSException.ERROR_OPTION);
           }
+        try
+          {
+            data = ArrayUtil.add (ArrayUtil.add (kd.public_key.getEncoded (), kd.id.getBytes ("UTF-8")),
+                                  certificate_path[0].getEncoded ());
+          }
+        catch (Exception e)
+          {
+            abort (kd.owner.provisioning_handle, "Internal error:" + e.getMessage ());
+          }
+        kd.owner.testMac (data, APIDescriptors.SET_CERTIFICATE_PATH, mac);
         kd.certificate_path = certificate_path;
       }
 
     @Override
-    public byte[] closeProvisioningSession (int provisioning_handle) throws SKSException
+    public byte[] closeProvisioningSession (int provisioning_handle, byte[] mac) throws SKSException
       {
         Provisioning prov = getOpenProvisioning (provisioning_handle);
+        byte[] attest = null;
+        try
+          {
+            byte[] arg = new StringBuffer (prov.client_session_id)
+                                  .append (prov.server_session_id)
+                                  .append (prov.issuer_uri).toString ().getBytes ("UTF-8");
+            prov.testMac (arg, APIDescriptors.CLOSE_SESSION, mac);
+            attest = prov.attest (ArrayUtil.add (SessionKeyOperations.SUCCESS_MODIFIER, prov.seqCounter2 ()));
+          }
+        catch (UnsupportedEncodingException e)
+          {
+          }
         prov.open = false;
-        // TODO real attest...
-        return new byte[]{4,7,8};
+        return attest;
       }
 
     @Override
@@ -339,12 +387,39 @@ public class SKSTestImplementation implements SecureKeyStore
                                                                 int session_key_limit) throws SKSException
       {
         Provisioning p = new Provisioning ();
+        byte[] session_key = null;
+        ECPublicKey client_ephemeral_key = null;
         p.server_session_id = server_session_id;
         p.client_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
+        p.issuer_uri = issuer_uri;
+        try
+          {
+            byte[] kdf_data = new StringBuffer (p.client_session_id).append (server_session_id).append (issuer_uri).toString ().getBytes ("UTF-8");
+            KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC", "BC");
+            ECGenParameterSpec eccgen = new ECGenParameterSpec ("P-256");
+            generator.initialize (eccgen, new SecureRandom ());
+            KeyPair kp = generator.generateKeyPair();
+            client_ephemeral_key = (ECPublicKey) kp.getPublic ();
+            KeyAgreement ka = KeyAgreement.getInstance ("ECDHC", "BC");
+            ka.init (kp.getPrivate ());
+            ka.doPhase (server_ephemeral_key, true);
+            Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
+            mac.init (new SecretKeySpec (ka.generateSecret (), "RAW"));
+            session_key = mac.doFinal (kdf_data);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+        catch (UnsupportedEncodingException e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+        p.session_key = session_key;
         return new ProvisioningSessionResult (p.provisioning_handle,
                                               p.client_session_id,
                                               new byte[]{4,5,6}, /* Session Attestation */
-                                              ECKeys.PUBLIC_KEY2);
+                                              client_ephemeral_key);
       }
 
     @Override

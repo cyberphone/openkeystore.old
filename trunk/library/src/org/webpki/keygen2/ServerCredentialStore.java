@@ -746,6 +746,12 @@ public class ServerCredentialStore implements Serializable
           }
       }
     
+    byte[] getMACSequenceCounterAndUpdate ()
+      {
+        int q = mac_sequence_counter++;
+        return  new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
+      }
+    
 
     // Constructors
 

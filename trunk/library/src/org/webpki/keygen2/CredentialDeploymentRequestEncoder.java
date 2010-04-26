@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 
+import org.webpki.sks.SessionKeyOperations;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 import org.webpki.xml.DOMWriterHelper;
@@ -31,18 +32,18 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
 
     ServerCookie server_cookie;
 
-    ServerCredentialStore ics;
+    ServerCredentialStore server_credential_store;
     
-    MACInterface mac_interface;
+    SessionKeyOperations mac_interface;
     
     // Constructors
 
     public CredentialDeploymentRequestEncoder (String submit_url, 
-                                               ServerCredentialStore ics,
-                                               MACInterface mac_interface) throws IOException
+                                               ServerCredentialStore server_credential_store,
+                                               SessionKeyOperations mac_interface) throws IOException
       {
         this.submit_url = submit_url;
-        this.ics = ics;
+        this.server_credential_store = server_credential_store;
         this.mac_interface = mac_interface;
       }
 
@@ -64,15 +65,13 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
         XMLSigner ds = new XMLSigner (signer);
         ds.removeXMLSignatureNS ();
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, ics.server_session_id);
+        ds.createEnvelopedSignature (doc, server_credential_store.server_session_id);
       }
     
     
     private byte[] mac (byte[] data, APIDescriptors method) throws IOException, GeneralSecurityException
       {
-        int q = ics.mac_sequence_counter++;
-        return mac_interface.getMac (data, 
-                                     ArrayUtil.add (method.getBinary (), new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)}));
+        return mac_interface.getMac (data, ArrayUtil.add (method.getBinary (), server_credential_store.getMACSequenceCounterAndUpdate ()));
       }
     
     
@@ -89,15 +88,15 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, ics.client_session_id);
+        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_credential_store.client_session_id);
 
-        wr.setStringAttribute (ID_ATTR, ics.server_session_id);
+        wr.setStringAttribute (ID_ATTR, server_credential_store.server_session_id);
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
 
         XMLSignatureWrapper.addXMLSignatureNS (wr);
 
-        if (ics.getKeyProperties ().isEmpty ())
+        if (server_credential_store.getKeyProperties ().isEmpty ())
           {
             throw new IOException ("Empty request not allowed!");
           }
@@ -107,7 +106,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
         ////////////////////////////////////////////////////////////////////////
         try
           {
-            for (ServerCredentialStore.KeyProperties key : ics.getKeyProperties ())
+            for (ServerCredentialStore.KeyProperties key : server_credential_store.getKeyProperties ())
               {
                 wr.addChildElement (CERTIFIED_PUBLIC_KEY_ELEM);
                 wr.setStringAttribute (ID_ATTR, key.id);
@@ -160,9 +159,9 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
             ////////////////////////////////////////////////////////////////////////
             top.setAttribute (CLOSE_SESSION_MAC_ATTR,
                               new Base64 ().getBase64StringFromBinary (
-                                         mac (new StringBuffer ().append (ics.client_session_id)
-                                                                 .append (ics.server_session_id)
-                                                                 .append (ics.issuer_uri).toString ().getBytes ("UTF-8"),
+                                  mac (new StringBuffer ().append (server_credential_store.client_session_id)
+                                      .append (server_credential_store.server_session_id)
+                                      .append (server_credential_store.issuer_uri).toString ().getBytes ("UTF-8"),
                                               APIDescriptors.CLOSE_SESSION)));
           }
         catch (GeneralSecurityException e)

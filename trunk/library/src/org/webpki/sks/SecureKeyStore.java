@@ -31,12 +31,11 @@ public interface SecureKeyStore
     
     public void abortProvisioningSession (int provisioning_handle) throws SKSException;
     
-    public void setCertificatePath (int provisioning_handle,
-                                    int key_handle,
+    public void setCertificatePath (int key_handle,
                                     X509Certificate[] certificate_path,
                                     byte[] mac) throws SKSException;
     
-    public byte[] closeProvisioningSession (int provisioning_handle) throws SKSException;
+    public byte[] closeProvisioningSession (int provisioning_handle, byte[] mac) throws SKSException;
 
     public ProvisioningSessionResult createProvisioningSession (String session_key_algorithm,
                                                                 String server_session_id,

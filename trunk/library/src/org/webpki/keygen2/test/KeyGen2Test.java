@@ -6,17 +6,25 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECGenParameterSpec;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+
+import javax.crypto.KeyAgreement;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -51,7 +59,6 @@ import org.webpki.keygen2.KeyInitializationResponseEncoder;
 import org.webpki.keygen2.KeyUsage;
 import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.KeyInitializationRequestEncoder;
-import org.webpki.keygen2.MACInterface;
 import org.webpki.keygen2.PassphraseFormats;
 import org.webpki.keygen2.ProvisioningSessionRequestDecoder;
 import org.webpki.keygen2.ProvisioningSessionRequestEncoder;
@@ -67,6 +74,8 @@ import org.webpki.sks.KeyPairResult;
 import org.webpki.sks.ProvisioningSessionResult;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
+import org.webpki.sks.SessionKeyOperations;
+import org.webpki.util.ArrayUtil;
 import org.webpki.xml.XMLSchemaCache;
 import org.webpki.xml.XMLObjectWrapper;
 
@@ -208,6 +217,11 @@ public class KeyGen2Test
           {
             CredentialDeploymentRequestDecoder cred_dep_request =
                            (CredentialDeploymentRequestDecoder) client_xml_cache.parse (xmldata);
+            /* 
+               Note: we could have saved provisioning_handle but that would not work
+               for certifications that are delayed.  The following code is working
+               for fully interactive and delayed scenarios by using SKS as state-holder
+            */
             provisioning_handle = EnumeratedProvisioningSession.INIT;
             EnumeratedProvisioningSession eps;
             while ((provisioning_handle = (eps = sks.enumerateProvisioningSessions (provisioning_handle, true)).getProvisioningHandle ()) != 0xFFFFFFFF)
@@ -225,7 +239,7 @@ public class KeyGen2Test
                         cred_dep_request.getServerSessionID ());
               }
             HashMap<String,Integer> keys = new HashMap<String,Integer> ();
-            // Find open keys to this provisioning session
+            // Find keys belonging to this provisioning session
             int key_handle = EnumeratedKey.INIT;
             EnumeratedKey ek;
             while ((key_handle = (ek = sks.enumerateKeys (key_handle, true)).getKeyHandle ()) != EnumeratedKey.EXIT)
@@ -235,6 +249,7 @@ public class KeyGen2Test
                     keys.put (ek.getID (), key_handle);
                   }
               }
+            // Final check, do these keys match the request?
             for (CredentialDeploymentRequestDecoder.CertifiedPublicKey key : cred_dep_request.getCertifiedPublicKeys ())
               {
                 Integer kh = keys.get (key.getID ());
@@ -242,11 +257,12 @@ public class KeyGen2Test
                   {
                     abort ("Did not find key:" + key.getID () + " in deployment request");
                   }
-                sks.setCertificatePath (provisioning_handle, kh, key.getCertificatePath (), key.getMAC ());
+                sks.setCertificatePath (kh, key.getCertificatePath (), key.getMAC ());
               }
             CredentialDeploymentResponseEncoder cre_dep_response = 
                       new CredentialDeploymentResponseEncoder (cred_dep_request,
-                                                               sks.closeProvisioningSession (provisioning_handle));
+                                                               sks.closeProvisioningSession (provisioning_handle,
+                                                                                             cred_dep_request.getCloseSessionMAC ()));
             return cre_dep_response.writeXML ();
           }
       }
@@ -273,26 +289,51 @@ public class KeyGen2Test
 
         ServerCredentialStore server_credential_store;
         
-        class SessionKey implements ServerSessionKeyInterface
+        class SessionKey implements ServerSessionKeyInterface, SessionKeyOperations
           {
             ECPrivateKey ec_private_key;
             
             byte[] session_key;
   
             @Override
-            public ECPublicKey generateEphemeralKey () throws IOException
+            public ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException
               {
-                ec_private_key = ECKeys.PRIVATE_KEY1;
-                return ECKeys.PUBLIC_KEY1;
+                KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC", "BC");
+                ECGenParameterSpec eccgen = new ECGenParameterSpec ("P-256");
+                generator.initialize (eccgen, new SecureRandom ());
+                KeyPair kp = generator.generateKeyPair();
+                ec_private_key = (ECPrivateKey) kp.getPrivate ();
+                return (ECPublicKey) kp.getPublic ();
               }
 
             @Override
-            public byte[] generateSessionKey (ECPublicKey client_ephemeral_key) throws IOException
+            public void generateSessionKey (ECPublicKey client_ephemeral_key,
+                                            String client_session_id,
+                                            String server_session_id,
+                                            String issuer_uri) throws IOException, GeneralSecurityException
               {
-                // TODO Auto-generated method stub
-                return null;
+                byte[] kdf_data = new StringBuffer (client_session_id).append (server_session_id).append (issuer_uri).toString ().getBytes ("UTF-8");
+                KeyAgreement ka = KeyAgreement.getInstance ("ECDHC", "BC");
+                ka.init (ec_private_key);
+                ka.doPhase (client_ephemeral_key, true);
+                Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
+                mac.init (new SecretKeySpec (ka.generateSecret (), "RAW"));
+                session_key = mac.doFinal (kdf_data);
               }
-            
+
+            @Override
+            public byte[] getMac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException
+              {
+                Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
+                mac.init (new SecretKeySpec (ArrayUtil.add (session_key, key_modifier), "RAW"));
+                return mac.doFinal (data);
+              }
+
+            @Override
+            public byte[] getAttest (byte[] data) throws IOException, GeneralSecurityException
+              {
+                return getMac (data, ATTEST_MODIFIER);
+              }
           }
         
         SessionKey server_sess_key = new SessionKey ();
@@ -302,7 +343,8 @@ public class KeyGen2Test
             server_xml_cache = new XMLSchemaCache ();
             server_xml_cache.addWrapper (KeyInitializationResponseDecoder.class);
             server_xml_cache.addWrapper (ProvisioningSessionResponseDecoder.class);
-          }
+            server_xml_cache.addWrapper (CredentialDeploymentResponseDecoder.class);
+         }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Create a prov session req for the client
@@ -324,6 +366,10 @@ public class KeyGen2Test
         byte[] keyInitRequest (byte[] xmldata) throws Exception
           {
             ProvisioningSessionResponseDecoder prov_sess_response = (ProvisioningSessionResponseDecoder) server_xml_cache.parse (xmldata);
+            server_sess_key.generateSessionKey (prov_sess_response.getClientEphemeralKey (),
+                                                prov_sess_response.getClientSessionID (),
+                                                Constants.SERVER_SESSION_ID,
+                                                ISSUER_URI);
             try
               {
                 server_credential_store = new ServerCredentialStore (prov_sess_response.getClientSessionID (),
@@ -431,19 +477,18 @@ public class KeyGen2Test
             CredentialDeploymentRequestEncoder credential_deployment_request 
                            = new CredentialDeploymentRequestEncoder (CRE_DEP_URL, 
                                                                      server_credential_store,
-                                                                     new MACInterface ()
-                           {
-
-                            @Override
-                            public byte[] getMac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException
-                              {
-                                // TODO Auto-generated method stub
-                                return new byte[]{4,6,};
-                              }
-                             
-                           });
+                                                                     server_sess_key);
 
             return credential_deployment_request.writeXML ();
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Finally we get the attestested response
+        ///////////////////////////////////////////////////////////////////////////////////
+        void creDepResponse (byte[] xmldata) throws Exception
+          {
+            CredentialDeploymentResponseDecoder cre_dep_response = (CredentialDeploymentResponseDecoder) server_xml_cache.parse (xmldata);
+            cre_dep_response.verifyProvisioningResult (server_credential_store, server_sess_key);
           }
       }
     
@@ -513,6 +558,7 @@ public class KeyGen2Test
             xml = fileLogger (client.KeyInitResponse (xml));
             xml = fileLogger (server.creDepRequest (xml));
             xml = fileLogger (client.creDepResponse (xml));
+            server.creDepResponse (xml);
             writeString ("\n\n");
             int key_handle = EnumeratedKey.INIT;
             EnumeratedKey ek;

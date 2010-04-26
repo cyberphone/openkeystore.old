@@ -400,6 +400,8 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
     private byte[] mac_key;
 
     private byte[] encoder_key;
+    
+    private byte[] close_session_mac;
 
     private SymmetricKeyDecrypter master_key_decrypter;
 
@@ -443,6 +445,12 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
     public CertifiedPublicKey[] getCertifiedPublicKeys ()
       {
         return certified_keys.toArray (new CertifiedPublicKey[0]);
+      }
+
+
+    public byte[] getCloseSessionMAC ()
+      {
+        return close_session_mac;
       }
 
 
@@ -508,6 +516,8 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         server_session_id = ah.getString (ID_ATTR);
 
         submit_url = ah.getString (SUBMIT_URL_ATTR);
+        
+        close_session_mac = ah.getBinary (CLOSE_SESSION_MAC_ATTR);
 
         rd.getChild ();
 
