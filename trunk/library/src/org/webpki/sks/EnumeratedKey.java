@@ -25,6 +25,12 @@ public class EnumeratedKey
         return id;
       }
     
+
+    public EnumeratedKey ()
+      {
+        key_handle = EXIT;
+      }
+    
     // TODO - a LOT!!!!
     
     public EnumeratedKey (int key_handle, 

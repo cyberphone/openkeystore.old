@@ -52,5 +52,8 @@ public interface SecureKeyStore
                                                                         boolean provisioning_state) throws SKSException;
 
     public KeyAttributes getKeyAttributes (int key_handle) throws SKSException;
+    
+    public byte[] signProvisioningSessionData (int provisioning_handle,
+                                               byte[] data) throws SKSException;
    
   }

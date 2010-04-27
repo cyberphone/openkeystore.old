@@ -4,8 +4,11 @@ import java.io.IOException;
 
 import java.util.LinkedHashMap;
 
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
+import org.webpki.sks.SessionKeyOperations;
+import org.webpki.util.ArrayUtil;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
@@ -40,7 +43,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
       }
     
     
-    public void validateAndPopulate (KeyInitializationRequestEncoder kire, AttestationVerifier verifier) throws IOException
+    public void validateAndPopulate (KeyInitializationRequestEncoder kire, SessionKeyOperations session_key_operations) throws IOException, GeneralSecurityException
       {
         kire.ics.checkSession (client_session_id, server_session_id);
         if (generated_keys.size () != kire.ics.requested_keys.size ())
@@ -52,12 +55,15 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
             ServerCredentialStore.KeyProperties kp = kire.ics.requested_keys.get (gpk.id);
             if (kp == null)
               {
-                ServerCredentialStore.bad ("Missing id:" + gpk.id);
+                ServerCredentialStore.bad ("Missing key id:" + gpk.id);
               }
             kp.public_key = gpk.public_key;
             kp.encrypted_private_key = gpk.encrypted_private_key;
-            byte[] data = null;
-            verifier.verifyAttestation (kp.key_attestation = gpk.key_attestation, data);
+            byte[] data = ArrayUtil.add (gpk.id.getBytes ("UTF-8"), gpk.public_key.getEncoded ());
+            if (!ArrayUtil.compare (session_key_operations.getAttest (data), kp.key_attestation = gpk.key_attestation))
+              {
+                ServerCredentialStore.bad ("Attestation failed for key id:" + gpk.id);
+              }
           }
       }
 

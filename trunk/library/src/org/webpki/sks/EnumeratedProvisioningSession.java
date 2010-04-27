@@ -26,6 +26,13 @@ public class EnumeratedProvisioningSession
         return server_session_id;
       }
     
+
+    public EnumeratedProvisioningSession ()
+      {
+        provisioning_handle = EXIT;
+      }
+
+
     public EnumeratedProvisioningSession (int provisioning_handle,
                                           String client_session_id,
                                           String server_session_id)

@@ -112,15 +112,18 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 wr.setStringAttribute (ID_ATTR, key.id);
 
                 ////////////////////////////////////////////////////////////////////////
-                // Always: the X509 Certificate
+                // Always: the X509 Certificate(s)
                 ////////////////////////////////////////////////////////////////////////
+                byte[] data =  ArrayUtil.add (key.public_key.getEncoded (), key.id.getBytes ("UTF-8"));
                 X509Certificate[] certificate_path = CertificateUtil.getSortedPath (key.certificate_path);
-                byte[] ee_cert = certificate_path[0].getEncoded ();
-                mac (wr,
-                     ArrayUtil.add (key.public_key.getEncoded (), ArrayUtil.add (key.id.getBytes ("UTF-8"), ee_cert)),
-                     APIDescriptors.SET_CERTIFICATE_PATH);
+                for (X509Certificate certificate : certificate_path)
+                  {
+                    data = ArrayUtil.add (data, certificate.getEncoded ());
+                  }
+                mac (wr, data, APIDescriptors.SET_CERTIFICATE_PATH);
                 XMLSignatureWrapper.writeX509DataSubset (wr, certificate_path);
-
+                byte[] ee_cert = certificate_path[0].getEncoded ();
+                
                 ////////////////////////////////////////////////////////////////////////
                 // Optional: "piggybacked" symmetric key
                 ////////////////////////////////////////////////////////////////////////
