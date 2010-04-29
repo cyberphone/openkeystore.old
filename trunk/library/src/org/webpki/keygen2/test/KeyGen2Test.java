@@ -1,11 +1,14 @@
 package org.webpki.keygen2.test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -16,14 +19,18 @@ import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 
+import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.AfterClass;
@@ -53,6 +60,7 @@ import org.webpki.keygen2.CredentialDeploymentRequestDecoder;
 import org.webpki.keygen2.CredentialDeploymentRequestEncoder;
 import org.webpki.keygen2.CredentialDeploymentResponseDecoder;
 import org.webpki.keygen2.CredentialDeploymentResponseEncoder;
+import org.webpki.keygen2.CryptoConstants;
 import org.webpki.keygen2.KeyInitializationResponseDecoder;
 import org.webpki.keygen2.KeyInitializationResponseEncoder;
 import org.webpki.keygen2.KeyUsage;
@@ -65,6 +73,7 @@ import org.webpki.keygen2.ProvisioningSessionResponseDecoder;
 import org.webpki.keygen2.ProvisioningSessionResponseEncoder;
 import org.webpki.keygen2.ServerCredentialStore;
 import org.webpki.keygen2.ServerSessionKeyInterface;
+
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
@@ -73,16 +82,23 @@ import org.webpki.sks.KeyPairResult;
 import org.webpki.sks.ProvisioningSessionResult;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
-import org.webpki.sks.SessionKeyOperations;
+
 import org.webpki.util.ArrayUtil;
+
 import org.webpki.xml.XMLSchemaCache;
 import org.webpki.xml.XMLObjectWrapper;
 
 public class KeyGen2Test
   {
+    static final byte[] KEY_BACKUP_TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','t','?'};
+    
     boolean pin_protection;
     
+    boolean private_key_backup;
+    
     boolean ecc_key;
+    
+    boolean server_seed;
     
     static FileOutputStream fos;
    
@@ -146,7 +162,7 @@ public class KeyGen2Test
                                                  prov_sess_req.getServerEphemeralKey (),
                                                  prov_sess_req.getSubmitURL (), /* IssuerURI */
                                                  true, /* Updatable */
-                                                 client_time,
+                                                 (int)(client_time.getTime () / 1000),
                                                  prov_sess_req.getSessionLifeTime (),
                                                  prov_sess_req.getSessionKeyLimit ());
             provisioning_handle = sess.getProvisioningHandle ();
@@ -288,7 +304,7 @@ public class KeyGen2Test
 
         ServerCredentialStore server_credential_store;
 
-        class SessionKey implements ServerSessionKeyInterface, SessionKeyOperations
+        class SessionKey implements ServerSessionKeyInterface
           {
             ECPrivateKey server_ec_private_key;
             ECPublicKey server_ec_public_key;
@@ -312,30 +328,38 @@ public class KeyGen2Test
                                                      String client_session_id,
                                                      String server_session_id,
                                                      String issuer_uri,
+                                                     Date client_time,
                                                      byte[] session_attestation) throws IOException, GeneralSecurityException
               {
-                // This is not the SKS original, this better and simpler
                 byte[] csi = new StringBuffer (client_session_id)
                                       .append (server_session_id)
                                       .append (issuer_uri).toString ().getBytes ("UTF-8");
 
+                // SP800-56A C(2, 0, ECC CDH)
                 KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
                 key_agreement.init (server_ec_private_key);
                 key_agreement.doPhase (client_ephemeral_key, true);
                 byte[] Z = key_agreement.generateSecret ();
 
+                // The custom KDF
                 byte[] kdf_data = ArrayUtil.add (csi, device_certificate.getEncoded ());
                 Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
                 mac.init (new SecretKeySpec (Z, "RAW"));
                 session_key = mac.doFinal (kdf_data);
-
-                kdf_data = ArrayUtil.add (csi,
-                                          ArrayUtil.add (server_ec_public_key.getEncoded (),
-                                                         client_ephemeral_key.getEncoded ()));
+                
+                // The session key signature
+                ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+                DataOutputStream dos = new DataOutputStream (baos);
+                dos.write (csi);
+                dos.write (server_ec_public_key.getEncoded ());
+                dos.write (client_ephemeral_key.getEncoded ());
+                dos.writeInt ((int) (client_time.getTime () / 1000));
+                dos.close ();
                 mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
                 mac.init (new SecretKeySpec (session_key, "RAW"));
-                byte[] session_key_attest = mac.doFinal (kdf_data);
+                byte[] session_key_attest = mac.doFinal (baos.toByteArray ());
 
+                // Verify that the session key signature was signed by the device key
                 Signature verifier = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
                 verifier.initVerify (device_certificate.getPublicKey ());
                 verifier.update (session_key_attest);
@@ -346,7 +370,7 @@ public class KeyGen2Test
               }
 
             @Override
-            public byte[] getMac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException
+            public byte[] mac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException
               {
                 Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
                 mac.init (new SecretKeySpec (ArrayUtil.add (session_key, key_modifier), "RAW"));
@@ -354,9 +378,29 @@ public class KeyGen2Test
               }
 
             @Override
-            public byte[] getAttest (byte[] data) throws IOException, GeneralSecurityException
+            public byte[] attest (byte[] data) throws IOException, GeneralSecurityException
               {
-                return getMac (data, ATTEST_MODIFIER);
+                return mac (data, CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST);
+              }
+
+            @Override
+            public byte[] decrypt (byte[] data) throws IOException, GeneralSecurityException
+              {
+                byte[] key = mac (CryptoConstants.CRYPTO_STRING_ENCRYPTION, new byte[0]);
+                Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+                crypt.init (Cipher.DECRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (data, 0, 16));
+                return crypt.doFinal (data, 16, data.length - 16);
+              }
+
+            @Override
+            public byte[] encrypt (byte[] data) throws IOException, GeneralSecurityException
+              {
+                byte[] key = mac (CryptoConstants.CRYPTO_STRING_ENCRYPTION, new byte[0]);
+                Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+                byte[] iv = new byte[16];
+                new SecureRandom ().nextBytes (iv);
+                crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (iv));
+                return ArrayUtil.add (iv, crypt.doFinal (data));
               }
 
           }
@@ -369,7 +413,25 @@ public class KeyGen2Test
             server_xml_cache.addWrapper (KeyInitializationResponseDecoder.class);
             server_xml_cache.addWrapper (ProvisioningSessionResponseDecoder.class);
             server_xml_cache.addWrapper (CredentialDeploymentResponseDecoder.class);
-         }
+          }
+        
+        void verifyPrivateKeyBackup (ServerCredentialStore.KeyProperties key_prop) throws IOException, GeneralSecurityException
+          {
+            PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (server_sess_key.decrypt (key_prop.getEncryptedPrivateKey ()));
+            boolean rsa = key_prop.getPublicKey () instanceof RSAPublicKey;
+            PrivateKey private_key = KeyFactory.getInstance (rsa ? "RSA" : "EC").generatePrivate (key_spec);
+            Signature sign = Signature.getInstance ((rsa ? SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256).getJCEName ());
+            sign.initSign (private_key);
+            sign.update (KEY_BACKUP_TEST_STRING);
+            byte[] key_archival_verify = sign.sign ();
+            Signature verify = Signature.getInstance ((rsa ? SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256).getJCEName ());
+            verify.initVerify (key_prop.getPublicKey ());
+            verify.update (KEY_BACKUP_TEST_STRING);
+            if (!verify.verify (key_archival_verify))
+              {
+                throw new GeneralSecurityException ("Archived private key validation failed");
+              }
+          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Create a prov session req for the client
@@ -378,7 +440,7 @@ public class KeyGen2Test
           {
             ProvisioningSessionRequestEncoder prov_sess_req =
                 new ProvisioningSessionRequestEncoder (server_sess_key.generateEphemeralKey (),
-                                                       Constants.SERVER_SESSION_ID,
+                                                       "S.7767676dfrgfd",
                                                        ISSUER_URI,
                                                        10000,
                                                        50);
@@ -395,8 +457,9 @@ public class KeyGen2Test
             server_sess_key.generateAndVerifySessionKey (prov_sess_response.getClientEphemeralKey (),
                                                          certificate_path[0],
                                                          prov_sess_response.getClientSessionID (),
-                                                         Constants.SERVER_SESSION_ID,
+                                                         prov_sess_response.getServerSessionID (),
                                                          ISSUER_URI,
+                                                         prov_sess_response.getClientTime (),
                                                          prov_sess_response.getSessionAttestation ());
             prov_sess_response.verifySignature (new SymKeyVerifierInterface ()
               {
@@ -404,14 +467,14 @@ public class KeyGen2Test
                 @Override
                 public boolean verifyData (byte[] data, byte[] digest, MacAlgorithms algorithm) throws IOException, GeneralSecurityException
                   {
-                    return ArrayUtil.compare (server_sess_key.getMac (data, SessionKeyOperations.SIGNATURE_MODIFIER), digest);
+                    return ArrayUtil.compare (server_sess_key.mac (data, CryptoConstants.CRYPTO_STRING_SIGNATURE), digest);
                   }
               
               });
             try
               {
                 server_credential_store = new ServerCredentialStore (prov_sess_response.getClientSessionID (),
-                                                                     Constants.SERVER_SESSION_ID,
+                                                                     prov_sess_response.getServerSessionID (),
                                                                      ISSUER_URI);
                 key_init_request = new KeyInitializationRequestEncoder (KEY_INIT_URL, server_credential_store);
                 key_init_request.writeXML ();
@@ -422,7 +485,7 @@ public class KeyGen2Test
                 
               }
             server_credential_store = new ServerCredentialStore (prov_sess_response.getClientSessionID (),
-                                                                 Constants.SERVER_SESSION_ID,
+                                                                 prov_sess_response.getServerSessionID (),
                                                                  ISSUER_URI);
             if (pin_protection)
               {
@@ -431,7 +494,17 @@ public class KeyGen2Test
             server_credential_store.createKey (KeyUsage.AUTHENTICATION, key_alg1, pin_policy);
             if (ecc_key)
               {
-                server_credential_store.createKey (KeyUsage.ENCRYPTION, key_alg2, pin_policy);
+                ServerCredentialStore.KeyProperties kp = server_credential_store.createKey (KeyUsage.ENCRYPTION, key_alg2, pin_policy);
+                if (private_key_backup)
+                  {
+                    kp.setPrivateKeyBackup (true);
+                  }
+                if (server_seed)
+                  {
+                    byte[] seed = new byte[32];
+                    new SecureRandom ().nextBytes (seed);
+                    kp.setServerSeed (seed);
+                  }
               }
             key_init_request = new KeyInitializationRequestEncoder (KEY_INIT_URL, server_credential_store);
             return key_init_request.writeXML ();
@@ -447,6 +520,10 @@ public class KeyGen2Test
             key_init_response.validateAndPopulate (key_init_request, server_sess_key);
             for (ServerCredentialStore.KeyProperties key_prop : server_credential_store.getKeyProperties ())
               {
+                if (key_prop.getPrivateKeyBackupFlag ())
+                  {
+                    verifyPrivateKeyBackup (key_prop);
+                  }
                 boolean otp = key_prop.getKeyUsage () == KeyUsage.SYMMETRIC_KEY;
                 boolean auth = key_prop.getKeyUsage () == KeyUsage.AUTHENTICATION;
                 CertSpec cert_spec = new CertSpec ();
@@ -621,6 +698,16 @@ public class KeyGen2Test
         Doer doer = new Doer ();
         pin_protection = true;
         ecc_key = true;
+        doer.perform ();
+      }
+    @Test
+    public void test4 () throws Exception
+      {
+        Doer doer = new Doer ();
+        pin_protection = true;
+        private_key_backup = true;
+        ecc_key = true;
+        server_seed = true;
         doer.perform ();
       }
 

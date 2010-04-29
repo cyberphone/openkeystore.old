@@ -4,17 +4,22 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 import java.math.BigInteger;
+
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import org.webpki.crypto.ECDomains;
+
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.MimeTypedObject;
+
 import org.webpki.xml.DOMWriterHelper;
 
 public class ServerCredentialStore implements Serializable
@@ -584,7 +589,7 @@ public class ServerCredentialStore implements Serializable
 
         byte[] key_attestation;   // Filled in by KeyInitializationRequestDecoder
         
-        public byte[] getKeyAttestationy ()
+        public byte[] getKeyAttestation ()
           {
             return key_attestation;
           }
@@ -609,6 +614,28 @@ public class ServerCredentialStore implements Serializable
         public boolean getExportable ()
           {
             return exportable;
+          }
+        
+        
+        byte[] server_seed;
+        
+        public KeyProperties setServerSeed (byte[] server_seed)
+          {
+            this.server_seed = server_seed;
+            return this;
+          }
+        
+        boolean private_key_backup;
+        
+        public KeyProperties setPrivateKeyBackup (boolean flag)
+          {
+            private_key_backup = flag;
+            return this;
+          }
+        
+        public boolean getPrivateKeyBackupFlag ()
+          {
+            return private_key_backup;
           }
 
 
@@ -696,6 +723,20 @@ public class ServerCredentialStore implements Serializable
               {
                 wr.setBooleanAttribute (EXPORTABLE_ATTR, exportable);
               }
+            
+            if (private_key_backup)
+              {
+                wr.setBooleanAttribute (PRIVATE_KEY_BACKUP_ATTR, private_key_backup);
+              }
+            
+            if (server_seed != null)
+              {
+                if (server_seed.length != 32)
+                  {
+                    bad ("Sever seed must be 32 bytes");
+                  }
+                wr.setBinaryAttribute (SERVER_SEED_ATTR, server_seed);
+              }
 
             key_alg_data.writeKeyAlgorithmData (wr);
 
@@ -751,20 +792,25 @@ public class ServerCredentialStore implements Serializable
         int q = mac_sequence_counter++;
         return  new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
       }
-    
 
-    // Constructors
+    static void bad (String error_msg) throws IOException
+      {
+        throw new IOException (error_msg);
+      }
+    
+    static byte[] str2bin (String string) throws UnsupportedEncodingException
+      {
+        return string.getBytes ("UTF-8");
+      }
+
+ 
+    // Constructor
 
     public ServerCredentialStore (String client_session_id, String server_session_id, String issuer_uri) throws IOException
       {
         this.client_session_id = client_session_id;
         this.server_session_id = server_session_id;
         this.issuer_uri = issuer_uri;
-      }
-
-    static void bad (String error_msg) throws IOException
-      {
-        throw new IOException (error_msg);
       }
 
     public PINPolicy createPINPolicy (PassphraseFormats format, int min_length, int max_length, int retry_limit, PUKPolicy puk_policy) throws IOException

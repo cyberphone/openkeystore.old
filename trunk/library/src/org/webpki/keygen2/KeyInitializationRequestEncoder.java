@@ -27,7 +27,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
 
     ServerCookie server_cookie;
     
-    ServerCredentialStore ics;
+    ServerCredentialStore server_credential_store;
     
     private boolean need_signature_ns;
     
@@ -41,10 +41,10 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
     // Constructors
 
     public KeyInitializationRequestEncoder (String submit_url,
-                                            ServerCredentialStore ics) throws IOException
+                                            ServerCredentialStore server_credential_store) throws IOException
       {
         this.submit_url = submit_url;
-        this.ics = ics;
+        this.server_credential_store = server_credential_store;
       }
 
 
@@ -84,7 +84,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
         ds.removeXMLSignatureNS ();
         need_signature_ns = true;
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, ics.server_session_id);
+        ds.createEnvelopedSignature (doc, server_credential_store.server_session_id);
       }
     
     
@@ -106,9 +106,9 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, ics.server_session_id);
+        wr.setStringAttribute (ID_ATTR, server_credential_store.server_session_id);
 
-        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, ics.client_session_id);
+        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_credential_store.client_session_id);
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
 
@@ -122,12 +122,12 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
         ////////////////////////////////////////////////////////////////////////
         // There MUST not be zero keys to initialize...
         ////////////////////////////////////////////////////////////////////////
-        if (ics.requested_keys.isEmpty ())
+        if (server_credential_store.requested_keys.isEmpty ())
           {
             bad ("Empty request not allowd!");
           }
         ServerCredentialStore.KeyProperties last_req_key = null;
-        for (ServerCredentialStore.KeyProperties req_key : ics.requested_keys.values ())
+        for (ServerCredentialStore.KeyProperties req_key : server_credential_store.requested_keys.values ())
           {
             if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
                 getPUKPolicy (last_req_key) != getPUKPolicy (req_key))

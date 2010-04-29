@@ -1,10 +1,11 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 
-import org.webpki.sks.SessionKeyOperations;
 import org.webpki.util.ArrayUtil;
+
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
@@ -48,11 +49,12 @@ public class CredentialDeploymentResponseDecoder extends CredentialDeploymentRes
       }
     
     
-    public void verifyProvisioningResult (ServerCredentialStore server_credential_store, SessionKeyOperations mac_interface) throws IOException, GeneralSecurityException
+    public void verifyProvisioningResult (ServerCredentialStore server_credential_store,
+                                          ServerSessionKeyInterface sess_key_interface) throws IOException, GeneralSecurityException
       {
         server_credential_store.checkSession (client_session_id, server_session_id);
-        if (!ArrayUtil.compare (mac_interface.getAttest (ArrayUtil.add (SessionKeyOperations.SUCCESS_MODIFIER, 
-                                                                        server_credential_store.getMACSequenceCounterAndUpdate ())),
+        if (!ArrayUtil.compare (sess_key_interface.attest (ArrayUtil.add (CryptoConstants.CRYPTO_STRING_SUCCESS, 
+                                                                          server_credential_store.getMACSequenceCounterAndUpdate ())),
                                 close_session_attestation))
           {
             ServerCredentialStore.bad ("Final attestation failed!");

@@ -1,5 +1,7 @@
 package org.webpki.keygen2;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
 import java.util.LinkedHashMap;
@@ -7,8 +9,8 @@ import java.util.LinkedHashMap;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
-import org.webpki.sks.SessionKeyOperations;
 import org.webpki.util.ArrayUtil;
+
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
@@ -43,24 +45,36 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
       }
     
     
-    public void validateAndPopulate (KeyInitializationRequestEncoder kire, SessionKeyOperations session_key_operations) throws IOException, GeneralSecurityException
+    public void validateAndPopulate (KeyInitializationRequestEncoder key_init_req, ServerSessionKeyInterface session_key_operations) throws IOException, GeneralSecurityException
       {
-        kire.ics.checkSession (client_session_id, server_session_id);
-        if (generated_keys.size () != kire.ics.requested_keys.size ())
+        key_init_req.server_credential_store.checkSession (client_session_id, server_session_id);
+        if (generated_keys.size () != key_init_req.server_credential_store.requested_keys.size ())
           {
             ServerCredentialStore.bad ("Different number of requested and received keys");
           }
         for (GeneratedPublicKey gpk : generated_keys.values ())
           {
-            ServerCredentialStore.KeyProperties kp = kire.ics.requested_keys.get (gpk.id);
+            ServerCredentialStore.KeyProperties kp = key_init_req.server_credential_store.requested_keys.get (gpk.id);
             if (kp == null)
               {
                 ServerCredentialStore.bad ("Missing key id:" + gpk.id);
               }
             kp.public_key = gpk.public_key;
             kp.encrypted_private_key = gpk.encrypted_private_key;
-            byte[] data = ArrayUtil.add (gpk.id.getBytes ("UTF-8"), gpk.public_key.getEncoded ());
-            if (!ArrayUtil.compare (session_key_operations.getAttest (data), kp.key_attestation = gpk.key_attestation))
+            ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+            DataOutputStream fdata = new DataOutputStream (baos);
+            // Write key attestation data
+            fdata.write (ServerCredentialStore.str2bin (gpk.id));
+            fdata.write (gpk.public_key.getEncoded ());
+            fdata.write (kp.server_seed == null ? KeyInitializationRequestDecoder.DEFAULT_SEED : kp.server_seed);
+            fdata.writeBoolean (kp.private_key_backup);
+            if (kp.private_key_backup)
+              {
+                fdata.write (kp.encrypted_private_key);
+              }
+            fdata.close ();
+            if (!ArrayUtil.compare (session_key_operations.attest (baos.toByteArray ()),
+                                    kp.key_attestation = gpk.key_attestation))
               {
                 ServerCredentialStore.bad ("Attestation failed for key id:" + gpk.id);
               }

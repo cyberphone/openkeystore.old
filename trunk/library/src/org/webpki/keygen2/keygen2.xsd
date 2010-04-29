@@ -781,7 +781,8 @@
 
             </xs:choice>
 
-            <!-- Optional private key wrapped by SKS. -->
+            <!-- Optional private key wrapped by SKS. 
+                 See "KeyPair@PrivateKeyBackup".-->
  
             <xs:element name="PrivateKey" type="xs:base64Binary" minOccurs="0"/>
  
@@ -843,28 +844,6 @@
 
             </xs:choice>
 
-            <!-- An issuer MAY for reasons such a compliance with SOX,
-                 require that encryption keys are put in a specific
-                 "Escrow" store.  This is indicated by the following
-                 element where a public key to be used for wrapping the
-                 private key is supplied.  A client MAY disallow or at
-                 least warn about this action of the issuer.
-
-                 Also see "GeneratedPublicKey/EncryptedPrivateKey".
-
-                 Note that a conforming client MUST abort the provisioning
-                 session for private key backup requests for other types of
-                 keys than for KeyUsage="encryption". -->
-            <xs:element name="PrivateKeyArchivalKey" minOccurs="0">
-               <xs:complexType>
-                  <xs:sequence>
-                     <!-- A single certificate representing the issuer's
-                          key backup key. -->
-                     <xs:element ref="ds:X509Data"/>
-                  </xs:sequence>
-               </xs:complexType>
-            </xs:element>
-
          </xs:sequence>
 
          <!-- A unique key-ID. -->
@@ -878,9 +857,20 @@
               2. "piggybacked-symmetric-key": see the "PiggybackedSymmetricKey" element. -->
          <xs:attribute name="KeyUsage" type="kgen:keyUsageTypes" use="required"/>
 
+         <!-- "PrivateKeyBackup" An issuer MAY for reasons such a compliance
+              with regulations require that encryption keys are put in a specific
+              "Escrow" store.  This is indicated by the following attribute.
+              A client MAY disallow or at least warn about this action of the
+              issuer.  Default: false. -->
+         <xs:attribute name="PrivateKeyBackup" type="xs:boolean" use="optional"/>
+
+         <!-- The server MAY contribute to key randomness by supplying a "seed"
+              that SHOULD be used by the SKS.  Default: 32 zero bytes. -->
+         <xs:attribute name="ServerSeed" type="xs:base64Binary" use="optional"/>
+
          <!-- Is the key exportable?  Note: this option MAY be supported
               by the client.  Note: in the case "KeyUsage" is defined as
-              "piggybacked-symmetric-key", it is actually the exportability
+              "symmetric-key", it is actually the exportability
               of the symmetric key that is denoted.  Default: false. -->
          <xs:attribute name="Exportable" type="xs:boolean" use="optional"/>
 

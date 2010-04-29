@@ -3,19 +3,10 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.util.Vector;
-import java.util.LinkedHashMap;
 
 import java.security.cert.X509Certificate;
 
-import java.security.GeneralSecurityException;
-
-import javax.crypto.Mac;
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.spec.IvParameterSpec;
-
 import org.webpki.util.ImageData;
-import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
@@ -25,97 +16,12 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLVerifier;
 
 import org.webpki.crypto.VerifierInterface;
-import org.webpki.crypto.MacAlgorithms;
-import org.webpki.crypto.SymEncryptionAlgorithms;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
 public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequest
   {
-
-    public class PresetValue
-      {
-        boolean hidden;
-
-        byte[] encrypted_value;
-
-        String value;
-
-        boolean is_puk;
-
-        Object local_reference_object;
-
-
-        public boolean isHidden ()
-          {
-            return hidden;
-          }
-
-
-        public boolean isPUK ()
-          {
-            return is_puk;
-          }
-
-
-        public Object getLocalReferenceObject ()
-          {
-            return local_reference_object;
-          }
-
-
-        public String getValue () throws IOException
-          {
-            if (value == null)
-              {
-                try
-                  {
-                    if (encoder_key == null)
-                      {
-                        if (encrypted_encoder_key == null)
-                          {
-                            bad ("Missing in XML object: " + PRESET_VALUES_ELEM);
-                          }
-                        if (master_key_decrypter == null)
-                          {
-                            bad ("You must call \"setDecrypter\" before accessing data");
-                          }
-                        encoder_key = master_key_decrypter.decrypt (encrypted_encoder_key, encryption_certificate);
-                        Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
-/*
-                        mac.init (new SecretKeySpec (key_operation_request_decoder.getSessionHash (), "RAW"));
-*/
-                        mac.update (encoder_key);
-                        for (byte[] enc_val : encrypted_preset_values.values ())
-                          {
-                            mac.update (enc_val);
-                          }
-                        if (!ArrayUtil.compare (mac_key, mac.doFinal ()))
-                          {
-                            bad ("MAC error");
-                          }
-                      }
-                    if (encrypted_value.length < 32 || encrypted_value.length % 16 != 0)
-                      {
-                        bad ("Unexpected length of encrypted data: " + encrypted_value.length);
-                      }
-                    Cipher crypt = Cipher.getInstance (SymEncryptionAlgorithms.AES_CBC_P5.getJCEName ());
-                    crypt.init (Cipher.DECRYPT_MODE,
-                                new SecretKeySpec (encoder_key, "AES"),
-                                new IvParameterSpec (encrypted_value, 0, 16));
-                    value = new String (crypt.doFinal (encrypted_value, 16, encrypted_value.length - 16), "UTF-8");
-                  }
-                catch (GeneralSecurityException gse)
-                  {
-                    bad (gse.getMessage ());
-                  }
-              }
-            return value;
-          }
-
-      }
-
 
     public class Extension
       {
@@ -393,21 +299,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
     private XMLSignatureWrapper signature;                  // Optional
 
-    private X509Certificate encryption_certificate;         // Optional
-
-    private byte[] encrypted_encoder_key;
-
-    private byte[] mac_key;
-
-    private byte[] encoder_key;
-    
     private byte[] close_session_mac;
-
-    private SymmetricKeyDecrypter master_key_decrypter;
-
-    private LinkedHashMap<String,byte[]> encrypted_preset_values = new LinkedHashMap<String,byte[]> ();
-
-    private Vector<PresetValue> preset_values = new Vector<PresetValue> ();
 
     private KeyInitializationRequestDecoder key_operation_request_decoder;
 
@@ -460,12 +352,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
       }
 
 
-    public void setDecrypter (SymmetricKeyDecrypter master_key_decrypter)
-      {
-        this.master_key_decrypter = master_key_decrypter;
-      }
-
-
     public void setKeyOperationRequestDecoder (KeyInitializationRequestDecoder key_operation_request_decoder)
       {
         this.key_operation_request_decoder = key_operation_request_decoder;
@@ -475,31 +361,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
     public boolean isSigned ()
       {
         return signature != null;
-      }
-
-
-    public PresetValue[] getPresetValues () throws IOException
-      {
-        if (key_operation_request_decoder == null)
-          {
-            bad ("You must call \"setKeyOperationRequestDecoder\" first");
-          }
-/*
-        for (KeyInitializationRequestDecoder.PresetValueReference pvr : key_operation_request_decoder.preset_value_references)
-          {
-            PresetValue pv = new PresetValue ();
-            if ((pv.encrypted_value = encrypted_preset_values.get (pvr.data)) == null)
-              {
-                bad ("Missing data for: " + pvr.data);
-              }
-
-            pv.is_puk = pvr instanceof KeyInitializationRequestDecoder.PUKPolicy;
-            pv.local_reference_object = pvr.local_reference_object;
-            pv.hidden = pvr.hidden;
-            preset_values.add (pv);
-          }
-*/
-        return preset_values.toArray (new PresetValue[0]);
       }
 
 
@@ -529,57 +390,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
             certified_keys.add (new CertifiedPublicKey (rd));
           }
         while (rd.hasNext (CERTIFIED_PUBLIC_KEY_ELEM));
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get optional preset values
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (PRESET_VALUES_ELEM))
-          {
-            rd.getNext (PRESET_VALUES_ELEM);
-            mac_key = ah.getBinary (MAC_ATTR);
-            rd.getChild ();
-
-/*
-            rd.getNext (ENCRYPTED_KEY_ELEM);
-            rd.getChild ();
-            XMLEncUtil.getEncryptionMethod (rd, new EncryptionAlgorithms[]{AsymEncryptionAlgorithms.RSA_PKCS_1});
-
-            if (rd.hasNext (XMLSignatureWrapper.KEY_INFO_ELEM))
-              {
-                rd.getNext (XMLSignatureWrapper.KEY_INFO_ELEM);
-                rd.getChild ();
-                encryption_certificate = XMLSignatureWrapper.readSortedX509DataSubset (rd)[0];
-                rd.getParent ();
-              }
-            encrypted_encoder_key = XMLEncUtil.getCipherValue (rd);
-            String carried_key_name = rd.getString (CARRIED_KEY_NAME_ELEM);
-            rd.getParent ();
-
-            EncryptionAlgorithms[] granted = new EncryptionAlgorithms[]{SymEncryptionAlgorithms.AES128_CBC,
-                                                                        SymEncryptionAlgorithms.AES256_CBC};
-
-            while (rd.hasNext (ENCRYPTED_DATA_ELEM))
-              {
-                rd.getNext (ENCRYPTED_DATA_ELEM);
-                String id = ah.getString (XMLSignatureWrapper.ID_ATTR);
-                rd.getChild ();
-
-                granted = new EncryptionAlgorithms[]{XMLEncUtil.getEncryptionMethod (rd, granted)};
-
-                rd.getNext (XMLSignatureWrapper.KEY_INFO_ELEM);
-                rd.getChild ();
-                String key_name = rd.getString (XMLSignatureWrapper.KEY_NAME_ELEM);
-                if (!carried_key_name.equals (key_name))
-                  {
-                    bad ("Unexpected symmetric key name: " + key_name);
-                  }
-                rd.getParent ();
-                encrypted_preset_values.put (id, XMLEncUtil.getCipherValue (rd));
-                rd.getParent ();
-              }
-            rd.getParent ();
-*/
-          }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get optional server cookie

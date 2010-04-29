@@ -2,7 +2,6 @@ package org.webpki.sks;
 
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
-import java.util.Date;
 
 import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.KeyUsage;
@@ -42,7 +41,7 @@ public interface SecureKeyStore
                                                                 ECPublicKey server_ephemeral_key,
                                                                 String issuer_uri,
                                                                 boolean updatable,
-                                                                Date client_time,
+                                                                int client_time,
                                                                 int session_life_time,
                                                                 int session_key_limit) throws SKSException;
 

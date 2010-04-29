@@ -23,6 +23,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class KeyInitializationRequestDecoder extends KeyInitializationRequest
   {
+    static final byte[] DEFAULT_SEED = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    
     abstract class PresetValueReference
       {
         byte[] value;
@@ -331,6 +333,16 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             id = ah.getString (ID_ATTR);
             key_usage = KeyUsage.getKeyUsageFromString (ah.getString (KEY_USAGE_ATTR));
             exportable = ah.getBooleanConditional (EXPORTABLE_ATTR);
+            private_key_backup = ah.getBooleanConditional (PRIVATE_KEY_BACKUP_ATTR);
+            server_seed = ah.getBinaryConditional (SERVER_SEED_ATTR);
+            if (server_seed == null)
+              {
+                server_seed = DEFAULT_SEED;
+              }
+            else if (server_seed.length != 32)
+              {
+                bad ("Sever seed must be 32 bytes");
+              }
 
             rd.getChild ();
 
@@ -413,7 +425,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
         
 
-     // TODO        
         byte[] server_seed;
         
         public byte[] getServerSeed ()
@@ -431,11 +442,11 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
         
      // TODO        
-        boolean private_key_backup_flag;
+        boolean private_key_backup;
         
         public boolean getPrivateKeyBackupFlag ()
           {
-            return private_key_backup_flag;
+            return private_key_backup;
           }
         
 
@@ -467,20 +478,20 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
         
      // TODO        
-        boolean enable_pin_caching_flag;
+        boolean enable_pin_caching;
         
         public boolean getEnablePINCachingFlag ()
           {
-            return enable_pin_caching_flag;
+            return enable_pin_caching;
           }
 
         
      // TODO        
-        boolean import_private_key_flag;
+        boolean import_private_key;
         
         public boolean getImportPrivateKeyFlag ()
           {
-            return import_private_key_flag;
+            return import_private_key;
           }
 
         

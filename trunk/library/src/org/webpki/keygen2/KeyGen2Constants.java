@@ -4,12 +4,12 @@ package org.webpki.keygen2;
 public interface KeyGen2Constants
   {
 
-    String KEYGEN2_NS                  = "http://xmlns.webpki.org/keygen2/beta/20100402#";
+    String KEYGEN2_NS                        = "http://xmlns.webpki.org/keygen2/beta/20100402#";
 
-    String KEYGEN2_SCHEMA_FILE         = "keygen2.xsd";
+    String KEYGEN2_SCHEMA_FILE               = "keygen2.xsd";
 
 
-    // Various global XML attributes
+    // XML attributes
 
     String ID_ATTR                           = "ID";
 
@@ -47,6 +47,8 @@ public interface KeyGen2Constants
 
     String NAMED_CURVE_ATTR                  = "NamedCurve";
 
+    String SERVER_SEED_ATTR                  = "ServerSeed";
+    
     String LANGUAGES_ATTR                    = "Languages";
 
     String EXPIRES_ATTR                      = "Expires";
@@ -75,6 +77,8 @@ public interface KeyGen2Constants
 
     String KEY_SIZE_ATTR                     = "KeySize";
 
+    String PRIVATE_KEY_BACKUP_ATTR           = "PrivateKeyBackup";
+
     String MAX_LENGTH_ATTR                   = "MaxLength";
 
     String MIN_LENGTH_ATTR                   = "MinLength";
@@ -92,10 +96,6 @@ public interface KeyGen2Constants
     String USER_MODIFIABLE_ATTR              = "UserModifiable";
 
     String PATTERN_RESTRICTIONS_ATTR         = "PatternRestrictions";
-
-    String FORCE_NEW_PIN_ATTR                = "ForceNewPIN";
-
-    String NOTIFY_DAYS_BEFORE_EXPIRY_ATTR    = "NotifyDaysBeforeExpiry";
 
     String SUBJECT_ATTR                      = "Subject";
 
@@ -119,7 +119,8 @@ public interface KeyGen2Constants
 
     String WRITABLE_ATTR                     = "Writable";
 
-    // Top elements
+
+    // XML elements
 
     String SERVER_EPHEMERAL_KEY_ELEM         = "ServerEphemeralKey";
 
@@ -131,15 +132,11 @@ public interface KeyGen2Constants
 
     String CERTIFIED_PUBLIC_KEY_ELEM         = "CertifiedPublicKey";
 
-    String PRESET_VALUES_ELEM                = "PresetValues";
-
     String SYMMETRIC_KEY_ELEM                = "SymmetricKey";
 
     String PRIVATE_KEY_ELEM                  = "PrivateKey";
 
     String KEY_PAIR_ELEM                     = "KeyPair";       
-
-    String MANAGE_OBJECT_ELEM                = "ManageObject";       
 
     String PIN_POLICY_ELEM                   = "PINPolicy";       
 
@@ -148,9 +145,6 @@ public interface KeyGen2Constants
     String PRESET_PIN_ELEM                   = "PresetPIN";
        
     String DEVICE_SYNCHRONIZED_PIN_ELEM      = "DeviceSynchronizedPIN";
-
-       
-    // Sub elements
 
     String EXTENSION_ELEM                    = "Extension";
 
@@ -170,15 +164,8 @@ public interface KeyGen2Constants
 
     String PROPERTY_BAG_ELEM                 = "PropertyBag";       
 
-    String RENEWAL_SERVICE_ELEM              = "RenewalService";
-
     String RSA_ELEM                          = "RSA";
 
     String EC_ELEM                           = "EC";
-
-    String URL_ELEM                          = "URL";
-
-    String DNS_LOOKUP_ELEM                   = "DNSLookup";
-
 
   }

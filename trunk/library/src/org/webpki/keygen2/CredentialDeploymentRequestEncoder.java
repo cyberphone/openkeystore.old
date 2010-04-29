@@ -9,9 +9,9 @@ import org.w3c.dom.Element;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 
-import org.webpki.sks.SessionKeyOperations;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
+
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.ServerCookie;
 
@@ -34,17 +34,17 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
 
     ServerCredentialStore server_credential_store;
     
-    SessionKeyOperations mac_interface;
+    ServerSessionKeyInterface sess_key_interface;
     
     // Constructors
 
     public CredentialDeploymentRequestEncoder (String submit_url, 
                                                ServerCredentialStore server_credential_store,
-                                               SessionKeyOperations mac_interface) throws IOException
+                                               ServerSessionKeyInterface sess_key_interface) throws IOException
       {
         this.submit_url = submit_url;
         this.server_credential_store = server_credential_store;
-        this.mac_interface = mac_interface;
+        this.sess_key_interface = sess_key_interface;
       }
 
 
@@ -71,7 +71,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
     
     private byte[] mac (byte[] data, APIDescriptors method) throws IOException, GeneralSecurityException
       {
-        return mac_interface.getMac (data, ArrayUtil.add (method.getBinary (), server_credential_store.getMACSequenceCounterAndUpdate ()));
+        return sess_key_interface.mac (data, ArrayUtil.add (method.getBinary (), server_credential_store.getMACSequenceCounterAndUpdate ()));
       }
     
     
