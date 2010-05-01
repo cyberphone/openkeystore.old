@@ -1,3 +1,19 @@
+/*
+ *  Copyright 2006-2010 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package org.webpki.keygen2.test;
 
 import java.io.IOException;
@@ -67,9 +83,9 @@ public class SKSTestImplementation implements SecureKeyStore
         String id;
         String friendly_name;
         int key_handle;
-        Provisioning owner;
+        ProvisioningSession owner;
 
-        KeyData (Provisioning owner)
+        KeyData (ProvisioningSession owner)
           {
             this.owner = owner;
             key_handle = next_key_handle++;
@@ -77,7 +93,7 @@ public class SKSTestImplementation implements SecureKeyStore
           }
       }
 
-    private class Provisioning
+    private class ProvisioningSession
       {
         String client_session_id;
         String server_session_id;
@@ -87,7 +103,7 @@ public class SKSTestImplementation implements SecureKeyStore
         boolean open = true;
         int mac_sequence_counter;
         
-        Provisioning ()
+        ProvisioningSession ()
           {
             provisioning_handle = next_prov_handle++;
             provisionings.put (provisioning_handle, this);
@@ -108,14 +124,9 @@ public class SKSTestImplementation implements SecureKeyStore
             return null;  // For compiler only..
           }
         
-        byte[] seqCounter2 ()
+        void testMac (MacBuilder actual_mac, byte[] claimed_mac) throws SKSException
           {
-            return short2bytes (mac_sequence_counter++);
-          }
-        
-        void testMac (byte[] data, APIDescriptors method, byte[] claimed_mac) throws SKSException
-          {
-            if (ArrayUtil.compare (mac (data, ArrayUtil.add (method.getBinary (), seqCounter2 ())),  claimed_mac))
+            if (ArrayUtil.compare (actual_mac.getResult (),  claimed_mac))
               {
                 return;
               }
@@ -131,11 +142,6 @@ public class SKSTestImplementation implements SecureKeyStore
         void abort (String message) throws SKSException
           {
              abort (message, SKSException.ERROR_INTERNAL);
-          }
-    
-       byte[] attest (byte[] data) throws SKSException
-          {
-            return mac (data, CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST);
           }
 
         byte[] encrypt (byte[] data) throws SKSException, GeneralSecurityException
@@ -155,15 +161,98 @@ public class SKSTestImplementation implements SecureKeyStore
             crypt.init (Cipher.DECRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (data, 0, 16));
             return crypt.doFinal (data, 16, data.length - 16);
           }
+
+        private MacBuilder getMacBuilder (byte[] key_modifier) throws SKSException
+          {
+            try
+              {
+                return new MacBuilder (ArrayUtil.add (session_key, key_modifier));
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new SKSException ("Internal error");
+              }
+          }
+
+        private MacBuilder getMacBuilder (APIDescriptors method) throws SKSException
+          {
+            int q = mac_sequence_counter++;
+            return getMacBuilder (ArrayUtil.add (method.getBinary (), new byte[]{(byte)(q >>> 8), (byte)q}));
+          }
+      }
+    
+    
+    private class MacBuilder
+      {
+        Mac mac;
+        
+        MacBuilder (byte[] key) throws GeneralSecurityException
+          {
+            mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
+            mac.init (new SecretKeySpec (key, "RAW"));
+          }
+
+        MacBuilder addVerbatim (byte[] data)
+          {
+            mac.update (data);
+            return this;
+          }
+
+        private byte[] short2bytes (int s)
+          {
+            return new byte[]{(byte)(s >>> 8), (byte)s};
+          }
+
+        private byte[] int2bytes (int i)
+          {
+            return new byte[]{(byte)(i >>> 24), (byte)(i >>> 16), (byte)(i >>> 8), (byte)i};
+          }
+
+        void addArray (byte[] data)
+          {
+            mac.update (short2bytes (data.length));
+            mac.update (data);
+          }
+        
+        void addString (String string) throws UnsupportedEncodingException
+          {
+            addArray (string.getBytes ("UTF-8"));
+          }
+        
+        void addInt (int i)
+          {
+            mac.update (int2bytes (i));
+          }
+        
+        void addShort (int s)
+          {
+            mac.update (short2bytes (s));
+          }
+        
+        void addByte (byte b)
+          {
+            mac.update (b);
+          }
+        
+        void addBool (boolean flag)
+          {
+            mac.update (flag ? (byte) 0x01 : (byte) 0x00);
+          }
+        
+        byte[] getResult ()
+          {
+            return mac.doFinal ();
+          }
+        
       }
    
     private LinkedHashMap<Integer,KeyData> keys = new LinkedHashMap<Integer,KeyData> ();
 
-    private LinkedHashMap<Integer,Provisioning> provisionings = new LinkedHashMap<Integer,Provisioning> ();
+    private LinkedHashMap<Integer,ProvisioningSession> provisionings = new LinkedHashMap<Integer,ProvisioningSession> ();
    
-    private Provisioning getOpenProvisioning (int provisioning_handle) throws SKSException
+    private ProvisioningSession getOpenProvisioningSession (int provisioning_handle) throws SKSException
       {
-        Provisioning prov = provisionings.get (provisioning_handle);
+        ProvisioningSession prov = provisionings.get (provisioning_handle);
         if (prov == null)
           {
             throw new SKSException ("No such prov sess:" + provisioning_handle, SKSException.ERROR_NO_SESSION);
@@ -189,27 +278,7 @@ public class SKSTestImplementation implements SecureKeyStore
         return kd;
       }
     
-    private byte[] short2bytes (int s)
-      {
-        return new byte[]{(byte)(s >>> 8), (byte)s};
-      }
-
-    private byte[] int2bytes (int i)
-      {
-        return new byte[]{(byte)(i >>> 24), (byte)(i >>> 16), (byte)(i >>> 8), (byte)i};
-      }
-
-    private byte[] str2bytes (String string) throws UnsupportedEncodingException
-      {
-        return string.getBytes ("UTF-8");
-      }
-
-    private byte[] bool2bytes (boolean flag) throws UnsupportedEncodingException
-      {
-        return new byte[]{flag ? (byte)0x01 : (byte)0x00};
-      }
-  
-   private KeyData getStdKey (int key_handle) throws SKSException
+    private KeyData getStdKey (int key_handle) throws SKSException
       {
         KeyData kd = keys.get (key_handle);
         if (kd == null)
@@ -236,11 +305,11 @@ public class SKSTestImplementation implements SecureKeyStore
         return new EnumeratedKey ();
       }
 
-    private EnumeratedProvisioningSession getProvisioning (Iterator<Provisioning> iter, boolean provisioning_state)
+    private EnumeratedProvisioningSession getProvisioning (Iterator<ProvisioningSession> iter, boolean provisioning_state)
       {
         while (iter.hasNext ())
           {
-            Provisioning prov = iter.next ();
+            ProvisioningSession prov = iter.next ();
             if (prov.open == provisioning_state)
               {
                 return new EnumeratedProvisioningSession (prov.provisioning_handle, prov.client_session_id, prov.server_session_id);
@@ -273,7 +342,7 @@ public class SKSTestImplementation implements SecureKeyStore
                                         String friendly_name,
                                         KeyInitializationRequestDecoder.KeyAlgorithmData key_algorithm) throws SKSException
       {
-        Provisioning prov = getOpenProvisioning (provisioning_handle);
+        ProvisioningSession prov = getOpenProvisioningSession (provisioning_handle);
         for (KeyData kd : keys.values ())
           {
             if (kd.owner == prov && kd.id.equals (id))
@@ -328,13 +397,24 @@ public class SKSTestImplementation implements SecureKeyStore
             KeyPair key_pair = kpg.generateKeyPair ();
             PublicKey public_key = key_pair.getPublic ();   
             PrivateKey private_key = key_pair.getPrivate ();
-            byte[] encrypted_private_key = private_key_backup ? prov.encrypt (private_key.getEncoded ()) : null;
-            byte[] key_attestation = ArrayUtil.add (str2bytes (id), public_key.getEncoded ());
-            key_attestation = ArrayUtil.add (key_attestation, server_seed);
-            key_attestation = ArrayUtil.add (key_attestation, bool2bytes (private_key_backup));
+            byte[] encrypted_private_key = null;
             if (private_key_backup)
               {
-                key_attestation = ArrayUtil.add (key_attestation, encrypted_private_key);
+                byte[] key = prov.getMacBuilder (new byte[0]).addVerbatim (CryptoConstants.CRYPTO_STRING_ENCRYPTION).getResult ();
+                Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+                byte[] iv = new byte[16];
+                new SecureRandom ().nextBytes (iv);
+                crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (iv));
+                encrypted_private_key =  ArrayUtil.add (iv, crypt.doFinal (private_key.getEncoded ()));
+              }
+            MacBuilder key_attestation = prov.getMacBuilder (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST);
+            key_attestation.addString (id);
+            key_attestation.addArray (public_key.getEncoded ());
+            key_attestation.addArray (server_seed);
+            key_attestation.addBool (private_key_backup);
+            if (private_key_backup)
+              {
+                key_attestation.addArray (encrypted_private_key);
               }
             KeyData kd = new KeyData (prov);
             kd.id = id;
@@ -342,7 +422,7 @@ public class SKSTestImplementation implements SecureKeyStore
             kd.public_key = public_key;   
             kd.private_key = private_key;
             return new KeyPairResult (public_key,
-                                      prov.attest (key_attestation),
+                                      key_attestation.getResult (),
                                       encrypted_private_key);
           }
         catch (GeneralSecurityException e)
@@ -359,7 +439,7 @@ public class SKSTestImplementation implements SecureKeyStore
     @Override
     public void abortProvisioningSession (int provisioning_handle) throws SKSException
       {
-        Provisioning prov = getOpenProvisioning (provisioning_handle);
+        ProvisioningSession prov = getOpenProvisioningSession (provisioning_handle);
         provisionings.remove (provisioning_handle);
         Iterator<KeyData> list = keys.values ().iterator ();
         while (list.hasNext ())
@@ -394,38 +474,61 @@ public class SKSTestImplementation implements SecureKeyStore
     public void setCertificatePath (int key_handle, X509Certificate[] certificate_path, byte[] mac) throws SKSException
       {
         KeyData kd = getOpenKey (key_handle);
-        byte[] data = null;
         if (kd.certificate_path != null)
           {
             kd.owner.abort ("Multiple cert insert:" + key_handle, SKSException.ERROR_OPTION);
           }
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder set_certificate_mac = kd.owner.getMacBuilder (APIDescriptors.SET_CERTIFICATE_PATH);
         try
           {
-            data = ArrayUtil.add (kd.public_key.getEncoded (), str2bytes (kd.id));
+            set_certificate_mac.addArray (kd.public_key.getEncoded ());
+            set_certificate_mac.addString (kd.id);
             for (X509Certificate certificate : certificate_path)
               {
-                data = ArrayUtil.add (data, certificate.getEncoded ());
+                set_certificate_mac.addArray (certificate.getEncoded ());
               }
           }
         catch (Exception e)
           {
             kd.owner.abort ("Internal error:" + e.getMessage ());
           }
-        kd.owner.testMac (data, APIDescriptors.SET_CERTIFICATE_PATH, mac);
+        kd.owner.testMac (set_certificate_mac, mac);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Done.  Perform the actual task we were meant to do
+        ///////////////////////////////////////////////////////////////////////////////////
         kd.certificate_path = certificate_path;
       }
 
     @Override
     public byte[] closeProvisioningSession (int provisioning_handle, byte[] mac) throws SKSException
       {
-        Provisioning prov = getOpenProvisioning (provisioning_handle);
+        ProvisioningSession prov = getOpenProvisioningSession (provisioning_handle);
         try
           {
-            byte[] arg = str2bytes (new StringBuffer (prov.client_session_id)
-                                             .append (prov.server_session_id)
-                                             .append (prov.issuer_uri).toString ());
-            prov.testMac (arg, APIDescriptors.CLOSE_SESSION, mac);
-            byte[] attest = prov.attest (ArrayUtil.add (CryptoConstants.CRYPTO_STRING_SUCCESS, prov.seqCounter2 ()));
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Verify incoming MAC
+            ///////////////////////////////////////////////////////////////////////////////////
+            MacBuilder close_mac = prov.getMacBuilder (APIDescriptors.CLOSE_SESSION);
+            close_mac.addString (prov.client_session_id);
+            close_mac.addString (prov.server_session_id);
+            close_mac.addString (prov.issuer_uri);
+            prov.testMac (close_mac, mac);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Generate a final attestation
+            ///////////////////////////////////////////////////////////////////////////////////
+            MacBuilder close_attestation = prov.getMacBuilder (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST);
+            close_attestation.addVerbatim (CryptoConstants.CRYPTO_STRING_SUCCESS);
+            close_attestation.addShort (prov.mac_sequence_counter);
+            byte[] attest = close_attestation.getResult ();
+            
+            ///////////////////////////////////////////////////////////////////////////////////
+            // We are done, close the show for this time
+            ///////////////////////////////////////////////////////////////////////////////////
             prov.open = false;
             return attest;
           }
@@ -460,7 +563,7 @@ public class SKSTestImplementation implements SecureKeyStore
             KeyPair kp = generator.generateKeyPair ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Do the ECDHC operation
+            // Apply the SP800-56A C(2, 0, ECC CDH) algorithm
             ///////////////////////////////////////////////////////////////////////////////////
             client_ephemeral_key = (ECPublicKey) kp.getPublic ();
             KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
@@ -469,26 +572,26 @@ public class SKSTestImplementation implements SecureKeyStore
             byte[] Z = key_agreement.generateSecret ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // The custom KDF 
+            // But use a custom KDF 
             ///////////////////////////////////////////////////////////////////////////////////
-            byte[] csi = str2bytes (new StringBuffer (client_session_id)
-                                             .append (server_session_id)
-                                             .append (issuer_uri).toString ());
-            byte[] kdf_data = ArrayUtil.add (csi, getDeviceCertificatePath ()[0].getEncoded ());
-            Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
-            mac.init (new SecretKeySpec (Z, "RAW"));
-            session_key = mac.doFinal (kdf_data);
+            MacBuilder kdf = new MacBuilder (Z);
+            kdf.addString (client_session_id);
+            kdf.addString (server_session_id);
+            kdf.addString (issuer_uri);
+            kdf.addArray (getDeviceCertificatePath ()[0].getEncoded ());
+            session_key = kdf.getResult ();
 
             ///////////////////////////////////////////////////////////////////////////////////
             // SessionKey attested data
             ///////////////////////////////////////////////////////////////////////////////////
-            byte[] data = ArrayUtil.add (csi, 
-                                         ArrayUtil.add (server_ephemeral_key.getEncoded (),
-                                                        client_ephemeral_key.getEncoded ()));
-            data = ArrayUtil.add (data, int2bytes (client_time));
-            mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
-            mac.init (new SecretKeySpec (session_key, "RAW"));
-            byte[] session_key_attest = mac.doFinal (data);
+            MacBuilder ska = new MacBuilder (session_key);
+            ska.addString (client_session_id);
+            ska.addString (server_session_id);
+            ska.addString (issuer_uri);
+            ska.addArray (server_ephemeral_key.getEncoded ());
+            ska.addArray (client_ephemeral_key.getEncoded ());
+            ska.addInt (client_time);
+            byte[] session_key_attest = ska.getResult ();
             
             ///////////////////////////////////////////////////////////////////////////////////
             // Sign attestation
@@ -502,7 +605,7 @@ public class SKSTestImplementation implements SecureKeyStore
           {
             throw new SKSException (e, SKSException.ERROR_CRYPTO);
           }
-        Provisioning p = new Provisioning ();
+        ProvisioningSession p = new ProvisioningSession ();
         p.server_session_id = server_session_id;
         p.client_session_id = client_session_id;
         p.issuer_uri = issuer_uri;
@@ -535,7 +638,7 @@ public class SKSTestImplementation implements SecureKeyStore
           {
             return getProvisioning (provisionings.values ().iterator (), provisioning_state);
           }
-        Iterator<Provisioning> list = provisionings.values ().iterator ();
+        Iterator<ProvisioningSession> list = provisionings.values ().iterator ();
         while (list.hasNext ())
           {
             if (list.next ().provisioning_handle == provisioning_handle)
@@ -555,7 +658,7 @@ public class SKSTestImplementation implements SecureKeyStore
     @Override
     public byte[] signProvisioningSessionData (int provisioning_handle, byte[] data) throws SKSException
       {
-        return getOpenProvisioning (provisioning_handle).mac (data, CryptoConstants.CRYPTO_STRING_SIGNATURE);
+        return getOpenProvisioningSession (provisioning_handle).getMacBuilder (CryptoConstants.CRYPTO_STRING_SIGNATURE).addVerbatim (data).getResult ();
       }
 
   }

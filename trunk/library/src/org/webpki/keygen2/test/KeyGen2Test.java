@@ -1,9 +1,26 @@
+/*
+ *  Copyright 2006-2010 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package org.webpki.keygen2.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import java.math.BigInteger;
 
@@ -101,6 +118,9 @@ public class KeyGen2Test
     boolean server_seed;
     
     static FileOutputStream fos;
+    
+    static SecureKeyStore sks;
+    
    
     @BeforeClass
     public static void openFile () throws Exception
@@ -111,6 +131,7 @@ public class KeyGen2Test
             fos = new FileOutputStream (dir + "/" + KeyGen2Test.class.getCanonicalName () + ".txt");
           }
         Security.addProvider(new BouncyCastleProvider());
+        sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
       }
 
     @AfterClass
@@ -126,8 +147,6 @@ public class KeyGen2Test
       {
         XMLSchemaCache client_xml_cache;
         
-        SecureKeyStore sks;
-        
         int provisioning_handle;
         
         KeyInitializationRequestDecoder key_init_request;
@@ -136,7 +155,6 @@ public class KeyGen2Test
         
         Client () throws Exception
           {
-            sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
             client_xml_cache = new XMLSchemaCache ();
             client_xml_cache.addWrapper (ProvisioningSessionRequestDecoder.class);
             client_xml_cache.addWrapper (KeyInitializationRequestDecoder.class);
@@ -311,6 +329,21 @@ public class KeyGen2Test
             
             byte[] session_key;
   
+            private byte[] getMacString (String string) throws UnsupportedEncodingException
+              {
+                return getMacArray (string.getBytes ("UTF-8"));
+              }
+
+            private byte[] getMacShort (int s)
+              {
+                return new byte[]{(byte)(s >>> 8), (byte)s};
+              }
+
+            private byte[] getMacArray (byte[] data)
+              {
+                return ArrayUtil.add (getMacShort (data.length), data);
+              }
+
             @Override
             public ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException
               {
@@ -331,9 +364,6 @@ public class KeyGen2Test
                                                      Date client_time,
                                                      byte[] session_attestation) throws IOException, GeneralSecurityException
               {
-                byte[] csi = new StringBuffer (client_session_id)
-                                      .append (server_session_id)
-                                      .append (issuer_uri).toString ().getBytes ("UTF-8");
 
                 // SP800-56A C(2, 0, ECC CDH)
                 KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
@@ -342,7 +372,11 @@ public class KeyGen2Test
                 byte[] Z = key_agreement.generateSecret ();
 
                 // The custom KDF
-                byte[] kdf_data = ArrayUtil.add (csi, device_certificate.getEncoded ());
+                byte[] kdf_data = new byte[0];
+                kdf_data = ArrayUtil.add (kdf_data, getMacString (client_session_id));
+                kdf_data = ArrayUtil.add (kdf_data, getMacString (server_session_id));
+                kdf_data = ArrayUtil.add (kdf_data, getMacString (issuer_uri));
+                kdf_data = ArrayUtil.add (kdf_data, getMacArray (device_certificate.getEncoded ()));
                 Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
                 mac.init (new SecretKeySpec (Z, "RAW"));
                 session_key = mac.doFinal (kdf_data);
@@ -350,9 +384,11 @@ public class KeyGen2Test
                 // The session key signature
                 ByteArrayOutputStream baos = new ByteArrayOutputStream ();
                 DataOutputStream dos = new DataOutputStream (baos);
-                dos.write (csi);
-                dos.write (server_ec_public_key.getEncoded ());
-                dos.write (client_ephemeral_key.getEncoded ());
+                dos.write (getMacString (client_session_id));
+                dos.write (getMacString (server_session_id));
+                dos.write (getMacString (issuer_uri));
+                dos.write (getMacArray (server_ec_public_key.getEncoded ()));
+                dos.write (getMacArray (client_ephemeral_key.getEncoded ()));
                 dos.writeInt ((int) (client_time.getTime () / 1000));
                 dos.close ();
                 mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
@@ -666,11 +702,11 @@ public class KeyGen2Test
             writeString ("\n\n");
             int key_handle = EnumeratedKey.INIT;
             EnumeratedKey ek;
-            while ((key_handle = (ek = client.sks.enumerateKeys (key_handle, false)).getKeyHandle ()) != EnumeratedKey.EXIT)
+            while ((key_handle = (ek = sks.enumerateKeys (key_handle, false)).getKeyHandle ()) != EnumeratedKey.EXIT)
               {
                 if (ek.getProvisioningHandle () == client.provisioning_handle)
                   {
-                    KeyAttributes ka = client.sks.getKeyAttributes (key_handle);
+                    KeyAttributes ka = sks.getKeyAttributes (key_handle);
                     writeString ("Deployed key[" + key_handle + "] " + CertificateUtil.convertRFC2253ToLegacy (ka.getCertificatePath ()[0].getSubjectX500Principal ().getName ()) + "\n");
                   }
               }

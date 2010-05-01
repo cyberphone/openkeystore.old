@@ -1,3 +1,19 @@
+/*
+ *  Copyright 2006-2010 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package org.webpki.keygen2;
 
 import java.io.IOException;
@@ -114,13 +130,15 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 ////////////////////////////////////////////////////////////////////////
                 // Always: the X509 Certificate(s)
                 ////////////////////////////////////////////////////////////////////////
-                byte[] data =  ArrayUtil.add (key.public_key.getEncoded (), key.id.getBytes ("UTF-8"));
+                ServerCredentialStore.MacGenerator set_certificate = new ServerCredentialStore.MacGenerator ();
+                set_certificate.addArray (key.public_key.getEncoded ());
+                set_certificate.addString (key.id);
                 X509Certificate[] certificate_path = CertificateUtil.getSortedPath (key.certificate_path);
                 for (X509Certificate certificate : certificate_path)
                   {
-                    data = ArrayUtil.add (data, certificate.getEncoded ());
+                    set_certificate.addArray (certificate.getEncoded ());
                   }
-                mac (wr, data, APIDescriptors.SET_CERTIFICATE_PATH);
+                mac (wr, set_certificate.getResult (), APIDescriptors.SET_CERTIFICATE_PATH);
                 XMLSignatureWrapper.writeX509DataSubset (wr, certificate_path);
                 byte[] ee_cert = certificate_path[0].getEncoded ();
                 
@@ -130,14 +148,13 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 if (key.encrypted_symmetric_key != null)
                   {
                     wr.addBinary (SYMMETRIC_KEY_ELEM, key.encrypted_symmetric_key);
-                    byte[] endorsed_algorithms = new byte[0];
+                    ServerCredentialStore.MacGenerator set_symkey = new ServerCredentialStore.MacGenerator ();
+                    set_symkey.addArray (ee_cert);
                     for (String algorithm : getSortedAlgorithms (key.endorsed_algorithms))
                       {
-                        endorsed_algorithms = ArrayUtil.add (endorsed_algorithms, algorithm.getBytes ("UTF-8"));
+                        set_symkey.addString (algorithm);
                       }
-                    mac (wr,
-                         ArrayUtil.add (ee_cert, ArrayUtil.add (key.encrypted_symmetric_key, endorsed_algorithms)),
-                         APIDescriptors.SET_SYMMETRIC_KEY);
+                    mac (wr, set_symkey.getResult (), APIDescriptors.SET_SYMMETRIC_KEY);
                     wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, key.endorsed_algorithms);
                   }
  
@@ -146,13 +163,13 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 ////////////////////////////////////////////////////////////////////////
                 for (ServerCredentialStore.ExtensionInterface ei : key.extensions.values ())
                   {
-                    ei.writeExtension (wr,
-                                       mac (ArrayUtil.add (ee_cert, 
-                                                 ArrayUtil.add (
-                                                      ArrayUtil.add (new byte[]{ei.getBaseType ()}, ei.getQualifier ()),
-                                                           ArrayUtil.add (ei.type.getBytes ("UTF-8"), ei.getExtensionData ()))),
-                                            APIDescriptors.ADD_EXTENSION)
-                                       );
+                    ServerCredentialStore.MacGenerator add_ext = new ServerCredentialStore.MacGenerator ();
+                    add_ext.addArray (ee_cert);
+                    add_ext.addByte (ei.getBaseType ());
+                    add_ext.addArray (ei.getQualifier ());
+                    add_ext.addString (ei.type);
+                    add_ext.addBlob (ei.getExtensionData ());
+                    ei.writeExtension (wr, mac (add_ext.getResult (), APIDescriptors.ADD_EXTENSION));
                   }
                 wr.getParent ();
               }
@@ -160,12 +177,13 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
             ////////////////////////////////////////////////////////////////////////
             // Done with the crypto, now set the "closeProvisioningSession" MAC
             ////////////////////////////////////////////////////////////////////////
+            ServerCredentialStore.MacGenerator close = new ServerCredentialStore.MacGenerator ();
+            close.addString (server_credential_store.client_session_id);
+            close.addString (server_credential_store.server_session_id);
+            close.addString (server_credential_store.issuer_uri);
             top.setAttribute (CLOSE_SESSION_MAC_ATTR,
-                              new Base64 ().getBase64StringFromBinary (
-                                  mac (new StringBuffer ().append (server_credential_store.client_session_id)
-                                      .append (server_credential_store.server_session_id)
-                                      .append (server_credential_store.issuer_uri).toString ().getBytes ("UTF-8"),
-                                              APIDescriptors.CLOSE_SESSION)));
+                              new Base64 ().getBase64StringFromBinary (mac (close.getResult (),
+                                                                            APIDescriptors.CLOSE_SESSION)));
           }
         catch (GeneralSecurityException e)
           {
