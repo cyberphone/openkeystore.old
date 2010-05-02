@@ -22,7 +22,7 @@ import java.util.Vector;
 
 import java.security.cert.X509Certificate;
 
-import org.webpki.util.ImageData;
+import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
@@ -38,31 +38,97 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequest
   {
-
-    public class Extension
+    public abstract class Extension
       {
-        private Extension () {}
-
+  
         String type;
+        
+        public String getExtensionType ()
+          {
+            return type;
+          }
+        
+        byte[] mac;
+        
+        public byte[] getMAC ()
+          {
+            return mac;
+          }
+        
+        public abstract byte getBaseType ();
+        
+        public byte[] getQualifier () throws IOException
+          {
+            return new byte[0];
+          }
+        
+        public abstract byte[] getExtensionData () throws IOException;
+        
+        Extension (DOMReaderHelper rd, CertifiedPublicKey cpk) throws IOException
+          {
+            DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+            type = ah.getString (TYPE_ATTR);
+            mac = ah.getBinary (MAC_ATTR);
+            cpk.extensions.add (this);
+          }
+      }
 
+
+    class StandardExtension extends Extension
+      {
         byte[] data;
 
+        StandardExtension (byte[] data, DOMReaderHelper rd, CertifiedPublicKey cpk) throws IOException
+          {
+            super (rd, cpk);
+            this.data = data;
+          }
 
-        public byte[] getData ()
+
+        @Override
+        public byte getBaseType ()
+          {
+            return (byte)0x00;
+          }
+
+
+        @Override
+        public byte[] getExtensionData () throws IOException
           {
             return data;
           }
 
+      }
 
-        public String getType ()
+    
+    class EncryptedExtension extends Extension
+      {
+        byte[] data;
+         
+        EncryptedExtension (byte[] data, DOMReaderHelper rd, CertifiedPublicKey cpk) throws IOException
           {
-            return type;
+            super (rd, cpk);
+            this.data = data;
           }
-
+  
+  
+        @Override
+        public byte getBaseType ()
+          {
+            return (byte)0x01;
+          }
+  
+  
+        @Override
+        public byte[] getExtensionData () throws IOException
+          {
+            return data;
+          }
+  
       }
 
 
-    public class Property
+    class Property
       {
         private Property () {}
 
@@ -71,63 +137,70 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         String value;
 
         boolean writable;
-
-
-        public boolean isWritable ()
-          {
-            return writable;
-          }
-
-
-        public String getName ()
-          {
-            return name;
-          }
-
-
-        public String getValue ()
-          {
-            return value;
-          }
       }
+    
 
-
-    public class PropertyBag
+    class PropertyBag extends Extension
       {
-        private PropertyBag () {}
-
-        String type;
+        private PropertyBag (DOMReaderHelper rd, CertifiedPublicKey cpk) throws IOException
+          {
+            super (rd, cpk);
+          }
 
         Vector<Property> properties = new Vector<Property> ();
 
-
-        public Property[] getProperties ()
+        @Override
+        public byte getBaseType ()
           {
-            return properties.toArray (new Property[0]);
+            return (byte)0x02;
           }
 
 
-        public String getType ()
+        private byte[] getStringData (String string) throws IOException
           {
-            return type;
+            byte[] data = string.getBytes ("UTF-8");
+            return ArrayUtil.add (new byte[]{(byte)(data.length >>> 8), (byte)data.length}, data);
+          }
+
+        @Override
+        public byte[] getExtensionData () throws IOException
+          {
+            byte[] total = new byte[0];
+            for (Property prop : properties)
+              {
+                total = ArrayUtil.add (total,
+                                       ArrayUtil.add (getStringData (prop.name),
+                                                      ArrayUtil.add (new byte[]{prop.writable ? (byte)1 : (byte)0},
+                                                                     getStringData (prop.value))));
+              }
+            return total;
           }
       }
 
 
-    @SuppressWarnings("serial")
-    public class Logotype extends ImageData
+    class Logotype extends Extension
       {
-        String type_uri;
-
-        Logotype (byte[] data, String mime_type, String type_uri)
+        byte[] data;
+        
+        String mime_type;
+  
+        Logotype (byte[] data, String mime_type, DOMReaderHelper rd, CertifiedPublicKey cpk) throws IOException
           {
-            super (data, mime_type);
-            this.type_uri = type_uri;
+            super (rd, cpk);
+            this.mime_type = mime_type;
+            this.data = data;
           }
-
-        public String getType ()
+  
+        @Override
+        public byte getBaseType ()
           {
-            return type_uri;
+            return (byte)0x03;
+          }
+  
+        @Override
+        public byte[] getExtensionData () throws IOException
+          {
+            return data;
           }
       }
 
@@ -138,8 +211,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
         String id;
 
-        Vector<PropertyBag> property_bags = new Vector<PropertyBag> ();
-
         byte[] encrypted_symmetric_key;
 
         byte[] symmetric_key_mac;
@@ -148,9 +219,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
         String[] endorsed_algorithms;
 
-        Vector<Logotype> logotypes = new Vector<Logotype> ();
-
-        Vector<Extension> extension_objects = new Vector<Extension> ();
+        Vector<Extension> extensions = new Vector<Extension> ();
 
         CertifiedPublicKey () { }
 
@@ -167,9 +236,9 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
             if (rd.hasNext (SYMMETRIC_KEY_ELEM))
               {
-                rd.getNext (SYMMETRIC_KEY_ELEM);
-                symmetric_key_mac = ah.getBinary (MAC_ATTR);
+                encrypted_symmetric_key = rd.getBinary (SYMMETRIC_KEY_ELEM);
                 endorsed_algorithms = getSortedAlgorithms (ah.getList (ENDORSED_ALGORITHMS_ATTR));
+                symmetric_key_mac = ah.getBinary (MAC_ATTR);
               }
 
             while (rd.hasNext ())
@@ -177,8 +246,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
                 if (rd.hasNext (PROPERTY_BAG_ELEM))
                   {
                     rd.getNext (PROPERTY_BAG_ELEM);
-                    PropertyBag property_bag = new PropertyBag ();
-                    property_bag.type = ah.getString (TYPE_ATTR);
+                    PropertyBag property_bag = new PropertyBag (rd, this);
                     rd.getChild ();
                     while (rd.hasNext (PROPERTY_ELEM))
                       {
@@ -189,21 +257,19 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
                         property.writable = ah.getBooleanConditional (WRITABLE_ATTR);
                         property_bag.properties.add (property);
                       }
-                    property_bags.add (property_bag);
                     rd.getParent ();
                   }
                 else if (rd.hasNext (LOGOTYPE_ELEM))
                   {
-                    logotypes.add (new Logotype (rd.getBinary (LOGOTYPE_ELEM),
-                                                 ah.getString (MIME_TYPE_ATTR),
-                                                 ah.getString (TYPE_ATTR)));
+                    new Logotype (rd.getBinary (LOGOTYPE_ELEM), ah.getString (MIME_TYPE_ATTR), rd, this);
+                  }
+                else if (rd.hasNext (EXTENSION_ELEM))
+                  {
+                    new StandardExtension (rd.getBinary (EXTENSION_ELEM), rd, this);
                   }
                 else
                   {
-                    Extension ext = new Extension ();
-                    ext.data = rd.getBinary (EXTENSION_ELEM);
-                    ext.type = ah.getString (TYPE_ATTR);
-                    extension_objects.add (ext);
+                    new EncryptedExtension (rd.getBinary (ENCRYPTED_EXTENSION_ELEM), rd, this);
                   }
               }
             rd.getParent ();
@@ -245,21 +311,9 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
           }
 
 
-        public PropertyBag[] getPropertyBags ()
-          {
-            return property_bags.toArray (new PropertyBag[0]);
-          }
-
-
-        public Logotype[] getLogotypes ()
-          {
-            return logotypes.toArray (new Logotype[0]);
-          }
-
-
         public Extension[] getExtensions ()
           {
-            return extension_objects.toArray (new Extension[0]);
+            return extensions.toArray (new Extension[0]);
           }
 
       }
@@ -295,12 +349,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
       }
 
 
-    private void bad (String error_msg) throws IOException
-      {
-        throw new IOException (error_msg);
-      }
-
-
     private Vector<CertifiedPublicKey> certified_keys = new Vector<CertifiedPublicKey> ();
       
     private String client_session_id;
@@ -316,8 +364,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
     private XMLSignatureWrapper signature;                  // Optional
 
     private byte[] close_session_mac;
-
-    private KeyInitializationRequestDecoder key_operation_request_decoder;
 
 
     public String getServerSessionID ()
@@ -365,12 +411,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
         new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);
-      }
-
-
-    public void setKeyOperationRequestDecoder (KeyInitializationRequestDecoder key_operation_request_decoder)
-      {
-        this.key_operation_request_decoder = key_operation_request_decoder;
       }
 
 

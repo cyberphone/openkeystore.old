@@ -112,6 +112,10 @@ public class KeyGen2Test
     
     boolean server_seed;
     
+    boolean property_bag;
+    
+    boolean symmetric_key;
+    
     static FileOutputStream fos;
     
     static SecureKeyStore sks;
@@ -148,7 +152,7 @@ public class KeyGen2Test
         
         ProvisioningSessionRequestDecoder prov_sess_req;
         
-        Client () throws Exception
+        Client () throws IOException
           {
             client_xml_cache = new XMLSchemaCache ();
             client_xml_cache.addWrapper (ProvisioningSessionRequestDecoder.class);
@@ -165,7 +169,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Get prov sess request and respond with epheral keys and and attest
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] provSessResponse (byte[] xmldata) throws Exception
+        byte[] provSessResponse (byte[] xmldata) throws IOException
           {
             prov_sess_req = (ProvisioningSessionRequestDecoder) client_xml_cache.parse (xmldata);
             Date client_time = new Date ();
@@ -207,7 +211,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key init request and respond with freshly generated public keys
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] KeyInitResponse (byte[] xmldata) throws Exception
+        byte[] KeyInitResponse (byte[] xmldata) throws IOException
           {
             key_init_request = (KeyInitializationRequestDecoder) client_xml_cache.parse (xmldata);
             KeyInitializationResponseEncoder key_init_response = 
@@ -215,22 +219,22 @@ public class KeyGen2Test
             for (KeyInitializationRequestDecoder.KeyObject key : key_init_request.getKeyObjects ())
               {
                 KeyPair kpr = sks.createKeyPair (provisioning_handle,
-                                                       key_init_request.getKeyAttestationAlgorithm (),
-                                                       key.getServerSeed (),
-                                                       key.getID (),
-                                                       0, /* pin_policy_handle */
-                                                       "2457".getBytes ("UTF-8"), /* pin_value */
-                                                       key.getBiometricProtection (),
-                                                       key.getPrivateKeyBackupFlag (),
-                                                       key.getExportPolicy (),
-                                                       key.getUpdatableFlag (),
-                                                       key.getDeletePolicy (),
-                                                       key.getEnablePINCachingFlag (),
-                                                       key.getImportPrivateKeyFlag (),
-                                                       key.getKeyUsage (),
-                                                       key.getFriendlyName (),
-                                                       key.getKeyAlgorithmData (),
-                                                       key.getMAC ());
+                                                 key_init_request.getKeyAttestationAlgorithm (),
+                                                 key.getServerSeed (),
+                                                 key.getID (),
+                                                 0, /* pin_policy_handle */
+                                                 "2457".getBytes ("UTF-8"), /* pin_value */
+                                                 key.getBiometricProtection (),
+                                                 key.getPrivateKeyBackupFlag (),
+                                                 key.getExportPolicy (),
+                                                 key.getUpdatableFlag (),
+                                                 key.getDeletePolicy (),
+                                                 key.getEnablePINCachingFlag (),
+                                                 key.getImportPrivateKeyFlag (),
+                                                 key.getKeyUsage (),
+                                                 key.getFriendlyName (),
+                                                 key.getKeyAlgorithmData (),
+                                                 key.getMAC ());
                 key_init_response.addPublicKey (kpr.getPublicKey (),
                                                 kpr.getKeyAttestation (),
                                                 key.getID (),
@@ -242,55 +246,75 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Get the certificates and attributes and return a success message
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] creDepResponse (byte[] xmldata) throws Exception
+        byte[] creDepResponse (byte[] xmldata) throws IOException
           {
             CredentialDeploymentRequestDecoder cred_dep_request =
                            (CredentialDeploymentRequestDecoder) client_xml_cache.parse (xmldata);
             /* 
-               Note: we could have saved provisioning_handle but that would not work
-               for certifications that are delayed.  The following code is working
+               Note: we could have used the saved provisioning_handle but that would not
+               work for certifications that are delayed.  The following code is working
                for fully interactive and delayed scenarios by using SKS as state-holder
             */
-            provisioning_handle = EnumeratedProvisioningSession.INIT;
-            EnumeratedProvisioningSession eps;
-            while ((provisioning_handle = (eps = sks.enumerateProvisioningSessions (provisioning_handle, true)).getProvisioningHandle ()) != 0xFFFFFFFF)
+            EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
+            while (true)
               {
+                eps = sks.enumerateProvisioningSessions (eps, true);
+                if (!eps.isValid ())
+                  {
+                    abort ("Provisioning session not found:" + 
+                        cred_dep_request.getClientSessionID () + "/" +
+                        cred_dep_request.getServerSessionID ());
+                  }
                 if (eps.getClientSessionID ().equals(cred_dep_request.getClientSessionID ()) &&
                     eps.getServerSessionID ().equals (cred_dep_request.getServerSessionID ()))
                   {
                     break;
                   }
               }
-            if (provisioning_handle == EnumeratedProvisioningSession.EXIT)
-              {
-                abort ("Provisioning session not found:" + 
-                        cred_dep_request.getClientSessionID () + "/" +
-                        cred_dep_request.getServerSessionID ());
-              }
             HashMap<String,Integer> keys = new HashMap<String,Integer> ();
+            
+            //////////////////////////////////////////////////////////////////////////
             // Find keys belonging to this provisioning session
-            int key_handle = EnumeratedKey.INIT;
-            EnumeratedKey ek;
-            while ((key_handle = (ek = sks.enumerateKeys (key_handle, true)).getKeyHandle ()) != EnumeratedKey.EXIT)
+            //////////////////////////////////////////////////////////////////////////
+            EnumeratedKey ek = new EnumeratedKey ();
+            while ((ek = sks.enumerateKeys (ek, true)).isValid ())
               {
-                if (ek.getProvisioningHandle () == provisioning_handle)
+                if (ek.getProvisioningHandle () == eps.getProvisioningHandle ())
                   {
-                    keys.put (ek.getID (), key_handle);
+                    keys.put (ek.getID (), ek.getKeyHandle ());
                   }
               }
+            //////////////////////////////////////////////////////////////////////////
             // Final check, do these keys match the request?
+            //////////////////////////////////////////////////////////////////////////
             for (CredentialDeploymentRequestDecoder.CertifiedPublicKey key : cred_dep_request.getCertifiedPublicKeys ())
               {
-                Integer kh = keys.get (key.getID ());
-                if (kh == null)
+                Integer key_handle = keys.get (key.getID ());
+                if (key_handle == null)
                   {
                     abort ("Did not find key:" + key.getID () + " in deployment request");
                   }
-                sks.setCertificatePath (kh, key.getCertificatePath (), key.getMAC ());
+                sks.setCertificatePath (key_handle, key.getCertificatePath (), key.getMAC ());
+                if (key.getEncryptedSymmetricKey () != null)
+                  {
+                    sks.setSymmetricKey (key_handle, 
+                                         key.getEncryptedSymmetricKey (),
+                                         key.getSymmetricKeyEndorsedAlgorithms (),
+                                         key.getSymmetricKeyMac ());
+                  }
+                for (CredentialDeploymentRequestDecoder.Extension extension : key.getExtensions ())
+                  {
+                    sks.addExtension (key_handle,
+                                      extension.getBaseType (), 
+                                      extension.getQualifier (),
+                                      extension.getExtensionType (),
+                                      extension.getExtensionData (),
+                                      extension.getMAC ());
+                  }
               }
             CredentialDeploymentResponseEncoder cre_dep_response = 
                       new CredentialDeploymentResponseEncoder (cred_dep_request,
-                                                               sks.closeProvisioningSession (provisioning_handle,
+                                                               sks.closeProvisioningSession (eps.getProvisioningHandle (),
                                                                                              cred_dep_request.getCloseSessionMAC ()));
             return cre_dep_response.writeXML ();
           }
@@ -435,10 +459,11 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Create a prov session req for the client
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] provSessRequest () throws Exception
+        byte[] provSessRequest () throws IOException, GeneralSecurityException
           {
+            String server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()); 
             prov_sess_request =  new ProvisioningSessionRequestEncoder (server_sess_key.generateEphemeralKey (),
-                                                                        "S.7767676dfrgfd",
+                                                                        server_session_id,
                                                                         ISSUER_URI,
                                                                         10000,
                                                                         50);
@@ -448,7 +473,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Create a key init request for the client
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] keyInitRequest (byte[] xmldata) throws Exception
+        byte[] keyInitRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             ////////////////////////////////////////////////////////////////////////////////////
             // Begin with creating the "SessionKey" that holds just about everything
@@ -477,10 +502,23 @@ public class KeyGen2Test
               {
                 pin_policy = server_credential_store.createPINPolicy (PassphraseFormats.NUMERIC, 4, 8, 3, puk_policy);
               }
-            server_credential_store.createKey (KeyUsage.AUTHENTICATION, key_alg1, pin_policy);
+            ServerCredentialStore.KeyProperties kp = server_credential_store.createKey (
+                symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION, key_alg1, pin_policy);
+            if (symmetric_key)
+              {
+                kp.setSymmetricKey (server_sess_key.encrypt (new byte[]{0,2,3,4,5,6,7,8,9,11,12,13,14,15}),
+                                                             new String[]{MacAlgorithms.HMAC_SHA1.getURI ()});
+              }
+            if (property_bag)
+              {
+                kp.addPropertyBag ("http://host/prop")
+                  .addProperty ("main", "234", false)
+                  .addProperty ("a", "fun", true);
+                kp.addEncryptedExtension ("http://host/ee", server_sess_key.encrypt (new byte[]{0,5}));
+              }
             if (ecc_key)
               {
-                ServerCredentialStore.KeyProperties kp = server_credential_store.createKey (KeyUsage.ENCRYPTION, key_alg2, pin_policy);
+                kp = server_credential_store.createKey (KeyUsage.ENCRYPTION, key_alg2, pin_policy);
                 if (private_key_backup)
                   {
                     kp.setPrivateKeyBackup (true);
@@ -500,7 +538,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Get the key init response and respond with certified public keys and attributes
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] creDepRequest (byte[] xmldata) throws Exception
+        byte[] creDepRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             KeyInitializationResponseDecoder key_init_response = (KeyInitializationResponseDecoder) server_xml_cache.parse (xmldata);
             key_init_response.validateAndPopulate (key_init_request, server_sess_key);
@@ -575,7 +613,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally we get the attestested response
         ///////////////////////////////////////////////////////////////////////////////////
-        void creDepResponse (byte[] xmldata) throws Exception
+        void creDepResponse (byte[] xmldata) throws IOException
           {
             CredentialDeploymentResponseDecoder cre_dep_response = (CredentialDeploymentResponseDecoder) server_xml_cache.parse (xmldata);
             cre_dep_response.verifyProvisioningResult (server_credential_store, server_sess_key);
@@ -639,6 +677,10 @@ public class KeyGen2Test
           {
             writeString ("Begin Test\nPINs = ");
             writeString (pin_protection ? "Yes\n" : "No\n");
+            writeString ("ECC Key = ");
+            writeString (ecc_key ? "Yes\n" : "No\n");
+            writeString ("Private Key Backup = ");
+            writeString (private_key_backup ? "Yes\n" : "No\n");
             server = new Server ();
             client = new Client ();
             byte[] xml;
@@ -650,14 +692,13 @@ public class KeyGen2Test
             xml = fileLogger (client.creDepResponse (xml));
             server.creDepResponse (xml);
             writeString ("\n\n");
-            int key_handle = EnumeratedKey.INIT;
-            EnumeratedKey ek;
-            while ((key_handle = (ek = sks.enumerateKeys (key_handle, false)).getKeyHandle ()) != EnumeratedKey.EXIT)
+            EnumeratedKey ek = new EnumeratedKey ();
+            while ((ek = sks.enumerateKeys (ek, false)).isValid ())
               {
                 if (ek.getProvisioningHandle () == client.provisioning_handle)
                   {
-                    KeyAttributes ka = sks.getKeyAttributes (key_handle);
-                    writeString ("Deployed key[" + key_handle + "] " + CertificateUtil.convertRFC2253ToLegacy (ka.getCertificatePath ()[0].getSubjectX500Principal ().getName ()) + "\n");
+                    KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
+                    writeString ("Deployed key[" + ek.getKeyHandle () + "] " + CertificateUtil.convertRFC2253ToLegacy (ka.getCertificatePath ()[0].getSubjectX500Principal ().getName ()) + "\n");
                   }
               }
             writeString ("\n\n");
@@ -694,6 +735,25 @@ public class KeyGen2Test
         private_key_backup = true;
         ecc_key = true;
         server_seed = true;
+        doer.perform ();
+      }
+    @Test
+    public void test5 () throws Exception
+      {
+        Doer doer = new Doer ();
+        pin_protection = true;
+        ecc_key = true;
+        property_bag = true;
+        server_seed = true;
+        doer.perform ();
+      }
+    @Test
+    public void test6 () throws Exception
+      {
+        Doer doer = new Doer ();
+        pin_protection = true;
+        symmetric_key = true;
+        property_bag = true;
         doer.perform ();
       }
 

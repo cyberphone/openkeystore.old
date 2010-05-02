@@ -76,13 +76,23 @@ public class SKSTestImplementation implements SecureKeyStore
 
     private class KeyEntry
       {
+        int key_handle;
+
         PublicKey public_key;
         PrivateKey private_key;
+
+        byte[] symmetric_key;
+        String[] endorsed_algorithms;
+
         X509Certificate[] certificate_path;
+
         String id;
         String friendly_name;
-        int key_handle;
+        KeyUsage key_usage;
+
         Provisioning owner;
+
+        LinkedHashMap<String,Extension> extensions = new LinkedHashMap<String,Extension> ();
 
         KeyEntry (Provisioning owner)
           {
@@ -90,8 +100,32 @@ public class SKSTestImplementation implements SecureKeyStore
             key_handle = next_key_handle++;
             keys.put (key_handle, this);
           }
+        
+        MacBuilder getEECertMacBuilder (APIDescriptors method) throws SKSException
+          {
+            if (certificate_path == null)
+              {
+                owner.abort ("EE certificate missing", SKSException.ERROR_OPTION);
+              }
+            MacBuilder mac_builder = owner.getMacBuilder (method);
+            try
+              {
+                mac_builder.addArray (certificate_path[0].getEncoded ());
+              }
+            catch (GeneralSecurityException e)
+              {
+              }
+            return mac_builder;
+          }
       }
 
+    private class Extension
+      {
+        byte[] qualifier;
+        byte[] extension_data;
+        byte basic_type;
+      }
+    
     private class Provisioning
       {
         String client_session_id;
@@ -138,12 +172,19 @@ public class SKSTestImplementation implements SecureKeyStore
             return ArrayUtil.add (iv, crypt.doFinal (data));
           }
 
-        byte[] decrypt (byte[] data) throws SKSException, GeneralSecurityException
+        byte[] decrypt (byte[] data) throws SKSException
           {
             byte[] key = getMacBuilder (new byte[0]).addVerbatim (CryptoConstants.CRYPTO_STRING_ENCRYPTION).getResult ();
-            Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
-            crypt.init (Cipher.DECRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (data, 0, 16));
-            return crypt.doFinal (data, 16, data.length - 16);
+            try
+              {
+                Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+                crypt.init (Cipher.DECRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (data, 0, 16));
+                return crypt.doFinal (data, 16, data.length - 16);
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new SKSException (e, SKSException.ERROR_INTERNAL);
+              }
           }
 
         private MacBuilder getMacBuilder (byte[] key_modifier) throws SKSException
@@ -188,9 +229,22 @@ public class SKSTestImplementation implements SecureKeyStore
             mac.update (data);
           }
         
-        void addString (String string) throws UnsupportedEncodingException
+        void addBlob (byte[] data)
           {
-            addArray (string.getBytes ("UTF-8"));
+            addInt (data.length);
+            mac.update (data);
+          }
+        
+        void addString (String string) throws SKSException
+          {
+            try
+              {
+                addArray (string.getBytes ("UTF-8"));
+              }
+            catch (UnsupportedEncodingException e)
+              {
+                throw new SKSException ("Interal UTF-8");
+              }
           }
         
         void addInt (int i)
@@ -415,18 +469,15 @@ public class SKSTestImplementation implements SecureKeyStore
             ///////////////////////////////////////////////////////////////////////////////////
             // Finally, create a key entry
             ///////////////////////////////////////////////////////////////////////////////////
-            KeyEntry ke = new KeyEntry (prov);
-            ke.id = id;
-            ke.friendly_name = friendly_name;
-            ke.public_key = public_key;   
-            ke.private_key = private_key;
+            KeyEntry key_entry = new KeyEntry (prov);
+            key_entry.id = id;
+            key_entry.friendly_name = friendly_name;
+            key_entry.public_key = public_key;   
+            key_entry.private_key = private_key;
+            key_entry.key_usage = key_usage;
             return new KeyPair (public_key, key_attestation.getResult (), encrypted_private_key);
           }
         catch (GeneralSecurityException e)
-          {
-            prov.abort (e.getMessage ());
-          }
-        catch (UnsupportedEncodingException e)
           {
             prov.abort (e.getMessage ());
           }
@@ -441,8 +492,8 @@ public class SKSTestImplementation implements SecureKeyStore
         Iterator<KeyEntry> list = keys.values ().iterator ();
         while (list.hasNext ())
           {
-            KeyEntry ke = list.next ();
-            if (ke.owner == prov)
+            KeyEntry key_entry = list.next ();
+            if (key_entry.owner == prov)
               {
                 list.remove ();
               }
@@ -450,16 +501,16 @@ public class SKSTestImplementation implements SecureKeyStore
       }
 
     @Override
-    public EnumeratedKey enumerateKeys (int key_handle, boolean provisioning_state) throws SKSException
+    public EnumeratedKey enumerateKeys (EnumeratedKey ek, boolean provisioning_state) throws SKSException
       {
-        if (key_handle == EnumeratedKey.INIT)
+        if (!ek.isValid ())
           {
             return getKey (keys.values ().iterator (), provisioning_state);
           }
         Iterator<KeyEntry> list = keys.values ().iterator ();
         while (list.hasNext ())
           {
-            if (list.next ().key_handle == key_handle)
+            if (list.next ().key_handle == ek.getKeyHandle ())
               {
                 return getKey (list, provisioning_state);
               }
@@ -470,19 +521,19 @@ public class SKSTestImplementation implements SecureKeyStore
     @Override
     public void setCertificatePath (int key_handle, X509Certificate[] certificate_path, byte[] mac) throws SKSException
       {
-        KeyEntry ke = getOpenKey (key_handle);
-        if (ke.certificate_path != null)
+        KeyEntry key_entry = getOpenKey (key_handle);
+        if (key_entry.certificate_path != null)
           {
-            ke.owner.abort ("Multiple cert insert:" + key_handle, SKSException.ERROR_OPTION);
+            key_entry.owner.abort ("Multiple cert insert:" + key_handle, SKSException.ERROR_OPTION);
           }
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder set_certificate_mac = ke.owner.getMacBuilder (APIDescriptors.SET_CERTIFICATE_PATH);
+        MacBuilder set_certificate_mac = key_entry.owner.getMacBuilder (APIDescriptors.SET_CERTIFICATE_PATH);
         try
           {
-            set_certificate_mac.addArray (ke.public_key.getEncoded ());
-            set_certificate_mac.addString (ke.id);
+            set_certificate_mac.addArray (key_entry.public_key.getEncoded ());
+            set_certificate_mac.addString (key_entry.id);
             for (X509Certificate certificate : certificate_path)
               {
                 set_certificate_mac.addArray (certificate.getEncoded ());
@@ -490,49 +541,43 @@ public class SKSTestImplementation implements SecureKeyStore
           }
         catch (Exception e)
           {
-            ke.owner.abort ("Internal error:" + e.getMessage ());
+            key_entry.owner.abort ("Internal error:" + e.getMessage ());
           }
-        ke.owner.testMac (set_certificate_mac, mac);
+        key_entry.owner.testMac (set_certificate_mac, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Done.  Perform the actual task we were meant to do
         ///////////////////////////////////////////////////////////////////////////////////
-        ke.certificate_path = certificate_path;
+        key_entry.certificate_path = certificate_path;
       }
 
     @Override
     public byte[] closeProvisioningSession (int provisioning_handle, byte[] mac) throws SKSException
       {
         Provisioning prov = getOpenProvisioningSession (provisioning_handle);
-        try
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Verify incoming MAC
-            ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder close_mac = prov.getMacBuilder (APIDescriptors.CLOSE_SESSION);
-            close_mac.addString (prov.client_session_id);
-            close_mac.addString (prov.server_session_id);
-            close_mac.addString (prov.issuer_uri);
-            prov.testMac (close_mac, mac);
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder close_mac = prov.getMacBuilder (APIDescriptors.CLOSE_PROVISIONING_SESSION);
+        close_mac.addString (prov.client_session_id);
+        close_mac.addString (prov.server_session_id);
+        close_mac.addString (prov.issuer_uri);
+        prov.testMac (close_mac, mac);
+// TODO - check status of a lot of stuff and perform atomic updates
 
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Generate a final attestation
-            ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder close_attestation = prov.getMacBuilder (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST);
-            close_attestation.addVerbatim (CryptoConstants.CRYPTO_STRING_SUCCESS);
-            close_attestation.addShort (prov.mac_sequence_counter);
-            byte[] attest = close_attestation.getResult ();
-            
-            ///////////////////////////////////////////////////////////////////////////////////
-            // We are done, close the show for this time
-            ///////////////////////////////////////////////////////////////////////////////////
-            prov.open = false;
-            return attest;
-          }
-        catch (UnsupportedEncodingException e)
-          {
-            throw new SKSException (e, SKSException.ERROR_INTERNAL);
-          }
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Generate a final attestation
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder close_attestation = prov.getMacBuilder (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST);
+        close_attestation.addVerbatim (CryptoConstants.CRYPTO_STRING_SUCCESS);
+        close_attestation.addShort (prov.mac_sequence_counter);
+        byte[] attest = close_attestation.getResult ();
+        
+        ///////////////////////////////////////////////////////////////////////////////////
+        // We are done, close the show for this time
+        ///////////////////////////////////////////////////////////////////////////////////
+        prov.open = false;
+        return attest;
       }
 
     @Override
@@ -628,17 +673,17 @@ public class SKSTestImplementation implements SecureKeyStore
       }
 
     @Override
-    public EnumeratedProvisioningSession enumerateProvisioningSessions (int provisioning_handle,
+    public EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
                                                                         boolean provisioning_state) throws SKSException
       {
-        if (provisioning_handle == EnumeratedProvisioningSession.INIT)
+        if (!eps.isValid ())
           {
             return getProvisioning (provisionings.values ().iterator (), provisioning_state);
           }
         Iterator<Provisioning> list = provisionings.values ().iterator ();
         while (list.hasNext ())
           {
-            if (list.next ().provisioning_handle == provisioning_handle)
+            if (list.next ().provisioning_handle == eps.getProvisioningHandle ())
               {
                 return getProvisioning (list, provisioning_state);
               }
@@ -656,6 +701,56 @@ public class SKSTestImplementation implements SecureKeyStore
     public byte[] signProvisioningSessionData (int provisioning_handle, byte[] data) throws SKSException
       {
         return getOpenProvisioningSession (provisioning_handle).getMacBuilder (CryptoConstants.CRYPTO_STRING_SIGNATURE).addVerbatim (data).getResult ();
+      }
+
+    @Override
+    public void addExtension (int key_handle, 
+                              byte basic_type,
+                              byte[] qualifier,
+                              String extension_type,
+                              byte[] extension_data,
+                              byte[] mac) throws SKSException
+      {
+        KeyEntry key_entry = getOpenKey (key_handle);
+        if (key_entry.extensions.get (extension_type) != null)
+          {
+            key_entry.owner.abort ("Duplicate extension:" + extension_type, SKSException.ERROR_OPTION);
+          }
+        MacBuilder ext_mac = key_entry.getEECertMacBuilder (APIDescriptors.ADD_EXTENSION);
+        ext_mac.addByte (basic_type);
+        ext_mac.addArray (qualifier);
+        ext_mac.addString (extension_type);
+        ext_mac.addBlob (extension_data);
+        key_entry.owner.testMac (ext_mac, mac);
+        Extension extension = new Extension ();
+        extension.basic_type = basic_type;
+        extension.qualifier = qualifier;
+        extension.extension_data = basic_type == 0x01 ? key_entry.owner.decrypt (extension_data) : extension_data;
+        key_entry.extensions.put (extension_type, extension);
+      }
+
+    @Override
+    public void setSymmetricKey (int key_handle, byte[] encrypted_symmetric_key, String[] endorsed_algorithms, byte[] mac) throws SKSException
+      {
+        KeyEntry key_entry = getOpenKey (key_handle);
+        if (key_entry.symmetric_key != null)
+          {
+            key_entry.owner.abort ("Duplicate symmetric key:" + key_handle, SKSException.ERROR_OPTION);
+          }
+        if (key_entry.key_usage != KeyUsage.SYMMETRIC_KEY)
+          {
+            key_entry.owner.abort ("Wrong key usage for symmetric key:" + key_handle, SKSException.ERROR_OPTION);
+          }
+        MacBuilder sym_mac = key_entry.getEECertMacBuilder (APIDescriptors.SET_SYMMETRIC_KEY);
+        sym_mac.addArray (encrypted_symmetric_key);
+// TODO verify against supported sym alg...
+        for (String algorithm : endorsed_algorithms)
+          {
+            sym_mac.addString (algorithm);
+          }
+        key_entry.owner.testMac (sym_mac, mac);
+        key_entry.symmetric_key = key_entry.owner.decrypt (encrypted_symmetric_key);
+        key_entry.endorsed_algorithms = endorsed_algorithms;
       }
 
   }

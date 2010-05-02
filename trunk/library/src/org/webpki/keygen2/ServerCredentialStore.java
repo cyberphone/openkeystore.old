@@ -64,7 +64,7 @@ public class ServerCredentialStore implements Serializable
   
         void addBlob (byte[] data) throws IOException
           {
-             baos.write (int2bytes (data.length));
+            baos.write (int2bytes (data.length));
             baos.write (data);
           }
 
@@ -174,12 +174,12 @@ public class ServerCredentialStore implements Serializable
       {
         private static final long serialVersionUID = 1L;
 
-        byte[] data;
+        byte[] encrypted_data;
 
-        EncryptedExtension (String type, byte[] data)
+        EncryptedExtension (String type, byte[] encrypted_data)
           {
             super (type);
-            this.data = data;
+            this.encrypted_data = encrypted_data;
           }
 
         public byte getBaseType ()
@@ -189,12 +189,12 @@ public class ServerCredentialStore implements Serializable
 
         public byte[] getExtensionData () throws IOException
           {
-            return data;
+            return encrypted_data;
           }
 
         void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
           {
-            wr.addBinary (ENCRYPTED_EXTENSION_ELEM, data);
+            wr.addBinary (ENCRYPTED_EXTENSION_ELEM, encrypted_data);
             writeCore (wr, mac_data);
           }
       }
@@ -276,22 +276,16 @@ public class ServerCredentialStore implements Serializable
             return (byte)0x02;
           }
         
-        private byte[] stringToByteArray (String string) throws IOException
-          {
-            byte[] raw = string.getBytes ("UTF-8");
-            return ArrayUtil.add (new byte[]{(byte)(raw.length >>> 8), (byte)(raw.length & 0xFF)}, raw);
-          }
-        
         public byte[] getExtensionData () throws IOException
           {
-            byte[] data = new byte[0];
+            MacGenerator convert = new MacGenerator ();
             for (Property prop : properties.values ())
               {
-                data = ArrayUtil.add (data, 
-                                      ArrayUtil.add (stringToByteArray (prop.name),
-                                                     ArrayUtil.add (new byte[]{(byte)(prop.writable ? 0x01 : 0x00)} , stringToByteArray (prop.value))));
-              }
-            return data;
+                convert.addString (prop.name);
+                convert.addBool (prop.writable);
+                convert.addString (prop.value);
+               }
+            return convert.getResult ();
           }
 
         void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
@@ -313,6 +307,7 @@ public class ServerCredentialStore implements Serializable
                   }
                 wr.getParent ();
               }
+            wr.getParent ();
           }
 
       }
@@ -601,9 +596,9 @@ public class ServerCredentialStore implements Serializable
             return this;
           }
 
-        public KeyProperties addEncryptedExtension (String type, byte[] data) throws IOException
+        public KeyProperties addEncryptedExtension (String type, byte[] encrypted_data) throws IOException
           {
-            addExtension (new EncryptedExtension (type, data));
+            addExtension (new EncryptedExtension (type, encrypted_data));
             return this;
           }
 

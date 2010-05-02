@@ -18,8 +18,7 @@ package org.webpki.sks;
 
 public class EnumeratedKey
   {
-    public static final int INIT = 0xFFFFFFFF;
-    public static final int EXIT = 0xFFFFFFFF;
+    public static final int INIT_EXIT = 0xFFFFFFFF;
     
     int key_handle;
     
@@ -44,7 +43,13 @@ public class EnumeratedKey
 
     public EnumeratedKey ()
       {
-        key_handle = EXIT;
+        key_handle = INIT_EXIT;
+      }
+    
+    
+    public boolean isValid ()
+      {
+        return key_handle != INIT_EXIT;
       }
     
     // TODO - a LOT!!!!

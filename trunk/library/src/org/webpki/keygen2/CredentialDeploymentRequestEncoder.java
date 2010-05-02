@@ -25,7 +25,6 @@ import org.w3c.dom.Element;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 
-import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 
 import org.webpki.xml.DOMWriterHelper;
@@ -150,6 +149,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                     wr.addBinary (SYMMETRIC_KEY_ELEM, key.encrypted_symmetric_key);
                     ServerCredentialStore.MacGenerator set_symkey = new ServerCredentialStore.MacGenerator ();
                     set_symkey.addArray (ee_cert);
+                    set_symkey.addArray (key.getEncryptedSymmetricKey ());
                     for (String algorithm : getSortedAlgorithms (key.endorsed_algorithms))
                       {
                         set_symkey.addString (algorithm);
@@ -183,7 +183,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
             close.addString (server_credential_store.issuer_uri);
             top.setAttribute (CLOSE_SESSION_MAC_ATTR,
                               new Base64 ().getBase64StringFromBinary (mac (close.getResult (),
-                                                                            APIDescriptors.CLOSE_SESSION)));
+                                                                            APIDescriptors.CLOSE_PROVISIONING_SESSION)));
           }
         catch (GeneralSecurityException e)
           {

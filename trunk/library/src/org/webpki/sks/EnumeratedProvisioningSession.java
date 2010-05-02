@@ -18,8 +18,7 @@ package org.webpki.sks;
 
 public class EnumeratedProvisioningSession
   {
-    public static final int INIT = 0xFFFFFFFF;
-    public static final int EXIT = 0xFFFFFFFF;
+    private static final int INIT_EXIT = 0xFFFFFFFF;
 
     int provisioning_handle;
     
@@ -45,7 +44,13 @@ public class EnumeratedProvisioningSession
 
     public EnumeratedProvisioningSession ()
       {
-        provisioning_handle = EXIT;
+        provisioning_handle = INIT_EXIT;
+      }
+    
+    
+    public boolean isValid ()
+      {
+        return provisioning_handle != INIT_EXIT;
       }
 
 

@@ -20,11 +20,11 @@ import java.io.IOException;
 
 public enum APIDescriptors
   {
-    SET_CERTIFICATE_PATH  ("setCertificatePath"),
-    SET_SYMMETRIC_KEY     ("setSymmetricKey"),
-    CLOSE_SESSION         ("closeProvisioningSession"),
-    CREATE_KEY_PAIR       ("createKeyPair"),
-    ADD_EXTENSION         ("addExtension");
+    SET_CERTIFICATE_PATH            ("setCertificatePath"),
+    SET_SYMMETRIC_KEY               ("setSymmetricKey"),
+    CLOSE_PROVISIONING_SESSION      ("closeProvisioningSession"),
+    CREATE_KEY_PAIR                 ("createKeyPair"),
+    ADD_EXTENSION                   ("addExtension");
 
     private byte[] binary;       // As expressed in MACs
 

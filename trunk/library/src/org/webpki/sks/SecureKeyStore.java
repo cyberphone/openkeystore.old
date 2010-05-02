@@ -42,7 +42,7 @@ public interface SecureKeyStore
                                   KeyInitializationRequestDecoder.KeyAlgorithmData key_algorithm,
                                   byte[] mac) throws SKSException;
     
-    public EnumeratedKey enumerateKeys (int key_handle,
+    public EnumeratedKey enumerateKeys (EnumeratedKey ek,
                                         boolean provisioning_state) throws SKSException;
     
     public void abortProvisioningSession (int provisioning_handle) throws SKSException;
@@ -50,6 +50,18 @@ public interface SecureKeyStore
     public void setCertificatePath (int key_handle,
                                     X509Certificate[] certificate_path,
                                     byte[] mac) throws SKSException;
+    
+    public void addExtension (int key_handle,
+                              byte basic_type,
+                              byte[] qualifier,
+                              String extension_type,
+                              byte[] extension_data,
+                              byte[] mac) throws SKSException;
+    
+    public void setSymmetricKey (int key_handle,
+                                 byte[] encrypted_symmetric_key,
+                                 String[] endorsed_algorithms,
+                                 byte[] mac) throws SKSException;
     
     public byte[] closeProvisioningSession (int provisioning_handle, byte[] mac) throws SKSException;
 
@@ -64,7 +76,7 @@ public interface SecureKeyStore
 
     public DeviceInfo getDeviceInfo () throws SKSException;
     
-    public EnumeratedProvisioningSession enumerateProvisioningSessions (int provisioning_handle,
+    public EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
                                                                         boolean provisioning_state) throws SKSException;
 
     public KeyAttributes getKeyAttributes (int key_handle) throws SKSException;
