@@ -18,7 +18,7 @@ package org.webpki.sks;
 
 import java.security.interfaces.ECPublicKey;
 
-public class ProvisioningSessionResult
+public class ProvisioningSession
   {
     int provisioning_handle;
 
@@ -48,7 +48,7 @@ public class ProvisioningSessionResult
         return client_ephemeral_key;
       }
 
-    public ProvisioningSessionResult (int provisioning_handle, 
+    public ProvisioningSession (int provisioning_handle, 
                                       String client_session_id,
                                       byte[] session_attestation,
                                       ECPublicKey client_ephemeral_key)

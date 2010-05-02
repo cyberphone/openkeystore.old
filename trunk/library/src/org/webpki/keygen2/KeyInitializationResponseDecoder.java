@@ -59,37 +59,43 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
       }
     
     
-    public void validateAndPopulate (KeyInitializationRequestEncoder key_init_req, ServerSessionKeyInterface session_key_operations) throws IOException, GeneralSecurityException
+    public void validateAndPopulate (KeyInitializationRequestEncoder key_init_request, ServerSessionKeyInterface session_key_operations) throws IOException
       {
-        key_init_req.server_credential_store.checkSession (client_session_id, server_session_id);
-        if (generated_keys.size () != key_init_req.server_credential_store.requested_keys.size ())
+        key_init_request.server_credential_store.checkSession (client_session_id, server_session_id);
+        if (generated_keys.size () != key_init_request.server_credential_store.requested_keys.size ())
           {
             ServerCredentialStore.bad ("Different number of requested and received keys");
           }
-        for (GeneratedPublicKey gpk : generated_keys.values ())
+        try
           {
-            ServerCredentialStore.KeyProperties kp = key_init_req.server_credential_store.requested_keys.get (gpk.id);
-            if (kp == null)
+            for (GeneratedPublicKey gpk : generated_keys.values ())
               {
-                ServerCredentialStore.bad ("Missing key id:" + gpk.id);
+                ServerCredentialStore.KeyProperties kp = key_init_request.server_credential_store.requested_keys.get (gpk.id);
+                if (kp == null)
+                  {
+                    ServerCredentialStore.bad ("Missing key id:" + gpk.id);
+                  }
+                kp.public_key = gpk.public_key;
+                kp.encrypted_private_key = gpk.encrypted_private_key;
+                ServerCredentialStore.MacGenerator key_attestation = new ServerCredentialStore.MacGenerator ();
+                // Write key attestation data
+                key_attestation.addString (gpk.id);
+                key_attestation.addArray (gpk.public_key.getEncoded ());
+                if (kp.private_key_backup)
+                  {
+                    key_attestation.addArray (kp.encrypted_private_key);
+                  }
+                 if (!ArrayUtil.compare (key_init_request.server_credential_store.attest (key_attestation.getResult (),
+                                                                                          session_key_operations),
+                                         kp.key_attestation = gpk.key_attestation))
+                  {
+                    ServerCredentialStore.bad ("Attestation failed for key id:" + gpk.id);
+                  }
               }
-            kp.public_key = gpk.public_key;
-            kp.encrypted_private_key = gpk.encrypted_private_key;
-            ServerCredentialStore.MacGenerator key_attestation = new ServerCredentialStore.MacGenerator ();
-            // Write key attestation data
-            key_attestation.addString (gpk.id);
-            key_attestation.addArray (gpk.public_key.getEncoded ());
-            key_attestation.addArray (kp.server_seed == null ? KeyInitializationRequestDecoder.DEFAULT_SEED : kp.server_seed);
-            key_attestation.addBool (kp.private_key_backup);
-            if (kp.private_key_backup)
-              {
-                key_attestation.addArray (kp.encrypted_private_key);
-              }
-             if (!ArrayUtil.compare (session_key_operations.attest (key_attestation.getResult ()),
-                                     kp.key_attestation = gpk.key_attestation))
-              {
-                ServerCredentialStore.bad ("Attestation failed for key id:" + gpk.id);
-              }
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
           }
       }
 

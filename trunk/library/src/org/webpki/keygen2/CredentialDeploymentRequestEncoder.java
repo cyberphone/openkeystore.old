@@ -87,7 +87,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
     
     private byte[] mac (byte[] data, APIDescriptors method) throws IOException, GeneralSecurityException
       {
-        return sess_key_interface.mac (data, ArrayUtil.add (method.getBinary (), server_credential_store.getMACSequenceCounterAndUpdate ()));
+        return server_credential_store.mac (data, method, sess_key_interface);
       }
     
     

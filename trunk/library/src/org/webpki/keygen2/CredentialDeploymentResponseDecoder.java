@@ -66,14 +66,16 @@ public class CredentialDeploymentResponseDecoder extends CredentialDeploymentRes
     
     
     public void verifyProvisioningResult (ServerCredentialStore server_credential_store,
-                                          ServerSessionKeyInterface sess_key_interface) throws IOException, GeneralSecurityException
+                                          ServerSessionKeyInterface sess_key_interface) throws IOException
       {
         server_credential_store.checkSession (client_session_id, server_session_id);
-        if (!ArrayUtil.compare (sess_key_interface.attest (ArrayUtil.add (CryptoConstants.CRYPTO_STRING_SUCCESS, 
-                                                                          server_credential_store.getMACSequenceCounterAndUpdate ())),
-                                close_session_attestation))
+        try
           {
-            ServerCredentialStore.bad ("Final attestation failed!");
+            server_credential_store.checkFinalResult (close_session_attestation, sess_key_interface);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
           }
       }
 

@@ -898,7 +898,10 @@
          <!-- An issuer's optional suggestion on how to name the credential. -->
          <xs:attribute name="FriendlyName" type="xs:string" use="optional"/>
 
-      </xs:complexType>
+         <!-- Mandatory MAC (Message Authentication Code). -->
+         <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
+
+       </xs:complexType>
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

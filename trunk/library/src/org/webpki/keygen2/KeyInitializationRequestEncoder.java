@@ -18,6 +18,8 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+
 import java.util.Vector;
 
 import org.w3c.dom.Document;
@@ -45,6 +47,9 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
     
     ServerCredentialStore server_credential_store;
     
+    ServerSessionKeyInterface sess_key_interface;
+
+    
     private boolean need_signature_ns;
     
     Vector<String> written_pin = new Vector<String> ();
@@ -57,10 +62,12 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
     // Constructors
 
     public KeyInitializationRequestEncoder (String submit_url,
-                                            ServerCredentialStore server_credential_store) throws IOException
+                                            ServerCredentialStore server_credential_store,
+                                            ServerSessionKeyInterface sess_key_interface) throws IOException
       {
         this.submit_url = submit_url;
         this.server_credential_store = server_credential_store;
+        this.sess_key_interface = sess_key_interface;
       }
 
 
@@ -143,50 +150,57 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
             bad ("Empty request not allowd!");
           }
         ServerCredentialStore.KeyProperties last_req_key = null;
-        for (ServerCredentialStore.KeyProperties req_key : server_credential_store.requested_keys.values ())
+        try
           {
-            if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
-                getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
+            for (ServerCredentialStore.KeyProperties req_key : server_credential_store.requested_keys.values ())
               {
-                wr.getParent ();
-              }
-            if (last_req_key != null && last_req_key.pin_policy != null &&
-                last_req_key.pin_policy != req_key.pin_policy)
-              {
-                wr.getParent ();
-              }
-            if (getPUKPolicy (req_key) != null)
-              {
-                if (written_puk.contains (getPUKPolicy (req_key).id))
+                if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
+                    getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
                   {
-                    if (getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
+                    wr.getParent ();
+                  }
+                if (last_req_key != null && last_req_key.pin_policy != null &&
+                    last_req_key.pin_policy != req_key.pin_policy)
+                  {
+                    wr.getParent ();
+                  }
+                if (getPUKPolicy (req_key) != null)
+                  {
+                    if (written_puk.contains (getPUKPolicy (req_key).id))
                       {
-                        bad ("PUK grouping error");
+                        if (getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
+                          {
+                            bad ("PUK grouping error");
+                          }
+                      }
+                    else
+                      {
+                        getPUKPolicy (req_key).writePolicy (wr, sess_key_interface);
+                        written_puk.add (getPUKPolicy (req_key).id);
                       }
                   }
-                else
+                if (req_key.pin_policy != null)
                   {
-                    getPUKPolicy (req_key).writePolicy (wr);
-                    written_puk.add (getPUKPolicy (req_key).id);
-                  }
-              }
-            if (req_key.pin_policy != null)
-              {
-                if (written_pin.contains (req_key.pin_policy.id))
-                  {
-                    if (last_req_key.pin_policy != req_key.pin_policy)
+                    if (written_pin.contains (req_key.pin_policy.id))
                       {
-                        bad ("PIN grouping error");
+                        if (last_req_key.pin_policy != req_key.pin_policy)
+                          {
+                            bad ("PIN grouping error");
+                          }
+                      }
+                    else
+                      {
+                        req_key.pin_policy.writePolicy (wr, sess_key_interface);
+                        written_pin.add (req_key.pin_policy.id);
                       }
                   }
-                else
-                  {
-                    req_key.pin_policy.writePolicy (wr);
-                    written_pin.add (req_key.pin_policy.id);
-                  }
+                req_key.writeRequest (wr, sess_key_interface);
+                last_req_key = req_key;
               }
-            req_key.writeRequest (wr);
-            last_req_key = req_key;
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
           }
         if (last_req_key != null && last_req_key.pin_policy != null)
           {

@@ -16,13 +16,17 @@
  */
 package org.webpki.keygen2;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
 import java.util.Date;
 
+import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 
+import org.webpki.util.ArrayUtil;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
@@ -30,6 +34,8 @@ import org.webpki.xml.ServerCookie;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSymKeyVerifier;
 
+import org.webpki.crypto.MacAlgorithms;
+import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SymKeyVerifierInterface;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -88,9 +94,46 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
       }
 
 
-    public void verifySignature (SymKeyVerifierInterface verifier) throws IOException
+    public void verifyAndGenerateSessionKey (final ServerSessionKeyInterface session_key_operations,
+                                             ProvisioningSessionRequestEncoder prov_sess_request) throws IOException
       {
-        new XMLSymKeyVerifier (verifier).validateEnvelopedSignature (this, null, signature, client_session_id);
+        try
+          {
+            ServerCredentialStore.MacGenerator kdf = new ServerCredentialStore.MacGenerator ();
+            kdf.addString (client_session_id);
+            kdf.addString (server_session_id);
+            kdf.addString (prov_sess_request.submit_url);
+            kdf.addArray (device_certificate_path[0].getEncoded ());
+
+            ServerCredentialStore.MacGenerator session_key_mac_data = new ServerCredentialStore.MacGenerator ();
+            session_key_mac_data.addString (client_session_id);
+            session_key_mac_data.addString (server_session_id);
+            session_key_mac_data.addString (prov_sess_request.submit_url);
+            session_key_mac_data.addArray (prov_sess_request.server_ephemeral_key.getEncoded ());
+            session_key_mac_data.addArray (client_ephemeral_key.getEncoded ());
+            session_key_mac_data.addInt ((int) (client_time.getTime () / 1000));
+
+            session_key_operations.generateAndVerifySessionKey (client_ephemeral_key,
+                                                                kdf.getResult (),
+                                                                session_key_mac_data.getResult (),
+                                                                device_certificate_path[0].getPublicKey (),
+                                                                session_attestation,
+                                                                SignatureAlgorithms.RSA_SHA256);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
+        new XMLSymKeyVerifier (new SymKeyVerifierInterface ()
+          {
+
+            @Override
+            public boolean verifyData (byte[] data, byte[] digest, MacAlgorithms algorithm) throws IOException, GeneralSecurityException
+              {
+                return ArrayUtil.compare (session_key_operations.mac (data, CryptoConstants.CRYPTO_STRING_SIGNATURE), digest);
+              }
+          
+          }).validateEnvelopedSignature (this, null, signature, client_session_id);
       }
 
 

@@ -39,8 +39,6 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class KeyInitializationRequestDecoder extends KeyInitializationRequest
   {
-    static final byte[] DEFAULT_SEED = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    
     abstract class PresetValueReference
       {
         byte[] value;
@@ -317,6 +315,8 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
       {
         String id;
         
+        byte[] mac;
+        
         boolean start_of_puk_group;
 
         boolean start_of_pin_group;
@@ -347,13 +347,14 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
             id = ah.getString (ID_ATTR);
+            mac = ah.getBinary (MAC_ATTR);
             key_usage = KeyUsage.getKeyUsageFromString (ah.getString (KEY_USAGE_ATTR));
             exportable = ah.getBooleanConditional (EXPORTABLE_ATTR);
             private_key_backup = ah.getBooleanConditional (PRIVATE_KEY_BACKUP_ATTR);
             server_seed = ah.getBinaryConditional (SERVER_SEED_ATTR);
             if (server_seed == null)
               {
-                server_seed = DEFAULT_SEED;
+                server_seed = CryptoConstants.DEFAULT_SEED;
               }
             else if (server_seed.length != 32)
               {
@@ -438,6 +439,12 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
         public String getID ()
           {
             return id;
+          }
+
+        
+        public byte[] getMAC ()
+          {
+            return mac;
           }
         
 

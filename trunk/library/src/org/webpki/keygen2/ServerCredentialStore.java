@@ -24,6 +24,7 @@ import java.io.Serializable;
 
 import java.math.BigInteger;
 
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
@@ -358,7 +359,7 @@ public class ServerCredentialStore implements Serializable
             this.retry_limit = retry_limit;
           }
 
-        void writePolicy (DOMWriterHelper wr) throws IOException
+        void writePolicy (DOMWriterHelper wr, ServerSessionKeyInterface sess_key_interface) throws IOException
           {
             wr.addChildElement (PUK_POLICY_ELEM);
             super.write (wr);
@@ -436,7 +437,7 @@ public class ServerCredentialStore implements Serializable
             this.id = pin_prefix + ++next_pin_id_suffix;
           }
 
-        void writePolicy (DOMWriterHelper wr) throws IOException
+        void writePolicy (DOMWriterHelper wr, ServerSessionKeyInterface sess_key_interface) throws IOException
           {
             wr.addChildElement (PIN_POLICY_ELEM);
             wr.setStringAttribute (ID_ATTR, id);
@@ -696,10 +697,12 @@ public class ServerCredentialStore implements Serializable
           }
         
         
-        byte[] server_seed;
+        byte[] server_seed = CryptoConstants.DEFAULT_SEED;
+        boolean server_seed_set;
         
         public KeyProperties setServerSeed (byte[] server_seed)
           {
+            server_seed_set = true;
             this.server_seed = server_seed;
             return this;
           }
@@ -783,8 +786,11 @@ public class ServerCredentialStore implements Serializable
               }
           }
 
-        void writeRequest (DOMWriterHelper wr) throws IOException
+        void writeRequest (DOMWriterHelper wr, ServerSessionKeyInterface sess_key_interface) throws IOException, GeneralSecurityException
           {
+            MacGenerator key_pair_mac = new MacGenerator ();
+            key_pair_mac.addString (id);
+            key_pair_mac.addArray (server_seed);
             if (device_pin_protected)
               {
                 wr.addChildElement (DEVICE_SYNCHRONIZED_PIN_ELEM);
@@ -808,7 +814,7 @@ public class ServerCredentialStore implements Serializable
                 wr.setBooleanAttribute (PRIVATE_KEY_BACKUP_ATTR, private_key_backup);
               }
             
-            if (server_seed != null)
+            if (server_seed_set)
               {
                 if (server_seed.length != 32)
                   {
@@ -817,6 +823,8 @@ public class ServerCredentialStore implements Serializable
                 wr.setBinaryAttribute (SERVER_SEED_ATTR, server_seed);
               }
 
+            wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), APIDescriptors.CREATE_KEY_PAIR, sess_key_interface));
+            
             key_alg_data.writeKeyAlgorithmData (wr);
 
             wr.getParent ();
@@ -866,12 +874,34 @@ public class ServerCredentialStore implements Serializable
           }
       }
     
-    byte[] getMACSequenceCounterAndUpdate ()
+    private byte[] getMACSequenceCounterAndUpdate ()
       {
         int q = mac_sequence_counter++;
         return  new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
       }
 
+    byte[] mac (byte[] data, APIDescriptors method, ServerSessionKeyInterface sess_key_interface) throws IOException, GeneralSecurityException
+      {
+        return sess_key_interface.mac (data, ArrayUtil.add (method.getBinary (), getMACSequenceCounterAndUpdate ()));
+      }
+    
+    byte[] attest (byte[] data, ServerSessionKeyInterface sess_key_interface) throws IOException, GeneralSecurityException
+      {
+        return sess_key_interface.mac (data, CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST); 
+      }
+    
+    void checkFinalResult (byte[] close_session_attestation,  ServerSessionKeyInterface sess_key_interface) throws IOException, GeneralSecurityException
+      {
+  
+        if (!ArrayUtil.compare (attest (ArrayUtil.add (CryptoConstants.CRYPTO_STRING_SUCCESS, 
+                                                       getMACSequenceCounterAndUpdate ()),
+                                        sess_key_interface),
+                                close_session_attestation))
+          {
+            bad ("Final attestation failed!");
+          }
+      }
+  
     static void bad (String error_msg) throws IOException
       {
         throw new IOException (error_msg);
@@ -880,11 +910,12 @@ public class ServerCredentialStore implements Serializable
  
     // Constructor
 
-    public ServerCredentialStore (String client_session_id, String server_session_id, String issuer_uri) throws IOException
+    public ServerCredentialStore (ProvisioningSessionResponseDecoder prov_sess_response,
+                                  ProvisioningSessionRequestEncoder prov_sess_request) throws IOException
       {
-        this.client_session_id = client_session_id;
-        this.server_session_id = server_session_id;
-        this.issuer_uri = issuer_uri;
+        this.client_session_id = prov_sess_response.client_session_id;
+        this.server_session_id = prov_sess_request.server_session_id;
+        this.issuer_uri = prov_sess_request.submit_url;
       }
 
     public PINPolicy createPINPolicy (PassphraseFormats format, int min_length, int max_length, int retry_limit, PUKPolicy puk_policy) throws IOException
