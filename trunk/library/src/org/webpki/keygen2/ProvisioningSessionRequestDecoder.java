@@ -86,7 +86,11 @@ public class ProvisioningSessionRequestDecoder extends ProvisioningSessionReques
         return session_key_limit;
       }
 
-
+    public boolean getSessionUpdatableFlag ()
+      {
+        return session_updatable_flag;
+      }
+    
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
         new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);

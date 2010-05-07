@@ -21,16 +21,19 @@ import java.io.IOException;
 
 public enum PassphraseFormats
   {
-    NUMERIC       ("numeric"),
-    ALPHANUMERIC  ("alphanumeric"),
-    PRINTABLE     ("printable"),
-    HEX2BYTES     ("hex2bytes");
+    NUMERIC       ("numeric",      (byte)0x00),
+    ALPHANUMERIC  ("alphanumeric", (byte)0x01),
+    STRING        ("string",       (byte)0x02),
+    BINARY        ("binary",       (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
+    
+    private final byte sks_value;
 
-    private PassphraseFormats (String xml_name)
+    private PassphraseFormats (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
+        this.sks_value = sks_value;
       }
 
 
@@ -39,6 +42,10 @@ public enum PassphraseFormats
         return xml_name;
       }
 
+    public byte getSKSValue ()
+      {
+        return sks_value;
+      }
 
     public static PassphraseFormats getPassphraseFormatFromString (String xml_name) throws IOException
       {

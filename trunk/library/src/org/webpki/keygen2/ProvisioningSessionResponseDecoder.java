@@ -111,7 +111,10 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
             session_key_mac_data.addString (prov_sess_request.submit_url);
             session_key_mac_data.addArray (prov_sess_request.server_ephemeral_key.getEncoded ());
             session_key_mac_data.addArray (client_ephemeral_key.getEncoded ());
+            session_key_mac_data.addBool (prov_sess_request.session_updatable_flag);
             session_key_mac_data.addInt ((int) (client_time.getTime () / 1000));
+            session_key_mac_data.addInt (prov_sess_request.session_life_time);
+            session_key_mac_data.addShort (prov_sess_request.session_key_limit);
 
             session_key_operations.generateAndVerifySessionKey (client_ephemeral_key,
                                                                 kdf.getResult (),

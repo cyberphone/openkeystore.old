@@ -38,7 +38,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -116,6 +115,12 @@ public class KeyGen2Test
     
     boolean symmetric_key;
     
+    boolean updatable;
+    
+    boolean device_pin;
+    
+    boolean puk_protection;
+    
     static FileOutputStream fos;
     
     static SecureKeyStore sks;
@@ -178,7 +183,7 @@ public class KeyGen2Test
                                                  prov_sess_req.getServerSessionID (),
                                                  prov_sess_req.getServerEphemeralKey (),
                                                  prov_sess_req.getSubmitURL (), /* IssuerURI */
-                                                 true, /* Updatable */
+                                                 prov_sess_req.getSessionUpdatableFlag (),
                                                  (int)(client_time.getTime () / 1000),
                                                  prov_sess_req.getSessionLifeTime (),
                                                  prov_sess_req.getSessionKeyLimit ());
@@ -216,13 +221,37 @@ public class KeyGen2Test
             key_init_request = (KeyInitializationRequestDecoder) client_xml_cache.parse (xmldata);
             KeyInitializationResponseEncoder key_init_response = 
                   new KeyInitializationResponseEncoder (key_init_request);
+            int pin_policy_handle = 0;
+            int puk_policy_handle = 0;
             for (KeyInitializationRequestDecoder.KeyObject key : key_init_request.getKeyObjects ())
               {
+                if (key.getPINPolicy () == null)
+                  {
+                    pin_policy_handle = key.isDevicePINProtected () ? 0xFFFFFFFF : 0;
+                    puk_policy_handle = 0;
+                  }
+                else if (key.isStartOfPINPolicy ())
+                  {
+                    if (key.isStartOfPUKPolicy ())
+                      {
+                        KeyInitializationRequestDecoder.PUKPolicy puk_policy = key.getPINPolicy ().getPUKPolicy ();
+                        puk_policy_handle = sks.createPUKPolicy (provisioning_handle, 
+                                                                 puk_policy.getID (),
+                                                                 puk_policy.getEncryptedValue (),
+                                                                 puk_policy.getFormat (),
+                                                                 puk_policy.getRetryLimit (),
+                                                                 puk_policy.getMAC());
+                      }
+                    pin_policy_handle = sks.createPINPolicy (provisioning_handle,
+                                                             key.getPINPolicy ().getID (),
+                                                             puk_policy_handle,
+                                                             key.getPINPolicy ().getMAC ());
+                  }
                 KeyPair kpr = sks.createKeyPair (provisioning_handle,
                                                  key_init_request.getKeyAttestationAlgorithm (),
                                                  key.getServerSeed (),
                                                  key.getID (),
-                                                 0, /* pin_policy_handle */
+                                                 pin_policy_handle,
                                                  "2457".getBytes ("UTF-8"), /* pin_value */
                                                  key.getBiometricProtection (),
                                                  key.getPrivateKeyBackupFlag (),
@@ -271,29 +300,13 @@ public class KeyGen2Test
                     break;
                   }
               }
-            HashMap<String,Integer> keys = new HashMap<String,Integer> ();
             
-            //////////////////////////////////////////////////////////////////////////
-            // Find keys belonging to this provisioning session
-            //////////////////////////////////////////////////////////////////////////
-            EnumeratedKey ek = new EnumeratedKey ();
-            while ((ek = sks.enumerateKeys (ek, true)).isValid ())
-              {
-                if (ek.getProvisioningHandle () == eps.getProvisioningHandle ())
-                  {
-                    keys.put (ek.getID (), ek.getKeyHandle ());
-                  }
-              }
             //////////////////////////////////////////////////////////////////////////
             // Final check, do these keys match the request?
             //////////////////////////////////////////////////////////////////////////
             for (CredentialDeploymentRequestDecoder.CertifiedPublicKey key : cred_dep_request.getCertifiedPublicKeys ())
               {
-                Integer key_handle = keys.get (key.getID ());
-                if (key_handle == null)
-                  {
-                    abort ("Did not find key:" + key.getID () + " in deployment request");
-                  }
+                int key_handle = sks.getKeyHandle (eps.getProvisioningHandle (), key.getID ());
                 sks.setCertificatePath (key_handle, key.getCertificatePath (), key.getMAC ());
                 if (key.getEncryptedSymmetricKey () != null)
                   {
@@ -461,12 +474,16 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] provSessRequest () throws IOException, GeneralSecurityException
           {
-            String server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()); 
+            String server_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()); 
             prov_sess_request =  new ProvisioningSessionRequestEncoder (server_sess_key.generateEphemeralKey (),
                                                                         server_session_id,
                                                                         ISSUER_URI,
                                                                         10000,
                                                                         50);
+            if (updatable)
+              {
+                prov_sess_request.setUpdatable (true);
+              }
             return prov_sess_request.writeXML ();
           }
 
@@ -498,12 +515,20 @@ public class KeyGen2Test
                 
               }
             server_credential_store = new ServerCredentialStore (prov_sess_response, prov_sess_request);
+            if (puk_protection)
+              {
+                puk_policy =
+                  server_credential_store.createPUKPolicy (server_sess_key.encrypt (new byte[]{'0','1','2','3','4','5','6', '7','8','9'}),
+                                                                                    PassphraseFormats.NUMERIC,
+                                                                                    3);
+              }
             if (pin_protection)
               {
                 pin_policy = server_credential_store.createPINPolicy (PassphraseFormats.NUMERIC, 4, 8, 3, puk_policy);
               }
-            ServerCredentialStore.KeyProperties kp = server_credential_store.createKey (
-                symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION, key_alg1, pin_policy);
+            ServerCredentialStore.KeyProperties kp = device_pin ?
+                server_credential_store.createDevicePINProtectedKey (KeyUsage.AUTHENTICATION, key_alg1) :
+                server_credential_store.createKey (symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION, key_alg1, pin_policy);
             if (symmetric_key)
               {
                 kp.setSymmetricKey (server_sess_key.encrypt (new byte[]{0,2,3,4,5,6,7,8,9,11,12,13,14,15}),
@@ -693,7 +718,7 @@ public class KeyGen2Test
             server.creDepResponse (xml);
             writeString ("\n\n");
             EnumeratedKey ek = new EnumeratedKey ();
-            while ((ek = sks.enumerateKeys (ek, false)).isValid ())
+            while ((ek = sks.enumerateKeys (ek)).isValid ())
               {
                 if (ek.getProvisioningHandle () == client.provisioning_handle)
                   {
@@ -748,12 +773,29 @@ public class KeyGen2Test
         doer.perform ();
       }
     @Test
+    public void test7 () throws Exception
+    {
+      Doer doer = new Doer ();
+      updatable = true;
+      pin_protection = true;
+      puk_protection = true;
+      doer.perform ();
+    }
     public void test6 () throws Exception
+    {
+      Doer doer = new Doer ();
+      updatable = true;
+      pin_protection = true;
+      symmetric_key = true;
+      property_bag = true;
+      doer.perform ();
+    }
+    @Test
+    public void test8 () throws Exception
       {
         Doer doer = new Doer ();
-        pin_protection = true;
-        symmetric_key = true;
-        property_bag = true;
+        updatable = true;
+        device_pin = true;
         doer.perform ();
       }
 

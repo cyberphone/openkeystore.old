@@ -21,6 +21,7 @@ import java.security.interfaces.ECPublicKey;
 
 import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.KeyUsage;
+import org.webpki.keygen2.PassphraseFormats;
 
 public interface SecureKeyStore
   {
@@ -42,9 +43,10 @@ public interface SecureKeyStore
                                   KeyInitializationRequestDecoder.KeyAlgorithmData key_algorithm,
                                   byte[] mac) throws SKSException;
     
-    public EnumeratedKey enumerateKeys (EnumeratedKey ek,
-                                        boolean provisioning_state) throws SKSException;
-    
+    public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException;
+
+    public int getKeyHandle (int provisioning_handle, String id) throws SKSException;
+
     public void abortProvisioningSession (int provisioning_handle) throws SKSException;
     
     public void setCertificatePath (int key_handle,
@@ -64,6 +66,18 @@ public interface SecureKeyStore
                                  byte[] mac) throws SKSException;
     
     public byte[] closeProvisioningSession (int provisioning_handle, byte[] mac) throws SKSException;
+    
+    public int createPINPolicy (int provisioning_handle,
+                                String id,
+                                int puk_policy_handle,
+                                byte[] mac) throws SKSException;
+
+    public int createPUKPolicy (int provisioning_handle,
+                                String id,
+                                byte[] encrypted_value,
+                                PassphraseFormats format,
+                                int retry_limit,
+                                byte[] mac) throws SKSException;
 
     public ProvisioningSession createProvisioningSession (String session_key_algorithm,
                                                           String server_session_id,

@@ -18,8 +18,6 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.math.BigInteger;
-
 import java.util.Vector;
 import java.util.Set;
 import java.util.EnumSet;
@@ -41,16 +39,16 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
   {
     abstract class PresetValueReference
       {
-        byte[] value;
+        byte[] encrypted_value;
 
         PresetValueReference (DOMReaderHelper rd) throws IOException
           {
-            value = rd.getAttributeHelper ().getBinary (VALUE_ATTR);
+            encrypted_value = rd.getAttributeHelper ().getBinary (VALUE_ATTR);
           }
         
-        public byte[] getValue ()
+        public byte[] getEncryptedValue ()
           {
-            return value;
+            return encrypted_value;
           }
 
       }
@@ -77,6 +75,8 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
     public class PUKPolicy extends PresetValueReference
       {
+        byte[] mac;
+        
         Object user_data;
 
         PassphraseFormats format;
@@ -91,6 +91,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             retry_limit = rd.getAttributeHelper ().getInt (RETRY_LIMIT_ATTR);
             id = rd.getAttributeHelper ().getString (ID_ATTR);
             format = PassphraseFormats.getPassphraseFormatFromString (rd.getAttributeHelper ().getString (FORMAT_ATTR));
+            mac = rd.getAttributeHelper ().getBinary (MAC_ATTR);
           }
 
 
@@ -122,11 +123,19 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           {
             return id;
           }
+
+        
+        public byte[] getMAC ()
+          {
+            return mac;
+          }
       }
 
 
     public class PINPolicy
       {
+        byte[] mac;
+        
         String id;
         
         PUKPolicy puk_policy;
@@ -152,6 +161,8 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
         PINPolicy (DOMReaderHelper rd) throws IOException
           {
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+            
+            mac = ah.getBinary (MAC_ATTR);
             
             id = ah.getString (ID_ATTR);
 
@@ -241,6 +252,12 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
 
 
+        public byte[] getMAC ()
+          {
+            return mac;
+          }
+
+
         public void setUserData (Object user_data)
           {
             this.user_data = user_data;
@@ -270,9 +287,9 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
       {
         int key_size;
 
-        BigInteger fixed_exponent;  // May be null
+        int fixed_exponent;  // May be 0
 
-        RSA (int key_size, BigInteger fixed_exponent)
+        RSA (int key_size, int fixed_exponent)
           {
             this.key_size = key_size;
             this.fixed_exponent = fixed_exponent;
@@ -285,7 +302,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
 
 
-        public BigInteger getFixedExponent ()
+        public int getFixedExponent ()
           {
             return fixed_exponent;
           }
@@ -366,10 +383,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             if (rd.hasNext (RSA_ELEM))
               {
                 rd.getNext (RSA_ELEM);
-
-                byte[] exponent = ah.getBinaryConditional (FIXED_EXPONENT_ATTR);
-                key_algorithm_data = new RSA (ah.getInt (KEY_SIZE_ATTR),
-                                              exponent == null ? null : new BigInteger (exponent));
+                key_algorithm_data = new RSA (ah.getInt (KEY_SIZE_ATTR), ah.getIntConditional (FIXED_EXPONENT_ATTR));
               }
             else
               {
@@ -697,9 +711,9 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
               {
                 readPINPolicy (rd, false, null);
               }
-            else if (rd.hasNext (DEVICE_SYNCHRONIZED_PIN_ELEM))
+            else if (rd.hasNext (DEVICE_PIN_ELEM))
               {
-                rd.getNext (DEVICE_SYNCHRONIZED_PIN_ELEM);
+                rd.getNext (DEVICE_PIN_ELEM);
                 rd.getChild ();
                 readKeyProperties (rd, true);
                 rd.getParent ();

@@ -21,24 +21,33 @@ import java.io.IOException;
 
 public enum KeyUsage
   {
-    SIGNATURE                  ("signature"),
-    AUTHENTICATION             ("authentication"),
-    ENCRYPTION                 ("encryption"),
-    UNIVERSAL                  ("universal"),
-    TRANSPORT                  ("transport"),
-    SYMMETRIC_KEY              ("symmetric-key");
+    SIGNATURE                  ("signature",      (byte)0x00),
+    AUTHENTICATION             ("authentication", (byte)0x01),
+    ENCRYPTION                 ("encryption",     (byte)0x02),
+    UNIVERSAL                  ("universal",      (byte)0x03),
+    TRANSPORT                  ("transport",      (byte)0x04),
+    SYMMETRIC_KEY              ("symmetric-key",  (byte)0x05);
 
     private final String xml_name;       // As expressed in XML
+    
+    private final byte sks_value;
 
-    private KeyUsage (String xml_name)
+    private KeyUsage (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
+        this.sks_value = sks_value;
       }
 
 
     public String getXMLName ()
       {
         return xml_name;
+      }
+    
+
+    public byte getSKSValue ()
+      {
+        return sks_value;
       }
 
 

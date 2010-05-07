@@ -33,13 +33,6 @@ public class EnumeratedKey
         return provisioning_handle;
       }
     
-    String id;
-    
-    public String getID ()
-      {
-        return id;
-      }
-    
 
     public EnumeratedKey ()
       {
@@ -55,11 +48,9 @@ public class EnumeratedKey
     // TODO - a LOT!!!!
     
     public EnumeratedKey (int key_handle, 
-                          String id,
                           int provisioning_handle)
       {
         this.key_handle = key_handle;
-        this.id = id;
         this.provisioning_handle = provisioning_handle;
       }
 

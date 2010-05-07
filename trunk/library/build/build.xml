@@ -1,7 +1,7 @@
 <project name="WEBPKI.ORG library" default="compile" basedir=".">
 
   <!-- set global properties for this build -->
-  <property name="test.sks.implementation" value="org.webpki.keygen2.test.SKSTestImplementation"/>
+  <property name="test.sks.implementation" value="org.webpki.keygen2.test.SKSReferenceImplementation"/>
   <property name="src_dir" value="../src" />
   <property name="temp_dir" value="../.tmp" />
   <property name="test_dir" value="../test" />

@@ -331,7 +331,7 @@
                     This option (which MAY be supported by the device), is
                     mainly intended for keys belonging to an organization
                     that manages the device. -->
-               <xs:element ref="kgen:DeviceSynchronizedPIN"/>
+               <xs:element ref="kgen:DevicePIN"/>
 
            </xs:choice>
 
@@ -839,7 +839,7 @@
                      <xs:attribute name="KeySize" type="xs:positiveInteger" use="required"/>
 
                      <!-- Optional: fixed length of exponent. -->
-                    <xs:attribute name="FixedExponent" type="xs:base64Binary" use="optional"/>
+                    <xs:attribute name="FixedExponent" type="xs:positiveInteger" use="optional"/>
 
                   </xs:complexType>
                </xs:element>
@@ -932,7 +932,7 @@
 
       <!-- Restrictions on PIN patterns.  Note that restrictions are to be
            applied to the decoded byte representation which means that a
-           "three-in-a-row" restriction assigned to a "hex2bytes" PIN may
+           "three-in-a-row" restriction assigned to a "binary" PIN may
            be specified as 0AAA but not 0A0A0A.  Default: none. -->
       <xs:attribute name="PatternRestrictions" type="kgen:pinPatternList" use="optional"/>
 
@@ -1015,6 +1015,9 @@
            a request but MAY stay constant between requests. -->
       <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
+      <!-- Mandatory MAC (Message Authentication Code). -->
+      <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
+
    </xs:attributeGroup>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1058,7 +1061,7 @@
       Request sub-object for creating a key protected by the key "host" device PIN-code.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:element name="DeviceSynchronizedPIN">
+   <xs:element name="DevicePIN">
       <xs:complexType>
          <xs:sequence>
             <xs:element ref="kgen:KeyPair"/>
@@ -1269,16 +1272,16 @@
 
    <xs:simpleType name="sksID">
       <xs:restriction base="xs:ID">
+         <xs:pattern value="[0-9,a-z,A-Z,_,\-,\.]*"/>
          <xs:maxLength value="32"/>
-         <xs:minLength value="1"/>
       </xs:restriction>
    </xs:simpleType>
 
    <xs:simpleType name="sksNCName">
       <xs:restriction base="xs:NCName">
+         <xs:pattern value="[0-9,a-z,A-Z,_,\-,\.]*"/>
          <xs:maxLength value="32"/>
-         <xs:minLength value="1"/>
-      </xs:restriction>
+       </xs:restriction>
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1341,8 +1344,8 @@
       <xs:restriction base="xs:string">
          <xs:enumeration value="numeric"/>
          <xs:enumeration value="alphanumeric"/>
-         <xs:enumeration value="printable"/>
-         <xs:enumeration value="hex2bytes"/>
+         <xs:enumeration value="string"/>
+         <xs:enumeration value="binary"/>
       </xs:restriction>
    </xs:simpleType>
 

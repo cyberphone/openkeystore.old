@@ -24,6 +24,8 @@ public enum APIDescriptors
     SET_SYMMETRIC_KEY               ("setSymmetricKey"),
     CLOSE_PROVISIONING_SESSION      ("closeProvisioningSession"),
     CREATE_KEY_PAIR                 ("createKeyPair"),
+    CREATE_PIN_POLICY               ("createPINPolicy"),
+    CREATE_PUK_POLICY               ("createPUKPolicy"),
     ADD_EXTENSION                   ("addExtension");
 
     private byte[] binary;       // As expressed in MACs

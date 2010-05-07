@@ -22,8 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
-import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -354,13 +352,21 @@ public class ServerCredentialStore implements Serializable
             this.retry_limit = retry_limit;
           }
 
-        void writePolicy (DOMWriterHelper wr, ServerSessionKeyInterface sess_key_interface) throws IOException
+        void writePolicy (DOMWriterHelper wr, ServerSessionKeyInterface sess_key_interface) throws IOException, GeneralSecurityException
           {
             wr.addChildElement (PUK_POLICY_ELEM);
             super.write (wr);
+
             wr.setStringAttribute (ID_ATTR, id);
             wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
             wr.setStringAttribute (FORMAT_ATTR, format.getXMLName ());
+
+            MacGenerator puk_policy_mac = new MacGenerator ();
+            puk_policy_mac.addString (id);
+            puk_policy_mac.addArray (encrypted_value);
+            puk_policy_mac.addByte (format.getSKSValue ());
+            puk_policy_mac.addShort (retry_limit);
+            wr.setBinaryAttribute (MAC_ATTR, mac (puk_policy_mac.getResult (), APIDescriptors.CREATE_PUK_POLICY, sess_key_interface));
           }
       }
 
@@ -432,7 +438,7 @@ public class ServerCredentialStore implements Serializable
             this.id = pin_prefix + ++next_pin_id_suffix;
           }
 
-        void writePolicy (DOMWriterHelper wr, ServerSessionKeyInterface sess_key_interface) throws IOException
+        void writePolicy (DOMWriterHelper wr, ServerSessionKeyInterface sess_key_interface) throws IOException, GeneralSecurityException
           {
             wr.addChildElement (PIN_POLICY_ELEM);
             wr.setStringAttribute (ID_ATTR, id);
@@ -465,6 +471,11 @@ public class ServerCredentialStore implements Serializable
               {
                 wr.setStringAttribute (INPUT_METHOD_ATTR, input_method.getXMLName ());
               }
+
+            MacGenerator pin_policy_mac = new MacGenerator ();
+            pin_policy_mac.addString (id);
+            pin_policy_mac.addString (puk_policy == null ? CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id);
+            wr.setBinaryAttribute (MAC_ATTR, mac (pin_policy_mac.getResult (), APIDescriptors.CREATE_PIN_POLICY, sess_key_interface));
           }
 
         public PINPolicy setInputMethod (InputMethods input_method)
@@ -498,6 +509,8 @@ public class ServerCredentialStore implements Serializable
         private static final long serialVersionUID = 1L;
 
         abstract void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException;
+        
+        abstract void updateKeyAlgorithmMac (MacGenerator mac_gen) throws IOException;
 
         public static final class EC extends KeyAlgorithmData implements Serializable
           {
@@ -516,6 +529,13 @@ public class ServerCredentialStore implements Serializable
                 wr.setStringAttribute (NAMED_CURVE_ATTR, named_curve.getURI ());
                 wr.getParent ();
               }
+            
+            void updateKeyAlgorithmMac (MacGenerator mac_gen) throws IOException
+              {
+                mac_gen.addByte (CryptoConstants.ECC_KEY);
+                mac_gen.addString (named_curve.getURI ());
+              }
+
           }
 
         public static final class RSA extends KeyAlgorithmData implements Serializable
@@ -524,14 +544,14 @@ public class ServerCredentialStore implements Serializable
 
             int key_size;
 
-            BigInteger fixed_exponent;
+            int fixed_exponent;
 
             public RSA (int key_size)
               {
                 this.key_size = key_size;
               }
 
-            public RSA (int key_size, BigInteger fixed_exponent)
+            public RSA (int key_size, int fixed_exponent)
               {
                 this (key_size);
                 this.fixed_exponent = fixed_exponent;
@@ -541,11 +561,18 @@ public class ServerCredentialStore implements Serializable
               {
                 wr.addChildElement (RSA_ELEM);
                 wr.setIntAttribute (KEY_SIZE_ATTR, key_size);
-                if (fixed_exponent != null)
+                if (fixed_exponent != 0)
                   {
-                    wr.setBinaryAttribute (FIXED_EXPONENT_ATTR, fixed_exponent.toByteArray ());
+                    wr.setIntAttribute (FIXED_EXPONENT_ATTR, fixed_exponent);
                   }
                 wr.getParent ();
+              }
+
+            void updateKeyAlgorithmMac (MacGenerator mac_gen) throws IOException
+              {
+                mac_gen.addByte (CryptoConstants.RSA_KEY);
+                mac_gen.addShort (key_size);
+                mac_gen.addInt (fixed_exponent);
               }
           }
 
@@ -564,7 +591,13 @@ public class ServerCredentialStore implements Serializable
               {
                 bad ("DSA not implemented!");
               }
+
+            void updateKeyAlgorithmMac (MacGenerator mac_gen)
+              {
+                 
+              }
           }
+
 
       }
 
@@ -786,9 +819,18 @@ public class ServerCredentialStore implements Serializable
             MacGenerator key_pair_mac = new MacGenerator ();
             key_pair_mac.addString (id);
             key_pair_mac.addArray (server_seed);
+            key_pair_mac.addString (pin_policy == null ? 
+                                      device_pin_protected ?
+                                          CryptoConstants.CRYPTO_STRING_PIN_DEVICE
+                                                           : 
+                                          CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE 
+                                                       :
+                                      pin_policy.id);
+            key_pair_mac.addByte (key_usage.getSKSValue ());
+            key_alg_data.updateKeyAlgorithmMac (key_pair_mac);
             if (device_pin_protected)
               {
-                wr.addChildElement (DEVICE_SYNCHRONIZED_PIN_ELEM);
+                wr.addChildElement (DEVICE_PIN_ELEM);
               }
             if (preset_pin != null)
               {

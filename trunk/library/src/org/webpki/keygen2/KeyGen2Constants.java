@@ -160,7 +160,7 @@ public interface KeyGen2Constants
 
     String PRESET_PIN_ELEM                   = "PresetPIN";
        
-    String DEVICE_SYNCHRONIZED_PIN_ELEM      = "DeviceSynchronizedPIN";
+    String DEVICE_PIN_ELEM                   = "DevicePIN";
 
     String EXTENSION_ELEM                    = "Extension";
 
