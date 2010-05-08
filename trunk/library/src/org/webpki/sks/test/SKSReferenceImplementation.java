@@ -426,7 +426,371 @@ public class SKSReferenceImplementation implements SecureKeyStore
         return new X509Certificate[]{(X509Certificate)TPMKeyStore.getTPMKeyStore ().getCertificate ("mykey")};
       }
 
+    
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                              getDeviceInfo                                 //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public DeviceInfo getDeviceInfo () throws SKSException
+      {
+        try
+          {
+            X509Certificate[] certificate_path = getDeviceCertificatePath ();
+            return new DeviceInfo (certificate_path);
+          }
+        catch (Exception e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+      }
 
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                              enumerateKeys                                 //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException
+      {
+        if (!ek.isValid ())
+          {
+            return getKey (keys.values ().iterator ());
+          }
+        Iterator<KeyEntry> list = keys.values ().iterator ();
+        while (list.hasNext ())
+          {
+            if (list.next ().key_handle == ek.getKeyHandle ())
+              {
+                return getKey (list);
+              }
+          }
+        return new EnumeratedKey ();
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                            getKeyAttributes                                //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public KeyAttributes getKeyAttributes (int key_handle) throws SKSException
+      {
+        return new KeyAttributes (getStdKey (key_handle).certificate_path);
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                         abortProvisioningSession                           //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void abortProvisioningSession (int provisioning_handle) throws SKSException
+      {
+        Provisioning prov = getOpenProvisioningSession (provisioning_handle);
+        provisionings.remove (provisioning_handle);
+        Iterator<KeyEntry> list = keys.values ().iterator ();
+        while (list.hasNext ())
+          {
+            KeyEntry key_entry = list.next ();
+            if (key_entry.owner == prov)
+              {
+                list.remove ();
+              }
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                        closeProvisioningSession                            //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public byte[] closeProvisioningSession (int provisioning_handle, byte[] mac) throws SKSException
+      {
+        Provisioning prov = getOpenProvisioningSession (provisioning_handle);
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder close_mac = prov.getMacBuilder (APIDescriptors.CLOSE_PROVISIONING_SESSION);
+        close_mac.addString (prov.client_session_id);
+        close_mac.addString (prov.server_session_id);
+        close_mac.addString (prov.issuer_uri);
+        prov.testMac (close_mac, mac);
+// TODO - check status of a lot of stuff and perform atomic updates
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Generate a final attestation
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder close_attestation = prov.getMacBuilder (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST);
+        close_attestation.addVerbatim (CryptoConstants.CRYPTO_STRING_SUCCESS);
+        close_attestation.addShort (prov.mac_sequence_counter);
+        byte[] attest = close_attestation.getResult ();
+        
+        ///////////////////////////////////////////////////////////////////////////////////
+        // We are done, close the show for this time
+        ///////////////////////////////////////////////////////////////////////////////////
+        prov.open = false;
+        return attest;
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                        createProvisioningSession                           //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public ProvisioningSession createProvisioningSession (String session_key_algorithm,
+                                                          String server_session_id,
+                                                          ECPublicKey server_ephemeral_key,
+                                                          String issuer_uri,
+                                                          boolean updatable,
+                                                          int client_time,
+                                                          int session_life_time,
+                                                          short session_key_limit) throws SKSException
+      {
+        byte[] session_attestation = null;
+        byte[] session_key = null;
+        ECPublicKey client_ephemeral_key = null;
+        String client_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()); 
+        try
+          {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Create client ephemeral key
+            ///////////////////////////////////////////////////////////////////////////////////
+            KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC", "BC");
+            ECGenParameterSpec eccgen = new ECGenParameterSpec ("P-256");
+            generator.initialize (eccgen, new SecureRandom ());
+            java.security.KeyPair kp = generator.generateKeyPair ();
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Apply the SP800-56A C(2, 0, ECC CDH) algorithm
+            ///////////////////////////////////////////////////////////////////////////////////
+            client_ephemeral_key = (ECPublicKey) kp.getPublic ();
+            KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
+            key_agreement.init (kp.getPrivate ());
+            key_agreement.doPhase (server_ephemeral_key, true);
+            byte[] Z = key_agreement.generateSecret ();
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // But use a custom KDF 
+            ///////////////////////////////////////////////////////////////////////////////////
+            MacBuilder kdf = new MacBuilder (Z);
+            kdf.addString (client_session_id);
+            kdf.addString (server_session_id);
+            kdf.addString (issuer_uri);
+            kdf.addArray (getDeviceCertificatePath ()[0].getEncoded ());
+            session_key = kdf.getResult ();
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // SessionKey attested data
+            ///////////////////////////////////////////////////////////////////////////////////
+            MacBuilder ska = new MacBuilder (session_key);
+            ska.addString (client_session_id);
+            ska.addString (server_session_id);
+            ska.addString (issuer_uri);
+            ska.addArray (server_ephemeral_key.getEncoded ());
+            ska.addArray (client_ephemeral_key.getEncoded ());
+            ska.addBool (updatable);
+            ska.addInt (client_time);
+            ska.addInt (session_life_time);
+            ska.addShort (session_key_limit);
+            byte[] session_key_attest = ska.getResult ();
+            
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Sign attestation
+            ///////////////////////////////////////////////////////////////////////////////////
+            Signature signer = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+            signer.initSign ((PrivateKey) TPMKeyStore.getTPMKeyStore ().getKey ("mykey", TPMKeyStore.getSignerPassword ().toCharArray ()));
+            signer.update (session_key_attest);
+            session_attestation = signer.sign ();
+          }
+        catch (Exception e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+        Provisioning p = new Provisioning ();
+        p.server_session_id = server_session_id;
+        p.client_session_id = client_session_id;
+        p.issuer_uri = issuer_uri;
+        p.session_key = session_key;
+        return new ProvisioningSession (p.provisioning_handle,
+                                        client_session_id,
+                                        session_attestation,
+                                        client_ephemeral_key);
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                       enumerateProvisioningSessions                        //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
+                                                                        boolean provisioning_state) throws SKSException
+      {
+        if (!eps.isValid ())
+          {
+            return getProvisioning (provisionings.values ().iterator (), provisioning_state);
+          }
+        Iterator<Provisioning> list = provisionings.values ().iterator ();
+        while (list.hasNext ())
+          {
+            if (list.next ().provisioning_handle == eps.getProvisioningHandle ())
+              {
+                return getProvisioning (list, provisioning_state);
+              }
+          }
+        return new EnumeratedProvisioningSession ();
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                      signProvisioningSessionData                           //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public byte[] signProvisioningSessionData (int provisioning_handle, byte[] data) throws SKSException
+      {
+        return getOpenProvisioningSession (provisioning_handle).getMacBuilder (CryptoConstants.CRYPTO_STRING_SIGNATURE).addVerbatim (data).getResult ();
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                              getKeyHandle                                  //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public int getKeyHandle (int provisioning_handle, String id) throws SKSException
+      {
+        Provisioning prov = getOpenProvisioningSession (provisioning_handle);
+        for (KeyEntry key_entry : keys.values ())
+          {
+            if (key_entry.owner == prov && key_entry.id.equals (id))
+              {
+                return key_entry.key_handle;
+              }
+          }
+        prov.abort ("Key: " +id + "missing");
+        return 0;  // For compiler...
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                              addExtension                                  //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void addExtension (int key_handle, 
+                              byte basic_type,
+                              byte[] qualifier,
+                              String extension_type,
+                              byte[] extension_data,
+                              byte[] mac) throws SKSException
+      {
+        KeyEntry key_entry = getOpenKey (key_handle);
+        if (key_entry.extensions.get (extension_type) != null)
+          {
+            key_entry.owner.abort ("Duplicate extension:" + extension_type, SKSException.ERROR_OPTION);
+          }
+        MacBuilder ext_mac = key_entry.getEECertMacBuilder (APIDescriptors.ADD_EXTENSION);
+        ext_mac.addByte (basic_type);
+        ext_mac.addArray (qualifier);
+        ext_mac.addString (extension_type);
+        ext_mac.addBlob (extension_data);
+        key_entry.owner.testMac (ext_mac, mac);
+        Extension extension = new Extension ();
+        extension.basic_type = basic_type;
+        extension.qualifier = qualifier;
+        extension.extension_data = basic_type == 0x01 ? key_entry.owner.decrypt (extension_data) : extension_data;
+        key_entry.extensions.put (extension_type, extension);
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                            setSymmetricKey                                 //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void setSymmetricKey (int key_handle, byte[] encrypted_symmetric_key, String[] endorsed_algorithms, byte[] mac) throws SKSException
+      {
+        KeyEntry key_entry = getOpenKey (key_handle);
+        if (key_entry.symmetric_key != null)
+          {
+            key_entry.owner.abort ("Duplicate symmetric key:" + key_handle, SKSException.ERROR_OPTION);
+          }
+        if (key_entry.key_usage != KeyUsage.SYMMETRIC_KEY)
+          {
+            key_entry.owner.abort ("Wrong key usage for symmetric key:" + key_handle, SKSException.ERROR_OPTION);
+          }
+        MacBuilder sym_mac = key_entry.getEECertMacBuilder (APIDescriptors.SET_SYMMETRIC_KEY);
+        sym_mac.addArray (encrypted_symmetric_key);
+// TODO verify against supported sym alg...
+        for (String algorithm : endorsed_algorithms)
+          {
+            sym_mac.addString (algorithm);
+          }
+        key_entry.owner.testMac (sym_mac, mac);
+        key_entry.symmetric_key = key_entry.owner.decrypt (encrypted_symmetric_key);
+        key_entry.endorsed_algorithms = endorsed_algorithms;
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                           setCertificatePath                               //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void setCertificatePath (int key_handle, X509Certificate[] certificate_path, byte[] mac) throws SKSException
+      {
+        KeyEntry key_entry = getOpenKey (key_handle);
+        if (key_entry.certificate_path != null)
+          {
+            key_entry.owner.abort ("Multiple cert insert:" + key_handle, SKSException.ERROR_OPTION);
+          }
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder set_certificate_mac = key_entry.owner.getMacBuilder (APIDescriptors.SET_CERTIFICATE_PATH);
+        try
+          {
+            set_certificate_mac.addArray (key_entry.public_key.getEncoded ());
+            set_certificate_mac.addString (key_entry.id);
+            for (X509Certificate certificate : certificate_path)
+              {
+                set_certificate_mac.addArray (certificate.getEncoded ());
+              }
+          }
+        catch (GeneralSecurityException e)
+          {
+            key_entry.owner.abort ("Internal error:" + e.getMessage ());
+          }
+        key_entry.owner.testMac (set_certificate_mac, mac);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Done.  Perform the actual task we were meant to do
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.certificate_path = certificate_path;
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                              createKeyPair                                 //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
     @Override
     public KeyPair createKeyPair (int provisioning_handle, 
                                   String id,
@@ -601,293 +965,12 @@ public class SKSReferenceImplementation implements SecureKeyStore
         return null; // For the compiler only...
       }
 
-    @Override
-    public void abortProvisioningSession (int provisioning_handle) throws SKSException
-      {
-        Provisioning prov = getOpenProvisioningSession (provisioning_handle);
-        provisionings.remove (provisioning_handle);
-        Iterator<KeyEntry> list = keys.values ().iterator ();
-        while (list.hasNext ())
-          {
-            KeyEntry key_entry = list.next ();
-            if (key_entry.owner == prov)
-              {
-                list.remove ();
-              }
-          }
-      }
 
-    @Override
-    public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException
-      {
-        if (!ek.isValid ())
-          {
-            return getKey (keys.values ().iterator ());
-          }
-        Iterator<KeyEntry> list = keys.values ().iterator ();
-        while (list.hasNext ())
-          {
-            if (list.next ().key_handle == ek.getKeyHandle ())
-              {
-                return getKey (list);
-              }
-          }
-        return new EnumeratedKey ();
-      }
-
-    @Override
-    public void setCertificatePath (int key_handle, X509Certificate[] certificate_path, byte[] mac) throws SKSException
-      {
-        KeyEntry key_entry = getOpenKey (key_handle);
-        if (key_entry.certificate_path != null)
-          {
-            key_entry.owner.abort ("Multiple cert insert:" + key_handle, SKSException.ERROR_OPTION);
-          }
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
-        ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder set_certificate_mac = key_entry.owner.getMacBuilder (APIDescriptors.SET_CERTIFICATE_PATH);
-        try
-          {
-            set_certificate_mac.addArray (key_entry.public_key.getEncoded ());
-            set_certificate_mac.addString (key_entry.id);
-            for (X509Certificate certificate : certificate_path)
-              {
-                set_certificate_mac.addArray (certificate.getEncoded ());
-              }
-          }
-        catch (GeneralSecurityException e)
-          {
-            key_entry.owner.abort ("Internal error:" + e.getMessage ());
-          }
-        key_entry.owner.testMac (set_certificate_mac, mac);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Done.  Perform the actual task we were meant to do
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.certificate_path = certificate_path;
-      }
-
-    @Override
-    public byte[] closeProvisioningSession (int provisioning_handle, byte[] mac) throws SKSException
-      {
-        Provisioning prov = getOpenProvisioningSession (provisioning_handle);
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
-        ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder close_mac = prov.getMacBuilder (APIDescriptors.CLOSE_PROVISIONING_SESSION);
-        close_mac.addString (prov.client_session_id);
-        close_mac.addString (prov.server_session_id);
-        close_mac.addString (prov.issuer_uri);
-        prov.testMac (close_mac, mac);
-// TODO - check status of a lot of stuff and perform atomic updates
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Generate a final attestation
-        ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder close_attestation = prov.getMacBuilder (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST);
-        close_attestation.addVerbatim (CryptoConstants.CRYPTO_STRING_SUCCESS);
-        close_attestation.addShort (prov.mac_sequence_counter);
-        byte[] attest = close_attestation.getResult ();
-        
-        ///////////////////////////////////////////////////////////////////////////////////
-        // We are done, close the show for this time
-        ///////////////////////////////////////////////////////////////////////////////////
-        prov.open = false;
-        return attest;
-      }
-
-    @Override
-    public ProvisioningSession createProvisioningSession (String session_key_algorithm,
-                                                          String server_session_id,
-                                                          ECPublicKey server_ephemeral_key,
-                                                          String issuer_uri,
-                                                          boolean updatable,
-                                                          int client_time,
-                                                          int session_life_time,
-                                                          short session_key_limit) throws SKSException
-      {
-        byte[] session_attestation = null;
-        byte[] session_key = null;
-        ECPublicKey client_ephemeral_key = null;
-        String client_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()); 
-        try
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Create client ephemeral key
-            ///////////////////////////////////////////////////////////////////////////////////
-            KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC", "BC");
-            ECGenParameterSpec eccgen = new ECGenParameterSpec ("P-256");
-            generator.initialize (eccgen, new SecureRandom ());
-            java.security.KeyPair kp = generator.generateKeyPair ();
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Apply the SP800-56A C(2, 0, ECC CDH) algorithm
-            ///////////////////////////////////////////////////////////////////////////////////
-            client_ephemeral_key = (ECPublicKey) kp.getPublic ();
-            KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
-            key_agreement.init (kp.getPrivate ());
-            key_agreement.doPhase (server_ephemeral_key, true);
-            byte[] Z = key_agreement.generateSecret ();
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // But use a custom KDF 
-            ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder kdf = new MacBuilder (Z);
-            kdf.addString (client_session_id);
-            kdf.addString (server_session_id);
-            kdf.addString (issuer_uri);
-            kdf.addArray (getDeviceCertificatePath ()[0].getEncoded ());
-            session_key = kdf.getResult ();
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // SessionKey attested data
-            ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder ska = new MacBuilder (session_key);
-            ska.addString (client_session_id);
-            ska.addString (server_session_id);
-            ska.addString (issuer_uri);
-            ska.addArray (server_ephemeral_key.getEncoded ());
-            ska.addArray (client_ephemeral_key.getEncoded ());
-            ska.addBool (updatable);
-            ska.addInt (client_time);
-            ska.addInt (session_life_time);
-            ska.addShort (session_key_limit);
-            byte[] session_key_attest = ska.getResult ();
-            
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Sign attestation
-            ///////////////////////////////////////////////////////////////////////////////////
-            Signature signer = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
-            signer.initSign ((PrivateKey) TPMKeyStore.getTPMKeyStore ().getKey ("mykey", TPMKeyStore.getSignerPassword ().toCharArray ()));
-            signer.update (session_key_attest);
-            session_attestation = signer.sign ();
-          }
-        catch (Exception e)
-          {
-            throw new SKSException (e, SKSException.ERROR_CRYPTO);
-          }
-        Provisioning p = new Provisioning ();
-        p.server_session_id = server_session_id;
-        p.client_session_id = client_session_id;
-        p.issuer_uri = issuer_uri;
-        p.session_key = session_key;
-        return new ProvisioningSession (p.provisioning_handle,
-                                        client_session_id,
-                                        session_attestation,
-                                        client_ephemeral_key);
-      }
-
-    @Override
-    public DeviceInfo getDeviceInfo () throws SKSException
-      {
-        try
-          {
-            X509Certificate[] certificate_path = getDeviceCertificatePath ();
-            return new DeviceInfo (certificate_path);
-          }
-        catch (Exception e)
-          {
-            throw new SKSException (e, SKSException.ERROR_CRYPTO);
-          }
-      }
-
-    @Override
-    public EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
-                                                                        boolean provisioning_state) throws SKSException
-      {
-        if (!eps.isValid ())
-          {
-            return getProvisioning (provisionings.values ().iterator (), provisioning_state);
-          }
-        Iterator<Provisioning> list = provisionings.values ().iterator ();
-        while (list.hasNext ())
-          {
-            if (list.next ().provisioning_handle == eps.getProvisioningHandle ())
-              {
-                return getProvisioning (list, provisioning_state);
-              }
-          }
-        return new EnumeratedProvisioningSession ();
-      }
-
-    @Override
-    public KeyAttributes getKeyAttributes (int key_handle) throws SKSException
-      {
-        return new KeyAttributes (getStdKey (key_handle).certificate_path);
-      }
-
-    @Override
-    public byte[] signProvisioningSessionData (int provisioning_handle, byte[] data) throws SKSException
-      {
-        return getOpenProvisioningSession (provisioning_handle).getMacBuilder (CryptoConstants.CRYPTO_STRING_SIGNATURE).addVerbatim (data).getResult ();
-      }
-
-    @Override
-    public void addExtension (int key_handle, 
-                              byte basic_type,
-                              byte[] qualifier,
-                              String extension_type,
-                              byte[] extension_data,
-                              byte[] mac) throws SKSException
-      {
-        KeyEntry key_entry = getOpenKey (key_handle);
-        if (key_entry.extensions.get (extension_type) != null)
-          {
-            key_entry.owner.abort ("Duplicate extension:" + extension_type, SKSException.ERROR_OPTION);
-          }
-        MacBuilder ext_mac = key_entry.getEECertMacBuilder (APIDescriptors.ADD_EXTENSION);
-        ext_mac.addByte (basic_type);
-        ext_mac.addArray (qualifier);
-        ext_mac.addString (extension_type);
-        ext_mac.addBlob (extension_data);
-        key_entry.owner.testMac (ext_mac, mac);
-        Extension extension = new Extension ();
-        extension.basic_type = basic_type;
-        extension.qualifier = qualifier;
-        extension.extension_data = basic_type == 0x01 ? key_entry.owner.decrypt (extension_data) : extension_data;
-        key_entry.extensions.put (extension_type, extension);
-      }
-
-    @Override
-    public void setSymmetricKey (int key_handle, byte[] encrypted_symmetric_key, String[] endorsed_algorithms, byte[] mac) throws SKSException
-      {
-        KeyEntry key_entry = getOpenKey (key_handle);
-        if (key_entry.symmetric_key != null)
-          {
-            key_entry.owner.abort ("Duplicate symmetric key:" + key_handle, SKSException.ERROR_OPTION);
-          }
-        if (key_entry.key_usage != KeyUsage.SYMMETRIC_KEY)
-          {
-            key_entry.owner.abort ("Wrong key usage for symmetric key:" + key_handle, SKSException.ERROR_OPTION);
-          }
-        MacBuilder sym_mac = key_entry.getEECertMacBuilder (APIDescriptors.SET_SYMMETRIC_KEY);
-        sym_mac.addArray (encrypted_symmetric_key);
-// TODO verify against supported sym alg...
-        for (String algorithm : endorsed_algorithms)
-          {
-            sym_mac.addString (algorithm);
-          }
-        key_entry.owner.testMac (sym_mac, mac);
-        key_entry.symmetric_key = key_entry.owner.decrypt (encrypted_symmetric_key);
-        key_entry.endorsed_algorithms = endorsed_algorithms;
-      }
-
-    @Override
-    public int getKeyHandle (int provisioning_handle, String id) throws SKSException
-      {
-        Provisioning prov = getOpenProvisioningSession (provisioning_handle);
-        for (KeyEntry key_entry : keys.values ())
-          {
-            if (key_entry.owner == prov && key_entry.id.equals (id))
-              {
-                return key_entry.key_handle;
-              }
-          }
-        prov.abort ("Key: " +id + "missing");
-        return 0;  // For compiler...
-      }
-
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                            createPINPolicy                                 //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
     @Override
     public int createPINPolicy (int provisioning_handle,
                                 String id,
@@ -934,6 +1017,12 @@ public class SKSReferenceImplementation implements SecureKeyStore
         return pin_policy.pin_policy_handle;
       }
 
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                            createPUKPolicy                                 //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
     @Override
     public int createPUKPolicy (int provisioning_handle,
                                 String id, 
