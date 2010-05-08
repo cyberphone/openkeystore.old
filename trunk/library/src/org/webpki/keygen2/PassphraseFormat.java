@@ -19,7 +19,7 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 
-public enum PassphraseFormats
+public enum PassphraseFormat
   {
     NUMERIC       ("numeric",      (byte)0x00),
     ALPHANUMERIC  ("alphanumeric", (byte)0x01),
@@ -30,7 +30,7 @@ public enum PassphraseFormats
     
     private final byte sks_value;
 
-    private PassphraseFormats (String xml_name, byte sks_value)
+    private PassphraseFormat (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
@@ -47,9 +47,9 @@ public enum PassphraseFormats
         return sks_value;
       }
 
-    public static PassphraseFormats getPassphraseFormatFromString (String xml_name) throws IOException
+    public static PassphraseFormat getPassphraseFormatFromString (String xml_name) throws IOException
       {
-        for (PassphraseFormats type : PassphraseFormats.values ())
+        for (PassphraseFormat type : PassphraseFormat.values ())
           {
             if (xml_name.equals (type.xml_name))
               {

@@ -72,18 +72,23 @@ import org.webpki.keygen2.CredentialDeploymentRequestEncoder;
 import org.webpki.keygen2.CredentialDeploymentResponseDecoder;
 import org.webpki.keygen2.CredentialDeploymentResponseEncoder;
 import org.webpki.keygen2.CryptoConstants;
+import org.webpki.keygen2.InputMethod;
 import org.webpki.keygen2.KeyInitializationResponseDecoder;
 import org.webpki.keygen2.KeyInitializationResponseEncoder;
 import org.webpki.keygen2.KeyUsage;
 import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.KeyInitializationRequestEncoder;
-import org.webpki.keygen2.PassphraseFormats;
+import org.webpki.keygen2.PINGrouping;
+import org.webpki.keygen2.PassphraseFormat;
+import org.webpki.keygen2.PatternRestriction;
 import org.webpki.keygen2.ProvisioningSessionRequestDecoder;
 import org.webpki.keygen2.ProvisioningSessionRequestEncoder;
 import org.webpki.keygen2.ProvisioningSessionResponseDecoder;
 import org.webpki.keygen2.ProvisioningSessionResponseEncoder;
 import org.webpki.keygen2.ServerCredentialStore;
 import org.webpki.keygen2.ServerSessionKeyInterface;
+import org.webpki.keygen2.ServerCredentialStore.KeyAlgorithmData;
+import org.webpki.keygen2.ServerCredentialStore.PINPolicy;
 
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
@@ -120,6 +125,10 @@ public class KeyGen2Test
     boolean device_pin;
     
     boolean puk_protection;
+    
+    boolean add_pin_pattern;
+    
+    boolean preset_pin;
     
     static FileOutputStream fos;
     
@@ -225,34 +234,53 @@ public class KeyGen2Test
             int puk_policy_handle = 0;
             for (KeyInitializationRequestDecoder.KeyObject key : key_init_request.getKeyObjects ())
               {
+                byte[] pin_value = key.getPresetPIN ();
                 if (key.getPINPolicy () == null)
                   {
                     pin_policy_handle = key.isDevicePINProtected () ? 0xFFFFFFFF : 0;
                     puk_policy_handle = 0;
                   }
-                else if (key.isStartOfPINPolicy ())
+                else
                   {
-                    if (key.isStartOfPUKPolicy ())
+                    if (key.getPINPolicy ().getUserDefinedFlag ())
                       {
-                        KeyInitializationRequestDecoder.PUKPolicy puk_policy = key.getPINPolicy ().getPUKPolicy ();
-                        puk_policy_handle = sks.createPUKPolicy (provisioning_handle, 
-                                                                 puk_policy.getID (),
-                                                                 puk_policy.getEncryptedValue (),
-                                                                 puk_policy.getFormat (),
-                                                                 puk_policy.getRetryLimit (),
-                                                                 puk_policy.getMAC());
+                        pin_value = "015354".getBytes ("UTF-8");
                       }
-                    pin_policy_handle = sks.createPINPolicy (provisioning_handle,
-                                                             key.getPINPolicy ().getID (),
-                                                             puk_policy_handle,
-                                                             key.getPINPolicy ().getMAC ());
+                    if (key.isStartOfPINPolicy ())
+                      {
+                        if (key.isStartOfPUKPolicy ())
+                          {
+                            KeyInitializationRequestDecoder.PUKPolicy puk_policy = key.getPINPolicy ().getPUKPolicy ();
+                            puk_policy_handle = sks.createPUKPolicy (provisioning_handle, 
+                                                                     puk_policy.getID (),
+                                                                     puk_policy.getEncryptedValue (),
+                                                                     puk_policy.getFormat (),
+                                                                     puk_policy.getRetryLimit (),
+                                                                     puk_policy.getMAC());
+                          }
+                        KeyInitializationRequestDecoder.PINPolicy pin_policy = key.getPINPolicy ();
+    
+                        pin_policy_handle = sks.createPINPolicy (provisioning_handle,
+                                                                 pin_policy.getID (),
+                                                                 puk_policy_handle,
+                                                                 pin_policy.getUserDefinedFlag (),
+                                                                 pin_policy.getUserModifiableFlag (),
+                                                                 pin_policy.getFormat (),
+                                                                 pin_policy.getRetryLimit (),
+                                                                 pin_policy.getGrouping (),
+                                                                 pin_policy.getPatternRestrictions (),
+                                                                 pin_policy.getMinLength (),
+                                                                 pin_policy.getMaxLength (),
+                                                                 pin_policy.getInputMethod (),
+                                                                 pin_policy.getMAC ());
+                      }
                   }
                 KeyPair kpr = sks.createKeyPair (provisioning_handle,
+                                                 key.getID (),
                                                  key_init_request.getKeyAttestationAlgorithm (),
                                                  key.getServerSeed (),
-                                                 key.getID (),
                                                  pin_policy_handle,
-                                                 "2457".getBytes ("UTF-8"), /* pin_value */
+                                                 pin_value,
                                                  key.getBiometricProtection (),
                                                  key.getPrivateKeyBackupFlag (),
                                                  key.getExportPolicy (),
@@ -479,7 +507,7 @@ public class KeyGen2Test
                                                                         server_session_id,
                                                                         ISSUER_URI,
                                                                         10000,
-                                                                        50);
+                                                                        (short)50);
             if (updatable)
               {
                 prov_sess_request.setUpdatable (true);
@@ -519,16 +547,31 @@ public class KeyGen2Test
               {
                 puk_policy =
                   server_credential_store.createPUKPolicy (server_sess_key.encrypt (new byte[]{'0','1','2','3','4','5','6', '7','8','9'}),
-                                                                                    PassphraseFormats.NUMERIC,
+                                                                                    PassphraseFormat.NUMERIC,
                                                                                     3);
               }
             if (pin_protection)
               {
-                pin_policy = server_credential_store.createPINPolicy (PassphraseFormats.NUMERIC, 4, 8, 3, puk_policy);
+                pin_policy = server_credential_store.createPINPolicy (PassphraseFormat.NUMERIC,
+                                                                      4,
+                                                                      8,
+                                                                      3,
+                                                                      puk_policy);
+                if (add_pin_pattern)
+                  {
+                    pin_policy.addPatternRestriction (PatternRestriction.THREE_IN_A_ROW);
+                    pin_policy.addPatternRestriction (PatternRestriction.SEQUENCE);
+                  }
               }
             ServerCredentialStore.KeyProperties kp = device_pin ?
                 server_credential_store.createDevicePINProtectedKey (KeyUsage.AUTHENTICATION, key_alg1) :
-                server_credential_store.createKey (symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION, key_alg1, pin_policy);
+                  preset_pin ? server_credential_store.createKeyWithPresetPIN (symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION,
+                                                                               key_alg1, pin_policy,
+                                                                               server_sess_key.encrypt (new byte[]{'3','1','2','5','8','9'}))
+                             :
+                server_credential_store.createKey (symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION,
+                                                   key_alg1,
+                                                   pin_policy);
             if (symmetric_key)
               {
                 kp.setSymmetricKey (server_sess_key.encrypt (new byte[]{0,2,3,4,5,6,7,8,9,11,12,13,14,15}),
@@ -700,10 +743,21 @@ public class KeyGen2Test
         
         void perform () throws Exception
           {
-            writeString ("Begin Test\nPINs = ");
+            writeString ("Begin Test\n");
+            writeString ("PUK = ");
+            writeString (puk_protection ? "Yes\n" : "No\n");
+            writeString ("PINs = ");
             writeString (pin_protection ? "Yes\n" : "No\n");
+            writeString ("Device PIN = ");
+            writeString (device_pin ? "Yes\n" : "No\n");
+            writeString ("Preset PIN = ");
+            writeString (preset_pin ? "Yes\n" : "No\n");
+            writeString ("PIN patterns = ");
+            writeString (add_pin_pattern ? "Yes\n" : "No\n");
             writeString ("ECC Key = ");
             writeString (ecc_key ? "Yes\n" : "No\n");
+            writeString ("Server Seed = ");
+            writeString (server_seed ? "Yes\n" : "No\n");
             writeString ("Private Key Backup = ");
             writeString (private_key_backup ? "Yes\n" : "No\n");
             server = new Server ();
@@ -749,6 +803,7 @@ public class KeyGen2Test
       {
         Doer doer = new Doer ();
         pin_protection = true;
+        add_pin_pattern = true;
         ecc_key = true;
         doer.perform ();
       }
@@ -773,22 +828,22 @@ public class KeyGen2Test
         doer.perform ();
       }
     @Test
-    public void test7 () throws Exception
-    {
-      Doer doer = new Doer ();
-      updatable = true;
-      pin_protection = true;
-      puk_protection = true;
-      doer.perform ();
-    }
     public void test6 () throws Exception
-    {
-      Doer doer = new Doer ();
-      updatable = true;
-      pin_protection = true;
-      symmetric_key = true;
-      property_bag = true;
-      doer.perform ();
+      {
+        Doer doer = new Doer ();
+        updatable = true;
+        pin_protection = true;
+        puk_protection = true;
+        doer.perform ();
+      }
+    public void test7 () throws Exception
+      {
+        Doer doer = new Doer ();
+        updatable = true;
+        pin_protection = true;
+        symmetric_key = true;
+        property_bag = true;
+        doer.perform ();
     }
     @Test
     public void test8 () throws Exception
@@ -796,6 +851,15 @@ public class KeyGen2Test
         Doer doer = new Doer ();
         updatable = true;
         device_pin = true;
+        doer.perform ();
+      }
+    @Test
+    public void test9 () throws Exception
+      {
+        Doer doer = new Doer ();
+        updatable = true;
+        pin_protection = true;
+        preset_pin = true;
         doer.perform ();
       }
 

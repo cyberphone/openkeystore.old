@@ -81,7 +81,7 @@ public class ProvisioningSessionRequestDecoder extends ProvisioningSessionReques
       }
 
     
-    public int getSessionKeyLimit ()
+    public short getSessionKeyLimit ()
       {
         return session_key_limit;
       }
@@ -121,7 +121,7 @@ public class ProvisioningSessionRequestDecoder extends ProvisioningSessionReques
         
         session_updatable_flag = ah.getBooleanConditional (UPDATABLE_ATTR, session_updatable_flag);
         
-        session_key_limit = ah.getInt (SESSION_KEY_LIMIT_ATTR);
+        session_key_limit = (short)ah.getInt (SESSION_KEY_LIMIT_ATTR);
         
         session_life_time = ah.getInt (SESSION_LIFE_TIME_ATTR);
 

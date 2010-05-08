@@ -21,22 +21,31 @@ import java.io.IOException;
 
 public enum PINGrouping
   {
-    NONE                     ("none"),
-    SHARED                   ("shared"),
-    SIGNATURE_PLUS_STANDARD  ("signature+standard"),
-    UNIQUE                   ("unique");
+    NONE                     ("none",               (byte)0x00),
+    SHARED                   ("shared",             (byte)0x01),
+    SIGNATURE_PLUS_STANDARD  ("signature+standard", (byte)0x02),
+    UNIQUE                   ("unique",             (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
+    
+    private final byte sks_value;        // As expressed in SKS
 
-    private PINGrouping (String xml_name)
+    private PINGrouping (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
+        this.sks_value = sks_value;
       }
 
 
     public String getXMLName ()
       {
         return xml_name;
+      }
+
+    
+    public byte getSKSValue ()
+      {
+        return sks_value;
       }
 
 

@@ -30,7 +30,7 @@ public enum KeyUsage
 
     private final String xml_name;       // As expressed in XML
     
-    private final byte sks_value;
+    private final byte sks_value;        // As expressed in SKS
 
     private KeyUsage (String xml_name, byte sks_value)
       {

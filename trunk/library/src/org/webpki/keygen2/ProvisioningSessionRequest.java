@@ -45,7 +45,7 @@ abstract class ProvisioningSessionRequest extends XMLObjectWrapper
 
     int session_life_time;
 
-    int session_key_limit;
+    short session_key_limit;
 
     ServerCookie server_cookie;
 

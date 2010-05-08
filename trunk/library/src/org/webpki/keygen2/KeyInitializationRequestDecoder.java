@@ -79,29 +79,29 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
         
         Object user_data;
 
-        PassphraseFormats format;
+        PassphraseFormat format;
 
-        int retry_limit;
+        short retry_limit;
         
         String id;
  
         PUKPolicy (DOMReaderHelper rd) throws IOException
           {
             super (rd);
-            retry_limit = rd.getAttributeHelper ().getInt (RETRY_LIMIT_ATTR);
+            retry_limit = (short)rd.getAttributeHelper ().getInt (RETRY_LIMIT_ATTR);
             id = rd.getAttributeHelper ().getString (ID_ATTR);
-            format = PassphraseFormats.getPassphraseFormatFromString (rd.getAttributeHelper ().getString (FORMAT_ATTR));
+            format = PassphraseFormat.getPassphraseFormatFromString (rd.getAttributeHelper ().getString (FORMAT_ATTR));
             mac = rd.getAttributeHelper ().getBinary (MAC_ATTR);
           }
 
 
-        public int getRetryLimit ()
+        public short getRetryLimit ()
           {
             return retry_limit;
           }
 
 
-        public PassphraseFormats getFormat ()
+        public PassphraseFormat getFormat ()
           {
             return format;
           }
@@ -142,21 +142,19 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
         
         Object user_data;
 
-        PassphraseFormats format;
+        PassphraseFormat format;
 
-        int retry_limit;
+        short retry_limit;
 
-        int min_length;
+        byte min_length;
 
-        int max_length;
+        byte max_length;
 
         PINGrouping group;
 
-        boolean caching_support;
+        InputMethod input_method;
 
-        InputMethods input_method;
-
-        Set<PatternRestrictions> pattern_restrictions = EnumSet.noneOf (PatternRestrictions.class);
+        Set<PatternRestriction> pattern_restrictions = EnumSet.noneOf (PatternRestriction.class);
 
         PINPolicy (DOMReaderHelper rd) throws IOException
           {
@@ -166,63 +164,64 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             
             id = ah.getString (ID_ATTR);
 
-            min_length = ah.getInt (MIN_LENGTH_ATTR);
+            min_length = (byte)ah.getInt (MIN_LENGTH_ATTR);
 
-            max_length = ah.getInt (MAX_LENGTH_ATTR);
+            max_length = (byte)ah.getInt (MAX_LENGTH_ATTR);
 
             if (min_length > max_length)
               {
                 bad ("PIN length: min > max");
               }
 
-            retry_limit = ah.getInt (RETRY_LIMIT_ATTR);
+            retry_limit = (short)ah.getInt (RETRY_LIMIT_ATTR);
 
-            format = PassphraseFormats.getPassphraseFormatFromString (ah.getString (FORMAT_ATTR));
+            format = PassphraseFormat.getPassphraseFormatFromString (ah.getString (FORMAT_ATTR));
 
             group = PINGrouping.getPINGroupingFromString (ah.getStringConditional (GROUPING_ATTR,
                                                                                    PINGrouping.NONE.getXMLName ()));
 
-            input_method = InputMethods.getMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR,
-                                                                                      InputMethods.ANY.getXMLName ()));
-
-            caching_support = ah.getBooleanConditional (CACHING_SUPPORT_ATTR);
+            input_method = InputMethod.getMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR,
+                                                                                     InputMethod.ANY.getXMLName ()));
+            
+            read_user_modifiable = ah.getStringConditional (USER_MODIFIABLE_ATTR) != null;
+            user_modifiable = ah.getBooleanConditional (USER_MODIFIABLE_ATTR, false);
 
             String pr[] = ah.getListConditional (PATTERN_RESTRICTIONS_ATTR);
             if (pr != null)
               {
                 for (String pattern : pr)
                   {
-                    pattern_restrictions.add (PatternRestrictions.getPatternRestrictionFromString (pattern));
+                    pattern_restrictions.add (PatternRestriction.getPatternRestrictionFromString (pattern));
                   }
               }
           }
 
 
-        public Set<PatternRestrictions> getPatternRestrictions ()
+        public Set<PatternRestriction> getPatternRestrictions ()
           {
             return pattern_restrictions;
           }
 
 
-        public int getMinLength ()
+        public byte getMinLength ()
           {
             return min_length;
           }
 
 
-        public int getMaxLength ()
+        public byte getMaxLength ()
           {
             return max_length;
           }
 
 
-        public int getRetryLimit ()
+        public short getRetryLimit ()
           {
             return retry_limit;
           }
 
 
-        public PassphraseFormats getFormat ()
+        public PassphraseFormat getFormat ()
           {
             return format;
           }
@@ -234,13 +233,25 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
 
 
-        public boolean getCachingSupport ()
+        boolean user_defined;
+        
+        public boolean getUserDefinedFlag ()
           {
-            return caching_support;
+            return user_defined;
           }
 
 
-        public InputMethods getInputMethod ()
+        boolean user_modifiable;
+        
+        boolean read_user_modifiable;
+        
+        public boolean getUserModifiableFlag ()
+          {
+            return user_modifiable;
+          }
+
+
+        public InputMethod getInputMethod ()
           {
             return input_method;
           }
@@ -383,7 +394,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             if (rd.hasNext (RSA_ELEM))
               {
                 rd.getNext (RSA_ELEM);
-                key_algorithm_data = new RSA (ah.getInt (KEY_SIZE_ATTR), ah.getIntConditional (FIXED_EXPONENT_ATTR));
+                key_algorithm_data = new RSA (ah.getInt (KEY_SIZE_ATTR), ah.getIntConditional (EXPONENT_ATTR));
               }
             else
               {
@@ -408,9 +419,9 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
 
 
-        public PresetPIN getPresetPIN ()
+        public byte[] getPresetPIN ()
           {
-            return preset_pin;
+            return preset_pin == null ? null : preset_pin.encrypted_value;
           }
 
 
@@ -564,6 +575,14 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
         else
           {
+            if (pin_policy != null)
+              {
+                pin_policy.user_defined = true;
+                if (!pin_policy.read_user_modifiable)
+                  {
+                    pin_policy.user_modifiable = true;
+                  }
+              }
             request_objects.add (rk = new KeyObject (rd, pin_policy, start_of_pin_group, null, false));
           }
         return rk;

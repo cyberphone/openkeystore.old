@@ -35,7 +35,7 @@ public interface KeyGen2Constants
 
     String KEY_USAGE_ATTR                    = "KeyUsage";
 
-    String FIXED_EXPONENT_ATTR               = "FixedExponent";
+    String EXPONENT_ATTR                     = "Exponent";
 
     String SERVER_SESSION_ID_ATTR            = "ServerSessionID";
 
@@ -105,7 +105,7 @@ public interface KeyGen2Constants
 
     String FORMAT_ATTR                       = "Format";
 
-    String CACHING_SUPPORT_ATTR              = "CachingSupport";
+    String ENABLE_PIN_CACHING_ATTR           = "EnablePINCaching";
 
     String INPUT_METHOD_ATTR                 = "InputMethod";
 

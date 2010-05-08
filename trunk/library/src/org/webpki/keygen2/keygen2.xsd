@@ -368,10 +368,6 @@
               "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1". -->
          <xs:attribute name="KeyAttestationAlgorithm" type="xs:anyURI" use="required"/>
 
-         <!-- "ServerSeeed" is an optional random number input to SKS.  If not
-               specified a string of 32 bytes of zeroes will be used. -->
-         <xs:attribute name="ServerSeeed" type="xs:base64Binary" use="optional"/>
-
       </xs:complexType>
 
    </xs:element>
@@ -749,9 +745,9 @@
                   <!-- The name of the property. -->
                   <xs:attribute name="Name" use="required">
                      <xs:simpleType>
-                        <xs:restriction base="xs:NCName">
-                           <xs:maxLength value="255"/>
+                        <xs:restriction base="xs:string">
                            <xs:minLength value="1"/>
+                           <xs:maxLength value="100"/>
                         </xs:restriction>
                      </xs:simpleType>
                   </xs:attribute>
@@ -829,17 +825,18 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- Algorithm and algorithm-specific data for the requested key. -->
+            <!-- SKS Specification: createKeyPair.KeyAlgorithmType -->
             <xs:choice>
 
                <xs:element name="RSA">
                   <xs:complexType>
 
-                     <!-- Length of RSA key to be generated. -->
+                     <!-- SKS Reference: createKeyPair.RSAKeySize -->
                      <xs:attribute name="KeySize" type="xs:positiveInteger" use="required"/>
 
-                     <!-- Optional: fixed length of exponent. -->
-                    <xs:attribute name="FixedExponent" type="xs:positiveInteger" use="optional"/>
+                     <!-- SKS Reference: createKeyPair.RSAExponent 
+                          Default: 0 => Use SKS default. -->
+                    <xs:attribute name="Exponent" type="xs:positiveInteger" use="optional"/>
 
                   </xs:complexType>
                </xs:element>
@@ -847,8 +844,7 @@
                <xs:element name="EC">
                   <xs:complexType>
 
-                     <!-- Tentative. The OID of the requested EC curve.
-                          Conforming implementations MAY support EC. -->
+                     <!-- SKS Reference: createKeyPair.NamedCurve -->
                      <xs:attribute name="NamedCurve" type="xs:anyURI" use="required"/>
 
                   </xs:complexType>
@@ -867,27 +863,25 @@
 
          </xs:sequence>
 
-         <!-- A unique key-ID. -->
+         <!-- SKS Reference: createKeyPair.ID -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
-         <!-- A key usage type. Two of the key usage types have a specific
-              meaning during the provisioning phase: 
-              1. A "transport" key is only used for transporting and managing
-              extensions objects, i.e. its private key MUST be disabled after
-              the provisioning. 
-              2. "piggybacked-symmetric-key": see the "PiggybackedSymmetricKey" element. -->
+         <!-- SKS Reference: createKeyPair.ServerSeed 
+              Default: 32 zero bytes. -->
+         <xs:attribute name="ServerSeed" type="xs:base64Binary" use="optional"/>
+
+         <!-- SKS Reference: createKeyPair.KeyUsage. -->
          <xs:attribute name="KeyUsage" type="kgen:keyUsageTypes" use="required"/>
 
-         <!-- "PrivateKeyBackup" An issuer MAY for reasons such a compliance
-              with regulations require that encryption keys are put in a specific
-              "Escrow" store.  This is indicated by the following attribute.
-              A client MAY disallow or at least warn about this action of the
-              issuer.  Default: false. -->
+         <!-- SKS Reference: createKeyPair.PrivateKeyBackup 
+              Default: false. -->
          <xs:attribute name="PrivateKeyBackup" type="xs:boolean" use="optional"/>
 
-         <!-- The server MAY contribute to key randomness by supplying a "seed"
-              that SHOULD be used by the SKS.  Default: 32 zero bytes. -->
-         <xs:attribute name="ServerSeed" type="xs:base64Binary" use="optional"/>
+         <!-- SKS Reference: createKeyPair.EnablePINCaching 
+              Default: false. -->
+         <xs:attribute name="EnablePINCaching" type="xs:boolean" use="optional"/>
+
+<!--  VERY UNCLEAR -->
 
          <!-- Is the key exportable?  Note: this option MAY be supported
               by the client.  Note: in the case "KeyUsage" is defined as
@@ -895,72 +889,23 @@
               of the symmetric key that is denoted.  Default: false. -->
          <xs:attribute name="Exportable" type="xs:boolean" use="optional"/>
 
-         <!-- An issuer's optional suggestion on how to name the credential. -->
+         <!-- SKS Reference: createKeyPair.FriendlyName 
+              Default: false. -->
          <xs:attribute name="FriendlyName" type="xs:string" use="optional"/>
 
-         <!-- Mandatory MAC (Message Authentication Code). -->
+         <!-- SKS Reference: createKeyPair.MAC --> 
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
        </xs:complexType>
    </xs:element>
 
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      User PIN policy object.
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:attributeGroup name="pinPolicy">
-
-      <xs:attributeGroup ref="kgen:basePinOrPukParams"/>
-
-      <!-- Minimum length of a PIN code. -->
-      <xs:attribute name="MinLength" type="kgen:pinLength" use="required"/>
-
-      <!-- Maximum length of a PIN code. -->
-      <xs:attribute name="MaxLength" type="kgen:pinLength" use="required"/>
-
-      <!-- Multiple keys protected and governed by a common PIN policy can
-           be augmented with an added twist or constraint: Sharing a common
-           PIN or the opposite, requiring unique PINs.  Sharing a PIN means
-           that the user only has to define a PIN once for the entire group
-           and that it stays "synchronized".  This value is ignored if there
-           is only one key defined under the given policy.  A conformant
-           implementation SHOULD [conceptually] use a single PIN error-counter
-           for shared PINs, and key-specific error-counters for the other
-           grouping alternatives. 
-           Default: none (no grouping restrictions or requirements). -->
-      <xs:attribute name="Grouping" type="kgen:pinGrouping" use="optional"/>
-
-      <!-- Restrictions on PIN patterns.  Note that restrictions are to be
-           applied to the decoded byte representation which means that a
-           "three-in-a-row" restriction assigned to a "binary" PIN may
-           be specified as 0AAA but not 0A0A0A.  Default: none. -->
-      <xs:attribute name="PatternRestrictions" type="kgen:pinPatternList" use="optional"/>
-
-      <!-- PIN caching support.  A conforming client SHOULD support an option
-           allowing applications to use a key multiple times without giving
-           a new PIN-code.  If such an option is supported there MUST also
-           be support for non-cached mode as well as a way for emptying the
-           PIN cache.  Note that cache life-time is outside of the KeyGen2
-           specification and may be indefinitely long or limited by the
-           platform.  Default: false. -->
-      <xs:attribute name="CachingSupport" type="xs:boolean" use="optional"/>
-
-      <!-- PIN input options.  A conforming client SHOULD support different
-           policies regarding how PIN-codes are inputted.  This specification
-           assumes that there are two methods available: 
-           1. Programmatic through an API 
-           2. Confined to a "Trusted GUI" of the key-store system 
-           Default: "any". -->
-      <xs:attribute name="InputMethod" type="kgen:pinInput" use="optional"/>
-
-   </xs:attributeGroup>
 
    <xs:attributeGroup name="extensionAttrs">
 
-      <!-- Minimum length of a PIN code. -->
+      <!-- SKS Reference: addExtensionData.ExtensionType --> 
       <xs:attribute name="Type" type="xs:anyURI" use="required"/>
 
-      <!-- Maximum length of a PIN code. -->
+      <!-- SKS Reference: addExtensionData.MAC --> 
       <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
    </xs:attributeGroup>
@@ -979,46 +924,23 @@
 
          </xs:sequence>
 
-         <xs:attributeGroup ref="kgen:encryptedPinOrPuk"/>
-         <xs:attributeGroup ref="kgen:basePinOrPukParams"/>
+         <!-- SKS Reference: createPUKPolicy.ID -->
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+
+         <!-- SKS Reference: createPUKPolicy.PUKValue -->
+         <xs:attribute name="Value" type="xs:base64Binary" use="required"/>
+
+         <!-- SKS Reference: createPUKPolicy.Format -->
+         <xs:attribute name="Format" type="kgen:pinFormats" use="required"/>
+    
+         <!-- SKS Reference: createPUKPolicy.RetryLimit -->
+         <xs:attribute name="RetryLimit" type="xs:unsignedShort" use="required"/>
+
+         <!-- SKS Reference: createPUKPolicy.MAC -->
+         <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
          
       </xs:complexType>
    </xs:element>
-
-   <xs:attributeGroup name="encryptedPinOrPuk">
-
-      <!-- Encrypted PIN (or PUK) code. -->
-      <xs:attribute name="Value" type="xs:base64Binary" use="required"/>
-
-   </xs:attributeGroup>
-   
-   <xs:attributeGroup name="presetPinParam">
-
-      <xs:attributeGroup ref="kgen:encryptedPinOrPuk"/>
-
-      <!-- True if the PIN can be changed by the user.  Default: false. -->
-      <xs:attribute name="UserModifiable" type="xs:boolean" use="optional"/>
-
-   </xs:attributeGroup>
-   
-   <xs:attributeGroup name="basePinOrPukParams">
-
-      <!-- Format of the PIN or PUK code. -->
-      <xs:attribute name="Format" type="kgen:pinFormats" use="required"/>
-
-      <!-- Maximum number of PIN or PUK tries in a row before locking-up.
-           That is, a limit of three allows two bad PINs, while the third
-           MUST be correct.  -->
-      <xs:attribute name="RetryLimit" type="xs:unsignedShort" use="required"/>
-
-      <!-- This mandatory server-generated item MUST be unique within
-           a request but MAY stay constant between requests. -->
-      <xs:attribute name="ID" type="kgen:sksID" use="required"/>
-
-      <!-- Mandatory MAC (Message Authentication Code). -->
-      <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
-
-   </xs:attributeGroup>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       Request sub-object for creating a set of keys associated with a user PIN policy.
@@ -1042,7 +964,8 @@
                         <xs:element ref="kgen:KeyPair"/>
                      </xs:sequence>
                            
-                     <xs:attributeGroup ref="kgen:presetPinParam"/>
+                     <!-- SKS Reference: createKeyPair.PINValue -->
+                     <xs:attribute name="Value" type="xs:base64Binary" use="required"/>
 
                   </xs:complexType>
                </xs:element>
@@ -1051,8 +974,48 @@
 
          </xs:sequence>
 
-         <!-- The governing user PIN policy object. -->
-         <xs:attributeGroup ref="kgen:pinPolicy"/>
+         <!-- SKS Reference: createPINPolicy.ID -->
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+
+         <!-- SKS Reference: createPINPolicy.PUKPolicyHandle 
+              "PUKPolicyHandle" is an implicit and implementation-dependent
+              PUK reference object which is defined by the presence of an
+              enclosing "PUKPolicy" object. -->
+
+         <!-- SKS Reference: createPINPolicy.UserDefined 
+              "UserDefined" is an implicit variable which is defined by the
+              presence of a "PresetPIN" object enclosing the "KeyPair" object. -->
+
+         <!-- SKS Reference: createPINPolicy.UserModifiable 
+              Default: false for preset PINs, true for user-defined PINs. -->
+         <xs:attribute name="UserModifiable" type="xs:boolean" use="optional"/>
+
+         <!-- SKS Reference: createPINPolicy.Format -->
+         <xs:attribute name="Format" type="kgen:pinFormats" use="required"/>
+    
+         <!-- SKS Reference: createPINPolicy.RetryLimit -->
+         <xs:attribute name="RetryLimit" type="xs:unsignedShort" use="required"/>
+
+         <!-- SKS Reference: createPINPolicy.Grouping 
+              Default: "none". -->
+         <xs:attribute name="Grouping" type="kgen:pinGrouping" use="optional"/>
+
+         <!-- SKS Reference: createPINPolicy.PatternRestrictions 
+              Default: none. -->
+         <xs:attribute name="PatternRestrictions" type="kgen:pinPatternList" use="optional"/>
+
+         <!-- SKS Reference: createPINPolicy.MinLength -->
+         <xs:attribute name="MinLength" type="kgen:pinLength" use="required"/>
+
+         <!-- SKS Reference: createPINPolicy.MaxLength -->
+         <xs:attribute name="MaxLength" type="kgen:pinLength" use="required"/>
+
+         <!-- SKS Reference: createPINPolicy.InputMethod 
+              Default: "any". -->
+         <xs:attribute name="InputMethod" type="kgen:pinInput" use="optional"/>
+
+         <!-- SKS Reference: createPINPolicy.MAC -->
+         <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -1091,17 +1054,6 @@
 
                <!-- Delete all keys matching a subject filter specification. -->
                <xs:element ref="kgen:DeleteKeysByContent"/>
-
-               <!-- Update a user PIN policy.  This MAY lead to the user
-                    being asked to change PIN if the existing PIN is incompatible
-                    with the new policy. -->
-               <xs:element ref="kgen:UpdatePINPolicy"/>
-
-               <!-- Update a PUK policy and value. -->
-               <xs:element ref="kgen:UpdatePUKPolicy"/>
-
-               <!-- Update a preset PIN value. -->
-               <xs:element ref="kgen:UpdatePresetPIN"/>
 
            </xs:choice>
 
@@ -1214,58 +1166,6 @@
       Management sub-object that updates the PIN policy to a set of assocated keys.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:element name="UpdatePINPolicy">
-      <xs:complexType>
-         <xs:complexContent>
-            <xs:extension base="kgen:certID">
-
-               <!-- If the issuer wants the user to change PIN according
-                    to the new policy, it may enforce that.  Default: false. -->
-               <xs:attribute name="ForceNewPIN" type="xs:boolean" use="optional"/>
-
-               <!-- The governing user PIN policy object. -->
-               <xs:attributeGroup ref="kgen:pinPolicy"/>
-
-            </xs:extension>
-         </xs:complexContent>
-      </xs:complexType>
-   </xs:element>
-
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      Management sub-object that updates the PUK code to a set of associated keys.
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:element name="UpdatePUKPolicy">
-      <xs:complexType>
-         <xs:complexContent>
-            <xs:extension base="kgen:certID">
-
-               <!-- The new PUK data. -->
-               <xs:attributeGroup ref="kgen:encryptedPinOrPuk"/>
-               <xs:attributeGroup ref="kgen:basePinOrPukParams"/>
-
-            </xs:extension>
-         </xs:complexContent>
-      </xs:complexType>
-   </xs:element>
-
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      Management sub-object that updates the preset PIN of an associated key.
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:element name="UpdatePresetPIN">
-      <xs:complexType>
-         <xs:complexContent>
-            <xs:extension base="kgen:certID">
-
-               <!-- The new PIN. -->
-               <xs:attributeGroup ref="kgen:presetPinParam"/>
-
-            </xs:extension>
-         </xs:complexContent>
-      </xs:complexType>
-   </xs:element>
-
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       IDs flowing between the SKS and the issuers MUST be 1-32 bytes.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -1372,8 +1272,10 @@
             <xs:list>
                <xs:simpleType>
                   <xs:restriction base="xs:string">
+                     <xs:enumeration value="two-in-a-row"/>
                      <xs:enumeration value="three-in-a-row"/>
                      <xs:enumeration value="sequence"/>
+                     <xs:enumeration value="repeated"/>
                      <xs:enumeration value="missing-group"/>
                   </xs:restriction>
                </xs:simpleType>

@@ -18,17 +18,21 @@ package org.webpki.sks;
 
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
+import java.util.Set;
 
+import org.webpki.keygen2.InputMethod;
 import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.KeyUsage;
-import org.webpki.keygen2.PassphraseFormats;
+import org.webpki.keygen2.PINGrouping;
+import org.webpki.keygen2.PassphraseFormat;
+import org.webpki.keygen2.PatternRestriction;
 
 public interface SecureKeyStore
   {
     public KeyPair createKeyPair (int provisioning_handle,
+                                  String id,
                                   String attestation_algorithm,
                                   byte[] server_seed,
-                                  String id,
                                   int pin_policy_handle,
                                   byte[] pin_value,
                                   byte biometric_protection,
@@ -45,7 +49,8 @@ public interface SecureKeyStore
     
     public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException;
 
-    public int getKeyHandle (int provisioning_handle, String id) throws SKSException;
+    public int getKeyHandle (int provisioning_handle,
+                             String id) throws SKSException;
 
     public void abortProvisioningSession (int provisioning_handle) throws SKSException;
     
@@ -65,18 +70,28 @@ public interface SecureKeyStore
                                  String[] endorsed_algorithms,
                                  byte[] mac) throws SKSException;
     
-    public byte[] closeProvisioningSession (int provisioning_handle, byte[] mac) throws SKSException;
+    public byte[] closeProvisioningSession (int provisioning_handle,
+                                            byte[] mac) throws SKSException;
     
     public int createPINPolicy (int provisioning_handle,
                                 String id,
                                 int puk_policy_handle,
+                                boolean user_defined,
+                                boolean user_modifiable,
+                                PassphraseFormat format,
+                                short retry_limit,
+                                PINGrouping grouping,
+                                Set<PatternRestriction> pattern_restrictions,
+                                byte min_length,
+                                byte max_length,
+                                InputMethod input_method,
                                 byte[] mac) throws SKSException;
 
     public int createPUKPolicy (int provisioning_handle,
                                 String id,
                                 byte[] encrypted_value,
-                                PassphraseFormats format,
-                                int retry_limit,
+                                PassphraseFormat format,
+                                short retry_limit,
                                 byte[] mac) throws SKSException;
 
     public ProvisioningSession createProvisioningSession (String session_key_algorithm,
@@ -86,7 +101,7 @@ public interface SecureKeyStore
                                                           boolean updatable,
                                                           int client_time,
                                                           int session_life_time,
-                                                          int session_key_limit) throws SKSException;
+                                                          short session_key_limit) throws SKSException;
 
     public DeviceInfo getDeviceInfo () throws SKSException;
     

@@ -27,7 +27,9 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.Vector;
 
 import org.webpki.crypto.ECDomains;
@@ -340,11 +342,11 @@ public class ServerCredentialStore implements Serializable
             return id;
           }
 
-        PassphraseFormats format;
+        PassphraseFormat format;
 
         int retry_limit;
 
-        PUKPolicy (byte[] value, PassphraseFormats format, int retry_limit) throws IOException
+        PUKPolicy (byte[] value, PassphraseFormat format, int retry_limit) throws IOException
           {
             super (value);
             this.id = puk_prefix + ++next_puk_id_suffix;
@@ -406,9 +408,16 @@ public class ServerCredentialStore implements Serializable
             user_modifiable_set = true;
             return this;
           }
+        
+        boolean user_defined;
+        
+        public boolean getUserDefinedFlag ()
+          {
+            return user_defined;
+          }
 
 
-        PassphraseFormats format;
+        PassphraseFormat format;
 
         int min_length;
 
@@ -416,13 +425,11 @@ public class ServerCredentialStore implements Serializable
 
         int retry_limit;
 
-        PINGrouping group; // Optional
+        PINGrouping grouping; // Optional
 
-        PatternRestrictions[] pattern_restrictions; // Optional
+        Set<PatternRestriction> pattern_restrictions = EnumSet.noneOf (PatternRestriction.class);
 
-        boolean caching_support; // Optional
-
-        InputMethods input_method; // Optional
+        InputMethod input_method; // Optional
 
 
         String id;
@@ -449,23 +456,19 @@ public class ServerCredentialStore implements Serializable
               {
                 wr.setBooleanAttribute (USER_MODIFIABLE_ATTR, user_modifiable);
               }
-            if (group != null)
+            if (grouping != null)
               {
-                wr.setStringAttribute (GROUPING_ATTR, group.getXMLName ());
+                wr.setStringAttribute (GROUPING_ATTR, grouping.getXMLName ());
               }
             wr.setStringAttribute (FORMAT_ATTR, format.getXMLName ());
-            if (pattern_restrictions != null)
+            if (!pattern_restrictions.isEmpty ())
               {
                 Vector<String> prs = new Vector<String> ();
-                for (PatternRestrictions pr : pattern_restrictions)
+                for (PatternRestriction pr : pattern_restrictions)
                   {
                     prs.add (pr.getXMLName ());
                   }
                 wr.setListAttribute (PATTERN_RESTRICTIONS_ATTR, prs.toArray (new String[0]));
-              }
-            if (caching_support)
-              {
-                wr.setBooleanAttribute (CACHING_SUPPORT_ATTR, caching_support);
               }
             if (input_method != null)
               {
@@ -475,30 +478,33 @@ public class ServerCredentialStore implements Serializable
             MacGenerator pin_policy_mac = new MacGenerator ();
             pin_policy_mac.addString (id);
             pin_policy_mac.addString (puk_policy == null ? CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id);
+            pin_policy_mac.addBool (user_defined);
+            pin_policy_mac.addBool (user_modifiable);
+            pin_policy_mac.addByte (format.getSKSValue ());
+            pin_policy_mac.addShort (retry_limit);
+            pin_policy_mac.addByte (grouping == null ? PINGrouping.NONE.getSKSValue () : grouping.getSKSValue ());
+            pin_policy_mac.addByte (PatternRestriction.getSKSValue (pattern_restrictions));
+            pin_policy_mac.addShort (min_length);
+            pin_policy_mac.addShort (max_length);
+            pin_policy_mac.addByte (input_method == null ? InputMethod.ANY.getSKSValue () : input_method.getSKSValue ());
             wr.setBinaryAttribute (MAC_ATTR, mac (pin_policy_mac.getResult (), APIDescriptors.CREATE_PIN_POLICY, sess_key_interface));
           }
 
-        public PINPolicy setInputMethod (InputMethods input_method)
+        public PINPolicy setInputMethod (InputMethod input_method)
           {
             this.input_method = input_method;
             return this;
           }
 
-        public PINPolicy setGrouping (PINGrouping group)
+        public PINPolicy setGrouping (PINGrouping grouping)
           {
-            this.group = group;
+            this.grouping = grouping;
             return this;
           }
 
-        public PINPolicy setCachingSupport (boolean flag)
+        public PINPolicy addPatternRestriction (PatternRestriction pattern)
           {
-            this.caching_support = flag;
-            return this;
-          }
-
-        public PINPolicy setPatternRestrictions (PatternRestrictions[] patterns)
-          {
-            this.pattern_restrictions = patterns;
+            this.pattern_restrictions.add (pattern);
             return this;
           }
 
@@ -563,7 +569,7 @@ public class ServerCredentialStore implements Serializable
                 wr.setIntAttribute (KEY_SIZE_ATTR, key_size);
                 if (fixed_exponent != 0)
                   {
-                    wr.setIntAttribute (FIXED_EXPONENT_ATTR, fixed_exponent);
+                    wr.setIntAttribute (EXPONENT_ATTR, fixed_exponent);
                   }
                 wr.getParent ();
               }
@@ -801,7 +807,7 @@ public class ServerCredentialStore implements Serializable
               {
                 if (pin_policy.not_first)
                   {
-                    if (pin_policy.group == PINGrouping.SHARED && ((pin_policy.preset_test == null && preset_pin != null) || (pin_policy.preset_test != null && preset_pin == null)))
+                    if (pin_policy.grouping == PINGrouping.SHARED && ((pin_policy.preset_test == null && preset_pin != null) || (pin_policy.preset_test != null && preset_pin == null)))
                       {
                         bad ("\"shared\" PIN keys must either have no \"preset_pin\" " + "value or all be preset");
                       }
@@ -826,6 +832,14 @@ public class ServerCredentialStore implements Serializable
                                           CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE 
                                                        :
                                       pin_policy.id);
+            if (getEncryptedPIN () == null)
+              {
+                key_pair_mac.addString (CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE);
+              }
+            else
+              {
+                key_pair_mac.addArray (getEncryptedPIN ());
+              }
             key_pair_mac.addByte (key_usage.getSKSValue ());
             key_alg_data.updateKeyAlgorithmMac (key_pair_mac);
             if (device_pin_protected)
@@ -955,7 +969,7 @@ public class ServerCredentialStore implements Serializable
         this.issuer_uri = prov_sess_request.submit_url;
       }
 
-    public PINPolicy createPINPolicy (PassphraseFormats format, int min_length, int max_length, int retry_limit, PUKPolicy puk_policy) throws IOException
+    public PINPolicy createPINPolicy (PassphraseFormat format, int min_length, int max_length, int retry_limit, PUKPolicy puk_policy) throws IOException
       {
         PINPolicy pin_policy = new PINPolicy ();
         pin_policy.format = format;
@@ -965,7 +979,7 @@ public class ServerCredentialStore implements Serializable
         pin_policy.puk_policy = puk_policy;
         if (format == null)
           {
-            bad ("PassphraseFormats must not be null");
+            bad ("PassphraseFormat must not be null");
           }
         if (min_length > max_length)
           {
@@ -975,7 +989,7 @@ public class ServerCredentialStore implements Serializable
       }
 
 
-    public PUKPolicy createPUKPolicy (byte[] encrypted_puk, PassphraseFormats format, int retry_limit) throws IOException
+    public PUKPolicy createPUKPolicy (byte[] encrypted_puk, PassphraseFormat format, int retry_limit) throws IOException
       {
         return new PUKPolicy (encrypted_puk, format, retry_limit);
       }
@@ -1004,7 +1018,8 @@ public class ServerCredentialStore implements Serializable
         KeyProperties key = addKeyProperties (key_usage, key_alg_data, pin_policy, null, false);
         if (pin_policy != null)
           {
-            pin_policy.user_modifiable = true;
+            pin_policy.user_defined = true;
+            pin_policy.user_modifiable = true;  // A default
           }
         return key;
       }

@@ -19,17 +19,20 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 
-public enum InputMethods
+public enum InputMethod
   {
-    ANY           ("any"),
-    PROGRAMMATIC  ("programmatic"),
-    TRUSTED_GUI   ("trusted-gui");
+    ANY           ("any",          (byte)0x00),
+    PROGRAMMATIC  ("programmatic", (byte)0x01),
+    TRUSTED_GUI   ("trusted-gui",  (byte)0x02);
 
     private final String xml_name;       // As expressed in XML
 
-    private InputMethods (String xml_name)
+    private final byte sks_value;        // As expressed in SKS
+
+    private InputMethod (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
+        this.sks_value = sks_value;
       }
 
 
@@ -38,10 +41,16 @@ public enum InputMethods
         return xml_name;
       }
 
-
-    public static InputMethods getMethodFromString (String xml_name) throws IOException
+    
+    public byte getSKSValue ()
       {
-        for (InputMethods type : InputMethods.values ())
+        return sks_value;
+      }
+
+
+    public static InputMethod getMethodFromString (String xml_name) throws IOException
+      {
+        for (InputMethod type : InputMethod.values ())
           {
             if (xml_name.equals (type.xml_name))
               {

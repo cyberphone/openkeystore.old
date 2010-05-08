@@ -48,7 +48,7 @@ public class ProvisioningSessionRequestEncoder extends ProvisioningSessionReques
                                               String server_session_id,
                                               String submit_url,
                                               int session_life_time,
-                                              int session_key_limit)  throws IOException
+                                              short session_key_limit)  throws IOException
       {
         super.server_ephemeral_key = server_ephemeral_key;
         super.server_session_id = server_session_id;

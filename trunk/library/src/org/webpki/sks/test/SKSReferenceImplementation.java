@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.keygen2.test;
+package org.webpki.sks.test;
 
 import java.io.IOException;
 
@@ -39,6 +39,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -53,10 +54,14 @@ import org.webpki.crypto.SignatureAlgorithms;
 
 import org.webpki.keygen2.APIDescriptors;
 import org.webpki.keygen2.CryptoConstants;
+import org.webpki.keygen2.InputMethod;
 import org.webpki.keygen2.KeyGen2URIs;
 import org.webpki.keygen2.KeyUsage;
 import org.webpki.keygen2.KeyInitializationRequestDecoder;
-import org.webpki.keygen2.PassphraseFormats;
+import org.webpki.keygen2.PINGrouping;
+import org.webpki.keygen2.PassphraseFormat;
+import org.webpki.keygen2.PatternRestriction;
+import org.webpki.keygen2.test.TPMKeyStore;
 
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
@@ -117,6 +122,8 @@ public class SKSReferenceImplementation implements SecureKeyStore
 
         boolean device_pin_protected;
         
+        byte[] pin_value;
+        
         PINPolicy pin_policy_owner;
 
         HashMap<String,Extension> extensions = new HashMap<String,Extension> ();
@@ -159,6 +166,8 @@ public class SKSReferenceImplementation implements SecureKeyStore
         
         PUKPolicy puk_owner;
         
+        boolean user_defined;
+        
         PINPolicy (Provisioning owner, String id) throws SKSException
           {
             super (owner, id);
@@ -172,8 +181,8 @@ public class SKSReferenceImplementation implements SecureKeyStore
         int puk_policy_handle;
         
         byte[] value;
-        PassphraseFormats format;
-        int retry_limit;
+        PassphraseFormat format;
+        short retry_limit;
 
         PUKPolicy (Provisioning owner, String id) throws SKSException
           {
@@ -192,7 +201,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
         byte[] session_key;
         int provisioning_handle;
         boolean open = true;
-        int mac_sequence_counter;
+        short mac_sequence_counter;
         
         Provisioning ()
           {
@@ -259,7 +268,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
 
         MacBuilder getMacBuilder (APIDescriptors method) throws SKSException
           {
-            int q = mac_sequence_counter++;
+            short q = mac_sequence_counter++;
             return getMacBuilder (ArrayUtil.add (method.getBinary (), new byte[]{(byte)(q >>> 8), (byte)q}));
           }
       }
@@ -420,9 +429,9 @@ public class SKSReferenceImplementation implements SecureKeyStore
 
     @Override
     public KeyPair createKeyPair (int provisioning_handle, 
+                                  String id,
                                   String attestation_algorithm,
                                   byte[] server_seed,
-                                  String id,
                                   int pin_policy_handle,
                                   byte[] pin_value,
                                   byte biometric_protection,
@@ -463,6 +472,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
         ///////////////////////////////////////////////////////////////////////////////////
         PINPolicy pin_policy_owner = null;
         boolean device_pin_protected = false;
+        boolean decrypt_pin = false;
         String pin_policy_id = CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE;
         if (pin_policy_handle != 0)
           {
@@ -479,6 +489,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
                     prov.abort ("No such PIN policy in this session:" + pin_policy_handle);
                   }
                 pin_policy_id = pin_policy_owner.id;
+                decrypt_pin = !pin_policy_owner.user_defined;
               }
           }
 
@@ -489,6 +500,14 @@ public class SKSReferenceImplementation implements SecureKeyStore
         key_pair_mac.addString (id);
         key_pair_mac.addArray (server_seed);
         key_pair_mac.addString (pin_policy_id);
+        if (decrypt_pin)
+          {
+            key_pair_mac.addArray (pin_value);
+          }
+        else
+          {
+            key_pair_mac.addString (CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE);
+          }
         key_pair_mac.addByte (key_usage.getSKSValue ());
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -566,11 +585,12 @@ public class SKSReferenceImplementation implements SecureKeyStore
             // Finally, create a key entry
             ///////////////////////////////////////////////////////////////////////////////////
             KeyEntry key_entry = new KeyEntry (prov, id);
+            key_entry.pin_policy_owner = pin_policy_owner;
             key_entry.friendly_name = friendly_name;
+            key_entry.pin_value = decrypt_pin ? prov.decrypt (pin_value) : pin_value;
             key_entry.public_key = public_key;   
             key_entry.private_key = private_key;
             key_entry.key_usage = key_usage;
-            key_entry.pin_policy_owner = pin_policy_owner;
             key_entry.device_pin_protected = device_pin_protected;
             return new KeyPair (public_key, key_attestation.getResult (), encrypted_private_key);
           }
@@ -685,7 +705,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
                                                           boolean updatable,
                                                           int client_time,
                                                           int session_life_time,
-                                                          int session_key_limit) throws SKSException
+                                                          short session_key_limit) throws SKSException
       {
         byte[] session_attestation = null;
         byte[] session_key = null;
@@ -869,7 +889,19 @@ public class SKSReferenceImplementation implements SecureKeyStore
       }
 
     @Override
-    public int createPINPolicy (int provisioning_handle, String id, int puk_policy_handle, byte[] mac) throws SKSException
+    public int createPINPolicy (int provisioning_handle,
+                                String id,
+                                int puk_policy_handle,
+                                boolean user_defined,
+                                boolean user_modifiable,
+                                PassphraseFormat format,
+                                short retry_limit,
+                                PINGrouping grouping,
+                                Set<PatternRestriction> pattern_restrictions,
+                                byte min_length,
+                                byte max_length,
+                                InputMethod input_method,
+                                byte[] mac) throws SKSException
       {
         Provisioning prov = getOpenProvisioningSession (provisioning_handle);
         String puk_policy_id = CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE;
@@ -886,9 +918,19 @@ public class SKSReferenceImplementation implements SecureKeyStore
         MacBuilder pin_policy_mac = prov.getMacBuilder (APIDescriptors.CREATE_PIN_POLICY);
         pin_policy_mac.addString (id);
         pin_policy_mac.addString (puk_policy_id);
+        pin_policy_mac.addBool (user_defined);
+        pin_policy_mac.addBool (user_modifiable);
+        pin_policy_mac.addByte (format.getSKSValue ());
+        pin_policy_mac.addShort (retry_limit);
+        pin_policy_mac.addByte (grouping.getSKSValue ());
+        pin_policy_mac.addByte (PatternRestriction.getSKSValue (pattern_restrictions));
+        pin_policy_mac.addShort (min_length);
+        pin_policy_mac.addShort (max_length);
+        pin_policy_mac.addByte (input_method.getSKSValue ());
         prov.testMac (pin_policy_mac, mac);
         PINPolicy pin_policy = new PINPolicy (prov, id);
         pin_policy.puk_owner = puk_policy;
+        pin_policy.user_defined = user_defined;
         return pin_policy.pin_policy_handle;
       }
 
@@ -896,8 +938,8 @@ public class SKSReferenceImplementation implements SecureKeyStore
     public int createPUKPolicy (int provisioning_handle,
                                 String id, 
                                 byte[] encrypted_value,
-                                PassphraseFormats format,
-                                int retry_limit,
+                                PassphraseFormat format,
+                                short retry_limit,
                                 byte[] mac) throws SKSException
       {
         Provisioning prov = getOpenProvisioningSession (provisioning_handle);
