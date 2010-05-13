@@ -289,56 +289,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
       }
 
 
-    public abstract class KeyAlgorithmData
-      {
-      }
-
-
-    public class RSA extends KeyAlgorithmData
-      {
-        int key_size;
-
-        int fixed_exponent;  // May be 0
-
-        RSA (int key_size, int fixed_exponent)
-          {
-            this.key_size = key_size;
-            this.fixed_exponent = fixed_exponent;
-          }
-
-
-        public int getKeySize ()
-          {
-            return key_size;
-          }
-
-
-        public int getFixedExponent ()
-          {
-            return fixed_exponent;
-          }
-
-      }
-
-
-    public class EC extends KeyAlgorithmData
-      {
-        ECDomains named_curve;
-
-        EC (ECDomains named_curve)
-          {
-            this.named_curve = named_curve;
-          }
-
-
-        public ECDomains getNamedCurve ()
-          {
-            return named_curve;
-          }
-
-      }
-
-
     public class KeyObject
       {
         String id;
@@ -394,7 +344,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             if (rd.hasNext (RSA_ELEM))
               {
                 rd.getNext (RSA_ELEM);
-                key_algorithm_data = new RSA (ah.getInt (KEY_SIZE_ATTR), ah.getIntConditional (EXPONENT_ATTR));
+                key_algorithm_data = new KeyAlgorithmData.RSA (ah.getInt (KEY_SIZE_ATTR), ah.getIntConditional (EXPONENT_ATTR));
               }
             else
               {
@@ -402,7 +352,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
                 String ec_uri = ah.getString (NAMED_CURVE_ATTR);
                 if (ec_uri.startsWith ("urn:oid:"))
                   {
-                    key_algorithm_data = new EC (ECDomains.getECDomainFromOID (ec_uri.substring (8)));
+                    key_algorithm_data = new KeyAlgorithmData.EC (ECDomains.getECDomainFromOID (ec_uri.substring (8)));
                   }
                 else
                   {

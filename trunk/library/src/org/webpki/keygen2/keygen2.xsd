@@ -669,7 +669,10 @@
                <xs:complexType>
                   <xs:simpleContent>
                      <xs:extension base="kgen:imageType">
-                 <xs:attributeGroup ref="kgen:extensionAttrs"/>
+
+                        <!-- Mandatory extension type attribute. -->
+                        <xs:attributeGroup ref="kgen:extensionAttrs"/>
+
                      </xs:extension>
                   </xs:simpleContent>
                </xs:complexType>
@@ -687,7 +690,7 @@
                      <xs:extension base="xs:base64Binary">
 
                         <!-- Mandatory extension type attribute. -->
-                         <xs:attributeGroup ref="kgen:extensionAttrs"/>
+                        <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
                      </xs:extension>
                   </xs:simpleContent>
@@ -701,7 +704,7 @@
                      <xs:extension base="xs:base64Binary">
 
                         <!-- Mandatory extension type attribute. -->
-                         <xs:attributeGroup ref="kgen:extensionAttrs"/>
+                        <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
                      </xs:extension>
                   </xs:simpleContent>

@@ -824,6 +824,7 @@ public class ServerCredentialStore implements Serializable
           {
             MacGenerator key_pair_mac = new MacGenerator ();
             key_pair_mac.addString (id);
+            key_pair_mac.addString (key_attestation_algorithm);
             key_pair_mac.addArray (server_seed);
             key_pair_mac.addString (pin_policy == null ? 
                                       device_pin_protected ?
@@ -916,6 +917,8 @@ public class ServerCredentialStore implements Serializable
     String client_session_id;
     
     String issuer_uri;
+    
+    String key_attestation_algorithm;
     
     void checkSession (String client_session_id, String server_session_id) throws IOException
       {

@@ -149,6 +149,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
           {
             bad ("Empty request not allowd!");
           }
+        server_credential_store.key_attestation_algorithm = key_attestation_algorithm;
         ServerCredentialStore.KeyProperties last_req_key = null;
         try
           {

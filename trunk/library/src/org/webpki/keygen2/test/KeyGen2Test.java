@@ -502,7 +502,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] provSessRequest () throws IOException, GeneralSecurityException
           {
-            String server_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()); 
+            String server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()); 
             prov_sess_request =  new ProvisioningSessionRequestEncoder (server_sess_key.generateEphemeralKey (),
                                                                         server_session_id,
                                                                         ISSUER_URI,

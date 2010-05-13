@@ -21,7 +21,7 @@ import java.security.interfaces.ECPublicKey;
 import java.util.Set;
 
 import org.webpki.keygen2.InputMethod;
-import org.webpki.keygen2.KeyInitializationRequestDecoder;
+import org.webpki.keygen2.KeyAlgorithmData;
 import org.webpki.keygen2.KeyUsage;
 import org.webpki.keygen2.PINGrouping;
 import org.webpki.keygen2.PassphraseFormat;
@@ -44,7 +44,7 @@ public interface SecureKeyStore
                                   boolean import_private_key,
                                   KeyUsage key_usage,
                                   String friendly_name,
-                                  KeyInitializationRequestDecoder.KeyAlgorithmData key_algorithm,
+                                  KeyAlgorithmData key_algorithm,
                                   byte[] mac) throws SKSException;
     
     public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException;

@@ -47,8 +47,8 @@ public interface CryptoConstants
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Predefined PIN and PUK policy IDs for MAC operations
     /////////////////////////////////////////////////////////////////////////////////////////////
-    public static final String CRYPTO_STRING_NOT_AVAILABLE     = "#N/A";
+    public static final String CRYPTO_STRING_NOT_AVAILABLE   = "#N/A";
 
-    public static final String CRYPTO_STRING_PIN_DEVICE        = "#Device PIN";
+    public static final String CRYPTO_STRING_PIN_DEVICE      = "#Device PIN";
     
   }

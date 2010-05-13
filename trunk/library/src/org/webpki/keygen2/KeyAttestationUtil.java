@@ -16,8 +16,6 @@
  */
 package org.webpki.keygen2;
 
-import java.io.IOException;
-
 import javax.crypto.Cipher;
 
 import java.security.GeneralSecurityException;
@@ -25,9 +23,6 @@ import java.security.MessageDigest;
 import java.security.PublicKey;
 
 import java.security.interfaces.RSAKey;
-
-import org.webpki.keygen2.KeyGen2URIs;
-import org.webpki.keygen2.KeyUsage;
 
 import org.webpki.util.ArrayUtil;
 
@@ -153,28 +148,6 @@ public class KeyAttestationUtil
                 // A more comprehensive diagnostic would be preferable...
                 throw new GeneralSecurityException ("Signature package content error");
               }
-          }
-      }
-
-
-    /**
-     * Create a KeyGen2 KA1 nonce value
-     * @param key_id The ID element for the particular key.
-     * @param client_session_id The client-side provisioning session-ID.
-     * @param server_session_id The server-side provisioning session-ID.
-     * @return The nonce.
-     */
-    public static byte[] createKA1Nonce (String key_id, String client_session_id, String server_session_id) throws IOException
-      {
-        try
-          {
-            return MessageDigest.getInstance (SHA256).digest (new StringBuffer (key_id).append ('\0').
-                                                                        append (client_session_id).append ('\0').
-                                                                        append (server_session_id).append ('\0').toString ().getBytes ("UTF-8"));
-          }
-        catch (GeneralSecurityException gse)
-          {
-            throw new IOException (gse.getMessage ());
           }
       }
 
