@@ -288,7 +288,7 @@ public class KeyGen2Test
                                                  key.getDeletePolicy (),
                                                  key.getEnablePINCachingFlag (),
                                                  key.getImportPrivateKeyFlag (),
-                                                 key.getKeyUsage (),
+                                                 key.getKeyUsage ().getSKSValue (),
                                                  key.getFriendlyName (),
                                                  key.getKeyAlgorithmData (),
                                                  key.getMAC ());

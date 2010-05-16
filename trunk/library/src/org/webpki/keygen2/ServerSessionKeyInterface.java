@@ -20,10 +20,9 @@ import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 
-import java.util.Date;
 
 import org.webpki.crypto.SignatureAlgorithms;
 

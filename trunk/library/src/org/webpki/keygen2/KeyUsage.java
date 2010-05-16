@@ -21,12 +21,12 @@ import java.io.IOException;
 
 public enum KeyUsage
   {
-    SIGNATURE                  ("signature",      (byte)0x00),
-    AUTHENTICATION             ("authentication", (byte)0x01),
-    ENCRYPTION                 ("encryption",     (byte)0x02),
-    UNIVERSAL                  ("universal",      (byte)0x03),
-    TRANSPORT                  ("transport",      (byte)0x04),
-    SYMMETRIC_KEY              ("symmetric-key",  (byte)0x05);
+    SIGNATURE                  ("signature",      (byte)0x01),
+    AUTHENTICATION             ("authentication", (byte)0x02),
+    ENCRYPTION                 ("encryption",     (byte)0x04),
+    UNIVERSAL                  ("universal",      (byte)0x08),
+    TRANSPORT                  ("transport",      (byte)0x10),
+    SYMMETRIC_KEY              ("symmetric-key",  (byte)0x20);
 
     private final String xml_name;       // As expressed in XML
     

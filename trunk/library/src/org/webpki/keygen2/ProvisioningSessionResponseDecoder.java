@@ -16,8 +16,6 @@
  */
 package org.webpki.keygen2;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import java.util.Date;

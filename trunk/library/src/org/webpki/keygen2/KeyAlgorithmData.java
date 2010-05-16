@@ -46,6 +46,12 @@ public abstract class KeyAlgorithmData
           {
             return named_curve;
           }
+
+        
+        public String getNamedCurveURI ()
+          {
+            return named_curve.getURI ();
+          }
       }
 
   }

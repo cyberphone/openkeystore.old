@@ -55,6 +55,7 @@ import org.webpki.ca.CertSpec;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.ECDomains;
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
@@ -84,7 +85,8 @@ import org.webpki.util.ArrayUtil;
 
 public class SKSTest
   {
-   
+    static final byte[] TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','t','?'};
+  
     static FileOutputStream fos;
     
     static SecureKeyStore sks;
@@ -220,6 +222,71 @@ public class SKSTest
                            null /* pin_policy */,
                            KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
         sess.closeSession ();
+      }
+    @Test
+    public void test7 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        sess.createECKey ("Key.1",
+                           null /* pin_value */,
+                           null /* pin_policy */,
+                           KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST7");
+        sess.closeSession ();
+        
+      }
+    @Test
+    public void test8 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        GenKey key = sess.createECKey ("Key.1",
+                                       null /* pin_value */,
+                                       null /* pin_policy */,
+                                       KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST8");
+        sess.closeSession ();
+        byte[] result = device.sks.signHashedData (key.key_handle, 
+                                                   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                                   new byte[0], 
+                                                   HashAlgorithms.SHA256.digest (TEST_STRING));
+        Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
+        verify.initVerify (key.cert_path[0]);
+        verify.update (TEST_STRING);
+        if (!verify.verify (result))
+          {
+            fail ("Bad signature");
+          }
+      }
+    @Test
+    public void test9 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        GenKey key = sess.createRSAKey ("Key.1",
+                                        2048,
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST9");
+        sess.closeSession ();
+        byte[] result = device.sks.signHashedData (key.key_handle, 
+                                                   "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                                   new byte[0], 
+                                                   HashAlgorithms.SHA256.digest (TEST_STRING));
+        Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+        verify.initVerify (key.cert_path[0]);
+        verify.update (TEST_STRING);
+        if (!verify.verify (result))
+          {
+            fail ("Bad signature");
+          }
+        result = device.sks.signHashedData (key.key_handle, 
+                                            "http://www.w3.org/2000/09/xmldsig#rsa-sha1", 
+                                            new byte[0], 
+                                            HashAlgorithms.SHA1.digest (TEST_STRING));
+        verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA1.getJCEName (), "BC");
+        verify.initVerify (key.cert_path[0]);
+        verify.update (TEST_STRING);
+        if (!verify.verify (result))
+          {
+            fail ("Bad signature");
+          }
       }
 
   }

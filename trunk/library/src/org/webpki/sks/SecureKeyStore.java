@@ -42,7 +42,7 @@ public interface SecureKeyStore
                                   byte delete_policy,
                                   boolean enable_pin_caching,
                                   boolean import_private_key,
-                                  KeyUsage key_usage,
+                                  byte key_usage,
                                   String friendly_name,
                                   KeyAlgorithmData key_algorithm,
                                   byte[] mac) throws SKSException;
@@ -112,5 +112,15 @@ public interface SecureKeyStore
     
     public byte[] signProvisioningSessionData (int provisioning_handle,
                                                byte[] data) throws SKSException;
+
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+    // "User" API
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public byte[] signHashedData (int key_handle,
+                                  String signature_algorithm,
+                                  byte[] pin,
+                                  byte[] hashed_data) throws SKSException;
    
   }
