@@ -349,7 +349,7 @@ public class ProvSess
         puk_policy.puk_policy_handle = sks.createPUKPolicy (provisioning_handle, 
                                                             id,
                                                             encrypted_value, 
-                                                            format, 
+                                                            format.getSKSValue (), 
                                                             (short)retry_limit, 
                                                             mac (puk_policy_mac.getResult (), APIDescriptors.CREATE_PUK_POLICY));
         return puk_policy;
@@ -383,10 +383,10 @@ public class ProvSess
                                                             puk_policy_handle,
                                                             user_defined,
                                                             user_modifiable,
-                                                            format,
+                                                            format.getSKSValue (),
                                                             (short)retry_limit,
                                                             grouping,
-                                                            pattern_restrictions, 
+                                                            PatternRestriction.getSKSValue (pattern_restrictions), 
                                                             (byte)min_length, 
                                                             (byte)max_length, 
                                                             input_method, 
@@ -512,7 +512,7 @@ public class ProvSess
                                               import_private_key, 
                                               key_usage.getSKSValue (), 
                                               friendly_name, 
-                                              key_algorithm, 
+                                              key_algorithm.getSKSValue (), 
                                               mac (key_pair_mac.getResult (), APIDescriptors.CREATE_KEY_PAIR));
         MacGenerator key_attestation = new MacGenerator ();
         key_attestation.addString (id);

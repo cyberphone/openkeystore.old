@@ -18,14 +18,9 @@ package org.webpki.sks;
 
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
-import java.util.Set;
 
 import org.webpki.keygen2.InputMethod;
-import org.webpki.keygen2.KeyAlgorithmData;
-import org.webpki.keygen2.KeyUsage;
 import org.webpki.keygen2.PINGrouping;
-import org.webpki.keygen2.PassphraseFormat;
-import org.webpki.keygen2.PatternRestriction;
 
 public interface SecureKeyStore
   {
@@ -44,7 +39,7 @@ public interface SecureKeyStore
                                   boolean import_private_key,
                                   byte key_usage,
                                   String friendly_name,
-                                  KeyAlgorithmData key_algorithm,
+                                  byte[] key_algorithm,
                                   byte[] mac) throws SKSException;
     
     public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException;
@@ -78,10 +73,10 @@ public interface SecureKeyStore
                                 int puk_policy_handle,
                                 boolean user_defined,
                                 boolean user_modifiable,
-                                PassphraseFormat format,
+                                byte format,
                                 short retry_limit,
                                 PINGrouping grouping,
-                                Set<PatternRestriction> pattern_restrictions,
+                                byte pattern_restrictions,
                                 byte min_length,
                                 byte max_length,
                                 InputMethod input_method,
@@ -90,7 +85,7 @@ public interface SecureKeyStore
     public int createPUKPolicy (int provisioning_handle,
                                 String id,
                                 byte[] encrypted_value,
-                                PassphraseFormat format,
+                                byte format,
                                 short retry_limit,
                                 byte[] mac) throws SKSException;
 

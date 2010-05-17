@@ -40,7 +40,6 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.HashMap;
-import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -49,12 +48,8 @@ import javax.crypto.Mac;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.webpki.keygen2.CryptoConstants;
 import org.webpki.keygen2.InputMethod;
-import org.webpki.keygen2.KeyAlgorithmData;
 import org.webpki.keygen2.PINGrouping;
-import org.webpki.keygen2.PassphraseFormat;
-import org.webpki.keygen2.PatternRestriction;
 import org.webpki.keygen2.test.TPMKeyStore;
 
 import org.webpki.sks.DeviceInfo;
@@ -68,8 +63,17 @@ import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.util.ArrayUtil;
 
+/*
+ *  The following is an SKS reference application that is supposed to complement
+ *  the specification by showing how various constructs can be implemented.
+ *  In addition to the reference implementation there is a set of SKS JUinit
+ *  tests that should work identical on a "real" SKS token.
+ */
 public class SKSReferenceImplementation implements SecureKeyStore
   {
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // Method IDs are used "as is" in KDFs 
+    /////////////////////////////////////////////////////////////////////////////////////////////
     static final byte[] METHOD_SET_CERTIFICATE_PATH       = new byte[] {'s','e','t','C','e','r','t','i','f','i','c','a','t','e','P','a','t','h'};
     static final byte[] METHOD_SET_SYMMETRIC_KEY          = new byte[] {'s','e','t','S','y','m','m','e','t','r','i','c','K','e','y'};
     static final byte[] METHOD_CLOSE_PROVISIONING_SESSION = new byte[] {'c','l','o','s','e','P','r','o','v','i','s','i','o','n','i','n','g','S','e','s','s','i','o','n'};
@@ -78,6 +82,30 @@ public class SKSReferenceImplementation implements SecureKeyStore
     static final byte[] METHOD_CREATE_PUK_POLICY          = new byte[] {'c','r','e','a','t','e','P','U','K','P','o','l','i','c','y'};
     static final byte[] METHOD_ADD_EXTENSION              = new byte[] {'a','d','d','E','x','t','e','n','s','i','o','n'};
 
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // Strings that are used as key modifiers to HMAC operations are used "as is"
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte[] CRYPTO_STRING_DEVICE_ATTEST   = new byte[] {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
+    static final byte[] CRYPTO_STRING_ENCRYPTION      = new byte[] {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
+    static final byte[] CRYPTO_STRING_SIGNATURE       = new byte[] {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // Strings that are used in HMAC arguments include a length-indicator as well
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte[] CRYPTO_STRING_SUCCESS         = new byte[] {(byte)0x00, (byte)0x07, 'S','u','c','c','e','s','s'};
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // SKS key algorithm IDs
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte RSA_KEY = (byte) 0x00;
+    static final byte ECC_KEY = (byte) 0x01;
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // Predefined PIN and PUK policy IDs for MAC operations
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final String CRYPTO_STRING_NOT_AVAILABLE   = "#N/A";
+    static final String CRYPTO_STRING_PIN_DEVICE      = "#Device PIN";
+    
     int next_key_handle = 1;
     HashMap<Integer,KeyEntry> keys = new HashMap<Integer,KeyEntry> ();
 
@@ -151,7 +179,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
               {
                 owner.abort ("EE certificate missing", SKSException.ERROR_OPTION);
               }
-            MacBuilder mac_builder = owner.getMacBuilderAPI (method);
+            MacBuilder mac_builder = owner.getMacBuilderForMethodCall (method);
             try
               {
                 mac_builder.addArray (certificate_path[0].getEncoded ());
@@ -175,7 +203,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
         int pin_policy_handle;
         
         PUKPolicy puk_policy;
-        
+        byte format;
         boolean user_defined;
         
         PINPolicy (Provisioning owner, String id) throws SKSException
@@ -191,7 +219,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
         int puk_policy_handle;
         
         byte[] value;
-        PassphraseFormat format;
+        byte format;
         short retry_limit;
         short error_counter;
 
@@ -242,7 +270,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
 
         byte[] encrypt (byte[] data) throws SKSException, GeneralSecurityException
           {
-            byte[] key = getMacBuilder (new byte[0]).addVerbatim (CryptoConstants.CRYPTO_STRING_ENCRYPTION).getResult ();
+            byte[] key = getMacBuilder (new byte[0]).addVerbatim (CRYPTO_STRING_ENCRYPTION).getResult ();
             Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
             byte[] iv = new byte[16];
             new SecureRandom ().nextBytes (iv);
@@ -252,7 +280,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
 
         byte[] decrypt (byte[] data) throws SKSException
           {
-            byte[] key = getMacBuilder (new byte[0]).addVerbatim (CryptoConstants.CRYPTO_STRING_ENCRYPTION).getResult ();
+            byte[] key = getMacBuilder (new byte[0]).addVerbatim (CRYPTO_STRING_ENCRYPTION).getResult ();
             try
               {
                 Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
@@ -277,7 +305,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
               }
           }
 
-        MacBuilder getMacBuilderAPI (byte[] method) throws SKSException
+        MacBuilder getMacBuilderForMethodCall (byte[] method) throws SKSException
           {
             short q = mac_sequence_counter++;
             return getMacBuilder (ArrayUtil.add (method, new byte[]{(byte)(q >>> 8), (byte)q}));
@@ -480,6 +508,11 @@ public class SKSReferenceImplementation implements SecureKeyStore
             bad ("Session not open:" +  provisioning_handle, SKSException.ERROR_NO_SESSION);
           }
         return provisioning;
+      }
+    
+    int getShort (byte[] buffer, int index)
+      {
+        return ((buffer[index++] << 8) & 0xFFFF) + (buffer[index] & 0xFF);
       }
     
     KeyEntry getOpenKey (int key_handle) throws SKSException
@@ -720,7 +753,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder close_mac = provisioning.getMacBuilderAPI (METHOD_CLOSE_PROVISIONING_SESSION);
+        MacBuilder close_mac = provisioning.getMacBuilderForMethodCall (METHOD_CLOSE_PROVISIONING_SESSION);
         close_mac.addString (provisioning.client_session_id);
         close_mac.addString (provisioning.server_session_id);
         close_mac.addString (provisioning.issuer_uri);
@@ -747,8 +780,8 @@ public class SKSReferenceImplementation implements SecureKeyStore
         ///////////////////////////////////////////////////////////////////////////////////
         // Generate a final attestation
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder close_attestation = provisioning.getMacBuilder (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST);
-        close_attestation.addVerbatim (CryptoConstants.CRYPTO_STRING_SUCCESS);
+        MacBuilder close_attestation = provisioning.getMacBuilder (CRYPTO_STRING_DEVICE_ATTEST);
+        close_attestation.addVerbatim (CRYPTO_STRING_SUCCESS);
         close_attestation.addShort (provisioning.mac_sequence_counter);
         byte[] attest = close_attestation.getResult ();
         
@@ -884,7 +917,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
     @Override
     public byte[] signProvisioningSessionData (int provisioning_handle, byte[] data) throws SKSException
       {
-        return getOpenProvisioningSession (provisioning_handle).getMacBuilder (CryptoConstants.CRYPTO_STRING_SIGNATURE).addVerbatim (data).getResult ();
+        return getOpenProvisioningSession (provisioning_handle).getMacBuilder (CRYPTO_STRING_SIGNATURE).addVerbatim (data).getResult ();
       }
 
 
@@ -1007,7 +1040,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder set_certificate_mac = key_entry.owner.getMacBuilderAPI (METHOD_SET_CERTIFICATE_PATH);
+        MacBuilder set_certificate_mac = key_entry.owner.getMacBuilderForMethodCall (METHOD_SET_CERTIFICATE_PATH);
         try
           {
             set_certificate_mac.addArray (key_entry.public_key.getEncoded ());
@@ -1051,7 +1084,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
                                   boolean import_private_key,
                                   byte key_usage,
                                   String friendly_name,
-                                  KeyAlgorithmData key_algorithm,
+                                  byte[] key_algorithm,
                                   byte[] mac) throws SKSException
       {
         Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
@@ -1074,12 +1107,12 @@ public class SKSReferenceImplementation implements SecureKeyStore
         PINPolicy pin_policy = null;
         boolean device_pin_protected = false;
         boolean decrypt_pin = false;
-        String pin_policy_id = CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE;
+        String pin_policy_id = CRYPTO_STRING_NOT_AVAILABLE;
         if (pin_policy_handle != 0)
           {
             if (pin_policy_handle == 0xFFFFFFFF)
               {
-                pin_policy_id = CryptoConstants.CRYPTO_STRING_PIN_DEVICE;
+                pin_policy_id = CRYPTO_STRING_PIN_DEVICE;
                 device_pin_protected = true;
               }
             else
@@ -1098,7 +1131,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
         ///////////////////////////////////////////////////////////////////////////////////
         // Prepare for verifying incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder key_pair_mac = provisioning.getMacBuilderAPI (METHOD_CREATE_KEY_PAIR);
+        MacBuilder key_pair_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_PAIR);
         key_pair_mac.addString (id);
         key_pair_mac.addString (attestation_algorithm);
         key_pair_mac.addArray (server_seed);
@@ -1110,51 +1143,60 @@ public class SKSReferenceImplementation implements SecureKeyStore
           }
         else
           {
-            key_pair_mac.addString (CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE);
+            key_pair_mac.addString (CRYPTO_STRING_NOT_AVAILABLE);
           }
         // TODO if (pin_policy != null) check that pin_value is following the policy
         key_pair_mac.addByte (key_usage);
+        key_pair_mac.addVerbatim (key_algorithm);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
+        provisioning.testMac (key_pair_mac, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Decode key algorithm specifier
         ///////////////////////////////////////////////////////////////////////////////////
-        boolean rsa = key_algorithm instanceof KeyAlgorithmData.RSA;
-        if (!rsa && !(key_algorithm instanceof KeyAlgorithmData.EC))
+        boolean rsa = key_algorithm[0] == RSA_KEY;
+        if (!rsa && (key_algorithm[0] != ECC_KEY))
           {
             provisioning.abort ("RSA or ECC expected", SKSException.ERROR_OPTION);
           }
         AlgorithmParameterSpec alg_par_spec = null;
         if (rsa)
           {
-            key_pair_mac.addByte (CryptoConstants.RSA_KEY);
-            int size = ((KeyAlgorithmData.RSA)key_algorithm).getKeySize ();
+            if (key_algorithm.length != 7)
+              {
+                provisioning.abort ("Bad RSA KeyAlgorithm format", SKSException.ERROR_OPTION);
+              }
+            int size = getShort (key_algorithm, 1);
             if (size != 1024 && size != 2048)
               {
                 provisioning.abort ("RSA size unsupported: " + size, SKSException.ERROR_OPTION);
               }
-            int exponent = ((KeyAlgorithmData.RSA)key_algorithm).getFixedExponent ();
+            int exponent = (getShort (key_algorithm, 3) << 16) + getShort (key_algorithm, 5);
             alg_par_spec = new RSAKeyGenParameterSpec (size, 
                                                        exponent == 0 ? RSAKeyGenParameterSpec.F4 : BigInteger.valueOf (exponent));
-            key_pair_mac.addShort (size);
-            key_pair_mac.addInt (exponent);
           }
         else
           {
-            key_pair_mac.addByte (CryptoConstants.ECC_KEY);
-            String ec_uri = ((KeyAlgorithmData.EC)key_algorithm).getNamedCurveURI ();
+            if (key_algorithm.length < 10 || getShort (key_algorithm, 1) != (key_algorithm.length - 3))
+              {
+                provisioning.abort ("Bad ECC KeyAlgorithm format", SKSException.ERROR_OPTION);
+              }
+            String ec_uri = "";
+            for (int i = 3; i < key_algorithm.length; i++)
+              {
+                ec_uri += (char) key_algorithm[i];
+              }
             Algorithm alg = algorithms.get (ec_uri);
             if (alg == null || (alg.mask & ALG_ECC_CRV) == 0)
               {
                 provisioning.abort ("Unsupported EC curve: " + ec_uri, SKSException.ERROR_OPTION);
               }
             alg_par_spec = new ECGenParameterSpec (alg.jce_name);
-            key_pair_mac.addString (ec_uri);
           }
 
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
-        ///////////////////////////////////////////////////////////////////////////////////
-        provisioning.testMac (key_pair_mac, mac);
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1179,7 +1221,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
             ///////////////////////////////////////////////////////////////////////////////////
             // Create attestation data
             ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder key_attestation = provisioning.getMacBuilder (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST);
+            MacBuilder key_attestation = provisioning.getMacBuilder (CRYPTO_STRING_DEVICE_ATTEST);
             key_attestation.addString (id);
             key_attestation.addArray (public_key.getEncoded ());
             if (private_key_backup)
@@ -1223,17 +1265,17 @@ public class SKSReferenceImplementation implements SecureKeyStore
                                 int puk_policy_handle,
                                 boolean user_defined,
                                 boolean user_modifiable,
-                                PassphraseFormat format,
+                                byte format,
                                 short retry_limit,
                                 PINGrouping grouping,
-                                Set<PatternRestriction> pattern_restrictions,
+                                byte pattern_restrictions,
                                 byte min_length,
                                 byte max_length,
                                 InputMethod input_method,
                                 byte[] mac) throws SKSException
       {
         Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
-        String puk_policy_id = CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE;
+        String puk_policy_id = CRYPTO_STRING_NOT_AVAILABLE;
         PUKPolicy puk_policy = null;
         if (puk_policy_handle != 0)
           {
@@ -1245,21 +1287,22 @@ public class SKSReferenceImplementation implements SecureKeyStore
             puk_policy_id = puk_policy.id;
             provisioning.names.put (puk_policy_id, true); // Referenced
           }
-        MacBuilder pin_policy_mac = provisioning.getMacBuilderAPI (METHOD_CREATE_PIN_POLICY);
+        MacBuilder pin_policy_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PIN_POLICY);
         pin_policy_mac.addString (id);
         pin_policy_mac.addString (puk_policy_id);
         pin_policy_mac.addBool (user_defined);
         pin_policy_mac.addBool (user_modifiable);
-        pin_policy_mac.addByte (format.getSKSValue ());
+        pin_policy_mac.addByte (format);
         pin_policy_mac.addShort (retry_limit);
         pin_policy_mac.addByte (grouping.getSKSValue ());
-        pin_policy_mac.addByte (PatternRestriction.getSKSValue (pattern_restrictions));
+        pin_policy_mac.addByte (pattern_restrictions);
         pin_policy_mac.addShort (min_length);
         pin_policy_mac.addShort (max_length);
         pin_policy_mac.addByte (input_method.getSKSValue ());
         provisioning.testMac (pin_policy_mac, mac);
         PINPolicy pin_policy = new PINPolicy (provisioning, id);
         pin_policy.puk_policy = puk_policy;
+        pin_policy.format = format;
         pin_policy.user_defined = user_defined;
         return pin_policy.pin_policy_handle;
       }
@@ -1274,15 +1317,15 @@ public class SKSReferenceImplementation implements SecureKeyStore
     public int createPUKPolicy (int provisioning_handle,
                                 String id, 
                                 byte[] encrypted_value,
-                                PassphraseFormat format,
+                                byte format,
                                 short retry_limit,
                                 byte[] mac) throws SKSException
       {
         Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
-        MacBuilder puk_policy_mac = provisioning.getMacBuilderAPI (METHOD_CREATE_PUK_POLICY);
+        MacBuilder puk_policy_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PUK_POLICY);
         puk_policy_mac.addString (id);
         puk_policy_mac.addArray (encrypted_value);
-        puk_policy_mac.addByte (format.getSKSValue ());
+        puk_policy_mac.addByte (format);
         puk_policy_mac.addShort (retry_limit);
         provisioning.testMac (puk_policy_mac, mac);
         PUKPolicy puk_policy = new PUKPolicy (provisioning, id);

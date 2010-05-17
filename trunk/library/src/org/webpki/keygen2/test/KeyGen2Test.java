@@ -87,8 +87,6 @@ import org.webpki.keygen2.ProvisioningSessionResponseDecoder;
 import org.webpki.keygen2.ProvisioningSessionResponseEncoder;
 import org.webpki.keygen2.ServerCredentialStore;
 import org.webpki.keygen2.ServerSessionKeyInterface;
-import org.webpki.keygen2.ServerCredentialStore.KeyAlgorithmData;
-import org.webpki.keygen2.ServerCredentialStore.PINPolicy;
 
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
@@ -254,7 +252,7 @@ public class KeyGen2Test
                             puk_policy_handle = sks.createPUKPolicy (provisioning_handle, 
                                                                      puk_policy.getID (),
                                                                      puk_policy.getEncryptedValue (),
-                                                                     puk_policy.getFormat (),
+                                                                     puk_policy.getFormat ().getSKSValue (),
                                                                      puk_policy.getRetryLimit (),
                                                                      puk_policy.getMAC());
                           }
@@ -265,10 +263,10 @@ public class KeyGen2Test
                                                                  puk_policy_handle,
                                                                  pin_policy.getUserDefinedFlag (),
                                                                  pin_policy.getUserModifiableFlag (),
-                                                                 pin_policy.getFormat (),
+                                                                 pin_policy.getFormat ().getSKSValue (),
                                                                  pin_policy.getRetryLimit (),
                                                                  pin_policy.getGrouping (),
-                                                                 pin_policy.getPatternRestrictions (),
+                                                                 PatternRestriction.getSKSValue (pin_policy.getPatternRestrictions ()),
                                                                  pin_policy.getMinLength (),
                                                                  pin_policy.getMaxLength (),
                                                                  pin_policy.getInputMethod (),
@@ -290,7 +288,7 @@ public class KeyGen2Test
                                                  key.getImportPrivateKeyFlag (),
                                                  key.getKeyUsage ().getSKSValue (),
                                                  key.getFriendlyName (),
-                                                 key.getKeyAlgorithmData (),
+                                                 key.getKeyAlgorithmData ().getSKSValue (),
                                                  key.getMAC ());
                 key_init_response.addPublicKey (kpr.getPublicKey (),
                                                 kpr.getKeyAttestation (),
