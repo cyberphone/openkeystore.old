@@ -78,7 +78,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
     static final byte[] METHOD_CREATE_KEY_PAIR            = new byte[] {'c','r','e','a','t','e','K','e','y','P','a','i','r'};
     static final byte[] METHOD_CREATE_PIN_POLICY          = new byte[] {'c','r','e','a','t','e','P','I','N','P','o','l','i','c','y'};
     static final byte[] METHOD_CREATE_PUK_POLICY          = new byte[] {'c','r','e','a','t','e','P','U','K','P','o','l','i','c','y'};
-    static final byte[] METHOD_ADD_EXTENSION              = new byte[] {'a','d','d','E','x','t','e','n','s','i','o','n'};
+    static final byte[] METHOD_ADD_EXTENSION_DATA         = new byte[] {'a','d','d','E','x','t','e','n','s','i','o','n','D','a','t','a'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Other KDF constants that are used "as is"
@@ -994,23 +994,23 @@ public class SKSReferenceImplementation implements SecureKeyStore
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                              addExtension                                  //
+    //                            addExtensionData                                //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public void addExtension (int key_handle, 
-                              byte basic_type,
-                              byte[] qualifier,
-                              String extension_type,
-                              byte[] extension_data,
-                              byte[] mac) throws SKSException
+    public void addExtensionData (int key_handle, 
+                                  byte basic_type,
+                                  byte[] qualifier,
+                                  String extension_type,
+                                  byte[] extension_data,
+                                  byte[] mac) throws SKSException
       {
         KeyEntry key_entry = getOpenKey (key_handle);
         if (key_entry.extensions.get (extension_type) != null)
           {
             key_entry.owner.abort ("Duplicate extension: " + extension_type, SKSException.ERROR_OPTION);
           }
-        MacBuilder ext_mac = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
+        MacBuilder ext_mac = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION_DATA);
         ext_mac.addByte (basic_type);
         ext_mac.addArray (qualifier);
         ext_mac.addString (extension_type);
@@ -1273,11 +1273,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
             ///////////////////////////////////////////////////////////////////////////////////
             // If key backup was request, wrap a copy of key
             ///////////////////////////////////////////////////////////////////////////////////
-            byte[] encrypted_private_key = null;
-            if (private_key_backup)
-              {
-                encrypted_private_key = provisioning.encrypt (private_key.getEncoded ());
-              }
+            byte[] encrypted_private_key = private_key_backup ? provisioning.encrypt (private_key.getEncoded ()) : null;
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Create attestation data

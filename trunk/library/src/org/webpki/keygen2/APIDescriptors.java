@@ -26,7 +26,7 @@ public enum APIDescriptors
     CREATE_KEY_PAIR                 ("createKeyPair"),
     CREATE_PIN_POLICY               ("createPINPolicy"),
     CREATE_PUK_POLICY               ("createPUKPolicy"),
-    ADD_EXTENSION                   ("addExtension");
+    ADD_EXTENSION_DATA              ("addExtensionData");
 
     private byte[] binary;       // As expressed in MACs
 
