@@ -164,6 +164,8 @@ public class KeyGen2Test
         
         ProvisioningSessionRequestDecoder prov_sess_req;
         
+        DeviceInfo device_info;
+        
         Client () throws IOException
           {
             client_xml_cache = new XMLSchemaCache ();
@@ -196,7 +198,7 @@ public class KeyGen2Test
                                                  prov_sess_req.getSessionKeyLimit ());
             provisioning_handle = sess.getProvisioningHandle ();
             
-            DeviceInfo dev = sks.getDeviceInfo ();
+            device_info = sks.getDeviceInfo ();
             ProvisioningSessionResponseEncoder prov_sess_response = 
                   new ProvisioningSessionResponseEncoder (sess.getClientEphemeralKey (),
                                                           prov_sess_req.getServerSessionID (),
@@ -204,7 +206,7 @@ public class KeyGen2Test
                                                           prov_sess_req.getServerTime (),
                                                           client_time,
                                                           sess.getSessionAttestation (),
-                                                          dev.getDeviceCertificatePath ());
+                                                          device_info.getDeviceCertificatePath ());
             prov_sess_response.signRequest (new SymKeySignerInterface ()
               {
                 public MacAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
@@ -265,11 +267,11 @@ public class KeyGen2Test
                                                                  pin_policy.getUserModifiableFlag (),
                                                                  pin_policy.getFormat ().getSKSValue (),
                                                                  pin_policy.getRetryLimit (),
-                                                                 pin_policy.getGrouping (),
+                                                                 pin_policy.getGrouping ().getSKSValue (),
                                                                  PatternRestriction.getSKSValue (pin_policy.getPatternRestrictions ()),
                                                                  pin_policy.getMinLength (),
                                                                  pin_policy.getMaxLength (),
-                                                                 pin_policy.getInputMethod (),
+                                                                 pin_policy.getInputMethod ().getSKSValue (),
                                                                  pin_policy.getMAC ());
                       }
                   }
@@ -407,9 +409,8 @@ public class KeyGen2Test
             public void generateAndVerifySessionKey (ECPublicKey client_ephemeral_key,
                                                      byte[] kdf_data,
                                                      byte[] session_key_mac_data,
-                                                     PublicKey device_public_key,
-                                                     byte[] session_attestation,
-                                                     SignatureAlgorithms signature_algorithm) throws IOException, GeneralSecurityException
+                                                     X509Certificate device_certificate,
+                                                     byte[] session_attestation) throws IOException, GeneralSecurityException
               {
 
                 // SP800-56A C(2, 0, ECC CDH)
@@ -427,6 +428,10 @@ public class KeyGen2Test
                 mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
                 mac.init (new SecretKeySpec (session_key, "RAW"));
                 byte[] session_key_attest = mac.doFinal (session_key_mac_data);
+                
+                PublicKey device_public_key = device_certificate.getPublicKey ();
+                SignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
+                    SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256;
 
                 // Verify that the session key signature was signed by the device key
                 Signature verifier = Signature.getInstance (signature_algorithm.getJCEName (), "BC");

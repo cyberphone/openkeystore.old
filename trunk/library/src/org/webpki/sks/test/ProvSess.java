@@ -92,9 +92,8 @@ public class ProvSess
         public void generateAndVerifySessionKey (ECPublicKey client_ephemeral_key,
                                                  byte[] kdf_data,
                                                  byte[] session_key_mac_data,
-                                                 PublicKey device_public_key,
-                                                 byte[] session_attestation,
-                                                 SignatureAlgorithms signature_algorithm) throws IOException, GeneralSecurityException
+                                                 X509Certificate device_certificate,
+                                                 byte[] session_attestation) throws IOException, GeneralSecurityException
           {
   
             // SP800-56A C(2, 0, ECC CDH)
@@ -113,6 +112,10 @@ public class ProvSess
             mac.init (new SecretKeySpec (session_key, "RAW"));
             byte[] session_key_attest = mac.doFinal (session_key_mac_data);
   
+            PublicKey device_public_key = device_certificate.getPublicKey ();
+            SignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
+                SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256;
+
             // Verify that the session key signature was signed by the device key
             Signature verifier = Signature.getInstance (signature_algorithm.getJCEName (), "BC");
             verifier.initVerify (device_public_key);
@@ -268,7 +271,7 @@ public class ProvSess
     ///////////////////////////////////////////////////////////////////////////////////
     // Create provisioning session
     ///////////////////////////////////////////////////////////////////////////////////
-    public ProvSess (Device device) throws Exception
+    public ProvSess (Device device) throws GeneralSecurityException, IOException
       {
         sks = device.sks;
         server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
@@ -305,9 +308,8 @@ public class ProvSess
            server_sess_key.generateAndVerifySessionKey (sess.getClientEphemeralKey (),
                                                         kdf.getResult (),
                                                         session_key_mac_data.getResult (),
-                                                        device.device_info.getDeviceCertificatePath ()[0].getPublicKey (),
-                                                        sess.getSessionAttestation (),
-                                                        SignatureAlgorithms.RSA_SHA256);
+                                                        device.device_info.getDeviceCertificatePath ()[0],
+                                                        sess.getSessionAttestation ());
      }
     
     public void closeSession () throws IOException, GeneralSecurityException
@@ -327,6 +329,11 @@ public class ProvSess
           }
       }
     
+    public void abortSession () throws IOException
+      {
+        sks.abortProvisioningSession (provisioning_handle);
+      }
+
     byte[] getPassphraseBytes (PassphraseFormat format, String passphrase) throws IOException
       {
         if (format == PassphraseFormat.BINARY)
@@ -385,11 +392,11 @@ public class ProvSess
                                                             user_modifiable,
                                                             format.getSKSValue (),
                                                             (short)retry_limit,
-                                                            grouping,
+                                                            grouping.getSKSValue (),
                                                             PatternRestriction.getSKSValue (pattern_restrictions), 
                                                             (byte)min_length, 
                                                             (byte)max_length, 
-                                                            input_method, 
+                                                            input_method.getSKSValue (), 
                                                             mac (pin_policy_mac.getResult (), APIDescriptors.CREATE_PIN_POLICY));
         return pin_policy;
       }

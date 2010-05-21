@@ -85,7 +85,7 @@ import org.webpki.util.ArrayUtil;
 
 public class SKSTest
   {
-    static final byte[] TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','t','?'};
+    static final byte[] TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','o','t','?'};
   
     static FileOutputStream fos;
     
@@ -93,7 +93,27 @@ public class SKSTest
     
     Device device;
     
-   
+    private boolean nameTest (String name) throws IOException, GeneralSecurityException
+      {
+        try
+          {
+            ProvSess sess = new ProvSess (device);
+            sess.createPINPolicy (name,
+                PassphraseFormat.NUMERIC,
+                4 /* min_length */, 
+                8 /* max_length */,
+                (short) 3 /* retry_limit*/, 
+                null /* puk_policy */);
+            sess.abortSession ();
+          }
+        catch (SKSException e)
+          {
+            return false;
+          }
+        return true;
+      }
+
+  
     @BeforeClass
     public static void openFile () throws Exception
       {
@@ -206,7 +226,7 @@ public class SKSTest
       {
         ProvSess sess = new ProvSess (device);
         sess.createRSAKey ("Key.1",
-                           2048 /* rsa_size */,
+                           1024 /* rsa_size */,
                            null /* pin_value */,
                            null /* pin_policy */,
                            KeyUsage.AUTHENTICATION);
@@ -216,32 +236,51 @@ public class SKSTest
     public void test6 () throws Exception
       {
         ProvSess sess = new ProvSess (device);
-        sess.createRSAKey ("Key.1",
-                           2048 /* rsa_size */,
-                           null /* pin_value */,
-                           null /* pin_policy */,
-                           KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
+        int i = 1;
+        for (short rsa_key_size : device.device_info.getRSAKeySizes ())
+          {
+            sess.createRSAKey ("Key." + i++,
+                               rsa_key_size /* rsa_size */,
+                               null /* pin_value */,
+                               null /* pin_policy */,
+                               KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
+          }
+        if (i == 1) fail("Missing RSA");
         sess.closeSession ();
       }
     @Test
     public void test7 () throws Exception
       {
-        ProvSess sess = new ProvSess (device);
-        sess.createECKey ("Key.1",
-                           null /* pin_value */,
-                           null /* pin_policy */,
-                           KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST7");
-        sess.closeSession ();
-        
+        assertTrue (nameTest ("a"));
+        assertTrue (nameTest ("_"));
+        assertTrue (nameTest ("a."));
+        assertTrue (nameTest ("azAZ09-._"));
+        assertTrue (nameTest ("a123456789a123456789a12345678955"));
+        assertFalse (nameTest (".a"));
+        assertFalse (nameTest ("-"));
+        assertFalse (nameTest (" I_am_a_bad_name"));
+        assertFalse (nameTest (""));
+        assertFalse (nameTest ("a123456789a123456789a123456789555"));
       }
     @Test
     public void test8 () throws Exception
       {
         ProvSess sess = new ProvSess (device);
+        sess.createECKey ("Key.1",
+                           null /* pin_value */,
+                           null /* pin_policy */,
+                           KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST8");
+        sess.closeSession ();
+        
+      }
+    @Test
+    public void test12 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
         GenKey key = sess.createECKey ("Key.1",
                                        null /* pin_value */,
                                        null /* pin_policy */,
-                                       KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST8");
+                                       KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST12");
         sess.closeSession ();
         byte[] result = device.sks.signHashedData (key.key_handle, 
                                                    "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
@@ -250,21 +289,19 @@ public class SKSTest
         Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
         verify.initVerify (key.cert_path[0]);
         verify.update (TEST_STRING);
-        if (!verify.verify (result))
-          {
-            fail ("Bad signature");
-          }
+        assertTrue ("Bad signature", verify.verify (result));
       }
     @Test
-    public void test9 () throws Exception
+    public void test13 () throws Exception
       {
         ProvSess sess = new ProvSess (device);
         GenKey key = sess.createRSAKey ("Key.1",
                                         2048,
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST9");
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
         sess.closeSession ();
+
         byte[] result = device.sks.signHashedData (key.key_handle, 
                                                    "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
                                                    new byte[0], 
@@ -272,10 +309,8 @@ public class SKSTest
         Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
         verify.initVerify (key.cert_path[0]);
         verify.update (TEST_STRING);
-        if (!verify.verify (result))
-          {
-            fail ("Bad signature");
-          }
+        assertTrue ("Bad signature", verify.verify (result));
+
         result = device.sks.signHashedData (key.key_handle, 
                                             "http://www.w3.org/2000/09/xmldsig#rsa-sha1", 
                                             new byte[0], 
@@ -283,10 +318,7 @@ public class SKSTest
         verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA1.getJCEName (), "BC");
         verify.initVerify (key.cert_path[0]);
         verify.update (TEST_STRING);
-        if (!verify.verify (result))
-          {
-            fail ("Bad signature");
-          }
+        assertTrue ("Bad signature", verify.verify (result));
       }
 
   }

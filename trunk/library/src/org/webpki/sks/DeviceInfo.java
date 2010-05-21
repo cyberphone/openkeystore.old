@@ -21,15 +21,31 @@ import java.security.cert.X509Certificate;
 public class DeviceInfo
   {
     X509Certificate[] certificate_path;
+    String[] algorithms;
+    short[] rsa_key_sizes;
     
     public X509Certificate[] getDeviceCertificatePath ()
       {
         return certificate_path;
       }
     
-    public DeviceInfo (X509Certificate[] certificate_path)
+    public short[] getRSAKeySizes ()
+      {
+        return rsa_key_sizes;
+      }
+    
+    public String[] getAlgorithms ()
+      {
+        return algorithms;
+      }
+    
+    public DeviceInfo (X509Certificate[] certificate_path,
+                       short[] rsa_key_sizes,
+                       String[] algorithms)
       {
         this.certificate_path = certificate_path;
+        this.rsa_key_sizes = rsa_key_sizes;
+        this.algorithms = algorithms;
       }
 
   }

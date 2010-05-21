@@ -23,6 +23,7 @@ import java.util.Date;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.xml.DOMReaderHelper;
@@ -33,7 +34,6 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSymKeyVerifier;
 
 import org.webpki.crypto.MacAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SymKeyVerifierInterface;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -117,9 +117,8 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
             session_key_operations.generateAndVerifySessionKey (client_ephemeral_key,
                                                                 kdf.getResult (),
                                                                 session_key_mac_data.getResult (),
-                                                                device_certificate_path[0].getPublicKey (),
-                                                                session_attestation,
-                                                                SignatureAlgorithms.RSA_SHA256);
+                                                                device_certificate_path[0],
+                                                                session_attestation);
           }
         catch (GeneralSecurityException e)
           {

@@ -19,9 +19,6 @@ package org.webpki.sks;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 
-import org.webpki.keygen2.InputMethod;
-import org.webpki.keygen2.PINGrouping;
-
 public interface SecureKeyStore
   {
     public KeyPair createKeyPair (int provisioning_handle,
@@ -75,11 +72,11 @@ public interface SecureKeyStore
                                 boolean user_modifiable,
                                 byte format,
                                 short retry_limit,
-                                PINGrouping grouping,
+                                byte grouping,
                                 byte pattern_restrictions,
                                 byte min_length,
                                 byte max_length,
-                                InputMethod input_method,
+                                byte input_method,
                                 byte[] mac) throws SKSException;
 
     public int createPUKPolicy (int provisioning_handle,
