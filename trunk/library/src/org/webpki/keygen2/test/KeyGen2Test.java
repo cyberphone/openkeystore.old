@@ -345,12 +345,12 @@ public class KeyGen2Test
                   }
                 for (CredentialDeploymentRequestDecoder.Extension extension : key.getExtensions ())
                   {
-                    sks.addExtensionData (key_handle,
-                                          extension.getBaseType (), 
-                                          extension.getQualifier (),
-                                          extension.getExtensionType (),
-                                          extension.getExtensionData (),
-                                          extension.getMAC ());
+                    sks.addExtension (key_handle,
+                                      extension.getBaseType (), 
+                                      extension.getQualifier (),
+                                      extension.getExtensionType (),
+                                      extension.getExtensionData (),
+                                      extension.getMAC ());
                   }
               }
             CredentialDeploymentResponseEncoder cre_dep_response = 

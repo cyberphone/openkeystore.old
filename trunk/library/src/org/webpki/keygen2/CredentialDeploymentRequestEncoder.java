@@ -169,7 +169,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                     add_ext.addArray (ei.getQualifier ());
                     add_ext.addString (ei.type);
                     add_ext.addBlob (ei.getExtensionData ());
-                    ei.writeExtension (wr, mac (add_ext.getResult (), APIDescriptors.ADD_EXTENSION_DATA));
+                    ei.writeExtension (wr, mac (add_ext.getResult (), APIDescriptors.ADD_EXTENSION));
                   }
                 wr.getParent ();
               }

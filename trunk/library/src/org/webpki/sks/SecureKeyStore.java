@@ -50,12 +50,12 @@ public interface SecureKeyStore
                                     X509Certificate[] certificate_path,
                                     byte[] mac) throws SKSException;
     
-    public void addExtensionData (int key_handle,
-                                  byte basic_type,
-                                  byte[] qualifier,
-                                  String extension_type,
-                                  byte[] extension_data,
-                                  byte[] mac) throws SKSException;
+    public void addExtension (int key_handle,
+                              byte base_type,
+                              byte[] qualifier,
+                              String extension_type,
+                              byte[] extension_data,
+                              byte[] mac) throws SKSException;
     
     public void setSymmetricKey (int key_handle,
                                  byte[] encrypted_symmetric_key,

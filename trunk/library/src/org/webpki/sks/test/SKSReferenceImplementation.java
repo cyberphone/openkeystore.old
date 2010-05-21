@@ -78,7 +78,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
     static final byte[] METHOD_CREATE_KEY_PAIR            = new byte[] {'c','r','e','a','t','e','K','e','y','P','a','i','r'};
     static final byte[] METHOD_CREATE_PIN_POLICY          = new byte[] {'c','r','e','a','t','e','P','I','N','P','o','l','i','c','y'};
     static final byte[] METHOD_CREATE_PUK_POLICY          = new byte[] {'c','r','e','a','t','e','P','U','K','P','o','l','i','c','y'};
-    static final byte[] METHOD_ADD_EXTENSION_DATA         = new byte[] {'a','d','d','E','x','t','e','n','s','i','o','n','D','a','t','a'};
+    static final byte[] METHOD_ADD_EXTENSION              = new byte[] {'a','d','d','E','x','t','e','n','s','i','o','n'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Other KDF constants that are used "as is"
@@ -102,8 +102,8 @@ public class SKSReferenceImplementation implements SecureKeyStore
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS key algorithm IDs
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte RSA_KEY = (byte) 0x00;
-    static final byte ECC_KEY = (byte) 0x01;
+    static final byte RSA_KEY = 0x00;
+    static final byte ECC_KEY = 0x01;
     
     int next_key_handle = 1;
     HashMap<Integer,KeyEntry> keys = new HashMap<Integer,KeyEntry> ();
@@ -224,12 +224,20 @@ public class SKSReferenceImplementation implements SecureKeyStore
             return mac_builder;
           }
       }
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // See "BaseType" for "addExtensionData" in the SKS specification
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte BASE_TYPE_EXTENSION           = 0x00;
+    static final byte BASE_TYPE_ENCRYPTED_EXTENSION = 0x01;
+    static final byte BASE_TYPE_PROPERTY_BAG        = 0x02;
+    static final byte BASE_TYPE_LOGOTYPE            = 0x03;
 
     class Extension
       {
         byte[] qualifier;
         byte[] extension_data;
-        byte basic_type;
+        byte base_type;
       }
     
     class PINPolicy extends NameSpace
@@ -994,32 +1002,32 @@ public class SKSReferenceImplementation implements SecureKeyStore
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                            addExtensionData                                //
+    //                              addExtension                                  //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public void addExtensionData (int key_handle, 
-                                  byte basic_type,
-                                  byte[] qualifier,
-                                  String extension_type,
-                                  byte[] extension_data,
-                                  byte[] mac) throws SKSException
+    public void addExtension (int key_handle, 
+                              byte base_type,
+                              byte[] qualifier,
+                              String extension_type,
+                              byte[] extension_data,
+                              byte[] mac) throws SKSException
       {
         KeyEntry key_entry = getOpenKey (key_handle);
         if (key_entry.extensions.get (extension_type) != null)
           {
-            key_entry.owner.abort ("Duplicate extension: " + extension_type, SKSException.ERROR_OPTION);
+            key_entry.owner.abort ("Duplicate \"ExtensionType\": " + extension_type, SKSException.ERROR_OPTION);
           }
-        MacBuilder ext_mac = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION_DATA);
-        ext_mac.addByte (basic_type);
+        MacBuilder ext_mac = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
+        ext_mac.addByte (base_type);
         ext_mac.addArray (qualifier);
         ext_mac.addString (extension_type);
         ext_mac.addBlob (extension_data);
         key_entry.owner.verifyMac (ext_mac, mac);
         Extension extension = new Extension ();
-        extension.basic_type = basic_type;
+        extension.base_type = base_type;
         extension.qualifier = qualifier;
-        extension.extension_data = basic_type == 0x01 ? key_entry.owner.decrypt (extension_data) : extension_data;
+        extension.extension_data = base_type == BASE_TYPE_ENCRYPTED_EXTENSION ? key_entry.owner.decrypt (extension_data) : extension_data;
         key_entry.extensions.put (extension_type, extension);
       }
 
