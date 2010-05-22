@@ -320,5 +320,124 @@ public class SKSTest
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
       }
+    @Test
+    public void test14 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
 
+        GenKey key = sess.createRSAKey ("Key.1",
+                                        1024,
+                                        ok_pin /* pin_value */,
+                                        pin_policy /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST14");
+        sess.closeSession ();
+
+        try
+          {
+            device.sks.signHashedData (key.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0], 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Bad PIN should not work");
+          }
+        catch (SKSException e)
+          {
+          }
+        try
+          {
+            device.sks.signHashedData (key.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       ok_pin.getBytes ("UTF-8"), 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+          }
+        catch (SKSException e)
+          {
+            fail ("Good PIN should work");
+          }
+        try
+          {
+            device.sks.signHashedData (key.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0], 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Bad PIN should not work");
+          }
+        catch (SKSException e)
+          {
+          }
+        try
+          {
+            device.sks.signHashedData (key.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0], 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Bad PIN should not work");
+          }
+        catch (SKSException e)
+          {
+          }
+        try
+          {
+            device.sks.signHashedData (key.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       ok_pin.getBytes ("UTF-8"), 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+          }
+        catch (SKSException e)
+          {
+            fail ("Good PIN should work");
+          }
+        try
+          {
+            device.sks.signHashedData (key.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0], 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Bad PIN should not work");
+          }
+        catch (SKSException e)
+          {
+          }
+        try
+          {
+            device.sks.signHashedData (key.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0], 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Bad PIN should not work");
+          }
+        catch (SKSException e)
+          {
+          }
+        try
+          {
+            device.sks.signHashedData (key.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0], 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Bad PIN should not work");
+          }
+        catch (SKSException e)
+          {
+          }
+        try
+          {
+            device.sks.signHashedData (key.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       ok_pin.getBytes ("UTF-8"), 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Good PIN but too many errors should NOT work");
+          }
+        catch (SKSException e)
+          {
+          }
+         
+      }
   }
