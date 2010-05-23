@@ -100,11 +100,54 @@ public class SKSReferenceImplementation implements SecureKeyStore
     static final String CRYPTO_STRING_DEVICE_PIN    = "#Device PIN";
     
     /////////////////////////////////////////////////////////////////////////////////////////////
-    // SKS key algorithm IDs
+    // SKS key algorithm IDs used in "createKeyPair"
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final byte RSA_KEY = 0x00;
     static final byte ECC_KEY = 0x01;
     
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // See "KeyUsage" in the SKS specification
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte KEY_USAGE_SIGNATURE        = 0x01;
+    static final byte KEY_USAGE_AUTHENTICATION   = 0x02;
+    static final byte KEY_USAGE_ENCRYPTION       = 0x04;
+    static final byte KEY_USAGE_UNIVERSAL        = 0x08;
+    static final byte KEY_USAGE_TRANSPORT        = 0x10;
+    static final byte KEY_USAGE_SYMMETRIC_KEY    = 0x20;
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // See "PIN Grouping" in the SKS specification
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte PIN_GROUPING_NONE          = 0x00;
+    static final byte PIN_GROUPING_SHARED        = 0x01;
+    static final byte PIN_GROUPING_SIGN_PLUS_STD = 0x02;
+    static final byte PIN_GROUPING_UNIQUE        = 0x03;
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // See "PIN Pattern Control" in the SKS specification
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte PIN_PATTERN_TWO_IN_A_ROW   = 0x01;
+    static final byte PIN_PATTERN_THREE_IN_A_ROW = 0x02;
+    static final byte PIN_PATTERN_SEQUENCE       = 0x04;
+    static final byte PIN_PATTERN_REPEATED       = 0x08;
+    static final byte PIN_PATTERN_MISSING_GROUP  = 0x10;
+ 
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // See "PIN and PUK Formats" in the SKS specification
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte PIN_FORMAT_NUMERIC         = 0x00;
+    static final byte PIN_FORMAT_ALPHANUMERIC    = 0x01;
+    static final byte PIN_FORMAT_STRING          = 0x02;
+    static final byte PIN_FORMAT_BINARY          = 0x03;
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // See "BaseType" for "addExtension" in the SKS specification
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte BASE_TYPE_EXTENSION           = 0x00;
+    static final byte BASE_TYPE_ENCRYPTED_EXTENSION = 0x01;
+    static final byte BASE_TYPE_PROPERTY_BAG        = 0x02;
+    static final byte BASE_TYPE_LOGOTYPE            = 0x03;
+
     int next_key_handle = 1;
     HashMap<Integer,KeyEntry> keys = new HashMap<Integer,KeyEntry> ();
 
@@ -163,41 +206,6 @@ public class SKSReferenceImplementation implements SecureKeyStore
       
       }
 
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "KeyUsage" in the SKS specification
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte KEY_USAGE_SIGNATURE        = 0x01;
-    static final byte KEY_USAGE_AUTHENTICATION   = 0x02;
-    static final byte KEY_USAGE_ENCRYPTION       = 0x04;
-    static final byte KEY_USAGE_UNIVERSAL        = 0x08;
-    static final byte KEY_USAGE_TRANSPORT        = 0x10;
-    static final byte KEY_USAGE_SYMMETRIC_KEY    = 0x20;
-    
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "PIN Grouping" in the SKS specification
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_GROUPING_NONE          = 0x00;
-    static final byte PIN_GROUPING_SHARED        = 0x01;
-    static final byte PIN_GROUPING_SIGN_PLUS_STD = 0x02;
-    static final byte PIN_GROUPING_UNIQUE        = 0x03;
-    
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "PIN Pattern Control" in the SKS specification
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_PATTERN_TWO_IN_A_ROW   = 0x01;
-    static final byte PIN_PATTERN_THREE_IN_A_ROW = 0x02;
-    static final byte PIN_PATTERN_SEQUENCE       = 0x04;
-    static final byte PIN_PATTERN_REPEATED       = 0x08;
-    static final byte PIN_PATTERN_MISSING_GROUP  = 0x10;
- 
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "PIN and PUK Formats" in the SKS specification
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_FORMAT_NUMERIC         = 0x00;
-    static final byte PIN_FORMAT_ALPHANUMERIC    = 0x01;
-    static final byte PIN_FORMAT_STRING          = 0x02;
-    static final byte PIN_FORMAT_BINARY          = 0x03;
-    
     class KeyEntry extends NameSpace
       {
         int key_handle;
@@ -289,14 +297,6 @@ public class SKSReferenceImplementation implements SecureKeyStore
           }
       }
     
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "BaseType" for "addExtensionData" in the SKS specification
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte BASE_TYPE_EXTENSION           = 0x00;
-    static final byte BASE_TYPE_ENCRYPTED_EXTENSION = 0x01;
-    static final byte BASE_TYPE_PROPERTY_BAG        = 0x02;
-    static final byte BASE_TYPE_LOGOTYPE            = 0x03;
-
     class Extension
       {
         byte[] qualifier;
