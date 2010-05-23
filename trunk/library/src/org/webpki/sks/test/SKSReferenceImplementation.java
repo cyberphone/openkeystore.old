@@ -220,13 +220,13 @@ public class SKSReferenceImplementation implements SecureKeyStore
       {
         int key_handle;
         byte key_usage;
+
         PublicKey public_key;
         PrivateKey private_key;
+        X509Certificate[] certificate_path;
 
         byte[] symmetric_key;
         HashMap<String,Boolean> endorsed_algorithms = new HashMap<String,Boolean> ();
-
-        X509Certificate[] certificate_path;
 
         String friendly_name;
 
@@ -319,6 +319,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
         int pin_policy_handle;
         
         PUKPolicy puk_policy;
+
         short retry_limit;
         byte format;
         boolean user_defined;
@@ -1452,14 +1453,9 @@ public class SKSReferenceImplementation implements SecureKeyStore
         ///////////////////////////////////////////////////////////////////////////////////
         // Decode key algorithm specifier
         ///////////////////////////////////////////////////////////////////////////////////
-        boolean rsa = key_algorithm.length > 0 && key_algorithm[0] == RSA_KEY;
         AlgorithmParameterSpec alg_par_spec = null;
-        if (rsa)
+        if (key_algorithm.length == 7 && key_algorithm[0] == RSA_KEY)
           {
-            if (key_algorithm.length != 7)
-              {
-                provisioning.abort ("Bad RSA KeyAlgorithm format");
-              }
             int size = getShort (key_algorithm, 1);
             boolean found = false;
             for (short rsa_key_size : RSA_KEY_SIZES)
@@ -1503,19 +1499,19 @@ public class SKSReferenceImplementation implements SecureKeyStore
             // At last, generate the desired key-pair
             ///////////////////////////////////////////////////////////////////////////////////
             SecureRandom secure_random = new SecureRandom (server_seed); 
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance (rsa ? "RSA" : "EC", "BC");
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance (alg_par_spec instanceof RSAKeyGenParameterSpec ? "RSA" : "EC", "BC");
             kpg.initialize (alg_par_spec, secure_random);
             java.security.KeyPair key_pair = kpg.generateKeyPair ();
             PublicKey public_key = key_pair.getPublic ();   
             PrivateKey private_key = key_pair.getPrivate ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // If key backup was request, wrap a copy of key
+            // If key backup was requested, wrap a copy of key
             ///////////////////////////////////////////////////////////////////////////////////
             byte[] encrypted_private_key = private_key_backup ? provisioning.encrypt (private_key.getEncoded ()) : null;
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Create attestation data
+            // Create key attestation data
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder key_attestation = provisioning.getMacBuilder (KDF_DEVICE_ATTESTATION);
             key_attestation.addString (id);
@@ -1534,7 +1530,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
             key_entry.friendly_name = friendly_name;
             key_entry.pin_value = pin_value;
             key_entry.public_key = public_key;   
-            key_entry.private_key = import_private_key ? null : private_key;  // To enable the duplicate import test...
+            key_entry.private_key = import_private_key ? null : private_key;  // To enable the duplicate/missing import test...
             key_entry.key_usage = key_usage;
             key_entry.device_pin_protected = device_pin_protected;
             return new KeyPair (public_key,
