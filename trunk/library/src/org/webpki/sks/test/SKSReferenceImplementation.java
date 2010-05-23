@@ -61,7 +61,7 @@ import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.util.ArrayUtil;
 
-/**
+/*
  *                          ###########################
  *                          #  SKS - Secure Key Store #
  *                          ###########################
@@ -75,7 +75,7 @@ import org.webpki.util.ArrayUtil;
  *  In addition to the reference implementation there is a set of SKS JUnit tests
  *  that should work identical on a "real" SKS token.
  *  
- *  @author: Anders Rundgren
+ *  Author: Anders Rundgren
  */
 public class SKSReferenceImplementation implements SecureKeyStore
   {
@@ -93,21 +93,21 @@ public class SKSReferenceImplementation implements SecureKeyStore
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Other KDF constants that are used "as is"
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte[] KDF_DEVICE_ATTESTATION = new byte[] {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
-    static final byte[] KDF_ENCRYPTION_KEY     = new byte[] {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
-    static final byte[] KDF_EXTERNAL_SIGNATURE = new byte[] {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
-    static final byte[] KDF_PROOF_OF_OWNERSHIP = new byte[] {'P','r','o','o','f',' ','O','f',' ','O','w','n','e','r','s','h','i','p'};
+    static final byte[] KDF_DEVICE_ATTESTATION            = new byte[] {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
+    static final byte[] KDF_ENCRYPTION_KEY                = new byte[] {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
+    static final byte[] KDF_EXTERNAL_SIGNATURE            = new byte[] {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
+    static final byte[] KDF_PROOF_OF_OWNERSHIP            = new byte[] {'P','r','o','o','f',' ','O','f',' ','O','w','n','e','r','s','h','i','p'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "Success" used when attesting the completed provisioning session
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte[] CRYPTO_STRING_SUCCESS  = new byte[] {(byte)0x00, (byte)0x07, 'S','u','c','c','e','s','s'};
+    static final byte[] CRYPTO_STRING_SUCCESS             = new byte[] {(byte)0x00, (byte)0x07, 'S','u','c','c','e','s','s'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Predefined PIN and PUK policy IDs for MAC operations
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final String CRYPTO_STRING_NOT_AVAILABLE = "#N/A";
-    static final String CRYPTO_STRING_DEVICE_PIN    = "#Device PIN";
+    static final String CRYPTO_STRING_NOT_AVAILABLE       = "#N/A";
+    static final String CRYPTO_STRING_DEVICE_PIN          = "#Device PIN";
     
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "KeyUsage" in the SKS specification
@@ -544,7 +544,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
     
     static final String ALGORITHM_SESSION_KEY_ATTEST_1 = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sk1";
     
-    static final short[] rsa_key_sizes = new short[]{1024, 2048};
+    static final short[] RSA_KEY_SIZES = new short[]{1024, 2048};
 
     static
       {
@@ -816,7 +816,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
           {
             X509Certificate[] certificate_path = getDeviceCertificatePath ();
             return new DeviceInfo (certificate_path,
-                                   rsa_key_sizes,
+                                   RSA_KEY_SIZES,
                                    algorithms.keySet ().toArray (new String[0]));
           }
         catch (Exception e)
@@ -1462,7 +1462,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
               }
             int size = getShort (key_algorithm, 1);
             boolean found = false;
-            for (short rsa_key_size : rsa_key_sizes)
+            for (short rsa_key_size : RSA_KEY_SIZES)
               {
                 if (size == rsa_key_size)
                   {
