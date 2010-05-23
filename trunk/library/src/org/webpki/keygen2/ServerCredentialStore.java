@@ -842,6 +842,7 @@ public class ServerCredentialStore implements Serializable
                 key_pair_mac.addArray (getEncryptedPIN ());
               }
             key_pair_mac.addByte (key_usage.getSKSValue ());
+            key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
             key_alg_data.updateKeyAlgorithmMac (key_pair_mac);
             if (device_pin_protected)
               {

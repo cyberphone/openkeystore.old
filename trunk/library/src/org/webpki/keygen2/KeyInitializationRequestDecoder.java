@@ -326,6 +326,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
             id = ah.getString (ID_ATTR);
             mac = ah.getBinary (MAC_ATTR);
+            friendly_name = ah.getStringConditional (FRIENDLY_NAME_ATTR, "");
             key_usage = KeyUsage.getKeyUsageFromString (ah.getString (KEY_USAGE_ATTR));
             exportable = ah.getBooleanConditional (EXPORTABLE_ATTR);
             private_key_backup = ah.getBooleanConditional (PRIVATE_KEY_BACKUP_ATTR);
@@ -493,7 +494,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
 
         
-     // TODO        
         String friendly_name;
         
         public String getFriendlyName ()

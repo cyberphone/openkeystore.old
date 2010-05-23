@@ -61,11 +61,21 @@ import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.util.ArrayUtil;
 
-/*
+/**
+ *                          ###########################
+ *                          #  SKS - Secure Key Store #
+ *                          ###########################
+ *
+ *  SKS is a cryptographic module that supports E2ES (End-to-End Security) for
+ *  provisioning PKI, Symmetric keys, PINs, PUKs and Extension data.
+ *  
  *  The following is an SKS reference application that is supposed to complement
  *  the specification by showing how the different constructs can be implemented.
- *  In addition to the reference implementation there is a set of SKS JUnit
- *  tests that should work identical on a "real" SKS token.
+ *  
+ *  In addition to the reference implementation there is a set of SKS JUnit tests
+ *  that should work identical on a "real" SKS token.
+ *  
+ *  @author: Anders Rundgren
  */
 public class SKSReferenceImplementation implements SecureKeyStore
   {
@@ -100,45 +110,39 @@ public class SKSReferenceImplementation implements SecureKeyStore
     static final String CRYPTO_STRING_DEVICE_PIN    = "#Device PIN";
     
     /////////////////////////////////////////////////////////////////////////////////////////////
-    // SKS key algorithm IDs used in "createKeyPair"
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte RSA_KEY = 0x00;
-    static final byte ECC_KEY = 0x01;
-    
-    /////////////////////////////////////////////////////////////////////////////////////////////
     // See "KeyUsage" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte KEY_USAGE_SIGNATURE        = 0x01;
-    static final byte KEY_USAGE_AUTHENTICATION   = 0x02;
-    static final byte KEY_USAGE_ENCRYPTION       = 0x04;
-    static final byte KEY_USAGE_UNIVERSAL        = 0x08;
-    static final byte KEY_USAGE_TRANSPORT        = 0x10;
-    static final byte KEY_USAGE_SYMMETRIC_KEY    = 0x20;
+    static final byte KEY_USAGE_SIGNATURE           = 0x01;
+    static final byte KEY_USAGE_AUTHENTICATION      = 0x02;
+    static final byte KEY_USAGE_ENCRYPTION          = 0x04;
+    static final byte KEY_USAGE_UNIVERSAL           = 0x08;
+    static final byte KEY_USAGE_TRANSPORT           = 0x10;
+    static final byte KEY_USAGE_SYMMETRIC_KEY       = 0x20;
     
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "PIN Grouping" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_GROUPING_NONE          = 0x00;
-    static final byte PIN_GROUPING_SHARED        = 0x01;
-    static final byte PIN_GROUPING_SIGN_PLUS_STD = 0x02;
-    static final byte PIN_GROUPING_UNIQUE        = 0x03;
+    static final byte PIN_GROUPING_NONE             = 0x00;
+    static final byte PIN_GROUPING_SHARED           = 0x01;
+    static final byte PIN_GROUPING_SIGN_PLUS_STD    = 0x02;
+    static final byte PIN_GROUPING_UNIQUE           = 0x03;
     
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "PIN Pattern Control" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_PATTERN_TWO_IN_A_ROW   = 0x01;
-    static final byte PIN_PATTERN_THREE_IN_A_ROW = 0x02;
-    static final byte PIN_PATTERN_SEQUENCE       = 0x04;
-    static final byte PIN_PATTERN_REPEATED       = 0x08;
-    static final byte PIN_PATTERN_MISSING_GROUP  = 0x10;
+    static final byte PIN_PATTERN_TWO_IN_A_ROW      = 0x01;
+    static final byte PIN_PATTERN_THREE_IN_A_ROW    = 0x02;
+    static final byte PIN_PATTERN_SEQUENCE          = 0x04;
+    static final byte PIN_PATTERN_REPEATED          = 0x08;
+    static final byte PIN_PATTERN_MISSING_GROUP     = 0x10;
  
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "PIN and PUK Formats" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_FORMAT_NUMERIC         = 0x00;
-    static final byte PIN_FORMAT_ALPHANUMERIC    = 0x01;
-    static final byte PIN_FORMAT_STRING          = 0x02;
-    static final byte PIN_FORMAT_BINARY          = 0x03;
+    static final byte PIN_FORMAT_NUMERIC            = 0x00;
+    static final byte PIN_FORMAT_ALPHANUMERIC       = 0x01;
+    static final byte PIN_FORMAT_STRING             = 0x02;
+    static final byte PIN_FORMAT_BINARY             = 0x03;
     
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "BaseType" for "addExtension" in the SKS specification
@@ -148,6 +152,12 @@ public class SKSReferenceImplementation implements SecureKeyStore
     static final byte BASE_TYPE_PROPERTY_BAG        = 0x02;
     static final byte BASE_TYPE_LOGOTYPE            = 0x03;
 
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // SKS key algorithm IDs used in "createKeyPair"
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte RSA_KEY = 0x00;
+    static final byte ECC_KEY = 0x01;
+    
     int next_key_handle = 1;
     HashMap<Integer,KeyEntry> keys = new HashMap<Integer,KeyEntry> ();
 
@@ -876,6 +886,9 @@ public class SKSReferenceImplementation implements SecureKeyStore
     @Override
     public byte[] closeProvisioningSession (int provisioning_handle, byte[] mac) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get provisioning session
+        ///////////////////////////////////////////////////////////////////////////////////
         Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1220,6 +1233,9 @@ public class SKSReferenceImplementation implements SecureKeyStore
                                   byte[] key_algorithm,
                                   byte[] mac) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get provisioning session
+        ///////////////////////////////////////////////////////////////////////////////////
         Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1262,7 +1278,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Prepare for verifying incoming MAC
+        // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder key_pair_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_PAIR);
         key_pair_mac.addString (id);
@@ -1278,6 +1294,14 @@ public class SKSReferenceImplementation implements SecureKeyStore
           {
             key_pair_mac.addString (CRYPTO_STRING_NOT_AVAILABLE);
           }
+        key_pair_mac.addByte (key_usage);
+        key_pair_mac.addString (friendly_name);
+        key_pair_mac.addVerbatim (key_algorithm);
+        provisioning.verifyMac (key_pair_mac, mac);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Perform a gazillion tests on PINs if applicable
+        ///////////////////////////////////////////////////////////////////////////////////
         if (pin_policy != null)
           {
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1424,13 +1448,6 @@ public class SKSReferenceImplementation implements SecureKeyStore
                   }
               }
           }
-        key_pair_mac.addByte (key_usage);
-        key_pair_mac.addVerbatim (key_algorithm);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
-        ///////////////////////////////////////////////////////////////////////////////////
-        provisioning.verifyMac (key_pair_mac, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Decode key algorithm specifier
@@ -1483,7 +1500,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////
-            // Generate the desired key-pair
+            // At last, generate the desired key-pair
             ///////////////////////////////////////////////////////////////////////////////////
             SecureRandom secure_random = new SecureRandom (server_seed); 
             KeyPairGenerator kpg = KeyPairGenerator.getInstance (rsa ? "RSA" : "EC", "BC");

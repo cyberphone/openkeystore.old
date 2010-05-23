@@ -445,20 +445,20 @@ public class ProvSess
         byte[] server_seed = new byte[32];
         new SecureRandom ().nextBytes (server_seed);
         return createKey (id,
-        KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1,
-        server_seed,
-        pin_policy,
-        pin_value,
-        (byte) 0 /* biometric_protection */,
-        false /* boolean private_key_backup */,
-        (byte)0 /* export_policy */,
-        true /* updatable */,
-        (byte)0 /* delete_policy */,
-        false /* enable_pin_caching */,
-        false /* import_private_key */,
-        key_usage,
-        "" /* friendly_name */,
-        new KeyAlgorithmData.EC (ECDomains.P_256));
+                          KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1,
+                          server_seed,
+                          pin_policy,
+                          pin_value,
+                          (byte) 0 /* biometric_protection */,
+                          false /* boolean private_key_backup */,
+                          (byte)0 /* export_policy */,
+                          true /* updatable */,
+                          (byte)0 /* delete_policy */,
+                          false /* enable_pin_caching */,
+                          false /* import_private_key */,
+                          key_usage,
+                          "" /* friendly_name */,
+                          new KeyAlgorithmData.EC (ECDomains.P_256));
       }
 
     public GenKey createKey (String id,
@@ -503,6 +503,7 @@ public class ProvSess
             key_pair_mac.addArray (encrypted_pin_value);
           }
         key_pair_mac.addByte (key_usage.getSKSValue ());
+        key_pair_mac.addString (friendly_name);
         if (key_algorithm instanceof KeyAlgorithmData.RSA)
           {
             key_pair_mac.addByte (CryptoConstants.RSA_KEY);
