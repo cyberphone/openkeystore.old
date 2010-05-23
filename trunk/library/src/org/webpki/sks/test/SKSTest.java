@@ -31,6 +31,8 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
+import java.util.EnumSet;
+import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -93,17 +95,53 @@ public class SKSTest
     
     Device device;
     
-    private boolean nameTest (String name) throws IOException, GeneralSecurityException
+    private boolean nameCheck (String name) throws IOException, GeneralSecurityException
       {
         try
           {
             ProvSess sess = new ProvSess (device);
             sess.createPINPolicy (name,
-                PassphraseFormat.NUMERIC,
-                4 /* min_length */, 
-                8 /* max_length */,
-                (short) 3 /* retry_limit*/, 
-                null /* puk_policy */);
+                                  PassphraseFormat.NUMERIC,
+                                  4 /* min_length */, 
+                                  8 /* max_length */,
+                                  (short) 3 /* retry_limit*/, 
+                                  null /* puk_policy */);
+            sess.abortSession ();
+          }
+        catch (SKSException e)
+          {
+            return false;
+          }
+        return true;
+      }
+  
+    private boolean PINCheck (PassphraseFormat format,
+                              PatternRestriction[] patterns,
+                              String name) throws IOException, GeneralSecurityException
+      {
+        try
+          {
+            Set<PatternRestriction> pattern_restrictions = EnumSet.noneOf (PatternRestriction.class);
+            if (patterns != null)
+              {
+                for (PatternRestriction pattern : patterns)
+                  {
+                    pattern_restrictions.add (pattern);
+                  }
+              }
+            ProvSess sess = new ProvSess (device);
+            PINPol pin_pol = sess.createPINPolicy ("PIN",
+                                                   format,
+                                                   pattern_restrictions,
+                                                   PINGrouping.NONE,
+                                                   4 /* min_length */, 
+                                                   8 /* max_length */,
+                                                   (short) 3 /* retry_limit*/, 
+                                                   null /* puk_policy */);
+            sess.createECKey ("Key.1",
+                              name /* pin_value */,
+                              pin_pol /* pin_policy */,
+                              KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST8");
             sess.abortSession ();
           }
         catch (SKSException e)
@@ -113,7 +151,50 @@ public class SKSTest
         return true;
       }
 
-  
+    private boolean PINGroupCheck (boolean same_pin, PINGrouping grouping) throws IOException, GeneralSecurityException
+      {
+        try
+          {
+            String pin1 = "1234";
+            String pin2 = "4567";
+            ProvSess sess = new ProvSess (device);
+            PINPol pin_pol = sess.createPINPolicy ("PIN",
+                                         PassphraseFormat.NUMERIC,
+                                         EnumSet.noneOf (PatternRestriction.class),
+                                         grouping,
+                                         4 /* min_length */, 
+                                         8 /* max_length */,
+                                         (short) 3 /* retry_limit*/, 
+                                         null /* puk_policy */);
+            sess.createECKey ("Key.1",
+                pin1 /* pin_value */,
+                pin_pol /* pin_policy */,
+                KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST");
+            if (grouping == PINGrouping.SIGNATURE_PLUS_STANDARD)
+              {
+                sess.createECKey ("Key.1s",
+                    pin1 /* pin_value */,
+                    pin_pol /* pin_policy */,
+                    KeyUsage.UNIVERSAL).setCertificate ("CN=TEST");
+                sess.createECKey ("Key.2s",
+                    same_pin ? pin1 : pin2 /* pin_value */,
+                    pin_pol /* pin_policy */,
+                    KeyUsage.SIGNATURE).setCertificate ("CN=TEST");
+              }
+            sess.createECKey ("Key.2",
+                same_pin ? pin1 : pin2 /* pin_value */,
+                pin_pol /* pin_policy */,
+                KeyUsage.SIGNATURE).setCertificate ("CN=TEST");
+            sess.abortSession ();
+          }
+        catch (SKSException e)
+          {
+              return false;
+          }
+        return true;
+      }
+
+
     @BeforeClass
     public static void openFile () throws Exception
       {
@@ -251,16 +332,16 @@ public class SKSTest
     @Test
     public void test7 () throws Exception
       {
-        assertTrue (nameTest ("a"));
-        assertTrue (nameTest ("_"));
-        assertTrue (nameTest ("a."));
-        assertTrue (nameTest ("azAZ09-._"));
-        assertTrue (nameTest ("a123456789a123456789a12345678955"));
-        assertFalse (nameTest (".a"));
-        assertFalse (nameTest ("-"));
-        assertFalse (nameTest (" I_am_a_bad_name"));
-        assertFalse (nameTest (""));
-        assertFalse (nameTest ("a123456789a123456789a123456789555"));
+        assertTrue (nameCheck ("a"));
+        assertTrue (nameCheck ("_"));
+        assertTrue (nameCheck ("a."));
+        assertTrue (nameCheck ("azAZ09-._"));
+        assertTrue (nameCheck ("a123456789a123456789a12345678955"));
+        assertFalse (nameCheck (".a"));
+        assertFalse (nameCheck ("-"));
+        assertFalse (nameCheck (" I_am_a_bad_name"));
+        assertFalse (nameCheck (""));
+        assertFalse (nameCheck ("a123456789a123456789a123456789555"));
       }
     @Test
     public void test8 () throws Exception
@@ -439,5 +520,59 @@ public class SKSTest
           {
           }
          
+      }
+    @Test
+    public void test15 () throws Exception
+      {
+        assertTrue (PINCheck (PassphraseFormat.ALPHANUMERIC, null, "AB123"));
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, null, "1234"));
+        assertTrue (PINCheck (PassphraseFormat.STRING, null, "azAB13.\n"));
+        assertTrue (PINCheck (PassphraseFormat.BINARY, null, "12300234FF"));
+
+        assertFalse (PINCheck (PassphraseFormat.ALPHANUMERIC, null, "ab123"));  // Lowercase 
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, null, "AB1234"));      // Alpha
+
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE}, "1234"));      // Up seq
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE}, "8765"));      // Down seq
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE}, "1235"));      // No seq
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE}, "1345"));      // No seq
+
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.TWO_IN_A_ROW}, "1232"));      // No two in row
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.TWO_IN_A_ROW}, "11345"));      // Two in a row
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.TWO_IN_A_ROW}, "13455"));      // Two in a row
+
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.THREE_IN_A_ROW}, "11232"));      // No two in row
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.THREE_IN_A_ROW}, "111345"));      // Three in a row
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.THREE_IN_A_ROW}, "134555"));      // Three in a row
+        
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE, PatternRestriction.THREE_IN_A_ROW}, "1235"));      // No seq or three in a row
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE, PatternRestriction.THREE_IN_A_ROW}, "6789"));      // Seq
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE, PatternRestriction.THREE_IN_A_ROW}, "1115"));      // Three in a row
+
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "1476"));      // Bad combo
+        assertFalse (PINCheck (PassphraseFormat.BINARY, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "12300234FF"));      // Bad combo
+
+        assertTrue (PINCheck (PassphraseFormat.STRING, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "2aZ."));
+        assertTrue (PINCheck (PassphraseFormat.ALPHANUMERIC, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "AB34"));
+
+        assertFalse (PINCheck (PassphraseFormat.STRING, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "2aZA"));  // Non alphanum missing
+        assertFalse (PINCheck (PassphraseFormat.STRING, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "a.jZ"));  // Number missing
+        assertFalse (PINCheck (PassphraseFormat.STRING, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "2 ZA"));  // Lowercase missing
+        assertFalse (PINCheck (PassphraseFormat.STRING, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "2a 6"));  // Uppercase missing
+
+        assertFalse (PINCheck (PassphraseFormat.ALPHANUMERIC, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "ABCK")); // Missing number
+        assertFalse (PINCheck (PassphraseFormat.ALPHANUMERIC, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "1235")); // Missing alpha
+        
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.REPEATED}, "1345"));
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.REPEATED}, "1315"));  // Two of same
+        
+        assertTrue (PINGroupCheck (true, PINGrouping.NONE));
+        assertTrue (PINGroupCheck (false, PINGrouping.NONE));
+        assertTrue (PINGroupCheck (true, PINGrouping.SHARED));
+        assertFalse (PINGroupCheck (false, PINGrouping.SHARED));
+        assertFalse (PINGroupCheck (true, PINGrouping.UNIQUE));
+        assertTrue (PINGroupCheck (false, PINGrouping.UNIQUE));
+        assertFalse (PINGroupCheck (true, PINGrouping.SIGNATURE_PLUS_STANDARD));
+        assertTrue (PINGroupCheck (false, PINGrouping.SIGNATURE_PLUS_STANDARD));
       }
   }

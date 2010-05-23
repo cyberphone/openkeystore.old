@@ -261,7 +261,6 @@ public class SKSReferenceImplementation implements SecureKeyStore
                   {
                     authFailed ();
                   }
-                // TODO, a lot of more tests and actions..
                 if (!ArrayUtil.compare (this.pin_value, pin))
                   {
                     setErrorCounter (++error_counter);
@@ -276,7 +275,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
           {
             if (certificate_path == null)
               {
-                owner.abort ("EE certificate missing", SKSException.ERROR_OPTION);
+                owner.abort ("EE certificate missing");
               }
             MacBuilder mac_builder = owner.getMacBuilderForMethodCall (method);
             try
@@ -377,7 +376,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
     
         void abort (String message) throws SKSException
           {
-            abort (message, SKSException.ERROR_INTERNAL);
+            abort (message, SKSException.ERROR_OPTION);
           }
 
         byte[] encrypt (byte[] data) throws SKSException, GeneralSecurityException
@@ -891,7 +890,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
           {
             if (!provisioning.names.get(id))
               {
-                provisioning.abort ("Unreferenced object ID: " + id);
+                provisioning.abort ("Unreferenced object \"ID\": " + id);
               }
           }
         for (KeyEntry key_entry : keys.values ())
@@ -1087,7 +1086,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
         KeyEntry key_entry = getOpenKey (key_handle);
         if (key_entry.extensions.get (extension_type) != null)
           {
-            key_entry.owner.abort ("Duplicate \"ExtensionType\": " + extension_type, SKSException.ERROR_OPTION);
+            key_entry.owner.abort ("Duplicate \"ExtensionType\": " + extension_type);
           }
         MacBuilder ext_mac = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
         ext_mac.addByte (base_type);
@@ -1117,11 +1116,11 @@ public class SKSReferenceImplementation implements SecureKeyStore
         KeyEntry key_entry = getOpenKey (key_handle);
         if (key_entry.symmetric_key != null)
           {
-            key_entry.owner.abort ("Duplicate symmetric key: " + key_entry.id, SKSException.ERROR_OPTION);
+            key_entry.owner.abort ("Duplicate symmetric key: " + key_entry.id);
           }
         if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
           {
-            key_entry.owner.abort ("Wrong key usage for symmetric key: " + key_entry.id, SKSException.ERROR_OPTION);
+            key_entry.owner.abort ("Wrong key usage for symmetric key: " + key_entry.id);
           }
         MacBuilder sym_mac = key_entry.getEECertMacBuilder (METHOD_SET_SYMMETRIC_KEY);
         sym_mac.addArray (encrypted_symmetric_key);
@@ -1131,12 +1130,12 @@ public class SKSReferenceImplementation implements SecureKeyStore
             sym_mac.addString (algorithm);
             if (key_entry.endorsed_algorithms.put (algorithm, true) != null)
               {
-                key_entry.owner.abort ("Duplicate algorithm: " + algorithm, SKSException.ERROR_OPTION);
+                key_entry.owner.abort ("Duplicate algorithm: " + algorithm);
               }
             Algorithm alg = algorithms.get (algorithm);
             if (alg == null || (alg.mask & (ALG_SYM_ENC | ALG_HMAC)) == 0)
               {
-                key_entry.owner.abort ((alg == null ? "Unsupported" : "Incorrect") + " algorithm: " + algorithm, SKSException.ERROR_OPTION);
+                key_entry.owner.abort ((alg == null ? "Unsupported" : "Incorrect") + " algorithm: " + algorithm);
               }
             if ((alg.mask & ALG_SYM_ENC) != 0)
               {
@@ -1148,7 +1147,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
                 if ((l & alg.mask) == 0)
                   {
                     key_entry.owner.abort ("Wrong key size (" + key_entry.symmetric_key.length +
-                                           ") for algorithm: " + algorithm, SKSException.ERROR_OPTION);
+                                           ") for algorithm: " + algorithm);
                   }
               }
           }
@@ -1169,7 +1168,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
         KeyEntry key_entry = getOpenKey (key_handle);
         if (key_entry.certificate_path != null)
           {
-            key_entry.owner.abort ("Duplicate \"setCertificatePath\" for key: " + key_entry.id, SKSException.ERROR_OPTION);
+            key_entry.owner.abort ("Duplicate \"setCertificatePath\" for key: " + key_entry.id);
           }
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
@@ -1186,7 +1185,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
           }
         catch (GeneralSecurityException e)
           {
-            key_entry.owner.abort ("Internal error: " + e.getMessage ());
+            key_entry.owner.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
           }
         key_entry.owner.verifyMac (set_certificate_mac, mac);
 
@@ -1286,7 +1285,40 @@ public class SKSReferenceImplementation implements SecureKeyStore
             ///////////////////////////////////////////////////////////////////////////////////
             if (pin_value.length > pin_policy.max_length || pin_value.length < pin_policy.min_length)
               {
-                provisioning.abort ("PIN length error", SKSException.ERROR_OPTION);
+                provisioning.abort ("PIN length error");
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check PIN syntax
+            ///////////////////////////////////////////////////////////////////////////////////
+            boolean upperalpha = false;
+            boolean loweralpha = false;
+            boolean number = false;
+            boolean nonalphanum = false;
+            for (int i = 0; i < pin_value.length; i++)
+              {
+                int c = pin_value[i];
+                if (c >= 'A' && c <= 'Z')
+                  {
+                    upperalpha = true;
+                  }
+                else if (c >= 'a' && c <= 'z')
+                  {
+                    loweralpha = true;
+                  }
+                else if (c >= '0' && c <= '9')
+                  {
+                    number = true;
+                  }
+                else
+                  {
+                    nonalphanum = true;
+                  }
+              }
+            if ((pin_policy.format == PIN_FORMAT_NUMERIC && (loweralpha || nonalphanum || upperalpha)) ||
+                (pin_policy.format == PIN_FORMAT_ALPHANUMERIC && (loweralpha || nonalphanum)))
+              {
+                provisioning.abort ("Bad PIN syntax");
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1308,7 +1340,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
                   }
                 if (seq)
                   {
-                    provisioning.abort ("PIN must not be a sequence like 1234", SKSException.ERROR_OPTION);
+                    provisioning.abort ("PIN must not be a sequence");
                   }
               }
             if ((pin_policy.pattern_restrictions & PIN_PATTERN_REPEATED) != 0)
@@ -1320,7 +1352,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
                       {
                         if (j != i && b == pin_value[j])
                           {
-                            provisioning.abort ("Repeated PIN characters", SKSException.ERROR_OPTION);
+                            provisioning.abort ("Repeated PIN character");
                           }
                       }
                   }
@@ -1336,7 +1368,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
                       {
                         if (++same_count == max)
                           {
-                            provisioning.abort (max + " or more of same the character in a row", SKSException.ERROR_OPTION);
+                            provisioning.abort ("PIN with " + max + " or more of same the character in a row");
                           }
                       }
                     else
@@ -1348,28 +1380,10 @@ public class SKSReferenceImplementation implements SecureKeyStore
               }
             if ((pin_policy.pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0)
               {
-                boolean alpha = false;
-                boolean number = false;
-                boolean punctuation = pin_policy.format == PIN_FORMAT_ALPHANUMERIC;
-                for (int i = 0; i < pin_value.length; i++)
+                if (!upperalpha || !number || 
+                    (pin_policy.format == PIN_FORMAT_STRING && (!loweralpha || !nonalphanum)))
                   {
-                    int c = pin_value[i];
-                    if ((c >= 'A' && c <= 'Z') || (c >= 'a' || c <= 'z'))
-                      {
-                        alpha = true;
-                      }
-                    else if (c >= '0' && c <= '9')
-                      {
-                        number = true;
-                      }
-                    else
-                      {
-                        punctuation = true;
-                      }
-                  }
-                if (!alpha || !number || !punctuation)
-                  {
-                    provisioning.abort ("Missing character group in PIN", SKSException.ERROR_OPTION);
+                    provisioning.abort ("Missing character group in PIN");
                   }
               }
             
@@ -1385,14 +1399,14 @@ public class SKSReferenceImplementation implements SecureKeyStore
                         case PIN_GROUPING_SHARED:
                           if (!ArrayUtil.compare (key_entry.pin_value, pin_value))
                             {
-                              provisioning.abort ("Grouping = \"shared\" requires identical PINs", SKSException.ERROR_OPTION);
+                              provisioning.abort ("Grouping = \"shared\" requires identical PINs");
                             }
                           continue;
                           
                         case PIN_GROUPING_UNIQUE:
                           if (ArrayUtil.compare (key_entry.pin_value, pin_value))
                             {
-                              provisioning.abort ("Grouping = \"unique\" requires unique PINs", SKSException.ERROR_OPTION);
+                              provisioning.abort ("Grouping = \"unique\" requires unique PINs");
                             }
                           continue;
                           
@@ -1400,7 +1414,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
                           if (((key_usage == KEY_USAGE_SIGNATURE) ^ (key_entry.key_usage == KEY_USAGE_SIGNATURE)) ^
                               !ArrayUtil.compare (key_entry.pin_value, pin_value))
                             {
-                              provisioning.abort ("Grouping = \"signature+standard\" PIN error", SKSException.ERROR_OPTION);
+                              provisioning.abort ("Grouping = \"signature+standard\" PIN error");
                             }
                           continue;
 
@@ -1427,7 +1441,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
           {
             if (key_algorithm.length != 7)
               {
-                provisioning.abort ("Bad RSA KeyAlgorithm format", SKSException.ERROR_OPTION);
+                provisioning.abort ("Bad RSA KeyAlgorithm format");
               }
             int size = getShort (key_algorithm, 1);
             boolean found = false;
@@ -1441,7 +1455,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
               }
             if (!found)
               {
-                provisioning.abort ("RSA size unsupported: " + size, SKSException.ERROR_OPTION);
+                provisioning.abort ("RSA size unsupported: " + size);
               }
             int exponent = (getShort (key_algorithm, 3) << 16) + getShort (key_algorithm, 5);
             alg_par_spec = new RSAKeyGenParameterSpec (size, 
@@ -1452,7 +1466,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
             if (key_algorithm.length < 10 || key_algorithm[0] != ECC_KEY ||
                 getShort (key_algorithm, 1) != (key_algorithm.length - 3))
               {
-                provisioning.abort ("Bad ECC KeyAlgorithm format", SKSException.ERROR_OPTION);
+                provisioning.abort ("Bad ECC KeyAlgorithm format");
               }
             StringBuffer ec_uri = new StringBuffer ();
             for (int i = 3; i < key_algorithm.length; i++)
@@ -1462,11 +1476,10 @@ public class SKSReferenceImplementation implements SecureKeyStore
             Algorithm alg = algorithms.get (ec_uri.toString ());
             if (alg == null || (alg.mask & ALG_ECC_CRV) == 0)
               {
-                provisioning.abort ("Unsupported EC curve: " + ec_uri, SKSException.ERROR_OPTION);
+                provisioning.abort ("Unsupported EC curve: " + ec_uri);
               }
             alg_par_spec = new ECGenParameterSpec (alg.jce_name);
           }
-
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1514,7 +1527,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
           }
         catch (GeneralSecurityException e)
           {
-            provisioning.abort (e.getMessage ());
+            provisioning.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
           }
         return null; // For the compiler only...
       }
@@ -1552,6 +1565,11 @@ public class SKSReferenceImplementation implements SecureKeyStore
               }
             puk_policy_id = puk_policy.id;
             provisioning.names.put (puk_policy_id, true); // Referenced
+          }
+        if ((pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0 &&
+            format != PIN_FORMAT_ALPHANUMERIC && format != PIN_FORMAT_STRING)
+          {
+            provisioning.abort ("Wrong use of the \"missing-group\" PIN pattern policy");
           }
         MacBuilder pin_policy_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PIN_POLICY);
         pin_policy_mac.addString (id);

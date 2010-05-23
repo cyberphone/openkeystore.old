@@ -364,11 +364,21 @@ public class ProvSess
     
     public PINPol createPINPolicy (String id, PassphraseFormat format, int min_length, int max_length, int retry_limit, PUKPol puk_policy) throws IOException, GeneralSecurityException
       {
+        return createPINPolicy (id, format,  EnumSet.noneOf (PatternRestriction.class), PINGrouping.NONE, min_length, max_length, retry_limit, puk_policy);
+      }
+    
+    public PINPol createPINPolicy (String id, 
+                                   PassphraseFormat format,
+                                   Set<PatternRestriction> pattern_restrictions,
+                                   PINGrouping grouping,
+                                   int min_length,
+                                   int max_length, 
+                                   int retry_limit,
+                                   PUKPol puk_policy) throws IOException, GeneralSecurityException
+      {
         PINPol pin_policy = new PINPol ();
         boolean user_defined = true;
         boolean user_modifiable = true;
-        PINGrouping grouping = PINGrouping.NONE;
-        Set<PatternRestriction> pattern_restrictions = EnumSet.noneOf (PatternRestriction.class);
         InputMethod input_method = InputMethod.ANY;
         int puk_policy_handle = puk_policy == null ? 0 : puk_policy.puk_policy_handle;
         MacGenerator pin_policy_mac = new MacGenerator ();
@@ -385,6 +395,7 @@ public class ProvSess
         pin_policy_mac.addByte (input_method.getSKSValue ());
         pin_policy.id = id;
         pin_policy.user_defined = user_defined;
+        pin_policy.format = format;
         pin_policy.pin_policy_handle = sks.createPINPolicy (provisioning_handle,
                                                             id, 
                                                             puk_policy_handle,
@@ -400,8 +411,7 @@ public class ProvSess
                                                             mac (pin_policy_mac.getResult (), APIDescriptors.CREATE_PIN_POLICY));
         return pin_policy;
       }
-    
-    
+   
     public GenKey createRSAKey (String id,
                                 int rsa_size,
                                 String pin_value,
