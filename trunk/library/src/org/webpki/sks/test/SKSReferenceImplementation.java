@@ -69,7 +69,7 @@ import org.webpki.util.ArrayUtil;
  *  SKS is a cryptographic module that supports E2ES (End-to-End Security) for
  *  provisioning PKI, Symmetric keys, PINs, PUKs and Extension data.
  *  
- *  The following is an SKS reference application that is supposed to complement
+ *  The following is an SKS reference implementation that is supposed to complement
  *  the specification by showing how the different constructs can be implemented.
  *  
  *  In addition to the reference implementation there is a set of SKS JUnit tests
@@ -157,6 +157,11 @@ public class SKSReferenceImplementation implements SecureKeyStore
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final byte RSA_KEY = 0x00;
     static final byte ECC_KEY = 0x01;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // SKS "sanity" limits
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final int PIN_PUK_MAX_LENGTH = 100;
     
     int next_key_handle = 1;
     HashMap<Integer,KeyEntry> keys = new HashMap<Integer,KeyEntry> ();
@@ -340,7 +345,7 @@ public class SKSReferenceImplementation implements SecureKeyStore
       {
         int puk_policy_handle;
         
-        byte[] value;
+        byte[] puk_value;
         byte format;
         short retry_limit;
         short error_counter;
@@ -1584,6 +1589,10 @@ public class SKSReferenceImplementation implements SecureKeyStore
           {
             provisioning.abort ("Wrong use of the \"missing-group\" PIN pattern policy");
           }
+        if (min_length <= 1 || max_length > PIN_PUK_MAX_LENGTH || max_length < min_length)
+          {
+            provisioning.abort ("PIN policy length error");
+          }
         MacBuilder pin_policy_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PIN_POLICY);
         pin_policy_mac.addString (id);
         pin_policy_mac.addString (puk_policy_id);
@@ -1630,8 +1639,22 @@ public class SKSReferenceImplementation implements SecureKeyStore
         puk_policy_mac.addByte (format);
         puk_policy_mac.addShort (retry_limit);
         provisioning.verifyMac (puk_policy_mac, mac);
+        byte[] puk_value = provisioning.decrypt (encrypted_value);
+        if (puk_value.length <= 1 || puk_value.length > PIN_PUK_MAX_LENGTH)
+          {
+            provisioning.abort ("PUK length error");
+          }
+        for (int i = 0; i < puk_value.length; i++)
+          {
+            int c = puk_value[i];
+            if ((c < '0' || c > '9') && (format == PIN_FORMAT_NUMERIC ||
+                                        ((c < 'A' || c > 'Z') && format == PIN_FORMAT_ALPHANUMERIC)))
+              {
+                provisioning.abort ("Bad PUK syntax");
+              }
+          }
         PUKPolicy puk_policy = new PUKPolicy (provisioning, id);
-        puk_policy.value = provisioning.decrypt (encrypted_value);
+        puk_policy.puk_value = puk_value;
         puk_policy.format = format;
         puk_policy.retry_limit = retry_limit;
         return puk_policy.puk_policy_handle;

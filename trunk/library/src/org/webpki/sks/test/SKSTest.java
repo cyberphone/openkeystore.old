@@ -117,7 +117,7 @@ public class SKSTest
   
     private boolean PINCheck (PassphraseFormat format,
                               PatternRestriction[] patterns,
-                              String name) throws IOException, GeneralSecurityException
+                              String pin) throws IOException, GeneralSecurityException
       {
         try
           {
@@ -139,9 +139,28 @@ public class SKSTest
                                                    (short) 3 /* retry_limit*/, 
                                                    null /* puk_policy */);
             sess.createECKey ("Key.1",
-                              name /* pin_value */,
+                              pin /* pin_value */,
                               pin_pol /* pin_policy */,
                               KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST8");
+            sess.abortSession ();
+          }
+        catch (SKSException e)
+          {
+            return false;
+          }
+        return true;
+      }
+
+    private boolean PUKCheck (PassphraseFormat format,
+                              String puk) throws IOException, GeneralSecurityException
+      {
+        try
+          {
+            ProvSess sess = new ProvSess (device);
+            PUKPol pin_pol = sess.createPUKPolicy ("PUK",
+                                                   format,
+                                                   (short) 3 /* retry_limit*/, 
+                                                   puk /* puk_policy */);
             sess.abortSession ();
           }
         catch (SKSException e)
@@ -524,6 +543,15 @@ public class SKSTest
     @Test
     public void test15 () throws Exception
       {
+        assertTrue (PUKCheck (PassphraseFormat.ALPHANUMERIC, "AB123"));
+        assertTrue (PUKCheck (PassphraseFormat.NUMERIC, "1234"));
+        assertTrue (PUKCheck (PassphraseFormat.STRING, "azAB13.\n"));
+        assertTrue (PUKCheck (PassphraseFormat.BINARY, "12300234FF"));
+
+        assertFalse (PUKCheck (PassphraseFormat.ALPHANUMERIC, ""));  // too short 
+        assertFalse (PUKCheck (PassphraseFormat.ALPHANUMERIC, "ab123"));  // Lowercase 
+        assertFalse (PUKCheck (PassphraseFormat.NUMERIC, "AB1234"));      // Alpha
+
         assertTrue (PINCheck (PassphraseFormat.ALPHANUMERIC, null, "AB123"));
         assertTrue (PINCheck (PassphraseFormat.NUMERIC, null, "1234"));
         assertTrue (PINCheck (PassphraseFormat.STRING, null, "azAB13.\n"));
