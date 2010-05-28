@@ -734,4 +734,61 @@ public class SKSTest
           {
           }
       }
+    @Test
+    public void test20 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        GenKey key2 = sess2.createECKey ("Key.1",
+                                         null /* pin_value */,
+                                         null /* pin_policy */,
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        GenKey key3 = sess2.createECKey ("Key.2",
+                                         null /* pin_value */,
+                                         null /* pin_policy */,
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess2.postUpdateKey (key2, key1);
+        try
+          {
+            sess2.postUpdateKey (key3, key1);
+            fail ("Multiple updates of the same key");
+          }
+        catch (SKSException e)
+          {
+          }
+      }
+    public void test21 () throws Exception
+    {
+      ProvSess sess = new ProvSess (device);
+      GenKey key1 = sess.createECKey ("Key.1",
+                                      null /* pin_value */,
+                                      null /* pin_policy */,
+                                      KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+      GenKey key2 = sess.createECKey ("Key.2",
+                                      null /* pin_value */,
+                                      null /* pin_policy */,
+                                      KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+      sess.closeSession ();
+      assertTrue (sess.exists ());
+      ProvSess sess2 = new ProvSess (device);
+      GenKey key3 = sess2.createECKey ("Key.1",
+                                       null /* pin_value */,
+                                       null /* pin_policy */,
+                                       KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+      sess2.postUpdateKey (key3, key1);
+      try
+        {
+          sess2.postUpdateKey (key3, key2);
+          fail ("Multiple updates using the same key");
+        }
+      catch (SKSException e)
+        {
+        }
+    }
   }

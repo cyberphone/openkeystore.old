@@ -990,11 +990,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the update buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////
-        PostReplaceOrClone old = provisioning.post_replace_or_clone_keys.put (key_handle_original,
-                                                                 new PostReplaceOrClone (key_handle_original, key_entry, true)); 
-        if (old != null && old.replace)
+        PostReplaceOrClone previous = provisioning.post_replace_or_clone_keys.put (key_handle_original,
+                                                                                   new PostReplaceOrClone (key_handle_original, key_entry, true)); 
+        if (previous != null && previous.replace)
           {
-            provisioning.abort ("Multiple updates of the same key: " + key_handle_original);
+            provisioning.abort ("Multiple replacements of the same key: " + key_handle_original);
           }
       }
 
