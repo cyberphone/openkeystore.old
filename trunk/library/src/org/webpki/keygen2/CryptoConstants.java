@@ -21,28 +21,30 @@ public interface CryptoConstants
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Strings that are used as key modifiers to HMAC operations are used "as is"
     /////////////////////////////////////////////////////////////////////////////////////////////
-    public static final byte[] CRYPTO_STRING_DEVICE_ATTEST   = new byte[] {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
+    public static final byte[] CRYPTO_STRING_DEVICE_ATTEST       = {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
 
-    public static final byte[] CRYPTO_STRING_ENCRYPTION      = new byte[] {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
+    public static final byte[] CRYPTO_STRING_ENCRYPTION          = {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
 
-    public static final byte[] CRYPTO_STRING_SIGNATURE       = new byte[] {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
+    public static final byte[] CRYPTO_STRING_SIGNATURE           = {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
+
+    public static final byte[] CRYPTO_STRING_PROOF_OF_OWNERSHIP  = {'P','r','o','o','f',' ','O','f',' ','O','w','n','e','r','s','h','i','p'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Strings that are used in HMAC arguments include a length-indicator as well
     /////////////////////////////////////////////////////////////////////////////////////////////
-    public static final byte[] CRYPTO_STRING_SUCCESS         = new byte[] {(byte)0x00, (byte)0x07, 'S','u','c','c','e','s','s'};
+    public static final byte[] CRYPTO_STRING_SUCCESS             = {0x00, 0x07, 'S','u','c','c','e','s','s'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // If there is no ServerSeed, this is the default
     /////////////////////////////////////////////////////////////////////////////////////////////
-    public static final byte[] DEFAULT_SEED = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    public static final byte[] DEFAULT_SEED = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS key algorithm ids
     /////////////////////////////////////////////////////////////////////////////////////////////
-    public static final byte RSA_KEY = (byte) 0x00;
+    public static final byte RSA_KEY = 0x00;
 
-    public static final byte ECC_KEY = (byte) 0x01;
+    public static final byte ECC_KEY = 0x01;
     
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Predefined PIN and PUK policy IDs for MAC operations

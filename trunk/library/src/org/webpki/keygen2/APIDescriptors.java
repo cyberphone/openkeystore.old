@@ -23,6 +23,8 @@ public enum APIDescriptors
     SET_CERTIFICATE_PATH            ("setCertificatePath"),
     SET_SYMMETRIC_KEY               ("setSymmetricKey"),
     CLOSE_PROVISIONING_SESSION      ("closeProvisioningSession"),
+    POST_PROVISIONING_DELETE_KEY    ("postProvisioningDeleteKey"),
+    POST_PROVISIONING_UPDATE_KEY    ("postProvisioningUpdateKey"),
     CREATE_KEY_PAIR                 ("createKeyPair"),
     CREATE_PIN_POLICY               ("createPINPolicy"),
     CREATE_PUK_POLICY               ("createPUKPolicy"),

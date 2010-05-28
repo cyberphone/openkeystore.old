@@ -17,8 +17,8 @@
 package org.webpki.sks.test;
 
 import java.io.IOException;
-
 import java.io.UnsupportedEncodingException;
+import java.io.Serializable;
 
 import java.math.BigInteger;
 
@@ -77,37 +77,41 @@ import org.webpki.util.ArrayUtil;
  *  
  *  Author: Anders Rundgren
  */
-public class SKSReferenceImplementation implements SecureKeyStore
+public class SKSReferenceImplementation implements SecureKeyStore, Serializable
   {
+    private static final long serialVersionUID = 1L;
+    
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Method IDs are used "as is" in the MAC KDF 
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte[] METHOD_SET_CERTIFICATE_PATH       = new byte[] {'s','e','t','C','e','r','t','i','f','i','c','a','t','e','P','a','t','h'};
-    static final byte[] METHOD_SET_SYMMETRIC_KEY          = new byte[] {'s','e','t','S','y','m','m','e','t','r','i','c','K','e','y'};
-    static final byte[] METHOD_CLOSE_PROVISIONING_SESSION = new byte[] {'c','l','o','s','e','P','r','o','v','i','s','i','o','n','i','n','g','S','e','s','s','i','o','n'};
-    static final byte[] METHOD_CREATE_KEY_PAIR            = new byte[] {'c','r','e','a','t','e','K','e','y','P','a','i','r'};
-    static final byte[] METHOD_CREATE_PIN_POLICY          = new byte[] {'c','r','e','a','t','e','P','I','N','P','o','l','i','c','y'};
-    static final byte[] METHOD_CREATE_PUK_POLICY          = new byte[] {'c','r','e','a','t','e','P','U','K','P','o','l','i','c','y'};
-    static final byte[] METHOD_ADD_EXTENSION              = new byte[] {'a','d','d','E','x','t','e','n','s','i','o','n'};
+    static final byte[] METHOD_SET_CERTIFICATE_PATH         = {'s','e','t','C','e','r','t','i','f','i','c','a','t','e','P','a','t','h'};
+    static final byte[] METHOD_SET_SYMMETRIC_KEY            = {'s','e','t','S','y','m','m','e','t','r','i','c','K','e','y'};
+    static final byte[] METHOD_CLOSE_PROVISIONING_SESSION   = {'c','l','o','s','e','P','r','o','v','i','s','i','o','n','i','n','g','S','e','s','s','i','o','n'};
+    static final byte[] METHOD_CREATE_KEY_PAIR              = {'c','r','e','a','t','e','K','e','y','P','a','i','r'};
+    static final byte[] METHOD_CREATE_PIN_POLICY            = {'c','r','e','a','t','e','P','I','N','P','o','l','i','c','y'};
+    static final byte[] METHOD_CREATE_PUK_POLICY            = {'c','r','e','a','t','e','P','U','K','P','o','l','i','c','y'};
+    static final byte[] METHOD_ADD_EXTENSION                = {'a','d','d','E','x','t','e','n','s','i','o','n'};
+    static final byte[] METHOD_POST_PROVISIONING_DELETE_KEY = {'p','o','s','t','P','r','o','v','i','s','i','o','n','i','n','g','D','e','l','e','t','e','K','e','y'};
+    static final byte[] METHOD_POST_PROVISIONING_UPDATE_KEY = {'p','o','s','t','P','r','o','v','i','s','i','o','n','i','n','g','U','p','d','a','t','e','K','e','y'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Other KDF constants that are used "as is"
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte[] KDF_DEVICE_ATTESTATION            = new byte[] {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
-    static final byte[] KDF_ENCRYPTION_KEY                = new byte[] {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
-    static final byte[] KDF_EXTERNAL_SIGNATURE            = new byte[] {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
-    static final byte[] KDF_PROOF_OF_OWNERSHIP            = new byte[] {'P','r','o','o','f',' ','O','f',' ','O','w','n','e','r','s','h','i','p'};
+    static final byte[] KDF_DEVICE_ATTESTATION              = {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
+    static final byte[] KDF_ENCRYPTION_KEY                  = {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
+    static final byte[] KDF_EXTERNAL_SIGNATURE              = {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
+    static final byte[] KDF_PROOF_OF_OWNERSHIP              = {'P','r','o','o','f',' ','O','f',' ','O','w','n','e','r','s','h','i','p'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "Success" used when attesting the completed provisioning session
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte[] CRYPTO_STRING_SUCCESS             = new byte[] {(byte)0x00, (byte)0x07, 'S','u','c','c','e','s','s'};
+    static final byte[] CRYPTO_STRING_SUCCESS               = {0x00, 0x07, 'S','u','c','c','e','s','s'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Predefined PIN and PUK policy IDs for MAC operations
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final String CRYPTO_STRING_NOT_AVAILABLE       = "#N/A";
-    static final String CRYPTO_STRING_DEVICE_PIN          = "#Device PIN";
+    static final String CRYPTO_STRING_NOT_AVAILABLE         = "#N/A";
+    static final String CRYPTO_STRING_DEVICE_PIN            = "#Device PIN";
     
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "KeyUsage" in the SKS specification
@@ -175,8 +179,10 @@ public class SKSReferenceImplementation implements SecureKeyStore
     int next_puk_handle = 1;
     HashMap<Integer,PUKPolicy> puk_policies = new HashMap<Integer,PUKPolicy> ();    
 
-    abstract class NameSpace
+    abstract class NameSpace implements Serializable
       {
+        private static final long serialVersionUID = 1L;
+
         String id;
         
         Provisioning owner;
@@ -221,10 +227,14 @@ public class SKSReferenceImplementation implements SecureKeyStore
       
       }
 
-    class KeyEntry extends NameSpace
+    class KeyEntry extends NameSpace implements Serializable
       {
+        private static final long serialVersionUID = 1L;
+
         int key_handle;
         byte key_usage;
+        
+        boolean booked;
 
         PublicKey public_key;
         PrivateKey private_key;
@@ -294,33 +304,63 @@ public class SKSReferenceImplementation implements SecureKeyStore
               }
           }
         
-        MacBuilder getEECertMacBuilder (byte[] method) throws SKSException
+        byte[] getEncodedEECert () throws SKSException
           {
             if (certificate_path == null)
               {
                 owner.abort ("EE certificate missing");
               }
-            MacBuilder mac_builder = owner.getMacBuilderForMethodCall (method);
             try
               {
-                mac_builder.addArray (certificate_path[0].getEncoded ());
+                return certificate_path[0].getEncoded ();
               }
             catch (GeneralSecurityException e)
               {
+                throw new SKSException (e, SKSException.ERROR_INTERNAL);
               }
+          }
+        
+        MacBuilder getEECertMacBuilder (byte[] method) throws SKSException
+          {
+            MacBuilder mac_builder = owner.getMacBuilderForMethodCall (method);
+            mac_builder.addArray (getEncodedEECert ());
             return mac_builder;
+          }
+        
+        byte[] getPostProvisioningMac () throws SKSException
+          {
+            MacBuilder mac_builder = owner.getMacBuilder (KDF_PROOF_OF_OWNERSHIP);
+            mac_builder.addArray (getEncodedEECert ());
+            return mac_builder.getResult ();
+          }
+
+        void checkAndSetBooked () throws SKSException
+          {
+            if (booked)
+              {
+                owner.abort ("Key used for multiple updates: " + key_handle);
+              }
+            booked = true;
+            if (pin_policy != null || device_pin_protected)
+              {
+                owner.abort ("Update/Clone keys cannot have PIN codes");
+              }
           }
       }
     
-    class Extension
+    class Extension implements Serializable
       {
+        private static final long serialVersionUID = 1L;
+
         byte[] qualifier;
         byte[] extension_data;
         byte base_type;
       }
     
-    class PINPolicy extends NameSpace
+    class PINPolicy extends NameSpace implements Serializable
       {
+        private static final long serialVersionUID = 1L;
+
         int pin_policy_handle;
         
         PUKPolicy puk_policy;
@@ -341,8 +381,10 @@ public class SKSReferenceImplementation implements SecureKeyStore
           }
       }
     
-    class PUKPolicy extends NameSpace
+    class PUKPolicy extends NameSpace implements Serializable
       {
+        private static final long serialVersionUID = 1L;
+
         int puk_policy_handle;
         
         byte[] puk_value;
@@ -358,9 +400,17 @@ public class SKSReferenceImplementation implements SecureKeyStore
           }
       }
 
-    class Provisioning
+    class Provisioning implements Serializable
       {
+        private static final long serialVersionUID = 1L;
+
+        // The virtual/shared name-space
         HashMap<String,Boolean> names = new HashMap<String,Boolean> ();
+
+        // Post Management
+        HashMap<Integer,Boolean> post_deletes = new HashMap<Integer,Boolean> ();
+        HashMap<Integer,PostReplaceOrClone> post_new_keys = new HashMap<Integer,PostReplaceOrClone> ();
+        
         String client_session_id;
         String server_session_id;
         String issuer_uri;
@@ -437,10 +487,53 @@ public class SKSReferenceImplementation implements SecureKeyStore
             short q = mac_sequence_counter++;
             return getMacBuilder (ArrayUtil.add (method, new byte[]{(byte)(q >>> 8), (byte)q}));
           }
+
+        KeyEntry getTargetKey (int key_handle) throws SKSException
+          {
+            KeyEntry ke = keys.get (key_handle);
+            if (ke == null)
+              {
+                abort ("Key not found: " + key_handle, SKSException.ERROR_NO_KEY);
+              }
+            if (ke.owner.open)
+              {
+                abort ("Key " + key_handle + " still in provisioning", SKSException.ERROR_NO_KEY);
+              }
+            return ke;
+          }
+
+        void takeOwnerShip (Provisioning old_owner)
+          {
+            for (KeyEntry key_entry : keys.values ())
+              {
+                if (key_entry.owner == old_owner)
+                  {
+                    key_entry.owner = this;
+                  }
+              }
+            for (PINPolicy pin_policy : pin_policies.values ())
+              {
+                if (pin_policy.owner == old_owner)
+                  {
+                    pin_policy.owner = this;
+                  }
+              }
+            for (PUKPolicy puk_policy : puk_policies.values ())
+              {
+                if (puk_policy.owner == old_owner)
+                  {
+                    puk_policy.owner = this;
+                  }
+              }
+            provisionings.remove (old_owner.provisioning_handle);  // OK to perform also if already done
+          }
+
       }
     
-    class MacBuilder
+    class MacBuilder implements Serializable
       {
+        private static final long serialVersionUID = 1L;
+
         Mac mac;
         
         MacBuilder (byte[] key) throws GeneralSecurityException
@@ -509,14 +602,31 @@ public class SKSReferenceImplementation implements SecureKeyStore
           }
         
       }
-
     
+    class PostReplaceOrClone implements Serializable
+      {
+        private static final long serialVersionUID = 1L;
+
+        int target_key_handle;
+        KeyEntry the_new_key;
+        boolean replace;
+        
+        PostReplaceOrClone (int target_key_handle, KeyEntry the_new_key, boolean replace)
+          {
+            this.target_key_handle = target_key_handle;
+            this.the_new_key = the_new_key;
+            this.replace = replace;
+          }
+      }
+   
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Algorithm Support
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    static class Algorithm
+    static class Algorithm implements Serializable
       {
+        private static final long serialVersionUID = 1L;
+
         int mask;
         String jce_name;
       }
@@ -758,7 +868,6 @@ public class SKSReferenceImplementation implements SecureKeyStore
                                                          (byte)0x05, (byte)0x00, (byte)0x04, (byte)0x20};
 
 
-
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
     //                             signHashedData                                 //
@@ -806,6 +915,88 @@ public class SKSReferenceImplementation implements SecureKeyStore
         catch (Exception e)
           {
             throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                      postProvisioningDeleteKey                             //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void postProvisioningDeleteKey (int provisioning_handle, 
+                                           int key_handle,
+                                           byte[] mac) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get provisioning session
+        ///////////////////////////////////////////////////////////////////////////////////
+        Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
+       
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key to be deleted
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = provisioning.getTargetKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder post_prov_del_mac = provisioning.getMacBuilderForMethodCall (METHOD_POST_PROVISIONING_DELETE_KEY);
+        post_prov_del_mac.addArray (key_entry.getPostProvisioningMac ());
+        provisioning.verifyMac (post_prov_del_mac, mac);
+        
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Put the operation in the delete buffer used by "closeProvisioningSession"
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (provisioning.post_deletes.put (key_handle, true) != null)
+          {
+            provisioning.abort ("Multiple deletes of the same key: " + key_handle);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                      postProvisioningUpdateKey                             //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void postProvisioningUpdateKey (int key_handle, 
+                                           int key_handle_original, 
+                                           byte[] mac) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get open key and associated provisioning session
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getOpenKey (key_handle);
+        Provisioning provisioning = key_entry.owner;
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Reserve the key for this update operation
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.checkAndSetBooked ();
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key to be updated
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry old_key_entry = provisioning.getTargetKey (key_handle_original);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder post_prov_del_mac = key_entry.getEECertMacBuilder (METHOD_POST_PROVISIONING_UPDATE_KEY);
+        post_prov_del_mac.addArray (old_key_entry.getPostProvisioningMac ());
+        provisioning.verifyMac (post_prov_del_mac, mac);
+        
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Put the operation in the update buffer used by "closeProvisioningSession"
+        ///////////////////////////////////////////////////////////////////////////////////
+        PostReplaceOrClone old = provisioning.post_new_keys.put (key_handle_original,
+                                                                 new PostReplaceOrClone (key_handle_original, key_entry, true)); 
+        if (old != null && old.replace)
+          {
+            provisioning.abort ("Multiple updates of the same key: " + key_handle_original);
           }
       }
 
@@ -905,6 +1096,10 @@ public class SKSReferenceImplementation implements SecureKeyStore
         close_mac.addString (provisioning.server_session_id);
         close_mac.addString (provisioning.issuer_uri);
         provisioning.verifyMac (close_mac, mac);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Perform "sanity" checks on provisioned data
+        ///////////////////////////////////////////////////////////////////////////////////
         for (String id : provisioning.names.keySet ())
           {
             if (!provisioning.names.get(id))
@@ -920,9 +1115,60 @@ public class SKSReferenceImplementation implements SecureKeyStore
                   {
                     provisioning.abort ("Missing \"setCertificatePath\" for key: " + key_entry.id);
                   }
+                // TODO private key import..
               }
           }
-// TODO - check status of a lot of stuff and perform atomic updates
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Management 1: Verify that target keys are still there + check for conflicts
+        ///////////////////////////////////////////////////////////////////////////////////
+        for (int delete_key_handle : provisioning.post_deletes.keySet ())
+          {
+            provisioning.getTargetKey (delete_key_handle);
+            if (provisioning.post_new_keys.get (delete_key_handle) != null)
+              {
+                provisioning.abort ("Ambiguious management of key: " + delete_key_handle);
+              }
+          }
+        for (int new_key_handle : provisioning.post_new_keys.keySet ())
+          {
+            provisioning.getTargetKey (new_key_handle);
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Management 2: Perform operations and take ownership of post-managed sessions
+        ///////////////////////////////////////////////////////////////////////////////////
+        for (int delete_key_handle : provisioning.post_deletes.keySet ())
+          {
+            KeyEntry key_entry = provisioning.getTargetKey (delete_key_handle);
+            keys.remove (delete_key_handle);
+            provisioning.takeOwnerShip (key_entry.owner);
+          }
+        for (PostReplaceOrClone post_op : provisioning.post_new_keys.values ())
+          {
+            KeyEntry key_entry = provisioning.getTargetKey (post_op.target_key_handle);
+            provisioning.takeOwnerShip (key_entry.owner);
+            if (post_op.replace)
+              {
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Store new key in the place of the old (keeping the handle intact after update)
+                ///////////////////////////////////////////////////////////////////////////////////
+                keys.put (post_op.target_key_handle, post_op.the_new_key);
+
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Remove space occupied by the new key
+                ///////////////////////////////////////////////////////////////////////////////////
+                keys.remove (post_op.the_new_key.key_handle);
+
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Inherit protection data from the old key but nothing else
+                ///////////////////////////////////////////////////////////////////////////////////
+                post_op.the_new_key.pin_policy = key_entry.pin_policy;
+                post_op.the_new_key.pin_value = key_entry.pin_value;
+                post_op.the_new_key.error_counter = key_entry.error_counter;
+                post_op.the_new_key.key_handle = key_entry.key_handle;
+              }
+          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Generate a final attestation
@@ -1571,7 +1817,14 @@ public class SKSReferenceImplementation implements SecureKeyStore
                                 byte input_method,
                                 byte[] mac) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get provisioning session
+        ///////////////////////////////////////////////////////////////////////////////////
         Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Perform PIN "sanity" check
+        ///////////////////////////////////////////////////////////////////////////////////
         String puk_policy_id = CRYPTO_STRING_NOT_AVAILABLE;
         PUKPolicy puk_policy = null;
         if (puk_policy_handle != 0)
@@ -1593,6 +1846,10 @@ public class SKSReferenceImplementation implements SecureKeyStore
           {
             provisioning.abort ("PIN policy length error");
           }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder pin_policy_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PIN_POLICY);
         pin_policy_mac.addString (id);
         pin_policy_mac.addString (puk_policy_id);
@@ -1606,6 +1863,10 @@ public class SKSReferenceImplementation implements SecureKeyStore
         pin_policy_mac.addShort (max_length);
         pin_policy_mac.addByte (input_method);
         provisioning.verifyMac (pin_policy_mac, mac);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Success, create object
+        ///////////////////////////////////////////////////////////////////////////////////
         PINPolicy pin_policy = new PINPolicy (provisioning, id);
         pin_policy.puk_policy = puk_policy;
         pin_policy.format = format;
@@ -1632,7 +1893,14 @@ public class SKSReferenceImplementation implements SecureKeyStore
                                 short retry_limit,
                                 byte[] mac) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get provisioning session
+        ///////////////////////////////////////////////////////////////////////////////////
         Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder puk_policy_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PUK_POLICY);
         puk_policy_mac.addString (id);
         puk_policy_mac.addArray (encrypted_value);
@@ -1640,6 +1908,10 @@ public class SKSReferenceImplementation implements SecureKeyStore
         puk_policy_mac.addShort (retry_limit);
         provisioning.verifyMac (puk_policy_mac, mac);
         byte[] puk_value = provisioning.decrypt (encrypted_value);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Perform PUK "sanity" check
+        ///////////////////////////////////////////////////////////////////////////////////
         if (puk_value.length <= 1 || puk_value.length > PIN_PUK_MAX_LENGTH)
           {
             provisioning.abort ("PUK length error");
@@ -1653,6 +1925,10 @@ public class SKSReferenceImplementation implements SecureKeyStore
                 provisioning.abort ("Bad PUK syntax");
               }
           }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Success, create object
+        ///////////////////////////////////////////////////////////////////////////////////
         PUKPolicy puk_policy = new PUKPolicy (provisioning, id);
         puk_policy.puk_value = puk_value;
         puk_policy.format = format;

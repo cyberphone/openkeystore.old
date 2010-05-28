@@ -23,6 +23,7 @@ import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 import java.util.Date;
@@ -36,6 +37,9 @@ import org.webpki.ca.CertSpec;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.test.DemoKeyStore;
+import org.webpki.keygen2.CryptoConstants;
+import org.webpki.sks.EnumeratedKey;
+import org.webpki.sks.SKSException;
 
 public class GenKey
   {
@@ -89,6 +93,44 @@ public class GenKey
         this.cert_path = cert_path;
         prov_sess.setCertificate (key_handle, id, public_key, cert_path);
         return this;
+      }
+    
+    public byte[] getPostProvMac () throws IOException, GeneralSecurityException
+      {
+        return prov_sess.mac (getEECertMacBuilder ().getResult (), CryptoConstants.CRYPTO_STRING_PROOF_OF_OWNERSHIP);
+      }
+    
+    ProvSess.MacGenerator getEECertMacBuilder () throws CertificateEncodingException, IOException
+      {
+        ProvSess.MacGenerator ee_mac = new ProvSess.MacGenerator ();
+        ee_mac.addArray (cert_path[0].getEncoded ());
+        return ee_mac;
+      }
+
+    public boolean exists () throws SKSException
+      {
+        EnumeratedKey ek = new EnumeratedKey ();
+        while ((ek = prov_sess.sks.enumerateKeys (ek)).isValid ())
+          {
+            if (ek.getKeyHandle () == key_handle)
+              {
+                return true;
+              }
+          }
+        return false;
+      }
+
+    public EnumeratedKey getUpdatedKeyInfo () throws SKSException
+      {
+        EnumeratedKey ek = new EnumeratedKey ();
+        while ((ek = prov_sess.sks.enumerateKeys (ek)).isValid ())
+          {
+            if (ek.getKeyHandle () == key_handle)
+              {
+                return ek;
+              }
+          }
+        throw new SKSException ("Bad state");
       }
         
   }

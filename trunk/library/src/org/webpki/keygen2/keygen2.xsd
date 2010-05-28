@@ -515,7 +515,7 @@
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session. -->
-         <xs:attribute name="ServerSessionID" type="xs:string" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -648,7 +648,7 @@
                      "http://xmlns.webpki.org/keygen2/1.0#logotype.application"
 
                  "Icon" is intended to be useful in a selection window
-                 where multiple credentials are features as a map of
+                 where multiple credentials are featured as a map of
                  icons.  "Card" is the shape needed by for example
                  Microsoft's InformationCards.  "List" is meant to be
                  used in credential listings where you need a minute

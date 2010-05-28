@@ -603,4 +603,135 @@ public class SKSTest
         assertFalse (PINGroupCheck (true, PINGrouping.SIGNATURE_PLUS_STANDARD));
         assertTrue (PINGroupCheck (false, PINGrouping.SIGNATURE_PLUS_STANDARD));
       }
+    @Test
+    public void test16 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST16");
+        GenKey key2 = sess.createECKey ("Key.2",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST16");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        sess2.postDeleteKey (key1);
+        assertTrue ("Ownership error", key2.getUpdatedKeyInfo ().getProvisioningHandle () == sess.provisioning_handle);
+        assertTrue ("Missing key, deletes MUST only be performed during session close", key1.exists ());
+        sess2.closeSession ();
+        assertFalse ("Key was not deleted", key1.exists ());
+        assertTrue ("Ownership error", key2.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+        assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+      }
+    @Test
+    public void test17 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST17");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        GenKey key2 = sess2.createECKey ("Key.1",
+                                         null /* pin_value */,
+                                         null /* pin_policy */,
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST17");
+        sess2.postUpdateKey (key2, key1);
+        sess2.closeSession ();
+        assertTrue ("Key should exist even after update", key1.exists ());
+        assertFalse ("Key has been used and should be removed", key2.exists ());
+        assertTrue ("Ownership error", key1.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+        assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+      }
+    @Test
+    public void test18 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        GenKey key2 = sess2.createECKey ("Key.1",
+                                         null /* pin_value */,
+                                         null /* pin_policy */,
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess2.postUpdateKey (key2, key1);
+        sess2.closeSession ();
+        assertTrue ("Key should exist even after update", key1.exists ());
+        assertFalse ("Key has been used and should be removed", key2.exists ());
+        assertTrue ("Ownership error", key1.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+        assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+        try
+          {
+            device.sks.signHashedData (key1.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                       new byte[0], 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Bad PIN should not work");
+          }
+        catch (SKSException e)
+          {
+          }
+        try
+          {
+            byte[] result = device.sks.signHashedData (key1.key_handle, 
+                                                       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                                       ok_pin.getBytes ("UTF-8"), 
+                                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
+            verify.initVerify (key2.cert_path[0]);
+            verify.update (TEST_STRING);
+            assertTrue ("Bad signature", verify.verify (result));
+          }
+        catch (SKSException e)
+          {
+            fail ("Good PIN should work");
+          }
+      }
+    @Test
+    public void test19 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        PINPol pin_policy = sess2.createPINPolicy ("PIN",
+                                                   PassphraseFormat.NUMERIC,
+                                                   4 /* min_length */, 
+                                                   8 /* max_length */,
+                                                   (short) 3 /* retry_limit*/, 
+                                                   null /* puk_policy */);
+        GenKey key2 = sess2.createECKey ("Key.1",
+                                         ok_pin /* pin_value */,
+                                         pin_policy,
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        try
+          {
+            sess2.postUpdateKey (key2, key1);
+            fail ("No PINs on update keys please");
+          }
+        catch (SKSException e)
+          {
+          }
+      }
   }

@@ -104,8 +104,19 @@ public interface SecureKeyStore
     
     public byte[] signProvisioningSessionData (int provisioning_handle,
                                                byte[] data) throws SKSException;
-
     
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Post Provisioning (Management)
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public void postProvisioningDeleteKey (int provisioning_handle,
+                                           int key_handle,
+                                           byte[] mac) throws SKSException;
+
+    public void postProvisioningUpdateKey (int key_handle,
+                                           int key_handle_original,
+                                           byte[] mac) throws SKSException;
+
     ///////////////////////////////////////////////////////////////////////////////////
     // "User" API
     ///////////////////////////////////////////////////////////////////////////////////

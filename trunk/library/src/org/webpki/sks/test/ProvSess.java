@@ -58,6 +58,7 @@ import org.webpki.keygen2.PassphraseFormat;
 import org.webpki.keygen2.PatternRestriction;
 import org.webpki.keygen2.ServerSessionKeyInterface;
 
+import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.KeyPair;
 import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
@@ -183,7 +184,7 @@ public class ProvSess
     
     SecureKeyStore sks;
     
-    class MacGenerator
+    static class MacGenerator
       {
         private ByteArrayOutputStream baos;
         
@@ -255,6 +256,11 @@ public class ProvSess
     byte[] mac (byte[] data, APIDescriptors method) throws IOException, GeneralSecurityException
       {
         return server_sess_key.mac (data, ArrayUtil.add (method.getBinary (), getMACSequenceCounterAndUpdate ()));
+      }
+
+    byte[] mac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException
+      {
+        return server_sess_key.mac (data, key_modifier);
       }
     
     byte[] attest (byte[] data) throws IOException, GeneralSecurityException
@@ -583,6 +589,37 @@ public class ProvSess
         sks.setCertificatePath (key_handle,
                                 certificate_path,
                                 mac (set_certificate.getResult (), APIDescriptors.SET_CERTIFICATE_PATH));
+      }
+    
+    void postDeleteKey (GenKey key) throws IOException, GeneralSecurityException
+      {
+        MacGenerator del_mac = new MacGenerator ();
+        del_mac.addArray (key.getPostProvMac ());
+        sks.postProvisioningDeleteKey (provisioning_handle, 
+                                       key.key_handle,
+                                       mac (del_mac.getResult (), APIDescriptors.POST_PROVISIONING_DELETE_KEY));
+      }
+    
+    void postUpdateKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
+      {
+        MacGenerator upd_mac = new_key.getEECertMacBuilder ();
+        upd_mac.addArray (old_key.getPostProvMac ());
+        sks.postProvisioningUpdateKey (new_key.key_handle, 
+                                       old_key.key_handle,
+                                       mac (upd_mac.getResult (), APIDescriptors.POST_PROVISIONING_UPDATE_KEY));
+      }
+    
+    boolean exists () throws SKSException
+      {
+        EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
+        while ((eps = sks.enumerateProvisioningSessions (eps, false)).isValid ())
+          {
+            if (eps.getProvisioningHandle () == provisioning_handle)
+              {
+                return true;
+              }
+          }
+        return false;
       }
 
   }
