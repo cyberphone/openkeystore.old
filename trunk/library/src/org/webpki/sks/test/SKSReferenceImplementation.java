@@ -409,7 +409,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         // Post Management
         HashMap<Integer,Boolean> post_deletes = new HashMap<Integer,Boolean> ();
-        HashMap<Integer,PostReplaceOrClone> post_new_keys = new HashMap<Integer,PostReplaceOrClone> ();
+        HashMap<Integer,PostReplaceOrClone> post_replace_or_clone_keys = new HashMap<Integer,PostReplaceOrClone> ();
         
         String client_session_id;
         String server_session_id;
@@ -660,7 +660,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     
     static final String ALGORITHM_SESSION_KEY_ATTEST_1 = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sk1";
     
-    static final short[] RSA_KEY_SIZES = new short[]{1024, 2048};
+    static final short[] RSA_KEY_SIZES = {1024, 2048};
 
     static
       {
@@ -859,13 +859,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     /////////////////////////////////////////////////////////////////////////////////////////////
     // PKCS #1 Signature Support Data
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte[] DIGEST_INFO_SHA1   = new byte[] {(byte)0x30, (byte)0x21, (byte)0x30, (byte)0x09, (byte)0x06,
-                                                         (byte)0x05, (byte)0x2b, (byte)0x0e, (byte)0x03, (byte)0x02,
-                                                         (byte)0x1a, (byte)0x05, (byte)0x00, (byte)0x04, (byte)0x14};
-    static final byte[] DIGEST_INFO_SHA256 = new byte[] {(byte)0x30, (byte)0x31, (byte)0x30, (byte)0x0d, (byte)0x06,
-                                                         (byte)0x09, (byte)0x60, (byte)0x86, (byte)0x48, (byte)0x01,
-                                                         (byte)0x65, (byte)0x03, (byte)0x04, (byte)0x02, (byte)0x01,
-                                                         (byte)0x05, (byte)0x00, (byte)0x04, (byte)0x20};
+    static final byte[] DIGEST_INFO_SHA1   = {0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2b, 0x0e, 0x03, 0x02,
+                                              0x1a, 0x05, 0x00, 0x04, 0x14};
+
+    static final byte[] DIGEST_INFO_SHA256 = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
+                                              0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20};
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -992,7 +990,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the update buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////
-        PostReplaceOrClone old = provisioning.post_new_keys.put (key_handle_original,
+        PostReplaceOrClone old = provisioning.post_replace_or_clone_keys.put (key_handle_original,
                                                                  new PostReplaceOrClone (key_handle_original, key_entry, true)); 
         if (old != null && old.replace)
           {
@@ -1125,12 +1123,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         for (int delete_key_handle : provisioning.post_deletes.keySet ())
           {
             provisioning.getTargetKey (delete_key_handle);
-            if (provisioning.post_new_keys.get (delete_key_handle) != null)
+            if (provisioning.post_replace_or_clone_keys.get (delete_key_handle) != null)
               {
                 provisioning.abort ("Ambiguious management of key: " + delete_key_handle);
               }
           }
-        for (int new_key_handle : provisioning.post_new_keys.keySet ())
+        for (int new_key_handle : provisioning.post_replace_or_clone_keys.keySet ())
           {
             provisioning.getTargetKey (new_key_handle);
           }
@@ -1144,7 +1142,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             keys.remove (delete_key_handle);
             provisioning.takeOwnerShip (key_entry.owner);
           }
-        for (PostReplaceOrClone post_op : provisioning.post_new_keys.values ())
+        for (PostReplaceOrClone post_op : provisioning.post_replace_or_clone_keys.values ())
           {
             KeyEntry key_entry = provisioning.getTargetKey (post_op.target_key_handle);
             provisioning.takeOwnerShip (key_entry.owner);
@@ -1161,7 +1159,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 keys.remove (post_op.the_new_key.key_handle);
 
                 ///////////////////////////////////////////////////////////////////////////////////
-                // Inherit protection data from the old key but nothing else
+                // Inherit protection data and handle from the old key but nothing else
                 ///////////////////////////////////////////////////////////////////////////////////
                 post_op.the_new_key.pin_policy = key_entry.pin_policy;
                 post_op.the_new_key.pin_value = key_entry.pin_value;
