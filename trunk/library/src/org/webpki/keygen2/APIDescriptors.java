@@ -25,6 +25,7 @@ public enum APIDescriptors
     CLOSE_PROVISIONING_SESSION      ("closeProvisioningSession"),
     POST_PROVISIONING_DELETE_KEY    ("postProvisioningDeleteKey"),
     POST_PROVISIONING_UPDATE_KEY    ("postProvisioningUpdateKey"),
+    POST_PROVISIONING_CLONE_KEY     ("postProvisioningCloneKey"),
     CREATE_KEY_PAIR                 ("createKeyPair"),
     CREATE_PIN_POLICY               ("createPINPolicy"),
     CREATE_PUK_POLICY               ("createPUKPolicy"),

@@ -93,6 +93,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final byte[] METHOD_ADD_EXTENSION                = {'a','d','d','E','x','t','e','n','s','i','o','n'};
     static final byte[] METHOD_POST_PROVISIONING_DELETE_KEY = {'p','o','s','t','P','r','o','v','i','s','i','o','n','i','n','g','D','e','l','e','t','e','K','e','y'};
     static final byte[] METHOD_POST_PROVISIONING_UPDATE_KEY = {'p','o','s','t','P','r','o','v','i','s','i','o','n','i','n','g','U','p','d','a','t','e','K','e','y'};
+    static final byte[] METHOD_POST_PROVISIONING_CLONE_KEY  = {'p','o','s','t','P','r','o','v','i','s','i','o','n','i','n','g','C','l','o','n','e','K','e','y'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Other KDF constants that are used "as is"
@@ -334,18 +335,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             return mac_builder.getResult ();
           }
 
-        void checkAndSetBooked () throws SKSException
-          {
-            if (booked)
-              {
-                owner.abort ("Key used for multiple updates: " + key_handle);
-              }
-            booked = true;
-            if (pin_policy != null || device_pin_protected)
-              {
-                owner.abort ("Update/Clone keys cannot have PIN codes");
-              }
-          }
       }
     
     class Extension implements Serializable
@@ -409,7 +398,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         // Post Management
         HashMap<Integer,Boolean> post_deletes = new HashMap<Integer,Boolean> ();
-        HashMap<Integer,PostReplaceOrClone> post_replace_or_clone_keys = new HashMap<Integer,PostReplaceOrClone> ();
+        HashMap<Integer,PostUpdateOrClone> post_update_or_clone_keys = new HashMap<Integer,PostUpdateOrClone> ();
         
         String client_session_id;
         String server_session_id;
@@ -603,19 +592,19 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         
       }
     
-    class PostReplaceOrClone implements Serializable
+    class PostUpdateOrClone implements Serializable
       {
         private static final long serialVersionUID = 1L;
 
         int target_key_handle;
         KeyEntry the_new_key;
-        boolean replace;
+        boolean update;
         
-        PostReplaceOrClone (int target_key_handle, KeyEntry the_new_key, boolean replace)
+        PostUpdateOrClone (int target_key_handle, KeyEntry the_new_key, boolean update)
           {
             this.target_key_handle = target_key_handle;
             this.the_new_key = the_new_key;
-            this.replace = replace;
+            this.update = update;
           }
       }
    
@@ -856,6 +845,64 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         return alg;
       }
 
+    void performUpdateOrClone (int key_handle, 
+                               int key_handle_original, 
+                               byte[] mac,
+                               boolean update) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get open key and associated provisioning session
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getOpenKey (key_handle);
+        Provisioning provisioning = key_entry.owner;
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Reserve the key for this update/clone operation
+        ///////////////////////////////////////////////////////////////////////////////////
+          if (key_entry.booked)
+            {
+              provisioning.abort ("Key used for multiple update or clone operations: " + key_handle);
+            }
+          key_entry.booked = true;
+          if (key_entry.pin_policy != null || key_entry.device_pin_protected)
+            {
+              provisioning.abort ("Update and clone keys cannot have PIN codes");
+            }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key to be updated
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry old_key_entry = provisioning.getTargetKey (key_handle_original);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Cloned keys are constrained
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (!update)
+          {
+            if (old_key_entry.pin_policy != null && old_key_entry.pin_policy.grouping != PIN_GROUPING_SHARED)
+              {
+                provisioning.abort ("Cloned PIN-protected keys must have PINGrouping=\"shared\"");
+              }
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder post_prov_del_mac = key_entry.getEECertMacBuilder (update ? METHOD_POST_PROVISIONING_UPDATE_KEY : METHOD_POST_PROVISIONING_CLONE_KEY);
+        post_prov_del_mac.addArray (old_key_entry.getPostProvisioningMac ());
+        provisioning.verifyMac (post_prov_del_mac, mac);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Put the operation in the update buffer used by "closeProvisioningSession"
+        ///////////////////////////////////////////////////////////////////////////////////
+        PostUpdateOrClone previous = provisioning.post_update_or_clone_keys.put (key_handle_original,
+                                                                                 new PostUpdateOrClone (key_handle_original, key_entry, update)); 
+        if (update && previous != null && previous.update)
+          {
+            provisioning.abort ("Multiple updates of the same key: " + key_handle_original);
+          }
+      }
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     // PKCS #1 Signature Support Data
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -953,6 +1000,20 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
       }
 
+    
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                       postProvisioningCloneKey                             //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void postProvisioningCloneKey (int key_handle,
+                                          int key_handle_original,
+                                          byte[] mac) throws SKSException
+      {
+        performUpdateOrClone (key_handle, key_handle_original, mac, false);
+      }
+
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
@@ -964,38 +1025,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                                            int key_handle_original, 
                                            byte[] mac) throws SKSException
       {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Get open key and associated provisioning session
-        ///////////////////////////////////////////////////////////////////////////////////
-        KeyEntry key_entry = getOpenKey (key_handle);
-        Provisioning provisioning = key_entry.owner;
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Reserve the key for this update operation
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.checkAndSetBooked ();
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Get key to be updated
-        ///////////////////////////////////////////////////////////////////////////////////
-        KeyEntry old_key_entry = provisioning.getTargetKey (key_handle_original);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
-        ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder post_prov_del_mac = key_entry.getEECertMacBuilder (METHOD_POST_PROVISIONING_UPDATE_KEY);
-        post_prov_del_mac.addArray (old_key_entry.getPostProvisioningMac ());
-        provisioning.verifyMac (post_prov_del_mac, mac);
-        
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Put the operation in the update buffer used by "closeProvisioningSession"
-        ///////////////////////////////////////////////////////////////////////////////////
-        PostReplaceOrClone previous = provisioning.post_replace_or_clone_keys.put (key_handle_original,
-                                                                                   new PostReplaceOrClone (key_handle_original, key_entry, true)); 
-        if (previous != null && previous.replace)
-          {
-            provisioning.abort ("Multiple replacements of the same key: " + key_handle_original);
-          }
+        performUpdateOrClone (key_handle, key_handle_original, mac, true);
       }
 
 
@@ -1123,12 +1153,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         for (int delete_key_handle : provisioning.post_deletes.keySet ())
           {
             provisioning.getTargetKey (delete_key_handle);
-            if (provisioning.post_replace_or_clone_keys.get (delete_key_handle) != null)
+            if (provisioning.post_update_or_clone_keys.get (delete_key_handle) != null)
               {
                 provisioning.abort ("Ambiguious management of key: " + delete_key_handle);
               }
           }
-        for (int new_key_handle : provisioning.post_replace_or_clone_keys.keySet ())
+        for (int new_key_handle : provisioning.post_update_or_clone_keys.keySet ())
           {
             provisioning.getTargetKey (new_key_handle);
           }
@@ -1142,11 +1172,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             keys.remove (delete_key_handle);
             provisioning.takeOwnerShip (key_entry.owner);
           }
-        for (PostReplaceOrClone post_op : provisioning.post_replace_or_clone_keys.values ())
+        for (PostUpdateOrClone post_op : provisioning.post_update_or_clone_keys.values ())
           {
             KeyEntry key_entry = provisioning.getTargetKey (post_op.target_key_handle);
             provisioning.takeOwnerShip (key_entry.owner);
-            if (post_op.replace)
+            if (post_op.update)
               {
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Store new key in the place of the old (keeping the handle intact after update)
@@ -1154,18 +1184,19 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 keys.put (post_op.target_key_handle, post_op.the_new_key);
 
                 ///////////////////////////////////////////////////////////////////////////////////
-                // Remove space occupied by the new key
+                // Remove space occupied by the new key and restore old key handle
                 ///////////////////////////////////////////////////////////////////////////////////
                 keys.remove (post_op.the_new_key.key_handle);
-
-                ///////////////////////////////////////////////////////////////////////////////////
-                // Inherit protection data and handle from the old key but nothing else
-                ///////////////////////////////////////////////////////////////////////////////////
-                post_op.the_new_key.pin_policy = key_entry.pin_policy;
-                post_op.the_new_key.pin_value = key_entry.pin_value;
-                post_op.the_new_key.error_counter = key_entry.error_counter;
                 post_op.the_new_key.key_handle = key_entry.key_handle;
-              }
+              }   
+ 
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Inherit protection data from the old key but nothing else
+            ///////////////////////////////////////////////////////////////////////////////////
+            post_op.the_new_key.pin_policy = key_entry.pin_policy;
+            post_op.the_new_key.pin_value = key_entry.pin_value;
+            post_op.the_new_key.error_counter = key_entry.error_counter;
+            post_op.the_new_key.device_pin_protected = key_entry.device_pin_protected;
           }
 
         ///////////////////////////////////////////////////////////////////////////////////

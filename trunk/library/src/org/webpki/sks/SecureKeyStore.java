@@ -117,6 +117,10 @@ public interface SecureKeyStore
                                            int key_handle_original,
                                            byte[] mac) throws SKSException;
 
+    public void postProvisioningCloneKey (int key_handle,
+                                          int key_handle_original,
+                                          byte[] mac) throws SKSException;
+
     ///////////////////////////////////////////////////////////////////////////////////
     // "User" API
     ///////////////////////////////////////////////////////////////////////////////////

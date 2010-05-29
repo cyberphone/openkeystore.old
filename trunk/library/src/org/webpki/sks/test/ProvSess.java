@@ -609,6 +609,15 @@ public class ProvSess
                                        mac (upd_mac.getResult (), APIDescriptors.POST_PROVISIONING_UPDATE_KEY));
       }
     
+    void postCloneKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
+      {
+        MacGenerator upd_mac = new_key.getEECertMacBuilder ();
+        upd_mac.addArray (old_key.getPostProvMac ());
+        sks.postProvisioningCloneKey (new_key.key_handle, 
+                                      old_key.key_handle,
+                                      mac (upd_mac.getResult (), APIDescriptors.POST_PROVISIONING_CLONE_KEY));
+      }
+  
     boolean exists () throws SKSException
       {
         EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();

@@ -764,31 +764,98 @@ public class SKSTest
           }
       }
     public void test21 () throws Exception
-    {
-      ProvSess sess = new ProvSess (device);
-      GenKey key1 = sess.createECKey ("Key.1",
-                                      null /* pin_value */,
-                                      null /* pin_policy */,
-                                      KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
-      GenKey key2 = sess.createECKey ("Key.2",
-                                      null /* pin_value */,
-                                      null /* pin_policy */,
-                                      KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
-      sess.closeSession ();
-      assertTrue (sess.exists ());
-      ProvSess sess2 = new ProvSess (device);
-      GenKey key3 = sess2.createECKey ("Key.1",
-                                       null /* pin_value */,
-                                       null /* pin_policy */,
-                                       KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
-      sess2.postUpdateKey (key3, key1);
-      try
-        {
-          sess2.postUpdateKey (key3, key2);
-          fail ("Multiple updates using the same key");
-        }
-      catch (SKSException e)
-        {
-        }
-    }
+      {
+        ProvSess sess = new ProvSess (device);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        GenKey key2 = sess.createECKey ("Key.2",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        GenKey key3 = sess2.createECKey ("Key.1",
+                                         null /* pin_value */,
+                                         null /* pin_policy */,
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess2.postUpdateKey (key3, key1);
+        try
+          {
+            sess2.postUpdateKey (key3, key2);
+            fail ("Multiple updates using the same key");
+          }
+        catch (SKSException e)
+          {
+          }
+      }
+    @Test
+    public void test22 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  PINGrouping.SHARED,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        GenKey key2 = sess2.createRSAKey ("Key.1",
+                                          2048,
+                                          null /* pin_value */,
+                                          null /* pin_policy */,
+                                          KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
+        sess2.postCloneKey (key2, key1);
+        sess2.closeSession ();
+        assertTrue ("Old key should exist after clone", key1.exists ());
+        assertTrue ("New key should exist after clone", key2.exists ());
+        assertTrue ("Ownership error", key1.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+        assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+        try
+          {
+            device.sks.signHashedData (key2.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0], 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Bad PIN should not work");
+          }
+        catch (SKSException e)
+          {
+            assertTrue ("There should be an auth error", e.getError () == SKSException.ERROR_AUTHORIZATION);
+          }
+        try
+          {
+            byte[] result = device.sks.signHashedData (key2.key_handle, 
+                                                      "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                                       ok_pin.getBytes ("UTF-8"), 
+                                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+            verify.initVerify (key2.cert_path[0]);
+            verify.update (TEST_STRING);
+            assertTrue ("Bad signature key2", verify.verify (result));
+            result = device.sks.signHashedData (key1.key_handle, 
+                                                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                                ok_pin.getBytes ("UTF-8"), 
+                                                HashAlgorithms.SHA256.digest (TEST_STRING));
+            verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
+            verify.initVerify (key1.cert_path[0]);
+            verify.update (TEST_STRING);
+            assertTrue ("Bad signature key1", verify.verify (result));
+          }
+        catch (SKSException e)
+          {
+            fail ("Good PIN should work");
+          }
+      }
   }
