@@ -106,7 +106,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "Success" used when attesting the completed provisioning session
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte[] CRYPTO_STRING_SUCCESS               = {0x00, 0x07, 'S','u','c','c','e','s','s'};
+    static final String CRYPTO_STRING_SUCCESS               = "Success";
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Predefined PIN and PUK policy IDs for MAC operations
@@ -1214,7 +1214,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Generate a final attestation
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder close_attestation = provisioning.getMacBuilder (KDF_DEVICE_ATTESTATION);
-        close_attestation.addVerbatim (CRYPTO_STRING_SUCCESS);
+        close_attestation.addString (CRYPTO_STRING_SUCCESS);
         close_attestation.addShort (provisioning.mac_sequence_counter);
         byte[] attest = close_attestation.getResult ();
         
