@@ -1824,10 +1824,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             key_entry.private_key = import_private_key ? null : private_key;  // To enable the duplicate/missing import test...
             key_entry.key_usage = key_usage;
             key_entry.device_pin_protected = device_pin_protected;
-            return new KeyPair (public_key,
+            return new KeyPair (key_entry.key_handle,
+                                public_key,
                                 key_attestation.getResult (),
-                                encrypted_private_key,
-                                key_entry.key_handle);
+                                encrypted_private_key);
           }
         catch (GeneralSecurityException e)
           {

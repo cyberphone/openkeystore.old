@@ -20,23 +20,23 @@ import java.security.PublicKey;
 
 public class KeyPair
   {
+    private int key_handle;
+    
     private PublicKey public_key;
     
     private byte[] key_attestation;
     
     private byte[] encrypted_private_key;
     
-    private int key_handle;
-    
-    public KeyPair (PublicKey public_key, 
+    public KeyPair (int key_handle,
+                    PublicKey public_key, 
                     byte[] key_attestation,
-                    byte[] encrypted_private_key,
-                    int key_handle)
+                    byte[] encrypted_private_key)
       {
+        this.key_handle = key_handle;
         this.public_key = public_key;
         this.key_attestation = key_attestation;
         this.encrypted_private_key = encrypted_private_key;
-        this.key_handle = key_handle;
       }
     
     public PublicKey getPublicKey ()
