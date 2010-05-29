@@ -489,10 +489,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               {
                 abort ("Key " + key_handle + " still in provisioning");
               }
-            if (!ke.owner.updatable)
-              {
-                abort ("Key " + key_handle + " not belonging to an updatable provisioning session");
-              }
             return ke;
           }
 
@@ -520,6 +516,14 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                   }
               }
             provisionings.remove (old_owner.provisioning_handle);  // OK to perform also if already done
+          }
+
+        void checkIfUpdatable (KeyEntry old_key_entry) throws SKSException
+          {
+            if (!old_key_entry.owner.updatable)
+              {
+                abort ("Key " + old_key_entry.key_handle + " not belonging to an updatable provisioning session");
+              }
           }
 
       }
@@ -878,6 +882,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Get key to be updated/cloned
         ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry old_key_entry = provisioning.getTargetKey (key_handle_original);
+        provisioning.checkIfUpdatable (old_key_entry);
 
         if (!update)
           {
@@ -988,6 +993,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Get key to be deleted
         ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = provisioning.getTargetKey (key_handle);
+        provisioning.checkIfUpdatable (key_entry);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
