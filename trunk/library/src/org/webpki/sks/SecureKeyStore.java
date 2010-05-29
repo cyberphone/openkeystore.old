@@ -30,7 +30,6 @@ public interface SecureKeyStore
                                   byte biometric_protection,
                                   boolean private_key_backup,
                                   byte export_policy,
-                                  boolean updatable,
                                   byte delete_policy,
                                   boolean enable_pin_caching,
                                   boolean import_private_key,

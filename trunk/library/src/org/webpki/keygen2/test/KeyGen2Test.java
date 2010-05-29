@@ -284,7 +284,6 @@ public class KeyGen2Test
                                                  key.getBiometricProtection (),
                                                  key.getPrivateKeyBackupFlag (),
                                                  key.getExportPolicy (),
-                                                 key.getUpdatableFlag (),
                                                  key.getDeletePolicy (),
                                                  key.getEnablePINCachingFlag (),
                                                  key.getImportPrivateKeyFlag (),

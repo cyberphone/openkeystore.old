@@ -459,15 +459,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
         
      // TODO        
-        boolean updatable_flag;
-        
-        public boolean getUpdatableFlag ()
-          {
-            return updatable_flag;
-          }
-
-
-     // TODO        
         byte delete_policy;
         
         public byte getDeletePolicy ()

@@ -234,7 +234,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         int key_handle;
         byte key_usage;
-        boolean updatable;
         
         boolean booked;
 
@@ -488,7 +487,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
             if (ke.owner.open)
               {
-                abort ("Key " + key_handle + " still in provisioning", SKSException.ERROR_NO_KEY);
+                abort ("Key " + key_handle + " still in provisioning");
+              }
+            if (!ke.owner.updatable)
+              {
+                abort ("Key " + key_handle + " not belonging to an updatable provisioning session");
               }
             return ke;
           }
@@ -517,14 +520,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                   }
               }
             provisionings.remove (old_owner.provisioning_handle);  // OK to perform also if already done
-          }
-
-        public void updateCheck (KeyEntry old_key_entry) throws SKSException
-          {
-            if (!old_key_entry.updatable)
-              {
-                abort ("Key [" + old_key_entry.key_handle + "] not marked as updatable");
-              }
           }
 
       }
@@ -884,14 +879,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry old_key_entry = provisioning.getTargetKey (key_handle_original);
 
-        if (update)
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Update keys must be marked as such
-            ///////////////////////////////////////////////////////////////////////////////////
-            provisioning.updateCheck (old_key_entry);
-          }
-        else
+        if (!update)
           {
             ///////////////////////////////////////////////////////////////////////////////////
             // Cloned keys are constrained
@@ -1001,10 +989,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = provisioning.getTargetKey (key_handle);
 
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Deleted keys must be marked as updatable
-        ///////////////////////////////////////////////////////////////////////////////////
-        provisioning.updateCheck (key_entry);
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1527,7 +1511,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                                   byte biometric_protection,
                                   boolean private_key_backup,
                                   byte export_policy,
-                                  boolean updatable,
                                   byte delete_policy,
                                   boolean enable_pin_caching,
                                   boolean import_private_key,
@@ -1551,10 +1534,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         if (server_seed.length != 32)
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
-          }
-        if (updatable && !provisioning.updatable)
-          {
-            provisioning.abort ("\"Updatable\" key lacks updatable session: " +id);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1839,7 +1818,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             key_entry.private_key = import_private_key ? null : private_key;  // To enable the duplicate/missing import test...
             key_entry.key_usage = key_usage;
             key_entry.device_pin_protected = device_pin_protected;
-            key_entry.updatable = updatable;
             return new KeyPair (public_key,
                                 key_attestation.getResult (),
                                 encrypted_private_key,
