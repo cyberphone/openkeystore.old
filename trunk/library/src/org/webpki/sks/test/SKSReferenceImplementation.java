@@ -234,6 +234,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         int key_handle;
         byte key_usage;
+        boolean updatable;
         
         boolean booked;
 
@@ -406,6 +407,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         byte[] session_key;
         int provisioning_handle;
         boolean open = true;
+        boolean updatable;
         short mac_sequence_counter;
         
         Provisioning ()
@@ -515,6 +517,14 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                   }
               }
             provisionings.remove (old_owner.provisioning_handle);  // OK to perform also if already done
+          }
+
+        public void updateCheck (KeyEntry old_key_entry) throws SKSException
+          {
+            if (!old_key_entry.updatable)
+              {
+                abort ("Key [" + old_key_entry.key_handle + "] not marked as updatable");
+              }
           }
 
       }
@@ -861,24 +871,31 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
           if (key_entry.booked)
             {
-              provisioning.abort ("Key used for multiple update or clone operations: " + key_handle);
+              provisioning.abort ("Key used for multiple update/clone operations: " + key_handle);
             }
           key_entry.booked = true;
           if (key_entry.pin_policy != null || key_entry.device_pin_protected)
             {
-              provisioning.abort ("Update and clone keys cannot have PIN codes");
+              provisioning.abort ("Update/clone keys cannot have PIN codes");
             }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Get key to be updated
+        // Get key to be updated/cloned
         ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry old_key_entry = provisioning.getTargetKey (key_handle_original);
 
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Cloned keys are constrained
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (!update)
+        if (update)
           {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Update keys must be marked as such
+            ///////////////////////////////////////////////////////////////////////////////////
+            provisioning.updateCheck (old_key_entry);
+          }
+        else
+          {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Cloned keys are constrained
+            ///////////////////////////////////////////////////////////////////////////////////
             if (old_key_entry.pin_policy != null && old_key_entry.pin_policy.grouping != PIN_GROUPING_SHARED)
               {
                 provisioning.abort ("Cloned PIN-protected keys must have PINGrouping=\"shared\"");
@@ -984,6 +1001,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = provisioning.getTargetKey (key_handle);
 
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Deleted keys must be marked as updatable
+        ///////////////////////////////////////////////////////////////////////////////////
+        provisioning.updateCheck (key_entry);
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1299,6 +1320,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         p.client_session_id = client_session_id;
         p.issuer_uri = issuer_uri;
         p.session_key = session_key;
+        p.updatable = updatable;
         return new ProvisioningSession (p.provisioning_handle,
                                         client_session_id,
                                         session_attestation,
@@ -1529,6 +1551,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         if (server_seed.length != 32)
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
+          }
+        if (updatable && !provisioning.updatable)
+          {
+            provisioning.abort ("\"Updatable\" key lacks updatable session: " +id);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1813,6 +1839,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             key_entry.private_key = import_private_key ? null : private_key;  // To enable the duplicate/missing import test...
             key_entry.key_usage = key_usage;
             key_entry.device_pin_protected = device_pin_protected;
+            key_entry.updatable = updatable;
             return new KeyPair (public_key,
                                 key_attestation.getResult (),
                                 encrypted_private_key,
