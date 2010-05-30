@@ -180,6 +180,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     int next_puk_handle = 1;
     HashMap<Integer,PUKPolicy> puk_policies = new HashMap<Integer,PUKPolicy> ();    
 
+
     abstract class NameSpace implements Serializable
       {
         private static final long serialVersionUID = 1L;
@@ -225,8 +226,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             this.owner = owner;
             this.id = id;
           }
-      
       }
+
 
     class KeyEntry extends NameSpace implements Serializable
       {
@@ -334,9 +335,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             mac_builder.addArray (getEncodedEECert ());
             return mac_builder.getResult ();
           }
-
       }
-    
+
+
     class Extension implements Serializable
       {
         private static final long serialVersionUID = 1L;
@@ -345,7 +346,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         byte[] extension_data;
         byte base_type;
       }
-    
+
+
     class PINPolicy extends NameSpace implements Serializable
       {
         private static final long serialVersionUID = 1L;
@@ -369,7 +371,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             pin_policies.put (pin_policy_handle, this);
           }
       }
-    
+
+
     class PUKPolicy extends NameSpace implements Serializable
       {
         private static final long serialVersionUID = 1L;
@@ -388,6 +391,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             puk_policies.put (puk_policy_handle, this);
           }
       }
+
 
     class Provisioning implements Serializable
       {
@@ -525,9 +529,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 abort ("Key " + old_key_entry.key_handle + " not belonging to an updatable provisioning session");
               }
           }
-
       }
-    
+
+
     class MacBuilder implements Serializable
       {
         private static final long serialVersionUID = 1L;
@@ -598,9 +602,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             return mac.doFinal ();
           }
-        
       }
-    
+
+
     class PostUpdateOrClone implements Serializable
       {
         private static final long serialVersionUID = 1L;
@@ -616,7 +620,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             this.update = update;
           }
       }
-   
+
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Algorithm Support
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1048,10 +1053,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     @Override
     public DeviceInfo getDeviceInfo () throws SKSException
       {
+        // TODO very incomplete (but still useful...)
         try
           {
-            X509Certificate[] certificate_path = getDeviceCertificatePath ();
-            return new DeviceInfo (certificate_path,
+            return new DeviceInfo (getDeviceCertificatePath (),
                                    RSA_KEY_SIZES,
                                    algorithms.keySet ().toArray (new String[0]));
           }
@@ -1094,6 +1099,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     @Override
     public KeyAttributes getKeyAttributes (int key_handle) throws SKSException
       {
+        // TODO very incomplete (but still useful...)
         return new KeyAttributes (getStdKey (key_handle).certificate_path);
       }
 
@@ -1311,6 +1317,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         p.issuer_uri = issuer_uri;
         p.session_key = session_key;
         p.updatable = updatable;
+        // TODO session_key_limit is not handled yet
         return new ProvisioningSession (p.provisioning_handle,
                                         client_session_id,
                                         session_attestation,
@@ -1816,7 +1823,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             // Finally, create a key entry
             ///////////////////////////////////////////////////////////////////////////////////
             KeyEntry key_entry = new KeyEntry (provisioning, id);
-            provisioning.names.put (id, true); // Referenced
+            provisioning.names.put (id, true); // Referenced (for "closeProvisioningSession")
             key_entry.pin_policy = pin_policy;
             key_entry.friendly_name = friendly_name;
             key_entry.pin_value = pin_value;
@@ -1824,6 +1831,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             key_entry.private_key = import_private_key ? null : private_key;  // To enable the duplicate/missing import test...
             key_entry.key_usage = key_usage;
             key_entry.device_pin_protected = device_pin_protected;
+            // TODO key attributes are not fully aligned with the specification
             return new KeyPair (key_entry.key_handle,
                                 public_key,
                                 key_attestation.getResult (),
