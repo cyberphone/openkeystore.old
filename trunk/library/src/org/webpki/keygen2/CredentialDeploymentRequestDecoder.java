@@ -38,6 +38,62 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequest
   {
+    public static class PostOperation
+      {
+        public static final int DELETE_KEY            = 0;
+        public static final int UPDATE_KEY            = 1;
+        public static final int CLONE_KEY_PROTECTION  = 2;
+        
+        String client_session_id;
+        
+        String server_session_id;
+        
+        byte[] mac;
+        
+        byte[] certificate_fingerprint;
+        
+        int post_operation;
+        
+        PostOperation (String client_session_id,
+                       String server_session_id,
+                       byte[] certificate_fingerprint,
+                       byte[] mac,
+                       int post_operation)
+          {
+            this.client_session_id = client_session_id;
+            this.server_session_id = server_session_id;
+            this.certificate_fingerprint = certificate_fingerprint;
+            this.mac = mac;
+            this.post_operation = post_operation;
+          }
+        
+        public byte[] getMAC ()
+          {
+            return mac;
+          }
+        
+        public byte[] getCertificateFingerprint ()
+          {
+            return certificate_fingerprint;
+          }
+        
+        public int getPostOperation ()
+          {
+            return post_operation;
+          }
+        
+        public String getClientSessionID ()
+          {
+            return client_session_id;
+          }
+        
+        public String getServerSessionID ()
+          {
+            return server_session_id;
+          }
+  
+      }
+
     public abstract class Extension
       {
   
@@ -220,6 +276,8 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         String[] endorsed_algorithms;
 
         Vector<Extension> extensions = new Vector<Extension> ();
+        
+        PostOperation post_operation;
 
         CertifiedPublicKey () { }
 
@@ -267,9 +325,17 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
                   {
                     new StandardExtension (rd.getBinary (EXTENSION_ELEM), rd, this);
                   }
-                else
+                else if (rd.hasNext (ENCRYPTED_EXTENSION_ELEM))
                   {
                     new EncryptedExtension (rd.getBinary (ENCRYPTED_EXTENSION_ELEM), rd, this);
+                  }
+                else if (rd.hasNext (CLONE_KEY_PROTECTION_ELEM))
+                  {
+                    post_operation = readPostOperation (rd, PostOperation.CLONE_KEY_PROTECTION, CLONE_KEY_PROTECTION_ELEM);
+                  }
+                else
+                  {
+                    post_operation = readPostOperation (rd, PostOperation.UPDATE_KEY, UPDATE_KEY_ELEM);
                   }
               }
             rd.getParent ();
@@ -315,39 +381,24 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
           {
             return extensions.toArray (new Extension[0]);
           }
+        
+        public PostOperation getPostOperation ()
+          {
+            return post_operation;
+          }
 
       }
     
-
-    public class RenewalService
+    private PostOperation readPostOperation (DOMReaderHelper rd, int post_op, String xml_elem) throws IOException
       {
-        int notify_days_before_expiry;
-
-        String[] renewal_urls;
-
-        String[] renewal_dnss;
-
-        private RenewalService () {}
-
-
-        public int getNotifyDaysBeforeExpiry ()
-          {
-            return notify_days_before_expiry;
-          }
-
-
-        public String[] getURLs ()
-          {
-            return renewal_urls;
-          }
-
-
-        public String[] getDNSLookups ()
-          {
-            return renewal_dnss;
-          }
+        rd.getNext (xml_elem);
+        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+        return new PostOperation (ah.getString (CLIENT_SESSION_ID_ATTR),
+                                  ah.getString (SERVER_SESSION_ID_ATTR),
+                                  ah.getBinary (CERTIFICATE_FINGERPRINT_ATTR),
+                                  ah.getBinary (MAC_ATTR),
+                                  post_op);
       }
-
 
     private Vector<CertifiedPublicKey> certified_keys = new Vector<CertifiedPublicKey> ();
       

@@ -16,29 +16,14 @@
  */
 package org.webpki.sks.test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import java.math.BigInteger;
-
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
-import java.security.cert.X509Certificate;
 import java.util.EnumSet;
 import java.util.Set;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyAgreement;
-import javax.crypto.Mac;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -49,41 +34,17 @@ import static org.junit.Assert.*;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import org.webpki.asn1.cert.DistinguishedName;
-
-import org.webpki.ca.CA;
-import org.webpki.ca.CertSpec;
-
-import org.webpki.crypto.AsymKeySignerInterface;
-import org.webpki.crypto.CertificateUtil;
-import org.webpki.crypto.ECDomains;
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.KeyUsageBits;
-import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
-import org.webpki.crypto.SymKeySignerInterface;
 
-import org.webpki.crypto.test.DemoKeyStore;
-
-import org.webpki.keygen2.CryptoConstants;
-import org.webpki.keygen2.InputMethod;
-import org.webpki.keygen2.KeyGen2URIs;
 import org.webpki.keygen2.KeyUsage;
 import org.webpki.keygen2.PINGrouping;
 import org.webpki.keygen2.PassphraseFormat;
 import org.webpki.keygen2.PatternRestriction;
-import org.webpki.keygen2.ServerSessionKeyInterface;
 
-import org.webpki.sks.DeviceInfo;
-import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
-import org.webpki.sks.KeyAttributes;
-import org.webpki.sks.KeyPair;
-import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
-
-import org.webpki.util.ArrayUtil;
 
 public class SKSTest
   {
@@ -850,6 +811,152 @@ public class SKSTest
                                                 HashAlgorithms.SHA256.digest (TEST_STRING));
             verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
             verify.initVerify (key1.cert_path[0]);
+            verify.update (TEST_STRING);
+            assertTrue ("Bad signature key1", verify.verify (result));
+          }
+        catch (SKSException e)
+          {
+            fail ("Good PIN should work");
+          }
+      }
+    @Test
+    public void test23 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  PINGrouping.SHARED,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        GenKey key2 = sess.createECKey ("Key.2",
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        GenKey key3 = sess2.createRSAKey ("Key.1",
+                                          2048,
+                                          null /* pin_value */,
+                                          null /* pin_policy */,
+                                          KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
+        sess2.postCloneKey (key3, key1);
+        sess2.closeSession ();
+        assertTrue ("Old key should exist after clone", key1.exists ());
+        assertTrue ("New key should exist after clone", key2.exists ());
+        assertTrue ("Ownership error", key1.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+        assertTrue ("Ownership error", key2.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+        assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+        try
+          {
+            device.sks.signHashedData (key3.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0], 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Bad PIN should not work");
+          }
+        catch (SKSException e)
+          {
+            assertTrue ("There should be an auth error", e.getError () == SKSException.ERROR_AUTHORIZATION);
+          }
+        try
+          {
+            byte[] result = device.sks.signHashedData (key3.key_handle, 
+                                                      "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                                       ok_pin.getBytes ("UTF-8"), 
+                                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+            verify.initVerify (key3.cert_path[0]);
+            verify.update (TEST_STRING);
+            assertTrue ("Bad signature key3", verify.verify (result));
+            result = device.sks.signHashedData (key1.key_handle, 
+                                                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                                ok_pin.getBytes ("UTF-8"), 
+                                                HashAlgorithms.SHA256.digest (TEST_STRING));
+            verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
+            verify.initVerify (key1.cert_path[0]);
+            verify.update (TEST_STRING);
+            assertTrue ("Bad signature key1", verify.verify (result));
+          }
+        catch (SKSException e)
+          {
+            fail ("Good PIN should work");
+          }
+      }
+    @Test
+    public void test24 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  PINGrouping.SHARED,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        GenKey key2 = sess2.createECKey ("Key.2",
+                                         null /* pin_value */,
+                                         null,
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        GenKey key3 = sess2.createRSAKey ("Key.1",
+                                          2048,
+                                          null /* pin_value */,
+                                          null /* pin_policy */,
+                                          KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
+        sess2.postUpdateKey (key2, key1);
+        sess2.postCloneKey (key3, key1);
+        sess2.closeSession ();
+        assertTrue ("Old key should exist after update", key1.exists ());
+        assertFalse ("New key should NOT exist after update", key2.exists ());
+        assertTrue ("New key should exist after clone", key3.exists ());
+        assertTrue ("Ownership error", key1.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+        assertTrue ("Ownership error", key3.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+        assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+        try
+          {
+            device.sks.signHashedData (key3.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0], 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Bad PIN should not work");
+          }
+        catch (SKSException e)
+          {
+            assertTrue ("There should be an auth error", e.getError () == SKSException.ERROR_AUTHORIZATION);
+          }
+        try
+          {
+            byte[] result = device.sks.signHashedData (key3.key_handle, 
+                                                      "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                                       ok_pin.getBytes ("UTF-8"), 
+                                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+            verify.initVerify (key3.cert_path[0]);
+            verify.update (TEST_STRING);
+            assertTrue ("Bad signature key3", verify.verify (result));
+            result = device.sks.signHashedData (key1.key_handle, 
+                                                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                                ok_pin.getBytes ("UTF-8"), 
+                                                HashAlgorithms.SHA256.digest (TEST_STRING));
+            verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
+            verify.initVerify (key2.cert_path[0]);
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key1", verify.verify (result));
           }

@@ -29,6 +29,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -60,6 +61,7 @@ import org.webpki.ca.CertSpec;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.ECDomains;
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
@@ -105,7 +107,9 @@ import org.webpki.xml.XMLObjectWrapper;
 public class KeyGen2Test
   {
     static final byte[] KEY_BACKUP_TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','t','?'};
-    
+
+    static final byte[] TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','o','t','?'};
+
     boolean pin_protection;
     
     boolean private_key_backup;
@@ -120,7 +124,13 @@ public class KeyGen2Test
     
     boolean updatable;
     
+    Server clone_key_protection;
+    
+    Server update_key;
+    
     boolean device_pin;
+    
+    boolean pin_group_shared;
     
     boolean puk_protection;
     
@@ -302,7 +312,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Get the certificates and attributes and return a success message
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] creDepResponse (byte[] xmldata) throws IOException
+        byte[] creDepResponse (byte[] xmldata) throws IOException, CertificateEncodingException
           {
             CredentialDeploymentRequestDecoder cred_dep_request =
                            (CredentialDeploymentRequestDecoder) client_xml_cache.parse (xmldata);
@@ -351,6 +361,51 @@ public class KeyGen2Test
                                       extension.getExtensionData (),
                                       extension.getMAC ());
                   }
+                CredentialDeploymentRequestDecoder.PostOperation post_operation = key.getPostOperation ();
+                if (post_operation != null)
+                  {
+                    EnumeratedProvisioningSession old = new EnumeratedProvisioningSession ();
+                    while (true)
+                      {
+                        old = sks.enumerateProvisioningSessions (old, false);
+                        if (!old.isValid ())
+                          {
+                            abort ("Old provisioning session not found:" + 
+                                post_operation.getClientSessionID () + "/" +
+                                post_operation.getServerSessionID ());
+                          }
+                        if (old.getClientSessionID ().equals(post_operation.getClientSessionID ()) &&
+                            old.getServerSessionID ().equals (post_operation.getServerSessionID ()))
+                          {
+                            break;
+                          }
+                      }
+                    EnumeratedKey ek = new EnumeratedKey ();
+                    while (true)
+                      {
+                        ek = sks.enumerateKeys (ek);
+                        if (!ek.isValid ())
+                          {
+                            abort ("Old key not found");
+                          }
+                        if (ek.getProvisioningHandle () == old.getProvisioningHandle ())
+                          {
+                            KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
+                            if (ArrayUtil.compare (HashAlgorithms.SHA256.digest (ka.getCertificatePath ()[0].getEncoded ()), post_operation.getCertificateFingerprint ()))
+                              {
+                                if (post_operation.getPostOperation () == CredentialDeploymentRequestDecoder.PostOperation.CLONE_KEY_PROTECTION)
+                                  {
+                                    sks.pp_cloneKeyProtection (key_handle, ek.getKeyHandle (), post_operation.getMAC ());
+                                  }
+                                else
+                                  {
+                                    sks.pp_updateKey (key_handle, ek.getKeyHandle (), post_operation.getMAC ());
+                                  }
+                                break;
+                              }
+                          }
+                      }
+                  }
               }
             CredentialDeploymentResponseEncoder cre_dep_response = 
                       new CredentialDeploymentResponseEncoder (cred_dep_request,
@@ -377,6 +432,8 @@ public class KeyGen2Test
         ServerCredentialStore.KeyAlgorithmData key_alg1 =  new ServerCredentialStore.KeyAlgorithmData.RSA (2048);
 
         ServerCredentialStore.KeyAlgorithmData key_alg2 =  new ServerCredentialStore.KeyAlgorithmData.EC (ECDomains.P_256);
+        
+        byte[] predef_server_pin = {'3','1','2','5','8','9'};
 
         KeyInitializationRequestEncoder key_init_request;
         
@@ -564,12 +621,16 @@ public class KeyGen2Test
                     pin_policy.addPatternRestriction (PatternRestriction.THREE_IN_A_ROW);
                     pin_policy.addPatternRestriction (PatternRestriction.SEQUENCE);
                   }
+                if (pin_group_shared)
+                  {
+                    pin_policy.setGrouping (PINGrouping.SHARED);
+                  }
               }
             ServerCredentialStore.KeyProperties kp = device_pin ?
                 server_credential_store.createDevicePINProtectedKey (KeyUsage.AUTHENTICATION, key_alg1) :
                   preset_pin ? server_credential_store.createKeyWithPresetPIN (symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION,
                                                                                key_alg1, pin_policy,
-                                                                               server_sess_key.encrypt (new byte[]{'3','1','2','5','8','9'}))
+                                                                               server_sess_key.encrypt (predef_server_pin))
                              :
                 server_credential_store.createKey (symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION,
                                                    key_alg1,
@@ -599,6 +660,20 @@ public class KeyGen2Test
                     new SecureRandom ().nextBytes (seed);
                     kp.setServerSeed (seed);
                   }
+              }
+            if (clone_key_protection != null)
+              {
+                kp.setClonedKeyProtection (clone_key_protection.server_credential_store.getClientSessionID (), 
+                                           clone_key_protection.server_credential_store.getServerSessionID (),
+                                           clone_key_protection.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
+                                           clone_key_protection.server_sess_key);
+              }
+            if (update_key != null)
+              {
+                kp.setUpdatedKey (update_key.server_credential_store.getClientSessionID (), 
+                                  update_key.server_credential_store.getServerSessionID (),
+                                  update_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
+                                  update_key.server_sess_key);
               }
             key_init_request = new KeyInitializationRequestEncoder (KEY_INIT_URL, server_credential_store, server_sess_key);
             return key_init_request.writeXML ();
@@ -863,6 +938,76 @@ public class KeyGen2Test
         pin_protection = true;
         preset_pin = true;
         doer.perform ();
+      }
+    @Test
+    public void test10 () throws Exception
+      {
+        Doer doer1 = new Doer ();
+        updatable = true;
+        pin_protection = true;
+        pin_group_shared = true;
+        preset_pin = true;
+        doer1.perform ();
+        updatable = false;
+        pin_protection = false;
+        preset_pin = false;
+        clone_key_protection = doer1.server;
+        Doer doer2 = new Doer ();
+        doer2.perform ();
+        EnumeratedKey ek = new EnumeratedKey ();
+        int j = 0;
+        while ((ek = sks.enumerateKeys (ek)).isValid ())
+          {
+            if (ek.getProvisioningHandle () == doer2.client.provisioning_handle)
+              {
+                j++;
+                KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
+                byte[] result = sks.signHashedData (ek.getKeyHandle (),
+                                                    SignatureAlgorithms.RSA_SHA256.getURI (),
+                                                    doer2.server.predef_server_pin,
+                                                    HashAlgorithms.SHA256.digest (TEST_STRING));
+                Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+                verify.initVerify (ka.getCertificatePath ()[0]);
+                verify.update (TEST_STRING);
+                assertTrue ("Bad signature", verify.verify (result));
+              }
+          }
+        assertTrue ("Missing keys", j == 2);
+      }
+    @Test
+    public void test11 () throws Exception
+      {
+        Doer doer1 = new Doer ();
+        updatable = true;
+        pin_protection = true;
+        pin_group_shared = true;
+        preset_pin = true;
+        doer1.perform ();
+        updatable = false;
+        pin_protection = false;
+        preset_pin = false;
+        update_key= doer1.server;
+        Doer doer2 = new Doer ();
+        doer2.perform ();
+        EnumeratedKey ek = new EnumeratedKey ();
+        int j = 0;
+        while ((ek = sks.enumerateKeys (ek)).isValid ())
+          {
+            if (ek.getProvisioningHandle () == doer2.client.provisioning_handle)
+              {
+                j++;
+                KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
+                byte[] result = sks.signHashedData (ek.getKeyHandle (),
+                                                    SignatureAlgorithms.RSA_SHA256.getURI (),
+                                                    doer2.server.predef_server_pin,
+                                                    HashAlgorithms.SHA256.digest (TEST_STRING));
+                Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+                verify.initVerify (ka.getCertificatePath ()[0]);
+                verify.update (TEST_STRING);
+                assertTrue ("Bad signature", verify.verify (result));
+              }
+          }
+        assertTrue ("Missing keys", j == 1);
       }
 
   }

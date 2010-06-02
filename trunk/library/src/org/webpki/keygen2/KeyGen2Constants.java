@@ -16,7 +16,6 @@
  */
 package org.webpki.keygen2;
 
-
 public interface KeyGen2Constants
   {
 
@@ -168,12 +167,6 @@ public interface KeyGen2Constants
 
     String LOGOTYPE_ELEM                     = "Logotype";
 
-    String CLONE_KEY_ELEM                    = "CloneKey";
-
-    String REPLACE_KEY_ELEM                  = "ReplaceKey";
-
-    String DELETE_KEY_ELEM                   = "DeleteKey";
-
     String ISSUER_LOGOTYPE_ELEM              = "IssuerLogotype";       
 
     String PROPERTY_ELEM                     = "Property";       
@@ -183,5 +176,11 @@ public interface KeyGen2Constants
     String RSA_ELEM                          = "RSA";
 
     String EC_ELEM                           = "EC";
+    
+    String UPDATE_KEY_ELEM                   = "UpdateKey";
+
+    String CLONE_KEY_PROTECTION_ELEM         = "CloneKeyProtection";
+    
+    String DELETE_KEY_ELEM                   = "DeleteKey";
 
   }

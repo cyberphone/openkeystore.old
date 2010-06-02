@@ -21,8 +21,8 @@
     "Perfection is achieved, not when there is nothing more to add, but when
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
-    Version: BETA 
-    Revised: 02-April-2010 
+    Version: ALPHA 
+    Revised: 02-June-2010 
     Author: Anders Rundgren
 
     Copyright 2006-2010 WebPKI.org (http://webpki.org).
@@ -712,6 +712,14 @@
             </xs:element>
 
            </xs:choice>
+           
+           <xs:choice minOccurs="0">
+
+             <xs:element name="UpdateKey" type="kgen:managementObject"/>
+
+             <xs:element name="CloneKeyProtection" type="kgen:managementObject"/>
+
+           </xs:choice>
 
          </xs:sequence>
 
@@ -1086,6 +1094,22 @@
            by the "Signature" certificate it is considered as non-matching and
            will abort all but the conditional delete operation. -->
       <xs:attribute name="CertificateSHA1" type="xs:base64Binary" use="required"/>
+
+   </xs:complexType>
+
+   <xs:complexType name="managementObject">
+
+      <!-- One of the two IDs identifying a provisioning session. -->
+      <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
+
+      <!-- The other ID identifying a provisioning session. -->
+      <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
+
+      <!-- Handle to the certificate that is specified by management objects. -->
+      <xs:attribute name="CertificateFingerprint" type="xs:base64Binary" use="required"/>
+
+      <!-- Mandatory MAC (Message Authentication Code). -->
+      <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
    </xs:complexType>
 

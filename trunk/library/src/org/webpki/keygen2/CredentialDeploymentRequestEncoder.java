@@ -35,6 +35,7 @@ import org.webpki.xmldsig.XMLSigner;
 
 import org.webpki.crypto.SignerInterface;
 import org.webpki.crypto.CertificateUtil;
+import org.webpki.keygen2.ServerCredentialStore.PostProvisioningTargetKey;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -50,7 +51,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
     ServerCredentialStore server_credential_store;
     
     ServerSessionKeyInterface sess_key_interface;
-    
+     
     // Constructors
 
     public CredentialDeploymentRequestEncoder (String submit_url, 
@@ -93,6 +94,20 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
     private void mac (DOMWriterHelper wr, byte[] data, APIDescriptors method) throws IOException, GeneralSecurityException
       {
         wr.setBinaryAttribute (MAC_ATTR, mac (data, method));
+      }
+    
+    
+    private void writePostOp (DOMWriterHelper wr,
+                              PostProvisioningTargetKey target_key,
+                              ServerCredentialStore.MacGenerator post_op_mac) throws IOException, GeneralSecurityException
+      {
+        wr.addChildElement (target_key.post_operation.getXMLElem ());
+        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, target_key.client_session_id);
+        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, target_key.server_session_id);
+        wr.setBinaryAttribute (CERTIFICATE_FINGERPRINT_ATTR, target_key.certificate_fingerprint);
+        post_op_mac.addArray (target_key.post_provisioning_mac);
+        mac (wr, post_op_mac.getResult (), target_key.post_operation.getMethod ());
+        wr.getParent ();
       }
 
 
@@ -171,6 +186,17 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                     add_ext.addBlob (ei.getExtensionData ());
                     ei.writeExtension (wr, mac (add_ext.getResult (), APIDescriptors.ADD_EXTENSION));
                   }
+
+                ////////////////////////////////////////////////////////////////////////
+                // Optional: post operation
+                ////////////////////////////////////////////////////////////////////////
+                if (key.clone_or_update_operation != null)
+                  {
+                    ServerCredentialStore.MacGenerator set_post_mac = new ServerCredentialStore.MacGenerator ();
+                    set_post_mac.addArray (ee_cert);
+                    writePostOp (wr, key.clone_or_update_operation, set_post_mac);
+                  }
+ 
                 wr.getParent ();
               }
 

@@ -108,17 +108,17 @@ public interface SecureKeyStore
     // Post Provisioning (Management)
     ///////////////////////////////////////////////////////////////////////////////////
 
-    public void postProvisioningDeleteKey (int provisioning_handle,
-                                           int key_handle,
-                                           byte[] mac) throws SKSException;
+    public void pp_deleteKey (int provisioning_handle,
+                              int target_key_handle,
+                              byte[] mac) throws SKSException;
 
-    public void postProvisioningUpdateKey (int key_handle,
-                                           int key_handle_original,
-                                           byte[] mac) throws SKSException;
+    public void pp_updateKey (int key_handle,
+                              int target_key_handle,
+                              byte[] mac) throws SKSException;
 
-    public void postProvisioningCloneKey (int key_handle,
-                                          int key_handle_original,
-                                          byte[] mac) throws SKSException;
+    public void pp_cloneKeyProtection (int key_handle,
+                                       int target_key_handle,
+                                       byte[] mac) throws SKSException;
 
     ///////////////////////////////////////////////////////////////////////////////////
     // "User" API
@@ -126,7 +126,11 @@ public interface SecureKeyStore
 
     public byte[] signHashedData (int key_handle,
                                   String signature_algorithm,
-                                  byte[] pin,
+                                  byte[] authorization,
                                   byte[] hashed_data) throws SKSException;
+    
+    void deleteKey (int key_handle,
+                    byte[] authorization) throws SKSException;
+    
    
   }

@@ -23,7 +23,6 @@ import java.util.Date;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.xml.DOMReaderHelper;

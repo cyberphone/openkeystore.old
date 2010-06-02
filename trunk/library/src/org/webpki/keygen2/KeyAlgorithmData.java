@@ -1,7 +1,6 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import org.webpki.crypto.ECDomains;
 import org.webpki.util.ArrayUtil;

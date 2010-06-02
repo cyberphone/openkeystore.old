@@ -114,7 +114,7 @@
 
   <target name="deploy" depends="clean,dist"/>
 	
-  <target name="testkg2">
+  <target name="_test">
     <mkdir dir="${test_dir}"/>
   	<condition property="test.dir.path" value="">
       <not>
@@ -122,32 +122,25 @@
       </not>
   	</condition>
 	<property name="test.dir.path" location="${test_dir}"/>
-  	<echo message="${test.dir.path}"/>
     <junit fork="yes" haltonfailure="yes">
-      <test name="org.webpki.keygen2.test.KeyGen2Test" />
+      <test name="${test.class}"/>
     	<sysproperty key="sks.implementation" value="${test.sks.implementation}"/>
     	<sysproperty key="test.dir" value="${test.dir.path}"/>
       <formatter type="plain" usefile="false" />
       <classpath refid="junit.classpath" />
     </junit>
   </target>
+	
+  <target name="testkg2">
+    <antcall target="_test">
+       <param name="test.class" value="org.webpki.keygen2.test.KeyGen2Test"/>
+     </antcall>
+  </target>
 
   <target name="testsks">
-    <mkdir dir="${test_dir}"/>
-  	<condition property="test.dir.path" value="">
-      <not>
-        <isset property="test.out.file"/>
-      </not>
-  	</condition>
-	<property name="test.dir.path" location="${test_dir}"/>
-  	<echo message="${test.dir.path}"/>
-    <junit fork="yes" haltonfailure="yes">
-      <test name="org.webpki.sks.test.SKSTest" />
-    	<sysproperty key="sks.implementation" value="${test.sks.implementation}"/>
-    	<sysproperty key="test.dir" value="${test.dir.path}"/>
-      <formatter type="plain" usefile="false" />
-      <classpath refid="junit.classpath" />
-    </junit>
+    <antcall target="_test">
+       <param name="test.class" value="org.webpki.sks.test.SKSTest"/>
+     </antcall>
   </target>
 
 </project>

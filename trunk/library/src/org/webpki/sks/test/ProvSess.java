@@ -591,27 +591,27 @@ public class ProvSess
       {
         MacGenerator del_mac = new MacGenerator ();
         del_mac.addArray (key.getPostProvMac ());
-        sks.postProvisioningDeleteKey (provisioning_handle, 
-                                       key.key_handle,
-                                       mac (del_mac.getResult (), APIDescriptors.POST_PROVISIONING_DELETE_KEY));
+        sks.pp_deleteKey (provisioning_handle, 
+                          key.key_handle,
+                          mac (del_mac.getResult (), APIDescriptors.PP_DELETE_KEY));
       }
     
     void postUpdateKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new_key.getEECertMacBuilder ();
         upd_mac.addArray (old_key.getPostProvMac ());
-        sks.postProvisioningUpdateKey (new_key.key_handle, 
-                                       old_key.key_handle,
-                                       mac (upd_mac.getResult (), APIDescriptors.POST_PROVISIONING_UPDATE_KEY));
+        sks.pp_updateKey (new_key.key_handle, 
+                          old_key.key_handle,
+                          mac (upd_mac.getResult (), APIDescriptors.PP_UPDATE_KEY));
       }
     
     void postCloneKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new_key.getEECertMacBuilder ();
         upd_mac.addArray (old_key.getPostProvMac ());
-        sks.postProvisioningCloneKey (new_key.key_handle, 
-                                      old_key.key_handle,
-                                      mac (upd_mac.getResult (), APIDescriptors.POST_PROVISIONING_CLONE_KEY));
+        sks.pp_cloneKeyProtection (new_key.key_handle, 
+                                   old_key.key_handle,
+                                   mac (upd_mac.getResult (), APIDescriptors.PP_CLONE_KEY_PROTECTION));
       }
   
     boolean exists () throws SKSException
