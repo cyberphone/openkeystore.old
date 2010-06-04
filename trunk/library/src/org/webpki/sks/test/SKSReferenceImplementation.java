@@ -68,7 +68,7 @@ import org.webpki.util.ArrayUtil;
  *                          ###########################
  *
  *  SKS is a cryptographic module that supports E2ES (End-to-End Security) for
- *  provisioning PKI, Symmetric keys, PINs, PUKs and Extension data.
+ *  provisioning and managing PKI, Symmetric keys, PINs, PUKs and Extension data.
  *  
  *  The following is an SKS reference implementation that is supposed to complement
  *  the specification by showing how the different constructs can be implemented.

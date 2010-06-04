@@ -47,8 +47,11 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.AfterClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.BeforeClass;
+import org.junit.rules.TestName;
+
 import static org.junit.Assert.*;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -142,6 +145,7 @@ public class KeyGen2Test
     
     static SecureKeyStore sks;
     
+    int round;    
    
     @BeforeClass
     public static void openFile () throws Exception
@@ -164,6 +168,9 @@ public class KeyGen2Test
           }
       }
     
+    @Rule 
+    public TestName _name = new TestName();
+
     class Client
       {
         XMLSchemaCache client_xml_cache;
@@ -711,7 +718,7 @@ public class KeyGen2Test
                         cert_spec.setKeyUsageBit (KeyUsageBits.keyEncipherment);
                       }
                   }
-                cert_spec.setSubject ("CN=John Doe, E=john.doe@example.com" +
+                cert_spec.setSubject ("CN=JUnit " + _name.getMethodName() + ", E=john.doe@example.com" +
                                       (otp ? ", OU=OTP Key" : ""));
 
                 GregorianCalendar start = new GregorianCalendar ();
@@ -820,7 +827,7 @@ public class KeyGen2Test
         
         void perform () throws Exception
           {
-            writeString ("Begin Test\n");
+            writeString ("Begin Test (" + _name.getMethodName() + ":" + (++round) + ")\n");
             writeString ("PUK = ");
             writeString (puk_protection ? "Yes\n" : "No\n");
             writeString ("PINs = ");
@@ -835,8 +842,12 @@ public class KeyGen2Test
             writeString (ecc_key ? "Yes\n" : "No\n");
             writeString ("Server Seed = ");
             writeString (server_seed ? "Yes\n" : "No\n");
+            writeString ("PropertyBag = ");
+            writeString (property_bag ? "Yes\n" : "No\n");
             writeString ("Private Key Backup = ");
             writeString (private_key_backup ? "Yes\n" : "No\n");
+            if (clone_key_protection != null) writeString ("CloneKeyProtection added\n");
+            if (update_key != null) writeString ("UpdateKey added\n");
             server = new Server ();
             client = new Client ();
             byte[] xml;

@@ -28,8 +28,11 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.BeforeClass;
+import org.junit.rules.TestName;
+
 import static org.junit.Assert.*;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -55,6 +58,140 @@ public class SKSTest
     static SecureKeyStore sks;
     
     Device device;
+    
+    private int sessionCount () throws Exception
+      {
+        EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
+        int i = 0;
+        while ((eps = sks.enumerateProvisioningSessions (eps, false)).isValid ())
+          {
+            i++;
+          }
+        return i;
+      }
+    
+    private void edgeDeleteCase (boolean post) throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        GenKey key3 = sess2.createECKey ("Key.1",
+                                         null /* pin_value */,
+                                         null /* pin_policy */,
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        if (post)
+          {
+            sess2.postUpdateKey (key3, key1);
+          }
+        else
+          {
+            sks.deleteKey (key1.key_handle, new byte[0]);
+          }
+        try
+          {
+            if (post)
+              {
+                sks.deleteKey (key1.key_handle, new byte[0]);
+              }
+            else
+              {
+                sess2.postUpdateKey (key3, key1);
+              }
+            sess2.closeSession ();
+            fail ("Multiple updates using the same key");
+          }
+        catch (SKSException e)
+          {
+          }
+      }
+
+    private void deleteKey (GenKey key) throws SKSException
+      {
+        sks.deleteKey (key.key_handle, new byte[0]);
+      }
+    
+    private void updateReplace (boolean order) throws Exception
+      {
+        int q = sessionCount ();
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  PINGrouping.SHARED,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        GenKey key2 = sess2.createECKey ("Key.2",
+                                         null /* pin_value */,
+                                         null,
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        GenKey key3 = sess2.createRSAKey ("Key.1",
+                                          2048,
+                                          null /* pin_value */,
+                                          null /* pin_policy */,
+                                          KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
+        if (order) sess2.postCloneKey (key3, key1);
+        sess2.postUpdateKey (key2, key1);
+        if (!order) sess2.postCloneKey (key3, key1);
+        sess2.closeSession ();
+        assertTrue ("Old key should exist after update", key1.exists ());
+        assertFalse ("New key should NOT exist after update", key2.exists ());
+        assertTrue ("New key should exist after clone", key3.exists ());
+        assertTrue ("Ownership error", key1.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+        assertTrue ("Ownership error", key3.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+        assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+        try
+          {
+            device.sks.signHashedData (key3.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0], 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("Bad PIN should not work");
+          }
+        catch (SKSException e)
+          {
+            assertTrue ("There should be an auth error", e.getError () == SKSException.ERROR_AUTHORIZATION);
+          }
+        try
+          {
+            byte[] result = device.sks.signHashedData (key3.key_handle, 
+                                                      "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                                       ok_pin.getBytes ("UTF-8"), 
+                                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+            verify.initVerify (key3.cert_path[0]);
+            verify.update (TEST_STRING);
+            assertTrue ("Bad signature key3", verify.verify (result));
+            result = device.sks.signHashedData (key1.key_handle, 
+                                                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                                ok_pin.getBytes ("UTF-8"), 
+                                                HashAlgorithms.SHA256.digest (TEST_STRING));
+            verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
+            verify.initVerify (key2.cert_path[0]);
+            verify.update (TEST_STRING);
+            assertTrue ("Bad signature key1", verify.verify (result));
+          }
+        catch (SKSException e)
+          {
+            fail ("Good PIN should work");
+          }
+        assertTrue ("Session count", ++q == sessionCount ());
+      }
+
     
     private boolean nameCheck (String name) throws IOException, GeneralSecurityException
       {
@@ -214,7 +351,10 @@ public class SKSTest
              sks.abortProvisioningSession (eps.getProvisioningHandle ());
            }
       }
-        
+
+    @Rule 
+    public TestName name = new TestName();
+   
     private void write (byte[] data) throws Exception
       {
         if (fos != null)
@@ -237,11 +377,14 @@ public class SKSTest
     @Test
     public void test1 () throws Exception
       {
+        int q = sessionCount ();
         new ProvSess (device).closeSession ();
+        assertTrue ("Session count", q == sessionCount ());
       }
-    @Test(expected=SKSException.class)
+    @Test
     public void test2 () throws Exception
       {
+        int q = sessionCount ();
         ProvSess sess = new ProvSess (device);
         sess.createPINPolicy ("PIN",
                               PassphraseFormat.NUMERIC,
@@ -249,7 +392,15 @@ public class SKSTest
                               8 /* max_length */,
                               (short) 3 /* retry_limit*/, 
                               null /* puk_policy */);
-        sess.closeSession ();
+        try
+          {
+            sess.closeSession ();
+            fail ("Should have thrown an exception");
+          }
+        catch (SKSException e)
+          {
+          }
+        assertTrue ("Session count", q == sessionCount ());
       }
     @Test
     public void test3 () throws Exception
@@ -330,18 +481,18 @@ public class SKSTest
         sess.createECKey ("Key.1",
                            null /* pin_value */,
                            null /* pin_policy */,
-                           KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST8");
+                           KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
         
       }
     @Test
-    public void test12 () throws Exception
+    public void test9 () throws Exception
       {
         ProvSess sess = new ProvSess (device);
         GenKey key = sess.createECKey ("Key.1",
                                        null /* pin_value */,
                                        null /* pin_policy */,
-                                       KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST12");
+                                       KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
         byte[] result = device.sks.signHashedData (key.key_handle, 
                                                    "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
@@ -353,14 +504,14 @@ public class SKSTest
         assertTrue ("Bad signature", verify.verify (result));
       }
     @Test
-    public void test13 () throws Exception
+    public void test10 () throws Exception
       {
         ProvSess sess = new ProvSess (device);
         GenKey key = sess.createRSAKey ("Key.1",
                                         2048,
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
 
         byte[] result = device.sks.signHashedData (key.key_handle, 
@@ -382,7 +533,7 @@ public class SKSTest
         assertTrue ("Bad signature", verify.verify (result));
       }
     @Test
-    public void test14 () throws Exception
+    public void test11 () throws Exception
       {
         String ok_pin = "1563";
         ProvSess sess = new ProvSess (device);
@@ -397,7 +548,7 @@ public class SKSTest
                                         1024,
                                         ok_pin /* pin_value */,
                                         pin_policy /* pin_policy */,
-                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST14");
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
 
         try
@@ -502,7 +653,7 @@ public class SKSTest
          
       }
     @Test
-    public void test15 () throws Exception
+    public void test12 () throws Exception
       {
         assertTrue (PUKCheck (PassphraseFormat.ALPHANUMERIC, "AB123"));
         assertTrue (PUKCheck (PassphraseFormat.NUMERIC, "1234"));
@@ -565,17 +716,18 @@ public class SKSTest
         assertTrue (PINGroupCheck (false, PINGrouping.SIGNATURE_PLUS_STANDARD));
       }
     @Test
-    public void test16 () throws Exception
+    public void test13 () throws Exception
       {
+        int q = sessionCount ();
         ProvSess sess = new ProvSess (device);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST16");
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         GenKey key2 = sess.createECKey ("Key.2",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST16");
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
@@ -586,6 +738,61 @@ public class SKSTest
         assertFalse ("Key was not deleted", key1.exists ());
         assertTrue ("Ownership error", key2.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
         assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+        assertTrue ("Session count", ++q == sessionCount ());
+      }
+    @Test
+    public void test14 () throws Exception
+      {
+        int q = sessionCount ();
+        ProvSess sess = new ProvSess (device);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        sess2.postDeleteKey (key1);
+        assertTrue ("Missing key, deletes MUST only be performed during session close", key1.exists ());
+        sess2.closeSession ();
+        assertFalse ("Key was not deleted", key1.exists ());
+        assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+        assertTrue ("Session count",q == sessionCount ());
+      }
+    @Test
+    public void test15 () throws Exception
+      {
+        int q = sessionCount ();
+        ProvSess sess = new ProvSess (device);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+        GenKey key2 = sess.createECKey ("Key.2",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST16");
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        deleteKey (key1);
+        assertFalse ("Key was not deleted", key1.exists ());
+        assertTrue ("Key did not exist", key2.exists ());
+        assertTrue ("Session count", ++q == sessionCount ());
+      }
+    @Test
+    public void test16 () throws Exception
+      {
+        int q = sessionCount ();
+        ProvSess sess = new ProvSess (device);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        deleteKey (key1);
+        assertFalse ("Key was not deleted", key1.exists ());
+        assertTrue ("Session count", q == sessionCount ());
       }
     @Test
     public void test17 () throws Exception
@@ -594,14 +801,14 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST17");
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
         GenKey key2 = sess2.createECKey ("Key.1",
                                          null /* pin_value */,
                                          null /* pin_policy */,
-                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST17");
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess2.postUpdateKey (key2, key1);
         sess2.closeSession ();
         assertTrue ("Key should exist even after update", key1.exists ());
@@ -623,14 +830,14 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         ok_pin /* pin_value */,
                                         pin_policy,
-                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
         GenKey key2 = sess2.createECKey ("Key.1",
                                          null /* pin_value */,
                                          null /* pin_policy */,
-                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess2.postUpdateKey (key2, key1);
         sess2.closeSession ();
         assertTrue ("Key should exist even after update", key1.exists ());
@@ -724,6 +931,7 @@ public class SKSTest
           {
           }
       }
+    @Test
     public void test21 () throws Exception
       {
         ProvSess sess = new ProvSess (device);
@@ -894,75 +1102,42 @@ public class SKSTest
     @Test
     public void test24 () throws Exception
       {
-        String ok_pin = "1563";
+        updateReplace (true);
+      }
+    @Test
+    public void test25 () throws Exception
+      {
+        updateReplace (false);
+      }
+    @Test
+    public void test26 () throws Exception
+      {
+        edgeDeleteCase (true);
+      }
+    @Test
+    public void test27 () throws Exception
+      {
+        edgeDeleteCase (false);
+      }
+    @Test
+    public void test28 () throws Exception
+      {
+        int q = sessionCount ();
         ProvSess sess = new ProvSess (device);
-        PINPol pin_policy = sess.createPINPolicy ("PIN",
-                                                  PassphraseFormat.NUMERIC,
-                                                  EnumSet.noneOf (PatternRestriction.class),
-                                                  PINGrouping.SHARED,
-                                                  4 /* min_length */, 
-                                                  8 /* max_length */,
-                                                  (short) 3 /* retry_limit*/, 
-                                                  null /* puk_policy */);
         GenKey key1 = sess.createECKey ("Key.1",
-                                        ok_pin /* pin_value */,
-                                        pin_policy,
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        GenKey key2 = sess.createECKey ("Key.2",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
-        GenKey key2 = sess2.createECKey ("Key.2",
-                                         null /* pin_value */,
-                                         null,
-                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
-        GenKey key3 = sess2.createRSAKey ("Key.1",
-                                          2048,
-                                          null /* pin_value */,
-                                          null /* pin_policy */,
-                                          KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
-        sess2.postUpdateKey (key2, key1);
-        sess2.postCloneKey (key3, key1);
+        sess2.postDeleteKey (key2);
+        sks.deleteKey (key1.key_handle, new byte[0]);
         sess2.closeSession ();
-        assertTrue ("Old key should exist after update", key1.exists ());
-        assertFalse ("New key should NOT exist after update", key2.exists ());
-        assertTrue ("New key should exist after clone", key3.exists ());
-        assertTrue ("Ownership error", key1.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
-        assertTrue ("Ownership error", key3.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
-        assertFalse ("Managed sessions MUST be deleted", sess.exists ());
-        try
-          {
-            device.sks.signHashedData (key3.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       new byte[0], 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
-            fail ("Bad PIN should not work");
-          }
-        catch (SKSException e)
-          {
-            assertTrue ("There should be an auth error", e.getError () == SKSException.ERROR_AUTHORIZATION);
-          }
-        try
-          {
-            byte[] result = device.sks.signHashedData (key3.key_handle, 
-                                                      "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                                       ok_pin.getBytes ("UTF-8"), 
-                                                       HashAlgorithms.SHA256.digest (TEST_STRING));
-            Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
-            verify.initVerify (key3.cert_path[0]);
-            verify.update (TEST_STRING);
-            assertTrue ("Bad signature key3", verify.verify (result));
-            result = device.sks.signHashedData (key1.key_handle, 
-                                                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                                ok_pin.getBytes ("UTF-8"), 
-                                                HashAlgorithms.SHA256.digest (TEST_STRING));
-            verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
-            verify.initVerify (key2.cert_path[0]);
-            verify.update (TEST_STRING);
-            assertTrue ("Bad signature key1", verify.verify (result));
-          }
-        catch (SKSException e)
-          {
-            fail ("Good PIN should work");
-          }
+        assertTrue ("Session count", q == sessionCount ());
       }
   }

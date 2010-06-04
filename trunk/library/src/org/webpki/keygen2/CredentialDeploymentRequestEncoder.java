@@ -188,7 +188,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                   }
 
                 ////////////////////////////////////////////////////////////////////////
-                // Optional: post operation
+                // Optional: post operation associated with the provisioned key
                 ////////////////////////////////////////////////////////////////////////
                 if (key.clone_or_update_operation != null)
                   {
