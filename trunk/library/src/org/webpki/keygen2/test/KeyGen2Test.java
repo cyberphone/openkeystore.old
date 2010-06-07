@@ -29,7 +29,6 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -98,11 +97,14 @@ import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.KeyAttributes;
 import org.webpki.sks.KeyPair;
+import org.webpki.sks.Property;
 import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
+import org.webpki.tools.XML2HTMLPrinter;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.HTMLHeader;
 
 import org.webpki.xml.XMLSchemaCache;
 import org.webpki.xml.XMLObjectWrapper;
@@ -131,6 +133,8 @@ public class KeyGen2Test
     
     Server update_key;
     
+    Server delete_key;
+    
     boolean device_pin;
     
     boolean pin_group_shared;
@@ -145,15 +149,22 @@ public class KeyGen2Test
     
     static SecureKeyStore sks;
     
+    static boolean html_mode;
+    
     int round;    
    
     @BeforeClass
     public static void openFile () throws Exception
       {
+        html_mode = new Boolean (System.getProperty ("html.mode", "false"));
         String dir = System.getProperty ("test.dir");
         if (dir.length () > 0)
           {
-            fos = new FileOutputStream (dir + "/" + KeyGen2Test.class.getCanonicalName () + ".txt");
+            fos = new FileOutputStream (dir + "/" + KeyGen2Test.class.getCanonicalName () + (html_mode ? ".html" : ".txt"));
+            if (html_mode)
+              {
+                fos.write (HTMLHeader.createHTMLHeader (false, true,"KeyGen2 JUinit test output", null).append ("<body>").toString ().getBytes ("UTF-8"));
+              }
           }
         Security.addProvider(new BouncyCastleProvider());
         sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
@@ -164,6 +175,10 @@ public class KeyGen2Test
       {
         if (fos != null)
           {
+            if (html_mode)
+              {
+                fos.write ("</body></html>".getBytes ("UTF-8"));
+              }
             fos.close ();
           }
       }
@@ -197,6 +212,56 @@ public class KeyGen2Test
             throw new IOException (message);
           }
         
+        private void postProvisioning (CredentialDeploymentRequestDecoder.PostOperation post_operation, int handle) throws IOException, GeneralSecurityException
+          {
+            EnumeratedProvisioningSession old = new EnumeratedProvisioningSession ();
+            while (true)
+              {
+                old = sks.enumerateProvisioningSessions (old, false);
+                if (!old.isValid ())
+                  {
+                    abort ("Old provisioning session not found:" + 
+                        post_operation.getClientSessionID () + "/" +
+                        post_operation.getServerSessionID ());
+                  }
+                if (old.getClientSessionID ().equals(post_operation.getClientSessionID ()) &&
+                    old.getServerSessionID ().equals (post_operation.getServerSessionID ()))
+                  {
+                    break;
+                  }
+              }
+            EnumeratedKey ek = new EnumeratedKey ();
+            while (true)
+              {
+                ek = sks.enumerateKeys (ek);
+                if (!ek.isValid ())
+                  {
+                    abort ("Old key not found");
+                  }
+                if (ek.getProvisioningHandle () == old.getProvisioningHandle ())
+                  {
+                    KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
+                    if (ArrayUtil.compare (HashAlgorithms.SHA256.digest (ka.getCertificatePath ()[0].getEncoded ()), post_operation.getCertificateFingerprint ()))
+                      {
+                        switch (post_operation.getPostOperation ())
+                          {
+                            case CredentialDeploymentRequestDecoder.PostOperation.CLONE_KEY_PROTECTION:
+                              sks.pp_cloneKeyProtection (handle, ek.getKeyHandle (), post_operation.getMAC ());
+                              break;
+
+                            case CredentialDeploymentRequestDecoder.PostOperation.UPDATE_KEY:
+                              sks.pp_updateKey (handle, ek.getKeyHandle (), post_operation.getMAC ());
+                              break;
+                              
+                            default:
+                              sks.pp_deleteKey (handle, ek.getKeyHandle (), post_operation.getMAC ());
+                          }
+                        return;
+                      }
+                  }
+              }
+          }
+
         ///////////////////////////////////////////////////////////////////////////////////
         // Get prov sess request and respond with epheral keys and and attest
         ///////////////////////////////////////////////////////////////////////////////////
@@ -319,7 +384,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Get the certificates and attributes and return a success message
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] creDepResponse (byte[] xmldata) throws IOException, CertificateEncodingException
+        byte[] creDepResponse (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             CredentialDeploymentRequestDecoder cred_dep_request =
                            (CredentialDeploymentRequestDecoder) client_xml_cache.parse (xmldata);
@@ -371,48 +436,12 @@ public class KeyGen2Test
                 CredentialDeploymentRequestDecoder.PostOperation post_operation = key.getPostOperation ();
                 if (post_operation != null)
                   {
-                    EnumeratedProvisioningSession old = new EnumeratedProvisioningSession ();
-                    while (true)
-                      {
-                        old = sks.enumerateProvisioningSessions (old, false);
-                        if (!old.isValid ())
-                          {
-                            abort ("Old provisioning session not found:" + 
-                                post_operation.getClientSessionID () + "/" +
-                                post_operation.getServerSessionID ());
-                          }
-                        if (old.getClientSessionID ().equals(post_operation.getClientSessionID ()) &&
-                            old.getServerSessionID ().equals (post_operation.getServerSessionID ()))
-                          {
-                            break;
-                          }
-                      }
-                    EnumeratedKey ek = new EnumeratedKey ();
-                    while (true)
-                      {
-                        ek = sks.enumerateKeys (ek);
-                        if (!ek.isValid ())
-                          {
-                            abort ("Old key not found");
-                          }
-                        if (ek.getProvisioningHandle () == old.getProvisioningHandle ())
-                          {
-                            KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
-                            if (ArrayUtil.compare (HashAlgorithms.SHA256.digest (ka.getCertificatePath ()[0].getEncoded ()), post_operation.getCertificateFingerprint ()))
-                              {
-                                if (post_operation.getPostOperation () == CredentialDeploymentRequestDecoder.PostOperation.CLONE_KEY_PROTECTION)
-                                  {
-                                    sks.pp_cloneKeyProtection (key_handle, ek.getKeyHandle (), post_operation.getMAC ());
-                                  }
-                                else
-                                  {
-                                    sks.pp_updateKey (key_handle, ek.getKeyHandle (), post_operation.getMAC ());
-                                  }
-                                break;
-                              }
-                          }
-                      }
+                    postProvisioning (post_operation, key_handle);
                   }
+              }
+            for (CredentialDeploymentRequestDecoder.PostOperation pp_del : cred_dep_request.getPostProvisioningDeleteKeys ())
+              {
+                postProvisioning (pp_del, eps.getProvisioningHandle ());
               }
             CredentialDeploymentResponseEncoder cre_dep_response = 
                       new CredentialDeploymentResponseEncoder (cred_dep_request,
@@ -682,6 +711,13 @@ public class KeyGen2Test
                                   update_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
                                   update_key.server_sess_key);
               }
+            if (delete_key != null)
+              {
+                server_credential_store.addPostProvisioningDeleteKey (delete_key.server_credential_store.getClientSessionID (), 
+                                                                      delete_key.server_credential_store.getServerSessionID (),
+                                                                      delete_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
+                                                                      delete_key.server_sess_key);
+              }
             key_init_request = new KeyInitializationRequestEncoder (KEY_INIT_URL, server_credential_store, server_sess_key);
             return key_init_request.writeXML ();
           }
@@ -783,7 +819,18 @@ public class KeyGen2Test
           {
             if (fos != null)
               {
-                fos.write (data);
+                for (int i = 0; i < data.length; i++)
+                  {
+                    byte b = data[i];
+                    if (b == '\n' && html_mode)
+                      {
+                        fos.write ("<br>".getBytes ("UTF-8"));
+                      }
+                    else
+                      {
+                        fos.write (b);
+                      }
+                  }
               }
           }
         
@@ -797,20 +844,37 @@ public class KeyGen2Test
             write (message.getBytes ("UTF-8"));
           }
         
+        private void writeOption (String option, boolean writeit) throws Exception
+          {
+            if (writeit)
+              {
+                writeString (option);
+                write ('\n');
+              }
+          }
+        
         byte[] fileLogger (byte[] xmldata) throws Exception
           {
             XMLObjectWrapper xo = xmlschemas.parse (xmldata);
-            String element = "#" + (++pass) + ": " + xo.element ();
-            write ('\n');
-            for (int i = 0; i < element.length (); i++) write ('-');
-            write ('\n');
-            writeString (element);
-            write ('\n');
-            for (int i = 0; i < element.length (); i++) write ('-');
-            write ('\n');
-            write ('\n');
-            write (xmldata);
-            write ('\n');
+            if (html_mode)
+              {
+                writeString ("&nbsp;<br><table><tr><td bgcolor=\"#F0F0F0\" style=\"border:solid;border-width:1px;padding:4px\">&nbsp;Pass #" + (++pass) + ":&nbsp;" + xo.element () + "&nbsp;</td></tr></table>&nbsp;<br>");
+                writeString (XML2HTMLPrinter.convert (new String (xmldata, "UTF-8")));
+              }
+            else
+              {
+                String element = "#" + (++pass) + ": " + xo.element ();
+                write ('\n');
+                for (int i = 0; i < element.length (); i++) write ('-');
+                write ('\n');
+                writeString (element);
+                write ('\n');
+                for (int i = 0; i < element.length (); i++) write ('-');
+                write ('\n');
+                write ('\n');
+                write (xmldata);
+                write ('\n');
+              }
             return xmldata;
           }
 
@@ -828,26 +892,18 @@ public class KeyGen2Test
         void perform () throws Exception
           {
             writeString ("Begin Test (" + _name.getMethodName() + ":" + (++round) + ")\n");
-            writeString ("PUK = ");
-            writeString (puk_protection ? "Yes\n" : "No\n");
-            writeString ("PINs = ");
-            writeString (pin_protection ? "Yes\n" : "No\n");
-            writeString ("Device PIN = ");
-            writeString (device_pin ? "Yes\n" : "No\n");
-            writeString ("Preset PIN = ");
-            writeString (preset_pin ? "Yes\n" : "No\n");
-            writeString ("PIN patterns = ");
-            writeString (add_pin_pattern ? "Yes\n" : "No\n");
-            writeString ("ECC Key = ");
-            writeString (ecc_key ? "Yes\n" : "No\n");
-            writeString ("Server Seed = ");
-            writeString (server_seed ? "Yes\n" : "No\n");
-            writeString ("PropertyBag = ");
-            writeString (property_bag ? "Yes\n" : "No\n");
-            writeString ("Private Key Backup = ");
-            writeString (private_key_backup ? "Yes\n" : "No\n");
-            if (clone_key_protection != null) writeString ("CloneKeyProtection added\n");
-            if (update_key != null) writeString ("UpdateKey added\n");
+            writeOption ("PUK Protection", puk_protection);
+            writeOption ("PIN Protection ", pin_protection);
+            writeOption ("Device PIN", device_pin);
+            writeOption ("Preset PIN", preset_pin);
+            writeOption ("PIN patterns", add_pin_pattern);
+            writeOption ("ECC Key", ecc_key);
+            writeOption ("Server Seed", server_seed);
+            writeOption ("PropertyBag", property_bag);
+            writeOption ("Private Key Backup", private_key_backup);
+            writeOption ("CloneKeyProtection", clone_key_protection != null);
+            writeOption ("UpdateKey", update_key != null);
+            writeOption ("DeleteKey", delete_key != null);
             server = new Server ();
             client = new Client ();
             byte[] xml;
@@ -869,7 +925,6 @@ public class KeyGen2Test
                   }
               }
             writeString ("\n\n");
-            
          }
         
       }
@@ -924,6 +979,7 @@ public class KeyGen2Test
         puk_protection = true;
         doer.perform ();
       }
+    @Test
     public void test7 () throws Exception
       {
         Doer doer = new Doer ();
@@ -932,7 +988,45 @@ public class KeyGen2Test
         symmetric_key = true;
         property_bag = true;
         doer.perform ();
-    }
+        ServerCredentialStore.PropertyBag prop_bag = doer.server.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getPropertyBags ()[0];
+        EnumeratedKey ek = new EnumeratedKey ();
+        int j = 0;
+        while ((ek = sks.enumerateKeys (ek)).isValid ())
+          {
+            if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
+              {
+                j++;
+                Property[] props1 = sks.getExtension (ek.getKeyHandle (), prop_bag.getType ()).getProperties ();
+                ServerCredentialStore.Property[] props2 = prop_bag.getProperties ();
+                assertTrue ("Prop len error", props1.length == props2.length);
+                int w = 0;
+                for (int i = 0; i < props1.length; i++)
+                  {
+                    if (props2[i].isWritable ())
+                      {
+                        w = i;
+                      }
+                    assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
+                    assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
+                  }
+                sks.setProperty (ek.getKeyHandle (), prop_bag.getType (), props2[w].getName (), props2[w].getValue () + "w2");
+                props1 = sks.getExtension (ek.getKeyHandle (), prop_bag.getType ()).getProperties ();
+                for (int i = 0; i < props1.length; i++)
+                  {
+                    assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
+                    assertTrue ("Prop value error", (i == w) ^ props1[i].getValue ().equals (props2[i].getValue ()));
+                  }
+                sks.setProperty (ek.getKeyHandle (), prop_bag.getType (), props2[w].getName (), props2[w].getValue ());
+                props1 = sks.getExtension (ek.getKeyHandle (), prop_bag.getType ()).getProperties ();
+                for (int i = 0; i < props1.length; i++)
+                  {
+                    assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
+                    assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
+                  }
+              }
+          }
+        assertTrue ("Missing keys", j == 1);
+      }
     @Test
     public void test8 () throws Exception
       {
@@ -1019,6 +1113,27 @@ public class KeyGen2Test
               }
           }
         assertTrue ("Missing keys", j == 1);
+      }
+    @Test
+    public void test12 () throws Exception
+      {
+        Doer doer1 = new Doer ();
+        updatable = true;
+        doer1.perform ();
+        updatable = false;
+        delete_key= doer1.server;
+        Doer doer2 = new Doer ();
+        doer2.perform ();
+        EnumeratedKey ek = new EnumeratedKey ();
+        int j = 0;
+        while ((ek = sks.enumerateKeys (ek)).isValid ())
+          {
+            if (ek.getProvisioningHandle () == doer1.client.provisioning_handle)
+              {
+                j++;
+              }
+          }
+        assertTrue ("Missing keys", j == 0);
       }
 
   }

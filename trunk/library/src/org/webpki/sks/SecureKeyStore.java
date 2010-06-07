@@ -21,6 +21,28 @@ import java.security.interfaces.ECPublicKey;
 
 public interface SecureKeyStore
   {
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Core Provisioning API
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public ProvisioningSession createProvisioningSession (String session_key_algorithm,
+                                                          String server_session_id,
+                                                          ECPublicKey server_ephemeral_key,
+                                                          String issuer_uri,
+                                                          boolean updatable,
+                                                          int client_time,
+                                                          int session_life_time,
+                                                          short session_key_limit) throws SKSException;
+
+    public byte[] closeProvisioningSession (int provisioning_handle,
+                                            byte[] mac) throws SKSException;
+
+    public EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
+                                                                        boolean provisioning_state) throws SKSException;
+
+    public byte[] signProvisioningSessionData (int provisioning_handle,
+                                               byte[] data) throws SKSException;
+
     public KeyPair createKeyPair (int provisioning_handle,
                                   String id,
                                   String attestation_algorithm,
@@ -38,8 +60,6 @@ public interface SecureKeyStore
                                   byte[] key_algorithm,
                                   byte[] mac) throws SKSException;
     
-    public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException;
-
     public int getKeyHandle (int provisioning_handle,
                              String id) throws SKSException;
 
@@ -60,9 +80,6 @@ public interface SecureKeyStore
                                  byte[] encrypted_symmetric_key,
                                  String[] endorsed_algorithms,
                                  byte[] mac) throws SKSException;
-    
-    public byte[] closeProvisioningSession (int provisioning_handle,
-                                            byte[] mac) throws SKSException;
     
     public int createPINPolicy (int provisioning_handle,
                                 String id,
@@ -85,25 +102,6 @@ public interface SecureKeyStore
                                 short retry_limit,
                                 byte[] mac) throws SKSException;
 
-    public ProvisioningSession createProvisioningSession (String session_key_algorithm,
-                                                          String server_session_id,
-                                                          ECPublicKey server_ephemeral_key,
-                                                          String issuer_uri,
-                                                          boolean updatable,
-                                                          int client_time,
-                                                          int session_life_time,
-                                                          short session_key_limit) throws SKSException;
-
-    public DeviceInfo getDeviceInfo () throws SKSException;
-    
-    public EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
-                                                                        boolean provisioning_state) throws SKSException;
-
-    public KeyAttributes getKeyAttributes (int key_handle) throws SKSException;
-    
-    public byte[] signProvisioningSessionData (int provisioning_handle,
-                                               byte[] data) throws SKSException;
-    
     ///////////////////////////////////////////////////////////////////////////////////
     // Post Provisioning (Management)
     ///////////////////////////////////////////////////////////////////////////////////
@@ -124,6 +122,10 @@ public interface SecureKeyStore
     // "User" API
     ///////////////////////////////////////////////////////////////////////////////////
 
+    public KeyAttributes getKeyAttributes (int key_handle) throws SKSException;
+    
+    public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException;
+
     public byte[] signHashedData (int key_handle,
                                   String signature_algorithm,
                                   byte[] authorization,
@@ -133,4 +135,18 @@ public interface SecureKeyStore
                     byte[] authorization) throws SKSException;
     
    
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Miscellaneous
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public DeviceInfo getDeviceInfo () throws SKSException;
+
+    public Extension getExtension (int key_handle,
+                                   String extension_type) throws SKSException;
+
+    public void setProperty (int key_handle,
+                             String extension_type,
+                             String name,
+                             String value) throws SKSException;
+
   }

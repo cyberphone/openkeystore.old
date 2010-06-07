@@ -22,14 +22,22 @@ public class KeyAttributes
   {
     X509Certificate[] certificate_path;
     
+    String[] extension_types;
+    
     public X509Certificate[] getCertificatePath ()
       {
         return certificate_path;
       }
+
+    public String[] getExtensionTypes ()
+      {
+        return extension_types;
+      }
     
-    public KeyAttributes (X509Certificate[] certificate_path)
+    public KeyAttributes (X509Certificate[] certificate_path,
+                          String[] extension_types)
       {
         this.certificate_path = certificate_path;
+        this.extension_types = extension_types;
       }
-
   }

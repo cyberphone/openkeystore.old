@@ -169,7 +169,6 @@ public class ServerCredentialStore implements Serializable
           {
             return baos.toByteArray ();
           }
-       
       }
   
     public abstract class ExtensionInterface implements Serializable
@@ -198,7 +197,6 @@ public class ServerCredentialStore implements Serializable
           {
             wr.setBinaryAttribute (MAC_ATTR, mac_data);
             wr.setStringAttribute (TYPE_ATTR, type);
-           
           }
         
         ExtensionInterface (String type)
@@ -311,6 +309,21 @@ public class ServerCredentialStore implements Serializable
         boolean writable;
         
         private Property () {}
+        
+        public String getName ()
+          {
+            return name;
+          }
+        
+        public String getValue ()
+          {
+            return value;
+          }
+        
+        public boolean isWritable ()
+          {
+            return writable;
+          }
       }
 
     public class PropertyBag extends ExtensionInterface implements Serializable
@@ -353,6 +366,11 @@ public class ServerCredentialStore implements Serializable
                }
             return convert.getResult ();
           }
+        
+        public Property[] getProperties ()
+          {
+            return properties.values ().toArray (new Property[0]);
+          }
 
         void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
           {
@@ -375,7 +393,6 @@ public class ServerCredentialStore implements Serializable
               }
             wr.getParent ();
           }
-
       }
 
 
@@ -573,7 +590,6 @@ public class ServerCredentialStore implements Serializable
             this.pattern_restrictions.add (pattern);
             return this;
           }
-
       }
 
     public static abstract class KeyAlgorithmData implements Serializable
@@ -607,7 +623,6 @@ public class ServerCredentialStore implements Serializable
                 mac_gen.addByte (CryptoConstants.ECC_KEY);
                 mac_gen.addString (named_curve.getURI ());
               }
-
           }
 
         public static final class RSA extends KeyAlgorithmData implements Serializable
@@ -669,8 +684,6 @@ public class ServerCredentialStore implements Serializable
                  
               }
           }
-
-
       }
 
     public class KeyProperties implements Serializable
@@ -688,8 +701,20 @@ public class ServerCredentialStore implements Serializable
                 bad ("Duplicate extension:" + ei.type);
               }
           }
-       
 
+        public PropertyBag[] getPropertyBags ()
+          {
+            Vector<PropertyBag> prop_bags = new Vector<PropertyBag> ();
+            for (ExtensionInterface ei : extensions.values ())
+              {
+                if (ei instanceof PropertyBag)
+                  {
+                    prop_bags.add ((PropertyBag) ei);
+                  }
+              }
+            return prop_bags.toArray (new PropertyBag[0]);
+          }
+        
         public PropertyBag addPropertyBag (String type) throws IOException
           {
             PropertyBag pb = new PropertyBag (type);
@@ -1064,7 +1089,6 @@ public class ServerCredentialStore implements Serializable
         post_operations.add (new_post_op);
         return new_post_op;
       }
-
     
     void checkSession (String client_session_id, String server_session_id) throws IOException
       {
@@ -1119,6 +1143,15 @@ public class ServerCredentialStore implements Serializable
       }
     
     
+    public void addPostProvisioningDeleteKey (String old_client_session_id,
+                                              String old_server_session_id,
+                                              X509Certificate old_key,
+                                              ServerSessionKeyInterface old_session_key_interface) throws IOException, GeneralSecurityException
+      {
+        addPostOperation (old_client_session_id, old_server_session_id, old_key, PostOperation.DELETE_KEY, old_session_key_interface);
+      }
+
+  
     public String getClientSessionID ()
       {
         return client_session_id;

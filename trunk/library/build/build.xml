@@ -116,16 +116,23 @@
 	
   <target name="_test">
     <mkdir dir="${test_dir}"/>
-  	<condition property="test.dir.path" value="">
+  	<condition property="test.dir" value="">
       <not>
         <isset property="test.out.file"/>
       </not>
   	</condition>
-	<property name="test.dir.path" location="${test_dir}"/>
+	<property name="test.dir" location="${test_dir}"/>
+  	<condition property="test.out.html" value="">
+      <not>
+        <isset property="html.mode"/>
+      </not>
+  	</condition>
+	<property name="test.out.html" value="true"/>
     <junit fork="yes" haltonfailure="yes">
       <test name="${test.class}"/>
     	<sysproperty key="sks.implementation" value="${test.sks.implementation}"/>
-    	<sysproperty key="test.dir" value="${test.dir.path}"/>
+    	<sysproperty key="test.dir" value="${test.dir}"/>
+    	<sysproperty key="html.mode" value="${test.out.html}"/>
       <formatter type="plain" usefile="false" />
       <classpath refid="junit.classpath" />
     </junit>

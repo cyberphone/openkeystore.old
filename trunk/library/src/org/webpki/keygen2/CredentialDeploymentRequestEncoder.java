@@ -199,6 +199,17 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
  
                 wr.getParent ();
               }
+            
+            ////////////////////////////////////////////////////////////////////////
+            // Optional: post provisioning delete operations
+            ////////////////////////////////////////////////////////////////////////
+            for (ServerCredentialStore.PostProvisioningTargetKey pptk : server_credential_store.post_operations)
+              {
+                if (pptk.post_operation == ServerCredentialStore.PostOperation.DELETE_KEY)
+                  {
+                    writePostOp (wr, pptk, new ServerCredentialStore.MacGenerator ());
+                  }
+              }
 
             ////////////////////////////////////////////////////////////////////////
             // Done with the crypto, now set the "closeProvisioningSession" MAC

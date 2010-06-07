@@ -401,6 +401,8 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
       }
 
     private Vector<CertifiedPublicKey> certified_keys = new Vector<CertifiedPublicKey> ();
+    
+    private Vector<PostOperation> pp_delete_keys = new Vector<PostOperation> ();
       
     private String client_session_id;
 
@@ -451,6 +453,12 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
       {
         return certified_keys.toArray (new CertifiedPublicKey[0]);
       }
+    
+    
+    public PostOperation[] getPostProvisioningDeleteKeys ()
+      {
+        return pp_delete_keys.toArray (new PostOperation[0]);
+      }
 
 
     public byte[] getCloseSessionMAC ()
@@ -497,6 +505,14 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
             certified_keys.add (new CertifiedPublicKey (rd));
           }
         while (rd.hasNext (CERTIFIED_PUBLIC_KEY_ELEM));
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Get optional post provisioning deletes
+        /////////////////////////////////////////////////////////////////////////////////////////
+        while (rd.hasNext (DELETE_KEY_ELEM))
+          {
+            pp_delete_keys.add (readPostOperation (rd, PostOperation.DELETE_KEY, DELETE_KEY_ELEM));
+          }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get optional server cookie
