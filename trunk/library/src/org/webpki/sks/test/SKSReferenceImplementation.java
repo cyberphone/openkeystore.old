@@ -76,6 +76,9 @@ import org.webpki.sks.SecureKeyStore;
  *  In addition to the reference implementation there is a set of SKS JUnit tests
  *  that should work identical on a "real" SKS token.
  *  
+ *  Compared to the SKS specification, the reference implementation uses a slightly
+ *  more java-centric way of passing parameters, but the content is identical.
+ *  
  *  Author: Anders Rundgren
  */
 public class SKSReferenceImplementation implements SecureKeyStore, Serializable
@@ -882,6 +885,22 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
       }
 
+    void checkEndorsedAlgorithms (KeyEntry key_entry, String input_algorithm) throws SKSException
+      {
+        boolean not_found = true;
+        for (String endorsed_algorithm : key_entry.endorsed_algorithms.keySet ())
+          {
+            if (endorsed_algorithm.equals (input_algorithm))
+              {
+                not_found = false;
+              }
+          }
+        if (not_found)
+          {
+            bad ("\"EndorsedAlgorithms\" for key[" + key_entry.key_handle + "] does not include: " + input_algorithm);
+          }
+      }
+
     byte[] addArrays (byte[] a, byte[] b)
       {
         byte[] r = new byte[a.length + b.length];
@@ -966,8 +985,16 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     @Override
     public void deleteKey (int key_handle, byte[] authorization) throws SKSException
       {
-        // TODO authorization
+         ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = getStdKey (key_handle);
+
+        // TODO authorization
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Delete key and optionally the entire provisioning object (if empty)
+        ///////////////////////////////////////////////////////////////////////////////////
         localDeleteKey (key_entry);
         deleteEmptySession (key_entry.owner);
       }
@@ -979,14 +1006,28 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public void setProperty (int key_handle, String extension_type, String name, String value) throws SKSException
+    public void setProperty (int key_handle, 
+                             String extension_type,
+                             String name,
+                             String value) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Lookup the extension(s) bound to the key
+        ///////////////////////////////////////////////////////////////////////////////////
         ExtObject ext_obj = key_entry.extensions.get (extension_type);
         if (ext_obj == null || ext_obj.base_type != BASE_TYPE_PROPERTY_BAG)
           {
             bad ("No such property bag: " + extension_type);
           }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Found, now look for the property name and update the associated value
+        ///////////////////////////////////////////////////////////////////////////////////
         int i = 0;
         byte[] utf8_name;
         byte[] utf8_value;
@@ -1031,13 +1072,152 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     @Override
     public Extension getExtension (int key_handle, String extension_type) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Lookup the extension(s) bound to the key
+        ///////////////////////////////////////////////////////////////////////////////////
         ExtObject ext_obj = key_entry.extensions.get (extension_type);
         if (ext_obj == null)
           {
             bad ("No such extension: " + extension_type);
           }
         return new Extension (ext_obj.qualifier, ext_obj.extension_data, ext_obj.base_type);
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                          symmetricKeyEncrypt                               //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public byte[] symmetricKeyEncrypt (int key_handle, 
+                                       boolean encrypt_mode,
+                                       String encryption_algorithm,
+                                       byte[] authorization,
+                                       byte[] data) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that we are dealing with a symmetric key
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
+          {
+            bad ("Not a symmetric key: " + key_handle);
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (authorization);
+        
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the encryption algorithm is known and applicable
+        ///////////////////////////////////////////////////////////////////////////////////
+        Algorithm alg = getAlgorithm (encryption_algorithm);
+        if ((alg.mask & ALG_SYM_ENC) == 0)
+          {
+            bad ("Not a symmetric key encryption algorithm: " + encryption_algorithm);
+          }
+        checkEndorsedAlgorithms (key_entry, encryption_algorithm);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Finally, perform operation
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            Cipher crypt = Cipher.getInstance (alg.jce_name);
+            SecretKeySpec sk = new SecretKeySpec (key_entry.symmetric_key, "AES");
+            boolean iv_required = (alg.mask & ALG_IV_REQ) != 0;
+            if (encrypt_mode)
+              {
+                if (iv_required)
+                  {
+                    byte[] iv = new byte[16];
+                    new SecureRandom ().nextBytes (iv);
+                    crypt.init (Cipher.ENCRYPT_MODE, sk, new IvParameterSpec (iv));
+                    return addArrays (iv, crypt.doFinal (data));
+                  }
+                crypt.init (Cipher.ENCRYPT_MODE, sk);
+              }
+            else
+              {
+                if (iv_required)
+                  {
+                    crypt.init (Cipher.DECRYPT_MODE, sk, new IvParameterSpec (data, 0, 16));
+                    return crypt.doFinal (data, 16, data.length - 16);
+                  }
+                crypt.init (Cipher.DECRYPT_MODE, sk);
+              }
+            return crypt.doFinal (data);
+          }
+        catch (Exception e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                               performHMAC                                  //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public byte[] performHMAC (int key_handle, 
+                               String hmac_algorithm,
+                               byte[] authorization,
+                               byte[] data) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that we are dealing with a symmetric key
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
+          {
+            bad ("Not a symmetric key: " + key_handle);
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (authorization);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the HMAC algorithm is known and applicable
+        ///////////////////////////////////////////////////////////////////////////////////
+        Algorithm alg = getAlgorithm (hmac_algorithm);
+        if ((alg.mask & ALG_HMAC) == 0)
+          {
+            bad ("Not a HMAC algorithm: " + hmac_algorithm);
+          }
+        checkEndorsedAlgorithms (key_entry, hmac_algorithm);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Finally, perform operation
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            Mac mac = Mac.getInstance (alg.jce_name);
+            mac.init (new SecretKeySpec (key_entry.symmetric_key, "RAW"));
+            return mac.doFinal (data);
+          }
+        catch (Exception e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
       }
 
 
@@ -1052,8 +1232,29 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                                   byte[] authorization,
                                   byte[] hashed_data) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the key may be used for signatures
+        ///////////////////////////////////////////////////////////////////////////////////
+        if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE | 
+                                    KEY_USAGE_AUTHENTICATION |
+                                    KEY_USAGE_UNIVERSAL)) == 0)
+          {
+            bad ("\"KeyUsage\" for key[" + key_handle + "] does not permit \"signHashedData\"");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
         key_entry.verifyPIN (authorization);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the signature algorithm is known and applicable
+        ///////////////////////////////////////////////////////////////////////////////////
         Algorithm alg = getAlgorithm (signature_algorithm);
         if ((alg.mask & ALG_ASYM_SGN) == 0)
           {
@@ -1064,16 +1265,18 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             bad ("Wrong length of \"HashedData\": " + hashed_data.length);
           }
-        if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE | 
-                                    KEY_USAGE_AUTHENTICATION |
-                                    KEY_USAGE_UNIVERSAL)) == 0)
-          {
-            bad ("\"KeyUsage\" for key[" + key_handle + "] does not permit \"signHashedData\"");
-          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the key basic type matches the algorithm
+        ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.public_key instanceof RSAPublicKey ^ ((alg.mask & ALG_RSA_KEY) != 0))
           {
             bad ("\"SignatureAlgorithm\" for key[" + key_handle + "] does not match key type");
           }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Finally, perform operation
+        ///////////////////////////////////////////////////////////////////////////////////
         try
           {
             if (key_entry.public_key instanceof RSAPublicKey && hash_len > 0)
@@ -1267,7 +1470,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             if (!provisioning.names.get(id))
               {
-                provisioning.abort ("Unreferenced object \"ID\": " + id);
+                provisioning.abort ("Unreferenced object \"ID\" : " + id);
               }
           }
         for (KeyEntry key_entry : keys.values ())
@@ -1277,6 +1480,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 if (key_entry.certificate_path == null)
                   {
                     provisioning.abort ("Missing \"setCertificatePath\" for key: " + key_entry.id);
+                  }
+                if (key_entry.key_usage == KEY_USAGE_SYMMETRIC_KEY && key_entry.symmetric_key == null)
+                  {
+                    provisioning.abort ("Missing \"setSymmetricKey\" for key: " + key_entry.id);
                   }
                 // TODO private key import..
               }
@@ -1638,21 +1845,21 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Decrypt and store symmetric key
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.symmetric_key = key_entry.owner.decrypt (encrypted_symmetric_key);
-        for (String algorithm : endorsed_algorithms)
+        for (String endorsed_algorithm : endorsed_algorithms)
           {
-            sym_mac.addString (algorithm);
-            if (key_entry.endorsed_algorithms.put (algorithm, true) != null)
+            sym_mac.addString (endorsed_algorithm);
+            if (key_entry.endorsed_algorithms.put (endorsed_algorithm, true) != null)
               {
-                key_entry.owner.abort ("Duplicate algorithm: " + algorithm);
+                key_entry.owner.abort ("Duplicate algorithm: " + endorsed_algorithm);
               }
-            Algorithm alg = algorithms.get (algorithm);
+            Algorithm alg = algorithms.get (endorsed_algorithm);
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Check that the algorithms are known and applicable to symmetric keys
             ///////////////////////////////////////////////////////////////////////////////////
             if (alg == null || (alg.mask & (ALG_SYM_ENC | ALG_HMAC)) == 0)
               {
-                key_entry.owner.abort ((alg == null ? "Unsupported" : "Incorrect") + " algorithm: " + algorithm);
+                key_entry.owner.abort ((alg == null ? "Unsupported" : "Incorrect") + " algorithm: " + endorsed_algorithm);
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1668,7 +1875,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 if ((l & alg.mask) == 0)
                   {
                     key_entry.owner.abort ("Wrong key size (" + key_entry.symmetric_key.length +
-                                           ") for algorithm: " + algorithm);
+                                           ") for algorithm: " + endorsed_algorithm);
                   }
               }
           }

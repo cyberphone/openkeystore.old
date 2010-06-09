@@ -67,6 +67,7 @@ import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 
 import org.webpki.crypto.test.DemoKeyStore;
@@ -111,9 +112,7 @@ import org.webpki.xml.XMLObjectWrapper;
 
 public class KeyGen2Test
   {
-    static final byte[] KEY_BACKUP_TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','t','?'};
-
-    static final byte[] TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','o','t','?'};
+    static final byte[] TEST_STRING = {'S','u','c','c','e','s','s',' ','o','r',' ','n','o','t','?'};
 
     boolean pin_protection;
     
@@ -145,12 +144,22 @@ public class KeyGen2Test
     
     boolean preset_pin;
     
+    boolean encryption_key;
+    
+    boolean encrypted_extension;
+    
     static FileOutputStream fos;
     
     static SecureKeyStore sks;
     
     static boolean html_mode;
+
+    static final byte[] OTP_SEED = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
     
+    static final byte[] AES32BITKEY = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
+    
+    static final byte[] USER_DEFINED_PIN = {'0','1','5','3','5','4'};
+
     int round;    
    
     @BeforeClass
@@ -163,7 +172,7 @@ public class KeyGen2Test
             fos = new FileOutputStream (dir + "/" + KeyGen2Test.class.getCanonicalName () + (html_mode ? ".html" : ".txt"));
             if (html_mode)
               {
-                fos.write (HTMLHeader.createHTMLHeader (false, true,"KeyGen2 JUinit test output", null).append ("<body>").toString ().getBytes ("UTF-8"));
+                fos.write (HTMLHeader.createHTMLHeader (false, true,"KeyGen2 JUinit test output", null).append ("<body><h3>KeyGen2 JUnit Test</h3><p>").toString ().getBytes ("UTF-8"));
               }
           }
         Security.addProvider(new BouncyCastleProvider());
@@ -214,18 +223,18 @@ public class KeyGen2Test
         
         private void postProvisioning (CredentialDeploymentRequestDecoder.PostOperation post_operation, int handle) throws IOException, GeneralSecurityException
           {
-            EnumeratedProvisioningSession old = new EnumeratedProvisioningSession ();
+            EnumeratedProvisioningSession old_provisioning_session = new EnumeratedProvisioningSession ();
             while (true)
               {
-                old = sks.enumerateProvisioningSessions (old, false);
-                if (!old.isValid ())
+                old_provisioning_session = sks.enumerateProvisioningSessions (old_provisioning_session, false);
+                if (!old_provisioning_session.isValid ())
                   {
                     abort ("Old provisioning session not found:" + 
                         post_operation.getClientSessionID () + "/" +
                         post_operation.getServerSessionID ());
                   }
-                if (old.getClientSessionID ().equals(post_operation.getClientSessionID ()) &&
-                    old.getServerSessionID ().equals (post_operation.getServerSessionID ()))
+                if (old_provisioning_session.getClientSessionID ().equals(post_operation.getClientSessionID ()) &&
+                    old_provisioning_session.getServerSessionID ().equals (post_operation.getServerSessionID ()))
                   {
                     break;
                   }
@@ -238,7 +247,7 @@ public class KeyGen2Test
                   {
                     abort ("Old key not found");
                   }
-                if (ek.getProvisioningHandle () == old.getProvisioningHandle ())
+                if (ek.getProvisioningHandle () == old_provisioning_session.getProvisioningHandle ())
                   {
                     KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                     if (ArrayUtil.compare (HashAlgorithms.SHA256.digest (ka.getCertificatePath ()[0].getEncoded ()), post_operation.getCertificateFingerprint ()))
@@ -252,7 +261,7 @@ public class KeyGen2Test
                             case CredentialDeploymentRequestDecoder.PostOperation.UPDATE_KEY:
                               sks.pp_updateKey (handle, ek.getKeyHandle (), post_operation.getMAC ());
                               break;
-                              
+
                             default:
                               sks.pp_deleteKey (handle, ek.getKeyHandle (), post_operation.getMAC ());
                           }
@@ -263,7 +272,7 @@ public class KeyGen2Test
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Get prov sess request and respond with epheral keys and and attest
+        // Get provisioning session request and respond with ephemeral keys and and attest
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] provSessResponse (byte[] xmldata) throws IOException
           {
@@ -305,7 +314,7 @@ public class KeyGen2Test
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Get key init request and respond with freshly generated public keys
+        // Get key initialization request and respond with freshly generated public keys
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] KeyInitResponse (byte[] xmldata) throws IOException
           {
@@ -326,7 +335,7 @@ public class KeyGen2Test
                   {
                     if (key.getPINPolicy ().getUserDefinedFlag ())
                       {
-                        pin_value = "015354".getBytes ("UTF-8");
+                        pin_value = USER_DEFINED_PIN;
                       }
                     if (key.isStartOfPINPolicy ())
                       {
@@ -341,7 +350,6 @@ public class KeyGen2Test
                                                                      puk_policy.getMAC());
                           }
                         KeyInitializationRequestDecoder.PINPolicy pin_policy = key.getPINPolicy ();
-    
                         pin_policy_handle = sks.createPINPolicy (provisioning_handle,
                                                                  pin_policy.getID (),
                                                                  puk_policy_handle,
@@ -417,6 +425,10 @@ public class KeyGen2Test
               {
                 int key_handle = sks.getKeyHandle (eps.getProvisioningHandle (), key.getID ());
                 sks.setCertificatePath (key_handle, key.getCertificatePath (), key.getMAC ());
+
+                //////////////////////////////////////////////////////////////////////////
+                // There may be a symmetric key
+                //////////////////////////////////////////////////////////////////////////
                 if (key.getEncryptedSymmetricKey () != null)
                   {
                     sks.setSymmetricKey (key_handle, 
@@ -424,6 +436,10 @@ public class KeyGen2Test
                                          key.getSymmetricKeyEndorsedAlgorithms (),
                                          key.getSymmetricKeyMac ());
                   }
+
+                //////////////////////////////////////////////////////////////////////////
+                // There may be extensions
+                //////////////////////////////////////////////////////////////////////////
                 for (CredentialDeploymentRequestDecoder.Extension extension : key.getExtensions ())
                   {
                     sks.addExtension (key_handle,
@@ -433,16 +449,28 @@ public class KeyGen2Test
                                       extension.getExtensionData (),
                                       extension.getMAC ());
                   }
+
+                //////////////////////////////////////////////////////////////////////////
+                // There may be an pp_updateKey or pp_cloneKeyProtection
+                //////////////////////////////////////////////////////////////////////////
                 CredentialDeploymentRequestDecoder.PostOperation post_operation = key.getPostOperation ();
                 if (post_operation != null)
                   {
                     postProvisioning (post_operation, key_handle);
                   }
               }
+
+            //////////////////////////////////////////////////////////////////////////
+            // There may be any number of pp_deleteKey
+            //////////////////////////////////////////////////////////////////////////
             for (CredentialDeploymentRequestDecoder.PostOperation pp_del : cred_dep_request.getPostProvisioningDeleteKeys ())
               {
                 postProvisioning (pp_del, eps.getProvisioningHandle ());
               }
+
+            //////////////////////////////////////////////////////////////////////////
+            // Create final and attested message
+            //////////////////////////////////////////////////////////////////////////
             CredentialDeploymentResponseEncoder cre_dep_response = 
                       new CredentialDeploymentResponseEncoder (cred_dep_request,
                                                                sks.closeProvisioningSession (eps.getProvisioningHandle (),
@@ -464,10 +492,6 @@ public class KeyGen2Test
         ServerCredentialStore.PINPolicy pin_policy;
 
         ServerCredentialStore.PUKPolicy puk_policy;
-        
-        ServerCredentialStore.KeyAlgorithmData key_alg1 =  new ServerCredentialStore.KeyAlgorithmData.RSA (2048);
-
-        ServerCredentialStore.KeyAlgorithmData key_alg2 =  new ServerCredentialStore.KeyAlgorithmData.EC (ECDomains.P_256);
         
         byte[] predef_server_pin = {'3','1','2','5','8','9'};
 
@@ -581,11 +605,11 @@ public class KeyGen2Test
             PrivateKey private_key = KeyFactory.getInstance (rsa ? "RSA" : "EC").generatePrivate (key_spec);
             Signature sign = Signature.getInstance ((rsa ? SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256).getJCEName ());
             sign.initSign (private_key);
-            sign.update (KEY_BACKUP_TEST_STRING);
+            sign.update (TEST_STRING);
             byte[] key_archival_verify = sign.sign ();
             Signature verify = Signature.getInstance ((rsa ? SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256).getJCEName ());
             verify.initVerify (key_prop.getPublicKey ());
-            verify.update (KEY_BACKUP_TEST_STRING);
+            verify.update (TEST_STRING);
             if (!verify.verify (key_archival_verify))
               {
                 throw new GeneralSecurityException ("Archived private key validation failed");
@@ -662,40 +686,43 @@ public class KeyGen2Test
                     pin_policy.setGrouping (PINGrouping.SHARED);
                   }
               }
+            ServerCredentialStore.KeyAlgorithmData key_alg =  ecc_key ?
+                 new ServerCredentialStore.KeyAlgorithmData.EC (ECDomains.P_256) : new ServerCredentialStore.KeyAlgorithmData.RSA (2048);
+
             ServerCredentialStore.KeyProperties kp = device_pin ?
-                server_credential_store.createDevicePINProtectedKey (KeyUsage.AUTHENTICATION, key_alg1) :
+                server_credential_store.createDevicePINProtectedKey (KeyUsage.AUTHENTICATION, key_alg) :
                   preset_pin ? server_credential_store.createKeyWithPresetPIN (symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION,
-                                                                               key_alg1, pin_policy,
+                                                                               key_alg, pin_policy,
                                                                                server_sess_key.encrypt (predef_server_pin))
                              :
                 server_credential_store.createKey (symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION,
-                                                   key_alg1,
+                                                   key_alg,
                                                    pin_policy);
-            if (symmetric_key)
+            if (symmetric_key || encryption_key)
               {
-                kp.setSymmetricKey (server_sess_key.encrypt (new byte[]{0,2,3,4,5,6,7,8,9,11,12,13,14,15}),
-                                                             new String[]{MacAlgorithms.HMAC_SHA1.getURI ()});
+                kp.setSymmetricKey (server_sess_key.encrypt (encryption_key ? AES32BITKEY : OTP_SEED),
+                                                             new String[]{encryption_key ?
+                                            SymEncryptionAlgorithms.AES256_CBC.getURI () : MacAlgorithms.HMAC_SHA1.getURI ()});
               }
             if (property_bag)
               {
                 kp.addPropertyBag ("http://host/prop")
                   .addProperty ("main", "234", false)
                   .addProperty ("a", "fun", true);
+              }
+            if (encrypted_extension)
+              {
                 kp.addEncryptedExtension ("http://host/ee", server_sess_key.encrypt (new byte[]{0,5}));
               }
-            if (ecc_key)
+            if (private_key_backup)
               {
-                kp = server_credential_store.createKey (KeyUsage.ENCRYPTION, key_alg2, pin_policy);
-                if (private_key_backup)
-                  {
-                    kp.setPrivateKeyBackup (true);
-                  }
-                if (server_seed)
-                  {
-                    byte[] seed = new byte[32];
-                    new SecureRandom ().nextBytes (seed);
-                    kp.setServerSeed (seed);
-                  }
+                kp.setPrivateKeyBackup (true);
+              }
+            if (server_seed)
+              {
+                byte[] seed = new byte[32];
+                new SecureRandom ().nextBytes (seed);
+                kp.setServerSeed (seed);
               }
             if (clone_key_protection != null)
               {
@@ -891,7 +918,11 @@ public class KeyGen2Test
         
         void perform () throws Exception
           {
-            writeString ("Begin Test (" + _name.getMethodName() + ":" + (++round) + ")\n");
+            if (html_mode)
+              {
+                writeString ("<b>");
+              }
+            writeString ("Begin Test (" + _name.getMethodName() + ":" + (++round) + (html_mode ? ")</b><br>" : ")\n"));
             writeOption ("PUK Protection", puk_protection);
             writeOption ("PIN Protection ", pin_protection);
             writeOption ("Device PIN", device_pin);
@@ -900,6 +931,9 @@ public class KeyGen2Test
             writeOption ("ECC Key", ecc_key);
             writeOption ("Server Seed", server_seed);
             writeOption ("PropertyBag", property_bag);
+            writeOption ("Symmetric Key", symmetric_key);
+            writeOption ("Encryption Key", encryption_key);
+            writeOption ("Encrypted Extension", encrypted_extension);
             writeOption ("Private Key Backup", private_key_backup);
             writeOption ("CloneKeyProtection", clone_key_protection != null);
             writeOption ("UpdateKey", update_key != null);
@@ -914,7 +948,7 @@ public class KeyGen2Test
             xml = fileLogger (server.creDepRequest (xml));
             xml = fileLogger (client.creDepResponse (xml));
             server.creDepResponse (xml);
-            writeString ("\n\n");
+            writeString ("\n");
             EnumeratedKey ek = new EnumeratedKey ();
             while ((ek = sks.enumerateKeys (ek)).isValid ())
               {
@@ -967,6 +1001,7 @@ public class KeyGen2Test
         pin_protection = true;
         ecc_key = true;
         property_bag = true;
+        encrypted_extension = true;
         server_seed = true;
         doer.perform ();
       }
@@ -1023,6 +1058,8 @@ public class KeyGen2Test
                     assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
                     assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
                   }
+                assertTrue ("HMAC error", ArrayUtil.compare (sks.performHMAC (ek.getKeyHandle (), MacAlgorithms.HMAC_SHA1.getURI (), USER_DEFINED_PIN, TEST_STRING),
+                                                             MacAlgorithms.HMAC_SHA1.digest (OTP_SEED, TEST_STRING)));
               }
           }
         assertTrue ("Missing keys", j == 1);
@@ -1032,11 +1069,34 @@ public class KeyGen2Test
       {
         Doer doer = new Doer ();
         updatable = true;
+        pin_protection = true;
+        encryption_key = true;
+        symmetric_key = true;
+        doer.perform ();
+        EnumeratedKey ek = new EnumeratedKey ();
+        int j = 0;
+        while ((ek = sks.enumerateKeys (ek)).isValid ())
+          {
+            if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
+              {
+                j++;
+                byte[] enc = sks.symmetricKeyEncrypt (ek.getKeyHandle (), true, SymEncryptionAlgorithms.AES256_CBC.getURI (), USER_DEFINED_PIN, TEST_STRING);
+                assertTrue ("Encrypt/decrypt error", ArrayUtil.compare (sks.symmetricKeyEncrypt (ek.getKeyHandle (), false, SymEncryptionAlgorithms.AES256_CBC.getURI (), USER_DEFINED_PIN, enc),
+                                                                        TEST_STRING));
+              }
+          }
+        assertTrue ("Missing keys", j == 1);
+      }
+    @Test
+    public void test9 () throws Exception
+      {
+        Doer doer = new Doer ();
+        updatable = true;
         device_pin = true;
         doer.perform ();
       }
     @Test
-    public void test9 () throws Exception
+    public void test10 () throws Exception
       {
         Doer doer = new Doer ();
         updatable = true;
@@ -1045,7 +1105,7 @@ public class KeyGen2Test
         doer.perform ();
       }
     @Test
-    public void test10 () throws Exception
+    public void test11 () throws Exception
       {
         Doer doer1 = new Doer ();
         updatable = true;
@@ -1080,7 +1140,7 @@ public class KeyGen2Test
         assertTrue ("Missing keys", j == 2);
       }
     @Test
-    public void test11 () throws Exception
+    public void test12 () throws Exception
       {
         Doer doer1 = new Doer ();
         updatable = true;
@@ -1115,7 +1175,7 @@ public class KeyGen2Test
         assertTrue ("Missing keys", j == 1);
       }
     @Test
-    public void test12 () throws Exception
+    public void test13 () throws Exception
       {
         Doer doer1 = new Doer ();
         updatable = true;

@@ -131,6 +131,17 @@ public interface SecureKeyStore
                                   byte[] authorization,
                                   byte[] hashed_data) throws SKSException;
     
+    public byte[] performHMAC (int key_handle,
+                               String hmac_algorithm,
+                               byte[] authorization,
+                               byte[] data) throws SKSException;
+    
+    public byte[] symmetricKeyEncrypt (int key_handle,
+                                       boolean encrypt_mode,
+                                       String encryption_algorithm,
+                                       byte[] authorization,
+                                       byte[] data) throws SKSException;
+
     void deleteKey (int key_handle,
                     byte[] authorization) throws SKSException;
     
