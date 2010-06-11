@@ -25,6 +25,8 @@ import java.security.Signature;
 import java.util.EnumSet;
 import java.util.Set;
 
+import javax.crypto.Cipher;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -37,6 +39,7 @@ import static org.junit.Assert.*;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 
@@ -48,6 +51,7 @@ import org.webpki.keygen2.PatternRestriction;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
+import org.webpki.util.ArrayUtil;
 
 public class SKSTest
   {
@@ -1139,5 +1143,89 @@ public class SKSTest
         sks.deleteKey (key1.key_handle, new byte[0]);
         sess2.closeSession ();
         assertTrue ("Session count", q == sessionCount ());
+      }
+    @Test
+    public void test29 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
+
+        GenKey key = sess.createRSAKey ("Key.1",
+                                        1024,
+                                        ok_pin /* pin_value */,
+                                        pin_policy /* pin_policy */,
+                                        KeyUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName());
+        GenKey key2 = sess.createRSAKey ("Key.2",
+                                         1024,
+                                         ok_pin /* pin_value */,
+                                         pin_policy /* pin_policy */,
+                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+        sess.closeSession ();
+        
+        Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName (), "BC");
+        cipher.init (Cipher.ENCRYPT_MODE, key.cert_path[0]);
+        byte[] enc = cipher.doFinal (TEST_STRING);
+        assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
+                                                                                            new byte[0],
+                                                                                            AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                                                            ok_pin.getBytes ("UTF-8"), 
+                                                                                            enc), TEST_STRING));
+        try
+          {
+            device.sks.asymmetricKeyDecrypt (key.key_handle, 
+                                             new byte[0], SignatureAlgorithms.RSA_SHA256.getURI (), 
+                                             ok_pin.getBytes ("UTF-8"), 
+                                             enc);
+            fail ("Alg error");
+          }
+        catch (SKSException e)
+          {
+            
+          }
+        try
+          {
+            device.sks.asymmetricKeyDecrypt (key.key_handle, 
+                                             new byte[]{6},
+                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                             ok_pin.getBytes ("UTF-8"), 
+                                             enc);
+            fail ("Parm error");
+          }
+        catch (SKSException e)
+          {
+            
+          }
+        try
+          {
+            device.sks.asymmetricKeyDecrypt (key.key_handle, 
+                                             new byte[0],
+                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                             (ok_pin + "4").getBytes ("UTF-8"), 
+                                             enc);
+            fail ("PIN error");
+          }
+        catch (SKSException e)
+          {
+            
+          }
+        try
+          {
+            device.sks.asymmetricKeyDecrypt (key2.key_handle, 
+                                             new byte[0],
+                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                             ok_pin.getBytes ("UTF-8"), 
+                                             enc);
+            fail ("Key usage error");
+          }
+        catch (SKSException e)
+          {
+            
+          }
       }
   }

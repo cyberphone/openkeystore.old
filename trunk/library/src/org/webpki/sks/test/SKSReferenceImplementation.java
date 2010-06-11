@@ -885,8 +885,17 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
       }
 
-    void checkEndorsedAlgorithms (KeyEntry key_entry, String input_algorithm) throws SKSException
+    Algorithm checkKeyAndAlgorithm (KeyEntry key_entry, String input_algorithm, int expected_type) throws SKSException
       {
+        if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
+          {
+            bad ("Not a symmetric key: " + key_entry.key_handle);
+          }
+        Algorithm alg = getAlgorithm (input_algorithm);
+        if ((alg.mask & expected_type) == 0)
+          {
+            bad ("Algorithm does not match operation: " + input_algorithm);
+          }
         boolean not_found = true;
         for (String endorsed_algorithm : key_entry.endorsed_algorithms.keySet ())
           {
@@ -899,6 +908,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             bad ("\"EndorsedAlgorithms\" for key[" + key_entry.key_handle + "] does not include: " + input_algorithm);
           }
+        return alg;
       }
 
     byte[] addArrays (byte[] a, byte[] b)
@@ -1091,6 +1101,147 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
+    //                         asymmetricKeyDecrypt                               //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public byte[] asymmetricKeyDecrypt (int key_handle, 
+                                        byte[] parameters,
+                                        String encryption_algorithm, 
+                                        byte[] authorization, 
+                                        byte[] data) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the key may be used for signatures
+        ///////////////////////////////////////////////////////////////////////////////////
+        if ((key_entry.key_usage & (KEY_USAGE_ENCRYPTION | KEY_USAGE_UNIVERSAL)) == 0)
+          {
+            bad ("\"KeyUsage\" for key[" + key_handle + "] does not permit \"asymmetricKeyDecrypt\"");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the encryption algorithm is known and applicable
+        ///////////////////////////////////////////////////////////////////////////////////
+        Algorithm alg = getAlgorithm (encryption_algorithm);
+        if ((alg.mask & ALG_ASYM_ENC) == 0)
+          {
+            bad ("Not an asymmetric key encryption algorithm: " + encryption_algorithm);
+          }
+        if (parameters.length != 0)  // Only support basic RSA yet...
+          {
+            bad ("\"Parameters\" for key[" + key_handle + "] do not match algorithm");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the key basic type matches the algorithm
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (!(key_entry.public_key instanceof RSAPublicKey))
+          {
+            bad ("\"EncryptionAlgorithm\" for key[" + key_handle + "] does not match key type");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (authorization);
+        
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Finally, perform operation
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            Cipher cipher = Cipher.getInstance (alg.jce_name, "BC");
+            cipher.init (Cipher.DECRYPT_MODE, key_entry.private_key);
+            return cipher.doFinal (data);
+          }
+        catch (Exception e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                             signHashedData                                 //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public byte[] signHashedData (int key_handle,
+                                  String signature_algorithm,
+                                  byte[] authorization,
+                                  byte[] data) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the key may be used for signatures
+        ///////////////////////////////////////////////////////////////////////////////////
+        if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE | 
+                                    KEY_USAGE_AUTHENTICATION |
+                                    KEY_USAGE_UNIVERSAL)) == 0)
+          {
+            bad ("\"KeyUsage\" for key[" + key_handle + "] does not permit \"signHashedData\"");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (authorization);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the signature algorithm is known and applicable
+        ///////////////////////////////////////////////////////////////////////////////////
+        Algorithm alg = getAlgorithm (signature_algorithm);
+        if ((alg.mask & ALG_ASYM_SGN) == 0)
+          {
+            bad ("Not an asymmetric key signature algorithm: " + signature_algorithm);
+          }
+        int hash_len = (alg.mask / ALG_HASH_DIV) & 0xFF;
+        if (hash_len > 0 && hash_len != data.length)
+          {
+            bad ("Wrong length of \"Data\": " + data.length);
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the key basic type matches the algorithm
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (key_entry.public_key instanceof RSAPublicKey ^ ((alg.mask & ALG_RSA_KEY) != 0))
+          {
+            bad ("\"SignatureAlgorithm\" for key[" + key_handle + "] does not match key type");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Finally, perform operation
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            if (key_entry.public_key instanceof RSAPublicKey && hash_len > 0)
+              {
+                data = addArrays (hash_len == 20 ? DIGEST_INFO_SHA1 : DIGEST_INFO_SHA256, data);
+              }
+            Signature signature = Signature.getInstance (alg.jce_name, "BC");
+            signature.initSign (key_entry.private_key);
+            signature.update (data);
+            return signature.sign ();
+          }
+        catch (Exception e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
     //                          symmetricKeyEncrypt                               //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
@@ -1107,28 +1258,15 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         KeyEntry key_entry = getStdKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check that we are dealing with a symmetric key
+        // Check the key and then check that the algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
-          {
-            bad ("Not a symmetric key: " + key_handle);
-          }
+        Algorithm alg = checkKeyAndAlgorithm (key_entry, encryption_algorithm, ALG_SYM_ENC);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.verifyPIN (authorization);
         
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the encryption algorithm is known and applicable
-        ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = getAlgorithm (encryption_algorithm);
-        if ((alg.mask & ALG_SYM_ENC) == 0)
-          {
-            bad ("Not a symmetric key encryption algorithm: " + encryption_algorithm);
-          }
-        checkEndorsedAlgorithms (key_entry, encryption_algorithm);
-
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1183,27 +1321,14 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         KeyEntry key_entry = getStdKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check that we are dealing with a symmetric key
+        // Check the key and then check that the algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
-          {
-            bad ("Not a symmetric key: " + key_handle);
-          }
+        Algorithm alg = checkKeyAndAlgorithm (key_entry, hmac_algorithm, ALG_HMAC);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.verifyPIN (authorization);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the HMAC algorithm is known and applicable
-        ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = getAlgorithm (hmac_algorithm);
-        if ((alg.mask & ALG_HMAC) == 0)
-          {
-            bad ("Not a HMAC algorithm: " + hmac_algorithm);
-          }
-        checkEndorsedAlgorithms (key_entry, hmac_algorithm);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -1213,80 +1338,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             Mac mac = Mac.getInstance (alg.jce_name);
             mac.init (new SecretKeySpec (key_entry.symmetric_key, "RAW"));
             return mac.doFinal (data);
-          }
-        catch (Exception e)
-          {
-            throw new SKSException (e, SKSException.ERROR_CRYPTO);
-          }
-      }
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //                                                                            //
-    //                             signHashedData                                 //
-    //                                                                            //
-    ////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public byte[] signHashedData (int key_handle,
-                                  String signature_algorithm,
-                                  byte[] authorization,
-                                  byte[] hashed_data) throws SKSException
-      {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Get key (which must belong to an already fully provisioned session)
-        ///////////////////////////////////////////////////////////////////////////////////
-        KeyEntry key_entry = getStdKey (key_handle);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the key may be used for signatures
-        ///////////////////////////////////////////////////////////////////////////////////
-        if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE | 
-                                    KEY_USAGE_AUTHENTICATION |
-                                    KEY_USAGE_UNIVERSAL)) == 0)
-          {
-            bad ("\"KeyUsage\" for key[" + key_handle + "] does not permit \"signHashedData\"");
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify PIN (in any)
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.verifyPIN (authorization);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the signature algorithm is known and applicable
-        ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = getAlgorithm (signature_algorithm);
-        if ((alg.mask & ALG_ASYM_SGN) == 0)
-          {
-            bad ("Not an asymmetric key signature algorithm: " + signature_algorithm);
-          }
-        int hash_len = (alg.mask / ALG_HASH_DIV) & 0xFF;
-        if (hash_len > 0 && hash_len != hashed_data.length)
-          {
-            bad ("Wrong length of \"HashedData\": " + hashed_data.length);
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the key basic type matches the algorithm
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.public_key instanceof RSAPublicKey ^ ((alg.mask & ALG_RSA_KEY) != 0))
-          {
-            bad ("\"SignatureAlgorithm\" for key[" + key_handle + "] does not match key type");
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Finally, perform operation
-        ///////////////////////////////////////////////////////////////////////////////////
-        try
-          {
-            if (key_entry.public_key instanceof RSAPublicKey && hash_len > 0)
-              {
-                hashed_data = addArrays (hash_len == 20 ? DIGEST_INFO_SHA1 : DIGEST_INFO_SHA256, hashed_data);
-              }
-            Signature signature = Signature.getInstance (alg.jce_name, "BC");
-            signature.initSign (key_entry.private_key);
-            signature.update (hashed_data);
-            return signature.sign ();
           }
         catch (Exception e)
           {
