@@ -898,19 +898,15 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             bad ("Algorithm does not match operation: " + input_algorithm);
           }
-        boolean not_found = true;
         for (String endorsed_algorithm : key_entry.endorsed_algorithms.keySet ())
           {
             if (endorsed_algorithm.equals (input_algorithm))
               {
-                not_found = false;
+                return alg;
               }
           }
-        if (not_found)
-          {
-            bad ("\"EndorsedAlgorithms\" for key[" + key_entry.key_handle + "] does not include: " + input_algorithm);
-          }
-        return alg;
+        bad ("\"EndorsedAlgorithms\" for key[" + key_entry.key_handle + "] does not include: " + input_algorithm);
+        return null;  // for compiler...
       }
 
     byte[] addArrays (byte[] a, byte[] b)
