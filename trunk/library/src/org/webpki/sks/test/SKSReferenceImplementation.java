@@ -68,15 +68,15 @@ import org.webpki.sks.SecureKeyStore;
  *                          ###########################
  *
  *  SKS is a cryptographic module that supports E2ES (End-to-End Security) for
- *  provisioning and managing PKI, Symmetric keys, PINs, PUKs and Extension data.
+ *  Provisioning and Managing PKI, Symmetric keys, PINs, PUKs and Extension data.
  *  
- *  The following is an SKS reference implementation that is supposed to complement
+ *  The following is an SKS Reference Implementation that is supposed to complement
  *  the specification by showing how the different constructs can be implemented.
  *  
- *  In addition to the reference implementation there is a set of SKS JUnit tests
+ *  In addition to the Reference Implementation there is a set of SKS JUnit tests
  *  that should work identical on a "real" SKS token.
  *  
- *  Compared to the SKS specification, the reference implementation uses a slightly
+ *  Compared to the SKS specification, the Reference Implementation uses a slightly
  *  more java-centric way of passing parameters, but the content is identical.
  *  
  *  Author: Anders Rundgren
@@ -361,6 +361,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         short retry_limit;
         byte format;
         boolean user_defined;
+        boolean user_modifiable;
+        byte input_method;
         byte grouping;
         byte pattern_restrictions;
         byte min_length;
@@ -506,13 +508,13 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
             for (PostProvisioningObject post_op : post_provisioning_objects)
               {
-                if (post_op.the_new_key != null && key_entry != null && post_op.the_new_key == key_entry)
+                if (post_op.new_key != null && key_entry != null && post_op.new_key == key_entry)
                   {
                     abort ("New key used for multiple operations: " + key_entry.key_handle);
                   }
                 if (post_op.target_key_entry == key_entry_original)
                   {
-                    if (key_entry == null || post_op.the_new_key == null) // pp_deleteKey
+                    if (key_entry == null || post_op.new_key == null) // pp_deleteKey
                       {
                         abort ("Delete wasn't exclusive for key: " + key_handle_original);
                       }
@@ -605,13 +607,13 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         private static final long serialVersionUID = 1L;
 
         KeyEntry target_key_entry;
-        KeyEntry the_new_key;  // null for pp_deleteKey
+        KeyEntry new_key;      // null for pp_deleteKey
         boolean update;        // true for pp_updateKey
         
-        PostProvisioningObject (KeyEntry target_key_entry, KeyEntry the_new_key, boolean update)
+        PostProvisioningObject (KeyEntry target_key_entry, KeyEntry new_key, boolean update)
           {
             this.target_key_entry = target_key_entry;
-            this.the_new_key = the_new_key;
+            this.new_key = new_key;
             this.update = update;
           }
       }
@@ -972,7 +974,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         provisioning.verifyMac (post_prov_del_mac, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Put the operation in the update buffer used by "closeProvisioningSession"
+        // Put the operation in the pp-op buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.addPostProvisioningObject (target_key_entry, key_entry, update); 
       }
@@ -1374,7 +1376,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         provisioning.verifyMac (post_prov_del_mac, mac);
         
         ///////////////////////////////////////////////////////////////////////////////////
-        // Put the operation in the delete buffer used by "closeProvisioningSession"
+        // Put the operation in the pp-op buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.addPostProvisioningObject (target_key_entry, null, false); 
       }
@@ -1554,7 +1556,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         for (PostProvisioningObject post_op : provisioning.post_provisioning_objects)
           {
             KeyEntry key_entry = post_op.target_key_entry;
-            if (post_op.the_new_key == null)
+            if (post_op.new_key == null)
               {
                 localDeleteKey (key_entry);
               }
@@ -1565,22 +1567,22 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                     ///////////////////////////////////////////////////////////////////////////////////
                     // Store new key in the place of the old (keeping the handle intact after update)
                     ///////////////////////////////////////////////////////////////////////////////////
-                    keys.put (key_entry.key_handle, post_op.the_new_key);
+                    keys.put (key_entry.key_handle, post_op.new_key);
     
                     ///////////////////////////////////////////////////////////////////////////////////
                     // Remove space occupied by the new key and restore old key handle
                     ///////////////////////////////////////////////////////////////////////////////////
-                    keys.remove (post_op.the_new_key.key_handle);
-                    post_op.the_new_key.key_handle = key_entry.key_handle;
+                    keys.remove (post_op.new_key.key_handle);
+                    post_op.new_key.key_handle = key_entry.key_handle;
                   }   
      
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Inherit protection data from the old key but nothing else
                 ///////////////////////////////////////////////////////////////////////////////////
-                post_op.the_new_key.pin_policy = key_entry.pin_policy;
-                post_op.the_new_key.pin_value = key_entry.pin_value;
-                post_op.the_new_key.error_counter = key_entry.error_counter;
-                post_op.the_new_key.device_pin_protected = key_entry.device_pin_protected;
+                post_op.new_key.pin_policy = key_entry.pin_policy;
+                post_op.new_key.pin_value = key_entry.pin_value;
+                post_op.new_key.error_counter = key_entry.error_counter;
+                post_op.new_key.device_pin_protected = key_entry.device_pin_protected;
               }
           }
 
@@ -2391,13 +2393,15 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         PINPolicy pin_policy = new PINPolicy (provisioning, id);
         pin_policy.puk_policy = puk_policy;
-        pin_policy.format = format;
         pin_policy.user_defined = user_defined;
+        pin_policy.user_modifiable = user_modifiable;
+        pin_policy.format = format;
         pin_policy.retry_limit = retry_limit;
         pin_policy.grouping = grouping;
         pin_policy.pattern_restrictions = pattern_restrictions;
         pin_policy.min_length = min_length;
         pin_policy.max_length = max_length;
+        pin_policy.input_method = input_method;
         return pin_policy.pin_policy_handle;
       }
 
