@@ -1080,8 +1080,10 @@ public class KeyGen2Test
             if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
               {
                 j++;
-                byte[] enc = sks.symmetricKeyEncrypt (ek.getKeyHandle (), true, SymEncryptionAlgorithms.AES256_CBC.getURI (), USER_DEFINED_PIN, TEST_STRING);
-                assertTrue ("Encrypt/decrypt error", ArrayUtil.compare (sks.symmetricKeyEncrypt (ek.getKeyHandle (), false, SymEncryptionAlgorithms.AES256_CBC.getURI (), USER_DEFINED_PIN, enc),
+                byte[] iv = new byte[16];
+                new SecureRandom ().nextBytes (iv);
+                byte[] enc = sks.symmetricKeyEncrypt (ek.getKeyHandle (), true, iv, SymEncryptionAlgorithms.AES256_CBC.getURI (), USER_DEFINED_PIN, TEST_STRING);
+                assertTrue ("Encrypt/decrypt error", ArrayUtil.compare (sks.symmetricKeyEncrypt (ek.getKeyHandle (), false, iv, SymEncryptionAlgorithms.AES256_CBC.getURI (), USER_DEFINED_PIN, enc),
                                                                         TEST_STRING));
               }
           }

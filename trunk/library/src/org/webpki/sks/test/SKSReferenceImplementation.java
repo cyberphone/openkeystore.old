@@ -445,7 +445,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         byte[] encrypt (byte[] data) throws SKSException, GeneralSecurityException
           {
             byte[] key = getMacBuilder (new byte[0]).addVerbatim (KDF_ENCRYPTION_KEY).getResult ();
-            Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+            Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding", "BC");
             byte[] iv = new byte[16];
             new SecureRandom ().nextBytes (iv);
             crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (iv));
@@ -457,7 +457,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             byte[] key = getMacBuilder (new byte[0]).addVerbatim (KDF_ENCRYPTION_KEY).getResult ();
             try
               {
-                Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+                Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding", "BC");
                 crypt.init (Cipher.DECRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (data, 0, 16));
                 return crypt.doFinal (data, 16, data.length - 16);
               }
@@ -537,7 +537,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         
         MacBuilder (byte[] key) throws GeneralSecurityException
           {
-            mac = Mac.getInstance ("HmacSHA256");
+            mac = Mac.getInstance ("HmacSHA256", "BC");
             mac.init (new SecretKeySpec (key, "RAW"));
           }
 
@@ -1191,11 +1191,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Verify PIN (in any)
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.verifyPIN (authorization);
-
-        ///////////////////////////////////////////////////////////////////////////////////
         // Check that the signature algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
         Algorithm alg = getAlgorithm (signature_algorithm);
@@ -1216,6 +1211,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             bad ("\"SignatureAlgorithm\" for key[" + key_handle + "] does not match key type");
           }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -1246,6 +1246,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     @Override
     public byte[] symmetricKeyEncrypt (int key_handle, 
                                        boolean encrypt_mode,
+                                       byte[] iv,
                                        String encryption_algorithm,
                                        byte[] authorization,
                                        byte[] data) throws SKSException
@@ -1270,28 +1271,16 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            Cipher crypt = Cipher.getInstance (alg.jce_name);
+            Cipher crypt = Cipher.getInstance (alg.jce_name, "BC");
             SecretKeySpec sk = new SecretKeySpec (key_entry.symmetric_key, "AES");
-            boolean iv_required = (alg.mask & ALG_IV_REQ) != 0;
-            if (encrypt_mode)
+            int mode = encrypt_mode ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
+            if ((alg.mask & ALG_IV_REQ) == 0)
               {
-                if (iv_required)
-                  {
-                    byte[] iv = new byte[16];
-                    new SecureRandom ().nextBytes (iv);
-                    crypt.init (Cipher.ENCRYPT_MODE, sk, new IvParameterSpec (iv));
-                    return addArrays (iv, crypt.doFinal (data));
-                  }
-                crypt.init (Cipher.ENCRYPT_MODE, sk);
+                crypt.init (mode, sk);
               }
             else
               {
-                if (iv_required)
-                  {
-                    crypt.init (Cipher.DECRYPT_MODE, sk, new IvParameterSpec (data, 0, 16));
-                    return crypt.doFinal (data, 16, data.length - 16);
-                  }
-                crypt.init (Cipher.DECRYPT_MODE, sk);
+                crypt.init (mode, sk, new IvParameterSpec (iv));
               }
             return crypt.doFinal (data);
           }
@@ -1333,7 +1322,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            Mac mac = Mac.getInstance (alg.jce_name);
+            Mac mac = Mac.getInstance (alg.jce_name, "BC");
             mac.init (new SecretKeySpec (key_entry.symmetric_key, "RAW"));
             return mac.doFinal (data);
           }

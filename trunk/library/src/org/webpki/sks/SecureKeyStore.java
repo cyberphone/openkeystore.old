@@ -138,6 +138,7 @@ public interface SecureKeyStore
     
     public byte[] symmetricKeyEncrypt (int key_handle,
                                        boolean encrypt_mode,
+                                       byte[] iv,
                                        String encryption_algorithm,
                                        byte[] authorization,
                                        byte[] data) throws SKSException;
