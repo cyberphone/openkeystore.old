@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
@@ -35,6 +36,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
 import java.util.Arrays;
@@ -69,27 +71,29 @@ import org.webpki.sks.SecureKeyStore;
  *
  *  SKS is a cryptographic module that supports E2ES (End-to-End Security) for
  *  Provisioning and Managing PKI, Symmetric keys, PINs, PUKs and Extension data.
- *  
- *  The following is an SKS Reference Implementation that is supposed to complement
+ *
+ *  The following is an SKS Reference Implementation that is intended to complement
  *  the specification by showing how the different constructs can be implemented.
- *  
+ *
  *  In addition to the Reference Implementation there is a set of SKS JUnit tests
  *  that should work identical on a "real" SKS token.
- *  
+ *
  *  Compared to the SKS specification, the Reference Implementation uses a slightly
- *  more java-centric way of passing parameters, but the content is identical.
- *  
+ *  more java-centric way of passing parameters, but the content is supposed to be
+ *  identical.
+ *
  *  Author: Anders Rundgren
  */
 public class SKSReferenceImplementation implements SecureKeyStore, Serializable
   {
     private static final long serialVersionUID = 1L;
-    
+
     /////////////////////////////////////////////////////////////////////////////////////////////
-    // Method IDs are used "as is" in the MAC KDF 
+    // Method IDs are used "as is" in the MAC KDF
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final byte[] METHOD_SET_CERTIFICATE_PATH        = {'s','e','t','C','e','r','t','i','f','i','c','a','t','e','P','a','t','h'};
     static final byte[] METHOD_SET_SYMMETRIC_KEY           = {'s','e','t','S','y','m','m','e','t','r','i','c','K','e','y'};
+    static final byte[] METHOD_RESTORE_PRIVATE_KEY         = {'r','e','s','t','o','r','e','P','r','i','v','a','t','e','K','e','y'};
     static final byte[] METHOD_CLOSE_PROVISIONING_SESSION  = {'c','l','o','s','e','P','r','o','v','i','s','i','o','n','i','n','g','S','e','s','s','i','o','n'};
     static final byte[] METHOD_CREATE_KEY_PAIR             = {'c','r','e','a','t','e','K','e','y','P','a','i','r'};
     static final byte[] METHOD_CREATE_PIN_POLICY           = {'c','r','e','a','t','e','P','I','N','P','o','l','i','c','y'};
@@ -117,7 +121,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final String CRYPTO_STRING_NOT_AVAILABLE        = "#N/A";
     static final String CRYPTO_STRING_DEVICE_PIN           = "#Device PIN";
-    
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "KeyUsage" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +131,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final byte KEY_USAGE_UNIVERSAL           = 0x08;
     static final byte KEY_USAGE_TRANSPORT           = 0x10;
     static final byte KEY_USAGE_SYMMETRIC_KEY       = 0x20;
-    
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "PIN Grouping" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +139,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final byte PIN_GROUPING_SHARED           = 0x01;
     static final byte PIN_GROUPING_SIGN_PLUS_STD    = 0x02;
     static final byte PIN_GROUPING_UNIQUE           = 0x03;
-    
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "PIN Pattern Control" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,7 +148,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final byte PIN_PATTERN_SEQUENCE          = 0x04;
     static final byte PIN_PATTERN_REPEATED          = 0x08;
     static final byte PIN_PATTERN_MISSING_GROUP     = 0x10;
- 
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "PIN and PUK Formats" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +156,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final byte PIN_FORMAT_ALPHANUMERIC       = 0x01;
     static final byte PIN_FORMAT_STRING             = 0x02;
     static final byte PIN_FORMAT_BINARY             = 0x03;
-    
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "BaseType" for "addExtension" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -171,18 +175,18 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     // SKS "sanity" limits
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final int PIN_PUK_MAX_LENGTH = 100;
-    
+
     int next_key_handle = 1;
     HashMap<Integer,KeyEntry> keys = new HashMap<Integer,KeyEntry> ();
 
     int next_prov_handle = 1;
     HashMap<Integer,Provisioning> provisionings = new HashMap<Integer,Provisioning> ();
-    
+
     int next_pin_handle = 1;
     HashMap<Integer,PINPolicy> pin_policies = new HashMap<Integer,PINPolicy> ();
-    
+
     int next_puk_handle = 1;
-    HashMap<Integer,PUKPolicy> puk_policies = new HashMap<Integer,PUKPolicy> ();    
+    HashMap<Integer,PUKPolicy> puk_policies = new HashMap<Integer,PUKPolicy> ();
 
 
     abstract class NameSpace implements Serializable
@@ -190,9 +194,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         private static final long serialVersionUID = 1L;
 
         String id;
-        
+
         Provisioning owner;
-        
+
         NameSpace (Provisioning owner, String id) throws SKSException
           {
             //////////////////////////////////////////////////////////////////////
@@ -239,7 +243,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         int key_handle;
         byte key_usage;
-        
+
         PublicKey public_key;
         PrivateKey private_key;
         X509Certificate[] certificate_path;
@@ -250,7 +254,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         String friendly_name;
 
         boolean device_pin_protected;
-        
+
         byte[] pin_value;
         short error_counter;
         PINPolicy pin_policy;
@@ -263,12 +267,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             key_handle = next_key_handle++;
             keys.put (key_handle, this);
           }
-        
+
         void authError () throws SKSException
           {
             throw new SKSException ("Authorization error for key: " + key_handle, SKSException.ERROR_AUTHORIZATION);
           }
-        
+
         void setErrorCounter (short new_error_count)
           {
             if (pin_policy.grouping == PIN_GROUPING_SHARED)
@@ -289,7 +293,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 error_counter = new_error_count;
               }
           }
-        
+
         void verifyPIN (byte[] pin) throws SKSException
           {
             if (pin_policy != null)
@@ -307,7 +311,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 setErrorCounter ((short)0);
               }
           }
-        
+
         byte[] getEncodedEECert () throws SKSException
           {
             if (certificate_path == null)
@@ -323,19 +327,24 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 throw new SKSException (e, SKSException.ERROR_INTERNAL);
               }
           }
-        
+
         MacBuilder getEECertMacBuilder (byte[] method) throws SKSException
           {
             MacBuilder mac_builder = owner.getMacBuilderForMethodCall (method);
             mac_builder.addArray (getEncodedEECert ());
             return mac_builder;
           }
-        
+
         byte[] getPostProvisioningMac () throws SKSException
           {
             MacBuilder mac_builder = owner.getMacBuilder (KDF_PROOF_OF_OWNERSHIP);
             mac_builder.addArray (getEncodedEECert ());
             return mac_builder.getResult ();
+          }
+
+        boolean isRSA ()
+          {
+            return certificate_path[0].getPublicKey () instanceof RSAPublicKey;
           }
       }
 
@@ -355,7 +364,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         private static final long serialVersionUID = 1L;
 
         int pin_policy_handle;
-        
+
         PUKPolicy puk_policy;
 
         short retry_limit;
@@ -367,7 +376,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         byte pattern_restrictions;
         byte min_length;
         byte max_length;
-        
+
         PINPolicy (Provisioning owner, String id) throws SKSException
           {
             super (owner, id);
@@ -382,7 +391,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         private static final long serialVersionUID = 1L;
 
         int puk_policy_handle;
-        
+
         byte[] puk_value;
         byte format;
         short retry_limit;
@@ -406,7 +415,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         // Post provisioning management
         Vector<PostProvisioningObject> post_provisioning_objects = new Vector<PostProvisioningObject> ();
-        
+
         String client_session_id;
         String server_session_id;
         String issuer_uri;
@@ -415,13 +424,13 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         boolean open = true;
         boolean updatable;
         short mac_sequence_counter;
-        
+
         Provisioning ()
           {
             provisioning_handle = next_prov_handle++;
             provisionings.put (provisioning_handle, this);
           }
-        
+
         void verifyMac (MacBuilder actual_mac, byte[] claimed_mac) throws SKSException
           {
             if (Arrays.equals (actual_mac.getResult (),  claimed_mac))
@@ -430,13 +439,13 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
             abort ("MAC error", SKSException.ERROR_MAC);
           }
-        
+
         void abort (String message, int exception_type) throws SKSException
           {
             abortProvisioningSession (provisioning_handle);
             bad (message, exception_type);
           }
-    
+
         void abort (String message) throws SKSException
           {
             abort (message, SKSException.ERROR_OPTION);
@@ -534,7 +543,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         private static final long serialVersionUID = 1L;
 
         Mac mac;
-        
+
         MacBuilder (byte[] key) throws GeneralSecurityException
           {
             mac = Mac.getInstance ("HmacSHA256", "BC");
@@ -546,19 +555,19 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             mac.update (data);
             return this;
           }
- 
+
         void addArray (byte[] data)
           {
             addShort (data.length);
             mac.update (data);
           }
-        
+
         void addBlob (byte[] data)
           {
             addInt (data.length);
             mac.update (data);
           }
-        
+
         void addString (String string) throws SKSException
           {
             try
@@ -570,7 +579,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 bad ("Interal UTF-8");
               }
           }
-        
+
         void addInt (int i)
           {
             mac.update ((byte)(i >>> 24));
@@ -578,23 +587,23 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             mac.update ((byte)(i >>> 8));
             mac.update ((byte)i);
           }
-        
+
         void addShort (int s)
           {
             mac.update ((byte)(s >>> 8));
             mac.update ((byte)s);
           }
-        
+
         void addByte (byte b)
           {
             mac.update (b);
           }
-        
+
         void addBool (boolean flag)
           {
             mac.update (flag ? (byte) 0x01 : (byte) 0x00);
           }
-        
+
         byte[] getResult ()
           {
             return mac.doFinal ();
@@ -609,7 +618,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         KeyEntry target_key_entry;
         KeyEntry new_key;      // null for pp_deleteKey
         boolean update;        // true for pp_updateKey
-        
+
         PostProvisioningObject (KeyEntry target_key_entry, KeyEntry new_key, boolean update)
           {
             this.target_key_entry = target_key_entry;
@@ -630,7 +639,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         int mask;
         String jce_name;
       }
-    
+
     static HashMap<String,Algorithm> algorithms = new HashMap<String,Algorithm> ();
 
     static void addAlgorithm (String uri, String jce_name, int mask)
@@ -640,7 +649,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         alg.jce_name = jce_name;
         algorithms.put (uri, alg);
       }
-    
+
     static final int ALG_SYM_ENC  = 0x00001;
     static final int ALG_IV_REQ   = 0x00002;
     static final int ALG_SYML_128 = 0x00004;
@@ -655,11 +664,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final int ALG_HASH_160 = 0x14000;
     static final int ALG_HASH_256 = 0x20000;
     static final int ALG_HASH_DIV = 0x01000;
-    
+
     static final String ALGORITHM_KEY_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1";
-    
+
     static final String ALGORITHM_SESSION_KEY_ATTEST_1 = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sk1";
-    
+
     static final short[] RSA_KEY_SIZES = {1024, 2048};
 
     static
@@ -739,7 +748,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("urn:oid:1.2.840.10045.3.1.7", "P-256", ALG_ECC_CRV);
       }
-    
+
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Utility Functions
@@ -758,12 +767,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         return provisioning;
       }
-    
+
     int getShort (byte[] buffer, int index)
       {
         return ((buffer[index++] << 8) & 0xFFFF) + (buffer[index] & 0xFF);
       }
-    
+
     KeyEntry getOpenKey (int key_handle) throws SKSException
       {
         KeyEntry ke = keys.get (key_handle);
@@ -777,7 +786,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         return ke;
       }
-    
+
     KeyEntry getStdKey (int key_handle) throws SKSException
       {
         KeyEntry ke = keys.get (key_handle);
@@ -791,7 +800,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         return ke;
       }
-    
+
     EnumeratedKey getKey (Iterator<KeyEntry> iter)
       {
         while (iter.hasNext ())
@@ -804,7 +813,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         return new EnumeratedKey ();
       }
-    
+
     void deleteObject (HashMap<Integer,?> objects, Provisioning provisioning)
       {
         Iterator<?> list = objects.values ().iterator ();
@@ -830,7 +839,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         return new EnumeratedProvisioningSession ();
       }
-    
+
     X509Certificate[] getDeviceCertificatePath () throws KeyStoreException, IOException
       {
         return new X509Certificate[]{(X509Certificate)TPMKeyStore.getTPMKeyStore ().getCertificate ("mykey")};
@@ -838,14 +847,14 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
     void bad (String message) throws SKSException
       {
-        throw new SKSException (message); 
+        throw new SKSException (message);
       }
 
     void bad (String message, int option) throws SKSException
       {
-        throw new SKSException (message, option); 
+        throw new SKSException (message, option);
       }
-    
+
     void deleteEmptySession (Provisioning provisioning)
       {
         for (KeyEntry key_entry : keys.values ())
@@ -927,8 +936,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         return alg;
       }
 
-    void addUpdateKeyOrCloneKeyProtection (int key_handle, 
-                                           int target_key_handle, 
+    void addUpdateKeyOrCloneKeyProtection (int key_handle,
+                                           int target_key_handle,
                                            byte[] mac,
                                            boolean update) throws SKSException
       {
@@ -950,7 +959,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Get key to be updated/cloned
         ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry target_key_entry = provisioning.getTargetKey (target_key_handle);
- 
+
         if (!update)
           {
             ///////////////////////////////////////////////////////////////////////////////////
@@ -972,7 +981,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the pp-op buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////
-        provisioning.addPostProvisioningObject (target_key_entry, key_entry, update); 
+        provisioning.addPostProvisioningObject (target_key_entry, key_entry, update);
       }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -983,6 +992,53 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
     static final byte[] DIGEST_INFO_SHA256 = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
                                               0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20};
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                               unlockKey                                    //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void unlockKey (int key_handle, byte[] authorization) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that this key can be unlocked by a PUK
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (key_entry.pin_policy == null || key_entry.pin_policy.puk_policy == null)
+          {
+            bad ("Key [" + key_entry.key_handle + "] has no PUK");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the PUK hasn't already reached max
+        ///////////////////////////////////////////////////////////////////////////////////
+        PUKPolicy puk_policy = key_entry.pin_policy.puk_policy;
+        if (puk_policy.error_counter >= puk_policy.retry_limit)
+          {
+            bad ("PUK for key [" + key_entry.key_handle + "] is already locked", SKSException.ERROR_AUTHORIZATION);
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check the PUK value
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (!Arrays.equals (puk_policy.puk_value, authorization))
+          {
+            ++puk_policy.error_counter;
+            bad ("Incorrect PUK for key: " + key_entry.key_handle, SKSException.ERROR_AUTHORIZATION);
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Success!  Reset both PINs and the PUK error counters
+        ///////////////////////////////////////////////////////////////////////////////////
+        puk_policy.error_counter = 0;
+        key_entry.setErrorCounter ((short)0);
+      }
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -1014,7 +1070,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public void setProperty (int key_handle, 
+    public void setProperty (int key_handle,
                              String extension_type,
                              String name,
                              String value) throws SKSException
@@ -1103,10 +1159,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public byte[] asymmetricKeyDecrypt (int key_handle, 
+    public byte[] asymmetricKeyDecrypt (int key_handle,
                                         byte[] parameters,
-                                        String encryption_algorithm, 
-                                        byte[] authorization, 
+                                        String encryption_algorithm,
+                                        byte[] authorization,
                                         byte[] data) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1138,7 +1194,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key basic type matches the algorithm
         ///////////////////////////////////////////////////////////////////////////////////
-        if (!(key_entry.public_key instanceof RSAPublicKey))
+        if (!key_entry.isRSA ())  // We only know RSA in the ref impl....
           {
             bad ("\"EncryptionAlgorithm\" for key[" + key_handle + "] does not match key type");
           }
@@ -1147,7 +1203,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Verify PIN (in any)
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.verifyPIN (authorization);
-        
+
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1183,7 +1239,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key may be used for signatures
         ///////////////////////////////////////////////////////////////////////////////////
-        if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE | 
+        if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE |
                                     KEY_USAGE_AUTHENTICATION |
                                     KEY_USAGE_UNIVERSAL)) == 0)
           {
@@ -1207,7 +1263,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key basic type matches the algorithm
         ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.public_key instanceof RSAPublicKey ^ ((alg.mask & ALG_RSA_KEY) != 0))
+        if (key_entry.isRSA () ^ ((alg.mask & ALG_RSA_KEY) != 0))
           {
             bad ("\"SignatureAlgorithm\" for key[" + key_handle + "] does not match key type");
           }
@@ -1222,7 +1278,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            if (key_entry.public_key instanceof RSAPublicKey && hash_len > 0)
+            if (key_entry.isRSA () && hash_len > 0)
               {
                 data = addArrays (hash_len == 20 ? DIGEST_INFO_SHA1 : DIGEST_INFO_SHA256, data);
               }
@@ -1244,7 +1300,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public byte[] symmetricKeyEncrypt (int key_handle, 
+    public byte[] symmetricKeyEncrypt (int key_handle,
                                        boolean encrypt_mode,
                                        byte[] iv,
                                        String encryption_algorithm,
@@ -1265,7 +1321,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Verify PIN (in any)
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.verifyPIN (authorization);
-        
+
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1297,7 +1353,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public byte[] performHMAC (int key_handle, 
+    public byte[] performHMAC (int key_handle,
                                String hmac_algorithm,
                                byte[] authorization,
                                byte[] data) throws SKSException
@@ -1339,7 +1395,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public void pp_deleteKey (int provisioning_handle, 
+    public void pp_deleteKey (int provisioning_handle,
                               int target_key_handle,
                               byte[] mac) throws SKSException
       {
@@ -1347,7 +1403,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Get provisioning session
         ///////////////////////////////////////////////////////////////////////////////////
         Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
-       
+
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key to be deleted
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1359,14 +1415,14 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         MacBuilder post_prov_del_mac = provisioning.getMacBuilderForMethodCall (METHOD_PP_DELETE_KEY);
         post_prov_del_mac.addArray (target_key_entry.getPostProvisioningMac ());
         provisioning.verifyMac (post_prov_del_mac, mac);
-        
+
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the pp-op buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////
-        provisioning.addPostProvisioningObject (target_key_entry, null, false); 
+        provisioning.addPostProvisioningObject (target_key_entry, null, false);
       }
 
-    
+
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
     //                          pp_cloneKeyProtection                             //
@@ -1387,8 +1443,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public void pp_updateKey (int key_handle, 
-                              int target_key_handle, 
+    public void pp_updateKey (int key_handle,
+                              int target_key_handle,
                               byte[] mac) throws SKSException
       {
         addUpdateKeyOrCloneKeyProtection (key_handle, target_key_handle, mac, true);
@@ -1523,7 +1579,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                   {
                     provisioning.abort ("Missing \"setSymmetricKey\" for key: " + key_entry.id);
                   }
-                // TODO private key import..
               }
           }
 
@@ -1553,14 +1608,14 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                     // Store new key in the place of the old (keeping the handle intact after update)
                     ///////////////////////////////////////////////////////////////////////////////////
                     keys.put (key_entry.key_handle, post_op.new_key);
-    
+
                     ///////////////////////////////////////////////////////////////////////////////////
                     // Remove space occupied by the new key and restore old key handle
                     ///////////////////////////////////////////////////////////////////////////////////
                     keys.remove (post_op.new_key.key_handle);
                     post_op.new_key.key_handle = key_entry.key_handle;
-                  }   
-     
+                  }
+
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Inherit protection data from the old key but nothing else
                 ///////////////////////////////////////////////////////////////////////////////////
@@ -1617,7 +1672,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         close_attestation.addString (CRYPTO_STRING_SUCCESS);
         close_attestation.addShort (provisioning.mac_sequence_counter);
         byte[] attest = close_attestation.getResult ();
-        
+
         ///////////////////////////////////////////////////////////////////////////////////
         // We are done, close the show for this time
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1648,7 +1703,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         byte[] session_attestation = null;
         byte[] session_key = null;
         ECPublicKey client_ephemeral_key = null;
-        String client_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()); 
+        String client_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1669,7 +1724,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             byte[] Z = key_agreement.generateSecret ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // But use a custom KDF 
+            // But use a custom KDF
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder kdf = new MacBuilder (Z);
             kdf.addString (client_session_id);
@@ -1692,7 +1747,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             ska.addInt (session_life_time);
             ska.addShort (session_key_limit);
             byte[] session_key_attest = ska.getResult ();
-            
+
             ///////////////////////////////////////////////////////////////////////////////////
             // Sign attestation
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1790,7 +1845,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public void addExtension (int key_handle, 
+    public void addExtension (int key_handle,
                               byte base_type,
                               byte[] qualifier,
                               String extension_type,
@@ -1851,12 +1906,55 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
+    //                           restorePrivateKey                                //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void restorePrivateKey (int key_handle, byte[] private_key, byte[] mac) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key and associated provisioning session
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getOpenKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check for key usage errors
+        ///////////////////////////////////////////////////////////////////////////////////
+        if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE | KEY_USAGE_ENCRYPTION | KEY_USAGE_UNIVERSAL | KEY_USAGE_AUTHENTICATION)) == 0)
+          {
+            key_entry.owner.abort ("Invalid key usage for \"restorePrivateKey\" on key: " + key_entry.id);
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder priv_mac = key_entry.getEECertMacBuilder (METHOD_RESTORE_PRIVATE_KEY);
+        priv_mac.addArray (private_key);
+        key_entry.owner.verifyMac (priv_mac, mac);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Decrypt and store private key.  Note: SKS accepts multiple restores...
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (key_entry.owner.decrypt (private_key));
+            key_entry.private_key = KeyFactory.getInstance (key_entry.isRSA () ? "RSA" : "EC", "BC").generatePrivate (key_spec);
+          }
+        catch (GeneralSecurityException e)
+          {
+            key_entry.owner.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
     //                            setSymmetricKey                                 //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public void setSymmetricKey (int key_handle,
-                                 byte[] encrypted_symmetric_key,
+                                 byte[] symmetric_key,
                                  String[] endorsed_algorithms,
                                  byte[] mac) throws SKSException
       {
@@ -1868,21 +1966,21 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for various container errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.symmetric_key != null)
-          {
-            key_entry.owner.abort ("Duplicate symmetric key: " + key_entry.id);
-          }
         if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
           {
-            key_entry.owner.abort ("Wrong key usage for symmetric key: " + key_entry.id);
+            key_entry.owner.abort ("Invalid key usage for \"setSymmetricKey\" on key: " + key_entry.id);
           }
         MacBuilder sym_mac = key_entry.getEECertMacBuilder (METHOD_SET_SYMMETRIC_KEY);
-        sym_mac.addArray (encrypted_symmetric_key);
+        sym_mac.addArray (symmetric_key);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Decrypt and store symmetric key
+        // Decrypt symmetric key
         ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.symmetric_key = key_entry.owner.decrypt (encrypted_symmetric_key);
+        byte[] clear_text_symmetric_key = key_entry.owner.decrypt (symmetric_key);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check endorsed algorithms
+        ///////////////////////////////////////////////////////////////////////////////////
         for (String endorsed_algorithm : endorsed_algorithms)
           {
             sym_mac.addString (endorsed_algorithm);
@@ -1901,27 +1999,32 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Encryption key length must match algorithm and only be 128, 192, or 256 bits
+            // AES encryption keys must match algorithm and only be 128, 192, or 256 bits
             ///////////////////////////////////////////////////////////////////////////////////
             if ((alg.mask & ALG_SYM_ENC) != 0)
               {
-                int l = key_entry.symmetric_key.length;
+                int l = clear_text_symmetric_key.length;
                 if (l == 16) l = ALG_SYML_128;
                 else if (l == 24) l = ALG_SYML_192;
                 else if (l == 32) l = ALG_SYML_256;
                 else l = 0;
                 if ((l & alg.mask) == 0)
                   {
-                    key_entry.owner.abort ("Wrong key size (" + key_entry.symmetric_key.length +
+                    key_entry.owner.abort ("Wrong key size (" + clear_text_symmetric_key.length +
                                            ") for algorithm: " + endorsed_algorithm);
                   }
               }
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Finally, verify incoming MAC
+        // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.owner.verifyMac (sym_mac, mac);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Store symmetric key.  Note: SKS allows multiple settings...
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.symmetric_key = clear_text_symmetric_key;
       }
 
 
@@ -1931,7 +2034,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public void setCertificatePath (int key_handle, 
+    public void setCertificatePath (int key_handle,
                                     X509Certificate[] certificate_path,
                                     byte[] mac) throws SKSException
       {
@@ -1939,10 +2042,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Get key and associated provisioning session
         ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = getOpenKey (key_handle);
-        if (key_entry.certificate_path != null)
-          {
-            key_entry.owner.abort ("Duplicate \"setCertificatePath\" for key: " + key_entry.id);
-          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
@@ -1964,7 +2063,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         key_entry.owner.verifyMac (set_certificate_mac, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Done.  Perform the actual task we were meant to do
+        // Store certificate path.  Note: SKS allows multiple store operations...
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.certificate_path = certificate_path.clone ();
       }
@@ -1976,7 +2075,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public KeyPair createKeyPair (int provisioning_handle, 
+    public KeyPair createKeyPair (int provisioning_handle,
                                   String id,
                                   String attestation_algorithm,
                                   byte[] server_seed,
@@ -1987,7 +2086,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                                   byte export_policy,
                                   byte delete_policy,
                                   boolean enable_pin_caching,
-                                  boolean import_private_key,
                                   byte key_usage,
                                   String friendly_name,
                                   byte[] key_algorithm,
@@ -2008,6 +2106,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         if (server_seed.length != 32)
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
+          }
+        if (private_key_backup && 
+            (key_usage & (KEY_USAGE_SIGNATURE | KEY_USAGE_ENCRYPTION | KEY_USAGE_UNIVERSAL | KEY_USAGE_AUTHENTICATION)) == 0)
+          {
+            provisioning.abort ("Private key backup not allowed for key usage: " + key_usage);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2164,13 +2267,13 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
             if ((pin_policy.pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0)
               {
-                if (!upperalpha || !number || 
+                if (!upperalpha || !number ||
                     (pin_policy.format == PIN_FORMAT_STRING && (!loweralpha || !nonalphanum)))
                   {
                     provisioning.abort ("Missing character group in PIN");
                   }
               }
-            
+
             ///////////////////////////////////////////////////////////////////////////////////
             // Check that PIN grouping rules are followed
             ///////////////////////////////////////////////////////////////////////////////////
@@ -2186,14 +2289,14 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                               provisioning.abort ("Grouping = \"shared\" requires identical PINs");
                             }
                           continue;
-                          
+
                         case PIN_GROUPING_UNIQUE:
                           if (Arrays.equals (key_entry.pin_value, pin_value))
                             {
                               provisioning.abort ("Grouping = \"unique\" requires unique PINs");
                             }
                           continue;
-                          
+
                         case PIN_GROUPING_SIGN_PLUS_STD:
                           if (((key_usage == KEY_USAGE_SIGNATURE) ^ (key_entry.key_usage == KEY_USAGE_SIGNATURE)) ^
                               !Arrays.equals (key_entry.pin_value, pin_value))
@@ -2230,7 +2333,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 provisioning.abort ("RSA size unsupported: " + size);
               }
             int exponent = (getShort (key_algorithm, 3) << 16) + getShort (key_algorithm, 5);
-            alg_par_spec = new RSAKeyGenParameterSpec (size, 
+            alg_par_spec = new RSAKeyGenParameterSpec (size,
                                                        exponent == 0 ? RSAKeyGenParameterSpec.F4 : BigInteger.valueOf (exponent));
           }
         else
@@ -2257,11 +2360,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             ///////////////////////////////////////////////////////////////////////////////////
             // At last, generate the desired key-pair
             ///////////////////////////////////////////////////////////////////////////////////
-            SecureRandom secure_random = new SecureRandom (server_seed); 
+            SecureRandom secure_random = new SecureRandom (server_seed);
             KeyPairGenerator kpg = KeyPairGenerator.getInstance (alg_par_spec instanceof RSAKeyGenParameterSpec ? "RSA" : "EC", "BC");
             kpg.initialize (alg_par_spec, secure_random);
             java.security.KeyPair key_pair = kpg.generateKeyPair ();
-            PublicKey public_key = key_pair.getPublic ();   
+            PublicKey public_key = key_pair.getPublic ();
             PrivateKey private_key = key_pair.getPrivate ();
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -2288,8 +2391,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             key_entry.pin_policy = pin_policy;
             key_entry.friendly_name = friendly_name;
             key_entry.pin_value = pin_value;
-            key_entry.public_key = public_key;   
-            key_entry.private_key = import_private_key ? null : private_key;  // To enable the duplicate/missing import test...
+            key_entry.public_key = public_key;
+            key_entry.private_key = private_key;
             key_entry.key_usage = key_usage;
             key_entry.device_pin_protected = device_pin_protected;
             // TODO key attributes are not fully aligned with the specification
@@ -2398,8 +2501,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public int createPUKPolicy (int provisioning_handle,
-                                String id, 
-                                byte[] encrypted_value,
+                                String id,
+                                byte[] value,
                                 byte format,
                                 short retry_limit,
                                 byte[] mac) throws SKSException
@@ -2414,11 +2517,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder puk_policy_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PUK_POLICY);
         puk_policy_mac.addString (id);
-        puk_policy_mac.addArray (encrypted_value);
+        puk_policy_mac.addArray (value);
         puk_policy_mac.addByte (format);
         puk_policy_mac.addShort (retry_limit);
         provisioning.verifyMac (puk_policy_mac, mac);
-        byte[] puk_value = provisioning.decrypt (encrypted_value);
+        byte[] puk_value = provisioning.decrypt (value);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform PUK "sanity" check

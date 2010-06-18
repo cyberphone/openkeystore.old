@@ -35,7 +35,6 @@ import org.webpki.crypto.VerifierInterface;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-
 public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequest
   {
     public static class PostOperation
@@ -271,6 +270,10 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
         byte[] symmetric_key_mac;
 
+        byte[] encrypted_private_key;
+
+        byte[] private_key_mac;
+
         byte[] mac;
 
         String[] endorsed_algorithms;
@@ -297,6 +300,11 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
                 encrypted_symmetric_key = rd.getBinary (SYMMETRIC_KEY_ELEM);
                 endorsed_algorithms = getSortedAlgorithms (ah.getList (ENDORSED_ALGORITHMS_ATTR));
                 symmetric_key_mac = ah.getBinary (MAC_ATTR);
+              }
+            else if (rd.hasNext (PRIVATE_KEY_ELEM))
+              {
+                encrypted_private_key = rd.getBinary (PRIVATE_KEY_ELEM);
+                private_key_mac = ah.getBinary (MAC_ATTR);
               }
 
             while (rd.hasNext ())
@@ -357,6 +365,18 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         public byte[] getSymmetricKeyMac ()
           {
             return symmetric_key_mac;
+          }
+
+
+        public byte[] getEncryptedPrivateKey ()
+          {
+            return encrypted_private_key;
+          }
+
+
+        public byte[] getPrivateKeyMac ()
+          {
+            return private_key_mac;
           }
 
 

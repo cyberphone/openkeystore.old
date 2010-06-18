@@ -54,7 +54,7 @@ public class KeyPair
         return key_attestation;
       }
     
-    public byte[] getEncryptedPrivateKey ()
+    public byte[] getPrivateKey ()
       {
         return encrypted_private_key;
       }

@@ -436,7 +436,6 @@ public class ProvSess
                           (byte)0 /* export_policy */,
                           (byte)0 /* delete_policy */,
                           false /* enable_pin_caching */,
-                          false /* import_private_key */,
                           key_usage,
                           "" /* friendly_name */,
                           new KeyAlgorithmData.RSA (2048, 0));
@@ -459,7 +458,6 @@ public class ProvSess
                           (byte)0 /* export_policy */,
                           (byte)0 /* delete_policy */,
                           false /* enable_pin_caching */,
-                          false /* import_private_key */,
                           key_usage,
                           "" /* friendly_name */,
                           new KeyAlgorithmData.EC (ECDomains.P_256));
@@ -475,7 +473,6 @@ public class ProvSess
                              byte export_policy,
                              byte delete_policy,
                              boolean enable_pin_caching,
-                             boolean import_private_key,
                              KeyUsage key_usage,
                              String friendly_name,
                              KeyAlgorithmData key_algorithm) throws SKSException, IOException, GeneralSecurityException
@@ -529,7 +526,6 @@ public class ProvSess
                                               export_policy, 
                                               delete_policy, 
                                               enable_pin_caching, 
-                                              import_private_key, 
                                               key_usage.getSKSValue (), 
                                               friendly_name, 
                                               key_algorithm.getSKSValue (), 
@@ -539,8 +535,8 @@ public class ProvSess
         key_attestation.addArray (key_pair.getPublicKey ().getEncoded ());
         if (private_key_backup)
           {
-            key_attestation.addArray (key_pair.getEncryptedPrivateKey ());
-            verifyPrivateKeyBackup (key_pair.getEncryptedPrivateKey (), key_pair.getPublicKey ());
+            key_attestation.addArray (key_pair.getPrivateKey ());
+            verifyPrivateKeyBackup (key_pair.getPrivateKey (), key_pair.getPublicKey ());
             }
          if (!ArrayUtil.compare (attest (key_attestation.getResult ()), key_pair.getKeyAttestation ()))
            {

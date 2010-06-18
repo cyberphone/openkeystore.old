@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
     KeyGen2 XML schema.  The primary purpose of KeyGen2 is usage as a
-    browser-based protocol for on-line provisioning and management of
+    browser-based protocol for on-line Provisioning and Management of
     PKI-based user-keys stored in containers compatible with the SKS
     (Secure Key Store) specification.
 
@@ -9,14 +9,14 @@
     and similar symmetric keys.  By "piggybacking" symmetric keys on PKI, the
     management operations work identical for PKI and symmetric keys.
 
-    By using the KeyGen2 decoupled extension mechanism, "alien" objects like
+    Utilizing the KeyGen2 generic extension mechanism, "alien" objects like
     downloadable code and InformationCards tied to specific keys can be
-    issued and maintained without changing the core protocol engine.
+    issued and maintained without changing the protocol engine.
 
     Historical note: KeyGen2 started its life as a 4-pass stand-alone
     key-provisioning protocol back in 2007 but ended up as a KeyGen2/SKS
     10-pass "combo" three years later.  Properly implemented the current
-    incarnation provides full end-to-end security.
+    incarnation provides E2ES (End-to-End Security).
 
     "Perfection is achieved, not when there is nothing more to add, but when
     there is nothing left to take away" [Antoine de Saint-Exupery]
@@ -40,11 +40,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20100402#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/alpha/20100402#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20100402#"
+           xmlns:kgen="http://xmlns.webpki.org/keygen2/alpha/20100402#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -610,109 +610,124 @@
                  be rejected. -->
             <xs:element ref="ds:X509Data"/>
 
-            <!-- Optional: "piggybacked" symmetric key. -->
-            <xs:element name="SymmetricKey" minOccurs="0">
-               <xs:complexType>
-                  <xs:simpleContent>
-                      <xs:extension base="xs:base64Binary">
+             <xs:choice minOccurs="0">
  
-                          <!-- "EndorsedAlgorithms" holds a non-empty list of
-                               algorithms endorsed by the issuer for usage with
-                               the provisioned symmetric key.  If there is no
-                               particular restriction on the algorithm to use, the
-                               issuer SHOULD indicate that with the KeyGen2-specific
-                               algorithm URI:
-                               "http://xmlns.webpki.org/keygen2/1.0#algorithm.any" -->
-                          <xs:attribute name="EndorsedAlgorithms" type="kgen:uriList" use="required"/>
+               <!-- Optional: "piggybacked" symmetric key. -->
+               <xs:element name="SymmetricKey">
+                  <xs:complexType>
+                     <xs:simpleContent>
+                        <xs:extension base="xs:base64Binary">
+ 
+                           <!-- "EndorsedAlgorithms" holds a non-empty list of
+                                algorithms endorsed by the issuer for usage with
+                                the provisioned symmetric key. -->
+                           <xs:attribute name="EndorsedAlgorithms" type="kgen:uriList" use="required"/>
         
-                          <!-- Mandatory MAC (Message Authentication Code). -->
-                          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
-                     </xs:extension>
-                  </xs:simpleContent>
-               </xs:complexType>
-           </xs:element>
+                           <!-- Mandatory MAC (Message Authentication Code). -->
+                           <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
+
+                        </xs:extension>
+                     </xs:simpleContent>
+                  </xs:complexType>
+               </xs:element>
+
+               <!-- Optional: restored private key. -->
+               <xs:element name="PrivateKey">
+                  <xs:complexType>
+                     <xs:simpleContent>
+                        <xs:extension base="xs:base64Binary">
+      
+                           <!-- Mandatory MAC (Message Authentication Code). -->
+                           <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
+
+                        </xs:extension>
+                     </xs:simpleContent>
+                  </xs:complexType>
+               </xs:element>
+
+            </xs:choice>
 
             <xs:choice minOccurs="0" maxOccurs="unbounded">
 
-            <!-- Some credentials like OTP seeds need additional attributes
-                 to work.  These are supplied as typed "PropertyBags" holding
-                 "Property" name-value elements. -->
-            <xs:element ref="kgen:PropertyBag"/>
+               <!-- Some credentials like OTP seeds need additional attributes
+                    to work.  These are supplied as typed "PropertyBags" holding
+                    "Property" name-value elements. -->
+               <xs:element ref="kgen:PropertyBag"/>
 
-            <!-- Optional logotypes that can be used in various GUIs.
-                 The "Type" URI indicates a logotype's usage and SHOULD
-                 be communicated during the platform negotiation phase.
-                 Logotypes MAY be ignored by the client software.  Currently
-                 KeyGen2 defines the following predefined type URIs:
+               <!-- Optional logotypes that can be used in various GUIs.
+                    The "Type" URI indicates a logotype's usage and SHOULD
+                    be communicated during the platform negotiation phase.
+                    Logotypes MAY be ignored by the client software.  Currently
+                    KeyGen2 defines the following predefined type URIs:
 
-                     "http://xmlns.webpki.org/keygen2/1.0#logotype.icon" 
-                     "http://xmlns.webpki.org/keygen2/1.0#logotype.card" 
-                     "http://xmlns.webpki.org/keygen2/1.0#logotype.list" 
-                     "http://xmlns.webpki.org/keygen2/1.0#logotype.application"
+                        "http://xmlns.webpki.org/keygen2/1.0#logotype.icon" 
+                        "http://xmlns.webpki.org/keygen2/1.0#logotype.card" 
+                        "http://xmlns.webpki.org/keygen2/1.0#logotype.list" 
+                        "http://xmlns.webpki.org/keygen2/1.0#logotype.application"
 
-                 "Icon" is intended to be useful in a selection window
-                 where multiple credentials are featured as a map of
-                 icons.  "Card" is the shape needed by for example
-                 Microsoft's InformationCards.  "List" is meant to be
-                 used in credential listings where you need a minute
-                 image together with explanatory text.  "Application"
-                 is a shape that could be used in applications where the
-                 logotype is useful for branding/recognition purposes
-                 like in OTP systems.
+                    "Icon" is intended to be useful in a selection window
+                    where multiple credentials are featured as a map of
+                    icons.  "Card" is the shape needed by for example
+                    Microsoft's InformationCards.  "List" is meant to be
+                    used in credential listings where you need a minute
+                    image together with explanatory text.  "Application"
+                    is a shape that could be used in applications where the
+                    logotype is useful for branding/recognition purposes
+                    like in OTP systems.
 
-                 Logotype recommendations: 
-                 Logotypes should not have framing borders or extra margins
-                 unless these are integral parts of the actual logotype image. 
-                 Logotypes should render nicely on light backgrounds. 
-                 Logotype "surroundings" should preferably be transparent to
-                 accommodate white to light grey backgrounds.  If there are
-                 shadows that should migrate with the background, PNG files
-                 with alpha channels are recommended. -->
-            <xs:element name="Logotype">
-               <xs:complexType>
-                  <xs:simpleContent>
-                     <xs:extension base="kgen:imageType">
+                    Logotype recommendations: 
+                    Logotypes should not have framing borders or extra margins
+                    unless these are integral parts of the actual logotype image. 
+                    Logotypes should render nicely on light backgrounds. 
+                    Logotype "surroundings" should preferably be transparent to
+                    accommodate white to light grey backgrounds.  If there are
+                    shadows that should migrate with the background, PNG files
+                    with alpha channels are recommended. -->
+               <xs:element name="Logotype">
+                  <xs:complexType>
+                     <xs:simpleContent>
+                        <xs:extension base="kgen:imageType">
 
-                        <!-- Mandatory extension type attribute. -->
-                        <xs:attributeGroup ref="kgen:extensionAttrs"/>
+                           <!-- Mandatory extension type attribute. -->
+                           <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
-                     </xs:extension>
-                  </xs:simpleContent>
-               </xs:complexType>
-            </xs:element>
+                        </xs:extension>
+                     </xs:simpleContent>
+                  </xs:complexType>
+               </xs:element>
 
-            <!-- If platform negotiations (through the use of mutually
-                 recognized credential extension URIs) indicate support
-                 for additional data associated with a certified key it is
-                 supposed to be delivered in the following optional object.
-                 To not interfere with core KeyGen2 XML schema validation,
-                 extension data including XML ditto MUST be Base64-encoded. -->
-            <xs:element name="Extension">
-               <xs:complexType>
-                  <xs:simpleContent>
-                     <xs:extension base="xs:base64Binary">
+               <!-- If platform negotiations (through the use of mutually
+                    recognized credential extension URIs) indicate support
+                    for additional data associated with a certified key it is
+                    supposed to be delivered in the following optional object.
+                    To not interfere with core KeyGen2 XML schema validation,
+                    extension data including XML ditto MUST be Base64-encoded. -->
+               <xs:element name="Extension">
+                  <xs:complexType>
+                     <xs:simpleContent>
+                        <xs:extension base="xs:base64Binary">
 
-                        <!-- Mandatory extension type attribute. -->
-                        <xs:attributeGroup ref="kgen:extensionAttrs"/>
+                           <!-- Mandatory extension type attribute. -->
+                           <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
-                     </xs:extension>
-                  </xs:simpleContent>
-               </xs:complexType>
-            </xs:element>
+                        </xs:extension>
+                     </xs:simpleContent>
+                  </xs:complexType>
+               </xs:element>
 
-            <!-- Encrypted version of "Extension". -->
-            <xs:element name="EncryptedExtension">
-               <xs:complexType>
-                  <xs:simpleContent>
-                     <xs:extension base="xs:base64Binary">
+               <!-- Encrypted version of "Extension". -->
+               <xs:element name="EncryptedExtension">
+                  <xs:complexType>
+                     <xs:simpleContent>
+                        <xs:extension base="xs:base64Binary">
 
-                        <!-- Mandatory extension type attribute. -->
-                        <xs:attributeGroup ref="kgen:extensionAttrs"/>
+                           <!-- Mandatory extension type attribute. -->
+                           <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
-                     </xs:extension>
-                  </xs:simpleContent>
-               </xs:complexType>
-            </xs:element>
+                        </xs:extension>
+                     </xs:simpleContent>
+                  </xs:complexType>
+               </xs:element>
 
            </xs:choice>
            
@@ -1063,7 +1078,7 @@
    </xs:complexType>
 
 
-   <xs:element name="DeleteKeysByContent">
+   <xs:element name="SearchFilter">
       <xs:complexType>
 
          <!-- Qualifiers. At least one MUST be defined.  Note that "IssuedBefore"

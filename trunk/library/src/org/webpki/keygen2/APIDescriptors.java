@@ -22,6 +22,7 @@ public enum APIDescriptors
   {
     SET_CERTIFICATE_PATH            ("setCertificatePath"),
     SET_SYMMETRIC_KEY               ("setSymmetricKey"),
+    RESTORE_PRIVATE_KEY             ("restorePrivateKey"),
     CLOSE_PROVISIONING_SESSION      ("closeProvisioningSession"),
     PP_DELETE_KEY                   ("pp_deleteKey"),
     PP_UPDATE_KEY                   ("pp_updateKey"),

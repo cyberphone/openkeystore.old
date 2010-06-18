@@ -16,35 +16,14 @@
  */
 package org.webpki.keygen2;
 
-
 public interface KeyGen2URIs
   {
-
-    public interface FORMATS
-      {
-        String PKCS8_PRIVATE_KEY_INFO      = "http://xmlns.webpki.org/keygen2/1.0#format.pkcs8";
-      }
-
 
     public interface ALGORITHMS
       {
         String KEY_ATTESTATION_1           = "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1";
 
         String SESSION_KEY_1               = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sk1";
-      }
-
-
-    public interface OTPPROVIDERS
-      {
-        String IETF_HOTP                   = "http://xmlns.webpki.org/keygen2/1.0#provider.ietf-hotp";
-
-        String IETF_TOTP                   = "http://xmlns.webpki.org/keygen2/1.0#provider.ietf-totp";
-
-        String IETF_OCRA                   = "http://xmlns.webpki.org/keygen2/1.0#provider.ietf-ocra";
-
-        String RSA_SECURID                 = "http://www.rsasecurity.com/rsalabs/otps/schemas/2005/09/otps-wst#SecurID-AES";
-
-        String RSA_SECURID_EVENT           = "http://www.rsa.com/names/2008/04/algorithms/SecurID#SecurID-AES128-Counter";
       }
 
 

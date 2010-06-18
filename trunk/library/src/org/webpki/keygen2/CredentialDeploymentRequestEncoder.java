@@ -39,7 +39,6 @@ import org.webpki.keygen2.ServerCredentialStore.PostProvisioningTargetKey;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-
 public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequest
   {
     String submit_url;
@@ -164,13 +163,25 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                     wr.addBinary (SYMMETRIC_KEY_ELEM, key.encrypted_symmetric_key);
                     ServerCredentialStore.MacGenerator set_symkey = new ServerCredentialStore.MacGenerator ();
                     set_symkey.addArray (ee_cert);
-                    set_symkey.addArray (key.getEncryptedSymmetricKey ());
+                    set_symkey.addArray (key.encrypted_symmetric_key);
                     for (String algorithm : getSortedAlgorithms (key.endorsed_algorithms))
                       {
                         set_symkey.addString (algorithm);
                       }
                     mac (wr, set_symkey.getResult (), APIDescriptors.SET_SYMMETRIC_KEY);
                     wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, key.endorsed_algorithms);
+                  }
+ 
+                ////////////////////////////////////////////////////////////////////////
+                // Optional: private key
+                ////////////////////////////////////////////////////////////////////////
+                if (key.encrypted_private_key != null)
+                  {
+                    wr.addBinary (PRIVATE_KEY_ELEM, key.encrypted_private_key);
+                    ServerCredentialStore.MacGenerator restore_privkey = new ServerCredentialStore.MacGenerator ();
+                    restore_privkey.addArray (ee_cert);
+                    restore_privkey.addArray (key.encrypted_private_key);
+                    mac (wr, restore_privkey.getResult (), APIDescriptors.RESTORE_PRIVATE_KEY);
                   }
  
                 ////////////////////////////////////////////////////////////////////////

@@ -35,6 +35,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAKeyGenParameterSpec;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -110,6 +111,9 @@ import org.webpki.util.HTMLHeader;
 import org.webpki.xml.XMLSchemaCache;
 import org.webpki.xml.XMLObjectWrapper;
 
+/*
+ * KeyGen2 "Protocol Exerciser" / JUnit Test
+ */
 public class KeyGen2Test
   {
     static final byte[] TEST_STRING = {'S','u','c','c','e','s','s',' ','o','r',' ','n','o','t','?'};
@@ -145,6 +149,8 @@ public class KeyGen2Test
     boolean preset_pin;
     
     boolean encryption_key;
+    
+    boolean set_private_key;
     
     boolean encrypted_extension;
     
@@ -376,7 +382,6 @@ public class KeyGen2Test
                                                  key.getExportPolicy (),
                                                  key.getDeletePolicy (),
                                                  key.getEnablePINCachingFlag (),
-                                                 key.getImportPrivateKeyFlag (),
                                                  key.getKeyUsage ().getSKSValue (),
                                                  key.getFriendlyName (),
                                                  key.getKeyAlgorithmData ().getSKSValue (),
@@ -384,7 +389,7 @@ public class KeyGen2Test
                 key_init_response.addPublicKey (kpr.getPublicKey (),
                                                 kpr.getKeyAttestation (),
                                                 key.getID (),
-                                                kpr.getEncryptedPrivateKey ());
+                                                kpr.getPrivateKey ());
               }
             return key_init_response.writeXML ();
           }
@@ -435,6 +440,16 @@ public class KeyGen2Test
                                          key.getEncryptedSymmetricKey (),
                                          key.getSymmetricKeyEndorsedAlgorithms (),
                                          key.getSymmetricKeyMac ());
+                  }
+
+                //////////////////////////////////////////////////////////////////////////
+                // There may be a private key
+                //////////////////////////////////////////////////////////////////////////
+                if (key.getEncryptedPrivateKey () != null)
+                  {
+                    sks.restorePrivateKey (key_handle, 
+                                           key.getEncryptedPrivateKey (),
+                                           key.getPrivateKeyMac ());
                   }
 
                 //////////////////////////////////////////////////////////////////////////
@@ -500,6 +515,8 @@ public class KeyGen2Test
         ProvisioningSessionRequestEncoder prov_sess_request;
 
         ServerCredentialStore server_credential_store;
+        
+        PrivateKey gen_private_key;
 
         class SoftHSM implements ServerSessionKeyInterface
           {
@@ -600,9 +617,9 @@ public class KeyGen2Test
         
         void verifyPrivateKeyBackup (ServerCredentialStore.KeyProperties key_prop) throws IOException, GeneralSecurityException
           {
-            PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (server_sess_key.decrypt (key_prop.getEncryptedPrivateKey ()));
+            PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (server_sess_key.decrypt (key_prop.getBackupPrivateKey ()));
             boolean rsa = key_prop.getPublicKey () instanceof RSAPublicKey;
-            PrivateKey private_key = KeyFactory.getInstance (rsa ? "RSA" : "EC").generatePrivate (key_spec);
+            PrivateKey private_key = KeyFactory.getInstance (rsa ? "RSA" : "EC", "BC").generatePrivate (key_spec);
             Signature sign = Signature.getInstance ((rsa ? SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256).getJCEName ());
             sign.initSign (private_key);
             sign.update (TEST_STRING);
@@ -700,9 +717,9 @@ public class KeyGen2Test
                                                    pin_policy);
             if (symmetric_key || encryption_key)
               {
-                kp.setSymmetricKey (server_sess_key.encrypt (encryption_key ? AES32BITKEY : OTP_SEED),
-                                                             new String[]{encryption_key ?
-                                            SymEncryptionAlgorithms.AES256_CBC.getURI () : MacAlgorithms.HMAC_SHA1.getURI ()});
+                kp.setEncryptedSymmetricKey (server_sess_key.encrypt (encryption_key ? AES32BITKEY : OTP_SEED),
+                                                                      new String[]{encryption_key ?
+                                                     SymEncryptionAlgorithms.AES256_CBC.getURI () : MacAlgorithms.HMAC_SHA1.getURI ()});
               }
             if (property_bag)
               {
@@ -788,6 +805,24 @@ public class KeyGen2Test
                 GregorianCalendar end = (GregorianCalendar) start.clone ();
                 end.set (GregorianCalendar.YEAR, end.get (GregorianCalendar.YEAR) + 25);
 
+                PublicKey pub_key =  key_prop.getPublicKey ();
+
+                if (set_private_key)
+                  {
+                    KeyPairGenerator generator = KeyPairGenerator.getInstance (ecc_key ? "EC" :"RSA", "BC");
+                    if (ecc_key)
+                      {
+                        generator.initialize (new ECGenParameterSpec ("P-256"), new SecureRandom ());
+                      }
+                    else
+                      {
+                        generator.initialize (new RSAKeyGenParameterSpec (1024, RSAKeyGenParameterSpec.F4), new SecureRandom ());
+                      }
+                    java.security.KeyPair kp = generator.generateKeyPair();
+                    pub_key = kp.getPublic ();
+                    gen_private_key = kp.getPrivate ();
+                  }
+
                 X509Certificate certificate = 
                     new CA ().createCert (cert_spec,
                                           DistinguishedName.subjectDN ((X509Certificate)DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey")),
@@ -813,9 +848,14 @@ public class KeyGen2Test
                           return signer.sign ();
                         }
                       
-                    },
-                                          key_prop.getPublicKey ());
+                    }, pub_key);
                 key_prop.setCertificatePath (new X509Certificate[]{certificate});
+
+                if (set_private_key)
+                  {
+                    key_prop.setEncryptedPrivateKey (server_sess_key.encrypt (gen_private_key.getEncoded ()));
+                  }
+
               }
             CredentialDeploymentRequestEncoder credential_deployment_request 
                            = new CredentialDeploymentRequestEncoder (CRE_DEP_URL, 
@@ -935,6 +975,7 @@ public class KeyGen2Test
             writeOption ("Encryption Key", encryption_key);
             writeOption ("Encrypted Extension", encrypted_extension);
             writeOption ("Private Key Backup", private_key_backup);
+            writeOption ("Private Key Restore", set_private_key);
             writeOption ("CloneKeyProtection", clone_key_protection != null);
             writeOption ("UpdateKey", update_key != null);
             writeOption ("DeleteKey", delete_key != null);
@@ -999,6 +1040,14 @@ public class KeyGen2Test
       {
         Doer doer = new Doer ();
         pin_protection = true;
+        private_key_backup = true;
+        doer.perform ();
+      }
+    @Test
+    public void test6 () throws Exception
+      {
+        Doer doer = new Doer ();
+        pin_protection = true;
         ecc_key = true;
         property_bag = true;
         encrypted_extension = true;
@@ -1006,7 +1055,7 @@ public class KeyGen2Test
         doer.perform ();
       }
     @Test
-    public void test6 () throws Exception
+    public void test7 () throws Exception
       {
         Doer doer = new Doer ();
         updatable = true;
@@ -1015,7 +1064,7 @@ public class KeyGen2Test
         doer.perform ();
       }
     @Test
-    public void test7 () throws Exception
+    public void test8 () throws Exception
       {
         Doer doer = new Doer ();
         updatable = true;
@@ -1065,7 +1114,7 @@ public class KeyGen2Test
         assertTrue ("Missing keys", j == 1);
       }
     @Test
-    public void test8 () throws Exception
+    public void test9 () throws Exception
       {
         Doer doer = new Doer ();
         updatable = true;
@@ -1090,7 +1139,7 @@ public class KeyGen2Test
         assertTrue ("Missing keys", j == 1);
       }
     @Test
-    public void test9 () throws Exception
+    public void test10 () throws Exception
       {
         Doer doer = new Doer ();
         updatable = true;
@@ -1098,7 +1147,7 @@ public class KeyGen2Test
         doer.perform ();
       }
     @Test
-    public void test10 () throws Exception
+    public void test11 () throws Exception
       {
         Doer doer = new Doer ();
         updatable = true;
@@ -1107,7 +1156,7 @@ public class KeyGen2Test
         doer.perform ();
       }
     @Test
-    public void test11 () throws Exception
+    public void test12 () throws Exception
       {
         Doer doer1 = new Doer ();
         updatable = true;
@@ -1142,7 +1191,7 @@ public class KeyGen2Test
         assertTrue ("Missing keys", j == 2);
       }
     @Test
-    public void test12 () throws Exception
+    public void test13 () throws Exception
       {
         Doer doer1 = new Doer ();
         updatable = true;
@@ -1177,7 +1226,7 @@ public class KeyGen2Test
         assertTrue ("Missing keys", j == 1);
       }
     @Test
-    public void test13 () throws Exception
+    public void test14 () throws Exception
       {
         Doer doer1 = new Doer ();
         updatable = true;
@@ -1196,6 +1245,33 @@ public class KeyGen2Test
               }
           }
         assertTrue ("Missing keys", j == 0);
+      }
+    @Test
+    public void test15 () throws Exception
+      {
+        Doer doer = new Doer ();
+        set_private_key = true;
+        pin_protection = true;
+        preset_pin = true;
+        doer.perform ();
+        EnumeratedKey ek = new EnumeratedKey ();
+        int j = 0;
+        while ((ek = sks.enumerateKeys (ek)).isValid ())
+          {
+            if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
+              {
+                j++;
+                byte[] result = sks.signHashedData (ek.getKeyHandle (),
+                                                    SignatureAlgorithms.RSA_SHA256.getURI (),
+                                                    doer.server.predef_server_pin,
+                                                    HashAlgorithms.SHA256.digest (TEST_STRING));
+                Signature sign = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+                sign.initSign (doer.server.gen_private_key);
+                sign.update (TEST_STRING);
+                assertTrue ("Bad signature", ArrayUtil.compare (sign.sign (), result));
+              }
+          }
+        assertTrue ("Missing keys", j == 1);
       }
 
   }

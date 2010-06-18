@@ -1228,4 +1228,81 @@ public class SKSTest
             
           }
       }
+    @Test
+    public void test30 () throws Exception
+      {
+        String ok_pin = "1563";
+        String puk_ok = "17644";
+        ProvSess sess = new ProvSess (device);
+        PUKPol puk = sess.createPUKPolicy ("PUK",
+                                           PassphraseFormat.NUMERIC,
+                                           (short) 3 /* retry_limit*/, 
+                                           puk_ok /* puk_policy */);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  puk /* puk_policy */);
+
+        GenKey key = sess.createRSAKey ("Key.1",
+                                        1024,
+                                        ok_pin /* pin_value */,
+                                        pin_policy /* pin_policy */,
+                                        KeyUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName());
+        sess.closeSession ();
+        
+        Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName (), "BC");
+        cipher.init (Cipher.ENCRYPT_MODE, key.cert_path[0]);
+        byte[] enc = cipher.doFinal (TEST_STRING);
+        assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
+                                                                                            new byte[0],
+                                                                                            AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                                                            ok_pin.getBytes ("UTF-8"), 
+                                                                                            enc), TEST_STRING));
+        for (int i = 0; i < 4; i++)
+          {
+            try
+              {
+                device.sks.asymmetricKeyDecrypt (key.key_handle, 
+                                                 new byte[0],
+                                                 AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                 (ok_pin + "4").getBytes ("UTF-8"), 
+                                                 enc);
+                fail ("PIN error");
+              }
+            catch (SKSException e)
+              {
+                
+              }
+          }
+        try
+          {
+            device.sks.asymmetricKeyDecrypt (key.key_handle, 
+                                             new byte[0],
+                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                             ok_pin.getBytes ("UTF-8"), 
+                                             enc);
+            fail ("PIN lock error");
+          }
+        catch (SKSException e)
+          {
+            
+          }
+        try
+          {
+            device.sks.unlockKey (key.key_handle, (puk_ok + "2").getBytes ("UTF-8"));
+            fail ("PUK unlock error");
+          }
+        catch (SKSException e)
+          {
+            
+          }
+        device.sks.unlockKey (key.key_handle, puk_ok.getBytes ("UTF-8"));
+        assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
+                                                                                            new byte[0],
+                                                                                            AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                                                            ok_pin.getBytes ("UTF-8"), 
+                                                                                            enc), TEST_STRING));
+      }
   }

@@ -26,7 +26,6 @@ import org.webpki.xml.ServerCookie;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-
 public class CredentialDeploymentResponseDecoder extends CredentialDeploymentResponse
   {
       

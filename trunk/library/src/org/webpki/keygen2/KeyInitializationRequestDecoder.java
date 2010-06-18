@@ -34,7 +34,6 @@ import org.webpki.crypto.ECDomains;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-
 public class KeyInitializationRequestDecoder extends KeyInitializationRequest
   {
     abstract class PresetValueReference
@@ -475,16 +474,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             return enable_pin_caching;
           }
 
-        
-     // TODO        
-        boolean import_private_key;
-        
-        public boolean getImportPrivateKeyFlag ()
-          {
-            return import_private_key;
-          }
-
-        
+      
         String friendly_name;
         
         public String getFriendlyName ()

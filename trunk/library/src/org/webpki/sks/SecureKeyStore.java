@@ -19,6 +19,9 @@ package org.webpki.sks;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 
+/**
+ * SKS (Secure Key Store) API.
+ */
 public interface SecureKeyStore
   {
     ///////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +57,6 @@ public interface SecureKeyStore
                                   byte export_policy,
                                   byte delete_policy,
                                   boolean enable_pin_caching,
-                                  boolean import_private_key,
                                   byte key_usage,
                                   String friendly_name,
                                   byte[] key_algorithm,
@@ -77,10 +79,14 @@ public interface SecureKeyStore
                               byte[] mac) throws SKSException;
     
     public void setSymmetricKey (int key_handle,
-                                 byte[] encrypted_symmetric_key,
+                                 byte[] symmetric_key,
                                  String[] endorsed_algorithms,
                                  byte[] mac) throws SKSException;
     
+    public void restorePrivateKey (int key_handle,
+                                   byte[] private_key,
+                                   byte[] mac) throws SKSException;
+
     public int createPINPolicy (int provisioning_handle,
                                 String id,
                                 int puk_policy_handle,
@@ -97,7 +103,7 @@ public interface SecureKeyStore
 
     public int createPUKPolicy (int provisioning_handle,
                                 String id,
-                                byte[] encrypted_value,
+                                byte[] value,
                                 byte format,
                                 short retry_limit,
                                 byte[] mac) throws SKSException;
@@ -166,5 +172,8 @@ public interface SecureKeyStore
                              String extension_type,
                              String name,
                              String value) throws SKSException;
+
+    public void unlockKey (int key_handle,
+                           byte[] authorization) throws SKSException;
 
   }

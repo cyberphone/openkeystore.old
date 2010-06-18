@@ -25,7 +25,6 @@ import org.webpki.xml.DOMWriterHelper;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-
 abstract class CredentialDeploymentResponse extends XMLObjectWrapper 
   {
     CredentialDeploymentResponse () {}

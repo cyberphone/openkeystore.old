@@ -694,6 +694,8 @@ public class ServerCredentialStore implements Serializable
         
         PostProvisioningTargetKey clone_or_update_operation;
         
+        boolean key_init_done;
+        
         private void addExtension (ExtensionInterface ei) throws IOException
           {
             if (extensions.put (ei.type, ei) != null)
@@ -753,14 +755,18 @@ public class ServerCredentialStore implements Serializable
           {
             return certificate_path;
           }
-        
+
 
         byte[] encrypted_symmetric_key;
         
         String[] endorsed_algorithms;
 
-        public KeyProperties setSymmetricKey (byte[] encrypted_symmetric_key, String[] endorsed_algorithms)
+        public KeyProperties setEncryptedSymmetricKey (byte[] encrypted_symmetric_key, String[] endorsed_algorithms) throws IOException
           {
+            if (key_usage != KeyUsage.SYMMETRIC_KEY)
+              {
+                bad ("Symmetric keys musy use KeyUsage.SYMMETRIC_KEY");
+              }
             this.encrypted_symmetric_key = encrypted_symmetric_key;
             this.endorsed_algorithms = endorsed_algorithms;
             return this;
@@ -769,6 +775,20 @@ public class ServerCredentialStore implements Serializable
         public byte[] getEncryptedSymmetricKey ()
           {
             return encrypted_symmetric_key;
+          }
+
+
+        byte[] encrypted_private_key;
+        
+        public KeyProperties setEncryptedPrivateKey (byte[] encrypted_private_key)
+          {
+            this.encrypted_private_key = encrypted_private_key;
+            return this;
+          }
+
+        public byte[] getEncryptedPrivateKey ()
+          {
+            return encrypted_private_key;
           }
 
         
@@ -802,11 +822,11 @@ public class ServerCredentialStore implements Serializable
           }
 
 
-        byte[] encrypted_private_key;
+        byte[] backup_private_key;
 
-        public byte[] getEncryptedPrivateKey ()
+        public byte[] getBackupPrivateKey ()
           {
-            return encrypted_private_key;
+            return backup_private_key;
           }
         
 
@@ -834,6 +854,7 @@ public class ServerCredentialStore implements Serializable
             return this;
           }
         
+
         boolean private_key_backup;
         
         public KeyProperties setPrivateKeyBackup (boolean flag)
@@ -958,6 +979,7 @@ public class ServerCredentialStore implements Serializable
 
         void writeRequest (DOMWriterHelper wr, ServerSessionKeyInterface session_key_interface) throws IOException, GeneralSecurityException
           {
+            key_init_done = true;
             MacGenerator key_pair_mac = new MacGenerator ();
             key_pair_mac.addString (id);
             key_pair_mac.addString (key_attestation_algorithm);
