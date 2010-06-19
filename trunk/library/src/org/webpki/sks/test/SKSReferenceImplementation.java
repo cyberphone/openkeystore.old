@@ -1843,7 +1843,15 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     @Override
     public byte[] signProvisioningSessionData (int provisioning_handle, byte[] data) throws SKSException
       {
-        return getOpenProvisioningSession (provisioning_handle).getMacBuilder (KDF_EXTERNAL_SIGNATURE).addVerbatim (data).getResult ();
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get provisioning session
+        ///////////////////////////////////////////////////////////////////////////////////
+        Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Sign (HMAC) data using a derived SessionKey
+        ///////////////////////////////////////////////////////////////////////////////////
+        return provisioning.getMacBuilder (KDF_EXTERNAL_SIGNATURE).addVerbatim (data).getResult ();
       }
 
 
@@ -1956,7 +1964,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for key usage errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE | KEY_USAGE_ENCRYPTION | KEY_USAGE_UNIVERSAL | KEY_USAGE_AUTHENTICATION)) == 0)
+        if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE |
+                                    KEY_USAGE_ENCRYPTION |
+                                    KEY_USAGE_UNIVERSAL |
+                                    KEY_USAGE_AUTHENTICATION)) == 0)
           {
             key_entry.owner.abort ("Invalid key usage for \"restorePrivateKey\" on key: " + key_entry.id);
           }
@@ -2143,8 +2154,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
           }
-        if (private_key_backup && 
-            (key_usage & (KEY_USAGE_SIGNATURE | KEY_USAGE_ENCRYPTION | KEY_USAGE_UNIVERSAL | KEY_USAGE_AUTHENTICATION)) == 0)
+        if (private_key_backup && (key_usage & (KEY_USAGE_SIGNATURE |
+                                                KEY_USAGE_ENCRYPTION |
+                                                KEY_USAGE_UNIVERSAL |
+                                                KEY_USAGE_AUTHENTICATION)) == 0)
           {
             provisioning.abort ("Private key backup not allowed for key usage: " + key_usage);
           }
