@@ -1316,6 +1316,17 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Check the key and then check that the algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
         Algorithm alg = checkKeyAndAlgorithm (key_entry, encryption_algorithm, ALG_SYM_ENC);
+        if ((alg.mask & ALG_IV_REQ) == 0)
+          {
+            if (iv.length != 0)
+              {
+                bad ("IV must be zero length for : " + encryption_algorithm);
+              }
+          }
+        else if (iv.length != 16)
+          {
+            bad ("IV must be 16 bytes for: " + encryption_algorithm);
+          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
@@ -1330,7 +1341,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             Cipher crypt = Cipher.getInstance (alg.jce_name, "BC");
             SecretKeySpec sk = new SecretKeySpec (key_entry.symmetric_key, "AES");
             int mode = encrypt_mode ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
-            if ((alg.mask & ALG_IV_REQ) == 0)
+            if (iv.length == 0)
               {
                 crypt.init (mode, sk);
               }
@@ -2368,7 +2379,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             PrivateKey private_key = key_pair.getPrivate ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // If key backup was requested, wrap a copy of key
+            // If private key backup was requested, wrap a copy of the private key
             ///////////////////////////////////////////////////////////////////////////////////
             byte[] encrypted_private_key = private_key_backup ? provisioning.encrypt (private_key.getEncoded ()) : null;
 
