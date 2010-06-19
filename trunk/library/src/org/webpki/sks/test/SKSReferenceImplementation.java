@@ -1673,21 +1673,24 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               {
                 if (key_entry.owner == old_owner)
                   {
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    // There was a key that required changed ownership
+                    ///////////////////////////////////////////////////////////////////////////////////
                     key_entry.owner = provisioning;
-                  }
-              }
-            for (PINPolicy pin_policy : pin_policies.values ())
-              {
-                if (pin_policy.owner == old_owner)
-                  {
-                    pin_policy.owner = provisioning;
-                  }
-              }
-            for (PUKPolicy puk_policy : puk_policies.values ())
-              {
-                if (puk_policy.owner == old_owner)
-                  {
-                    puk_policy.owner = provisioning;
+                    if (key_entry.pin_policy != null)
+                      {
+                        ///////////////////////////////////////////////////////////////////////////////
+                        // Which also had a PIN policy...
+                        ///////////////////////////////////////////////////////////////////////////////
+                        key_entry.pin_policy.owner = provisioning;
+                        if (key_entry.pin_policy.puk_policy != null)
+                          {
+                            ///////////////////////////////////////////////////////////////////////////
+                            // Which in turn had a PUK policy...
+                            ///////////////////////////////////////////////////////////////////////////
+                            key_entry.pin_policy.puk_policy.owner = provisioning;
+                          }
+                      }
                   }
               }
             provisionings.remove (old_owner.provisioning_handle);  // OK to perform also if already done
