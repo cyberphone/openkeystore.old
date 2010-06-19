@@ -1016,12 +1016,31 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the PUK hasn't already reached max
+        // Check that the PUK error counter hasn't already reached max
         ///////////////////////////////////////////////////////////////////////////////////
         PUKPolicy puk_policy = key_entry.pin_policy.puk_policy;
-        if (puk_policy.error_counter >= puk_policy.retry_limit)
+        if (puk_policy.retry_limit > 0)
           {
-            abort ("PUK for key [" + key_entry.key_handle + "] is already locked", SKSException.ERROR_AUTHORIZATION);
+            ///////////////////////////////////////////////////////////////////////////////////
+            // The key is using the "standard" retry PUK policy
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (puk_policy.error_counter >= puk_policy.retry_limit)
+              {
+                abort ("PUK for key [" + key_entry.key_handle + "] is already locked", SKSException.ERROR_AUTHORIZATION);
+              }
+          }
+        else
+          {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // The "liberal" PUK policy never locks up but introduces a mandatory delay...
+            ///////////////////////////////////////////////////////////////////////////////////
+            try
+              {
+                Thread.sleep (1000);
+              }
+            catch (InterruptedException e)
+              {
+              }
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1029,7 +1048,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         if (!Arrays.equals (puk_policy.puk_value, authorization))
           {
-            ++puk_policy.error_counter;
+            if (puk_policy.retry_limit > 0)
+              {
+                ++puk_policy.error_counter;
+              }
             abort ("Incorrect PUK for key: " + key_entry.key_handle, SKSException.ERROR_AUTHORIZATION);
           }
 
