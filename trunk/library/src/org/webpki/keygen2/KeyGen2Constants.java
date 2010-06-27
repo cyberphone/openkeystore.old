@@ -26,6 +26,12 @@ public interface KeyGen2Constants
 
     // XML attributes
 
+    String ALGORITHMS_ATTR                   = "Algorithms";
+
+    String FEATURES_ATTR                     = "Features";
+
+    String EXTENSIONS_ATTR                   = "Extensions";
+
     String ID_ATTR                           = "ID";
 
     String TYPE_ATTR                         = "Type";
@@ -35,6 +41,8 @@ public interface KeyGen2Constants
     String KEY_USAGE_ATTR                    = "KeyUsage";
 
     String EXPONENT_ATTR                     = "Exponent";
+
+    String SETTABLE_EXPONENT_ATTR            = "SettableExponent";
 
     String SERVER_SESSION_ID_ATTR            = "ServerSessionID";
 
@@ -73,6 +81,8 @@ public interface KeyGen2Constants
     String CERTIFICATE_FINGERPRINT_ATTR      = "CertificateFingerprint";
 
     String MIME_TYPE_ATTR                    = "MimeType";
+
+    String KEY_SIZES_ATTR                    = "KeySizes";
 
     String MAC_ATTR                          = "MAC";
 
@@ -137,6 +147,8 @@ public interface KeyGen2Constants
 
     // XML elements
 
+    String BASIC_CAPABILITIES_ELEM           = "BasicCapabilities";
+
     String SERVER_EPHEMERAL_KEY_ELEM         = "ServerEphemeralKey";
 
     String DEVICE_CERTIFICATE_ELEM           = "DeviceCertificate";
@@ -172,6 +184,8 @@ public interface KeyGen2Constants
     String PROPERTY_ELEM                     = "Property";       
 
     String PROPERTY_BAG_ELEM                 = "PropertyBag";       
+
+    String RSA_SUPPORT_ELEM                  = "RSASupport";
 
     String RSA_ELEM                          = "RSA";
 

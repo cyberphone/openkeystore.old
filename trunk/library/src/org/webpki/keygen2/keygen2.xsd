@@ -59,12 +59,31 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- Optional logotype that MAY be shown in the provisioning GUI
+            <!-- Issuer logotypes that SHOULD be shown in the provisioning GUI
                  as "branding" and hint.  See the "Logotype" element for
-                 general recommendations regarding images.  An "IssuerLogotype"
-                 is RECOMMENDED to be of the size and type matching
-                 "http://xmlns.webpki.org/keygen2/1.0#logotype.application" -->
-            <xs:element name="IssuerLogotype" type="kgen:imageType" minOccurs="0"/>
+                 general recommendations regarding images. An issuer SHOULD
+                 provide a selection of images so that the client software
+                 can use one which fits the screen of the provisioning device -->
+            <xs:element name="IssuerLogotype" maxOccurs="unbounded">
+               <xs:complexType>
+
+                  <!-- Where to get the logotype. -->
+                  <xs:attribute name="LogotypeURL" type="kgen:httpURI" use="required"/>
+
+                  <!-- MIME type. -->
+                  <xs:attribute name="MimeType" type="kgen:mimeType" use="required"/>
+
+                  <!-- Width in pixels.  For SVG it holds the "ideal" width -->
+                  <xs:attribute name="Width" type="xs:positiveInteger" use="required"/>
+
+                  <!-- Height in pixels.  For SVG it holds the "ideal" height -->
+                  <xs:attribute name="Height" type="xs:positiveInteger" use="required"/>
+
+                  <!-- ImageFingerprint using SHA256. -->
+                  <xs:attribute name="ImageFingerprint" type="xs:base64Binary" use="required"/>
+
+               </xs:complexType>
+            </xs:element>
 
             <!-- The requesting issuer SHOULD enquire about capabilities that are
                  not default or even may be unavailable due to export restrictions.
@@ -72,7 +91,7 @@
                  fact lead to run-time errors in the client implementation! -->
             <xs:element ref="kgen:BasicCapabilities"/>
 
-            <!-- See "ServerCookie" definition. -->
+            <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
             <!-- A request MAY also include an enveloped XML signature
@@ -85,19 +104,19 @@
                  If the trust anchor is not known, the client software SHOULD
                  warn the user before proceeding.  The user SHOULD be able to
                  abort the operation in case of an unknown issuer.  A broken
-                 signature MUST abort the entire process. -->
+                 signature MUST abort the entire process -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
 
          </xs:sequence> 
 
          <!-- This mandatory server-generated item MUST be unique between
               key provisioning sessions but MUST remain constant among
-              requests within a specific session. -->
+              requests within a specific session -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- Where to HTTP POST the platform negotiation response.
               Note that applicable session cookies MUST be submitted
-              in the request as well.  -->
+              in the request as well -->
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
       </xs:complexType>
@@ -122,20 +141,20 @@
                  export restrictions or marginal implementations, output
                  its reduced capability in order for the issuer to either
                  deny credentials (with an appropriate message to user...),
-                 or issue credentials with a limited scope.
+                 or issue credentials with a possibly more limited scope.
 
                  In the case a capability is secret, a client MAY not
                  return a capability except for signed requests from a
-                 known (pre-configured) party. -->
+                 known (pre-configured) party -->
             <xs:element ref="kgen:BasicCapabilities"/>
 
-            <!-- See "ServerCookie" definition. -->
+            <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
          </xs:sequence>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
-              within a specific session. -->
+              within a specific session -->
          <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
       </xs:complexType>
@@ -155,7 +174,7 @@
          <xs:sequence>
 
             <!-- "ServerEphemeralKey" holds a server-generated ephemeral key
-                 for creating an SKS "SessionKey" (shared session key). -->
+                 for creating an SKS "SessionKey" (shared session key) -->
             <xs:element name="ServerEphemeralKey">
                <xs:complexType>
                   <xs:sequence>
@@ -167,24 +186,24 @@
                </xs:complexType>
             </xs:element>
 
-            <!-- See "ServerCookie" definition. -->
+            <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
-            <!-- See "PlatformNegotiationRequest/Signature". -->
+            <!-- See "PlatformNegotiationRequest/Signature" -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
 
          </xs:sequence> 
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
-              within a specific session. -->
+              within a specific session -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- Mandatory time-stamp indicating when the request was issued.
-              The provisioning middleware MAY check it for "sanity". -->
+              The provisioning middleware MAY check it for "sanity" -->
          <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
 
          <!-- "SessionLifeTime" specifies the lifetime of the SKS
-              provisioning session in seconds. -->
+              provisioning session in seconds -->
          <xs:attribute name="SessionLifeTime" use="required">
             <xs:simpleType>
                <xs:restriction base="xs:positiveInteger">
@@ -195,7 +214,7 @@
          </xs:attribute>
 
          <!-- "SessionKeyLimit" specifies how many "SessionKey"
-              operations the SKS should permit. -->
+              operations the SKS should permit -->
          <xs:attribute name="SessionKeyLimit" use="required">
             <xs:simpleType>
                <xs:restriction base="xs:positiveInteger">
@@ -208,12 +227,12 @@
          <!-- "SessionKeyAlgorithm" specifies the algorithm to use for
               creating an SKS "SessionKey".  Currently the only known URI is:
 
-              "http://xmlns.webpki.org/keygen2/1.0#algorithm.sk1". -->
+              "http://xmlns.webpki.org/keygen2/1.0#algorithm.sk1" -->
          <xs:attribute name="SessionKeyAlgorithm" type="xs:anyURI" use="required"/>
 
          <!-- "Updatable" tells SKS if the provisioning session may
               be referred to in post-provisioning sessions or not.
-              Default: false. -->
+              Default: false -->
          <xs:attribute name="Updatable" type="xs:boolean" use="optional"/>
 
          <!-- Where to HTTP POST the provisioning session response.
@@ -241,20 +260,20 @@
          <xs:sequence>
 
             <!-- "ClientEphemeralKey" holds an SKS-generated ephemeral key
-                 for creating an SKS "SessionKey" (shared session key). -->
+                 for creating an SKS "SessionKey" (shared session key) -->
             <xs:element name="ClientEphemeralKey">
                <xs:complexType>
                   <xs:sequence>
 
                      <!-- MUST contain an ECDH public key using the same
-                          elliptic curve as "ServerEphemeralKey". -->
+                          elliptic curve as "ServerEphemeralKey" -->
                      <xs:element ref="ds11:ECKeyValue"/>
 
                   </xs:sequence>
                </xs:complexType>
             </xs:element>
 
-            <!-- "DeviceCertificate" holds the SKS device certificate. -->
+            <!-- "DeviceCertificate" holds the SKS device certificate -->
             <xs:element name="DeviceCertificate">
                <xs:complexType>
                   <xs:sequence>
@@ -266,35 +285,35 @@
                </xs:complexType>
             </xs:element>
 
-            <!-- See "ServerCookie" definition. -->
+            <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
             <!-- MUST hold an enveloped XML symmetric-key signature created
                  by the SKS "signProvisioningSessionData" method and use "ID"
-                 as the "Reference" URI attribute. -->
+                 as the "Reference" URI attribute -->
             <xs:element ref="ds:Signature"/>
 
          </xs:sequence> 
 
-         <!-- "ID" holds the SKS-generated ClientSessionID. -->
+         <!-- "ID" holds the SKS-generated ClientSessionID -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
-         <!-- MUST be equal to "ProvisioningSessionRequest/@ID". -->
+         <!-- MUST be equal to "ProvisioningSessionRequest/@ID" -->
          <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
-         <!-- Copy of "ProvisioningSessionRequest/@ServerTime". -->
+         <!-- Copy of "ProvisioningSessionRequest/@ServerTime" -->
          <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
 
-         <!-- The provisioning client's local clock is a mandatory item. -->
+         <!-- The provisioning client's local clock is a mandatory item -->
          <xs:attribute name="ClientTime" type="xs:dateTime" use="required"/>
 
          <!-- The "SessionAttestation" attribute holds the output from
-              the SKS "createProvisioningSession" method. -->
+              the SKS "createProvisioningSession" method -->
          <xs:attribute name="SessionAttestation" type="xs:base64Binary" use="required"/>
 
          <!-- The "ServerCertificateFingerprint" attribute MUST be populated with
               the SHA256 hash of the associated server certificate if the
-              "ProvisioningSessionResponse" was invoked over HTTPS. -->
+              "ProvisioningSessionResponse" was invoked over HTTPS -->
          <xs:attribute name="ServerCertificateFingerprint" type="xs:base64Binary" use="optional"/>
 
       </xs:complexType>
@@ -315,30 +334,30 @@
 
             <xs:choice maxOccurs="unbounded">
 
-               <!-- A key that requires no PIN code. -->
+               <!-- A key that requires no PIN code -->
                <xs:element ref="kgen:KeyPair"/>
 
                <!-- One or more keys that are protected by a specific PIN policy.
                     In addition to the PIN there is a master PUK code that can
                     unlock keys that have been locked due to the use of erroneous
-                    PIN codes. -->
+                    PIN codes -->
                <xs:element ref="kgen:PUKPolicy"/>
 
-               <!-- One or more keys that are protected by a specific PIN policy. -->
+               <!-- One or more keys that are protected by a specific PIN policy -->
                <xs:element ref="kgen:PINPolicy"/>
 
                <!-- A key that is protected by the same PIN as the device.
                     This option (which MAY be supported by the device), is
                     mainly intended for keys belonging to an organization
-                    that manages the device. -->
+                    that manages the device -->
                <xs:element ref="kgen:DevicePIN"/>
 
            </xs:choice>
 
-            <!-- See "ServerCookie" definition. -->
+            <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
-            <!-- See "PlatformNegotiationRequest/Signature". -->
+            <!-- See "PlatformNegotiationRequest/Signature" -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
 
          </xs:sequence> 
@@ -348,24 +367,24 @@
               like required by some certification schemes.  The attribute
               below informs the client software if the current process is
               to be terminated after the "KeyInitializationResponse" message
-              has been sent.  Default:  false. -->
+              has been sent.  Default:  false -->
          <xs:attribute name="DeferredCertification" type="xs:boolean" use="optional"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
-              within a specific session. -->
+              within a specific session -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- MUST be equal to"ProvisioningSessionResponse/@ID"
-              within a specific session. -->
+              within a specific session -->
          <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
 
          <!-- Where to HTTP POST the key operation response.  Note that
               applicable session cookies MUST be submitted in the request
-              as well. -->
+              as well -->
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
          <!-- "KeyAttestationAlgorithm" is mandatory.  Currently the only known is:
-              "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1". -->
+              "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1" -->
          <xs:attribute name="KeyAttestationAlgorithm" type="xs:anyURI" use="required"/>
 
       </xs:complexType>
@@ -385,20 +404,20 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- The keys to be certified. -->
+            <!-- The keys to be certified -->
             <xs:element ref="kgen:GeneratedPublicKey" maxOccurs="unbounded"/>
 
-            <!-- See "ServerCookie" definition. -->
+            <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
          </xs:sequence>
 
          <!-- MUST be equal to "PlatformNegotiationResponse/@ID"
-              within a specific session. -->
+              within a specific session -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
-              within a specific session. -->
+              within a specific session -->
          <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
       </xs:complexType>
@@ -417,40 +436,35 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- The now certified keys. -->
+            <!-- The now certified keys -->
             <xs:element ref="kgen:CertifiedPublicKey" maxOccurs="unbounded"/>
 
-            <!-- Optional post provisioning deletes. -->
+            <!-- SKS Reference: pp_deleteKey -->
             <xs:element name="DeleteKey" type="kgen:managementObject" minOccurs="0" maxOccurs="unbounded"/>
 
-            <!-- See "ServerCookie" definition. -->
+            <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
-            <!-- See "PlatformNegotiationRequest/Signature". -->
+            <!-- See "PlatformNegotiationRequest/Signature" -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
 
          </xs:sequence>
 
          <!-- MUST be equal to "ProvisioningSessionResponse/@ID"
-              within a specific session. -->
+              within a specific session -->
          <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
-              within a specific session. -->
+              within a specific session -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
-         <!-- Where to POST the response. -->
+         <!-- Where to POST the response -->
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
-         <!-- "closeProvisioningSession" MAC. -->
+         <!-- SKS Reference: closeProvisioningSession -->
          <xs:attribute name="CloseSessionMAC" type="xs:base64Binary" use="required"/>
+
       </xs:complexType>
-
-      <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                Constraints (that can be enforced by schema-directed validation).
-       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
    </xs:element>
 
    <!--==========================================================================================
@@ -466,20 +480,20 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- See "ServerCookie" definition. -->
+            <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
          </xs:sequence>
 
          <!-- MUST be equal to "PlatformNegotiationResponse/@ID"
-              within a specific session. -->
+              within a specific session -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
-              within a specific session. -->
+              within a specific session -->
          <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
-         <!-- "closeProvisioningSession" attestation. -->
+         <!-- SKS Reference: closeProvisioningSession -->
          <xs:attribute name="CloseSessionAttestation" type="xs:base64Binary" use="required"/>
 
       </xs:complexType>
@@ -513,11 +527,11 @@
             </xs:simpleType>
          </xs:attribute>
 
-         <!-- String associated with the "Error" code. -->
+         <!-- String associated with the "Error" code -->
          <xs:attribute name="Argument" type="xs:string" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
-              within a specific session. -->
+              within a specific session -->
          <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
       </xs:complexType>
@@ -539,7 +553,7 @@
                  the client SHOULD anyway return its capability if it differs
                  (presumably due to export issues) from the mandatory
                  RSA 1024 and 2048 key-sizes or is unable to set exponents -->
-            <xs:element name="RSAKeyGenerationSupport" minOccurs="0">
+            <xs:element name="RSASupport" minOccurs="0">
                <xs:complexType>
 
                   <!-- List of RSA key-sizes -->
@@ -562,36 +576,31 @@
 
          </xs:sequence>
 
-         <!-- In a request issuer preferences are listed in descending order.
+         <!-- In a request algorithm preferences are listed in descending order.
               If this element is not specified during the request phase,
               the client SHOULD anyway return its capability if it differs
-              (presumably due to export issues) from the mandatory
-              "http://www.w3.org/2001/04/xmlenc#aes256-cbc" algorithm  -->
-         <xs:attribute name="SymmetricKeyEncryptionAlgorithms" type="kgen:uriList" use="optional"/>
+              from the mandatory SKS algorithms -->
+         <xs:attribute name="Algorithms" type="kgen:uriList" use="optional"/>
 
-         <!-- In a request issuer preferences are listed in descending order.
-              Conforming clients MUST support the (default)
-              "http://www.w3.org/2001/04/xmlenc#rsa-1_5" algorithm -->
-         <xs:attribute name="AsymmetricKeyEncryptionAlgorithms" type="kgen:uriList" use="optional"/>
+         <!-- In a request feature preferences are listed in descending order.
+              Features are things that are supported by the SKS or the platform
+              the SKS is running in -->
+         <xs:attribute name="Features" type="kgen:uriList" use="optional"/>
 
-         <!-- In a request issuer preferences are listed in descending order.
-              Conforming clients MUST support the (default)
-              "http://xmlns.webpki.org/keygen2/1.0#algorithm.key-attestation-1"
-              method -->
-         <xs:attribute name="KeyAttestationMethods" type="kgen:uriList" use="optional"/>
-
-         <!-- Arbitrary extensions MAY be requested.  Although most clients
-              are likely to for example support HOTP
+         <!-- Arbitrary extension objects MAY be requested.  Although most
+              clients are likely to for example support HOTP
               ("http://xmlns.webpki.org/keygen2/1.0#provider.ietf-hotp"),
-              application support is outside of the core KeyGen2 specification
-              and SHOULD be requested rather than taken for granted -->
+              application support is outside of the core SKS specification
+              and SHOULD be requested rather than taken for granted.
+              A provisioning client MAY dynamicaĺly check for application
+              availability -->
          <xs:attribute name="Extensions" type="kgen:uriList" use="optional"/>
 
       </xs:complexType>
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      Base-object for representing a certified public key.
+                     Base-object for representing a certified public key
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <xs:element name="CertifiedPublicKey">
@@ -607,12 +616,13 @@
                  respect to being known or trusted by the client platform.
                  That is, all technically valid certificates MUST be accepted
                  without warnings.  Certificates in excess of 50KB MAY though
-                 be rejected. -->
+                 be rejected -->
             <xs:element ref="ds:X509Data"/>
 
              <xs:choice minOccurs="0">
  
-               <!-- Optional: "piggybacked" symmetric key. -->
+               <!-- SKS Reference: setSymmetricKey 
+                    Optional "piggybacked" symmetric key -->
                <xs:element name="SymmetricKey">
                   <xs:complexType>
                      <xs:simpleContent>
@@ -620,10 +630,10 @@
  
                            <!-- "EndorsedAlgorithms" holds a non-empty list of
                                 algorithms endorsed by the issuer for usage with
-                                the provisioned symmetric key. -->
+                                the provisioned symmetric key -->
                            <xs:attribute name="EndorsedAlgorithms" type="kgen:uriList" use="required"/>
         
-                           <!-- Mandatory MAC (Message Authentication Code). -->
+                           <!-- Mandatory MAC (Message Authentication Code) -->
                            <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
                         </xs:extension>
@@ -631,13 +641,14 @@
                   </xs:complexType>
                </xs:element>
 
-               <!-- Optional: restored private key. -->
+               <!-- SKS Reference: restorePrivateKey 
+                    Optional restored private key -->
                <xs:element name="PrivateKey">
                   <xs:complexType>
                      <xs:simpleContent>
                         <xs:extension base="xs:base64Binary">
       
-                           <!-- Mandatory MAC (Message Authentication Code). -->
+                           <!-- Mandatory MAC (Message Authentication Code) -->
                            <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
                         </xs:extension>
@@ -647,14 +658,16 @@
 
             </xs:choice>
 
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
+             <xs:choice minOccurs="0" maxOccurs="unbounded">
 
-               <!-- Some credentials like OTP seeds need additional attributes
+               <!-- SKS Reference: addExtension 
+                    Some credentials like OTP seeds need additional attributes
                     to work.  These are supplied as typed "PropertyBags" holding
-                    "Property" name-value elements. -->
+                    "Property" name-value elements -->
                <xs:element ref="kgen:PropertyBag"/>
 
-               <!-- Optional logotypes that can be used in various GUIs.
+               <!-- SKS Reference: addExtension 
+                    Optional logotypes that can be used in various GUIs.
                     The "Type" URI indicates a logotype's usage and SHOULD
                     be communicated during the platform negotiation phase.
                     Logotypes MAY be ignored by the client software.  Currently
@@ -682,13 +695,13 @@
                     Logotype "surroundings" should preferably be transparent to
                     accommodate white to light grey backgrounds.  If there are
                     shadows that should migrate with the background, PNG files
-                    with alpha channels are recommended. -->
+                    with alpha channels are recommended -->
                <xs:element name="Logotype">
                   <xs:complexType>
                      <xs:simpleContent>
                         <xs:extension base="kgen:imageType">
 
-                           <!-- Mandatory extension type attribute. -->
+                           <!-- Mandatory extension type attribute -->
                            <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
                         </xs:extension>
@@ -696,18 +709,13 @@
                   </xs:complexType>
                </xs:element>
 
-               <!-- If platform negotiations (through the use of mutually
-                    recognized credential extension URIs) indicate support
-                    for additional data associated with a certified key it is
-                    supposed to be delivered in the following optional object.
-                    To not interfere with core KeyGen2 XML schema validation,
-                    extension data including XML ditto MUST be Base64-encoded. -->
+               <!-- SKS Reference: addExtension -->
                <xs:element name="Extension">
                   <xs:complexType>
                      <xs:simpleContent>
                         <xs:extension base="xs:base64Binary">
 
-                           <!-- Mandatory extension type attribute. -->
+                           <!-- Mandatory extension type attribute -->
                            <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
                         </xs:extension>
@@ -715,13 +723,13 @@
                   </xs:complexType>
                </xs:element>
 
-               <!-- Encrypted version of "Extension". -->
+               <!-- SKS Reference: addExtension -->
                <xs:element name="EncryptedExtension">
                   <xs:complexType>
                      <xs:simpleContent>
                         <xs:extension base="xs:base64Binary">
 
-                           <!-- Mandatory extension type attribute. -->
+                           <!-- Mandatory extension type attribute -->
                            <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
                         </xs:extension>
@@ -733,16 +741,18 @@
            
            <xs:choice minOccurs="0">
 
-             <xs:element name="UpdateKey" type="kgen:managementObject"/>
+              <!-- SKS Reference: pp_updateKey -->
+              <xs:element name="UpdateKey" type="kgen:managementObject"/>
 
-             <xs:element name="CloneKeyProtection" type="kgen:managementObject"/>
+              <!-- SKS Reference: pp_cloneKeyProtection -->
+              <xs:element name="CloneKeyProtection" type="kgen:managementObject"/>
 
            </xs:choice>
 
          </xs:sequence>
 
          <!-- A unique key-ID which MUST match the corresponding
-              "KeyInitializationResponse/GeneratedPublicKey/@ID". -->
+              "KeyInitializationResponse/GeneratedPublicKey/@ID" -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
@@ -750,10 +760,10 @@
       </xs:complexType>
 
       <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                Constraints (that can be enforced by schema-directed validation).
+                Constraints (that can be enforced by schema-directed validation)
        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-      <!-- All Extension type URIs for a key MUST be a unique. -->
+      <!-- All Extension type URIs for a key MUST be a unique -->
       <xs:unique name="ExtensionTypeUnique">
          <xs:selector xpath="*"/>
          <xs:field xpath="@Type"/>
@@ -762,7 +772,7 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      Object for representing properties.
+                            Object for representing properties
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:element name="PropertyBag">
@@ -771,7 +781,7 @@
             <xs:element name="Property" maxOccurs="unbounded">
                <xs:complexType>
 
-                  <!-- The unique name of the property. -->
+                  <!-- The unique name of the property -->
                   <xs:attribute name="Name" use="required">
                      <xs:simpleType>
                         <xs:restriction base="xs:string">
@@ -781,27 +791,27 @@
                      </xs:simpleType>
                   </xs:attribute>
 
-                  <!-- The value of the property. -->
+                  <!-- The value of the property -->
                   <xs:attribute name="Value" type="xs:string" use="required"/>
 
                   <!-- By default values are read-only but they may be
-                       declared as read/writable as well. -->
+                       declared as read/writable as well -->
                   <xs:attribute name="Writable" type="xs:boolean" use="optional"/>
 
                </xs:complexType>
             </xs:element>
          </xs:sequence>
 
-         <!-- Mandatory extension attributes. -->
+         <!-- Mandatory extension attributes -->
          <xs:attributeGroup ref="kgen:extensionAttrs"/>
 
       </xs:complexType>
 
       <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                Constraints (that can be enforced by schema-directed validation).
+                Constraints (that can be enforced by schema-directed validation)
        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-      <!-- All Properties within a PropertyBag MUST be a unique. -->
+      <!-- All Properties within a PropertyBag MUST be a unique -->
       <xs:unique name="PropertyUnique">
          <xs:selector xpath="kgen:Property"/>
          <xs:field xpath="@Name"/>
@@ -810,10 +820,10 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      Base-object for representing a created public key.
+                    Base-object for representing a created public key
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <xs:element name="GeneratedPublicKey">
+   <xs:element name="GeneratedPublicKey">
       <xs:complexType>
          <xs:sequence>
 
@@ -827,27 +837,25 @@
 
             </xs:choice>
 
-            <!-- Optional private key wrapped by SKS. 
-                 See "KeyPair@PrivateKeyBackup".-->
- 
+            <!-- SKS Reference: createKeyPair.PrivateKeyBackup -->
             <xs:element name="PrivateKey" type="xs:base64Binary" minOccurs="0"/>
  
          </xs:sequence>
 
          <!-- SKS attestation vouching for the public key as being generated in 
               a specific environment together with its private key counterpart.
-              Also see: "KeyAttestationAlgorithm". -->
+              Also see: "KeyAttestationAlgorithm" -->
          <xs:attribute name="KeyAttestation" type="xs:base64Binary" use="optional"/>
 
          <!-- A unique key-ID which MUST match a "KeyPair/@ID"
-              in the corresponding "KeyInitializationRequest". -->
+              in the corresponding "KeyInitializationRequest" -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
       </xs:complexType>
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      Base-object for requesting the creation of a key (pair).
+                   Base-object for requesting the creation of a key (pair)
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:element name="KeyPair">
@@ -864,7 +872,7 @@
                      <xs:attribute name="KeySize" type="xs:positiveInteger" use="required"/>
 
                      <!-- SKS Reference: createKeyPair.RSAExponent 
-                          Default: 0 => Use SKS default. -->
+                          Default: 0 => Use SKS default -->
                     <xs:attribute name="Exponent" type="xs:positiveInteger" use="optional"/>
 
                   </xs:complexType>
@@ -882,7 +890,7 @@
                <xs:element name="DSA">
                   <xs:complexType>
 
-                     <!-- NOT READY. The length of the key. -->
+                     <!-- NOT READY. The length of the key -->
                      <xs:attribute name="KeySize" type="xs:integer" use="required"/>
 
                   </xs:complexType>
@@ -896,30 +904,28 @@
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- SKS Reference: createKeyPair.ServerSeed 
-              Default: 32 zero bytes. -->
+              Default: 32 zero bytes -->
          <xs:attribute name="ServerSeed" type="xs:base64Binary" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.KeyUsage. -->
+         <!-- SKS Reference: createKeyPair.KeyUsage -->
          <xs:attribute name="KeyUsage" type="kgen:keyUsageTypes" use="required"/>
 
          <!-- SKS Reference: createKeyPair.PrivateKeyBackup 
-              Default: false. -->
+              Default: false -->
          <xs:attribute name="PrivateKeyBackup" type="xs:boolean" use="optional"/>
 
          <!-- SKS Reference: createKeyPair.EnablePINCaching 
-              Default: false. -->
+              Default: false -->
          <xs:attribute name="EnablePINCaching" type="xs:boolean" use="optional"/>
 
 <!--  VERY UNCLEAR -->
 
-         <!-- Is the key exportable?  Note: this option MAY be supported
-              by the client.  Note: in the case "KeyUsage" is defined as
-              "symmetric-key", it is actually the exportability
-              of the symmetric key that is denoted.  Default: false. -->
+         <!-- SKS Reference: createKeyPair.ExportPolicy 
+              Default: false -->
          <xs:attribute name="Exportable" type="xs:boolean" use="optional"/>
 
          <!-- SKS Reference: createKeyPair.FriendlyName 
-              Default: false. -->
+              Default: false -->
          <xs:attribute name="FriendlyName" type="xs:string" use="optional"/>
 
          <!-- SKS Reference: createKeyPair.MAC --> 
@@ -941,14 +947,14 @@
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       Request sub-object for creating a set of PIN-protected keys associated with a
-      a common master PUK code. 
+      a common master PUK code
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:element name="PUKPolicy">
       <xs:complexType>
          <xs:sequence>
 
-            <!-- The PIN-protected key groups. -->
+            <!-- The PIN-protected key groups -->
             <xs:element ref="kgen:PINPolicy" maxOccurs="unbounded"/>
 
          </xs:sequence>
@@ -972,7 +978,7 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      Request sub-object for creating a set of keys associated with a user PIN policy.
+      Request sub-object for creating a set of keys associated with a user PIN policy
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:element name="PINPolicy">
@@ -982,10 +988,10 @@
             <xs:choice>
 
                <!-- One or more keys protected by user-defined PINs governed by
-                    a common PIN policy. -->
+                    a common PIN policy -->
                <xs:element ref="kgen:KeyPair" maxOccurs="unbounded"/>
 
-               <!-- One or more keys protected by issuer-defined PINs. -->
+               <!-- One or more keys protected by issuer-defined PINs -->
                <xs:element name="PresetPIN" maxOccurs="unbounded">
                   <xs:complexType>
 
@@ -1009,14 +1015,14 @@
          <!-- SKS Reference: createPINPolicy.PUKPolicyHandle 
               "PUKPolicyHandle" is an implicit and implementation-dependent
               PUK reference object which is defined by the presence of an
-              enclosing "PUKPolicy" object. -->
+              enclosing "PUKPolicy" object -->
 
          <!-- SKS Reference: createPINPolicy.UserDefined 
               "UserDefined" is an implicit variable which is defined by the
-              presence of a "PresetPIN" object enclosing the "KeyPair" object. -->
+              presence of a "PresetPIN" object enclosing the "KeyPair" object -->
 
          <!-- SKS Reference: createPINPolicy.UserModifiable 
-              Default: false for preset PINs, true for user-defined PINs. -->
+              Default: false for preset PINs, true for user-defined PINs -->
          <xs:attribute name="UserModifiable" type="xs:boolean" use="optional"/>
 
          <!-- SKS Reference: createPINPolicy.Format -->
@@ -1026,11 +1032,11 @@
          <xs:attribute name="RetryLimit" type="xs:unsignedShort" use="required"/>
 
          <!-- SKS Reference: createPINPolicy.Grouping 
-              Default: "none". -->
+              Default: "none" -->
          <xs:attribute name="Grouping" type="kgen:pinGrouping" use="optional"/>
 
          <!-- SKS Reference: createPINPolicy.PatternRestrictions 
-              Default: none. -->
+              Default: none -->
          <xs:attribute name="PatternRestrictions" type="kgen:pinPatternList" use="optional"/>
 
          <!-- SKS Reference: createPINPolicy.MinLength -->
@@ -1040,7 +1046,7 @@
          <xs:attribute name="MaxLength" type="kgen:pinLength" use="required"/>
 
          <!-- SKS Reference: createPINPolicy.InputMethod 
-              Default: "any". -->
+              Default: "any" -->
          <xs:attribute name="InputMethod" type="kgen:pinInput" use="optional"/>
 
          <!-- SKS Reference: createPINPolicy.MAC -->
@@ -1050,7 +1056,7 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      Request sub-object for creating a key protected by the key "host" device PIN-code.
+      Request sub-object for creating a key protected by the key "host" device PIN-code
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:element name="DevicePIN">
@@ -1063,16 +1069,16 @@
 
    <xs:complexType name="managementObject">
 
-      <!-- One of the two IDs identifying a provisioning session. -->
+      <!-- One of the two IDs identifying a provisioning session -->
       <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
 
-      <!-- The other ID identifying a provisioning session. -->
+      <!-- The other ID identifying a provisioning session -->
       <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
-      <!-- Handle to the certificate that is specified by management objects. -->
+      <!-- Handle to the certificate that is specified by management objects -->
       <xs:attribute name="CertificateFingerprint" type="xs:base64Binary" use="required"/>
 
-      <!-- Mandatory MAC (Message Authentication Code). -->
+      <!-- Mandatory MAC (Message Authentication Code) -->
       <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
    </xs:complexType>
@@ -1086,7 +1092,7 @@
               be kept or deleted depending on which one is biggest.  The "Subject"
               attribute is a regular expression matching RFC 2253 names.  "Email"
               attributes SHOULD be searched for in both the subject DN and in
-              subject alt name extensions.  -->
+              subject alt name extensions -->
          <xs:attribute name="Subject" type="kgen:distinguishedNameExpr" use="optional"/>
          <xs:attribute name="Serial" type="xs:integer" use="optional"/>
          <xs:attribute name="Email" type="xs:string" use="optional"/>
@@ -1099,7 +1105,7 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      IDs flowing between the SKS and the issuers MUST be 1-32 bytes.
+      IDs flowing between the SKS and the issuers MUST be 1-32 bytes
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="sksID">
@@ -1123,7 +1129,7 @@
       request and a time stamp.  The format of ServerCookie data is out of scope
       for the KeyGen2 specification.  If a ServerCookie is specified in a request
       it MUST be copied verbatim to the associated response object by the client
-      software.
+      software
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:element name="ServerCookie">
@@ -1136,7 +1142,7 @@
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       Image definition.  An image SHOULD consist of a size-wise device-adapted
-      GIF or PNG picture.
+      GIF or PNG picture
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:complexType name="imageType">
@@ -1148,7 +1154,7 @@
    </xs:complexType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                    Key usage definitions.
+                                Key usage definitions
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="keyUsageTypes">
@@ -1163,7 +1169,7 @@
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                       PIN policy definitions.
+                                  PIN policy definitions
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="pinLength">
@@ -1218,7 +1224,7 @@
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                   URI and OID definitions.
+                                 URI and OID definitions
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="oidValue">
@@ -1251,7 +1257,7 @@
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                  Language list definitions.
+                                  Language list definitions
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="languageList">
@@ -1264,7 +1270,7 @@
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                MIME type definition (MUST NOT contain character encoding).
+                MIME type definition (MUST NOT contain character encoding)
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="mimeType">
@@ -1274,7 +1280,7 @@
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                  Key container definitions.
+                                  Key container definitions
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="containerList">
@@ -1298,7 +1304,7 @@
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Subject" attributes MUST be represented as regular expressions compatible with
      the XML Schema "pattern" facet.  Note that the regular expressions MUST be
-     targeted for RFC 2253 encoded data.
+     targeted for RFC 2253 encoded data
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="distinguishedNameExpr">

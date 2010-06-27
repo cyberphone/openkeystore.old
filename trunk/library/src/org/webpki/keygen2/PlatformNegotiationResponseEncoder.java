@@ -1,5 +1,4 @@
 package org.webpki.keygen2;
-
 /*
  *  Copyright 2006-2010 WebPKI.org (http://webpki.org).
  *
@@ -22,7 +21,6 @@ import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.ServerCookie;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
-
 
 public class PlatformNegotiationResponseEncoder extends PlatformNegotiationResponse
   {

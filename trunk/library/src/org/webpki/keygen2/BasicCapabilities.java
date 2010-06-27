@@ -17,56 +17,77 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
-import java.io.Serializable;
 
-import java.util.Vector;
 import java.util.LinkedHashSet;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 
-import org.webpki.crypto.EncryptionAlgorithms;
-import org.webpki.crypto.SymEncryptionAlgorithms;
+import static org.webpki.keygen2.KeyGen2Constants.*;
 
-
-public class BasicCapabilities implements Serializable
+public class BasicCapabilities
   {
-    private static final long serialVersionUID = 1L;
+    LinkedHashSet<String> algorithms = new LinkedHashSet<String> ();
 
-    static final String BASIC_CAPABILITIES_ELEM = "BasicCapabilities";
+    LinkedHashSet<String> features = new LinkedHashSet<String> ();
 
-    static final String SYMMETRIC_KEY_ENCRYPTION_ALGORITHMS_ATTR = "SymmetricKeyEncryptionAlgorithms";
-
-    LinkedHashSet<SymEncryptionAlgorithms> sym_encryption_algorithms = new LinkedHashSet<SymEncryptionAlgorithms> ();
+    LinkedHashSet<String> extensions = new LinkedHashSet<String> ();
+    
+    LinkedHashSet<Integer> rsa_key_sizes = new LinkedHashSet<Integer> ();
+    
+    boolean rsa_exponent_set;
+    
+    boolean rsa_exponent_settable;
+    
+    boolean rsa_key_size_set;
 
     String comment;
     
+    public BasicCapabilities ()
+      {
+        rsa_key_sizes.add (1024);
+        rsa_key_sizes.add (2048);
+      }
+    
+    
+    static void read (DOMReaderHelper rd, LinkedHashSet<String> args, String tag) throws IOException
+      {
+        String[] opt_uri_list = rd.getAttributeHelper ().getListConditional (tag);
+        if (opt_uri_list != null)
+          {
+            for (String uri : opt_uri_list)
+              {
+                args.add (uri);
+              }
+          }
+      }
 
     static BasicCapabilities read (DOMReaderHelper rd) throws IOException
       {
         BasicCapabilities doc_data = new BasicCapabilities ();
         rd.getNext (BASIC_CAPABILITIES_ELEM);
-        String[] opt_uri_list = rd.getAttributeHelper ().getListConditional (SYMMETRIC_KEY_ENCRYPTION_ALGORITHMS_ATTR);
-        if (opt_uri_list != null) for (String algorithm_uri : opt_uri_list)
-          {
-            doc_data.sym_encryption_algorithms.add (SymEncryptionAlgorithms.getAlgorithmFromURI (algorithm_uri));
-          }
+        read (rd, doc_data.algorithms, ALGORITHMS_ATTR);
+        read (rd, doc_data.features, FEATURES_ATTR);
+        read (rd, doc_data.extensions, EXTENSIONS_ATTR);
         rd.getChild ();
+        if (rd.hasNext ())
+          {
+            rd.getNext (RSA_SUPPORT_ELEM);
+            for (String rsa : rd.getAttributeHelper ().getList (KEY_SIZES_ATTR))
+              {
+                doc_data.rsa_key_sizes.add (new Integer (rsa));
+              }
+          }
         rd.getParent ();
         return doc_data;
       }
 
 
-    void conditionalOutput (DOMWriterHelper wr, EncryptionAlgorithms[] algorithms, String tag)
+    void conditionalOutput (DOMWriterHelper wr, LinkedHashSet<String> arg_set, String tag)
       {
-        if (algorithms.length > 0)
+        if (!arg_set.isEmpty ())
           {
-            Vector<String> uris = new Vector<String> ();
-            for (EncryptionAlgorithms alg : algorithms)
-              {
-                uris.add (alg.getURI ());
-              }
-            wr.setListAttribute (tag, uris.toArray (new String[0]));
+            wr.setListAttribute (tag, arg_set.toArray (new String[0]));
           }
       }
 
@@ -79,18 +100,80 @@ public class BasicCapabilities implements Serializable
           {
             wr.addComment (comment, true);
           }
-        conditionalOutput (wr,
-                           sym_encryption_algorithms.toArray (new EncryptionAlgorithms[0]), 
-                           SYMMETRIC_KEY_ENCRYPTION_ALGORITHMS_ATTR);
+        conditionalOutput (wr,  algorithms, ALGORITHMS_ATTR);
+        conditionalOutput (wr,  features, FEATURES_ATTR);
+        conditionalOutput (wr,  extensions, EXTENSIONS_ATTR);
+        if (rsa_exponent_set || rsa_key_size_set)
+          {
+            wr.addChildElement (RSA_SUPPORT_ELEM);
+            if (rsa_exponent_set)
+              {
+                wr.setBooleanAttribute (SETTABLE_EXPONENT_ATTR, rsa_exponent_settable);
+              }
+            String[] sizes = new String[rsa_key_sizes.size ()];
+            int i = 0;
+            for (int size : rsa_key_sizes)
+              {
+                sizes[i++] = String.valueOf (size);
+              }
+            wr.setListAttribute (KEY_SIZES_ATTR, sizes);
+          }
         wr.getParent ();
       }
 
-
-    public BasicCapabilities addSymmetricKeyEncryptionAlgorithm (SymEncryptionAlgorithms algorithm)
+    
+    void add (LinkedHashSet<String> arg_set, String arg) throws IOException
       {
-        sym_encryption_algorithms.add (algorithm);
+        if (!arg_set.add (arg))
+          {
+            throw new IOException ("Multiply defined argument: " + arg);
+          }
+      }
+
+
+    public BasicCapabilities addAlgorithm (String algorithm) throws IOException
+      {
+        add (algorithms, algorithm);
         return this;
       }
+
+    
+    public BasicCapabilities addFeature (String feature) throws IOException
+      {
+        add (algorithms, feature);
+        return this;
+      }
+
+    
+    public BasicCapabilities addExtension (String extension) throws IOException
+      {
+        add (extensions, extension);
+        return this;
+      }
+
+
+    public BasicCapabilities addRSAKeySize (int key_size) throws IOException
+      {
+        if (!rsa_key_size_set)
+          {
+            rsa_key_sizes.clear ();
+            rsa_key_size_set = true;
+          }
+        if (!rsa_key_sizes.add (key_size))
+          {
+            throw new IOException ("Multiply defined key size:" + key_size);
+          }
+        return this;
+      }
+
+
+    public BasicCapabilities setRSAExponentSettable (boolean flag) throws IOException
+      {
+        rsa_exponent_set = true;
+        rsa_exponent_settable = flag;
+        return this;
+      }
+
 
     public BasicCapabilities setComment (String comment)
       {
@@ -99,8 +182,38 @@ public class BasicCapabilities implements Serializable
       }
 
 
-    public LinkedHashSet<SymEncryptionAlgorithms> getSymmetricKeyEncryptionAlgorithms () throws IOException
+    public String[] getAlgorithms () throws IOException
       {
-        return sym_encryption_algorithms;
+        return algorithms.toArray (new String[0]);
       }
-  }
+
+    
+    public String[] getFeatures () throws IOException
+      {
+        return features.toArray (new String[0]);
+      }
+
+
+    public String[] getExtensions () throws IOException
+      {
+        return extensions.toArray (new String[0]);
+      }
+
+
+    public int[] getRSAKeySizes () throws IOException
+      {
+        int[] sizes = new int[rsa_key_sizes.size ()];
+        int i = 0;
+        for (int size : rsa_key_sizes)
+          {
+            sizes[i++] = size;
+          }
+        return sizes;
+      }
+
+
+    public boolean getRSAExponentSettableFlag ()
+      {
+        return rsa_exponent_settable;
+      }
+ }

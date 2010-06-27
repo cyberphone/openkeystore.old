@@ -32,8 +32,10 @@ import java.security.SecureRandom;
 import java.security.Signature;
 
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -41,6 +43,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Vector;
@@ -249,7 +252,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         X509Certificate[] certificate_path;
 
         byte[] symmetric_key;
-        HashMap<String,Boolean> endorsed_algorithms = new HashMap<String,Boolean> ();
+        HashSet<String> endorsed_algorithms = new HashSet<String> ();
 
         String friendly_name;
 
@@ -275,14 +278,16 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         void setErrorCounter (short new_error_count)
           {
-            if (pin_policy.grouping == PIN_GROUPING_SHARED)
+            if (pin_policy.grouping == PIN_GROUPING_SHARED || pin_policy.grouping == PIN_GROUPING_SIGN_PLUS_STD)
               {
                 /////////////////////////////////////////////////////////////////////////////////////////
                 // That multiple keys "share" a PIN doesn't mean that you get n times more chances...
                 /////////////////////////////////////////////////////////////////////////////////////////
                 for (KeyEntry key_entry : keys.values ())
                   {
-                    if (key_entry.pin_policy == pin_policy)
+                    if (key_entry.pin_policy == pin_policy &&
+                        (pin_policy.grouping == PIN_GROUPING_SHARED ||
+                            ((key_usage != KEY_USAGE_SIGNATURE) ^ (key_entry.key_usage == KEY_USAGE_SIGNATURE))))
                       {
                         key_entry.error_counter = new_error_count;
                       }
@@ -907,12 +912,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             abort ("Algorithm does not match operation: " + input_algorithm);
           }
-        for (String endorsed_algorithm : key_entry.endorsed_algorithms.keySet ())
+        if (key_entry.endorsed_algorithms.contains (input_algorithm))
           {
-            if (endorsed_algorithm.equals (input_algorithm))
-              {
-                return alg;
-              }
+            return alg;
           }
         abort ("\"EndorsedAlgorithms\" for key[" + key_entry.key_handle + "] does not include: " + input_algorithm);
         return null;  // for compiler...
@@ -2031,7 +2033,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         for (String endorsed_algorithm : endorsed_algorithms)
           {
             sym_mac.addString (endorsed_algorithm);
-            if (key_entry.endorsed_algorithms.put (endorsed_algorithm, true) != null)
+            if (!key_entry.endorsed_algorithms.add (endorsed_algorithm))
               {
                 key_entry.owner.abort ("Duplicate algorithm: " + endorsed_algorithm);
               }

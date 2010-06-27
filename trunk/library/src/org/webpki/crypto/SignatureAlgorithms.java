@@ -21,14 +21,16 @@ import java.io.IOException;
 
 public enum SignatureAlgorithms
   {
-    RSA_SHA1     ("1.2.840.113549.1.1.5",  "http://www.w3.org/2000/09/xmldsig#rsa-sha1",          "SHA1withRSA",     HashAlgorithms.SHA1),
-    RSA_SHA256   ("1.2.840.113549.1.1.11", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",   "SHA256withRSA",   HashAlgorithms.SHA256),
-    RSA_SHA384   ("1.2.840.113549.1.1.12", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384",   "SHA384withRSA",   HashAlgorithms.SHA384),
-    RSA_SHA512   ("1.2.840.113549.1.1.13", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",   "SHA512withRSA",   HashAlgorithms.SHA512),
-    ECDSA_SHA1   ("1.2.840.10045.1",       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha1",   "SHA1withECDSA",   HashAlgorithms.SHA1),
-    ECDSA_SHA256 ("1.2.840.10045.4.3.2",   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", "SHA256withECDSA", HashAlgorithms.SHA256),
-    ECDSA_SHA384 ("1.2.840.10045.4.3.3",   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384", "SHA384withECDSA", HashAlgorithms.SHA384),
-    ECDSA_SHA512 ("1.2.840.10045.4.3.4",   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512", "SHA512withECDSA", HashAlgorithms.SHA512);
+    RSA_NONE     (null,                    "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.none",   "NONEwithRSA",     null),
+    RSA_SHA1     ("1.2.840.113549.1.1.5",  "http://www.w3.org/2000/09/xmldsig#rsa-sha1",               "SHA1withRSA",     HashAlgorithms.SHA1),
+    RSA_SHA256   ("1.2.840.113549.1.1.11", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",        "SHA256withRSA",   HashAlgorithms.SHA256),
+    RSA_SHA384   ("1.2.840.113549.1.1.12", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384",        "SHA384withRSA",   HashAlgorithms.SHA384),
+    RSA_SHA512   ("1.2.840.113549.1.1.13", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",        "SHA512withRSA",   HashAlgorithms.SHA512),
+    ECDSA_NONE   (null,                    "http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdsa.none", "NONEwithECDSA",   null),
+    ECDSA_SHA1   ("1.2.840.10045.1",       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha1",        "SHA1withECDSA",   HashAlgorithms.SHA1),
+    ECDSA_SHA256 ("1.2.840.10045.4.3.2",   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",      "SHA256withECDSA", HashAlgorithms.SHA256),
+    ECDSA_SHA384 ("1.2.840.10045.4.3.3",   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384",      "SHA384withECDSA", HashAlgorithms.SHA384),
+    ECDSA_SHA512 ("1.2.840.10045.4.3.4",   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512",      "SHA512withECDSA", HashAlgorithms.SHA512);
 
     private final String oid;       // As expressed in OIDs
     private final String uri;       // As expressed in XML messages
