@@ -18,21 +18,29 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.util.Vector;
+
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-
 public class PlatformNegotiationResponseDecoder extends PlatformNegotiationResponse
   {
-    private String server_session_id;
-
     BasicCapabilities basic_capabilities;
+    
+    public class ImagePreference
+      {
+        private ImagePreference () {}
 
-    private ServerCookie server_cookie;                         // Optional
-
+        String type;
+        String mime_type;
+        int width;
+        int height;
+      }
+    
+    Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
 
     public String getServerSessionID ()
       {
@@ -50,14 +58,14 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
       {
         return basic_capabilities;
       }
-
-/*
-    private void bad (String mismatch) throws IOException
+    
+    
+    public ImagePreference[] getImagesPreferences ()
       {
-        throw new IOException ("Mismatch between request and response: " + mismatch);
+        return image_preferences.toArray (new ImagePreference[0]);
       }
-*/
 
+    
     protected void fromXML (DOMReaderHelper rd) throws IOException
       {
         DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
@@ -73,12 +81,22 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
         //////////////////////////////////////////////////////////////////////////
 
         basic_capabilities = BasicCapabilities.read (rd);
+        
+        while (rd.hasNext (IMAGE_PREFERENCE_ELEM))
+          {
+            ImagePreference im_pref = new ImagePreference ();
+            rd.getNext (IMAGE_PREFERENCE_ELEM);
+            im_pref.type = ah.getString (TYPE_ATTR);
+            im_pref.mime_type = ah.getString (MIME_TYPE_ATTR);
+            im_pref.width = ah.getInt (WIDTH_ATTR);
+            im_pref.height = ah.getInt (HEIGHT_ATTR);
+            image_preferences.add (im_pref);
+          }
 
         if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
           {
             server_cookie = ServerCookie.read (rd);
           }
       }
-
 
    }

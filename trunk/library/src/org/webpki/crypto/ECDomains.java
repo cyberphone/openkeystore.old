@@ -26,12 +26,12 @@ import org.webpki.asn1.ParseUtil;
 
 public enum ECDomains
   {
-    B_163   ("1.3.132.0.15",        "B-163", 163, SignatureAlgorithms.ECDSA_SHA1),
-    B_233   ("1.3.132.0.27",        "B-233", 233, SignatureAlgorithms.ECDSA_SHA256),
-    B_283   ("1.3.132.0.17",        "B-283", 283, SignatureAlgorithms.ECDSA_SHA384),
-    P_192   ("1.2.840.10045.3.1.1", "P-192", 192, SignatureAlgorithms.ECDSA_SHA256),
-    P_256   ("1.2.840.10045.3.1.7", "P-256", 256, SignatureAlgorithms.ECDSA_SHA256),
-    P_384   ("1.3.132.0.34",        "P-384", 384, SignatureAlgorithms.ECDSA_SHA384);
+    B_163   ("1.3.132.0.15",        "B-163",     163, SignatureAlgorithms.ECDSA_SHA1),
+    B_233   ("1.3.132.0.27",        "B-233",     233, SignatureAlgorithms.ECDSA_SHA256),
+    B_283   ("1.3.132.0.17",        "B-283",     283, SignatureAlgorithms.ECDSA_SHA384),
+    P_192   ("1.2.840.10045.3.1.1", "secp192r1", 192, SignatureAlgorithms.ECDSA_SHA256),
+    P_256   ("1.2.840.10045.3.1.7", "secp256r1", 256, SignatureAlgorithms.ECDSA_SHA256),
+    P_384   ("1.3.132.0.34",        "secp384r1", 384, SignatureAlgorithms.ECDSA_SHA384);
 
     private final String oid;       // As expressed in ASN.1 messages
     private final String jcename;   // As expressed for JCE

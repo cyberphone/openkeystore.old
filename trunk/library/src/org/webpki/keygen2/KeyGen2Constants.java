@@ -26,6 +26,14 @@ public interface KeyGen2Constants
 
     // XML attributes
 
+    String LOGOTYPE_URL_ATTR                 = "LogotypeURL";
+
+    String WIDTH_ATTR                        = "Width";
+
+    String HEIGHT_ATTR                       = "Height";
+
+    String IMAGE_FINGERPRINT_ATTR            = "ImageFingerprint";
+
     String ALGORITHMS_ATTR                   = "Algorithms";
 
     String FEATURES_ATTR                     = "Features";
@@ -148,6 +156,8 @@ public interface KeyGen2Constants
     // XML elements
 
     String BASIC_CAPABILITIES_ELEM           = "BasicCapabilities";
+
+    String IMAGE_PREFERENCE_ELEM             = "ImagePreference";
 
     String SERVER_EPHEMERAL_KEY_ELEM         = "ServerEphemeralKey";
 

@@ -751,7 +751,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         //////////////////////////////////////////////////////////////////////////////////////
         //  Elliptic Curves
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("urn:oid:1.2.840.10045.3.1.7", "P-256", ALG_ECC_CRV);
+        addAlgorithm ("urn:oid:1.2.840.10045.3.1.7", "secp256r1", ALG_ECC_CRV);
       }
 
 
@@ -1748,14 +1748,23 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             // Create client ephemeral key
             ///////////////////////////////////////////////////////////////////////////////////
             KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC", "BC");
-            ECGenParameterSpec eccgen = new ECGenParameterSpec ("P-256");
+            ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
             generator.initialize (eccgen, new SecureRandom ());
             java.security.KeyPair kp = generator.generateKeyPair ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Apply the SP800-56A C(2, 0, ECC CDH) algorithm
+            // Check that the server and client ECDH keys are compatible
             ///////////////////////////////////////////////////////////////////////////////////
             client_ephemeral_key = (ECPublicKey) kp.getPublic ();
+            if (!client_ephemeral_key.getParams ().getCurve ().equals (server_ephemeral_key.getParams ().getCurve ()) ||
+                (client_ephemeral_key.getParams ().getCofactor () != server_ephemeral_key.getParams ().getCofactor ()))
+              {
+                throw new GeneralSecurityException ("Non-matching ephemeral keys");
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Apply the SP800-56A C(2, 0, ECC CDH) algorithm
+            ///////////////////////////////////////////////////////////////////////////////////
             KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
             key_agreement.init (kp.getPrivate ());
             key_agreement.doPhase (server_ephemeral_key, true);
@@ -1775,6 +1784,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             // SessionKey attested data
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder ska = new MacBuilder (session_key);
+            ska.addString (session_key_algorithm);
             ska.addString (client_session_id);
             ska.addString (server_session_id);
             ska.addString (issuer_uri);

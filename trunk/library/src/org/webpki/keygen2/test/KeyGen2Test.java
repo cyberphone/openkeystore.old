@@ -39,6 +39,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Vector;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -79,6 +80,7 @@ import org.webpki.keygen2.CredentialDeploymentResponseDecoder;
 import org.webpki.keygen2.CredentialDeploymentResponseEncoder;
 import org.webpki.keygen2.CryptoConstants;
 import org.webpki.keygen2.InputMethod;
+import org.webpki.keygen2.KeyGen2URIs;
 import org.webpki.keygen2.KeyInitializationResponseDecoder;
 import org.webpki.keygen2.KeyInitializationResponseEncoder;
 import org.webpki.keygen2.KeyUsage;
@@ -87,6 +89,10 @@ import org.webpki.keygen2.KeyInitializationRequestEncoder;
 import org.webpki.keygen2.PINGrouping;
 import org.webpki.keygen2.PassphraseFormat;
 import org.webpki.keygen2.PatternRestriction;
+import org.webpki.keygen2.PlatformNegotiationRequestDecoder;
+import org.webpki.keygen2.PlatformNegotiationRequestEncoder;
+import org.webpki.keygen2.PlatformNegotiationResponseDecoder;
+import org.webpki.keygen2.PlatformNegotiationResponseEncoder;
 import org.webpki.keygen2.ProvisioningSessionRequestDecoder;
 import org.webpki.keygen2.ProvisioningSessionRequestEncoder;
 import org.webpki.keygen2.ProvisioningSessionResponseDecoder;
@@ -154,6 +160,10 @@ public class KeyGen2Test
     
     boolean encrypted_extension;
     
+    boolean ask_for_4096;
+    
+    boolean image_prefs;
+    
     static FileOutputStream fos;
     
     static SecureKeyStore sks;
@@ -216,6 +226,7 @@ public class KeyGen2Test
         Client () throws IOException
           {
             client_xml_cache = new XMLSchemaCache ();
+            client_xml_cache.addWrapper (PlatformNegotiationRequestDecoder.class);
             client_xml_cache.addWrapper (ProvisioningSessionRequestDecoder.class);
             client_xml_cache.addWrapper (KeyInitializationRequestDecoder.class);
             client_xml_cache.addWrapper (CredentialDeploymentRequestDecoder.class);
@@ -278,6 +289,41 @@ public class KeyGen2Test
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Get platform request and respond with SKS compatible data
+        ///////////////////////////////////////////////////////////////////////////////////
+        byte[] platformResponse (byte[] xmldata) throws IOException
+          {
+            PlatformNegotiationRequestDecoder platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (xmldata);
+            device_info = sks.getDeviceInfo ();
+            PlatformNegotiationResponseEncoder platform_response = 
+              new PlatformNegotiationResponseEncoder (platform_req);
+            Vector<Short> matches = new Vector<Short> ();
+            for (short key_size : platform_req.getBasicCapabilities ().getRSAKeySizes ())
+              {
+                for (short d_key_size : device_info.getRSAKeySizes ())
+                  {
+                    if (key_size == d_key_size)
+                      {
+                        matches.add (key_size);
+                        break;
+                      }
+                  }
+              }
+            if (!matches.isEmpty () && matches.size () != device_info.getRSAKeySizes ().length)
+              {
+                for (short key_size : matches)
+                  {
+                    platform_response.getBasicCapabilities ().addRSAKeySize (key_size);
+                  }
+              }
+            if (image_prefs)
+              {
+                platform_response.addImagePreference (KeyGen2URIs.LOGOTYPES.CARD, "image/png", 200, 120);
+              }
+            return platform_response.writeXML ();
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Get provisioning session request and respond with ephemeral keys and and attest
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] provSessResponse (byte[] xmldata) throws IOException
@@ -295,7 +341,6 @@ public class KeyGen2Test
                                                  prov_sess_req.getSessionKeyLimit ());
             provisioning_handle = sess.getProvisioningHandle ();
             
-            device_info = sks.getDeviceInfo ();
             ProvisioningSessionResponseEncoder prov_sess_response = 
                   new ProvisioningSessionResponseEncoder (sess.getClientEphemeralKey (),
                                                           prov_sess_req.getServerSessionID (),
@@ -496,11 +541,15 @@ public class KeyGen2Test
     
     class Server
       {
+        static final String PLATFORM_URI = "http://issuer.example.com/platform";
+
         static final String ISSUER_URI = "http://issuer.example.com/provsess";
         
         static final String KEY_INIT_URL = "http://issuer.example.com/keyinit";
 
         static final String CRE_DEP_URL = "http://issuer.example.com/credep";
+
+        static final String LOGO_URL = "http://issuer.example.com/images/logo.png";
         
         XMLSchemaCache server_xml_cache;
         
@@ -510,6 +559,8 @@ public class KeyGen2Test
         
         byte[] predef_server_pin = {'3','1','2','5','8','9'};
 
+        PlatformNegotiationRequestEncoder platform_request;
+
         KeyInitializationRequestEncoder key_init_request;
         
         ProvisioningSessionRequestEncoder prov_sess_request;
@@ -517,6 +568,8 @@ public class KeyGen2Test
         ServerCredentialStore server_credential_store;
         
         PrivateKey gen_private_key;
+        
+        String server_session_id;
 
         class SoftHSM implements ServerSessionKeyInterface
           {
@@ -531,7 +584,7 @@ public class KeyGen2Test
             public ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException
               {
                 KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC", "BC");
-                ECGenParameterSpec eccgen = new ECGenParameterSpec ("P-256");
+                ECGenParameterSpec eccgen = new ECGenParameterSpec (ECDomains.P_256.getJCEName ());
                 generator.initialize (eccgen, new SecureRandom ());
                 java.security.KeyPair kp = generator.generateKeyPair();
                 server_ec_private_key = (ECPrivateKey) kp.getPrivate ();
@@ -610,8 +663,9 @@ public class KeyGen2Test
         Server () throws Exception
           {
             server_xml_cache = new XMLSchemaCache ();
-            server_xml_cache.addWrapper (KeyInitializationResponseDecoder.class);
+            server_xml_cache.addWrapper (PlatformNegotiationResponseDecoder.class);
             server_xml_cache.addWrapper (ProvisioningSessionResponseDecoder.class);
+            server_xml_cache.addWrapper (KeyInitializationResponseDecoder.class);
             server_xml_cache.addWrapper (CredentialDeploymentResponseDecoder.class);
           }
         
@@ -633,12 +687,28 @@ public class KeyGen2Test
               }
           }
 
+        //////////////////////////////////////////////////////////////////////////////////
+        // Create platform negotiation request for the client
         ///////////////////////////////////////////////////////////////////////////////////
-        // Create a prov session req for the client
-        ///////////////////////////////////////////////////////////////////////////////////
-        byte[] provSessRequest () throws IOException, GeneralSecurityException
+        byte[] platformRequest () throws IOException, GeneralSecurityException
           {
-            String server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()); 
+            server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
+            platform_request =  new PlatformNegotiationRequestEncoder (server_session_id,
+                                                                       PLATFORM_URI);
+            platform_request.addLogotype (LOGO_URL, "image/png", new byte[]{0,5,6,6}, 200, 150);
+            if (ask_for_4096)
+              {
+                platform_request.getBasicCapabilities ().addRSAKeySize ((short)4096).addRSAKeySize ((short)2048);
+              }
+            return platform_request.writeXML ();
+          }
+
+        //////////////////////////////////////////////////////////////////////////////////
+        // Create a provisioning session request for the client
+        ///////////////////////////////////////////////////////////////////////////////////
+        byte[] provSessRequest (byte[] xmldata) throws IOException, GeneralSecurityException
+          {
+            PlatformNegotiationResponseDecoder platform_response = (PlatformNegotiationResponseDecoder) server_xml_cache.parse (xmldata);
             prov_sess_request =  new ProvisioningSessionRequestEncoder (server_sess_key.generateEphemeralKey (),
                                                                         server_session_id,
                                                                         ISSUER_URI,
@@ -948,6 +1018,8 @@ public class KeyGen2Test
         
         Doer () throws Exception
           {
+            xmlschemas.addWrapper (PlatformNegotiationRequestDecoder.class);
+            xmlschemas.addWrapper (PlatformNegotiationResponseDecoder.class);
             xmlschemas.addWrapper (ProvisioningSessionRequestDecoder.class);
             xmlschemas.addWrapper (ProvisioningSessionResponseDecoder.class);
             xmlschemas.addWrapper (KeyInitializationRequestDecoder.class);
@@ -963,6 +1035,8 @@ public class KeyGen2Test
                 writeString ("<b>");
               }
             writeString ("Begin Test (" + _name.getMethodName() + ":" + (++round) + (html_mode ? ")</b><br>" : ")\n"));
+            writeOption ("4096 over 2048 RSA key preference", ask_for_4096);
+            writeOption ("Client shows one image preference", image_prefs);
             writeOption ("PUK Protection", puk_protection);
             writeOption ("PIN Protection ", pin_protection);
             writeOption ("Device PIN", device_pin);
@@ -982,7 +1056,9 @@ public class KeyGen2Test
             server = new Server ();
             client = new Client ();
             byte[] xml;
-            xml = fileLogger (server.provSessRequest ());
+            xml = fileLogger (server.platformRequest ());
+            xml = fileLogger (client.platformResponse (xml));
+            xml = fileLogger (server.provSessRequest (xml));
             xml = fileLogger (client.provSessResponse (xml));
             xml = fileLogger (server.keyInitRequest (xml));
             xml = fileLogger (client.KeyInitResponse (xml));
@@ -1007,12 +1083,14 @@ public class KeyGen2Test
     @Test
     public void test1 () throws Exception
       {
+        ask_for_4096 = true;
         new Doer ().perform ();
       }
     @Test
     public void test2 () throws Exception
       {
         Doer doer = new Doer ();
+        image_prefs = true;
         pin_protection = true;
         doer.perform ();
       }

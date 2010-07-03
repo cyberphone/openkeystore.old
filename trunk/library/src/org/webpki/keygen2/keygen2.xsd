@@ -66,22 +66,19 @@
                  can use one which fits the screen of the provisioning device -->
             <xs:element name="IssuerLogotype" maxOccurs="unbounded">
                <xs:complexType>
+                  <xs:complexContent>
 
-                  <!-- Where to get the logotype. -->
-                  <xs:attribute name="LogotypeURL" type="kgen:httpURI" use="required"/>
+                     <xs:extension base="kgen:imageData">
 
-                  <!-- MIME type. -->
-                  <xs:attribute name="MimeType" type="kgen:mimeType" use="required"/>
+                        <!-- Where to get the logotype. -->
+                        <xs:attribute name="LogotypeURL" type="kgen:httpURI" use="required"/>
 
-                  <!-- Width in pixels.  For SVG it holds the "ideal" width -->
-                  <xs:attribute name="Width" type="xs:positiveInteger" use="required"/>
+                        <!-- ImageFingerprint using SHA256. -->
+                        <xs:attribute name="ImageFingerprint" type="xs:base64Binary" use="required"/>
 
-                  <!-- Height in pixels.  For SVG it holds the "ideal" height -->
-                  <xs:attribute name="Height" type="xs:positiveInteger" use="required"/>
+                     </xs:extension>
 
-                  <!-- ImageFingerprint using SHA256. -->
-                  <xs:attribute name="ImageFingerprint" type="xs:base64Binary" use="required"/>
-
+                  </xs:complexContent>
                </xs:complexType>
             </xs:element>
 
@@ -108,6 +105,12 @@
             <xs:element ref="ds:Signature" minOccurs="0"/>
 
          </xs:sequence> 
+
+         <!-- GUI language in preference order.  Primarily for public computers -->
+         <xs:attribute name="Languages" type="kgen:languageList" use="optional"/>
+
+         <!-- Key container constraints in preference order -->
+         <xs:attribute name="KeyContainers" type="kgen:containerList" use="optional"/>
 
          <!-- This mandatory server-generated item MUST be unique between
               key provisioning sessions but MUST remain constant among
@@ -147,6 +150,22 @@
                  return a capability except for signed requests from a
                  known (pre-configured) party -->
             <xs:element ref="kgen:BasicCapabilities"/>
+            
+            <!-- Optional hints for the "CertifiedPublicKey/Logotype" extension -->
+            <xs:element name="ImagePreference" minOccurs="0" maxOccurs="unbounded">
+               <xs:complexType>
+                  <xs:complexContent>
+
+                     <xs:extension base="kgen:imageData">
+
+                        <!-- Logotype usage type -->
+                        <xs:attribute name="Type" type="xs:anyURI" use="required"/>
+
+                     </xs:extension>
+
+                  </xs:complexContent>
+               </xs:complexType>
+            </xs:element>
 
             <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
@@ -325,6 +344,107 @@
 
 
    <!--==========================================================================================
+              The primary (top-level) [optional] credential discovery request object
+   ===========================================================================================-->
+
+   <xs:element name="CredentialDiscoveryRequest">
+      <xs:complexType>
+         <xs:sequence>
+
+            <!-- "LookupSpecifier" holds an issuer-signed search object -->
+            <xs:element name="LookupSpecifier" maxOccurs="unbounded">
+               <xs:complexType>
+                  <xs:sequence>
+
+                     <!-- Optional search filter -->
+                     <xs:element ref="kgen:SearchFilter" minOccurs="0"/>
+
+                     <!-- MUST contain the issuer (CA) certificate/signature -->
+                     <xs:element ref="ds:Signature"/>
+
+                  </xs:sequence>
+
+                  <!-- MUST be be linked to by the enveloped signature element -->
+                  <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+
+               </xs:complexType>
+            </xs:element>
+
+            <!-- See "ServerCookie" definition -->
+            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+
+            <!-- See "PlatformNegotiationRequest/Signature" -->
+            <xs:element ref="ds:Signature" minOccurs="0"/>
+
+         </xs:sequence> 
+
+         <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
+              within a specific session -->
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+
+         <!-- MUST be equal to"ProvisioningSessionResponse/@ID"
+              within a specific session -->
+         <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
+
+         <!-- Where to HTTP POST the credential discovery response.  Note that
+              applicable session cookies MUST be submitted in the request
+              as well -->
+         <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
+
+      </xs:complexType>
+
+   </xs:element>
+
+   <!--==========================================================================================
+                End of [optional] credential discovery request object definition
+   ===========================================================================================-->
+
+
+   <!--==========================================================================================
+               The primary (top-level) [optional] credential discovery response object
+   ===========================================================================================-->
+
+   <xs:element name="CredentialDiscoveryResponse">
+      <xs:complexType>
+         <xs:sequence>
+
+            <!-- The number of "LookupResult" objects MUST match the number
+                 of "LookupSpecifier" objects -->
+            <xs:element name="LookupResult" maxOccurs="unbounded">
+               <xs:complexType>
+                  <xs:sequence>
+
+                     <!-- Matching credentials... -->
+                     <xs:element ref="kgen:MatchingCredential"  minOccurs="0" maxOccurs="unbounded"/>
+
+                  </xs:sequence>
+
+                  <!-- MUST match with "LookupSpecifier@ID" -->
+                  <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+
+               </xs:complexType>
+            </xs:element>
+
+            <!-- See "ServerCookie" definition -->
+            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+
+         </xs:sequence> 
+
+         <!-- "ID" holds the SKS-generated ClientSessionID -->
+         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+
+         <!-- MUST be equal to "ProvisioningSessionRequest/@ID" -->
+         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
+
+      </xs:complexType>
+   </xs:element>
+
+   <!--==========================================================================================
+                End of [optional] credential discovery response object definition
+   ===========================================================================================-->
+
+
+   <!--==========================================================================================
                     The primary (top-level) key initialization request object
    ===========================================================================================-->
 
@@ -440,7 +560,7 @@
             <xs:element ref="kgen:CertifiedPublicKey" maxOccurs="unbounded"/>
 
             <!-- SKS Reference: pp_deleteKey -->
-            <xs:element name="DeleteKey" type="kgen:managementObject" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="DeleteKey" type="kgen:targetKey" minOccurs="0" maxOccurs="unbounded"/>
 
             <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
@@ -568,7 +688,7 @@
                      </xs:simpleType>
                   </xs:attribute>
 
-                  <!-- Optional attribute: Can the exponent be set?  Default: true -->
+                  <!-- Optional attribute: Can the exponent be set?  Default: false -->
                   <xs:attribute name="SettableExponent" type="xs:boolean" use="optional"/>
 
                </xs:complexType>
@@ -576,14 +696,12 @@
 
          </xs:sequence>
 
-         <!-- In a request algorithm preferences are listed in descending order.
-              If this element is not specified during the request phase,
-              the client SHOULD anyway return its capability if it differs
-              from the mandatory SKS algorithms -->
+         <!-- If non-mandatory algorithms are preferred, the following attribute
+              can host a list of such.  If the response does not contain a requested
+              algorithm it means that it is not supported -->
          <xs:attribute name="Algorithms" type="kgen:uriList" use="optional"/>
 
-         <!-- In a request feature preferences are listed in descending order.
-              Features are things that are supported by the SKS or the platform
+         <!-- Features are things that are supported by the SKS or the platform
               the SKS is running in -->
          <xs:attribute name="Features" type="kgen:uriList" use="optional"/>
 
@@ -671,12 +789,12 @@
                     The "Type" URI indicates a logotype's usage and SHOULD
                     be communicated during the platform negotiation phase.
                     Logotypes MAY be ignored by the client software.  Currently
-                    KeyGen2 defines the following predefined type URIs:
+                    KeyGen2 supports the following predefined type URIs:
 
-                        "http://xmlns.webpki.org/keygen2/1.0#logotype.icon" 
-                        "http://xmlns.webpki.org/keygen2/1.0#logotype.card" 
-                        "http://xmlns.webpki.org/keygen2/1.0#logotype.list" 
-                        "http://xmlns.webpki.org/keygen2/1.0#logotype.application"
+                    - "http://xmlns.webpki.org/keygen2/1.0#logotype.icon" 
+                    - "http://xmlns.webpki.org/keygen2/1.0#logotype.card" 
+                    - "http://xmlns.webpki.org/keygen2/1.0#logotype.list" 
+                    - "http://xmlns.webpki.org/keygen2/1.0#logotype.application"
 
                     "Icon" is intended to be useful in a selection window
                     where multiple credentials are featured as a map of
@@ -742,10 +860,10 @@
            <xs:choice minOccurs="0">
 
               <!-- SKS Reference: pp_updateKey -->
-              <xs:element name="UpdateKey" type="kgen:managementObject"/>
+              <xs:element name="UpdateKey" type="kgen:targetKey"/>
 
               <!-- SKS Reference: pp_cloneKeyProtection -->
-              <xs:element name="CloneKeyProtection" type="kgen:managementObject"/>
+              <xs:element name="CloneKeyProtection" type="kgen:targetKey"/>
 
            </xs:choice>
 
@@ -811,7 +929,7 @@
                 Constraints (that can be enforced by schema-directed validation)
        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-      <!-- All Properties within a PropertyBag MUST be a unique -->
+      <!-- Property names within a PropertyBag MUST be unique -->
       <xs:unique name="PropertyUnique">
          <xs:selector xpath="kgen:Property"/>
          <xs:field xpath="@Name"/>
@@ -890,7 +1008,7 @@
                <xs:element name="DSA">
                   <xs:complexType>
 
-                     <!-- NOT READY. The length of the key -->
+                     <!-- The length of the key -->
                      <xs:attribute name="KeySize" type="xs:integer" use="required"/>
 
                   </xs:complexType>
@@ -1067,7 +1185,20 @@
       </xs:complexType>
    </xs:element>
 
-   <xs:complexType name="managementObject">
+   <xs:complexType name="imageData">
+
+      <!-- MIME type. -->
+      <xs:attribute name="MimeType" type="kgen:mimeType" use="required"/>
+
+      <!-- Width in pixels.  For SVG it holds the "ideal" width -->
+      <xs:attribute name="Width" type="xs:positiveInteger" use="required"/>
+
+      <!-- Height in pixels.  For SVG it holds the "ideal" height -->
+      <xs:attribute name="Height" type="xs:positiveInteger" use="required"/>
+
+   </xs:complexType>
+
+   <xs:complexType name="keyID">
 
       <!-- One of the two IDs identifying a provisioning session -->
       <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
@@ -1075,14 +1206,33 @@
       <!-- The other ID identifying a provisioning session -->
       <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
-      <!-- Handle to the certificate that is specified by management objects -->
+      <!-- Handle to the certificate (key ID) -->
       <xs:attribute name="CertificateFingerprint" type="xs:base64Binary" use="required"/>
-
-      <!-- Mandatory MAC (Message Authentication Code) -->
-      <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
    </xs:complexType>
 
+   <xs:complexType name="targetKey">
+      <xs:complexContent>
+
+         <xs:extension base="kgen:keyID">
+
+            <!-- Mandatory MAC (Message Authentication Code) -->
+            <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
+
+         </xs:extension>
+
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="MatchingCredential">
+      <xs:complexType>
+         <xs:complexContent>
+
+            <xs:extension base="kgen:keyID"/>
+
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
 
    <xs:element name="SearchFilter">
       <xs:complexType>

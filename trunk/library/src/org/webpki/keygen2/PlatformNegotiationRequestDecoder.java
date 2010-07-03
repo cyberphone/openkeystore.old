@@ -18,7 +18,8 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import org.webpki.util.ImageData;
+import java.util.Vector;
+
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
@@ -30,18 +31,47 @@ import org.webpki.crypto.VerifierInterface;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-
 public class PlatformNegotiationRequestDecoder extends PlatformNegotiationRequest
   {
-    private String server_session_id;
-
-    private String submit_url;
+    public class ImageDescriptor
+      {
+        private ImageDescriptor () {}
+        
+        int width;
+        int height;
+        String mime_type;
+        String logotype_url;
+        byte[] image_fingerprint;
+        
+        public int getWidth ()
+          {
+            return width;
+          }
+        
+        public int getHeight ()
+          {
+            return height;
+          }
+        
+        public String getMimeType ()
+          {
+            return mime_type;
+          }
+        
+        public String getLogotypeURL ()
+          {
+            return logotype_url;
+          }
+        
+        public byte[] getImageFingerprint ()
+          {
+            return image_fingerprint;
+          }
+      }
     
-    private ImageData issuer_logotype;      // Optional
+    Vector<ImageDescriptor> image_descriptors = new Vector<ImageDescriptor> ();
 
     BasicCapabilities basic_capabilities;
-
-    private ServerCookie server_cookie;     // Optional
 
     private XMLSignatureWrapper signature;  // Optional
 
@@ -64,10 +94,10 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
       }
 
 
-    public ImageData getIssuerLogotype ()
-    {
-      return issuer_logotype;
-    }
+    public ImageDescriptor[] getIssuerLogotypes ()
+      {
+        return image_descriptors.toArray (new ImageDescriptor[0]);
+      }
 
 
     public void verifySignature (VerifierInterface verifier) throws IOException
@@ -102,25 +132,30 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
 
         rd.getChild ();
 
-        if (rd.hasNext (ISSUER_LOGOTYPE_ELEM))
+        do
           {
-            issuer_logotype = new ImageData (rd.getBinary (ISSUER_LOGOTYPE_ELEM), ah.getString (MIME_TYPE_ATTR));
+            rd.getNext (ISSUER_LOGOTYPE_ELEM);
+            ImageDescriptor im_des = new ImageDescriptor ();
+            im_des.mime_type = ah.getString (MIME_TYPE_ATTR);
+            im_des.logotype_url = ah.getString (LOGOTYPE_URL_ATTR);
+            im_des.width = ah.getInt (WIDTH_ATTR);
+            im_des.height = ah.getInt (HEIGHT_ATTR);
+            im_des.image_fingerprint = ah.getBinary (IMAGE_FINGERPRINT_ATTR);
+            image_descriptors.add (im_des);
           }
+        while (rd.hasNext (ISSUER_LOGOTYPE_ELEM));
 
         basic_capabilities = BasicCapabilities.read (rd);
 
-        if (rd.hasNext ()) do
+        if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
           {
-            if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
-              {
-                server_cookie = ServerCookie.read (rd);
-              }
-            else // Must be a Signature otherwise schema validation has gone wrong...
-              {
-                signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
-              }
+            server_cookie = ServerCookie.read (rd);
           }
-        while (rd.hasNext ());
+
+        if (rd.hasNext ())// Must be a Signature otherwise schema validation has gone wrong...
+          {
+            signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
+          }
       }
 
   }

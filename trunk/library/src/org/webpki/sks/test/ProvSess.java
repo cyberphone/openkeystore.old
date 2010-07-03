@@ -82,7 +82,7 @@ public class ProvSess
         public ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException
           {
             KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC", "BC");
-            ECGenParameterSpec eccgen = new ECGenParameterSpec ("P-256");
+            ECGenParameterSpec eccgen = new ECGenParameterSpec (ECDomains.P_256.getJCEName ());
             generator.initialize (eccgen, new SecureRandom ());
             java.security.KeyPair kp = generator.generateKeyPair();
             server_ec_private_key = (ECPrivateKey) kp.getPrivate ();
@@ -301,6 +301,7 @@ public class ProvSess
            kdf.addArray (device.device_info.getDeviceCertificatePath ()[0].getEncoded ());
 
            MacGenerator session_key_mac_data = new MacGenerator ();
+           session_key_mac_data.addString (session_key_algorithm);
            session_key_mac_data.addString (client_session_id);
            session_key_mac_data.addString (server_session_id);
            session_key_mac_data.addString (ISSUER_URI);

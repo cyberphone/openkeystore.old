@@ -33,7 +33,7 @@ public class BasicCapabilities
 
     LinkedHashSet<String> extensions = new LinkedHashSet<String> ();
     
-    LinkedHashSet<Integer> rsa_key_sizes = new LinkedHashSet<Integer> ();
+    LinkedHashSet<Short> rsa_key_sizes = new LinkedHashSet<Short> ();
     
     boolean rsa_exponent_set;
     
@@ -43,10 +43,12 @@ public class BasicCapabilities
 
     String comment;
     
-    public BasicCapabilities ()
+    BasicCapabilities ()
       {
-        rsa_key_sizes.add (1024);
-        rsa_key_sizes.add (2048);
+        for (short key_size : CryptoConstants.SKS_DEFAULT_RSA_SUPPORT)
+          {
+            rsa_key_sizes.add (key_size);
+          }
       }
     
     
@@ -75,8 +77,10 @@ public class BasicCapabilities
             rd.getNext (RSA_SUPPORT_ELEM);
             for (String rsa : rd.getAttributeHelper ().getList (KEY_SIZES_ATTR))
               {
-                doc_data.rsa_key_sizes.add (new Integer (rsa));
+                doc_data.addRSAKeySize (new Short (rsa));
               }
+            doc_data.rsa_exponent_settable = rd.getAttributeHelper ().getBooleanConditional (SETTABLE_EXPONENT_ATTR);
+
           }
         rd.getParent ();
         return doc_data;
@@ -152,7 +156,7 @@ public class BasicCapabilities
       }
 
 
-    public BasicCapabilities addRSAKeySize (int key_size) throws IOException
+    public BasicCapabilities addRSAKeySize (short key_size) throws IOException
       {
         if (!rsa_key_size_set)
           {
@@ -200,13 +204,13 @@ public class BasicCapabilities
       }
 
 
-    public int[] getRSAKeySizes () throws IOException
+    public short[] getRSAKeySizes () throws IOException
       {
-        int[] sizes = new int[rsa_key_sizes.size ()];
+        short[] sizes = new short[rsa_key_sizes.size ()];
         int i = 0;
-        for (int size : rsa_key_sizes)
+        for (short key_size : rsa_key_sizes)
           {
-            sizes[i++] = size;
+            sizes[i++] = key_size;
           }
         return sizes;
       }

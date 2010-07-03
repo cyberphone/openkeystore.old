@@ -17,6 +17,8 @@ package org.webpki.keygen2;
  */
 import java.io.IOException;
 
+import java.util.Vector;
+
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.ServerCookie;
 
@@ -24,14 +26,19 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class PlatformNegotiationResponseEncoder extends PlatformNegotiationResponse
   {
-
-    private String server_session_id;
-
     BasicCapabilities basic_capabilities = new BasicCapabilities ();
 
-    private ServerCookie server_cookie;  // Optional
-
     private String prefix;  // Default: no prefix
+    
+    class ImagePreference
+      {
+        String type;
+        String mime_type;
+        int width;
+        int height;
+      }
+    
+    Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
 
 
     public ServerCookie setServerCookie (ServerCookie server_cookie)
@@ -58,9 +65,25 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
       }
 
 
-    public PlatformNegotiationResponseEncoder (String server_session_id)
+    public PlatformNegotiationResponseEncoder addImagePreference (String type_url,
+                                                                  String mime_type,
+                                                                  int width,
+                                                                  int height)
       {
-        this.server_session_id = server_session_id;
+        ImagePreference im_pref = new ImagePreference ();
+        im_pref.type = type_url;
+        im_pref.mime_type = mime_type;
+        im_pref.width = width;
+        im_pref.height = height;
+        image_preferences.add (im_pref);
+        return this;
+      }
+
+
+    public PlatformNegotiationResponseEncoder (PlatformNegotiationRequestDecoder decoder)
+      {
+        this.server_session_id = decoder.server_session_id;
+        this.server_cookie = decoder.server_cookie;
       }
 
     protected void toXML (DOMWriterHelper wr) throws IOException
@@ -73,6 +96,19 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
         // Basic capabilities
         ////////////////////////////////////////////////////////////////////////
         basic_capabilities.write (wr);
+
+        ////////////////////////////////////////////////////////////////////////
+        // Optional image preferences
+        ////////////////////////////////////////////////////////////////////////
+        for (ImagePreference im_pref : image_preferences)
+          {
+            wr.addChildElement (IMAGE_PREFERENCE_ELEM);
+            wr.setStringAttribute (TYPE_ATTR, im_pref.type);
+            wr.setStringAttribute (MIME_TYPE_ATTR, im_pref.mime_type);
+            wr.setIntAttribute (WIDTH_ATTR, im_pref.width);
+            wr.setIntAttribute (HEIGHT_ATTR, im_pref.height);
+            wr.getParent ();
+          }
 
         ////////////////////////////////////////////////////////////////////////
         // Optional ServerCookie

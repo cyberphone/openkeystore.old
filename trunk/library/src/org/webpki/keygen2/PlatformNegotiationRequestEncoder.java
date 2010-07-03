@@ -18,9 +18,9 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import org.w3c.dom.Document;
+import java.util.Vector;
 
-import org.webpki.util.MimeTypedObject;
+import org.w3c.dom.Document;
 
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.ServerCookie;
@@ -32,33 +32,32 @@ import org.webpki.crypto.SignerInterface;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-
 public class PlatformNegotiationRequestEncoder extends PlatformNegotiationRequest
   {
-
-    String server_session_id;
-
-    String submit_url;
+    class ImageDescriptor
+      {
+        String mime_type;
+        byte[] image_fingerprint;
+        int width;
+        int height;
+        String logotype_url;
+      }
 
     private String prefix;  // Default: no prefix
-
-    MimeTypedObject issuer_logotype;
     
+    Vector<ImageDescriptor> image_descriptors = new Vector<ImageDescriptor> ();
+
     BasicCapabilities basic_capabilities = new BasicCapabilities ();
 
-    ServerCookie server_cookie;
-    
     boolean needs_dsig_ns;
 
     // Constructors
 
     public PlatformNegotiationRequestEncoder (String server_session_id,
-                                              String submit_url,
-                                              MimeTypedObject issuer_logotype)
+                                              String submit_url)
       {
         this.server_session_id = server_session_id;
         this.submit_url = submit_url;
-        this.issuer_logotype = issuer_logotype;
       }
 
 
@@ -83,9 +82,27 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         ds.createEnvelopedSignature (doc, server_session_id);
       }
 
+
     public BasicCapabilities getBasicCapabilities ()
       {
         return basic_capabilities;
+      }
+    
+    
+    public PlatformNegotiationRequestEncoder addLogotype (String logotype_url,
+                                                          String mime_type,
+                                                          byte[] image_fingerprint,
+                                                          int width,
+                                                          int height)
+      {
+        ImageDescriptor im_des = new ImageDescriptor ();
+        im_des.logotype_url = logotype_url;
+        im_des.mime_type = mime_type;
+        im_des.image_fingerprint = image_fingerprint;
+        im_des.width = width;
+        im_des.height = height;
+        image_descriptors.add (im_des);
+        return this;
       }
 
 
@@ -105,11 +122,20 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         ////////////////////////////////////////////////////////////////////////
         // Issuer logotype(s)
         ////////////////////////////////////////////////////////////////////////
-        if (issuer_logotype != null)
-        {
-          wr.addBinary (ISSUER_LOGOTYPE_ELEM, issuer_logotype.getData ());
-          wr.setStringAttribute (MIME_TYPE_ATTR, issuer_logotype.getMimeType ());
-        }
+        if (image_descriptors.isEmpty ())
+          {
+            throw new IOException ("There must be at least one logotype image defined");
+          }
+        for (ImageDescriptor im_des : image_descriptors)
+          {
+            wr.addChildElement (ISSUER_LOGOTYPE_ELEM);
+            wr.setStringAttribute (MIME_TYPE_ATTR, im_des.mime_type);
+            wr.setStringAttribute (LOGOTYPE_URL_ATTR, im_des.logotype_url);
+            wr.setIntAttribute (WIDTH_ATTR, im_des.width);
+            wr.setIntAttribute (HEIGHT_ATTR, im_des.height);
+            wr.setBinaryAttribute (IMAGE_FINGERPRINT_ATTR, im_des.image_fingerprint);
+            wr.getParent ();
+          }
 
         ////////////////////////////////////////////////////////////////////////
         // Basic capabilities

@@ -53,4 +53,6 @@ public interface CryptoConstants
 
     public static final String CRYPTO_STRING_PIN_DEVICE      = "#Device PIN";
     
+    public static final short[] SKS_DEFAULT_RSA_SUPPORT      = {1024, 2048};
+    
   }
