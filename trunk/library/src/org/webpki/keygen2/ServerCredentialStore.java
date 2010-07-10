@@ -830,17 +830,17 @@ public class ServerCredentialStore implements Serializable
           }
         
 
-        boolean exportable;
+        ExportPolicy export_policy;
         
-        public KeyProperties setExportable (boolean flag)
+        public KeyProperties setExportPolicy (ExportPolicy export_policy)
           {
-            exportable = flag;
+            this.export_policy = export_policy;
             return this;
           }
 
-        public boolean getExportable ()
+        public ExportPolicy getExportPolicy ()
           {
-            return exportable;
+            return export_policy;
           }
         
         
@@ -866,6 +866,50 @@ public class ServerCredentialStore implements Serializable
         public boolean getPrivateKeyBackupFlag ()
           {
             return private_key_backup;
+          }
+
+
+        boolean enable_pin_caching;
+        
+        public KeyProperties setEnablePINCaching (boolean flag)
+          {
+            enable_pin_caching = flag;
+            return this;
+          }
+        
+        public boolean getEnablePINCachingFlag ()
+          {
+            return enable_pin_caching;
+          }
+
+
+        BiometricProtection biometric_protection;
+        
+        public KeyProperties setBiometricProtection (BiometricProtection biometric_protection) throws IOException
+          {
+            // TODO there must be some PIN-related tests here...
+            this.biometric_protection = biometric_protection;
+            return this;
+          }
+
+        public BiometricProtection getBiometricProtection ()
+          {
+            return biometric_protection;
+          }
+
+
+        DeletePolicy delete_policy;
+        
+        public KeyProperties setDeletePolicy (DeletePolicy delete_policy) throws IOException
+          {
+            // TODO there must be some PIN-related tests here...
+            this.delete_policy = delete_policy;
+            return this;
+          }
+
+        public DeletePolicy getDeletePolicy ()
+          {
+            return delete_policy;
           }
 
 
@@ -999,6 +1043,14 @@ public class ServerCredentialStore implements Serializable
               {
                 key_pair_mac.addArray (getEncryptedPIN ());
               }
+            key_pair_mac.addByte (biometric_protection == null ?
+                       BiometricProtection.NONE.getSKSValue () : biometric_protection.getSKSValue ());
+            key_pair_mac.addBool (private_key_backup);
+            key_pair_mac.addByte (export_policy == null ?
+                ExportPolicy.NON_EXPORTABLE.getSKSValue () : export_policy.getSKSValue ());
+            key_pair_mac.addByte (delete_policy == null ?
+                DeletePolicy.NONE.getSKSValue () : delete_policy.getSKSValue ());
+            key_pair_mac.addBool (enable_pin_caching);
             key_pair_mac.addByte (key_usage.getSKSValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
             key_alg_data.updateKeyAlgorithmMac (key_pair_mac);
@@ -1015,14 +1067,24 @@ public class ServerCredentialStore implements Serializable
             wr.setStringAttribute (ID_ATTR, id);
             wr.setStringAttribute (KEY_USAGE_ATTR, key_usage.getXMLName ());
 
-            if (exportable)
+            if (export_policy != null)
               {
-                wr.setBooleanAttribute (EXPORTABLE_ATTR, exportable);
+                wr.setStringAttribute (EXPORT_POLICY_ATTR, export_policy.getXMLName ());
               }
             
             if (private_key_backup)
               {
                 wr.setBooleanAttribute (PRIVATE_KEY_BACKUP_ATTR, private_key_backup);
+              }
+
+            if (biometric_protection != null)
+              {
+                wr.setStringAttribute (BIOMETRIC_PROTECTION_ATTR, biometric_protection.getXMLName ());
+              }
+            
+            if (delete_policy != null)
+              {
+                wr.setStringAttribute (DELETE_POLICY_ATTR, delete_policy.getXMLName ());
               }
             
             if (server_seed_set)

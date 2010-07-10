@@ -261,6 +261,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         byte[] pin_value;
         short error_counter;
         PINPolicy pin_policy;
+        boolean enable_pin_caching;
+        
+        byte biometric_protection;
+        byte export_policy;
+        byte delete_policy;
+
 
         HashMap<String,ExtObject> extensions = new HashMap<String,ExtObject> ();
 
@@ -340,9 +346,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             return mac_builder;
           }
 
-        byte[] getPostProvisioningMac () throws SKSException
+        byte[] getPostProvisioningMac (Provisioning actual_session) throws SKSException
           {
-            MacBuilder mac_builder = owner.getMacBuilder (KDF_PROOF_OF_OWNERSHIP);
+            MacBuilder mac_builder = owner.getMacBuilder (KDF_PROOF_OF_OWNERSHIP, actual_session);
             mac_builder.addArray (getEncodedEECert ());
             return mac_builder.getResult ();
           }
@@ -429,6 +435,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         boolean open = true;
         boolean updatable;
         short mac_sequence_counter;
+        short session_key_limit;
 
         Provisioning ()
           {
@@ -480,9 +487,13 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 throw new SKSException (e, SKSException.ERROR_INTERNAL);
               }
           }
-
-        MacBuilder getMacBuilder (byte[] key_modifier) throws SKSException
+        
+        MacBuilder getMacBuilder (byte[] key_modifier, Provisioning actual_session) throws SKSException
           {
+            if (session_key_limit-- <= 0)
+              {
+                actual_session.abort ("\"SessionKey\" usage limit reached", SKSException.ERROR_OPTION);
+              }
             try
               {
                 return new MacBuilder (addArrays (session_key, key_modifier));
@@ -491,6 +502,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               {
                 throw new SKSException ("Internal error");
               }
+          }
+
+        MacBuilder getMacBuilder (byte[] key_modifier) throws SKSException
+          {
+            return getMacBuilder (key_modifier, this);
           }
 
         MacBuilder getMacBuilderForMethodCall (byte[] method) throws SKSException
@@ -917,7 +933,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             return alg;
           }
         abort ("\"EndorsedAlgorithms\" for key[" + key_entry.key_handle + "] does not include: " + input_algorithm);
-        return null;  // for compiler...
+        return null;    // For the compiler only...
       }
 
     byte[] addArrays (byte[] a, byte[] b)
@@ -977,7 +993,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder post_prov_del_mac = key_entry.getEECertMacBuilder (update ? METHOD_PP_UPDATE_KEY : METHOD_PP_CLONE_KEY_PROTECTION);
-        post_prov_del_mac.addArray (target_key_entry.getPostProvisioningMac ());
+        post_prov_del_mac.addArray (target_key_entry.getPostProvisioningMac (provisioning));
         provisioning.verifyMac (post_prov_del_mac, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1448,7 +1464,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder post_prov_del_mac = provisioning.getMacBuilderForMethodCall (METHOD_PP_DELETE_KEY);
-        post_prov_del_mac.addArray (target_key_entry.getPostProvisioningMac ());
+        post_prov_del_mac.addArray (target_key_entry.getPostProvisioningMac (provisioning));
         provisioning.verifyMac (post_prov_del_mac, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1814,7 +1830,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         p.issuer_uri = issuer_uri;
         p.session_key = session_key;
         p.updatable = updatable;
-        // TODO session_key_limit is not handled yet
+        p.session_key_limit = session_key_limit;
         return new ProvisioningSession (p.provisioning_handle,
                                         client_session_id,
                                         session_attestation,
@@ -1891,7 +1907,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
           }
         provisioning.abort ("Key " + id + " missing");
-        return 0;  // For compiler...
+        return 0;    // For the compiler only...
       }
 
 
@@ -2218,6 +2234,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             key_pair_mac.addString (CRYPTO_STRING_NOT_AVAILABLE);
           }
+        key_pair_mac.addByte (biometric_protection);
+        key_pair_mac.addBool (private_key_backup);
+        key_pair_mac.addByte (export_policy);
+        key_pair_mac.addByte (delete_policy);
+        key_pair_mac.addBool (enable_pin_caching);
         key_pair_mac.addByte (key_usage);
         key_pair_mac.addString (friendly_name);
         key_pair_mac.addVerbatim (key_algorithm);
@@ -2456,7 +2477,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             key_entry.private_key = private_key;
             key_entry.key_usage = key_usage;
             key_entry.device_pin_protected = device_pin_protected;
-            // TODO key attributes are not fully aligned with the specification
+            key_entry.enable_pin_caching = enable_pin_caching;
+            key_entry.biometric_protection = biometric_protection;
+            key_entry.export_policy = export_policy;
+            key_entry.delete_policy = delete_policy;
             return new KeyPair (key_entry.key_handle,
                                 public_key,
                                 key_attestation.getResult (),
@@ -2466,7 +2490,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             provisioning.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
           }
-        return null; // For the compiler only...
+        return null;    // For the compiler only...
       }
 
 

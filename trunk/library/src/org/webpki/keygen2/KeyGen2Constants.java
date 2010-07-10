@@ -18,7 +18,6 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-
     String KEYGEN2_NS                        = "http://xmlns.webpki.org/keygen2/alpha/20100402#";
 
     String KEYGEN2_SCHEMA_FILE               = "keygen2.xsd";
@@ -74,7 +73,9 @@ public interface KeyGen2Constants
 
     String UPDATABLE_ATTR                    = "Updatable";
 
-    String EXPORTABLE_ATTR                   = "Exportable";
+    String EXPORT_POLICY_ATTR                = "ExportPolicy";
+
+    String DELETE_POLICY_ATTR                = "DeletePolicy";
 
     String NAMED_CURVE_ATTR                  = "NamedCurve";
 
@@ -129,6 +130,8 @@ public interface KeyGen2Constants
     String USER_MODIFIABLE_ATTR              = "UserModifiable";
 
     String PATTERN_RESTRICTIONS_ATTR         = "PatternRestrictions";
+
+    String BIOMETRIC_PROTECTION_ATTR         = "BiometricProtection";
 
     String SUBJECT_ATTR                      = "Subject";
 

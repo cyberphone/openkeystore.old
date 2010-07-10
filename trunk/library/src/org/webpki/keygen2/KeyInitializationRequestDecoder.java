@@ -303,12 +303,10 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
         PresetPIN preset_pin;
 
         boolean device_pin_protected;
-
+        
         KeyUsage key_usage;
 
         KeyAlgorithmData key_algorithm_data;
-
-        boolean exportable;
 
         KeyObject (DOMReaderHelper rd, 
                    PINPolicy pin_policy,
@@ -323,12 +321,19 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             this.device_pin_protected = device_pin_protected;
 
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+
             id = ah.getString (ID_ATTR);
+
             mac = ah.getBinary (MAC_ATTR);
+
             friendly_name = ah.getStringConditional (FRIENDLY_NAME_ATTR, "");
+
             key_usage = KeyUsage.getKeyUsageFromString (ah.getString (KEY_USAGE_ATTR));
-            exportable = ah.getBooleanConditional (EXPORTABLE_ATTR);
+
             private_key_backup = ah.getBooleanConditional (PRIVATE_KEY_BACKUP_ATTR);
+
+            enable_pin_caching = ah.getBooleanConditional (ENABLE_PIN_CACHING_ATTR);
+
             server_seed = ah.getBinaryConditional (SERVER_SEED_ATTR);
             if (server_seed == null)
               {
@@ -338,6 +343,14 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
               {
                 bad ("Sever seed must be 32 bytes");
               }
+
+            biometric_protection = BiometricProtection.getBiometricProtectionFromString (ah.getStringConditional (BIOMETRIC_PROTECTION_ATTR, 
+                                                                                         BiometricProtection.NONE.getXMLName ()));
+
+            delete_policy = DeletePolicy.getDeletePolicyFromString (ah.getStringConditional (DELETE_POLICY_ATTR, 
+                                                                    DeletePolicy.NONE.getXMLName ()));
+            export_policy = ExportPolicy.getExportPolicyFromString (ah.getStringConditional (EXPORT_POLICY_ATTR, 
+                                                                    ExportPolicy.NON_EXPORTABLE.getXMLName ()));
 
             rd.getChild ();
 
@@ -405,12 +418,6 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
 
 
-        public boolean isExportable ()
-          {
-            return exportable;
-          }
-
-
         public String getID ()
           {
             return id;
@@ -430,16 +437,14 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             return server_seed;
           }
         
-     // TODO        
-        byte biometric_protection;
+        BiometricProtection biometric_protection;
 
-        public byte getBiometricProtection ()
+        public BiometricProtection getBiometricProtection ()
           {
             return biometric_protection;
           }
 
         
-     // TODO        
         boolean private_key_backup;
         
         public boolean getPrivateKeyBackupFlag ()
@@ -448,25 +453,22 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
         
 
-     // TODO        
-        byte export_policy;
+        ExportPolicy export_policy;
         
-        public byte getExportPolicy ()
+        public ExportPolicy getExportPolicy ()
           {
             return export_policy;
           }
 
         
-     // TODO        
-        byte delete_policy;
+        DeletePolicy delete_policy;
         
-        public byte getDeletePolicy ()
+        public DeletePolicy getDeletePolicy ()
           {
             return delete_policy;
           }
 
         
-     // TODO        
         boolean enable_pin_caching;
         
         public boolean getEnablePINCachingFlag ()

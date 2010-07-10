@@ -661,6 +661,7 @@
                           End of client error response object definition
    ===========================================================================================-->
 
+
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             Object representing basic algorithm/capability requirements/support
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -710,7 +711,7 @@
               ("http://xmlns.webpki.org/keygen2/1.0#provider.ietf-hotp"),
               application support is outside of the core SKS specification
               and SHOULD be requested rather than taken for granted.
-              A provisioning client MAY dynamicaĺly check for application
+              A provisioning client MAY dynamically check for application
               availability -->
          <xs:attribute name="Extensions" type="kgen:uriList" use="optional"/>
 
@@ -925,12 +926,8 @@
 
       </xs:complexType>
 
-      <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                Constraints (that can be enforced by schema-directed validation)
-       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
       <!-- Property names within a PropertyBag MUST be unique -->
-      <xs:unique name="PropertyUnique">
+      <xs:unique name="Unique.Property">
          <xs:selector xpath="kgen:Property"/>
          <xs:field xpath="@Name"/>
       </xs:unique>
@@ -1025,25 +1022,31 @@
               Default: 32 zero bytes -->
          <xs:attribute name="ServerSeed" type="xs:base64Binary" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.KeyUsage -->
-         <xs:attribute name="KeyUsage" type="kgen:keyUsageTypes" use="required"/>
+         <!-- SKS Reference: createKeyPair.BiometricProtection 
+              Default: "none" -->
+         <xs:attribute name="BiometricProtection" type="kgen:biomProtTypes" use="optional"/>
 
          <!-- SKS Reference: createKeyPair.PrivateKeyBackup 
               Default: false -->
          <xs:attribute name="PrivateKeyBackup" type="xs:boolean" use="optional"/>
 
+         <!-- SKS Reference: createKeyPair.ExportPolicy 
+              Default: "non-exportable" -->
+         <xs:attribute name="ExportPolicy" type="kgen:expPolicyTypes" use="optional"/>
+
+         <!-- SKS Reference: createKeyPair.DeletePolicy 
+              Default: "none" -->
+         <xs:attribute name="DeletePolicy" type="kgen:delPolicyTypes" use="optional"/>
+
          <!-- SKS Reference: createKeyPair.EnablePINCaching 
               Default: false -->
          <xs:attribute name="EnablePINCaching" type="xs:boolean" use="optional"/>
 
-<!--  VERY UNCLEAR -->
-
-         <!-- SKS Reference: createKeyPair.ExportPolicy 
-              Default: false -->
-         <xs:attribute name="Exportable" type="xs:boolean" use="optional"/>
+         <!-- SKS Reference: createKeyPair.KeyUsage -->
+         <xs:attribute name="KeyUsage" type="kgen:keyUsageTypes" use="required"/>
 
          <!-- SKS Reference: createKeyPair.FriendlyName 
-              Default: false -->
+              Default: "" -->
          <xs:attribute name="FriendlyName" type="xs:string" use="optional"/>
 
          <!-- SKS Reference: createKeyPair.MAC --> 
@@ -1315,6 +1318,44 @@
          <xs:enumeration value="universal"/>
          <xs:enumeration value="transport"/>
          <xs:enumeration value="symmetric-key"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                             Biometric protection definitions
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+   <xs:simpleType name="biomProtTypes">
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="none"/>
+         <xs:enumeration value="alternative"/>
+         <xs:enumeration value="combined"/>
+         <xs:enumeration value="exclusive"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                                  Delete policy definitions
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+   <xs:simpleType name="delPolicyTypes">
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="none"/>
+         <xs:enumeration value="pin"/>
+         <xs:enumeration value="puk"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                                  Export policy definitions
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+   <xs:simpleType name="expPolicyTypes">
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="non-exportable"/>
+         <xs:enumeration value="pin"/>
+         <xs:enumeration value="puk"/>
+         <xs:enumeration value="none"/>
       </xs:restriction>
    </xs:simpleType>
 

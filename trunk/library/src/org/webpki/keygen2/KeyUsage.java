@@ -18,7 +18,6 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-
 public enum KeyUsage
   {
     SIGNATURE                  ("signature",      (byte)0x01),
@@ -60,7 +59,7 @@ public enum KeyUsage
                 return key_type;
               }
           }
-        throw new IOException ("Unknown key-type: " + xml_name);
+        throw new IOException ("Unknown key usage type: " + xml_name);
       }
 
   }

@@ -18,7 +18,6 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-
 public enum InputMethod
   {
     ANY           ("any",          (byte)0x00),

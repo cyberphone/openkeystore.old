@@ -18,18 +18,17 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-public enum PINGrouping
+public enum DeletePolicy
   {
-    NONE                     ("none",               (byte)0x00),
-    SHARED                   ("shared",             (byte)0x01),
-    SIGNATURE_PLUS_STANDARD  ("signature+standard", (byte)0x02),
-    UNIQUE                   ("unique",             (byte)0x03);
+    NONE       ("none", (byte)0x00),
+    PIN        ("pin",  (byte)0x01),
+    PUK        ("puk",  (byte)0x02);
 
     private final String xml_name;       // As expressed in XML
     
     private final byte sks_value;        // As expressed in SKS
 
-    private PINGrouping (String xml_name, byte sks_value)
+    private DeletePolicy (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
@@ -40,24 +39,24 @@ public enum PINGrouping
       {
         return xml_name;
       }
-
     
+
     public byte getSKSValue ()
       {
         return sks_value;
       }
 
 
-    public static PINGrouping getPINGroupingFromString (String xml_name) throws IOException
+    public static DeletePolicy getDeletePolicyFromString (String xml_name) throws IOException
       {
-        for (PINGrouping option : PINGrouping.values ())
+        for (DeletePolicy del_pol : DeletePolicy.values ())
           {
-            if (xml_name.equals (option.xml_name))
+            if (xml_name.equals (del_pol.xml_name))
               {
-                return option;
+                return del_pol;
               }
           }
-        throw new IOException ("Unknown group: " + xml_name);
+        throw new IOException ("Unknown delete policy: " + xml_name);
       }
 
   }

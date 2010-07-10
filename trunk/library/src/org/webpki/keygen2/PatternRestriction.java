@@ -19,7 +19,6 @@ package org.webpki.keygen2;
 import java.io.IOException;
 import java.util.Set;
 
-
 public enum PatternRestriction
   {
     TWO_IN_A_ROW    ("two-in-a-row",   (byte)0x01),    // "11342" is flagged

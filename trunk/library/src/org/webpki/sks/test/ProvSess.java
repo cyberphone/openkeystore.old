@@ -48,7 +48,10 @@ import org.webpki.crypto.ECDomains;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.keygen2.APIDescriptors;
+import org.webpki.keygen2.BiometricProtection;
 import org.webpki.keygen2.CryptoConstants;
+import org.webpki.keygen2.DeletePolicy;
+import org.webpki.keygen2.ExportPolicy;
 import org.webpki.keygen2.InputMethod;
 import org.webpki.keygen2.KeyAlgorithmData;
 import org.webpki.keygen2.KeyGen2URIs;
@@ -432,10 +435,10 @@ public class ProvSess
                           server_seed,
                           pin_policy,
                           pin_value,
-                          (byte) 0 /* biometric_protection */,
+                          BiometricProtection.NONE /* biometric_protection */,
                           false /* boolean private_key_backup */,
-                          (byte)0 /* export_policy */,
-                          (byte)0 /* delete_policy */,
+                          ExportPolicy.NON_EXPORTABLE /* export_policy */,
+                          DeletePolicy.NONE /* delete_policy */,
                           false /* enable_pin_caching */,
                           key_usage,
                           "" /* friendly_name */,
@@ -454,10 +457,10 @@ public class ProvSess
                           server_seed,
                           pin_policy,
                           pin_value,
-                          (byte) 0 /* biometric_protection */,
+                          BiometricProtection.NONE /* biometric_protection */,
                           false /* boolean private_key_backup */,
-                          (byte)0 /* export_policy */,
-                          (byte)0 /* delete_policy */,
+                          ExportPolicy.NON_EXPORTABLE /* export_policy */,
+                          DeletePolicy.NONE /* delete_policy */,
                           false /* enable_pin_caching */,
                           key_usage,
                           "" /* friendly_name */,
@@ -469,10 +472,10 @@ public class ProvSess
                              byte[] server_seed,
                              PINPol pin_policy,
                              String pin_value,
-                             byte biometric_protection,
+                             BiometricProtection biometric_protection,
                              boolean private_key_backup,
-                             byte export_policy,
-                             byte delete_policy,
+                             ExportPolicy export_policy,
+                             DeletePolicy delete_policy,
                              boolean enable_pin_caching,
                              KeyUsage key_usage,
                              String friendly_name,
@@ -503,6 +506,11 @@ public class ProvSess
           {
             key_pair_mac.addArray (encrypted_pin_value);
           }
+        key_pair_mac.addByte (biometric_protection.getSKSValue ());
+        key_pair_mac.addBool (private_key_backup);
+        key_pair_mac.addByte (export_policy.getSKSValue ());
+        key_pair_mac.addByte (delete_policy.getSKSValue ());
+        key_pair_mac.addBool (enable_pin_caching);
         key_pair_mac.addByte (key_usage.getSKSValue ());
         key_pair_mac.addString (friendly_name);
         if (key_algorithm instanceof KeyAlgorithmData.RSA)
@@ -522,10 +530,10 @@ public class ProvSess
                                               server_seed,
                                               pin_policy == null ? 0 : pin_policy.pin_policy_handle, 
                                               encrypted_pin_value, 
-                                              biometric_protection, 
+                                              biometric_protection.getSKSValue (), 
                                               private_key_backup, 
-                                              export_policy, 
-                                              delete_policy, 
+                                              export_policy.getSKSValue (), 
+                                              delete_policy.getSKSValue (), 
                                               enable_pin_caching, 
                                               key_usage.getSKSValue (), 
                                               friendly_name, 

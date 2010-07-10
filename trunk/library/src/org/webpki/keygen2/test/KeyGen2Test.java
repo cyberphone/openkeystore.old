@@ -79,6 +79,8 @@ import org.webpki.keygen2.CredentialDeploymentRequestEncoder;
 import org.webpki.keygen2.CredentialDeploymentResponseDecoder;
 import org.webpki.keygen2.CredentialDeploymentResponseEncoder;
 import org.webpki.keygen2.CryptoConstants;
+import org.webpki.keygen2.DeletePolicy;
+import org.webpki.keygen2.ExportPolicy;
 import org.webpki.keygen2.InputMethod;
 import org.webpki.keygen2.KeyGen2URIs;
 import org.webpki.keygen2.KeyInitializationResponseDecoder;
@@ -161,6 +163,12 @@ public class KeyGen2Test
     boolean encrypted_extension;
     
     boolean ask_for_4096;
+    
+    ExportPolicy export_policy;
+    
+    DeletePolicy delete_policy;
+    
+    InputMethod input_method;
     
     boolean image_prefs;
     
@@ -422,10 +430,10 @@ public class KeyGen2Test
                                                  key.getServerSeed (),
                                                  pin_policy_handle,
                                                  pin_value,
-                                                 key.getBiometricProtection (),
+                                                 key.getBiometricProtection ().getSKSValue (),
                                                  key.getPrivateKeyBackupFlag (),
-                                                 key.getExportPolicy (),
-                                                 key.getDeletePolicy (),
+                                                 key.getExportPolicy ().getSKSValue (),
+                                                 key.getDeletePolicy ().getSKSValue (),
                                                  key.getEnablePINCachingFlag (),
                                                  key.getKeyUsage ().getSKSValue (),
                                                  key.getFriendlyName (),
@@ -772,6 +780,10 @@ public class KeyGen2Test
                   {
                     pin_policy.setGrouping (PINGrouping.SHARED);
                   }
+                if (input_method != null)
+                  {
+                    pin_policy.setInputMethod (input_method);
+                  }
               }
             ServerCredentialStore.KeyAlgorithmData key_alg =  ecc_key ?
                  new ServerCredentialStore.KeyAlgorithmData.EC (ECDomains.P_256) : new ServerCredentialStore.KeyAlgorithmData.RSA (2048);
@@ -804,6 +816,14 @@ public class KeyGen2Test
             if (private_key_backup)
               {
                 kp.setPrivateKeyBackup (true);
+              }
+            if (export_policy != null)
+              {
+                kp.setExportPolicy (export_policy);
+              }
+            if (delete_policy != null)
+              {
+                kp.setDeletePolicy (delete_policy);
               }
             if (server_seed)
               {
@@ -1039,6 +1059,7 @@ public class KeyGen2Test
             writeOption ("Client shows one image preference", image_prefs);
             writeOption ("PUK Protection", puk_protection);
             writeOption ("PIN Protection ", pin_protection);
+            writeOption ("PIN Input Method ", input_method != null);
             writeOption ("Device PIN", device_pin);
             writeOption ("Preset PIN", preset_pin);
             writeOption ("PIN patterns", add_pin_pattern);
@@ -1049,6 +1070,8 @@ public class KeyGen2Test
             writeOption ("Encryption Key", encryption_key);
             writeOption ("Encrypted Extension", encrypted_extension);
             writeOption ("Private Key Backup", private_key_backup);
+            writeOption ("Delete Policy", delete_policy != null);
+            writeOption ("Export Policy", export_policy != null);
             writeOption ("Private Key Restore", set_private_key);
             writeOption ("CloneKeyProtection", clone_key_protection != null);
             writeOption ("UpdateKey", update_key != null);
@@ -1139,6 +1162,7 @@ public class KeyGen2Test
         updatable = true;
         pin_protection = true;
         puk_protection = true;
+        input_method = InputMethod.PROGRAMMATIC;
         doer.perform ();
       }
     @Test
@@ -1350,6 +1374,28 @@ public class KeyGen2Test
               }
           }
         assertTrue ("Missing keys", j == 1);
+      }
+    @Test
+    public void test16 () throws Exception
+      {
+        for (ExportPolicy exp_pol : ExportPolicy.values ())
+          {
+            Doer doer = new Doer ();
+            export_policy = exp_pol;
+            ecc_key = true;
+            doer.perform ();
+          }
+      }
+    @Test
+    public void test17 () throws Exception
+      {
+        for (DeletePolicy del_pol : DeletePolicy.values ())
+          {
+            Doer doer = new Doer ();
+            delete_policy = del_pol;
+            ecc_key = true;
+            doer.perform ();
+          }
       }
 
   }

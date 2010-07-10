@@ -18,7 +18,6 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-
 public enum PassphraseFormat
   {
     NUMERIC       ("numeric",      (byte)0x00),
