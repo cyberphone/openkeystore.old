@@ -526,16 +526,16 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               {
                 abort ("Key " + key_handle + " still in provisioning");
               }
+            if (!ke.owner.updatable)
+              {
+                abort ("Key " + key_handle + " not belonging to an updatable provisioning session");
+              }
             return ke;
           }
 
         public void addPostProvisioningObject (KeyEntry key_entry_original, KeyEntry key_entry, boolean update) throws SKSException
           {
             int key_handle_original = key_entry_original.key_handle;
-            if (!key_entry_original.owner.updatable)
-              {
-                abort ("Key " + key_handle_original + " not belonging to an updatable provisioning session");
-              }
             for (PostProvisioningObject post_op : post_provisioning_objects)
               {
                 if (post_op.new_key != null && key_entry != null && post_op.new_key == key_entry)
