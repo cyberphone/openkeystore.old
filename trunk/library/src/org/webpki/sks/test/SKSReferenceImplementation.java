@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
-import java.security.KeyStoreException;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -54,8 +54,6 @@ import javax.crypto.Mac;
 
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.webpki.keygen2.test.TPMKeyStore;
 
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
@@ -775,6 +773,27 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     // Utility Functions
     /////////////////////////////////////////////////////////////////////////////////////////////
 
+    static final char[] ATTESTATION_KEY_PASSWORD =  {'t','e','s','t','i','n','g'};
+
+    static final String ATTESTATION_KEY_ALIAS = "mykey";
+
+    KeyStore getAttestationKeyStore () throws GeneralSecurityException, IOException
+      {
+        KeyStore ks = KeyStore.getInstance ("JKS");
+        ks.load (getClass ().getResourceAsStream ("attestationkeystore.jks"), ATTESTATION_KEY_PASSWORD);
+        return ks;
+      }
+    
+    X509Certificate[] getDeviceCertificatePath () throws GeneralSecurityException, IOException
+      {
+        return new X509Certificate[]{(X509Certificate)getAttestationKeyStore ().getCertificate (ATTESTATION_KEY_ALIAS)};
+      }
+
+    PrivateKey getAttestationKey () throws GeneralSecurityException, IOException
+      {
+        return (PrivateKey) getAttestationKeyStore ().getKey (ATTESTATION_KEY_ALIAS, ATTESTATION_KEY_PASSWORD);        
+      }
+
     Provisioning getOpenProvisioningSession (int provisioning_handle) throws SKSException
       {
         Provisioning provisioning = provisionings.get (provisioning_handle);
@@ -859,11 +878,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
           }
         return new EnumeratedProvisioningSession ();
-      }
-
-    X509Certificate[] getDeviceCertificatePath () throws KeyStoreException, IOException
-      {
-        return new X509Certificate[]{(X509Certificate)TPMKeyStore.getTPMKeyStore ().getCertificate ("mykey")};
       }
 
     void abort (String message) throws SKSException
@@ -1816,7 +1830,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             // Sign attestation
             ///////////////////////////////////////////////////////////////////////////////////
             Signature signer = Signature.getInstance ("SHA256withRSA", "BC");
-            signer.initSign ((PrivateKey) TPMKeyStore.getTPMKeyStore ().getKey ("mykey", TPMKeyStore.getSignerPassword ().toCharArray ()));
+            signer.initSign (getAttestationKey ());
             signer.update (session_key_attest);
             session_attestation = signer.sign ();
           }

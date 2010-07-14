@@ -49,7 +49,7 @@
        includes="**/*.java, **/*.xsd"/>
     <!-- Compile the java code from ${src_dir} into ${temp_dir} -->
     <mkdir dir="${temp_dir}" />
-    <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}" classpathref="compile.classpath">
+    <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}" classpathref="compile.classpath" includeAntRuntime="false">
       <compilerarg value="-Xlint"/>
     </javac>
   </target>
