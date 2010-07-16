@@ -321,7 +321,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
           }
 
-        byte[] getEncodedEECert () throws SKSException
+        MacBuilder addEECert (MacBuilder mac_builder) throws SKSException
           {
             if (certificate_path == null)
               {
@@ -329,8 +329,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
             try
               {
-                return certificate_path[0].getEncoded ();
-              }
+                mac_builder.addArray (certificate_path[0].getEncoded ());
+                return mac_builder;
+             }
             catch (GeneralSecurityException e)
               {
                 throw new SKSException (e, SKSException.ERROR_INTERNAL);
@@ -339,16 +340,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         MacBuilder getEECertMacBuilder (byte[] method) throws SKSException
           {
-            MacBuilder mac_builder = owner.getMacBuilderForMethodCall (method);
-            mac_builder.addArray (getEncodedEECert ());
-            return mac_builder;
+            return addEECert (owner.getMacBuilderForMethodCall (method));
           }
 
         byte[] getPostProvisioningMac (Provisioning actual_session) throws SKSException
           {
-            MacBuilder mac_builder = owner.getMacBuilder (KDF_PROOF_OF_OWNERSHIP, actual_session);
-            mac_builder.addArray (getEncodedEECert ());
-            return mac_builder.getResult ();
+            return addEECert (owner.getMacBuilder (KDF_PROOF_OF_OWNERSHIP, actual_session)).getResult ();
           }
 
         boolean isRSA ()
