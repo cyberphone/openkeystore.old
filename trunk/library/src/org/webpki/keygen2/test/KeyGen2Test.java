@@ -483,7 +483,7 @@ public class KeyGen2Test
             //////////////////////////////////////////////////////////////////////////
             // Final check, do these keys match the request?
             //////////////////////////////////////////////////////////////////////////
-            for (CredentialDeploymentRequestDecoder.CertifiedPublicKey key : cred_dep_request.getCertifiedPublicKeys ())
+            for (CredentialDeploymentRequestDecoder.DeployedKeyEntry key : cred_dep_request.getDeployedKeyEntrys ())
               {
                 int key_handle = sks.getKeyHandle (eps.getProvisioningHandle (), key.getID ());
                 sks.setCertificatePath (key_handle, key.getCertificatePath (), key.getMAC ());

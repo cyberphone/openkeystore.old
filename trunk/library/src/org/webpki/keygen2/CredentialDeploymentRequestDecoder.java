@@ -119,7 +119,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         
         public abstract byte[] getExtensionData () throws IOException;
         
-        Extension (DOMReaderHelper rd, CertifiedPublicKey cpk) throws IOException
+        Extension (DOMReaderHelper rd, DeployedKeyEntry cpk) throws IOException
           {
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
             type = ah.getString (TYPE_ATTR);
@@ -133,7 +133,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
       {
         byte[] data;
 
-        StandardExtension (byte[] data, DOMReaderHelper rd, CertifiedPublicKey cpk) throws IOException
+        StandardExtension (byte[] data, DOMReaderHelper rd, DeployedKeyEntry cpk) throws IOException
           {
             super (rd, cpk);
             this.data = data;
@@ -160,7 +160,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
       {
         byte[] data;
          
-        EncryptedExtension (byte[] data, DOMReaderHelper rd, CertifiedPublicKey cpk) throws IOException
+        EncryptedExtension (byte[] data, DOMReaderHelper rd, DeployedKeyEntry cpk) throws IOException
           {
             super (rd, cpk);
             this.data = data;
@@ -197,7 +197,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
     class PropertyBag extends Extension
       {
-        private PropertyBag (DOMReaderHelper rd, CertifiedPublicKey cpk) throws IOException
+        private PropertyBag (DOMReaderHelper rd, DeployedKeyEntry cpk) throws IOException
           {
             super (rd, cpk);
           }
@@ -239,7 +239,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         
         String mime_type;
   
-        Logotype (byte[] data, String mime_type, DOMReaderHelper rd, CertifiedPublicKey cpk) throws IOException
+        Logotype (byte[] data, String mime_type, DOMReaderHelper rd, DeployedKeyEntry cpk) throws IOException
           {
             super (rd, cpk);
             this.mime_type = mime_type;
@@ -260,7 +260,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
       }
 
 
-    public class CertifiedPublicKey
+    public class DeployedKeyEntry
       {
         X509Certificate[] certificate_path;
 
@@ -282,13 +282,13 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         
         PostOperation post_operation;
 
-        CertifiedPublicKey () { }
+        DeployedKeyEntry () { }
 
 
-        CertifiedPublicKey (DOMReaderHelper rd) throws IOException
+        DeployedKeyEntry (DOMReaderHelper rd) throws IOException
           {
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-            rd.getNext (CERTIFIED_PUBLIC_KEY_ELEM);
+            rd.getNext (CERTIFICATE_PATH_ELEM);
             id = ah.getString (ID_ATTR);
             mac = ah.getBinary (MAC_ATTR);
             rd.getChild ();
@@ -420,7 +420,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
                                   post_op);
       }
 
-    private Vector<CertifiedPublicKey> certified_keys = new Vector<CertifiedPublicKey> ();
+    private Vector<DeployedKeyEntry> deployed_key_entries = new Vector<DeployedKeyEntry> ();
     
     private Vector<PostOperation> pp_delete_keys = new Vector<PostOperation> ();
       
@@ -469,9 +469,9 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
       }
 
 
-    public CertifiedPublicKey[] getCertifiedPublicKeys ()
+    public DeployedKeyEntry[] getDeployedKeyEntrys ()
       {
-        return certified_keys.toArray (new CertifiedPublicKey[0]);
+        return deployed_key_entries.toArray (new DeployedKeyEntry[0]);
       }
     
     
@@ -518,13 +518,13 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         rd.getChild ();
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the certified_keys [1..n]
+        // Get the deployed_key_entries [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
         do 
           {
-            certified_keys.add (new CertifiedPublicKey (rd));
+            deployed_key_entries.add (new DeployedKeyEntry (rd));
           }
-        while (rd.hasNext (CERTIFIED_PUBLIC_KEY_ELEM));
+        while (rd.hasNext (CERTIFICATE_PATH_ELEM));
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get optional post provisioning deletes

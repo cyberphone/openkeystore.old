@@ -164,13 +164,13 @@ public interface KeyGen2Constants
 
     String SERVER_EPHEMERAL_KEY_ELEM         = "ServerEphemeralKey";
 
-    String DEVICE_CERTIFICATE_ELEM           = "DeviceCertificate";
+    String DEVICE_CERTIFICATE_PATH_ELEM      = "DeviceCertificatePath";
 
     String CLIENT_EPHEMERAL_KEY_ELEM         = "ClientEphemeralKey";
 
-    String GENERATED_PUBLIC_KEY_ELEM         = "GeneratedPublicKey";
+    String PUBLIC_KEY_ELEM                   = "PublicKey";
 
-    String CERTIFIED_PUBLIC_KEY_ELEM         = "CertifiedPublicKey";
+    String CERTIFICATE_PATH_ELEM             = "CertificatePath";
 
     String SYMMETRIC_KEY_ELEM                = "SymmetricKey";
 

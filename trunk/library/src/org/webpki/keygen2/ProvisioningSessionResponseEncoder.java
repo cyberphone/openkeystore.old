@@ -113,7 +113,7 @@ public class ProvisioningSessionResponseEncoder extends ProvisioningSessionRespo
         ////////////////////////////////////////////////////////////////////////
         // Device certificate path
         ////////////////////////////////////////////////////////////////////////
-        wr.addChildElement (DEVICE_CERTIFICATE_ELEM);
+        wr.addChildElement (DEVICE_CERTIFICATE_PATH_ELEM);
         XMLSignatureWrapper.writeX509DataSubset (wr, device_certificate_path);
         wr.getParent();
 

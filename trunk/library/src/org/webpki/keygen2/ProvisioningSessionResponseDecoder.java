@@ -168,7 +168,7 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the device certificate path
         /////////////////////////////////////////////////////////////////////////////////////////
-        rd.getNext (DEVICE_CERTIFICATE_ELEM);
+        rd.getNext (DEVICE_CERTIFICATE_PATH_ELEM);
         rd.getChild ();
         device_certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);
         rd.getParent ();

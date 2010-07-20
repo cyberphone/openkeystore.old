@@ -137,7 +137,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
           {
             for (ServerCredentialStore.KeyProperties key : server_credential_store.getKeyProperties ())
               {
-                wr.addChildElement (CERTIFIED_PUBLIC_KEY_ELEM);
+                wr.addChildElement (CERTIFICATE_PATH_ELEM);
                 wr.setStringAttribute (ID_ATTR, key.id);
 
                 ////////////////////////////////////////////////////////////////////////

@@ -121,7 +121,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
         do
           {
             GeneratedPublicKey gk = new GeneratedPublicKey ();
-            rd.getNext (GENERATED_PUBLIC_KEY_ELEM);
+            rd.getNext (PUBLIC_KEY_ELEM);
             gk.id = ah.getString (ID_ATTR);
             gk.key_attestation = ah.getBinaryConditional (KEY_ATTESTATION_ATTR);
             rd.getChild ();
@@ -136,7 +136,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
                 ServerCredentialStore.bad ("Duplicate key id:" + gk.id);
               }
           }
-        while (rd.hasNext (GENERATED_PUBLIC_KEY_ELEM));
+        while (rd.hasNext (PUBLIC_KEY_ELEM));
 
         if (rd.hasNext ())  // If not ServerCookie XML validation has gone wrong
           {

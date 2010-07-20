@@ -151,7 +151,7 @@
                  known (pre-configured) party -->
             <xs:element ref="kgen:BasicCapabilities"/>
             
-            <!-- Optional hints for the "CertifiedPublicKey/Logotype" extension -->
+            <!-- Optional hints for the "CertificatePath/Logotype" extension -->
             <xs:element name="ImagePreference" minOccurs="0" maxOccurs="unbounded">
                <xs:complexType>
                   <xs:complexContent>
@@ -292,8 +292,8 @@
                </xs:complexType>
             </xs:element>
 
-            <!-- "DeviceCertificate" holds the SKS device certificate -->
-            <xs:element name="DeviceCertificate">
+            <!-- "DeviceCertificatePath" holds the SKS device certificate path -->
+            <xs:element name="DeviceCertificatePath">
                <xs:complexType>
                   <xs:sequence>
 
@@ -525,7 +525,7 @@
          <xs:sequence>
 
             <!-- The keys to be certified -->
-            <xs:element ref="kgen:GeneratedPublicKey" maxOccurs="unbounded"/>
+            <xs:element ref="kgen:PublicKey" maxOccurs="unbounded"/>
 
             <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
@@ -557,7 +557,7 @@
          <xs:sequence>
 
             <!-- The now certified keys -->
-            <xs:element ref="kgen:CertifiedPublicKey" maxOccurs="unbounded"/>
+            <xs:element ref="kgen:CertificatePath" maxOccurs="unbounded"/>
 
             <!-- SKS Reference: pp_deleteKey -->
             <xs:element name="DeleteKey" type="kgen:targetKey" minOccurs="0" maxOccurs="unbounded"/>
@@ -719,10 +719,10 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                     Base-object for representing a certified public key
+     Base-object for representing a certified public key, path, and other key entry data
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <xs:element name="CertifiedPublicKey">
+    <xs:element name="CertificatePath">
       <xs:complexType>
          <xs:sequence>
 
@@ -871,7 +871,7 @@
          </xs:sequence>
 
          <!-- A unique key-ID which MUST match the corresponding
-              "KeyInitializationResponse/GeneratedPublicKey/@ID" -->
+              "KeyInitializationResponse/PublicKey/@ID" -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
@@ -938,7 +938,7 @@
                     Base-object for representing a created public key
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:element name="GeneratedPublicKey">
+   <xs:element name="PublicKey">
       <xs:complexType>
          <xs:sequence>
 
