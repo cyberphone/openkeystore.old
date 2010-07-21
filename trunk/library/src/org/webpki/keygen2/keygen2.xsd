@@ -392,7 +392,6 @@
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
       </xs:complexType>
-
    </xs:element>
 
    <!--==========================================================================================
@@ -508,7 +507,6 @@
          <xs:attribute name="KeyAttestationAlgorithm" type="xs:anyURI" use="required"/>
 
       </xs:complexType>
-
    </xs:element>
 
    <!--==========================================================================================
