@@ -313,18 +313,31 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         void verifyPIN (byte[] pin) throws SKSException
           {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // If there is no PIN there is nothing to verify...
+            ///////////////////////////////////////////////////////////////////////////////////
             if (pin_policy != null)
               {
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Check that we haven't already passed the limit
+                ///////////////////////////////////////////////////////////////////////////////////
                 if (error_counter >= pin_policy.retry_limit)
                   {
                     authError ();
                   }
+
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Check the PIN value
+                ///////////////////////////////////////////////////////////////////////////////////
                 if (!Arrays.equals (this.pin_value, pin))
                   {
                     setErrorCounter (++error_counter);
                     authError ();
                   }
-                // A success always resets error count
+
+                ///////////////////////////////////////////////////////////////////////////////////
+                // A success always resets the PIN error counter(s)
+                ///////////////////////////////////////////////////////////////////////////////////
                 setErrorCounter ((short)0);
               }
           }
@@ -377,7 +390,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Success!  Reset PUK error counter
+            // A success always resets the PUK error counter
             ///////////////////////////////////////////////////////////////////////////////////
             puk_policy.error_counter = 0;
           }
@@ -1173,7 +1186,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.export_policy == EXPORT_POLICY_NON_EXPORTABLE)
           {
-            throw new SKSException ("Key [" + key_entry.key_handle + "] not exportable", SKSException.ERROR_NOT_ALLOWED);
+            throw new SKSException ("Key [" + key_entry.key_handle + "] is not exportable", SKSException.ERROR_NOT_ALLOWED);
           }
         
         ///////////////////////////////////////////////////////////////////////////////////
