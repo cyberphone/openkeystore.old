@@ -1386,6 +1386,14 @@ public class KeyGen2Test
           {
             Doer doer = new Doer ();
             export_policy = exp_pol;
+            if (exp_pol == ExportPolicy.PIN || exp_pol == ExportPolicy.PUK)
+              {
+                pin_protection = true;
+              }
+            if (exp_pol == ExportPolicy.PUK)
+              {
+                puk_protection = true;
+              }
             ecc_key = true;
             doer.perform ();
           }
@@ -1396,6 +1404,14 @@ public class KeyGen2Test
         for (DeletePolicy del_pol : DeletePolicy.values ())
           {
             Doer doer = new Doer ();
+            if (del_pol == DeletePolicy.PIN || del_pol == DeletePolicy.PUK)
+              {
+                pin_protection = true;
+              }
+            if (del_pol == DeletePolicy.PUK)
+              {
+                puk_protection = true;
+              }
             delete_policy = del_pol;
             ecc_key = true;
             doer.perform ();

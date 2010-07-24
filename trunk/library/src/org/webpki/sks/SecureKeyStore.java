@@ -175,5 +175,8 @@ public interface SecureKeyStore
 
     public void unlockKey (int key_handle,
                            byte[] authorization) throws SKSException;
+    
+    public byte[] exportKey (int key_handle,
+                             byte[] authorization) throws SKSException;
 
   }

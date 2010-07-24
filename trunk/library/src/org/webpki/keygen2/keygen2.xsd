@@ -262,7 +262,6 @@
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
       </xs:complexType>
-
    </xs:element>
 
    <!--==========================================================================================
@@ -1137,8 +1136,8 @@
               enclosing "PUKPolicy" object -->
 
          <!-- SKS Reference: createPINPolicy.UserDefined 
-              "UserDefined" is an implicit variable which is defined by the
-              presence of a "PresetPIN" object enclosing the "KeyPair" object -->
+              "UserDefined" is an implicit variable which is true unless
+              there is a "PresetPIN" object enclosing the "KeyPair" object -->
 
          <!-- SKS Reference: createPINPolicy.UserModifiable 
               Default: false for preset PINs, true for user-defined PINs -->
@@ -1350,10 +1349,10 @@
 
    <xs:simpleType name="expPolicyTypes">
       <xs:restriction base="xs:string">
-         <xs:enumeration value="non-exportable"/>
+         <xs:enumeration value="none"/>
          <xs:enumeration value="pin"/>
          <xs:enumeration value="puk"/>
-         <xs:enumeration value="none"/>
+         <xs:enumeration value="non-exportable"/>
       </xs:restriction>
    </xs:simpleType>
 

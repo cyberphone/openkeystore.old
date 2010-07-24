@@ -167,6 +167,14 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final byte BASE_TYPE_LOGOTYPE            = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
+    // "ExportPolicy" and "DeletePolicy" share constants (and code...)
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte EXP_DEL_POLICY_NONE           = 0x00;
+    static final byte EXP_DEL_POLICY_PIN            = 0x01;
+    static final byte EXP_DEL_POLICY_PUK            = 0x02;
+    static final byte EXPORT_POLICY_NON_EXPORTABLE  = 0x03;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS key algorithm IDs used in "createKeyPair"
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final byte RSA_KEY = 0x00;
@@ -318,6 +326,71 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                   }
                 // A success always resets error count
                 setErrorCounter ((short)0);
+              }
+          }
+
+        void verifyPUK (byte[] puk) throws SKSException
+          {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check that this key really has a PUK...
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (pin_policy == null || pin_policy.puk_policy == null)
+              {
+                abort ("Key [" + key_handle + "] has no PUK");
+              }
+
+            PUKPolicy puk_policy = pin_policy.puk_policy;
+            if (puk_policy.retry_limit > 0)
+              {
+                ///////////////////////////////////////////////////////////////////////////////////
+                // The key is using the "standard" retry PUK policy
+                ///////////////////////////////////////////////////////////////////////////////////
+                if (puk_policy.error_counter >= puk_policy.retry_limit)
+                  {
+                    abort ("PUK for key [" + key_handle + "] is already locked", SKSException.ERROR_AUTHORIZATION);
+                  }
+              }
+            else
+              {
+                ///////////////////////////////////////////////////////////////////////////////////
+                // The "liberal" PUK policy never locks up but introduces a mandatory delay...
+                ///////////////////////////////////////////////////////////////////////////////////
+                try
+                  {
+                    Thread.sleep (1000);
+                  }
+                catch (InterruptedException e)
+                  {
+                  }
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check the PUK value
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (!Arrays.equals (puk_policy.puk_value, puk))
+              {
+                if (puk_policy.retry_limit > 0)
+                  {
+                    ++puk_policy.error_counter;
+                  }
+                abort ("Incorrect PUK for key: " + key_handle, SKSException.ERROR_AUTHORIZATION);
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Success!  Reset PUK error counter
+            ///////////////////////////////////////////////////////////////////////////////////
+            puk_policy.error_counter = 0;
+          }
+
+        void authorizeOperation (byte policy, byte[] authorization) throws SKSException
+          {
+            if (policy == EXP_DEL_POLICY_PIN)
+              {
+                verifyPIN (authorization);
+              }
+            else if (policy == EXP_DEL_POLICY_PUK)
+              {
+                verifyPUK (authorization);
               }
           }
 
@@ -680,12 +753,15 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final int ALG_HASH_160 = 0x14000;
     static final int ALG_HASH_256 = 0x20000;
     static final int ALG_HASH_DIV = 0x01000;
+    static final int ALG_NONE     = 0x40000;
 
     static final String ALGORITHM_KEY_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1";
 
     static final String ALGORITHM_SESSION_KEY_ATTEST_1 = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sk1";
 
     static final short[] RSA_KEY_SIZES = {1024, 2048};
+    
+    static final int MAX_SYMMETRIC_KEY_SIZE = 64;
 
     static
       {
@@ -763,6 +839,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         //  Elliptic Curves
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("urn:oid:1.2.840.10045.3.1.7", "secp256r1", ALG_ECC_CRV);
+
+        //////////////////////////////////////////////////////////////////////////////////////
+        //  Static Password
+        //////////////////////////////////////////////////////////////////////////////////////
+        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.none", null, ALG_NONE);
       }
 
 
@@ -1037,57 +1118,13 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         KeyEntry key_entry = getStdKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check that this key can be unlocked by a PUK
+        // Verify PUK
         ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.pin_policy == null || key_entry.pin_policy.puk_policy == null)
-          {
-            abort ("Key [" + key_entry.key_handle + "] has no PUK");
-          }
+        key_entry.verifyPUK (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the PUK error counter hasn't already reached max
+        // Success!  Reset PIN error counter(s)
         ///////////////////////////////////////////////////////////////////////////////////
-        PUKPolicy puk_policy = key_entry.pin_policy.puk_policy;
-        if (puk_policy.retry_limit > 0)
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // The key is using the "standard" retry PUK policy
-            ///////////////////////////////////////////////////////////////////////////////////
-            if (puk_policy.error_counter >= puk_policy.retry_limit)
-              {
-                abort ("PUK for key [" + key_entry.key_handle + "] is already locked", SKSException.ERROR_AUTHORIZATION);
-              }
-          }
-        else
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // The "liberal" PUK policy never locks up but introduces a mandatory delay...
-            ///////////////////////////////////////////////////////////////////////////////////
-            try
-              {
-                Thread.sleep (1000);
-              }
-            catch (InterruptedException e)
-              {
-              }
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check the PUK value
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (!Arrays.equals (puk_policy.puk_value, authorization))
-          {
-            if (puk_policy.retry_limit > 0)
-              {
-                ++puk_policy.error_counter;
-              }
-            abort ("Incorrect PUK for key: " + key_entry.key_handle, SKSException.ERROR_AUTHORIZATION);
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Success!  Reset both PINs and the PUK error counters
-        ///////////////////////////////////////////////////////////////////////////////////
-        puk_policy.error_counter = 0;
         key_entry.setErrorCounter ((short)0);
       }
 
@@ -1100,18 +1137,55 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     @Override
     public void deleteKey (int key_handle, byte[] authorization) throws SKSException
       {
-         ///////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////
         // Get key (which must belong to an already fully provisioned session)
         ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = getStdKey (key_handle);
 
-        // TODO authorization
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that authorization matches the declaration
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.authorizeOperation (key_entry.delete_policy, authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Delete key and optionally the entire provisioning object (if empty)
         ///////////////////////////////////////////////////////////////////////////////////
         localDeleteKey (key_entry);
         deleteEmptySession (key_entry.owner);
+      }
+
+    
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                               exportKey                                    //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public byte[] exportKey (int key_handle, byte[] authorization) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Is this key exportable at all?
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (key_entry.export_policy == EXPORT_POLICY_NON_EXPORTABLE)
+          {
+            throw new SKSException ("Key [" + key_entry.key_handle + "] not exportable", SKSException.ERROR_NOT_ALLOWED);
+          }
+        
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that authorization matches the declaration
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.authorizeOperation (key_entry.export_policy, authorization);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Export key in raw unencrypted format
+        ///////////////////////////////////////////////////////////////////////////////////
+        return key_entry.key_usage == KEY_USAGE_SYMMETRIC_KEY ?
+                                      key_entry.symmetric_key : key_entry.private_key.getEncoded ();
       }
 
 
@@ -2063,6 +2137,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Decrypt symmetric key
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] clear_text_symmetric_key = key_entry.owner.decrypt (symmetric_key);
+        if (clear_text_symmetric_key.length > MAX_SYMMETRIC_KEY_SIZE)
+          {
+            key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_SYMMETRIC_KEY_SIZE + " bytes");
+          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check endorsed algorithms
@@ -2079,7 +2157,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             ///////////////////////////////////////////////////////////////////////////////////
             // Check that the algorithms are known and applicable to symmetric keys
             ///////////////////////////////////////////////////////////////////////////////////
-            if (alg == null || (alg.mask & (ALG_SYM_ENC | ALG_HMAC)) == 0)
+            if (alg == null || (alg.mask & (ALG_SYM_ENC | ALG_HMAC | ALG_NONE)) == 0)
               {
                 key_entry.owner.abort ((alg == null ? "Unsupported" : "Incorrect") + " algorithm: " + endorsed_algorithm);
               }
@@ -2258,8 +2336,30 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform a gazillion tests on PINs if applicable
         ///////////////////////////////////////////////////////////////////////////////////
-        if (pin_policy != null)
+        if (pin_policy == null)
           {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Certain policy attributes require PIN objects
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (delete_policy == EXP_DEL_POLICY_PIN || delete_policy == EXP_DEL_POLICY_PUK ||
+                export_policy == EXP_DEL_POLICY_PIN || export_policy == EXP_DEL_POLICY_PUK)
+              {
+                provisioning.abort ("Export or delete policy lacks a PIN object");
+              }
+          }
+        else
+          {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Certain policy attributes require PUK objects
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (pin_policy.puk_policy == null)
+              {
+                if (delete_policy == EXP_DEL_POLICY_PUK || export_policy == EXP_DEL_POLICY_PUK)
+                  {
+                    provisioning.abort ("Export or delete policy lacks a PUK object");
+                  }
+              }
+
             ///////////////////////////////////////////////////////////////////////////////////
             // Check PIN length
             ///////////////////////////////////////////////////////////////////////////////////
