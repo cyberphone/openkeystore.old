@@ -23,7 +23,7 @@ public enum ExportPolicy
     NONE               ("none",           (byte)0x00),
     PIN                ("pin",            (byte)0x01),
     PUK                ("puk",            (byte)0x02),
-    NON_EXPORTABLE     ("non-exportable", (byte)0x03);
+    NON_EXPORTABLE     ("non-exportable", (byte)0x04);
 
     private final String xml_name;       // As expressed in XML
     

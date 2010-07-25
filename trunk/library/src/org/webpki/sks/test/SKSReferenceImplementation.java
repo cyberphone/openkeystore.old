@@ -172,7 +172,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final byte EXP_DEL_POLICY_NONE           = 0x00;
     static final byte EXP_DEL_POLICY_PIN            = 0x01;
     static final byte EXP_DEL_POLICY_PUK            = 0x02;
-    static final byte EXPORT_POLICY_NON_EXPORTABLE  = 0x03;
+    static final byte EXPORT_POLICY_NON_EXPORTABLE  = 0x04;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS key algorithm IDs used in "createKeyPair"
@@ -251,6 +251,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         private static final long serialVersionUID = 1L;
 
         int key_handle;
+
         byte key_usage;
 
         PublicKey public_key;
@@ -395,7 +396,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             puk_policy.error_counter = 0;
           }
 
-        void authorizeOperation (byte policy, byte[] authorization) throws SKSException
+        void authorizeExportOrDeleteOperation (byte policy, byte[] authorization) throws SKSException
           {
             if (policy == EXP_DEL_POLICY_PIN)
               {
@@ -502,6 +503,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
       {
         private static final long serialVersionUID = 1L;
 
+        int provisioning_handle;
+
         // The virtual/shared name-space
         HashMap<String,Boolean> names = new HashMap<String,Boolean> ();
 
@@ -512,10 +515,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         String server_session_id;
         String issuer_uri;
         byte[] session_key;
-        int provisioning_handle;
         boolean open = true;
         boolean updatable;
         short mac_sequence_counter;
+        int client_time;
+        int session_life_time;
         short session_key_limit;
 
         Provisioning ()
@@ -1158,7 +1162,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that authorization matches the declaration
         ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.authorizeOperation (key_entry.delete_policy, authorization);
+        key_entry.authorizeExportOrDeleteOperation (key_entry.delete_policy, authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Delete key and optionally the entire provisioning object (if empty)
@@ -1192,7 +1196,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that authorization matches the declaration
         ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.authorizeOperation (key_entry.export_policy, authorization);
+        key_entry.authorizeExportOrDeleteOperation (key_entry.export_policy, authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Export key in raw unencrypted format
@@ -1928,6 +1932,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         p.issuer_uri = issuer_uri;
         p.session_key = session_key;
         p.updatable = updatable;
+        p.client_time = client_time;
+        p.session_life_time = session_life_time;
         p.session_key_limit = session_key_limit;
         return new ProvisioningSession (p.provisioning_handle,
                                         client_session_id,
@@ -2354,8 +2360,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             ///////////////////////////////////////////////////////////////////////////////////
             // Certain policy attributes require PIN objects
             ///////////////////////////////////////////////////////////////////////////////////
-            if (delete_policy == EXP_DEL_POLICY_PIN || delete_policy == EXP_DEL_POLICY_PUK ||
-                export_policy == EXP_DEL_POLICY_PIN || export_policy == EXP_DEL_POLICY_PUK)
+            if (((delete_policy | export_policy) & (EXP_DEL_POLICY_PIN | EXP_DEL_POLICY_PUK)) != 0)
               {
                 provisioning.abort ("Export or delete policy lacks a PIN object");
               }
@@ -2367,7 +2372,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             ///////////////////////////////////////////////////////////////////////////////////
             if (pin_policy.puk_policy == null)
               {
-                if (delete_policy == EXP_DEL_POLICY_PUK || export_policy == EXP_DEL_POLICY_PUK)
+                if (((delete_policy | export_policy) & EXP_DEL_POLICY_PUK) != 0)
                   {
                     provisioning.abort ("Export or delete policy lacks a PUK object");
                   }
@@ -2547,7 +2552,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             if (key_algorithm.length < 10 || key_algorithm[0] != ECC_KEY ||
                 getShort (key_algorithm, 1) != (key_algorithm.length - 3))
               {
-                provisioning.abort ("Bad ECC KeyAlgorithm format");
+                provisioning.abort ("Incorrect \"KeyAlgorithm\" format");
               }
             StringBuffer ec_uri = new StringBuffer ();
             for (int i = 3; i < key_algorithm.length; i++)
@@ -2557,7 +2562,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             Algorithm alg = algorithms.get (ec_uri.toString ());
             if (alg == null || (alg.mask & ALG_ECC_CRV) == 0)
               {
-                provisioning.abort ("Unsupported EC curve: " + ec_uri);
+                provisioning.abort ("Unsupported eliptic curve: " + ec_uri);
               }
             alg_par_spec = new ECGenParameterSpec (alg.jce_name);
           }

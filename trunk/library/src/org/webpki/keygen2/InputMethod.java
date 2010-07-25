@@ -20,9 +20,9 @@ import java.io.IOException;
 
 public enum InputMethod
   {
-    ANY           ("any",          (byte)0x00),
     PROGRAMMATIC  ("programmatic", (byte)0x01),
-    TRUSTED_GUI   ("trusted-gui",  (byte)0x02);
+    TRUSTED_GUI   ("trusted-gui",  (byte)0x02),
+    ANY           ("any",          (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
 
