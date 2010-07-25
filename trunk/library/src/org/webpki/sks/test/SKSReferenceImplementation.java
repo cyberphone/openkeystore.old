@@ -2418,18 +2418,26 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               {
                 provisioning.abort ("Bad PIN syntax");
               }
+            if ((pin_policy.pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0)
+              {
+                if (!upperalpha || !number ||
+                    (pin_policy.format == PIN_FORMAT_STRING && (!loweralpha || !nonalphanum)))
+                  {
+                    provisioning.abort ("Missing character group in PIN");
+                  }
+              }
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Check PIN patterns
             ///////////////////////////////////////////////////////////////////////////////////
             if ((pin_policy.pattern_restrictions & PIN_PATTERN_SEQUENCE) != 0)
               {
-                int c = pin_value[0];
-                int f = (pin_value[1] - c) & 0xFF;
-                boolean seq = (f == 1) || (f == 0xFF);
+                byte c = pin_value[0];
+                byte f = (byte)(pin_value[1] - c);
+                boolean seq = (f == 1) || (f == -1);
                 for (int i = 1; i < pin_value.length; i++)
                   {
-                    if (((c + f) & 0xFF) != (pin_value[i] & 0xFF))
+                    if ((byte)(c + f) != pin_value[i])
                       {
                         seq = false;
                         break;
@@ -2472,16 +2480,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                     else
                       {
                         same_count = 1;
+                        c = pin_value[i];
                       }
-                    c = pin_value[i];
-                  }
-              }
-            if ((pin_policy.pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0)
-              {
-                if (!upperalpha || !number ||
-                    (pin_policy.format == PIN_FORMAT_STRING && (!loweralpha || !nonalphanum)))
-                  {
-                    provisioning.abort ("Missing character group in PIN");
                   }
               }
 
@@ -2566,6 +2566,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
             alg_par_spec = new ECGenParameterSpec (alg.jce_name);
           }
+
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////
