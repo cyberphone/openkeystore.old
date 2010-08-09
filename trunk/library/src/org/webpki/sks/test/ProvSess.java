@@ -167,13 +167,9 @@ public class ProvSess
     
     static final String ISSUER_URI = "http://issuer.example.com/provsess";
     
-    boolean session_updatable_flag = true;
-    
     Date client_time;
     
     int provisioning_handle;
-    
-    short session_key_limit = 50;
     
     int session_life_time = 10000;
     
@@ -186,6 +182,12 @@ public class ProvSess
     short mac_sequence_counter;
     
     SecureKeyStore sks;
+    
+    boolean override_export_policy;
+    
+    byte overriden_export_policy;
+    
+    boolean user_defined_pins = true;
     
     static class MacGenerator
       {
@@ -250,6 +252,33 @@ public class ProvSess
        
       }
 
+    private String[] getSortedAlgorithms (String[] algorithms) throws IOException
+      {
+        int i = 0;
+        while (true)
+          {
+            if (i < (algorithms.length - 1))
+              {
+                if (algorithms[i].compareTo (algorithms[i + 1]) > 0)
+                  {
+                    String s = algorithms[i];
+                    algorithms[i] = algorithms[i + 1];
+                    algorithms[i + 1] = s;
+                    i = 0;
+                  }
+                else
+                  {
+                    i++;
+                  }
+              }
+            else
+              {
+                break;
+              }
+          }
+        return algorithms;
+      }
+
     private byte[] getMACSequenceCounterAndUpdate ()
       {
         int q = mac_sequence_counter++;
@@ -276,11 +305,10 @@ public class ProvSess
         throw new IOException (message);
       }
   
-
     ///////////////////////////////////////////////////////////////////////////////////
     // Create provisioning session
     ///////////////////////////////////////////////////////////////////////////////////
-    public ProvSess (Device device) throws GeneralSecurityException, IOException
+    private ProvSess (Device device, short session_key_limit, boolean session_updatable_flag) throws GeneralSecurityException, IOException
       {
         sks = device.sks;
         server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
@@ -322,6 +350,21 @@ public class ProvSess
                                                         sess.getSessionAttestation ());
      }
     
+    public ProvSess (Device device) throws GeneralSecurityException, IOException
+    {
+      this (device, (short)50, true);
+    }
+
+    public ProvSess (Device device, short session_key_limit) throws GeneralSecurityException, IOException
+    {
+      this (device, session_key_limit, true);
+    }
+
+    public ProvSess (Device device, boolean session_updatable_flag) throws GeneralSecurityException, IOException
+    {
+      this (device, (short)50, session_updatable_flag);
+    }
+
     public void closeSession () throws IOException, GeneralSecurityException
       {
         MacGenerator close = new MacGenerator ();
@@ -342,6 +385,18 @@ public class ProvSess
     public void abortSession () throws IOException
       {
         sks.abortProvisioningSession (provisioning_handle);
+      }
+    
+    
+    public void overrideExportPolicy (byte export_policy)
+      {
+        override_export_policy = true;
+        overriden_export_policy = export_policy;
+      }
+    
+    public void makePINsServerDefined ()
+      {
+        user_defined_pins = false;
       }
 
     byte[] getPassphraseBytes (PassphraseFormat format, String passphrase) throws IOException
@@ -387,8 +442,8 @@ public class ProvSess
                                    PUKPol puk_policy) throws IOException, GeneralSecurityException
       {
         PINPol pin_policy = new PINPol ();
-        boolean user_defined = true;
-        boolean user_modifiable = true;
+        boolean user_defined = user_defined_pins;
+        boolean user_modifiable = user_defined_pins;
         InputMethod input_method = InputMethod.ANY;
         int puk_policy_handle = puk_policy == null ? 0 : puk_policy.puk_policy_handle;
         MacGenerator pin_policy_mac = new MacGenerator ();
@@ -481,6 +536,7 @@ public class ProvSess
                              String friendly_name,
                              KeyAlgorithmData key_algorithm) throws SKSException, IOException, GeneralSecurityException
       {
+        byte actual_export_policy = override_export_policy ? overriden_export_policy : export_policy.getSKSValue ();
         MacGenerator key_pair_mac = new MacGenerator ();
         key_pair_mac.addString (id);
         key_pair_mac.addString (attestation_algorithm);
@@ -508,7 +564,7 @@ public class ProvSess
           }
         key_pair_mac.addByte (biometric_protection.getSKSValue ());
         key_pair_mac.addBool (private_key_backup);
-        key_pair_mac.addByte (export_policy.getSKSValue ());
+        key_pair_mac.addByte (actual_export_policy);
         key_pair_mac.addByte (delete_policy.getSKSValue ());
         key_pair_mac.addBool (enable_pin_caching);
         key_pair_mac.addByte (key_usage.getSKSValue ());
@@ -532,7 +588,7 @@ public class ProvSess
                                               encrypted_pin_value, 
                                               biometric_protection.getSKSValue (), 
                                               private_key_backup, 
-                                              export_policy.getSKSValue (), 
+                                              actual_export_policy, 
                                               delete_policy.getSKSValue (), 
                                               enable_pin_caching, 
                                               key_usage.getSKSValue (), 
@@ -592,6 +648,32 @@ public class ProvSess
                                 mac (set_certificate.getResult (), APIDescriptors.SET_CERTIFICATE_PATH));
       }
     
+    void setSymmetricKey (GenKey key, byte[] symmetric_key, String[] endorsed_algorithms) throws IOException, GeneralSecurityException
+      {
+        String[] sorted_algorithms = getSortedAlgorithms (endorsed_algorithms);
+        MacGenerator symk_mac = key.getEECertMacBuilder ();
+        byte[] encrypted_symmetric_key = server_sess_key.encrypt (symmetric_key);
+        symk_mac.addArray (encrypted_symmetric_key);
+        for (String algorithm : sorted_algorithms)
+          {
+            symk_mac.addString (algorithm);
+          }
+        sks.setSymmetricKey (key.key_handle,
+                             encrypted_symmetric_key,
+                             sorted_algorithms,
+                             mac (symk_mac.getResult (), APIDescriptors.SET_SYMMETRIC_KEY));
+      }
+
+    void restorePrivateKey (GenKey key, PrivateKey private_key) throws IOException, GeneralSecurityException
+      {
+        MacGenerator privk_mac = key.getEECertMacBuilder ();
+        byte[] encrypted_private_key = server_sess_key.encrypt (private_key.getEncoded ());
+        privk_mac.addArray (encrypted_private_key);
+        sks.restorePrivateKey (key.key_handle,
+                               encrypted_private_key,
+                               mac (privk_mac.getResult (), APIDescriptors.RESTORE_PRIVATE_KEY));
+      }
+
     void postDeleteKey (GenKey key) throws IOException, GeneralSecurityException
       {
         MacGenerator del_mac = new MacGenerator ();

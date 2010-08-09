@@ -51,6 +51,11 @@ public class GenKey
     
     public GenKey setCertificate (String dn) throws IOException, GeneralSecurityException
       {
+        return setCertificate (dn, public_key);
+      }
+
+    public GenKey setCertificate (String dn, PublicKey public_key) throws IOException, GeneralSecurityException
+      {
         CertSpec cert_spec = new CertSpec ();
         cert_spec.setEndEntityConstraint ();
         cert_spec.setSubject (dn);

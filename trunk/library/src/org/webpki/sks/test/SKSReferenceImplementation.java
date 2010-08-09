@@ -72,6 +72,10 @@ import org.webpki.sks.SecureKeyStore;
  *
  *  SKS is a cryptographic module that supports E2ES (End-to-End Security) for
  *  Provisioning and Managing PKI, Symmetric keys, PINs, PUKs and Extension data.
+ *  
+ *  Cryptographic Issuer Isolation and Transaction-based Update Operations enable
+ *  consumers having multiple providers sharing the same container, something which
+ *  is a necessity in mobile phones with trusted hardware. 
  *
  *  The following is an SKS Reference Implementation that is intended to complement
  *  the specification by showing how the different constructs can be implemented.
@@ -173,6 +177,21 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final byte EXP_DEL_POLICY_PIN            = 0x01;
     static final byte EXP_DEL_POLICY_PUK            = 0x02;
     static final byte EXPORT_POLICY_NON_EXPORTABLE  = 0x04;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // "InputMethod" constants
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte INPUT_METHOD_PROGRAMMATIC     = 0x01;
+    static final byte INPUT_METHOD_TRUSTED_GUI      = 0x02;
+    static final byte INPUT_METHOD_ANY              = 0x03;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // "BiometricProtection" constants
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte BIOM_PROT_NONE                = 0x00;
+    static final byte BIOM_PROT_ALTERNATIVE         = 0x01;
+    static final byte BIOM_PROT_COMBINED            = 0x02;
+    static final byte BIOM_PROT_EXCLUSIVE           = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS key algorithm IDs used in "createKeyPair"
@@ -286,7 +305,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         void authError () throws SKSException
           {
-            throw new SKSException ("Authorization error for key: " + key_handle, SKSException.ERROR_AUTHORIZATION);
+            abort ("Authorization error for key #" + key_handle, SKSException.ERROR_AUTHORIZATION);
           }
 
         void setErrorCounter (short new_error_count)
@@ -317,7 +336,14 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             ///////////////////////////////////////////////////////////////////////////////////
             // If there is no PIN there is nothing to verify...
             ///////////////////////////////////////////////////////////////////////////////////
-            if (pin_policy != null)
+            if (pin_policy == null)
+              {
+                if (pin.length != 0)
+                  {
+                    abort ("Redundant authorization information for key #" + key_handle);
+                  }
+              }
+            else
               {
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Check that we haven't already passed the limit
@@ -350,7 +376,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             ///////////////////////////////////////////////////////////////////////////////////
             if (pin_policy == null || pin_policy.puk_policy == null)
               {
-                abort ("Key [" + key_handle + "] has no PUK");
+                abort ("Key #" + key_handle + " has no PUK");
               }
 
             PUKPolicy puk_policy = pin_policy.puk_policy;
@@ -361,7 +387,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 ///////////////////////////////////////////////////////////////////////////////////
                 if (puk_policy.error_counter >= puk_policy.retry_limit)
                   {
-                    abort ("PUK for key [" + key_handle + "] is already locked", SKSException.ERROR_AUTHORIZATION);
+                    authError ();
                   }
               }
             else
@@ -387,7 +413,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                   {
                     ++puk_policy.error_counter;
                   }
-                abort ("Incorrect PUK for key: " + key_handle, SKSException.ERROR_AUTHORIZATION);
+                authError ();
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -412,7 +438,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             if (certificate_path == null)
               {
-                owner.abort ("EE certificate missing");
+                owner.abort ("End-entity certificate missing. \"setCertificatePath\" performed?");
               }
             try
               {
@@ -569,7 +595,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
             catch (GeneralSecurityException e)
               {
-                throw new SKSException (e, SKSException.ERROR_INTERNAL);
+                throw new SKSException (e);
               }
           }
         
@@ -577,7 +603,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             if (session_key_limit-- <= 0)
               {
-                actual_session.abort ("\"SessionKey\" usage limit reached", SKSException.ERROR_OPTION);
+                actual_session.abort ("\"SessionKeyLimit\" exceeded");
               }
             try
               {
@@ -585,7 +611,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
             catch (GeneralSecurityException e)
               {
-                throw new SKSException ("Internal error");
+                throw new SKSException (e);
               }
           }
 
@@ -605,41 +631,48 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             KeyEntry ke = keys.get (key_handle);
             if (ke == null)
               {
-                abort ("Key not found: " + key_handle, SKSException.ERROR_NO_KEY);
+                abort ("Key not found #" + key_handle, SKSException.ERROR_NO_KEY);
               }
             if (ke.owner.open)
               {
-                abort ("Key " + key_handle + " still in provisioning");
+                abort ("Key #" + key_handle + " still in provisioning");
               }
             if (!ke.owner.updatable)
               {
-                abort ("Key " + key_handle + " not belonging to an updatable provisioning session");
+                abort ("Key #" + key_handle + " belongs to a non-updatable provisioning session");
               }
             return ke;
           }
 
         public void addPostProvisioningObject (KeyEntry key_entry_original, KeyEntry key_entry, boolean update) throws SKSException
           {
-            int key_handle_original = key_entry_original.key_handle;
             for (PostProvisioningObject post_op : post_provisioning_objects)
               {
-                if (post_op.new_key != null && key_entry != null && post_op.new_key == key_entry)
+                if (post_op.new_key != null && post_op.new_key == key_entry)
                   {
-                    abort ("New key used for multiple operations: " + key_entry.key_handle);
+                    abort ("New key used for multiple operations: " + key_entry.id);
                   }
                 if (post_op.target_key_entry == key_entry_original)
                   {
                     if (key_entry == null || post_op.new_key == null) // pp_deleteKey
                       {
-                        abort ("Delete wasn't exclusive for key: " + key_handle_original);
+                        abort ("Delete wasn't exclusive for key #" + key_entry_original.key_handle);
                       }
                     else if (update && post_op.update)
                       {
-                        abort ("Multiple updates of the same key: " + key_handle_original);
+                        abort ("Multiple updates of the same key #" + key_entry_original.key_handle);
                       }
                   }
               }
             post_provisioning_objects.add (new PostProvisioningObject (key_entry_original, key_entry, update));
+          }
+
+        public void rangeTest (byte value, byte low_limit, byte high_limit, String object_name) throws SKSException
+          {
+            if (value > high_limit || value < low_limit)
+              {
+                abort ("Invalid \"" + object_name + "\" value=" + value);
+              }
           }
       }
 
@@ -894,11 +927,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         Provisioning provisioning = provisionings.get (provisioning_handle);
         if (provisioning == null)
           {
-            abort ("No such provisioning sess:" + provisioning_handle, SKSException.ERROR_NO_SESSION);
+            abort ("No such provisioning session: " + provisioning_handle, SKSException.ERROR_NO_SESSION);
           }
         if (!provisioning.open)
           {
-            abort ("Session not open:" +  provisioning_handle, SKSException.ERROR_NO_SESSION);
+            abort ("Session not open: " +  provisioning_handle, SKSException.ERROR_NO_SESSION);
           }
         return provisioning;
       }
@@ -913,11 +946,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         KeyEntry ke = keys.get (key_handle);
         if (ke == null)
           {
-            abort ("Key not found: " + key_handle, SKSException.ERROR_NO_KEY);
+            abort ("Key not found #" + key_handle, SKSException.ERROR_NO_KEY);
           }
         if (!ke.owner.open)
           {
-            abort ("Key " + key_handle + " not belonging to open sess: " + ke.owner.provisioning_handle, SKSException.ERROR_NO_KEY);
+            abort ("Key #" + key_handle + " not belonging to open session", SKSException.ERROR_NO_KEY);
           }
         return ke;
       }
@@ -927,11 +960,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         KeyEntry ke = keys.get (key_handle);
         if (ke == null)
           {
-            abort ("Key not found: " + key_handle, SKSException.ERROR_NO_KEY);
+            abort ("Key not found #" + key_handle, SKSException.ERROR_NO_KEY);
           }
         if (ke.owner.open)
           {
-            abort ("Key " + key_handle + " still in provisioning", SKSException.ERROR_NO_KEY);
+            abort ("Key #" + key_handle + " still in provisioning", SKSException.ERROR_NO_KEY);
           }
         return ke;
       }
@@ -969,7 +1002,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             Provisioning provisioning = iter.next ();
             if (provisioning.open == provisioning_state)
               {
-                return new EnumeratedProvisioningSession (provisioning.provisioning_handle, provisioning.client_session_id, provisioning.server_session_id);
+                return new EnumeratedProvisioningSession (provisioning.provisioning_handle, 
+                                                          provisioning.client_session_id,
+                                                          provisioning.server_session_id);
               }
           }
         return new EnumeratedProvisioningSession ();
@@ -1030,7 +1065,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
       {
         if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
           {
-            abort ("Not a symmetric key: " + key_entry.key_handle);
+            abort ("Not a symmetric key #" + key_entry.key_handle);
           }
         Algorithm alg = getAlgorithm (input_algorithm);
         if ((alg.mask & expected_type) == 0)
@@ -1041,7 +1076,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             return alg;
           }
-        abort ("\"EndorsedAlgorithms\" for key[" + key_entry.key_handle + "] does not include: " + input_algorithm);
+        abort ("\"EndorsedAlgorithms\" for key #" + key_entry.key_handle + " does not include: " + input_algorithm);
         return null;    // For the compiler only...
       }
 
@@ -1094,7 +1129,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             ///////////////////////////////////////////////////////////////////////////////////
             if (target_key_entry.pin_policy != null && target_key_entry.pin_policy.grouping != PIN_GROUPING_SHARED)
               {
-                provisioning.abort ("Cloned key protection must have PINGrouping=\"shared\"");
+                provisioning.abort ("Cloned key protection must have PIN grouping=\"shared\"");
               }
           }
 
@@ -1190,7 +1225,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.export_policy == EXPORT_POLICY_NON_EXPORTABLE)
           {
-            throw new SKSException ("Key [" + key_entry.key_handle + "] is not exportable", SKSException.ERROR_NOT_ALLOWED);
+            abort ("Key #" + key_entry.key_handle + " is not exportable", SKSException.ERROR_NOT_ALLOWED);
           }
         
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1228,7 +1263,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ExtObject ext_obj = key_entry.extensions.get (extension_type);
         if (ext_obj == null || ext_obj.base_type != BASE_TYPE_PROPERTY_BAG)
           {
-            abort ("No such property bag: " + extension_type);
+            abort ("No such \"PropertyBag\" : " + extension_type);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1257,7 +1292,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               {
                 if (ext_obj.extension_data[i] != 0x01)
                   {
-                    abort ("Property not writable: " + name);
+                    abort ("\"Property\" not writable: " + name);
                   }
                 ext_obj.extension_data = addArrays (addArrays (Arrays.copyOfRange (ext_obj.extension_data, 0, ++i),
                                                                addArrays (new byte[]{(byte)(utf8_value.length >> 8),(byte)utf8_value.length}, utf8_value)),
@@ -1266,7 +1301,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
             i += val_len + 3;
           }
-        abort ("Property not found: " + name);
+        abort ("\"Property\" not found: " + name);
       }
 
 
@@ -1289,7 +1324,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ExtObject ext_obj = key_entry.extensions.get (extension_type);
         if (ext_obj == null)
           {
-            abort ("No such extension: " + extension_type);
+            abort ("No such extension: " + extension_type + " for key #" + key_handle);
           }
         return new Extension (ext_obj.qualifier, ext_obj.extension_data, ext_obj.base_type);
       }
@@ -1317,7 +1352,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         if ((key_entry.key_usage & (KEY_USAGE_ENCRYPTION | KEY_USAGE_UNIVERSAL)) == 0)
           {
-            abort ("\"KeyUsage\" for key[" + key_handle + "] does not permit \"asymmetricKeyDecrypt\"");
+            abort ("\"KeyUsage\" for key #" + key_handle + " does not permit \"asymmetricKeyDecrypt\"");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1330,7 +1365,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         if (parameters.length != 0)  // Only support basic RSA yet...
           {
-            abort ("\"Parameters\" for key[" + key_handle + "] do not match algorithm");
+            abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1338,7 +1373,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         if (!key_entry.isRSA ())  // We only know RSA in the ref impl....
           {
-            abort ("\"EncryptionAlgorithm\" for key[" + key_handle + "] does not match key type");
+            abort ("\"EncryptionAlgorithm\" for key #" + key_handle + " does not match key type");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1385,7 +1420,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                                     KEY_USAGE_AUTHENTICATION |
                                     KEY_USAGE_UNIVERSAL)) == 0)
           {
-            abort ("\"KeyUsage\" for key[" + key_handle + "] does not permit \"signHashedData\"");
+            abort ("\"KeyUsage\" for key #" + key_handle + " does not permit \"signHashedData\"");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1399,7 +1434,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         int hash_len = (alg.mask / ALG_HASH_DIV) & 0xFF;
         if (hash_len > 0 && hash_len != data.length)
           {
-            abort ("Wrong length of \"Data\": " + data.length);
+            abort ("Incorrect length of \"Data\": " + data.length);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1407,7 +1442,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.isRSA () ^ ((alg.mask & ALG_RSA_KEY) != 0))
           {
-            abort ("\"SignatureAlgorithm\" for key[" + key_handle + "] does not match key type");
+            abort ("\"SignatureAlgorithm\" for key #" + key_handle + " does not match key type");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1462,7 +1497,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             if (iv.length != 0)
               {
-                abort ("IV must be zero length for : " + encryption_algorithm);
+                abort ("IV must be zero length for: " + encryption_algorithm);
               }
           }
         else if (iv.length != 16)
@@ -1854,7 +1889,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
       {
         if (!session_key_algorithm.equals (ALGORITHM_SESSION_KEY_ATTEST_1))
           {
-            abort ("Bad \"SessionKeyAlgorithm\": " + session_key_algorithm);
+            abort ("Unknown \"SessionKeyAlgorithm\" : " + session_key_algorithm);
           }
         byte[] session_attestation = null;
         byte[] session_key = null;
@@ -1924,7 +1959,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         catch (Exception e)
           {
-            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+            throw new SKSException (e);
           }
         Provisioning p = new Provisioning ();
         p.server_session_id = server_session_id;
@@ -2038,7 +2073,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.extensions.get (extension_type) != null)
           {
-            key_entry.owner.abort ("Duplicate \"ExtensionType\": " + extension_type);
+            key_entry.owner.abort ("Duplicate \"ExtensionType\" : " + extension_type);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2063,7 +2098,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                     ((extension_data[i++] & 0xFE) != 0) ||
                     (i += getShort (extension_data, i) + 2) > extension_data.length)
                   {
-                    key_entry.owner.abort ("PropertyBag format error: " + extension_type);
+                    key_entry.owner.abort ("\"PropertyBag\" format error: " + extension_type);
                   }
               }
             while (i != extension_data.length);
@@ -2075,7 +2110,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ExtObject extension = new ExtObject ();
         extension.base_type = base_type;
         extension.qualifier = qualifier;
-        extension.extension_data = base_type == BASE_TYPE_ENCRYPTED_EXTENSION ? key_entry.owner.decrypt (extension_data) : extension_data;
+        extension.extension_data = base_type == BASE_TYPE_ENCRYPTED_EXTENSION ?
+                                     key_entry.owner.decrypt (extension_data) : extension_data;
         key_entry.extensions.put (extension_type, extension);
       }
 
@@ -2101,7 +2137,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                                     KEY_USAGE_UNIVERSAL |
                                     KEY_USAGE_AUTHENTICATION)) == 0)
           {
-            key_entry.owner.abort ("Invalid key usage for \"restorePrivateKey\" on key: " + key_entry.id);
+            key_entry.owner.abort ("Invalid \"KeyUsage\" for \"restorePrivateKey\"");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2121,7 +2157,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         catch (GeneralSecurityException e)
           {
-            key_entry.owner.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
+            key_entry.owner.abort (e.getMessage (), SKSException.ERROR_CRYPTO);
           }
       }
 
@@ -2147,7 +2183,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
           {
-            key_entry.owner.abort ("Invalid key usage for \"setSymmetricKey\" on key: " + key_entry.id);
+            key_entry.owner.abort ("Invalid \"KeyUsage\" for \"setSymmetricKey\"");
           }
         MacBuilder sym_mac = key_entry.getEECertMacBuilder (METHOD_SET_SYMMETRIC_KEY);
         sym_mac.addArray (symmetric_key);
@@ -2193,7 +2229,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 else l = 0;
                 if ((l & alg.mask) == 0)
                   {
-                    key_entry.owner.abort ("Wrong key size (" + clear_text_symmetric_key.length +
+                    key_entry.owner.abort ("Incorrect key size (" + clear_text_symmetric_key.length +
                                            ") for algorithm: " + endorsed_algorithm);
                   }
               }
@@ -2284,19 +2320,48 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         if (!attestation_algorithm.equals (ALGORITHM_KEY_ATTEST_1))
           {
-            provisioning.abort ("Unsupported \"AttestationAlgorithm\": " + attestation_algorithm, SKSException.ERROR_ALGORITHM);
+            provisioning.abort ("Unsupported \"AttestationAlgorithm\" : " + attestation_algorithm, SKSException.ERROR_ALGORITHM);
           }
         if (server_seed.length != 32)
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
+          }
+        boolean hit = false;
+        for (int q = 0, m = 1; q < 8; q++, m <<= 1)
+          {
+            if ((key_usage & m) != 0)
+              {
+                if (hit)
+                  {
+                    hit = false;
+                    break;
+                  }
+                if ((m & (KEY_USAGE_SIGNATURE | KEY_USAGE_AUTHENTICATION | KEY_USAGE_ENCRYPTION |
+                          KEY_USAGE_UNIVERSAL | KEY_USAGE_TRANSPORT | KEY_USAGE_SYMMETRIC_KEY)) == 0)
+
+                  {
+                    break;
+                  }
+                hit = true;
+              }
+          }
+        if (!hit)
+          {
+            provisioning.abort ("Invalid \"KeyUsage\" value=" +  key_usage);
           }
         if (private_key_backup && (key_usage & (KEY_USAGE_SIGNATURE |
                                                 KEY_USAGE_ENCRYPTION |
                                                 KEY_USAGE_UNIVERSAL |
                                                 KEY_USAGE_AUTHENTICATION)) == 0)
           {
-            provisioning.abort ("Private key backup not allowed for key usage: " + key_usage);
+            provisioning.abort ("Private key backup not allowed for \"KeyUsage\" : " + key_usage);
           }
+        if (export_policy != EXPORT_POLICY_NON_EXPORTABLE)
+          {
+            provisioning.rangeTest (export_policy, EXP_DEL_POLICY_NONE, EXP_DEL_POLICY_PUK, "ExportPolicy");
+          }
+        provisioning.rangeTest (delete_policy, EXP_DEL_POLICY_NONE, EXP_DEL_POLICY_PUK, "DeletePolicy");
+        provisioning.rangeTest (biometric_protection, BIOM_PROT_NONE, BIOM_PROT_EXCLUSIVE, "BiometricProtection");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Get proper PIN policy ID
@@ -2416,8 +2481,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             if ((pin_policy.format == PIN_FORMAT_NUMERIC && (loweralpha || nonalphanum || upperalpha)) ||
                 (pin_policy.format == PIN_FORMAT_ALPHANUMERIC && (loweralpha || nonalphanum)))
               {
-                provisioning.abort ("Bad PIN syntax");
+                provisioning.abort ("PIN syntax error");
               }
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check PIN patterns
+            ///////////////////////////////////////////////////////////////////////////////////
             if ((pin_policy.pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0)
               {
                 if (!upperalpha || !number ||
@@ -2426,10 +2495,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                     provisioning.abort ("Missing character group in PIN");
                   }
               }
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Check PIN patterns
-            ///////////////////////////////////////////////////////////////////////////////////
             if ((pin_policy.pattern_restrictions & PIN_PATTERN_SEQUENCE) != 0)
               {
                 byte c = pin_value[0];
@@ -2652,6 +2717,17 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform PIN "sanity" check
         ///////////////////////////////////////////////////////////////////////////////////
+        provisioning.rangeTest (grouping, PIN_GROUPING_NONE, PIN_GROUPING_UNIQUE, "Grouping");
+        provisioning.rangeTest (input_method, INPUT_METHOD_PROGRAMMATIC, INPUT_METHOD_ANY, "InputMethod");
+        provisioning.rangeTest (format, PIN_FORMAT_NUMERIC, PIN_FORMAT_BINARY, "Format");
+        if ((pattern_restrictions & ~(PIN_PATTERN_TWO_IN_A_ROW | 
+                                      PIN_PATTERN_THREE_IN_A_ROW |
+                                      PIN_PATTERN_SEQUENCE |
+                                      PIN_PATTERN_REPEATED |
+                                      PIN_PATTERN_MISSING_GROUP)) != 0)
+          {
+            provisioning.abort ("Invalid \"PatternRestrictions\" value=" + pattern_restrictions);
+          }
         String puk_policy_id = CRYPTO_STRING_NOT_AVAILABLE;
         PUKPolicy puk_policy = null;
         if (puk_policy_handle != 0)
@@ -2667,7 +2743,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         if ((pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0 &&
             format != PIN_FORMAT_ALPHANUMERIC && format != PIN_FORMAT_STRING)
           {
-            provisioning.abort ("Wrong use of the \"missing-group\" PIN pattern policy");
+            provisioning.abort ("Incorrect \"Format\" for the \"missing-group\" PIN pattern policy");
           }
         if (min_length <= 1 || max_length > PIN_PUK_MAX_LENGTH || max_length < min_length)
           {
@@ -2741,6 +2817,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform PUK "sanity" check
         ///////////////////////////////////////////////////////////////////////////////////
+        provisioning.rangeTest (format, PIN_FORMAT_NUMERIC, PIN_FORMAT_BINARY, "Format");
         if (puk_value.length <= 1 || puk_value.length > PIN_PUK_MAX_LENGTH)
           {
             provisioning.abort ("PUK length error");
@@ -2751,7 +2828,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             if ((c < '0' || c > '9') && (format == PIN_FORMAT_NUMERIC ||
                                         ((c < 'A' || c > 'Z') && format == PIN_FORMAT_ALPHANUMERIC)))
               {
-                provisioning.abort ("Bad PUK syntax");
+                provisioning.abort ("PUK syntax error");
               }
           }
 

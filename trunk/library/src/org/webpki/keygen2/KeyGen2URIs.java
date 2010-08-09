@@ -18,25 +18,15 @@ package org.webpki.keygen2;
 
 public interface KeyGen2URIs
   {
-
     public interface ALGORITHMS
       {
         String KEY_ATTESTATION_1           = "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1";
 
         String SESSION_KEY_1               = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sk1";
-        
-        String ECB_NOPAD                   = "http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.nopad";
-        
-        String ECB_PKCS_5                  = "http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.pkcs5";
-        
-        String RSA_NONE                    = "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.none";
-        
-        String ECDSA_NONE                  = "http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdsa.none";
-        
+
         String NONE                        = "http://xmlns.webpki.org/keygen2/1.0#algorithm.none";
 
       }
-
 
     public interface LOGOTYPES
       {
@@ -48,5 +38,4 @@ public interface KeyGen2URIs
 
         String APPLICATION                 = "http://xmlns.webpki.org/keygen2/1.0#logotype.application";
       }
-
   }

@@ -23,22 +23,23 @@ import java.security.GeneralSecurityException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-
 public enum MacAlgorithms
   {
-    HMAC_MD5    ("http://www.w3.org/2001/04/xmldsig-more#hmac-md5",    "HmacMD5"),
-    HMAC_SHA1   ("http://www.w3.org/2000/09/xmldsig#hmac-sha1",        "HmacSHA1"),
-    HMAC_SHA256 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HmacSHA256"),
-    HMAC_SHA384 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", "HmacSHA384"),
-    HMAC_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", "HmacSHA512");
+    HMAC_MD5    ("http://www.w3.org/2001/04/xmldsig-more#hmac-md5",    "HmacMD5",    false),
+    HMAC_SHA1   ("http://www.w3.org/2000/09/xmldsig#hmac-sha1",        "HmacSHA1",   true),
+    HMAC_SHA256 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HmacSHA256", true),
+    HMAC_SHA384 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", "HmacSHA384", false),
+    HMAC_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", "HmacSHA512", false);
 
     private final String uri;       // As expressed in XML messages
     private final String jcename;   // As expressed for JCE
+    private boolean sks_mandatory;  // If required in SKS
 
-    private MacAlgorithms (String uri, String jcename)
+    private MacAlgorithms (String uri, String jcename, boolean sks_mandatory)
       {
         this.uri = uri;
         this.jcename = jcename;
+        this.sks_mandatory = sks_mandatory;
       }
 
 
@@ -54,6 +55,12 @@ public enum MacAlgorithms
       }
 
     
+    public boolean isMandatorySKSAlgorithm ()
+      {
+        return sks_mandatory;
+      }
+
+
     public byte[] digest (byte[] key, byte[] data) throws IOException
       {
         try

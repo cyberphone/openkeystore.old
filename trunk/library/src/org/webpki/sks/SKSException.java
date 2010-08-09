@@ -40,21 +40,17 @@ public class SKSException extends IOException
     /* Provisioning session not found */
     public static final int ERROR_NO_SESSION     = 0x06;
 
-    /* closeProvisioningSession failed to verify */
-    public static final int ERROR_SESSION_VERIFY = 0x07;
-
     /* Key not found */
-    public static final int ERROR_NO_KEY         = 0x08;
-
+    public static final int ERROR_NO_KEY         = 0x07;
 
     /* Unknown or not fitting algorithm */
-    public static final int ERROR_ALGORITHM      = 0x09;
+    public static final int ERROR_ALGORITHM      = 0x08;
 
     /* Invalid or unsupported option */
-    public static final int ERROR_OPTION         = 0x0A;
+    public static final int ERROR_OPTION         = 0x09;
 
     /* Internal error */
-    public static final int ERROR_INTERNAL       = 0x0B;
+    public static final int ERROR_INTERNAL       = 0x0A;
 
     int error;
     
@@ -68,6 +64,12 @@ public class SKSException extends IOException
       {
         super (t);
         this.error = error;
+      }
+
+    public SKSException (Throwable t)
+      {
+        super (t);
+        this.error = ERROR_INTERNAL;
       }
 
     public SKSException (String e)

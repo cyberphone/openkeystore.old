@@ -1,7 +1,6 @@
 package org.webpki.net;
 
 import java.io.IOException;
-import java.io.FileInputStream;
 import java.io.OutputStream;
 
 import java.net.Proxy;
@@ -12,6 +11,11 @@ import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.HttpURLConnection;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +23,14 @@ import java.util.LinkedHashMap;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
+import java.security.cert.CertificateFactory;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
-
 
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.SSLContext;
@@ -30,9 +39,12 @@ import javax.net.ssl.X509TrustManager;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 
-import org.webpki.crypto.JKSCAVerifier;
 import org.webpki.crypto.CertificateInfo;
+import org.webpki.crypto.KeyStoreReader;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -95,7 +107,6 @@ public class HttpsWrapper
     private boolean follow_redirects;
     private boolean allow_diffhostnames;
     private boolean allow_invalidcert;
-    private boolean allow_untrustedcert;
     private boolean require_success;
     private KeyStore trust_store;
     private SSLSocketFactory socket_factory;
@@ -105,9 +116,12 @@ public class HttpsWrapper
     private String response_message;
     private PasswordAuthentication password_authentication;
     private boolean interactive_mode;
+    private boolean enable_revocation_test;
     private String url;
     private static Proxy default_proxy;
     private static KeyStore default_trust_store;
+    private KeyStore key_store;
+    private String key_store_password;
 
     private LinkedHashMap<String,Vector<String>> request_headers = new LinkedHashMap<String,Vector<String>> ();
 
@@ -138,7 +152,7 @@ public class HttpsWrapper
           {
             try
               {
-                if (trust_store != null || allow_untrustedcert || allow_invalidcert)
+                if (key_store != null || trust_store != null || allow_invalidcert)
                   {
                     /////////////////////////////////////
                     // Do we have a trust store?
@@ -151,11 +165,18 @@ public class HttpsWrapper
                         String sep = System.getProperty ("file.separator");
                         String password = System.getProperty ("javax.net.ssl.trustStorePassword");
                         setTrustStore (System.getProperty ("java.home").concat (sep + "lib" + sep + "security" + sep + "cacerts"),
-                                       null, password == null ? "" : password);
+                                       password == null ? "" : password);
                       }
 
+                    KeyManager[] key_managers = null;
+                    if (key_store != null)
+                      {
+                        KeyManagerFactory kmf = KeyManagerFactory.getInstance ("SunX509");
+                        kmf.init (key_store, key_store_password.toCharArray ());
+                        key_managers = kmf.getKeyManagers ();
+                      }
                     SSLContext ctx = SSLContext.getInstance ("TLS");
-                    ctx.init (null, new TrustManager[]{new HttpsWrapperTrustManager ()}, null);
+                    ctx.init (key_managers, new TrustManager[]{new HttpsWrapperTrustManager ()}, null);
                     socket_factory = ctx.getSocketFactory ();
                   }
               }
@@ -169,22 +190,6 @@ public class HttpsWrapper
           }
       }
 
-    private static KeyStore loadKeyStore (String store_name, String store_type, String store_passphrase) throws IOException
-      {
-        try
-          {
-            KeyStore ks = KeyStore.getInstance (store_type == null ? "JKS" : store_type);
-            ks.load (new FileInputStream (store_name),
-                              store_passphrase == null ? null : store_passphrase.toCharArray ());
-            return ks;
-          }
-        catch (GeneralSecurityException gse)
-          {
-            IOException iox = new IOException ();
-            iox.initCause (gse.getCause ());
-            throw iox;
-          }
-      }
 
     /**
      * Sets the Trust Store to use. The Trust Store is used to verify server 
@@ -197,12 +202,11 @@ public class HttpsWrapper
      * either a GET or POST request.
      *
      * @param store_name Path to the Trust store file.
-     * @param store_type Store type. (null => JKS)
      * @param store_passphrase Passphrase to unlock Trust Store.
      */
-    public void setTrustStore (String store_name, String store_type, String store_passphrase) throws IOException
+    public void setTrustStore (String store_name, String store_passphrase) throws IOException
       {
-        trust_store = loadKeyStore (store_name, store_type, store_passphrase);
+        trust_store = KeyStoreReader.loadKeyStore (store_name, store_passphrase);
         ssl_initialized = false;
       }
 
@@ -215,12 +219,11 @@ public class HttpsWrapper
      * JDK Trust Store. <br><br>
      *
      * @param store_name Path to the Trust store file.
-     * @param store_type Store type. (null => JKS)
      * @param store_passphrase Passphrase to unlock Trust Store.
      */
-    public static void setDefaultTrustStore (String store_name, String store_type, String store_passphrase) throws IOException
+    public static void setDefaultTrustStore (String store_name, String store_passphrase) throws IOException
       {
-        default_trust_store = loadKeyStore (store_name, store_type, store_passphrase);
+        default_trust_store = KeyStoreReader.loadKeyStore (store_name, store_passphrase);
       }
 
 
@@ -261,6 +264,45 @@ public class HttpsWrapper
       }
 
 
+    /**
+     * Sets the Key Store to use. The Key Store is used to authenticate 
+     * with using SSL.<br><br>
+     *
+     * If this method is not called the HttpsWrapper will use the default 
+     * JDK Key Store (none). <br><br>
+     *
+     * To set your own Key Store this method must be called before making
+     * either a GET or POST request.
+     *
+     * @param trust_store Initialized java KeyStore.
+     */
+    public void setKeyStore (KeyStore key_store, String key_store_password)
+      {
+        this.key_store = key_store;
+        this.key_store_password = key_store_password;
+        ssl_initialized = false;
+      }
+
+    
+    /**
+     * Sets the Key Store to use. The Key Store is used to authenticate 
+     * with using SSL.<br><br>
+     *
+     * If this method is not called the HttpsWrapper will use the default 
+     * JDK Key Store (none). <br><br>
+     *
+     * To set your own Key Store this method must be called before making
+     * either a GET or POST request.
+     *
+     * @param trust_store Initialized java KeyStore.
+     * @throws IOException 
+     */
+    public void setKeyStore (String key_store_file, String key_store_password) throws IOException
+      {
+        setKeyStore (KeyStoreReader.loadKeyStore (key_store_file, key_store_password), key_store_password);
+      }
+
+    
     /** 
      * Performs a POST request to the Web Server, posting data without any 
      * interpretation of character encoding.
@@ -506,20 +548,6 @@ public class HttpsWrapper
    
 
     /** 
-     * If true, client allows certificates that cannot be verified 
-     * against an installed root certificate. Default value is false. <br><br>
-     *
-     * This method affects all proceeding requests. <br><br>
-     *
-     * @param flag True to allow broken certificate chains, else false.
-     */
-    public void allowUntrustedCert (boolean flag)
-      {
-        allow_untrustedcert = flag;
-      }
-
-
-    /** 
      * If true, client allows server certificates that are either 
      * not valid yet or have expired. Default value is false.  <br><br>
      *
@@ -544,6 +572,19 @@ public class HttpsWrapper
     public void allowDiffHostNames (boolean flag)
       {
         allow_diffhostnames = flag;
+      }
+
+    
+    /** 
+     * If true, enable server certificate revocation checks. <br><br>
+     *
+     * This method affects all proceeding requests. <br><br>
+     *
+     * @param flag 
+     */
+    public void setServerCertificateRevocation (boolean flag)
+      {
+        enable_revocation_test = flag;
       }
 
     
@@ -799,13 +840,11 @@ public class HttpsWrapper
     private class HttpsWrapperTrustManager implements X509TrustManager 
       { 
   
-        private JKSCAVerifier verifier;
         /**
          * Constructor
          */
         private HttpsWrapperTrustManager () throws IOException
           {
-            verifier = new JKSCAVerifier (trust_store);
           }
 
 
@@ -819,27 +858,45 @@ public class HttpsWrapper
     
         /**
          * Handles server certificate validation. 
-         * Flags for validity and cert chain verification 
-         * decides this functions behaviour.
+         * Flags for validity and certificate chain verification 
+         * decides this functions behavior.
          *
          * Implements X509TrustManager.
          */
         public void checkServerTrusted (X509Certificate[] chain, String authType) throws CertificateException
           { 
             try
-              {       
-                verifier.setTrustedRequired (!allow_untrustedcert);
-                verifier.verifyCertificatePath (chain);
+              {
+                Set<TrustAnchor> trust = new HashSet<TrustAnchor> ();
+                // All CAs must in an *installed* CA path be valid as trust
+                // anchors
+                Enumeration<String> aliases = trust_store.aliases ();
+                while (aliases.hasMoreElements ())
+                  {
+                    String alias = aliases.nextElement ();
+                    if (trust_store.isCertificateEntry (alias))
+                      {
+                        trust.add (new TrustAnchor ((X509Certificate) trust_store.getCertificate (alias), null));
+                      }
+                  }
+                CertPathValidator cpv = CertPathValidator.getInstance ("PKIX");
+                PKIXParameters param = new PKIXParameters (trust);
+                param.setDate (new Date ());
+                param.setRevocationEnabled (enable_revocation_test);
+                List<X509Certificate> certchain = new ArrayList<X509Certificate> ();
+                for (X509Certificate cert : chain)
+                  {
+                    certchain.add (cert);
+                  }
+                CertPath cp = CertificateFactory.getInstance ("X.509").generateCertPath (certchain);
+                cpv.validate (cp, param);
+              }
+            catch (GeneralSecurityException e)
+              {
                 if (!allow_invalidcert)
                   {
-                    chain[0].checkValidity ();
+                    throw new CertificateException (e);
                   }
-              } 
-            catch (IOException ioe)
-              {
-                CertificateException cex = new CertificateException ();
-                cex.initCause (ioe.getCause ());
-                throw cex;
               }
           }
 
@@ -1189,14 +1246,9 @@ public class HttpsWrapper
                                                     "Write data to file",
                                                     CmdFrequency.OPTIONAL);
 
-        CmdLineArgument CMD_untrusted_ok  = create (CmdLineArgumentGroup.GENERAL,
-                                                    "accept/untrusted", null,
-                                                    "Accept untrusted certificates",
-                                                    CmdFrequency.OPTIONAL);
-
         CmdLineArgument CMD_invalid_ok    = create (CmdLineArgumentGroup.GENERAL,
-                                                    "accept/expired", null,
-                                                    "Accept expired certificates",
+                                                    "accept/invalid", null,
+                                                    "Accept invalid server certificates",
                                                     CmdFrequency.OPTIONAL);
 
         CmdLineArgument CMD_badnames_ok   = create (CmdLineArgumentGroup.GENERAL,
@@ -1219,14 +1271,19 @@ public class HttpsWrapper
                                                     "Set external trust store",
                                                     CmdFrequency.OPTIONAL);
 
-        CmdLineArgument CMD_storetype     = create (CmdLineArgumentGroup.GENERAL,
-                                                    "storetype", "type",
-                                                    "Set type of external trust store",
-                                                    "JKS");
-
         CmdLineArgument CMD_storepass     = create (CmdLineArgumentGroup.GENERAL,
                                                     "storepass", "password",
                                                     "Set password of external trust store",
+                                                    "testing");
+
+        CmdLineArgument CMD_keystore    = create (CmdLineArgumentGroup.GENERAL,
+                                                    "keystore", "filename",
+                                                    "Set external key store",
+                                                    CmdFrequency.OPTIONAL);
+
+       CmdLineArgument CMD_keystorepass = create (CmdLineArgumentGroup.GENERAL,
+                                                    "keystorepass", "password",
+                                                    "Set password of key store",
                                                     "testing");
 
         CmdLineArgument CMD_proxyhost     = create (CmdLineArgumentGroup.GENERAL,
@@ -1345,11 +1402,6 @@ public class HttpsWrapper
                 wrap.allowInvalidCert (true);
               }
 
-            if (CMD_untrusted_ok.found)
-              {
-                wrap.allowUntrustedCert (true);
-              }
-
             if (CMD_setheader.found)
               {
                 for (String value : CMD_setheader.argvalue)
@@ -1372,8 +1424,13 @@ public class HttpsWrapper
             if (CMD_truststore.found)
               {
                 wrap.setTrustStore (CMD_truststore.getString (),
-                                    CMD_storetype.getString (),
                                     CMD_storepass.getString ());
+              }
+
+            if (CMD_keystore.found)
+              {
+                wrap.setKeyStore (CMD_keystore.getString (),
+                                  CMD_keystorepass.getString ());
               }
 
             if (CMD_get_oper.found)

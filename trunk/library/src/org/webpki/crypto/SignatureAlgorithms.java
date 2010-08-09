@@ -18,31 +18,51 @@ package org.webpki.crypto;
 
 import java.io.IOException;
 
-
 public enum SignatureAlgorithms
   {
-    RSA_NONE     (null,                    "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.none",   "NONEwithRSA",     null),
-    RSA_SHA1     ("1.2.840.113549.1.1.5",  "http://www.w3.org/2000/09/xmldsig#rsa-sha1",               "SHA1withRSA",     HashAlgorithms.SHA1),
-    RSA_SHA256   ("1.2.840.113549.1.1.11", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",        "SHA256withRSA",   HashAlgorithms.SHA256),
-    RSA_SHA384   ("1.2.840.113549.1.1.12", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384",        "SHA384withRSA",   HashAlgorithms.SHA384),
-    RSA_SHA512   ("1.2.840.113549.1.1.13", "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",        "SHA512withRSA",   HashAlgorithms.SHA512),
-    ECDSA_NONE   (null,                    "http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdsa.none", "NONEwithECDSA",   null),
-    ECDSA_SHA1   ("1.2.840.10045.1",       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha1",        "SHA1withECDSA",   HashAlgorithms.SHA1),
-    ECDSA_SHA256 ("1.2.840.10045.4.3.2",   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",      "SHA256withECDSA", HashAlgorithms.SHA256),
-    ECDSA_SHA384 ("1.2.840.10045.4.3.3",   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384",      "SHA384withECDSA", HashAlgorithms.SHA384),
-    ECDSA_SHA512 ("1.2.840.10045.4.3.4",   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512",      "SHA512withECDSA", HashAlgorithms.SHA512);
+    RSA_NONE     ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.none", 
+                  null,                    "NONEwithRSA",     null,                  true),
+        
+    RSA_SHA1     ("http://www.w3.org/2000/09/xmldsig#rsa-sha1",              
+                  "1.2.840.113549.1.1.5",  "SHA1withRSA",     HashAlgorithms.SHA1,   true),
+        
+    RSA_SHA256   ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",       
+                  "1.2.840.113549.1.1.11", "SHA256withRSA",   HashAlgorithms.SHA256, true),
+        
+    RSA_SHA384   ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha384",       
+                  "1.2.840.113549.1.1.12", "SHA384withRSA",   HashAlgorithms.SHA384, false),
+        
+    RSA_SHA512   ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",       
+                  "1.2.840.113549.1.1.13", "SHA512withRSA",   HashAlgorithms.SHA512, false),
+        
+    ECDSA_NONE   ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdsa.none",
+                  null,                    "NONEwithECDSA",   null,                  true),
+        
+    ECDSA_SHA1   ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha1",       
+                  "1.2.840.10045.1",       "SHA1withECDSA",   HashAlgorithms.SHA1,   true),
+        
+    ECDSA_SHA256 ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",     
+                  "1.2.840.10045.4.3.2",   "SHA256withECDSA", HashAlgorithms.SHA256, true),
+        
+    ECDSA_SHA384 ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384",     
+                  "1.2.840.10045.4.3.3",   "SHA384withECDSA", HashAlgorithms.SHA384, false),
+        
+    ECDSA_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512",     
+                  "1.2.840.10045.4.3.4",   "SHA512withECDSA", HashAlgorithms.SHA512, false);
 
     private final String oid;       // As expressed in OIDs
     private final String uri;       // As expressed in XML messages
     private final String jcename;   // As expressed for JCE
     private final HashAlgorithms digest_alg;
+    private boolean sks_mandatory;  // If required in SKS
 
-    private SignatureAlgorithms (String oid, String uri, String jcename, HashAlgorithms digest_alg)
+    private SignatureAlgorithms (String uri, String oid, String jcename, HashAlgorithms digest_alg, boolean sks_mandatory)
       {
-        this.oid = oid;
         this.uri = uri;
+        this.oid = oid;
         this.jcename = jcename;
         this.digest_alg = digest_alg;
+        this.sks_mandatory = sks_mandatory;
       }
 
 
@@ -67,6 +87,12 @@ public enum SignatureAlgorithms
     public HashAlgorithms getDigestAlgorithm ()
       {
         return digest_alg;
+      }
+
+
+    public boolean isMandatorySKSAlgorithm ()
+      {
+        return sks_mandatory;
       }
 
 
