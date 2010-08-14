@@ -74,8 +74,8 @@ import org.webpki.sks.SecureKeyStore;
  *  Provisioning and Managing PKI, Symmetric keys, PINs, PUKs and Extension data.
  *  
  *  Cryptographic Issuer Isolation and Transaction-based Update Operations enable
- *  consumers having multiple providers sharing the same container, something which
- *  is a necessity in mobile phones with trusted hardware. 
+ *  multiple credential providers sharing a single container, something which
+ *  becomes a necessity in mobile phones with trusted hardware. 
  *
  *  The following is an SKS Reference Implementation that is intended to complement
  *  the specification by showing how the different constructs can be implemented.
@@ -130,79 +130,82 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "KeyUsage" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte KEY_USAGE_SIGNATURE           = 0x01;
-    static final byte KEY_USAGE_AUTHENTICATION      = 0x02;
-    static final byte KEY_USAGE_ENCRYPTION          = 0x04;
-    static final byte KEY_USAGE_UNIVERSAL           = 0x08;
-    static final byte KEY_USAGE_TRANSPORT           = 0x10;
-    static final byte KEY_USAGE_SYMMETRIC_KEY       = 0x20;
+    static final byte KEY_USAGE_SIGNATURE                  = 0x01;
+    static final byte KEY_USAGE_AUTHENTICATION             = 0x02;
+    static final byte KEY_USAGE_ENCRYPTION                 = 0x04;
+    static final byte KEY_USAGE_UNIVERSAL                  = 0x08;
+    static final byte KEY_USAGE_TRANSPORT                  = 0x10;
+    static final byte KEY_USAGE_SYMMETRIC_KEY              = 0x20;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "PIN Grouping" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_GROUPING_NONE             = 0x00;
-    static final byte PIN_GROUPING_SHARED           = 0x01;
-    static final byte PIN_GROUPING_SIGN_PLUS_STD    = 0x02;
-    static final byte PIN_GROUPING_UNIQUE           = 0x03;
+    static final byte PIN_GROUPING_NONE                    = 0x00;
+    static final byte PIN_GROUPING_SHARED                  = 0x01;
+    static final byte PIN_GROUPING_SIGN_PLUS_STD           = 0x02;
+    static final byte PIN_GROUPING_UNIQUE                  = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "PIN Pattern Control" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_PATTERN_TWO_IN_A_ROW      = 0x01;
-    static final byte PIN_PATTERN_THREE_IN_A_ROW    = 0x02;
-    static final byte PIN_PATTERN_SEQUENCE          = 0x04;
-    static final byte PIN_PATTERN_REPEATED          = 0x08;
-    static final byte PIN_PATTERN_MISSING_GROUP     = 0x10;
+    static final byte PIN_PATTERN_TWO_IN_A_ROW             = 0x01;
+    static final byte PIN_PATTERN_THREE_IN_A_ROW           = 0x02;
+    static final byte PIN_PATTERN_SEQUENCE                 = 0x04;
+    static final byte PIN_PATTERN_REPEATED                 = 0x08;
+    static final byte PIN_PATTERN_MISSING_GROUP            = 0x10;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "PIN and PUK Formats" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_FORMAT_NUMERIC            = 0x00;
-    static final byte PIN_FORMAT_ALPHANUMERIC       = 0x01;
-    static final byte PIN_FORMAT_STRING             = 0x02;
-    static final byte PIN_FORMAT_BINARY             = 0x03;
+    static final byte PIN_FORMAT_NUMERIC                   = 0x00;
+    static final byte PIN_FORMAT_ALPHANUMERIC              = 0x01;
+    static final byte PIN_FORMAT_STRING                    = 0x02;
+    static final byte PIN_FORMAT_BINARY                    = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "BaseType" for "addExtension" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte BASE_TYPE_EXTENSION           = 0x00;
-    static final byte BASE_TYPE_ENCRYPTED_EXTENSION = 0x01;
-    static final byte BASE_TYPE_PROPERTY_BAG        = 0x02;
-    static final byte BASE_TYPE_LOGOTYPE            = 0x03;
+    static final byte BASE_TYPE_EXTENSION                  = 0x00;
+    static final byte BASE_TYPE_ENCRYPTED_EXTENSION        = 0x01;
+    static final byte BASE_TYPE_PROPERTY_BAG               = 0x02;
+    static final byte BASE_TYPE_LOGOTYPE                   = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "ExportPolicy" and "DeletePolicy" share constants (and code...)
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte EXP_DEL_POLICY_NONE           = 0x00;
-    static final byte EXP_DEL_POLICY_PIN            = 0x01;
-    static final byte EXP_DEL_POLICY_PUK            = 0x02;
-    static final byte EXPORT_POLICY_NON_EXPORTABLE  = 0x04;
+    static final byte EXPORT_DELETE_POLICY_NONE            = 0x00;
+    static final byte EXPORT_DELETE_POLICY_PIN             = 0x01;
+    static final byte EXPORT_DELETE_POLICY_PUK             = 0x02;
+    static final byte EXPORT_POLICY_NON_EXPORTABLE         = 0x04;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "InputMethod" constants
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte INPUT_METHOD_PROGRAMMATIC     = 0x01;
-    static final byte INPUT_METHOD_TRUSTED_GUI      = 0x02;
-    static final byte INPUT_METHOD_ANY              = 0x03;
+    static final byte INPUT_METHOD_PROGRAMMATIC            = 0x01;
+    static final byte INPUT_METHOD_TRUSTED_GUI             = 0x02;
+    static final byte INPUT_METHOD_ANY                     = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "BiometricProtection" constants
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte BIOM_PROT_NONE                = 0x00;
-    static final byte BIOM_PROT_ALTERNATIVE         = 0x01;
-    static final byte BIOM_PROT_COMBINED            = 0x02;
-    static final byte BIOM_PROT_EXCLUSIVE           = 0x03;
+    static final byte BIOMETRIC_PROTECTION_NONE            = 0x00;
+    static final byte BIOMETRIC_PROTECTION_ALTERNATIVE     = 0x01;
+    static final byte BIOMETRIC_PROTECTION_COMBINED        = 0x02;
+    static final byte BIOMETRIC_PROTECTION_EXCLUSIVE       = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS key algorithm IDs used in "createKeyPair"
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte RSA_KEY = 0x00;
-    static final byte ECC_KEY = 0x01;
+    static final byte KEY_ALGORITHM_TYPE_RSA               = 0x00;
+    static final byte KEY_ALGORITHM_TYPE_ECC               = 0x01;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS "sanity" limits
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final int PIN_PUK_MAX_LENGTH = 100;
+    static final int PIN_PUK_MAX_LENGTH                    = 100;
+    static final int MAX_SYMMETRIC_KEY_SIZE                = 64;
+    static final int ID_TYPE_MAX_LENGTH                    = 32;
+
 
     int next_key_handle = 1;
     HashMap<Integer,KeyEntry> keys = new HashMap<Integer,KeyEntry> ();
@@ -235,7 +238,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 owner.abort ("Duplicate \"ID\" : " + id);
               }
             boolean flag = false;
-            if (id.length () == 0 || id.length () > 32)
+            if (id.length () == 0 || id.length () > ID_TYPE_MAX_LENGTH)
               {
                 flag = true;
               }
@@ -424,11 +427,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         void authorizeExportOrDeleteOperation (byte policy, byte[] authorization) throws SKSException
           {
-            if (policy == EXP_DEL_POLICY_PIN)
+            if (policy == EXPORT_DELETE_POLICY_PIN)
               {
                 verifyPIN (authorization);
               }
-            else if (policy == EXP_DEL_POLICY_PUK)
+            else if (policy == EXPORT_DELETE_POLICY_PUK)
               {
                 verifyPUK (authorization);
               }
@@ -811,8 +814,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
     static final short[] RSA_KEY_SIZES = {1024, 2048};
     
-    static final int MAX_SYMMETRIC_KEY_SIZE = 64;
-
     static
       {
         //////////////////////////////////////////////////////////////////////////////////////
@@ -1112,10 +1113,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform a "sanity" test
         ///////////////////////////////////////////////////////////////////////////////////
-          if (key_entry.pin_policy != null || key_entry.device_pin_protected)
-            {
-              provisioning.abort ("Update/clone keys cannot have PIN codes");
-            }
+        if (key_entry.pin_policy != null || key_entry.device_pin_protected)
+          {
+            provisioning.abort ("Update/clone keys cannot have PIN codes");
+          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key to be updated/cloned
@@ -1478,7 +1479,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public byte[] symmetricKeyEncrypt (int key_handle,
-                                       boolean encrypt_mode,
+                                       boolean mode,
                                        byte[] iv,
                                        String encryption_algorithm,
                                        byte[] authorization,
@@ -1517,14 +1518,14 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             Cipher crypt = Cipher.getInstance (alg.jce_name, "BC");
             SecretKeySpec sk = new SecretKeySpec (key_entry.symmetric_key, "AES");
-            int mode = encrypt_mode ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
+            int jce_mode = mode ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
             if (iv.length == 0)
               {
-                crypt.init (mode, sk);
+                crypt.init (jce_mode, sk);
               }
             else
               {
-                crypt.init (mode, sk, new IvParameterSpec (iv));
+                crypt.init (jce_mode, sk, new IvParameterSpec (iv));
               }
             return crypt.doFinal (data);
           }
@@ -2358,10 +2359,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         if (export_policy != EXPORT_POLICY_NON_EXPORTABLE)
           {
-            provisioning.rangeTest (export_policy, EXP_DEL_POLICY_NONE, EXP_DEL_POLICY_PUK, "ExportPolicy");
+            provisioning.rangeTest (export_policy, EXPORT_DELETE_POLICY_NONE, EXPORT_DELETE_POLICY_PUK, "ExportPolicy");
           }
-        provisioning.rangeTest (delete_policy, EXP_DEL_POLICY_NONE, EXP_DEL_POLICY_PUK, "DeletePolicy");
-        provisioning.rangeTest (biometric_protection, BIOM_PROT_NONE, BIOM_PROT_EXCLUSIVE, "BiometricProtection");
+        provisioning.rangeTest (delete_policy, EXPORT_DELETE_POLICY_NONE, EXPORT_DELETE_POLICY_PUK, "DeletePolicy");
+        provisioning.rangeTest (biometric_protection, BIOMETRIC_PROTECTION_NONE, BIOMETRIC_PROTECTION_EXCLUSIVE, "BiometricProtection");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Get proper PIN policy ID
@@ -2425,7 +2426,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             ///////////////////////////////////////////////////////////////////////////////////
             // Certain policy attributes require PIN objects
             ///////////////////////////////////////////////////////////////////////////////////
-            if (((delete_policy | export_policy) & (EXP_DEL_POLICY_PIN | EXP_DEL_POLICY_PUK)) != 0)
+            if (((delete_policy | export_policy) & (EXPORT_DELETE_POLICY_PIN | EXPORT_DELETE_POLICY_PUK)) != 0)
               {
                 provisioning.abort ("Export or delete policy lacks a PIN object");
               }
@@ -2437,7 +2438,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             ///////////////////////////////////////////////////////////////////////////////////
             if (pin_policy.puk_policy == null)
               {
-                if (((delete_policy | export_policy) & EXP_DEL_POLICY_PUK) != 0)
+                if (((delete_policy | export_policy) & EXPORT_DELETE_POLICY_PUK) != 0)
                   {
                     provisioning.abort ("Export or delete policy lacks a PUK object");
                   }
@@ -2592,7 +2593,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Decode key algorithm specifier
         ///////////////////////////////////////////////////////////////////////////////////
         AlgorithmParameterSpec alg_par_spec = null;
-        if (key_algorithm.length == 7 && key_algorithm[0] == RSA_KEY)
+        if (key_algorithm.length == 7 && key_algorithm[0] == KEY_ALGORITHM_TYPE_RSA)
           {
             int size = getShort (key_algorithm, 1);
             boolean found = false;
@@ -2614,7 +2615,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         else
           {
-            if (key_algorithm.length < 10 || key_algorithm[0] != ECC_KEY ||
+            if (key_algorithm.length < 10 || key_algorithm[0] != KEY_ALGORITHM_TYPE_ECC ||
                 getShort (key_algorithm, 1) != (key_algorithm.length - 3))
               {
                 provisioning.abort ("Incorrect \"KeyAlgorithm\" format");
