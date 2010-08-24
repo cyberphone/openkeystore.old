@@ -274,7 +274,7 @@ public class HttpsWrapper
      * To set your own Key Store this method must be called before making
      * either a GET or POST request.
      *
-     * @param trust_store Initialized java KeyStore.
+     * @param key_store Initialized java KeyStore.
      */
     public void setKeyStore (KeyStore key_store, String key_store_password)
       {
@@ -294,7 +294,7 @@ public class HttpsWrapper
      * To set your own Key Store this method must be called before making
      * either a GET or POST request.
      *
-     * @param trust_store Initialized java KeyStore.
+     * @param key_store_file
      * @throws IOException 
      */
     public void setKeyStore (String key_store_file, String key_store_password) throws IOException
@@ -427,7 +427,7 @@ public class HttpsWrapper
                 conn.setRequestProperty (key, value);
               }
           }
-
+        conn.setConnectTimeout(60000);
         conn.connect ();
 
         if (https_flag)

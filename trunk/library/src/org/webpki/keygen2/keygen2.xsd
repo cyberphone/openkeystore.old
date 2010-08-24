@@ -21,8 +21,8 @@
     "Perfection is achieved, not when there is nothing more to add, but when
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
-    Version: ALPHA 
-    Revised: 07-June-2010 
+    Version: BETA 
+    Revised: 20-August-2010 
     Author: Anders Rundgren
 
     Copyright 2006-2010 WebPKI.org (http://webpki.org).
@@ -40,11 +40,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/alpha/20100402#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20100820#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kgen="http://xmlns.webpki.org/keygen2/alpha/20100402#"
+           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20100820#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -1238,10 +1238,10 @@
       <xs:complexType>
 
          <!-- Qualifiers. At least one MUST be defined.  Note that "IssuedBefore"
-              and "IssuedAfter"  may be used to create a region that should either
-              be kept or deleted depending on which one is biggest.  The "Subject"
+              and "IssuedAfter" can be used to create a region that should either
+              be included or excluded depending on which one is biggest.  The "Subject"
               attribute is a regular expression matching RFC 2253 names.  "Email"
-              attributes SHOULD be searched for in both the subject DN and in
+              attributes MUST be searched for in both the subject DN and in
               subject alt name extensions -->
          <xs:attribute name="Subject" type="kgen:distinguishedNameExpr" use="optional"/>
          <xs:attribute name="Serial" type="xs:integer" use="optional"/>

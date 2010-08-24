@@ -202,9 +202,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS "sanity" limits
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final int PIN_PUK_MAX_LENGTH                    = 100;
-    static final int MAX_SYMMETRIC_KEY_SIZE                = 64;
-    static final int ID_TYPE_MAX_LENGTH                    = 32;
+    static final int MAX_LENGTH_PIN_PUK                    = 100;
+    static final int MAX_LENGTH_SYMMETRIC_KEY              = 64;
+    static final int MAX_LENGTH_ID_TYPE                    = 32;
+    static final int MAX_LENGTH_CRYPTO_DATA                = 16384;
+    static final int MAX_LENGTH_EXTENSION_DATA             = 65536;
 
 
     int next_key_handle = 1;
@@ -238,7 +240,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                 owner.abort ("Duplicate \"ID\" : " + id);
               }
             boolean flag = false;
-            if (id.length () == 0 || id.length () > ID_TYPE_MAX_LENGTH)
+            if (id.length () == 0 || id.length () > MAX_LENGTH_ID_TYPE)
               {
                 flag = true;
               }
@@ -467,6 +469,14 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         boolean isRSA ()
           {
             return certificate_path[0].getPublicKey () instanceof RSAPublicKey;
+          }
+
+        void checkCryptoDataSize (byte[] data) throws SKSException
+          {
+            if (data.length > MAX_LENGTH_CRYPTO_DATA)
+              {
+                abort ("Exceeded \"CryptoDataSize\" for key #" + key_handle);
+              }
           }
       }
 
@@ -1098,7 +1108,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         return alg;
       }
-
+    
     void addUpdateKeyOrCloneKeyProtection (int key_handle,
                                            int target_key_handle,
                                            byte[] mac,
@@ -1415,6 +1425,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         KeyEntry key_entry = getStdKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Enforce the data limit
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.checkCryptoDataSize (data);
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key may be used for signatures
         ///////////////////////////////////////////////////////////////////////////////////
         if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE |
@@ -1491,6 +1506,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         KeyEntry key_entry = getStdKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Enforce the data limit
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.checkCryptoDataSize (data);
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Check the key and then check that the algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
         Algorithm alg = checkKeyAndAlgorithm (key_entry, encryption_algorithm, ALG_SYM_ENC);
@@ -1551,6 +1571,11 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Get key (which must belong to an already fully provisioned session)
         ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Enforce the data limit
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.checkCryptoDataSize (data);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check the key and then check that the algorithm is known and applicable
@@ -2086,11 +2111,28 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ext_mac.addString (extension_type);
         ext_mac.addBlob (extension_data);
         key_entry.owner.verifyMac (ext_mac, mac);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Perform some "sanity" tests
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (base_type == BASE_TYPE_ENCRYPTED_EXTENSION)
+          {
+            extension_data = key_entry.owner.decrypt (extension_data);
+          }
+        if (extension_data.length > MAX_LENGTH_EXTENSION_DATA)
+          {
+            key_entry.owner.abort ("Extension data exceeds " + MAX_LENGTH_EXTENSION_DATA + " bytes");
+          }
+        if ((base_type == BASE_TYPE_LOGOTYPE) ^ (qualifier.length != 0))
+          {
+            key_entry.owner.abort ("\"Qualifier\" length error");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Property bags are checked for not being empty or incorrectly formatted
+        ///////////////////////////////////////////////////////////////////////////////////
         if (base_type == BASE_TYPE_PROPERTY_BAG)
           {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Property bags are checked for not being empty or incorrectly formatted
-            ///////////////////////////////////////////////////////////////////////////////////
             int i = 0;
             do
               {
@@ -2111,8 +2153,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ExtObject extension = new ExtObject ();
         extension.base_type = base_type;
         extension.qualifier = qualifier;
-        extension.extension_data = base_type == BASE_TYPE_ENCRYPTED_EXTENSION ?
-                                     key_entry.owner.decrypt (extension_data) : extension_data;
+        extension.extension_data = extension_data;
         key_entry.extensions.put (extension_type, extension);
       }
 
@@ -2193,9 +2234,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Decrypt symmetric key
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] clear_text_symmetric_key = key_entry.owner.decrypt (symmetric_key);
-        if (clear_text_symmetric_key.length > MAX_SYMMETRIC_KEY_SIZE)
+        if (clear_text_symmetric_key.length > MAX_LENGTH_SYMMETRIC_KEY)
           {
-            key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_SYMMETRIC_KEY_SIZE + " bytes");
+            key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2716,7 +2757,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Perform PIN "sanity" check
+        // Perform PIN "sanity" checks
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.rangeTest (grouping, PIN_GROUPING_NONE, PIN_GROUPING_UNIQUE, "Grouping");
         provisioning.rangeTest (input_method, INPUT_METHOD_PROGRAMMATIC, INPUT_METHOD_ANY, "InputMethod");
@@ -2746,7 +2787,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             provisioning.abort ("Incorrect \"Format\" for the \"missing-group\" PIN pattern policy");
           }
-        if (min_length <= 1 || max_length > PIN_PUK_MAX_LENGTH || max_length < min_length)
+        if (min_length <= 1 || max_length > MAX_LENGTH_PIN_PUK || max_length < min_length)
           {
             provisioning.abort ("PIN policy length error");
           }
@@ -2816,10 +2857,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         byte[] puk_value = provisioning.decrypt (value);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Perform PUK "sanity" check
+        // Perform PUK "sanity" checks
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.rangeTest (format, PIN_FORMAT_NUMERIC, PIN_FORMAT_BINARY, "Format");
-        if (puk_value.length <= 1 || puk_value.length > PIN_PUK_MAX_LENGTH)
+        if (puk_value.length <= 1 || puk_value.length > MAX_LENGTH_PIN_PUK)
           {
             provisioning.abort ("PUK length error");
           }
