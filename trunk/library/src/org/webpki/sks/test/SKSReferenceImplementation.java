@@ -1678,7 +1678,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             return new DeviceInfo (getDeviceCertificatePath (),
                                    RSA_KEY_SIZES,
-                                   algorithms.keySet ().toArray (new String[0]));
+                                   new HashSet<String> (algorithms.keySet ()));
           }
         catch (Exception e)
           {

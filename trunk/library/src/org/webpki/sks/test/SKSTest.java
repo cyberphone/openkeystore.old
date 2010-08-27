@@ -60,6 +60,7 @@ import org.webpki.keygen2.PatternRestriction;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
+import org.webpki.sks.test.SKSReferenceImplementation;
 import org.webpki.util.ArrayUtil;
 
 public class SKSTest

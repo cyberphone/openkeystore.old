@@ -17,11 +17,12 @@
 package org.webpki.sks;
 
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
 
 public class DeviceInfo
   {
     X509Certificate[] certificate_path;
-    String[] algorithms;
+    HashSet<String> algorithms;
     short[] rsa_key_sizes;
     
     public X509Certificate[] getDeviceCertificatePath ()
@@ -34,14 +35,14 @@ public class DeviceInfo
         return rsa_key_sizes;
       }
     
-    public String[] getAlgorithms ()
+    public HashSet<String> getAlgorithms ()
       {
         return algorithms;
       }
     
     public DeviceInfo (X509Certificate[] certificate_path,
                        short[] rsa_key_sizes,
-                       String[] algorithms)
+                       HashSet<String> algorithms)
       {
         this.certificate_path = certificate_path;
         this.rsa_key_sizes = rsa_key_sizes;
