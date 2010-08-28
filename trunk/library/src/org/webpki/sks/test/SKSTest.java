@@ -1328,6 +1328,7 @@ public class SKSTest
       {
         String ok_pin = "1563";
         String puk_ok = "17644";
+        short pin_retry = 3;
         ProvSess sess = new ProvSess (device);
         PUKPol puk = sess.createPUKPolicy ("PUK",
                                            PassphraseFormat.NUMERIC,
@@ -1337,7 +1338,7 @@ public class SKSTest
                                                   PassphraseFormat.NUMERIC,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
-                                                  (short) 3 /* retry_limit*/, 
+                                                  pin_retry/* retry_limit*/, 
                                                   puk /* puk_policy */);
 
         GenKey key = sess.createRSAKey ("Key.1",
@@ -1355,7 +1356,7 @@ public class SKSTest
                                                                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
                                                                                             ok_pin.getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
-        for (int i = 0; i < 4; i++)
+        for (int i = 1; i <= (pin_retry * 2); i++)
           {
             try
               {
@@ -1370,6 +1371,7 @@ public class SKSTest
               {
                 
               }
+            assertTrue ("PIN should be blocked", device.sks.getKeyProtectionInfo (key.key_handle).isPINBlocked () ^ (i < pin_retry));
           }
         try
           {
@@ -1547,6 +1549,7 @@ public class SKSTest
                                         pin_policy /* pin_policy */,
                                         KeyUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
+        assertFalse ("Not asymmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetric ());
         try
           {
             device.sks.exportKey (key.key_handle, new byte[0]);
@@ -1628,6 +1631,7 @@ public class SKSTest
                                         KeyUsage.SYMMETRIC_KEY).setCertificate ("CN=TEST18");
         sess.setSymmetricKey (key, symmetric_key, new String[]{MacAlgorithms.HMAC_SHA1.getURI ()});
         sess.closeSession ();
+        assertTrue ("Not symmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetric ());
         byte[] result = sess.sks.performHMAC (key.key_handle, MacAlgorithms.HMAC_SHA1.getURI (), ok_pin.getBytes ("UTF-8"), TEST_STRING);
         assertTrue ("HMAC error", ArrayUtil.compare (result, MacAlgorithms.HMAC_SHA1.digest (symmetric_key, TEST_STRING)));
         try

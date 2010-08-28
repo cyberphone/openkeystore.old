@@ -17,26 +17,43 @@
 package org.webpki.sks;
 
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
 
 public class KeyAttributes
   {
+    static final byte KEY_USAGE_SIGNATURE                  = 0x01;
+    static final byte KEY_USAGE_AUTHENTICATION             = 0x02;
+    static final byte KEY_USAGE_ENCRYPTION                 = 0x04;
+    static final byte KEY_USAGE_UNIVERSAL                  = 0x08;
+    static final byte KEY_USAGE_TRANSPORT                  = 0x10;
+    static final byte KEY_USAGE_SYMMETRIC_KEY              = 0x20;
+
+    byte key_usage;
+    
     X509Certificate[] certificate_path;
     
-    String[] extension_types;
+    HashSet<String> extension_types;
     
     public X509Certificate[] getCertificatePath ()
       {
         return certificate_path;
       }
+    
+    public boolean isSymmetric ()
+      {
+        return key_usage == KEY_USAGE_SYMMETRIC_KEY;
+      }
 
-    public String[] getExtensionTypes ()
+    public HashSet<String> getExtensionTypes ()
       {
         return extension_types;
       }
     
-    public KeyAttributes (X509Certificate[] certificate_path,
-                          String[] extension_types)
+    public KeyAttributes (byte key_usage,
+                          X509Certificate[] certificate_path,
+                          HashSet<String> extension_types)
       {
+        this.key_usage = key_usage;
         this.certificate_path = certificate_path;
         this.extension_types = extension_types;
       }

@@ -167,6 +167,8 @@ public interface SecureKeyStore
 
     public Extension getExtension (int key_handle,
                                    String extension_type) throws SKSException;
+    
+    public KeyProtectionInfo getKeyProtectionInfo (int key_handle) throws SKSException;
 
     public void setProperty (int key_handle,
                              String extension_type,

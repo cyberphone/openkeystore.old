@@ -61,6 +61,7 @@ import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.Extension;
 import org.webpki.sks.KeyAttributes;
 import org.webpki.sks.KeyPair;
+import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
@@ -193,6 +194,16 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final byte BIOMETRIC_PROTECTION_COMBINED        = 0x02;
     static final byte BIOMETRIC_PROTECTION_EXCLUSIVE       = 0x03;
 
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // "ProtectionStatus" constants
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte PROTECTION_STATUS_NO_PIN             = 0x00;
+    static final byte PROTECTION_STATUS_PIN_PROTECTED      = 0x01;
+    static final byte PROTECTION_STATUS_PIN_BLOCKED        = 0x04;
+    static final byte PROTECTION_STATUS_PUK_PROTECTED      = 0x02;
+    static final byte PROTECTION_STATUS_PUK_BLOCKED        = 0x08;
+    static final byte PROTECTION_STATUS_DEVICE_PIN         = 0x10;
+ 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS key algorithm IDs used in "createKeyPair"
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1013,7 +1024,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             Provisioning provisioning = iter.next ();
             if (provisioning.open == provisioning_state)
               {
-                return new EnumeratedProvisioningSession (provisioning.provisioning_handle, 
+                return new EnumeratedProvisioningSession (provisioning.client_time,
+                                                          provisioning.provisioning_handle, 
                                                           provisioning.client_session_id,
                                                           provisioning.server_session_id);
               }
@@ -1713,6 +1725,46 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
+    //                          getKeyProtectionInfo                              //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public KeyProtectionInfo getKeyProtectionInfo (int key_handle) throws SKSException
+      {
+        // TODO very incomplete (but still useful...)
+        KeyEntry key_entry = getStdKey (key_handle);
+        byte protection_status = PROTECTION_STATUS_NO_PIN;
+        if (key_entry.device_pin_protected)
+          {
+            protection_status = PROTECTION_STATUS_DEVICE_PIN;
+          }
+        else if (key_entry.pin_policy != null)
+          {
+            protection_status = PROTECTION_STATUS_PIN_PROTECTED;
+            if (key_entry.error_counter >= key_entry.pin_policy.retry_limit)
+              {
+                protection_status |= PROTECTION_STATUS_PIN_BLOCKED;
+              }
+            if (key_entry.pin_policy.puk_policy != null)
+              {
+                protection_status |= PROTECTION_STATUS_PUK_PROTECTED;
+                if (key_entry.pin_policy.puk_policy.error_counter >= key_entry.pin_policy.puk_policy.retry_limit)
+                  {
+                    protection_status |= PROTECTION_STATUS_PUK_BLOCKED;
+                  }
+              }
+          }
+        return new KeyProtectionInfo (key_entry.pin_policy == null ? 0 : key_entry.pin_policy.format,
+                                      key_entry.enable_pin_caching,
+                                      protection_status,
+                                      key_entry.pin_policy == null ? 0 : key_entry.pin_policy.input_method,
+                                      key_entry.export_policy,
+                                      key_entry.delete_policy);
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
     //                            getKeyAttributes                                //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
@@ -1721,8 +1773,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
       {
         // TODO very incomplete (but still useful...)
         KeyEntry key_entry = getStdKey (key_handle);
-        return new KeyAttributes (key_entry.certificate_path,
-                                  key_entry.extensions.keySet ().toArray (new String[0]));
+        return new KeyAttributes (key_entry.key_usage,
+                                  key_entry.certificate_path,
+                                  new HashSet<String> (key_entry.extensions.keySet ()));
       }
 
 

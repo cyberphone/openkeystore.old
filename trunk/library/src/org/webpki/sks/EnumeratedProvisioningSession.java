@@ -16,6 +16,8 @@
  */
 package org.webpki.sks;
 
+import java.util.Date;
+
 public class EnumeratedProvisioningSession
   {
     private static final int INIT_EXIT = 0xFFFFFFFF;
@@ -27,6 +29,7 @@ public class EnumeratedProvisioningSession
         return provisioning_handle;
       }
     
+
     String client_session_id;
     
     public String getClientSessionID ()
@@ -34,11 +37,20 @@ public class EnumeratedProvisioningSession
         return client_session_id;
       }
     
+
     String server_session_id;
     
     public String getServerSessionID ()
       {
         return server_session_id;
+      }
+    
+
+    int client_time;
+    
+    public Date getClientTime ()
+      {
+        return new Date (client_time * 1000);
       }
     
 
@@ -54,10 +66,12 @@ public class EnumeratedProvisioningSession
       }
 
 
-    public EnumeratedProvisioningSession (int provisioning_handle,
+    public EnumeratedProvisioningSession (int client_time,
+                                          int provisioning_handle,
                                           String client_session_id,
                                           String server_session_id)
       {
+        this.client_time = client_time;
         this.provisioning_handle = provisioning_handle;
         this.client_session_id = client_session_id;
         this.server_session_id = server_session_id;
