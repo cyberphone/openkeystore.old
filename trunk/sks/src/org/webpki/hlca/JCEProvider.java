@@ -17,9 +17,9 @@ import org.webpki.sks.SecureKeyStore;
 @SuppressWarnings("serial")
 public final class JCEProvider extends Provider
   {
-    private static String info = "WebPKI.org SecureKeyStore Provider v0.10";
+    private static String info = "WebPKI.org SKS Provider v0.10";
 
-    public static String PROVIDER_NAME = "WebPKI";
+    public static String PROVIDER_NAME = "SKS";
     
     private HashSet<String> algorithms;
 
@@ -33,7 +33,7 @@ public final class JCEProvider extends Provider
       {
         super (PROVIDER_NAME, 1.41, info);
         //KeyStore
-        put ("KeyStore.WebPKI", JCEKeyStore.class.getName ());
+        put ("KeyStore." + PROVIDER_NAME, JCEKeyStore.class.getName ());
 
         SecureKeyStore sks = ServiceLoader.load (SecureKeyStore.class).iterator ().next ();
         try

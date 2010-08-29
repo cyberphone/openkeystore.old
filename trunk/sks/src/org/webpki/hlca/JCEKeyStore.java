@@ -19,7 +19,11 @@ import java.util.ServiceLoader;
 import java.util.Vector;
 import java.util.Date;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
@@ -44,7 +48,7 @@ public class JCEKeyStore extends KeyStoreSpi
 
     private static final String NOT_IMPLEMENTED = "Not implemented";
     
-    private int getInt (char[] id)
+    private static int getInt (char[] id)
       {
         int v = 0;
         for (char c : id)
@@ -427,23 +431,28 @@ public class JCEKeyStore extends KeyStoreSpi
       {
         return findKey (alias) != null;
       }
-    
 
-    /**Loads the keystore */
-    @Override
-    public void engineLoad (InputStream stream, char[] password) throws IOException
+    public static SecureKeyStore loadKeyStore (InputStream stream, char[] password) throws IOException
       {
-        sks = ServiceLoader.load (SecureKeyStore.class).iterator ().next ();
+        SecureKeyStore sks = ServiceLoader.load (SecureKeyStore.class).iterator ().next ();
         if (sks instanceof SKSReferenceImplementation)
           {
-            if (stream == null || password == null)
+            if (stream != null)
               {
-                throw new IOException ("stream or password was null");
-              }
-            try
-              {
-                byte[] data = ArrayUtil.getByteArrayFromInputStream (stream);
-                System.arraycopy (arg0, arg1, arg2, arg3, arg4);
+                try
+                  {
+                    byte[] data = ArrayUtil.getByteArrayFromInputStream (stream);
+                    Object object = new ObjectInputStream (new ByteArrayInputStream (data)).readObject ();
+                    if (!(object instanceof SKSReferenceImplementation))
+                      {
+                        throw new IOException ("Bad SKS file");
+                      }
+                    sks = (SKSReferenceImplementation) object;
+                  }
+                catch (ClassNotFoundException e)
+                  {
+                    throw new IOException (e);
+                  }
               }
           }
         else
@@ -462,6 +471,14 @@ public class JCEKeyStore extends KeyStoreSpi
               }
             setup.init ();
           }
+        return sks;
+      }
+
+    /**Loads the keystore */
+    @Override
+    public void engineLoad (InputStream stream, char[] password) throws IOException
+      {
+        sks = loadKeyStore (stream ,password);
       }
     
 
@@ -507,6 +524,24 @@ public class JCEKeyStore extends KeyStoreSpi
           }
         return i;
       }
+
+    public static void storeSoftToken (SecureKeyStore sks, OutputStream stream, char[] password) throws IOException
+      {
+        if (sks instanceof SKSReferenceImplementation)
+          {
+            if (stream == null || password == null)
+              {
+                throw new IOException ("stream or password was null");
+              }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+            new ObjectOutputStream (baos).writeObject (sks);
+            stream.write (baos.toByteArray ());
+          }
+        else
+          {
+            throw new IOException ("You cannot store this SKS type");
+          }
+      }
     
    /*public void engineStore (KeyStore.LoadStoreParameter param)*/
     
@@ -514,7 +549,7 @@ public class JCEKeyStore extends KeyStoreSpi
     public void engineStore (OutputStream stream, char[] password)
     throws IOException, NoSuchAlgorithmException, CertificateException
       {
-        throw new IOException (NOT_IMPLEMENTED);
+        storeSoftToken (sks, stream, password);
       }
 
   }

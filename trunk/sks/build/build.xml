@@ -5,9 +5,11 @@
   <property name="temp_dir" value="../.tmp" />
   <property name="dist_dir"  value="../dist" />
   <property name="library_dir" value="../../library"/>
-  <property name="phone_sks" value="webpki.org-phonesks-1.00.jar" />
+  <property name="resource_dir" value="../../resources"/>
+  <property name="hlca" value="webpki.org-hlca-1.00.jar" />
   <property name="sks_dbemulator" value="webpki.org-sks-dbemulator-1.00.jar" />
   <property name="sks_hwdevice" value="webpki.org-sks-hwdevice-1.00.jar" />
+  <property name="sks_softtoken" value="webpki.org-sks-softtoken-1.00.jar" />
   <property name="doc_dir"  value="../doc" />
   <property name="debug"  value="on"/>
   <property environment="env"/>
@@ -21,6 +23,9 @@
   <path id="compile.classpath">
     <fileset dir="${library_dir}/dist">
       <include name="webpki.org-libext*.jar"/>
+    </fileset>
+    <fileset dir="${resource_dir}/third-party-jars">
+      <include name="bcprov*.jar"/>
     </fileset>
   </path>
 
@@ -37,7 +42,11 @@
        includes="**/*.java, **/*.xsd"/>
     <!-- Compile the java code from ${src_dir} into ${temp_dir} -->
     <mkdir dir="${temp_dir}" />
-    <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}" classpathref="compile.classpath">
+    <javac srcdir="${src_dir}" debug="${debug}" destdir="${temp_dir}" classpathref="compile.classpath">
+      <include name="org/**/softtoken/*"/>
+  	  <include name="org/**/hlca/test/*"/>
+  	  <include name="org/**/JCE*"/>
+	  <include name="org/**/Digester*"/>
       <compilerarg value="-Xlint"/>
     </javac>
     <!-- Copy all files except .java  -->
@@ -54,14 +63,21 @@
     <mkdir dir="${dist_dir}" />
 
     <!-- Put everything from ${temp_dir} into the two jar files -->
-	<jar jarfile="${dist_dir}/${phone_sks}">
+	<jar jarfile="${dist_dir}/${hlca}">
 		<fileset dir="${temp_dir}">
-		    <exclude name="org/webpki/sks/hwdevice/**"/>
-		    <exclude name="org/webpki/sks/dbemulator/**"/>
-		    <exclude name="org/webpki/io/**"/>
+		    <include name="org/webpki/hlca/**"/>
 		</fileset>
 	</jar>
-	<signjar jar="${dist_dir}/${phone_sks}" alias="jcesign" storepass="${sign.pwd}" keypass="${sign.pwd}" keystore="${sign.cert}"/>
+	<signjar jar="${dist_dir}/${hlca}" alias="jcesign" storepass="${sign.pwd}" keypass="${sign.pwd}" keystore="${sign.cert}"/>
+  	
+    <jar jarfile="${dist_dir}/${sks_softtoken}">
+      <fileset dir="${temp_dir}">
+          <include name="org/webpki/sksimpl/softtoken/**"/>
+      </fileset>
+      <zipfileset dir="../../library/src/org/webpki/sks/test" includes="attestationkeystore.jks" prefix="org/webpki/sksimpl/softtoken"/>
+      <service type="org.webpki.sks.SecureKeyStore" provider="org.webpki.sksimpl.softtoken.SKSReferenceImplementation"/>
+    </jar>
+  	
     <jar jarfile="${dist_dir}/${sks_dbemulator}">
       <fileset dir="${temp_dir}">
           <include name="org/webpki/sks/dbemulator/**"/>
@@ -69,6 +85,7 @@
       <zipfileset dir="../../resources/keygen2-certificates" includes="deviceca.jks" prefix="org/webpki/sks/dbemulator"/>
       <service type="org.webpki.sks.SecureKeyStore" provider="org.webpki.sks.dbemulator.SKSEmulator"/>
     </jar>
+  	
     <jar jarfile="${dist_dir}/${sks_hwdevice}">
       <fileset dir="${temp_dir}">
         <include name="org/webpki/sks/hwdevice/**"/>
@@ -106,9 +123,7 @@
   
   <target name="clean">
 	    <delete dir="${temp_dir}"/>
-	    <delete file="${dist_dir}/${phone_sks}" failonerror="false"/>
-        <delete file="${dist_dir}/${sks_dbemulator}" failonerror="false"/>
-        <delete file="${dist_dir}/${sks_hwdevice}" failonerror="false"/>
+	    <delete dir="${dist_dir}"/>
   </target>
 	
   <target name="dist" depends="clean,compile"/>
