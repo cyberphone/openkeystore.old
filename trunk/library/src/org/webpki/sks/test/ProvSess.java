@@ -399,7 +399,7 @@ public class ProvSess
         user_defined_pins = false;
       }
 
-    byte[] getPassphraseBytes (PassphraseFormat format, String passphrase) throws IOException
+    public byte[] getPassphraseBytes (PassphraseFormat format, String passphrase) throws IOException
       {
         if (format == PassphraseFormat.BINARY)
           {
@@ -664,7 +664,7 @@ public class ProvSess
                              mac (symk_mac.getResult (), APIDescriptors.SET_SYMMETRIC_KEY));
       }
 
-    void restorePrivateKey (GenKey key, PrivateKey private_key) throws IOException, GeneralSecurityException
+    public void restorePrivateKey (GenKey key, PrivateKey private_key) throws IOException, GeneralSecurityException
       {
         MacGenerator privk_mac = key.getEECertMacBuilder ();
         byte[] encrypted_private_key = server_sess_key.encrypt (private_key.getEncoded ());
@@ -674,7 +674,7 @@ public class ProvSess
                                mac (privk_mac.getResult (), APIDescriptors.RESTORE_PRIVATE_KEY));
       }
 
-    void postDeleteKey (GenKey key) throws IOException, GeneralSecurityException
+    public void postDeleteKey (GenKey key) throws IOException, GeneralSecurityException
       {
         MacGenerator del_mac = new MacGenerator ();
         del_mac.addArray (key.getPostProvMac ());
@@ -683,7 +683,7 @@ public class ProvSess
                           mac (del_mac.getResult (), APIDescriptors.PP_DELETE_KEY));
       }
     
-    void postUpdateKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
+    public void postUpdateKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new_key.getEECertMacBuilder ();
         upd_mac.addArray (old_key.getPostProvMac ());
@@ -692,7 +692,7 @@ public class ProvSess
                           mac (upd_mac.getResult (), APIDescriptors.PP_UPDATE_KEY));
       }
     
-    void postCloneKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
+    public void postCloneKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new_key.getEECertMacBuilder ();
         upd_mac.addArray (old_key.getPostProvMac ());
@@ -701,7 +701,7 @@ public class ProvSess
                                    mac (upd_mac.getResult (), APIDescriptors.PP_CLONE_KEY_PROTECTION));
       }
   
-    boolean exists () throws SKSException
+    public boolean exists () throws SKSException
       {
         EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
         while ((eps = sks.enumerateProvisioningSessions (eps, false)).isValid ())
