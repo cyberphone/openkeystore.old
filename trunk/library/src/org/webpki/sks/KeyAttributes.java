@@ -44,6 +44,14 @@ public class KeyAttributes
         return key_usage == KEY_USAGE_SYMMETRIC_KEY;
       }
 
+    public boolean isAsymmetric ()
+      {
+        return (key_usage & (KEY_USAGE_SIGNATURE |
+                             KEY_USAGE_AUTHENTICATION |
+                             KEY_USAGE_ENCRYPTION |
+                             KEY_USAGE_UNIVERSAL)) != 0;
+      }
+
     public HashSet<String> getExtensionTypes ()
       {
         return extension_types;
