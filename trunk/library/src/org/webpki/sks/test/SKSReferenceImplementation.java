@@ -75,9 +75,9 @@ import org.webpki.sks.SecureKeyStore;
  *  Symmetric keys, PINs, PUKs and Extension data.
  *  
  *  VSDs (Virtual Security Domains),  E2ES (End To End Security), and
- *  TBO (Transaction Based Operation) enable multiple credential providers to
- *  securely and reliable share a key container, something which becomes a
- *  necessity in mobile phones with embedded security hardware.
+ *  TBM (Transaction Based Management) enable multiple credential providers
+ *  to securely and reliable share a key container, something which becomes
+ *  a necessity in mobile phones with embedded security hardware.
  *
  *  The following is an SKS Reference Implementation that is intended to complement
  *  the specification by showing how the different constructs can be implemented.
