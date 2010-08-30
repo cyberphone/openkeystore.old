@@ -71,12 +71,13 @@ import org.webpki.sks.SecureKeyStore;
  *                          #  SKS - Secure Key Store #
  *                          ###########################
  *
- *  SKS is a cryptographic module that supports E2ES (End-to-End Security) for
- *  Provisioning and Managing PKI, Symmetric keys, PINs, PUKs and Extension data.
+ *  SKS is a cryptographic module that supports for Provisioning and Managing PKI,
+ *  Symmetric keys, PINs, PUKs and Extension data.
  *  
- *  Cryptographic Issuer Isolation and Transaction-based Update Operations enable
- *  multiple credential providers sharing a single container, something which
- *  becomes a necessity in mobile phones with trusted hardware. 
+ *  VSDs (Virtual Security Domains),  E2ES (End To End Security), and
+ *  TBO (Transaction Based Operation) enable multiple credential providers to
+ *  securely and reliable share a key container, something which becomes a
+ *  necessity in mobile phones with embedded security hardware.
  *
  *  The following is an SKS Reference Implementation that is intended to complement
  *  the specification by showing how the different constructs can be implemented.
