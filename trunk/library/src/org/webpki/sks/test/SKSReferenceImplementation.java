@@ -74,10 +74,10 @@ import org.webpki.sks.SecureKeyStore;
  *  SKS is a cryptographic module that supports for Provisioning and Managing PKI,
  *  Symmetric keys, PINs, PUKs and Extension data.
  *  
- *  VSDs (Virtual Security Domains),  E2ES (End To End Security), and
- *  TBM (Transaction Based Management) enable multiple credential providers
- *  to securely and reliable share a key container, something which becomes
- *  a necessity in mobile phones with embedded security hardware.
+ *  VSDs (Virtual Security Domains),  E2ES (End To End Security), and Transaction-
+ *  Based Operation enable multiple credential providers to securely and reliable
+ *  share a key container, something which will become a necessity in mobile phones
+ *  with embedded security hardware.
  *
  *  The following is an SKS Reference Implementation that is intended to complement
  *  the specification by showing how the different constructs can be implemented.
