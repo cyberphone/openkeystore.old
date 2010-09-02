@@ -1,5 +1,6 @@
 package org.webpki.net;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -23,6 +24,8 @@ import java.util.LinkedHashMap;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.Provider;
+import java.security.Security;
 
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
@@ -116,7 +119,7 @@ public class HttpsWrapper
     private String response_message;
     private PasswordAuthentication password_authentication;
     private boolean interactive_mode;
-    private boolean enable_revocation_test;
+    private boolean enable_revocation_test=false;
     private String url;
     private static Proxy default_proxy;
     private static KeyStore default_trust_store;
@@ -874,7 +877,7 @@ public class HttpsWrapper
                 while (aliases.hasMoreElements ())
                   {
                     String alias = aliases.nextElement ();
-                    if (trust_store.isCertificateEntry (alias))
+                   if (trust_store.isCertificateEntry (alias))
                       {
                         trust.add (new TrustAnchor ((X509Certificate) trust_store.getCertificate (alias), null));
                       }
@@ -1276,15 +1279,20 @@ public class HttpsWrapper
                                                     "Set password of external trust store",
                                                     "testing");
 
-        CmdLineArgument CMD_keystore    = create (CmdLineArgumentGroup.GENERAL,
+        CmdLineArgument CMD_keystore      = create (CmdLineArgumentGroup.GENERAL,
                                                     "keystore", "filename",
                                                     "Set external key store",
                                                     CmdFrequency.OPTIONAL);
 
-       CmdLineArgument CMD_keystorepass = create (CmdLineArgumentGroup.GENERAL,
-                                                    "keystorepass", "password",
-                                                    "Set password of key store",
+       CmdLineArgument CMD_keypass        = create (CmdLineArgumentGroup.GENERAL,
+                                                    "keypass", "password",
+                                                    "Set password of key",
                                                     "testing");
+
+       CmdLineArgument CMD_addprovider    = create (CmdLineArgumentGroup.GENERAL,
+                                                    "provider", "class",
+                                                    "Add provider",
+                                                    CmdFrequency.OPTIONAL);
 
         CmdLineArgument CMD_proxyhost     = create (CmdLineArgumentGroup.GENERAL,
                                                     "proxyhost", "host-or-ip",
@@ -1353,7 +1361,7 @@ public class HttpsWrapper
           }
 
 
-        void execute (String argv[]) throws IOException
+        void execute (String argv[]) throws Exception
           {
             decodeCommandLine (argv);
 
@@ -1421,6 +1429,25 @@ public class HttpsWrapper
                 wrap.setHeader ("Content-Type", CMD_mime_type.getString ());
               }
 
+            if (CMD_addprovider.found)
+              {
+                Provider provider = (Provider) Class.forName (CMD_addprovider.getString ()).newInstance ();
+                String prov = null;
+                for (Provider.Service ps : provider.getServices ())
+                  {
+                    if (ps.getType ().equals ("KeyStore"))
+                      {
+                        prov = ps.getAlgorithm ();
+                      }
+                  }
+                Security.addProvider (provider);
+                KeyStore ks = KeyStore.getInstance (prov);
+                System.out.println (CMD_keystore.getString ());
+                ks.load (CMD_keystore.found ? new FileInputStream (CMD_keystore.getString ()) : null, null);
+                wrap.setKeyStore (ks, CMD_keypass.getString ());
+                CMD_keystore.found = false;
+              }
+
             if (CMD_truststore.found)
               {
                 wrap.setTrustStore (CMD_truststore.getString (),
@@ -1430,7 +1457,7 @@ public class HttpsWrapper
             if (CMD_keystore.found)
               {
                 wrap.setKeyStore (CMD_keystore.getString (),
-                                  CMD_keystorepass.getString ());
+                                  CMD_keypass.getString ());
               }
 
             if (CMD_get_oper.found)
@@ -1476,7 +1503,7 @@ public class HttpsWrapper
     /**
      * Command-line interface to the HttpsWrapper.
      */
-    static public void main (String[] argv) throws IOException
+    static public void main (String[] argv) throws Exception
       {
         new CommandLine ().execute (argv);
       }

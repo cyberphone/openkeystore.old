@@ -29,6 +29,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.Signature;
 
 import java.security.cert.X509Certificate;
@@ -55,6 +56,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
@@ -74,13 +76,13 @@ import org.webpki.sks.SecureKeyStore;
  *  SKS is a cryptographic module that supports for Provisioning and Managing PKI,
  *  Symmetric keys, PINs, PUKs and Extension data.
  *  
- *  VSDs (Virtual Security Domains),  E2ES (End To End Security), and Transaction-
+ *  VSDs (Virtual Security Domains), E2ES (End To End Security), and Transaction-
  *  Based Operation enable multiple credential providers to securely and reliable
  *  share a key container, something which will become a necessity in mobile phones
  *  with embedded security hardware.
  *
- *  The following is an SKS Reference Implementation that is intended to complement
- *  the specification by showing how the different constructs can be implemented.
+ *  The following SKS Reference Implementation is intended to complement the
+ *  specification by showing how the different constructs can be implemented.
  *
  *  In addition to the Reference Implementation there is a set of SKS JUnit tests
  *  that should work identical on a "real" SKS token.
@@ -215,7 +217,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     // SKS "sanity" limits
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final int MAX_LENGTH_PIN_PUK                    = 100;
-    static final int MAX_LENGTH_SYMMETRIC_KEY              = 64;
+    static final int MAX_LENGTH_SYMMETRIC_KEY              = 100;
     static final int MAX_LENGTH_ID_TYPE                    = 32;
     static final int MAX_LENGTH_CRYPTO_DATA                = 16384;
     static final int MAX_LENGTH_EXTENSION_DATA             = 65536;
@@ -232,6 +234,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
     int next_puk_handle = 1;
     HashMap<Integer,PUKPolicy> puk_policies = new HashMap<Integer,PUKPolicy> ();
+
+
+    public SKSReferenceImplementation ()
+      {
+        Security.addProvider(new BouncyCastleProvider());
+      }
 
 
     abstract class NameSpace implements Serializable
@@ -2368,7 +2376,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             set_certificate_mac.addString (key_entry.id);
             for (X509Certificate certificate : certificate_path)
               {
-                set_certificate_mac.addArray (certificate.getEncoded ());
+                byte[] der = certificate.getEncoded ();
+                if (der.length > MAX_LENGTH_CRYPTO_DATA)
+                  {
+                    key_entry.owner.abort ("Certificate for: " + key_entry.id + " exceeds " + MAX_LENGTH_CRYPTO_DATA + " bytes");
+                  }
+                set_certificate_mac.addArray (der);
               }
           }
         catch (GeneralSecurityException e)
