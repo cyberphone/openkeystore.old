@@ -57,6 +57,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
@@ -73,8 +74,8 @@ import org.webpki.sks.SecureKeyStore;
  *                          #  SKS - Secure Key Store #
  *                          ###########################
  *
- *  SKS is a cryptographic module that supports for Provisioning and Managing PKI,
- *  Symmetric keys, PINs, PUKs and Extension data.
+ *  SKS is a cryptographic module that supports On-line Provisioning and Management
+ *  of PKI, Symmetric keys, PINs, PUKs and Extension data.
  *  
  *  VSDs (Virtual Security Domains), E2ES (End To End Security), and Transaction-
  *  Based Operation enable multiple credential providers to securely and reliable
