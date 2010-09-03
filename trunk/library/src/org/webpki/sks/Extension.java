@@ -7,13 +7,13 @@ public class Extension
   {
     byte[] qualifier;
     byte[] extension_data;
-    byte base_type;
+    byte sub_type;
 
-    public Extension (byte[] qualifier, byte[] extension_data, byte base_type)
+    public Extension (byte[] qualifier, byte[] extension_data, byte sub_type)
       {
         this.qualifier = qualifier;
         this.extension_data = extension_data;
-        this.base_type = base_type;
+        this.sub_type = sub_type;
       }
     
     public byte[] getQualifier ()
@@ -21,9 +21,9 @@ public class Extension
         return qualifier;
       }
     
-    public byte getBaseType ()
+    public byte getSubType ()
       {
-        return base_type;
+        return sub_type;
       }
     
     public byte[] getExtensionData ()
@@ -40,7 +40,7 @@ public class Extension
     public Property[] getProperties () throws SKSException
       {
         LinkedHashMap<String,Property> properties = new LinkedHashMap<String,Property> ();
-        if (base_type != 0x02) throw new SKSException ("Not a \"PropertyBag\"");
+        if (sub_type != 0x02) throw new SKSException ("Not a \"PropertyBag\"");
         int i = 0;
         try
           {
