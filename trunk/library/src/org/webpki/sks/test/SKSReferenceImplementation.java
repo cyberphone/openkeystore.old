@@ -168,12 +168,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final byte PIN_FORMAT_BINARY                    = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "BaseType" for "addExtension" in the SKS specification
+    // See "SubType" for "addExtension" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte BASE_TYPE_EXTENSION                  = 0x00;
-    static final byte BASE_TYPE_ENCRYPTED_EXTENSION        = 0x01;
-    static final byte BASE_TYPE_PROPERTY_BAG               = 0x02;
-    static final byte BASE_TYPE_LOGOTYPE                   = 0x03;
+    static final byte SUB_TYPE_EXTENSION                   = 0x00;
+    static final byte SUB_TYPE_ENCRYPTED_EXTENSION         = 0x01;
+    static final byte SUB_TYPE_PROPERTY_BAG                = 0x02;
+    static final byte SUB_TYPE_LOGOTYPE                    = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "ExportPolicy" and "DeletePolicy" share constants (and code...)
@@ -220,6 +220,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     static final int MAX_LENGTH_PIN_PUK                    = 100;
     static final int MAX_LENGTH_SYMMETRIC_KEY              = 100;
     static final int MAX_LENGTH_ID_TYPE                    = 32;
+    static final int MAX_LENGTH_URI                        = 1000;
     static final int MAX_LENGTH_CRYPTO_DATA                = 16384;
     static final int MAX_LENGTH_EXTENSION_DATA             = 65536;
 
@@ -508,7 +509,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
         byte[] qualifier;
         byte[] extension_data;
-        byte base_type;
+        byte sub_type;
       }
 
 
@@ -1130,7 +1131,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         return alg;
       }
-    
+
     void addUpdateKeyOrCloneKeyProtection (int key_handle,
                                            int target_key_handle,
                                            byte[] mac,
@@ -1294,7 +1295,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Lookup the extension(s) bound to the key
         ///////////////////////////////////////////////////////////////////////////////////
         ExtObject ext_obj = key_entry.extensions.get (extension_type);
-        if (ext_obj == null || ext_obj.base_type != BASE_TYPE_PROPERTY_BAG)
+        if (ext_obj == null || ext_obj.sub_type != SUB_TYPE_PROPERTY_BAG)
           {
             abort ("No such \"PropertyBag\" : " + extension_type);
           }
@@ -1359,7 +1360,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             abort ("No such extension: " + extension_type + " for key #" + key_handle);
           }
-        return new Extension (ext_obj.qualifier, ext_obj.extension_data, ext_obj.base_type);
+        return new Extension (ext_obj.qualifier, ext_obj.extension_data, ext_obj.sub_type);
       }
 
 
@@ -1980,6 +1981,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             abort ("Unknown \"SessionKeyAlgorithm\" : " + session_key_algorithm);
           }
+        if (issuer_uri.length () == 0 || issuer_uri.length () >  MAX_LENGTH_URI)
+          {
+            abort ("URI length error: " + issuer_uri.length ());
+          }
         byte[] session_attestation = null;
         byte[] session_key = null;
         ECPublicKey client_ephemeral_key = null;
@@ -2146,7 +2151,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public void addExtension (int key_handle,
-                              byte base_type,
+                              byte sub_type,
                               byte[] qualifier,
                               String extension_type,
                               byte[] extension_data,
@@ -2158,8 +2163,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         KeyEntry key_entry = getOpenKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check for duplicates
+        // Check for duplicates and length errors
         ///////////////////////////////////////////////////////////////////////////////////
+        if (extension_type.length () == 0 || extension_type.length () >  MAX_LENGTH_URI)
+          {
+            key_entry.owner.abort ("URI length error: " + extension_type.length ());
+          }
         if (key_entry.extensions.get (extension_type) != null)
           {
             key_entry.owner.abort ("Duplicate \"ExtensionType\" : " + extension_type);
@@ -2169,7 +2178,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder ext_mac = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
-        ext_mac.addByte (base_type);
+        ext_mac.addByte (sub_type);
         ext_mac.addArray (qualifier);
         ext_mac.addString (extension_type);
         ext_mac.addBlob (extension_data);
@@ -2178,7 +2187,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform some "sanity" tests
         ///////////////////////////////////////////////////////////////////////////////////
-        if (base_type == BASE_TYPE_ENCRYPTED_EXTENSION)
+        if (sub_type == SUB_TYPE_ENCRYPTED_EXTENSION)
           {
             extension_data = key_entry.owner.decrypt (extension_data);
           }
@@ -2186,7 +2195,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             key_entry.owner.abort ("Extension data exceeds " + MAX_LENGTH_EXTENSION_DATA + " bytes");
           }
-        if ((base_type == BASE_TYPE_LOGOTYPE) ^ (qualifier.length != 0))
+        if ((sub_type == SUB_TYPE_LOGOTYPE) ^ (qualifier.length != 0))
           {
             key_entry.owner.abort ("\"Qualifier\" length error");
           }
@@ -2194,7 +2203,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Property bags are checked for not being empty or incorrectly formatted
         ///////////////////////////////////////////////////////////////////////////////////
-        if (base_type == BASE_TYPE_PROPERTY_BAG)
+        if (sub_type == SUB_TYPE_PROPERTY_BAG)
           {
             int i = 0;
             do
@@ -2214,7 +2223,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Succeeded, create object
         ///////////////////////////////////////////////////////////////////////////////////
         ExtObject extension = new ExtObject ();
-        extension.base_type = base_type;
+        extension.sub_type = sub_type;
         extension.qualifier = qualifier;
         extension.extension_data = extension_data;
         key_entry.extensions.put (extension_type, extension);
@@ -2235,7 +2244,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         KeyEntry key_entry = getOpenKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check for key usage errors
+        // Check for key usage and length errors
         ///////////////////////////////////////////////////////////////////////////////////
         if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE |
                                     KEY_USAGE_ENCRYPTION |
@@ -2243,6 +2252,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                                     KEY_USAGE_AUTHENTICATION)) == 0)
           {
             key_entry.owner.abort ("Invalid \"KeyUsage\" for \"restorePrivateKey\"");
+          }
+        if (private_key.length > (MAX_LENGTH_CRYPTO_DATA + 2))
+          {
+            key_entry.owner.abort ("Private key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////

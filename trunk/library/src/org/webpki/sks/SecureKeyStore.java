@@ -72,7 +72,7 @@ public interface SecureKeyStore
                                     byte[] mac) throws SKSException;
     
     public void addExtension (int key_handle,
-                              byte base_type,
+                              byte sub_type,
                               byte[] qualifier,
                               String extension_type,
                               byte[] extension_data,

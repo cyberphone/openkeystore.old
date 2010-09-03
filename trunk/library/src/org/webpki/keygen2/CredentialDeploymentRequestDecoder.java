@@ -110,7 +110,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
             return mac;
           }
         
-        public abstract byte getBaseType ();
+        public abstract byte getSubType ();
         
         public byte[] getQualifier () throws IOException
           {
@@ -141,7 +141,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
 
         @Override
-        public byte getBaseType ()
+        public byte getSubType ()
           {
             return (byte)0x00;
           }
@@ -168,7 +168,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
   
   
         @Override
-        public byte getBaseType ()
+        public byte getSubType ()
           {
             return (byte)0x01;
           }
@@ -205,7 +205,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         Vector<Property> properties = new Vector<Property> ();
 
         @Override
-        public byte getBaseType ()
+        public byte getSubType ()
           {
             return (byte)0x02;
           }
@@ -247,7 +247,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
           }
   
         @Override
-        public byte getBaseType ()
+        public byte getSubType ()
           {
             return (byte)0x03;
           }

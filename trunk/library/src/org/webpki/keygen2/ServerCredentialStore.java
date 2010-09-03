@@ -182,7 +182,7 @@ public class ServerCredentialStore implements Serializable
             return type;
           }
         
-        public abstract byte getBaseType ();
+        public abstract byte getSubType ();
         
         public byte[] getQualifier () throws IOException
           {
@@ -217,7 +217,7 @@ public class ServerCredentialStore implements Serializable
             this.data = data;
           }
 
-        public byte getBaseType ()
+        public byte getSubType ()
           {
             return (byte)0x00;
           }
@@ -246,7 +246,7 @@ public class ServerCredentialStore implements Serializable
             this.encrypted_data = encrypted_data;
           }
 
-        public byte getBaseType ()
+        public byte getSubType ()
           {
             return (byte) 0x01;
           }
@@ -275,7 +275,7 @@ public class ServerCredentialStore implements Serializable
             this.logotype = logotype;
           }
 
-        public byte getBaseType ()
+        public byte getSubType ()
           {
             return (byte) 0x03;
           }
@@ -350,7 +350,7 @@ public class ServerCredentialStore implements Serializable
             super (type);
           }
         
-        public byte getBaseType ()
+        public byte getSubType ()
           {
             return (byte)0x02;
           }
