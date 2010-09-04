@@ -72,9 +72,9 @@ public interface SecureKeyStore
                                     byte[] mac) throws SKSException;
     
     public void addExtension (int key_handle,
+                              String type,
                               byte sub_type,
                               byte[] qualifier,
-                              String extension_type,
                               byte[] extension_data,
                               byte[] mac) throws SKSException;
     
@@ -166,12 +166,12 @@ public interface SecureKeyStore
     public DeviceInfo getDeviceInfo () throws SKSException;
 
     public Extension getExtension (int key_handle,
-                                   String extension_type) throws SKSException;
+                                   String type) throws SKSException;
     
     public KeyProtectionInfo getKeyProtectionInfo (int key_handle) throws SKSException;
 
     public void setProperty (int key_handle,
-                             String extension_type,
+                             String type,
                              String name,
                              String value) throws SKSException;
 

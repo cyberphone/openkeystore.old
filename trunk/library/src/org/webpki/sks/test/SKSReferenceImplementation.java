@@ -1282,7 +1282,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public void setProperty (int key_handle,
-                             String extension_type,
+                             String type,
                              String name,
                              String value) throws SKSException
       {
@@ -1294,10 +1294,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Lookup the extension(s) bound to the key
         ///////////////////////////////////////////////////////////////////////////////////
-        ExtObject ext_obj = key_entry.extensions.get (extension_type);
+        ExtObject ext_obj = key_entry.extensions.get (type);
         if (ext_obj == null || ext_obj.sub_type != SUB_TYPE_PROPERTY_BAG)
           {
-            abort ("No such \"PropertyBag\" : " + extension_type);
+            abort ("No such \"PropertyBag\" : " + type);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1345,7 +1345,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public Extension getExtension (int key_handle, String extension_type) throws SKSException
+    public Extension getExtension (int key_handle, String type) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key (which must belong to an already fully provisioned session)
@@ -1355,12 +1355,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Lookup the extension(s) bound to the key
         ///////////////////////////////////////////////////////////////////////////////////
-        ExtObject ext_obj = key_entry.extensions.get (extension_type);
+        ExtObject ext_obj = key_entry.extensions.get (type);
         if (ext_obj == null)
           {
-            abort ("No such extension: " + extension_type + " for key #" + key_handle);
+            abort ("No such extension: " + type + " for key #" + key_handle);
           }
-        return new Extension (ext_obj.qualifier, ext_obj.extension_data, ext_obj.sub_type);
+        return new Extension (ext_obj.sub_type, ext_obj.qualifier, ext_obj.extension_data);
       }
 
 
@@ -2151,9 +2151,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public void addExtension (int key_handle,
+                              String type,
                               byte sub_type,
                               byte[] qualifier,
-                              String extension_type,
                               byte[] extension_data,
                               byte[] mac) throws SKSException
       {
@@ -2165,22 +2165,22 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for duplicates and length errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if (extension_type.length () == 0 || extension_type.length () >  MAX_LENGTH_URI)
+        if (type.length () == 0 || type.length () >  MAX_LENGTH_URI)
           {
-            key_entry.owner.abort ("URI length error: " + extension_type.length ());
+            key_entry.owner.abort ("URI length error: " + type.length ());
           }
-        if (key_entry.extensions.get (extension_type) != null)
+        if (key_entry.extensions.get (type) != null)
           {
-            key_entry.owner.abort ("Duplicate \"ExtensionType\" : " + extension_type);
+            key_entry.owner.abort ("Duplicate \"Type\" : " + type);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder ext_mac = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
+        ext_mac.addString (type);
         ext_mac.addByte (sub_type);
         ext_mac.addArray (qualifier);
-        ext_mac.addString (extension_type);
         ext_mac.addBlob (extension_data);
         key_entry.owner.verifyMac (ext_mac, mac);
 
@@ -2195,7 +2195,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             key_entry.owner.abort ("Extension data exceeds " + MAX_LENGTH_EXTENSION_DATA + " bytes");
           }
-        if ((sub_type == SUB_TYPE_LOGOTYPE) ^ (qualifier.length != 0))
+        if (((sub_type == SUB_TYPE_LOGOTYPE) ^ (qualifier.length != 0)) || qualifier.length > 100)
           {
             key_entry.owner.abort ("\"Qualifier\" length error");
           }
@@ -2213,7 +2213,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
                     ((extension_data[i++] & 0xFE) != 0) ||
                     (i += getShort (extension_data, i) + 2) > extension_data.length)
                   {
-                    key_entry.owner.abort ("\"PropertyBag\" format error: " + extension_type);
+                    key_entry.owner.abort ("\"PropertyBag\" format error: " + type);
                   }
               }
             while (i != extension_data.length);
@@ -2226,7 +2226,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         extension.sub_type = sub_type;
         extension.qualifier = qualifier;
         extension.extension_data = extension_data;
-        key_entry.extensions.put (extension_type, extension);
+        key_entry.extensions.put (type, extension);
       }
 
 

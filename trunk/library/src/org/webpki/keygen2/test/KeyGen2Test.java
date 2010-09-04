@@ -515,9 +515,9 @@ public class KeyGen2Test
                 for (CredentialDeploymentRequestDecoder.Extension extension : key.getExtensions ())
                   {
                     sks.addExtension (key_handle,
+                                      extension.getExtensionType (),
                                       extension.getSubType (), 
                                       extension.getQualifier (),
-                                      extension.getExtensionType (),
                                       extension.getExtensionData (),
                                       extension.getMAC ());
                   }

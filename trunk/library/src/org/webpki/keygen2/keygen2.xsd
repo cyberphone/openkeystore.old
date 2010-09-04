@@ -22,7 +22,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 20-August-2010 
+    Revised: 04-September-2010 
     Author: Anders Rundgren
 
     Copyright 2006-2010 WebPKI.org (http://webpki.org).
@@ -1055,10 +1055,10 @@
 
    <xs:attributeGroup name="extensionAttrs">
 
-      <!-- SKS Reference: addExtensionData.ExtensionType --> 
+      <!-- SKS Reference: addExtension.Type --> 
       <xs:attribute name="Type" type="xs:anyURI" use="required"/>
 
-      <!-- SKS Reference: addExtensionData.MAC --> 
+      <!-- SKS Reference: addExtension.MAC --> 
       <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
    </xs:attributeGroup>
