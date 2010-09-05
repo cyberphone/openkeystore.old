@@ -217,8 +217,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS "sanity" limits
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final int MAX_LENGTH_PIN_PUK                    = 100;
-    static final int MAX_LENGTH_SYMMETRIC_KEY              = 100;
+    static final int MAX_LENGTH_PIN_PUK                    = 128;
+    static final int MAX_LENGTH_MIME_TYPE                  = 128;
+    static final int MAX_LENGTH_SYMMETRIC_KEY              = 128;
     static final int MAX_LENGTH_ID_TYPE                    = 32;
     static final int MAX_LENGTH_URI                        = 1000;
     static final int MAX_LENGTH_CRYPTO_DATA                = 16384;
@@ -846,6 +847,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
 
     static final short[] RSA_KEY_SIZES = {1024, 2048};
     
+    static final int AES_PADDING = 32;
+    
     static
       {
         //////////////////////////////////////////////////////////////////////////////////////
@@ -1313,7 +1316,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
         catch (Exception e)
           {
-            throw new SKSException (e, SKSException.ERROR_INTERNAL);
+            throw new SKSException (e);
           }
         while (i < ext_obj.extension_data.length)
           {
@@ -1326,7 +1329,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               {
                 if (ext_obj.extension_data[i] != 0x01)
                   {
-                    abort ("\"Property\" not writable: " + name);
+                    abort ("\"Property\" not writable: " + name, SKSException.ERROR_NOT_ALLOWED);
                   }
                 ext_obj.extension_data = addArrays (addArrays (Arrays.copyOfRange (ext_obj.extension_data, 0, ++i),
                                                                addArrays (new byte[]{(byte)(utf8_value.length >> 8),(byte)utf8_value.length}, utf8_value)),
@@ -2173,29 +2176,12 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             key_entry.owner.abort ("Duplicate \"Type\" : " + type);
           }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
-        ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder ext_mac = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
-        ext_mac.addString (type);
-        ext_mac.addByte (sub_type);
-        ext_mac.addArray (qualifier);
-        ext_mac.addBlob (extension_data);
-        key_entry.owner.verifyMac (ext_mac, mac);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Perform some "sanity" tests
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (sub_type == SUB_TYPE_ENCRYPTED_EXTENSION)
-          {
-            extension_data = key_entry.owner.decrypt (extension_data);
-          }
-        if (extension_data.length > MAX_LENGTH_EXTENSION_DATA)
+        if (extension_data.length > (sub_type == SUB_TYPE_ENCRYPTED_EXTENSION ? 
+                                      MAX_LENGTH_EXTENSION_DATA + AES_PADDING : MAX_LENGTH_EXTENSION_DATA))
           {
             key_entry.owner.abort ("Extension data exceeds " + MAX_LENGTH_EXTENSION_DATA + " bytes");
           }
-        if (((sub_type == SUB_TYPE_LOGOTYPE) ^ (qualifier.length != 0)) || qualifier.length > 100)
+        if (((sub_type == SUB_TYPE_LOGOTYPE) ^ (qualifier.length != 0)) || qualifier.length > MAX_LENGTH_MIME_TYPE)
           {
             key_entry.owner.abort ("\"Qualifier\" length error");
           }
@@ -2220,12 +2206,23 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder ext_mac = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
+        ext_mac.addString (type);
+        ext_mac.addByte (sub_type);
+        ext_mac.addArray (qualifier);
+        ext_mac.addBlob (extension_data);
+        key_entry.owner.verifyMac (ext_mac, mac);
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Succeeded, create object
         ///////////////////////////////////////////////////////////////////////////////////
         ExtObject extension = new ExtObject ();
         extension.sub_type = sub_type;
         extension.qualifier = qualifier;
-        extension.extension_data = extension_data;
+        extension.extension_data = (sub_type == SUB_TYPE_ENCRYPTED_EXTENSION) ?
+                                     key_entry.owner.decrypt (extension_data) : extension_data;
         key_entry.extensions.put (type, extension);
       }
 
@@ -2253,7 +2250,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             key_entry.owner.abort ("Invalid \"KeyUsage\" for \"restorePrivateKey\"");
           }
-        if (private_key.length > (MAX_LENGTH_CRYPTO_DATA + 2))
+        if (private_key.length > (MAX_LENGTH_CRYPTO_DATA + AES_PADDING))
           {
             key_entry.owner.abort ("Private key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
           }
@@ -2303,6 +2300,10 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             key_entry.owner.abort ("Invalid \"KeyUsage\" for \"setSymmetricKey\"");
           }
+        if (symmetric_key.length > (MAX_LENGTH_SYMMETRIC_KEY + AES_PADDING))
+          {
+            key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
+          }
         MacBuilder sym_mac = key_entry.getEECertMacBuilder (METHOD_SET_SYMMETRIC_KEY);
         sym_mac.addArray (symmetric_key);
 
@@ -2310,10 +2311,6 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Decrypt symmetric key
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] clear_text_symmetric_key = key_entry.owner.decrypt (symmetric_key);
-        if (clear_text_symmetric_key.length > MAX_LENGTH_SYMMETRIC_KEY)
-          {
-            key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
-          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check endorsed algorithms
