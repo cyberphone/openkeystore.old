@@ -66,6 +66,7 @@ import org.webpki.sks.KeyAttributes;
 import org.webpki.sks.KeyPair;
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.ProvisioningSession;
+import org.webpki.sks.SKSError;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
 
@@ -94,7 +95,7 @@ import org.webpki.sks.SecureKeyStore;
  *
  *  Author: Anders Rundgren
  */
-public class SKSReferenceImplementation implements SecureKeyStore, Serializable
+public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Serializable
   {
     private static final long serialVersionUID = 1L;
 
@@ -218,7 +219,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     // SKS "sanity" limits
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final int MAX_LENGTH_PIN_PUK                    = 128;
-    static final int MAX_LENGTH_MIME_TYPE                  = 128;
+    static final int MAX_LENGTH_QUALIFIER                  = 128;
     static final int MAX_LENGTH_SYMMETRIC_KEY              = 128;
     static final int MAX_LENGTH_ID_TYPE                    = 32;
     static final int MAX_LENGTH_URI                        = 1000;
@@ -561,7 +562,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
       }
 
 
-    class Provisioning implements Serializable
+    class Provisioning implements SKSError, Serializable
       {
         private static final long serialVersionUID = 1L;
 
@@ -605,7 +606,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
             throw new SKSException (message, exception_type);
           }
 
-        void abort (String message) throws SKSException
+        @Override
+        public void abort (String message) throws SKSException
           {
             abort (message, SKSException.ERROR_OPTION);
           }
@@ -1041,7 +1043,8 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         return new EnumeratedProvisioningSession ();
       }
 
-    void abort (String message) throws SKSException
+    @Override
+    public void abort (String message) throws SKSException
       {
         throw new SKSException (message);
       }
@@ -1049,6 +1052,153 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
     void abort (String message, int option) throws SKSException
       {
         throw new SKSException (message, option);
+      }
+
+    void verifyPINPolicyCompliance (byte[] pin_value, PINPolicy pin_policy, byte key_usage, SKSError sks_error) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check PIN length
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (pin_value.length > pin_policy.max_length || pin_value.length < pin_policy.min_length)
+          {
+            sks_error.abort ("PIN length error");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check PIN syntax
+        ///////////////////////////////////////////////////////////////////////////////////
+        boolean upperalpha = false;
+        boolean loweralpha = false;
+        boolean number = false;
+        boolean nonalphanum = false;
+        for (int i = 0; i < pin_value.length; i++)
+          {
+            int c = pin_value[i];
+            if (c >= 'A' && c <= 'Z')
+              {
+                upperalpha = true;
+              }
+            else if (c >= 'a' && c <= 'z')
+              {
+                loweralpha = true;
+              }
+            else if (c >= '0' && c <= '9')
+              {
+                number = true;
+              }
+            else
+              {
+                nonalphanum = true;
+              }
+          }
+        if ((pin_policy.format == PIN_FORMAT_NUMERIC && (loweralpha || nonalphanum || upperalpha)) ||
+            (pin_policy.format == PIN_FORMAT_ALPHANUMERIC && (loweralpha || nonalphanum)))
+          {
+            sks_error.abort ("PIN syntax error");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check PIN patterns
+        ///////////////////////////////////////////////////////////////////////////////////
+        if ((pin_policy.pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0)
+          {
+            if (!upperalpha || !number ||
+                (pin_policy.format == PIN_FORMAT_STRING && (!loweralpha || !nonalphanum)))
+              {
+                sks_error.abort ("Missing character group in PIN");
+              }
+          }
+        if ((pin_policy.pattern_restrictions & PIN_PATTERN_SEQUENCE) != 0)
+          {
+            byte c = pin_value[0];
+            byte f = (byte)(pin_value[1] - c);
+            boolean seq = (f == 1) || (f == -1);
+            for (int i = 1; i < pin_value.length; i++)
+              {
+                if ((byte)(c + f) != pin_value[i])
+                  {
+                    seq = false;
+                    break;
+                  }
+                c = pin_value[i];
+              }
+            if (seq)
+              {
+                sks_error.abort ("PIN must not be a sequence");
+              }
+          }
+        if ((pin_policy.pattern_restrictions & PIN_PATTERN_REPEATED) != 0)
+          {
+            for (int i = 0; i < pin_value.length; i++)
+              {
+                byte b = pin_value[i];
+                for (int j = 0; j < pin_value.length; j++)
+                  {
+                    if (j != i && b == pin_value[j])
+                      {
+                        sks_error.abort ("Repeated PIN character");
+                      }
+                  }
+              }
+          }
+        if ((pin_policy.pattern_restrictions & (PIN_PATTERN_TWO_IN_A_ROW | PIN_PATTERN_THREE_IN_A_ROW)) != 0)
+          {
+            int max = ((pin_policy.pattern_restrictions & PIN_PATTERN_TWO_IN_A_ROW) == 0) ? 3 : 2;
+            byte c = pin_value [0];
+            int same_count = 1;
+            for (int i = 1; i < pin_value.length; i++)
+              {
+                if (c == pin_value[i])
+                  {
+                    if (++same_count == max)
+                      {
+                        sks_error.abort ("PIN with " + max + " or more of same the character in a row");
+                      }
+                  }
+                else
+                  {
+                    same_count = 1;
+                    c = pin_value[i];
+                  }
+              }
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that PIN grouping rules are followed
+        ///////////////////////////////////////////////////////////////////////////////////
+        for (KeyEntry key_entry : keys.values ())
+          {
+            if (key_entry.pin_policy == pin_policy)
+              {
+                switch (pin_policy.grouping)
+                  {
+                    case PIN_GROUPING_SHARED:
+                      if (!Arrays.equals (key_entry.pin_value, pin_value))
+                        {
+                          sks_error.abort ("Grouping = \"shared\" requires identical PINs");
+                        }
+                      continue;
+
+                    case PIN_GROUPING_UNIQUE:
+                      if (Arrays.equals (key_entry.pin_value, pin_value))
+                        {
+                          sks_error.abort ("Grouping = \"unique\" requires unique PINs");
+                        }
+                      continue;
+
+                    case PIN_GROUPING_SIGN_PLUS_STD:
+                      if (((key_usage == KEY_USAGE_SIGNATURE) ^ (key_entry.key_usage == KEY_USAGE_SIGNATURE)) ^
+                          !Arrays.equals (key_entry.pin_value, pin_value))
+                        {
+                          sks_error.abort ("Grouping = \"signature+standard\" PIN error");
+                        }
+                      continue;
+
+                    default:
+                      continue;
+                  }
+              }
+          }
       }
 
     void deleteEmptySession (Provisioning provisioning)
@@ -1209,6 +1359,62 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         // Success!  Reset PIN error counter(s)
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.setErrorCounter ((short)0);
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                               changePIN                                    //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void changePIN (int key_handle, byte[] old_pin, byte[] new_pin) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getStdKey (key_handle);
+        
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Test input for validity
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (key_entry.pin_policy == null)
+          {
+            abort ("Key not protected by a PIN object");
+          }
+        if (!key_entry.pin_policy.user_modifiable)
+          {
+            abort ("PIN not user modifiable");
+          }
+        verifyPINPolicyCompliance (new_pin, key_entry.pin_policy, key_entry.key_usage, this);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify old PIN
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (old_pin);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Success, change PIN!
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (key_entry.pin_policy.grouping == PIN_GROUPING_SHARED || key_entry.pin_policy.grouping == PIN_GROUPING_SIGN_PLUS_STD)
+          {
+            /////////////////////////////////////////////////////////////////////////////////////////
+            // Multiple keys "sharing" a PIN means that the new value must be distributed
+            /////////////////////////////////////////////////////////////////////////////////////////
+            for (KeyEntry ke : keys.values ())
+              {
+                if (ke.pin_policy == key_entry.pin_policy &&
+                    (key_entry.pin_policy.grouping == PIN_GROUPING_SHARED ||
+                        ((key_entry.key_usage != KEY_USAGE_SIGNATURE) ^ (ke.key_usage == KEY_USAGE_SIGNATURE))))
+                  {
+                    ke.pin_value = new_pin;
+                  }
+              }
+          }
+        else
+          {
+            key_entry.pin_value = new_pin;
+          }
       }
 
 
@@ -2175,7 +2381,7 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
           {
             key_entry.owner.abort ("Extension data exceeds " + MAX_LENGTH_EXTENSION_DATA + " bytes");
           }
-        if (((sub_type == SUB_TYPE_LOGOTYPE) ^ (qualifier.length != 0)) || qualifier.length > MAX_LENGTH_MIME_TYPE)
+        if (((sub_type == SUB_TYPE_LOGOTYPE) ^ (qualifier.length != 0)) || qualifier.length > MAX_LENGTH_QUALIFIER)
           {
             key_entry.owner.abort ("\"Qualifier\" length error");
           }
@@ -2558,148 +2764,9 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Check PIN length
+            // Testing the actual PIN value
             ///////////////////////////////////////////////////////////////////////////////////
-            if (pin_value.length > pin_policy.max_length || pin_value.length < pin_policy.min_length)
-              {
-                provisioning.abort ("PIN length error");
-              }
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Check PIN syntax
-            ///////////////////////////////////////////////////////////////////////////////////
-            boolean upperalpha = false;
-            boolean loweralpha = false;
-            boolean number = false;
-            boolean nonalphanum = false;
-            for (int i = 0; i < pin_value.length; i++)
-              {
-                int c = pin_value[i];
-                if (c >= 'A' && c <= 'Z')
-                  {
-                    upperalpha = true;
-                  }
-                else if (c >= 'a' && c <= 'z')
-                  {
-                    loweralpha = true;
-                  }
-                else if (c >= '0' && c <= '9')
-                  {
-                    number = true;
-                  }
-                else
-                  {
-                    nonalphanum = true;
-                  }
-              }
-            if ((pin_policy.format == PIN_FORMAT_NUMERIC && (loweralpha || nonalphanum || upperalpha)) ||
-                (pin_policy.format == PIN_FORMAT_ALPHANUMERIC && (loweralpha || nonalphanum)))
-              {
-                provisioning.abort ("PIN syntax error");
-              }
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Check PIN patterns
-            ///////////////////////////////////////////////////////////////////////////////////
-            if ((pin_policy.pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0)
-              {
-                if (!upperalpha || !number ||
-                    (pin_policy.format == PIN_FORMAT_STRING && (!loweralpha || !nonalphanum)))
-                  {
-                    provisioning.abort ("Missing character group in PIN");
-                  }
-              }
-            if ((pin_policy.pattern_restrictions & PIN_PATTERN_SEQUENCE) != 0)
-              {
-                byte c = pin_value[0];
-                byte f = (byte)(pin_value[1] - c);
-                boolean seq = (f == 1) || (f == -1);
-                for (int i = 1; i < pin_value.length; i++)
-                  {
-                    if ((byte)(c + f) != pin_value[i])
-                      {
-                        seq = false;
-                        break;
-                      }
-                    c = pin_value[i];
-                  }
-                if (seq)
-                  {
-                    provisioning.abort ("PIN must not be a sequence");
-                  }
-              }
-            if ((pin_policy.pattern_restrictions & PIN_PATTERN_REPEATED) != 0)
-              {
-                for (int i = 0; i < pin_value.length; i++)
-                  {
-                    byte b = pin_value[i];
-                    for (int j = 0; j < pin_value.length; j++)
-                      {
-                        if (j != i && b == pin_value[j])
-                          {
-                            provisioning.abort ("Repeated PIN character");
-                          }
-                      }
-                  }
-              }
-            if ((pin_policy.pattern_restrictions & (PIN_PATTERN_TWO_IN_A_ROW | PIN_PATTERN_THREE_IN_A_ROW)) != 0)
-              {
-                int max = ((pin_policy.pattern_restrictions & PIN_PATTERN_TWO_IN_A_ROW) == 0) ? 3 : 2;
-                byte c = pin_value [0];
-                int same_count = 1;
-                for (int i = 1; i < pin_value.length; i++)
-                  {
-                    if (c == pin_value[i])
-                      {
-                        if (++same_count == max)
-                          {
-                            provisioning.abort ("PIN with " + max + " or more of same the character in a row");
-                          }
-                      }
-                    else
-                      {
-                        same_count = 1;
-                        c = pin_value[i];
-                      }
-                  }
-              }
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Check that PIN grouping rules are followed
-            ///////////////////////////////////////////////////////////////////////////////////
-            for (KeyEntry key_entry : keys.values ())
-              {
-                if (key_entry.pin_policy == pin_policy)
-                  {
-                    switch (pin_policy.grouping)
-                      {
-                        case PIN_GROUPING_SHARED:
-                          if (!Arrays.equals (key_entry.pin_value, pin_value))
-                            {
-                              provisioning.abort ("Grouping = \"shared\" requires identical PINs");
-                            }
-                          continue;
-
-                        case PIN_GROUPING_UNIQUE:
-                          if (Arrays.equals (key_entry.pin_value, pin_value))
-                            {
-                              provisioning.abort ("Grouping = \"unique\" requires unique PINs");
-                            }
-                          continue;
-
-                        case PIN_GROUPING_SIGN_PLUS_STD:
-                          if (((key_usage == KEY_USAGE_SIGNATURE) ^ (key_entry.key_usage == KEY_USAGE_SIGNATURE)) ^
-                              !Arrays.equals (key_entry.pin_value, pin_value))
-                            {
-                              provisioning.abort ("Grouping = \"signature+standard\" PIN error");
-                            }
-                          continue;
-
-                        default:
-                          continue;
-                      }
-                  }
-              }
+            verifyPINPolicyCompliance (pin_value, pin_policy, key_usage, provisioning);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2955,5 +3022,4 @@ public class SKSReferenceImplementation implements SecureKeyStore, Serializable
         puk_policy.retry_limit = retry_limit;
         return puk_policy.puk_policy_handle;
       }
-
   }

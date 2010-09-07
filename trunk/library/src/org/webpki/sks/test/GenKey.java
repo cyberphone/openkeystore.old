@@ -17,6 +17,7 @@
 package org.webpki.sks.test;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
@@ -136,6 +137,11 @@ public class GenKey
               }
           }
         throw new SKSException ("Bad state");
+      }
+    
+    public void changePin (String old_pin, String new_pin) throws SKSException, IOException
+      {
+        prov_sess.sks.changePIN (key_handle, old_pin.getBytes ("UTF-8"), new_pin.getBytes ("UTF-8"));
       }
         
   }

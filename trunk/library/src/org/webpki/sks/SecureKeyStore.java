@@ -178,6 +178,10 @@ public interface SecureKeyStore
     public void unlockKey (int key_handle,
                            byte[] authorization) throws SKSException;
     
+    public void changePIN (int key_handle,
+                           byte[] old_pin,
+                           byte[] new_pin) throws SKSException;
+    
     public byte[] exportKey (int key_handle,
                              byte[] authorization) throws SKSException;
 

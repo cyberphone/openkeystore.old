@@ -189,6 +189,8 @@ public class ProvSess
     
     boolean user_defined_pins = true;
     
+    boolean user_modifiable_pins = true; 
+    
     static class MacGenerator
       {
         private ByteArrayOutputStream baos;
@@ -399,6 +401,11 @@ public class ProvSess
         user_defined_pins = false;
       }
 
+    public void makePINsUserNonModifiable ()
+      {
+        user_modifiable_pins = false;
+      }
+
     public byte[] getPassphraseBytes (PassphraseFormat format, String passphrase) throws IOException
       {
         if (format == PassphraseFormat.BINARY)
@@ -443,7 +450,7 @@ public class ProvSess
       {
         PINPol pin_policy = new PINPol ();
         boolean user_defined = user_defined_pins;
-        boolean user_modifiable = user_defined_pins;
+        boolean user_modifiable = user_modifiable_pins && user_defined_pins;
         InputMethod input_method = InputMethod.ANY;
         int puk_policy_handle = puk_policy == null ? 0 : puk_policy.puk_policy_handle;
         MacGenerator pin_policy_mac = new MacGenerator ();

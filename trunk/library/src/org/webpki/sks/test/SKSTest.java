@@ -689,6 +689,15 @@ public class SKSTest
         verify.initVerify (key.cert_path[0]);
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
+        try
+          {
+            key.changePin ("1274", "3421");
+            fail ("Should bomb since this has no pin");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Key not protected by a PIN object");
+          }
       }
     @Test
     public void test10 () throws Exception
@@ -735,6 +744,7 @@ public class SKSTest
     @Test
     public void test13 () throws Exception
       {
+        int q = sessionCount ();
         assertTrue (PUKCheck (PassphraseFormat.ALPHANUMERIC, "AB123"));
         assertTrue (PUKCheck (PassphraseFormat.NUMERIC, "1234"));
         assertTrue (PUKCheck (PassphraseFormat.STRING, "azAB13.\n"));
@@ -794,6 +804,7 @@ public class SKSTest
         assertTrue (PINGroupCheck (false, PINGrouping.UNIQUE));
         assertFalse (PINGroupCheck (true, PINGrouping.SIGNATURE_PLUS_STANDARD));
         assertTrue (PINGroupCheck (false, PINGrouping.SIGNATURE_PLUS_STANDARD));
+        assertTrue ("Session Count", q == sessionCount ());
       }
     @Test
     public void test14 () throws Exception
@@ -1347,6 +1358,16 @@ public class SKSTest
                                         pin_policy /* pin_policy */,
                                         KeyUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
+        
+        try
+          {
+            key.changePin (ok_pin, "843");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "PIN length error");
+          }
+        key.changePin (ok_pin, ok_pin = "8463");
         
         Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName (), "BC");
         cipher.init (Cipher.ENCRYPT_MODE, key.cert_path[0]);
