@@ -133,6 +133,7 @@ public interface SecureKeyStore
     public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException;
 
     public byte[] signHashedData (int key_handle,
+                                  byte[] parameters,
                                   String signature_algorithm,
                                   byte[] authorization,
                                   byte[] data) throws SKSException;
@@ -179,9 +180,13 @@ public interface SecureKeyStore
                            byte[] authorization) throws SKSException;
     
     public void changePIN (int key_handle,
-                           byte[] old_pin,
+                           byte[] authorization,
                            byte[] new_pin) throws SKSException;
     
+    public void setPIN (int key_handle,
+                        byte[] authorization,
+                        byte[] new_pin) throws SKSException;
+
     public byte[] exportKey (int key_handle,
                              byte[] authorization) throws SKSException;
 

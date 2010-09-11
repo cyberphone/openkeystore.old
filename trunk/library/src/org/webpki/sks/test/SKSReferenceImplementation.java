@@ -1054,7 +1054,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         throw new SKSException (message, option);
       }
 
-    void verifyPINPolicyCompliance (byte[] pin_value, PINPolicy pin_policy, byte key_usage, SKSError sks_error) throws SKSException
+    void verifyPINPolicyCompliance (KeyEntry target_key, byte[] pin_value, PINPolicy pin_policy, byte key_usage, SKSError sks_error) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Check PIN length
@@ -1168,7 +1168,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         for (KeyEntry key_entry : keys.values ())
           {
-            if (key_entry.pin_policy == pin_policy)
+            if (key_entry.pin_policy == pin_policy && key_entry != target_key)
               {
                 switch (pin_policy.grouping)
                   {
@@ -1200,7 +1200,20 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
           }
       }
-
+    
+    void testUpdatablePIN (KeyEntry key_entry, byte[] new_pin) throws SKSException
+      {
+        if (key_entry.pin_policy == null)
+          {
+            abort ("Key #" + key_entry.key_handle + " is not PIN protected");
+          }
+        if (!key_entry.pin_policy.user_modifiable)
+          {
+            abort ("PIN for key #" + key_entry.key_handle + " is not user modifiable", SKSException.ERROR_NOT_ALLOWED);
+          }
+        verifyPINPolicyCompliance (key_entry, new_pin, key_entry.pin_policy, key_entry.key_usage, this);
+      }
+    
     void deleteEmptySession (Provisioning provisioning)
       {
         for (KeyEntry key_entry : keys.values ())
@@ -1239,6 +1252,29 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                   }
                 puk_policies.remove (puk_policy_handle);
               }
+          }
+      }
+
+    void updatePIN (KeyEntry key_entry, byte[] new_pin)
+      {
+        if (key_entry.pin_policy.grouping == PIN_GROUPING_SHARED || key_entry.pin_policy.grouping == PIN_GROUPING_SIGN_PLUS_STD)
+          {
+            /////////////////////////////////////////////////////////////////////////////////////////
+            // Multiple keys "sharing" a PIN means that the new value must be distributed
+            /////////////////////////////////////////////////////////////////////////////////////////
+            for (KeyEntry test_key : keys.values ())
+              {
+                if (test_key.pin_policy == key_entry.pin_policy &&
+                    (key_entry.pin_policy.grouping == PIN_GROUPING_SHARED ||
+                        ((key_entry.key_usage != KEY_USAGE_SIGNATURE) ^ (test_key.key_usage == KEY_USAGE_SIGNATURE))))
+                  {
+                    test_key.pin_value = new_pin;
+                  }
+              }
+          }
+        else
+          {
+            key_entry.pin_value = new_pin;
           }
       }
 
@@ -1368,7 +1404,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public void changePIN (int key_handle, byte[] old_pin, byte[] new_pin) throws SKSException
+    public void changePIN (int key_handle, byte[] authorization, byte[] new_pin) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key (which must belong to an already fully provisioned session)
@@ -1376,45 +1412,50 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         KeyEntry key_entry = getStdKey (key_handle);
         
         ///////////////////////////////////////////////////////////////////////////////////
-        // Test input for validity
+        // Test target PIN
         ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.pin_policy == null)
-          {
-            abort ("Key not protected by a PIN object");
-          }
-        if (!key_entry.pin_policy.user_modifiable)
-          {
-            abort ("PIN not user modifiable");
-          }
-        verifyPINPolicyCompliance (new_pin, key_entry.pin_policy, key_entry.key_usage, this);
+        testUpdatablePIN (key_entry, new_pin);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Verify old PIN
+        // Verify old PIN.  If successful error counter are reset
         ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.verifyPIN (old_pin);
+        key_entry.verifyPIN (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Success, change PIN!
+        // Success!  Set PIN value(s)
         ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.pin_policy.grouping == PIN_GROUPING_SHARED || key_entry.pin_policy.grouping == PIN_GROUPING_SIGN_PLUS_STD)
-          {
-            /////////////////////////////////////////////////////////////////////////////////////////
-            // Multiple keys "sharing" a PIN means that the new value must be distributed
-            /////////////////////////////////////////////////////////////////////////////////////////
-            for (KeyEntry ke : keys.values ())
-              {
-                if (ke.pin_policy == key_entry.pin_policy &&
-                    (key_entry.pin_policy.grouping == PIN_GROUPING_SHARED ||
-                        ((key_entry.key_usage != KEY_USAGE_SIGNATURE) ^ (ke.key_usage == KEY_USAGE_SIGNATURE))))
-                  {
-                    ke.pin_value = new_pin;
-                  }
-              }
-          }
-        else
-          {
-            key_entry.pin_value = new_pin;
-          }
+        updatePIN (key_entry, new_pin);
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                                 setPIN                                     //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void setPIN (int key_handle, byte[] authorization, byte[] new_pin) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getStdKey (key_handle);
+        
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Test target PIN
+        ///////////////////////////////////////////////////////////////////////////////////
+        testUpdatablePIN (key_entry, new_pin);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PUK
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPUK (authorization);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Success!  Set PIN value(s) and unlock associated key(s)
+        ///////////////////////////////////////////////////////////////////////////////////
+        updatePIN (key_entry, new_pin);
+        key_entry.setErrorCounter ((short)0);
       }
 
 
@@ -1641,6 +1682,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public byte[] signHashedData (int key_handle,
+                                  byte[] parameters,
                                   String signature_algorithm,
                                   byte[] authorization,
                                   byte[] data) throws SKSException
@@ -1677,6 +1719,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         if (hash_len > 0 && hash_len != data.length)
           {
             abort ("Incorrect length of \"Data\": " + data.length);
+          }
+        if (parameters.length != 0)
+          {
+            abort ("Incorrect length of \"Parameters\": " + parameters.length);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2766,7 +2812,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // Testing the actual PIN value
             ///////////////////////////////////////////////////////////////////////////////////
-            verifyPINPolicyCompliance (pin_value, pin_policy, key_usage, provisioning);
+            verifyPINPolicyCompliance (null, pin_value, pin_policy, key_usage, provisioning);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////

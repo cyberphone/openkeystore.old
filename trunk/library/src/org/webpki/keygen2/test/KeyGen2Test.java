@@ -1285,6 +1285,7 @@ public class KeyGen2Test
                 j++;
                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
+                                                    new byte[0],
                                                     SignatureAlgorithms.RSA_SHA256.getURI (),
                                                     doer2.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
@@ -1320,6 +1321,7 @@ public class KeyGen2Test
                 j++;
                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
+                                                    new byte[0],
                                                     SignatureAlgorithms.RSA_SHA256.getURI (),
                                                     doer2.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
@@ -1368,6 +1370,7 @@ public class KeyGen2Test
               {
                 j++;
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
+                                                    new byte[0],
                                                     SignatureAlgorithms.RSA_SHA256.getURI (),
                                                     doer.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
