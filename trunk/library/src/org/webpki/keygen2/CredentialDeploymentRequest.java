@@ -30,38 +30,9 @@ import org.webpki.crypto.CertificateUtil;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-
 abstract class CredentialDeploymentRequest extends XMLObjectWrapper 
   {
     CredentialDeploymentRequest () {}
-
-
-    static String[] getSortedAlgorithms (String[] algorithms) throws IOException
-      {
-        int i = 0;
-        while (true)
-          {
-            if (i < (algorithms.length - 1))
-              {
-                if (algorithms[i].compareTo (algorithms[i + 1]) > 0)
-                  {
-                    String s = algorithms[i];
-                    algorithms[i] = algorithms[i + 1];
-                    algorithms[i + 1] = s;
-                    i = 0;
-                  }
-                else
-                  {
-                    i++;
-                  }
-              }
-            else
-              {
-                break;
-              }
-          }
-        return algorithms;
-      }
 
 
     static void checkCertificateOrder (X509Certificate[] eepath, X509Certificate[] capath) throws IOException

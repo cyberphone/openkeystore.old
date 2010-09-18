@@ -89,7 +89,7 @@ public class CredentialDeploymentResponseDecoder extends CredentialDeploymentRes
 
         server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
         
-        close_session_attestation = ah.getBinary (CLOSE_SESSION_ATTESTATION_ATTR);
+        close_session_attestation = ah.getBinary (SESSION_ATTESTATION_ATTR);
 
         rd.getChild ();
 

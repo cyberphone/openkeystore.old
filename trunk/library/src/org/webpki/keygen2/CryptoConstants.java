@@ -30,11 +30,6 @@ public interface CryptoConstants
     public static final byte[] CRYPTO_STRING_PROOF_OF_OWNERSHIP  = {'P','r','o','o','f',' ','O','f',' ','O','w','n','e','r','s','h','i','p'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
-    // Strings that are used in HMAC arguments include a length-indicator as well
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    public static final byte[] CRYPTO_STRING_SUCCESS             = {0x00, 0x07, 'S','u','c','c','e','s','s'};
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
     // If there is no ServerSeed, this is the default
     /////////////////////////////////////////////////////////////////////////////////////////////
     public static final byte[] DEFAULT_SEED = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};

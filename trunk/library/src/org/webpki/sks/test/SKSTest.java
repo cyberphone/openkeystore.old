@@ -1315,7 +1315,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Not an asymmetric key encryption algorithm: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+            checkException (e, "Algorithm does not match operation: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
           }
         try
           {
@@ -1354,7 +1354,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "\"KeyUsage\" for key # does not permit \"asymmetricKeyDecrypt\"");
+            checkException (e, "Operation does not match \"KeyUsage\" for key #");
           }
       }
     @Test
@@ -1712,7 +1712,6 @@ public class SKSTest
                 try
                   {
                     String ok_pin = "1563";
-                    byte[] symmetric_key = {0,5};
                     ProvSess sess = new ProvSess (device);
                     PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                               PassphraseFormat.NUMERIC,
@@ -1725,13 +1724,13 @@ public class SKSTest
                     GenKey key = sess.createECKey ("Key.1",
                                                     ok_pin /* pin_value */,
                                                     pin_policy,
-                                                    key_usage).setCertificate ("CN=TEST18");
-                    sess.setSymmetricKey (key, symmetric_key, new String[]{MacAlgorithms.HMAC_SHA1.getURI ()});
+                                                    key_usage,
+                                                    new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate ("CN=TEST18");
                     fail ("Not allowed");
                   }
                 catch (SKSException e)
                   {
-                    checkException (e, "Invalid \"KeyUsage\" for \"setSymmetricKey\"");
+                    checkException (e, "\"KeyUsage\" does not match algorithm: http://www.w3.org/2000/09/xmldsig#hmac-sha1");
                   }
               }
           }
@@ -1753,8 +1752,9 @@ public class SKSTest
         GenKey key = sess.createECKey ("Key.1",
                                         ok_pin /* pin_value */,
                                         pin_policy,
-                                        KeyUsage.SYMMETRIC_KEY).setCertificate ("CN=TEST18");
-        sess.setSymmetricKey (key, symmetric_key, new String[]{MacAlgorithms.HMAC_SHA1.getURI ()});
+                                        KeyUsage.SYMMETRIC_KEY,
+                                        new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate ("CN=TEST18");
+        sess.setSymmetricKey (key, symmetric_key);
         sess.closeSession ();
         assertTrue ("Not symmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetric ());
         byte[] result = sess.sks.performHMAC (key.key_handle, MacAlgorithms.HMAC_SHA1.getURI (), ok_pin.getBytes ("UTF-8"), TEST_STRING);
@@ -1803,13 +1803,15 @@ public class SKSTest
                                                       8 /* max_length */,
                                                       (short) 3 /* retry_limit*/, 
                                                       null /* puk_policy */);
-            GenKey key = sess.createECKey ("Key.1",
-                                            ok_pin /* pin_value */,
-                                            pin_policy,
-                                            KeyUsage.SYMMETRIC_KEY).setCertificate ("CN=TEST18");
+            GenKey key = null;
             try
               {
-                sess.setSymmetricKey (key, symmetric_key, new String[]{sym_enc.getURI ()});
+                key = sess.createECKey ("Key.1",
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        KeyUsage.SYMMETRIC_KEY,
+                                        new String[]{sym_enc.getURI ()}).setCertificate ("CN=TEST18");
+                sess.setSymmetricKey (key, symmetric_key);
               }
             catch (SKSException e)
               {
@@ -1823,23 +1825,31 @@ public class SKSTest
             new SecureRandom ().nextBytes (iv_val);
             byte[] result = sess.sks.symmetricKeyEncrypt (key.key_handle,
                                                           true,
-                                                          sym_enc.needsIV () ? iv_val : iv_none,
+                                                          sym_enc.needsIV () && !sym_enc.internalIV () ? iv_val : iv_none,
                                                           sym_enc.getURI (),
                                                           ok_pin.getBytes ("UTF-8"),
                                                           data);
+            byte[] res2 = result.clone ();
             Cipher crypt = Cipher.getInstance (sym_enc.getJCEName ());
             if (sym_enc.needsIV ())
               {
+                if (sym_enc.internalIV ())
+                  {
+                    byte[] temp = new byte[result.length - 16];
+                    System.arraycopy (res2, 0, iv_val, 0, 16);
+                    System.arraycopy (res2, 16, temp, 0, temp.length);
+                    res2 = temp;
+                  }
                 crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (symmetric_key, "AES"), new IvParameterSpec (iv_val));
               }
             else
               {
                 crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (symmetric_key, "AES"));
               }
-            assertTrue ("encrypt error", ArrayUtil.compare (result, crypt.doFinal (data)));
+            assertTrue ("encrypt error", ArrayUtil.compare (res2, crypt.doFinal (data)));
             assertTrue ("decrypt error", ArrayUtil.compare (data, sess.sks.symmetricKeyEncrypt (key.key_handle, 
                                                                                                 false,
-                                                                                                sym_enc.needsIV () ? iv_val : iv_none,
+                                                                                                sym_enc.needsIV () && !sym_enc.internalIV () ? iv_val : iv_none,
                                                                                                 sym_enc.getURI (),
                                                                                                 ok_pin.getBytes ("UTF-8"),
                                                                                                 result)));
@@ -1847,7 +1857,7 @@ public class SKSTest
               {
                 sess.sks.symmetricKeyEncrypt (key.key_handle,
                                               true,
-                                              sym_enc.needsIV () ? iv_none : iv_val,
+                                              sym_enc.needsIV () && !sym_enc.internalIV () ? iv_none : iv_val,
                                               sym_enc.getURI (),
                                               ok_pin.getBytes ("UTF-8"),
                                               data);
@@ -1877,13 +1887,15 @@ public class SKSTest
                                                       8 /* max_length */,
                                                       (short) 3 /* retry_limit*/, 
                                                       null /* puk_policy */);
-            GenKey key = sess.createECKey ("Key.1",
-                                            ok_pin /* pin_value */,
-                                            pin_policy,
-                                            KeyUsage.SYMMETRIC_KEY).setCertificate ("CN=TEST18");
+            GenKey key = null;
             try
               {
-                sess.setSymmetricKey (key, symmetric_key, new String[]{hmac.getURI ()});
+                key = sess.createECKey ("Key.1",
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        KeyUsage.SYMMETRIC_KEY,
+                                        new String[]{hmac.getURI ()}).setCertificate ("CN=TEST18");
+                sess.setSymmetricKey (key, symmetric_key);
               }
             catch (SKSException e)
               {
@@ -1916,10 +1928,11 @@ public class SKSTest
         GenKey key = sess.createECKey ("Key.1",
                                         ok_pin /* pin_value */,
                                         pin_policy,
-                                        KeyUsage.SYMMETRIC_KEY).setCertificate ("CN=TEST18");
+                                        KeyUsage.SYMMETRIC_KEY,
+                                        new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate ("CN=TEST18");
         try
           {
-            sess.setSymmetricKey (key, symmetric_key, new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()});
+            sess.setSymmetricKey (key, symmetric_key);
             fail ("Wrong key size");
           }
         catch (SKSException e)
@@ -1944,8 +1957,9 @@ public class SKSTest
         GenKey key = sess.createECKey ("Key.1",
                                        ok_pin /* pin_value */,
                                        pin_policy /* pin_policy */,
-                                       KeyUsage.SYMMETRIC_KEY).setCertificate ("CN=" + name.getMethodName());
-        sess.setSymmetricKey (key, symmetric_key, new String[]{KeyGen2URIs.ALGORITHMS.NONE});
+                                       KeyUsage.SYMMETRIC_KEY,
+                                       new String[]{KeyGen2URIs.ALGORITHMS.NONE}).setCertificate ("CN=" + name.getMethodName());
+        sess.setSymmetricKey (key, symmetric_key);
         sess.closeSession ();
         try
           {
@@ -2048,7 +2062,7 @@ public class SKSTest
               }
             catch (SKSException e)
               {
-                checkException (e, "\"KeyUsage\" for key # does not permit \"asymmetricKeyDecrypt\"");
+                checkException (e, "Operation does not match \"KeyUsage\" for key #");
               }
             try
               {
@@ -2065,7 +2079,7 @@ public class SKSTest
               }
             catch (SKSException e)
               {
-                checkException (e, "\"KeyUsage\" for key # does not permit \"signHashedData\"");
+                checkException (e, "Operation does not match \"KeyUsage\" for key #");
               }
           }
       }

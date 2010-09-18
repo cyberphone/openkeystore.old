@@ -22,7 +22,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 04-September-2010 
+    Revised: 18-September-2010 
     Author: Anders Rundgren
 
     Copyright 2006-2010 WebPKI.org (http://webpki.org).
@@ -579,7 +579,10 @@
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
          <!-- SKS Reference: closeProvisioningSession -->
-         <xs:attribute name="CloseSessionMAC" type="xs:base64Binary" use="required"/>
+         <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
+
+         <!-- SKS Reference: closeProvisioningSession -->
+         <xs:attribute name="Nonce" type="xs:base64Binary" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -611,7 +614,7 @@
          <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
          <!-- SKS Reference: closeProvisioningSession -->
-         <xs:attribute name="CloseSessionAttestation" type="xs:base64Binary" use="required"/>
+         <xs:attribute name="SessionAttestation" type="xs:base64Binary" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -744,11 +747,6 @@
                      <xs:simpleContent>
                         <xs:extension base="xs:base64Binary">
  
-                           <!-- "EndorsedAlgorithms" holds a non-empty list of
-                                algorithms endorsed by the issuer for usage with
-                                the provisioned symmetric key -->
-                           <xs:attribute name="EndorsedAlgorithms" type="kgen:uriList" use="required"/>
-        
                            <!-- Mandatory MAC (Message Authentication Code) -->
                            <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
@@ -949,7 +947,7 @@
 
             </xs:choice>
 
-            <!-- SKS Reference: createKeyPair.PrivateKeyBackup -->
+            <!-- SKS Reference: createKeyPair.PrivateKey -->
             <xs:element name="PrivateKey" type="xs:base64Binary" minOccurs="0"/>
  
          </xs:sequence>
@@ -1049,6 +1047,9 @@
          <!-- SKS Reference: createKeyPair.MAC --> 
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
+         <!-- SKS Reference: createKeyPair.EndorsedAlgorithm -->
+         <xs:attribute name="EndorsedAlgorithms" type="kgen:uriList" use="optional"/>
+        
        </xs:complexType>
    </xs:element>
 

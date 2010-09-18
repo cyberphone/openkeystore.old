@@ -114,27 +114,30 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
       {
         Element top = wr.initializeRootObject (prefix);
 
-        //////////////////////////////////////////////////////////////////////////
-        // Set top-level attributes
-        //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_credential_store.client_session_id);
-
-        wr.setStringAttribute (ID_ATTR, server_credential_store.server_session_id);
-
-        wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
-
-        XMLSignatureWrapper.addXMLSignatureNS (wr);
-
-        if (server_credential_store.getKeyProperties ().isEmpty ())
-          {
-            throw new IOException ("Empty request not allowed!");
-          }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Write [1..n] Credentials
-        ////////////////////////////////////////////////////////////////////////
         try
           {
+            //////////////////////////////////////////////////////////////////////////
+            // Set top-level attributes
+            //////////////////////////////////////////////////////////////////////////
+            wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_credential_store.client_session_id);
+    
+            wr.setStringAttribute (ID_ATTR, server_credential_store.server_session_id);
+    
+            wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
+    
+            byte[] nonce;
+            wr.setBinaryAttribute (NONCE_ATTR, nonce = sess_key_interface.generateNonce ());
+    
+            XMLSignatureWrapper.addXMLSignatureNS (wr);
+    
+            if (server_credential_store.getKeyProperties ().isEmpty ())
+              {
+                throw new IOException ("Empty request not allowed!");
+              }
+    
+            ////////////////////////////////////////////////////////////////////////
+            // Write [1..n] Credentials
+            ////////////////////////////////////////////////////////////////////////
             for (ServerCredentialStore.KeyProperties key : server_credential_store.getKeyProperties ())
               {
                 wr.addChildElement (CERTIFICATE_PATH_ELEM);
@@ -164,12 +167,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                     ServerCredentialStore.MacGenerator set_symkey = new ServerCredentialStore.MacGenerator ();
                     set_symkey.addArray (ee_cert);
                     set_symkey.addArray (key.encrypted_symmetric_key);
-                    for (String algorithm : getSortedAlgorithms (key.endorsed_algorithms))
-                      {
-                        set_symkey.addString (algorithm);
-                      }
                     mac (wr, set_symkey.getResult (), APIDescriptors.SET_SYMMETRIC_KEY);
-                    wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, key.endorsed_algorithms);
                   }
  
                 ////////////////////////////////////////////////////////////////////////
@@ -229,9 +227,10 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
             close.addString (server_credential_store.client_session_id);
             close.addString (server_credential_store.server_session_id);
             close.addString (server_credential_store.issuer_uri);
-            top.setAttribute (CLOSE_SESSION_MAC_ATTR,
-                              new Base64 ().getBase64StringFromBinary (mac (close.getResult (),
-                                                                            APIDescriptors.CLOSE_PROVISIONING_SESSION)));
+            close.addArray (nonce);
+            top.setAttribute (MAC_ATTR,
+                              new Base64 ().getBase64StringFromBinary (server_credential_store.saved_close_mac = mac (close.getResult (),
+                                                                              APIDescriptors.CLOSE_PROVISIONING_SESSION)));
           }
         catch (GeneralSecurityException e)
           {

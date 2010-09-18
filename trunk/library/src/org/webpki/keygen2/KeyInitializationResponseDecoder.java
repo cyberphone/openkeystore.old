@@ -85,6 +85,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
                     key_attestation.addArray (kp.backup_private_key);
                   }
                  if (!ArrayUtil.compare (key_init_request.server_credential_store.attest (key_attestation.getResult (),
+                                                                                          kp.expected_attest_mac_count,
                                                                                           session_key_operations),
                                          kp.key_attestation = gpk.key_attestation))
                   {

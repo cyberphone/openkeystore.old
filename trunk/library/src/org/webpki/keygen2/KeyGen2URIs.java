@@ -20,9 +20,9 @@ public interface KeyGen2URIs
   {
     public interface ALGORITHMS
       {
-        String KEY_ATTESTATION_1           = "http://xmlns.webpki.org/keygen2/1.0#algorithm.ka1";
+        String KEY_ATTESTATION_1           = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
 
-        String SESSION_KEY_1               = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sk1";
+        String SESSION_KEY_1               = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
 
         String NONE                        = "http://xmlns.webpki.org/keygen2/1.0#algorithm.none";
 

@@ -38,6 +38,7 @@ public interface SecureKeyStore
                                                           short session_key_limit) throws SKSException;
 
     public byte[] closeProvisioningSession (int provisioning_handle,
+                                            byte[] nonce,
                                             byte[] mac) throws SKSException;
 
     public EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
@@ -60,6 +61,7 @@ public interface SecureKeyStore
                                   byte key_usage,
                                   String friendly_name,
                                   byte[] key_algorithm,
+                                  String[] endorsed_algorithms,
                                   byte[] mac) throws SKSException;
     
     public int getKeyHandle (int provisioning_handle,
@@ -80,7 +82,6 @@ public interface SecureKeyStore
     
     public void setSymmetricKey (int key_handle,
                                  byte[] symmetric_key,
-                                 String[] endorsed_algorithms,
                                  byte[] mac) throws SKSException;
     
     public void restorePrivateKey (int key_handle,

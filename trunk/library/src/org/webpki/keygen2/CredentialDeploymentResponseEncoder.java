@@ -73,7 +73,7 @@ public class CredentialDeploymentResponseEncoder extends CredentialDeploymentRes
 
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
 
-        wr.setBinaryAttribute (CLOSE_SESSION_ATTESTATION_ATTR, close_session_attestation);
+        wr.setBinaryAttribute (SESSION_ATTESTATION_ATTR, close_session_attestation);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional ServerCookie

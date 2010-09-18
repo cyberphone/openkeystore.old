@@ -442,6 +442,7 @@ public class KeyGen2Test
                                                  key.getKeyUsage ().getSKSValue (),
                                                  key.getFriendlyName (),
                                                  key.getKeyAlgorithmData ().getSKSValue (),
+                                                 key.getEndorsedAlgorithms (),
                                                  key.getMAC ());
                 key_init_response.addPublicKey (kpr.getPublicKey (),
                                                 kpr.getKeyAttestation (),
@@ -495,7 +496,6 @@ public class KeyGen2Test
                   {
                     sks.setSymmetricKey (key_handle, 
                                          key.getEncryptedSymmetricKey (),
-                                         key.getSymmetricKeyEndorsedAlgorithms (),
                                          key.getSymmetricKeyMac ());
                   }
 
@@ -546,6 +546,7 @@ public class KeyGen2Test
             CredentialDeploymentResponseEncoder cre_dep_response = 
                       new CredentialDeploymentResponseEncoder (cred_dep_request,
                                                                sks.closeProvisioningSession (eps.getProvisioningHandle (),
+                                                                                             cred_dep_request.getCloseSessionNonce (),
                                                                                              cred_dep_request.getCloseSessionMAC ()));
             return cre_dep_response.writeXML ();
           }
@@ -667,6 +668,14 @@ public class KeyGen2Test
                 new SecureRandom ().nextBytes (iv);
                 crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (iv));
                 return ArrayUtil.add (iv, crypt.doFinal (data));
+              }
+
+            @Override
+            public byte[] generateNonce () throws IOException, GeneralSecurityException
+              {
+                byte[] rnd = new byte[32];
+                new SecureRandom ().nextBytes (rnd);
+                return rnd;
               }
           }
         
@@ -803,9 +812,8 @@ public class KeyGen2Test
                                                    pin_policy);
             if (symmetric_key || encryption_key)
               {
-                kp.setEncryptedSymmetricKey (server_sess_key.encrypt (encryption_key ? AES32BITKEY : OTP_SEED),
-                                                                      new String[]{encryption_key ?
-                                                     SymEncryptionAlgorithms.AES256_CBC.getURI () : MacAlgorithms.HMAC_SHA1.getURI ()});
+                kp.setEndorsedAlgorithms (new String[]{encryption_key ? SymEncryptionAlgorithms.AES256_CBC.getURI () : MacAlgorithms.HMAC_SHA1.getURI ()});
+                kp.setEncryptedSymmetricKey (server_sess_key.encrypt (encryption_key ? AES32BITKEY : OTP_SEED));
               }
             if (property_bag)
               {
@@ -1235,8 +1243,7 @@ public class KeyGen2Test
             if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
               {
                 j++;
-                byte[] iv = new byte[16];
-                new SecureRandom ().nextBytes (iv);
+                byte[] iv = new byte[0];
                 byte[] enc = sks.symmetricKeyEncrypt (ek.getKeyHandle (), true, iv, SymEncryptionAlgorithms.AES256_CBC.getURI (), USER_DEFINED_PIN, TEST_STRING);
                 assertTrue ("Encrypt/decrypt error", ArrayUtil.compare (sks.symmetricKeyEncrypt (ek.getKeyHandle (), false, iv, SymEncryptionAlgorithms.AES256_CBC.getURI (), USER_DEFINED_PIN, enc),
                                                                         TEST_STRING));

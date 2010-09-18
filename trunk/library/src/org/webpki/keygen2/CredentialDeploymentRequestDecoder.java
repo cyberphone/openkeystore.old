@@ -276,8 +276,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
         byte[] mac;
 
-        String[] endorsed_algorithms;
-
         Vector<Extension> extensions = new Vector<Extension> ();
         
         PostOperation post_operation;
@@ -298,7 +296,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
             if (rd.hasNext (SYMMETRIC_KEY_ELEM))
               {
                 encrypted_symmetric_key = rd.getBinary (SYMMETRIC_KEY_ELEM);
-                endorsed_algorithms = getSortedAlgorithms (ah.getList (ENDORSED_ALGORITHMS_ATTR));
                 symmetric_key_mac = ah.getBinary (MAC_ATTR);
               }
             else if (rd.hasNext (PRIVATE_KEY_ELEM))
@@ -380,12 +377,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
           }
 
 
-        public String[] getSymmetricKeyEndorsedAlgorithms ()
-          {
-            return endorsed_algorithms;
-          }
-
-
         public String getID ()
           {
             return id;
@@ -437,6 +428,8 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
     private XMLSignatureWrapper signature;                  // Optional
 
     private byte[] close_session_mac;
+    
+    private byte[] close_session_nonce;
 
 
     public String getServerSessionID ()
@@ -486,6 +479,12 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         return close_session_mac;
       }
 
+    
+    public byte[] getCloseSessionNonce ()
+      {
+        return close_session_nonce;
+      }
+
 
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
@@ -513,7 +512,9 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
         submit_url = ah.getString (SUBMIT_URL_ATTR);
         
-        close_session_mac = ah.getBinary (CLOSE_SESSION_MAC_ATTR);
+        close_session_mac = ah.getBinary (MAC_ATTR);
+        
+        close_session_nonce = ah.getBinary (NONCE_ATTR);
 
         rd.getChild ();
 

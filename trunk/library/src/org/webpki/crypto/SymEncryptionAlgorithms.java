@@ -21,46 +21,48 @@ import java.io.IOException;
 public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
   {
     AES128_CBC      ("http://www.w3.org/2001/04/xmlenc#aes128-cbc", 
-                        "AES/CBC/PKCS5Padding", 16, true, true, false),
+                        "AES/CBC/PKCS5Padding", 16, true,  true, true, false),
                         
     AES192_CBC      ("http://www.w3.org/2001/04/xmlenc#aes192-cbc",
-                        "AES/CBC/PKCS5Padding", 24, true, true, false),
+                        "AES/CBC/PKCS5Padding", 24, true,  true, true, false),
                         
     AES256_CBC      ("http://www.w3.org/2001/04/xmlenc#aes256-cbc",
-                        "AES/CBC/PKCS5Padding", 32, true, true, false),
+                        "AES/CBC/PKCS5Padding", 32, true,  true, true, false),
                         
     KW_AES128       ("http://www.w3.org/2001/04/xmlenc#kw-aes128",
-                        "AESWrap",              16, false, false, true),
+                        "AESWrap",              16, false, false, false, true),
                         
     KW_AES256       ("http://www.w3.org/2001/04/xmlenc#kw-aes256",
-                        "AESWrap",              32, false, false, true),
+                        "AESWrap",              32, false, false, false, true),
                         
     AES_ECB_NP      ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.nopad",
-                        "AES/ECB/NoPadding",    0,  false, true,  true),  // SecurID
+                        "AES/ECB/NoPadding",    0,  false, false, true,  true),  // SecurID
                         
     AES_ECB_P5      ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.pkcs5",
-                        "AES/ECB/PKCS5Padding", 0,  false, true,  false),
+                        "AES/ECB/PKCS5Padding", 0,  false, false, true,  false),
                         
     AES_CBC_NP      ("internal:AES/CBC/NoPadding",
-                        "AES/CBC/NoPadding",    0,  true, false,  true),
+                        "AES/CBC/NoPadding",    0,  true,  false, false,  true),
                         
-    AES_CBC_P5      ("internal:AES/CBC/PKCS5Padding",
-                        "AES/CBC/PKCS5Padding", 0,  true, false,  false);
+    AES_CBC_P5      ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.cbc.pkcs5",
+                        "AES/CBC/PKCS5Padding", 0,  true,  false, true,   false);
     
 
     private final String         uri;             // As expressed in XML
     private final String         jcename;         // As expressed for JCE
     private final int            key_length;      // 0 => 16, 24 and 32 are ok
     private final boolean        iv_mode;         // CBC
+    private final boolean        internal_iv;     // XML Encryption
     private final boolean        sks_mandatory;   // If required
     private final boolean        needs_padding;   // If that is the case
 
-    private SymEncryptionAlgorithms (String uri, String jcename, int key_length, boolean iv_mode, boolean sks_mandatory, boolean needs_padding)
+    private SymEncryptionAlgorithms (String uri, String jcename, int key_length, boolean iv_mode, boolean internal_iv, boolean sks_mandatory, boolean needs_padding)
       {
         this.uri = uri;
         this.jcename = jcename;
         this.key_length = key_length;
         this.iv_mode = iv_mode;
+        this.internal_iv = internal_iv;
         this.sks_mandatory = sks_mandatory;
         this.needs_padding = needs_padding;
       }
@@ -87,6 +89,12 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
     public boolean needsIV ()
       {
         return iv_mode;
+      }
+
+    
+    public boolean internalIV ()
+      {
+        return internal_iv;
       }
 
     

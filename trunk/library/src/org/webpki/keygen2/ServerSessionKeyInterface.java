@@ -39,4 +39,6 @@ public interface ServerSessionKeyInterface
     public byte[] encrypt (byte[] data) throws IOException, GeneralSecurityException;
 
     public byte[] decrypt (byte[] data) throws IOException, GeneralSecurityException;
+    
+    public byte[] generateNonce () throws IOException, GeneralSecurityException;
   }

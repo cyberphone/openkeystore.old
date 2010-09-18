@@ -696,6 +696,8 @@ public class ServerCredentialStore implements Serializable
         
         boolean key_init_done;
         
+        byte[] expected_attest_mac_count;  // Two bytes
+        
         private void addExtension (ExtensionInterface ei) throws IOException
           {
             if (extensions.put (ei.type, ei) != null)
@@ -759,18 +761,25 @@ public class ServerCredentialStore implements Serializable
 
         byte[] encrypted_symmetric_key;
         
-        String[] endorsed_algorithms;
-
-        public KeyProperties setEncryptedSymmetricKey (byte[] encrypted_symmetric_key, String[] endorsed_algorithms) throws IOException
+        public KeyProperties setEncryptedSymmetricKey (byte[] encrypted_symmetric_key) throws IOException
           {
             if (key_usage != KeyUsage.SYMMETRIC_KEY)
               {
                 bad ("Symmetric keys musy use KeyUsage.SYMMETRIC_KEY");
               }
             this.encrypted_symmetric_key = encrypted_symmetric_key;
-            this.endorsed_algorithms = endorsed_algorithms;
             return this;
           }
+        
+
+        String[] endorsed_algorithms;
+
+        public KeyProperties setEndorsedAlgorithms (String[] endorsed_algorithms) throws IOException
+          {
+            this.endorsed_algorithms = BasicCapabilities.getSortedAlgorithms (endorsed_algorithms);
+            return this;
+          }
+
 
         public byte[] getEncryptedSymmetricKey ()
           {
@@ -1054,6 +1063,11 @@ public class ServerCredentialStore implements Serializable
             key_pair_mac.addByte (key_usage.getSKSValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
             key_alg_data.updateKeyAlgorithmMac (key_pair_mac);
+            if (endorsed_algorithms != null) for (String algorithm : endorsed_algorithms)
+              {
+                key_pair_mac.addString (algorithm);
+              }
+
             if (device_pin_protected)
               {
                 wr.addChildElement (DEVICE_PIN_ELEM);
@@ -1071,7 +1085,12 @@ public class ServerCredentialStore implements Serializable
               {
                 wr.setStringAttribute (EXPORT_POLICY_ATTR, export_policy.getXMLName ());
               }
-            
+
+            if (endorsed_algorithms != null)
+              {
+                wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, endorsed_algorithms);
+              }
+
             if (private_key_backup)
               {
                 wr.setBooleanAttribute (PRIVATE_KEY_BACKUP_ATTR, private_key_backup);
@@ -1097,6 +1116,8 @@ public class ServerCredentialStore implements Serializable
               }
 
             wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), APIDescriptors.CREATE_KEY_PAIR, session_key_interface));
+            
+            expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
             
             key_alg_data.writeKeyAlgorithmData (wr);
 
@@ -1140,6 +1161,8 @@ public class ServerCredentialStore implements Serializable
     String issuer_uri;
     
     String key_attestation_algorithm;
+    
+    byte[] saved_close_mac;
     
     PostProvisioningTargetKey addPostOperation (String old_client_session_id,
                                                 String old_server_session_id,
@@ -1193,16 +1216,18 @@ public class ServerCredentialStore implements Serializable
         return session_key_interface.mac (data, ArrayUtil.add (method.getBinary (), getMACSequenceCounterAndUpdate ()));
       }
     
-    byte[] attest (byte[] data, ServerSessionKeyInterface session_key_interface) throws IOException, GeneralSecurityException
+    byte[] attest (byte[] data, byte[] mac_counter, ServerSessionKeyInterface session_key_interface) throws IOException, GeneralSecurityException
       {
-        return session_key_interface.mac (data, CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST); 
+        return session_key_interface.mac (data, ArrayUtil.add (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST, mac_counter)); 
       }
     
     void checkFinalResult (byte[] close_session_attestation,  ServerSessionKeyInterface session_key_interface) throws IOException, GeneralSecurityException
       {
-  
-        if (!ArrayUtil.compare (attest (ArrayUtil.add (CryptoConstants.CRYPTO_STRING_SUCCESS, 
-                                                       getMACSequenceCounterAndUpdate ()),
+        MacGenerator check = new MacGenerator ();
+        check.addString (KeyGen2URIs.ALGORITHMS.SESSION_KEY_1);
+        check.addArray (saved_close_mac);
+        if (!ArrayUtil.compare (attest (check.getResult (),
+                                        getMACSequenceCounterAndUpdate (),
                                         session_key_interface),
                                 close_session_attestation))
           {

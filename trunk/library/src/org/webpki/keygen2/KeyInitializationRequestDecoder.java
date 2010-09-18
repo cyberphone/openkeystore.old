@@ -307,7 +307,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
         KeyUsage key_usage;
 
         KeyAlgorithmData key_algorithm_data;
-
+        
         KeyObject (DOMReaderHelper rd, 
                    PINPolicy pin_policy,
                    boolean start_of_pin_group, 
@@ -333,6 +333,16 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             private_key_backup = ah.getBooleanConditional (PRIVATE_KEY_BACKUP_ATTR);
 
             enable_pin_caching = ah.getBooleanConditional (ENABLE_PIN_CACHING_ATTR);
+            
+            endorsed_algorithms = ah.getListConditional (ENDORSED_ALGORITHMS_ATTR);
+            if (endorsed_algorithms == null)
+              {
+                endorsed_algorithms = new String[0];
+              }
+            else
+              {
+                endorsed_algorithms = BasicCapabilities.getSortedAlgorithms (endorsed_algorithms);
+              }
 
             server_seed = ah.getBinaryConditional (SERVER_SEED_ATTR);
             if (server_seed == null)
@@ -482,6 +492,14 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
         public String getFriendlyName ()
           {
             return friendly_name;
+          }
+        
+        
+        String[] endorsed_algorithms;
+
+        public String[] getEndorsedAlgorithms ()
+          {
+            return endorsed_algorithms;
           }
 
       }
