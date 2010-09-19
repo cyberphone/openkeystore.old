@@ -207,7 +207,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            assertTrue ("There should be an auth error", e.getError () == SKSException.ERROR_AUTHORIZATION);
+            authorizationErrorCheck (e);
           }
         try
           {
@@ -341,6 +341,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            authorizationErrorCheck (e);
           }
         try
           {
@@ -365,6 +366,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            authorizationErrorCheck (e);
           }
         try
           {
@@ -377,6 +379,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            authorizationErrorCheck (e);
           }
         try
           {
@@ -401,6 +404,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            authorizationErrorCheck (e);
           }
         try
           {
@@ -413,6 +417,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            authorizationErrorCheck (e);
           }
         try
           {
@@ -425,6 +430,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            authorizationErrorCheck (e);
           }
         try
           {
@@ -437,6 +443,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            authorizationErrorCheck (e);
           }
       }
      
@@ -598,6 +605,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            checkException (e, "Unreferenced object \"ID\" : PIN");
           }
         assertTrue ("Session count", q == sessionCount ());
       }
@@ -616,7 +624,7 @@ public class SKSTest
                               (short) 3 /* retry_limit*/, 
                               "012355" /* puk_policy */);
       }
-    @Test(expected=SKSException.class)
+    @Test
     public void test4 () throws Exception
       {
         ProvSess sess = new ProvSess (device);
@@ -630,9 +638,16 @@ public class SKSTest
                               8 /* max_length */,
                               (short) 3 /* retry_limit*/, 
                               puk /* puk_policy */);
-        sess.closeSession ();
+        try
+          {
+            sess.closeSession ();
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Unreferenced object \"ID\" : PIN");
+          }
       }
-    @Test(expected=SKSException.class)
+    @Test
     public void test5 () throws Exception
       {
         ProvSess sess = new ProvSess (device);
@@ -641,7 +656,14 @@ public class SKSTest
                            null /* pin_value */,
                            null /* pin_policy */,
                            KeyUsage.AUTHENTICATION);
-        sess.closeSession ();
+        try
+          {
+            sess.closeSession ();
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Missing \"setCertificatePath\" for key: Key.1");
+          }
       }
     @Test
     public void test6 () throws Exception
@@ -869,6 +891,7 @@ public class SKSTest
             catch (SKSException e)
               {
                 assertFalse ("Only OK for non-updatable", updatable);
+                checkException (e, "Key # belongs to a non-updatable provisioning session");
               }
             assertTrue ("Missing key, deletes MUST only be performed during session close", key1.exists ());
             try
@@ -878,6 +901,7 @@ public class SKSTest
               }
             catch (SKSException e)
               {
+                checkException (e, "No such provisioning session: " + sess2.provisioning_handle);
               }
             assertTrue ("Key was not deleted", key1.exists () ^ updatable);
             assertTrue ("Managed sessions MUST be deleted", sess.exists () ^ updatable);
@@ -980,6 +1004,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            authorizationErrorCheck (e);
           }
         try
           {
@@ -1027,6 +1052,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            checkException (e, "Update/clone keys cannot have PIN codes");
           }
       }
     @Test
@@ -1056,6 +1082,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            checkException (e, "Multiple updates of key #");
           }
       }
     @Test
@@ -1073,7 +1100,7 @@ public class SKSTest
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
-        GenKey key3 = sess2.createECKey ("Key.1",
+        GenKey key3 = sess2.createECKey ("Key.3",
                                          null /* pin_value */,
                                          null /* pin_policy */,
                                          KeyUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
@@ -1085,6 +1112,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
+            checkException (e, "New key used for multiple operations: Key.3");
           }
       }
     @Test
@@ -1129,7 +1157,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            assertTrue ("There should be an auth error", e.getError () == SKSException.ERROR_AUTHORIZATION);
+            authorizationErrorCheck (e);
           }
         try
           {
@@ -1204,7 +1232,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            assertTrue ("There should be an auth error", e.getError () == SKSException.ERROR_AUTHORIZATION);
+            authorizationErrorCheck (e);
           }
         try
           {
@@ -1350,11 +1378,10 @@ public class SKSTest
                                              AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
                                              ok_pin.getBytes ("UTF-8"), 
                                              enc);
-            fail ("Key usage error");
+            fail ("PKCS #1 error");
           }
         catch (SKSException e)
           {
-            checkException (e, "Operation does not match \"KeyUsage\" for key #");
           }
       }
     @Test
@@ -2040,7 +2067,7 @@ public class SKSTest
             try
               {
                 sess.restorePrivateKey (key, key_pair.getPrivate ());
-                assertFalse ("Not allowed", key_usage == KeyUsage.TRANSPORT || key_usage == KeyUsage.SYMMETRIC_KEY);
+                assertTrue("Not allowed", key_usage.supportsAsymmetricKeyEncryption () || key_usage.supportsAsymmetricKeySign ());
               }
             catch (SKSException e)
               {
@@ -2058,7 +2085,7 @@ public class SKSTest
                                                                                                     AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
                                                                                                     ok_pin.getBytes ("UTF-8"), 
                                                                                                     enc), TEST_STRING));
-                assertTrue ("Bad alg", key_usage == KeyUsage.ENCRYPTION || key_usage == KeyUsage.UNIVERSAL);
+                assertTrue ("Bad alg", key_usage.supportsAsymmetricKeyEncryption ());
               }
             catch (SKSException e)
               {
@@ -2075,7 +2102,7 @@ public class SKSTest
                 verify.initVerify (key.cert_path[0]);
                 verify.update (TEST_STRING);
                 assertTrue ("Bad signature", verify.verify (result));
-                assertFalse ("Bad alg", key_usage == KeyUsage.ENCRYPTION);
+                assertTrue ("Bad alg", key_usage.supportsAsymmetricKeySign ());
               }
             catch (SKSException e)
               {

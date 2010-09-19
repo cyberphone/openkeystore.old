@@ -588,11 +588,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         void verifyMac (MacBuilder actual_mac, byte[] claimed_mac) throws SKSException
           {
-            if (Arrays.equals (actual_mac.getResult (),  claimed_mac))
+            if (!Arrays.equals (actual_mac.getResult (),  claimed_mac))
               {
-                return;
+                abort ("MAC error", SKSException.ERROR_MAC);
               }
-            abort ("MAC error", SKSException.ERROR_MAC);
           }
 
         void abort (String message, int exception_type) throws SKSException
@@ -661,47 +660,47 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         KeyEntry getTargetKey (int key_handle) throws SKSException
           {
-            KeyEntry ke = keys.get (key_handle);
-            if (ke == null)
+            KeyEntry key_entry = keys.get (key_handle);
+            if (key_entry == null)
               {
                 abort ("Key not found #" + key_handle, SKSException.ERROR_NO_KEY);
               }
-            if (ke.owner.open)
+            if (key_entry.owner.open)
               {
                 abort ("Key #" + key_handle + " still in provisioning");
               }
-            if (!ke.owner.updatable)
+            if (!key_entry.owner.updatable)
               {
                 abort ("Key #" + key_handle + " belongs to a non-updatable provisioning session");
               }
-            return ke;
+            return key_entry;
           }
 
-        public void addPostProvisioningObject (KeyEntry key_entry_original, KeyEntry key_entry, boolean update) throws SKSException
+        public void addPostProvisioningObject (KeyEntry target_key_entry, KeyEntry key_entry, boolean update) throws SKSException
           {
-            if (key_entry_original.owner.session_key_limit-- <= 0)
-              {
-                abort ("Post provisioning \"SessionKeyLimit\" exceeded");
-              }
             for (PostProvisioningObject post_op : post_provisioning_objects)
               {
                 if (post_op.new_key != null && post_op.new_key == key_entry)
                   {
                     abort ("New key used for multiple operations: " + key_entry.id);
                   }
-                if (post_op.target_key_entry == key_entry_original)
+                if (post_op.target_key_entry == target_key_entry)
                   {
                     if (key_entry == null || post_op.new_key == null) // pp_deleteKey
                       {
-                        abort ("Delete wasn't exclusive for key #" + key_entry_original.key_handle);
+                        abort ("Delete wasn't exclusive for key #" + target_key_entry.key_handle);
                       }
                     else if (update && post_op.update)
                       {
-                        abort ("Multiple updates of the same key #" + key_entry_original.key_handle);
+                        abort ("Multiple updates of key #" + target_key_entry.key_handle);
                       }
                   }
               }
-            post_provisioning_objects.add (new PostProvisioningObject (key_entry_original, key_entry, update));
+            if (target_key_entry.owner.session_key_limit-- <= 0)
+              {
+                abort ("Post provisioning \"SessionKeyLimit\" exceeded");
+              }
+            post_provisioning_objects.add (new PostProvisioningObject (target_key_entry, key_entry, update));
           }
 
         public void rangeTest (byte value, byte low_limit, byte high_limit, String object_name) throws SKSException
@@ -901,7 +900,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         addAlgorithm ("http://www.w3.org/2001/04/xmlenc#rsa-1_5",
                       "RSA/ECB/PKCS1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY,
-                      KEY_USAGE_ENCRYPTION | KEY_USAGE_UNIVERSAL);
+                      KEY_USAGE_ENCRYPTION | KEY_USAGE_AUTHENTICATION | KEY_USAGE_UNIVERSAL);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Signatures
@@ -995,40 +994,40 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     KeyEntry getOpenKey (int key_handle) throws SKSException
       {
-        KeyEntry ke = keys.get (key_handle);
-        if (ke == null)
+        KeyEntry key_entry = keys.get (key_handle);
+        if (key_entry == null)
           {
             abort ("Key not found #" + key_handle, SKSException.ERROR_NO_KEY);
           }
-        if (!ke.owner.open)
+        if (!key_entry.owner.open)
           {
             abort ("Key #" + key_handle + " not belonging to open session", SKSException.ERROR_NO_KEY);
           }
-        return ke;
+        return key_entry;
       }
 
     KeyEntry getStdKey (int key_handle) throws SKSException
       {
-        KeyEntry ke = keys.get (key_handle);
-        if (ke == null)
+        KeyEntry key_entry = keys.get (key_handle);
+        if (key_entry == null)
           {
             abort ("Key not found #" + key_handle, SKSException.ERROR_NO_KEY);
           }
-        if (ke.owner.open)
+        if (key_entry.owner.open)
           {
             abort ("Key #" + key_handle + " still in provisioning", SKSException.ERROR_NO_KEY);
           }
-        return ke;
+        return key_entry;
       }
 
     EnumeratedKey getKey (Iterator<KeyEntry> iter)
       {
         while (iter.hasNext ())
           {
-            KeyEntry ke = iter.next ();
-            if (!ke.owner.open)
+            KeyEntry key_entry = iter.next ();
+            if (!key_entry.owner.open)
               {
-                return new EnumeratedKey (ke.key_handle, ke.owner.provisioning_handle);
+                return new EnumeratedKey (key_entry.key_handle, key_entry.owner.provisioning_handle);
               }
           }
         return new EnumeratedKey ();
@@ -1246,12 +1245,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         provisionings.remove (provisioning.provisioning_handle);
       }
 
-    void localDeleteKey (KeyEntry target_key_entry)
+    void localDeleteKey (KeyEntry key_entry)
       {
-        keys.remove (target_key_entry.key_handle);
-        if (target_key_entry.pin_policy != null)
+        keys.remove (key_entry.key_handle);
+        if (key_entry.pin_policy != null)
           {
-            int pin_policy_handle = target_key_entry.pin_policy.pin_policy_handle;
+            int pin_policy_handle = key_entry.pin_policy.pin_policy_handle;
             for (int handle : keys.keySet ())
               {
                 if (handle == pin_policy_handle)
@@ -1260,9 +1259,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                   }
               }
             pin_policies.remove (pin_policy_handle);
-            if (target_key_entry.pin_policy.puk_policy != null)
+            if (key_entry.pin_policy.puk_policy != null)
               {
-                int puk_policy_handle = target_key_entry.pin_policy.puk_policy.puk_policy_handle;
+                int puk_policy_handle = key_entry.pin_policy.puk_policy.puk_policy_handle;
                 for (int handle : pin_policies.keySet ())
                   {
                     if (handle == puk_policy_handle)
@@ -1303,7 +1302,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         Algorithm alg = getAlgorithm (input_algorithm);
         if ((alg.mask & expected_type) == 0)
           {
-            abort ("Algorithm does not match operation: " + input_algorithm);
+            abort ("Algorithm does not match operation: " + input_algorithm, SKSException.ERROR_ALGORITHM);
           }
         if ((key_entry.key_usage & alg.key_usage_mask) == 0)
           {
@@ -1313,7 +1312,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             return alg;
           }
-        abort ("\"EndorsedAlgorithms\" for key #" + key_entry.key_handle + " does not include: " + input_algorithm);
+        abort ("\"EndorsedAlgorithms\" for key #" + key_entry.key_handle + " does not include: " + input_algorithm, SKSException.ERROR_ALGORITHM);
         return null;    // For the compiler only...
       }
 
@@ -1347,7 +1346,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         Algorithm alg = algorithms.get (algorithm_uri);
         if (alg == null)
           {
-            abort ("Unsupported algorithm: " + algorithm_uri);
+            abort ("Unsupported algorithm: " + algorithm_uri, SKSException.ERROR_ALGORITHM);
           }
         return alg;
       }
@@ -2568,7 +2567,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         KeyEntry key_entry = getOpenKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check for various container errors
+        // Check for various input errors
         ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
           {
@@ -2577,6 +2576,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         if (symmetric_key.length > (MAX_LENGTH_SYMMETRIC_KEY + AES_PADDING))
           {
             key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
+          }
+        if (key_entry.symmetric_key != null)
+          {
+            key_entry.owner.abort ("Multiple calls to \"setSymmetricKey\" for: " + key_entry.id);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2603,7 +2606,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Store symmetric key.  Note: SKS allows multiple settings...
+        // Store symmetric key
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.symmetric_key = clear_text_symmetric_key;
       }
@@ -2663,8 +2666,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Store certificate path.  Note: SKS allows multiple store operations...
+        // Store certificate path
         ///////////////////////////////////////////////////////////////////////////////////
+        if (key_entry.certificate_path != null)
+          {
+            key_entry.owner.abort ("Multiple calls to \"setCertificatePath\" for: " + key_entry.id);
+          }
         key_entry.certificate_path = certificate_path.clone ();
       }
 

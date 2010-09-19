@@ -20,21 +20,27 @@ import java.io.IOException;
 
 public enum KeyUsage
   {
-    SIGNATURE                  ("signature",      (byte)0x01),
-    AUTHENTICATION             ("authentication", (byte)0x02),
-    ENCRYPTION                 ("encryption",     (byte)0x04),
-    UNIVERSAL                  ("universal",      (byte)0x08),
-    TRANSPORT                  ("transport",      (byte)0x10),
-    SYMMETRIC_KEY              ("symmetric-key",  (byte)0x20);
+    SIGNATURE                  ("signature",      (byte)0x01, false, true),
+    AUTHENTICATION             ("authentication", (byte)0x02, true,  true),
+    ENCRYPTION                 ("encryption",     (byte)0x04, true,  false),
+    UNIVERSAL                  ("universal",      (byte)0x08, true,  true),
+    TRANSPORT                  ("transport",      (byte)0x10, false, false),
+    SYMMETRIC_KEY              ("symmetric-key",  (byte)0x20, false, false);
 
     private final String xml_name;       // As expressed in XML
     
     private final byte sks_value;        // As expressed in SKS
+    
+    private final boolean asym_encrypt;  // If asymmetric key encryption is permitted
 
-    private KeyUsage (String xml_name, byte sks_value)
+    private final boolean asym_sign;     // If asymmetric key sign is permitted
+
+    private KeyUsage (String xml_name, byte sks_value, boolean asym_encrypt, boolean asym_sign)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
+        this.asym_encrypt = asym_encrypt;
+        this.asym_sign = asym_sign;
       }
 
 
@@ -50,6 +56,18 @@ public enum KeyUsage
       }
 
 
+    public boolean supportsAsymmetricKeyEncryption ()
+      {
+        return asym_encrypt;
+      }
+
+
+    public boolean supportsAsymmetricKeySign ()
+      {
+        return asym_sign;
+      }
+
+
     public static KeyUsage getKeyUsageFromString (String xml_name) throws IOException
       {
         for (KeyUsage key_type : KeyUsage.values ())
@@ -61,5 +79,4 @@ public enum KeyUsage
           }
         throw new IOException ("Unknown key usage type: " + xml_name);
       }
-
   }
