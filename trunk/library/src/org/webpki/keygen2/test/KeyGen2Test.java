@@ -89,7 +89,7 @@ import org.webpki.keygen2.InputMethod;
 import org.webpki.keygen2.KeyGen2URIs;
 import org.webpki.keygen2.KeyInitializationResponseDecoder;
 import org.webpki.keygen2.KeyInitializationResponseEncoder;
-import org.webpki.keygen2.KeyUsage;
+import org.webpki.keygen2.AppUsage;
 import org.webpki.keygen2.KeyInitializationRequestDecoder;
 import org.webpki.keygen2.KeyInitializationRequestEncoder;
 import org.webpki.keygen2.PINGrouping;
@@ -439,7 +439,7 @@ public class KeyGen2Test
                                                  key.getExportPolicy ().getSKSValue (),
                                                  key.getDeletePolicy ().getSKSValue (),
                                                  key.getEnablePINCachingFlag (),
-                                                 key.getKeyUsage ().getSKSValue (),
+                                                 key.getAppUsage ().getSKSValue (),
                                                  key.getFriendlyName (),
                                                  key.getKeyAlgorithmData ().getSKSValue (),
                                                  key.getEndorsedAlgorithms (),
@@ -802,12 +802,12 @@ public class KeyGen2Test
                  new ServerCredentialStore.KeyAlgorithmData.EC (ECDomains.P_256) : new ServerCredentialStore.KeyAlgorithmData.RSA (2048);
 
             ServerCredentialStore.KeyProperties kp = device_pin ?
-                server_credential_store.createDevicePINProtectedKey (KeyUsage.AUTHENTICATION, key_alg) :
-                  preset_pin ? server_credential_store.createKeyWithPresetPIN (symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION,
+                server_credential_store.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
+                  preset_pin ? server_credential_store.createKeyWithPresetPIN (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                                                key_alg, pin_policy,
                                                                                server_sess_key.encrypt (predef_server_pin))
                              :
-                server_credential_store.createKey (symmetric_key ? KeyUsage.SYMMETRIC_KEY : KeyUsage.AUTHENTICATION,
+                server_credential_store.createKey (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                    key_alg,
                                                    pin_policy);
             if (symmetric_key || encryption_key)
@@ -882,8 +882,8 @@ public class KeyGen2Test
                   {
                     verifyPrivateKeyBackup (key_prop);
                   }
-                boolean otp = key_prop.getKeyUsage () == KeyUsage.SYMMETRIC_KEY;
-                boolean auth = key_prop.getKeyUsage () == KeyUsage.AUTHENTICATION;
+                boolean otp = symmetric_key && !encryption_key;
+                boolean auth = key_prop.getAppUsage () == AppUsage.AUTHENTICATION;
                 CertSpec cert_spec = new CertSpec ();
                 if (!otp)
                   {
@@ -1085,6 +1085,7 @@ public class KeyGen2Test
             writeOption ("Delete Policy", delete_policy != null);
             writeOption ("Export Policy", export_policy != null);
             writeOption ("Private Key Restore", set_private_key);
+            writeOption ("Updatable session", updatable);
             writeOption ("CloneKeyProtection", clone_key_protection != null);
             writeOption ("UpdateKey", update_key != null);
             writeOption ("DeleteKey", delete_key != null);
@@ -1171,7 +1172,6 @@ public class KeyGen2Test
     public void test7 () throws Exception
       {
         Doer doer = new Doer ();
-        updatable = true;
         pin_protection = true;
         puk_protection = true;
         input_method = InputMethod.PROGRAMMATIC;
@@ -1181,7 +1181,6 @@ public class KeyGen2Test
     public void test8 () throws Exception
       {
         Doer doer = new Doer ();
-        updatable = true;
         pin_protection = true;
         symmetric_key = true;
         property_bag = true;
@@ -1231,7 +1230,6 @@ public class KeyGen2Test
     public void test9 () throws Exception
       {
         Doer doer = new Doer ();
-        updatable = true;
         pin_protection = true;
         encryption_key = true;
         symmetric_key = true;
@@ -1255,7 +1253,6 @@ public class KeyGen2Test
     public void test10 () throws Exception
       {
         Doer doer = new Doer ();
-        updatable = true;
         device_pin = true;
         doer.perform ();
       }
@@ -1263,7 +1260,6 @@ public class KeyGen2Test
     public void test11 () throws Exception
       {
         Doer doer = new Doer ();
-        updatable = true;
         pin_protection = true;
         preset_pin = true;
         doer.perform ();

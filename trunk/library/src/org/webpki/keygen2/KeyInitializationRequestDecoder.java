@@ -304,7 +304,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
         boolean device_pin_protected;
         
-        KeyUsage key_usage;
+        AppUsage app_usage;
 
         KeyAlgorithmData key_algorithm_data;
         
@@ -328,7 +328,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
             friendly_name = ah.getStringConditional (FRIENDLY_NAME_ATTR, "");
 
-            key_usage = KeyUsage.getKeyUsageFromString (ah.getString (KEY_USAGE_ATTR));
+            app_usage = AppUsage.getKeyUsageFromString (ah.getString (APP_USAGE_ATTR));
 
             private_key_backup = ah.getBooleanConditional (PRIVATE_KEY_BACKUP_ATTR);
 
@@ -422,9 +422,9 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
 
 
-        public KeyUsage getKeyUsage ()
+        public AppUsage getAppUsage ()
           {
-            return key_usage;
+            return app_usage;
           }
 
 

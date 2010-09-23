@@ -55,7 +55,7 @@ import org.webpki.keygen2.ExportPolicy;
 import org.webpki.keygen2.InputMethod;
 import org.webpki.keygen2.KeyAlgorithmData;
 import org.webpki.keygen2.KeyGen2URIs;
-import org.webpki.keygen2.KeyUsage;
+import org.webpki.keygen2.AppUsage;
 import org.webpki.keygen2.PINGrouping;
 import org.webpki.keygen2.PassphraseFormat;
 import org.webpki.keygen2.PatternRestriction;
@@ -318,7 +318,7 @@ public class ProvSess
     ///////////////////////////////////////////////////////////////////////////////////
     // Create provisioning session
     ///////////////////////////////////////////////////////////////////////////////////
-    private ProvSess (Device device, short session_key_limit, boolean session_updatable_flag) throws GeneralSecurityException, IOException
+    public ProvSess (Device device, short session_key_limit, boolean session_updatable_flag) throws GeneralSecurityException, IOException
       {
         sks = device.sks;
         server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
@@ -501,7 +501,7 @@ public class ProvSess
                                 int rsa_size,
                                 String pin_value,
                                 PINPol pin_policy,
-                                KeyUsage key_usage) throws SKSException, IOException, GeneralSecurityException
+                                AppUsage key_usage) throws SKSException, IOException, GeneralSecurityException
       {
         return createRSAKey (id, rsa_size, pin_value, pin_policy, key_usage, null);
       }
@@ -510,7 +510,7 @@ public class ProvSess
                                 int rsa_size,
                                 String pin_value,
                                 PINPol pin_policy,
-                                KeyUsage key_usage,
+                                AppUsage key_usage,
                                 String[] endorsed_algorithm) throws SKSException, IOException, GeneralSecurityException
       {
         byte[] server_seed = new byte[32];
@@ -534,7 +534,7 @@ public class ProvSess
     public GenKey createECKey (String id,
                                String pin_value,
                                PINPol pin_policy,
-                               KeyUsage key_usage) throws SKSException, IOException, GeneralSecurityException
+                               AppUsage key_usage) throws SKSException, IOException, GeneralSecurityException
       {
         return createECKey (id, pin_value, pin_policy, key_usage, null);
       }
@@ -542,7 +542,7 @@ public class ProvSess
     public GenKey createECKey (String id,
                                String pin_value,
                                PINPol pin_policy,
-                               KeyUsage key_usage,
+                               AppUsage key_usage,
                                String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
       {
         byte[] server_seed = new byte[32];
@@ -573,7 +573,7 @@ public class ProvSess
                              ExportPolicy export_policy,
                              DeletePolicy delete_policy,
                              boolean enable_pin_caching,
-                             KeyUsage key_usage,
+                             AppUsage key_usage,
                              String friendly_name,
                              KeyAlgorithmData key_algorithm,
                              String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException

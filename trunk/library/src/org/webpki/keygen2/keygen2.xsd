@@ -22,7 +22,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 18-September-2010 
+    Revised: 23-September-2010 
     Author: Anders Rundgren
 
     Copyright 2006-2010 WebPKI.org (http://webpki.org).
@@ -1037,8 +1037,8 @@
               Default: false -->
          <xs:attribute name="EnablePINCaching" type="xs:boolean" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.KeyUsage -->
-         <xs:attribute name="KeyUsage" type="kgen:keyUsageTypes" use="required"/>
+         <!-- SKS Reference: createKeyPair.AppUsage -->
+         <xs:attribute name="AppUsage" type="kgen:appUsageTYpes" use="required"/>
 
          <!-- SKS Reference: createKeyPair.FriendlyName 
               Default: "" -->
@@ -1305,17 +1305,15 @@
    </xs:complexType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                Key usage definitions
+                            Application usage definitions
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:simpleType name="keyUsageTypes">
+   <xs:simpleType name="appUsageTYpes">
       <xs:restriction base="xs:string">
          <xs:enumeration value="signature"/>
          <xs:enumeration value="authentication"/>
          <xs:enumeration value="encryption"/>
          <xs:enumeration value="universal"/>
-         <xs:enumeration value="transport"/>
-         <xs:enumeration value="symmetric-key"/>
       </xs:restriction>
    </xs:simpleType>
 

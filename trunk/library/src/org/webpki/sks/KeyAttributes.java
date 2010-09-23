@@ -19,16 +19,13 @@ package org.webpki.sks;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
 
+import org.webpki.keygen2.AppUsage;
+
 public class KeyAttributes
   {
-    static final byte KEY_USAGE_SIGNATURE                  = 0x01;
-    static final byte KEY_USAGE_AUTHENTICATION             = 0x02;
-    static final byte KEY_USAGE_ENCRYPTION                 = 0x04;
-    static final byte KEY_USAGE_UNIVERSAL                  = 0x08;
-    static final byte KEY_USAGE_TRANSPORT                  = 0x10;
-    static final byte KEY_USAGE_SYMMETRIC_KEY              = 0x20;
-
-    byte key_usage;
+    byte app_usage;
+    
+    boolean is_symmetric_key;
     
     X509Certificate[] certificate_path;
     
@@ -41,15 +38,19 @@ public class KeyAttributes
     
     public boolean isSymmetric ()
       {
-        return key_usage == KEY_USAGE_SYMMETRIC_KEY;
+        return is_symmetric_key;
       }
-
-    public boolean isAsymmetric ()
+    
+    public AppUsage getAppUsage () throws SKSException
       {
-        return (key_usage & (KEY_USAGE_SIGNATURE |
-                             KEY_USAGE_AUTHENTICATION |
-                             KEY_USAGE_ENCRYPTION |
-                             KEY_USAGE_UNIVERSAL)) != 0;
+        for (AppUsage au : AppUsage.values ())
+          {
+            if (au.getSKSValue () == app_usage)
+              {
+                return au;
+              }
+          }
+        throw new SKSException ("Internal AppUsage error");
       }
 
     public HashSet<String> getExtensionTypes ()
@@ -57,11 +58,13 @@ public class KeyAttributes
         return extension_types;
       }
     
-    public KeyAttributes (byte key_usage,
+    public KeyAttributes (boolean is_symmetric_key,
+                          byte app_usage,
                           X509Certificate[] certificate_path,
                           HashSet<String> extension_types)
       {
-        this.key_usage = key_usage;
+        this.is_symmetric_key = is_symmetric_key;
+        this.app_usage = app_usage;
         this.certificate_path = certificate_path;
         this.extension_types = extension_types;
       }

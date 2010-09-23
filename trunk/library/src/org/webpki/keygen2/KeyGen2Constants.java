@@ -45,7 +45,7 @@ public interface KeyGen2Constants
 
     String NONCE_ATTR                        = "Nonce";
 
-    String KEY_USAGE_ATTR                    = "KeyUsage";
+    String APP_USAGE_ATTR                    = "AppUsage";
 
     String EXPONENT_ATTR                     = "Exponent";
 

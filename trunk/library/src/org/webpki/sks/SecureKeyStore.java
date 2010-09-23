@@ -58,7 +58,7 @@ public interface SecureKeyStore
                                   byte export_policy,
                                   byte delete_policy,
                                   boolean enable_pin_caching,
-                                  byte key_usage,
+                                  byte app_usage,
                                   String friendly_name,
                                   byte[] key_algorithm,
                                   String[] endorsed_algorithms,

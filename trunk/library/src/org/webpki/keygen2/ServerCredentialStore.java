@@ -705,7 +705,7 @@ public class ServerCredentialStore implements Serializable
                 bad ("Duplicate extension:" + ei.type);
               }
           }
-
+        
         public PropertyBag[] getPropertyBags ()
           {
             Vector<PropertyBag> prop_bags = new Vector<PropertyBag> ();
@@ -725,6 +725,21 @@ public class ServerCredentialStore implements Serializable
             addExtension (pb);
             return pb;
           }
+
+
+        Object object;
+        
+        public KeyProperties setUserObject (Object object)
+          {
+            this.object = object;
+            return this;
+          }
+        
+        public Object getUserObject ()
+          {
+            return object;
+          }
+
 
         public KeyProperties addExtension (String type, byte[] data) throws IOException
           {
@@ -763,10 +778,6 @@ public class ServerCredentialStore implements Serializable
         
         public KeyProperties setEncryptedSymmetricKey (byte[] encrypted_symmetric_key) throws IOException
           {
-            if (key_usage != KeyUsage.SYMMETRIC_KEY)
-              {
-                bad ("Symmetric keys musy use KeyUsage.SYMMETRIC_KEY");
-              }
             this.encrypted_symmetric_key = encrypted_symmetric_key;
             return this;
           }
@@ -930,11 +941,11 @@ public class ServerCredentialStore implements Serializable
           }
         
 
-        KeyUsage key_usage;
+        AppUsage app_usage;
 
-        public KeyUsage getKeyUsage ()
+        public AppUsage getAppUsage ()
           {
-            return key_usage;
+            return app_usage;
           }
 
         KeyAlgorithmData key_alg_data;
@@ -1005,10 +1016,10 @@ public class ServerCredentialStore implements Serializable
             return this;
           }
 
-        KeyProperties (KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protected) throws IOException
+        KeyProperties (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protected) throws IOException
           {
             this.id = key_prefix + ++next_key_id_suffix;
-            this.key_usage = key_usage;
+            this.app_usage = app_usage;
             this.key_alg_data = key_alg_data;
             this.pin_policy = pin_policy;
             this.preset_pin = preset_pin;
@@ -1060,7 +1071,7 @@ public class ServerCredentialStore implements Serializable
             key_pair_mac.addByte (delete_policy == null ?
                 DeletePolicy.NONE.getSKSValue () : delete_policy.getSKSValue ());
             key_pair_mac.addBool (enable_pin_caching);
-            key_pair_mac.addByte (key_usage.getSKSValue ());
+            key_pair_mac.addByte (app_usage.getSKSValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
             key_alg_data.updateKeyAlgorithmMac (key_pair_mac);
             if (endorsed_algorithms != null) for (String algorithm : endorsed_algorithms)
@@ -1079,7 +1090,7 @@ public class ServerCredentialStore implements Serializable
               }
             wr.addChildElement (KEY_PAIR_ELEM);
             wr.setStringAttribute (ID_ATTR, id);
-            wr.setStringAttribute (KEY_USAGE_ATTR, key_usage.getXMLName ());
+            wr.setStringAttribute (APP_USAGE_ATTR, app_usage.getXMLName ());
 
             if (export_policy != null)
               {
@@ -1298,27 +1309,27 @@ public class ServerCredentialStore implements Serializable
       }
 
 
-    private KeyProperties addKeyProperties (KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protected) throws IOException
+    private KeyProperties addKeyProperties (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protected) throws IOException
       {
-        KeyProperties key = new KeyProperties (key_usage, key_alg_data, pin_policy, preset_pin, device_pin_protected);
+        KeyProperties key = new KeyProperties (app_usage, key_alg_data, pin_policy, preset_pin, device_pin_protected);
         requested_keys.put (key.getID (), key);
         return key;
       }
 
 
-    public KeyProperties createKeyWithPresetPIN (KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, byte[] encrypted_pin) throws IOException
+    public KeyProperties createKeyWithPresetPIN (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, byte[] encrypted_pin) throws IOException
       {
         if (pin_policy == null)
           {
             bad ("PresetPIN without PINPolicy is not allowed");
           }
-        return addKeyProperties (key_usage, key_alg_data, pin_policy, new PresetValue (encrypted_pin), false);
+        return addKeyProperties (app_usage, key_alg_data, pin_policy, new PresetValue (encrypted_pin), false);
       }
 
 
-    public KeyProperties createKey (KeyUsage key_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy) throws IOException
+    public KeyProperties createKey (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy) throws IOException
       {
-        KeyProperties key = addKeyProperties (key_usage, key_alg_data, pin_policy, null, false);
+        KeyProperties key = addKeyProperties (app_usage, key_alg_data, pin_policy, null, false);
         if (pin_policy != null)
           {
             pin_policy.user_defined = true;
@@ -1328,9 +1339,9 @@ public class ServerCredentialStore implements Serializable
       }
 
 
-    public KeyProperties createDevicePINProtectedKey (KeyUsage key_usage, KeyAlgorithmData key_alg_data) throws IOException
+    public KeyProperties createDevicePINProtectedKey (AppUsage app_usage, KeyAlgorithmData key_alg_data) throws IOException
       {
-        return addKeyProperties (key_usage, key_alg_data, null, null, true);
+        return addKeyProperties (app_usage, key_alg_data, null, null, true);
       }
 
   }

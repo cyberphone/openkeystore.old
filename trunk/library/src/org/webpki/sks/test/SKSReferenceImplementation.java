@@ -129,14 +129,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final String CRYPTO_STRING_DEVICE_PIN           = "#Device PIN";
 
     /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "KeyUsage" in the SKS specification
+    // See "AppUsage" in the SKS specification
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte KEY_USAGE_SIGNATURE                  = 0x01;
-    static final byte KEY_USAGE_AUTHENTICATION             = 0x02;
-    static final byte KEY_USAGE_ENCRYPTION                 = 0x04;
-    static final byte KEY_USAGE_UNIVERSAL                  = 0x08;
-    static final byte KEY_USAGE_TRANSPORT                  = 0x10;
-    static final byte KEY_USAGE_SYMMETRIC_KEY              = 0x20;
+    static final byte APP_USAGE_SIGNATURE                  = 0x00;
+    static final byte APP_USAGE_AUTHENTICATION             = 0x01;
+    static final byte APP_USAGE_ENCRYPTION                 = 0x02;
+    static final byte APP_USAGE_UNIVERSAL                  = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // See "PIN Grouping" in the SKS specification
@@ -295,7 +293,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         int key_handle;
 
-        byte key_usage;
+        byte app_usage;
 
         PublicKey public_key;
         PrivateKey private_key;
@@ -332,26 +330,56 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             abort ("Authorization error for key #" + key_handle, SKSException.ERROR_AUTHORIZATION);
           }
 
-        void setErrorCounter (short new_error_count)
+        @SuppressWarnings("fallthrough")
+        Vector<KeyEntry> getPINSynchronizedKeys ()
           {
-            if (pin_policy.grouping == PIN_GROUPING_SHARED || pin_policy.grouping == PIN_GROUPING_SIGN_PLUS_STD)
+            Vector<KeyEntry> group = new Vector<KeyEntry> ();
+            if (pin_policy.grouping == PIN_GROUPING_NONE)
               {
-                /////////////////////////////////////////////////////////////////////////////////////////
-                // That multiple keys "share" a PIN doesn't mean that you get n times more chances...
-                /////////////////////////////////////////////////////////////////////////////////////////
-                for (KeyEntry key_entry : keys.values ())
-                  {
-                    if (key_entry.pin_policy == pin_policy &&
-                        (pin_policy.grouping == PIN_GROUPING_SHARED ||
-                            ((key_usage != KEY_USAGE_SIGNATURE) ^ (key_entry.key_usage == KEY_USAGE_SIGNATURE))))
-                      {
-                        key_entry.error_counter = new_error_count;
-                      }
-                  }
+                group.add (this);
               }
             else
               {
-                error_counter = new_error_count;
+                /////////////////////////////////////////////////////////////////////////////////////////
+                // Multiple keys "sharing" a PIN means that status and values must be distributed
+                /////////////////////////////////////////////////////////////////////////////////////////
+                for (KeyEntry key_entry : keys.values ())
+                  {
+                    if (key_entry.pin_policy == pin_policy)
+                      {
+                        switch (pin_policy.grouping)
+                          {
+                            case PIN_GROUPING_UNIQUE:
+                              if (app_usage != key_entry.app_usage)
+                                {
+                                  continue;
+                                }
+                            case PIN_GROUPING_SIGN_PLUS_STD:
+                              if ((app_usage == APP_USAGE_SIGNATURE) ^ (key_entry.app_usage == APP_USAGE_SIGNATURE))
+                                {
+                                  continue;
+                                }
+                          }
+                        group.add (key_entry);
+                      }
+                  }
+              }
+            return group;
+          }
+
+        void setErrorCounter (short new_error_count)
+          {
+            for (KeyEntry key_entry : getPINSynchronizedKeys ())
+              {
+                key_entry.error_counter = new_error_count;
+              }
+          }
+        
+         void updatePIN (byte[] new_pin)
+          {
+            for (KeyEntry key_entry : getPINSynchronizedKeys ())
+              {
+                key_entry.pin_value = new_pin;
               }
           }
 
@@ -813,17 +841,15 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         int mask;
         String jce_name;
-        byte key_usage_mask;
       }
 
     static HashMap<String,Algorithm> algorithms = new HashMap<String,Algorithm> ();
 
-    static void addAlgorithm (String uri, String jce_name, int mask, int key_usage_mask)
+    static void addAlgorithm (String uri, String jce_name, int mask)
       {
         Algorithm alg = new Algorithm ();
         alg.mask = mask;
         alg.jce_name = jce_name;
-        alg.key_usage_mask = (byte)key_usage_mask;
         algorithms.put (uri, alg);
       }
 
@@ -859,91 +885,78 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes128-cbc",
                       "AES/CBC/PKCS5Padding",
-                      ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_128,
-                      KEY_USAGE_SYMMETRIC_KEY);
+                      ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_128);
 
         addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes192-cbc",
                       "AES/CBC/PKCS5Padding",
-                      ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_192,
-                      KEY_USAGE_SYMMETRIC_KEY);
+                      ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_192);
 
         addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes256-cbc",
                       "AES/CBC/PKCS5Padding",
-                      ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_256,
-                      KEY_USAGE_SYMMETRIC_KEY);
+                      ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_256);
 
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.nopad",
                       "AES/ECB/NoPadding",
-                      ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256,
-                      KEY_USAGE_SYMMETRIC_KEY);
+                      ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
 
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.pkcs5",
                       "AES/ECB/PKCS5Padding",
-                      ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256,
-                      KEY_USAGE_SYMMETRIC_KEY);
+                      ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
 
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.cbc.pkcs5",
                       "AES/CBC/PKCS5Padding",
-                      ALG_SYM_ENC | ALG_IV_REQ | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256,
-                      KEY_USAGE_SYMMETRIC_KEY);
+                      ALG_SYM_ENC | ALG_IV_REQ | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  HMAC Operations
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://www.w3.org/2000/09/xmldsig#hmac-sha1", "HmacSHA1", ALG_HMAC, KEY_USAGE_SYMMETRIC_KEY);
+        addAlgorithm ("http://www.w3.org/2000/09/xmldsig#hmac-sha1", "HmacSHA1", ALG_HMAC);
 
-        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HmacSHA256", ALG_HMAC, KEY_USAGE_SYMMETRIC_KEY);
+        addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HmacSHA256", ALG_HMAC);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Encryption
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://www.w3.org/2001/04/xmlenc#rsa-1_5",
                       "RSA/ECB/PKCS1Padding",
-                      ALG_ASYM_ENC | ALG_RSA_KEY,
-                      KEY_USAGE_ENCRYPTION | KEY_USAGE_AUTHENTICATION | KEY_USAGE_UNIVERSAL);
+                      ALG_ASYM_ENC | ALG_RSA_KEY);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Signatures
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://www.w3.org/2000/09/xmldsig#rsa-sha1",
                       "NONEwithRSA",
-                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_160,
-                      KEY_USAGE_SIGNATURE | KEY_USAGE_AUTHENTICATION | KEY_USAGE_UNIVERSAL);
+                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_160);
 
         addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
                       "NONEwithRSA",
-                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_256,
-                      KEY_USAGE_SIGNATURE | KEY_USAGE_AUTHENTICATION | KEY_USAGE_UNIVERSAL);
+                      ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_256);
 
         addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
                       "NONEwithECDSA",
-                      ALG_ASYM_SGN | ALG_ECC_KEY | ALG_HASH_256,
-                      KEY_USAGE_SIGNATURE | KEY_USAGE_AUTHENTICATION | KEY_USAGE_UNIVERSAL);
+                      ALG_ASYM_SGN | ALG_ECC_KEY | ALG_HASH_256);
 
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.none",
                       "NONEwithRSA",
-                      ALG_ASYM_SGN | ALG_RSA_KEY,
-                      KEY_USAGE_SIGNATURE | KEY_USAGE_AUTHENTICATION | KEY_USAGE_UNIVERSAL);
+                      ALG_ASYM_SGN | ALG_RSA_KEY);
 
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdsa.none",
                       "NONEwithECDSA",
-                      ALG_ASYM_SGN | ALG_ECC_KEY,
-                      KEY_USAGE_SIGNATURE | KEY_USAGE_AUTHENTICATION | KEY_USAGE_UNIVERSAL);
+                      ALG_ASYM_SGN | ALG_ECC_KEY);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Elliptic Curves
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("urn:oid:1.2.840.10045.3.1.7", "secp256r1", ALG_ECC_CRV, 0);
+        addAlgorithm ("urn:oid:1.2.840.10045.3.1.7", "secp256r1", ALG_ECC_CRV);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Special Algorithms
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm (ALGORITHM_SESSION_KEY_ATTEST_1, null, 0, 0);
+        addAlgorithm (ALGORITHM_SESSION_KEY_ATTEST_1, null, 0);
 
-        addAlgorithm (ALGORITHM_KEY_ATTEST_1, null, 0, 0);
+        addAlgorithm (ALGORITHM_KEY_ATTEST_1, null, 0);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.none", null, ALG_NONE,
-                      KEY_USAGE_SYMMETRIC_KEY | KEY_USAGE_ENCRYPTION | KEY_USAGE_SIGNATURE | KEY_USAGE_AUTHENTICATION | KEY_USAGE_UNIVERSAL);
+        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.none", null, ALG_NONE);
 
       }
 
@@ -1073,7 +1086,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         throw new SKSException (message, option);
       }
 
-    void verifyPINPolicyCompliance (KeyEntry target_key, byte[] pin_value, PINPolicy pin_policy, byte key_usage, SKSError sks_error) throws SKSException
+    @SuppressWarnings("fallthrough")
+    void verifyPINPolicyCompliance (boolean forced_setter, byte[] pin_value, PINPolicy pin_policy, byte app_usage, SKSError sks_error) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Check PIN length
@@ -1187,34 +1201,34 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         for (KeyEntry key_entry : keys.values ())
           {
-            if (key_entry.pin_policy == pin_policy && key_entry != target_key)
+            if (key_entry.pin_policy == pin_policy)
               {
+                boolean equal = Arrays.equals (key_entry.pin_value, pin_value);
+                if (forced_setter && !equal)
+                  {
+                    continue;
+                  }
                 switch (pin_policy.grouping)
                   {
                     case PIN_GROUPING_SHARED:
-                      if (!Arrays.equals (key_entry.pin_value, pin_value))
+                      if (!equal)
                         {
                           sks_error.abort ("Grouping = \"shared\" requires identical PINs");
                         }
                       continue;
 
                     case PIN_GROUPING_UNIQUE:
-                      if (Arrays.equals (key_entry.pin_value, pin_value))
+                      if (equal ^ (app_usage == key_entry.app_usage))
                         {
                           sks_error.abort ("Grouping = \"unique\" requires unique PINs");
                         }
                       continue;
 
                     case PIN_GROUPING_SIGN_PLUS_STD:
-                      if (((key_usage == KEY_USAGE_SIGNATURE) ^ (key_entry.key_usage == KEY_USAGE_SIGNATURE)) ^
-                          !Arrays.equals (key_entry.pin_value, pin_value))
+                      if (((app_usage == APP_USAGE_SIGNATURE) ^ (key_entry.app_usage == APP_USAGE_SIGNATURE)) ^ !equal)
                         {
                           sks_error.abort ("Grouping = \"signature+standard\" PIN error");
                         }
-                      continue;
-
-                    default:
-                      continue;
                   }
               }
           }
@@ -1230,7 +1244,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             abort ("PIN for key #" + key_entry.key_handle + " is not user modifiable", SKSException.ERROR_NOT_ALLOWED);
           }
-        verifyPINPolicyCompliance (key_entry, new_pin, key_entry.pin_policy, key_entry.key_usage, this);
+        verifyPINPolicyCompliance (true, new_pin, key_entry.pin_policy, key_entry.app_usage, this);
       }
     
     void deleteEmptySession (Provisioning provisioning)
@@ -1274,39 +1288,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
       }
 
-    void updatePIN (KeyEntry key_entry, byte[] new_pin)
-      {
-        if (key_entry.pin_policy.grouping == PIN_GROUPING_SHARED || key_entry.pin_policy.grouping == PIN_GROUPING_SIGN_PLUS_STD)
-          {
-            /////////////////////////////////////////////////////////////////////////////////////////
-            // Multiple keys "sharing" a PIN means that the new value must be distributed
-            /////////////////////////////////////////////////////////////////////////////////////////
-            for (KeyEntry test_key : keys.values ())
-              {
-                if (test_key.pin_policy == key_entry.pin_policy &&
-                    (key_entry.pin_policy.grouping == PIN_GROUPING_SHARED ||
-                        ((key_entry.key_usage != KEY_USAGE_SIGNATURE) ^ (test_key.key_usage == KEY_USAGE_SIGNATURE))))
-                  {
-                    test_key.pin_value = new_pin;
-                  }
-              }
-          }
-        else
-          {
-            key_entry.pin_value = new_pin;
-          }
-      }
-
     Algorithm checkKeyAndAlgorithm (KeyEntry key_entry, String input_algorithm, int expected_type) throws SKSException
       {
         Algorithm alg = getAlgorithm (input_algorithm);
         if ((alg.mask & expected_type) == 0)
           {
             abort ("Algorithm does not match operation: " + input_algorithm, SKSException.ERROR_ALGORITHM);
-          }
-        if ((key_entry.key_usage & alg.key_usage_mask) == 0)
-          {
-            abort ("Operation does not match \"KeyUsage\" for key #" + key_entry.key_handle);
           }
         if (key_entry.endorsed_algorithms.isEmpty () || key_entry.endorsed_algorithms.contains (input_algorithm))
           {
@@ -1460,7 +1447,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Success!  Set PIN value(s)
         ///////////////////////////////////////////////////////////////////////////////////
-        updatePIN (key_entry, new_pin);
+        key_entry.updatePIN (new_pin);
       }
 
 
@@ -1490,7 +1477,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Success!  Set PIN value(s) and unlock associated key(s)
         ///////////////////////////////////////////////////////////////////////////////////
-        updatePIN (key_entry, new_pin);
+        key_entry.updatePIN (new_pin);
         key_entry.setErrorCounter ((short)0);
       }
 
@@ -1550,8 +1537,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Export key in raw unencrypted format
         ///////////////////////////////////////////////////////////////////////////////////
-        return key_entry.key_usage == KEY_USAGE_SYMMETRIC_KEY ?
-                                      key_entry.symmetric_key : key_entry.private_key.getEncoded ();
+        return key_entry.symmetric_key == null ? key_entry.private_key.getEncoded () : key_entry.symmetric_key;
       }
 
 
@@ -2060,7 +2046,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
       {
         // TODO very incomplete (but still useful...)
         KeyEntry key_entry = getStdKey (key_handle);
-        return new KeyAttributes (key_entry.key_usage,
+        return new KeyAttributes (key_entry.symmetric_key != null,
+                                  key_entry.app_usage,
                                   key_entry.certificate_path,
                                   new HashSet<String> (key_entry.extensions.keySet ()));
       }
@@ -2126,13 +2113,48 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             if (key_entry.owner == provisioning)
               {
+                ///////////////////////////////////////////////////////////////////////////////////
+                // A key provisioned in this session
+                ///////////////////////////////////////////////////////////////////////////////////
                 if (key_entry.certificate_path == null)
                   {
                     provisioning.abort ("Missing \"setCertificatePath\" for key: " + key_entry.id);
                   }
-                if (key_entry.key_usage == KEY_USAGE_SYMMETRIC_KEY && key_entry.symmetric_key == null)
+
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Check that possible endorsed algorithms match key material
+                ///////////////////////////////////////////////////////////////////////////////////
+                for (String algorithm : key_entry.endorsed_algorithms)
                   {
-                    provisioning.abort ("Missing \"setSymmetricKey\" for key: " + key_entry.id);
+                    Algorithm alg = getAlgorithm (algorithm);
+                    if ((alg.mask & ALG_NONE) == 0)
+                      {
+                        ///////////////////////////////////////////////////////////////////////////////////
+                        // Symmetric versus asymmetric
+                        ///////////////////////////////////////////////////////////////////////////////////
+                        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ (key_entry.symmetric_key == null))
+                          {
+                            if (key_entry.symmetric_key == null)
+                              {
+                                ///////////////////////////////////////////////////////////////////////////////////
+                                // Asymmetric.  Check that algorithms match RSA or ECC
+                                ///////////////////////////////////////////////////////////////////////////////////
+                                if (((alg.mask & ALG_RSA_KEY) == 0) ^ key_entry.certificate_path[0].getPublicKey () instanceof RSAPublicKey)
+                                  {
+                                    continue;
+                                  }
+                              }
+                            else
+                              {
+                                ///////////////////////////////////////////////////////////////////////////////////
+                                // Symmetric. AES algorithms only operates on 128, 192, and 256 bit keys
+                                ///////////////////////////////////////////////////////////////////////////////////
+                                testAESKey (algorithm, key_entry.symmetric_key, provisioning);
+                                continue;
+                              }
+                          }
+                        key_entry.owner.abort ("Key type for: " + key_entry.id + " does not match algorithm: " + algorithm);
+                      }
                   }
               }
           }
@@ -2515,15 +2537,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         KeyEntry key_entry = getOpenKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check for key usage and length errors
+        // Check for key length errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if ((key_entry.key_usage & (KEY_USAGE_SIGNATURE |
-                                    KEY_USAGE_ENCRYPTION |
-                                    KEY_USAGE_UNIVERSAL |
-                                    KEY_USAGE_AUTHENTICATION)) == 0)
-          {
-            key_entry.owner.abort ("Invalid \"KeyUsage\" for \"restorePrivateKey\"");
-          }
         if (private_key.length > (MAX_LENGTH_CRYPTO_DATA + AES_PADDING))
           {
             key_entry.owner.abort ("Private key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
@@ -2569,10 +2584,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for various input errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
-          {
-            key_entry.owner.abort ("Invalid \"KeyUsage\" for \"setSymmetricKey\"");
-          }
         if (symmetric_key.length > (MAX_LENGTH_SYMMETRIC_KEY + AES_PADDING))
           {
             key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
@@ -2590,25 +2601,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         key_entry.owner.verifyMac (sym_mac, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Decrypt symmetric key
+        // Decrypt and store symmetric key
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] clear_text_symmetric_key = key_entry.owner.decrypt (symmetric_key);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check endorsed algorithms
-        ///////////////////////////////////////////////////////////////////////////////////
-        for (String endorsed_algorithm : key_entry.endorsed_algorithms)
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // AES encryption keys must match algorithm and only be 128, 192, or 256 bits
-            ///////////////////////////////////////////////////////////////////////////////////
-            testAESKey (endorsed_algorithm, clear_text_symmetric_key, key_entry.owner);
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Store symmetric key
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.symmetric_key = clear_text_symmetric_key;
+        key_entry.symmetric_key = key_entry.owner.decrypt (symmetric_key);
       }
 
 
@@ -2652,20 +2647,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         key_entry.owner.verifyMac (set_certificate_mac, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Verify that possible endorsed algorithms match key type
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.key_usage != KEY_USAGE_SYMMETRIC_KEY)
-          {
-            for (String algorithm : key_entry.endorsed_algorithms)
-              {
-                if (((getAlgorithm (algorithm).mask & ALG_RSA_KEY) != 0) ^ certificate_path[0].getPublicKey () instanceof RSAPublicKey)
-                  {
-                    key_entry.owner.abort ("Wrong key type for: " + key_entry.id);
-                  }
-              }
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
         // Store certificate path
         ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.certificate_path != null)
@@ -2693,7 +2674,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                   byte export_policy,
                                   byte delete_policy,
                                   boolean enable_pin_caching,
-                                  byte key_usage,
+                                  byte app_usage,
                                   String friendly_name,
                                   byte[] key_algorithm,
                                   String[] endorsed_algorithms,
@@ -2715,36 +2696,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
           }
-        boolean hit = false;
-        for (int q = 0, m = 1; q < 8; q++, m <<= 1)
-          {
-            if ((key_usage & m) != 0)
-              {
-                if (hit)
-                  {
-                    hit = false;
-                    break;
-                  }
-                if ((m & (KEY_USAGE_SIGNATURE | KEY_USAGE_AUTHENTICATION | KEY_USAGE_ENCRYPTION |
-                          KEY_USAGE_UNIVERSAL | KEY_USAGE_TRANSPORT | KEY_USAGE_SYMMETRIC_KEY)) == 0)
-
-                  {
-                    break;
-                  }
-                hit = true;
-              }
-          }
-        if (!hit)
-          {
-            provisioning.abort ("Invalid \"KeyUsage\" value=" +  key_usage);
-          }
-        if (private_key_backup && (key_usage & (KEY_USAGE_SIGNATURE |
-                                                KEY_USAGE_ENCRYPTION |
-                                                KEY_USAGE_UNIVERSAL |
-                                                KEY_USAGE_AUTHENTICATION)) == 0)
-          {
-            provisioning.abort ("\"KeyUsage\" does not permit private key backup");
-          }
+        provisioning.rangeTest (app_usage, APP_USAGE_SIGNATURE, APP_USAGE_UNIVERSAL, "AppUsage");
         if (export_policy != EXPORT_POLICY_NON_EXPORTABLE)
           {
             provisioning.rangeTest (export_policy, EXPORT_DELETE_POLICY_NONE, EXPORT_DELETE_POLICY_PUK, "ExportPolicy");
@@ -2801,14 +2753,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         key_pair_mac.addByte (export_policy);
         key_pair_mac.addByte (delete_policy);
         key_pair_mac.addBool (enable_pin_caching);
-        key_pair_mac.addByte (key_usage);
+        key_pair_mac.addByte (app_usage);
         key_pair_mac.addString (friendly_name);
         key_pair_mac.addVerbatim (key_algorithm);
         HashSet<String> temp_endorsed = new HashSet<String> ();
         for (String algorithm : endorsed_algorithms)
           {
             ///////////////////////////////////////////////////////////////////////////////////
-            // Check that the algorithms are known and matches key usage
+            // Check that the algorithms are known
             ///////////////////////////////////////////////////////////////////////////////////
             if (!temp_endorsed.add (algorithm))
               {
@@ -2822,10 +2774,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             if ((alg.mask & ALG_NONE) == 0 && endorsed_algorithms.length > 1)
               {
                 provisioning.abort ("Algorithm must be alone: " + algorithm );
-              }
-            if ((alg.key_usage_mask & key_usage) == 0)
-              {
-                provisioning.abort ("\"KeyUsage\" does not match algorithm: " + algorithm);
               }
             key_pair_mac.addString (algorithm);
           }
@@ -2860,7 +2808,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // Testing the actual PIN value
             ///////////////////////////////////////////////////////////////////////////////////
-            verifyPINPolicyCompliance (null, pin_value, pin_policy, key_usage, provisioning);
+            verifyPINPolicyCompliance (false, pin_value, pin_policy, app_usage, provisioning);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2945,7 +2893,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             key_entry.pin_value = pin_value;
             key_entry.public_key = public_key;
             key_entry.private_key = private_key;
-            key_entry.key_usage = key_usage;
+            key_entry.app_usage = app_usage;
             key_entry.device_pin_protected = device_pin_protected;
             key_entry.enable_pin_caching = enable_pin_caching;
             key_entry.biometric_protection = biometric_protection;

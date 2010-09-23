@@ -18,29 +18,21 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-public enum KeyUsage
+public enum AppUsage
   {
-    SIGNATURE                  ("signature",      (byte)0x01, false, true),
-    AUTHENTICATION             ("authentication", (byte)0x02, true,  true),
-    ENCRYPTION                 ("encryption",     (byte)0x04, true,  false),
-    UNIVERSAL                  ("universal",      (byte)0x08, true,  true),
-    TRANSPORT                  ("transport",      (byte)0x10, false, false),
-    SYMMETRIC_KEY              ("symmetric-key",  (byte)0x20, false, false);
+    SIGNATURE                  ("signature",      (byte)0x00),
+    AUTHENTICATION             ("authentication", (byte)0x01),
+    ENCRYPTION                 ("encryption",     (byte)0x02),
+    UNIVERSAL                  ("universal",      (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
     
     private final byte sks_value;        // As expressed in SKS
     
-    private final boolean asym_encrypt;  // If asymmetric key encryption is permitted
-
-    private final boolean asym_sign;     // If asymmetric key sign is permitted
-
-    private KeyUsage (String xml_name, byte sks_value, boolean asym_encrypt, boolean asym_sign)
+    private AppUsage (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
-        this.asym_encrypt = asym_encrypt;
-        this.asym_sign = asym_sign;
       }
 
 
@@ -56,21 +48,9 @@ public enum KeyUsage
       }
 
 
-    public boolean supportsAsymmetricKeyEncryption ()
+    public static AppUsage getKeyUsageFromString (String xml_name) throws IOException
       {
-        return asym_encrypt;
-      }
-
-
-    public boolean supportsAsymmetricKeySign ()
-      {
-        return asym_sign;
-      }
-
-
-    public static KeyUsage getKeyUsageFromString (String xml_name) throws IOException
-      {
-        for (KeyUsage key_type : KeyUsage.values ())
+        for (AppUsage key_type : AppUsage.values ())
           {
             if (xml_name.equals (key_type.xml_name))
               {
