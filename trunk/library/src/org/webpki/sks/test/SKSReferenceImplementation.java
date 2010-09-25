@@ -553,8 +553,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         byte input_method;
         byte grouping;
         byte pattern_restrictions;
-        byte min_length;
-        byte max_length;
+        short min_length;
+        short max_length;
 
         PINPolicy (Provisioning owner, String id) throws SKSException
           {
@@ -2947,8 +2947,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                 short retry_limit,
                                 byte grouping,
                                 byte pattern_restrictions,
-                                byte min_length,
-                                byte max_length,
+                                short min_length,
+                                short max_length,
                                 byte input_method,
                                 byte[] mac) throws SKSException
       {
@@ -2988,7 +2988,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             provisioning.abort ("Incorrect \"Format\" for the \"missing-group\" PIN pattern policy");
           }
-        if (min_length <= 1 || max_length > MAX_LENGTH_PIN_PUK || max_length < min_length)
+        if (min_length < 1 || max_length > MAX_LENGTH_PIN_PUK || max_length < min_length)
           {
             provisioning.abort ("PIN policy length error");
           }

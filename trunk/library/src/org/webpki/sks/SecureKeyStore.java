@@ -97,8 +97,8 @@ public interface SecureKeyStore
                                 short retry_limit,
                                 byte grouping,
                                 byte pattern_restrictions,
-                                byte min_length,
-                                byte max_length,
+                                short min_length,
+                                short max_length,
                                 byte input_method,
                                 byte[] mac) throws SKSException;
 
