@@ -174,8 +174,8 @@ public interface SecureKeyStore
 
     public void setProperty (int key_handle,
                              String type,
-                             String name,
-                             String value) throws SKSException;
+                             byte[] name,
+                             byte[] value) throws SKSException;
 
     public void unlockKey (int key_handle,
                            byte[] authorization) throws SKSException;

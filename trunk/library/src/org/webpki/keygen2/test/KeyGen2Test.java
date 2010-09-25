@@ -1206,14 +1206,14 @@ public class KeyGen2Test
                     assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
                     assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
                   }
-                sks.setProperty (ek.getKeyHandle (), prop_bag.getType (), props2[w].getName (), props2[w].getValue () + "w2");
+                sks.setProperty (ek.getKeyHandle (), prop_bag.getType (), props2[w].getName ().getBytes ("UTF-8"), (props2[w].getValue () + "w2").getBytes ("UTF-8"));
                 props1 = sks.getExtension (ek.getKeyHandle (), prop_bag.getType ()).getProperties ();
                 for (int i = 0; i < props1.length; i++)
                   {
                     assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
                     assertTrue ("Prop value error", (i == w) ^ props1[i].getValue ().equals (props2[i].getValue ()));
                   }
-                sks.setProperty (ek.getKeyHandle (), prop_bag.getType (), props2[w].getName (), props2[w].getValue ());
+                sks.setProperty (ek.getKeyHandle (), prop_bag.getType (), props2[w].getName ().getBytes ("UTF-8"), props2[w].getValue ().getBytes ("UTF-8"));
                 props1 = sks.getExtension (ek.getKeyHandle (), prop_bag.getType ()).getProperties ();
                 for (int i = 0; i < props1.length; i++)
                   {

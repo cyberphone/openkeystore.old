@@ -1552,8 +1552,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public void setProperty (int key_handle,
                              String type,
-                             String name,
-                             String value) throws SKSException
+                             byte[] name,
+                             byte[] value) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key (which must belong to an already fully provisioned session)
@@ -1573,17 +1573,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Found, now look for the property name and update the associated value
         ///////////////////////////////////////////////////////////////////////////////////
         int i = 0;
-        byte[] utf8_name;
-        byte[] utf8_value;
-        try
-          {
-            utf8_name = name.getBytes ("UTF-8");
-            utf8_value = value.getBytes ("UTF-8");
-          }
-        catch (Exception e)
-          {
-            throw new SKSException (e);
-          }
         while (i < ext_obj.extension_data.length)
           {
             int nam_len = getShort (ext_obj.extension_data, i);
@@ -1591,14 +1580,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             byte[] pname = Arrays.copyOfRange (ext_obj.extension_data, i, nam_len + i);
             i += nam_len;
             int val_len = getShort (ext_obj.extension_data, i + 1);
-            if (Arrays.equals (utf8_name, pname))
+            if (Arrays.equals (name, pname))
               {
                 if (ext_obj.extension_data[i] != 0x01)
                   {
                     abort ("\"Property\" not writable: " + name, SKSException.ERROR_NOT_ALLOWED);
                   }
                 ext_obj.extension_data = addArrays (addArrays (Arrays.copyOfRange (ext_obj.extension_data, 0, ++i),
-                                                               addArrays (new byte[]{(byte)(utf8_value.length >> 8),(byte)utf8_value.length}, utf8_value)),
+                                                               addArrays (new byte[]{(byte)(value.length >> 8),(byte)value.length}, value)),
                                                     Arrays.copyOfRange (ext_obj.extension_data, i + val_len + 2, ext_obj.extension_data.length));
                 return;
               }
@@ -2144,7 +2133,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                 ///////////////////////////////////////////////////////////////////////////////////
                                 if (((alg.mask & ALG_RSA_KEY) == 0) ^ key_entry.certificate_path[0].getPublicKey () instanceof RSAPublicKey)
                                   {
-                                    //TODO a bit more key material testing here would be nice...
                                     continue;
                                   }
                               }
@@ -2649,6 +2637,33 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             key_entry.owner.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
           }
         key_entry.owner.verifyMac (set_certificate_mac, mac);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check key material for SKS compliance
+        ///////////////////////////////////////////////////////////////////////////////////
+        PublicKey public_key = certificate_path[0].getPublicKey ();
+        if (public_key instanceof RSAPublicKey)
+          {
+            byte[] modulus = ((RSAPublicKey) public_key).getModulus ().toByteArray ();
+            int rsa_key_size = (modulus[0] == 0 ? modulus.length - 1 : modulus.length) * 8;
+            for (int size : RSA_KEY_SIZES)
+              {
+                if (size == rsa_key_size)
+                  {
+                    modulus = null;
+                    break;
+                  }
+              }
+            if (modulus != null)
+              {
+                key_entry.owner.abort ("Unsupported RSA key size " + rsa_key_size + " for: " + key_entry.id);
+              }
+          }
+        else
+          {
+            byte[] asn1 = ((ECPublicKey) public_key).getEncoded ();
+            //TODO ECC
+          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Store certificate path
