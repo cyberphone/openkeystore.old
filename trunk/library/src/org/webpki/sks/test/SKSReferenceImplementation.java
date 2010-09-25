@@ -1350,26 +1350,29 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         Provisioning provisioning = key_entry.owner;
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Perform a "sanity" test
+        // Get key to be updated/cloned
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry target_key_entry = provisioning.getTargetKey (target_key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Perform some "sanity" tests
         ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.pin_policy != null || key_entry.device_pin_protected)
           {
             provisioning.abort ("Update/clone keys cannot have PIN codes");
           }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Get key to be updated/cloned
-        ///////////////////////////////////////////////////////////////////////////////////
-        KeyEntry target_key_entry = provisioning.getTargetKey (target_key_handle);
-
+        if (target_key_entry.app_usage != key_entry.app_usage)
+          {
+            provisioning.abort ("Update/clone keys must have the same \"AppUsage\" as the target key");
+          }
         if (!update)
           {
             ///////////////////////////////////////////////////////////////////////////////////
             // Cloned_kp keys are constrained
             ///////////////////////////////////////////////////////////////////////////////////
-            if (target_key_entry.pin_policy != null && target_key_entry.pin_policy.grouping != PIN_GROUPING_SHARED)
+            if (target_key_entry.pin_policy != null && target_key_entry.pin_policy.grouping == PIN_GROUPING_NONE)
               {
-                provisioning.abort ("Cloned key protection must have PIN grouping=\"shared\"");
+                provisioning.abort ("Cloned key protection must not have PIN grouping=\"none\"");
               }
           }
 
@@ -2130,7 +2133,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                     if ((alg.mask & ALG_NONE) == 0)
                       {
                         ///////////////////////////////////////////////////////////////////////////////////
-                        // Symmetric versus asymmetric
+                        // A non-null endorsed algorithm found.  Symmetric or asymmetric key?
                         ///////////////////////////////////////////////////////////////////////////////////
                         if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ (key_entry.symmetric_key == null))
                           {
@@ -2141,6 +2144,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                 ///////////////////////////////////////////////////////////////////////////////////
                                 if (((alg.mask & ALG_RSA_KEY) == 0) ^ key_entry.certificate_path[0].getPublicKey () instanceof RSAPublicKey)
                                   {
+                                    //TODO a bit more key material testing here would be nice...
                                     continue;
                                   }
                               }
