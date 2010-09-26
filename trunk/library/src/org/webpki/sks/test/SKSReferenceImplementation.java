@@ -1224,7 +1224,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                     case PIN_GROUPING_UNIQUE:
                       if (equal ^ (app_usage == key_entry.app_usage))
                         {
-                          sks_error.abort ("Grouping = \"unique\" requires unique PINs");
+                          sks_error.abort ("Grouping = \"unique\" PIN error");
                         }
                       continue;
 
@@ -1383,9 +1383,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder post_prov_del_mac = key_entry.getEECertMacBuilder (update ? METHOD_PP_UPDATE_KEY : METHOD_PP_CLONE_KEY_PROTECTION);
-        post_prov_del_mac.addArray (target_key_entry.getPostProvisioningMac ());
-        provisioning.verifyMac (post_prov_del_mac, mac);
+        MacBuilder verifier = key_entry.getEECertMacBuilder (update ? METHOD_PP_UPDATE_KEY : METHOD_PP_CLONE_KEY_PROTECTION);
+        verifier.addArray (target_key_entry.getPostProvisioningMac ());
+        provisioning.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the pp-op buffer used by "closeProvisioningSession"
@@ -1907,9 +1907,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder post_prov_del_mac = provisioning.getMacBuilderForMethodCall (METHOD_PP_DELETE_KEY);
-        post_prov_del_mac.addArray (target_key_entry.getPostProvisioningMac ());
-        provisioning.verifyMac (post_prov_del_mac, mac);
+        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_PP_DELETE_KEY);
+        verifier.addArray (target_key_entry.getPostProvisioningMac ());
+        provisioning.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the pp-op buffer used by "closeProvisioningSession"
@@ -2088,12 +2088,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder close_mac = provisioning.getMacBuilderForMethodCall (METHOD_CLOSE_PROVISIONING_SESSION);
-        close_mac.addString (provisioning.client_session_id);
-        close_mac.addString (provisioning.server_session_id);
-        close_mac.addString (provisioning.issuer_uri);
-        close_mac.addArray (nonce);
-        provisioning.verifyMac (close_mac, mac);
+        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CLOSE_PROVISIONING_SESSION);
+        verifier.addString (provisioning.client_session_id);
+        verifier.addString (provisioning.server_session_id);
+        verifier.addString (provisioning.issuer_uri);
+        verifier.addArray (nonce);
+        provisioning.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform "sanity" checks on provisioned data
@@ -2500,12 +2500,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder ext_mac = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
-        ext_mac.addString (type);
-        ext_mac.addByte (sub_type);
-        ext_mac.addArray (qualifier);
-        ext_mac.addBlob (extension_data);
-        key_entry.owner.verifyMac (ext_mac, mac);
+        MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
+        verifier.addString (type);
+        verifier.addByte (sub_type);
+        verifier.addArray (qualifier);
+        verifier.addBlob (extension_data);
+        key_entry.owner.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Succeeded, create object
@@ -2543,9 +2543,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder priv_mac = key_entry.getEECertMacBuilder (METHOD_RESTORE_PRIVATE_KEY);
-        priv_mac.addArray (private_key);
-        key_entry.owner.verifyMac (priv_mac, mac);
+        MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_RESTORE_PRIVATE_KEY);
+        verifier.addArray (private_key);
+        key_entry.owner.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Decrypt and store private key.  Note: SKS accepts multiple restores...
@@ -2592,9 +2592,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder sym_mac = key_entry.getEECertMacBuilder (METHOD_SET_SYMMETRIC_KEY);
-        sym_mac.addArray (symmetric_key);
-        key_entry.owner.verifyMac (sym_mac, mac);
+        MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_SET_SYMMETRIC_KEY);
+        verifier.addArray (symmetric_key);
+        key_entry.owner.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Decrypt and store symmetric key
@@ -2621,11 +2621,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder set_certificate_mac = key_entry.owner.getMacBuilderForMethodCall (METHOD_SET_CERTIFICATE_PATH);
+        MacBuilder verifier = key_entry.owner.getMacBuilderForMethodCall (METHOD_SET_CERTIFICATE_PATH);
         try
           {
-            set_certificate_mac.addArray (key_entry.public_key.getEncoded ());
-            set_certificate_mac.addString (key_entry.id);
+            verifier.addArray (key_entry.public_key.getEncoded ());
+            verifier.addString (key_entry.id);
             for (X509Certificate certificate : certificate_path)
               {
                 byte[] der = certificate.getEncoded ();
@@ -2633,14 +2633,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                   {
                     key_entry.owner.abort ("Certificate for: " + key_entry.id + " exceeds " + MAX_LENGTH_CRYPTO_DATA + " bytes");
                   }
-                set_certificate_mac.addArray (der);
+                verifier.addArray (der);
               }
           }
         catch (GeneralSecurityException e)
           {
             key_entry.owner.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
           }
-        key_entry.owner.verifyMac (set_certificate_mac, mac);
+        key_entry.owner.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check key material for SKS compliance
@@ -2757,28 +2757,28 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder key_pair_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_PAIR);
-        key_pair_mac.addString (id);
-        key_pair_mac.addString (attestation_algorithm);
-        key_pair_mac.addArray (server_seed);
-        key_pair_mac.addString (pin_policy_id);
+        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_PAIR);
+        verifier.addString (id);
+        verifier.addString (attestation_algorithm);
+        verifier.addArray (server_seed);
+        verifier.addString (pin_policy_id);
         if (decrypt_pin)
           {
-            key_pair_mac.addArray (pin_value);
+            verifier.addArray (pin_value);
             pin_value = provisioning.decrypt (pin_value);
           }
         else
           {
-            key_pair_mac.addString (CRYPTO_STRING_NOT_AVAILABLE);
+            verifier.addString (CRYPTO_STRING_NOT_AVAILABLE);
           }
-        key_pair_mac.addByte (biometric_protection);
-        key_pair_mac.addBool (private_key_backup);
-        key_pair_mac.addByte (export_policy);
-        key_pair_mac.addByte (delete_policy);
-        key_pair_mac.addBool (enable_pin_caching);
-        key_pair_mac.addByte (app_usage);
-        key_pair_mac.addString (friendly_name);
-        key_pair_mac.addVerbatim (key_algorithm);
+        verifier.addByte (biometric_protection);
+        verifier.addBool (private_key_backup);
+        verifier.addByte (export_policy);
+        verifier.addByte (delete_policy);
+        verifier.addBool (enable_pin_caching);
+        verifier.addByte (app_usage);
+        verifier.addString (friendly_name);
+        verifier.addVerbatim (key_algorithm);
         HashSet<String> temp_endorsed = new HashSet<String> ();
         for (String algorithm : endorsed_algorithms)
           {
@@ -2798,9 +2798,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 provisioning.abort ("Algorithm must be alone: " + algorithm );
               }
-            key_pair_mac.addString (algorithm);
+            verifier.addString (algorithm);
           }
-        provisioning.verifyMac (key_pair_mac, mac);
+        provisioning.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform a gazillion tests on PINs if applicable
@@ -3000,19 +3000,19 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder pin_policy_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PIN_POLICY);
-        pin_policy_mac.addString (id);
-        pin_policy_mac.addString (puk_policy_id);
-        pin_policy_mac.addBool (user_defined);
-        pin_policy_mac.addBool (user_modifiable);
-        pin_policy_mac.addByte (format);
-        pin_policy_mac.addShort (retry_limit);
-        pin_policy_mac.addByte (grouping);
-        pin_policy_mac.addByte (pattern_restrictions);
-        pin_policy_mac.addShort (min_length);
-        pin_policy_mac.addShort (max_length);
-        pin_policy_mac.addByte (input_method);
-        provisioning.verifyMac (pin_policy_mac, mac);
+        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PIN_POLICY);
+        verifier.addString (id);
+        verifier.addString (puk_policy_id);
+        verifier.addBool (user_defined);
+        verifier.addBool (user_modifiable);
+        verifier.addByte (format);
+        verifier.addShort (retry_limit);
+        verifier.addByte (grouping);
+        verifier.addByte (pattern_restrictions);
+        verifier.addShort (min_length);
+        verifier.addShort (max_length);
+        verifier.addByte (input_method);
+        provisioning.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Success, create object
@@ -3053,25 +3053,25 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder puk_policy_mac = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PUK_POLICY);
-        puk_policy_mac.addString (id);
-        puk_policy_mac.addArray (value);
-        puk_policy_mac.addByte (format);
-        puk_policy_mac.addShort (retry_limit);
-        provisioning.verifyMac (puk_policy_mac, mac);
-        byte[] puk_value = provisioning.decrypt (value);
+        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PUK_POLICY);
+        verifier.addString (id);
+        verifier.addArray (value);
+        verifier.addByte (format);
+        verifier.addShort (retry_limit);
+        provisioning.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform PUK "sanity" checks
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.rangeTest (format, PIN_FORMAT_NUMERIC, PIN_FORMAT_BINARY, "Format");
-        if (puk_value.length <= 1 || puk_value.length > MAX_LENGTH_PIN_PUK)
+        byte[] puk_value = provisioning.decrypt (value);
+        if (puk_value.length == 0 || puk_value.length > MAX_LENGTH_PIN_PUK)
           {
             provisioning.abort ("PUK length error");
           }
         for (int i = 0; i < puk_value.length; i++)
           {
-            int c = puk_value[i];
+            byte c = puk_value[i];
             if ((c < '0' || c > '9') && (format == PIN_FORMAT_NUMERIC ||
                                         ((c < 'A' || c > 'Z') && format == PIN_FORMAT_ALPHANUMERIC)))
               {
