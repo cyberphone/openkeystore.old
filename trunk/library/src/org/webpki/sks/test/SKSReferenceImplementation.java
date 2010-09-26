@@ -881,7 +881,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static
       {
         //////////////////////////////////////////////////////////////////////////////////////
-        //  Symmetric key encryption
+        //  Symmetric Key Encryption and Decryption
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes128-cbc",
                       "AES/CBC/PKCS5Padding",
@@ -915,10 +915,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HmacSHA256", ALG_HMAC);
 
         //////////////////////////////////////////////////////////////////////////////////////
-        //  Asymmetric Key Encryption
+        //  Asymmetric Key Decryption
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://www.w3.org/2001/04/xmlenc#rsa-1_5",
                       "RSA/ECB/PKCS1Padding",
+                      ALG_ASYM_ENC | ALG_RSA_KEY);
+
+        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.raw",
+                      "RSA/ECB/NoPadding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
         //////////////////////////////////////////////////////////////////////////////////////
