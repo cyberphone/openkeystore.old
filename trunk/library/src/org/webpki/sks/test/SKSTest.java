@@ -2095,6 +2095,15 @@ public class SKSTest
             verify.initVerify (key.cert_path[0]);
             verify.update (TEST_STRING);
             assertTrue ("Bad signature", verify.verify (result));
+            try
+              {
+                device.sks.performHMAC (key.key_handle, MacAlgorithms.HMAC_SHA256.getURI (), ok_pin.getBytes ("UTF-8"), TEST_STRING);
+                fail ("Sym key!");
+              }
+            catch (SKSException e)
+              {
+                checkException (e, "Algorithm does not match key type: http://www.w3.org/2001/04/xmldsig-more#hmac-sha256");
+              }
           }
       }
     void create3Keys (String s_pin, String a_pin, String e_pin) throws Exception

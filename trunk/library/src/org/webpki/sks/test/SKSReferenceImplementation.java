@@ -517,6 +517,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             return certificate_path[0].getPublicKey () instanceof RSAPublicKey;
           }
+        
+        boolean isSymmetric ()
+          {
+            return symmetric_key != null;
+          }
 
         void checkCryptoDataSize (byte[] data) throws SKSException
           {
@@ -1295,6 +1300,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     Algorithm checkKeyAndAlgorithm (KeyEntry key_entry, String input_algorithm, int expected_type) throws SKSException
       {
         Algorithm alg = getAlgorithm (input_algorithm);
+        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ (key_entry.isSymmetric ()))
+          {
+            abort ("Algorithm does not match key type: " + input_algorithm, SKSException.ERROR_ALGORITHM);
+          }
         if ((alg.mask & expected_type) == 0)
           {
             abort ("Algorithm does not match operation: " + input_algorithm, SKSException.ERROR_ALGORITHM);
@@ -1544,7 +1553,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Export key in raw unencrypted format
         ///////////////////////////////////////////////////////////////////////////////////
-        return key_entry.symmetric_key == null ? key_entry.private_key.getEncoded () : key_entry.symmetric_key;
+        return key_entry.isSymmetric () ? key_entry.symmetric_key : key_entry.private_key.getEncoded ();
       }
 
 
@@ -2042,7 +2051,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
       {
         // TODO very incomplete (but still useful...)
         KeyEntry key_entry = getStdKey (key_handle);
-        return new KeyAttributes (key_entry.symmetric_key != null,
+        return new KeyAttributes (key_entry.isSymmetric (),
                                   key_entry.app_usage,
                                   key_entry.certificate_path,
                                   new HashSet<String> (key_entry.extensions.keySet ()));
@@ -2128,25 +2137,25 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                         ///////////////////////////////////////////////////////////////////////////////////
                         // A non-null endorsed algorithm found.  Symmetric or asymmetric key?
                         ///////////////////////////////////////////////////////////////////////////////////
-                        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ (key_entry.symmetric_key == null))
+                        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) == 0) ^ (key_entry.isSymmetric ()))
                           {
-                            if (key_entry.symmetric_key == null)
-                              {
-                                ///////////////////////////////////////////////////////////////////////////////////
-                                // Asymmetric.  Check that algorithms match RSA or ECC
-                                ///////////////////////////////////////////////////////////////////////////////////
-                                if (((alg.mask & ALG_RSA_KEY) == 0) ^ key_entry.certificate_path[0].getPublicKey () instanceof RSAPublicKey)
-                                  {
-                                    continue;
-                                  }
-                              }
-                            else
+                            if (key_entry.isSymmetric ())
                               {
                                 ///////////////////////////////////////////////////////////////////////////////////
                                 // Symmetric. AES algorithms only operates on 128, 192, and 256 bit keys
                                 ///////////////////////////////////////////////////////////////////////////////////
                                 testAESKey (algorithm, key_entry.symmetric_key, provisioning);
                                 continue;
+                              }
+                            else
+                              {
+                                ///////////////////////////////////////////////////////////////////////////////////
+                                // Asymmetric.  Check that algorithms match RSA or ECC
+                                ///////////////////////////////////////////////////////////////////////////////////
+                                if (((alg.mask & ALG_RSA_KEY) == 0) ^ key_entry.isRSA ())
+                                  {
+                                    continue;
+                                  }
                               }
                           }
                         key_entry.owner.abort ("Key type for: " + key_entry.id + " does not match algorithm: " + algorithm);
