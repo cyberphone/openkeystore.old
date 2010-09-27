@@ -874,6 +874,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final int ALG_HASH_256 = 0x20000;
     static final int ALG_HASH_DIV = 0x01000;
     static final int ALG_NONE     = 0x40000;
+    static final int ALG_ASYM_KA  = 0x80000;
 
     static final String ALGORITHM_KEY_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
 
@@ -930,6 +931,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                       "RSA/ECB/NoPadding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
+        //////////////////////////////////////////////////////////////////////////////////////
+        //  Diffie-Hellman Key Agreement
+        //////////////////////////////////////////////////////////////////////////////////////
+        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh",
+                      "ECDHC",
+                      ALG_ASYM_KA | ALG_ECC_KEY);
+        
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Signatures
         //////////////////////////////////////////////////////////////////////////////////////
@@ -1662,7 +1670,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the key basic type matches the algorithm
+        // Check that the key type matches the algorithm
         ///////////////////////////////////////////////////////////////////////////////////
         if (!key_entry.isRSA ())  // We only know RSA in the ref impl....
           {
@@ -1727,7 +1735,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the key basic type matches the algorithm
+        // Check that the key type matches the algorithm
         ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.isRSA () ^ ((alg.mask & ALG_RSA_KEY) != 0))
           {
@@ -1752,6 +1760,62 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             signature.initSign (key_entry.private_key);
             signature.update (data);
             return signature.sign ();
+          }
+        catch (Exception e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                             keyAgreement                                   //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public byte[] keyAgreement (int key_handle, 
+                                byte[] parameters,
+                                String key_agreement_algorithm,
+                                byte[] authorization,
+                                PublicKey public_key) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
+        KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the key agreement algorithm is known and applicable
+        ///////////////////////////////////////////////////////////////////////////////////
+        Algorithm alg = checkKeyAndAlgorithm (key_entry, key_agreement_algorithm, ALG_ASYM_KA);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check that the key type matches the algorithm
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (key_entry.isRSA ())
+          {
+            abort ("\"KeyAgreementAlgorithm\" for key #" + key_handle + " does not match key type");
+          }
+        if (!(public_key instanceof ECPublicKey))
+          {
+            abort ("Incorrect \"PublicKey\" type");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (authorization);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Finally, perform operation
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            KeyAgreement key_agreement = KeyAgreement.getInstance (alg.jce_name, "BC");
+            key_agreement.init (key_entry.private_key);
+            key_agreement.doPhase (public_key, true);
+            return key_agreement.generateSecret ();
           }
         catch (Exception e)
           {

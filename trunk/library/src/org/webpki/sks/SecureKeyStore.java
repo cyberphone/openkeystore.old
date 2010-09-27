@@ -16,7 +16,10 @@
  */
 package org.webpki.sks;
 
+import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 
 /**
@@ -156,6 +159,12 @@ public interface SecureKeyStore
                                         String encryption_algorithm,
                                         byte[] authorization,
                                         byte[] data) throws SKSException;
+
+    public byte[] keyAgreement (int key_handle,
+                                byte[] parameters,
+                                String key_agreement_algorithm,
+                                byte[] authorization,
+                                PublicKey public_key) throws SKSException;
 
     void deleteKey (int key_handle,
                     byte[] authorization) throws SKSException;
