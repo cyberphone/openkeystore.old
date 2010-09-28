@@ -1308,13 +1308,21 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     Algorithm checkKeyAndAlgorithm (KeyEntry key_entry, String input_algorithm, int expected_type) throws SKSException
       {
         Algorithm alg = getAlgorithm (input_algorithm);
-        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ (key_entry.isSymmetric ()))
-          {
-            abort ("Algorithm does not match key type: " + input_algorithm, SKSException.ERROR_ALGORITHM);
-          }
         if ((alg.mask & expected_type) == 0)
           {
             abort ("Algorithm does not match operation: " + input_algorithm, SKSException.ERROR_ALGORITHM);
+          }
+        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ (key_entry.isSymmetric ()))
+          {
+            abort ((key_entry.isSymmetric () ? "S" : "As") + "ymmetric key #" + key_entry.key_handle + " is incompatible with: " + input_algorithm, SKSException.ERROR_ALGORITHM);
+          }
+        if (key_entry.isSymmetric ())
+          {
+            testAESKey (input_algorithm, key_entry.symmetric_key, "#" + key_entry.key_handle, this);
+          }
+        else if (key_entry.isRSA () ^ (alg.mask & ALG_RSA_KEY) != 0)
+          {
+            abort ((key_entry.isRSA () ? "RSA" : "ECC") + " key #" + key_entry.key_handle + " is incompatible with: " + input_algorithm, SKSException.ERROR_ALGORITHM);
           }
         if (key_entry.endorsed_algorithms.isEmpty () || key_entry.endorsed_algorithms.contains (input_algorithm))
           {
@@ -1332,7 +1340,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         return r;
       }
 
-    void testAESKey (String algorithm, byte[] symmetric_key, SKSError sks_error) throws SKSException
+    void testAESKey (String algorithm, byte[] symmetric_key, String key_id, SKSError sks_error) throws SKSException
       {
         Algorithm alg = getAlgorithm (algorithm);
         if ((alg.mask & ALG_SYM_ENC) != 0)
@@ -1344,7 +1352,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             else l = 0;
             if ((l & alg.mask) == 0)
               {
-                sks_error.abort ("Incorrect key size (" + symmetric_key.length + ") for algorithm: " + algorithm);
+                sks_error.abort ("Key " + key_id + " has wrong size (" + symmetric_key.length + ") for algorithm: " + algorithm);
               }
           }
       }
@@ -1651,7 +1659,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public byte[] asymmetricKeyDecrypt (int key_handle,
                                         byte[] parameters,
-                                        String encryption_algorithm,
+                                        String algorithm,
                                         byte[] authorization,
                                         byte[] data) throws SKSException
       {
@@ -1663,18 +1671,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the encryption algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = checkKeyAndAlgorithm (key_entry, encryption_algorithm, ALG_ASYM_ENC);
+        Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_ASYM_ENC);
         if (parameters.length != 0)  // Only support basic RSA yet...
           {
             abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the key type matches the algorithm
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (!key_entry.isRSA ())  // We only know RSA in the ref impl....
-          {
-            abort ("\"EncryptionAlgorithm\" for key #" + key_handle + " does not match key type");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1706,7 +1706,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public byte[] signHashedData (int key_handle,
                                   byte[] parameters,
-                                  String signature_algorithm,
+                                  String algorithm,
                                   byte[] authorization,
                                   byte[] data) throws SKSException
       {
@@ -1723,7 +1723,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the signature algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = checkKeyAndAlgorithm (key_entry, signature_algorithm, ALG_ASYM_SGN);
+        Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_ASYM_SGN);
         int hash_len = (alg.mask / ALG_HASH_DIV) & 0xFF;
         if (hash_len > 0 && hash_len != data.length)
           {
@@ -1732,14 +1732,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         if (parameters.length != 0)
           {
             abort ("Incorrect length of \"Parameters\": " + parameters.length);
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the key type matches the algorithm
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.isRSA () ^ ((alg.mask & ALG_RSA_KEY) != 0))
-          {
-            abort ("\"SignatureAlgorithm\" for key #" + key_handle + " does not match key type");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1776,7 +1768,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public byte[] keyAgreement (int key_handle, 
                                 byte[] parameters,
-                                String key_agreement_algorithm,
+                                String algorithm,
                                 byte[] authorization,
                                 PublicKey public_key) throws SKSException
       {
@@ -1788,15 +1780,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key agreement algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = checkKeyAndAlgorithm (key_entry, key_agreement_algorithm, ALG_ASYM_KA);
+        Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_ASYM_KA);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key type matches the algorithm
         ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.isRSA ())
-          {
-            abort ("\"KeyAgreementAlgorithm\" for key #" + key_handle + " does not match key type");
-          }
         if (!(public_key instanceof ECPublicKey))
           {
             abort ("Incorrect \"PublicKey\" type");
@@ -1833,7 +1821,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     public byte[] symmetricKeyEncrypt (int key_handle,
                                        boolean mode,
                                        byte[] iv,
-                                       String encryption_algorithm,
+                                       String algorithm,
                                        byte[] authorization,
                                        byte[] data) throws SKSException
       {
@@ -1850,19 +1838,18 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check the key and then check that the algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = checkKeyAndAlgorithm (key_entry, encryption_algorithm, ALG_SYM_ENC);
+        Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_SYM_ENC);
         if ((alg.mask & ALG_IV_REQ) == 0 || (alg.mask & ALG_IV_INT) != 0)
           {
             if (iv.length != 0)
               {
-                abort ("IV must be zero length for: " + encryption_algorithm);
+                abort ("IV must be zero length for: " + algorithm);
               }
           }
         else if (iv.length != 16)
           {
-            abort ("IV must be 16 bytes for: " + encryption_algorithm);
+            abort ("IV must be 16 bytes for: " + algorithm);
           }
-        testAESKey (encryption_algorithm, key_entry.symmetric_key, this);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
@@ -1917,7 +1904,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public byte[] performHMAC (int key_handle,
-                               String hmac_algorithm,
+                               String algorithm,
                                byte[] authorization,
                                byte[] data) throws SKSException
       {
@@ -1934,7 +1921,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check the key and then check that the algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = checkKeyAndAlgorithm (key_entry, hmac_algorithm, ALG_HMAC);
+        Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_HMAC);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
@@ -2208,7 +2195,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                 ///////////////////////////////////////////////////////////////////////////////////
                                 // Symmetric. AES algorithms only operates on 128, 192, and 256 bit keys
                                 ///////////////////////////////////////////////////////////////////////////////////
-                                testAESKey (algorithm, key_entry.symmetric_key, provisioning);
+                                testAESKey (algorithm, key_entry.symmetric_key, key_entry.id, provisioning);
                                 continue;
                               }
                             else
@@ -2222,7 +2209,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                   }
                               }
                           }
-                        key_entry.owner.abort ("Key type for: " + key_entry.id + " does not match algorithm: " + algorithm);
+                        key_entry.owner.abort ((key_entry.isSymmetric () ? "Symmetric" : key_entry.isRSA () ? "RSA" : "ECC") + 
+                                               " key " + key_entry.id + " does not match algorithm: " + algorithm);
                       }
                   }
               }

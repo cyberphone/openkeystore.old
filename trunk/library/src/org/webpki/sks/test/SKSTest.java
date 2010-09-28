@@ -1973,7 +1973,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Incorrect key size (15) for algorithm: http://www.w3.org/2001/04/xmlenc#aes128-cbc");
+            checkException (e, "Key Key.1 has wrong size (15) for algorithm: http://www.w3.org/2001/04/xmlenc#aes128-cbc");
           }
       }
     @Test
@@ -2041,7 +2041,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Key type for: Key.1 does not match algorithm: http://www.w3.org/2001/04/xmlenc#aes128-cbc");
+            checkException (e, "RSA key Key.1 does not match algorithm: http://www.w3.org/2001/04/xmlenc#aes128-cbc");
           }
       }
     @Test
@@ -2102,7 +2102,7 @@ public class SKSTest
               }
             catch (SKSException e)
               {
-                checkException (e, "Algorithm does not match key type: http://www.w3.org/2001/04/xmldsig-more#hmac-sha256");
+                checkException (e, "Asymmetric key # is incompatible with: http://www.w3.org/2001/04/xmldsig-more#hmac-sha256");
               }
           }
       }
@@ -2209,5 +2209,38 @@ public class SKSTest
         create3Keys ("1111", "2222", "3333");
         create3Keys ("1111", "2222", "2222");
         create3Keys ("1111", "1111", "2222");
+      }
+    @Test
+    public void test49 () throws Exception
+      {
+        for (AppUsage key_usage : AppUsage.values ())
+          {
+            byte[] symmetric_key = {0,5,3,9,0,23,67,56,8,34,-45,4,2,5,6, 6};
+            String ok_pin = "1563";
+            ProvSess sess = new ProvSess (device);
+            PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                      PassphraseFormat.NUMERIC,
+                                                      EnumSet.noneOf (PatternRestriction.class),
+                                                      PINGrouping.SHARED,
+                                                      4 /* min_length */, 
+                                                      8 /* max_length */,
+                                                      (short) 3 /* retry_limit*/, 
+                                                      null /* puk_policy */);
+            GenKey key = sess.createECKey ("Key.1",
+                                            ok_pin /* pin_value */,
+                                            pin_policy,
+                                            key_usage,
+                                            new String[]{SymEncryptionAlgorithms.AES192_CBC.getURI ()}).setCertificate ("CN=TEST18");
+            try
+              {
+                sess.setSymmetricKey (key, symmetric_key);
+                sess.closeSession ();
+                fail ("Wrong length");
+              }
+            catch (SKSException e)
+              {
+                checkException (e, "Key Key.1 has wrong size (16) for algorithm: http://www.w3.org/2001/04/xmlenc#aes192-cbc");
+              }
+          }
       }
   }

@@ -136,6 +136,8 @@ public class KeyGen2Test
     
     boolean ecc_key;
     
+    boolean key_agreement;
+    
     boolean server_seed;
     
     boolean property_bag;
@@ -807,13 +809,17 @@ public class KeyGen2Test
                                                                                key_alg, pin_policy,
                                                                                server_sess_key.encrypt (predef_server_pin))
                              :
-                server_credential_store.createKey (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
+                server_credential_store.createKey (encryption_key || key_agreement? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                    key_alg,
                                                    pin_policy);
             if (symmetric_key || encryption_key)
               {
                 kp.setEndorsedAlgorithms (new String[]{encryption_key ? SymEncryptionAlgorithms.AES256_CBC.getURI () : MacAlgorithms.HMAC_SHA1.getURI ()});
                 kp.setEncryptedSymmetricKey (server_sess_key.encrypt (encryption_key ? AES32BITKEY : OTP_SEED));
+              }
+            if (key_agreement)
+              {
+                kp.setEndorsedAlgorithms (new String[]{KeyGen2URIs.ALGORITHMS.ECDH});
               }
             if (property_bag)
               {
@@ -1422,6 +1428,15 @@ public class KeyGen2Test
             ecc_key = true;
             doer.perform ();
           }
+      }
+    @Test
+    public void test18 () throws Exception
+      {
+        Doer doer = new Doer ();
+        pin_protection = true;
+        ecc_key = true;
+        key_agreement = true;
+        doer.perform ();
       }
 
   }

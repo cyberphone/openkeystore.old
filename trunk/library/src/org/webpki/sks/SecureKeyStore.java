@@ -138,31 +138,31 @@ public interface SecureKeyStore
 
     public byte[] signHashedData (int key_handle,
                                   byte[] parameters,
-                                  String signature_algorithm,
+                                  String algorithm,
                                   byte[] authorization,
                                   byte[] data) throws SKSException;
     
     public byte[] performHMAC (int key_handle,
-                               String hmac_algorithm,
+                               String algorithm,
                                byte[] authorization,
                                byte[] data) throws SKSException;
     
     public byte[] symmetricKeyEncrypt (int key_handle,
                                        boolean mode,
                                        byte[] iv,
-                                       String encryption_algorithm,
+                                       String algorithm,
                                        byte[] authorization,
                                        byte[] data) throws SKSException;
 
     public byte[] asymmetricKeyDecrypt (int key_handle,
                                         byte[] parameters,
-                                        String encryption_algorithm,
+                                        String algorithm,
                                         byte[] authorization,
                                         byte[] data) throws SKSException;
 
     public byte[] keyAgreement (int key_handle,
                                 byte[] parameters,
-                                String key_agreement_algorithm,
+                                String algorithm,
                                 byte[] authorization,
                                 PublicKey public_key) throws SKSException;
 
