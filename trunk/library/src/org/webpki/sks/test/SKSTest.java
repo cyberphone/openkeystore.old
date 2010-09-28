@@ -24,11 +24,13 @@ import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.spec.ECGenParameterSpec;
 
 import java.util.EnumSet;
 import java.util.Set;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -2242,5 +2244,34 @@ public class SKSTest
                 checkException (e, "Key Key.1 has wrong size (16) for algorithm: http://www.w3.org/2001/04/xmlenc#aes192-cbc");
               }
           }
+      }
+    @Test
+    public void test50 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  PINGrouping.SHARED,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
+        GenKey key = sess.createECKey ("Key.1",
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        AppUsage.ENCRYPTION).setCertificate ("CN=TEST18");
+        sess.closeSession ();
+        KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC", "BC");
+        ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
+        generator.initialize (eccgen, new SecureRandom ());
+        java.security.KeyPair kp = generator.generateKeyPair ();
+        byte[] z = device.sks.keyAgreement (key.key_handle, new byte[0], KeyGen2URIs.ALGORITHMS.ECDH, ok_pin.getBytes ("UTF-8"), kp.getPublic ());
+        KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
+        key_agreement.init (kp.getPrivate ());
+        key_agreement.doPhase (key.cert_path[0].getPublicKey (), true);
+        byte[] Z = key_agreement.generateSecret ();
+        assertTrue ("DH fail", ArrayUtil.compare (z, Z));
       }
   }
