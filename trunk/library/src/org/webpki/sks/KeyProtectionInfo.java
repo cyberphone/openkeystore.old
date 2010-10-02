@@ -37,8 +37,6 @@ public class KeyProtectionInfo
     
     byte delete_policy;
     
-    PassphraseFormat format;
-    
     public boolean getPINCachingFlag ()
       {
         return enable_pin_caching;
@@ -73,10 +71,24 @@ public class KeyProtectionInfo
       {
         return (protection_status & PROTECTION_STATUS_PIN_PROTECTED) != 0;
       }
+
+    public boolean isPUKProtected ()
+      {
+        return (protection_status & PROTECTION_STATUS_PUK_PROTECTED) != 0;
+      }
+    
+    PassphraseFormat format;
     
     public PassphraseFormat getPINFormat () throws SKSException
       {
         return format;
+      }
+
+    PassphraseFormat puk_format;
+    
+    public PassphraseFormat getPUKFormat () throws SKSException
+      {
+        return puk_format;
       }
 
     private PassphraseFormat convertFormat (byte format) throws SKSException
@@ -91,22 +103,39 @@ public class KeyProtectionInfo
         throw new SKSException ("Unknown format: " + format);
       }
 
-    public KeyProtectionInfo (byte format,
-                              boolean enable_pin_caching,
-                              byte protection_status,
+    public KeyProtectionInfo (byte protection_status,
+                              byte puk_format,
+                              short puk_retry_limit,
+                              short puk_error_count,
+                              boolean user_defined,
+                              boolean user_modifiable,
+                              byte format,
+                              short retry_limit,
+                              byte grouping,
+                              byte pattern_restrictions,
+                              short min_length,
+                              short max_length,
                               byte input_method,
+                              short pin_error_count,
+                              byte biometric_protection,
+                              boolean private_key_backup,
                               byte export_policy,
-                              byte delete_policy) throws SKSException
+                              byte delete_policy,
+                              boolean enable_pin_caching) throws SKSException
 
       {
-        this.enable_pin_caching = enable_pin_caching;
         this.protection_status = protection_status;
-        this.input_method = input_method;
-        this.export_policy = export_policy;
-        this.delete_policy = delete_policy;
+        if (isPUKProtected ())
+          {
+            this.puk_format = convertFormat (puk_format);
+          }
         if (isPINProtected ())
           {
             this.format = convertFormat (format);
           }
+        this.enable_pin_caching = enable_pin_caching;
+        this.input_method = input_method;
+        this.export_policy = export_policy;
+        this.delete_policy = delete_policy;
       }
   }

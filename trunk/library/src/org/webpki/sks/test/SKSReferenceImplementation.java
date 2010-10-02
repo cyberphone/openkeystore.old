@@ -219,6 +219,16 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final int MAX_LENGTH_CRYPTO_DATA                = 16384;
     static final int MAX_LENGTH_EXTENSION_DATA             = 65536;
 
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // SKS version and configuration data
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final short SKS_API_LEVEL                       = 0x0001;
+    static final String SKS_VENDOR_NAME                    = "WebPKI.org";
+    static final String SKS_VENDOR_DESCRIPTION             = "SKS Reference - Java Emulator Edition";
+    static final byte[] SKS_UPDATE_URL                     = new byte[0];
+    static final boolean SKS_DEVICE_PIN_SUPPORT            = true;  // Change here to test or disable
+    static final boolean SKS_BIOMETRIC_SUPPORT             = true;  // Change here to test or disable
+    static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
 
     int next_key_handle = 1;
     HashMap<Integer,KeyEntry> keys = new HashMap<Integer,KeyEntry> ();
@@ -307,13 +317,15 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         boolean device_pin_protected;
 
         byte[] pin_value;
-        short error_counter;
+        short error_count;
         PINPolicy pin_policy;
         boolean enable_pin_caching;
         
         byte biometric_protection;
         byte export_policy;
         byte delete_policy;
+        
+        boolean private_key_backup;
 
 
         HashMap<String,ExtObject> extensions = new HashMap<String,ExtObject> ();
@@ -371,7 +383,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             for (KeyEntry key_entry : getPINSynchronizedKeys ())
               {
-                key_entry.error_counter = new_error_count;
+                key_entry.error_count = new_error_count;
               }
           }
         
@@ -386,10 +398,21 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         void verifyPIN (byte[] pin) throws SKSException
           {
             ///////////////////////////////////////////////////////////////////////////////////
-            // If there is no PIN there is nothing to verify...
+            // If there is no PIN policy there is nothing to verify...
             ///////////////////////////////////////////////////////////////////////////////////
             if (pin_policy == null)
               {
+                if (device_pin_protected)
+                  {
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    // Only for testing purposes.  Device PINs are out-of-scope for the SKS API
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    if (!Arrays.equals (pin, new byte[]{'1','2','3','4'}))
+                      {
+                        abort ("Invalid device PIN for key #" + key_handle);
+                      }
+                    return;
+                  }
                 if (pin.length != 0)
                   {
                     abort ("Redundant authorization information for key #" + key_handle);
@@ -400,7 +423,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Check that we haven't already passed the limit
                 ///////////////////////////////////////////////////////////////////////////////////
-                if (error_counter >= pin_policy.retry_limit)
+                if (error_count >= pin_policy.retry_limit)
                   {
                     authError ();
                   }
@@ -410,7 +433,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 ///////////////////////////////////////////////////////////////////////////////////
                 if (!Arrays.equals (this.pin_value, pin))
                   {
-                    setErrorCounter (++error_counter);
+                    setErrorCounter (++error_count);
                     authError ();
                   }
 
@@ -437,7 +460,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 ///////////////////////////////////////////////////////////////////////////////////
                 // The key is using the "standard" retry PUK policy
                 ///////////////////////////////////////////////////////////////////////////////////
-                if (puk_policy.error_counter >= puk_policy.retry_limit)
+                if (puk_policy.error_count >= puk_policy.retry_limit)
                   {
                     authError ();
                   }
@@ -463,7 +486,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 if (puk_policy.retry_limit > 0)
                   {
-                    ++puk_policy.error_counter;
+                    ++puk_policy.error_count;
                   }
                 authError ();
               }
@@ -471,7 +494,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // A success always resets the PUK error counter
             ///////////////////////////////////////////////////////////////////////////////////
-            puk_policy.error_counter = 0;
+            puk_policy.error_count = 0;
           }
 
         void authorizeExportOrDeleteOperation (byte policy, byte[] authorization) throws SKSException
@@ -579,7 +602,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         byte[] puk_value;
         byte format;
         short retry_limit;
-        short error_counter;
+        short error_count;
 
         PUKPolicy (Provisioning owner, String id) throws SKSException
           {
@@ -1255,6 +1278,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
       {
         if (key_entry.pin_policy == null)
           {
+            if (key_entry.device_pin_protected)
+              {
+                abort ("Key #" + key_entry.key_handle + " is device PIN protected");
+              }
             abort ("Key #" + key_entry.key_handle + " is not PIN protected");
           }
         if (!key_entry.pin_policy.user_modifiable)
@@ -2014,12 +2041,20 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public DeviceInfo getDeviceInfo () throws SKSException
       {
-        // TODO very incomplete (but still useful...)
         try
           {
-            return new DeviceInfo (getDeviceCertificatePath (),
+            return new DeviceInfo (SKS_API_LEVEL,
+                                   SKS_UPDATE_URL,
+                                   SKS_VENDOR_NAME,
+                                   SKS_VENDOR_DESCRIPTION,
+                                   getDeviceCertificatePath (),
+                                   new HashSet<String> (algorithms.keySet ()),
+                                   SKS_RSA_EXPONENT_SUPPORT,
                                    RSA_KEY_SIZES,
-                                   new HashSet<String> (algorithms.keySet ()));
+                                   MAX_LENGTH_CRYPTO_DATA,
+                                   MAX_LENGTH_EXTENSION_DATA,
+                                   SKS_DEVICE_PIN_SUPPORT,
+                                   SKS_BIOMETRIC_SUPPORT);
           }
         catch (Exception e)
           {
@@ -2060,9 +2095,27 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public KeyProtectionInfo getKeyProtectionInfo (int key_handle) throws SKSException
       {
-        // TODO very incomplete (but still useful...)
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Find the protection data objects that are not stored in the key entry
+        ///////////////////////////////////////////////////////////////////////////////////
         byte protection_status = PROTECTION_STATUS_NO_PIN;
+        byte puk_format = 0;
+        short puk_retry_limit = 0;
+        short puk_error_count = 0;
+        boolean user_defined = false;
+        boolean user_modifiable = false;
+        byte format = 0;
+        short retry_limit = 0;
+        byte grouping = 0;
+        byte pattern_restrictions = 0;
+        short min_length = 0;
+        short max_length = 0;
+        byte input_method = 0;
         if (key_entry.device_pin_protected)
           {
             protection_status = PROTECTION_STATUS_DEVICE_PIN;
@@ -2070,25 +2123,50 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         else if (key_entry.pin_policy != null)
           {
             protection_status = PROTECTION_STATUS_PIN_PROTECTED;
-            if (key_entry.error_counter >= key_entry.pin_policy.retry_limit)
+            if (key_entry.error_count >= key_entry.pin_policy.retry_limit)
               {
                 protection_status |= PROTECTION_STATUS_PIN_BLOCKED;
               }
             if (key_entry.pin_policy.puk_policy != null)
               {
+                puk_format = key_entry.pin_policy.puk_policy.format; 
+                puk_retry_limit = key_entry.pin_policy.puk_policy.retry_limit;
+                puk_error_count = key_entry.pin_policy.puk_policy.error_count;
                 protection_status |= PROTECTION_STATUS_PUK_PROTECTED;
-                if (key_entry.pin_policy.puk_policy.error_counter >= key_entry.pin_policy.puk_policy.retry_limit)
+                if (key_entry.pin_policy.puk_policy.error_count >= key_entry.pin_policy.puk_policy.retry_limit)
                   {
                     protection_status |= PROTECTION_STATUS_PUK_BLOCKED;
                   }
               }
+            user_defined = key_entry.pin_policy.user_defined;
+            user_modifiable = key_entry.pin_policy.user_modifiable;
+            format = key_entry.pin_policy.format;
+            retry_limit = key_entry.pin_policy.retry_limit;
+            grouping = key_entry.pin_policy.grouping;
+            pattern_restrictions = key_entry.pin_policy.pattern_restrictions;
+            min_length = key_entry.pin_policy.min_length;
+            max_length = key_entry.pin_policy.max_length;
+            input_method = key_entry.pin_policy.input_method;
           }
-        return new KeyProtectionInfo (key_entry.pin_policy == null ? 0 : key_entry.pin_policy.format,
-                                      key_entry.enable_pin_caching,
-                                      protection_status,
-                                      key_entry.pin_policy == null ? 0 : key_entry.pin_policy.input_method,
+        return new KeyProtectionInfo (protection_status,
+                                      puk_format,
+                                      puk_retry_limit,
+                                      puk_error_count,
+                                      user_defined,
+                                      user_modifiable,
+                                      format,
+                                      retry_limit,
+                                      grouping,
+                                      pattern_restrictions,
+                                      min_length,
+                                      max_length,
+                                      input_method,
+                                      key_entry.error_count,
+                                      key_entry.biometric_protection,
+                                      key_entry.private_key_backup,
                                       key_entry.export_policy,
-                                      key_entry.delete_policy);
+                                      key_entry.delete_policy,
+                                      key_entry.enable_pin_caching);
       }
 
 
@@ -2100,11 +2178,19 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public KeyAttributes getKeyAttributes (int key_handle) throws SKSException
       {
-        // TODO very incomplete (but still useful...)
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get key (which must belong to an already fully provisioned session)
+        ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = getStdKey (key_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Return core key entry metadata
+        ///////////////////////////////////////////////////////////////////////////////////
         return new KeyAttributes (key_entry.isSymmetric (),
                                   key_entry.app_usage,
+                                  key_entry.friendly_name,
                                   key_entry.certificate_path,
+                                  key_entry.endorsed_algorithms,
                                   new HashSet<String> (key_entry.extensions.keySet ()));
       }
 
@@ -2255,7 +2341,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 ///////////////////////////////////////////////////////////////////////////////////
                 post_op.new_key.pin_policy = key_entry.pin_policy;
                 post_op.new_key.pin_value = key_entry.pin_value;
-                post_op.new_key.error_counter = key_entry.error_counter;
+                post_op.new_key.error_count = key_entry.error_count;
                 post_op.new_key.device_pin_protected = key_entry.device_pin_protected;
               }
           }
@@ -2615,6 +2701,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (key_entry.owner.decrypt (private_key));
             key_entry.private_key = KeyFactory.getInstance (key_entry.isRSA () ? "RSA" : "EC", "BC").generatePrivate (key_spec);
+            key_entry.private_key_backup = true;
           }
         catch (GeneralSecurityException e)
           {
@@ -2984,6 +3071,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             key_entry.export_policy = export_policy;
             key_entry.delete_policy = delete_policy;
             key_entry.endorsed_algorithms = temp_endorsed;
+            key_entry.private_key_backup = private_key_backup;
             return new KeyPair (key_entry.key_handle,
                                 public_key,
                                 key_attestation.getResult (),

@@ -23,18 +23,18 @@ import org.webpki.keygen2.AppUsage;
 
 public class KeyAttributes
   {
-    byte app_usage;
-    
     boolean is_symmetric_key;
     
+    byte app_usage;
+    
+    String friendly_name;
+
     X509Certificate[] certificate_path;
     
+    HashSet<String> endorsed_algorithms;
+
     HashSet<String> extension_types;
     
-    public X509Certificate[] getCertificatePath ()
-      {
-        return certificate_path;
-      }
     
     public boolean isSymmetric ()
       {
@@ -52,6 +52,21 @@ public class KeyAttributes
           }
         throw new SKSException ("Internal AppUsage error");
       }
+    
+    public String getFriendlyName ()
+      {
+        return friendly_name;
+      }
+
+    public X509Certificate[] getCertificatePath ()
+      {
+        return certificate_path;
+      }
+
+    public HashSet<String> getEndorsedAlgorithms ()
+      {
+        return extension_types;
+      }
 
     public HashSet<String> getExtensionTypes ()
       {
@@ -60,12 +75,16 @@ public class KeyAttributes
     
     public KeyAttributes (boolean is_symmetric_key,
                           byte app_usage,
+                          String friendly_name,
                           X509Certificate[] certificate_path,
+                          HashSet<String> endorsed_algorithms,
                           HashSet<String> extension_types)
       {
         this.is_symmetric_key = is_symmetric_key;
         this.app_usage = app_usage;
+        this.friendly_name = friendly_name;
         this.certificate_path = certificate_path;
+        this.endorsed_algorithms = endorsed_algorithms;
         this.extension_types = extension_types;
       }
   }

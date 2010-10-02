@@ -21,32 +21,115 @@ import java.util.HashSet;
 
 public class DeviceInfo
   {
+    short api_level;
+    
+    public short getAPILevel ()
+      {
+        return api_level;
+      }
+    
+    byte[] update_url;
+    
+    byte[] getUpdateURL ()
+      {
+        return update_url;
+      }
+
+    public String vendor_name;
+    
+    public String getVendorName ()
+      {
+        return vendor_name;
+      }
+    
+    String vendor_description;
+    
+    public String getVendorDescription ()
+      {
+        return vendor_description;
+      }
+    
     X509Certificate[] certificate_path;
-    HashSet<String> algorithms;
-    short[] rsa_key_sizes;
     
     public X509Certificate[] getDeviceCertificatePath ()
       {
         return certificate_path;
       }
     
-    public short[] getRSAKeySizes ()
-      {
-        return rsa_key_sizes;
-      }
+    HashSet<String> algorithms;
     
     public HashSet<String> getAlgorithms ()
       {
         return algorithms;
       }
-    
-    public DeviceInfo (X509Certificate[] certificate_path,
-                       short[] rsa_key_sizes,
-                       HashSet<String> algorithms)
-      {
-        this.certificate_path = certificate_path;
-        this.rsa_key_sizes = rsa_key_sizes;
-        this.algorithms = algorithms;
-      }
 
+    boolean rsa_exponent_support;
+    
+    public boolean getRSAExponentSupport ()
+      {
+        return rsa_exponent_support;
+      }
+    
+    short[] rsa_key_sizes;
+
+    public short[] getRSAKeySizes ()
+      {
+        return rsa_key_sizes;
+      }
+    
+    int crypto_data_size;
+    
+    public int getCryptoDataSize ()
+      {
+        return crypto_data_size;
+      }
+    
+    int extension_data_size;
+    
+    public int getExtensionDataSize ()
+      {
+        return extension_data_size;
+      }
+    
+    boolean device_pin_support;
+    
+    public boolean getDevicePINSupport ()
+      {
+        return device_pin_support;
+      }
+    
+    boolean biometric_support;
+    
+    public boolean getBiometricSupport ()
+      {
+        return biometric_support;
+      }
+    
+    
+    public DeviceInfo (short api_level,
+                       byte[] update_url,
+                       String vendor_name,
+                       String vendor_description,
+                       X509Certificate[] certificate_path,
+                       HashSet<String> algorithms,
+                       boolean rsa_exponent_support,
+                       short[] rsa_key_sizes,
+                       int crypto_data_size,
+                       int extension_data_size,
+                       boolean device_pin_support,
+                       boolean biometric_support)
+      {
+        this.api_level = api_level;
+        this.update_url = update_url;
+        this.vendor_name = vendor_name;
+        this.vendor_description = vendor_description;
+        this.certificate_path = certificate_path;
+        this.algorithms = algorithms;
+        this.rsa_exponent_support = rsa_exponent_support;
+        this.rsa_key_sizes = rsa_key_sizes;
+        this.crypto_data_size = crypto_data_size;
+        this.extension_data_size = extension_data_size;
+        this.device_pin_support = device_pin_support;
+        this.biometric_support = biometric_support;
+      }
   }
