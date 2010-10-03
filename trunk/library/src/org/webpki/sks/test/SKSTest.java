@@ -1744,10 +1744,12 @@ public class SKSTest
         catch (SKSException e)
           {
             authorizationErrorCheck (e);
+            assertTrue ("PIN Error count", key.getKeyProtectionInfo ().getPINErrorCount () == 1);
           }
         try
           {
             device.sks.exportKey (key.key_handle, ok_pin.getBytes ("UTF-8"));
+            assertTrue ("PIN Error count", key.getKeyProtectionInfo ().getPINErrorCount () == 0);
           }
         catch (SKSException e)
           {
@@ -1792,7 +1794,7 @@ public class SKSTest
         sess.overrideExportPolicy (ExportPolicy.PUK.getSKSValue ());
         PUKPol puk = sess.createPUKPolicy ("PUK",
                                            PassphraseFormat.NUMERIC,
-                                           (short) 3 /* retry_limit*/, 
+                                           (short) 5 /* retry_limit*/, 
                                            puk_ok /* puk_policy */);
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
@@ -1810,11 +1812,13 @@ public class SKSTest
         try
           {
             device.sks.exportKey (key.key_handle, new byte[0]);
-            fail ("Bad PIN should not work");
+            fail ("Bad PUK should not work");
           }
         catch (SKSException e)
           {
             authorizationErrorCheck (e);
+            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPUKErrorCount () == 1);
+            assertTrue ("PIN Error count", key.getKeyProtectionInfo ().getPINErrorCount () == 0);
           }
         try
           {
@@ -1824,10 +1828,12 @@ public class SKSTest
         catch (SKSException e)
           {
             authorizationErrorCheck (e);
+            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPUKErrorCount () == 2);
           }
         try
           {
             device.sks.exportKey (key.key_handle, puk_ok.getBytes ("UTF-8"));
+            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPUKErrorCount () == 0);
           }
         catch (SKSException e)
           {

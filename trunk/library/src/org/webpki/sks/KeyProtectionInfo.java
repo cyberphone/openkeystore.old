@@ -90,6 +90,20 @@ public class KeyProtectionInfo
       {
         return puk_format;
       }
+    
+    short puk_error_count;
+    
+    public short getPUKErrorCount ()
+      {
+        return puk_error_count;
+      }
+    
+    short pin_error_count;
+    
+    public short getPINErrorCount ()
+      {
+        return pin_error_count;
+      }
 
     private PassphraseFormat convertFormat (byte format) throws SKSException
       {
@@ -133,7 +147,9 @@ public class KeyProtectionInfo
           {
             this.format = convertFormat (format);
           }
+        this.puk_error_count = puk_error_count;
         this.enable_pin_caching = enable_pin_caching;
+        this.pin_error_count = pin_error_count;
         this.input_method = input_method;
         this.export_policy = export_policy;
         this.delete_policy = delete_policy;

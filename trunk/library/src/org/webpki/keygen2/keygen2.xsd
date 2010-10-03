@@ -390,6 +390,9 @@
               as well -->
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
+         <!-- Freshness nonce to bind discovery to the session -->
+         <xs:attribute name="Nonce" type="xs:base64Binary" use="required"/>
+
       </xs:complexType>
    </xs:element>
 

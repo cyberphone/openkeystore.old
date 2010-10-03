@@ -28,9 +28,9 @@ public class DeviceInfo
         return api_level;
       }
     
-    byte[] update_url;
+    String update_url;
     
-    byte[] getUpdateURL ()
+    String getUpdateURL ()
       {
         return update_url;
       }
@@ -107,7 +107,7 @@ public class DeviceInfo
     
     
     public DeviceInfo (short api_level,
-                       byte[] update_url,
+                       String update_url,
                        String vendor_name,
                        String vendor_description,
                        X509Certificate[] certificate_path,

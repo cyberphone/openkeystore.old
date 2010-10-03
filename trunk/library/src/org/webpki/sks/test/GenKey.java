@@ -40,6 +40,7 @@ import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.keygen2.CryptoConstants;
 import org.webpki.sks.EnumeratedKey;
+import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
 
 public class GenKey
@@ -137,6 +138,11 @@ public class GenKey
               }
           }
         throw new SKSException ("Bad state");
+      }
+    
+    public KeyProtectionInfo getKeyProtectionInfo() throws SKSException
+      {
+        return prov_sess.sks.getKeyProtectionInfo (key_handle);
       }
     
     public void changePin (String old_pin, String new_pin) throws SKSException, IOException

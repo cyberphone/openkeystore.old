@@ -225,7 +225,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final short SKS_API_LEVEL                       = 0x0001;
     static final String SKS_VENDOR_NAME                    = "WebPKI.org";
     static final String SKS_VENDOR_DESCRIPTION             = "SKS Reference - Java Emulator Edition";
-    static final byte[] SKS_UPDATE_URL                     = new byte[0];
+    static final String SKS_UPDATE_URL                     = "";
     static final boolean SKS_DEVICE_PIN_SUPPORT            = true;  // Change here to test or disable
     static final boolean SKS_BIOMETRIC_SUPPORT             = true;  // Change here to test or disable
     static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
