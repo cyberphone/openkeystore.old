@@ -889,7 +889,10 @@ public class HttpsWrapper
                 List<X509Certificate> certchain = new ArrayList<X509Certificate> ();
                 for (X509Certificate cert : chain)
                   {
-                    certchain.add (cert);
+                    if (!cert.getSubjectX500Principal().equals(cert.getIssuerX500Principal()))
+                      {
+                        certchain.add (cert);
+                      }
                   }
                 CertPath cp = CertificateFactory.getInstance ("X.509").generateCertPath (certchain);
                 cpv.validate (cp, param);

@@ -39,7 +39,7 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
                         "AES/ECB/NoPadding",    0,  false, false, true,  true),  // SecurID
                         
     AES_ECB_P5      ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.pkcs5",
-                        "AES/ECB/PKCS5Padding", 0,  false, false, true,  false),
+                        "AES/ECB/PKCS5Padding", 0,  false, false, false, false),
                         
     AES_CBC_NP      ("internal:AES/CBC/NoPadding",
                         "AES/CBC/NoPadding",    0,  true,  false, false,  true),

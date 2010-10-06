@@ -881,23 +881,24 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         algorithms.put (uri, alg);
       }
 
-    static final int ALG_SYM_ENC  = 0x00001;
-    static final int ALG_IV_REQ   = 0x00002;
-    static final int ALG_IV_INT   = 0x00004;
-    static final int ALG_SYML_128 = 0x00008;
-    static final int ALG_SYML_192 = 0x00010;
-    static final int ALG_SYML_256 = 0x00020;
-    static final int ALG_HMAC     = 0x00040;
-    static final int ALG_ASYM_ENC = 0x00080;
-    static final int ALG_ASYM_SGN = 0x00100;
-    static final int ALG_RSA_KEY  = 0x00200;
-    static final int ALG_ECC_KEY  = 0x00400;
-    static final int ALG_ECC_CRV  = 0x00800;
-    static final int ALG_HASH_160 = 0x14000;
-    static final int ALG_HASH_256 = 0x20000;
-    static final int ALG_HASH_DIV = 0x01000;
-    static final int ALG_NONE     = 0x40000;
-    static final int ALG_ASYM_KA  = 0x80000;
+    static final int ALG_SYM_ENC  = 0x000001;
+    static final int ALG_IV_REQ   = 0x000002;
+    static final int ALG_IV_INT   = 0x000004;
+    static final int ALG_SYML_128 = 0x000008;
+    static final int ALG_SYML_192 = 0x000010;
+    static final int ALG_SYML_256 = 0x000020;
+    static final int ALG_HMAC     = 0x000040;
+    static final int ALG_ASYM_ENC = 0x000080;
+    static final int ALG_ASYM_SGN = 0x000100;
+    static final int ALG_RSA_KEY  = 0x000200;
+    static final int ALG_ECC_KEY  = 0x000400;
+    static final int ALG_ECC_CRV  = 0x000800;
+    static final int ALG_HASH_160 = 0x014000;
+    static final int ALG_HASH_256 = 0x020000;
+    static final int ALG_HASH_DIV = 0x001000;
+    static final int ALG_NONE     = 0x040000;
+    static final int ALG_ASYM_KA  = 0x080000;
+    static final int ALG_AES_PAD  = 0x100000;
 
     static final String ALGORITHM_KEY_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
 
@@ -926,11 +927,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.nopad",
                       "AES/ECB/NoPadding",
-                      ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
-
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.pkcs5",
-                      "AES/ECB/PKCS5Padding",
-                      ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
+                      ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256 | ALG_AES_PAD);
 
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.cbc.pkcs5",
                       "AES/CBC/PKCS5Padding",
@@ -1876,6 +1873,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         else if (iv.length != 16)
           {
             abort ("IV must be 16 bytes for: " + algorithm);
+          }
+        if ((!mode || (alg.mask & ALG_AES_PAD) != 0) && data.length % 16 != 0)
+          {
+            abort ("Data must be a multiple of 16 bytes for: " + algorithm + (mode ? " encryption" : " decryption"));
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
