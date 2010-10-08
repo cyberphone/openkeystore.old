@@ -197,7 +197,9 @@ public class ProvSess
     
     boolean user_defined_pins = true;
     
-    boolean user_modifiable_pins = false; 
+    boolean user_modifiable_pins = false;
+    
+    boolean device_pin_protected = false;
     
     static class MacGenerator
       {
@@ -631,6 +633,7 @@ public class ProvSess
                                               id,
                                               attestation_algorithm, 
                                               server_seed,
+                                              device_pin_protected,
                                               pin_policy == null ? 0 : pin_policy.pin_policy_handle, 
                                               encrypted_pin_value, 
                                               biometric_protection.getSKSValue (), 

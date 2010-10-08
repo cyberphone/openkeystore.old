@@ -2696,7 +2696,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         key_entry.owner.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Decrypt and store private key.  Note: SKS accepts multiple restores...
+        // Decrypt and store private key.  Note: this SKS accepts multiple restores...
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
@@ -2839,6 +2839,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                   String id,
                                   String attestation_algorithm,
                                   byte[] server_seed,
+                                  boolean device_pin_protected,
                                   int pin_policy_handle,
                                   byte[] pin_value,
                                   byte biometric_protection,
@@ -2880,27 +2881,26 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Get proper PIN policy ID
         ///////////////////////////////////////////////////////////////////////////////////
         PINPolicy pin_policy = null;
-        boolean device_pin_protected = false;
         boolean decrypt_pin = false;
         String pin_policy_id = CRYPTO_STRING_NOT_AVAILABLE;
-        if (pin_policy_handle != 0)
+        if (device_pin_protected)
           {
-            if (pin_policy_handle == 0xFFFFFFFF)
+            pin_policy_id = CRYPTO_STRING_DEVICE_PIN;
+            if (pin_policy_handle != 0)
               {
-                pin_policy_id = CRYPTO_STRING_DEVICE_PIN;
-                device_pin_protected = true;
+                provisioning.abort ("Device PIN mixed with PIN policy ojbect: " + pin_policy_handle);
               }
-            else
+          }
+        else if (pin_policy_handle != 0)
+          {
+            pin_policy = pin_policies.get (pin_policy_handle);
+            if (pin_policy == null || pin_policy.owner != provisioning)
               {
-                pin_policy = pin_policies.get (pin_policy_handle);
-                if (pin_policy == null || pin_policy.owner != provisioning)
-                  {
-                    provisioning.abort ("No such PIN policy in this session: " + pin_policy_handle);
-                  }
-                pin_policy_id = pin_policy.id;
-                provisioning.names.put (pin_policy_id, true); // Referenced
-                decrypt_pin = !pin_policy.user_defined;
+                provisioning.abort ("No such PIN policy in this session: " + provisioning_handle);
               }
+            pin_policy_id = pin_policy.id;
+            provisioning.names.put (pin_policy_id, true); // Referenced
+            decrypt_pin = !pin_policy.user_defined;
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2956,6 +2956,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         if (pin_policy == null)
           {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // PIN value requires a defined PIN policy object
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (pin_value.length != 0)
+              {
+                provisioning.abort ("\"PINValue\" expected to be empty");
+              }
+
             ///////////////////////////////////////////////////////////////////////////////////
             // Certain policy attributes require PIN objects
             ///////////////////////////////////////////////////////////////////////////////////

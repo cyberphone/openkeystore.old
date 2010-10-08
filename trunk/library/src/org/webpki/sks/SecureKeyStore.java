@@ -54,6 +54,7 @@ public interface SecureKeyStore
                                   String id,
                                   String attestation_algorithm,
                                   byte[] server_seed,
+                                  boolean device_pin_protected,
                                   int pin_policy_handle,
                                   byte[] pin_value,
                                   byte biometric_protection,

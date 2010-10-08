@@ -391,9 +391,13 @@ public class KeyGen2Test
             for (KeyInitializationRequestDecoder.KeyObject key : key_init_request.getKeyObjects ())
               {
                 byte[] pin_value = key.getPresetPIN ();
+                if (pin_value == null)
+                  {
+                    pin_value = new byte[0];
+                  }
                 if (key.getPINPolicy () == null)
                   {
-                    pin_policy_handle = key.isDevicePINProtected () ? 0xFFFFFFFF : 0;
+                    pin_policy_handle = 0;
                     puk_policy_handle = 0;
                   }
                 else
@@ -434,6 +438,7 @@ public class KeyGen2Test
                                                  key.getID (),
                                                  key_init_request.getKeyAttestationAlgorithm (),
                                                  key.getServerSeed (),
+                                                 key.isDevicePINProtected (),
                                                  pin_policy_handle,
                                                  pin_value,
                                                  key.getBiometricProtection ().getSKSValue (),
