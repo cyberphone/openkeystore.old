@@ -1805,6 +1805,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Check that the key agreement algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
         Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_ASYM_KA);
+        if (parameters.length != 0)  // Only support external KDFs yet...
+          {
+            abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
+          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key type matches the algorithm
