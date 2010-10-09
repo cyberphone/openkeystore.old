@@ -2397,8 +2397,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Generate a final attestation
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder close_attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
-        close_attestation.addString (ALGORITHM_SESSION_KEY_ATTEST_1);
         close_attestation.addArray (mac);
+        close_attestation.addString (ALGORITHM_SESSION_KEY_ATTEST_1);
         byte[] attest = close_attestation.getResult ();
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -3060,7 +3060,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             // Create key attestation data
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder key_attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
-            key_attestation.addString (id);
+            key_attestation.addArray (mac);
             key_attestation.addArray (public_key.getEncoded ());
             if (private_key_backup)
               {

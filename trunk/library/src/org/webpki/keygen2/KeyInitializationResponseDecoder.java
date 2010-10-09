@@ -78,7 +78,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
                 kp.backup_private_key = gpk.backup_private_key;
                 ServerCredentialStore.MacGenerator key_attestation = new ServerCredentialStore.MacGenerator ();
                 // Write key attestation data
-                key_attestation.addString (gpk.id);
+                key_attestation.addArray (kp.input_mac);
                 key_attestation.addArray (gpk.public_key.getEncoded ());
                 if (kp.private_key_backup)
                   {
