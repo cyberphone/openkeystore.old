@@ -1496,7 +1496,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         testUpdatablePIN (key_entry, new_pin);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Verify old PIN.  If successful error counter are reset
+        // Verify old PIN
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.verifyPIN (authorization);
 
