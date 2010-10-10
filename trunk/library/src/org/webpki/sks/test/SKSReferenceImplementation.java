@@ -2892,7 +2892,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             pin_policy_id = CRYPTO_STRING_DEVICE_PIN;
             if (pin_policy_handle != 0)
               {
-                provisioning.abort ("Device PIN mixed with PIN policy ojbect: " + pin_policy_handle);
+                provisioning.abort ("Device PIN mixed with PIN policy ojbect");
               }
           }
         else if (pin_policy_handle != 0)
@@ -2900,7 +2900,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             pin_policy = pin_policies.get (pin_policy_handle);
             if (pin_policy == null || pin_policy.owner != provisioning)
               {
-                provisioning.abort ("No such PIN policy in this session: " + provisioning_handle);
+                provisioning.abort ("Referenced PIN policy object not found");
               }
             pin_policy_id = pin_policy.id;
             provisioning.names.put (pin_policy_id, true); // Referenced
@@ -3144,7 +3144,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             puk_policy = puk_policies.get (puk_policy_handle);
             if (puk_policy == null || puk_policy.owner != provisioning)
               {
-                provisioning.abort ("No such PUK policy in this session: " + puk_policy_handle);
+                provisioning.abort ("Referenced PUK policy object not found");
               }
             puk_policy_id = puk_policy.id;
             provisioning.names.put (puk_policy_id, true); // Referenced
