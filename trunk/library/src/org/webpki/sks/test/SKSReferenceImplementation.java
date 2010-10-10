@@ -2279,7 +2279,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                         ///////////////////////////////////////////////////////////////////////////////////
                         // A non-null endorsed algorithm found.  Symmetric or asymmetric key?
                         ///////////////////////////////////////////////////////////////////////////////////
-                        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) == 0) ^ (key_entry.isSymmetric ()))
+                        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) == 0) ^ key_entry.isSymmetric ())
                           {
                             if (key_entry.isSymmetric ())
                               {
