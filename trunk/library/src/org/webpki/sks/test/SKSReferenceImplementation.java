@@ -1336,7 +1336,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             abort ("Algorithm does not match operation: " + input_algorithm, SKSException.ERROR_ALGORITHM);
           }
-        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ (key_entry.isSymmetric ()))
+        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ key_entry.isSymmetric ())
           {
             abort ((key_entry.isSymmetric () ? "S" : "As") + "ymmetric key #" + key_entry.key_handle + " is incompatible with: " + input_algorithm, SKSException.ERROR_ALGORITHM);
           }
