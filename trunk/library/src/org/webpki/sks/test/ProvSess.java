@@ -629,7 +629,6 @@ public class ProvSess
           {
             key_pair_mac.addString (algorithm);
           }
-        byte[] input_mac;
         KeyPair key_pair = sks.createKeyPair (provisioning_handle, 
                                               id,
                                               attestation_algorithm, 
@@ -646,9 +645,9 @@ public class ProvSess
                                               friendly_name, 
                                               key_algorithm.getSKSValue (),
                                               sorted_algorithms,
-                                              input_mac = mac (key_pair_mac.getResult (), APIDescriptors.CREATE_KEY_PAIR));
+                                              mac (key_pair_mac.getResult (), APIDescriptors.CREATE_KEY_PAIR));
         MacGenerator key_attestation = new MacGenerator ();
-        key_attestation.addArray (input_mac);
+        key_attestation.addString (id);
         key_attestation.addArray (key_pair.getPublicKey ().getEncoded ());
         if (private_key_backup)
           {

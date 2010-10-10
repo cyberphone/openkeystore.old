@@ -698,8 +698,6 @@ public class ServerCredentialStore implements Serializable
         
         byte[] expected_attest_mac_count;  // Two bytes
         
-        byte[] input_mac;  // Used for verifying the response
-        
         private void addExtension (ExtensionInterface ei) throws IOException
           {
             if (extensions.put (ei.type, ei) != null)
@@ -1128,7 +1126,7 @@ public class ServerCredentialStore implements Serializable
                 wr.setBinaryAttribute (SERVER_SEED_ATTR, server_seed);
               }
 
-            wr.setBinaryAttribute (MAC_ATTR, input_mac = mac (key_pair_mac.getResult (), APIDescriptors.CREATE_KEY_PAIR, session_key_interface));
+            wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), APIDescriptors.CREATE_KEY_PAIR, session_key_interface));
             
             expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
             
