@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -104,6 +105,7 @@ import org.webpki.keygen2.ProvisioningSessionRequestEncoder;
 import org.webpki.keygen2.ProvisioningSessionResponseDecoder;
 import org.webpki.keygen2.ProvisioningSessionResponseEncoder;
 import org.webpki.keygen2.ServerCredentialStore;
+import org.webpki.keygen2.ServerKeyManagementInterface;
 import org.webpki.keygen2.ServerSessionKeyInterface;
 
 import org.webpki.sks.DeviceInfo;
@@ -286,15 +288,15 @@ public class KeyGen2Test
                         switch (post_operation.getPostOperation ())
                           {
                             case CredentialDeploymentRequestDecoder.PostOperation.CLONE_KEY_PROTECTION:
-                              sks.pp_cloneKeyProtection (handle, ek.getKeyHandle (), post_operation.getMAC ());
+                              sks.pp_cloneKeyProtection (handle, ek.getKeyHandle (), post_operation.getKMAuthentication (), post_operation.getMAC ());
                               break;
 
                             case CredentialDeploymentRequestDecoder.PostOperation.UPDATE_KEY:
-                              sks.pp_updateKey (handle, ek.getKeyHandle (), post_operation.getMAC ());
+                              sks.pp_updateKey (handle, ek.getKeyHandle (),  post_operation.getKMAuthentication (), post_operation.getMAC ());
                               break;
 
                             default:
-                              sks.pp_deleteKey (handle, ek.getKeyHandle (), post_operation.getMAC ());
+                              sks.pp_deleteKey (handle, ek.getKeyHandle (), post_operation.getKMAuthentication (), post_operation.getMAC ());
                           }
                         return;
                       }
@@ -349,7 +351,7 @@ public class KeyGen2Test
                                                  prov_sess_req.getServerSessionID (),
                                                  prov_sess_req.getServerEphemeralKey (),
                                                  prov_sess_req.getSubmitURL (), /* IssuerURI */
-                                                 prov_sess_req.getSessionUpdatableFlag (),
+                                                 prov_sess_req.getKeyManagementKey (),
                                                  (int)(client_time.getTime () / 1000),
                                                  prov_sess_req.getSessionLifeTime (),
                                                  prov_sess_req.getSessionKeyLimit ());
@@ -686,7 +688,38 @@ public class KeyGen2Test
               }
           }
         
+        class KM implements ServerKeyManagementInterface
+          {
+            KeyStore key_store;
+            
+            KM (int key_id) throws IOException, GeneralSecurityException
+              {
+                if (key_id < 0 || key_id > 1)
+                  {
+                    throw new IOException ("Unknown key_id: " + key_id);
+                  }
+                key_store = key_id == 0 ? DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getSubCAKeyStore ();
+              }
+
+            @Override
+            public byte[] generateKMAuthentication (byte[] data) throws IOException, GeneralSecurityException
+              {
+                Signature km_sign = Signature.getInstance (getKeyManagementKey () instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA", "BC");
+                km_sign.initSign ((PrivateKey) key_store.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
+                km_sign.update (data);
+                return km_sign.sign ();
+              }
+
+            @Override
+            public PublicKey getKeyManagementKey () throws IOException, GeneralSecurityException
+              {
+                return key_store.getCertificate ("mykey").getPublicKey ();
+              }
+          }
+        
         SoftHSM server_sess_key = new SoftHSM ();
+
+        KM server_km = new KM (0);
 
         Server () throws Exception
           {
@@ -744,7 +777,7 @@ public class KeyGen2Test
                                                                         (short)50);
             if (updatable)
               {
-                prov_sess_request.setUpdatable (true);
+                prov_sess_request.setKeyManagementKey(server_km);
               }
             return prov_sess_request.writeXML ();
           }
@@ -859,21 +892,21 @@ public class KeyGen2Test
                 kp.setClonedKeyProtection (clone_key_protection.server_credential_store.getClientSessionID (), 
                                            clone_key_protection.server_credential_store.getServerSessionID (),
                                            clone_key_protection.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
-                                           clone_key_protection.server_sess_key);
+                                           clone_key_protection.server_km);
               }
             if (update_key != null)
               {
                 kp.setUpdatedKey (update_key.server_credential_store.getClientSessionID (), 
                                   update_key.server_credential_store.getServerSessionID (),
                                   update_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
-                                  update_key.server_sess_key);
+                                  update_key.server_km);
               }
             if (delete_key != null)
               {
                 server_credential_store.addPostProvisioningDeleteKey (delete_key.server_credential_store.getClientSessionID (), 
                                                                       delete_key.server_credential_store.getServerSessionID (),
                                                                       delete_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
-                                                                      delete_key.server_sess_key);
+                                                                      delete_key.server_km);
               }
             key_init_request = new KeyInitializationRequestEncoder (KEY_INIT_URL, server_credential_store, server_sess_key);
             return key_init_request.writeXML ();
@@ -1253,9 +1286,19 @@ public class KeyGen2Test
               {
                 j++;
                 byte[] iv = new byte[0];
-                byte[] enc = sks.symmetricKeyEncrypt (ek.getKeyHandle (), true, iv, SymEncryptionAlgorithms.AES256_CBC.getURI (), USER_DEFINED_PIN, TEST_STRING);
-                assertTrue ("Encrypt/decrypt error", ArrayUtil.compare (sks.symmetricKeyEncrypt (ek.getKeyHandle (), false, iv, SymEncryptionAlgorithms.AES256_CBC.getURI (), USER_DEFINED_PIN, enc),
-                                                                        TEST_STRING));
+                byte[] enc = sks.symmetricKeyEncrypt (ek.getKeyHandle (),
+                                                      SymEncryptionAlgorithms.AES256_CBC.getURI (),
+                                                      true,
+                                                      iv,
+                                                      USER_DEFINED_PIN,
+                                                      TEST_STRING);
+                assertTrue ("Encrypt/decrypt error", ArrayUtil.compare (sks.symmetricKeyEncrypt (ek.getKeyHandle (),
+                                                                                                 SymEncryptionAlgorithms.AES256_CBC.getURI (),
+                                                                                                 false,
+                                                                                                 iv,
+                                                                                                 USER_DEFINED_PIN, 
+                                                                                                 enc),
+                                                                                                 TEST_STRING));
               }
           }
         assertTrue ("Missing keys", j == 1);
@@ -1299,8 +1342,8 @@ public class KeyGen2Test
                 j++;
                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
-                                                    new byte[0],
                                                     SignatureAlgorithms.RSA_SHA256.getURI (),
+                                                    new byte[0],
                                                     doer2.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
                 Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
@@ -1335,8 +1378,8 @@ public class KeyGen2Test
                 j++;
                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
-                                                    new byte[0],
                                                     SignatureAlgorithms.RSA_SHA256.getURI (),
+                                                    new byte[0],
                                                     doer2.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
                 Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
@@ -1384,8 +1427,8 @@ public class KeyGen2Test
               {
                 j++;
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
-                                                    new byte[0],
                                                     SignatureAlgorithms.RSA_SHA256.getURI (),
+                                                    new byte[0],
                                                     doer.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
                 Signature sign = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");

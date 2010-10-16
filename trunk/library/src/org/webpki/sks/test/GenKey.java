@@ -26,6 +26,7 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -42,6 +43,8 @@ import org.webpki.keygen2.CryptoConstants;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
+import org.webpki.sks.test.ProvSess.MacGenerator;
+import org.webpki.util.ArrayUtil;
 
 public class GenKey
   {
@@ -102,9 +105,25 @@ public class GenKey
         return this;
       }
     
-    public byte[] getPostProvMac () throws IOException, GeneralSecurityException
+    byte[] makeArray (byte[] data)
       {
-        return prov_sess.mac (getEECertMacBuilder ().getResult (), CryptoConstants.CRYPTO_STRING_PROOF_OF_OWNERSHIP);
+        return ArrayUtil.add (new byte[]{(byte)(data.length >>> 8), (byte)data.length}, data);
+      }
+
+    public byte[] getPostProvMac (MacGenerator upd_mac, ProvSess current) throws IOException, GeneralSecurityException
+      {
+        Integer kmk_id = prov_sess.kmk_id;
+        if (kmk_id == null)
+          {
+            kmk_id = 0;  // Just for JUnit...
+          }
+        ProvSess.KM km = new ProvSess.KM (kmk_id);
+        byte[] data = ArrayUtil.add (makeArray (cert_path[0].getEncoded ()),
+                                     makeArray (current.client_session_id.getBytes ("UTF-8")));
+        byte[] km_authentication = km.generateKMAuthentication (data);
+        upd_mac.addArray (km.getKeyManagementKey ().getEncoded ());
+        upd_mac.addArray (km_authentication);
+        return km_authentication;
       }
     
     ProvSess.MacGenerator getEECertMacBuilder () throws CertificateEncodingException, IOException

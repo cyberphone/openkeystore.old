@@ -509,8 +509,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
           }
 
-        MacBuilder addEECert (MacBuilder mac_builder) throws SKSException
+        MacBuilder getEECertMacBuilder (byte[] method) throws SKSException
           {
+            if (certificate_path == null)
+              {
+                owner.abort ("End-entity certificate missing. \"setCertificatePath\" performed?");
+              }
+            MacBuilder mac_builder = owner.getMacBuilderForMethodCall (method);
             try
               {
                 mac_builder.addArray (certificate_path[0].getEncoded ());
@@ -522,18 +527,34 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
           }
 
-        MacBuilder getEECertMacBuilder (byte[] method) throws SKSException
+        void validateTargetKeyReference (MacBuilder verifier,
+                                         byte[] mac,
+                                         byte[] km_authentication,
+                                         Provisioning provisioning) throws SKSException
           {
-            if (certificate_path == null)
+            try
               {
-                owner.abort ("End-entity certificate missing. \"setCertificatePath\" performed?");
+                verifier.addArray (owner.key_management_key.getEncoded ());
+                verifier.addArray (km_authentication);
+                provisioning.verifyMac (verifier, mac);
+                Signature km_verify = Signature.getInstance (owner.key_management_key instanceof RSAPublicKey ? 
+                                                                                              "SHA256WithRSA" : "SHA256WithECDSA", "BC");
+                km_verify.initVerify (owner.key_management_key);
+                km_verify.update (makeArray (certificate_path[0].getEncoded ()));
+                km_verify.update (makeArray (provisioning.client_session_id.getBytes ("UTF-8")));
+                if (!km_verify.verify (km_authentication))
+                  {
+                    provisioning.abort ("\"KMAuthentication\" signature did not verify for key #" + key_handle);
+                  }
               }
-            return addEECert (owner.getMacBuilderForMethodCall (method));
-          }
-
-        byte[] getPostProvisioningMac () throws SKSException
-          {
-            return addEECert (owner.getMacBuilder (KDF_PROOF_OF_OWNERSHIP, false)).getResult ();
+            catch (GeneralSecurityException e)
+              {
+                provisioning.abort (e.getMessage (), SKSException.ERROR_CRYPTO);
+              }
+            catch (UnsupportedEncodingException e)
+              {
+                provisioning.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
+              }
           }
 
         boolean isRSA ()
@@ -630,7 +651,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         String issuer_uri;
         byte[] session_key;
         boolean open = true;
-        boolean updatable;
+        PublicKey key_management_key;
         short mac_sequence_counter;
         int client_time;
         int session_life_time;
@@ -687,9 +708,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
           }
         
-        MacBuilder getMacBuilder (byte[] key_modifier, boolean check) throws SKSException
+        MacBuilder getMacBuilder (byte[] key_modifier) throws SKSException
           {
-            if (check && session_key_limit-- <= 0)
+            if (session_key_limit-- <= 0)
               {
                 abort ("\"SessionKeyLimit\" exceeded");
               }
@@ -701,11 +722,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 throw new SKSException (e);
               }
-          }
-
-        MacBuilder getMacBuilder (byte[] key_modifier) throws SKSException
-          {
-            return getMacBuilder (key_modifier, true);
           }
 
         MacBuilder getMacBuilderForMethodCall (byte[] method) throws SKSException
@@ -725,7 +741,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 abort ("Key #" + key_handle + " still in provisioning");
               }
-            if (!key_entry.owner.updatable)
+            if (key_entry.owner.key_management_key == null)
               {
                 abort ("Key #" + key_handle + " belongs to a non-updatable provisioning session");
               }
@@ -751,10 +767,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                         abort ("Multiple updates of key #" + target_key_entry.key_handle);
                       }
                   }
-              }
-            if (target_key_entry.owner.session_key_limit-- <= 0)
-              {
-                abort ("Post provisioning \"SessionKeyLimit\" exceeded");
               }
             post_provisioning_objects.add (new PostProvisioningObject (target_key_entry, key_entry, update));
           }
@@ -1041,6 +1053,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
       {
         return ((buffer[index++] << 8) & 0xFFFF) + (buffer[index] & 0xFF);
       }
+    
+    byte[] makeArray (byte[] data)
+      {
+        return addArrays (new byte[]{(byte)(data.length >>> 8), (byte)data.length}, data);
+      }
 
     KeyEntry getOpenKey (int key_handle) throws SKSException
       {
@@ -1103,10 +1120,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             Provisioning provisioning = iter.next ();
             if (provisioning.open == provisioning_state)
               {
-                return new EnumeratedProvisioningSession (provisioning.client_time,
+                return new EnumeratedProvisioningSession (provisioning.key_management_key,
+                                                          provisioning.client_time,
+                                                          provisioning.session_life_time,
                                                           provisioning.provisioning_handle, 
                                                           provisioning.client_session_id,
-                                                          provisioning.server_session_id);
+                                                          provisioning.server_session_id,
+                                                          provisioning.issuer_uri);
               }
           }
         return new EnumeratedProvisioningSession ();
@@ -1393,6 +1413,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     void addUpdateKeyOrCloneKeyProtection (int key_handle,
                                            int target_key_handle,
+                                           byte[] km_authentication,
                                            byte[] mac,
                                            boolean update) throws SKSException
       {
@@ -1430,11 +1451,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
+        // Verify incoming MAC and target key data
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = key_entry.getEECertMacBuilder (update ? METHOD_PP_UPDATE_KEY : METHOD_PP_CLONE_KEY_PROTECTION);
-        verifier.addArray (target_key_entry.getPostProvisioningMac ());
-        provisioning.verifyMac (verifier, mac);
+        target_key_entry.validateTargetKeyReference (verifier, mac, km_authentication, provisioning);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the pp-op buffer used by "closeProvisioningSession"
@@ -1682,8 +1702,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public byte[] asymmetricKeyDecrypt (int key_handle,
-                                        byte[] parameters,
                                         String algorithm,
+                                        byte[] parameters,
                                         byte[] authorization,
                                         byte[] data) throws SKSException
       {
@@ -1729,8 +1749,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public byte[] signHashedData (int key_handle,
-                                  byte[] parameters,
                                   String algorithm,
+                                  byte[] parameters,
                                   byte[] authorization,
                                   byte[] data) throws SKSException
       {
@@ -1791,8 +1811,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public byte[] keyAgreement (int key_handle, 
-                                byte[] parameters,
                                 String algorithm,
+                                byte[] parameters,
                                 byte[] authorization,
                                 PublicKey public_key) throws SKSException
       {
@@ -1847,9 +1867,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public byte[] symmetricKeyEncrypt (int key_handle,
+                                       String algorithm,
                                        boolean mode,
                                        byte[] iv,
-                                       String algorithm,
                                        byte[] authorization,
                                        byte[] data) throws SKSException
       {
@@ -1984,6 +2004,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public void pp_deleteKey (int provisioning_handle,
                               int target_key_handle,
+                              byte[] km_authentication,
                               byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1997,11 +2018,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         KeyEntry target_key_entry = provisioning.getTargetKey (target_key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
+        // Verify incoming MAC and target key data
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_PP_DELETE_KEY);
-        verifier.addArray (target_key_entry.getPostProvisioningMac ());
-        provisioning.verifyMac (verifier, mac);
+        target_key_entry.validateTargetKeyReference (verifier, mac, km_authentication, provisioning);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the pp-op buffer used by "closeProvisioningSession"
@@ -2018,9 +2038,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public void pp_cloneKeyProtection (int key_handle,
                                        int target_key_handle,
+                                       byte[] km_authentication,
                                        byte[] mac) throws SKSException
       {
-        addUpdateKeyOrCloneKeyProtection (key_handle, target_key_handle, mac, false);
+        addUpdateKeyOrCloneKeyProtection (key_handle, target_key_handle, km_authentication, mac, false);
       }
 
 
@@ -2032,9 +2053,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public void pp_updateKey (int key_handle,
                               int target_key_handle,
+                              byte[] km_authentication,
                               byte[] mac) throws SKSException
       {
-        addUpdateKeyOrCloneKeyProtection (key_handle, target_key_handle, mac, true);
+        addUpdateKeyOrCloneKeyProtection (key_handle, target_key_handle, km_authentication, mac, true);
       }
 
 
@@ -2419,7 +2441,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                                           String server_session_id,
                                                           ECPublicKey server_ephemeral_key,
                                                           String issuer_uri,
-                                                          boolean updatable,
+                                                          PublicKey key_management_key, // May be null
                                                           int client_time,
                                                           int session_life_time,
                                                           short session_key_limit) throws SKSException
@@ -2484,7 +2506,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ska.addString (issuer_uri);
             ska.addArray (server_ephemeral_key.getEncoded ());
             ska.addArray (client_ephemeral_key.getEncoded ());
-            ska.addBool (updatable);
+            ska.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
             ska.addInt (client_time);
             ska.addInt (session_life_time);
             ska.addShort (session_key_limit);
@@ -2507,7 +2529,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         p.client_session_id = client_session_id;
         p.issuer_uri = issuer_uri;
         p.session_key = session_key;
-        p.updatable = updatable;
+        p.key_management_key = key_management_key;
         p.client_time = client_time;
         p.session_life_time = session_life_time;
         p.session_key_limit = session_key_limit;

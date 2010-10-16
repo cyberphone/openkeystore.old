@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -47,6 +48,8 @@ import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.ECDomains;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.test.DemoKeyStore;
+
 import org.webpki.keygen2.APIDescriptors;
 import org.webpki.keygen2.BiometricProtection;
 import org.webpki.keygen2.CryptoConstants;
@@ -59,6 +62,7 @@ import org.webpki.keygen2.AppUsage;
 import org.webpki.keygen2.PINGrouping;
 import org.webpki.keygen2.PassphraseFormat;
 import org.webpki.keygen2.PatternRestriction;
+import org.webpki.keygen2.ServerKeyManagementInterface;
 import org.webpki.keygen2.ServerSessionKeyInterface;
 
 import org.webpki.sks.EnumeratedProvisioningSession;
@@ -80,7 +84,7 @@ public class ProvSess
         ECPrivateKey server_ec_private_key;
         
         byte[] session_key;
-  
+        
         @Override
         public ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException
           {
@@ -167,6 +171,36 @@ public class ProvSess
           }
       }
     
+    static class KM implements ServerKeyManagementInterface
+      {
+        KeyStore km_keystore;
+        
+        KM (int key_id) throws IOException, GeneralSecurityException
+          {
+            if (key_id < 0 || key_id > 1)
+              {
+                throw new IOException ("Unknown key_id: " + key_id);
+              }
+            km_keystore = key_id == 0 ? DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getSubCAKeyStore ();
+          }
+
+        @Override
+        public byte[] generateKMAuthentication (byte[] data) throws IOException, GeneralSecurityException
+          {
+            Signature km_sign = Signature.getInstance (getKeyManagementKey () instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA", "BC");
+            km_sign.initSign ((PrivateKey) km_keystore.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
+            km_sign.update (data);
+            return km_sign.sign ();
+          }
+
+        @Override
+        public PublicKey getKeyManagementKey () throws IOException, GeneralSecurityException
+          {
+            return km_keystore.getCertificate ("mykey").getPublicKey ();
+          }
+
+      }
+    
     SoftHSM server_sess_key = new SoftHSM ();
 
     static final byte[] KEY_BACKUP_TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','t','?'};
@@ -186,6 +220,8 @@ public class ProvSess
     String client_session_id;
     
     ECPublicKey server_ephemeral_key;
+    
+    Integer kmk_id;
     
     short mac_sequence_counter;
     
@@ -320,8 +356,10 @@ public class ProvSess
     ///////////////////////////////////////////////////////////////////////////////////
     // Create provisioning session
     ///////////////////////////////////////////////////////////////////////////////////
-    public ProvSess (Device device, short session_key_limit, boolean session_updatable_flag) throws GeneralSecurityException, IOException
+    public ProvSess (Device device, short session_key_limit, Integer kmk_id) throws GeneralSecurityException, IOException
       {
+        this.kmk_id = kmk_id;
+        PublicKey key_management_key = kmk_id == null ? null : new KM (kmk_id).getKeyManagementKey ();
         sks = device.sks;
         server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
         client_time = new Date ();
@@ -330,7 +368,7 @@ public class ProvSess
                                                       server_session_id,
                                                       server_ephemeral_key = server_sess_key.generateEphemeralKey (),
                                                       ISSUER_URI,
-                                                      session_updatable_flag,
+                                                      key_management_key,
                                                       (int)(client_time.getTime () / 1000),
                                                       session_life_time,
                                                       session_key_limit);
@@ -350,7 +388,7 @@ public class ProvSess
            session_key_mac_data.addString (ISSUER_URI);
            session_key_mac_data.addArray (server_ephemeral_key.getEncoded ());
            session_key_mac_data.addArray (sess.getClientEphemeralKey ().getEncoded ());
-           session_key_mac_data.addBool (session_updatable_flag);
+           session_key_mac_data.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
            session_key_mac_data.addInt ((int) (client_time.getTime () / 1000));
            session_key_mac_data.addInt (session_life_time);
            session_key_mac_data.addShort (session_key_limit);
@@ -364,17 +402,17 @@ public class ProvSess
     
     public ProvSess (Device device) throws GeneralSecurityException, IOException
     {
-      this (device, (short)50, true);
+      this (device, (short)50, null);
     }
 
     public ProvSess (Device device, short session_key_limit) throws GeneralSecurityException, IOException
     {
-      this (device, session_key_limit, true);
+      this (device, session_key_limit, null);
     }
 
-    public ProvSess (Device device, boolean session_updatable_flag) throws GeneralSecurityException, IOException
+    public ProvSess (Device device, Integer kmk_id) throws GeneralSecurityException, IOException
     {
-      this (device, (short)50, session_updatable_flag);
+      this (device, (short)50, kmk_id);
     }
 
     public void closeSession () throws IOException, GeneralSecurityException
@@ -721,28 +759,31 @@ public class ProvSess
 
     public void postDeleteKey (GenKey key) throws IOException, GeneralSecurityException
       {
-        MacGenerator del_mac = new MacGenerator ();
-        del_mac.addArray (key.getPostProvMac ());
+        MacGenerator upd_mac = new MacGenerator ();
+        byte[] km_authentication = key.getPostProvMac (upd_mac, this);
         sks.pp_deleteKey (provisioning_handle, 
                           key.key_handle,
-                          mac (del_mac.getResult (), APIDescriptors.PP_DELETE_KEY));
+                          km_authentication,
+                          mac (upd_mac.getResult (), APIDescriptors.PP_DELETE_KEY));
       }
     
     public void postUpdateKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new_key.getEECertMacBuilder ();
-        upd_mac.addArray (old_key.getPostProvMac ());
+        byte[] km_authentication = old_key.getPostProvMac (upd_mac, this);
         sks.pp_updateKey (new_key.key_handle, 
                           old_key.key_handle,
-                          mac (upd_mac.getResult (), APIDescriptors.PP_UPDATE_KEY));
+                         km_authentication,
+                         mac (upd_mac.getResult (), APIDescriptors.PP_UPDATE_KEY));
       }
     
     public void postCloneKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new_key.getEECertMacBuilder ();
-        upd_mac.addArray (old_key.getPostProvMac ());
+        byte[] km_authentication = old_key.getPostProvMac (upd_mac, this);
         sks.pp_cloneKeyProtection (new_key.key_handle, 
                                    old_key.key_handle,
+                                   km_authentication,
                                    mac (upd_mac.getResult (), APIDescriptors.PP_CLONE_KEY_PROTECTION));
       }
   

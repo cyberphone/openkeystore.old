@@ -27,8 +27,6 @@ public interface CryptoConstants
 
     public static final byte[] CRYPTO_STRING_SIGNATURE           = {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
 
-    public static final byte[] CRYPTO_STRING_PROOF_OF_OWNERSHIP  = {'P','r','o','o','f',' ','O','f',' ','O','w','n','e','r','s','h','i','p'};
-
     /////////////////////////////////////////////////////////////////////////////////////////////
     // If there is no ServerSeed, this is the default
     /////////////////////////////////////////////////////////////////////////////////////////////

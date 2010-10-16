@@ -21,9 +21,12 @@ import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 
 import java.util.EnumSet;
@@ -51,6 +54,7 @@ import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
+import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.ExportPolicy;
 import org.webpki.keygen2.KeyGen2URIs;
@@ -90,7 +94,7 @@ public class SKSTest
     
     private void edgeDeleteCase (boolean post) throws Exception
       {
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
@@ -163,7 +167,7 @@ public class SKSTest
       {
         int q = sessionCount ();
         String ok_pin = "1563";
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
@@ -201,8 +205,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key3.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        new byte[0], 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             fail ("Bad PIN should not work");
@@ -214,8 +218,8 @@ public class SKSTest
         try
           {
             byte[] result = device.sks.signHashedData (key3.key_handle,
+                                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
                                                        new byte[0],
-                                                      "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
                                                        ok_pin.getBytes ("UTF-8"), 
                                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
@@ -223,8 +227,8 @@ public class SKSTest
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key3", verify.verify (result));
             result = device.sks.signHashedData (key1.key_handle, 
-                                                new byte[0],
                                                 "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                                new byte[0],
                                                 ok_pin.getBytes ("UTF-8"), 
                                                 HashAlgorithms.SHA256.digest (TEST_STRING));
             verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
@@ -335,8 +339,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        new byte[0], 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             fail ("Bad PIN should not work");
@@ -348,8 +352,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        ok_pin.getBytes ("UTF-8"), 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
           }
@@ -360,8 +364,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        new byte[0], 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             fail ("Bad PIN should not work");
@@ -373,8 +377,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        new byte[0], 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             fail ("Bad PIN should not work");
@@ -386,8 +390,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        ok_pin.getBytes ("UTF-8"), 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
           }
@@ -398,8 +402,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        new byte[0], 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             fail ("Bad PIN should not work");
@@ -411,8 +415,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        new byte[0], 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             fail ("Bad PIN should not work");
@@ -424,8 +428,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        new byte[0], 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             fail ("Bad PIN should not work");
@@ -437,8 +441,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        ok_pin.getBytes ("UTF-8"), 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             fail ("Good PIN but too many errors should NOT work");
@@ -449,9 +453,9 @@ public class SKSTest
           }
       }
      
-    private void sessionLimitTest (int limit, boolean encrypted_pin, boolean fail_hard, boolean updatable) throws Exception
+    private void sessionLimitTest (int limit, boolean encrypted_pin, boolean fail_hard) throws Exception
       {
-        ProvSess sess = new ProvSess (device, (short)limit, true);
+        ProvSess sess = new ProvSess (device, (short)limit);
         GenKey key = null;
         if (encrypted_pin)
           {
@@ -479,20 +483,6 @@ public class SKSTest
             if (!fail_hard) fail (e.getMessage ());
             return;
           }
-        ProvSess sess2 = new ProvSess (device);
-        try
-          {
-            sess2.postDeleteKey (key);
-            sess2.closeSession ();
-            assertTrue ("Updable", updatable);
-            assertFalse ("Not exist", key.exists ());
-          }
-        catch (SKSException e)
-          {
-            if (updatable) fail ("Shouldn't happen");
-            checkException (e, "Post provisioning \"SessionKeyLimit\" exceeded");
-          }
- 
       }
 
     private boolean PINGroupCheck (boolean same_pin, PINGrouping grouping) throws IOException, GeneralSecurityException
@@ -580,7 +570,11 @@ public class SKSTest
             device.sks.changePIN (key4.key_handle, s_pin.getBytes ("UTF-8"), other_pin);
             try
               {
-                device.sks.signHashedData (key1.key_handle, new byte[0], "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", other_pin, HashAlgorithms.SHA256.digest (TEST_STRING));
+                device.sks.signHashedData (key1.key_handle, 
+                                           "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+                                           new byte[0],
+                                           other_pin, 
+                                           HashAlgorithms.SHA256.digest (TEST_STRING));
               }
             catch (SKSException e)
               {
@@ -792,8 +786,8 @@ public class SKSTest
                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
         byte[] result = device.sks.signHashedData (key.key_handle, 
-                                                   new byte[0],
                                                    "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                                   new byte[0],
                                                    new byte[0], 
                                                    HashAlgorithms.SHA256.digest (TEST_STRING));
         Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
@@ -823,8 +817,8 @@ public class SKSTest
         sess.closeSession ();
 
         byte[] result = device.sks.signHashedData (key.key_handle, 
-                                                   new byte[0],
                                                    "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                                   new byte[0],
                                                    new byte[0], 
                                                    HashAlgorithms.SHA256.digest (TEST_STRING));
         Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
@@ -833,8 +827,8 @@ public class SKSTest
         assertTrue ("Bad signature", verify.verify (result));
 
         result = device.sks.signHashedData (key.key_handle, 
-                                            new byte[0],
                                             "http://www.w3.org/2000/09/xmldsig#rsa-sha1", 
+                                            new byte[0],
                                             new byte[0], 
                                             HashAlgorithms.SHA1.digest (TEST_STRING));
         verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA1.getJCEName (), "BC");
@@ -928,7 +922,7 @@ public class SKSTest
     public void test14 () throws Exception
       {
         int q = sessionCount ();
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
@@ -957,7 +951,7 @@ public class SKSTest
           {
             boolean updatable = i == 0;
             int q = sessionCount ();
-            ProvSess sess = new ProvSess (device, updatable);
+            ProvSess sess = new ProvSess (device, updatable ? new Integer (0) : null);
             GenKey key1 = sess.createECKey ("Key.1",
                                             null /* pin_value */,
                                             null /* pin_policy */,
@@ -1031,7 +1025,7 @@ public class SKSTest
     @Test
     public void test18 () throws Exception
       {
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
@@ -1055,7 +1049,7 @@ public class SKSTest
     public void test19 () throws Exception
       {
         String ok_pin = "1563";
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   4 /* min_length */, 
@@ -1082,8 +1076,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key1.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                       new byte[0],
                                        new byte[0], 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             fail ("Bad PIN should not work");
@@ -1095,8 +1089,8 @@ public class SKSTest
         try
           {
             byte[] result = device.sks.signHashedData (key1.key_handle, 
-                                                       new byte[0],
                                                        "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                                       new byte[0],
                                                        ok_pin.getBytes ("UTF-8"), 
                                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
@@ -1114,7 +1108,7 @@ public class SKSTest
     public void test20 () throws Exception
       {
         String ok_pin = "1563";
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
@@ -1146,7 +1140,7 @@ public class SKSTest
     @Test
     public void test21 () throws Exception
       {
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
@@ -1177,7 +1171,7 @@ public class SKSTest
     @Test
     public void test22 () throws Exception
       {
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
@@ -1209,7 +1203,7 @@ public class SKSTest
     public void test23 () throws Exception
       {
         String ok_pin = "1563";
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
@@ -1239,8 +1233,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key2.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        new byte[0], 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             fail ("Bad PIN should not work");
@@ -1252,8 +1246,8 @@ public class SKSTest
         try
           {
             byte[] result = device.sks.signHashedData (key2.key_handle, 
+                                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
                                                        new byte[0],
-                                                      "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
                                                        ok_pin.getBytes ("UTF-8"), 
                                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
@@ -1261,8 +1255,8 @@ public class SKSTest
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key2", verify.verify (result));
             result = device.sks.signHashedData (key1.key_handle,
-                                                new byte[0],
                                                 "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                                new byte[0],
                                                 ok_pin.getBytes ("UTF-8"), 
                                                 HashAlgorithms.SHA256.digest (TEST_STRING));
             verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
@@ -1280,7 +1274,7 @@ public class SKSTest
     public void test24 () throws Exception
       {
         String ok_pin = "1563";
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
@@ -1315,8 +1309,8 @@ public class SKSTest
         try
           {
             device.sks.signHashedData (key3.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                       new byte[0],
                                        new byte[0], 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             fail ("Bad PIN should not work");
@@ -1328,8 +1322,8 @@ public class SKSTest
         try
           {
             byte[] result = device.sks.signHashedData (key3.key_handle, 
+                                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
                                                        new byte[0],
-                                                      "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
                                                        ok_pin.getBytes ("UTF-8"), 
                                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
@@ -1337,8 +1331,8 @@ public class SKSTest
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key3", verify.verify (result));
             result = device.sks.signHashedData (key1.key_handle, 
-                                                new byte[0],
                                                 "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                                new byte[0],
                                                 ok_pin.getBytes ("UTF-8"), 
                                                 HashAlgorithms.SHA256.digest (TEST_STRING));
             verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName (), "BC");
@@ -1380,7 +1374,7 @@ public class SKSTest
     public void test29 () throws Exception
       {
         int q = sessionCount ();
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
@@ -1426,14 +1420,15 @@ public class SKSTest
         cipher.init (Cipher.ENCRYPT_MODE, key.cert_path[0]);
         byte[] enc = cipher.doFinal (TEST_STRING);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            new byte[0],
                                                                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                                                            new byte[0],
                                                                                             ok_pin.getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
         try
           {
             device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             new byte[0], SignatureAlgorithms.RSA_SHA256.getURI (), 
+                                             SignatureAlgorithms.RSA_SHA256.getURI (), 
+                                             new byte[0],
                                              ok_pin.getBytes ("UTF-8"), 
                                              enc);
             fail ("Alg error");
@@ -1445,8 +1440,8 @@ public class SKSTest
         try
           {
             device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             new byte[]{6},
                                              AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                             new byte[]{6},
                                              ok_pin.getBytes ("UTF-8"), 
                                              enc);
             fail ("Parm error");
@@ -1458,8 +1453,8 @@ public class SKSTest
         try
           {
             device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             new byte[0],
                                              AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                             new byte[0],
                                              (ok_pin + "4").getBytes ("UTF-8"), 
                                              enc);
             fail ("PIN error");
@@ -1471,8 +1466,8 @@ public class SKSTest
         try
           {
             device.sks.asymmetricKeyDecrypt (key2.key_handle, 
-                                             new byte[0],
                                              AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                             new byte[0],
                                              ok_pin.getBytes ("UTF-8"), 
                                              enc);
             fail ("PKCS #1 error");
@@ -1522,8 +1517,8 @@ public class SKSTest
         cipher.init (Cipher.ENCRYPT_MODE, key.cert_path[0]);
         byte[] enc = cipher.doFinal (TEST_STRING);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            new byte[0],
                                                                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                                                            new byte[0],
                                                                                             ok_pin.getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
         for (int i = 1; i <= (pin_retry * 2); i++)
@@ -1531,8 +1526,8 @@ public class SKSTest
             try
               {
                 device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                                 new byte[0],
                                                  AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                 new byte[0],
                                                  (ok_pin + "4").getBytes ("UTF-8"), 
                                                  enc);
                 fail ("PIN error");
@@ -1546,8 +1541,8 @@ public class SKSTest
         try
           {
             device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             new byte[0],
                                              AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                             new byte[0],
                                              ok_pin.getBytes ("UTF-8"), 
                                              enc);
             fail ("PIN lock error");
@@ -1567,8 +1562,8 @@ public class SKSTest
           }
         device.sks.unlockKey (key.key_handle, puk_ok.getBytes ("UTF-8"));
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            new byte[0],
                                                                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                                                            new byte[0],
                                                                                             ok_pin.getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
         for (int i = 1; i <= (pin_retry * 2); i++)
@@ -1595,8 +1590,8 @@ public class SKSTest
           }
         device.sks.setPIN (key.key_handle, puk_ok.getBytes ("UTF-8"), (ok_pin + "2").getBytes ("UTF-8"));
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            new byte[0],
                                                                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                                                            new byte[0],
                                                                                             (ok_pin + "2").getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
       }
@@ -1628,8 +1623,8 @@ public class SKSTest
                                             AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
             sess.closeSession ();
             device.sks.signHashedData (key.key_handle, 
-                                       new byte[0],
                                        "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                       new byte[0],
                                        ok_pin.getBytes ("UTF-8"), 
                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             try
@@ -1957,9 +1952,9 @@ public class SKSTest
             byte[] iv_val = new byte[16];
             new SecureRandom ().nextBytes (iv_val);
             byte[] result = sess.sks.symmetricKeyEncrypt (key.key_handle,
+                                                          sym_enc.getURI (),
                                                           true,
                                                           sym_enc.needsIV () && !sym_enc.internalIV () ? iv_val : iv_none,
-                                                          sym_enc.getURI (),
                                                           ok_pin.getBytes ("UTF-8"),
                                                           data);
             byte[] res2 = result.clone ();
@@ -1981,17 +1976,17 @@ public class SKSTest
               }
             assertTrue ("encrypt error", ArrayUtil.compare (res2, crypt.doFinal (data)));
             assertTrue ("decrypt error", ArrayUtil.compare (data, sess.sks.symmetricKeyEncrypt (key.key_handle, 
+                                                                                                sym_enc.getURI (),
                                                                                                 false,
                                                                                                 sym_enc.needsIV () && !sym_enc.internalIV () ? iv_val : iv_none,
-                                                                                                sym_enc.getURI (),
                                                                                                 ok_pin.getBytes ("UTF-8"),
                                                                                                 result)));
             try
               {
                 sess.sks.symmetricKeyEncrypt (key.key_handle,
+                                              sym_enc.getURI (),
                                               true,
                                               sym_enc.needsIV () && !sym_enc.internalIV () ? iv_none : iv_val,
-                                              sym_enc.getURI (),
                                               ok_pin.getBytes ("UTF-8"),
                                               data);
                 fail ("Incorrect IV must fail");
@@ -2179,12 +2174,12 @@ public class SKSTest
     @Test
     public void test47 () throws Exception
       {
-        sessionLimitTest (5, false, true, false);
-        sessionLimitTest (6, false, false, false);
-        sessionLimitTest (6, true, true, false);
-        sessionLimitTest (7, true, false, false);
-        sessionLimitTest (7, false, false, true);
-        sessionLimitTest (8, true, false, true);
+        sessionLimitTest (5, false, true);
+        sessionLimitTest (6, false, false);
+        sessionLimitTest (6, true, true);
+        sessionLimitTest (7, true, false);
+        sessionLimitTest (7, false, false);
+        sessionLimitTest (8, true, false);
       }
 
     @Test
@@ -2215,13 +2210,13 @@ public class SKSTest
             cipher.init (Cipher.ENCRYPT_MODE, key.cert_path[0]);
             byte[] enc = cipher.doFinal (TEST_STRING);
             assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                                new byte[0],
                                                                                                 AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                                                                new byte[0],
                                                                                                 ok_pin.getBytes ("UTF-8"), 
                                                                                                 enc), TEST_STRING));
             byte[] result = device.sks.signHashedData (key.key_handle, 
-                                                       new byte[0],
                                                        "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
+                                                       new byte[0],
                                                        ok_pin.getBytes ("UTF-8"), 
                                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
@@ -2302,7 +2297,11 @@ public class SKSTest
         ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
         generator.initialize (eccgen, new SecureRandom ());
         java.security.KeyPair kp = generator.generateKeyPair ();
-        byte[] z = device.sks.keyAgreement (key.key_handle, new byte[0], KeyGen2URIs.ALGORITHMS.ECDH, ok_pin.getBytes ("UTF-8"), kp.getPublic ());
+        byte[] z = device.sks.keyAgreement (key.key_handle,
+                                            KeyGen2URIs.ALGORITHMS.ECDH,
+                                            new byte[0],
+                                            ok_pin.getBytes ("UTF-8"), 
+                                            kp.getPublic ());
         KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
         key_agreement.init (kp.getPrivate ());
         key_agreement.doPhase (key.cert_path[0].getPublicKey (), true);

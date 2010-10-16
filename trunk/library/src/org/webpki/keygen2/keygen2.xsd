@@ -15,14 +15,18 @@
 
     Historical note: KeyGen2 started its life as a 4-pass stand-alone
     key-provisioning protocol back in 2007 but ended up as a KeyGen2/SKS
-    10-pass "combo" three years later.  Properly implemented the current
-    incarnation provides E2ES (End-to-End Security).
+    10-pass "combo" three years later.
+
+    Properly implemented the current incarnation provides E2ES (End to End Security),
+    VSDs (Virtual Security Domains), and TOPM (Transaction Oriented Provisioning and
+    Management), which is mainly intended for mobile phones with embedded security
+    hardware hosting credentials from multiple and independent issuers.
 
     "Perfection is achieved, not when there is nothing more to add, but when
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 23-September-2010 
+    Revised: 16-October-2010 
     Author: Anders Rundgren
 
     Copyright 2006-2010 WebPKI.org (http://webpki.org).
@@ -205,6 +209,26 @@
                </xs:complexType>
             </xs:element>
 
+               <!-- SKS Reference: createProvisioningSession 
+                    Optional key management key -->
+            <xs:element name="KeyManagementKey" minOccurs="0">
+               <xs:complexType>
+                  <xs:sequence>
+
+                     <!-- MUST contain an RSA or ECDSA public key -->
+                     <xs:choice>
+
+                        <xs:element ref="ds:RSAKeyValue"/>
+
+                        <xs:element ref="ds11:ECKeyValue"/>
+
+                     </xs:choice>
+
+
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+
             <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
@@ -247,11 +271,6 @@
               SKS "SessionKey".  Currently the only documented algorithm URI is:
               "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1" -->
          <xs:attribute name="SessionKeyAlgorithm" type="xs:anyURI" use="required"/>
-
-         <!-- "Updatable" tells SKS if the provisioning session may
-              be referred to in post-provisioning sessions or not.
-              Default: false -->
-         <xs:attribute name="Updatable" type="xs:boolean" use="optional"/>
 
          <!-- Where to HTTP POST the provisioning session response.
               Note that applicable session cookies MUST be submitted
@@ -940,8 +959,7 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- MUST contain a public key element -->
- 
+            <!-- SKS Reference: createKeyPair.PublicKey -->
             <xs:choice>
 
                <xs:element ref="ds11:ECKeyValue"/>
@@ -955,9 +973,7 @@
  
          </xs:sequence>
 
-         <!-- SKS attestation vouching for the public key as being generated in 
-              a specific environment together with its private key counterpart.
-              Also see: "KeyAttestationAlgorithm" -->
+         <!-- SKS Reference: createKeyPair.KeyAttestation -->
          <xs:attribute name="KeyAttestation" type="xs:base64Binary" use="optional"/>
 
          <!-- A unique key-ID which MUST match a "KeyPair/@ID"
@@ -1222,6 +1238,9 @@
 
             <!-- Mandatory MAC (Message Authentication Code) -->
             <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
+
+            <!-- KMAuthentication -->
+            <xs:attribute name="KMAuthentication" type="xs:base64Binary" use="required"/>
 
          </xs:extension>
 

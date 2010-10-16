@@ -79,7 +79,9 @@ public class ServerCredentialStore implements Serializable
         
         String server_session_id;
         
-        byte[] post_provisioning_mac;
+        PublicKey key_management_key;
+        
+        byte[] km_authentication;
         
         byte[] certificate_fingerprint;
         
@@ -88,13 +90,15 @@ public class ServerCredentialStore implements Serializable
         PostProvisioningTargetKey (String client_session_id,
                                    String server_session_id,
                                    byte[] certificate_fingerprint,
-                                   byte[] post_provisioning_mac,
+                                   PublicKey key_management_key,
+                                   byte[] km_authentication,
                                    PostOperation post_operation)
           {
             this.client_session_id = client_session_id;
             this.server_session_id = server_session_id;
             this.certificate_fingerprint = certificate_fingerprint;
-            this.post_provisioning_mac = post_provisioning_mac;
+            this.key_management_key = key_management_key;
+            this.km_authentication = km_authentication;
             this.post_operation = post_operation;
           }
   
@@ -991,13 +995,13 @@ public class ServerCredentialStore implements Serializable
         public KeyProperties setClonedKeyProtection (String old_client_session_id, 
                                            String old_server_session_id,
                                            X509Certificate old_key,
-                                           ServerSessionKeyInterface old_session_key_interface) throws IOException, GeneralSecurityException
+                                           ServerKeyManagementInterface key_management_interface) throws IOException, GeneralSecurityException
           {
             PostProvisioningTargetKey op = addPostOperation (old_client_session_id,
                                                              old_server_session_id,
                                                              old_key,
                                                              PostOperation.CLONE_KEY_PROTECTION,
-                                                             old_session_key_interface);
+                                                             key_management_interface);
             setPostOp (op);
             return this;
           }
@@ -1005,13 +1009,13 @@ public class ServerCredentialStore implements Serializable
         public KeyProperties setUpdatedKey (String old_client_session_id, 
                                             String old_server_session_id,
                                             X509Certificate old_key,
-                                            ServerSessionKeyInterface old_session_key_interface) throws IOException, GeneralSecurityException
+                                            ServerKeyManagementInterface key_management_interface) throws IOException, GeneralSecurityException
           { 
             PostProvisioningTargetKey op = addPostOperation (old_client_session_id,
                                                              old_server_session_id,
                                                              old_key,
                                                              PostOperation.UPDATE_KEY,
-                                                             old_session_key_interface);
+                                                             key_management_interface);
             setPostOp (op);
             return this;
           }
@@ -1179,16 +1183,17 @@ public class ServerCredentialStore implements Serializable
                                                 String old_server_session_id,
                                                 X509Certificate old_key,
                                                 PostOperation operation,
-                                                ServerSessionKeyInterface old_session_key_interface) throws IOException, GeneralSecurityException
+                                                ServerKeyManagementInterface key_management_interface) throws IOException, GeneralSecurityException
       {
         byte[] certificate_data = old_key.getEncoded ();
-        MacGenerator post_mac = new MacGenerator ();
-        post_mac.addArray (certificate_data);
+        byte[] data = ArrayUtil.add (makeArray (certificate_data), 
+                                     makeArray (client_session_id.getBytes ("UTF-8")));
+        byte[] km_authentication = key_management_interface.generateKMAuthentication (data);
         PostProvisioningTargetKey new_post_op = new PostProvisioningTargetKey (old_client_session_id,
                                                                                old_server_session_id,
                                                                                HashAlgorithms.SHA256.digest (certificate_data),
-                                                                               old_session_key_interface.mac (post_mac.getResult (),
-                                                                                                              CryptoConstants.CRYPTO_STRING_PROOF_OF_OWNERSHIP),
+                                                                               key_management_interface.getKeyManagementKey (),
+                                                                               km_authentication,
                                                                                operation);
         for (PostProvisioningTargetKey post_op : post_operations)
           {
@@ -1208,6 +1213,11 @@ public class ServerCredentialStore implements Serializable
         return new_post_op;
       }
     
+    private byte[] makeArray (byte[] data)
+      {
+        return ArrayUtil.add (new byte[]{(byte)(data.length >>> 8), (byte)data.length}, data);
+      }
+
     void checkSession (String client_session_id, String server_session_id) throws IOException
       {
         if (!this.client_session_id.equals (client_session_id) || !this.server_session_id.equals (server_session_id))
@@ -1260,15 +1270,19 @@ public class ServerCredentialStore implements Serializable
         this.client_session_id = prov_sess_response.client_session_id;
         this.server_session_id = prov_sess_request.server_session_id;
         this.issuer_uri = prov_sess_request.submit_url;
-      }
+       }
     
     
     public void addPostProvisioningDeleteKey (String old_client_session_id,
                                               String old_server_session_id,
                                               X509Certificate old_key,
-                                              ServerSessionKeyInterface old_session_key_interface) throws IOException, GeneralSecurityException
+                                              ServerKeyManagementInterface key_management_interface) throws IOException, GeneralSecurityException
       {
-        addPostOperation (old_client_session_id, old_server_session_id, old_key, PostOperation.DELETE_KEY, old_session_key_interface);
+        addPostOperation (old_client_session_id, 
+                          old_server_session_id,
+                          old_key, 
+                          PostOperation.DELETE_KEY,
+                          key_management_interface);
       }
 
   

@@ -51,17 +51,21 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         
         byte[] certificate_fingerprint;
         
+        byte[] km_authentication;
+        
         int post_operation;
         
         PostOperation (String client_session_id,
                        String server_session_id,
                        byte[] certificate_fingerprint,
+                       byte[] km_authentication,
                        byte[] mac,
                        int post_operation)
           {
             this.client_session_id = client_session_id;
             this.server_session_id = server_session_id;
             this.certificate_fingerprint = certificate_fingerprint;
+            this.km_authentication = km_authentication;
             this.mac = mac;
             this.post_operation = post_operation;
           }
@@ -74,6 +78,11 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         public byte[] getCertificateFingerprint ()
           {
             return certificate_fingerprint;
+          }
+        
+        public byte[] getKMAuthentication ()
+          {
+            return km_authentication;
           }
         
         public int getPostOperation ()
@@ -407,6 +416,7 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         return new PostOperation (ah.getString (CLIENT_SESSION_ID_ATTR),
                                   ah.getString (SERVER_SESSION_ID_ATTR),
                                   ah.getBinary (CERTIFICATE_FINGERPRINT_ATTR),
+                                  ah.getBinary (KM_AUTHENTICATION_ATTR),
                                   ah.getBinary (MAC_ATTR),
                                   post_op);
       }

@@ -18,6 +18,8 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 
 import java.util.Date;
@@ -39,8 +41,6 @@ public class ProvisioningSessionRequestEncoder extends ProvisioningSessionReques
   {
     String prefix;  // Default: no prefix
     
-    private boolean did_set_session_updatable;
-
 
     // Constructors
 
@@ -64,10 +64,9 @@ public class ProvisioningSessionRequestEncoder extends ProvisioningSessionReques
       }
 
 
-    public void setUpdatable (boolean session_updatable_flag)
+    public void setKeyManagementKey (final ServerKeyManagementInterface key_management_operations) throws IOException, GeneralSecurityException
       {
-        did_set_session_updatable = true;
-        super.session_updatable_flag = session_updatable_flag;
+        super.key_management_key = key_management_operations.getKeyManagementKey ();
       }
 
 
@@ -101,6 +100,11 @@ public class ProvisioningSessionRequestEncoder extends ProvisioningSessionReques
         wr.initializeRootObject (prefix);
 
         XMLSignatureWrapper.addXMLSignature11NS (wr);
+        
+        if (key_management_key != null)
+          {
+            XMLSignatureWrapper.addXMLSignatureNS (wr);
+          }
 
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
@@ -115,11 +119,6 @@ public class ProvisioningSessionRequestEncoder extends ProvisioningSessionReques
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
         
-        if (did_set_session_updatable)
-          {
-            wr.setBooleanAttribute (UPDATABLE_ATTR, session_updatable_flag);
-          }
-        
         wr.setIntAttribute (SESSION_LIFE_TIME_ATTR, session_life_time);
 
         wr.setIntAttribute (SESSION_KEY_LIMIT_ATTR, session_key_limit);
@@ -133,6 +132,16 @@ public class ProvisioningSessionRequestEncoder extends ProvisioningSessionReques
         XMLSignatureWrapper.writePublicKey (wr, server_ephemeral_key);
         wr.getParent();
 
+        ////////////////////////////////////////////////////////////////////////
+        // Key management key
+        ////////////////////////////////////////////////////////////////////////
+        if (key_management_key != null)
+          {
+            wr.addChildElement (KEY_MANAGEMENT_KEY_ELEM);
+            XMLSignatureWrapper.writePublicKey (wr, key_management_key);
+            wr.getParent();
+          }
+        
         ////////////////////////////////////////////////////////////////////////
         // Optional ServerCookie
         ////////////////////////////////////////////////////////////////////////

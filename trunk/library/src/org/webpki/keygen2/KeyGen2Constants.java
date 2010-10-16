@@ -71,8 +71,6 @@ public interface KeyGen2Constants
 
     String SESSION_LIFE_TIME_ATTR            = "SessionLifeTime";
 
-    String UPDATABLE_ATTR                    = "Updatable";
-
     String EXPORT_POLICY_ATTR                = "ExportPolicy";
 
     String DELETE_POLICY_ATTR                = "DeletePolicy";
@@ -100,6 +98,8 @@ public interface KeyGen2Constants
     String ENDORSED_ALGORITHMS_ATTR          = "EndorsedAlgorithms";
 
     String KEY_ATTESTATION_ALGORITHM_ATTR    = "KeyAttestationAlgorithm";
+
+    String KM_AUTHENTICATION_ATTR            = "KMAuthentication";
 
     String KEY_ATTESTATION_ATTR              = "KeyAttestation";
 
@@ -157,6 +157,8 @@ public interface KeyGen2Constants
     String BASIC_CAPABILITIES_ELEM           = "BasicCapabilities";
 
     String IMAGE_PREFERENCE_ELEM             = "ImagePreference";
+
+    String KEY_MANAGEMENT_KEY_ELEM           = "KeyManagementKey";
 
     String SERVER_EPHEMERAL_KEY_ELEM         = "ServerEphemeralKey";
 

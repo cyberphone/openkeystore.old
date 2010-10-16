@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import java.util.Date;
 
+import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 
 import org.webpki.xml.DOMReaderHelper;
@@ -86,9 +87,9 @@ public class ProvisioningSessionRequestDecoder extends ProvisioningSessionReques
         return session_key_limit;
       }
 
-    public boolean getSessionUpdatableFlag ()
+    public PublicKey getKeyManagementKey ()
       {
-        return session_updatable_flag;
+        return key_management_key;
       }
     
     public void verifySignature (VerifierInterface verifier) throws IOException
@@ -119,8 +120,6 @@ public class ProvisioningSessionRequestDecoder extends ProvisioningSessionReques
         
         session_key_algorithm = ah.getString (SESSION_KEY_ALGORITHM_ATTR);
         
-        session_updatable_flag = ah.getBooleanConditional (UPDATABLE_ATTR, session_updatable_flag);
-        
         session_key_limit = (short)ah.getInt (SESSION_KEY_LIMIT_ATTR);
         
         session_life_time = ah.getInt (SESSION_LIFE_TIME_ATTR);
@@ -135,6 +134,17 @@ public class ProvisioningSessionRequestDecoder extends ProvisioningSessionReques
         rd.getChild ();
         server_ephemeral_key = (ECPublicKey) XMLSignatureWrapper.readPublicKey (rd);
         rd.getParent ();
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Get the optional key management key
+        /////////////////////////////////////////////////////////////////////////////////////////
+        if (rd.hasNext (KEY_MANAGEMENT_KEY_ELEM))
+          {
+            rd.getNext (KEY_MANAGEMENT_KEY_ELEM);
+            rd.getChild ();
+            key_management_key = XMLSignatureWrapper.readPublicKey (rd);
+            rd.getParent ();
+          }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional server cookie

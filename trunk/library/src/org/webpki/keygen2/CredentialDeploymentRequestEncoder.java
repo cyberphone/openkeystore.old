@@ -104,7 +104,9 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
         wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, target_key.client_session_id);
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, target_key.server_session_id);
         wr.setBinaryAttribute (CERTIFICATE_FINGERPRINT_ATTR, target_key.certificate_fingerprint);
-        post_op_mac.addArray (target_key.post_provisioning_mac);
+        wr.setBinaryAttribute (KM_AUTHENTICATION_ATTR, target_key.km_authentication);
+        post_op_mac.addArray (target_key.key_management_key.getEncoded ());
+        post_op_mac.addArray (target_key.km_authentication);
         mac (wr, post_op_mac.getResult (), target_key.post_operation.getMethod ());
         wr.getParent ();
       }

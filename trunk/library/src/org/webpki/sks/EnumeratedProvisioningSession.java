@@ -16,6 +16,7 @@
  */
 package org.webpki.sks;
 
+import java.security.PublicKey;
 import java.util.Date;
 
 public class EnumeratedProvisioningSession
@@ -27,6 +28,30 @@ public class EnumeratedProvisioningSession
     public int getProvisioningHandle ()
       {
         return provisioning_handle;
+      }
+    
+
+    PublicKey key_management_key;
+    
+    PublicKey getKeyManagementKey ()
+      {
+        return key_management_key;
+      }
+
+
+    int client_time;
+    
+    public Date getClientTime ()
+      {
+        return new Date (client_time * 1000);
+      }
+    
+
+    int session_life_time;
+    
+    public int getSessionLifeTime ()
+      {
+        return session_life_time;
       }
     
 
@@ -44,13 +69,13 @@ public class EnumeratedProvisioningSession
       {
         return server_session_id;
       }
+ 
     
-
-    int client_time;
+    String issuer_uri;
     
-    public Date getClientTime ()
+    public String getIssuerURI ()
       {
-        return new Date (client_time * 1000);
+        return issuer_uri;
       }
     
 
@@ -66,15 +91,21 @@ public class EnumeratedProvisioningSession
       }
 
 
-    public EnumeratedProvisioningSession (int client_time,
+    public EnumeratedProvisioningSession (PublicKey key_management_key,
+                                          int client_time,
+                                          int session_life_time,
                                           int provisioning_handle,
                                           String client_session_id,
-                                          String server_session_id)
+                                          String server_session_id,
+                                          String issuer_uri)
       {
+        this.key_management_key = key_management_key;
         this.client_time = client_time;
+        this.session_life_time = session_life_time;
         this.provisioning_handle = provisioning_handle;
         this.client_session_id = client_session_id;
         this.server_session_id = server_session_id;
+        this.issuer_uri = issuer_uri;
       }
 
   }

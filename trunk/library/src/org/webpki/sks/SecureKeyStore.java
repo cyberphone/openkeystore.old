@@ -35,7 +35,7 @@ public interface SecureKeyStore
                                                           String server_session_id,
                                                           ECPublicKey server_ephemeral_key,
                                                           String issuer_uri,
-                                                          boolean updatable,
+                                                          PublicKey key_management_key, // May be null
                                                           int client_time,
                                                           int session_life_time,
                                                           short session_key_limit) throws SKSException;
@@ -119,14 +119,17 @@ public interface SecureKeyStore
 
     public void pp_deleteKey (int provisioning_handle,
                               int target_key_handle,
+                              byte[] km_authentication,
                               byte[] mac) throws SKSException;
 
     public void pp_updateKey (int key_handle,
                               int target_key_handle,
+                              byte[] km_authentication,
                               byte[] mac) throws SKSException;
 
     public void pp_cloneKeyProtection (int key_handle,
                                        int target_key_handle,
+                                       byte[] km_authentication,
                                        byte[] mac) throws SKSException;
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -138,8 +141,8 @@ public interface SecureKeyStore
     public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException;
 
     public byte[] signHashedData (int key_handle,
-                                  byte[] parameters,
                                   String algorithm,
+                                  byte[] parameters,
                                   byte[] authorization,
                                   byte[] data) throws SKSException;
     
@@ -149,21 +152,21 @@ public interface SecureKeyStore
                                byte[] data) throws SKSException;
     
     public byte[] symmetricKeyEncrypt (int key_handle,
+                                       String algorithm,
                                        boolean mode,
                                        byte[] iv,
-                                       String algorithm,
                                        byte[] authorization,
                                        byte[] data) throws SKSException;
 
     public byte[] asymmetricKeyDecrypt (int key_handle,
-                                        byte[] parameters,
                                         String algorithm,
+                                        byte[] parameters,
                                         byte[] authorization,
                                         byte[] data) throws SKSException;
 
     public byte[] keyAgreement (int key_handle,
-                                byte[] parameters,
                                 String algorithm,
+                                byte[] parameters,
                                 byte[] authorization,
                                 PublicKey public_key) throws SKSException;
 

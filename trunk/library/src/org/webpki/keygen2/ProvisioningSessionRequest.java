@@ -18,6 +18,7 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.util.Date;
 
@@ -42,14 +43,14 @@ abstract class ProvisioningSessionRequest extends XMLObjectWrapper
     String submit_url;
     
     ECPublicKey server_ephemeral_key;
-
+    
+    PublicKey key_management_key;
+    
     int session_life_time;
 
     short session_key_limit;
 
     ServerCookie server_cookie;
-
-    boolean session_updatable_flag = false;
 
     String session_key_algorithm = KeyGen2URIs.ALGORITHMS.SESSION_KEY_1;
 
