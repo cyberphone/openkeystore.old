@@ -120,7 +120,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final byte[] KDF_DEVICE_ATTESTATION             = {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
     static final byte[] KDF_ENCRYPTION_KEY                 = {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
     static final byte[] KDF_EXTERNAL_SIGNATURE             = {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
-    static final byte[] KDF_PROOF_OF_OWNERSHIP             = {'P','r','o','o','f',' ','O','f',' ','O','w','n','e','r','s','h','i','p'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Predefined PIN and PUK policy IDs for MAC operations
