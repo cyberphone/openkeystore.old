@@ -376,7 +376,7 @@
                      <!-- Optional search filter -->
                      <xs:element ref="kgen:SearchFilter" minOccurs="0"/>
 
-                     <!-- MUST contain the issuer (CA) certificate/signature -->
+                     <!-- MUST contain the issuer KM signature -->
                      <xs:element ref="ds:Signature"/>
 
                   </xs:sequence>
