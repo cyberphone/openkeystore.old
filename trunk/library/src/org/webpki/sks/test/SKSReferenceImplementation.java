@@ -531,33 +531,34 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                          byte[] km_authentication,
                                          Provisioning provisioning) throws SKSException
           {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Verify MAC
+            ///////////////////////////////////////////////////////////////////////////////////
+            verifier.addArray (owner.key_management_key.getEncoded ());
+            verifier.addArray (km_authentication);
+            provisioning.verifyMac (verifier, mac);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Verify KM signature
+            ///////////////////////////////////////////////////////////////////////////////////
+            boolean ok = false;
             try
               {
-                verifier.addArray (owner.key_management_key.getEncoded ());
-                verifier.addArray (km_authentication);
-                provisioning.verifyMac (verifier, mac);
                 Signature km_verify = Signature.getInstance (owner.key_management_key instanceof RSAPublicKey ? 
                                                                                               "SHA256WithRSA" : "SHA256WithECDSA", "BC");
                 km_verify.initVerify (owner.key_management_key);
                 km_verify.update (makeArray (certificate_path[0].getEncoded ()));
                 km_verify.update (makeArray (provisioning.client_session_id.getBytes ("UTF-8")));
                 km_verify.update (makeArray (getDeviceCertificatePath ()[0].getEncoded ()));
-                if (!km_verify.verify (km_authentication))
-                  {
-                    provisioning.abort ("\"KMAuthentication\" signature did not verify for key #" + key_handle);
-                  }
+                ok = km_verify.verify (km_authentication);
               }
-            catch (GeneralSecurityException e)
+            catch (Exception e)
               {
                 provisioning.abort (e.getMessage (), SKSException.ERROR_CRYPTO);
               }
-            catch (UnsupportedEncodingException e)
+            if (!ok)
               {
-                provisioning.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
-              }
-            catch (IOException e)
-              {
-                provisioning.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
+                provisioning.abort ("\"KMAuthentication\" signature did not verify for key #" + key_handle);
               }
           }
 
