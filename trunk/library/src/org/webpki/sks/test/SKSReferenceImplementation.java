@@ -541,6 +541,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 km_verify.initVerify (owner.key_management_key);
                 km_verify.update (makeArray (certificate_path[0].getEncoded ()));
                 km_verify.update (makeArray (provisioning.client_session_id.getBytes ("UTF-8")));
+                km_verify.update (makeArray (getDeviceCertificatePath ()[0].getEncoded ()));
                 if (!km_verify.verify (km_authentication))
                   {
                     provisioning.abort ("\"KMAuthentication\" signature did not verify for key #" + key_handle);
@@ -551,6 +552,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 provisioning.abort (e.getMessage (), SKSException.ERROR_CRYPTO);
               }
             catch (UnsupportedEncodingException e)
+              {
+                provisioning.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
+              }
+            catch (IOException e)
               {
                 provisioning.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
               }

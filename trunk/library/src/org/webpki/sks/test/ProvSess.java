@@ -227,6 +227,8 @@ public class ProvSess
     
     SecureKeyStore sks;
     
+    Device device;
+    
     boolean override_export_policy;
     
     byte overriden_export_policy;
@@ -358,6 +360,7 @@ public class ProvSess
     ///////////////////////////////////////////////////////////////////////////////////
     public ProvSess (Device device, short session_key_limit, Integer kmk_id) throws GeneralSecurityException, IOException
       {
+        this.device = device;
         this.kmk_id = kmk_id;
         PublicKey key_management_key = kmk_id == null ? null : new KM (kmk_id).getKeyManagementKey ();
         sks = device.sks;

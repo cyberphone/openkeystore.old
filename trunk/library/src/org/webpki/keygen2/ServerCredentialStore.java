@@ -1179,6 +1179,8 @@ public class ServerCredentialStore implements Serializable
     
     byte[] saved_close_mac;
     
+    X509Certificate device_certificate;
+    
     PostProvisioningTargetKey addPostOperation (String old_client_session_id,
                                                 String old_server_session_id,
                                                 X509Certificate old_key,
@@ -1187,7 +1189,8 @@ public class ServerCredentialStore implements Serializable
       {
         byte[] certificate_data = old_key.getEncoded ();
         byte[] data = ArrayUtil.add (makeArray (certificate_data), 
-                                     makeArray (client_session_id.getBytes ("UTF-8")));
+                                     ArrayUtil.add (makeArray (client_session_id.getBytes ("UTF-8")),
+                                                    makeArray (device_certificate.getEncoded ())));
         byte[] km_authentication = key_management_interface.generateKMAuthentication (data);
         PostProvisioningTargetKey new_post_op = new PostProvisioningTargetKey (old_client_session_id,
                                                                                old_server_session_id,
@@ -1270,6 +1273,7 @@ public class ServerCredentialStore implements Serializable
         this.client_session_id = prov_sess_response.client_session_id;
         this.server_session_id = prov_sess_request.server_session_id;
         this.issuer_uri = prov_sess_request.submit_url;
+        this.device_certificate = prov_sess_response.device_certificate_path[0];
        }
     
     

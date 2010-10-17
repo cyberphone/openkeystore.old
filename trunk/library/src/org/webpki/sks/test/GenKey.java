@@ -119,7 +119,8 @@ public class GenKey
           }
         ProvSess.KM km = new ProvSess.KM (kmk_id);
         byte[] data = ArrayUtil.add (makeArray (cert_path[0].getEncoded ()),
-                                     makeArray (current.client_session_id.getBytes ("UTF-8")));
+                                     ArrayUtil.add (makeArray (current.client_session_id.getBytes ("UTF-8")),
+                                                    makeArray (current.device.device_info.getDeviceCertificatePath ()[0].getEncoded ())));
         byte[] km_authentication = km.generateKMAuthentication (data);
         upd_mac.addArray (km.getKeyManagementKey ().getEncoded ());
         upd_mac.addArray (km_authentication);
