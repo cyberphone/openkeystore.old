@@ -89,9 +89,26 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
       {
         return device_certificate_path;
       }
+    
+
+    class XMLSignVer implements SymKeyVerifierInterface
+      {
+        ServerCryptoInterface server_crypto_interface;
+        
+        XMLSignVer (ServerCryptoInterface server_crypto_interface)
+          {
+            this.server_crypto_interface = server_crypto_interface;
+          }
+
+        @Override
+        public boolean verifyData (byte[] data, byte[] digest, MacAlgorithms algorithm) throws IOException, GeneralSecurityException
+          {
+            return ArrayUtil.compare (server_crypto_interface.mac (data, CryptoConstants.CRYPTO_STRING_SIGNATURE), digest);
+          }
+      }
 
 
-    public void verifyAndGenerateSessionKey (final ServerSessionKeyInterface session_key_operations,
+    public void verifyAndGenerateSessionKey (ServerCryptoInterface server_crypto_interface,
                                              ProvisioningSessionRequestEncoder prov_sess_request) throws IOException
       {
         try
@@ -114,7 +131,7 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
             session_key_mac_data.addInt (prov_sess_request.session_life_time);
             session_key_mac_data.addShort (prov_sess_request.session_key_limit);
 
-            session_key_operations.generateAndVerifySessionKey (client_ephemeral_key,
+            server_crypto_interface.generateAndVerifySessionKey (client_ephemeral_key,
                                                                 kdf.getResult (),
                                                                 session_key_mac_data.getResult (),
                                                                 device_certificate_path[0],
@@ -124,16 +141,7 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
           {
             throw new IOException (e);
           }
-        new XMLSymKeyVerifier (new SymKeyVerifierInterface ()
-          {
-
-            @Override
-            public boolean verifyData (byte[] data, byte[] digest, MacAlgorithms algorithm) throws IOException, GeneralSecurityException
-              {
-                return ArrayUtil.compare (session_key_operations.mac (data, CryptoConstants.CRYPTO_STRING_SIGNATURE), digest);
-              }
-          
-          }).validateEnvelopedSignature (this, null, signature, client_session_id);
+        new XMLSymKeyVerifier (new XMLSignVer (server_crypto_interface)).validateEnvelopedSignature (this, null, signature, client_session_id);
       }
 
 

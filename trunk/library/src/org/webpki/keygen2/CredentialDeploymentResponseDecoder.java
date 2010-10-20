@@ -63,12 +63,12 @@ public class CredentialDeploymentResponseDecoder extends CredentialDeploymentRes
     
     
     public void verifyProvisioningResult (ServerCredentialStore server_credential_store,
-                                          ServerSessionKeyInterface sess_key_interface) throws IOException
+                                          ServerCryptoInterface server_crypto_interface) throws IOException
       {
         server_credential_store.checkSession (client_session_id, server_session_id);
         try
           {
-            server_credential_store.checkFinalResult (close_session_attestation, sess_key_interface);
+            server_credential_store.checkFinalResult (close_session_attestation, server_crypto_interface);
           }
         catch (GeneralSecurityException e)
           {

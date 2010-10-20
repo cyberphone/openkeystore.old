@@ -26,6 +26,9 @@ public interface CryptoConstants
     public static final byte[] CRYPTO_STRING_ENCRYPTION          = {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
 
     public static final byte[] CRYPTO_STRING_SIGNATURE           = {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
+    
+    public static final byte[] CRYPTO_STRING_TGT_KEY_REF         = {'T','a','r','g','e','t',' ','K','e','y',' ','R','e','f','e','r','e','n','c','e'};
+
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // If there is no ServerSeed, this is the default

@@ -17,7 +17,6 @@
 package org.webpki.sks.test;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
@@ -26,7 +25,6 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPublicKey;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -39,12 +37,13 @@ import org.webpki.ca.CertSpec;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.test.DemoKeyStore;
+
 import org.webpki.keygen2.CryptoConstants;
+
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.test.ProvSess.MacGenerator;
-import org.webpki.util.ArrayUtil;
 
 public class GenKey
   {
@@ -105,11 +104,6 @@ public class GenKey
         return this;
       }
     
-    byte[] makeArray (byte[] data)
-      {
-        return ArrayUtil.add (new byte[]{(byte)(data.length >>> 8), (byte)data.length}, data);
-      }
-
     public byte[] getPostProvMac (MacGenerator upd_mac, ProvSess current) throws IOException, GeneralSecurityException
       {
         Integer kmk_id = prov_sess.kmk_id;
@@ -117,12 +111,10 @@ public class GenKey
           {
             kmk_id = 0;  // Just for JUnit...
           }
-        ProvSess.KM km = new ProvSess.KM (kmk_id);
-        byte[] data = ArrayUtil.add (makeArray (cert_path[0].getEncoded ()),
-                                     ArrayUtil.add (makeArray (current.client_session_id.getBytes ("UTF-8")),
-                                                    makeArray (current.device.device_info.getDeviceCertificatePath ()[0].getEncoded ())));
-        byte[] km_authentication = km.generateKMAuthentication (data);
-        upd_mac.addArray (km.getKeyManagementKey ().getEncoded ());
+        PublicKey kmk = current.server_sess_key.enumerateKeyManagementKeys ()[kmk_id];
+        byte[] km_authentication = current.server_sess_key.generateKMAuthentication (kmk, current.mac (cert_path[0].getEncoded (),
+                                                                                                       CryptoConstants.CRYPTO_STRING_TGT_KEY_REF));
+        upd_mac.addArray (kmk.getEncoded ());
         upd_mac.addArray (km_authentication);
         return km_authentication;
       }

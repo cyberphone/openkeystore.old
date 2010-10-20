@@ -64,9 +64,9 @@ public class ProvisioningSessionRequestEncoder extends ProvisioningSessionReques
       }
 
 
-    public void setKeyManagementKey (final ServerKeyManagementInterface key_management_operations) throws IOException, GeneralSecurityException
+    public void setKeyManagementKey (PublicKey key_management_key) throws IOException, GeneralSecurityException
       {
-        super.key_management_key = key_management_operations.getKeyManagementKey ();
+        super.key_management_key = key_management_key;
       }
 
 

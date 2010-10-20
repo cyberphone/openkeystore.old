@@ -47,7 +47,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
     
     ServerCredentialStore server_credential_store;
     
-    ServerSessionKeyInterface sess_key_interface;
+    ServerCryptoInterface server_crypto_interface;
 
     
     private boolean need_signature_ns;
@@ -63,11 +63,11 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
 
     public KeyInitializationRequestEncoder (String submit_url,
                                             ServerCredentialStore server_credential_store,
-                                            ServerSessionKeyInterface sess_key_interface) throws IOException
+                                            ServerCryptoInterface server_crypto_interface) throws IOException
       {
         this.submit_url = submit_url;
         this.server_credential_store = server_credential_store;
-        this.sess_key_interface = sess_key_interface;
+        this.server_crypto_interface = server_crypto_interface;
       }
 
 
@@ -176,7 +176,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
                       }
                     else
                       {
-                        getPUKPolicy (req_key).writePolicy (wr, sess_key_interface);
+                        getPUKPolicy (req_key).writePolicy (wr, server_crypto_interface);
                         written_puk.add (getPUKPolicy (req_key).id);
                       }
                   }
@@ -191,11 +191,11 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
                       }
                     else
                       {
-                        req_key.pin_policy.writePolicy (wr, sess_key_interface);
+                        req_key.pin_policy.writePolicy (wr, server_crypto_interface);
                         written_pin.add (req_key.pin_policy.id);
                       }
                   }
-                req_key.writeRequest (wr, sess_key_interface);
+                req_key.writeRequest (wr, server_crypto_interface);
                 last_req_key = req_key;
               }
           }

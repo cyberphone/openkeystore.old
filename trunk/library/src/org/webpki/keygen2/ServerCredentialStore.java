@@ -80,25 +80,21 @@ public class ServerCredentialStore implements Serializable
         String server_session_id;
         
         PublicKey key_management_key;
-        
-        byte[] km_authentication;
-        
-        byte[] certificate_fingerprint;
+      
+        byte[] certificate_data;
         
         PostOperation post_operation;
         
         PostProvisioningTargetKey (String client_session_id,
                                    String server_session_id,
-                                   byte[] certificate_fingerprint,
+                                   byte[] certificate_data,
                                    PublicKey key_management_key,
-                                   byte[] km_authentication,
                                    PostOperation post_operation)
           {
             this.client_session_id = client_session_id;
             this.server_session_id = server_session_id;
-            this.certificate_fingerprint = certificate_fingerprint;
+            this.certificate_data = certificate_data;
             this.key_management_key = key_management_key;
-            this.km_authentication = km_authentication;
             this.post_operation = post_operation;
           }
   
@@ -107,7 +103,7 @@ public class ServerCredentialStore implements Serializable
             return o instanceof PostProvisioningTargetKey && 
                    client_session_id.equals(((PostProvisioningTargetKey)o).client_session_id) &&
                    server_session_id.equals (((PostProvisioningTargetKey)o).server_session_id) &&
-                   ArrayUtil.compare (certificate_fingerprint, ((PostProvisioningTargetKey)o).certificate_fingerprint);
+                   ArrayUtil.compare (certificate_data, ((PostProvisioningTargetKey)o).certificate_data);
           }
       }
   
@@ -441,7 +437,7 @@ public class ServerCredentialStore implements Serializable
             this.retry_limit = retry_limit;
           }
 
-        void writePolicy (DOMWriterHelper wr, ServerSessionKeyInterface sess_key_interface) throws IOException, GeneralSecurityException
+        void writePolicy (DOMWriterHelper wr, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
           {
             wr.addChildElement (PUK_POLICY_ELEM);
             super.write (wr);
@@ -455,7 +451,7 @@ public class ServerCredentialStore implements Serializable
             puk_policy_mac.addArray (encrypted_value);
             puk_policy_mac.addByte (format.getSKSValue ());
             puk_policy_mac.addShort (retry_limit);
-            wr.setBinaryAttribute (MAC_ATTR, mac (puk_policy_mac.getResult (), APIDescriptors.CREATE_PUK_POLICY, sess_key_interface));
+            wr.setBinaryAttribute (MAC_ATTR, mac (puk_policy_mac.getResult (), APIDescriptors.CREATE_PUK_POLICY, server_crypto_interface));
           }
       }
 
@@ -532,7 +528,7 @@ public class ServerCredentialStore implements Serializable
             this.id = pin_prefix + ++next_pin_id_suffix;
           }
 
-        void writePolicy (DOMWriterHelper wr, ServerSessionKeyInterface sess_key_interface) throws IOException, GeneralSecurityException
+        void writePolicy (DOMWriterHelper wr, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
           {
             wr.addChildElement (PIN_POLICY_ELEM);
             wr.setStringAttribute (ID_ATTR, id);
@@ -574,7 +570,7 @@ public class ServerCredentialStore implements Serializable
             pin_policy_mac.addShort (min_length);
             pin_policy_mac.addShort (max_length);
             pin_policy_mac.addByte (input_method == null ? InputMethod.ANY.getSKSValue () : input_method.getSKSValue ());
-            wr.setBinaryAttribute (MAC_ATTR, mac (pin_policy_mac.getResult (), APIDescriptors.CREATE_PIN_POLICY, sess_key_interface));
+            wr.setBinaryAttribute (MAC_ATTR, mac (pin_policy_mac.getResult (), APIDescriptors.CREATE_PIN_POLICY, server_crypto_interface));
           }
 
         public PINPolicy setInputMethod (InputMethod input_method)
@@ -995,13 +991,13 @@ public class ServerCredentialStore implements Serializable
         public KeyProperties setClonedKeyProtection (String old_client_session_id, 
                                            String old_server_session_id,
                                            X509Certificate old_key,
-                                           ServerKeyManagementInterface key_management_interface) throws IOException, GeneralSecurityException
+                                           PublicKey key_management_key) throws IOException, GeneralSecurityException
           {
             PostProvisioningTargetKey op = addPostOperation (old_client_session_id,
                                                              old_server_session_id,
                                                              old_key,
                                                              PostOperation.CLONE_KEY_PROTECTION,
-                                                             key_management_interface);
+                                                             key_management_key);
             setPostOp (op);
             return this;
           }
@@ -1009,13 +1005,13 @@ public class ServerCredentialStore implements Serializable
         public KeyProperties setUpdatedKey (String old_client_session_id, 
                                             String old_server_session_id,
                                             X509Certificate old_key,
-                                            ServerKeyManagementInterface key_management_interface) throws IOException, GeneralSecurityException
+                                            PublicKey key_management_key) throws IOException, GeneralSecurityException
           { 
             PostProvisioningTargetKey op = addPostOperation (old_client_session_id,
                                                              old_server_session_id,
                                                              old_key,
                                                              PostOperation.UPDATE_KEY,
-                                                             key_management_interface);
+                                                             key_management_key);
             setPostOp (op);
             return this;
           }
@@ -1045,7 +1041,7 @@ public class ServerCredentialStore implements Serializable
               }
           }
 
-        void writeRequest (DOMWriterHelper wr, ServerSessionKeyInterface session_key_interface) throws IOException, GeneralSecurityException
+        void writeRequest (DOMWriterHelper wr, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
           {
             key_init_done = true;
             MacGenerator key_pair_mac = new MacGenerator ();
@@ -1130,7 +1126,7 @@ public class ServerCredentialStore implements Serializable
                 wr.setBinaryAttribute (SERVER_SEED_ATTR, server_seed);
               }
 
-            wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), APIDescriptors.CREATE_KEY_PAIR, session_key_interface));
+            wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), APIDescriptors.CREATE_KEY_PAIR, server_crypto_interface));
             
             expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
             
@@ -1185,18 +1181,12 @@ public class ServerCredentialStore implements Serializable
                                                 String old_server_session_id,
                                                 X509Certificate old_key,
                                                 PostOperation operation,
-                                                ServerKeyManagementInterface key_management_interface) throws IOException, GeneralSecurityException
+                                                PublicKey key_management_key) throws IOException, GeneralSecurityException
       {
-        byte[] certificate_data = old_key.getEncoded ();
-        byte[] data = ArrayUtil.add (makeArray (certificate_data), 
-                                     ArrayUtil.add (makeArray (client_session_id.getBytes ("UTF-8")),
-                                                    makeArray (device_certificate.getEncoded ())));
-        byte[] km_authentication = key_management_interface.generateKMAuthentication (data);
         PostProvisioningTargetKey new_post_op = new PostProvisioningTargetKey (old_client_session_id,
                                                                                old_server_session_id,
-                                                                               HashAlgorithms.SHA256.digest (certificate_data),
-                                                                               key_management_interface.getKeyManagementKey (),
-                                                                               km_authentication,
+                                                                               old_key.getEncoded (),
+                                                                               key_management_key,
                                                                                operation);
         for (PostProvisioningTargetKey post_op : post_operations)
           {
@@ -1216,11 +1206,6 @@ public class ServerCredentialStore implements Serializable
         return new_post_op;
       }
     
-    private byte[] makeArray (byte[] data)
-      {
-        return ArrayUtil.add (new byte[]{(byte)(data.length >>> 8), (byte)data.length}, data);
-      }
-
     void checkSession (String client_session_id, String server_session_id) throws IOException
       {
         if (!this.client_session_id.equals (client_session_id) || !this.server_session_id.equals (server_session_id))
@@ -1235,24 +1220,24 @@ public class ServerCredentialStore implements Serializable
         return  new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
       }
 
-    byte[] mac (byte[] data, APIDescriptors method, ServerSessionKeyInterface session_key_interface) throws IOException, GeneralSecurityException
+    byte[] mac (byte[] data, APIDescriptors method, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
       {
-        return session_key_interface.mac (data, ArrayUtil.add (method.getBinary (), getMACSequenceCounterAndUpdate ()));
+        return server_crypto_interface.mac (data, ArrayUtil.add (method.getBinary (), getMACSequenceCounterAndUpdate ()));
       }
     
-    byte[] attest (byte[] data, byte[] mac_counter, ServerSessionKeyInterface session_key_interface) throws IOException, GeneralSecurityException
+    byte[] attest (byte[] data, byte[] mac_counter, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
       {
-        return session_key_interface.mac (data, ArrayUtil.add (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST, mac_counter)); 
+        return server_crypto_interface.mac (data, ArrayUtil.add (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST, mac_counter)); 
       }
     
-    void checkFinalResult (byte[] close_session_attestation,  ServerSessionKeyInterface session_key_interface) throws IOException, GeneralSecurityException
+    void checkFinalResult (byte[] close_session_attestation,  ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
       {
         MacGenerator check = new MacGenerator ();
         check.addArray (saved_close_mac);
         check.addString (KeyGen2URIs.ALGORITHMS.SESSION_KEY_1);
         if (!ArrayUtil.compare (attest (check.getResult (),
                                         getMACSequenceCounterAndUpdate (),
-                                        session_key_interface),
+                                        server_crypto_interface),
                                 close_session_attestation))
           {
             bad ("Final attestation failed!");
@@ -1280,13 +1265,13 @@ public class ServerCredentialStore implements Serializable
     public void addPostProvisioningDeleteKey (String old_client_session_id,
                                               String old_server_session_id,
                                               X509Certificate old_key,
-                                              ServerKeyManagementInterface key_management_interface) throws IOException, GeneralSecurityException
+                                              PublicKey key_management_key) throws IOException, GeneralSecurityException
       {
         addPostOperation (old_client_session_id, 
                           old_server_session_id,
                           old_key, 
                           PostOperation.DELETE_KEY,
-                          key_management_interface);
+                          key_management_key);
       }
 
   

@@ -43,6 +43,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import javax.crypto.Cipher;
@@ -105,8 +106,7 @@ import org.webpki.keygen2.ProvisioningSessionRequestEncoder;
 import org.webpki.keygen2.ProvisioningSessionResponseDecoder;
 import org.webpki.keygen2.ProvisioningSessionResponseEncoder;
 import org.webpki.keygen2.ServerCredentialStore;
-import org.webpki.keygen2.ServerKeyManagementInterface;
-import org.webpki.keygen2.ServerSessionKeyInterface;
+import org.webpki.keygen2.ServerCryptoInterface;
 
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
@@ -117,6 +117,7 @@ import org.webpki.sks.Property;
 import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
+
 import org.webpki.tools.XML2HTMLPrinter;
 
 import org.webpki.util.ArrayUtil;
@@ -147,6 +148,8 @@ public class KeyGen2Test
     boolean symmetric_key;
     
     boolean updatable;
+    
+    boolean ecc_kmk;
     
     Server clone_key_protection;
     
@@ -591,13 +594,30 @@ public class KeyGen2Test
         
         PrivateKey gen_private_key;
         
+        PublicKey server_km;
+        
         String server_session_id;
 
-        class SoftHSM implements ServerSessionKeyInterface
+        class SoftHSM implements ServerCryptoInterface
           {
             ////////////////////////////////////////////////////////////////////////////////////////
             // Private and secret keys would in a HSM implementation be represented as handles
             ////////////////////////////////////////////////////////////////////////////////////////
+            LinkedHashMap<PublicKey,PrivateKey> key_management_keys = new LinkedHashMap<PublicKey,PrivateKey> ();
+            
+            private void addKMK (KeyStore km_keystore) throws IOException, GeneralSecurityException
+              {
+                key_management_keys.put (km_keystore.getCertificate ("mykey").getPublicKey (),
+                                         (PrivateKey) km_keystore.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
+              }
+            
+            SoftHSM () throws IOException, GeneralSecurityException
+              {
+                addKMK (DemoKeyStore.getMybankDotComKeyStore ());
+                addKMK (DemoKeyStore.getSubCAKeyStore ());
+                addKMK (DemoKeyStore.getECDSAStore ());
+              }
+            
             ECPrivateKey server_ec_private_key;
             
             byte[] session_key;
@@ -686,40 +706,24 @@ public class KeyGen2Test
                 new SecureRandom ().nextBytes (rnd);
                 return rnd;
               }
-          }
-        
-        class KM implements ServerKeyManagementInterface
-          {
-            KeyStore key_store;
-            
-            KM (int key_id) throws IOException, GeneralSecurityException
-              {
-                if (key_id < 0 || key_id > 1)
-                  {
-                    throw new IOException ("Unknown key_id: " + key_id);
-                  }
-                key_store = key_id == 0 ? DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getSubCAKeyStore ();
-              }
 
             @Override
-            public byte[] generateKMAuthentication (byte[] data) throws IOException, GeneralSecurityException
+            public byte[] generateKMAuthentication (PublicKey key_management__key, byte[] data) throws IOException, GeneralSecurityException
               {
-                Signature km_sign = Signature.getInstance (getKeyManagementKey () instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA", "BC");
-                km_sign.initSign ((PrivateKey) key_store.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
+                Signature km_sign = Signature.getInstance (key_management__key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA", "BC");
+                km_sign.initSign (key_management_keys.get (key_management__key));
                 km_sign.update (data);
                 return km_sign.sign ();
               }
 
             @Override
-            public PublicKey getKeyManagementKey () throws IOException, GeneralSecurityException
+            public PublicKey[] enumerateKeyManagementKeys () throws IOException, GeneralSecurityException
               {
-                return key_store.getCertificate ("mykey").getPublicKey ();
+                return key_management_keys.keySet ().toArray (new PublicKey[0]);
               }
           }
         
         SoftHSM server_sess_key = new SoftHSM ();
-
-        KM server_km = new KM (0);
 
         Server () throws Exception
           {
@@ -777,7 +781,7 @@ public class KeyGen2Test
                                                                         (short)50);
             if (updatable)
               {
-                prov_sess_request.setKeyManagementKey(server_km);
+                prov_sess_request.setKeyManagementKey(server_km = server_sess_key.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
               }
             return prov_sess_request.writeXML ();
           }
@@ -1133,6 +1137,7 @@ public class KeyGen2Test
             writeOption ("CloneKeyProtection", clone_key_protection != null);
             writeOption ("UpdateKey", update_key != null);
             writeOption ("DeleteKey", delete_key != null);
+            writeOption ("ECC KMK", ecc_kmk);
             server = new Server ();
             client = new Client ();
             byte[] xml;
@@ -1323,6 +1328,7 @@ public class KeyGen2Test
       {
         Doer doer1 = new Doer ();
         updatable = true;
+        ecc_kmk = true;
         pin_protection = true;
         pin_group_shared = true;
         preset_pin = true;

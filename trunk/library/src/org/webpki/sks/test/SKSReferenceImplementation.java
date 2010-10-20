@@ -47,6 +47,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Vector;
 
 import javax.crypto.Cipher;
@@ -120,6 +121,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final byte[] KDF_DEVICE_ATTESTATION             = {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
     static final byte[] KDF_ENCRYPTION_KEY                 = {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
     static final byte[] KDF_EXTERNAL_SIGNATURE             = {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
+    static final byte[] KDF_TARGET_KEY_REFERENCE           = {'T','a','r','g','e','t',' ','K','e','y',' ','R','e','f','e','r','e','n','c','e'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Predefined PIN and PUK policy IDs for MAC operations
@@ -309,7 +311,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         X509Certificate[] certificate_path;
 
         byte[] symmetric_key;
-        HashSet<String> endorsed_algorithms;
+        LinkedHashSet<String> endorsed_algorithms;
 
         String friendly_name;
 
@@ -537,28 +539,24 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             verifier.addArray (owner.key_management_key.getEncoded ());
             verifier.addArray (km_authentication);
             provisioning.verifyMac (verifier, mac);
-
+            
             ///////////////////////////////////////////////////////////////////////////////////
             // Verify KM signature
             ///////////////////////////////////////////////////////////////////////////////////
-            boolean ok = false;
             try
               {
                 Signature km_verify = Signature.getInstance (owner.key_management_key instanceof RSAPublicKey ? 
                                                                                               "SHA256WithRSA" : "SHA256WithECDSA", "BC");
                 km_verify.initVerify (owner.key_management_key);
-                km_verify.update (makeArray (certificate_path[0].getEncoded ()));
-                km_verify.update (makeArray (provisioning.client_session_id.getBytes ("UTF-8")));
-                km_verify.update (makeArray (getDeviceCertificatePath ()[0].getEncoded ()));
-                ok = km_verify.verify (km_authentication);
+                km_verify.update (provisioning.getMacBuilder (KDF_TARGET_KEY_REFERENCE).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
+                if (!km_verify.verify (km_authentication))
+                  {
+                    provisioning.abort ("\"KMAuthentication\" signature did not verify for key #" + key_handle);
+                  }
               }
-            catch (Exception e)
+            catch (GeneralSecurityException e)
               {
                 provisioning.abort (e.getMessage (), SKSException.ERROR_CRYPTO);
-              }
-            if (!ok)
-              {
-                provisioning.abort ("\"KMAuthentication\" signature did not verify for key #" + key_handle);
               }
           }
 
@@ -1059,11 +1057,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         return ((buffer[index++] << 8) & 0xFFFF) + (buffer[index] & 0xFF);
       }
     
-    byte[] makeArray (byte[] data)
-      {
-        return addArrays (new byte[]{(byte)(data.length >>> 8), (byte)data.length}, data);
-      }
-
     KeyEntry getOpenKey (int key_handle) throws SKSException
       {
         KeyEntry key_entry = keys.get (key_handle);
@@ -2959,7 +2952,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         verifier.addByte (app_usage);
         verifier.addString (friendly_name);
         verifier.addVerbatim (key_algorithm);
-        HashSet<String> temp_endorsed = new HashSet<String> ();
+        LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
         for (String algorithm : endorsed_algorithms)
           {
             ///////////////////////////////////////////////////////////////////////////////////

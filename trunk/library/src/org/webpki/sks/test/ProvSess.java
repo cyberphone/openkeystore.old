@@ -36,6 +36,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Set;
 
 import javax.crypto.Cipher;
@@ -62,8 +63,7 @@ import org.webpki.keygen2.AppUsage;
 import org.webpki.keygen2.PINGrouping;
 import org.webpki.keygen2.PassphraseFormat;
 import org.webpki.keygen2.PatternRestriction;
-import org.webpki.keygen2.ServerKeyManagementInterface;
-import org.webpki.keygen2.ServerSessionKeyInterface;
+import org.webpki.keygen2.ServerCryptoInterface;
 
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.KeyPair;
@@ -76,11 +76,26 @@ import org.webpki.util.DebugFormatter;
 
 public class ProvSess
   {
-    class SoftHSM implements ServerSessionKeyInterface
+    class SoftHSM implements ServerCryptoInterface
       {
         ////////////////////////////////////////////////////////////////////////////////////////
         // Private and secret keys would in a HSM implementation be represented as handles
         ////////////////////////////////////////////////////////////////////////////////////////
+        HashMap<PublicKey,PrivateKey> key_management_keys = new HashMap<PublicKey,PrivateKey> ();
+        
+        private void addKMK (KeyStore km_keystore) throws IOException, GeneralSecurityException
+          {
+            key_management_keys.put (km_keystore.getCertificate ("mykey").getPublicKey (),
+                                     (PrivateKey) km_keystore.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
+          }
+        
+        SoftHSM () throws IOException, GeneralSecurityException
+          {
+            addKMK (DemoKeyStore.getMybankDotComKeyStore ());
+            addKMK (DemoKeyStore.getSubCAKeyStore ());
+            addKMK (DemoKeyStore.getECDSAStore ());
+          }
+
         ECPrivateKey server_ec_private_key;
         
         byte[] session_key;
@@ -169,37 +184,23 @@ public class ProvSess
             new SecureRandom ().nextBytes (rnd);
             return rnd;
           }
-      }
-    
-    static class KM implements ServerKeyManagementInterface
-      {
-        KeyStore km_keystore;
-        
-        KM (int key_id) throws IOException, GeneralSecurityException
-          {
-            if (key_id < 0 || key_id > 1)
-              {
-                throw new IOException ("Unknown key_id: " + key_id);
-              }
-            km_keystore = key_id == 0 ? DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getSubCAKeyStore ();
-          }
 
         @Override
-        public byte[] generateKMAuthentication (byte[] data) throws IOException, GeneralSecurityException
+        public byte[] generateKMAuthentication (PublicKey key_management__key, byte[] data) throws IOException, GeneralSecurityException
           {
-            Signature km_sign = Signature.getInstance (getKeyManagementKey () instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA", "BC");
-            km_sign.initSign ((PrivateKey) km_keystore.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
+            Signature km_sign = Signature.getInstance (key_management__key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA", "BC");
+            km_sign.initSign (key_management_keys.get (key_management__key));
             km_sign.update (data);
             return km_sign.sign ();
           }
 
         @Override
-        public PublicKey getKeyManagementKey () throws IOException, GeneralSecurityException
+        public PublicKey[] enumerateKeyManagementKeys () throws IOException, GeneralSecurityException
           {
-            return km_keystore.getCertificate ("mykey").getPublicKey ();
+            return key_management_keys.keySet ().toArray (new PublicKey[0]);
           }
-
       }
+    
     
     SoftHSM server_sess_key = new SoftHSM ();
 
@@ -362,7 +363,7 @@ public class ProvSess
       {
         this.device = device;
         this.kmk_id = kmk_id;
-        PublicKey key_management_key = kmk_id == null ? null : new KM (kmk_id).getKeyManagementKey ();
+        PublicKey key_management_key = kmk_id == null ? null : server_sess_key.enumerateKeyManagementKeys ()[kmk_id];
         sks = device.sks;
         server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
         client_time = new Date ();

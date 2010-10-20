@@ -58,7 +58,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
       }
     
     
-    public void validateAndPopulate (KeyInitializationRequestEncoder key_init_request, ServerSessionKeyInterface session_key_operations) throws IOException
+    public void validateAndPopulate (KeyInitializationRequestEncoder key_init_request, ServerCryptoInterface server_crypto_interface) throws IOException
       {
         key_init_request.server_credential_store.checkSession (client_session_id, server_session_id);
         if (generated_keys.size () != key_init_request.server_credential_store.requested_keys.size ())
@@ -86,7 +86,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
                   }
                  if (!ArrayUtil.compare (key_init_request.server_credential_store.attest (key_attestation.getResult (),
                                                                                           kp.expected_attest_mac_count,
-                                                                                          session_key_operations),
+                                                                                          server_crypto_interface),
                                          kp.key_attestation = gpk.key_attestation))
                   {
                     ServerCredentialStore.bad ("Attestation failed for key id:" + gpk.id);

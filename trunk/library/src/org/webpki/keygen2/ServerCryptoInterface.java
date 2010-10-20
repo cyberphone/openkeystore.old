@@ -19,12 +19,13 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
 
-public interface ServerSessionKeyInterface
+public interface ServerCryptoInterface
   {
     ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException;
     
@@ -41,4 +42,8 @@ public interface ServerSessionKeyInterface
     public byte[] decrypt (byte[] data) throws IOException, GeneralSecurityException;
     
     public byte[] generateNonce () throws IOException, GeneralSecurityException;
+
+    public byte[] generateKMAuthentication (PublicKey key_management_key, byte[] data) throws IOException, GeneralSecurityException;
+    
+    public PublicKey[] enumerateKeyManagementKeys () throws IOException, GeneralSecurityException;
   }

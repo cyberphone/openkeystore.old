@@ -18,6 +18,7 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import org.webpki.xml.ServerCookie;
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
@@ -29,6 +30,14 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 abstract class CredentialDiscoveryRequest extends XMLObjectWrapper 
   {
+    String submit_url;
+    
+    String server_session_id;
+    
+    String client_session_id;
+    
+    ServerCookie server_cookie;
+    
     CredentialDiscoveryRequest () {}
 
 

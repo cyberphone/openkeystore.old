@@ -33,6 +33,7 @@ import org.webpki.xml.ServerCookie;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSigner;
 
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SignerInterface;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.keygen2.ServerCredentialStore.PostProvisioningTargetKey;
@@ -49,17 +50,18 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
 
     ServerCredentialStore server_credential_store;
     
-    ServerSessionKeyInterface sess_key_interface;
-     
+    ServerCryptoInterface server_crypto_interface;
+    
+    
     // Constructors
 
     public CredentialDeploymentRequestEncoder (String submit_url, 
                                                ServerCredentialStore server_credential_store,
-                                               ServerSessionKeyInterface sess_key_interface) throws IOException
+                                               ServerCryptoInterface server_crypto_interface) throws IOException
       {
         this.submit_url = submit_url;
         this.server_credential_store = server_credential_store;
-        this.sess_key_interface = sess_key_interface;
+        this.server_crypto_interface = server_crypto_interface;
       }
 
 
@@ -86,7 +88,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
     
     private byte[] mac (byte[] data, APIDescriptors method) throws IOException, GeneralSecurityException
       {
-        return server_credential_store.mac (data, method, sess_key_interface);
+        return server_credential_store.mac (data, method, server_crypto_interface);
       }
     
     
@@ -103,10 +105,12 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
         wr.addChildElement (target_key.post_operation.getXMLElem ());
         wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, target_key.client_session_id);
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, target_key.server_session_id);
-        wr.setBinaryAttribute (CERTIFICATE_FINGERPRINT_ATTR, target_key.certificate_fingerprint);
-        wr.setBinaryAttribute (KM_AUTHENTICATION_ATTR, target_key.km_authentication);
+        wr.setBinaryAttribute (CERTIFICATE_FINGERPRINT_ATTR, HashAlgorithms.SHA256.digest (target_key.certificate_data));
+        byte[] key_id = server_crypto_interface.mac (target_key.certificate_data, CryptoConstants.CRYPTO_STRING_TGT_KEY_REF);
+        byte[] km_authentication = server_crypto_interface.generateKMAuthentication (target_key.key_management_key, key_id);
+        wr.setBinaryAttribute (KM_AUTHENTICATION_ATTR, km_authentication);
         post_op_mac.addArray (target_key.key_management_key.getEncoded ());
-        post_op_mac.addArray (target_key.km_authentication);
+        post_op_mac.addArray (km_authentication);
         mac (wr, post_op_mac.getResult (), target_key.post_operation.getMethod ());
         wr.getParent ();
       }
@@ -128,7 +132,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
             wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
     
             byte[] nonce;
-            wr.setBinaryAttribute (NONCE_ATTR, nonce = sess_key_interface.generateNonce ());
+            wr.setBinaryAttribute (NONCE_ATTR, nonce = server_crypto_interface.generateNonce ());
     
             XMLSignatureWrapper.addXMLSignatureNS (wr);
     
