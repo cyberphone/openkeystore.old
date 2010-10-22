@@ -84,6 +84,8 @@ import org.webpki.keygen2.CredentialDeploymentRequestDecoder;
 import org.webpki.keygen2.CredentialDeploymentRequestEncoder;
 import org.webpki.keygen2.CredentialDeploymentResponseDecoder;
 import org.webpki.keygen2.CredentialDeploymentResponseEncoder;
+import org.webpki.keygen2.CredentialDiscoveryRequestDecoder;
+import org.webpki.keygen2.CredentialDiscoveryRequestEncoder;
 import org.webpki.keygen2.CryptoConstants;
 import org.webpki.keygen2.DeletePolicy;
 import org.webpki.keygen2.ExportPolicy;
@@ -574,6 +576,8 @@ public class KeyGen2Test
 
         static final String CRE_DEP_URL = "http://issuer.example.com/credep";
 
+        static final String CRE_DISC_URL = "http://issuer.example.com/credisc";
+
         static final String LOGO_URL = "http://issuer.example.com/images/logo.png";
         
         XMLSchemaCache server_xml_cache;
@@ -801,6 +805,15 @@ public class KeyGen2Test
             // Here we could/should introduce an SKS identity/brand check
             ////////////////////////////////////////////////////////////////////////////////////
             X509Certificate[] certificate_path = prov_sess_response.getDeviceCertificatePath ();
+            if (certificate_path != null)
+              {
+                CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder (prov_sess_response, CRE_DISC_URL);
+                cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[0]);
+                cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[1]);
+ //               System.out.println (new String (cdre.writeXML (), "UTF-8"));
+                server_xml_cache.addWrapper (CredentialDiscoveryRequestDecoder.class);
+                server_xml_cache.parse (cdre.writeXML ());
+              }
 
             try
               {

@@ -113,13 +113,13 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
       {
         try
           {
-            ServerCredentialStore.MacGenerator kdf = new ServerCredentialStore.MacGenerator ();
+            MacGenerator kdf = new MacGenerator ();
             kdf.addString (client_session_id);
             kdf.addString (server_session_id);
             kdf.addString (prov_sess_request.submit_url);
             kdf.addArray (device_certificate_path[0].getEncoded ());
 
-            ServerCredentialStore.MacGenerator session_key_mac_data = new ServerCredentialStore.MacGenerator ();
+            MacGenerator session_key_mac_data = new MacGenerator ();
             session_key_mac_data.addString (prov_sess_request.session_key_algorithm);
             session_key_mac_data.addString (client_session_id);
             session_key_mac_data.addString (server_session_id);

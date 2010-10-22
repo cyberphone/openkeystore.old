@@ -18,49 +18,159 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+
 import java.util.Vector;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.ServerCookie;
+import org.webpki.xml.XMLObjectWrapper;
 
+import org.webpki.xmldsig.XMLAsymKeySigner;
+import org.webpki.xmldsig.XMLEnvelopedInput;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSigner;
 
+import org.webpki.crypto.AsymKeySignerInterface;
+import org.webpki.crypto.HashAlgorithms;
+import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SignerInterface;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryRequest
   {
-    public class LookupDescriptor
+    public class LookupDescriptor extends XMLObjectWrapper implements XMLEnvelopedInput, AsymKeySignerInterface
       {
         ServerCryptoInterface server_crypto_interface;
 
-        LookupDescriptor (ServerCryptoInterface server_crypto_interface)
+        PublicKey key_management_key;
+
+        String id;
+        
+        String email_address;
+        
+        Document root;
+        
+
+        LookupDescriptor (ServerCryptoInterface server_crypto_interface, PublicKey key_management_key)
           {
             this.server_crypto_interface = server_crypto_interface;
+            this.key_management_key = key_management_key;
+            this.id = lookup_prefix + ++next_lookup_id_suffix;
+          }
+        
+        public LookupDescriptor setEmailAddress (String email_address)
+          {
+            this.email_address = email_address;
+            return this;
           }
 
-        String mime_type;
-        byte[] image_fingerprint;
-        int width;
-        int height;
-        String logotype_url;
+        @Override
+        public String element ()
+          {
+            return LOOKUP_SPECIFIER_ELEM;
+          }
+
+        @Override
+        protected void fromXML (DOMReaderHelper rd) throws IOException
+          {
+            throw new IOException ("Should not be called");
+          }
+
+        @Override
+        protected boolean hasQualifiedElements ()
+          {
+            return true;
+          }
+
+        @Override
+        protected void init () throws IOException
+          {
+          }
+
+        @Override
+        public String namespace ()
+          {
+            return KEYGEN2_NS;
+          }
+
+        @Override
+        protected void toXML (DOMWriterHelper wr) throws IOException
+          {
+            wr.initializeRootObject (prefix);
+
+            wr.setBinaryAttribute (NONCE_ATTR, nonce);
+            
+            wr.setStringAttribute (ID_ATTR, id);
+          }
+
+        @Override
+        public Document getEnvelopeRoot () throws IOException
+          {
+            return root = getRootDocument ();
+          }
+
+        @Override
+        public Element getInsertElem () throws IOException
+          {
+            return null;
+          }
+
+        @Override
+        public String getReferenceURI () throws IOException
+          {
+            return id;
+          }
+
+        @Override
+        public XMLSignatureWrapper getSignature () throws IOException
+          {
+            throw new IOException ("Should not be called");
+          }
+
+        @Override
+        public Element getTargetElem () throws IOException
+          {
+            return null;
+          }
+
+        @Override
+        public PublicKey getPublicKey () throws IOException, GeneralSecurityException
+          {
+            return key_management_key;
+          }
+
+        @Override
+        public byte[] signData (byte[] data, SignatureAlgorithms algorithm) throws IOException, GeneralSecurityException
+          {
+            return server_crypto_interface.generateKMAuthentication (key_management_key, data);
+          }
       }
 
+ 
     private String prefix;  // Default: no prefix
     
     Vector<LookupDescriptor> lookup_descriptors = new Vector<LookupDescriptor> ();
 
+    String lookup_prefix = "Lookup.";
+    
+    byte[] nonce;
+    
+    int next_lookup_id_suffix = 0;
 
     // Constructors
 
-    public CredentialDiscoveryRequestEncoder (ServerCredentialStore server_credential_store,
+    public CredentialDiscoveryRequestEncoder (ProvisioningSessionResponseDecoder prov_sess_dec,
                                               String submit_url)
       {
-        super.server_session_id = server_credential_store.server_session_id;
+        super.server_session_id = prov_sess_dec.server_session_id;
+        super.client_session_id = prov_sess_dec.client_session_id;
         super.submit_url = submit_url;
       }
 
@@ -86,9 +196,9 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
       }
 
     
-    public LookupDescriptor addLookupDescriptor (ServerCryptoInterface server_crypto_interface)
+    public LookupDescriptor addLookupDescriptor (ServerCryptoInterface server_crypto_interface, PublicKey key_management_key)
       {
-        LookupDescriptor lo_des = new LookupDescriptor (server_crypto_interface);
+        LookupDescriptor lo_des = new LookupDescriptor (server_crypto_interface, key_management_key);
         lookup_descriptors.add (lo_des);
         return lo_des;
       }
@@ -116,15 +226,17 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
           {
             throw new IOException ("There must be at least one descriptor defined");
           }
+        MacGenerator concat = new MacGenerator ();
+        concat.addString (client_session_id);
+        concat.addString (server_session_id);
+        nonce = HashAlgorithms.SHA256.digest (concat.getResult ());
         for (LookupDescriptor im_des : lookup_descriptors)
           {
-            wr.addChildElement (ISSUER_LOGOTYPE_ELEM);
-            wr.setStringAttribute (MIME_TYPE_ATTR, im_des.mime_type);
-            wr.setStringAttribute (LOGOTYPE_URL_ATTR, im_des.logotype_url);
-            wr.setIntAttribute (WIDTH_ATTR, im_des.width);
-            wr.setIntAttribute (HEIGHT_ATTR, im_des.height);
-            wr.setBinaryAttribute (IMAGE_FINGERPRINT_ATTR, im_des.image_fingerprint);
-            wr.getParent ();
+            XMLAsymKeySigner ds = new XMLAsymKeySigner (im_des);
+            ds.removeXMLSignatureNS ();
+            ds.createEnvelopedSignature (im_des);
+            im_des.root.getDocumentElement ().removeAttributeNS ("http://www.w3.org/2000/xmlns/", prefix == null ? "xmlns" : prefix);
+            wr.addWrapped (im_des);
           }
 
         ////////////////////////////////////////////////////////////////////////
@@ -134,7 +246,5 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
           {
             server_cookie.write (wr);
           }
-
       }
-
   }

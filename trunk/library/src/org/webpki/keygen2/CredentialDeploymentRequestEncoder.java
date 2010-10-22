@@ -100,7 +100,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
     
     private void writePostOp (DOMWriterHelper wr,
                               PostProvisioningTargetKey target_key,
-                              ServerCredentialStore.MacGenerator post_op_mac) throws IOException, GeneralSecurityException
+                              MacGenerator post_op_mac) throws IOException, GeneralSecurityException
       {
         wr.addChildElement (target_key.post_operation.getXMLElem ());
         wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, target_key.client_session_id);
@@ -152,7 +152,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 ////////////////////////////////////////////////////////////////////////
                 // Always: the X509 Certificate(s)
                 ////////////////////////////////////////////////////////////////////////
-                ServerCredentialStore.MacGenerator set_certificate = new ServerCredentialStore.MacGenerator ();
+                MacGenerator set_certificate = new MacGenerator ();
                 set_certificate.addArray (key.public_key.getEncoded ());
                 set_certificate.addString (key.id);
                 X509Certificate[] certificate_path = CertificateUtil.getSortedPath (key.certificate_path);
@@ -170,7 +170,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 if (key.encrypted_symmetric_key != null)
                   {
                     wr.addBinary (SYMMETRIC_KEY_ELEM, key.encrypted_symmetric_key);
-                    ServerCredentialStore.MacGenerator set_symkey = new ServerCredentialStore.MacGenerator ();
+                    MacGenerator set_symkey = new MacGenerator ();
                     set_symkey.addArray (ee_cert);
                     set_symkey.addArray (key.encrypted_symmetric_key);
                     mac (wr, set_symkey.getResult (), APIDescriptors.SET_SYMMETRIC_KEY);
@@ -182,7 +182,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 if (key.encrypted_private_key != null)
                   {
                     wr.addBinary (PRIVATE_KEY_ELEM, key.encrypted_private_key);
-                    ServerCredentialStore.MacGenerator restore_privkey = new ServerCredentialStore.MacGenerator ();
+                    MacGenerator restore_privkey = new MacGenerator ();
                     restore_privkey.addArray (ee_cert);
                     restore_privkey.addArray (key.encrypted_private_key);
                     mac (wr, restore_privkey.getResult (), APIDescriptors.RESTORE_PRIVATE_KEY);
@@ -193,7 +193,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 ////////////////////////////////////////////////////////////////////////
                 for (ServerCredentialStore.ExtensionInterface ei : key.extensions.values ())
                   {
-                    ServerCredentialStore.MacGenerator add_ext = new ServerCredentialStore.MacGenerator ();
+                    MacGenerator add_ext = new MacGenerator ();
                     add_ext.addArray (ee_cert);
                     add_ext.addString (ei.type);
                     add_ext.addByte (ei.getSubType ());
@@ -207,7 +207,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                 ////////////////////////////////////////////////////////////////////////
                 if (key.clone_or_update_operation != null)
                   {
-                    ServerCredentialStore.MacGenerator set_post_mac = new ServerCredentialStore.MacGenerator ();
+                    MacGenerator set_post_mac = new MacGenerator ();
                     set_post_mac.addArray (ee_cert);
                     writePostOp (wr, key.clone_or_update_operation, set_post_mac);
                   }
@@ -222,14 +222,14 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
               {
                 if (pptk.post_operation == ServerCredentialStore.PostOperation.DELETE_KEY)
                   {
-                    writePostOp (wr, pptk, new ServerCredentialStore.MacGenerator ());
+                    writePostOp (wr, pptk, new MacGenerator ());
                   }
               }
 
             ////////////////////////////////////////////////////////////////////////
             // Done with the crypto, now set the "closeProvisioningSession" MAC
             ////////////////////////////////////////////////////////////////////////
-            ServerCredentialStore.MacGenerator close = new ServerCredentialStore.MacGenerator ();
+            MacGenerator close = new MacGenerator ();
             close.addString (server_credential_store.client_session_id);
             close.addString (server_credential_store.server_session_id);
             close.addString (server_credential_store.issuer_uri);

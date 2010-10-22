@@ -37,7 +37,7 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequest
   {
-    public static class PostOperation
+    public class PostOperation
       {
         public static final int DELETE_KEY            = 0;
         public static final int UPDATE_KEY            = 1;
@@ -429,8 +429,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
     private String server_session_id;
 
-    private String server_time;
-
     private String submit_url;
 
     private ServerCookie server_cookie;                     // Optional
@@ -451,12 +449,6 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
     public String getClientSessionID ()
       {
         return client_session_id;
-      }
-
-
-    public String getServerTime ()
-      {
-        return server_time;
       }
 
 

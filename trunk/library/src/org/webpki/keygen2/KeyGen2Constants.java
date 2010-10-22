@@ -207,5 +207,6 @@ public interface KeyGen2Constants
     String CLONE_KEY_PROTECTION_ELEM         = "CloneKeyProtection";
     
     String DELETE_KEY_ELEM                   = "DeleteKey";
-
+    
+    String LOOKUP_SPECIFIER_ELEM             = "LookupSpecifier";
   }

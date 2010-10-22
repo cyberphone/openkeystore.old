@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 
 import java.util.Date;
 
@@ -101,7 +102,7 @@ public class ProvisioningSessionRequestEncoder extends ProvisioningSessionReques
 
         XMLSignatureWrapper.addXMLSignature11NS (wr);
         
-        if (key_management_key != null)
+        if (key_management_key != null && key_management_key instanceof RSAPublicKey)
           {
             XMLSignatureWrapper.addXMLSignatureNS (wr);
           }

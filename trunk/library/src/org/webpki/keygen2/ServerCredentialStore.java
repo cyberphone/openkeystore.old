@@ -18,7 +18,6 @@ package org.webpki.keygen2;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -33,7 +32,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.webpki.crypto.ECDomains;
-import org.webpki.crypto.HashAlgorithms;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.MimeTypedObject;
@@ -108,68 +106,6 @@ public class ServerCredentialStore implements Serializable
       }
   
     Vector<PostProvisioningTargetKey> post_operations = new Vector<PostProvisioningTargetKey> ();
-  
-    static class MacGenerator
-      {
-        private ByteArrayOutputStream baos;
-        
-        MacGenerator ()
-          {
-            baos = new ByteArrayOutputStream ();
-          }
-        
-        private byte[] short2bytes (int s)
-          {
-            return new byte[]{(byte)(s >>> 8), (byte)s};
-          }
-  
-        private byte[] int2bytes (int i)
-          {
-            return new byte[]{(byte)(i >>> 24), (byte)(i >>> 16), (byte)(i >>> 8), (byte)i};
-          }
-  
-        void addBlob (byte[] data) throws IOException
-          {
-            baos.write (int2bytes (data.length));
-            baos.write (data);
-          }
-
-        void addArray (byte[] data) throws IOException
-          {
-            baos.write(short2bytes (data.length));
-            baos.write (data);
-          }
-        
-        void addString (String string) throws IOException
-          {
-            addArray (string.getBytes ("UTF-8"));
-          }
-        
-        void addInt (int i) throws IOException
-          {
-            baos.write (int2bytes (i));
-          }
-        
-        void addShort (int s) throws IOException
-          {
-            baos.write (short2bytes (s));
-          }
-        
-        void addByte (byte b)
-          {
-            baos.write (b);
-          }
-        
-        void addBool (boolean flag)
-          {
-            baos.write (flag ? (byte) 0x01 : (byte) 0x00);
-          }
-        
-        byte[] getResult ()
-          {
-            return baos.toByteArray ();
-          }
-      }
   
     public abstract class ExtensionInterface implements Serializable
       {
