@@ -50,7 +50,7 @@ abstract class CredentialDeploymentResponse extends XMLObjectWrapper
     
     public String element ()
       {
-        return "CredentialDeploymentResponse";
+        return CREDENTIAL_DEPLOYMENT_RESPONSE_ELEM;
       }
 
 

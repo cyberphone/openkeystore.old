@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
 
 import java.util.Vector;
 
@@ -163,6 +164,8 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
     byte[] nonce;
     
     int next_lookup_id_suffix = 0;
+    
+    boolean ecc_keys;
 
     // Constructors
 
@@ -200,6 +203,10 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
       {
         LookupDescriptor lo_des = new LookupDescriptor (server_crypto_interface, key_management_key);
         lookup_descriptors.add (lo_des);
+        if (key_management_key instanceof ECPublicKey)
+          {
+            ecc_keys = true;
+          }
         return lo_des;
       }
 
@@ -218,6 +225,11 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
         
         XMLSignatureWrapper.addXMLSignatureNS (wr);
+        
+        if (ecc_keys)
+          {
+            XMLSignatureWrapper.addXMLSignature11NS (wr);
+          }
 
         ////////////////////////////////////////////////////////////////////////
         // Lookup descriptors

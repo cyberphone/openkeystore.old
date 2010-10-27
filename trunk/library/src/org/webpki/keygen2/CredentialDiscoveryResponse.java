@@ -27,15 +27,16 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-abstract class PlatformNegotiationRequest extends XMLObjectWrapper 
+
+abstract class CredentialDiscoveryResponse extends XMLObjectWrapper 
   {
     String server_session_id;
-
-    String submit_url;
-
+    
+    String client_session_id;
+    
     ServerCookie server_cookie;
     
-    PlatformNegotiationRequest () {}
+    CredentialDiscoveryResponse () {}
 
 
     public void init () throws IOException
@@ -59,7 +60,7 @@ abstract class PlatformNegotiationRequest extends XMLObjectWrapper
     
     public String element ()
       {
-        return PLATFORM_NEGOTIATION_REQUEST_ELEM;
+        return CREDENTIAL_DISCOVERY_RESPONSE_ELEM;
       }
 
 

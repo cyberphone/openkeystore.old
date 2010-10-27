@@ -62,7 +62,7 @@ abstract class CredentialDiscoveryRequest extends XMLObjectWrapper
     
     public String element ()
       {
-        return "CredentialDiscoveryRequest";
+        return CREDENTIAL_DISCOVERY_REQUEST_ELEM;
       }
 
 

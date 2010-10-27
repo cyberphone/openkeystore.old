@@ -56,7 +56,7 @@ abstract class PlatformNegotiationResponse extends XMLObjectWrapper
     
     public String element ()
       {
-        return "PlatformNegotiationResponse";
+        return PLATFORM_NEGOTIATION_RESPONSE_ELEM;
       }
 
 

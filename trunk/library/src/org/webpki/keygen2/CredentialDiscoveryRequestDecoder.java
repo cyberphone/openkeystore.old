@@ -18,6 +18,8 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.security.PublicKey;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import org.w3c.dom.Element;
@@ -46,6 +48,8 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         XMLSignatureWrapper signature;
         
         Element element;
+        
+        PublicKey key_management_key;
 
         LookupSpecifier () { }
 
@@ -66,13 +70,18 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
           {
             return id;
           }
+        
+        public PublicKey getKeyManagementKey ()
+          {
+            return key_management_key;
+          }
       }
 
-    private Vector<LookupSpecifier> lookup_specifiers = new Vector<LookupSpecifier> ();
+    LinkedHashMap<String,LookupSpecifier> lookup_specifiers = new LinkedHashMap<String,LookupSpecifier> ();
     
-    private String client_session_id;
+    String client_session_id;
 
-    private String server_session_id;
+    String server_session_id;
 
     private String submit_url;
 
@@ -107,7 +116,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
 
     public LookupSpecifier[] getLookupSpecifiers ()
       {
-        return lookup_specifiers.toArray (new LookupSpecifier[0]);
+        return lookup_specifiers.values ().toArray (new LookupSpecifier[0]);
       }
     
     
@@ -145,9 +154,13 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         do 
           {
             LookupSpecifier o = new LookupSpecifier (rd);
-            lookup_specifiers.add (o);
+            if (lookup_specifiers.put (o.id, o) != null)
+              {
+                throw new IOException ("Duplicate id: " + o.id);
+              }
             XMLAsymKeyVerifier verifier = new XMLAsymKeyVerifier ();
             verifier.validateEnvelopedSignature (this, o.element, o.signature, o.id);
+            o.key_management_key = verifier.getPublicKey ();
           }
         while (rd.hasNext (LOOKUP_SPECIFIER_ELEM));
 

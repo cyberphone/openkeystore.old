@@ -86,6 +86,8 @@ import org.webpki.keygen2.CredentialDeploymentResponseDecoder;
 import org.webpki.keygen2.CredentialDeploymentResponseEncoder;
 import org.webpki.keygen2.CredentialDiscoveryRequestDecoder;
 import org.webpki.keygen2.CredentialDiscoveryRequestEncoder;
+import org.webpki.keygen2.CredentialDiscoveryResponseDecoder;
+import org.webpki.keygen2.CredentialDiscoveryResponseEncoder;
 import org.webpki.keygen2.CryptoConstants;
 import org.webpki.keygen2.DeletePolicy;
 import org.webpki.keygen2.ExportPolicy;
@@ -242,6 +244,8 @@ public class KeyGen2Test
         
         ProvisioningSessionRequestDecoder prov_sess_req;
         
+        CredentialDiscoveryRequestDecoder cre_disc_req;
+        
         DeviceInfo device_info;
         
         Client () throws IOException
@@ -249,6 +253,7 @@ public class KeyGen2Test
             client_xml_cache = new XMLSchemaCache ();
             client_xml_cache.addWrapper (PlatformNegotiationRequestDecoder.class);
             client_xml_cache.addWrapper (ProvisioningSessionRequestDecoder.class);
+            client_xml_cache.addWrapper (CredentialDiscoveryRequestDecoder.class);
             client_xml_cache.addWrapper (KeyInitializationRequestDecoder.class);
             client_xml_cache.addWrapper (CredentialDeploymentRequestDecoder.class);
           }
@@ -383,6 +388,38 @@ public class KeyGen2Test
                   }
               });
             return prov_sess_response.writeXML ();
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get credential doscovery request
+        ///////////////////////////////////////////////////////////////////////////////////
+        byte[] creDiscResponse (byte[] xmldata) throws IOException, GeneralSecurityException
+          {
+            cre_disc_req = (CredentialDiscoveryRequestDecoder) client_xml_cache.parse (xmldata);
+            CredentialDiscoveryResponseEncoder cdre = new CredentialDiscoveryResponseEncoder (cre_disc_req);
+            for (CredentialDiscoveryRequestDecoder.LookupSpecifier ls : cre_disc_req.getLookupSpecifiers ())
+              {
+                CredentialDiscoveryResponseEncoder.LookupResult lr = cdre.addLookupResult (ls.getID ());
+                EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
+                while ((eps = sks.enumerateProvisioningSessions (eps, false)).isValid ())
+                  {
+                    if (ls.getKeyManagementKey ().equals (eps.getKeyManagementKey ()))
+                      {
+                        EnumeratedKey ek = new EnumeratedKey ();
+                        while ((ek = sks.enumerateKeys (ek)).isValid ())
+                          {
+                            if (ek.getProvisioningHandle () == eps.getProvisioningHandle ())
+                              {
+                                KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
+                                lr.addMatchingCredential (HashAlgorithms.SHA256.digest (ka.getCertificatePath ()[0].getEncoded ()),
+                                                          eps.getClientSessionID (),
+                                                          eps.getServerSessionID ());
+                              }
+                          }
+                      }
+                  }
+              }
+            return cdre.writeXML ();
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -594,6 +631,8 @@ public class KeyGen2Test
         
         ProvisioningSessionRequestEncoder prov_sess_request;
 
+        ProvisioningSessionResponseDecoder prov_sess_response;
+        
         ServerCredentialStore server_credential_store;
         
         PrivateKey gen_private_key;
@@ -734,8 +773,24 @@ public class KeyGen2Test
             server_xml_cache = new XMLSchemaCache ();
             server_xml_cache.addWrapper (PlatformNegotiationResponseDecoder.class);
             server_xml_cache.addWrapper (ProvisioningSessionResponseDecoder.class);
+            server_xml_cache.addWrapper (CredentialDiscoveryResponseDecoder.class);
             server_xml_cache.addWrapper (KeyInitializationResponseDecoder.class);
             server_xml_cache.addWrapper (CredentialDeploymentResponseDecoder.class);
+          }
+        
+        void getProvSess (XMLObjectWrapper xml_object) throws IOException
+          {
+            ////////////////////////////////////////////////////////////////////////////////////
+            // Begin with creating the "SessionKey" that holds just about everything
+            ////////////////////////////////////////////////////////////////////////////////////
+            prov_sess_response = (ProvisioningSessionResponseDecoder) xml_object;
+            prov_sess_response.verifyAndGenerateSessionKey (server_sess_key, prov_sess_request);
+
+            ////////////////////////////////////////////////////////////////////////////////////
+            // Here we could/should introduce an SKS identity/brand check
+            ////////////////////////////////////////////////////////////////////////////////////
+            X509Certificate[] certificate_path = prov_sess_response.getDeviceCertificatePath ();
+
           }
         
         void verifyPrivateKeyBackup (ServerCredentialStore.KeyProperties key_prop) throws IOException, GeneralSecurityException
@@ -791,28 +846,30 @@ public class KeyGen2Test
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Create credential discover request for the client
+        ///////////////////////////////////////////////////////////////////////////////////
+        byte[] creDiscRequest (byte[] xmldata) throws IOException, GeneralSecurityException
+          {
+            getProvSess (server_xml_cache.parse (xmldata));
+            CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder (prov_sess_response, CRE_DISC_URL);
+            cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[0]);
+            cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[2]);
+            return cdre.writeXML ();
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Create a key init request for the client
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] keyInitRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
-            ////////////////////////////////////////////////////////////////////////////////////
-            // Begin with creating the "SessionKey" that holds just about everything
-            ////////////////////////////////////////////////////////////////////////////////////
-            ProvisioningSessionResponseDecoder prov_sess_response = (ProvisioningSessionResponseDecoder) server_xml_cache.parse (xmldata);
-            prov_sess_response.verifyAndGenerateSessionKey (server_sess_key, prov_sess_request);
-
-            ////////////////////////////////////////////////////////////////////////////////////
-            // Here we could/should introduce an SKS identity/brand check
-            ////////////////////////////////////////////////////////////////////////////////////
-            X509Certificate[] certificate_path = prov_sess_response.getDeviceCertificatePath ();
-            if (certificate_path != null)
+            XMLObjectWrapper xml_object = server_xml_cache.parse (xmldata);
+            if (xml_object instanceof ProvisioningSessionResponseDecoder)
               {
-                CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder (prov_sess_response, CRE_DISC_URL);
-                cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[0]);
-                cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[1]);
- //               System.out.println (new String (cdre.writeXML (), "UTF-8"));
-                server_xml_cache.addWrapper (CredentialDiscoveryRequestDecoder.class);
-                server_xml_cache.parse (cdre.writeXML ());
+                getProvSess (xml_object);
+              }
+            else
+              {
+                CredentialDiscoveryResponseDecoder cdrd = (CredentialDiscoveryResponseDecoder) xml_object;
               }
 
             try
@@ -1115,6 +1172,8 @@ public class KeyGen2Test
             xmlschemas.addWrapper (PlatformNegotiationResponseDecoder.class);
             xmlschemas.addWrapper (ProvisioningSessionRequestDecoder.class);
             xmlschemas.addWrapper (ProvisioningSessionResponseDecoder.class);
+            xmlschemas.addWrapper (CredentialDiscoveryRequestDecoder.class);
+            xmlschemas.addWrapper (CredentialDiscoveryResponseDecoder.class);
             xmlschemas.addWrapper (KeyInitializationRequestDecoder.class);
             xmlschemas.addWrapper (KeyInitializationResponseDecoder.class);
             xmlschemas.addWrapper (CredentialDeploymentRequestDecoder.class);
@@ -1158,6 +1217,11 @@ public class KeyGen2Test
             xml = fileLogger (client.platformResponse (xml));
             xml = fileLogger (server.provSessRequest (xml));
             xml = fileLogger (client.provSessResponse (xml));
+            if (delete_key != null || clone_key_protection != null || update_key != null)
+              {
+                xml = fileLogger (server.creDiscRequest (xml));
+                xml = fileLogger (client.creDiscResponse (xml));
+              }
             xml = fileLogger (server.keyInitRequest (xml));
             xml = fileLogger (client.KeyInitResponse (xml));
             xml = fileLogger (server.creDepRequest (xml));

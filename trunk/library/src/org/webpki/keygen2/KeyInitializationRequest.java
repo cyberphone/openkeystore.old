@@ -53,7 +53,7 @@ abstract class KeyInitializationRequest extends XMLObjectWrapper
     
     public String element ()
       {
-        return "KeyInitializationRequest";
+        return KEY_INITIALIZATION_REQUEST_ELEM;
       }
 
 

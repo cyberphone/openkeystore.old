@@ -59,7 +59,7 @@ abstract class KeyInitializationResponse extends XMLObjectWrapper
     
     public String element ()
       {
-        return "KeyInitializationResponse";
+        return KEY_INITIALIZATION_RESPONSE_ELEM;
       }
 
 

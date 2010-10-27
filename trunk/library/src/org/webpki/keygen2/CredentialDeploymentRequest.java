@@ -65,7 +65,7 @@ abstract class CredentialDeploymentRequest extends XMLObjectWrapper
     
     public String element ()
       {
-        return "CredentialDeploymentRequest";
+        return CREDENTIAL_DEPLOYMENT_REQUEST_ELEM;
       }
 
 

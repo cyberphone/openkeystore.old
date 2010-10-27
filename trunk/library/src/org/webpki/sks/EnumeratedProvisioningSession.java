@@ -33,7 +33,7 @@ public class EnumeratedProvisioningSession
 
     PublicKey key_management_key;
     
-    PublicKey getKeyManagementKey ()
+    public PublicKey getKeyManagementKey ()
       {
         return key_management_key;
       }
