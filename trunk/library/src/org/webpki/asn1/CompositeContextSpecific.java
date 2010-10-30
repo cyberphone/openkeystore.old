@@ -33,7 +33,7 @@ public final class CompositeContextSpecific extends Composite
             throw new IOException("Internal error: Wrong tag class");
           }
         
-        if(components == null || components.size() == 0)
+        if(components == null)
           {
             throw new IOException("Empty CONTEXT_SPECIFIC.");
           }

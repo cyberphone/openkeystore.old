@@ -438,7 +438,7 @@
 
                   </xs:sequence>
 
-                  <!-- MUST match with "LookupSpecifier@ID" -->
+                  <!-- MUST match "LookupSpecifier@ID" -->
                   <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
                </xs:complexType>
@@ -1278,7 +1278,8 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      IDs flowing between the SKS and the issuers MUST be 1-32 bytes
+      IDs flowing between the SKS and an issuer MUST be 1-32 bytes using a constrained
+      character set
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="sksID">
@@ -1511,7 +1512,7 @@
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     Subject" attributes MUST be represented as regular expressions compatible with
+     "Subject" attributes MUST be represented as regular expressions compatible with
      the XML Schema "pattern" facet.  Note that the regular expressions MUST be
      targeted for RFC 2253 encoded data
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
