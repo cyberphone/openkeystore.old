@@ -42,6 +42,8 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
     public class LookupSpecifier
       {
         String id;
+        
+        String email_address;
 
         byte[] nonce;
         
@@ -61,6 +63,11 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
             id = ah.getString (ID_ATTR);
             nonce = ah.getBinary (NONCE_ATTR);
             rd.getChild ();
+            if (rd.hasNext (SEARCH_FILTER_ELEM))
+              {
+                rd.getNext ();
+                email_address = ah.getStringConditional (EMAIL_ATTR);
+              }
             signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
             rd.getParent ();
           }
@@ -74,6 +81,11 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         public PublicKey getKeyManagementKey ()
           {
             return key_management_key;
+          }
+        
+        public String getEmailAddress ()
+          {
+            return email_address;
           }
       }
 

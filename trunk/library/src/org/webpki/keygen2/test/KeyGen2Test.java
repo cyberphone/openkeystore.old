@@ -69,6 +69,7 @@ import org.webpki.ca.CA;
 import org.webpki.ca.CertSpec;
 
 import org.webpki.crypto.AsymKeySignerInterface;
+import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.ECDomains;
 import org.webpki.crypto.HashAlgorithms;
@@ -411,7 +412,18 @@ public class KeyGen2Test
                             if (ek.getProvisioningHandle () == eps.getProvisioningHandle ())
                               {
                                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
-                                lr.addMatchingCredential (HashAlgorithms.SHA256.digest (ka.getCertificatePath ()[0].getEncoded ()),
+                                X509Certificate[] cert_path = ka.getCertificatePath ();
+// TODO full filter missing  
+                                if (ls.getEmailAddress () != null)
+                                  {
+                                    CertificateFilter cf = new CertificateFilter ();
+                                    cf.setEmailAddress (ls.getEmailAddress ());
+                                    if (!cf.matches (cert_path, null, null))
+                                      {
+                                        continue;
+                                      }
+                                  }
+                                lr.addMatchingCredential (HashAlgorithms.SHA256.digest (cert_path[0].getEncoded ()),
                                                           eps.getClientSessionID (),
                                                           eps.getServerSessionID ());
                               }
@@ -435,10 +447,6 @@ public class KeyGen2Test
             for (KeyInitializationRequestDecoder.KeyObject key : key_init_request.getKeyObjects ())
               {
                 byte[] pin_value = key.getPresetPIN ();
-                if (pin_value == null)
-                  {
-                    pin_value = new byte[0];
-                  }
                 if (key.getPINPolicy () == null)
                   {
                     pin_policy_handle = 0;
@@ -853,7 +861,8 @@ public class KeyGen2Test
             getProvSess (server_xml_cache.parse (xmldata));
             CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder (prov_sess_response, CRE_DISC_URL);
             cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[0]);
-            cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[2]);
+            cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[2]).setEmailAddress ("john.doe@example.com");
+            cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[2]).setEmailAddress ("jane.doe@example.com");
             return cdre.writeXML ();
           }
 
@@ -870,6 +879,8 @@ public class KeyGen2Test
             else
               {
                 CredentialDiscoveryResponseDecoder cdrd = (CredentialDiscoveryResponseDecoder) xml_object;
+                CredentialDiscoveryResponseDecoder.LookupResult[] lres = cdrd.getLookupResults ();
+// TODO verify
               }
 
             try
@@ -1367,7 +1378,7 @@ public class KeyGen2Test
             if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
               {
                 j++;
-                byte[] iv = new byte[0];
+                byte[] iv = null;
                 byte[] enc = sks.symmetricKeyEncrypt (ek.getKeyHandle (),
                                                       SymEncryptionAlgorithms.AES256_CBC.getURI (),
                                                       true,
@@ -1426,7 +1437,7 @@ public class KeyGen2Test
                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
                                                     SignatureAlgorithms.RSA_SHA256.getURI (),
-                                                    new byte[0],
+                                                    null,
                                                     doer2.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
                 Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
@@ -1462,7 +1473,7 @@ public class KeyGen2Test
                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
                                                     SignatureAlgorithms.RSA_SHA256.getURI (),
-                                                    new byte[0],
+                                                    null,
                                                     doer2.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
                 Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
@@ -1511,7 +1522,7 @@ public class KeyGen2Test
                 j++;
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
                                                     SignatureAlgorithms.RSA_SHA256.getURI (),
-                                                    new byte[0],
+                                                    null,
                                                     doer.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
                 Signature sign = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");

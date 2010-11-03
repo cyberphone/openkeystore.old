@@ -54,6 +54,8 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
 
         String id;
         
+        boolean search_filter;
+        
         String email_address;
         
         Document root;
@@ -68,6 +70,7 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         
         public LookupDescriptor setEmailAddress (String email_address)
           {
+            search_filter = true;
             this.email_address = email_address;
             return this;
           }
@@ -109,6 +112,15 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
             wr.setBinaryAttribute (NONCE_ATTR, nonce);
             
             wr.setStringAttribute (ID_ATTR, id);
+            if (search_filter)
+              {
+                wr.addChildElement (SEARCH_FILTER_ELEM);
+                if (email_address != null)
+                  {
+                    wr.setStringAttribute (EMAIL_ATTR, email_address);
+                  }
+                wr.getParent ();
+              }
           }
 
         @Override

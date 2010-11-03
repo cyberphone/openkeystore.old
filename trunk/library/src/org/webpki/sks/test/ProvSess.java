@@ -628,7 +628,7 @@ public class ProvSess
         key_pair_mac.addString (id);
         key_pair_mac.addString (attestation_algorithm);
         key_pair_mac.addArray (server_seed);
-        byte[] encrypted_pin_value = new byte[0];
+        byte[] encrypted_pin_value = null;
         if (pin_policy != null)
           {
             encrypted_pin_value = getPassphraseBytes (pin_policy.format, pin_value);

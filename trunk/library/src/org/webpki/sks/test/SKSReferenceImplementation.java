@@ -91,8 +91,8 @@ import org.webpki.sks.SecureKeyStore;
  *  that should work identical on a "real" SKS token.
  *
  *  Compared to the SKS specification, the Reference Implementation uses a slightly
- *  more java-centric way of passing parameters, but the content is supposed to be
- *  identical.
+ *  more java-centric way of passing parameters, including "null" arguments, but the
+ *  content is supposed to be identical.
  *
  *  Author: Anders Rundgren
  */
@@ -414,7 +414,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                       }
                     return;
                   }
-                if (pin.length != 0)
+                if (pin != null)
                   {
                     abort ("Redundant authorization information for key #" + key_handle);
                   }
@@ -507,6 +507,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             else if (policy == EXPORT_DELETE_POLICY_PUK)
               {
                 verifyPUK (authorization);
+              }
+            else if (authorization != null)
+              {
+                abort ("Redundant authorization information for key #" + key_handle);
               }
           }
 
@@ -1714,7 +1718,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Check that the encryption algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
         Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_ASYM_ENC);
-        if (parameters.length != 0)  // Only support basic RSA yet...
+        if (parameters != null)  // Only support basic RSA yet...
           {
             abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
           }
@@ -1771,9 +1775,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             abort ("Incorrect length of \"Data\": " + data.length);
           }
-        if (parameters.length != 0)
+        if (parameters != null)  // Only supports non-parameterized operations yet...
           {
-            abort ("Incorrect length of \"Parameters\": " + parameters.length);
+            abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1823,7 +1827,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Check that the key agreement algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
         Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_ASYM_KA);
-        if (parameters.length != 0)  // Only support external KDFs yet...
+        if (parameters != null)  // Only support external KDFs yet...
           {
             abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
           }
@@ -1887,12 +1891,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_SYM_ENC);
         if ((alg.mask & ALG_IV_REQ) == 0 || (alg.mask & ALG_IV_INT) != 0)
           {
-            if (iv.length != 0)
+            if (iv != null)
               {
-                abort ("IV must be zero length for: " + algorithm);
+                abort ("IV does not apply to: " + algorithm);
               }
           }
-        else if (iv.length != 16)
+        else if (iv == null || iv.length != 16)
           {
             abort ("IV must be 16 bytes for: " + algorithm);
           }
@@ -1929,7 +1933,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                     data = temp;
                   }
               }
-            if (iv.length == 0)
+            if (iv == null)
               {
                 crypt.init (jce_mode, sk);
               }
@@ -1938,7 +1942,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 crypt.init (jce_mode, sk, new IvParameterSpec (iv));
               }
             data = crypt.doFinal (data);
-            return (mode && (alg.mask & ALG_IV_INT) != 0) ? addArrays (iv,data) : data;
+            return (mode && (alg.mask & ALG_IV_INT) != 0) ? addArrays (iv, data) : data;
           }
         catch (Exception e)
           {
@@ -2873,7 +2877,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                   boolean enable_pin_caching,
                                   byte app_usage,
                                   String friendly_name,
-                                  byte[] key_algorithm,
+                                  byte[] key_specifier,
                                   String[] endorsed_algorithms,
                                   byte[] mac) throws SKSException
       {
@@ -2951,7 +2955,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         verifier.addBool (enable_pin_caching);
         verifier.addByte (app_usage);
         verifier.addString (friendly_name);
-        verifier.addVerbatim (key_algorithm);
+        verifier.addVerbatim (key_specifier);  // Already properly set w.r.t. SKS data types
         LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
         for (String algorithm : endorsed_algorithms)
           {
@@ -2983,7 +2987,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // PIN value requires a defined PIN policy object
             ///////////////////////////////////////////////////////////////////////////////////
-            if (pin_value.length != 0)
+            if (pin_value != null)
               {
                 provisioning.abort ("\"PINValue\" expected to be empty");
               }
@@ -3019,9 +3023,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Decode key algorithm specifier
         ///////////////////////////////////////////////////////////////////////////////////
         AlgorithmParameterSpec alg_par_spec = null;
-        if (key_algorithm.length == 7 && key_algorithm[0] == KEY_ALGORITHM_TYPE_RSA)
+        if (key_specifier.length == 7 && key_specifier[0] == KEY_ALGORITHM_TYPE_RSA)
           {
-            int size = getShort (key_algorithm, 1);
+            int size = getShort (key_specifier, 1);
             boolean found = false;
             for (short rsa_key_size : RSA_KEY_SIZES)
               {
@@ -3035,21 +3039,21 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 provisioning.abort ("RSA size unsupported: " + size);
               }
-            int exponent = (getShort (key_algorithm, 3) << 16) + getShort (key_algorithm, 5);
+            int exponent = (getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5);
             alg_par_spec = new RSAKeyGenParameterSpec (size,
                                                        exponent == 0 ? RSAKeyGenParameterSpec.F4 : BigInteger.valueOf (exponent));
           }
         else
           {
-            if (key_algorithm.length < 10 || key_algorithm[0] != KEY_ALGORITHM_TYPE_ECC ||
-                getShort (key_algorithm, 1) != (key_algorithm.length - 3))
+            if (key_specifier.length < 10 || key_specifier[0] != KEY_ALGORITHM_TYPE_ECC ||
+                getShort (key_specifier, 1) != (key_specifier.length - 3))
               {
                 provisioning.abort ("Incorrect \"KeyAlgorithm\" format");
               }
             StringBuffer ec_uri = new StringBuffer ();
-            for (int i = 3; i < key_algorithm.length; i++)
+            for (int i = 3; i < key_specifier.length; i++)
               {
-                ec_uri.append ((char) key_algorithm[i]);
+                ec_uri.append ((char) key_specifier[i]);
               }
             Algorithm alg = algorithms.get (ec_uri.toString ());
             if (alg == null || (alg.mask & ALG_ECC_CRV) == 0)

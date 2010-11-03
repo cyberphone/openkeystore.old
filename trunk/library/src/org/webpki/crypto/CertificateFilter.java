@@ -109,12 +109,6 @@ public class CertificateFilter
 
     public void integrityCheck () throws IOException
       {
-        if (sha1 == null && issuer_regex == null && subject_regex == null &&
-            policy_oid == null && serial == null && containers == null &&
-            key_usage == null && ext_key_usage_oid == null && email_address == null)
-          {
-            throw new IOException ("All \"CertificateFilter\" attributes cannot be null!");
-          }
         if (sha1 != null && sha1.length != 20)
           {
             throw new IOException ("\"Sha1\" hash not 20 bytes!");
@@ -519,8 +513,7 @@ public class CertificateFilter
       {
         try
           {
-            return cert_path[0].getBasicConstraints () < 0 &&  // EE only please!
-                   matchSerial (serial, cert_path[0]) &&
+            return matchSerial (serial, cert_path[0]) &&
                    matchSha1 (sha1, cert_path) &&
                    matchContainers (containers, container) &&
                    matchKeyUsage (key_usage == null ? default_key_usage : key_usage, cert_path[0]) &&

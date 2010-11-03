@@ -229,4 +229,6 @@ public interface KeyGen2Constants
     String LOOKUP_RESULT_ELEM                  = "LookupResult";
 
     String MATCHING_CREDENTIAL_ELEM            = "MatchingCredential";
+
+    String SEARCH_FILTER_ELEM                  = "SearchFilter";
   }

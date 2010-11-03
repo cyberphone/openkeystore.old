@@ -35,7 +35,7 @@ public interface SecureKeyStore
                                                           String server_session_id,
                                                           ECPublicKey server_ephemeral_key,
                                                           String issuer_uri,
-                                                          PublicKey key_management_key, // May be null
+                                                          PublicKey key_management_key, // Must be null if not applicable
                                                           int client_time,
                                                           int session_life_time,
                                                           short session_key_limit) throws SKSException;
@@ -56,7 +56,7 @@ public interface SecureKeyStore
                                   byte[] server_seed,
                                   boolean device_pin_protected,
                                   int pin_policy_handle,
-                                  byte[] pin_value,
+                                  byte[] pin_value,  // Must be null if not applicable
                                   byte biometric_protection,
                                   boolean private_key_backup,
                                   byte export_policy,
@@ -64,7 +64,7 @@ public interface SecureKeyStore
                                   boolean enable_pin_caching,
                                   byte app_usage,
                                   String friendly_name,
-                                  byte[] key_algorithm,
+                                  byte[] key_specifier,
                                   String[] endorsed_algorithms,
                                   byte[] mac) throws SKSException;
     
@@ -142,36 +142,36 @@ public interface SecureKeyStore
 
     public byte[] signHashedData (int key_handle,
                                   String algorithm,
-                                  byte[] parameters,
-                                  byte[] authorization,
+                                  byte[] parameters,    // Must be null if not applicable
+                                  byte[] authorization, // Must be null if not applicable
                                   byte[] data) throws SKSException;
     
     public byte[] performHMAC (int key_handle,
                                String algorithm,
-                               byte[] authorization,
+                               byte[] authorization, // Must be null if not applicable
                                byte[] data) throws SKSException;
     
     public byte[] symmetricKeyEncrypt (int key_handle,
                                        String algorithm,
                                        boolean mode,
-                                       byte[] iv,
-                                       byte[] authorization,
+                                       byte[] iv,            // Must be null if not applicable
+                                       byte[] authorization, // Must be null if not applicable
                                        byte[] data) throws SKSException;
 
     public byte[] asymmetricKeyDecrypt (int key_handle,
                                         String algorithm,
-                                        byte[] parameters,
-                                        byte[] authorization,
+                                        byte[] parameters,    // Must be null if not applicable
+                                        byte[] authorization, // Must be null if not applicable
                                         byte[] data) throws SKSException;
 
     public byte[] keyAgreement (int key_handle,
                                 String algorithm,
-                                byte[] parameters,
-                                byte[] authorization,
+                                byte[] parameters,    // Must be null if not applicable
+                                byte[] authorization, // Must be null if not applicable
                                 PublicKey public_key) throws SKSException;
 
     void deleteKey (int key_handle,
-                    byte[] authorization) throws SKSException;
+                    byte[] authorization /* Must be null if not applicable */) throws SKSException;
     
    
     ///////////////////////////////////////////////////////////////////////////////////
@@ -202,6 +202,6 @@ public interface SecureKeyStore
                         byte[] new_pin) throws SKSException;
 
     public byte[] exportKey (int key_handle,
-                             byte[] authorization) throws SKSException;
+                             byte[] authorization /* Must be null if not applicable */) throws SKSException;
 
   }
