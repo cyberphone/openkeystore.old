@@ -25,6 +25,7 @@ public enum APIDescriptors
     RESTORE_PRIVATE_KEY             ("restorePrivateKey"),
     CLOSE_PROVISIONING_SESSION      ("closeProvisioningSession"),
     PP_DELETE_KEY                   ("pp_deleteKey"),
+    PP_UNLOCK_KEY                   ("pp_unlockKey"),
     PP_UPDATE_KEY                   ("pp_updateKey"),
     PP_CLONE_KEY_PROTECTION         ("pp_cloneKeyProtection"),
     CREATE_KEY_PAIR                 ("createKeyPair"),

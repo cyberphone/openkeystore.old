@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import java.util.Vector;
 
-import java.math.BigInteger;
-
 import org.w3c.dom.Element;
 
 import org.webpki.util.MimeTypedObject;
@@ -69,12 +67,13 @@ public class SignatureRequestDecoder extends SignatureRequest
       {
         rd.getNext (CERTIFICATE_FILTER_ELEM);
         DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-        byte[] sha1 = ah.getBinaryConditional (CF_SHA1_ATTR);
-        String issuer = ah.getStringConditional (CF_ISSUER_ATTR);
-        String subject = ah.getStringConditional (CF_SUBJECT_ATTR);
-        String email_address = ah.getStringConditional (CF_EMAIL_ATTR);
-        BigInteger serial = ah.getBigIntegerConditional (CF_SERIAL_ATTR);
-        String policy_oid = ah.getStringConditional (CF_POLICY_ATTR);
+        CertificateFilter cf = new CertificateFilter ();
+        cf.setSha1 (ah.getBinaryConditional (CF_SHA1_ATTR));
+        cf.setIssuerRegEx (ah.getStringConditional (CF_ISSUER_ATTR));
+        cf.setSubjectRegEx (ah.getStringConditional (CF_SUBJECT_ATTR));
+        cf.setEmailAddress (ah.getStringConditional (CF_EMAIL_ATTR));
+        cf.setSerial (ah.getBigIntegerConditional (CF_SERIAL_ATTR));
+        cf.setPolicy (ah.getStringConditional (CF_POLICY_ATTR));
         String[] scontainers = ah.getListConditional (CF_CONTAINERS_ATTR);
         KeyContainerTypes[] containers = null;
         if (scontainers != null)
@@ -95,6 +94,7 @@ public class SignatureRequestDecoder extends SignatureRequest
                 if (!found) throw new IOException ("Unknown container: " + scontainers[q]);
               }
           }
+        cf.setContainers (containers);
         CertificateFilter.KeyUsage key_usage = null;
         String key_usage_string = ah.getStringConditional (CF_KEY_USAGE_ATTR);
         if (key_usage_string != null)
@@ -114,8 +114,9 @@ public class SignatureRequestDecoder extends SignatureRequest
                   }
               }
           }
-        String ext_key_usage_oid = ah.getStringConditional (CF_EXT_KEY_USAGE_ATTR);
-        return new CertificateFilter (sha1, issuer, subject, email_address, serial, policy_oid, containers, key_usage, ext_key_usage_oid);
+        cf.setKeyUsage (key_usage);
+        cf.setExtKeyUsage (ah.getStringConditional (CF_EXT_KEY_USAGE_ATTR));
+        return cf;
       }
 
 

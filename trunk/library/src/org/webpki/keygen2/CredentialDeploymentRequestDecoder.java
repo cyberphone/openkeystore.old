@@ -40,8 +40,9 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
     public class PostOperation
       {
         public static final int DELETE_KEY            = 0;
-        public static final int UPDATE_KEY            = 1;
-        public static final int CLONE_KEY_PROTECTION  = 2;
+        public static final int UNLOCK_KEY            = 1;
+        public static final int UPDATE_KEY            = 2;
+        public static final int CLONE_KEY_PROTECTION  = 3;
         
         String client_session_id;
         
@@ -423,8 +424,10 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
 
     private Vector<DeployedKeyEntry> deployed_key_entries = new Vector<DeployedKeyEntry> ();
     
-    private Vector<PostOperation> pp_delete_keys = new Vector<PostOperation> ();
+    private Vector<PostOperation> pp_unlock_keys = new Vector<PostOperation> ();
       
+    private Vector<PostOperation> pp_delete_keys = new Vector<PostOperation> ();
+    
     private String client_session_id;
 
     private String server_session_id;
@@ -469,6 +472,12 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         return deployed_key_entries.toArray (new DeployedKeyEntry[0]);
       }
     
+    
+    public PostOperation[] getPostProvisioningUnlockKeys ()
+      {
+        return pp_unlock_keys.toArray (new PostOperation[0]);
+      }
+
     
     public PostOperation[] getPostProvisioningDeleteKeys ()
       {
@@ -521,13 +530,20 @@ public class CredentialDeploymentRequestDecoder extends CredentialDeploymentRequ
         rd.getChild ();
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the deployed_key_entries [1..n]
+        // Get the deployed_key_entries [0..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        do 
+        while (rd.hasNext (CERTIFICATE_PATH_ELEM))
           {
             deployed_key_entries.add (new DeployedKeyEntry (rd));
           }
-        while (rd.hasNext (CERTIFICATE_PATH_ELEM));
+ 
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Get optional post provisioning unlocks
+        /////////////////////////////////////////////////////////////////////////////////////////
+        while (rd.hasNext (UNLOCK_KEY_ELEM))
+          {
+            pp_unlock_keys.add (readPostOperation (rd, PostOperation.UNLOCK_KEY, UNLOCK_KEY_ELEM));
+          }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get optional post provisioning deletes

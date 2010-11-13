@@ -68,14 +68,13 @@ public class SignatureRequestEncoder extends SignatureRequest
 
     static void writeCertificateFilter (DOMWriterHelper wr, CertificateFilter cf) throws IOException
       {
-        cf.integrityCheck ();
         wr.addEmptyElement (CERTIFICATE_FILTER_ELEM);
-        if (cf.getSha1 () != null) wr.setBinaryAttribute (CF_SHA1_ATTR, cf.getSha1 ());
-        if (cf.getIssuerRegEx () != null) wr.setStringAttribute (CF_ISSUER_ATTR, cf.getIssuerRegEx ());
-        if (cf.getSubjectRegEx () != null) wr.setStringAttribute (CF_SUBJECT_ATTR, cf.getSubjectRegEx ());
-        if (cf.getEmailAddress () != null) wr.setStringAttribute (CF_EMAIL_ATTR, cf.getEmailAddress ());
-        if (cf.getSerial () != null) wr.setBigIntegerAttribute (CF_SERIAL_ATTR, cf.getSerial ());
-        if (cf.getPolicy () != null) wr.setStringAttribute (CF_POLICY_ATTR, cf.getPolicy ());
+        wr.setBinaryAttribute (CF_SHA1_ATTR, cf.getSha1 ());
+        wr.setStringAttribute (CF_ISSUER_ATTR, cf.getIssuerRegEx ());
+        wr.setStringAttribute (CF_SUBJECT_ATTR, cf.getSubjectRegEx ());
+        wr.setStringAttribute (CF_EMAIL_ATTR, cf.getEmailAddress ());
+        wr.setBigIntegerAttribute (CF_SERIAL_ATTR, cf.getSerial ());
+        wr.setStringAttribute (CF_POLICY_ATTR, cf.getPolicy ());
         if (cf.getContainers () != null)
           {
             KeyContainerTypes[] containers = cf.getContainers ();

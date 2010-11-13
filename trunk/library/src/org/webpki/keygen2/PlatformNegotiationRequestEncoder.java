@@ -48,6 +48,8 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
     Vector<ImageDescriptor> image_descriptors = new Vector<ImageDescriptor> ();
 
     BasicCapabilities basic_capabilities = new BasicCapabilities ();
+    
+    Action action = Action.MANAGE;
 
     boolean needs_dsig_ns;
 
@@ -58,6 +60,12 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
       {
         this.server_session_id = server_session_id;
         this.submit_url = submit_url;
+      }
+    
+    
+    public void setAction (Action action)
+      {
+        this.action = action;
       }
 
 
@@ -113,6 +121,8 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
+        wr.setStringAttribute (ACTION_ATTR, action.getXMLName ());
+
         wr.setStringAttribute (ID_ATTR, server_session_id);
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);

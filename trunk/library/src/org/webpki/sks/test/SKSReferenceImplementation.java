@@ -112,6 +112,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final byte[] METHOD_CREATE_PUK_POLICY           = {'c','r','e','a','t','e','P','U','K','P','o','l','i','c','y'};
     static final byte[] METHOD_ADD_EXTENSION               = {'a','d','d','E','x','t','e','n','s','i','o','n'};
     static final byte[] METHOD_PP_DELETE_KEY               = {'p','p','_','d','e','l','e','t','e','K','e','y'};
+    static final byte[] METHOD_PP_UNLOCK_KEY               = {'p','p','_','u','n','l','o','c','k','K','e','y'};
     static final byte[] METHOD_PP_UPDATE_KEY               = {'p','p','_','u','p','d','a','t','e','K','e','y'};
     static final byte[] METHOD_PP_CLONE_KEY_PROTECTION     = {'p','p','_','c','l','o','n','e','K','e','y','P','r','o','t','e','c','t','i','o','n'};
 
@@ -755,7 +756,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             return key_entry;
           }
 
-        public void addPostProvisioningObject (KeyEntry target_key_entry, KeyEntry key_entry, boolean update) throws SKSException
+        public void addPostProvisioningObject (KeyEntry target_key_entry, KeyEntry key_entry, boolean upd_or_del) throws SKSException
           {
             for (PostProvisioningObject post_op : post_provisioning_objects)
               {
@@ -765,17 +766,28 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                   }
                 if (post_op.target_key_entry == target_key_entry)
                   {
-                    if (key_entry == null || post_op.new_key == null) // pp_deleteKey
+                    ////////////////////////////////////////////////////////////////////////////////////////////////
+                    // Multiple targeting of the same old key is OK but has restrictions
+                    ////////////////////////////////////////////////////////////////////////////////////////////////
+                    if ((key_entry == null && upd_or_del) || (post_op.new_key == null && post_op.upd_or_del)) // pp_deleteKey
                       {
                         abort ("Delete wasn't exclusive for key #" + target_key_entry.key_handle);
                       }
-                    else if (update && post_op.update)
+                    else if (key_entry == null && post_op.new_key == null) // pp_unlockKey * 2
+                      {
+                        abort ("Multiple unlocks of key #" + target_key_entry.key_handle);
+                      }
+                    else if (upd_or_del && post_op.upd_or_del)
                       {
                         abort ("Multiple updates of key #" + target_key_entry.key_handle);
                       }
                   }
               }
-            post_provisioning_objects.add (new PostProvisioningObject (target_key_entry, key_entry, update));
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // We want pp_unlockKey keys to be first in the list so that PIN inherits works as specified
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            post_provisioning_objects.add (key_entry == null ? 0 : post_provisioning_objects.size (),
+                                           new PostProvisioningObject (target_key_entry, key_entry, upd_or_del));
           }
 
         public void rangeTest (byte value, byte low_limit, byte high_limit, String object_name) throws SKSException
@@ -866,14 +878,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         private static final long serialVersionUID = 1L;
 
         KeyEntry target_key_entry;
-        KeyEntry new_key;      // null for pp_deleteKey
-        boolean update;        // true for pp_updateKey
+        KeyEntry new_key;      // null for pp_deleteKey and pp_unlockKey
+        boolean upd_or_del;    // true for pp_updateKey and pp_deleteKey
 
-        PostProvisioningObject (KeyEntry target_key_entry, KeyEntry new_key, boolean update)
+        PostProvisioningObject (KeyEntry target_key_entry, KeyEntry new_key, boolean upd_or_del)
           {
             this.target_key_entry = target_key_entry;
             this.new_key = new_key;
-            this.update = update;
+            this.upd_or_del = upd_or_del;
           }
       }
 
@@ -1464,6 +1476,39 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         provisioning.addPostProvisioningObject (target_key_entry, key_entry, update);
       }
 
+    void addUnlockKeyOrDeleteKey (int provisioning_handle,
+                                  int target_key_handle,
+                                  byte[] km_authentication,
+                                  byte[] mac,
+                                  boolean delete) throws SKSException
+      {
+        // /////////////////////////////////////////////////////////////////////////////////
+        // Get provisioning session
+        // /////////////////////////////////////////////////////////////////////////////////
+        Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
+
+        // /////////////////////////////////////////////////////////////////////////////////
+        // Get key to be deleted or unlocked
+        // /////////////////////////////////////////////////////////////////////////////////
+        KeyEntry target_key_entry = provisioning.getTargetKey (target_key_handle);
+        if (!delete && target_key_entry.pin_policy == null)
+          {
+            provisioning.abort ("Key #" + target_key_handle + " is not PIN protected");
+          }
+
+        // /////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC and target key data
+        // /////////////////////////////////////////////////////////////////////////////////
+        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (delete ? METHOD_PP_DELETE_KEY : METHOD_PP_UNLOCK_KEY);
+        target_key_entry.validateTargetKeyReference (verifier, mac, km_authentication, provisioning);
+
+        // /////////////////////////////////////////////////////////////////////////////////
+        // Put the operation in the pp-op buffer used by
+        // "closeProvisioningSession"
+        // /////////////////////////////////////////////////////////////////////////////////
+        provisioning.addPostProvisioningObject (target_key_entry, null, delete);
+      }
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     // PKCS #1 Signature Support Data
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -2009,26 +2054,23 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                               byte[] km_authentication,
                               byte[] mac) throws SKSException
       {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Get provisioning session
-        ///////////////////////////////////////////////////////////////////////////////////
-        Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
+        addUnlockKeyOrDeleteKey (provisioning_handle, target_key_handle, km_authentication, mac, true);
 
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Get key to be deleted
-        ///////////////////////////////////////////////////////////////////////////////////
-        KeyEntry target_key_entry = provisioning.getTargetKey (target_key_handle);
+      }
 
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC and target key data
-        ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_PP_DELETE_KEY);
-        target_key_entry.validateTargetKeyReference (verifier, mac, km_authentication, provisioning);
 
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Put the operation in the pp-op buffer used by "closeProvisioningSession"
-        ///////////////////////////////////////////////////////////////////////////////////
-        provisioning.addPostProvisioningObject (target_key_entry, null, false);
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                             pp_unlockKey                                   //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void pp_unlockKey (int provisioning_handle,
+                              int target_key_handle,
+                              byte[] km_authentication,
+                              byte[] mac) throws SKSException
+      {
+        addUnlockKeyOrDeleteKey (provisioning_handle, target_key_handle, km_authentication, mac, false);
       }
 
 
@@ -2347,11 +2389,28 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             KeyEntry key_entry = post_op.target_key_entry;
             if (post_op.new_key == null)
               {
-                localDeleteKey (key_entry);
+                if (post_op.upd_or_del)
+                  {
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    // pp_deleteKey
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    localDeleteKey (key_entry);
+                  }
+                else
+                  {
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    // pp_unlockKey.  Performed before pp_updateKey and pp_cloneKeyProtection 
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    key_entry.setErrorCounter ((short) 0);
+                    if (key_entry.pin_policy.puk_policy != null)
+                      {
+                        key_entry.pin_policy.puk_policy.error_count = 0;
+                      }
+                  }
               }
             else
               {
-                if (post_op.update)
+                if (post_op.upd_or_del)
                   {
                     ///////////////////////////////////////////////////////////////////////////////////
                     // Store new key in the place of the old (keeping the handle intact after update)

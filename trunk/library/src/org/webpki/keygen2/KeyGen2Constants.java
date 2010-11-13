@@ -37,6 +37,8 @@ public interface KeyGen2Constants
 
     String FEATURES_ATTR                       = "Features";
 
+    String ACTION_ATTR                         = "Action";
+
     String EXTENSIONS_ATTR                     = "Extensions";
 
     String ID_ATTR                             = "ID";
@@ -87,6 +89,8 @@ public interface KeyGen2Constants
 
     String CERTIFICATE_FINGERPRINT_ATTR        = "CertificateFingerprint";
 
+    String LOCKED_ATTR                         = "Locked";
+
     String MIME_TYPE_ATTR                      = "MimeType";
 
     String KEY_SIZES_ATTR                      = "KeySizes";
@@ -129,9 +133,9 @@ public interface KeyGen2Constants
 
     String BIOMETRIC_PROTECTION_ATTR           = "BiometricProtection";
 
-    String SUBJECT_ATTR                        = "Subject";
-
     String FRIENDLY_NAME_ATTR                  = "FriendlyName";
+
+    String SUBJECT_ATTR                        = "Subject";
 
     String SERIAL_ATTR                         = "Serial";
 
@@ -139,11 +143,11 @@ public interface KeyGen2Constants
 
     String POLICY_ATTR                         = "Policy";
 
+    String EXCLUDED_POLICIES_ATTR              = "ExcludedPolicies";
+
     String ISSUED_BEFORE_ATTR                  = "IssuedBefore";
 
     String ISSUED_AFTER_ATTR                   = "IssuedAfter";
-
-    String EXCLUDED_POLICIES_ATTR              = "ExcludedPolicies";
 
     String NAME_ATTR                           = "Name";
 
@@ -219,6 +223,8 @@ public interface KeyGen2Constants
     String EC_ELEM                             = "EC";
     
     String UPDATE_KEY_ELEM                     = "UpdateKey";
+
+    String UNLOCK_KEY_ELEM                     = "UnlockKey";
 
     String CLONE_KEY_PROTECTION_ELEM           = "CloneKeyProtection";
     

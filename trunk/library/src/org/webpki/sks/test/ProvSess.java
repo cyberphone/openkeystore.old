@@ -765,20 +765,24 @@ public class ProvSess
       {
         MacGenerator upd_mac = new MacGenerator ();
         byte[] km_authentication = key.getPostProvMac (upd_mac, this);
-        sks.pp_deleteKey (provisioning_handle, 
-                          key.key_handle,
-                          km_authentication,
-                          mac (upd_mac.getResult (), APIDescriptors.PP_DELETE_KEY));
+        sks.pp_deleteKey (provisioning_handle, key.key_handle, km_authentication, mac (upd_mac.getResult (), APIDescriptors.PP_DELETE_KEY));
       }
-    
+
+    public void postUnlockKey (GenKey key) throws IOException, GeneralSecurityException
+      {
+        MacGenerator upd_mac = new MacGenerator ();
+        byte[] km_authentication = key.getPostProvMac (upd_mac, this);
+        sks.pp_unlockKey (provisioning_handle, key.key_handle, km_authentication, mac (upd_mac.getResult (), APIDescriptors.PP_UNLOCK_KEY));
+      }
+  
     public void postUpdateKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new_key.getEECertMacBuilder ();
         byte[] km_authentication = old_key.getPostProvMac (upd_mac, this);
         sks.pp_updateKey (new_key.key_handle, 
                           old_key.key_handle,
-                         km_authentication,
-                         mac (upd_mac.getResult (), APIDescriptors.PP_UPDATE_KEY));
+                          km_authentication,
+                          mac (upd_mac.getResult (), APIDescriptors.PP_UPDATE_KEY));
       }
     
     public void postCloneKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException

@@ -110,6 +110,9 @@
 
          </xs:sequence> 
 
+         <!-- GUI notification -->
+         <xs:attribute name="Action" type="kgen:action" use="required"/>
+
          <!-- GUI language in preference order.  Primarily for public computers -->
          <xs:attribute name="Languages" type="kgen:languageList" use="optional"/>
 
@@ -223,7 +226,6 @@
                         <xs:element ref="ds11:ECKeyValue"/>
 
                      </xs:choice>
-
 
                   </xs:sequence>
                </xs:complexType>
@@ -575,8 +577,11 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- The now certified keys -->
-            <xs:element ref="kgen:CertificatePath" maxOccurs="unbounded"/>
+            <!-- The now certified keys.  Note: optional -->
+            <xs:element ref="kgen:CertificatePath" minOccurs="0" maxOccurs="unbounded"/>
+
+            <!-- SKS Reference: pp_unlockKey -->
+            <xs:element name="UnlockKey" type="kgen:targetKey" minOccurs="0" maxOccurs="unbounded"/>
 
             <!-- SKS Reference: pp_deleteKey -->
             <xs:element name="DeleteKey" type="kgen:targetKey" minOccurs="0" maxOccurs="unbounded"/>
@@ -748,15 +753,15 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- The package MAY contain additional certificates belonging
-                 to the same certificate-path.  There MUST NOT be any "holes"
-                 or "extras" in the path but it does not need to go up to the
-                 root.  The actual order of certificates is insignificant.
+            <!-- The certificate collection MAY contain additional certificates
+                 belonging to the same certificate-path.  There MUST NOT be any
+                 "holes" or "extras" in the path but it does not need to go up to
+                 the root.  The actual order of certificates is insignificant.
                  NOTE: Unlike TLS server-certificates, the KeyGen2 scheme
                  does not put any constraints on issued certificates with
                  respect to being known or trusted by the client platform.
                  That is, all technically valid certificates MUST be accepted
-                 without warnings.  Certificates in excess of 50KB MAY though
+                 without warnings.  Certificates in excess of 16KB MAY though
                  be rejected -->
             <xs:element ref="ds:X509Data"/>
 
@@ -1251,7 +1256,12 @@
       <xs:complexType>
          <xs:complexContent>
 
-            <xs:extension base="kgen:keyID"/>
+            <xs:extension base="kgen:keyID">
+
+              <!-- Locked?  Default: false -->
+              <xs:attribute name="Locked" type="xs:boolean" use="optional"/>
+
+         </xs:extension>
 
          </xs:complexContent>
       </xs:complexType>
@@ -1326,6 +1336,18 @@
          </xs:extension>
       </xs:simpleContent>
    </xs:complexType>
+
+   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                              Action definitions
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+   <xs:simpleType name="action">
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="create"/>
+         <xs:enumeration value="unlock"/>
+         <xs:enumeration value="manage"/>
+      </xs:restriction>
+   </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                             Application usage definitions

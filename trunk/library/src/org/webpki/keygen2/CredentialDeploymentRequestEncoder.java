@@ -136,13 +136,8 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
     
             XMLSignatureWrapper.addXMLSignatureNS (wr);
     
-            if (server_credential_store.getKeyProperties ().isEmpty ())
-              {
-                throw new IOException ("Empty request not allowed!");
-              }
-    
             ////////////////////////////////////////////////////////////////////////
-            // Write [1..n] Credentials
+            // Write [0..n] Credentials
             ////////////////////////////////////////////////////////////////////////
             for (ServerCredentialStore.KeyProperties key : server_credential_store.getKeyProperties ())
               {
@@ -213,6 +208,17 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
                   }
  
                 wr.getParent ();
+              }
+            
+            ////////////////////////////////////////////////////////////////////////
+            // Optional: post provisioning unlock operations
+            ////////////////////////////////////////////////////////////////////////
+            for (ServerCredentialStore.PostProvisioningTargetKey pptk : server_credential_store.post_operations)
+              {
+                if (pptk.post_operation == ServerCredentialStore.PostOperation.UNLOCK_KEY)
+                  {
+                    writePostOp (wr, pptk, new MacGenerator ());
+                  }
               }
             
             ////////////////////////////////////////////////////////////////////////

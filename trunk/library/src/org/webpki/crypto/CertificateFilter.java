@@ -107,19 +107,6 @@ public class CertificateFilter
       }
 
 
-    public void integrityCheck () throws IOException
-      {
-        if (sha1 != null && sha1.length != 20)
-          {
-            throw new IOException ("\"Sha1\" hash not 20 bytes!");
-          }
-        if (key_usage != null && key_usage.required.isEmpty () && key_usage.disallowed.isEmpty ())
-          {
-            throw new IOException ("KeyUsage without any specifier is not allowed!");
-          }
-      }
-
-
     private String quote (String dn_verbatim)
       {
         return Pattern.quote (CertificateUtil.convertLegacyToRFC2253 (dn_verbatim));
@@ -147,31 +134,12 @@ public class CertificateFilter
 
     private String compile (String dn_expression)
       {
+        if (dn_expression == null)
+          {
+            return null;
+          }
         Pattern.compile (dn_expression);
         return dn_expression;
-      }
-
-
-    public CertificateFilter (byte[] sha1, 
-                              String issuer_regex,
-                              String subject_regex,
-                              String email_address,
-                              BigInteger serial,
-                              String policy_oid,
-                              KeyContainerTypes[] containers,
-                              KeyUsage key_usage,
-                              String ext_key_usage_oid) throws IOException
-      {
-        this.sha1 = sha1;
-        this.issuer_regex = issuer_regex;
-        this.subject_regex = subject_regex;
-        this.email_address = email_address;
-        this.serial = serial;
-        this.policy_oid = policy_oid;
-        this.containers = containers;
-        this.key_usage = key_usage;
-        this.ext_key_usage_oid = ext_key_usage_oid;
-        integrityCheck ();
       }
 
 
@@ -511,6 +479,14 @@ public class CertificateFilter
                                               KeyUsage default_key_usage,
                                               KeyContainerTypes container) throws IOException
       {
+        if (sha1 != null && sha1.length != 20)
+          {
+            throw new IOException ("\"Sha1\" hash not 20 bytes!");
+          }
+        if (key_usage != null && key_usage.required.isEmpty () && key_usage.disallowed.isEmpty ())
+          {
+            throw new IOException ("KeyUsage without any specifier is not allowed!");
+          }
         try
           {
             return matchSerial (serial, cert_path[0]) &&

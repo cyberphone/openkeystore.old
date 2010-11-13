@@ -18,9 +18,11 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.math.BigInteger;
+
 import java.security.PublicKey;
+import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
-import java.util.Vector;
 
 import org.w3c.dom.Element;
 
@@ -43,7 +45,13 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
       {
         String id;
         
+        String subject_reg_ex;
+        BigInteger serial;
         String email_address;
+        String policy;
+        String[] excluded_policies;
+        GregorianCalendar issued_before;
+        GregorianCalendar issued_after;
 
         byte[] nonce;
         
@@ -66,7 +74,13 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
             if (rd.hasNext (SEARCH_FILTER_ELEM))
               {
                 rd.getNext ();
+                subject_reg_ex = ah.getStringConditional (SUBJECT_ATTR);
+                serial = ah.getBigIntegerConditional (SERIAL_ATTR);
                 email_address = ah.getStringConditional (EMAIL_ATTR);
+                policy = ah.getStringConditional (POLICY_ATTR);
+                excluded_policies = ah.getListConditional (EXCLUDED_POLICIES_ATTR);
+                issued_before = ah.getDateTimeConditional (ISSUED_BEFORE_ATTR);
+                issued_after = ah.getDateTimeConditional (ISSUED_AFTER_ATTR);
               }
             signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
             rd.getParent ();
@@ -83,9 +97,39 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
             return key_management_key;
           }
         
+        public String getSubjectRegEx ()
+          {
+            return subject_reg_ex;
+          }
+        
+        public BigInteger getSerial ()
+          {
+            return serial;
+          }
+        
         public String getEmailAddress ()
           {
             return email_address;
+          }
+        
+        public String getPolicy ()
+          {
+            return policy;
+          }
+        
+        public String[] getExcludedPolicies ()
+          {
+            return excluded_policies;
+          }
+        
+        public GregorianCalendar getIssuedBefore ()
+          {
+            return issued_before;
+          }
+
+        public GregorianCalendar getIssuedAfter ()
+          {
+            return issued_after;
           }
       }
 

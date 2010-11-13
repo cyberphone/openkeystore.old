@@ -37,6 +37,8 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
         String client_session_id;
 
         String server_session_id;
+        
+        boolean locked;
       }
     
     public class LookupResult
@@ -50,12 +52,13 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
             this.id = id;
           }
         
-        public void addMatchingCredential (byte[] certificate_fingerprint, String client_session_id, String server_session_id)
+        public void addMatchingCredential (byte[] certificate_fingerprint, String client_session_id, String server_session_id, boolean locked)
           {
             MatchingCredential mc = new MatchingCredential ();
             mc.certficate_fingerprint = certificate_fingerprint;
             mc.client_session_id = client_session_id;
             mc.server_session_id = server_session_id;
+            mc.locked = locked;
             matching_credentials.add (mc);
           }
       }
@@ -134,6 +137,10 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
                 wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, mc.client_session_id);
                 wr.setStringAttribute (SERVER_SESSION_ID_ATTR, mc.server_session_id);
                 wr.setBinaryAttribute (CERTIFICATE_FINGERPRINT_ATTR, mc.certficate_fingerprint);
+                if (mc.locked)
+                  {
+                    wr.setBooleanAttribute (LOCKED_ATTR, mc.locked);
+                  }
                 wr.getParent ();
               }
             wr.getParent ();

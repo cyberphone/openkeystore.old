@@ -45,6 +45,7 @@ public class ServerCredentialStore implements Serializable
     enum PostOperation
       {
         DELETE_KEY            (APIDescriptors.PP_DELETE_KEY,           DELETE_KEY_ELEM), 
+        UNLOCK_KEY            (APIDescriptors.PP_UNLOCK_KEY,           UNLOCK_KEY_ELEM), 
         UPDATE_KEY            (APIDescriptors.PP_UPDATE_KEY,           UPDATE_KEY_ELEM), 
         CLONE_KEY_PROTECTION  (APIDescriptors.PP_CLONE_KEY_PROTECTION, CLONE_KEY_PROTECTION_ELEM);
         
@@ -1005,7 +1006,7 @@ public class ServerCredentialStore implements Serializable
             key_pair_mac.addByte (export_policy == null ?
                 ExportPolicy.NON_EXPORTABLE.getSKSValue () : export_policy.getSKSValue ());
             key_pair_mac.addByte (delete_policy == null ?
-                DeletePolicy.NONE.getSKSValue () : delete_policy.getSKSValue ());
+                       DeletePolicy.NONE.getSKSValue () : delete_policy.getSKSValue ());
             key_pair_mac.addBool (enable_pin_caching);
             key_pair_mac.addByte (app_usage.getSKSValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
@@ -1211,6 +1212,19 @@ public class ServerCredentialStore implements Serializable
       }
 
   
+    public void addPostProvisioningUnlockKey (String old_client_session_id,
+                                              String old_server_session_id,
+                                              X509Certificate old_key,
+                                              PublicKey key_management_key) throws IOException, GeneralSecurityException
+      {
+        addPostOperation (old_client_session_id, 
+        old_server_session_id,
+        old_key, 
+        PostOperation.UNLOCK_KEY,
+        key_management_key);
+      }
+
+    
     public String getClientSessionID ()
       {
         return client_session_id;

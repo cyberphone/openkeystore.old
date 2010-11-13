@@ -2337,4 +2337,61 @@ public class SKSTest
             checkException (e, "Key # not belonging to open session");
           }
       }
+
+    @Test
+    public void test53 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device, 0);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  PINGrouping.SHARED,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
+        GenKey key = sess.createECKey ("Key.1",
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        sess.closeSession ();
+        for (int i = 1; i < 4; i++)
+          {
+            try
+              {
+                device.sks.signHashedData (key.key_handle, 
+                                           "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                           null,
+                                           (ok_pin + "4").getBytes ("UTF-8"), 
+                                           HashAlgorithms.SHA256.digest (TEST_STRING));
+                assertTrue ("PIN fail", i < 3);
+              }
+            catch (SKSException e)
+              {
+                authorizationErrorCheck (e);
+              }
+          }
+        try
+          {
+            device.sks.signHashedData (key.key_handle, 
+                                       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                       null,
+                                       ok_pin.getBytes ("UTF-8"), 
+                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            fail ("PIN fail");
+          }
+        catch (SKSException e)
+          {
+            authorizationErrorCheck (e);
+          }
+        ProvSess sess2 = new ProvSess (device);
+        sess2.postUnlockKey (key);
+        sess2.closeSession ();
+        device.sks.signHashedData (key.key_handle, 
+                                   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
+                                   null,
+                                   ok_pin.getBytes ("UTF-8"), 
+                                   HashAlgorithms.SHA256.digest (TEST_STRING));
+      }
   }

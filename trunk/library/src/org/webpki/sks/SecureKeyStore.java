@@ -122,6 +122,11 @@ public interface SecureKeyStore
                               byte[] km_authentication,
                               byte[] mac) throws SKSException;
 
+    public void pp_unlockKey (int provisioning_handle,
+                              int target_key_handle,
+                              byte[] km_authentication,
+                              byte[] mac) throws SKSException;
+
     public void pp_updateKey (int key_handle,
                               int target_key_handle,
                               byte[] km_authentication,

@@ -18,10 +18,13 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 
+import java.util.Date;
 import java.util.Vector;
 
 import org.w3c.dom.Document;
@@ -55,8 +58,14 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         String id;
         
         boolean search_filter;
-        
+
+        String subject_reg_ex;
+        BigInteger serial;
         String email_address;
+        String policy;
+        String[] excluded_policies;
+        Date issued_before;
+        Date issued_after;
         
         Document root;
         
@@ -68,10 +77,52 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
             this.id = lookup_prefix + ++next_lookup_id_suffix;
           }
         
+        public LookupDescriptor setSubjectRegEx (String subject_reg_ex)
+          {
+            search_filter = true;
+            this.subject_reg_ex = subject_reg_ex;
+            return this;
+          }
+
+        public LookupDescriptor setSerial (BigInteger serial)
+          {
+            search_filter = true;
+            this.serial = serial;
+            return this;
+          }
+
         public LookupDescriptor setEmailAddress (String email_address)
           {
             search_filter = true;
             this.email_address = email_address;
+            return this;
+          }
+
+        public LookupDescriptor setPolicy (String policy)
+          {
+            search_filter = true;
+            this.policy = policy;
+            return this;
+          }
+
+        public LookupDescriptor setExcludedPolicies (String[] excluded_policies)
+          {
+            search_filter = true;
+            this.excluded_policies = excluded_policies;
+            return this;
+          }
+
+        public LookupDescriptor setIssuedBefore (Date issued_before)
+          {
+            search_filter = true;
+            this.issued_before = issued_before;
+            return this;
+          }
+
+        public LookupDescriptor setIssuedAfter (Date issued_after)
+          {
+            search_filter = true;
+            this.issued_after = issued_after;
             return this;
           }
 
@@ -115,9 +166,33 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
             if (search_filter)
               {
                 wr.addChildElement (SEARCH_FILTER_ELEM);
+                if (subject_reg_ex != null)
+                  {
+                    wr.setStringAttribute (SUBJECT_ATTR, subject_reg_ex);
+                  }
+                if (serial != null)
+                  {
+                    wr.setBigIntegerAttribute (SERIAL_ATTR, serial);
+                  }
                 if (email_address != null)
                   {
                     wr.setStringAttribute (EMAIL_ATTR, email_address);
+                  }
+                if (policy != null)
+                  {
+                    wr.setStringAttribute (POLICY_ATTR, policy);
+                  }
+                if (excluded_policies != null)
+                  {
+                    wr.setListAttribute (EXCLUDED_POLICIES_ATTR, excluded_policies);
+                  }
+                if (issued_before != null)
+                  {
+                    wr.setDateTimeAttribute (ISSUED_BEFORE_ATTR, issued_before);
+                  }
+                if (issued_after != null)
+                  {
+                    wr.setDateTimeAttribute (ISSUED_AFTER_ATTR, issued_after);
                   }
                 wr.getParent ();
               }

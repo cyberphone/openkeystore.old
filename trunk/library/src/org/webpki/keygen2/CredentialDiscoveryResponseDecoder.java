@@ -32,11 +32,33 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
       {
         MatchingCredential () {}
         
-        byte[] certficate_fingerprint;
+        byte[] certificate_fingerprint;
         
         String client_session_id;
         
         String server_session_id;
+        
+        boolean locked;
+        
+        public String getClientSessionID ()
+          {
+            return client_session_id;
+          }
+        
+        public String getServerSessionID ()
+          {
+            return server_session_id;
+          }
+        
+        public byte[] getCertificateFingerprint ()
+          {
+            return certificate_fingerprint;
+          }
+        
+        public boolean isLocked ()
+          {
+            return locked;
+          }
       }
 
     public class LookupResult
@@ -59,7 +81,8 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
                 MatchingCredential mc = new MatchingCredential ();
                 mc.client_session_id = ah.getString (CLIENT_SESSION_ID_ATTR);
                 mc.server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
-                mc.certficate_fingerprint = ah.getBinary (CERTIFICATE_FINGERPRINT_ATTR);
+                mc.certificate_fingerprint = ah.getBinary (CERTIFICATE_FINGERPRINT_ATTR);
+                mc.locked = ah.getBooleanConditional (LOCKED_ATTR);
                 matching_credentials.add (mc);
               }
             rd.getParent ();
