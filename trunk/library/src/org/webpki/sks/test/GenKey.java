@@ -113,7 +113,7 @@ public class GenKey
           }
         PublicKey kmk = current.server_sess_key.enumerateKeyManagementKeys ()[kmk_id];
         byte[] km_authentication = current.server_sess_key.generateKMAuthentication (kmk, current.mac (cert_path[0].getEncoded (),
-                                                                                                       CryptoConstants.CRYPTO_STRING_TGT_KEY_REF));
+                                                                                                       prov_sess.device.device_info.getDeviceCertificatePath ()[0].getEncoded ()));
         upd_mac.addArray (kmk.getEncoded ());
         upd_mac.addArray (km_authentication);
         return km_authentication;

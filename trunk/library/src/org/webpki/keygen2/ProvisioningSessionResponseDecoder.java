@@ -121,9 +121,6 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
 
             MacGenerator session_key_mac_data = new MacGenerator ();
             session_key_mac_data.addString (prov_sess_request.session_key_algorithm);
-            session_key_mac_data.addString (client_session_id);
-            session_key_mac_data.addString (server_session_id);
-            session_key_mac_data.addString (prov_sess_request.submit_url);
             session_key_mac_data.addArray (prov_sess_request.server_ephemeral_key.getEncoded ());
             session_key_mac_data.addArray (client_ephemeral_key.getEncoded ());
             session_key_mac_data.addArray (prov_sess_request.key_management_key == null ? new byte[0] : prov_sess_request.key_management_key.getEncoded ());

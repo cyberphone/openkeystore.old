@@ -122,7 +122,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final byte[] KDF_DEVICE_ATTESTATION             = {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
     static final byte[] KDF_ENCRYPTION_KEY                 = {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
     static final byte[] KDF_EXTERNAL_SIGNATURE             = {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
-    static final byte[] KDF_TARGET_KEY_REFERENCE           = {'T','a','r','g','e','t',' ','K','e','y',' ','R','e','f','e','r','e','n','c','e'};
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Predefined PIN and PUK policy IDs for MAC operations
@@ -411,11 +410,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                     ///////////////////////////////////////////////////////////////////////////////////
                     if (!Arrays.equals (pin, new byte[]{'1','2','3','4'}))
                       {
-                        abort ("Invalid device PIN for key #" + key_handle);
+                        authError ();
                       }
-                    return;
                   }
-                if (pin != null)
+                else if (pin != null)
                   {
                     abort ("Redundant authorization information for key #" + key_handle);
                   }
@@ -553,7 +551,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 Signature km_verify = Signature.getInstance (owner.key_management_key instanceof RSAPublicKey ? 
                                                                                               "SHA256WithRSA" : "SHA256WithECDSA", "BC");
                 km_verify.initVerify (owner.key_management_key);
-                km_verify.update (provisioning.getMacBuilder (KDF_TARGET_KEY_REFERENCE).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
+                km_verify.update (provisioning.getMacBuilder (getDeviceCertificatePath ()[0].getEncoded ()).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
                 if (!km_verify.verify (km_authentication))
                   {
                     provisioning.abort ("\"KMAuthentication\" signature did not verify for key #" + key_handle);
@@ -937,7 +935,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     static final short[] RSA_KEY_SIZES = {1024, 2048};
     
-    static final int AES_PADDING = 32;
+    static final int AES_CBC_PKCS5_PADDING = 32;
     
     static
       {
@@ -1037,19 +1035,26 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     static final String ATTESTATION_KEY_ALIAS = "mykey";
 
-    KeyStore getAttestationKeyStore () throws GeneralSecurityException, IOException
+    KeyStore getAttestationKeyStore () throws GeneralSecurityException
       {
-        KeyStore ks = KeyStore.getInstance ("JKS");
-        ks.load (getClass ().getResourceAsStream ("attestationkeystore.jks"), ATTESTATION_KEY_PASSWORD);
-        return ks;
+        try
+          {
+            KeyStore ks = KeyStore.getInstance ("JKS");
+            ks.load (getClass ().getResourceAsStream ("attestationkeystore.jks"), ATTESTATION_KEY_PASSWORD);
+            return ks;
+          }
+        catch (IOException e)
+          {
+            throw new GeneralSecurityException (e);
+          }
       }
     
-    X509Certificate[] getDeviceCertificatePath () throws GeneralSecurityException, IOException
+    X509Certificate[] getDeviceCertificatePath () throws GeneralSecurityException
       {
         return new X509Certificate[]{(X509Certificate)getAttestationKeyStore ().getCertificate (ATTESTATION_KEY_ALIAS)};
       }
 
-    PrivateKey getAttestationKey () throws GeneralSecurityException, IOException
+    PrivateKey getAttestationKey () throws GeneralSecurityException
       {
         return (PrivateKey) getAttestationKeyStore ().getKey (ATTESTATION_KEY_ALIAS, ATTESTATION_KEY_PASSWORD);        
       }
@@ -2127,7 +2132,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                    SKS_DEVICE_PIN_SUPPORT,
                                    SKS_BIOMETRIC_SUPPORT);
           }
-        catch (Exception e)
+        catch (GeneralSecurityException e)
           {
             throw new SKSException (e, SKSException.ERROR_CRYPTO);
           }
@@ -2313,6 +2318,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         provisioning.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Generate the attestation in advance => checking SessionKeyLimit before "commit"
+        ///////////////////////////////////////////////////////////////////////////////////
+        MacBuilder close_attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
+        close_attestation.addArray (mac);
+        close_attestation.addString (ALGORITHM_SESSION_KEY_ATTEST_1);
+        byte[] attest = close_attestation.getResult ();
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Perform "sanity" checks on provisioned data
         ///////////////////////////////////////////////////////////////////////////////////
         for (String id : provisioning.names.keySet ())
@@ -2477,14 +2490,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         deleteEmptySession (provisioning);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Generate a final attestation
-        ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder close_attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
-        close_attestation.addArray (mac);
-        close_attestation.addString (ALGORITHM_SESSION_KEY_ATTEST_1);
-        byte[] attest = close_attestation.getResult ();
-
-        ///////////////////////////////////////////////////////////////////////////////////
         // We are done, close the show for this time
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.open = false;
@@ -2562,9 +2567,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder ska = new MacBuilder (session_key);
             ska.addString (session_key_algorithm);
-            ska.addString (client_session_id);
-            ska.addString (server_session_id);
-            ska.addString (issuer_uri);
             ska.addArray (server_ephemeral_key.getEncoded ());
             ska.addArray (client_ephemeral_key.getEncoded ());
             ska.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
@@ -2704,7 +2706,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             key_entry.owner.abort ("Duplicate \"Type\" : " + type);
           }
         if (extension_data.length > (sub_type == SUB_TYPE_ENCRYPTED_EXTENSION ? 
-                                      MAX_LENGTH_EXTENSION_DATA + AES_PADDING : MAX_LENGTH_EXTENSION_DATA))
+                                      MAX_LENGTH_EXTENSION_DATA + AES_CBC_PKCS5_PADDING : MAX_LENGTH_EXTENSION_DATA))
           {
             key_entry.owner.abort ("Extension data exceeds " + MAX_LENGTH_EXTENSION_DATA + " bytes");
           }
@@ -2770,7 +2772,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for key length errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if (private_key.length > (MAX_LENGTH_CRYPTO_DATA + AES_PADDING))
+        if (private_key.length > (MAX_LENGTH_CRYPTO_DATA + AES_CBC_PKCS5_PADDING))
           {
             key_entry.owner.abort ("Private key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
           }
@@ -2816,7 +2818,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for various input errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if (symmetric_key.length > (MAX_LENGTH_SYMMETRIC_KEY + AES_PADDING))
+        if (symmetric_key.length > (MAX_LENGTH_SYMMETRIC_KEY + AES_CBC_PKCS5_PADDING))
           {
             key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
           }
@@ -3005,6 +3007,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
         else
           {
+            if (pin_value != null)
+              {
+                pin_value = pin_value.clone ();
+              }
             verifier.addString (CRYPTO_STRING_NOT_AVAILABLE);
           }
         verifier.addByte (biometric_protection);
