@@ -186,7 +186,7 @@ public class ProvSess
           }
 
         @Override
-        public byte[] generateKMAuthentication (PublicKey key_management__key, byte[] data) throws IOException, GeneralSecurityException
+        public byte[] generateKeyManagementAuthorization (PublicKey key_management__key, byte[] data) throws IOException, GeneralSecurityException
           {
             Signature km_sign = Signature.getInstance (key_management__key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA", "BC");
             km_sign.initSign (key_management_keys.get (key_management__key));
@@ -761,34 +761,34 @@ public class ProvSess
     public void postDeleteKey (GenKey key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new MacGenerator ();
-        byte[] km_authentication = key.getPostProvMac (upd_mac, this);
-        sks.pp_deleteKey (provisioning_handle, key.key_handle, km_authentication, mac (upd_mac.getResult (), APIDescriptors.PP_DELETE_KEY));
+        byte[] authorization = key.getPostProvMac (upd_mac, this);
+        sks.pp_deleteKey (provisioning_handle, key.key_handle, authorization, mac (upd_mac.getResult (), APIDescriptors.PP_DELETE_KEY));
       }
 
     public void postUnlockKey (GenKey key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new MacGenerator ();
-        byte[] km_authentication = key.getPostProvMac (upd_mac, this);
-        sks.pp_unlockKey (provisioning_handle, key.key_handle, km_authentication, mac (upd_mac.getResult (), APIDescriptors.PP_UNLOCK_KEY));
+        byte[] authorization = key.getPostProvMac (upd_mac, this);
+        sks.pp_unlockKey (provisioning_handle, key.key_handle, authorization, mac (upd_mac.getResult (), APIDescriptors.PP_UNLOCK_KEY));
       }
   
     public void postUpdateKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new_key.getEECertMacBuilder ();
-        byte[] km_authentication = old_key.getPostProvMac (upd_mac, this);
+        byte[] authorization = old_key.getPostProvMac (upd_mac, this);
         sks.pp_updateKey (new_key.key_handle, 
                           old_key.key_handle,
-                          km_authentication,
+                          authorization,
                           mac (upd_mac.getResult (), APIDescriptors.PP_UPDATE_KEY));
       }
     
     public void postCloneKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new_key.getEECertMacBuilder ();
-        byte[] km_authentication = old_key.getPostProvMac (upd_mac, this);
+        byte[] authorization = old_key.getPostProvMac (upd_mac, this);
         sks.pp_cloneKeyProtection (new_key.key_handle, 
                                    old_key.key_handle,
-                                   km_authentication,
+                                   authorization,
                                    mac (upd_mac.getResult (), APIDescriptors.PP_CLONE_KEY_PROTECTION));
       }
   

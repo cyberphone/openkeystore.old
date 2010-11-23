@@ -533,14 +533,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         void validateTargetKeyReference (MacBuilder verifier,
                                          byte[] mac,
-                                         byte[] km_authentication,
+                                         byte[] authorization,
                                          Provisioning provisioning) throws SKSException
           {
             ///////////////////////////////////////////////////////////////////////////////////
             // Verify MAC
             ///////////////////////////////////////////////////////////////////////////////////
-            verifier.addArray (owner.key_management_key.getEncoded ());
-            verifier.addArray (km_authentication);
+            verifier.addArray (authorization);
             provisioning.verifyMac (verifier, mac);
             
             ///////////////////////////////////////////////////////////////////////////////////
@@ -552,9 +551,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                                                                               "SHA256WithRSA" : "SHA256WithECDSA", "BC");
                 km_verify.initVerify (owner.key_management_key);
                 km_verify.update (provisioning.getMacBuilder (getDeviceCertificatePath ()[0].getEncoded ()).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
-                if (!km_verify.verify (km_authentication))
+                if (!km_verify.verify (authorization))
                   {
-                    provisioning.abort ("\"KMAuthentication\" signature did not verify for key #" + key_handle);
+                    provisioning.abort ("\"Authorization\" signature did not verify for key #" + key_handle);
                   }
               }
             catch (GeneralSecurityException e)
@@ -754,24 +753,24 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             return key_entry;
           }
 
-        public void addPostProvisioningObject (KeyEntry target_key_entry, KeyEntry key_entry, boolean upd_or_del) throws SKSException
+        public void addPostProvisioningObject (KeyEntry target_key_entry, KeyEntry new_key, boolean upd_or_del) throws SKSException
           {
             for (PostProvisioningObject post_op : post_provisioning_objects)
               {
-                if (post_op.new_key != null && post_op.new_key == key_entry)
+                if (post_op.new_key != null && post_op.new_key == new_key)
                   {
-                    abort ("New key used for multiple operations: " + key_entry.id);
+                    abort ("New key used for multiple operations: " + new_key.id);
                   }
                 if (post_op.target_key_entry == target_key_entry)
                   {
                     ////////////////////////////////////////////////////////////////////////////////////////////////
                     // Multiple targeting of the same old key is OK but has restrictions
                     ////////////////////////////////////////////////////////////////////////////////////////////////
-                    if ((key_entry == null && upd_or_del) || (post_op.new_key == null && post_op.upd_or_del)) // pp_deleteKey
+                    if ((new_key == null && upd_or_del) || (post_op.new_key == null && post_op.upd_or_del)) // pp_deleteKey
                       {
                         abort ("Delete wasn't exclusive for key #" + target_key_entry.key_handle);
                       }
-                    else if (key_entry == null && post_op.new_key == null) // pp_unlockKey * 2
+                    else if (new_key == null && post_op.new_key == null) // pp_unlockKey * 2
                       {
                         abort ("Multiple unlocks of key #" + target_key_entry.key_handle);
                       }
@@ -784,8 +783,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ////////////////////////////////////////////////////////////////////////////////////////////////
             // We want pp_unlockKey keys to be first in the list so that PIN inherits works as specified
             ////////////////////////////////////////////////////////////////////////////////////////////////
-            post_provisioning_objects.add (key_entry == null ? 0 : post_provisioning_objects.size (),
-                                           new PostProvisioningObject (target_key_entry, key_entry, upd_or_del));
+            post_provisioning_objects.add (new_key == null ? 0 : post_provisioning_objects.size (),
+                                           new PostProvisioningObject (target_key_entry, new_key, upd_or_del));
           }
 
         public void rangeTest (byte value, byte low_limit, byte high_limit, String object_name) throws SKSException
@@ -1432,15 +1431,15 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     void addUpdateKeyOrCloneKeyProtection (int key_handle,
                                            int target_key_handle,
-                                           byte[] km_authentication,
+                                           byte[] authorization,
                                            byte[] mac,
                                            boolean update) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Get open key and associated provisioning session
         ///////////////////////////////////////////////////////////////////////////////////
-        KeyEntry key_entry = getOpenKey (key_handle);
-        Provisioning provisioning = key_entry.owner;
+        KeyEntry new_key = getOpenKey (key_handle);
+        Provisioning provisioning = new_key.owner;
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key to be updated/cloned
@@ -1450,11 +1449,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform some "sanity" tests
         ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.pin_policy != null || key_entry.device_pin_protected)
+        if (new_key.pin_policy != null || new_key.device_pin_protected)
           {
             provisioning.abort ("Update/clone keys cannot have PIN codes");
           }
-        if (target_key_entry.app_usage != key_entry.app_usage)
+        if (target_key_entry.app_usage != new_key.app_usage)
           {
             provisioning.abort ("Update/clone keys must have the same \"AppUsage\" as the target key");
           }
@@ -1472,18 +1471,18 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC and target key data
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = key_entry.getEECertMacBuilder (update ? METHOD_PP_UPDATE_KEY : METHOD_PP_CLONE_KEY_PROTECTION);
-        target_key_entry.validateTargetKeyReference (verifier, mac, km_authentication, provisioning);
+        MacBuilder verifier = new_key.getEECertMacBuilder (update ? METHOD_PP_UPDATE_KEY : METHOD_PP_CLONE_KEY_PROTECTION);
+        target_key_entry.validateTargetKeyReference (verifier, mac, authorization, provisioning);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the pp-op buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////
-        provisioning.addPostProvisioningObject (target_key_entry, key_entry, update);
+        provisioning.addPostProvisioningObject (target_key_entry, new_key, update);
       }
 
     void addUnlockKeyOrDeleteKey (int provisioning_handle,
                                   int target_key_handle,
-                                  byte[] km_authentication,
+                                  byte[] authorization,
                                   byte[] mac,
                                   boolean delete) throws SKSException
       {
@@ -1505,7 +1504,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Verify incoming MAC and target key data
         // /////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = provisioning.getMacBuilderForMethodCall (delete ? METHOD_PP_DELETE_KEY : METHOD_PP_UNLOCK_KEY);
-        target_key_entry.validateTargetKeyReference (verifier, mac, km_authentication, provisioning);
+        target_key_entry.validateTargetKeyReference (verifier, mac, authorization, provisioning);
 
         // /////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the pp-op buffer used by
@@ -2050,67 +2049,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                             pp_deleteKey                                   //
-    //                                                                            //
-    ////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public void pp_deleteKey (int provisioning_handle,
-                              int target_key_handle,
-                              byte[] km_authentication,
-                              byte[] mac) throws SKSException
-      {
-        addUnlockKeyOrDeleteKey (provisioning_handle, target_key_handle, km_authentication, mac, true);
-
-      }
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //                                                                            //
-    //                             pp_unlockKey                                   //
-    //                                                                            //
-    ////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public void pp_unlockKey (int provisioning_handle,
-                              int target_key_handle,
-                              byte[] km_authentication,
-                              byte[] mac) throws SKSException
-      {
-        addUnlockKeyOrDeleteKey (provisioning_handle, target_key_handle, km_authentication, mac, false);
-      }
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //                                                                            //
-    //                          pp_cloneKeyProtection                             //
-    //                                                                            //
-    ////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public void pp_cloneKeyProtection (int key_handle,
-                                       int target_key_handle,
-                                       byte[] km_authentication,
-                                       byte[] mac) throws SKSException
-      {
-        addUpdateKeyOrCloneKeyProtection (key_handle, target_key_handle, km_authentication, mac, false);
-      }
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //                                                                            //
-    //                               pp_updateKey                                 //
-    //                                                                            //
-    ////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public void pp_updateKey (int key_handle,
-                              int target_key_handle,
-                              byte[] km_authentication,
-                              byte[] mac) throws SKSException
-      {
-        addUpdateKeyOrCloneKeyProtection (key_handle, target_key_handle, km_authentication, mac, true);
-      }
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //                                                                            //
     //                              getDeviceInfo                                 //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
@@ -2268,6 +2206,140 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                   key_entry.certificate_path,
                                   key_entry.endorsed_algorithms,
                                   new HashSet<String> (key_entry.extensions.keySet ()));
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                       enumerateProvisioningSessions                        //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
+                                                                        boolean provisioning_state) throws SKSException
+      {
+        if (!eps.isValid ())
+          {
+            return getProvisioning (provisionings.values ().iterator (), provisioning_state);
+          }
+        Iterator<Provisioning> list = provisionings.values ().iterator ();
+        while (list.hasNext ())
+          {
+            if (list.next ().provisioning_handle == eps.getProvisioningHandle ())
+              {
+                return getProvisioning (list, provisioning_state);
+              }
+          }
+        return new EnumeratedProvisioningSession ();
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                      signProvisioningSessionData                           //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public byte[] signProvisioningSessionData (int provisioning_handle, byte[] data) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get provisioning session
+        ///////////////////////////////////////////////////////////////////////////////////
+        Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Sign (HMAC) data using a derived SessionKey
+        ///////////////////////////////////////////////////////////////////////////////////
+        return provisioning.getMacBuilder (KDF_EXTERNAL_SIGNATURE).addVerbatim (data).getResult ();
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                              getKeyHandle                                  //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public int getKeyHandle (int provisioning_handle, String id) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Get provisioning session
+        ///////////////////////////////////////////////////////////////////////////////////
+        Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Look for key with virtual ID
+        ///////////////////////////////////////////////////////////////////////////////////
+        for (KeyEntry key_entry : keys.values ())
+          {
+            if (key_entry.owner == provisioning && key_entry.id.equals (id))
+              {
+                return key_entry.key_handle;
+              }
+          }
+        provisioning.abort ("Key " + id + " missing");
+        return 0;    // For the compiler only...
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                             pp_deleteKey                                   //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void pp_deleteKey (int provisioning_handle,
+                              int target_key_handle,
+                              byte[] authorization,
+                              byte[] mac) throws SKSException
+      {
+        addUnlockKeyOrDeleteKey (provisioning_handle, target_key_handle, authorization, mac, true);
+
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                             pp_unlockKey                                   //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void pp_unlockKey (int provisioning_handle,
+                              int target_key_handle,
+                              byte[] authorization,
+                              byte[] mac) throws SKSException
+      {
+        addUnlockKeyOrDeleteKey (provisioning_handle, target_key_handle, authorization, mac, false);
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                          pp_cloneKeyProtection                             //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void pp_cloneKeyProtection (int key_handle,
+                                       int target_key_handle,
+                                       byte[] authorization,
+                                       byte[] mac) throws SKSException
+      {
+        addUpdateKeyOrCloneKeyProtection (key_handle, target_key_handle, authorization, mac, false);
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                               pp_updateKey                                 //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void pp_updateKey (int key_handle,
+                              int target_key_handle,
+                              byte[] authorization,
+                              byte[] mac) throws SKSException
+      {
+        addUpdateKeyOrCloneKeyProtection (key_handle, target_key_handle, authorization, mac, true);
       }
 
 
@@ -2600,79 +2672,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                         client_session_id,
                                         session_attestation,
                                         client_ephemeral_key);
-      }
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //                                                                            //
-    //                       enumerateProvisioningSessions                        //
-    //                                                                            //
-    ////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
-                                                                        boolean provisioning_state) throws SKSException
-      {
-        if (!eps.isValid ())
-          {
-            return getProvisioning (provisionings.values ().iterator (), provisioning_state);
-          }
-        Iterator<Provisioning> list = provisionings.values ().iterator ();
-        while (list.hasNext ())
-          {
-            if (list.next ().provisioning_handle == eps.getProvisioningHandle ())
-              {
-                return getProvisioning (list, provisioning_state);
-              }
-          }
-        return new EnumeratedProvisioningSession ();
-      }
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //                                                                            //
-    //                      signProvisioningSessionData                           //
-    //                                                                            //
-    ////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public byte[] signProvisioningSessionData (int provisioning_handle, byte[] data) throws SKSException
-      {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Get provisioning session
-        ///////////////////////////////////////////////////////////////////////////////////
-        Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Sign (HMAC) data using a derived SessionKey
-        ///////////////////////////////////////////////////////////////////////////////////
-        return provisioning.getMacBuilder (KDF_EXTERNAL_SIGNATURE).addVerbatim (data).getResult ();
-      }
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //                                                                            //
-    //                              getKeyHandle                                  //
-    //                                                                            //
-    ////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public int getKeyHandle (int provisioning_handle, String id) throws SKSException
-      {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Get provisioning session
-        ///////////////////////////////////////////////////////////////////////////////////
-        Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Look for key with virtual ID
-        ///////////////////////////////////////////////////////////////////////////////////
-        for (KeyEntry key_entry : keys.values ())
-          {
-            if (key_entry.owner == provisioning && key_entry.id.equals (id))
-              {
-                return key_entry.key_handle;
-              }
-          }
-        provisioning.abort ("Key " + id + " missing");
-        return 0;    // For the compiler only...
       }
 
 

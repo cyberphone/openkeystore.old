@@ -43,7 +43,7 @@ public interface ServerCryptoInterface
     
     public byte[] generateNonce () throws IOException, GeneralSecurityException;
 
-    public byte[] generateKMAuthentication (PublicKey key_management_key, byte[] data) throws IOException, GeneralSecurityException;
+    public byte[] generateKeyManagementAuthorization (PublicKey key_management_key, byte[] data) throws IOException, GeneralSecurityException;
     
     public PublicKey[] enumerateKeyManagementKeys () throws IOException, GeneralSecurityException;
   }

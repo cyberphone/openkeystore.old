@@ -119,22 +119,22 @@ public interface SecureKeyStore
 
     public void pp_deleteKey (int provisioning_handle,
                               int target_key_handle,
-                              byte[] km_authentication,
+                              byte[] authorization,
                               byte[] mac) throws SKSException;
 
     public void pp_unlockKey (int provisioning_handle,
                               int target_key_handle,
-                              byte[] km_authentication,
+                              byte[] authorization,
                               byte[] mac) throws SKSException;
 
     public void pp_updateKey (int key_handle,
                               int target_key_handle,
-                              byte[] km_authentication,
+                              byte[] authorization,
                               byte[] mac) throws SKSException;
 
     public void pp_cloneKeyProtection (int key_handle,
                                        int target_key_handle,
-                                       byte[] km_authentication,
+                                       byte[] authorization,
                                        byte[] mac) throws SKSException;
 
     ///////////////////////////////////////////////////////////////////////////////////

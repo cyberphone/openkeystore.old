@@ -302,19 +302,19 @@ public class KeyGen2Test
                         switch (post_operation.getPostOperation ())
                           {
                             case CredentialDeploymentRequestDecoder.PostOperation.CLONE_KEY_PROTECTION:
-                              sks.pp_cloneKeyProtection (handle, ek.getKeyHandle (), post_operation.getKMAuthentication (), post_operation.getMAC ());
+                              sks.pp_cloneKeyProtection (handle, ek.getKeyHandle (), post_operation.getAuthorization (), post_operation.getMAC ());
                               break;
 
                             case CredentialDeploymentRequestDecoder.PostOperation.UPDATE_KEY:
-                              sks.pp_updateKey (handle, ek.getKeyHandle (),  post_operation.getKMAuthentication (), post_operation.getMAC ());
+                              sks.pp_updateKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMAC ());
                               break;
 
                             case CredentialDeploymentRequestDecoder.PostOperation.UNLOCK_KEY:
-                              sks.pp_unlockKey (handle, ek.getKeyHandle (),  post_operation.getKMAuthentication (), post_operation.getMAC ());
+                              sks.pp_unlockKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMAC ());
                               break;
 
                             default:
-                              sks.pp_deleteKey (handle, ek.getKeyHandle (), post_operation.getKMAuthentication (), post_operation.getMAC ());
+                              sks.pp_deleteKey (handle, ek.getKeyHandle (), post_operation.getAuthorization (), post_operation.getMAC ());
                           }
                         return;
                       }
@@ -778,7 +778,7 @@ public class KeyGen2Test
               }
 
             @Override
-            public byte[] generateKMAuthentication (PublicKey key_management__key, byte[] data) throws IOException, GeneralSecurityException
+            public byte[] generateKeyManagementAuthorization (PublicKey key_management__key, byte[] data) throws IOException, GeneralSecurityException
               {
                 Signature km_sign = Signature.getInstance (key_management__key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA", "BC");
                 km_sign.initSign (key_management_keys.get (key_management__key));

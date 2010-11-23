@@ -103,7 +103,7 @@ public interface KeyGen2Constants
 
     String KEY_ATTESTATION_ALGORITHM_ATTR      = "KeyAttestationAlgorithm";
 
-    String KM_AUTHENTICATION_ATTR              = "KMAuthentication";
+    String AUTHORIZATION_ATTR                  = "Authorization";
 
     String KEY_ATTESTATION_ATTR                = "KeyAttestation";
 

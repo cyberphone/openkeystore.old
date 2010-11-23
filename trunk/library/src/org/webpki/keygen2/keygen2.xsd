@@ -1244,8 +1244,8 @@
             <!-- Mandatory MAC (Message Authentication Code) -->
             <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
-            <!-- KMAuthentication -->
-            <xs:attribute name="KMAuthentication" type="xs:base64Binary" use="required"/>
+            <!-- Authorization -->
+            <xs:attribute name="Authorization" type="xs:base64Binary" use="required"/>
 
          </xs:extension>
 

@@ -237,7 +237,7 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         @Override
         public byte[] signData (byte[] data, SignatureAlgorithms algorithm) throws IOException, GeneralSecurityException
           {
-            return server_crypto_interface.generateKMAuthentication (key_management_key, data);
+            return server_crypto_interface.generateKeyManagementAuthorization (key_management_key, data);
           }
       }
 
