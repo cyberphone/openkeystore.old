@@ -1439,7 +1439,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
       {
         if (protection >= min_protection_val && protection <= EXPORT_DELETE_PROTECTION_PUK)
           {
-            provisioning.abort ("Protection object lacks a PIN or PUK object", SKSException.ERROR_NOT_ALLOWED);
+            provisioning.abort ("Protection object lacks a PIN or PUK object");
           }
       }
 
