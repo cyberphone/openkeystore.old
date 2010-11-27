@@ -173,10 +173,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "ExportProtection" and "DeleteProtection" share constants (and code...)
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte EXPORT_DELETE_PROTECTION_NONE            = 0x00;
-    static final byte EXPORT_DELETE_PROTECTION_PIN             = 0x01;
-    static final byte EXPORT_DELETE_PROTECTION_PUK             = 0x02;
-    static final byte EXPORT_DELETE_PROTECTION_NOT_ALLOWED     = 0x03;
+    static final byte EXPORT_DELETE_PROTECTION_NONE        = 0x00;
+    static final byte EXPORT_DELETE_PROTECTION_PIN         = 0x01;
+    static final byte EXPORT_DELETE_PROTECTION_PUK         = 0x02;
+    static final byte EXPORT_DELETE_PROTECTION_NOT_ALLOWED = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "InputMethod" constants
