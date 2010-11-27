@@ -1732,7 +1732,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Policy object lacks a PIN or PUK object");
+            checkException (e, "Protection object lacks a PIN or PUK object");
           }
       }
 
@@ -1793,15 +1793,15 @@ public class SKSTest
         try
           {
              sess.createRSAKey ("Key.1",
-                                        1024,
-                                        ok_pin /* pin_value */,
-                                        pin_policy /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                1024,
+                                ok_pin /* pin_value */,
+                                pin_policy /* pin_policy */,
+                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
             fail ("No PUK");
           }
         catch (SKSException e)
           {
-            checkException (e, "Policy object lacks a PIN or PUK object");
+            checkException (e, "Protection object lacks a PIN or PUK object");
           }
       }
 

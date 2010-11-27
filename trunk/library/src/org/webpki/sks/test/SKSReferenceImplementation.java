@@ -173,10 +173,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "ExportProtection" and "DeleteProtection" share constants (and code...)
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte EXPORT_DELETE_POLICY_NONE            = 0x00;
-    static final byte EXPORT_DELETE_POLICY_PIN             = 0x01;
-    static final byte EXPORT_DELETE_POLICY_PUK             = 0x02;
-    static final byte EXPORT_DELETE_POLICY_NOT_ALLOWED     = 0x03;
+    static final byte EXPORT_DELETE_PROTECTION_NONE            = 0x00;
+    static final byte EXPORT_DELETE_PROTECTION_PIN             = 0x01;
+    static final byte EXPORT_DELETE_PROTECTION_PUK             = 0x02;
+    static final byte EXPORT_DELETE_PROTECTION_NOT_ALLOWED     = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "InputMethod" constants
@@ -501,15 +501,15 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             switch (policy)
               {
-                case EXPORT_DELETE_POLICY_PIN:
+                case EXPORT_DELETE_PROTECTION_PIN:
                   verifyPIN (authorization);
                   return;
                   
-                case EXPORT_DELETE_POLICY_PUK:
+                case EXPORT_DELETE_PROTECTION_PUK:
                   verifyPUK (authorization);
                   return;
 
-                case EXPORT_DELETE_POLICY_NOT_ALLOWED:
+                case EXPORT_DELETE_PROTECTION_NOT_ALLOWED:
                   abort ("Operation not allowed on key #" + key_handle, SKSException.ERROR_NOT_ALLOWED);
               }
             if (authorization != null)
@@ -1435,11 +1435,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         return alg;
       }
 
-    void verifyExportDeletePolicy (byte policy, byte min_policy_val, Provisioning provisioning) throws SKSException
+    void verifyExportDeleteProtection (byte protection, byte min_protection_val, Provisioning provisioning) throws SKSException
       {
-        if (policy >= min_policy_val && policy <= EXPORT_DELETE_POLICY_PUK)
+        if (protection >= min_protection_val && protection <= EXPORT_DELETE_PROTECTION_PUK)
           {
-            provisioning.abort ("Policy object lacks a PIN or PUK object", SKSException.ERROR_NOT_ALLOWED);
+            provisioning.abort ("Protection object lacks a PIN or PUK object", SKSException.ERROR_NOT_ALLOWED);
           }
       }
 
@@ -2963,8 +2963,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
           }
-        provisioning.rangeTest (export_protection, EXPORT_DELETE_POLICY_NONE, EXPORT_DELETE_POLICY_NOT_ALLOWED, "ExportProtection");
-        provisioning.rangeTest (delete_protection, EXPORT_DELETE_POLICY_NONE, EXPORT_DELETE_POLICY_NOT_ALLOWED, "DeleteProtection");
+        provisioning.rangeTest (export_protection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, "ExportProtection");
+        provisioning.rangeTest (delete_protection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, "DeleteProtection");
         provisioning.rangeTest (app_usage, APP_USAGE_SIGNATURE, APP_USAGE_UNIVERSAL, "AppUsage");
         provisioning.rangeTest (biometric_protection, BIOMETRIC_PROTECTION_NONE, BIOMETRIC_PROTECTION_EXCLUSIVE, "BiometricProtection");
 
@@ -3060,20 +3060,20 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Certain policy attributes require PIN objects
+            // Certain protection attributes require PIN objects
             ///////////////////////////////////////////////////////////////////////////////////
-            verifyExportDeletePolicy (delete_protection, EXPORT_DELETE_POLICY_PIN, provisioning);
-            verifyExportDeletePolicy (export_protection, EXPORT_DELETE_POLICY_PIN, provisioning);
+            verifyExportDeleteProtection (delete_protection, EXPORT_DELETE_PROTECTION_PIN, provisioning);
+            verifyExportDeleteProtection (export_protection, EXPORT_DELETE_PROTECTION_PIN, provisioning);
           }
         else
           {
             ///////////////////////////////////////////////////////////////////////////////////
-            // Certain policy attributes require PUK objects
+            // Certain protection attributes require PUK objects
             ///////////////////////////////////////////////////////////////////////////////////
             if (pin_policy.puk_policy == null)
               {
-                verifyExportDeletePolicy (delete_protection, EXPORT_DELETE_POLICY_PUK, provisioning);
-                verifyExportDeletePolicy (export_protection, EXPORT_DELETE_POLICY_PUK, provisioning);
+                verifyExportDeleteProtection (delete_protection, EXPORT_DELETE_PROTECTION_PUK, provisioning);
+                verifyExportDeleteProtection (export_protection, EXPORT_DELETE_PROTECTION_PUK, provisioning);
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
