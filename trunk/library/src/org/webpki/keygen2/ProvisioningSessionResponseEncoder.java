@@ -47,7 +47,7 @@ public class ProvisioningSessionResponseEncoder extends ProvisioningSessionRespo
                                                String client_session_id,
                                                Date server_time,
                                                Date client_time,
-                                               byte[] session_attestation,
+                                               byte[] attestation,
                                                X509Certificate[] device_certificate_path)  throws IOException
       {
         super.client_ephemeral_key = client_ephemeral_key;
@@ -55,7 +55,7 @@ public class ProvisioningSessionResponseEncoder extends ProvisioningSessionRespo
         super.client_session_id = client_session_id;
         super.server_time = server_time;
         super.client_time = client_time;
-        super.session_attestation = session_attestation;
+        super.attestation = attestation;
         super.device_certificate_path = device_certificate_path;
       }
 
@@ -101,7 +101,7 @@ public class ProvisioningSessionResponseEncoder extends ProvisioningSessionRespo
 
         wr.setDateTimeAttribute (CLIENT_TIME_ATTR, client_time);
         
-        wr.setBinaryAttribute (SESSION_ATTESTATION_ATTR, session_attestation);
+        wr.setBinaryAttribute (ATTESTATION_ATTR, attestation);
 
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key

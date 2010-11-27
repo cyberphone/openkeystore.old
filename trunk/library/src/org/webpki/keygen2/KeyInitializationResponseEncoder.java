@@ -122,7 +122,7 @@ public class KeyInitializationResponseEncoder extends KeyInitializationResponse
           {
             wr.addChildElement (PUBLIC_KEY_ELEM);
             wr.setStringAttribute (ID_ATTR, gk.id);
-            wr.setBinaryAttribute (KEY_ATTESTATION_ATTR, gk.key_attestation);
+            wr.setBinaryAttribute (ATTESTATION_ATTR, gk.key_attestation);
             XMLSignatureWrapper.writePublicKey (wr, gk.public_key);
             if (gk.encrypted_private_key != null)
               {

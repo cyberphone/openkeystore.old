@@ -357,10 +357,10 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             biometric_protection = BiometricProtection.getBiometricProtectionFromString (ah.getStringConditional (BIOMETRIC_PROTECTION_ATTR, 
                                                                                          BiometricProtection.NONE.getXMLName ()));
 
-            delete_policy = DeletePolicy.getDeletePolicyFromString (ah.getStringConditional (DELETE_POLICY_ATTR, 
-                                                                    DeletePolicy.NONE.getXMLName ()));
-            export_policy = ExportPolicy.getExportPolicyFromString (ah.getStringConditional (EXPORT_POLICY_ATTR, 
-                                                                    ExportPolicy.NON_EXPORTABLE.getXMLName ()));
+            delete_protection = DeleteProtection.getDeletePolicyFromString (ah.getStringConditional (DELETE_PROTECTION_ATTR, 
+                                                                            DeleteProtection.NONE.getXMLName ()));
+            export_protection = ExportProtection.getExportPolicyFromString (ah.getStringConditional (EXPORT_PROTECTION_ATTR, 
+                                                                            ExportProtection.NON_EXPORTABLE.getXMLName ()));
 
             rd.getChild ();
 
@@ -463,19 +463,19 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
         
 
-        ExportPolicy export_policy;
+        ExportProtection export_protection;
         
-        public ExportPolicy getExportPolicy ()
+        public ExportProtection getExportProtection ()
           {
-            return export_policy;
+            return export_protection;
           }
 
         
-        DeletePolicy delete_policy;
+        DeleteProtection delete_protection;
         
-        public DeletePolicy getDeletePolicy ()
+        public DeleteProtection getDeleteProtection ()
           {
-            return delete_policy;
+            return delete_protection;
           }
 
         
@@ -681,9 +681,9 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
               {
                 readPINPolicy (rd, false, null);
               }
-            else if (rd.hasNext (DEVICE_PIN_ELEM))
+            else if (rd.hasNext (DEVICE_PIN_PROTECTION_ELEM))
               {
-                rd.getNext (DEVICE_PIN_ELEM);
+                rd.getNext (DEVICE_PIN_PROTECTION_ELEM);
                 rd.getChild ();
                 readKeyProperties (rd, true);
                 rd.getParent ();

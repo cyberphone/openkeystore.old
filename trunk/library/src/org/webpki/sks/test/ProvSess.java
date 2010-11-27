@@ -54,8 +54,8 @@ import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.keygen2.APIDescriptors;
 import org.webpki.keygen2.BiometricProtection;
 import org.webpki.keygen2.CryptoConstants;
-import org.webpki.keygen2.DeletePolicy;
-import org.webpki.keygen2.ExportPolicy;
+import org.webpki.keygen2.DeleteProtection;
+import org.webpki.keygen2.ExportProtection;
 import org.webpki.keygen2.InputMethod;
 import org.webpki.keygen2.KeyAlgorithmData;
 import org.webpki.keygen2.KeyGen2URIs;
@@ -230,9 +230,9 @@ public class ProvSess
     
     Device device;
     
-    boolean override_export_policy;
+    boolean override_export_protection;
     
-    byte overriden_export_policy;
+    byte overriden_export_protection;
     
     boolean user_defined_pins = true;
     
@@ -398,7 +398,7 @@ public class ProvSess
                                                         kdf.getResult (),
                                                         session_key_mac_data.getResult (),
                                                         device.device_info.getDeviceCertificatePath ()[0],
-                                                        sess.getSessionAttestation ());
+                                                        sess.getAttestation ());
      }
     
     public ProvSess (Device device) throws GeneralSecurityException, IOException
@@ -428,7 +428,7 @@ public class ProvSess
         byte[] result = sks.closeProvisioningSession (provisioning_handle,
                                                       nonce,
                                                       close_mac = mac (close.getResult (),
-                                                           APIDescriptors.CLOSE_PROVISIONING_SESSION));
+                                                      APIDescriptors.CLOSE_PROVISIONING_SESSION));
         MacGenerator check = new MacGenerator ();
         check.addArray (close_mac);
         check.addString (KeyGen2URIs.ALGORITHMS.SESSION_KEY_1);
@@ -444,10 +444,10 @@ public class ProvSess
       }
     
     
-    public void overrideExportPolicy (byte export_policy)
+    public void overrideExportProtection (byte export_policy)
       {
-        override_export_policy = true;
-        overriden_export_policy = export_policy;
+        override_export_protection = true;
+        overriden_export_protection = export_policy;
       }
     
     public void makePINsServerDefined ()
@@ -563,8 +563,8 @@ public class ProvSess
                           pin_value,
                           BiometricProtection.NONE /* biometric_protection */,
                           false /* boolean private_key_backup */,
-                          ExportPolicy.NON_EXPORTABLE /* export_policy */,
-                          DeletePolicy.NONE /* delete_policy */,
+                          ExportProtection.NON_EXPORTABLE /* export_policy */,
+                          DeleteProtection.NONE /* delete_policy */,
                           false /* enable_pin_caching */,
                           key_usage,
                           "" /* friendly_name */,
@@ -595,8 +595,8 @@ public class ProvSess
                           pin_value,
                           BiometricProtection.NONE /* biometric_protection */,
                           false /* boolean private_key_backup */,
-                          ExportPolicy.NON_EXPORTABLE /* export_policy */,
-                          DeletePolicy.NONE /* delete_policy */,
+                          ExportProtection.NON_EXPORTABLE /* export_policy */,
+                          DeleteProtection.NONE /* delete_policy */,
                           false /* enable_pin_caching */,
                           key_usage,
                           "" /* friendly_name */,
@@ -611,8 +611,8 @@ public class ProvSess
                              String pin_value,
                              BiometricProtection biometric_protection,
                              boolean private_key_backup,
-                             ExportPolicy export_policy,
-                             DeletePolicy delete_policy,
+                             ExportProtection export_protection,
+                             DeleteProtection delete_protection,
                              boolean enable_pin_caching,
                              AppUsage key_usage,
                              String friendly_name,
@@ -620,7 +620,7 @@ public class ProvSess
                              String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
       {
         String[] sorted_algorithms = endorsed_algorithms == null ? new String[0] : getSortedAlgorithms (endorsed_algorithms);
-        byte actual_export_policy = override_export_policy ? overriden_export_policy : export_policy.getSKSValue ();
+        byte actual_export_policy = override_export_protection ? overriden_export_protection : export_protection.getSKSValue ();
         MacGenerator key_pair_mac = new MacGenerator ();
         key_pair_mac.addString (id);
         key_pair_mac.addString (attestation_algorithm);
@@ -649,7 +649,7 @@ public class ProvSess
         key_pair_mac.addByte (biometric_protection.getSKSValue ());
         key_pair_mac.addBool (private_key_backup);
         key_pair_mac.addByte (actual_export_policy);
-        key_pair_mac.addByte (delete_policy.getSKSValue ());
+        key_pair_mac.addByte (delete_protection.getSKSValue ());
         key_pair_mac.addBool (enable_pin_caching);
         key_pair_mac.addByte (key_usage.getSKSValue ());
         key_pair_mac.addString (friendly_name);
@@ -678,7 +678,7 @@ public class ProvSess
                                               biometric_protection.getSKSValue (), 
                                               private_key_backup, 
                                               actual_export_policy, 
-                                              delete_policy.getSKSValue (), 
+                                              delete_protection.getSKSValue (), 
                                               enable_pin_caching, 
                                               key_usage.getSKSValue (), 
                                               friendly_name, 
@@ -693,7 +693,7 @@ public class ProvSess
             key_attestation.addArray (key_pair.getPrivateKey ());
             verifyPrivateKeyBackup (key_pair.getPrivateKey (), key_pair.getPublicKey ());
             }
-         if (!ArrayUtil.compare (attest (key_attestation.getResult ()), key_pair.getKeyAttestation ()))
+         if (!ArrayUtil.compare (attest (key_attestation.getResult ()), key_pair.getAttestation ()))
            {
              bad ("Failed key attest");
            }

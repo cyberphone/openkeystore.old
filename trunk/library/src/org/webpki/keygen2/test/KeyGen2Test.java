@@ -91,8 +91,8 @@ import org.webpki.keygen2.CredentialDiscoveryRequestEncoder;
 import org.webpki.keygen2.CredentialDiscoveryResponseDecoder;
 import org.webpki.keygen2.CredentialDiscoveryResponseEncoder;
 import org.webpki.keygen2.CryptoConstants;
-import org.webpki.keygen2.DeletePolicy;
-import org.webpki.keygen2.ExportPolicy;
+import org.webpki.keygen2.DeleteProtection;
+import org.webpki.keygen2.ExportProtection;
 import org.webpki.keygen2.InputMethod;
 import org.webpki.keygen2.KeyGen2URIs;
 import org.webpki.keygen2.KeyInitializationResponseDecoder;
@@ -165,7 +165,7 @@ public class KeyGen2Test
     
     Server plain_unlock_key;
     
-    boolean device_pin;
+    boolean device_pin_protection;
     
     boolean pin_group_shared;
     
@@ -183,9 +183,9 @@ public class KeyGen2Test
     
     boolean ask_for_4096;
     
-    ExportPolicy export_policy;
+    ExportProtection export_protection;
     
-    DeletePolicy delete_policy;
+    DeleteProtection delete_protection;
     
     InputMethod input_method;
     
@@ -381,7 +381,7 @@ public class KeyGen2Test
                                                           sess.getClientSessionID (),
                                                           prov_sess_req.getServerTime (),
                                                           client_time,
-                                                          sess.getSessionAttestation (),
+                                                          sess.getAttestation (),
                                                           device_info.getDeviceCertificatePath ());
             prov_sess_response.signRequest (new SymKeySignerInterface ()
               {
@@ -502,8 +502,8 @@ public class KeyGen2Test
                                                  pin_value,
                                                  key.getBiometricProtection ().getSKSValue (),
                                                  key.getPrivateKeyBackupFlag (),
-                                                 key.getExportPolicy ().getSKSValue (),
-                                                 key.getDeletePolicy ().getSKSValue (),
+                                                 key.getExportProtection ().getSKSValue (),
+                                                 key.getDeleteProtection ().getSKSValue (),
                                                  key.getEnablePINCachingFlag (),
                                                  key.getAppUsage ().getSKSValue (),
                                                  key.getFriendlyName (),
@@ -511,7 +511,7 @@ public class KeyGen2Test
                                                  key.getEndorsedAlgorithms (),
                                                  key.getMAC ());
                 key_init_response.addPublicKey (kpr.getPublicKey (),
-                                                kpr.getKeyAttestation (),
+                                                kpr.getAttestation (),
                                                 key.getID (),
                                                 kpr.getPrivateKey ());
               }
@@ -639,6 +639,10 @@ public class KeyGen2Test
         static final String CRE_DISC_URL = "http://issuer.example.com/credisc";
 
         static final String LOGO_URL = "http://issuer.example.com/images/logo.png";
+        static final String LOGO_MIME = "image/png";
+        byte[] LOGO_SHA256 = {0,5,6,6,0,5,6,6,0,5,6,6,0,5,6,6,0,5,6,6,0,5,6,6,0,5,6,6,0,5,6,6}; 
+        static final int LOGO_WIDTH = 200;
+        static final int LOGO_HEIGHT = 150;
         
         XMLSchemaCache server_xml_cache;
         
@@ -849,9 +853,8 @@ public class KeyGen2Test
         byte[] platformRequest () throws IOException, GeneralSecurityException
           {
             server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
-            platform_request =  new PlatformNegotiationRequestEncoder (server_session_id,
-                                                                       PLATFORM_URI);
-            platform_request.addLogotype (LOGO_URL, "image/png", new byte[]{0,5,6,6}, 200, 150);
+            platform_request =  new PlatformNegotiationRequestEncoder (server_session_id, PLATFORM_URI);
+            platform_request.addLogotype (LOGO_URL, LOGO_MIME, LOGO_SHA256, LOGO_WIDTH, LOGO_HEIGHT);
             if (ask_for_4096)
               {
                 platform_request.getBasicCapabilities ().addRSAKeySize ((short)4096).addRSAKeySize ((short)2048);
@@ -950,7 +953,7 @@ public class KeyGen2Test
             ServerCredentialStore.KeyAlgorithmData key_alg =  ecc_key ?
                  new ServerCredentialStore.KeyAlgorithmData.EC (ECDomains.P_256) : new ServerCredentialStore.KeyAlgorithmData.RSA (2048);
 
-            ServerCredentialStore.KeyProperties kp = device_pin ?
+            ServerCredentialStore.KeyProperties kp = device_pin_protection ?
                 server_credential_store.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
                   preset_pin ? server_credential_store.createKeyWithPresetPIN (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                                                key_alg, pin_policy,
@@ -982,13 +985,13 @@ public class KeyGen2Test
               {
                 kp.setPrivateKeyBackup (true);
               }
-            if (export_policy != null)
+            if (export_protection != null)
               {
-                kp.setExportPolicy (export_policy);
+                kp.setExportProtection (export_protection);
               }
-            if (delete_policy != null)
+            if (delete_protection != null)
               {
-                kp.setDeletePolicy (delete_policy);
+                kp.setDeleteProtection (delete_protection);
               }
             if (server_seed)
               {
@@ -1237,7 +1240,7 @@ public class KeyGen2Test
             writeOption ("PUK Protection", puk_protection);
             writeOption ("PIN Protection ", pin_protection);
             writeOption ("PIN Input Method ", input_method != null);
-            writeOption ("Device PIN", device_pin);
+            writeOption ("Device PIN", device_pin_protection);
             writeOption ("Preset PIN", preset_pin);
             writeOption ("PIN patterns", add_pin_pattern);
             writeOption ("ECC Key", ecc_key);
@@ -1247,8 +1250,8 @@ public class KeyGen2Test
             writeOption ("Encryption Key", encryption_key);
             writeOption ("Encrypted Extension", encrypted_extension);
             writeOption ("Private Key Backup", private_key_backup);
-            writeOption ("Delete Policy", delete_policy != null);
-            writeOption ("Export Policy", export_policy != null);
+            writeOption ("Delete Protection", delete_protection != null);
+            writeOption ("Export Protection", export_protection != null);
             writeOption ("Private Key Restore", set_private_key);
             writeOption ("Updatable session", updatable);
             writeOption ("CloneKeyProtection", clone_key_protection != null);
@@ -1447,7 +1450,7 @@ public class KeyGen2Test
     public void test10 () throws Exception
       {
         Doer doer = new Doer ();
-        device_pin = true;
+        device_pin_protection = true;
         doer.perform ();
       }
 
@@ -1589,15 +1592,15 @@ public class KeyGen2Test
     @Test
     public void test16 () throws Exception
       {
-        for (ExportPolicy exp_pol : ExportPolicy.values ())
+        for (ExportProtection exp_pol : ExportProtection.values ())
           {
             Doer doer = new Doer ();
-            export_policy = exp_pol;
-            if (exp_pol == ExportPolicy.PIN || exp_pol == ExportPolicy.PUK)
+            export_protection = exp_pol;
+            if (exp_pol == ExportProtection.PIN || exp_pol == ExportProtection.PUK)
               {
                 pin_protection = true;
               }
-            if (exp_pol == ExportPolicy.PUK)
+            if (exp_pol == ExportProtection.PUK)
               {
                 puk_protection = true;
               }
@@ -1609,18 +1612,18 @@ public class KeyGen2Test
     @Test
     public void test17 () throws Exception
       {
-        for (DeletePolicy del_pol : DeletePolicy.values ())
+        for (DeleteProtection del_pol : DeleteProtection.values ())
           {
             Doer doer = new Doer ();
-            if (del_pol == DeletePolicy.PIN || del_pol == DeletePolicy.PUK)
+            if (del_pol == DeleteProtection.PIN || del_pol == DeleteProtection.PUK)
               {
                 pin_protection = true;
               }
-            if (del_pol == DeletePolicy.PUK)
+            if (del_pol == DeleteProtection.PUK)
               {
                 puk_protection = true;
               }
-            delete_policy = del_pol;
+            delete_protection = del_pol;
             ecc_key = true;
             doer.perform ();
           }

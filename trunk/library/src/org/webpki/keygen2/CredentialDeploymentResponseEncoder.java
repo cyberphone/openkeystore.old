@@ -34,19 +34,18 @@ public class CredentialDeploymentResponseEncoder extends CredentialDeploymentRes
 
     ServerCookie server_cookie;
     
-    byte[] close_session_attestation;
+    byte[] attestation;
 
     String prefix;
 
 
     // Constructors
 
-    public CredentialDeploymentResponseEncoder (CredentialDeploymentRequestDecoder cre_dep_dec,
-                                                byte[] close_session_attestation)
+    public CredentialDeploymentResponseEncoder (CredentialDeploymentRequestDecoder cre_dep_dec, byte[] attestation)
       {
         client_session_id = cre_dep_dec.getClientSessionID ();
         server_session_id = cre_dep_dec.getServerSessionID ();
-        this.close_session_attestation = close_session_attestation;
+        this.attestation = attestation;
       }
 
 
@@ -73,7 +72,7 @@ public class CredentialDeploymentResponseEncoder extends CredentialDeploymentRes
 
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
 
-        wr.setBinaryAttribute (SESSION_ATTESTATION_ATTR, close_session_attestation);
+        wr.setBinaryAttribute (ATTESTATION_ATTR, attestation);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional ServerCookie

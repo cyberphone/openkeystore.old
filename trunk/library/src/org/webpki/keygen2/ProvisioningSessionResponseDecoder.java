@@ -79,9 +79,9 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
       }
 
 
-    public byte[] getSessionAttestation ()
+    public byte[] getAttestation ()
       {
-        return session_attestation;
+        return attestation;
       }
 
 
@@ -132,7 +132,7 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
                                                                 kdf.getResult (),
                                                                 session_key_mac_data.getResult (),
                                                                 device_certificate_path[0],
-                                                                session_attestation);
+                                                                attestation);
           }
         catch (GeneralSecurityException e)
           {
@@ -158,7 +158,7 @@ public class ProvisioningSessionResponseDecoder extends ProvisioningSessionRespo
 
         client_time = ah.getDateTime (CLIENT_TIME_ATTR).getTime ();
 
-        session_attestation = ah.getBinary (SESSION_ATTESTATION_ATTR);
+        attestation = ah.getBinary (ATTESTATION_ATTR);
         
         rd.getChild ();
 

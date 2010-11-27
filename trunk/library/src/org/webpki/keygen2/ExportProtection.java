@@ -18,17 +18,18 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-public enum DeletePolicy
+public enum ExportProtection
   {
-    NONE       ("none", (byte)0x00),
-    PIN        ("pin",  (byte)0x01),
-    PUK        ("puk",  (byte)0x02);
+    NONE               ("none",           (byte)0x00),
+    PIN                ("pin",            (byte)0x01),
+    PUK                ("puk",            (byte)0x02),
+    NON_EXPORTABLE     ("non-exportable", (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
     
     private final byte sks_value;        // As expressed in SKS
 
-    private DeletePolicy (String xml_name, byte sks_value)
+    private ExportProtection (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
@@ -47,16 +48,16 @@ public enum DeletePolicy
       }
 
 
-    public static DeletePolicy getDeletePolicyFromString (String xml_name) throws IOException
+    public static ExportProtection getExportPolicyFromString (String xml_name) throws IOException
       {
-        for (DeletePolicy del_pol : DeletePolicy.values ())
+        for (ExportProtection exp_pol : ExportProtection.values ())
           {
-            if (xml_name.equals (del_pol.xml_name))
+            if (xml_name.equals (exp_pol.xml_name))
               {
-                return del_pol;
+                return exp_pol;
               }
           }
-        throw new IOException ("Unknown delete policy: " + xml_name);
+        throw new IOException ("Unknown export policy: " + xml_name);
       }
 
   }

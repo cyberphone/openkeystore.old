@@ -171,12 +171,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final byte SUB_TYPE_LOGOTYPE                    = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
-    // "ExportPolicy" and "DeletePolicy" share constants (and code...)
+    // "ExportProtection" and "DeleteProtection" share constants (and code...)
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final byte EXPORT_DELETE_POLICY_NONE            = 0x00;
     static final byte EXPORT_DELETE_POLICY_PIN             = 0x01;
     static final byte EXPORT_DELETE_POLICY_PUK             = 0x02;
-    static final byte EXPORT_POLICY_NON_EXPORTABLE         = 0x04;
+    static final byte EXPORT_DELETE_POLICY_NOT_ALLOWED     = 0x03;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // "InputMethod" constants
@@ -315,7 +315,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         String friendly_name;
 
-        boolean device_pin_protected;
+        boolean device_pin_protection;
 
         byte[] pin_value;
         short error_count;
@@ -323,8 +323,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         boolean enable_pin_caching;
         
         byte biometric_protection;
-        byte export_policy;
-        byte delete_policy;
+        byte export_protection;
+        byte delete_protection;
         
         boolean private_key_backup;
 
@@ -403,7 +403,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             if (pin_policy == null)
               {
-                if (device_pin_protected)
+                if (device_pin_protection)
                   {
                     ///////////////////////////////////////////////////////////////////////////////////
                     // Only for testing purposes.  Device PINs are out-of-scope for the SKS API
@@ -499,15 +499,20 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         void authorizeExportOrDeleteOperation (byte policy, byte[] authorization) throws SKSException
           {
-            if (policy == EXPORT_DELETE_POLICY_PIN)
+            switch (policy)
               {
-                verifyPIN (authorization);
+                case EXPORT_DELETE_POLICY_PIN:
+                  verifyPIN (authorization);
+                  return;
+                  
+                case EXPORT_DELETE_POLICY_PUK:
+                  verifyPUK (authorization);
+                  return;
+
+                case EXPORT_DELETE_POLICY_NOT_ALLOWED:
+                  abort ("Operation not allowed on key #" + key_handle, SKSException.ERROR_NOT_ALLOWED);
               }
-            else if (policy == EXPORT_DELETE_POLICY_PUK)
-              {
-                verifyPUK (authorization);
-              }
-            else if (authorization != null)
+            if (authorization != null)
               {
                 abort ("Redundant authorization information for key #" + key_handle);
               }
@@ -924,9 +929,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final int ALG_HASH_160 = 0x014000;
     static final int ALG_HASH_256 = 0x020000;
     static final int ALG_HASH_DIV = 0x001000;
-    static final int ALG_NONE     = 0x040000;
-    static final int ALG_ASYM_KA  = 0x080000;
-    static final int ALG_AES_PAD  = 0x100000;
+    static final int ALG_HASH_MSK = 0x00007F;
+    static final int ALG_NONE     = 0x080000;
+    static final int ALG_ASYM_KA  = 0x100000;
+    static final int ALG_AES_PAD  = 0x200000;
 
     static final String ALGORITHM_KEY_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
 
@@ -1313,7 +1319,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
       {
         if (key_entry.pin_policy == null)
           {
-            if (key_entry.device_pin_protected)
+            if (key_entry.device_pin_protection)
               {
                 abort ("Key #" + key_entry.key_handle + " is device PIN protected");
               }
@@ -1429,6 +1435,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         return alg;
       }
 
+    void verifyExportDeletePolicy (byte policy, byte min_policy_val, Provisioning provisioning) throws SKSException
+      {
+        if (policy >= min_policy_val && policy <= EXPORT_DELETE_POLICY_PUK)
+          {
+            provisioning.abort ("Policy object lacks a PIN or PUK object", SKSException.ERROR_NOT_ALLOWED);
+          }
+      }
+
     void addUpdateKeyOrCloneKeyProtection (int key_handle,
                                            int target_key_handle,
                                            byte[] authorization,
@@ -1449,7 +1463,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform some "sanity" tests
         ///////////////////////////////////////////////////////////////////////////////////
-        if (new_key.pin_policy != null || new_key.device_pin_protected)
+        if (new_key.pin_policy != null || new_key.device_pin_protection)
           {
             provisioning.abort ("Update/clone keys cannot have PIN codes");
           }
@@ -1625,7 +1639,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that authorization matches the declaration
         ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.authorizeExportOrDeleteOperation (key_entry.delete_policy, authorization);
+        key_entry.authorizeExportOrDeleteOperation (key_entry.delete_protection, authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Delete key and optionally the entire provisioning object (if empty)
@@ -1649,17 +1663,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         KeyEntry key_entry = getStdKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Is this key exportable at all?
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.export_policy == EXPORT_POLICY_NON_EXPORTABLE)
-          {
-            abort ("Key #" + key_entry.key_handle + " is not exportable", SKSException.ERROR_NOT_ALLOWED);
-          }
-        
-        ///////////////////////////////////////////////////////////////////////////////////
         // Check that authorization matches the declaration
         ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.authorizeExportOrDeleteOperation (key_entry.export_policy, authorization);
+        key_entry.authorizeExportOrDeleteOperation (key_entry.export_protection, authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Export key in raw unencrypted format
@@ -1819,7 +1825,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Check that the signature algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
         Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_ASYM_SGN);
-        int hash_len = (alg.mask / ALG_HASH_DIV) & 0xFF;
+        int hash_len = (alg.mask / ALG_HASH_DIV) & ALG_HASH_MSK;
         if (hash_len > 0 && hash_len != data.length)
           {
             abort ("Incorrect length of \"Data\": " + data.length);
@@ -2130,7 +2136,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         short min_length = 0;
         short max_length = 0;
         byte input_method = 0;
-        if (key_entry.device_pin_protected)
+        if (key_entry.device_pin_protection)
           {
             protection_status = PROTECTION_STATUS_DEVICE_PIN;
           }
@@ -2178,8 +2184,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                       key_entry.error_count,
                                       key_entry.biometric_protection,
                                       key_entry.private_key_backup,
-                                      key_entry.export_policy,
-                                      key_entry.delete_policy,
+                                      key_entry.export_protection,
+                                      key_entry.delete_protection,
                                       key_entry.enable_pin_caching);
       }
 
@@ -2395,7 +2401,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         MacBuilder close_attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
         close_attestation.addArray (mac);
         close_attestation.addString (ALGORITHM_SESSION_KEY_ATTEST_1);
-        byte[] attest = close_attestation.getResult ();
+        byte[] attestation = close_attestation.getResult ();
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform "sanity" checks on provisioned data
@@ -2515,7 +2521,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 post_op.new_key.pin_policy = key_entry.pin_policy;
                 post_op.new_key.pin_value = key_entry.pin_value;
                 post_op.new_key.error_count = key_entry.error_count;
-                post_op.new_key.device_pin_protected = key_entry.device_pin_protected;
+                post_op.new_key.device_pin_protection = key_entry.device_pin_protection;
               }
           }
 
@@ -2565,7 +2571,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // We are done, close the show for this time
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.open = false;
-        return attest;
+        return attestation;
       }
 
 
@@ -2592,7 +2598,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             abort ("URI length error: " + issuer_uri.length ());
           }
-        byte[] session_attestation = null;
+        byte[] attestation = null;
         byte[] session_key = null;
         ECPublicKey client_ephemeral_key = null;
         String client_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
@@ -2653,7 +2659,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             Signature signer = Signature.getInstance ("SHA256withRSA", "BC");
             signer.initSign (getAttestationKey ());
             signer.update (session_key_attest);
-            session_attestation = signer.sign ();
+            attestation = signer.sign ();
           }
         catch (Exception e)
           {
@@ -2670,7 +2676,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         p.session_key_limit = session_key_limit;
         return new ProvisioningSession (p.provisioning_handle,
                                         client_session_id,
-                                        session_attestation,
+                                        attestation,
                                         client_ephemeral_key);
       }
 
@@ -2927,13 +2933,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                   String id,
                                   String attestation_algorithm,
                                   byte[] server_seed,
-                                  boolean device_pin_protected,
+                                  boolean device_pin_protection,
                                   int pin_policy_handle,
                                   byte[] pin_value,
                                   byte biometric_protection,
                                   boolean private_key_backup,
-                                  byte export_policy,
-                                  byte delete_policy,
+                                  byte export_protection,
+                                  byte delete_protection,
                                   boolean enable_pin_caching,
                                   byte app_usage,
                                   String friendly_name,
@@ -2957,12 +2963,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
           }
+        provisioning.rangeTest (export_protection, EXPORT_DELETE_POLICY_NONE, EXPORT_DELETE_POLICY_NOT_ALLOWED, "ExportProtection");
+        provisioning.rangeTest (delete_protection, EXPORT_DELETE_POLICY_NONE, EXPORT_DELETE_POLICY_NOT_ALLOWED, "DeleteProtection");
         provisioning.rangeTest (app_usage, APP_USAGE_SIGNATURE, APP_USAGE_UNIVERSAL, "AppUsage");
-        if (export_policy != EXPORT_POLICY_NON_EXPORTABLE)
-          {
-            provisioning.rangeTest (export_policy, EXPORT_DELETE_POLICY_NONE, EXPORT_DELETE_POLICY_PUK, "ExportPolicy");
-          }
-        provisioning.rangeTest (delete_policy, EXPORT_DELETE_POLICY_NONE, EXPORT_DELETE_POLICY_PUK, "DeletePolicy");
         provisioning.rangeTest (biometric_protection, BIOMETRIC_PROTECTION_NONE, BIOMETRIC_PROTECTION_EXCLUSIVE, "BiometricProtection");
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2971,7 +2974,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         PINPolicy pin_policy = null;
         boolean decrypt_pin = false;
         String pin_policy_id = CRYPTO_STRING_NOT_AVAILABLE;
-        if (device_pin_protected)
+        if (device_pin_protection)
           {
             pin_policy_id = CRYPTO_STRING_DEVICE_PIN;
             if (pin_policy_handle != 0)
@@ -3014,8 +3017,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
         verifier.addByte (biometric_protection);
         verifier.addBool (private_key_backup);
-        verifier.addByte (export_policy);
-        verifier.addByte (delete_policy);
+        verifier.addByte (export_protection);
+        verifier.addByte (delete_protection);
         verifier.addBool (enable_pin_caching);
         verifier.addByte (app_usage);
         verifier.addString (friendly_name);
@@ -3059,10 +3062,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // Certain policy attributes require PIN objects
             ///////////////////////////////////////////////////////////////////////////////////
-            if (((delete_policy | export_policy) & (EXPORT_DELETE_POLICY_PIN | EXPORT_DELETE_POLICY_PUK)) != 0)
-              {
-                provisioning.abort ("Export or delete policy lacks a PIN object");
-              }
+            verifyExportDeletePolicy (delete_protection, EXPORT_DELETE_POLICY_PIN, provisioning);
+            verifyExportDeletePolicy (export_protection, EXPORT_DELETE_POLICY_PIN, provisioning);
           }
         else
           {
@@ -3071,10 +3072,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             if (pin_policy.puk_policy == null)
               {
-                if (((delete_policy | export_policy) & EXPORT_DELETE_POLICY_PUK) != 0)
-                  {
-                    provisioning.abort ("Export or delete policy lacks a PUK object");
-                  }
+                verifyExportDeletePolicy (delete_protection, EXPORT_DELETE_POLICY_PUK, provisioning);
+                verifyExportDeletePolicy (export_protection, EXPORT_DELETE_POLICY_PUK, provisioning);
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -3147,12 +3146,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // Create key attestation data
             ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder key_attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
-            key_attestation.addString (id);
-            key_attestation.addArray (public_key.getEncoded ());
+            MacBuilder attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
+            attestation.addString (id);
+            attestation.addArray (public_key.getEncoded ());
             if (private_key_backup)
               {
-                key_attestation.addArray (encrypted_private_key);
+                attestation.addArray (encrypted_private_key);
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -3166,16 +3165,16 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             key_entry.public_key = public_key;
             key_entry.private_key = private_key;
             key_entry.app_usage = app_usage;
-            key_entry.device_pin_protected = device_pin_protected;
+            key_entry.device_pin_protection = device_pin_protection;
             key_entry.enable_pin_caching = enable_pin_caching;
             key_entry.biometric_protection = biometric_protection;
-            key_entry.export_policy = export_policy;
-            key_entry.delete_policy = delete_policy;
+            key_entry.export_protection = export_protection;
+            key_entry.delete_protection = delete_protection;
             key_entry.endorsed_algorithms = temp_endorsed;
             key_entry.private_key_backup = private_key_backup;
             return new KeyPair (key_entry.key_handle,
                                 public_key,
-                                key_attestation.getResult (),
+                                attestation.getResult (),
                                 encrypted_private_key);
           }
         catch (GeneralSecurityException e)

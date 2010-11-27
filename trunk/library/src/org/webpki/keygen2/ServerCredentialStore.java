@@ -771,11 +771,11 @@ public class ServerCredentialStore implements Serializable
           }
 
 
-        byte[] key_attestation;   // Filled in by KeyInitializationRequestDecoder
+        byte[] attestation;   // Filled in by KeyInitializationRequestDecoder
         
-        public byte[] getKeyAttestation ()
+        public byte[] getAttestation ()
           {
-            return key_attestation;
+            return attestation;
           }
 
 
@@ -787,17 +787,17 @@ public class ServerCredentialStore implements Serializable
           }
         
 
-        ExportPolicy export_policy;
+        ExportProtection export_protection;
         
-        public KeyProperties setExportPolicy (ExportPolicy export_policy)
+        public KeyProperties setExportProtection (ExportProtection export_protection)
           {
-            this.export_policy = export_policy;
+            this.export_protection = export_protection;
             return this;
           }
 
-        public ExportPolicy getExportPolicy ()
+        public ExportProtection getExportPolicy ()
           {
-            return export_policy;
+            return export_protection;
           }
         
         
@@ -855,18 +855,18 @@ public class ServerCredentialStore implements Serializable
           }
 
 
-        DeletePolicy delete_policy;
+        DeleteProtection delete_protection;
         
-        public KeyProperties setDeletePolicy (DeletePolicy delete_policy) throws IOException
+        public KeyProperties setDeleteProtection (DeleteProtection delete_protection) throws IOException
           {
             // TODO there must be some PIN-related tests here...
-            this.delete_policy = delete_policy;
+            this.delete_protection = delete_protection;
             return this;
           }
 
-        public DeletePolicy getDeletePolicy ()
+        public DeleteProtection getDeletePolicy ()
           {
-            return delete_policy;
+            return delete_protection;
           }
 
 
@@ -903,11 +903,11 @@ public class ServerCredentialStore implements Serializable
           }
         
 
-        boolean device_pin_protected;
+        boolean device_pin_protection;
 
-        public boolean getDevicePINProtected ()
+        public boolean getDevicePINProtection ()
           {
-            return device_pin_protected;
+            return device_pin_protection;
           }
         
         
@@ -917,7 +917,7 @@ public class ServerCredentialStore implements Serializable
               {
                 bad ("Clone or Update already set for this key");
               }
-            if (pin_policy != null || device_pin_protected)
+            if (pin_policy != null || device_pin_protection)
               {
                 bad ("Clone/Update keys cannot be PIN protected");
               }
@@ -953,14 +953,14 @@ public class ServerCredentialStore implements Serializable
             return this;
           }
 
-        KeyProperties (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protected) throws IOException
+        KeyProperties (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
           {
             this.id = key_prefix + ++next_key_id_suffix;
             this.app_usage = app_usage;
             this.key_alg_data = key_alg_data;
             this.pin_policy = pin_policy;
             this.preset_pin = preset_pin;
-            this.device_pin_protected = device_pin_protected;
+            this.device_pin_protection = device_pin_protection;
             if (pin_policy != null)
               {
                 if (pin_policy.not_first)
@@ -986,7 +986,7 @@ public class ServerCredentialStore implements Serializable
             key_pair_mac.addString (key_attestation_algorithm);
             key_pair_mac.addArray (server_seed);
             key_pair_mac.addString (pin_policy == null ? 
-                                      device_pin_protected ?
+                                      device_pin_protection ?
                                           CryptoConstants.CRYPTO_STRING_PIN_DEVICE
                                                            : 
                                           CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE 
@@ -1003,10 +1003,10 @@ public class ServerCredentialStore implements Serializable
             key_pair_mac.addByte (biometric_protection == null ?
                        BiometricProtection.NONE.getSKSValue () : biometric_protection.getSKSValue ());
             key_pair_mac.addBool (private_key_backup);
-            key_pair_mac.addByte (export_policy == null ?
-                ExportPolicy.NON_EXPORTABLE.getSKSValue () : export_policy.getSKSValue ());
-            key_pair_mac.addByte (delete_policy == null ?
-                       DeletePolicy.NONE.getSKSValue () : delete_policy.getSKSValue ());
+            key_pair_mac.addByte (export_protection == null ?
+                ExportProtection.NON_EXPORTABLE.getSKSValue () : export_protection.getSKSValue ());
+            key_pair_mac.addByte (delete_protection == null ?
+                       DeleteProtection.NONE.getSKSValue () : delete_protection.getSKSValue ());
             key_pair_mac.addBool (enable_pin_caching);
             key_pair_mac.addByte (app_usage.getSKSValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
@@ -1016,9 +1016,9 @@ public class ServerCredentialStore implements Serializable
                 key_pair_mac.addString (algorithm);
               }
 
-            if (device_pin_protected)
+            if (device_pin_protection)
               {
-                wr.addChildElement (DEVICE_PIN_ELEM);
+                wr.addChildElement (DEVICE_PIN_PROTECTION_ELEM);
               }
             if (preset_pin != null)
               {
@@ -1029,9 +1029,9 @@ public class ServerCredentialStore implements Serializable
             wr.setStringAttribute (ID_ATTR, id);
             wr.setStringAttribute (APP_USAGE_ATTR, app_usage.getXMLName ());
 
-            if (export_policy != null)
+            if (export_protection != null)
               {
-                wr.setStringAttribute (EXPORT_POLICY_ATTR, export_policy.getXMLName ());
+                wr.setStringAttribute (EXPORT_PROTECTION_ATTR, export_protection.getXMLName ());
               }
 
             if (endorsed_algorithms != null)
@@ -1049,9 +1049,9 @@ public class ServerCredentialStore implements Serializable
                 wr.setStringAttribute (BIOMETRIC_PROTECTION_ATTR, biometric_protection.getXMLName ());
               }
             
-            if (delete_policy != null)
+            if (delete_protection != null)
               {
-                wr.setStringAttribute (DELETE_POLICY_ATTR, delete_policy.getXMLName ());
+                wr.setStringAttribute (DELETE_PROTECTION_ATTR, delete_protection.getXMLName ());
               }
             
             if (server_seed_set)
@@ -1071,7 +1071,7 @@ public class ServerCredentialStore implements Serializable
 
             wr.getParent ();
 
-            if (device_pin_protected || preset_pin != null)
+            if (device_pin_protection || preset_pin != null)
               {
                 wr.getParent ();
               }
@@ -1262,9 +1262,9 @@ public class ServerCredentialStore implements Serializable
       }
 
 
-    private KeyProperties addKeyProperties (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protected) throws IOException
+    private KeyProperties addKeyProperties (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
       {
-        KeyProperties key = new KeyProperties (app_usage, key_alg_data, pin_policy, preset_pin, device_pin_protected);
+        KeyProperties key = new KeyProperties (app_usage, key_alg_data, pin_policy, preset_pin, device_pin_protection);
         requested_keys.put (key.getID (), key);
         return key;
       }

@@ -33,14 +33,14 @@ public class CredentialDeploymentResponseDecoder extends CredentialDeploymentRes
 
     private String server_session_id;
     
-    private byte[] close_session_attestation;
+    private byte[] attestation;
 
     private ServerCookie server_cookie;     // Optional
 
 
-    public byte[] getCloseSessionAttestation ()
+    public byte[] getAttestation ()
       {
-        return close_session_attestation;
+        return attestation;
       }
 
     
@@ -68,7 +68,7 @@ public class CredentialDeploymentResponseDecoder extends CredentialDeploymentRes
         server_credential_store.checkSession (client_session_id, server_session_id);
         try
           {
-            server_credential_store.checkFinalResult (close_session_attestation, server_crypto_interface);
+            server_credential_store.checkFinalResult (attestation, server_crypto_interface);
           }
         catch (GeneralSecurityException e)
           {
@@ -89,7 +89,7 @@ public class CredentialDeploymentResponseDecoder extends CredentialDeploymentRes
 
         server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
         
-        close_session_attestation = ah.getBinary (SESSION_ATTESTATION_ATTR);
+        attestation = ah.getBinary (ATTESTATION_ATTR);
 
         rd.getChild ();
 

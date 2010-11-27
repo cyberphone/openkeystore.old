@@ -24,18 +24,18 @@ public class KeyPair
     
     private PublicKey public_key;
     
-    private byte[] key_attestation;
+    private byte[] attestation;
     
     private byte[] encrypted_private_key;
     
     public KeyPair (int key_handle,
                     PublicKey public_key, 
-                    byte[] key_attestation,
+                    byte[] attestation,
                     byte[] encrypted_private_key)
       {
         this.key_handle = key_handle;
         this.public_key = public_key;
-        this.key_attestation = key_attestation;
+        this.attestation = attestation;
         this.encrypted_private_key = encrypted_private_key;
       }
     
@@ -49,9 +49,9 @@ public class KeyPair
         return key_handle;
       }
     
-    public byte[] getKeyAttestation ()
+    public byte[] getAttestation ()
       {
-        return key_attestation;
+        return attestation;
       }
     
     public byte[] getPrivateKey ()

@@ -33,9 +33,9 @@ public class KeyProtectionInfo
     
     byte input_method;
     
-    byte export_policy;
+    byte export_protection;
     
-    byte delete_policy;
+    byte delete_protection;
     
     public boolean getPINCachingFlag ()
       {
@@ -52,14 +52,14 @@ public class KeyProtectionInfo
         return input_method;
       }
 
-    public byte getExportPolicy ()
+    public byte getExportProtection ()
       {
-        return export_policy;
+        return export_protection;
       }
 
-    public byte getDeletePolicy ()
+    public byte getDeleteProtection ()
       {
-        return delete_policy;
+        return delete_protection;
       }
     
     public boolean isPINBlocked ()
@@ -133,8 +133,8 @@ public class KeyProtectionInfo
                               short pin_error_count,
                               byte biometric_protection,
                               boolean private_key_backup,
-                              byte export_policy,
-                              byte delete_policy,
+                              byte export_protection,
+                              byte delete_protection,
                               boolean enable_pin_caching) throws SKSException
 
       {
@@ -151,7 +151,7 @@ public class KeyProtectionInfo
         this.enable_pin_caching = enable_pin_caching;
         this.pin_error_count = pin_error_count;
         this.input_method = input_method;
-        this.export_policy = export_policy;
-        this.delete_policy = delete_policy;
+        this.export_protection = export_protection;
+        this.delete_protection = delete_protection;
       }
   }

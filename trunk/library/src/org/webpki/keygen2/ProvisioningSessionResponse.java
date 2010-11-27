@@ -47,7 +47,7 @@ abstract class ProvisioningSessionResponse extends XMLObjectWrapper
     
     ECPublicKey client_ephemeral_key;
 
-    byte[] session_attestation;
+    byte[] attestation;
     
     ServerCookie server_cookie;
     

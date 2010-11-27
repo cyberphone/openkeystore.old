@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                         = "http://xmlns.webpki.org/keygen2/beta/20100820#";
+    String KEYGEN2_NS                          = "http://xmlns.webpki.org/keygen2/beta/20101127#";
 
     String KEYGEN2_SCHEMA_FILE                 = "keygen2.xsd";
 
@@ -73,9 +73,9 @@ public interface KeyGen2Constants
 
     String SESSION_LIFE_TIME_ATTR              = "SessionLifeTime";
 
-    String EXPORT_POLICY_ATTR                  = "ExportPolicy";
+    String EXPORT_PROTECTION_ATTR              = "ExportProtection";
 
-    String DELETE_POLICY_ATTR                  = "DeletePolicy";
+    String DELETE_PROTECTION_ATTR              = "DeleteProtection";
 
     String NAMED_CURVE_ATTR                    = "NamedCurve";
 
@@ -105,9 +105,7 @@ public interface KeyGen2Constants
 
     String AUTHORIZATION_ATTR                  = "Authorization";
 
-    String KEY_ATTESTATION_ATTR                = "KeyAttestation";
-
-    String SESSION_ATTESTATION_ATTR            = "SessionAttestation";
+    String ATTESTATION_ATTR                    = "Attestation";
 
     String KEY_SIZE_ATTR                       = "KeySize";
 
@@ -202,7 +200,7 @@ public interface KeyGen2Constants
 
     String PRESET_PIN_ELEM                     = "PresetPIN";
        
-    String DEVICE_PIN_ELEM                     = "DevicePIN";
+    String DEVICE_PIN_PROTECTION_ELEM          = "DevicePINProtection";
 
     String EXTENSION_ELEM                      = "Extension";
 

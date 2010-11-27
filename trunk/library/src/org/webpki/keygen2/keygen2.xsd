@@ -26,7 +26,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 16-October-2010 
+    Revised: 27-November-2010 
     Author: Anders Rundgren
 
     Copyright 2006-2010 WebPKI.org (http://webpki.org).
@@ -44,11 +44,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20100820#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20101127#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20100820#"
+           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20101127#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -345,9 +345,9 @@
          <!-- The provisioning client's local clock is a mandatory item -->
          <xs:attribute name="ClientTime" type="xs:dateTime" use="required"/>
 
-         <!-- The "SessionAttestation" attribute holds the output from
+         <!-- The "Attestation" attribute holds the output from
               the SKS "createProvisioningSession" method -->
-         <xs:attribute name="SessionAttestation" type="xs:base64Binary" use="required"/>
+         <xs:attribute name="Attestation" type="xs:base64Binary" use="required"/>
 
          <!-- The "ServerCertificateFingerprint" attribute MUST be populated with
               the SHA256 hash of the associated server certificate if the
@@ -491,7 +491,7 @@
                     This option (which MAY be supported by the device), is
                     mainly intended for keys belonging to an organization
                     that manages the device -->
-               <xs:element ref="kgen:DevicePIN"/>
+               <xs:element ref="kgen:DevicePINProtection"/>
 
            </xs:choice>
 
@@ -641,7 +641,7 @@
          <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
          <!-- SKS Reference: closeProvisioningSession -->
-         <xs:attribute name="SessionAttestation" type="xs:base64Binary" use="required"/>
+         <xs:attribute name="Attestation" type="xs:base64Binary" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -978,8 +978,8 @@
  
          </xs:sequence>
 
-         <!-- SKS Reference: createKeyPair.KeyAttestation -->
-         <xs:attribute name="KeyAttestation" type="xs:base64Binary" use="optional"/>
+         <!-- SKS Reference: createKeyPair.Attestation -->
+         <xs:attribute name="Attestation" type="xs:base64Binary" use="optional"/>
 
          <!-- A unique key-ID which MUST match a "KeyPair/@ID"
               in the corresponding "KeyInitializationRequest" -->
@@ -1049,13 +1049,13 @@
               Default: false -->
          <xs:attribute name="PrivateKeyBackup" type="xs:boolean" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.ExportPolicy 
+         <!-- SKS Reference: createKeyPair.ExportProtection 
               Default: "non-exportable" -->
-         <xs:attribute name="ExportPolicy" type="kgen:expPolicyTypes" use="optional"/>
+         <xs:attribute name="ExportProtection" type="kgen:expProtectionTypes" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.DeletePolicy 
+         <!-- SKS Reference: createKeyPair.DeleteProtection 
               Default: "none" -->
-         <xs:attribute name="DeletePolicy" type="kgen:delPolicyTypes" use="optional"/>
+         <xs:attribute name="DeleteProtection" type="kgen:delProtectionTypes" use="optional"/>
 
          <!-- SKS Reference: createKeyPair.EnablePINCaching 
               Default: false -->
@@ -1202,7 +1202,7 @@
       Request sub-object for creating a key protected by the key "host" device PIN-code
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:element name="DevicePIN">
+   <xs:element name="DevicePINProtection">
       <xs:complexType>
          <xs:sequence>
             <xs:element ref="kgen:KeyPair"/>
@@ -1376,22 +1376,23 @@
    </xs:simpleType>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                  Delete policy definitions
+                               Delete protection definitions
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:simpleType name="delPolicyTypes">
+   <xs:simpleType name="delProtectionTypes">
       <xs:restriction base="xs:string">
          <xs:enumeration value="none"/>
          <xs:enumeration value="pin"/>
          <xs:enumeration value="puk"/>
+         <xs:enumeration value="non-deletable"/>
       </xs:restriction>
    </xs:simpleType>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                  Export policy definitions
+                               Export protection definitions
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:simpleType name="expPolicyTypes">
+   <xs:simpleType name="expProtectionTypes">
       <xs:restriction base="xs:string">
          <xs:enumeration value="none"/>
          <xs:enumeration value="pin"/>

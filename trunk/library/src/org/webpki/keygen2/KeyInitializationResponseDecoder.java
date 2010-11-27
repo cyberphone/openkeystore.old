@@ -45,7 +45,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
 
         PublicKey public_key;
 
-        byte[] key_attestation;
+        byte[] attestation;
         
         byte[] backup_private_key;
 
@@ -76,18 +76,18 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
                   }
                 kp.public_key = gpk.public_key;
                 kp.backup_private_key = gpk.backup_private_key;
-                MacGenerator key_attestation = new MacGenerator ();
+                MacGenerator attestation = new MacGenerator ();
                 // Write key attestation data
-                key_attestation.addString (gpk.id);
-                key_attestation.addArray (gpk.public_key.getEncoded ());
+                attestation.addString (gpk.id);
+                attestation.addArray (gpk.public_key.getEncoded ());
                 if (kp.private_key_backup)
                   {
-                    key_attestation.addArray (kp.backup_private_key);
+                    attestation.addArray (kp.backup_private_key);
                   }
-                 if (!ArrayUtil.compare (key_init_request.server_credential_store.attest (key_attestation.getResult (),
+                 if (!ArrayUtil.compare (key_init_request.server_credential_store.attest (attestation.getResult (),
                                                                                           kp.expected_attest_mac_count,
                                                                                           server_crypto_interface),
-                                         kp.key_attestation = gpk.key_attestation))
+                                         kp.attestation = gpk.attestation))
                   {
                     ServerCredentialStore.bad ("Attestation failed for key id:" + gpk.id);
                   }
@@ -124,7 +124,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
             GeneratedPublicKey gk = new GeneratedPublicKey ();
             rd.getNext (PUBLIC_KEY_ELEM);
             gk.id = ah.getString (ID_ATTR);
-            gk.key_attestation = ah.getBinaryConditional (KEY_ATTESTATION_ATTR);
+            gk.attestation = ah.getBinaryConditional (ATTESTATION_ATTR);
             rd.getChild ();
             gk.public_key = XMLSignatureWrapper.readPublicKey (rd);
             if (rd.hasNext ())
