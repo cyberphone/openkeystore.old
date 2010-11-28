@@ -18,9 +18,9 @@
     10-pass "combo" three years later.
 
     Properly implemented the current incarnation provides E2ES (End to End Security),
-    VSDs (Virtual Security Domains), and TOPM (Transaction Oriented Provisioning and
-    Management), which is mainly intended for mobile phones with embedded security
-    hardware hosting credentials from multiple and independent issuers.
+    VSDs (Virtual Security Domains), and TOP (Transaction Oriented Provisioning),
+    which is mainly intended for mobile phones with embedded security hardware
+    hosting credentials from multiple and independent issuers.
 
     "Perfection is achieved, not when there is nothing more to add, but when
     there is nothing left to take away" [Antoine de Saint-Exupery]
