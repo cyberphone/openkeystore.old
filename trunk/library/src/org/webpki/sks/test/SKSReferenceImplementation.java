@@ -79,10 +79,10 @@ import org.webpki.sks.SecureKeyStore;
  *  SKS is a cryptographic module that supports On-line Provisioning and Management
  *  of PKI, Symmetric keys, PINs, PUKs and Extension data.
  *  
- *  VSDs (Virtual Security Domains), E2ES (End To End Security), and Transaction-
- *  Based Operation enable multiple credential providers to securely and reliable
- *  share a key container, something which will become a necessity in mobile phones
- *  with embedded security hardware.
+ *  VSDs (Virtual Security Domains), E2ES (End To End Security), and Transaction
+ *  Oriented Provisioning enable multiple credential providers to securely and
+ *  reliable share a key container, something which will become a necessity in
+ *  mobile phones with embedded security hardware.
  *
  *  The following SKS Reference Implementation is intended to complement the
  *  specification by showing how the different constructs can be implemented.
@@ -786,7 +786,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                   }
               }
             ////////////////////////////////////////////////////////////////////////////////////////////////
-            // We want pp_unlockKey keys to be first in the list so that PIN inherits works as specified
+            // We want pp_unlockKey keys to be first in the list so that shared PINs get unlocked as well
             ////////////////////////////////////////////////////////////////////////////////////////////////
             post_provisioning_objects.add (new_key == null ? 0 : post_provisioning_objects.size (),
                                            new PostProvisioningObject (target_key_entry, new_key, upd_or_del));
