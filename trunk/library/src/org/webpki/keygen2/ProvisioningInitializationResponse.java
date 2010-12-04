@@ -33,9 +33,9 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-abstract class BeginProvisioningResponse extends XMLObjectWrapper
+abstract class ProvisioningInitializationResponse extends XMLObjectWrapper
   {
-    BeginProvisioningResponse () {}
+    ProvisioningInitializationResponse () {}
 
     String server_session_id;
     

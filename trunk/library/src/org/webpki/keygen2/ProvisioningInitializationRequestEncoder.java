@@ -38,14 +38,14 @@ import org.webpki.crypto.SignerInterface;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class BeginProvisioningRequestEncoder extends BeginProvisioningRequest
+public class ProvisioningInitializationRequestEncoder extends ProvisioningInitializationRequest
   {
     String prefix;  // Default: no prefix
     
 
     // Constructors
 
-    public BeginProvisioningRequestEncoder (ECPublicKey server_ephemeral_key,
+    public ProvisioningInitializationRequestEncoder (ECPublicKey server_ephemeral_key,
                                               String server_session_id,
                                               String submit_url,
                                               int session_life_time,

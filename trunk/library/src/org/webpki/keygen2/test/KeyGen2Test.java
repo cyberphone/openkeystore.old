@@ -107,10 +107,10 @@ import org.webpki.keygen2.PlatformNegotiationRequestDecoder;
 import org.webpki.keygen2.PlatformNegotiationRequestEncoder;
 import org.webpki.keygen2.PlatformNegotiationResponseDecoder;
 import org.webpki.keygen2.PlatformNegotiationResponseEncoder;
-import org.webpki.keygen2.BeginProvisioningRequestDecoder;
-import org.webpki.keygen2.BeginProvisioningRequestEncoder;
-import org.webpki.keygen2.BeginProvisioningResponseDecoder;
-import org.webpki.keygen2.BeginProvisioningResponseEncoder;
+import org.webpki.keygen2.ProvisioningInitializationRequestDecoder;
+import org.webpki.keygen2.ProvisioningInitializationRequestEncoder;
+import org.webpki.keygen2.ProvisioningInitializationResponseDecoder;
+import org.webpki.keygen2.ProvisioningInitializationResponseEncoder;
 import org.webpki.keygen2.ServerCredentialStore;
 import org.webpki.keygen2.ServerCryptoInterface;
 
@@ -246,7 +246,7 @@ public class KeyGen2Test
         
         KeyInitializationRequestDecoder key_init_request;
         
-        BeginProvisioningRequestDecoder prov_sess_req;
+        ProvisioningInitializationRequestDecoder prov_sess_req;
         
         CredentialDiscoveryRequestDecoder cre_disc_req;
         
@@ -256,7 +256,7 @@ public class KeyGen2Test
           {
             client_xml_cache = new XMLSchemaCache ();
             client_xml_cache.addWrapper (PlatformNegotiationRequestDecoder.class);
-            client_xml_cache.addWrapper (BeginProvisioningRequestDecoder.class);
+            client_xml_cache.addWrapper (ProvisioningInitializationRequestDecoder.class);
             client_xml_cache.addWrapper (CredentialDiscoveryRequestDecoder.class);
             client_xml_cache.addWrapper (KeyInitializationRequestDecoder.class);
             client_xml_cache.addWrapper (ProvisioningFinalizationRequestDecoder.class);
@@ -362,7 +362,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] provSessResponse (byte[] xmldata) throws IOException
           {
-            prov_sess_req = (BeginProvisioningRequestDecoder) client_xml_cache.parse (xmldata);
+            prov_sess_req = (ProvisioningInitializationRequestDecoder) client_xml_cache.parse (xmldata);
             Date client_time = new Date ();
             ProvisioningSession sess = 
                   sks.createProvisioningSession (prov_sess_req.getSessionKeyAlgorithm (),
@@ -375,8 +375,8 @@ public class KeyGen2Test
                                                  prov_sess_req.getSessionKeyLimit ());
             provisioning_handle = sess.getProvisioningHandle ();
             
-            BeginProvisioningResponseEncoder prov_sess_response = 
-                  new BeginProvisioningResponseEncoder (sess.getClientEphemeralKey (),
+            ProvisioningInitializationResponseEncoder prov_sess_response = 
+                  new ProvisioningInitializationResponseEncoder (sess.getClientEphemeralKey (),
                                                           prov_sess_req.getServerSessionID (),
                                                           sess.getClientSessionID (),
                                                           prov_sess_req.getServerTime (),
@@ -660,9 +660,9 @@ public class KeyGen2Test
 
         KeyInitializationRequestEncoder key_init_request;
         
-        BeginProvisioningRequestEncoder prov_sess_request;
+        ProvisioningInitializationRequestEncoder prov_sess_request;
 
-        BeginProvisioningResponseDecoder prov_sess_response;
+        ProvisioningInitializationResponseDecoder prov_sess_response;
         
         ServerCredentialStore server_credential_store;
         
@@ -803,7 +803,7 @@ public class KeyGen2Test
           {
             server_xml_cache = new XMLSchemaCache ();
             server_xml_cache.addWrapper (PlatformNegotiationResponseDecoder.class);
-            server_xml_cache.addWrapper (BeginProvisioningResponseDecoder.class);
+            server_xml_cache.addWrapper (ProvisioningInitializationResponseDecoder.class);
             server_xml_cache.addWrapper (CredentialDiscoveryResponseDecoder.class);
             server_xml_cache.addWrapper (KeyInitializationResponseDecoder.class);
             server_xml_cache.addWrapper (ProvisioningFinalizationResponseDecoder.class);
@@ -814,7 +814,7 @@ public class KeyGen2Test
             ////////////////////////////////////////////////////////////////////////////////////
             // Begin with creating the "SessionKey" that holds just about everything
             ////////////////////////////////////////////////////////////////////////////////////
-            prov_sess_response = (BeginProvisioningResponseDecoder) xml_object;
+            prov_sess_response = (ProvisioningInitializationResponseDecoder) xml_object;
             prov_sess_response.verifyAndGenerateSessionKey (server_sess_key, prov_sess_request);
 
             ////////////////////////////////////////////////////////////////////////////////////
@@ -872,7 +872,7 @@ public class KeyGen2Test
         byte[] provSessRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             PlatformNegotiationResponseDecoder platform_response = (PlatformNegotiationResponseDecoder) server_xml_cache.parse (xmldata);
-            prov_sess_request =  new BeginProvisioningRequestEncoder (server_sess_key.generateEphemeralKey (),
+            prov_sess_request =  new ProvisioningInitializationRequestEncoder (server_sess_key.generateEphemeralKey (),
                                                                         server_session_id,
                                                                         ISSUER_URI,
                                                                         10000,
@@ -911,7 +911,7 @@ public class KeyGen2Test
         byte[] keyInitRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             XMLObjectWrapper xml_object = server_xml_cache.parse (xmldata);
-            if (xml_object instanceof BeginProvisioningResponseDecoder)
+            if (xml_object instanceof ProvisioningInitializationResponseDecoder)
               {
                 getProvSess (xml_object);
               }
@@ -1218,8 +1218,8 @@ public class KeyGen2Test
           {
             xmlschemas.addWrapper (PlatformNegotiationRequestDecoder.class);
             xmlschemas.addWrapper (PlatformNegotiationResponseDecoder.class);
-            xmlschemas.addWrapper (BeginProvisioningRequestDecoder.class);
-            xmlschemas.addWrapper (BeginProvisioningResponseDecoder.class);
+            xmlschemas.addWrapper (ProvisioningInitializationRequestDecoder.class);
+            xmlschemas.addWrapper (ProvisioningInitializationResponseDecoder.class);
             xmlschemas.addWrapper (CredentialDiscoveryRequestDecoder.class);
             xmlschemas.addWrapper (CredentialDiscoveryResponseDecoder.class);
             xmlschemas.addWrapper (KeyInitializationRequestDecoder.class);

@@ -38,7 +38,7 @@ import org.webpki.crypto.SymKeyVerifierInterface;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class BeginProvisioningResponseDecoder extends BeginProvisioningResponse
+public class ProvisioningInitializationResponseDecoder extends ProvisioningInitializationResponse
   {
     private XMLSignatureWrapper signature;
 
@@ -109,7 +109,7 @@ public class BeginProvisioningResponseDecoder extends BeginProvisioningResponse
 
 
     public void verifyAndGenerateSessionKey (ServerCryptoInterface server_crypto_interface,
-                                             BeginProvisioningRequestEncoder prov_sess_request) throws IOException
+                                             ProvisioningInitializationRequestEncoder prov_sess_request) throws IOException
       {
         try
           {

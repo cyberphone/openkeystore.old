@@ -256,7 +256,7 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
 
     // Constructors
 
-    public CredentialDiscoveryRequestEncoder (BeginProvisioningResponseDecoder prov_sess_dec,
+    public CredentialDiscoveryRequestEncoder (ProvisioningInitializationResponseDecoder prov_sess_dec,
                                               String submit_url)
       {
         super.server_session_id = prov_sess_dec.server_session_id;
