@@ -35,14 +35,14 @@ import org.webpki.crypto.SymKeySignerInterface;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class ProvisioningSessionResponseEncoder extends ProvisioningSessionResponse
+public class BeginProvisioningResponseEncoder extends BeginProvisioningResponse
   {
 
     String prefix;  // Default: no prefix
     
      // Constructors
 
-    public ProvisioningSessionResponseEncoder (ECPublicKey client_ephemeral_key,
+    public BeginProvisioningResponseEncoder (ECPublicKey client_ephemeral_key,
                                                String server_session_id,
                                                String client_session_id,
                                                Date server_time,

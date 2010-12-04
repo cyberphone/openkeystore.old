@@ -72,7 +72,7 @@
         byline="false"/>
     <replaceregexp file="${android_dir}/org/webpki/keygen2/keygen2.xsd"
         flags="s"
-        match="&lt;xs\:element name=&quot;CredentialDeploymentResponse&quot;&gt;.*?\n   &lt;\/xs\:element&gt;"
+        match="&lt;xs\:element name=&quot;FinalizeProvisioningResponse&quot;&gt;.*?\n   &lt;\/xs\:element&gt;"
         replace=""
         byline="false"/>
     <replaceregexp file="${android_dir}/org/webpki/keygen2/keygen2.xsd"

@@ -40,7 +40,7 @@ import org.webpki.keygen2.ServerCredentialStore.PostProvisioningTargetKey;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequest
+public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinalizationRequest
   {
     String submit_url;
 
@@ -55,7 +55,7 @@ public class CredentialDeploymentRequestEncoder extends CredentialDeploymentRequ
     
     // Constructors
 
-    public CredentialDeploymentRequestEncoder (String submit_url, 
+    public ProvisioningFinalizationRequestEncoder (String submit_url, 
                                                ServerCredentialStore server_credential_store,
                                                ServerCryptoInterface server_crypto_interface) throws IOException
       {

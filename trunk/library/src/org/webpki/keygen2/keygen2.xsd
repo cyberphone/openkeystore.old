@@ -22,13 +22,16 @@
     primarily intended for mobile phones with embedded security hardware hosting
     credentials from multiple and independent issuers.
 
-    KeyGen2 may be used in the following modes: 
-     - Mandatory: PlatformNegotiation 
-     - Action="create": ProvisioningSession KeyInitialization   
-     - Action="unlock": ProvisioningSession [CredentialDiscovery] 
-     - Action="manage": ProvisioningSession [CredentialDiscovery] [KeyInitialization] 
-     - Action="finalize":  
-     - Mandatory: CredentialDeployment *
+    KeyGen2 may be used in the following modes:
+
+     - Mandatory: PlatformNegotiation
+
+     - Action="create": ProvisioningInitialization KeyInitialization   
+     - Action="unlock": ProvisioningInitialization [CredentialDiscovery] 
+     - Action="manage": ProvisioningInitialization [CredentialDiscovery] [KeyInitialization] 
+     - Action="resume": N/A
+
+     - Mandatory: ProvisioningFinalization *
 
     * Note that a deferred certification process ends after KeyInitialization.
 
@@ -36,7 +39,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 27-November-2010 
+    Revised: 04-December-2010 
     Author: Anders Rundgren
 
     Copyright 2006-2010 WebPKI.org (http://webpki.org).
@@ -54,11 +57,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20101127#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20101204#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20101127#"
+           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20101204#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -202,10 +205,10 @@
 
 
    <!--==========================================================================================
-                   The primary (top-level) provisioning session request object
+                   The primary (top-level) provisioning initialization request object
    ===========================================================================================-->
 
-   <xs:element name="ProvisioningSessionRequest">
+   <xs:element name="ProvisioningInitializationRequest">
       <xs:complexType>
          <xs:sequence>
 
@@ -295,15 +298,15 @@
    </xs:element>
 
    <!--==========================================================================================
-                     End of provisioning session request object definition
+                     End of provisioning initialization request object definition
    ===========================================================================================-->
 
 
    <!--==========================================================================================
-                   The primary (top-level) provisioning session response object
+                   The primary (top-level) provisioning initialization response object
    ===========================================================================================-->
 
-   <xs:element name="ProvisioningSessionResponse">
+   <xs:element name="ProvisioningInitializationResponse">
       <xs:complexType>
          <xs:sequence>
 
@@ -346,10 +349,10 @@
          <!-- "ID" holds the SKS-generated ClientSessionID -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
-         <!-- MUST be equal to "ProvisioningSessionRequest/@ID" -->
+         <!-- MUST be equal to "ProvisioningInitializationRequest/@ID" -->
          <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
-         <!-- Copy of "ProvisioningSessionRequest/@ServerTime" -->
+         <!-- Copy of "ProvisioningInitializationRequest/@ServerTime" -->
          <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
 
          <!-- The provisioning client's local clock is a mandatory item -->
@@ -361,14 +364,14 @@
 
          <!-- The "ServerCertificateFingerprint" attribute MUST be populated with
               the SHA256 hash of the associated server certificate if the
-              "ProvisioningSessionResponse" was invoked over HTTPS -->
+              "ProvisioningInitializationResponse" was invoked over HTTPS -->
          <xs:attribute name="ServerCertificateFingerprint" type="xs:base64Binary" use="optional"/>
 
       </xs:complexType>
    </xs:element>
 
    <!--==========================================================================================
-                     End of provisioning session response object definition
+                     End of provisioning initialization response object definition
    ===========================================================================================-->
 
 
@@ -414,7 +417,7 @@
               within a specific session -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
-         <!-- MUST be equal to"ProvisioningSessionResponse/@ID"
+         <!-- MUST be equal to"ProvisioningInitializationResponse/@ID"
               within a specific session -->
          <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
 
@@ -464,7 +467,7 @@
          <!-- "ID" holds the SKS-generated ClientSessionID -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
-         <!-- MUST be equal to "ProvisioningSessionRequest/@ID" -->
+         <!-- MUST be equal to "ProvisioningInitializationRequest/@ID" -->
          <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
 
       </xs:complexType>
@@ -518,7 +521,7 @@
               like required by some certification schemes.  The attribute
               below informs the client software if the current process is
               to be terminated after the "KeyInitializationResponse" message
-              has been sent.  The resumed session MUST use Action="finalize".
+              has been sent.  The resumed session MUST use Action="resume".
               Default:  false -->
          <xs:attribute name="DeferredCertification" type="xs:boolean" use="optional"/>
 
@@ -526,7 +529,7 @@
               within a specific session -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
-         <!-- MUST be equal to"ProvisioningSessionResponse/@ID"
+         <!-- MUST be equal to"ProvisioningInitializationResponse/@ID"
               within a specific session -->
          <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
 
@@ -581,10 +584,10 @@
 
 
    <!--==========================================================================================
-                    The primary (top-level) credential deployment request object
+                    The primary (top-level) provisioning finalization request object
    ===========================================================================================-->
 
-   <xs:element name="CredentialDeploymentRequest">
+   <xs:element name="ProvisioningFinalizationRequest">
       <xs:complexType>
          <xs:sequence>
 
@@ -605,7 +608,7 @@
 
          </xs:sequence>
 
-         <!-- MUST be equal to "ProvisioningSessionResponse/@ID"
+         <!-- MUST be equal to "ProvisioningInitializationResponse/@ID"
               within a specific session -->
          <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
 
@@ -626,15 +629,15 @@
    </xs:element>
 
    <!--==========================================================================================
-                      End of credential deployment request object definition
+                      End of provisioning finalization request object definition
    ===========================================================================================-->
 
    
    <!--==========================================================================================
-                  The primary (top-level) credential deployment response object
+                  The primary (top-level) provisioning finalization response object
    ===========================================================================================-->
 
-   <xs:element name="CredentialDeploymentResponse">
+   <xs:element name="ProvisioningFinalizationResponse">
       <xs:complexType>
          <xs:sequence>
 
@@ -658,7 +661,7 @@
    </xs:element>
 
    <!--==========================================================================================
-                         End of credential deployment response object definition
+                         End of provisioning finalization object definition
    ===========================================================================================-->
 
 
@@ -1357,7 +1360,7 @@
          <xs:enumeration value="create"/>
          <xs:enumeration value="unlock"/>
          <xs:enumeration value="manage"/>
-         <xs:enumeration value="finalize"/>
+         <xs:enumeration value="resume"/>
       </xs:restriction>
    </xs:simpleType>
 

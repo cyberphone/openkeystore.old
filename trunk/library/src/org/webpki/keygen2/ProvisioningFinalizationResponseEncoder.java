@@ -25,7 +25,7 @@ import org.webpki.xml.ServerCookie;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class CredentialDeploymentResponseEncoder extends CredentialDeploymentResponse
+public class ProvisioningFinalizationResponseEncoder extends ProvisioningFinalizationResponse
   {
 
     String client_session_id;
@@ -41,10 +41,10 @@ public class CredentialDeploymentResponseEncoder extends CredentialDeploymentRes
 
     // Constructors
 
-    public CredentialDeploymentResponseEncoder (CredentialDeploymentRequestDecoder cre_dep_dec, byte[] attestation)
+    public ProvisioningFinalizationResponseEncoder (ProvisioningFinalizationRequestDecoder fin_prov_request, byte[] attestation)
       {
-        client_session_id = cre_dep_dec.getClientSessionID ();
-        server_session_id = cre_dep_dec.getServerSessionID ();
+        client_session_id = fin_prov_request.getClientSessionID ();
+        server_session_id = fin_prov_request.getServerSessionID ();
         this.attestation = attestation;
       }
 

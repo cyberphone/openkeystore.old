@@ -35,7 +35,7 @@ import org.webpki.crypto.VerifierInterface;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class ProvisioningSessionRequestDecoder extends ProvisioningSessionRequest
+public class BeginProvisioningRequestDecoder extends BeginProvisioningRequest
   {
     private XMLSignatureWrapper signature;  // Optional
 

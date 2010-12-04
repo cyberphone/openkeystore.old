@@ -25,9 +25,9 @@ import org.webpki.xml.DOMWriterHelper;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-abstract class CredentialDeploymentResponse extends XMLObjectWrapper 
+abstract class ProvisioningFinalizationResponse extends XMLObjectWrapper 
   {
-    CredentialDeploymentResponse () {}
+    ProvisioningFinalizationResponse () {}
 
 
     public void init () throws IOException
@@ -50,7 +50,7 @@ abstract class CredentialDeploymentResponse extends XMLObjectWrapper
     
     public String element ()
       {
-        return CREDENTIAL_DEPLOYMENT_RESPONSE_ELEM;
+        return PROVISIONING_FINALIZATION_RESPONSE_ELEM;
       }
 
 

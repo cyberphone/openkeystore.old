@@ -30,9 +30,9 @@ import org.webpki.crypto.CertificateUtil;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-abstract class CredentialDeploymentRequest extends XMLObjectWrapper 
+abstract class ProvisioningFinalizationRequest extends XMLObjectWrapper 
   {
-    CredentialDeploymentRequest () {}
+    ProvisioningFinalizationRequest () {}
 
 
     static void checkCertificateOrder (X509Certificate[] eepath, X509Certificate[] capath) throws IOException
@@ -65,7 +65,7 @@ abstract class CredentialDeploymentRequest extends XMLObjectWrapper
     
     public String element ()
       {
-        return CREDENTIAL_DEPLOYMENT_REQUEST_ELEM;
+        return PROVISIONING_FINALIZATION_REQUEST_ELEM;
       }
 
 

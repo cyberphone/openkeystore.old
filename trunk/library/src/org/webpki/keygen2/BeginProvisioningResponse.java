@@ -18,8 +18,9 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
+
 import java.util.Date;
 
 import org.webpki.xml.ServerCookie;
@@ -32,28 +33,25 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-abstract class ProvisioningSessionRequest extends XMLObjectWrapper
+abstract class BeginProvisioningResponse extends XMLObjectWrapper
   {
-    ProvisioningSessionRequest () {}
+    BeginProvisioningResponse () {}
 
     String server_session_id;
+    
+    String client_session_id;
 
     Date server_time;
-
-    String submit_url;
     
-    ECPublicKey server_ephemeral_key;
+    Date client_time;
     
-    PublicKey key_management_key;
+    ECPublicKey client_ephemeral_key;
+
+    byte[] attestation;
     
-    int session_life_time;
-
-    short session_key_limit;
-
     ServerCookie server_cookie;
-
-    String session_key_algorithm = KeyGen2URIs.ALGORITHMS.SESSION_KEY_1;
-
+    
+    X509Certificate[] device_certificate_path;
 
     public void init () throws IOException
       {
@@ -76,7 +74,7 @@ abstract class ProvisioningSessionRequest extends XMLObjectWrapper
     
     public String element ()
       {
-        return "ProvisioningSessionRequest";
+        return PROVISIONING_INITIALIZATION_RESPONSE_ELEM;
       }
 
 

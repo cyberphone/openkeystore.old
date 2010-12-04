@@ -82,10 +82,10 @@ import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.Action;
-import org.webpki.keygen2.CredentialDeploymentRequestDecoder;
-import org.webpki.keygen2.CredentialDeploymentRequestEncoder;
-import org.webpki.keygen2.CredentialDeploymentResponseDecoder;
-import org.webpki.keygen2.CredentialDeploymentResponseEncoder;
+import org.webpki.keygen2.ProvisioningFinalizationRequestDecoder;
+import org.webpki.keygen2.ProvisioningFinalizationRequestEncoder;
+import org.webpki.keygen2.ProvisioningFinalizationResponseDecoder;
+import org.webpki.keygen2.ProvisioningFinalizationResponseEncoder;
 import org.webpki.keygen2.CredentialDiscoveryRequestDecoder;
 import org.webpki.keygen2.CredentialDiscoveryRequestEncoder;
 import org.webpki.keygen2.CredentialDiscoveryResponseDecoder;
@@ -107,10 +107,10 @@ import org.webpki.keygen2.PlatformNegotiationRequestDecoder;
 import org.webpki.keygen2.PlatformNegotiationRequestEncoder;
 import org.webpki.keygen2.PlatformNegotiationResponseDecoder;
 import org.webpki.keygen2.PlatformNegotiationResponseEncoder;
-import org.webpki.keygen2.ProvisioningSessionRequestDecoder;
-import org.webpki.keygen2.ProvisioningSessionRequestEncoder;
-import org.webpki.keygen2.ProvisioningSessionResponseDecoder;
-import org.webpki.keygen2.ProvisioningSessionResponseEncoder;
+import org.webpki.keygen2.BeginProvisioningRequestDecoder;
+import org.webpki.keygen2.BeginProvisioningRequestEncoder;
+import org.webpki.keygen2.BeginProvisioningResponseDecoder;
+import org.webpki.keygen2.BeginProvisioningResponseEncoder;
 import org.webpki.keygen2.ServerCredentialStore;
 import org.webpki.keygen2.ServerCryptoInterface;
 
@@ -246,7 +246,7 @@ public class KeyGen2Test
         
         KeyInitializationRequestDecoder key_init_request;
         
-        ProvisioningSessionRequestDecoder prov_sess_req;
+        BeginProvisioningRequestDecoder prov_sess_req;
         
         CredentialDiscoveryRequestDecoder cre_disc_req;
         
@@ -256,10 +256,10 @@ public class KeyGen2Test
           {
             client_xml_cache = new XMLSchemaCache ();
             client_xml_cache.addWrapper (PlatformNegotiationRequestDecoder.class);
-            client_xml_cache.addWrapper (ProvisioningSessionRequestDecoder.class);
+            client_xml_cache.addWrapper (BeginProvisioningRequestDecoder.class);
             client_xml_cache.addWrapper (CredentialDiscoveryRequestDecoder.class);
             client_xml_cache.addWrapper (KeyInitializationRequestDecoder.class);
-            client_xml_cache.addWrapper (CredentialDeploymentRequestDecoder.class);
+            client_xml_cache.addWrapper (ProvisioningFinalizationRequestDecoder.class);
           }
 
         private void abort (String message) throws IOException, SKSException
@@ -268,7 +268,7 @@ public class KeyGen2Test
             throw new IOException (message);
           }
         
-        private void postProvisioning (CredentialDeploymentRequestDecoder.PostOperation post_operation, int handle) throws IOException, GeneralSecurityException
+        private void postProvisioning (ProvisioningFinalizationRequestDecoder.PostOperation post_operation, int handle) throws IOException, GeneralSecurityException
           {
             EnumeratedProvisioningSession old_provisioning_session = new EnumeratedProvisioningSession ();
             while (true)
@@ -301,15 +301,15 @@ public class KeyGen2Test
                       {
                         switch (post_operation.getPostOperation ())
                           {
-                            case CredentialDeploymentRequestDecoder.PostOperation.CLONE_KEY_PROTECTION:
+                            case ProvisioningFinalizationRequestDecoder.PostOperation.CLONE_KEY_PROTECTION:
                               sks.pp_cloneKeyProtection (handle, ek.getKeyHandle (), post_operation.getAuthorization (), post_operation.getMAC ());
                               break;
 
-                            case CredentialDeploymentRequestDecoder.PostOperation.UPDATE_KEY:
+                            case ProvisioningFinalizationRequestDecoder.PostOperation.UPDATE_KEY:
                               sks.pp_updateKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMAC ());
                               break;
 
-                            case CredentialDeploymentRequestDecoder.PostOperation.UNLOCK_KEY:
+                            case ProvisioningFinalizationRequestDecoder.PostOperation.UNLOCK_KEY:
                               sks.pp_unlockKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMAC ());
                               break;
 
@@ -362,7 +362,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] provSessResponse (byte[] xmldata) throws IOException
           {
-            prov_sess_req = (ProvisioningSessionRequestDecoder) client_xml_cache.parse (xmldata);
+            prov_sess_req = (BeginProvisioningRequestDecoder) client_xml_cache.parse (xmldata);
             Date client_time = new Date ();
             ProvisioningSession sess = 
                   sks.createProvisioningSession (prov_sess_req.getSessionKeyAlgorithm (),
@@ -375,8 +375,8 @@ public class KeyGen2Test
                                                  prov_sess_req.getSessionKeyLimit ());
             provisioning_handle = sess.getProvisioningHandle ();
             
-            ProvisioningSessionResponseEncoder prov_sess_response = 
-                  new ProvisioningSessionResponseEncoder (sess.getClientEphemeralKey (),
+            BeginProvisioningResponseEncoder prov_sess_response = 
+                  new BeginProvisioningResponseEncoder (sess.getClientEphemeralKey (),
                                                           prov_sess_req.getServerSessionID (),
                                                           sess.getClientSessionID (),
                                                           prov_sess_req.getServerTime (),
@@ -521,10 +521,10 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Get the certificates and attributes and return a success message
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] creDepResponse (byte[] xmldata) throws IOException, GeneralSecurityException
+        byte[] creFinalizeResponse (byte[] xmldata) throws IOException, GeneralSecurityException
           {
-            CredentialDeploymentRequestDecoder cred_dep_request =
-                           (CredentialDeploymentRequestDecoder) client_xml_cache.parse (xmldata);
+            ProvisioningFinalizationRequestDecoder fin_prov_request =
+                           (ProvisioningFinalizationRequestDecoder) client_xml_cache.parse (xmldata);
             /* 
                Note: we could have used the saved provisioning_handle but that would not
                work for certifications that are delayed.  The following code is working
@@ -537,11 +537,11 @@ public class KeyGen2Test
                 if (!eps.isValid ())
                   {
                     abort ("Provisioning session not found:" + 
-                        cred_dep_request.getClientSessionID () + "/" +
-                        cred_dep_request.getServerSessionID ());
+                        fin_prov_request.getClientSessionID () + "/" +
+                        fin_prov_request.getServerSessionID ());
                   }
-                if (eps.getClientSessionID ().equals(cred_dep_request.getClientSessionID ()) &&
-                    eps.getServerSessionID ().equals (cred_dep_request.getServerSessionID ()))
+                if (eps.getClientSessionID ().equals(fin_prov_request.getClientSessionID ()) &&
+                    eps.getServerSessionID ().equals (fin_prov_request.getServerSessionID ()))
                   {
                     break;
                   }
@@ -550,7 +550,7 @@ public class KeyGen2Test
             //////////////////////////////////////////////////////////////////////////
             // Final check, do these keys match the request?
             //////////////////////////////////////////////////////////////////////////
-            for (CredentialDeploymentRequestDecoder.DeployedKeyEntry key : cred_dep_request.getDeployedKeyEntrys ())
+            for (ProvisioningFinalizationRequestDecoder.DeployedKeyEntry key : fin_prov_request.getDeployedKeyEntrys ())
               {
                 int key_handle = sks.getKeyHandle (eps.getProvisioningHandle (), key.getID ());
                 sks.setCertificatePath (key_handle, key.getCertificatePath (), key.getMAC ());
@@ -578,7 +578,7 @@ public class KeyGen2Test
                 //////////////////////////////////////////////////////////////////////////
                 // There may be extensions
                 //////////////////////////////////////////////////////////////////////////
-                for (CredentialDeploymentRequestDecoder.Extension extension : key.getExtensions ())
+                for (ProvisioningFinalizationRequestDecoder.Extension extension : key.getExtensions ())
                   {
                     sks.addExtension (key_handle,
                                       extension.getExtensionType (),
@@ -591,7 +591,7 @@ public class KeyGen2Test
                 //////////////////////////////////////////////////////////////////////////
                 // There may be an pp_updateKey or pp_cloneKeyProtection
                 //////////////////////////////////////////////////////////////////////////
-                CredentialDeploymentRequestDecoder.PostOperation post_operation = key.getPostOperation ();
+                ProvisioningFinalizationRequestDecoder.PostOperation post_operation = key.getPostOperation ();
                 if (post_operation != null)
                   {
                     postProvisioning (post_operation, key_handle);
@@ -601,7 +601,7 @@ public class KeyGen2Test
             //////////////////////////////////////////////////////////////////////////
             // There may be any number of pp_unlockKey
             //////////////////////////////////////////////////////////////////////////
-            for (CredentialDeploymentRequestDecoder.PostOperation pp_unl : cred_dep_request.getPostProvisioningUnlockKeys ())
+            for (ProvisioningFinalizationRequestDecoder.PostOperation pp_unl : fin_prov_request.getPostProvisioningUnlockKeys ())
               {
                 postProvisioning (pp_unl, eps.getProvisioningHandle ());
               }
@@ -609,7 +609,7 @@ public class KeyGen2Test
             //////////////////////////////////////////////////////////////////////////
             // There may be any number of pp_deleteKey
             //////////////////////////////////////////////////////////////////////////
-            for (CredentialDeploymentRequestDecoder.PostOperation pp_del : cred_dep_request.getPostProvisioningDeleteKeys ())
+            for (ProvisioningFinalizationRequestDecoder.PostOperation pp_del : fin_prov_request.getPostProvisioningDeleteKeys ())
               {
                 postProvisioning (pp_del, eps.getProvisioningHandle ());
               }
@@ -617,12 +617,12 @@ public class KeyGen2Test
             //////////////////////////////////////////////////////////////////////////
             // Create final and attested message
             //////////////////////////////////////////////////////////////////////////
-            CredentialDeploymentResponseEncoder cre_dep_response = 
-                      new CredentialDeploymentResponseEncoder (cred_dep_request,
+            ProvisioningFinalizationResponseEncoder fin_prov_response = 
+                      new ProvisioningFinalizationResponseEncoder (fin_prov_request,
                                                                sks.closeProvisioningSession (eps.getProvisioningHandle (),
-                                                                                             cred_dep_request.getCloseSessionNonce (),
-                                                                                             cred_dep_request.getCloseSessionMAC ()));
-            return cre_dep_response.writeXML ();
+                                                                                             fin_prov_request.getCloseSessionNonce (),
+                                                                                             fin_prov_request.getCloseSessionMAC ()));
+            return fin_prov_response.writeXML ();
           }
       }
     
@@ -634,7 +634,7 @@ public class KeyGen2Test
         
         static final String KEY_INIT_URL = "http://issuer.example.com/keyinit";
 
-        static final String CRE_DEP_URL = "http://issuer.example.com/credep";
+        static final String FIN_PROV_URL = "http://issuer.example.com/finalize";
 
         static final String CRE_DISC_URL = "http://issuer.example.com/credisc";
 
@@ -660,9 +660,9 @@ public class KeyGen2Test
 
         KeyInitializationRequestEncoder key_init_request;
         
-        ProvisioningSessionRequestEncoder prov_sess_request;
+        BeginProvisioningRequestEncoder prov_sess_request;
 
-        ProvisioningSessionResponseDecoder prov_sess_response;
+        BeginProvisioningResponseDecoder prov_sess_response;
         
         ServerCredentialStore server_credential_store;
         
@@ -803,10 +803,10 @@ public class KeyGen2Test
           {
             server_xml_cache = new XMLSchemaCache ();
             server_xml_cache.addWrapper (PlatformNegotiationResponseDecoder.class);
-            server_xml_cache.addWrapper (ProvisioningSessionResponseDecoder.class);
+            server_xml_cache.addWrapper (BeginProvisioningResponseDecoder.class);
             server_xml_cache.addWrapper (CredentialDiscoveryResponseDecoder.class);
             server_xml_cache.addWrapper (KeyInitializationResponseDecoder.class);
-            server_xml_cache.addWrapper (CredentialDeploymentResponseDecoder.class);
+            server_xml_cache.addWrapper (ProvisioningFinalizationResponseDecoder.class);
           }
         
         void getProvSess (XMLObjectWrapper xml_object) throws IOException
@@ -814,7 +814,7 @@ public class KeyGen2Test
             ////////////////////////////////////////////////////////////////////////////////////
             // Begin with creating the "SessionKey" that holds just about everything
             ////////////////////////////////////////////////////////////////////////////////////
-            prov_sess_response = (ProvisioningSessionResponseDecoder) xml_object;
+            prov_sess_response = (BeginProvisioningResponseDecoder) xml_object;
             prov_sess_response.verifyAndGenerateSessionKey (server_sess_key, prov_sess_request);
 
             ////////////////////////////////////////////////////////////////////////////////////
@@ -872,7 +872,7 @@ public class KeyGen2Test
         byte[] provSessRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             PlatformNegotiationResponseDecoder platform_response = (PlatformNegotiationResponseDecoder) server_xml_cache.parse (xmldata);
-            prov_sess_request =  new ProvisioningSessionRequestEncoder (server_sess_key.generateEphemeralKey (),
+            prov_sess_request =  new BeginProvisioningRequestEncoder (server_sess_key.generateEphemeralKey (),
                                                                         server_session_id,
                                                                         ISSUER_URI,
                                                                         10000,
@@ -911,7 +911,7 @@ public class KeyGen2Test
         byte[] keyInitRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             XMLObjectWrapper xml_object = server_xml_cache.parse (xmldata);
-            if (xml_object instanceof ProvisioningSessionResponseDecoder)
+            if (xml_object instanceof BeginProvisioningResponseDecoder)
               {
                 getProvSess (xml_object);
               }
@@ -1028,7 +1028,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Get the key init response and respond with certified public keys and attributes
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] creDepRequest (byte[] xmldata) throws IOException, GeneralSecurityException
+        byte[] creFinalizeRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             if (plain_unlock_key == null)
               {
@@ -1125,21 +1125,21 @@ public class KeyGen2Test
                                                                       plain_unlock_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
                                                                       plain_unlock_key.server_km);
               }
-            CredentialDeploymentRequestEncoder credential_deployment_request 
-                           = new CredentialDeploymentRequestEncoder (CRE_DEP_URL, 
+            ProvisioningFinalizationRequestEncoder fin_prov_request 
+                           = new ProvisioningFinalizationRequestEncoder (FIN_PROV_URL, 
                                                                      server_credential_store,
                                                                      server_sess_key);
 
-            return credential_deployment_request.writeXML ();
+            return fin_prov_request.writeXML ();
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally we get the attestested response
         ///////////////////////////////////////////////////////////////////////////////////
-        void creDepResponse (byte[] xmldata) throws IOException
+        void creFinalizeResponse (byte[] xmldata) throws IOException
           {
-            CredentialDeploymentResponseDecoder cre_dep_response = (CredentialDeploymentResponseDecoder) server_xml_cache.parse (xmldata);
-            cre_dep_response.verifyProvisioningResult (server_credential_store, server_sess_key);
+            ProvisioningFinalizationResponseDecoder fin_prov_response = (ProvisioningFinalizationResponseDecoder) server_xml_cache.parse (xmldata);
+            fin_prov_response.verifyProvisioningResult (server_credential_store, server_sess_key);
           }
       }
     
@@ -1218,14 +1218,14 @@ public class KeyGen2Test
           {
             xmlschemas.addWrapper (PlatformNegotiationRequestDecoder.class);
             xmlschemas.addWrapper (PlatformNegotiationResponseDecoder.class);
-            xmlschemas.addWrapper (ProvisioningSessionRequestDecoder.class);
-            xmlschemas.addWrapper (ProvisioningSessionResponseDecoder.class);
+            xmlschemas.addWrapper (BeginProvisioningRequestDecoder.class);
+            xmlschemas.addWrapper (BeginProvisioningResponseDecoder.class);
             xmlschemas.addWrapper (CredentialDiscoveryRequestDecoder.class);
             xmlschemas.addWrapper (CredentialDiscoveryResponseDecoder.class);
             xmlschemas.addWrapper (KeyInitializationRequestDecoder.class);
             xmlschemas.addWrapper (KeyInitializationResponseDecoder.class);
-            xmlschemas.addWrapper (CredentialDeploymentRequestDecoder.class);
-            xmlschemas.addWrapper (CredentialDeploymentResponseDecoder.class);
+            xmlschemas.addWrapper (ProvisioningFinalizationRequestDecoder.class);
+            xmlschemas.addWrapper (ProvisioningFinalizationResponseDecoder.class);
           }
         
         void perform () throws Exception
@@ -1276,9 +1276,9 @@ public class KeyGen2Test
                 xml = fileLogger (server.keyInitRequest (xml));
                 xml = fileLogger (client.KeyInitResponse (xml));
               }
-            xml = fileLogger (server.creDepRequest (xml));
-            xml = fileLogger (client.creDepResponse (xml));
-            server.creDepResponse (xml);
+            xml = fileLogger (server.creFinalizeRequest (xml));
+            xml = fileLogger (client.creFinalizeResponse (xml));
+            server.creFinalizeResponse (xml);
             writeString ("\n");
             EnumeratedKey ek = new EnumeratedKey ();
             while ((ek = sks.enumerateKeys (ek)).isValid ())

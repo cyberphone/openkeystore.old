@@ -1189,8 +1189,8 @@ public class ServerCredentialStore implements Serializable
  
     // Constructor
 
-    public ServerCredentialStore (ProvisioningSessionResponseDecoder prov_sess_response,
-                                  ProvisioningSessionRequestEncoder prov_sess_request) throws IOException
+    public ServerCredentialStore (BeginProvisioningResponseDecoder prov_sess_response,
+                                  BeginProvisioningRequestEncoder prov_sess_request) throws IOException
       {
         this.client_session_id = prov_sess_response.client_session_id;
         this.server_session_id = prov_sess_request.server_session_id;
