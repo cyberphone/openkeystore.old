@@ -1435,9 +1435,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         return alg;
       }
 
-    void verifyExportDeleteProtection (byte protection, byte min_protection_val, Provisioning provisioning) throws SKSException
+    void verifyExportDeleteProtection (byte actual_protection, byte min_protection_val, Provisioning provisioning) throws SKSException
       {
-        if (protection >= min_protection_val && protection <= EXPORT_DELETE_PROTECTION_PUK)
+        if (actual_protection >= min_protection_val && actual_protection <= EXPORT_DELETE_PROTECTION_PUK)
           {
             provisioning.abort ("Protection object lacks a PIN or PUK object");
           }
