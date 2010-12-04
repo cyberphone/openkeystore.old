@@ -2623,7 +2623,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Apply the SP800-56A C(2, 0, ECC CDH) algorithm
+            // Apply the SP800-56A ECC CDH primitive
             ///////////////////////////////////////////////////////////////////////////////////
             KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
             key_agreement.init (kp.getPrivate ());
@@ -2631,7 +2631,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             byte[] Z = key_agreement.generateSecret ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // But use a custom KDF
+            // Use a custom KDF
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder kdf = new MacBuilder (Z);
             kdf.addString (client_session_id);

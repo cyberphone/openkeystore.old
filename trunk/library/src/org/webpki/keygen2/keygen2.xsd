@@ -18,9 +18,19 @@
     10-pass "combo" three years later.
 
     Properly implemented the current incarnation provides E2ES (End to End Security),
-    VSDs (Virtual Security Domains), and TOP (Transaction Oriented Provisioning),
-    which is mainly intended for mobile phones with embedded security hardware
-    hosting credentials from multiple and independent issuers.
+    VSDs (Virtual Security Domains), and Transaction Oriented Provisioning, which is
+    primarily intended for mobile phones with embedded security hardware hosting
+    credentials from multiple and independent issuers.
+
+    KeyGen2 may be used in the following modes: 
+     - Mandatory: PlatformNegotiation 
+     - Action="create": ProvisioningSession KeyInitialization   
+     - Action="unlock": ProvisioningSession [CredentialDiscovery] 
+     - Action="manage": ProvisioningSession [CredentialDiscovery] [KeyInitialization] 
+     - Action="finalize":  
+     - Mandatory: CredentialDeployment *
+
+    * Note that a deferred certification process ends after KeyInitialization.
 
     "Perfection is achieved, not when there is nothing more to add, but when
     there is nothing left to take away" [Antoine de Saint-Exupery]
@@ -508,7 +518,8 @@
               like required by some certification schemes.  The attribute
               below informs the client software if the current process is
               to be terminated after the "KeyInitializationResponse" message
-              has been sent.  Default:  false -->
+              has been sent.  The resumed session MUST use Action="finalize".
+              Default:  false -->
          <xs:attribute name="DeferredCertification" type="xs:boolean" use="optional"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
@@ -1346,6 +1357,7 @@
          <xs:enumeration value="create"/>
          <xs:enumeration value="unlock"/>
          <xs:enumeration value="manage"/>
+         <xs:enumeration value="finalize"/>
       </xs:restriction>
    </xs:simpleType>
 

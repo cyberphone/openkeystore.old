@@ -22,7 +22,8 @@ public enum Action
   {
     CREATE       ("create",  false, true),
     UNLOCK       ("unlock",  true, false),
-    MANAGE       ("manage",  true, true);
+    MANAGE       ("manage",  true, true),
+    FINALIZE     ("finalize",  true, true);
 
     private final String xml_name;       // As expressed in XML
     
