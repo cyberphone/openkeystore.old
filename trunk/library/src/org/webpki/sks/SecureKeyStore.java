@@ -31,7 +31,7 @@ public interface SecureKeyStore
     // Core Provisioning API
     ///////////////////////////////////////////////////////////////////////////////////
 
-    public ProvisioningSession createProvisioningSession (String session_key_algorithm,
+    public ProvisioningSession createProvisioningSession (String algorithm,
                                                           String server_session_id,
                                                           ECPublicKey server_ephemeral_key,
                                                           String issuer_uri,
@@ -52,7 +52,7 @@ public interface SecureKeyStore
 
     public KeyPair createKeyPair (int provisioning_handle,
                                   String id,
-                                  String attestation_algorithm,
+                                  String algorithm,
                                   byte[] server_seed,
                                   boolean device_pin_protection,
                                   int pin_policy_handle,

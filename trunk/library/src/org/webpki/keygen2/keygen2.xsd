@@ -282,10 +282,10 @@
             </xs:simpleType>
          </xs:attribute>
 
-         <!-- "SessionKeyAlgorithm" specifies the algorithm to use for creating an
+         <!-- "Algorithm" specifies the algorithm to use for creating an
               SKS "SessionKey".  Currently the only documented algorithm URI is:
               "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1" -->
-         <xs:attribute name="SessionKeyAlgorithm" type="xs:anyURI" use="required"/>
+         <xs:attribute name="Algorithm" type="xs:anyURI" use="required"/>
 
          <!-- Where to HTTP POST the provisioning session response.
               Note that applicable session cookies MUST be submitted
@@ -538,10 +538,10 @@
               as well -->
          <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
 
-         <!-- "KeyAttestationAlgorithm" is mandatory.  Currently the only
-               documented key attestation algorithm is:
+         <!-- "Algorithm" is mandatory.  Currently the only
+               documented key generation and attestation algorithm is:
               "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1" -->
-         <xs:attribute name="KeyAttestationAlgorithm" type="xs:anyURI" use="required"/>
+         <xs:attribute name="Algorithm" type="xs:anyURI" use="required"/>
 
       </xs:complexType>
    </xs:element>

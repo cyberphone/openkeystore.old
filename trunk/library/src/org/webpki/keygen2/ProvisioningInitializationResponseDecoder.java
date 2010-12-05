@@ -120,7 +120,7 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
             kdf.addArray (device_certificate_path[0].getEncoded ());
 
             MacGenerator session_key_mac_data = new MacGenerator ();
-            session_key_mac_data.addString (prov_sess_request.session_key_algorithm);
+            session_key_mac_data.addString (prov_sess_request.algorithm);
             session_key_mac_data.addArray (prov_sess_request.server_ephemeral_key.getEncoded ());
             session_key_mac_data.addArray (client_ephemeral_key.getEncoded ());
             session_key_mac_data.addArray (prov_sess_request.key_management_key == null ? new byte[0] : prov_sess_request.key_management_key.getEncoded ());

@@ -69,8 +69,6 @@ public interface KeyGen2Constants
 
     String SESSION_KEY_LIMIT_ATTR                    = "SessionKeyLimit";
 
-    String SESSION_KEY_ALGORITHM_ATTR                = "SessionKeyAlgorithm";
-
     String SESSION_LIFE_TIME_ATTR                    = "SessionLifeTime";
 
     String EXPORT_PROTECTION_ATTR                    = "ExportProtection";
@@ -100,8 +98,6 @@ public interface KeyGen2Constants
     String DEFERRED_CERTIFICATION_ATTR               = "DeferredCertification";
 
     String ENDORSED_ALGORITHMS_ATTR                  = "EndorsedAlgorithms";
-
-    String KEY_ATTESTATION_ALGORITHM_ATTR            = "KeyAttestationAlgorithm";
 
     String AUTHORIZATION_ATTR                        = "Authorization";
 

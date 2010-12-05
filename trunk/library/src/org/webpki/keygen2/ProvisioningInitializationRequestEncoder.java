@@ -73,7 +73,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
 
     public void setSessionKeyAlgorithm (String session_key_algorithm)
       {
-        super.session_key_algorithm = session_key_algorithm;
+        super.algorithm = session_key_algorithm;
       }
 
     public void setServerTime (Date server_time)
@@ -124,7 +124,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
 
         wr.setIntAttribute (SESSION_KEY_LIMIT_ATTR, session_key_limit);
 
-        wr.setStringAttribute (SESSION_KEY_ALGORITHM_ATTR, session_key_algorithm);
+        wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, algorithm);
 
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key

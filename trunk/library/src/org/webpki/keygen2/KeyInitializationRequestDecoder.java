@@ -602,11 +602,11 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
         return server_cookie;
       }
     
-    String key_attestation_algorithm;
+    String algorithm;
     
-    public String getKeyAttestationAlgorithm ()
+    public String getAlgorithm ()
       {
-        return key_attestation_algorithm;
+        return algorithm;
       }
 
 
@@ -650,7 +650,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
         deferred_certification = ah.getBooleanConditional (DEFERRED_CERTIFICATION_ATTR);
 
-        key_attestation_algorithm = ah.getString (KEY_ATTESTATION_ALGORITHM_ATTR);
+        algorithm = ah.getString (XMLSignatureWrapper.ALGORITHM_ATTR);
 
         rd.getChild ();
 

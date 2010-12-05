@@ -66,7 +66,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
     
     public String getSessionKeyAlgorithm ()
       {
-        return session_key_algorithm;
+        return algorithm;
       }
 
 
@@ -118,7 +118,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
 
         submit_url = ah.getString (SUBMIT_URL_ATTR);
         
-        session_key_algorithm = ah.getString (SESSION_KEY_ALGORITHM_ATTR);
+        algorithm = ah.getString (XMLSignatureWrapper.ALGORITHM_ATTR);
         
         session_key_limit = (short)ah.getInt (SESSION_KEY_LIMIT_ATTR);
         

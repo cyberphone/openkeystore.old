@@ -495,7 +495,7 @@ public class KeyGen2Test
                   }
                 KeyPair kpr = sks.createKeyPair (provisioning_handle,
                                                  key.getID (),
-                                                 key_init_request.getKeyAttestationAlgorithm (),
+                                                 key_init_request.getAlgorithm (),
                                                  key.getServerSeed (),
                                                  key.isDevicePINProtected (),
                                                  pin_policy_handle,

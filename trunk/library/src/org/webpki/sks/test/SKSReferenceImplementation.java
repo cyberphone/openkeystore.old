@@ -2581,7 +2581,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public ProvisioningSession createProvisioningSession (String session_key_algorithm,
+    public ProvisioningSession createProvisioningSession (String algorithm,
                                                           String server_session_id,
                                                           ECPublicKey server_ephemeral_key,
                                                           String issuer_uri,
@@ -2590,9 +2590,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                                           int session_life_time,
                                                           short session_key_limit) throws SKSException
       {
-        if (!session_key_algorithm.equals (ALGORITHM_SESSION_KEY_ATTEST_1))
+        if (!algorithm.equals (ALGORITHM_SESSION_KEY_ATTEST_1))
           {
-            abort ("Unknown \"SessionKeyAlgorithm\" : " + session_key_algorithm);
+            abort ("Unknown \"Algorithm\" : " + algorithm);
           }
         if (issuer_uri.length () == 0 || issuer_uri.length () >  MAX_LENGTH_URI)
           {
@@ -2644,7 +2644,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             // SessionKey attested data
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder ska = new MacBuilder (session_key);
-            ska.addString (session_key_algorithm);
+            ska.addString (algorithm);
             ska.addArray (server_ephemeral_key.getEncoded ());
             ska.addArray (client_ephemeral_key.getEncoded ());
             ska.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
@@ -2931,7 +2931,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public KeyPair createKeyPair (int provisioning_handle,
                                   String id,
-                                  String attestation_algorithm,
+                                  String algorithm,
                                   byte[] server_seed,
                                   boolean device_pin_protection,
                                   int pin_policy_handle,
@@ -2955,9 +2955,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Validate input as much as possible
         ///////////////////////////////////////////////////////////////////////////////////
-        if (!attestation_algorithm.equals (ALGORITHM_KEY_ATTEST_1))
+        if (!algorithm.equals (ALGORITHM_KEY_ATTEST_1))
           {
-            provisioning.abort ("Unsupported \"AttestationAlgorithm\" : " + attestation_algorithm, SKSException.ERROR_ALGORITHM);
+            provisioning.abort ("Unsupported \"Algorithm\" : " + algorithm, SKSException.ERROR_ALGORITHM);
           }
         if (server_seed.length != 32)
           {
@@ -2999,7 +2999,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_PAIR);
         verifier.addString (id);
-        verifier.addString (attestation_algorithm);
+        verifier.addString (algorithm);
         verifier.addArray (server_seed);
         verifier.addString (pin_policy_id);
         if (decrypt_pin)
@@ -3024,25 +3024,25 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         verifier.addString (friendly_name);
         verifier.addVerbatim (key_specifier);  // Already properly set w.r.t. SKS data types
         LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
-        for (String algorithm : endorsed_algorithms)
+        for (String endorsed_algorithm : endorsed_algorithms)
           {
             ///////////////////////////////////////////////////////////////////////////////////
             // Check that the algorithms are known
             ///////////////////////////////////////////////////////////////////////////////////
-            if (!temp_endorsed.add (algorithm))
+            if (!temp_endorsed.add (endorsed_algorithm))
               {
-                provisioning.abort ("Duplicate algorithm: " + algorithm);
+                provisioning.abort ("Duplicate algorithm: " + endorsed_algorithm);
               }
-            Algorithm alg = algorithms.get (algorithm);
+            Algorithm alg = algorithms.get (endorsed_algorithm);
             if (alg == null)
               {
-                provisioning.abort ("Unsupported algorithm: " + algorithm);
+                provisioning.abort ("Unsupported algorithm: " + endorsed_algorithm);
               }
             if ((alg.mask & ALG_NONE) == 0 && endorsed_algorithms.length > 1)
               {
-                provisioning.abort ("Algorithm must be alone: " + algorithm );
+                provisioning.abort ("Algorithm must be alone: " + endorsed_algorithm);
               }
-            verifier.addString (algorithm);
+            verifier.addString (endorsed_algorithm);
           }
         provisioning.verifyMac (verifier, mac);
 
