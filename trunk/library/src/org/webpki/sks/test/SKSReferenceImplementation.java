@@ -2884,7 +2884,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         if (biometric_protection != BIOMETRIC_PROTECTION_NONE &&
             ((biometric_protection != BIOMETRIC_PROTECTION_EXCLUSIVE) ^ pin_protection))
           {
-            provisioning.abort ("Invalid \"BiometricProtection\" and PIN combination" + pin_protection + biometric_protection);
+            provisioning.abort ("Invalid \"BiometricProtection\" and PIN combination");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
