@@ -1,0 +1,211 @@
+﻿Mapping SKS into a TEE/SE "Combo"
+=================================
+
+An SKS (Secure Key Store) may be self-contained like in a smart card,
+but it may also be architected as a TEE (Trusted Execution Environment)
+and SE (Security Element) combination.
+
+This very early TEE/SE draft represents SKS as described in V.60.
+
+SE Characteristics
+------------------
+# Stateless
+# No storage
+# Highly crypto capable with respect to algorithm support
+
+TEE Characteristics
+-------------------
+# Does all key access control: PINs, ACLs, App discrimination, etc
+# Stores and manages sealed and unsealed keystore data
+# Is assumed to be trusted including GUI
+# Does the "heavy lifting" for provisioning: Networking, GUI and XML
+
+Here follows a short description for an SE API emulating the SKS
+Provisioning API.
+
+The SKS "User API" is only about supplying sealed key objects to the SE
+since access control (PIN, ACLs, target app discrimination, etc.) is
+supposed to be performed in the TEE and is currently not described.
+
+SE_createProvisioningSession ()
+
+   Input:
+      Algorithm
+      ServerSessionID
+      ServerEphemeralKey
+      IssuerURI
+      KeyManagementKey
+      ClientTime
+      SessionLifeTime
+      SessionKeyLimit
+      ClientSessionID  // New: Created by the TEE
+
+   Output:
+      Status
+      ClientEphemeralKey
+      Attestation
+      TEEProv          // New: Sealed provisioning object with SessionKey et al stored in TEE
+
+
+SE_createKeyPair ()
+
+   Input:
+      TEEProv          // New: Current session.  Given by the TEE
+      ID
+      Algorithm
+      ServerSeed
+      PINPolicyReference
+      PINValueReference
+      BiometricProtection
+      PrivateKeyBackup
+      ExportProtection
+      DeleteProtection
+      EnablePINCaching
+      AppUsage
+      FriendlyName
+      KeySpecifier
+      EndorsedAlgorithms[]
+      MAC
+
+   Output:
+      Status
+      TEEProv          // New: Each provisioning method updates the Provisioning in the TEE
+      PublicKey
+      Attestation
+      [PrivateKey]
+      [PINValue]       // New: Decrypted and possibly sealed server-defined PIN
+      TEEKeyEntry      // New: Sealed key data to be stored in TEE.  Includes SE-enforcable
+                               attributes like ExportProtection and EndorsedAlgorithḿs[] as well
+
+
+SE_setCertificatePath ()
+
+   Input:
+      TEEProv              // New: Current session.  Given by the TEE
+      TEEKeyEntry          // Instead of TargetKeyHandle. The already provisioned key.  Given by the TEE
+      CertificatePath[]
+      MAC
+
+   Output:
+      Status
+      TEEProv              // New: Each provisioning method updates the Provisioning in the TEE
+      TEEKeyEntry          // New: Updated with SHA256(EE Certificate)
+
+
+SE_setSymmetricKey ()
+
+   Input:
+      TEEProv              // New: Current session.  Given by the TEE
+      TEEKeyEntry          // Instead of TargetKeyHandle. The already provisioned key.  Given by the TEE
+      EECertificate        // New: For verifying MAC and TEEKeyEntry bindings
+      SymmetricKey
+      MAC
+
+   Output:
+      Status
+      TEEProv              // New: Each provisioning method updates the Provisioning in the TEE
+      TEEKeyEntry          // New: Updated with SymmetricKey
+
+
+SE_pp_unlockKey ()
+
+   Input:
+      TEEProv                  // New: Current session.  Given by the TEE
+      TEEKeyEntry              // Instead of TargetKeyHandle. The already provisioned key.  Given by the TEE
+      EECertificate,           // New: Matching TEEKeyEntry.  Given by the TEE
+      TEEProv4TEEKeyEntry      // Instead of TargetKeyHandle. Matching TEEKeyEntry.  Given by the TEE
+      Authorization
+      MAC
+
+   Output:
+      Status
+      TEEProv                  // New: Each provisioning method updates the Provisioning in the TEE
+      TEEKeyEntry              // New: Updated but put in a non-committed TEE buffer
+
+
+
+SE_closeProvisioningSession ()
+
+   Input:
+      TEEProv                  // Instead of ProvisioningHandle.  Current session.  Given by the TEE
+      Nonce
+      MAC
+
+   Output
+      Status
+      TEEProv                  // New: Updated 
+      Attestation
+
+
+Other methods: TBD.
+
+
+Virtualization Support
+======================
+
+Assuming that there is a trusted path between the SE, Hypervisor
+and the VMs, the scheme should work without modifications also
+with virtualized TEEs, since nothing is stored in the SE (which
+would have required a more elaborate access control system).
+
+
+Security Considerations
+=======================
+
+A stateful scheme that only relies on sealing data obviously has certain
+security limitations, since there is no way you can eliminate a bad TEE
+from performing exhaustive attacks on for example the SessionKey.
+
+Before condemning the scheme as unsecure, it is important realizing that
+there is a limit even in for example smart card based schemes since a
+broken TEE allows PINs to be snooped and subsequently be used by trojans.
+
+However, what the proposed scheme indeed claims to achieve is a very
+important security characteristic and that is keeping secret and
+private keys secure from theft.  The latter requires a break-in in
+the SE which is out-of-scope for this specification.
+
+Now, how about the provisioning?  Couldn't it leak key data?
+Not really, since created keys are immediately sealed by the SE.
+How about "hammering" on the provisioning API until you found out the
+right SessionKey and then be able creating fake "createKeyPair ()"
+operations allowing key export?  In theory it is possibly but the
+SessionKey has a very high entropy and by also adding a 1-second
+delay for each MAC mismatch you *should* be on the safe side.
+
+There is also a time-limit to attacks since most provisionings are
+supposed to be done within a minute or so which at least for
+asymmetric keys (that are created and sealed by the SE), renders a
+possible *future* SessionKey break-in useless.
+
+Replay of for example "createKeyPair ()" is quite possible to do but
+it is unclear what the gain would be since you must still update the
+provisioning object with the proper key-pair instance, otherwise the
+succeeding "setCertificatePath ()" operation will break.
+
+Removing PINs?  That's right, there is no protection whatsoever against
+that since this is (in this scheme NB...) a TEE task!
+
+
+TEE - SE Authentication Option
+==============================
+
+Although not described in this document, it would be technically
+fairly simple adding a wrapped authentication key to "createKeyPair ()"
+which would be used in all subsequent operations with the TEEKeyEntry.
+OTOH, it is slightly hard to see the advantage having embedded and
+obfuscated secrets in TEEs, particularly not in a non-virtualized
+ditto.  In addition, it requires a session even for operations that
+in itself are not session-oriented such as SKS' "User API" methods.
+
+
+Conclusion
+==========
+
+Compared to the current soft keystores such as featured in Windows and
+Mozilla NSS, this scheme represents a major improvement since it combines
+HW-secured key storage with secure provisioning.
+
+Anders Rundgren,
+V0.13, December 19, 2010
+
