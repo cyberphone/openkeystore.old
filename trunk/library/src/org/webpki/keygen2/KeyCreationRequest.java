@@ -27,9 +27,9 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-abstract class KeyInitializationRequest extends XMLObjectWrapper
+abstract class KeyCreationRequest extends XMLObjectWrapper
   {
-    KeyInitializationRequest () {}
+    KeyCreationRequest () {}
 
 
     public void init () throws IOException
@@ -53,7 +53,7 @@ abstract class KeyInitializationRequest extends XMLObjectWrapper
     
     public String element ()
       {
-        return KEY_INITIALIZATION_REQUEST_ELEM;
+        return KEY_CREATION_REQUEST_ELEM;
       }
 
 

@@ -3,6 +3,7 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import org.webpki.crypto.ECDomains;
+import org.webpki.sks.SecureKeyStore;
 import org.webpki.util.ArrayUtil;
 
 public abstract class KeyAlgorithmData
@@ -44,7 +45,7 @@ public abstract class KeyAlgorithmData
         public byte[] getSKSValue () throws IOException
           {
             return ArrayUtil.add (
-                ArrayUtil.add (new byte[]{CryptoConstants.RSA_KEY}, short2bytes (key_size)),
+                ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_RSA}, short2bytes (key_size)),
                 ArrayUtil.add (short2bytes (fixed_exponent >>> 16), short2bytes (fixed_exponent))
                           );
           }
@@ -72,7 +73,7 @@ public abstract class KeyAlgorithmData
         public byte[] getSKSValue () throws IOException
           {
             return ArrayUtil.add (
-                ArrayUtil.add (new byte[]{CryptoConstants.ECC_KEY}, short2bytes (named_curve.getURI ().length ())),
+                ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_ECC}, short2bytes (named_curve.getURI ().length ())),
                 named_curve.getURI ().getBytes ("UTF-8")
                           );
           }

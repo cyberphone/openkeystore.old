@@ -14,23 +14,21 @@
  *  limitations under the License.
  *
  */
-package org.webpki.keygen2;
+package org.webpki.sks;
 
 import java.io.IOException;
 
-
-public enum BiometricProtection
+public enum InputMethod
   {
-    NONE             ("none",        (byte)0x00),
-    ALTERNATIVE      ("alternative", (byte)0x01),
-    COMBINED         ("combined",    (byte)0x02),
-    EXCLUSIVE        ("exclusive",   (byte)0x03);
+    PROGRAMMATIC  ("programmatic", (byte)0x01),
+    TRUSTED_GUI   ("trusted-gui",  (byte)0x02),
+    ANY           ("any",          (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
-    
+
     private final byte sks_value;        // As expressed in SKS
 
-    private BiometricProtection (String xml_name, byte sks_value)
+    private InputMethod (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
@@ -41,24 +39,24 @@ public enum BiometricProtection
       {
         return xml_name;
       }
-    
 
+    
     public byte getSKSValue ()
       {
         return sks_value;
       }
 
 
-    public static BiometricProtection getBiometricProtectionFromString (String xml_name) throws IOException
+    public static InputMethod getMethodFromString (String xml_name) throws IOException
       {
-        for (BiometricProtection biom_type : BiometricProtection.values ())
+        for (InputMethod type : InputMethod.values ())
           {
-            if (xml_name.equals (biom_type.xml_name))
+            if (xml_name.equals (type.xml_name))
               {
-                return biom_type;
+                return type;
               }
           }
-        throw new IOException ("Unknown biometric type: " + xml_name);
+        throw new IOException ("Unknown method: " + xml_name);
       }
 
   }

@@ -160,9 +160,9 @@ public interface KeyGen2Constants
     
     String PROVISIONING_INITIALIZATION_RESPONSE_ELEM = "ProvisioningInitializationResponse";
 
-    String KEY_INITIALIZATION_REQUEST_ELEM           = "KeyInitializationRequest";
+    String KEY_CREATION_REQUEST_ELEM                 = "KeyCreationRequest";
     
-    String KEY_INITIALIZATION_RESPONSE_ELEM          = "KeyInitializationResponse";
+    String KEY_CREATION_RESPONSE_ELEM                = "KeyCreationResponse";
 
     String CREDENTIAL_DISCOVERY_REQUEST_ELEM         = "CredentialDiscoveryRequest";
 
@@ -192,7 +192,7 @@ public interface KeyGen2Constants
 
     String PRIVATE_KEY_ELEM                          = "PrivateKey";
 
-    String KEY_PAIR_ELEM                             = "KeyPair";       
+    String KEY_ENTRY_ELEM                            = "KeyEntry";       
 
     String PIN_POLICY_ELEM                           = "PINPolicy";       
 

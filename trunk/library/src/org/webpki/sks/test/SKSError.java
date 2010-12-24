@@ -14,7 +14,9 @@
  *  limitations under the License.
  *
  */
-package org.webpki.sks;
+package org.webpki.sks.test;
+
+import org.webpki.sks.SKSException;
 
 public interface SKSError
   {

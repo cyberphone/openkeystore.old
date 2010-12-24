@@ -28,7 +28,7 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-abstract class KeyInitializationResponse extends XMLObjectWrapper
+abstract class KeyCreationResponse extends XMLObjectWrapper
   {
     String client_session_id;
 
@@ -36,7 +36,7 @@ abstract class KeyInitializationResponse extends XMLObjectWrapper
 
     ServerCookie server_cookie;                         // Optional
 
-    KeyInitializationResponse () {}
+    KeyCreationResponse () {}
 
     public void init () throws IOException
       {
@@ -59,7 +59,7 @@ abstract class KeyInitializationResponse extends XMLObjectWrapper
     
     public String element ()
       {
-        return KEY_INITIALIZATION_RESPONSE_ELEM;
+        return KEY_CREATION_RESPONSE_ELEM;
       }
 
 

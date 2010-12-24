@@ -32,7 +32,7 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class KeyInitializationResponseEncoder extends KeyInitializationResponse
+public class KeyCreationResponseEncoder extends KeyCreationResponse
   {
     private Vector<GeneratedPublicKey> generated_keys = new Vector<GeneratedPublicKey> ();
 
@@ -96,7 +96,7 @@ public class KeyInitializationResponseEncoder extends KeyInitializationResponse
       }
 
 
-    public KeyInitializationResponseEncoder (KeyInitializationRequestDecoder key_init_req) throws IOException
+    public KeyCreationResponseEncoder (KeyCreationRequestDecoder key_init_req) throws IOException
       {
         client_session_id = key_init_req.getClientSessionID ();
         server_session_id = key_init_req.getServerSessionID ();

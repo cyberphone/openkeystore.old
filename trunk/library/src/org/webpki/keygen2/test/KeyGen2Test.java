@@ -90,19 +90,11 @@ import org.webpki.keygen2.CredentialDiscoveryRequestDecoder;
 import org.webpki.keygen2.CredentialDiscoveryRequestEncoder;
 import org.webpki.keygen2.CredentialDiscoveryResponseDecoder;
 import org.webpki.keygen2.CredentialDiscoveryResponseEncoder;
-import org.webpki.keygen2.CryptoConstants;
-import org.webpki.keygen2.DeleteProtection;
-import org.webpki.keygen2.ExportProtection;
-import org.webpki.keygen2.InputMethod;
 import org.webpki.keygen2.KeyGen2URIs;
-import org.webpki.keygen2.KeyInitializationResponseDecoder;
-import org.webpki.keygen2.KeyInitializationResponseEncoder;
-import org.webpki.keygen2.AppUsage;
-import org.webpki.keygen2.KeyInitializationRequestDecoder;
-import org.webpki.keygen2.KeyInitializationRequestEncoder;
-import org.webpki.keygen2.PINGrouping;
-import org.webpki.keygen2.PassphraseFormat;
-import org.webpki.keygen2.PatternRestriction;
+import org.webpki.keygen2.KeyCreationResponseDecoder;
+import org.webpki.keygen2.KeyCreationResponseEncoder;
+import org.webpki.keygen2.KeyCreationRequestDecoder;
+import org.webpki.keygen2.KeyCreationRequestEncoder;
 import org.webpki.keygen2.PlatformNegotiationRequestDecoder;
 import org.webpki.keygen2.PlatformNegotiationRequestEncoder;
 import org.webpki.keygen2.PlatformNegotiationResponseDecoder;
@@ -114,11 +106,18 @@ import org.webpki.keygen2.ProvisioningInitializationResponseEncoder;
 import org.webpki.keygen2.ServerCredentialStore;
 import org.webpki.keygen2.ServerCryptoInterface;
 
+import org.webpki.sks.AppUsage;
+import org.webpki.sks.DeleteProtection;
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.ExportProtection;
+import org.webpki.sks.InputMethod;
 import org.webpki.sks.KeyAttributes;
-import org.webpki.sks.KeyPair;
+import org.webpki.sks.KeyData;
+import org.webpki.sks.Grouping;
+import org.webpki.sks.PassphraseFormat;
+import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.Property;
 import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
@@ -244,7 +243,7 @@ public class KeyGen2Test
         
         int provisioning_handle;
         
-        KeyInitializationRequestDecoder key_init_request;
+        KeyCreationRequestDecoder key_init_request;
         
         ProvisioningInitializationRequestDecoder prov_sess_req;
         
@@ -258,7 +257,7 @@ public class KeyGen2Test
             client_xml_cache.addWrapper (PlatformNegotiationRequestDecoder.class);
             client_xml_cache.addWrapper (ProvisioningInitializationRequestDecoder.class);
             client_xml_cache.addWrapper (CredentialDiscoveryRequestDecoder.class);
-            client_xml_cache.addWrapper (KeyInitializationRequestDecoder.class);
+            client_xml_cache.addWrapper (KeyCreationRequestDecoder.class);
             client_xml_cache.addWrapper (ProvisioningFinalizationRequestDecoder.class);
           }
 
@@ -446,12 +445,12 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] KeyInitResponse (byte[] xmldata) throws IOException
           {
-            key_init_request = (KeyInitializationRequestDecoder) client_xml_cache.parse (xmldata);
-            KeyInitializationResponseEncoder key_init_response = 
-                  new KeyInitializationResponseEncoder (key_init_request);
+            key_init_request = (KeyCreationRequestDecoder) client_xml_cache.parse (xmldata);
+            KeyCreationResponseEncoder key_init_response = 
+                  new KeyCreationResponseEncoder (key_init_request);
             int pin_policy_handle = 0;
             int puk_policy_handle = 0;
-            for (KeyInitializationRequestDecoder.KeyObject key : key_init_request.getKeyObjects ())
+            for (KeyCreationRequestDecoder.KeyObject key : key_init_request.getKeyObjects ())
               {
                 byte[] pin_value = key.getPresetPIN ();
                 if (key.getPINPolicy () == null)
@@ -469,7 +468,7 @@ public class KeyGen2Test
                       {
                         if (key.isStartOfPUKPolicy ())
                           {
-                            KeyInitializationRequestDecoder.PUKPolicy puk_policy = key.getPINPolicy ().getPUKPolicy ();
+                            KeyCreationRequestDecoder.PUKPolicy puk_policy = key.getPINPolicy ().getPUKPolicy ();
                             puk_policy_handle = sks.createPUKPolicy (provisioning_handle, 
                                                                      puk_policy.getID (),
                                                                      puk_policy.getEncryptedValue (),
@@ -477,7 +476,7 @@ public class KeyGen2Test
                                                                      puk_policy.getRetryLimit (),
                                                                      puk_policy.getMAC());
                           }
-                        KeyInitializationRequestDecoder.PINPolicy pin_policy = key.getPINPolicy ();
+                        KeyCreationRequestDecoder.PINPolicy pin_policy = key.getPINPolicy ();
                         pin_policy_handle = sks.createPINPolicy (provisioning_handle,
                                                                  pin_policy.getID (),
                                                                  puk_policy_handle,
@@ -493,27 +492,27 @@ public class KeyGen2Test
                                                                  pin_policy.getMAC ());
                       }
                   }
-                KeyPair kpr = sks.createKeyPair (provisioning_handle,
-                                                 key.getID (),
-                                                 key_init_request.getAlgorithm (),
-                                                 key.getServerSeed (),
-                                                 key.isDevicePINProtected (),
-                                                 pin_policy_handle,
-                                                 pin_value,
-                                                 key.getBiometricProtection ().getSKSValue (),
-                                                 key.getPrivateKeyBackupFlag (),
-                                                 key.getExportProtection ().getSKSValue (),
-                                                 key.getDeleteProtection ().getSKSValue (),
-                                                 key.getEnablePINCachingFlag (),
-                                                 key.getAppUsage ().getSKSValue (),
-                                                 key.getFriendlyName (),
-                                                 key.getKeyAlgorithmData ().getSKSValue (),
-                                                 key.getEndorsedAlgorithms (),
-                                                 key.getMAC ());
-                key_init_response.addPublicKey (kpr.getPublicKey (),
-                                                kpr.getAttestation (),
+                KeyData key_data = sks.createKeyEntry (provisioning_handle,
+                                                       key.getID (),
+                                                       key_init_request.getAlgorithm (),
+                                                       key.getServerSeed (),
+                                                       key.isDevicePINProtected (),
+                                                       pin_policy_handle,
+                                                       pin_value,
+                                                       key.getBiometricProtection ().getSKSValue (),
+                                                       key.getPrivateKeyBackupFlag (),
+                                                       key.getExportProtection ().getSKSValue (),
+                                                       key.getDeleteProtection ().getSKSValue (),
+                                                       key.getEnablePINCachingFlag (),
+                                                       key.getAppUsage ().getSKSValue (),
+                                                       key.getFriendlyName (),
+                                                       key.getKeyAlgorithmData ().getSKSValue (),
+                                                       key.getEndorsedAlgorithms (),
+                                                       key.getMAC ());
+                key_init_response.addPublicKey (key_data.getPublicKey (),
+                                                key_data.getAttestation (),
                                                 key.getID (),
-                                                kpr.getPrivateKey ());
+                                                key_data.getPrivateKey ());
               }
             return key_init_response.writeXML ();
           }
@@ -658,7 +657,7 @@ public class KeyGen2Test
 
         PlatformNegotiationRequestEncoder platform_request;
 
-        KeyInitializationRequestEncoder key_init_request;
+        KeyCreationRequestEncoder key_init_request;
         
         ProvisioningInitializationRequestEncoder prov_sess_request;
 
@@ -756,7 +755,7 @@ public class KeyGen2Test
             @Override
             public byte[] decrypt (byte[] data) throws IOException, GeneralSecurityException
               {
-                byte[] key = mac (CryptoConstants.CRYPTO_STRING_ENCRYPTION, new byte[0]);
+                byte[] key = mac (SecureKeyStore.KDF_ENCRYPTION_KEY, new byte[0]);
                 Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
                 crypt.init (Cipher.DECRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (data, 0, 16));
                 return crypt.doFinal (data, 16, data.length - 16);
@@ -765,7 +764,7 @@ public class KeyGen2Test
             @Override
             public byte[] encrypt (byte[] data) throws IOException, GeneralSecurityException
               {
-                byte[] key = mac (CryptoConstants.CRYPTO_STRING_ENCRYPTION, new byte[0]);
+                byte[] key = mac (SecureKeyStore.KDF_ENCRYPTION_KEY, new byte[0]);
                 Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
                 byte[] iv = new byte[16];
                 new SecureRandom ().nextBytes (iv);
@@ -805,7 +804,7 @@ public class KeyGen2Test
             server_xml_cache.addWrapper (PlatformNegotiationResponseDecoder.class);
             server_xml_cache.addWrapper (ProvisioningInitializationResponseDecoder.class);
             server_xml_cache.addWrapper (CredentialDiscoveryResponseDecoder.class);
-            server_xml_cache.addWrapper (KeyInitializationResponseDecoder.class);
+            server_xml_cache.addWrapper (KeyCreationResponseDecoder.class);
             server_xml_cache.addWrapper (ProvisioningFinalizationResponseDecoder.class);
           }
         
@@ -943,7 +942,7 @@ public class KeyGen2Test
                   }
                 if (pin_group_shared)
                   {
-                    pin_policy.setGrouping (PINGrouping.SHARED);
+                    pin_policy.setGrouping (Grouping.SHARED);
                   }
                 if (input_method != null)
                   {
@@ -1020,7 +1019,7 @@ public class KeyGen2Test
                                                                       delete_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
                                                                       delete_key.server_km);
               }
-            key_init_request = new KeyInitializationRequestEncoder (KEY_INIT_URL, server_credential_store, server_sess_key);
+            key_init_request = new KeyCreationRequestEncoder (KEY_INIT_URL, server_credential_store, server_sess_key);
             return key_init_request.writeXML ();
           }
 
@@ -1032,7 +1031,7 @@ public class KeyGen2Test
           {
             if (plain_unlock_key == null)
               {
-                KeyInitializationResponseDecoder key_init_response = (KeyInitializationResponseDecoder) server_xml_cache.parse (xmldata);
+                KeyCreationResponseDecoder key_init_response = (KeyCreationResponseDecoder) server_xml_cache.parse (xmldata);
                 key_init_response.validateAndPopulate (key_init_request, server_sess_key);
                 for (ServerCredentialStore.KeyProperties key_prop : server_credential_store.getKeyProperties ())
                   {
@@ -1222,8 +1221,8 @@ public class KeyGen2Test
             xmlschemas.addWrapper (ProvisioningInitializationResponseDecoder.class);
             xmlschemas.addWrapper (CredentialDiscoveryRequestDecoder.class);
             xmlschemas.addWrapper (CredentialDiscoveryResponseDecoder.class);
-            xmlschemas.addWrapper (KeyInitializationRequestDecoder.class);
-            xmlschemas.addWrapper (KeyInitializationResponseDecoder.class);
+            xmlschemas.addWrapper (KeyCreationRequestDecoder.class);
+            xmlschemas.addWrapper (KeyCreationResponseDecoder.class);
             xmlschemas.addWrapper (ProvisioningFinalizationRequestDecoder.class);
             xmlschemas.addWrapper (ProvisioningFinalizationResponseDecoder.class);
           }

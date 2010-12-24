@@ -51,22 +51,20 @@ import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.test.DemoKeyStore;
 
-import org.webpki.keygen2.APIDescriptors;
-import org.webpki.keygen2.BiometricProtection;
-import org.webpki.keygen2.CryptoConstants;
-import org.webpki.keygen2.DeleteProtection;
-import org.webpki.keygen2.ExportProtection;
-import org.webpki.keygen2.InputMethod;
 import org.webpki.keygen2.KeyAlgorithmData;
 import org.webpki.keygen2.KeyGen2URIs;
-import org.webpki.keygen2.AppUsage;
-import org.webpki.keygen2.PINGrouping;
-import org.webpki.keygen2.PassphraseFormat;
-import org.webpki.keygen2.PatternRestriction;
 import org.webpki.keygen2.ServerCryptoInterface;
 
+import org.webpki.sks.AppUsage;
+import org.webpki.sks.BiometricProtection;
+import org.webpki.sks.DeleteProtection;
 import org.webpki.sks.EnumeratedProvisioningSession;
-import org.webpki.sks.KeyPair;
+import org.webpki.sks.ExportProtection;
+import org.webpki.sks.InputMethod;
+import org.webpki.sks.KeyData;
+import org.webpki.sks.Grouping;
+import org.webpki.sks.PassphraseFormat;
+import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
@@ -160,7 +158,7 @@ public class ProvSess
         @Override
         public byte[] decrypt (byte[] data) throws IOException, GeneralSecurityException
           {
-            byte[] key = mac (CryptoConstants.CRYPTO_STRING_ENCRYPTION, new byte[0]);
+            byte[] key = mac (SecureKeyStore.KDF_ENCRYPTION_KEY, new byte[0]);
             Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
             crypt.init (Cipher.DECRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (data, 0, 16));
             return crypt.doFinal (data, 16, data.length - 16);
@@ -169,7 +167,7 @@ public class ProvSess
         @Override
         public byte[] encrypt (byte[] data) throws IOException, GeneralSecurityException
           {
-            byte[] key = mac (CryptoConstants.CRYPTO_STRING_ENCRYPTION, new byte[0]);
+            byte[] key = mac (SecureKeyStore.KDF_ENCRYPTION_KEY, new byte[0]);
             Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
             byte[] iv = new byte[16];
             new SecureRandom ().nextBytes (iv);
@@ -336,9 +334,9 @@ public class ProvSess
         return  new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
       }
 
-    byte[] mac (byte[] data, APIDescriptors method) throws IOException, GeneralSecurityException
+    byte[] mac4call (byte[] data, byte[] method) throws IOException, GeneralSecurityException
       {
-        return server_sess_key.mac (data, ArrayUtil.add (method.getBinary (), getMACSequenceCounterAndUpdate ()));
+        return server_sess_key.mac (data, ArrayUtil.add (method, getMACSequenceCounterAndUpdate ()));
       }
 
     byte[] mac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException
@@ -348,7 +346,7 @@ public class ProvSess
     
     byte[] attest (byte[] data) throws IOException, GeneralSecurityException
       {
-        return server_sess_key.mac (data, ArrayUtil.add (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST, getMACSequenceCounterAndUpdate ())); 
+        return server_sess_key.mac (data, ArrayUtil.add (SecureKeyStore.KDF_DEVICE_ATTESTATION, getMACSequenceCounterAndUpdate ())); 
       }
     
     void bad (String message) throws IOException
@@ -427,8 +425,8 @@ public class ProvSess
         byte[] close_mac;
         byte[] result = sks.closeProvisioningSession (provisioning_handle,
                                                       nonce,
-                                                      close_mac = mac (close.getResult (),
-                                                      APIDescriptors.CLOSE_PROVISIONING_SESSION));
+                                                      close_mac = mac4call (close.getResult (),
+                                                      SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION));
         MacGenerator check = new MacGenerator ();
         check.addArray (close_mac);
         check.addString (KeyGen2URIs.ALGORITHMS.SESSION_KEY_1);
@@ -484,19 +482,19 @@ public class ProvSess
                                                             encrypted_value, 
                                                             format.getSKSValue (), 
                                                             (short)retry_limit, 
-                                                            mac (puk_policy_mac.getResult (), APIDescriptors.CREATE_PUK_POLICY));
+                                                            mac4call (puk_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PUK_POLICY));
         return puk_policy;
       }
     
     public PINPol createPINPolicy (String id, PassphraseFormat format, int min_length, int max_length, int retry_limit, PUKPol puk_policy) throws IOException, GeneralSecurityException
       {
-        return createPINPolicy (id, format,  EnumSet.noneOf (PatternRestriction.class), PINGrouping.NONE, min_length, max_length, retry_limit, puk_policy);
+        return createPINPolicy (id, format,  EnumSet.noneOf (PatternRestriction.class), Grouping.NONE, min_length, max_length, retry_limit, puk_policy);
       }
     
     public PINPol createPINPolicy (String id, 
                                    PassphraseFormat format,
                                    Set<PatternRestriction> pattern_restrictions,
-                                   PINGrouping grouping,
+                                   Grouping grouping,
                                    int min_length,
                                    int max_length, 
                                    int retry_limit,
@@ -509,7 +507,7 @@ public class ProvSess
         int puk_policy_handle = puk_policy == null ? 0 : puk_policy.puk_policy_handle;
         MacGenerator pin_policy_mac = new MacGenerator ();
         pin_policy_mac.addString (id);
-        pin_policy_mac.addString (puk_policy == null ? CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id);
+        pin_policy_mac.addString (puk_policy == null ? SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id);
         pin_policy_mac.addBool (user_defined);
         pin_policy_mac.addBool (user_modifiable);
         pin_policy_mac.addByte (format.getSKSValue ());
@@ -534,7 +532,7 @@ public class ProvSess
                                                             (byte)min_length, 
                                                             (byte)max_length, 
                                                             input_method.getSKSValue (), 
-                                                            mac (pin_policy_mac.getResult (), APIDescriptors.CREATE_PIN_POLICY));
+                                                            mac4call (pin_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PIN_POLICY));
         return pin_policy;
       }
    
@@ -635,12 +633,12 @@ public class ProvSess
               }
           }
         key_pair_mac.addString (pin_policy == null ? 
-                                      CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE 
+                                      SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE 
                                                    :
                                       pin_policy.id);
         if (pin_policy == null || pin_policy.user_defined)
           {
-            key_pair_mac.addString (CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE);
+            key_pair_mac.addString (SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE);
           }
         else
           {
@@ -655,20 +653,20 @@ public class ProvSess
         key_pair_mac.addString (friendly_name);
         if (key_algorithm instanceof KeyAlgorithmData.RSA)
           {
-            key_pair_mac.addByte (CryptoConstants.RSA_KEY);
+            key_pair_mac.addByte (SecureKeyStore.KEY_ALGORITHM_TYPE_RSA);
             key_pair_mac.addShort (((KeyAlgorithmData.RSA)key_algorithm).getKeySize ());
             key_pair_mac.addInt (((KeyAlgorithmData.RSA)key_algorithm).getFixedExponent ());
           }
         else
           {
-            key_pair_mac.addByte (CryptoConstants.ECC_KEY);
+            key_pair_mac.addByte (SecureKeyStore.KEY_ALGORITHM_TYPE_ECC);
             key_pair_mac.addString (((KeyAlgorithmData.EC)key_algorithm).getNamedCurve ().getURI ());
           }
         for (String algorithm : sorted_algorithms)
           {
             key_pair_mac.addString (algorithm);
           }
-        KeyPair key_pair = sks.createKeyPair (provisioning_handle, 
+        KeyData key_pair = sks.createKeyEntry (provisioning_handle, 
                                               id,
                                               attestation_algorithm, 
                                               server_seed,
@@ -684,7 +682,7 @@ public class ProvSess
                                               friendly_name, 
                                               key_algorithm.getSKSValue (),
                                               sorted_algorithms,
-                                              mac (key_pair_mac.getResult (), APIDescriptors.CREATE_KEY_PAIR));
+                                              mac4call (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
         MacGenerator key_attestation = new MacGenerator ();
         key_attestation.addString (id);
         key_attestation.addArray (key_pair.getPublicKey ().getEncoded ());
@@ -735,7 +733,7 @@ public class ProvSess
           }
         sks.setCertificatePath (key_handle,
                                 certificate_path,
-                                mac (set_certificate.getResult (), APIDescriptors.SET_CERTIFICATE_PATH));
+                                mac4call (set_certificate.getResult (), SecureKeyStore.METHOD_SET_CERTIFICATE_PATH));
       }
     
     void setSymmetricKey (GenKey key, byte[] symmetric_key) throws IOException, GeneralSecurityException
@@ -745,7 +743,7 @@ public class ProvSess
         symk_mac.addArray (encrypted_symmetric_key);
         sks.setSymmetricKey (key.key_handle,
                              encrypted_symmetric_key,
-                             mac (symk_mac.getResult (), APIDescriptors.SET_SYMMETRIC_KEY));
+                             mac4call (symk_mac.getResult (), SecureKeyStore.METHOD_SET_SYMMETRIC_KEY));
       }
 
     public void restorePrivateKey (GenKey key, PrivateKey private_key) throws IOException, GeneralSecurityException
@@ -755,21 +753,21 @@ public class ProvSess
         privk_mac.addArray (encrypted_private_key);
         sks.restorePrivateKey (key.key_handle,
                                encrypted_private_key,
-                               mac (privk_mac.getResult (), APIDescriptors.RESTORE_PRIVATE_KEY));
+                               mac4call (privk_mac.getResult (), SecureKeyStore.METHOD_RESTORE_PRIVATE_KEY));
       }
 
     public void postDeleteKey (GenKey key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new MacGenerator ();
         byte[] authorization = key.getPostProvMac (upd_mac, this);
-        sks.pp_deleteKey (provisioning_handle, key.key_handle, authorization, mac (upd_mac.getResult (), APIDescriptors.PP_DELETE_KEY));
+        sks.pp_deleteKey (provisioning_handle, key.key_handle, authorization, mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_DELETE_KEY));
       }
 
     public void postUnlockKey (GenKey key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new MacGenerator ();
         byte[] authorization = key.getPostProvMac (upd_mac, this);
-        sks.pp_unlockKey (provisioning_handle, key.key_handle, authorization, mac (upd_mac.getResult (), APIDescriptors.PP_UNLOCK_KEY));
+        sks.pp_unlockKey (provisioning_handle, key.key_handle, authorization, mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_UNLOCK_KEY));
       }
   
     public void postUpdateKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
@@ -779,7 +777,7 @@ public class ProvSess
         sks.pp_updateKey (new_key.key_handle, 
                           old_key.key_handle,
                           authorization,
-                          mac (upd_mac.getResult (), APIDescriptors.PP_UPDATE_KEY));
+                          mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_UPDATE_KEY));
       }
     
     public void postCloneKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
@@ -789,7 +787,7 @@ public class ProvSess
         sks.pp_cloneKeyProtection (new_key.key_handle, 
                                    old_key.key_handle,
                                    authorization,
-                                   mac (upd_mac.getResult (), APIDescriptors.PP_CLONE_KEY_PROTECTION));
+                                   mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_CLONE_KEY_PROTECTION));
       }
   
     public boolean exists () throws SKSException

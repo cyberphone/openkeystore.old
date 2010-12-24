@@ -33,7 +33,7 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class KeyInitializationResponseDecoder extends KeyInitializationResponse
+public class KeyCreationResponseDecoder extends KeyCreationResponse
   {
     private LinkedHashMap<String,GeneratedPublicKey> generated_keys = new LinkedHashMap<String,GeneratedPublicKey> ();
 
@@ -58,7 +58,7 @@ public class KeyInitializationResponseDecoder extends KeyInitializationResponse
       }
     
     
-    public void validateAndPopulate (KeyInitializationRequestEncoder key_init_request, ServerCryptoInterface server_crypto_interface) throws IOException
+    public void validateAndPopulate (KeyCreationRequestEncoder key_init_request, ServerCryptoInterface server_crypto_interface) throws IOException
       {
         key_init_request.server_credential_store.checkSession (client_session_id, server_session_id);
         if (generated_keys.size () != key_init_request.server_credential_store.requested_keys.size ())

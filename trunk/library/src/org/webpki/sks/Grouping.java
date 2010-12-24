@@ -14,22 +14,22 @@
  *  limitations under the License.
  *
  */
-package org.webpki.keygen2;
+package org.webpki.sks;
 
 import java.io.IOException;
 
-public enum ExportProtection
+public enum Grouping
   {
-    NONE               ("none",           (byte)0x00),
-    PIN                ("pin",            (byte)0x01),
-    PUK                ("puk",            (byte)0x02),
-    NON_EXPORTABLE     ("non-exportable", (byte)0x03);
+    NONE                     ("none",               (byte)0x00),
+    SHARED                   ("shared",             (byte)0x01),
+    SIGNATURE_PLUS_STANDARD  ("signature+standard", (byte)0x02),
+    UNIQUE                   ("unique",             (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
     
     private final byte sks_value;        // As expressed in SKS
 
-    private ExportProtection (String xml_name, byte sks_value)
+    private Grouping (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
@@ -40,24 +40,24 @@ public enum ExportProtection
       {
         return xml_name;
       }
-    
 
+    
     public byte getSKSValue ()
       {
         return sks_value;
       }
 
 
-    public static ExportProtection getExportPolicyFromString (String xml_name) throws IOException
+    public static Grouping getPINGroupingFromString (String xml_name) throws IOException
       {
-        for (ExportProtection exp_pol : ExportProtection.values ())
+        for (Grouping option : Grouping.values ())
           {
-            if (xml_name.equals (exp_pol.xml_name))
+            if (xml_name.equals (option.xml_name))
               {
-                return exp_pol;
+                return option;
               }
           }
-        throw new IOException ("Unknown export policy: " + xml_name);
+        throw new IOException ("Unknown group: " + xml_name);
       }
 
   }

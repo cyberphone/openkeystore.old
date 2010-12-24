@@ -14,21 +14,22 @@
  *  limitations under the License.
  *
  */
-package org.webpki.keygen2;
+package org.webpki.sks;
 
 import java.io.IOException;
 
-public enum InputMethod
+public enum ExportProtection
   {
-    PROGRAMMATIC  ("programmatic", (byte)0x01),
-    TRUSTED_GUI   ("trusted-gui",  (byte)0x02),
-    ANY           ("any",          (byte)0x03);
+    NONE               ("none",           (byte)0x00),
+    PIN                ("pin",            (byte)0x01),
+    PUK                ("puk",            (byte)0x02),
+    NON_EXPORTABLE     ("non-exportable", (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
-
+    
     private final byte sks_value;        // As expressed in SKS
 
-    private InputMethod (String xml_name, byte sks_value)
+    private ExportProtection (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
@@ -39,24 +40,24 @@ public enum InputMethod
       {
         return xml_name;
       }
-
     
+
     public byte getSKSValue ()
       {
         return sks_value;
       }
 
 
-    public static InputMethod getMethodFromString (String xml_name) throws IOException
+    public static ExportProtection getExportPolicyFromString (String xml_name) throws IOException
       {
-        for (InputMethod type : InputMethod.values ())
+        for (ExportProtection exp_pol : ExportProtection.values ())
           {
-            if (xml_name.equals (type.xml_name))
+            if (xml_name.equals (exp_pol.xml_name))
               {
-                return type;
+                return exp_pol;
               }
           }
-        throw new IOException ("Unknown method: " + xml_name);
+        throw new IOException ("Unknown export policy: " + xml_name);
       }
 
   }

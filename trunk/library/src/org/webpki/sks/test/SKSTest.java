@@ -56,14 +56,14 @@ import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.test.DemoKeyStore;
 
-import org.webpki.keygen2.ExportProtection;
 import org.webpki.keygen2.KeyGen2URIs;
-import org.webpki.keygen2.AppUsage;
-import org.webpki.keygen2.PINGrouping;
-import org.webpki.keygen2.PassphraseFormat;
-import org.webpki.keygen2.PatternRestriction;
 
+import org.webpki.sks.AppUsage;
 import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.ExportProtection;
+import org.webpki.sks.Grouping;
+import org.webpki.sks.PassphraseFormat;
+import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
 import org.webpki.sks.test.SKSReferenceImplementation;
@@ -171,7 +171,7 @@ public class SKSTest
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
-                                                  PINGrouping.SHARED,
+                                                  Grouping.SHARED,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
                                                   (short) 3 /* retry_limit*/, 
@@ -282,7 +282,7 @@ public class SKSTest
             PINPol pin_pol = sess.createPINPolicy ("PIN",
                                                    format,
                                                    pattern_restrictions,
-                                                   PINGrouping.NONE,
+                                                   Grouping.NONE,
                                                    4 /* min_length */, 
                                                    8 /* max_length */,
                                                    (short) 3 /* retry_limit*/, 
@@ -485,7 +485,7 @@ public class SKSTest
           }
       }
 
-    private boolean PINGroupCheck (boolean same_pin, PINGrouping grouping) throws IOException, GeneralSecurityException
+    private boolean PINGroupCheck (boolean same_pin, Grouping grouping) throws IOException, GeneralSecurityException
       {
         try
           {
@@ -504,7 +504,7 @@ public class SKSTest
                 pin1 /* pin_value */,
                 pin_pol /* pin_policy */,
                 AppUsage.AUTHENTICATION).setCertificate ("CN=TEST");
-            if (grouping == PINGrouping.SIGNATURE_PLUS_STANDARD)
+            if (grouping == Grouping.SIGNATURE_PLUS_STANDARD)
               {
                 sess.createECKey ("Key.1s",
                     pin1 /* pin_value */,
@@ -559,7 +559,7 @@ public class SKSTest
         boolean ae = a_pin.equals (e_pin);
         boolean se = s_pin.equals (e_pin);
         byte[] other_pin = { '5', '5', '5', '5' };
-        for (PINGrouping pg : PINGrouping.values ())
+        for (Grouping pg : Grouping.values ())
           {
             String puk_ok = "17644";
             short pin_retry = 3;
@@ -572,21 +572,21 @@ public class SKSTest
             try
               {
                 GenKey key2 = sess.createRSAKey ("Key.2", 1024, a_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName ());
-                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, pg == PINGrouping.NONE || (pg == PINGrouping.SHARED && sa) || (pg == PINGrouping.SIGNATURE_PLUS_STANDARD && !sa) || (pg == PINGrouping.UNIQUE && !sa));
+                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, pg == Grouping.NONE || (pg == Grouping.SHARED && sa) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && !sa) || (pg == Grouping.UNIQUE && !sa));
               }
             catch (SKSException e)
               {
-                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, (pg == PINGrouping.SHARED && !sa) || (pg == PINGrouping.SIGNATURE_PLUS_STANDARD && sa) || (pg == PINGrouping.UNIQUE && sa));
+                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, (pg == Grouping.SHARED && !sa) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && sa) || (pg == Grouping.UNIQUE && sa));
                 continue;
               }
             try
               {
                 GenKey key3 = sess.createRSAKey ("Key.3", 1024, e_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName ());
-                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, pg == PINGrouping.NONE || (pg == PINGrouping.SHARED && sa && ae) || (pg == PINGrouping.SIGNATURE_PLUS_STANDARD && !sa && ae && !se) || (pg == PINGrouping.UNIQUE && !sa && !ae && !se));
+                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, pg == Grouping.NONE || (pg == Grouping.SHARED && sa && ae) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && !sa && ae && !se) || (pg == Grouping.UNIQUE && !sa && !ae && !se));
               }
             catch (SKSException e)
               {
-                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, (pg == PINGrouping.SHARED && (!sa || !ae)) || (pg == PINGrouping.SIGNATURE_PLUS_STANDARD && (sa || !ae || se)) || (pg == PINGrouping.UNIQUE && (sa || ae || se)));
+                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, (pg == Grouping.SHARED && (!sa || !ae)) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && (sa || !ae || se)) || (pg == Grouping.UNIQUE && (sa || ae || se)));
                 continue;
               }
             GenKey key4 = sess.createRSAKey ("Key.4", 1024, s_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.SIGNATURE).setCertificate ("CN=" + name.getMethodName ());
@@ -603,7 +603,7 @@ public class SKSTest
               }
             catch (SKSException e)
               {
-                assertTrue ("None does not distribute PINs", pg == PINGrouping.NONE);
+                assertTrue ("None does not distribute PINs", pg == Grouping.NONE);
               }
           }
       }
@@ -932,14 +932,14 @@ public class SKSTest
         assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.REPEATED}, "1345"));
         assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.REPEATED}, "1315"));  // Two of same
         
-        assertTrue (PINGroupCheck (true, PINGrouping.NONE));
-        assertTrue (PINGroupCheck (false, PINGrouping.NONE));
-        assertTrue (PINGroupCheck (true, PINGrouping.SHARED));
-        assertFalse (PINGroupCheck (false, PINGrouping.SHARED));
-        assertFalse (PINGroupCheck (true, PINGrouping.UNIQUE));
-        assertTrue (PINGroupCheck (false, PINGrouping.UNIQUE));
-        assertFalse (PINGroupCheck (true, PINGrouping.SIGNATURE_PLUS_STANDARD));
-        assertTrue (PINGroupCheck (false, PINGrouping.SIGNATURE_PLUS_STANDARD));
+        assertTrue (PINGroupCheck (true, Grouping.NONE));
+        assertTrue (PINGroupCheck (false, Grouping.NONE));
+        assertTrue (PINGroupCheck (true, Grouping.SHARED));
+        assertFalse (PINGroupCheck (false, Grouping.SHARED));
+        assertFalse (PINGroupCheck (true, Grouping.UNIQUE));
+        assertTrue (PINGroupCheck (false, Grouping.UNIQUE));
+        assertFalse (PINGroupCheck (true, Grouping.SIGNATURE_PLUS_STANDARD));
+        assertTrue (PINGroupCheck (false, Grouping.SIGNATURE_PLUS_STANDARD));
         assertTrue ("Session Count", q == sessionCount ());
       }
 
@@ -1232,7 +1232,7 @@ public class SKSTest
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
-                                                  PINGrouping.SHARED,
+                                                  Grouping.SHARED,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
                                                   (short) 3 /* retry_limit*/, 
@@ -1303,7 +1303,7 @@ public class SKSTest
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
-                                                  PINGrouping.SHARED,
+                                                  Grouping.SHARED,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
                                                   (short) 3 /* retry_limit*/, 
@@ -1637,7 +1637,7 @@ public class SKSTest
             PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                       PassphraseFormat.NUMERIC,
                                                       EnumSet.noneOf (PatternRestriction.class),
-                                                      PINGrouping.SHARED,
+                                                      Grouping.SHARED,
                                                       4 /* min_length */, 
                                                       8 /* max_length */,
                                                       (short) 3 /* retry_limit*/, 
@@ -1872,7 +1872,7 @@ public class SKSTest
             PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                       PassphraseFormat.NUMERIC,
                                                       EnumSet.noneOf (PatternRestriction.class),
-                                                      PINGrouping.SHARED,
+                                                      Grouping.SHARED,
                                                       4 /* min_length */, 
                                                       8 /* max_length */,
                                                       (short) 3 /* retry_limit*/, 
@@ -1896,7 +1896,7 @@ public class SKSTest
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
-                                                  PINGrouping.SHARED,
+                                                  Grouping.SHARED,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
                                                   (short) 3 /* retry_limit*/, 
@@ -1951,7 +1951,7 @@ public class SKSTest
             PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                       PassphraseFormat.NUMERIC,
                                                       EnumSet.noneOf (PatternRestriction.class),
-                                                      PINGrouping.SHARED,
+                                                      Grouping.SHARED,
                                                       4 /* min_length */, 
                                                       8 /* max_length */,
                                                       (short) 3 /* retry_limit*/, 
@@ -2035,7 +2035,7 @@ public class SKSTest
             PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                       PassphraseFormat.NUMERIC,
                                                       EnumSet.noneOf (PatternRestriction.class),
-                                                      PINGrouping.SHARED,
+                                                      Grouping.SHARED,
                                                       4 /* min_length */, 
                                                       8 /* max_length */,
                                                       (short) 3 /* retry_limit*/, 
@@ -2074,7 +2074,7 @@ public class SKSTest
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
-                                                  PINGrouping.SHARED,
+                                                  Grouping.SHARED,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
                                                   (short) 3 /* retry_limit*/, 
@@ -2219,7 +2219,7 @@ public class SKSTest
             PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                       PassphraseFormat.NUMERIC,
                                                       EnumSet.noneOf (PatternRestriction.class),
-                                                      PINGrouping.SHARED,
+                                                      Grouping.SHARED,
                                                       4 /* min_length */, 
                                                       8 /* max_length */,
                                                       (short) 3 /* retry_limit*/, 
@@ -2277,7 +2277,7 @@ public class SKSTest
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
-                                                  PINGrouping.SHARED,
+                                                  Grouping.SHARED,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
                                                   (short) 3 /* retry_limit*/, 
@@ -2307,7 +2307,7 @@ public class SKSTest
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
-                                                  PINGrouping.SHARED,
+                                                  Grouping.SHARED,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
                                                   (short) 3 /* retry_limit*/, 
@@ -2341,7 +2341,7 @@ public class SKSTest
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
-                                                  PINGrouping.SHARED,
+                                                  Grouping.SHARED,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
                                                   (short) 3 /* retry_limit*/, 
@@ -2371,7 +2371,7 @@ public class SKSTest
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   EnumSet.noneOf (PatternRestriction.class),
-                                                  PINGrouping.SHARED,
+                                                  Grouping.SHARED,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
                                                   (short) 3 /* retry_limit*/, 
@@ -2402,7 +2402,7 @@ public class SKSTest
             PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                       PassphraseFormat.NUMERIC,
                                                       EnumSet.noneOf (PatternRestriction.class),
-                                                      PINGrouping.SHARED,
+                                                      Grouping.SHARED,
                                                       4 /* min_length */, 
                                                       8 /* max_length */,
                                                       (short) 3 /* retry_limit*/, 
@@ -2441,7 +2441,7 @@ public class SKSTest
             PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                       PassphraseFormat.NUMERIC,
                                                       EnumSet.noneOf (PatternRestriction.class),
-                                                      PINGrouping.SHARED,
+                                                      Grouping.SHARED,
                                                       4 /* min_length */, 
                                                       8 /* max_length */,
                                                       (short) 3 /* retry_limit*/, 

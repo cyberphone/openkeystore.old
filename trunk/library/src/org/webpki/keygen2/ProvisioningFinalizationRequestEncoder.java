@@ -25,6 +25,7 @@ import org.w3c.dom.Element;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 
+import org.webpki.sks.SecureKeyStore;
 import org.webpki.util.Base64;
 
 import org.webpki.xml.DOMWriterHelper;
@@ -86,13 +87,13 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
       }
     
     
-    private byte[] mac (byte[] data, APIDescriptors method) throws IOException, GeneralSecurityException
+    private byte[] mac (byte[] data, byte[] method) throws IOException, GeneralSecurityException
       {
         return server_credential_store.mac (data, method, server_crypto_interface);
       }
     
     
-    private void mac (DOMWriterHelper wr, byte[] data, APIDescriptors method) throws IOException, GeneralSecurityException
+    private void mac (DOMWriterHelper wr, byte[] data, byte[] method) throws IOException, GeneralSecurityException
       {
         wr.setBinaryAttribute (MAC_ATTR, mac (data, method));
       }
@@ -154,7 +155,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                   {
                     set_certificate.addArray (certificate.getEncoded ());
                   }
-                mac (wr, set_certificate.getResult (), APIDescriptors.SET_CERTIFICATE_PATH);
+                mac (wr, set_certificate.getResult (), SecureKeyStore.METHOD_SET_CERTIFICATE_PATH);
                 XMLSignatureWrapper.writeX509DataSubset (wr, certificate_path);
                 byte[] ee_cert = certificate_path[0].getEncoded ();
                 
@@ -167,7 +168,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                     MacGenerator set_symkey = new MacGenerator ();
                     set_symkey.addArray (ee_cert);
                     set_symkey.addArray (key.encrypted_symmetric_key);
-                    mac (wr, set_symkey.getResult (), APIDescriptors.SET_SYMMETRIC_KEY);
+                    mac (wr, set_symkey.getResult (), SecureKeyStore.METHOD_SET_SYMMETRIC_KEY);
                   }
  
                 ////////////////////////////////////////////////////////////////////////
@@ -179,7 +180,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                     MacGenerator restore_privkey = new MacGenerator ();
                     restore_privkey.addArray (ee_cert);
                     restore_privkey.addArray (key.encrypted_private_key);
-                    mac (wr, restore_privkey.getResult (), APIDescriptors.RESTORE_PRIVATE_KEY);
+                    mac (wr, restore_privkey.getResult (), SecureKeyStore.METHOD_RESTORE_PRIVATE_KEY);
                   }
  
                 ////////////////////////////////////////////////////////////////////////
@@ -193,7 +194,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                     add_ext.addByte (ei.getSubType ());
                     add_ext.addArray (ei.getQualifier ());
                     add_ext.addBlob (ei.getExtensionData ());
-                    ei.writeExtension (wr, mac (add_ext.getResult (), APIDescriptors.ADD_EXTENSION));
+                    ei.writeExtension (wr, mac (add_ext.getResult (), SecureKeyStore.METHOD_ADD_EXTENSION));
                   }
 
                 ////////////////////////////////////////////////////////////////////////
@@ -241,7 +242,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             close.addArray (nonce);
             top.setAttribute (MAC_ATTR,
                               new Base64 ().getBase64StringFromBinary (server_credential_store.saved_close_mac = mac (close.getResult (),
-                                                                              APIDescriptors.CLOSE_PROVISIONING_SESSION)));
+                                                                              SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION)));
           }
         catch (GeneralSecurityException e)
           {

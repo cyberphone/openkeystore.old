@@ -7,5 +7,10 @@
 	<classpathentry kind="lib" path="/resources/third-party-jars/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="/resources/third-party-jars/junit-4.8.1.jar"/>
 	<classpathentry kind="lib" path="/resources/third-party-jars/bcprov-jdk16-145.jar"/>
+	<classpathentry kind="lib" path="/resources/jax-ws/webservices-api.jar"/>
+	<classpathentry kind="lib" path="/resources/jax-ws/webservices-extra-api.jar"/>
+	<classpathentry kind="lib" path="/resources/jax-ws/webservices-extra.jar"/>
+	<classpathentry kind="lib" path="/resources/jax-ws/webservices-rt.jar"/>
+	<classpathentry kind="lib" path="/resources/jax-ws/webservices-tools.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

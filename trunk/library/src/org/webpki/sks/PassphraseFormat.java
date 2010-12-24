@@ -14,22 +14,22 @@
  *  limitations under the License.
  *
  */
-package org.webpki.keygen2;
+package org.webpki.sks;
 
 import java.io.IOException;
 
-public enum PINGrouping
+public enum PassphraseFormat
   {
-    NONE                     ("none",               (byte)0x00),
-    SHARED                   ("shared",             (byte)0x01),
-    SIGNATURE_PLUS_STANDARD  ("signature+standard", (byte)0x02),
-    UNIQUE                   ("unique",             (byte)0x03);
+    NUMERIC       ("numeric",      (byte)0x00),
+    ALPHANUMERIC  ("alphanumeric", (byte)0x01),
+    STRING        ("string",       (byte)0x02),
+    BINARY        ("binary",       (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
     
-    private final byte sks_value;        // As expressed in SKS
+    private final byte sks_value;
 
-    private PINGrouping (String xml_name, byte sks_value)
+    private PassphraseFormat (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
@@ -41,23 +41,21 @@ public enum PINGrouping
         return xml_name;
       }
 
-    
     public byte getSKSValue ()
       {
         return sks_value;
       }
 
-
-    public static PINGrouping getPINGroupingFromString (String xml_name) throws IOException
+    public static PassphraseFormat getPassphraseFormatFromString (String xml_name) throws IOException
       {
-        for (PINGrouping option : PINGrouping.values ())
+        for (PassphraseFormat type : PassphraseFormat.values ())
           {
-            if (xml_name.equals (option.xml_name))
+            if (xml_name.equals (type.xml_name))
               {
-                return option;
+                return type;
               }
           }
-        throw new IOException ("Unknown group: " + xml_name);
+        throw new IOException ("Unknown format: " + xml_name);
       }
 
   }

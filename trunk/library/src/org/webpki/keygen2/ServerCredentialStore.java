@@ -33,6 +33,15 @@ import java.util.Vector;
 
 import org.webpki.crypto.ECDomains;
 
+import org.webpki.sks.AppUsage;
+import org.webpki.sks.BiometricProtection;
+import org.webpki.sks.DeleteProtection;
+import org.webpki.sks.ExportProtection;
+import org.webpki.sks.InputMethod;
+import org.webpki.sks.Grouping;
+import org.webpki.sks.PassphraseFormat;
+import org.webpki.sks.PatternRestriction;
+import org.webpki.sks.SecureKeyStore;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.MimeTypedObject;
 
@@ -44,22 +53,22 @@ public class ServerCredentialStore implements Serializable
     
     enum PostOperation
       {
-        DELETE_KEY            (APIDescriptors.PP_DELETE_KEY,           DELETE_KEY_ELEM), 
-        UNLOCK_KEY            (APIDescriptors.PP_UNLOCK_KEY,           UNLOCK_KEY_ELEM), 
-        UPDATE_KEY            (APIDescriptors.PP_UPDATE_KEY,           UPDATE_KEY_ELEM), 
-        CLONE_KEY_PROTECTION  (APIDescriptors.PP_CLONE_KEY_PROTECTION, CLONE_KEY_PROTECTION_ELEM);
+        DELETE_KEY            (SecureKeyStore.METHOD_PP_DELETE_KEY,           DELETE_KEY_ELEM), 
+        UNLOCK_KEY            (SecureKeyStore.METHOD_PP_UNLOCK_KEY,           UNLOCK_KEY_ELEM), 
+        UPDATE_KEY            (SecureKeyStore.METHOD_PP_UPDATE_KEY,           UPDATE_KEY_ELEM), 
+        CLONE_KEY_PROTECTION  (SecureKeyStore.METHOD_PP_CLONE_KEY_PROTECTION, CLONE_KEY_PROTECTION_ELEM);
         
-        private APIDescriptors method;
+        private byte[] method;
         
         private String xml_elem;
         
-        PostOperation (APIDescriptors method, String xml_elem)
+        PostOperation (byte[] method, String xml_elem)
           {
             this.method = method;
             this.xml_elem = xml_elem;
           }
 
-        APIDescriptors getMethod ()
+        byte[] getMethod ()
           {
             return method;
           }
@@ -388,7 +397,7 @@ public class ServerCredentialStore implements Serializable
             puk_policy_mac.addArray (encrypted_value);
             puk_policy_mac.addByte (format.getSKSValue ());
             puk_policy_mac.addShort (retry_limit);
-            wr.setBinaryAttribute (MAC_ATTR, mac (puk_policy_mac.getResult (), APIDescriptors.CREATE_PUK_POLICY, server_crypto_interface));
+            wr.setBinaryAttribute (MAC_ATTR, mac (puk_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PUK_POLICY, server_crypto_interface));
           }
       }
 
@@ -445,7 +454,7 @@ public class ServerCredentialStore implements Serializable
 
         int retry_limit;
 
-        PINGrouping grouping; // Optional
+        Grouping grouping; // Optional
 
         Set<PatternRestriction> pattern_restrictions = EnumSet.noneOf (PatternRestriction.class);
 
@@ -497,17 +506,17 @@ public class ServerCredentialStore implements Serializable
 
             MacGenerator pin_policy_mac = new MacGenerator ();
             pin_policy_mac.addString (id);
-            pin_policy_mac.addString (puk_policy == null ? CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id);
+            pin_policy_mac.addString (puk_policy == null ? SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id);
             pin_policy_mac.addBool (user_defined);
             pin_policy_mac.addBool (user_modifiable);
             pin_policy_mac.addByte (format.getSKSValue ());
             pin_policy_mac.addShort (retry_limit);
-            pin_policy_mac.addByte (grouping == null ? PINGrouping.NONE.getSKSValue () : grouping.getSKSValue ());
+            pin_policy_mac.addByte (grouping == null ? Grouping.NONE.getSKSValue () : grouping.getSKSValue ());
             pin_policy_mac.addByte (PatternRestriction.getSKSValue (pattern_restrictions));
             pin_policy_mac.addShort (min_length);
             pin_policy_mac.addShort (max_length);
             pin_policy_mac.addByte (input_method == null ? InputMethod.ANY.getSKSValue () : input_method.getSKSValue ());
-            wr.setBinaryAttribute (MAC_ATTR, mac (pin_policy_mac.getResult (), APIDescriptors.CREATE_PIN_POLICY, server_crypto_interface));
+            wr.setBinaryAttribute (MAC_ATTR, mac (pin_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PIN_POLICY, server_crypto_interface));
           }
 
         public PINPolicy setInputMethod (InputMethod input_method)
@@ -516,7 +525,7 @@ public class ServerCredentialStore implements Serializable
             return this;
           }
 
-        public PINPolicy setGrouping (PINGrouping grouping)
+        public PINPolicy setGrouping (Grouping grouping)
           {
             this.grouping = grouping;
             return this;
@@ -557,7 +566,7 @@ public class ServerCredentialStore implements Serializable
             
             void updateKeyAlgorithmMac (MacGenerator mac_gen) throws IOException
               {
-                mac_gen.addByte (CryptoConstants.ECC_KEY);
+                mac_gen.addByte (SecureKeyStore.KEY_ALGORITHM_TYPE_ECC);
                 mac_gen.addString (named_curve.getURI ());
               }
           }
@@ -594,7 +603,7 @@ public class ServerCredentialStore implements Serializable
 
             void updateKeyAlgorithmMac (MacGenerator mac_gen) throws IOException
               {
-                mac_gen.addByte (CryptoConstants.RSA_KEY);
+                mac_gen.addByte (SecureKeyStore.KEY_ALGORITHM_TYPE_RSA);
                 mac_gen.addShort (key_size);
                 mac_gen.addInt (fixed_exponent);
               }
@@ -763,7 +772,7 @@ public class ServerCredentialStore implements Serializable
           }
 
         
-        PublicKey public_key;   // Filled in by KeyInitializationRequestDecoder
+        PublicKey public_key;   // Filled in by KeyCreationRequestDecoder
 
         public PublicKey getPublicKey ()
           {
@@ -771,7 +780,7 @@ public class ServerCredentialStore implements Serializable
           }
 
 
-        byte[] attestation;   // Filled in by KeyInitializationRequestDecoder
+        byte[] attestation;   // Filled in by KeyCreationRequestDecoder
         
         public byte[] getAttestation ()
           {
@@ -801,7 +810,7 @@ public class ServerCredentialStore implements Serializable
           }
         
         
-        byte[] server_seed = CryptoConstants.DEFAULT_SEED;
+        byte[] server_seed = SecureKeyStore.DEFAULT_SEED;
         boolean server_seed_set;
         
         public KeyProperties setServerSeed (byte[] server_seed)
@@ -965,7 +974,7 @@ public class ServerCredentialStore implements Serializable
               {
                 if (pin_policy.not_first)
                   {
-                    if (pin_policy.grouping == PINGrouping.SHARED && ((pin_policy.preset_test == null && preset_pin != null) || (pin_policy.preset_test != null && preset_pin == null)))
+                    if (pin_policy.grouping == Grouping.SHARED && ((pin_policy.preset_test == null && preset_pin != null) || (pin_policy.preset_test != null && preset_pin == null)))
                       {
                         bad ("\"shared\" PIN keys must either have no \"preset_pin\" " + "value or all be preset");
                       }
@@ -987,14 +996,14 @@ public class ServerCredentialStore implements Serializable
             key_pair_mac.addArray (server_seed);
             key_pair_mac.addString (pin_policy == null ? 
                                       device_pin_protection ?
-                                          CryptoConstants.CRYPTO_STRING_PIN_DEVICE
+                                          SecureKeyStore.CRYPTO_STRING_DEVICE_PIN
                                                            : 
-                                          CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE 
+                                          SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE 
                                                        :
                                       pin_policy.id);
             if (getEncryptedPIN () == null)
               {
-                key_pair_mac.addString (CryptoConstants.CRYPTO_STRING_NOT_AVAILABLE);
+                key_pair_mac.addString (SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE);
               }
             else
               {
@@ -1025,7 +1034,7 @@ public class ServerCredentialStore implements Serializable
                 wr.addChildElement (PRESET_PIN_ELEM);
                 preset_pin.write (wr);
               }
-            wr.addChildElement (KEY_PAIR_ELEM);
+            wr.addChildElement (KEY_ENTRY_ELEM);
             wr.setStringAttribute (ID_ATTR, id);
             wr.setStringAttribute (APP_USAGE_ATTR, app_usage.getXMLName ());
 
@@ -1063,7 +1072,7 @@ public class ServerCredentialStore implements Serializable
                 wr.setBinaryAttribute (SERVER_SEED_ATTR, server_seed);
               }
 
-            wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), APIDescriptors.CREATE_KEY_PAIR, server_crypto_interface));
+            wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY, server_crypto_interface));
             
             expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
             
@@ -1157,14 +1166,14 @@ public class ServerCredentialStore implements Serializable
         return  new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
       }
 
-    byte[] mac (byte[] data, APIDescriptors method, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
+    byte[] mac (byte[] data, byte[] method, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
       {
-        return server_crypto_interface.mac (data, ArrayUtil.add (method.getBinary (), getMACSequenceCounterAndUpdate ()));
+        return server_crypto_interface.mac (data, ArrayUtil.add (method, getMACSequenceCounterAndUpdate ()));
       }
     
     byte[] attest (byte[] data, byte[] mac_counter, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
       {
-        return server_crypto_interface.mac (data, ArrayUtil.add (CryptoConstants.CRYPTO_STRING_DEVICE_ATTEST, mac_counter)); 
+        return server_crypto_interface.mac (data, ArrayUtil.add (SecureKeyStore.KDF_DEVICE_ATTESTATION, mac_counter)); 
       }
     
     void checkFinalResult (byte[] close_session_attestation,  ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException

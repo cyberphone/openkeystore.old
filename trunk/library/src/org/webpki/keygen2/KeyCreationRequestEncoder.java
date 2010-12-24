@@ -35,7 +35,7 @@ import org.webpki.crypto.SignerInterface;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class KeyInitializationRequestEncoder extends KeyInitializationRequest
+public class KeyCreationRequestEncoder extends KeyCreationRequest
   {
     String submit_url;
 
@@ -61,7 +61,7 @@ public class KeyInitializationRequestEncoder extends KeyInitializationRequest
 
     // Constructors
 
-    public KeyInitializationRequestEncoder (String submit_url,
+    public KeyCreationRequestEncoder (String submit_url,
                                             ServerCredentialStore server_credential_store,
                                             ServerCryptoInterface server_crypto_interface) throws IOException
       {

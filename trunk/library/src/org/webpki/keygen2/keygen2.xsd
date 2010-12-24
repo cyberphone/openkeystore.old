@@ -26,14 +26,14 @@
 
      - Mandatory: PlatformNegotiation
 
-     - Action="create": ProvisioningInitialization KeyInitialization   
+     - Action="create": ProvisioningInitialization KeyCreation   
      - Action="unlock": ProvisioningInitialization [CredentialDiscovery] 
-     - Action="manage": ProvisioningInitialization [CredentialDiscovery] [KeyInitialization] 
+     - Action="manage": ProvisioningInitialization [CredentialDiscovery] [KeyCreation] 
      - Action="resume": N/A
 
      - Mandatory: ProvisioningFinalization *
 
-    * Note that a deferred certification process ends after KeyInitialization.
+    * Note that a deferred certification process ends after KeyCreation.
 
     "Perfection is achieved, not when there is nothing more to add, but when
     there is nothing left to take away" [Antoine de Saint-Exupery]
@@ -482,14 +482,14 @@
                     The primary (top-level) key initialization request object
    ===========================================================================================-->
 
-   <xs:element name="KeyInitializationRequest">
+   <xs:element name="KeyCreationRequest">
       <xs:complexType>
          <xs:sequence>
 
             <xs:choice maxOccurs="unbounded">
 
                <!-- A key that requires no PIN code -->
-               <xs:element ref="kgen:KeyPair"/>
+               <xs:element ref="kgen:KeyEntry"/>
 
                <!-- One or more keys that are protected by a specific PIN policy.
                     In addition to the PIN there is a master PUK code that can
@@ -520,7 +520,7 @@
               temporarily interrupted and then be resumed at a later stage
               like required by some certification schemes.  The attribute
               below informs the client software if the current process is
-              to be terminated after the "KeyInitializationResponse" message
+              to be terminated after the "KeyCreationResponse" message
               has been sent.  The resumed session MUST use Action="resume".
               Default:  false -->
          <xs:attribute name="DeferredCertification" type="xs:boolean" use="optional"/>
@@ -555,7 +555,7 @@
                     The primary (top-level) key initialization response object
    ===========================================================================================-->
 
-   <xs:element name="KeyInitializationResponse">
+   <xs:element name="KeyCreationResponse">
       <xs:complexType>
          <xs:sequence>
 
@@ -760,7 +760,7 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     Base-object for representing a certified public key, path, and other key entry data
+     Base-object for representing a certified public key, path, and optional attributes
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <xs:element name="CertificatePath">
@@ -907,7 +907,7 @@
          </xs:sequence>
 
          <!-- A unique key-ID which MUST match the corresponding
-              "KeyInitializationResponse/PublicKey/@ID" -->
+              "KeyCreationResponse/PublicKey/@ID" -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
@@ -978,7 +978,7 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- SKS Reference: createKeyPair.PublicKey -->
+            <!-- SKS Reference: createKeyEntry.PublicKey -->
             <xs:choice>
 
                <xs:element ref="ds11:ECKeyValue"/>
@@ -987,39 +987,39 @@
 
             </xs:choice>
 
-            <!-- SKS Reference: createKeyPair.PrivateKey -->
+            <!-- SKS Reference: createKeyEntry.PrivateKey -->
             <xs:element name="PrivateKey" type="xs:base64Binary" minOccurs="0"/>
  
          </xs:sequence>
 
-         <!-- SKS Reference: createKeyPair.Attestation -->
+         <!-- SKS Reference: createKeyEntry.Attestation -->
          <xs:attribute name="Attestation" type="xs:base64Binary" use="optional"/>
 
-         <!-- A unique key-ID which MUST match a "KeyPair/@ID"
-              in the corresponding "KeyInitializationRequest" -->
+         <!-- A unique key-ID which MUST match a "KeyEntry/@ID"
+              in the corresponding "KeyCreationRequest" -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
       </xs:complexType>
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                   Base-object for requesting the creation of a key (pair)
+        Base-object for requesting the creation of a key entry and associated key pair
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:element name="KeyPair">
+   <xs:element name="KeyEntry">
       <xs:complexType>
          <xs:sequence>
 
-            <!-- SKS Specification: createKeyPair.KeyAlgorithmType -->
+            <!-- SKS Specification: createKeyEntry.KeyAlgorithmType -->
             <xs:choice>
 
                <xs:element name="RSA">
                   <xs:complexType>
 
-                     <!-- SKS Reference: createKeyPair.RSAKeySize -->
+                     <!-- SKS Reference: createKeyEntry.RSAKeySize -->
                      <xs:attribute name="KeySize" type="xs:positiveInteger" use="required"/>
 
-                     <!-- SKS Reference: createKeyPair.RSAExponent 
+                     <!-- SKS Reference: createKeyEntry.RSAExponent 
                           Default: 0 => Use SKS default -->
                     <xs:attribute name="Exponent" type="xs:positiveInteger" use="optional"/>
 
@@ -1029,7 +1029,7 @@
                <xs:element name="EC">
                   <xs:complexType>
 
-                     <!-- SKS Reference: createKeyPair.NamedCurve -->
+                     <!-- SKS Reference: createKeyEntry.NamedCurve -->
                      <xs:attribute name="NamedCurve" type="xs:anyURI" use="required"/>
 
                   </xs:complexType>
@@ -1048,44 +1048,44 @@
 
          </xs:sequence>
 
-         <!-- SKS Reference: createKeyPair.ID -->
+         <!-- SKS Reference: createKeyEntry.ID -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
-         <!-- SKS Reference: createKeyPair.ServerSeed 
+         <!-- SKS Reference: createKeyEntry.ServerSeed 
               Default: 32 zero bytes -->
          <xs:attribute name="ServerSeed" type="xs:base64Binary" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.BiometricProtection 
+         <!-- SKS Reference: createKeyEntry.BiometricProtection 
               Default: "none" -->
          <xs:attribute name="BiometricProtection" type="kgen:biomProtTypes" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.PrivateKeyBackup 
+         <!-- SKS Reference: createKeyEntry.PrivateKeyBackup 
               Default: false -->
          <xs:attribute name="PrivateKeyBackup" type="xs:boolean" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.ExportProtection 
+         <!-- SKS Reference: createKeyEntry.ExportProtection 
               Default: "non-exportable" -->
          <xs:attribute name="ExportProtection" type="kgen:expProtectionTypes" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.DeleteProtection 
+         <!-- SKS Reference: createKeyEntry.DeleteProtection 
               Default: "none" -->
          <xs:attribute name="DeleteProtection" type="kgen:delProtectionTypes" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.EnablePINCaching 
+         <!-- SKS Reference: createKeyEntry.EnablePINCaching 
               Default: false -->
          <xs:attribute name="EnablePINCaching" type="xs:boolean" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.AppUsage -->
+         <!-- SKS Reference: createKeyEntry.AppUsage -->
          <xs:attribute name="AppUsage" type="kgen:appUsageTYpes" use="required"/>
 
-         <!-- SKS Reference: createKeyPair.FriendlyName 
+         <!-- SKS Reference: createKeyEntry.FriendlyName 
               Default: "" -->
          <xs:attribute name="FriendlyName" type="xs:string" use="optional"/>
 
-         <!-- SKS Reference: createKeyPair.MAC --> 
+         <!-- SKS Reference: createKeyEntry.MAC --> 
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
-         <!-- SKS Reference: createKeyPair.EndorsedAlgorithm -->
+         <!-- SKS Reference: createKeyEntry.EndorsedAlgorithm -->
          <xs:attribute name="EndorsedAlgorithms" type="kgen:uriList" use="optional"/>
         
        </xs:complexType>
@@ -1146,17 +1146,17 @@
 
                <!-- One or more keys protected by user-defined PINs governed by
                     a common PIN policy -->
-               <xs:element ref="kgen:KeyPair" maxOccurs="unbounded"/>
+               <xs:element ref="kgen:KeyEntry" maxOccurs="unbounded"/>
 
                <!-- One or more keys protected by issuer-defined PINs -->
                <xs:element name="PresetPIN" maxOccurs="unbounded">
                   <xs:complexType>
 
                      <xs:sequence>
-                        <xs:element ref="kgen:KeyPair"/>
+                        <xs:element ref="kgen:KeyEntry"/>
                      </xs:sequence>
                            
-                     <!-- SKS Reference: createKeyPair.PINValue -->
+                     <!-- SKS Reference: createKeyEntry.PINValue -->
                      <xs:attribute name="Value" type="xs:base64Binary" use="required"/>
 
                   </xs:complexType>
@@ -1176,7 +1176,7 @@
 
          <!-- SKS Reference: createPINPolicy.UserDefined 
               "UserDefined" is an implicit variable which is true unless
-              there is a "PresetPIN" object enclosing the "KeyPair" object -->
+              there is a "PresetPIN" object enclosing the "KeyEntry" object -->
 
          <!-- SKS Reference: createPINPolicy.UserModifiable 
               Default: false for preset PINs, true for user-defined PINs -->
@@ -1219,7 +1219,7 @@
    <xs:element name="DevicePINProtection">
       <xs:complexType>
          <xs:sequence>
-            <xs:element ref="kgen:KeyPair"/>
+            <xs:element ref="kgen:KeyEntry"/>
          </xs:sequence>
       </xs:complexType>
    </xs:element>

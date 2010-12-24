@@ -45,8 +45,6 @@ public class EnumeratedKey
         return key_handle != INIT_EXIT;
       }
     
-    // TODO - a LOT!!!!
-    
     public EnumeratedKey (int key_handle, 
                           int provisioning_handle)
       {

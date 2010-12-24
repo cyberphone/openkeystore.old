@@ -14,22 +14,22 @@
  *  limitations under the License.
  *
  */
-package org.webpki.keygen2;
+package org.webpki.sks;
 
 import java.io.IOException;
 
-public enum AppUsage
+public enum DeleteProtection
   {
-    SIGNATURE                  ("signature",      (byte)0x00),
-    AUTHENTICATION             ("authentication", (byte)0x01),
-    ENCRYPTION                 ("encryption",     (byte)0x02),
-    UNIVERSAL                  ("universal",      (byte)0x03);
+    NONE              ("none",          (byte)0x00),
+    PIN               ("pin",           (byte)0x01),
+    PUK               ("puk",           (byte)0x02),
+    NON_DELETABLE     ("non-deletable", (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
     
     private final byte sks_value;        // As expressed in SKS
-    
-    private AppUsage (String xml_name, byte sks_value)
+
+    private DeleteProtection (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
@@ -48,15 +48,16 @@ public enum AppUsage
       }
 
 
-    public static AppUsage getKeyUsageFromString (String xml_name) throws IOException
+    public static DeleteProtection getDeletePolicyFromString (String xml_name) throws IOException
       {
-        for (AppUsage key_type : AppUsage.values ())
+        for (DeleteProtection del_pol : DeleteProtection.values ())
           {
-            if (xml_name.equals (key_type.xml_name))
+            if (xml_name.equals (del_pol.xml_name))
               {
-                return key_type;
+                return del_pol;
               }
           }
-        throw new IOException ("Unknown key usage type: " + xml_name);
+        throw new IOException ("Unknown delete policy: " + xml_name);
       }
+
   }

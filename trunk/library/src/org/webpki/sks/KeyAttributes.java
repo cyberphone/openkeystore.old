@@ -19,7 +19,6 @@ package org.webpki.sks;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
 
-import org.webpki.keygen2.AppUsage;
 
 public class KeyAttributes
   {

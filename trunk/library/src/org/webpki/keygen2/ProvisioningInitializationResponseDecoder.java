@@ -24,6 +24,7 @@ import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 
+import org.webpki.sks.SecureKeyStore;
 import org.webpki.util.ArrayUtil;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
@@ -103,7 +104,7 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
         @Override
         public boolean verifyData (byte[] data, byte[] digest, MacAlgorithms algorithm) throws IOException, GeneralSecurityException
           {
-            return ArrayUtil.compare (server_crypto_interface.mac (data, CryptoConstants.CRYPTO_STRING_SIGNATURE), digest);
+            return ArrayUtil.compare (server_crypto_interface.mac (data, SecureKeyStore.KDF_EXTERNAL_SIGNATURE), digest);
           }
       }
 

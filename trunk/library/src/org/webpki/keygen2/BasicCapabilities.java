@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import java.util.LinkedHashSet;
 
+import org.webpki.sks.SecureKeyStore;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 
@@ -45,7 +46,7 @@ public class BasicCapabilities
     
     BasicCapabilities ()
       {
-        for (short key_size : CryptoConstants.SKS_DEFAULT_RSA_SUPPORT)
+        for (short key_size : SecureKeyStore.SKS_DEFAULT_RSA_SUPPORT)
           {
             rsa_key_sizes.add (key_size);
           }

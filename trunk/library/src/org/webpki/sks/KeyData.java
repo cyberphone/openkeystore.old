@@ -18,7 +18,7 @@ package org.webpki.sks;
 
 import java.security.PublicKey;
 
-public class KeyPair
+public class KeyData
   {
     private int key_handle;
     
@@ -28,7 +28,7 @@ public class KeyPair
     
     private byte[] encrypted_private_key;
     
-    public KeyPair (int key_handle,
+    public KeyData (int key_handle,
                     PublicKey public_key, 
                     byte[] attestation,
                     byte[] encrypted_private_key)

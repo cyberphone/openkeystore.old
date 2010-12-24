@@ -64,10 +64,9 @@ import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.Extension;
 import org.webpki.sks.KeyAttributes;
-import org.webpki.sks.KeyPair;
+import org.webpki.sks.KeyData;
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.ProvisioningSession;
-import org.webpki.sks.SKSError;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
 
@@ -99,126 +98,6 @@ import org.webpki.sks.SecureKeyStore;
 public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Serializable
   {
     private static final long serialVersionUID = 1L;
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // Method IDs are used "as is" in the MAC KDF
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte[] METHOD_SET_CERTIFICATE_PATH        = {'s','e','t','C','e','r','t','i','f','i','c','a','t','e','P','a','t','h'};
-    static final byte[] METHOD_SET_SYMMETRIC_KEY           = {'s','e','t','S','y','m','m','e','t','r','i','c','K','e','y'};
-    static final byte[] METHOD_RESTORE_PRIVATE_KEY         = {'r','e','s','t','o','r','e','P','r','i','v','a','t','e','K','e','y'};
-    static final byte[] METHOD_CLOSE_PROVISIONING_SESSION  = {'c','l','o','s','e','P','r','o','v','i','s','i','o','n','i','n','g','S','e','s','s','i','o','n'};
-    static final byte[] METHOD_CREATE_KEY_PAIR             = {'c','r','e','a','t','e','K','e','y','P','a','i','r'};
-    static final byte[] METHOD_CREATE_PIN_POLICY           = {'c','r','e','a','t','e','P','I','N','P','o','l','i','c','y'};
-    static final byte[] METHOD_CREATE_PUK_POLICY           = {'c','r','e','a','t','e','P','U','K','P','o','l','i','c','y'};
-    static final byte[] METHOD_ADD_EXTENSION               = {'a','d','d','E','x','t','e','n','s','i','o','n'};
-    static final byte[] METHOD_PP_DELETE_KEY               = {'p','p','_','d','e','l','e','t','e','K','e','y'};
-    static final byte[] METHOD_PP_UNLOCK_KEY               = {'p','p','_','u','n','l','o','c','k','K','e','y'};
-    static final byte[] METHOD_PP_UPDATE_KEY               = {'p','p','_','u','p','d','a','t','e','K','e','y'};
-    static final byte[] METHOD_PP_CLONE_KEY_PROTECTION     = {'p','p','_','c','l','o','n','e','K','e','y','P','r','o','t','e','c','t','i','o','n'};
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // Other KDF constants that are used "as is"
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte[] KDF_DEVICE_ATTESTATION             = {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
-    static final byte[] KDF_ENCRYPTION_KEY                 = {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
-    static final byte[] KDF_EXTERNAL_SIGNATURE             = {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // Predefined PIN and PUK policy IDs for MAC operations
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final String CRYPTO_STRING_NOT_AVAILABLE        = "#N/A";
-    static final String CRYPTO_STRING_DEVICE_PIN           = "#Device PIN";
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "AppUsage" in the SKS specification
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte APP_USAGE_SIGNATURE                  = 0x00;
-    static final byte APP_USAGE_AUTHENTICATION             = 0x01;
-    static final byte APP_USAGE_ENCRYPTION                 = 0x02;
-    static final byte APP_USAGE_UNIVERSAL                  = 0x03;
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "PIN Grouping" in the SKS specification
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_GROUPING_NONE                    = 0x00;
-    static final byte PIN_GROUPING_SHARED                  = 0x01;
-    static final byte PIN_GROUPING_SIGN_PLUS_STD           = 0x02;
-    static final byte PIN_GROUPING_UNIQUE                  = 0x03;
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "PIN Pattern Control" in the SKS specification
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_PATTERN_TWO_IN_A_ROW             = 0x01;
-    static final byte PIN_PATTERN_THREE_IN_A_ROW           = 0x02;
-    static final byte PIN_PATTERN_SEQUENCE                 = 0x04;
-    static final byte PIN_PATTERN_REPEATED                 = 0x08;
-    static final byte PIN_PATTERN_MISSING_GROUP            = 0x10;
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "PIN and PUK Formats" in the SKS specification
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PIN_FORMAT_NUMERIC                   = 0x00;
-    static final byte PIN_FORMAT_ALPHANUMERIC              = 0x01;
-    static final byte PIN_FORMAT_STRING                    = 0x02;
-    static final byte PIN_FORMAT_BINARY                    = 0x03;
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // See "SubType" for "addExtension" in the SKS specification
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte SUB_TYPE_EXTENSION                   = 0x00;
-    static final byte SUB_TYPE_ENCRYPTED_EXTENSION         = 0x01;
-    static final byte SUB_TYPE_PROPERTY_BAG                = 0x02;
-    static final byte SUB_TYPE_LOGOTYPE                    = 0x03;
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // "ExportProtection" and "DeleteProtection" share constants (and code...)
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte EXPORT_DELETE_PROTECTION_NONE        = 0x00;
-    static final byte EXPORT_DELETE_PROTECTION_PIN         = 0x01;
-    static final byte EXPORT_DELETE_PROTECTION_PUK         = 0x02;
-    static final byte EXPORT_DELETE_PROTECTION_NOT_ALLOWED = 0x03;
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // "InputMethod" constants
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte INPUT_METHOD_PROGRAMMATIC            = 0x01;
-    static final byte INPUT_METHOD_TRUSTED_GUI             = 0x02;
-    static final byte INPUT_METHOD_ANY                     = 0x03;
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // "BiometricProtection" constants
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte BIOMETRIC_PROTECTION_NONE            = 0x00;
-    static final byte BIOMETRIC_PROTECTION_ALTERNATIVE     = 0x01;
-    static final byte BIOMETRIC_PROTECTION_COMBINED        = 0x02;
-    static final byte BIOMETRIC_PROTECTION_EXCLUSIVE       = 0x03;
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // "ProtectionStatus" constants
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte PROTECTION_STATUS_NO_PIN             = 0x00;
-    static final byte PROTECTION_STATUS_PIN_PROTECTED      = 0x01;
-    static final byte PROTECTION_STATUS_PIN_BLOCKED        = 0x04;
-    static final byte PROTECTION_STATUS_PUK_PROTECTED      = 0x02;
-    static final byte PROTECTION_STATUS_PUK_BLOCKED        = 0x08;
-    static final byte PROTECTION_STATUS_DEVICE_PIN         = 0x10;
- 
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // SKS key algorithm IDs used in "createKeyPair"
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final byte KEY_ALGORITHM_TYPE_RSA               = 0x00;
-    static final byte KEY_ALGORITHM_TYPE_ECC               = 0x01;
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // SKS "sanity" limits
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static final int MAX_LENGTH_PIN_PUK                    = 128;
-    static final int MAX_LENGTH_QUALIFIER                  = 128;
-    static final int MAX_LENGTH_SYMMETRIC_KEY              = 128;
-    static final int MAX_LENGTH_ID_TYPE                    = 32;
-    static final int MAX_LENGTH_URI                        = 1000;
-    static final int MAX_LENGTH_CRYPTO_DATA                = 16384;
-    static final int MAX_LENGTH_EXTENSION_DATA             = 65536;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS version and configuration data
@@ -2925,27 +2804,27 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                              createKeyPair                                 //
+    //                              createKeyEntry                                //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public KeyPair createKeyPair (int provisioning_handle,
-                                  String id,
-                                  String algorithm,
-                                  byte[] server_seed,
-                                  boolean device_pin_protection,
-                                  int pin_policy_handle,
-                                  byte[] pin_value,
-                                  byte biometric_protection,
-                                  boolean private_key_backup,
-                                  byte export_protection,
-                                  byte delete_protection,
-                                  boolean enable_pin_caching,
-                                  byte app_usage,
-                                  String friendly_name,
-                                  byte[] key_specifier,
-                                  String[] endorsed_algorithms,
-                                  byte[] mac) throws SKSException
+    public KeyData createKeyEntry (int provisioning_handle,
+                                   String id,
+                                   String algorithm,
+                                   byte[] server_seed,
+                                   boolean device_pin_protection,
+                                   int pin_policy_handle,
+                                   byte[] pin_value,
+                                   byte biometric_protection,
+                                   boolean private_key_backup,
+                                   byte export_protection,
+                                   byte delete_protection,
+                                   boolean enable_pin_caching,
+                                   byte app_usage,
+                                   String friendly_name,
+                                   byte[] key_specifier,
+                                   String[] endorsed_algorithms,
+                                   byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Get provisioning session
@@ -2974,6 +2853,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         PINPolicy pin_policy = null;
         boolean decrypt_pin = false;
         String pin_policy_id = CRYPTO_STRING_NOT_AVAILABLE;
+        boolean pin_protection = true;
         if (device_pin_protection)
           {
             pin_policy_id = CRYPTO_STRING_DEVICE_PIN;
@@ -2993,11 +2873,24 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             provisioning.names.put (pin_policy_id, true); // Referenced
             decrypt_pin = !pin_policy.user_defined;
           }
+        else
+          {
+            pin_protection = false;
+            if (enable_pin_caching)
+              {
+                provisioning.abort ("\"EnablePINCaching\" without PIN");
+              }
+          }
+        if (biometric_protection != BIOMETRIC_PROTECTION_NONE &&
+            ((biometric_protection != BIOMETRIC_PROTECTION_EXCLUSIVE) ^ pin_protection))
+          {
+            provisioning.abort ("Invalid \"BiometricProtection\" and PIN combination" + pin_protection + biometric_protection);
+          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_PAIR);
+        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_ENTRY);
         verifier.addString (id);
         verifier.addString (algorithm);
         verifier.addArray (server_seed);
@@ -3172,7 +3065,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             key_entry.delete_protection = delete_protection;
             key_entry.endorsed_algorithms = temp_endorsed;
             key_entry.private_key_backup = private_key_backup;
-            return new KeyPair (key_entry.key_handle,
+            return new KeyData (key_entry.key_handle,
                                 public_key,
                                 attestation.getResult (),
                                 encrypted_private_key);

@@ -14,22 +14,22 @@
  *  limitations under the License.
  *
  */
-package org.webpki.keygen2;
+package org.webpki.sks;
 
 import java.io.IOException;
 
-public enum DeleteProtection
+public enum BiometricProtection
   {
-    NONE              ("none",          (byte)0x00),
-    PIN               ("pin",           (byte)0x01),
-    PUK               ("puk",           (byte)0x02),
-    NON_DELETABLE     ("non-deletable", (byte)0x03);
+    NONE             ("none",        (byte)0x00),
+    ALTERNATIVE      ("alternative", (byte)0x01),
+    COMBINED         ("combined",    (byte)0x02),
+    EXCLUSIVE        ("exclusive",   (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
     
     private final byte sks_value;        // As expressed in SKS
 
-    private DeleteProtection (String xml_name, byte sks_value)
+    private BiometricProtection (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
@@ -48,16 +48,16 @@ public enum DeleteProtection
       }
 
 
-    public static DeleteProtection getDeletePolicyFromString (String xml_name) throws IOException
+    public static BiometricProtection getBiometricProtectionFromString (String xml_name) throws IOException
       {
-        for (DeleteProtection del_pol : DeleteProtection.values ())
+        for (BiometricProtection biom_type : BiometricProtection.values ())
           {
-            if (xml_name.equals (del_pol.xml_name))
+            if (xml_name.equals (biom_type.xml_name))
               {
-                return del_pol;
+                return biom_type;
               }
           }
-        throw new IOException ("Unknown delete policy: " + xml_name);
+        throw new IOException ("Unknown biometric type: " + xml_name);
       }
 
   }

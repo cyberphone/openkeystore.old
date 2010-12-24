@@ -22,6 +22,15 @@ import java.util.Vector;
 import java.util.Set;
 import java.util.EnumSet;
 
+import org.webpki.sks.AppUsage;
+import org.webpki.sks.BiometricProtection;
+import org.webpki.sks.DeleteProtection;
+import org.webpki.sks.ExportProtection;
+import org.webpki.sks.InputMethod;
+import org.webpki.sks.Grouping;
+import org.webpki.sks.PassphraseFormat;
+import org.webpki.sks.PatternRestriction;
+import org.webpki.sks.SecureKeyStore;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
@@ -34,7 +43,7 @@ import org.webpki.crypto.ECDomains;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class KeyInitializationRequestDecoder extends KeyInitializationRequest
+public class KeyCreationRequestDecoder extends KeyCreationRequest
   {
     abstract class PresetValueReference
       {
@@ -149,7 +158,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
         byte max_length;
 
-        PINGrouping group;
+        Grouping group;
 
         InputMethod input_method;
 
@@ -176,8 +185,8 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
 
             format = PassphraseFormat.getPassphraseFormatFromString (ah.getString (FORMAT_ATTR));
 
-            group = PINGrouping.getPINGroupingFromString (ah.getStringConditional (GROUPING_ATTR,
-                                                                                   PINGrouping.NONE.getXMLName ()));
+            group = Grouping.getPINGroupingFromString (ah.getStringConditional (GROUPING_ATTR,
+                                                                                   Grouping.NONE.getXMLName ()));
 
             input_method = InputMethod.getMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR,
                                                                                      InputMethod.ANY.getXMLName ()));
@@ -226,7 +235,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
           }
 
 
-        public PINGrouping getGrouping ()
+        public Grouping getGrouping ()
           {
             return group;
           }
@@ -314,7 +323,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
                    PresetPIN preset_pin,
                    boolean device_pin_protected) throws IOException
           {
-            rd.getNext (KEY_PAIR_ELEM);
+            rd.getNext (KEY_ENTRY_ELEM);
             this.pin_policy = pin_policy;
             this.start_of_pin_group = start_of_pin_group;
             this.preset_pin = preset_pin;
@@ -347,7 +356,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
             server_seed = ah.getBinaryConditional (SERVER_SEED_ATTR);
             if (server_seed == null)
               {
-                server_seed = CryptoConstants.DEFAULT_SEED;
+                server_seed = SecureKeyStore.DEFAULT_SEED;
               }
             else if (server_seed.length != 32)
               {
@@ -659,7 +668,7 @@ public class KeyInitializationRequestDecoder extends KeyInitializationRequest
         /////////////////////////////////////////////////////////////////////////////////////////
          while (true)
           {
-            if (rd.hasNext (KEY_PAIR_ELEM))
+            if (rd.hasNext (KEY_ENTRY_ELEM))
               {
                 readKeyProperties (rd, false);
               }

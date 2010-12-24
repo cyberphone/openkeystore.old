@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.keygen2;
+package org.webpki.sks;
 
 import java.io.IOException;
 import java.util.Set;
@@ -42,6 +42,12 @@ public enum PatternRestriction
     public String getXMLName ()
       {
         return xml_name;
+      }
+    
+    
+    public byte getSKSMaskBit ()
+      {
+        return sks_mask;
       }
 
 

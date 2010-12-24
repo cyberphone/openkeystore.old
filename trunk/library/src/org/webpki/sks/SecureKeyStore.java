@@ -28,6 +28,134 @@ import java.security.interfaces.ECPublicKey;
 public interface SecureKeyStore
   {
     ///////////////////////////////////////////////////////////////////////////////////
+    // SKS "sanity" limits
+    ///////////////////////////////////////////////////////////////////////////////////
+    public int MAX_LENGTH_PIN_PUK                    = 128;
+    public int MAX_LENGTH_QUALIFIER                  = 128;
+    public int MAX_LENGTH_SYMMETRIC_KEY              = 128;
+    public int MAX_LENGTH_ID_TYPE                    = 32;
+    public int MAX_LENGTH_URI                        = 1000;
+    public int MAX_LENGTH_CRYPTO_DATA                = 16384;
+    public int MAX_LENGTH_EXTENSION_DATA             = 65536;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Method IDs are used "as is" in the MAC KDF
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte[] METHOD_SET_CERTIFICATE_PATH        = {'s','e','t','C','e','r','t','i','f','i','c','a','t','e','P','a','t','h'};
+    public byte[] METHOD_SET_SYMMETRIC_KEY           = {'s','e','t','S','y','m','m','e','t','r','i','c','K','e','y'};
+    public byte[] METHOD_RESTORE_PRIVATE_KEY         = {'r','e','s','t','o','r','e','P','r','i','v','a','t','e','K','e','y'};
+    public byte[] METHOD_CLOSE_PROVISIONING_SESSION  = {'c','l','o','s','e','P','r','o','v','i','s','i','o','n','i','n','g','S','e','s','s','i','o','n'};
+    public byte[] METHOD_CREATE_KEY_ENTRY            = {'c','r','e','a','t','e','K','e','y','E','n','t','r','y'};
+    public byte[] METHOD_CREATE_PIN_POLICY           = {'c','r','e','a','t','e','P','I','N','P','o','l','i','c','y'};
+    public byte[] METHOD_CREATE_PUK_POLICY           = {'c','r','e','a','t','e','P','U','K','P','o','l','i','c','y'};
+    public byte[] METHOD_ADD_EXTENSION               = {'a','d','d','E','x','t','e','n','s','i','o','n'};
+    public byte[] METHOD_PP_DELETE_KEY               = {'p','p','_','d','e','l','e','t','e','K','e','y'};
+    public byte[] METHOD_PP_UNLOCK_KEY               = {'p','p','_','u','n','l','o','c','k','K','e','y'};
+    public byte[] METHOD_PP_UPDATE_KEY               = {'p','p','_','u','p','d','a','t','e','K','e','y'};
+    public byte[] METHOD_PP_CLONE_KEY_PROTECTION     = {'p','p','_','c','l','o','n','e','K','e','y','P','r','o','t','e','c','t','i','o','n'};
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Other KDF constants that are used "as is"
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte[] KDF_DEVICE_ATTESTATION             = {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
+    public byte[] KDF_ENCRYPTION_KEY                 = {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
+    public byte[] KDF_EXTERNAL_SIGNATURE             = {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Predefined PIN and PUK policy IDs for MAC operations
+    ///////////////////////////////////////////////////////////////////////////////////
+    public String CRYPTO_STRING_NOT_AVAILABLE        = "#N/A";
+    public String CRYPTO_STRING_DEVICE_PIN           = "#Device PIN";
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // See "AppUsage" in the SKS specification
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte APP_USAGE_SIGNATURE                  = 0x00;
+    public byte APP_USAGE_AUTHENTICATION             = 0x01;
+    public byte APP_USAGE_ENCRYPTION                 = 0x02;
+    public byte APP_USAGE_UNIVERSAL                  = 0x03;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // See "PIN Grouping" in the SKS specification
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte PIN_GROUPING_NONE                    = 0x00;
+    public byte PIN_GROUPING_SHARED                  = 0x01;
+    public byte PIN_GROUPING_SIGN_PLUS_STD           = 0x02;
+    public byte PIN_GROUPING_UNIQUE                  = 0x03;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // See "PIN Pattern Control" in the SKS specification
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte PIN_PATTERN_TWO_IN_A_ROW             = 0x01;
+    public byte PIN_PATTERN_THREE_IN_A_ROW           = 0x02;
+    public byte PIN_PATTERN_SEQUENCE                 = 0x04;
+    public byte PIN_PATTERN_REPEATED                 = 0x08;
+    public byte PIN_PATTERN_MISSING_GROUP            = 0x10;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // See "PIN and PUK Formats" in the SKS specification
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte PIN_FORMAT_NUMERIC                   = 0x00;
+    public byte PIN_FORMAT_ALPHANUMERIC              = 0x01;
+    public byte PIN_FORMAT_STRING                    = 0x02;
+    public byte PIN_FORMAT_BINARY                    = 0x03;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // See "SubType" for "addExtension" in the SKS specification
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte SUB_TYPE_EXTENSION                   = 0x00;
+    public byte SUB_TYPE_ENCRYPTED_EXTENSION         = 0x01;
+    public byte SUB_TYPE_PROPERTY_BAG                = 0x02;
+    public byte SUB_TYPE_LOGOTYPE                    = 0x03;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // "ExportProtection" and "DeleteProtection" share constants (and code...)
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte EXPORT_DELETE_PROTECTION_NONE        = 0x00;
+    public byte EXPORT_DELETE_PROTECTION_PIN         = 0x01;
+    public byte EXPORT_DELETE_PROTECTION_PUK         = 0x02;
+    public byte EXPORT_DELETE_PROTECTION_NOT_ALLOWED = 0x03;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // "InputMethod" constants
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte INPUT_METHOD_PROGRAMMATIC            = 0x01;
+    public byte INPUT_METHOD_TRUSTED_GUI             = 0x02;
+    public byte INPUT_METHOD_ANY                     = 0x03;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // "BiometricProtection" constants
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte BIOMETRIC_PROTECTION_NONE            = 0x00;
+    public byte BIOMETRIC_PROTECTION_ALTERNATIVE     = 0x01;
+    public byte BIOMETRIC_PROTECTION_COMBINED        = 0x02;
+    public byte BIOMETRIC_PROTECTION_EXCLUSIVE       = 0x03;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // SKS key algorithm IDs used in "createKeyPair"
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte KEY_ALGORITHM_TYPE_RSA               = 0x00;
+    public byte KEY_ALGORITHM_TYPE_ECC               = 0x01;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // "ProtectionStatus" constants
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte PROTECTION_STATUS_NO_PIN             = 0x00;
+    public byte PROTECTION_STATUS_PIN_PROTECTED      = 0x01;
+    public byte PROTECTION_STATUS_PIN_BLOCKED        = 0x04;
+    public byte PROTECTION_STATUS_PUK_PROTECTED      = 0x02;
+    public byte PROTECTION_STATUS_PUK_BLOCKED        = 0x08;
+    public byte PROTECTION_STATUS_DEVICE_PIN         = 0x10;
+ 
+    ///////////////////////////////////////////////////////////////////////////////////
+    // If there is no ServerSeed, this is the default
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte[] DEFAULT_SEED = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    
+    public short[] SKS_DEFAULT_RSA_SUPPORT = {1024, 2048};
+
+
+    ///////////////////////////////////////////////////////////////////////////////////
     // Core Provisioning API
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -50,23 +178,23 @@ public interface SecureKeyStore
     public byte[] signProvisioningSessionData (int provisioning_handle,
                                                byte[] data) throws SKSException;
 
-    public KeyPair createKeyPair (int provisioning_handle,
-                                  String id,
-                                  String algorithm,
-                                  byte[] server_seed,
-                                  boolean device_pin_protection,
-                                  int pin_policy_handle,
-                                  byte[] pin_value,  // Must be null if not applicable
-                                  byte biometric_protection,
-                                  boolean private_key_backup,
-                                  byte export_protection,
-                                  byte delete_protection,
-                                  boolean enable_pin_caching,
-                                  byte app_usage,
-                                  String friendly_name,
-                                  byte[] key_specifier,
-                                  String[] endorsed_algorithms,
-                                  byte[] mac) throws SKSException;
+    public KeyData createKeyEntry (int provisioning_handle,
+                                   String id,
+                                   String algorithm,
+                                   byte[] server_seed,
+                                   boolean device_pin_protection,
+                                   int pin_policy_handle,
+                                   byte[] pin_value,  // Must be null if not applicable
+                                   byte biometric_protection,
+                                   boolean private_key_backup,
+                                   byte export_protection,
+                                   byte delete_protection,
+                                   boolean enable_pin_caching,
+                                   byte app_usage,
+                                   String friendly_name,
+                                   byte[] key_specifier,
+                                   String[] endorsed_algorithms,
+                                   byte[] mac) throws SKSException;
     
     public int getKeyHandle (int provisioning_handle,
                              String id) throws SKSException;

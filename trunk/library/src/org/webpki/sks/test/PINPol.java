@@ -16,7 +16,7 @@
  */
 package org.webpki.sks.test;
 
-import org.webpki.keygen2.PassphraseFormat;
+import org.webpki.sks.PassphraseFormat;
 
 public class PINPol
   {

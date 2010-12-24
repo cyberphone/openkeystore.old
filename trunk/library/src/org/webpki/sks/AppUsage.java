@@ -14,22 +14,22 @@
  *  limitations under the License.
  *
  */
-package org.webpki.keygen2;
+package org.webpki.sks;
 
 import java.io.IOException;
 
-public enum PassphraseFormat
+public enum AppUsage
   {
-    NUMERIC       ("numeric",      (byte)0x00),
-    ALPHANUMERIC  ("alphanumeric", (byte)0x01),
-    STRING        ("string",       (byte)0x02),
-    BINARY        ("binary",       (byte)0x03);
+    SIGNATURE                  ("signature",      (byte)0x00),
+    AUTHENTICATION             ("authentication", (byte)0x01),
+    ENCRYPTION                 ("encryption",     (byte)0x02),
+    UNIVERSAL                  ("universal",      (byte)0x03);
 
     private final String xml_name;       // As expressed in XML
     
-    private final byte sks_value;
-
-    private PassphraseFormat (String xml_name, byte sks_value)
+    private final byte sks_value;        // As expressed in SKS
+    
+    private AppUsage (String xml_name, byte sks_value)
       {
         this.xml_name = xml_name;
         this.sks_value = sks_value;
@@ -40,22 +40,23 @@ public enum PassphraseFormat
       {
         return xml_name;
       }
+    
 
     public byte getSKSValue ()
       {
         return sks_value;
       }
 
-    public static PassphraseFormat getPassphraseFormatFromString (String xml_name) throws IOException
+
+    public static AppUsage getKeyUsageFromString (String xml_name) throws IOException
       {
-        for (PassphraseFormat type : PassphraseFormat.values ())
+        for (AppUsage key_type : AppUsage.values ())
           {
-            if (xml_name.equals (type.xml_name))
+            if (xml_name.equals (key_type.xml_name))
               {
-                return type;
+                return key_type;
               }
           }
-        throw new IOException ("Unknown format: " + xml_name);
+        throw new IOException ("Unknown key usage type: " + xml_name);
       }
-
   }

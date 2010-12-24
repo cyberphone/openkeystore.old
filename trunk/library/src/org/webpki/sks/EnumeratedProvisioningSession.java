@@ -16,8 +16,10 @@
  */
 package org.webpki.sks;
 
-import java.security.PublicKey;
+
 import java.util.Date;
+
+import java.security.PublicKey;
 
 public class EnumeratedProvisioningSession
   {
