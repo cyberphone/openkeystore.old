@@ -1,0 +1,97 @@
+package org.webpki.sks.ws.client;
+
+import java.util.Map;
+
+import javax.xml.ws.Holder;
+
+import javax.xml.ws.BindingProvider;
+
+public class SKSWSClient
+  {
+    private SKSWSInterface proxy;
+    
+    private String port;
+    
+    
+    public SKSWSClient (String port)
+      {
+        this.port = port;
+      }
+
+    /**
+     * Factory method. Each WS call should use this method.
+     * 
+     * @return A handle to a fresh WS instance
+     */
+    public SKSWSInterface getSKSWS ()
+    {
+        if (proxy == null)
+        {
+            synchronized (this)
+            {
+                SKSWS service = new SKSWS ();
+                SKSWSInterface temp_proxy = service.getSKSWSPort ();
+                Map<String,Object> request_object = ((BindingProvider) temp_proxy).getRequestContext ();
+                request_object.put (BindingProvider.ENDPOINT_ADDRESS_PROPERTY, port);
+                proxy = temp_proxy;
+            }
+        }
+        return proxy;
+    }
+
+    static void bad ()
+    {
+     throw new RuntimeException ("baddy"); 
+    }
+    
+    /**
+     * Test method. Use empty argument list for help.
+     * 
+     * @param args
+     *            Command line arguments
+     * @throws  
+     * @throws SKSExceptionBean 
+     */
+    public static void main (String args[])
+    {
+        if (args.length != 1)
+        {
+            System.out.println ("SKSWSClient port");
+            System.exit (3);
+        }
+        SKSWSClient client = new SKSWSClient (args[0]);
+        SKSWSInterface proxy = client.getSKSWS ();
+        System.out.println ("Version=" + proxy.getVersion ());
+        
+        try
+          {
+            proxy.abortProvisioningSession (5);
+            bad ();
+          }
+        catch (SKSException_Exception e)
+          {
+            System.out.println ("Ok e=" + e.getFaultInfo ().getError () + " m=" + e.getFaultInfo ().getMessage ());
+          }
+
+        Holder<Byte> blah = new Holder<Byte> ();
+        Holder<String> prot = new Holder<String> ();
+        try
+          {
+            proxy.getKeyProtectionInfo (4, prot, blah);
+            if (!prot.value.equals ("yes"))
+              {
+                bad ();
+              }
+            if (blah.value != 6)
+              {
+                bad ();
+              }
+            System.out.println ("Ok=getkey");
+          }
+        catch (SKSException_Exception e)
+          {
+            bad ();
+          }
+    }    
+
+  }
