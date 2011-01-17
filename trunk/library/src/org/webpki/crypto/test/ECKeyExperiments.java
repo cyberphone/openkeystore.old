@@ -14,7 +14,7 @@ import javax.crypto.KeyAgreement;
 public class ECKeyExperiments
   {
 
-    // Just to verify that NIST curves are identical for ECDH, ECDHC, and ECDSA
+    // Just to verify that NIST curves are identical for ECDH, ECDH, and ECDSA
 
     private ECKeyExperiments ()
       {
@@ -22,7 +22,7 @@ public class ECKeyExperiments
     
     private static KeyPair gen (String alg) throws Exception
       {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance (alg, "BC");
+        KeyPairGenerator generator = KeyPairGenerator.getInstance (alg);
         ECGenParameterSpec eccgen = new ECGenParameterSpec ("P-256");
         generator.initialize(eccgen, new SecureRandom());
         return generator.generateKeyPair();
@@ -35,12 +35,12 @@ public class ECKeyExperiments
     
     private static void signverify (KeyPair kp) throws Exception
       {
-        Signature signer = Signature.getInstance (ECC_SIGNATURE, "BC");
+        Signature signer = Signature.getInstance (ECC_SIGNATURE);
         signer.initSign (kp.getPrivate ());
         signer.update (data);
         byte[] signature = signer.sign ();
 
-        Signature verifier = Signature.getInstance (ECC_SIGNATURE, "BC");
+        Signature verifier = Signature.getInstance (ECC_SIGNATURE);
         verifier.initVerify (kp.getPublic ());
         verifier.update (data);
 
@@ -53,18 +53,18 @@ public class ECKeyExperiments
     
     private static void test (String alg) throws Exception
       {
-        KeyPair kp1 = gen ("ECDHC");
+        KeyPair kp1 = gen ("ECDH");
         KeyPair kp2 = gen (alg);
         String ka_alg = alg;
         if (alg.equals ("EC"))
           {
              ka_alg = "ECDH";
           }
-        KeyAgreement ka1 = KeyAgreement.getInstance(ka_alg, "BC");
+        KeyAgreement ka1 = KeyAgreement.getInstance(ka_alg);
 
         ka1.init(kp1.getPrivate());
 
-        KeyAgreement ka2 = KeyAgreement.getInstance(ka_alg, "BC");
+        KeyAgreement ka2 = KeyAgreement.getInstance(ka_alg);
 
         ka2.init(kp2.getPrivate());
 
@@ -90,7 +90,7 @@ public class ECKeyExperiments
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         test ("EC");
         test ("ECDH");
-        test ("ECDHC");
+        test ("ECDH");
       }
 
   }

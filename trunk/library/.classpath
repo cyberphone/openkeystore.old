@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v6.0"/>
 	<classpathentry kind="lib" path="/resources/third-party-jars/itext-1.4.2.jar"/>
 	<classpathentry kind="lib" path="/resources/third-party-jars/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="/resources/third-party-jars/junit-4.8.1.jar"/>
@@ -12,5 +11,6 @@
 	<classpathentry kind="lib" path="/resources/jax-ws/webservices-extra.jar"/>
 	<classpathentry kind="lib" path="/resources/jax-ws/webservices-rt.jar"/>
 	<classpathentry kind="lib" path="/resources/jax-ws/webservices-tools.jar"/>
+	<classpathentry kind="lib" path="/resources/third-party-jars/servlet-api.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

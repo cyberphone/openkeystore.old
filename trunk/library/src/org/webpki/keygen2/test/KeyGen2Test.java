@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2010 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2011 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -217,7 +217,7 @@ public class KeyGen2Test
                 fos.write (HTMLHeader.createHTMLHeader (false, true,"KeyGen2 JUinit test output", null).append ("<body><h3>KeyGen2 JUnit Test</h3><p>").toString ().getBytes ("UTF-8"));
               }
           }
-        Security.addProvider(new BouncyCastleProvider());
+        Security.insertProviderAt (new BouncyCastleProvider(), 1);
         sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
       }
 
@@ -698,7 +698,7 @@ public class KeyGen2Test
             @Override
             public ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException
               {
-                KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC", "BC");
+                KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
                 ECGenParameterSpec eccgen = new ECGenParameterSpec (ECDomains.P_256.getJCEName ());
                 generator.initialize (eccgen, new SecureRandom ());
                 java.security.KeyPair kp = generator.generateKeyPair();
@@ -715,7 +715,7 @@ public class KeyGen2Test
               {
 
                 // SP800-56A C(2, 0, ECC CDH)
-                KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
+                KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
                 key_agreement.init (server_ec_private_key);
                 key_agreement.doPhase (client_ephemeral_key, true);
                 byte[] Z = key_agreement.generateSecret ();
@@ -735,7 +735,7 @@ public class KeyGen2Test
                     SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256;
 
                 // Verify that the session key signature was signed by the device key
-                Signature verifier = Signature.getInstance (signature_algorithm.getJCEName (), "BC");
+                Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
                 verifier.initVerify (device_public_key);
                 verifier.update (session_key_attest);
                 if (!verifier.verify (session_attestation))
@@ -783,7 +783,7 @@ public class KeyGen2Test
             @Override
             public byte[] generateKeyManagementAuthorization (PublicKey key_management__key, byte[] data) throws IOException, GeneralSecurityException
               {
-                Signature km_sign = Signature.getInstance (key_management__key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA", "BC");
+                Signature km_sign = Signature.getInstance (key_management__key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
                 km_sign.initSign (key_management_keys.get (key_management__key));
                 km_sign.update (data);
                 return km_sign.sign ();
@@ -832,7 +832,7 @@ public class KeyGen2Test
           {
             PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (server_sess_key.decrypt (key_prop.getBackupPrivateKey ()));
             boolean rsa = key_prop.getPublicKey () instanceof RSAPublicKey;
-            PrivateKey private_key = KeyFactory.getInstance (rsa ? "RSA" : "EC", "BC").generatePrivate (key_spec);
+            PrivateKey private_key = KeyFactory.getInstance (rsa ? "RSA" : "EC").generatePrivate (key_spec);
             Signature sign = Signature.getInstance ((rsa ? SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256).getJCEName ());
             sign.initSign (private_key);
             sign.update (TEST_STRING);
@@ -1068,7 +1068,7 @@ public class KeyGen2Test
     
                     if (set_private_key)
                       {
-                        KeyPairGenerator generator = KeyPairGenerator.getInstance (ecc_key ? "EC" :"RSA", "BC");
+                        KeyPairGenerator generator = KeyPairGenerator.getInstance (ecc_key ? "EC" :"RSA");
                         if (ecc_key)
                           {
                             generator.initialize (new ECGenParameterSpec ("P-256"), new SecureRandom ());
@@ -1491,7 +1491,7 @@ public class KeyGen2Test
                                                     null,
                                                     doer2.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
-                Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+                Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
                 verify.initVerify (ka.getCertificatePath ()[0]);
                 verify.update (TEST_STRING);
                 assertTrue ("Bad signature", verify.verify (result));
@@ -1528,7 +1528,7 @@ public class KeyGen2Test
                                                     null,
                                                     doer2.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
-                Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+                Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
                 verify.initVerify (ka.getCertificatePath ()[0]);
                 verify.update (TEST_STRING);
                 assertTrue ("Bad signature", verify.verify (result));
@@ -1579,7 +1579,7 @@ public class KeyGen2Test
                                                     null,
                                                     doer.server.predef_server_pin,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
-                Signature sign = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName (), "BC");
+                Signature sign = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
                 sign.initSign (doer.server.gen_private_key);
                 sign.update (TEST_STRING);
                 assertTrue ("Bad signature", ArrayUtil.compare (sign.sign (), result));

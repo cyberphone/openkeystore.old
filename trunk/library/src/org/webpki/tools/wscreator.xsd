@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    WSCreator XML schema.  Used for creating java server and client code,
+    WSDL and .NET client code.
+
+    Version: BETA 
+    Revised: 15-January-2011 
+    Author: Anders Rundgren
+
+    Copyright 2006-2011 WebPKI.org (http://webpki.org).
+
+    Licensed under the Apache License, Version 2.0 (the "License"); 
+    you may not use this file except in compliance with the License. 
+    You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<xs:schema targetNamespace="http://xmlns.webpki.org/wscreator.1.00"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:wsc="http://xmlns.webpki.org/wscreator.1.00"
+           elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+   <xs:element name="WebService">
+      <xs:complexType>
+         <xs:sequence>
+
+            <xs:element ref="wsc:Exception" minOccurs="0" maxOccurs="unbounded"/>
+            
+            <xs:element ref="wsc:Method" maxOccurs="unbounded"/>
+
+         </xs:sequence> 
+
+         <!-- WS Target Namespace -->
+         <xs:attribute name="NameSpace" type="xs:anyURI" use="required"/>
+
+         <!-- WS Service Name -->
+         <xs:attribute name="Service" type="wsc:id" use="required"/>
+
+         <!-- WSDL Default URL -->
+         <xs:attribute name="DefaultURL" type="xs:anyURI" use="required"/>
+
+      </xs:complexType>
+
+   </xs:element>
+
+   <xs:element name="Exception">
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="Property" type="wsc:property" minOccurs="0" maxOccurs="unbounded"/>
+         </xs:sequence> 
+
+         <!-- Exception Name -->
+         <xs:attribute name="Name" type="wsc:id" use="required"/>
+
+         <!-- XML -->
+         <xs:attribute name="XMLName" type="wsc:id" use="optional"/>
+
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="Method">
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="Input" type="wsc:property" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Output" type="wsc:property" minOccurs="0" maxOccurs="unbounded"/>
+         </xs:sequence> 
+
+         <!-- Method Name -->
+         <xs:attribute name="Name" type="wsc:id" use="required"/>
+
+         <!-- XML -->
+         <xs:attribute name="XMLName" type="wsc:id" use="optional"/>
+
+         <!-- Exceptions -->
+         <xs:attribute name="Throws" type="wsc:exceptionList" use="optional"/>
+
+      </xs:complexType>
+   </xs:element>
+
+   <xs:simpleType name="exceptionList">
+      <xs:restriction>
+         <xs:simpleType>
+            <xs:list itemType="wsc:id"/>
+         </xs:simpleType>
+         <xs:minLength value="1"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="id">
+      <xs:restriction base="xs:NCName">
+         <xs:pattern value="[0-9,a-z,A-Z,_]*"/>
+       </xs:restriction>
+   </xs:simpleType>
+
+   <xs:complexType name="property">
+
+      <!-- Method Name -->
+      <xs:attribute name="Name" type="wsc:id" use="required"/>
+
+      <!-- XML -->
+      <xs:attribute name="XMLName" type="wsc:id" use="optional"/>
+
+      <!-- Null -->
+      <xs:attribute name="Null" type="xs:boolean" use="optional" default="false"/>
+
+      <!-- List -->
+      <xs:attribute name="List" type="xs:boolean" use="optional" default="false"/>
+
+      <!-- Data type -->
+      <xs:attribute name="Type" use="required">
+         <xs:simpleType>
+           <xs:restriction base="xs:string">
+             <xs:enumeration value="int"/>
+             <xs:enumeration value="short"/>
+             <xs:enumeration value="byte"/>
+             <xs:enumeration value="boolean"/>
+             <xs:enumeration value="string"/>
+             <xs:enumeration value="binary"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+
+   </xs:complexType>
+
+</xs:schema>

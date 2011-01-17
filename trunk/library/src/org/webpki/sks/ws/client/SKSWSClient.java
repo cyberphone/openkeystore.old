@@ -1,5 +1,7 @@
 package org.webpki.sks.ws.client;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.ws.Holder;
@@ -77,7 +79,7 @@ public class SKSWSClient
         Holder<String> prot = new Holder<String> ();
         try
           {
-            proxy.getKeyProtectionInfo (4, prot, blah);
+            proxy.getKeyProtectionInf (4, prot, blah);
             if (!prot.value.equals ("yes"))
               {
                 bad ();
@@ -87,6 +89,12 @@ public class SKSWSClient
                 bad ();
               }
             System.out.println ("Ok=getkey");
+
+            List<byte[]> certs = new ArrayList<byte[]> ();
+            certs.add (new byte[]{4,6});
+            certs.add (new byte[]{4,6,7});
+            
+            proxy.setCertificatePath (8,certs, new byte[]{4,6});
           }
         catch (SKSException_Exception e)
           {

@@ -44,13 +44,11 @@ public class SKSWSImplementation
     }
 
 
-    @WebMethod
-    @RequestWrapper(localName = "getKeyProtectionInfo", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.GetKeyProtectionInfo")
-    @ResponseWrapper(localName = "getKeyProtectionInfoResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.GetKeyProtectionInfoResponse")
+    @WebMethod(operationName="getKeyProtectionInfo")
     public void getKeyProtectionInfo(
         @WebParam(name = "keyHandle", targetNamespace = "")
         int keyHandle,
-        @WebParam(name = "protectionStatus", targetNamespace = "", mode = WebParam.Mode.OUT)
+        @WebParam(name = "ProtectionStatus", targetNamespace = "", mode = WebParam.Mode.OUT)
         Holder<String> protectionStatus,
         @WebParam(name = "blah", targetNamespace = "", mode = WebParam.Mode.OUT)
         Holder<Byte> blah)
@@ -65,15 +63,15 @@ public class SKSWSImplementation
     @RequestWrapper(localName = "setCertificatePath", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.SetCertificatePath")
     @ResponseWrapper(localName = "setCertificatePathResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.SetCertificatePathResponse")
     public void setCertificatePath(
-        @WebParam(name = "keyHandle", targetNamespace = "")
-        int keyHandle,
-        @WebParam(name = "x509Certificate", targetNamespace = "")
-        List<byte[]> x509Certificate,
-        @WebParam(name = "mac", targetNamespace = "")
+        @WebParam(name = "KeyHandle", targetNamespace = "")
+        int key_handle,
+        @WebParam(name = "X509Certificate", targetNamespace = "")
+        List<byte[]> x509_certificate,
+        @WebParam(name = "MAC", targetNamespace = "")
         byte[] mac)
         throws SKSException
         {
-          System.out.println ("Certs=" + x509Certificate.size () + " mac=" + mac.length);
+          System.out.println ("Certs=" + x509_certificate.size () + " mac=" + mac.length);
         }
 
   @WebMethod

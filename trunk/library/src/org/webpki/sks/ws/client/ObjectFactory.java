@@ -18,8 +18,8 @@ import org.webpki.sks.ws.common.CloseProvisioningSession;
 import org.webpki.sks.ws.common.CloseProvisioningSessionResponse;
 import org.webpki.sks.ws.common.GetKeyHandle;
 import org.webpki.sks.ws.common.GetKeyHandleResponse;
-import org.webpki.sks.ws.common.GetKeyProtectionInfo;
-import org.webpki.sks.ws.common.GetKeyProtectionInfoResponse;
+import org.webpki.sks.ws.common.getKeyProtectionInfo;
+import org.webpki.sks.ws.common.getKeyProtectionInfoResponse;
 import org.webpki.sks.ws.common.GetVersion;
 import org.webpki.sks.ws.common.GetVersionResponse;
 import org.webpki.sks.ws.common.SetCertificatePath;
@@ -80,12 +80,14 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link GetKeyProtectionInfo }
+     * Create an instance of {@link getKeyProtectionInfo }
      * 
      */
-    public GetKeyProtectionInfo createGetKeyProtectionInfo() {
-        return new GetKeyProtectionInfo();
+    /*
+    public getKeyProtectionInfo createGetKeyProtectionInfo() {
+        return new getKeyProtectionInfo();
     }
+    */
 
     /**
      * Create an instance of {@link GetVersionResponse }
@@ -112,12 +114,14 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link GetKeyProtectionInfoResponse }
+     * Create an instance of {@link getKeyProtectionInfoResponse }
      * 
      */
-    public GetKeyProtectionInfoResponse createGetKeyProtectionInfoResponse() {
-        return new GetKeyProtectionInfoResponse();
+    /*
+    public getKeyProtectionInfoResponse createGetKeyProtectionInfoResponse() {
+        return new getKeyProtectionInfoResponse();
     }
+    */
 
     /**
      * Create an instance of {@link AsymmetricKeyDecrypt }

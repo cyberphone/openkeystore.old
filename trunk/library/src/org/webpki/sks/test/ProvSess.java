@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2010 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2011 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public class ProvSess
         @Override
         public ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException
           {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC", "BC");
+            KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
             ECGenParameterSpec eccgen = new ECGenParameterSpec (ECDomains.P_256.getJCEName ());
             generator.initialize (eccgen, new SecureRandom ());
             java.security.KeyPair kp = generator.generateKeyPair();
@@ -118,7 +118,7 @@ public class ProvSess
           {
   
             // SP800-56A C(2, 0, ECC CDH)
-            KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
+            KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
             key_agreement.init (server_ec_private_key);
             key_agreement.doPhase (client_ephemeral_key, true);
             byte[] Z = key_agreement.generateSecret ();
@@ -138,7 +138,7 @@ public class ProvSess
                 SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256;
 
             // Verify that the session key signature was signed by the device key
-            Signature verifier = Signature.getInstance (signature_algorithm.getJCEName (), "BC");
+            Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
             verifier.initVerify (device_public_key);
             verifier.update (session_key_attest);
             if (!verifier.verify (session_attestation))
@@ -186,7 +186,7 @@ public class ProvSess
         @Override
         public byte[] generateKeyManagementAuthorization (PublicKey key_management__key, byte[] data) throws IOException, GeneralSecurityException
           {
-            Signature km_sign = Signature.getInstance (key_management__key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA", "BC");
+            Signature km_sign = Signature.getInstance (key_management__key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
             km_sign.initSign (key_management_keys.get (key_management__key));
             km_sign.update (data);
             return km_sign.sign ();

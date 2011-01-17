@@ -68,7 +68,7 @@
   <xs:element name="getKeyProtectionInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="protectionStatus" type="xs:string"/>
+        <xs:element name="ProtectionStatus" type="xs:string"/>
         <xs:element name="blah" type="xs:byte"/>
       </xs:sequence>
     </xs:complexType>
@@ -77,9 +77,9 @@
   <xs:element name="setCertificatePath">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="keyHandle" type="xs:int"/>
-        <xs:element name="x509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
-        <xs:element name="mac" type="xs:base64Binary"/>
+        <xs:element name="KeyHandle" type="xs:int"/>
+        <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
+        <xs:element name="MAC" type="xs:base64Binary"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -431,7 +431,7 @@
 
   <wsdl:service name="SKSWS">
     <wsdl:port name="SKSWSPort" binding="SKS:SKSWSPortBinding">
-      <soap:address location="REPLACE_WITH_ACTUAL_URL"/>
+      <soap:address location="http://localhost:8080/securekeystore"/>
     </wsdl:port>
   </wsdl:service>
 

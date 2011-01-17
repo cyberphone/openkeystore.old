@@ -10,6 +10,7 @@ import javax.xml.ws.WebFault;
  * Generated source version: 2.2
  * 
  */
+@SuppressWarnings("serial")
 @WebFault(name = "SKSException", targetNamespace = "http://xmlns.webpki.org/sks/v0.61")
 public class SKSException_Exception
     extends Exception

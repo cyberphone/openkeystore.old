@@ -18,7 +18,6 @@
     <isset property="env.JAVA_HOME"/>
   </condition>
   <fail message="JAVA_HOME must be set to environment!" unless="java.home"/>
-  <property name="catalina.home" value="${env.CATALINA_HOME}"/>
   <property name="ws" location="../../resources/jax-ws"/>
 
   <path id="jaxws.classpath">
@@ -36,9 +35,6 @@
   </taskdef>
 
 	<path id="compile.classpath">
-     <fileset dir="${catalina.home}/lib">
-	    <include name="*.jar"/>
-	 </fileset>
 	 <fileset dir="${ext.jar}">
 	   <include name="*.jar"/>
      </fileset>
@@ -104,7 +100,7 @@
       <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="${env.JAVA_HOME}\docs\api"/>
       <link offline="true" href="http://tomcat.apache.org/tomcat-5.5-doc/servletapi" packagelistLoc="${env.JAVA_HOME}\eedocs\docs\api"/>
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
-      <bottom><![CDATA[<i>2005-2010 WebPKI.org.</i>]]></bottom>
+      <bottom><![CDATA[<i>2005-2011 WebPKI.org.</i>]]></bottom>
     </javadoc>
   </target>
 
@@ -145,8 +141,7 @@
 
   <target name="clean">
     <delete dir="${temp_dir}"/>
-    <delete file="${dist_dir}/${webpki-libext}"/>
-    <delete file="${dist_dir}/${webpki-webutil}"/>
+    <delete dir="${dist_dir}"/>
   </target>
 
   <target name="_test">

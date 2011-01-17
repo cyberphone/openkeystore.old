@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2010 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2011 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -56,8 +56,6 @@ import javax.crypto.Mac;
 
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
@@ -121,12 +119,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     int next_puk_handle = 1;
     HashMap<Integer,PUKPolicy> puk_policies = new HashMap<Integer,PUKPolicy> ();
-
-
-    public SKSReferenceImplementation ()
-      {
-        Security.addProvider(new BouncyCastleProvider());
-      }
 
 
     abstract class NameSpace implements Serializable
@@ -432,7 +424,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             try
               {
                 Signature km_verify = Signature.getInstance (owner.key_management_key instanceof RSAPublicKey ? 
-                                                                                              "SHA256WithRSA" : "SHA256WithECDSA", "BC");
+                                                                                              "SHA256WithRSA" : "SHA256WithECDSA");
                 km_verify.initVerify (owner.key_management_key);
                 km_verify.update (provisioning.getMacBuilder (getDeviceCertificatePath ()[0].getEncoded ()).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
                 if (!km_verify.verify (authorization))
@@ -575,7 +567,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         byte[] encrypt (byte[] data) throws SKSException, GeneralSecurityException
           {
             byte[] key = getMacBuilder (new byte[0]).addVerbatim (KDF_ENCRYPTION_KEY).getResult ();
-            Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding", "BC");
+            Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
             byte[] iv = new byte[16];
             new SecureRandom ().nextBytes (iv);
             crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (iv));
@@ -587,7 +579,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             byte[] key = getMacBuilder (new byte[0]).addVerbatim (KDF_ENCRYPTION_KEY).getResult ();
             try
               {
-                Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding", "BC");
+                Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
                 crypt.init (Cipher.DECRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (data, 0, 16));
                 return crypt.doFinal (data, 16, data.length - 16);
               }
@@ -689,7 +681,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         MacBuilder (byte[] key) throws GeneralSecurityException
           {
-            mac = Mac.getInstance ("HmacSHA256", "BC");
+            mac = Mac.getInstance ("HmacSHA256");
             mac.init (new SecretKeySpec (key, "RAW"));
           }
 
@@ -868,7 +860,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         //  Diffie-Hellman Key Agreement
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh",
-                      "ECDHC",
+                      "ECDH",
                       ALG_ASYM_KA | ALG_ECC_KEY);
         
         //////////////////////////////////////////////////////////////////////////////////////
@@ -1667,7 +1659,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            Cipher cipher = Cipher.getInstance (alg.jce_name, "BC");
+            Cipher cipher = Cipher.getInstance (alg.jce_name);
             cipher.init (Cipher.DECRYPT_MODE, key_entry.private_key);
             return cipher.doFinal (data);
           }
@@ -1728,7 +1720,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 data = addArrays (hash_len == 20 ? DIGEST_INFO_SHA1 : DIGEST_INFO_SHA256, data);
               }
-            Signature signature = Signature.getInstance (alg.jce_name, "BC");
+            Signature signature = Signature.getInstance (alg.jce_name);
             signature.initSign (key_entry.private_key);
             signature.update (data);
             return signature.sign ();
@@ -1784,7 +1776,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            KeyAgreement key_agreement = KeyAgreement.getInstance (alg.jce_name, "BC");
+            KeyAgreement key_agreement = KeyAgreement.getInstance (alg.jce_name);
             key_agreement.init (key_entry.private_key);
             key_agreement.doPhase (public_key, true);
             return key_agreement.generateSecret ();
@@ -1849,7 +1841,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            Cipher crypt = Cipher.getInstance (alg.jce_name, "BC");
+            Cipher crypt = Cipher.getInstance (alg.jce_name);
             SecretKeySpec sk = new SecretKeySpec (key_entry.symmetric_key, "AES");
             int jce_mode = mode ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
             if ((alg.mask & ALG_IV_INT) != 0)
@@ -1921,7 +1913,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            Mac mac = Mac.getInstance (alg.jce_name, "BC");
+            Mac mac = Mac.getInstance (alg.jce_name);
             mac.init (new SecretKeySpec (key_entry.symmetric_key, "RAW"));
             return mac.doFinal (data);
           }
@@ -2486,7 +2478,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // Create client ephemeral key
             ///////////////////////////////////////////////////////////////////////////////////
-            KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC", "BC");
+            KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
             ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
             generator.initialize (eccgen, new SecureRandom ());
             java.security.KeyPair kp = generator.generateKeyPair ();
@@ -2504,7 +2496,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // Apply the SP800-56A ECC CDH primitive
             ///////////////////////////////////////////////////////////////////////////////////
-            KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDHC", "BC");
+            KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
             key_agreement.init (kp.getPrivate ());
             key_agreement.doPhase (server_ephemeral_key, true);
             byte[] Z = key_agreement.generateSecret ();
@@ -2535,7 +2527,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // Sign attestation
             ///////////////////////////////////////////////////////////////////////////////////
-            Signature signer = Signature.getInstance ("SHA256withRSA", "BC");
+            Signature signer = Signature.getInstance ("SHA256withRSA");
             signer.initSign (getAttestationKey ());
             signer.update (session_key_attest);
             attestation = signer.sign ();
@@ -2674,7 +2666,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         try
           {
             PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (key_entry.owner.decrypt (private_key));
-            key_entry.private_key = KeyFactory.getInstance (key_entry.isRSA () ? "RSA" : "EC", "BC").generatePrivate (key_spec);
+            key_entry.private_key = KeyFactory.getInstance (key_entry.isRSA () ? "RSA" : "EC").generatePrivate (key_spec);
             key_entry.private_key_backup = true;
           }
         catch (GeneralSecurityException e)
@@ -2875,6 +2867,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
         else
           {
+            verifyExportDeleteProtection (delete_protection, EXPORT_DELETE_PROTECTION_PIN, provisioning);
+            verifyExportDeleteProtection (export_protection, EXPORT_DELETE_PROTECTION_PIN, provisioning);
             pin_protection = false;
             if (enable_pin_caching)
               {
@@ -2885,6 +2879,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ((biometric_protection != BIOMETRIC_PROTECTION_EXCLUSIVE) ^ pin_protection))
           {
             provisioning.abort ("Invalid \"BiometricProtection\" and PIN combination");
+          }
+        if (pin_policy == null || pin_policy.puk_policy == null)
+          {
+            verifyExportDeleteProtection (delete_protection, EXPORT_DELETE_PROTECTION_PUK, provisioning);
+            verifyExportDeleteProtection (export_protection, EXPORT_DELETE_PROTECTION_PUK, provisioning);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2951,24 +2950,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 provisioning.abort ("\"PINValue\" expected to be empty");
               }
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Certain protection attributes require PIN objects
-            ///////////////////////////////////////////////////////////////////////////////////
-            verifyExportDeleteProtection (delete_protection, EXPORT_DELETE_PROTECTION_PIN, provisioning);
-            verifyExportDeleteProtection (export_protection, EXPORT_DELETE_PROTECTION_PIN, provisioning);
           }
         else
           {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Certain protection attributes require PUK objects
-            ///////////////////////////////////////////////////////////////////////////////////
-            if (pin_policy.puk_policy == null)
-              {
-                verifyExportDeleteProtection (delete_protection, EXPORT_DELETE_PROTECTION_PUK, provisioning);
-                verifyExportDeleteProtection (export_protection, EXPORT_DELETE_PROTECTION_PUK, provisioning);
-              }
-
             ///////////////////////////////////////////////////////////////////////////////////
             // Testing the actual PIN value
             ///////////////////////////////////////////////////////////////////////////////////
@@ -3025,7 +3009,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             // At last, generate the desired key-pair
             ///////////////////////////////////////////////////////////////////////////////////
             SecureRandom secure_random = new SecureRandom (server_seed);
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance (alg_par_spec instanceof RSAKeyGenParameterSpec ? "RSA" : "EC", "BC");
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance (alg_par_spec instanceof RSAKeyGenParameterSpec ? "RSA" : "EC");
             kpg.initialize (alg_par_spec, secure_random);
             java.security.KeyPair key_pair = kpg.generateKeyPair ();
             PublicKey public_key = key_pair.getPublic ();
