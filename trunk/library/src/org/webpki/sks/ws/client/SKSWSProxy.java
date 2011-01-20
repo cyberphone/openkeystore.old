@@ -18,11 +18,11 @@ import javax.xml.ws.ResponseWrapper;
  * Generated source version: 2.2
  * 
  */
-@WebService(name = "SKSWSInterface", targetNamespace = "http://xmlns.webpki.org/sks/v0.61")
-@XmlSeeAlso({
-    ObjectFactory.class
-})
-public interface SKSWSInterface {
+@WebService(name = "SKSWS", targetNamespace = "http://xmlns.webpki.org/sks/v0.61")
+//@XmlSeeAlso({
+//    ObjectFactory.class
+//})
+public interface SKSWSProxy {
 
 
     /**
@@ -179,8 +179,8 @@ public interface SKSWSInterface {
      * @throws SKSException_Exception
      */
     @WebMethod(operationName="getKeyProtectionInfo")
-    @RequestWrapper(localName = "getKeyProtectionInfo", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.getKeyProtectionInfo")
-    @ResponseWrapper(localName = "getKeyProtectionInfoResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.getKeyProtectionInfoResponse")
+//    @RequestWrapper(localName = "getKeyProtectionInfo", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.getKeyProtectionInfo")
+//    @ResponseWrapper(localName = "getKeyProtectionInfoResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.getKeyProtectionInfoResponse")
     public void getKeyProtectionInf(
         @WebParam(name = "keyHandle", targetNamespace = "")
         int keyHandle,

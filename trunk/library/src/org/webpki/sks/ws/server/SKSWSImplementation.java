@@ -23,7 +23,10 @@ import org.webpki.sks.SKSException;
 import com.sun.xml.ws.developer.SchemaValidation;
 
 @SchemaValidation
-@WebService(targetNamespace="http://xmlns.webpki.org/sks/v0.61", serviceName="SKSWS", portName="SKSWSPort")
+@WebService(targetNamespace="http://xmlns.webpki.org/sks/v0.61",
+            serviceName="SKSWS",
+            portName="SKSWSPort",
+            wsdlLocation="META-INF/SKSWS.wsdl")
 public class SKSWSImplementation
   {
 
@@ -45,6 +48,8 @@ public class SKSWSImplementation
 
 
     @WebMethod(operationName="getKeyProtectionInfo")
+ //   @RequestWrapper(localName = "getKeyProtectionInfo", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.getKeyProtectionInfo")
+ //   @ResponseWrapper(localName = "getKeyProtectionInfoResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.getKeyProtectionInfoResponse")
     public void getKeyProtectionInfo(
         @WebParam(name = "keyHandle", targetNamespace = "")
         int keyHandle,
@@ -104,7 +109,7 @@ public class SKSWSImplementation
         properties.put (Endpoint.WSDL_SERVICE, new QName ("http://xmlns.webpki.org/sks/v0.61", "SKSWS"));
 
         Endpoint endpoint = Endpoint.create (new SKSWSImplementation ());
-        endpoint.setMetadata (metadata);
+//        endpoint.setMetadata (metadata);
         endpoint.setProperties (properties);
         endpoint.publish (args[0]);
       }

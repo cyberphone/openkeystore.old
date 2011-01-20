@@ -47,8 +47,8 @@ public class SKSWS
      *     returns SKSWSInterface
      */
     @WebEndpoint(name = "SKSWSPort")
-    public SKSWSInterface getSKSWSPort() {
-        return super.getPort(new QName("http://xmlns.webpki.org/sks/v0.61", "SKSWSPort"), SKSWSInterface.class);
+    public SKSWSProxy getSKSWSPort() {
+        return super.getPort(new QName("http://xmlns.webpki.org/sks/v0.61", "SKSWSPort"), SKSWSProxy.class);
     }
 
     /**
@@ -59,8 +59,8 @@ public class SKSWS
      *     returns SKSWSInterface
      */
     @WebEndpoint(name = "SKSWSPort")
-    public SKSWSInterface getSKSWSPort(WebServiceFeature... features) {
-        return super.getPort(new QName("http://xmlns.webpki.org/sks/v0.61", "SKSWSPort"), SKSWSInterface.class, features);
+    public SKSWSProxy getSKSWSPort(WebServiceFeature... features) {
+        return super.getPort(new QName("http://xmlns.webpki.org/sks/v0.61", "SKSWSPort"), SKSWSProxy.class, features);
     }
 
     private static URL __getWsdlLocation() {

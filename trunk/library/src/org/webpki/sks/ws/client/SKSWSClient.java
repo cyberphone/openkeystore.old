@@ -10,7 +10,7 @@ import javax.xml.ws.BindingProvider;
 
 public class SKSWSClient
   {
-    private SKSWSInterface proxy;
+    private SKSWSProxy proxy;
     
     private String port;
     
@@ -25,14 +25,14 @@ public class SKSWSClient
      * 
      * @return A handle to a fresh WS instance
      */
-    public SKSWSInterface getSKSWS ()
+    public SKSWSProxy getSKSWS ()
     {
         if (proxy == null)
         {
             synchronized (this)
             {
                 SKSWS service = new SKSWS ();
-                SKSWSInterface temp_proxy = service.getSKSWSPort ();
+                SKSWSProxy temp_proxy = service.getSKSWSPort ();
                 Map<String,Object> request_object = ((BindingProvider) temp_proxy).getRequestContext ();
                 request_object.put (BindingProvider.ENDPOINT_ADDRESS_PROPERTY, port);
                 proxy = temp_proxy;
@@ -62,7 +62,7 @@ public class SKSWSClient
             System.exit (3);
         }
         SKSWSClient client = new SKSWSClient (args[0]);
-        SKSWSInterface proxy = client.getSKSWS ();
+        SKSWSProxy proxy = client.getSKSWS ();
         System.out.println ("Version=" + proxy.getVersion ());
         
         try
@@ -95,6 +95,7 @@ public class SKSWSClient
             certs.add (new byte[]{4,6,7});
             
             proxy.setCertificatePath (8,certs, new byte[]{4,6});
+            new SKSWSClient (args[0]).getSKSWS ();
           }
         catch (SKSException_Exception e)
           {

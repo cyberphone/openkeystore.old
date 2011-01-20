@@ -61,6 +61,7 @@ public class ObjectFactory {
      * 
      */
     public ObjectFactory() {
+      System.out.println ("OBJFACT");
     }
 
     /**

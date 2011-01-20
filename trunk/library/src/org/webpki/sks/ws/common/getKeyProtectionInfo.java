@@ -33,6 +33,10 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "getKeyProtectionInfo")
 public class getKeyProtectionInfo {
 
+  public getKeyProtectionInfo()
+    {
+      System.out.println ("KPI");
+    }
     protected int keyHandle;
 
     /**

@@ -32,6 +32,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "getKeyProtectionInfoResponse")
 @XmlType(propOrder={"protection_info","blah"})
 public class getKeyProtectionInfoResponse {
+  
+  public getKeyProtectionInfoResponse ()
+    {
+      System.out.println ("KPIR");
+    }
 
     @XmlElement(name="ProtectionStatus", required = true)
     public String protection_info;
