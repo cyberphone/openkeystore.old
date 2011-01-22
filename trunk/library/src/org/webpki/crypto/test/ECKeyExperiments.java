@@ -14,7 +14,7 @@ import javax.crypto.KeyAgreement;
 public class ECKeyExperiments
   {
 
-    // Just to verify that NIST curves are identical for ECDH, ECDH, and ECDSA
+    // Just to verify that NIST curves are identical for ECDH and ECDSA
 
     private ECKeyExperiments ()
       {
@@ -23,7 +23,7 @@ public class ECKeyExperiments
     private static KeyPair gen (String alg) throws Exception
       {
         KeyPairGenerator generator = KeyPairGenerator.getInstance (alg);
-        ECGenParameterSpec eccgen = new ECGenParameterSpec ("P-256");
+        ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
         generator.initialize(eccgen, new SecureRandom());
         return generator.generateKeyPair();
       }
@@ -60,7 +60,7 @@ public class ECKeyExperiments
           {
              ka_alg = "ECDH";
           }
-        KeyAgreement ka1 = KeyAgreement.getInstance(ka_alg);
+        KeyAgreement ka1 = KeyAgreement.getInstance(ka_alg, "BC");
 
         ka1.init(kp1.getPrivate());
 
@@ -78,11 +78,10 @@ public class ECKeyExperiments
         {
             throw new RuntimeException (alg + " 2-way test failed");
         }
-        System.out.println ("DH Worked: " + alg);
+        System.out.println ("ECDH Worked");
         signverify (kp1);
         signverify (kp2);
-        System.out.println ("ECDSA Worked: " + alg);
-
+        System.out.println ("ECDSA Worked");
       }
 
     public static void main (String[] argv) throws Exception
@@ -90,7 +89,6 @@ public class ECKeyExperiments
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         test ("EC");
         test ("ECDH");
-        test ("ECDH");
-      }
+       }
 
   }

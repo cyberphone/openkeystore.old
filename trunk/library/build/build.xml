@@ -192,7 +192,7 @@
   		        <include name="*.jar"/>
   			 </fileset>
   		</classpath>
-    	<jvmarg value="-Djava.endorsed.dirs=${ws}"/>
+  		<jvmarg value="-Djava.endorsed.dirs=${ws}"/>
     	<jvmarg value="-Dsks.implementation=${sks.implementation}"/>
     	<jvmarg value="-Dcom.sun.xml.ws.fault.SOAPFaultBuilder.disableCaptureStackTrace=false"/>
   	    <arg value="http://localhost:8080/securekeystore"/>

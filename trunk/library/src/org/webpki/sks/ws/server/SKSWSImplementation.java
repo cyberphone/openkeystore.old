@@ -24,15 +24,20 @@ import com.sun.xml.ws.developer.SchemaValidation;
 
 @SchemaValidation
 @WebService(targetNamespace="http://xmlns.webpki.org/sks/v0.61",
+            name="SKSWS.Interface",
             serviceName="SKSWS",
-            portName="SKSWSPort",
+            portName="SKSWS.Port",
             wsdlLocation="META-INF/SKSWS.wsdl")
+/*
+ * Usage in JBoss: 
+ * Remove @SchemaValidation. 
+ * Put code in a WAR.
+ * Set wsdlLocation="/WEB-INF/wsdl/SKSWS.wsdl"
+ */
 public class SKSWSImplementation
   {
 
     @WebMethod
-    @RequestWrapper(localName = "abortProvisioningSession", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.AbortProvisioningSession")
-    @ResponseWrapper(localName = "abortProvisioningSessionResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.AbortProvisioningSessionResponse")
     public void abortProvisioningSession(
         @WebParam(name = "keyHandle", targetNamespace = "")
         int keyHandle)
@@ -48,9 +53,9 @@ public class SKSWSImplementation
 
 
     @WebMethod(operationName="getKeyProtectionInfo")
- //   @RequestWrapper(localName = "getKeyProtectionInfo", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.getKeyProtectionInfo")
- //   @ResponseWrapper(localName = "getKeyProtectionInfoResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.getKeyProtectionInfoResponse")
-    public void getKeyProtectionInfo(
+    @RequestWrapper(localName = "getKeyProtectionInfo", targetNamespace = "http://xmlns.webpki.org/sks/v0.61")
+    @ResponseWrapper(localName = "getKeyProtectionInfo.Response", targetNamespace = "http://xmlns.webpki.org/sks/v0.61")
+     public void getKeyProtectionInfo(
         @WebParam(name = "keyHandle", targetNamespace = "")
         int keyHandle,
         @WebParam(name = "ProtectionStatus", targetNamespace = "", mode = WebParam.Mode.OUT)
@@ -65,8 +70,6 @@ public class SKSWSImplementation
       
     }
     @WebMethod
-    @RequestWrapper(localName = "setCertificatePath", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.SetCertificatePath")
-    @ResponseWrapper(localName = "setCertificatePathResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.SetCertificatePathResponse")
     public void setCertificatePath(
         @WebParam(name = "KeyHandle", targetNamespace = "")
         int key_handle,
@@ -80,9 +83,7 @@ public class SKSWSImplementation
         }
 
   @WebMethod
-  @WebResult(targetNamespace = "")
-  @RequestWrapper(localName = "getVersion", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.GetVersion")
-  @ResponseWrapper(localName = "getVersionResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.GetVersionResponse")
+  @WebResult(name="return", targetNamespace = "")
   public String getVersion()
     {
       // TODO Auto-generated method stub
@@ -105,12 +106,12 @@ public class SKSWSImplementation
 
         Map<String,Object> properties = new HashMap<String,Object> ();
 
-        properties.put (Endpoint.WSDL_PORT, new QName ("http://xmlns.webpki.org/sks/v0.61", "SKSWSPort"));
+        properties.put (Endpoint.WSDL_PORT, new QName ("http://xmlns.webpki.org/sks/v0.61", "SKSWS.Port"));
         properties.put (Endpoint.WSDL_SERVICE, new QName ("http://xmlns.webpki.org/sks/v0.61", "SKSWS"));
 
         Endpoint endpoint = Endpoint.create (new SKSWSImplementation ());
 //        endpoint.setMetadata (metadata);
-        endpoint.setProperties (properties);
+//        endpoint.setProperties (properties);
         endpoint.publish (args[0]);
       }
 

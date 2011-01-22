@@ -1,0 +1,82 @@
+<project name="SPOC Web Provider" default="dist" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="src_dir" value="../src"/>
+  <property name="temp_dir" value="../.tmp" />
+  <property name="dist_dir"  value="../dist" />
+  <property name="app_name" value="sksws.war"/>
+  <property name="ear" value="sksws.ear"/>
+  <property name="debug"  value="on"/>
+  <property name="ws" location="../../resources/jax-ws"/>
+  <property environment="env"/>
+
+  <path id="compile.classpath">
+    <fileset dir="${dist_dir}">
+       <include name="*.jar"/>
+    </fileset>
+	<fileset dir="${ws}">
+	  <include name="*.jar"/>
+	</fileset>
+  </path>
+
+  <target name="help">
+    <echo message="Available targets are help, dist, clean, deploy, compile and doc."/>
+  </target>
+
+  <target name="compile">
+    <delete dir="${temp_dir}"/>
+    <mkdir dir="${temp_dir}" />
+        <copy todir="${temp_dir}" preservelastmodified="true">
+          <fileset dir="${src_dir}">
+            <include name="org/webpki/sks/ws/server/*"/>
+          </fileset>
+        </copy>
+            <replace summary="true" dir="${temp_dir}" value="// Removed @SchemaValidation">
+               <include name="**/*.java"/>
+               <replacetoken><![CDATA[@SchemaValidation]]></replacetoken>
+             </replace>
+        <replace summary="true" dir="${temp_dir}" value="&quot;/WEB-INF/wsdl">
+           <include name="**/*.java"/>
+           <replacetoken><![CDATA["META-INF]]></replacetoken>
+         </replace>
+     <javac
+    	debug="${debug}"
+    	srcdir="${temp_dir}"
+    	destdir="${temp_dir}"
+		classpathref="compile.classpath"
+	    includeAntRuntime="false"
+		encoding="UTF-8">
+       <compilerarg value="-Xlint:-path"/>
+    </javac>
+  </target>
+
+  <target name="dist" depends="clean,compile">    
+  	<war destfile="${dist_dir}/${app_name}" webxml="jboss-sksws-web.xml">
+      <zipfileset file="../wsdl/SKSWS.wsdl" prefix="WEB-INF/wsdl"/>
+  	  <classes dir="${temp_dir}">
+        <include name="**/*.class"/>
+  	  </classes>
+   	</war>
+  	
+    <ear destfile="${dist_dir}/${ear}" appxml="jboss-sksws-application.xml">
+        <fileset dir="${dist_dir}" includes="${app_name}"/>
+  	    <zipfileset file="${dist_dir}/webpki.org-libext-1.00.jar" prefix="lib"/>
+    </ear>
+
+  </target>
+
+  <target name="updateJBoss">
+  	<copy file="${dist_dir}/${ear}" todir="${jboss.home}/server/default/deploy" preservelastmodified="true"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="${temp_dir}"/>
+	<mkdir dir="${temp_dir}"/>
+  </target>
+
+	<target name="deploy" depends="dist">
+		  <fail message="You must define JBOSS_HOME to point to the JBoss install directory" unless="env.JBOSS_HOME"/>
+	    <antcall target="updateJBoss"/>
+	  </target>
+
+</project>

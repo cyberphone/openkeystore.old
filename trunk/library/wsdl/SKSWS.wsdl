@@ -8,7 +8,6 @@
   <wsdl:types>
 
     <xs:schema targetNamespace="http://xmlns.webpki.org/sks/v0.61"
-               xmlns:SKS="http://xmlns.webpki.org/sks/v0.61"
  		       elementFormDefault="unqualified" attributeFormDefault="unqualified">
 
        <xs:element name="SKSException">
@@ -28,15 +27,32 @@
          </xs:complexType>
        </xs:element>
 
-  <xs:element name="abortProvisioningSessionResponse" nillable="true" type="SKS:abortProvisioningSessionResponse"/>
+  <xs:element name="abortProvisioningSessionResponse">
+  <xs:complexType>
+    <xs:sequence/>
+  </xs:complexType>
+       </xs:element>
 
-  <xs:element name="addExtension" nillable="true" type="SKS:addExtension"/>
+  <xs:element name="asymmetricKeyDecrypt">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="arg0" type="xs:int"/>
+      <xs:element name="arg1" type="xs:string"/>
+      <xs:element name="arg2" type="xs:base64Binary"/>
+      <xs:element name="arg3" type="xs:base64Binary"/>
+      <xs:element name="arg4" type="xs:base64Binary"/>
+    </xs:sequence>
+  </xs:complexType>
+      </xs:element>
 
-  <xs:element name="addExtensionResponse" nillable="true" type="SKS:addExtensionResponse"/>
+  <xs:element name="asymmetricKeyDecryptResponse">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="return" type="xs:base64Binary" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+      </xs:element>
 
-  <xs:element name="asymmetricKeyDecrypt" nillable="true" type="SKS:asymmetricKeyDecrypt"/>
-
-  <xs:element name="asymmetricKeyDecryptResponse" nillable="true" type="SKS:asymmetricKeyDecryptResponse"/>
 
   <xs:element name="changePIN">
     <xs:complexType>
@@ -48,14 +64,48 @@
     </xs:complexType>
   </xs:element>
 
-  <xs:element name="changePINResponse" nillable="true" type="SKS:changePINResponse"/>
+  <xs:element name="changePINResponse">
+  <xs:complexType>
+    <xs:sequence/>
+  </xs:complexType>
+  </xs:element>
 
-  <xs:element name="closeProvisioningSession" nillable="true" type="SKS:closeProvisioningSession"/>
+  <xs:element name="closeProvisioningSession">
+ <xs:complexType>
+    <xs:sequence>
+      <xs:element name="arg0" type="xs:int"/>
+      <xs:element name="arg1" type="xs:base64Binary" minOccurs="0"/>
+      <xs:element name="arg2" type="xs:base64Binary" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  </xs:element>
 
-  <xs:element name="closeProvisioningSessionResponse" nillable="true" type="SKS:closeProvisioningSessionResponse"/>
 
-  <xs:element name="getKeyHandle" nillable="true" type="SKS:getKeyHandle"/>
-  <xs:element name="getKeyHandleResponse" nillable="true" type="SKS:getKeyHandleResponse"/>
+  <xs:element name="closeProvisioningSessionResponse">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="return" type="xs:base64Binary" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  </xs:element>
+
+
+  <xs:element name="getKeyHandle">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="ID" type="xs:string"/>
+      <xs:element name="ProvisioningHandle" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+  </xs:element>
+
+  <xs:element name="getKeyHandleResponse">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="return" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+  </xs:element>
 
   <xs:element name="getKeyProtectionInfo">
     <xs:complexType>
@@ -65,7 +115,7 @@
     </xs:complexType>
   </xs:element>
 
-  <xs:element name="getKeyProtectionInfoResponse">
+  <xs:element name="getKeyProtectionInfo.Response">
     <xs:complexType>
       <xs:sequence>
         <xs:element name="ProtectionStatus" type="xs:string"/>
@@ -90,89 +140,21 @@
     </xs:complexType>
   </xs:element>
 
-  <xs:element name="getVersion" nillable="true" type="SKS:getVersion"/>
-
-  <xs:element name="getVersionResponse" nillable="true" type="SKS:getVersionResponse"/>
-
-  <xs:complexType name="getKeyHandle">
-    <xs:sequence>
-      <xs:element name="ID" type="xs:string"/>
-      <xs:element name="ProvisioningHandle" type="xs:int"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="getKeyHandleResponse">
-    <xs:sequence>
-      <xs:element name="return" type="xs:int"/>
-    </xs:sequence>
-  </xs:complexType>
-
-
-
-
-
-  <xs:complexType name="changePINResponse">
+  <xs:element name="getVersion">
+  <xs:complexType>
     <xs:sequence/>
   </xs:complexType>
+  </xs:element>
 
-  <xs:complexType name="getVersion">
-    <xs:sequence/>
-  </xs:complexType>
 
-  <xs:complexType name="getVersionResponse">
+  <xs:element name="getVersionResponse">
+  <xs:complexType>
     <xs:sequence>
       <xs:element name="return" type="xs:string" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
+  </xs:element>
 
-  <xs:complexType name="asymmetricKeyDecrypt">
-    <xs:sequence>
-      <xs:element name="arg0" type="xs:int"/>
-      <xs:element name="arg1" type="xs:string"/>
-      <xs:element name="arg2" type="xs:base64Binary"/>
-      <xs:element name="arg3" type="xs:base64Binary"/>
-      <xs:element name="arg4" type="xs:base64Binary"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="asymmetricKeyDecryptResponse">
-    <xs:sequence>
-      <xs:element name="return" type="xs:base64Binary" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="abortProvisioningSessionResponse">
-    <xs:sequence/>
-  </xs:complexType>
-
-  <xs:complexType name="closeProvisioningSession">
-    <xs:sequence>
-      <xs:element name="arg0" type="xs:int"/>
-      <xs:element name="arg1" type="xs:base64Binary" minOccurs="0"/>
-      <xs:element name="arg2" type="xs:base64Binary" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="closeProvisioningSessionResponse">
-    <xs:sequence>
-      <xs:element name="return" type="xs:base64Binary" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="addExtension">
-    <xs:sequence>
-      <xs:element name="arg0" type="xs:int"/>
-      <xs:element name="arg1" type="xs:string" minOccurs="0"/>
-      <xs:element name="arg2" type="xs:byte"/>
-      <xs:element name="arg3" type="xs:base64Binary" minOccurs="0"/>
-      <xs:element name="arg4" type="xs:base64Binary" minOccurs="0"/>
-      <xs:element name="arg5" type="xs:base64Binary" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="addExtensionResponse">
-    <xs:sequence/>
-  </xs:complexType>
     </xs:schema>
 
   </wsdl:types>
@@ -197,15 +179,7 @@
     <wsdl:part name="fault" element="SKS:SKSException"/>
   </wsdl:message>
 
-  <wsdl:message name="addExtension">
-    <wsdl:part name="parameters" element="SKS:addExtension"/>
-  </wsdl:message>
-
-  <wsdl:message name="addExtensionResponse">
-    <wsdl:part name="parameters" element="SKS:addExtensionResponse"/>
-  </wsdl:message>
-
-  <wsdl:message name="asymmetricKeyDecrypt">
+   <wsdl:message name="asymmetricKeyDecrypt">
     <wsdl:part name="parameters" element="SKS:asymmetricKeyDecrypt"/>
   </wsdl:message>
 
@@ -241,8 +215,8 @@
     <wsdl:part name="parameters" element="SKS:getKeyProtectionInfo"/>
   </wsdl:message>
 
-  <wsdl:message name="getKeyProtectionInfoResponse">
-    <wsdl:part name="parameters" element="SKS:getKeyProtectionInfoResponse"/>
+  <wsdl:message name="getKeyProtectionInfo.Response">
+    <wsdl:part name="parameters" element="SKS:getKeyProtectionInfo.Response"/>
   </wsdl:message>
 
   <wsdl:message name="setCertificatePath">
@@ -253,7 +227,7 @@
     <wsdl:part name="parameters" element="SKS:setCertificatePathResponse"/>
   </wsdl:message>
 
-  <wsdl:portType name="SKSWSInterface">
+  <wsdl:portType name="SKSWS.Interface">
 
     <wsdl:operation name="getVersion">
       <wsdl:input message="SKS:getVersion"/>
@@ -263,12 +237,6 @@
     <wsdl:operation name="abortProvisioningSession">
       <wsdl:input message="SKS:abortProvisioningSession"/>
       <wsdl:output message="SKS:abortProvisioningSessionResponse"/>
-      <wsdl:fault message="SKS:SKSException" name="SKSException"/>
-    </wsdl:operation>
-
-    <wsdl:operation name="addExtension">
-      <wsdl:input message="SKS:addExtension"/>
-      <wsdl:output message="SKS:addExtensionResponse"/>
       <wsdl:fault message="SKS:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -298,7 +266,7 @@
 
     <wsdl:operation name="getKeyProtectionInfo">
       <wsdl:input message="SKS:getKeyProtectionInfo"/>
-      <wsdl:output message="SKS:getKeyProtectionInfoResponse"/>
+      <wsdl:output message="SKS:getKeyProtectionInfo.Response"/>
       <wsdl:fault message="SKS:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -310,7 +278,7 @@
 
   </wsdl:portType>
 
-  <wsdl:binding name="SKSWSPortBinding" type="SKS:SKSWSInterface">
+  <wsdl:binding name="SKSWS.Binding" type="SKS:SKSWS.Interface">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
 
     <wsdl:operation name="getVersion">
@@ -324,19 +292,6 @@
     </wsdl:operation>
 
     <wsdl:operation name="abortProvisioningSession">
-      <soap:operation soapAction=""/>
-      <wsdl:input>
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="SKSException">
-        <soap:fault name="SKSException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-
-    <wsdl:operation name="addExtension">
       <soap:operation soapAction=""/>
       <wsdl:input>
         <soap:body use="literal"/>
@@ -430,7 +385,7 @@
   </wsdl:binding>
 
   <wsdl:service name="SKSWS">
-    <wsdl:port name="SKSWSPort" binding="SKS:SKSWSPortBinding">
+    <wsdl:port name="SKSWS.Port" binding="SKS:SKSWS.Binding">
       <soap:address location="http://localhost:8080/securekeystore"/>
     </wsdl:port>
   </wsdl:service>

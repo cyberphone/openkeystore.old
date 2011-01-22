@@ -19,9 +19,6 @@ import javax.xml.ws.ResponseWrapper;
  * 
  */
 @WebService(name = "SKSWS", targetNamespace = "http://xmlns.webpki.org/sks/v0.61")
-//@XmlSeeAlso({
-//    ObjectFactory.class
-//})
 public interface SKSWSProxy {
 
 
@@ -31,9 +28,7 @@ public interface SKSWSProxy {
      *     returns java.lang.String
      */
     @WebMethod
-    @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getVersion", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.GetVersion")
-    @ResponseWrapper(localName = "getVersionResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.GetVersionResponse")
+    @WebResult(name="return", targetNamespace = "")
     public String getVersion();
 
     /**
@@ -50,36 +45,7 @@ public interface SKSWSProxy {
         throws SKSException_Exception
     ;
 
-    /**
-     * 
-     * @param arg5
-     * @param arg4
-     * @param arg3
-     * @param arg2
-     * @param arg1
-     * @param arg0
-     * @throws SKSException_Exception
-     */
-    @WebMethod
-    @RequestWrapper(localName = "addExtension", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.AddExtension")
-    @ResponseWrapper(localName = "addExtensionResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.AddExtensionResponse")
-    public void addExtension(
-        @WebParam(name = "arg0", targetNamespace = "")
-        int arg0,
-        @WebParam(name = "arg1", targetNamespace = "")
-        String arg1,
-        @WebParam(name = "arg2", targetNamespace = "")
-        byte arg2,
-        @WebParam(name = "arg3", targetNamespace = "")
-        byte[] arg3,
-        @WebParam(name = "arg4", targetNamespace = "")
-        byte[] arg4,
-        @WebParam(name = "arg5", targetNamespace = "")
-        byte[] arg5)
-        throws SKSException_Exception
-    ;
-
-    /**
+     /**
      * 
      * @param arg4
      * @param arg3
@@ -179,8 +145,8 @@ public interface SKSWSProxy {
      * @throws SKSException_Exception
      */
     @WebMethod(operationName="getKeyProtectionInfo")
-//    @RequestWrapper(localName = "getKeyProtectionInfo", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.getKeyProtectionInfo")
-//    @ResponseWrapper(localName = "getKeyProtectionInfoResponse", targetNamespace = "http://xmlns.webpki.org/sks/v0.61", className = "org.webpki.sks.ws.common.getKeyProtectionInfoResponse")
+    @RequestWrapper(localName = "getKeyProtectionInfo", targetNamespace = "http://xmlns.webpki.org/sks/v0.61")
+    @ResponseWrapper(localName = "getKeyProtectionInfo.Response", targetNamespace = "http://xmlns.webpki.org/sks/v0.61")
     public void getKeyProtectionInf(
         @WebParam(name = "keyHandle", targetNamespace = "")
         int keyHandle,

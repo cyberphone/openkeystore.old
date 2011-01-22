@@ -163,7 +163,6 @@ public class WSCreator extends XMLObjectWrapper
                "                  xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\">\n\n" +
                "  <wsdl:types>\n\n" + 
                "    <xs:schema targetNamespace=\"" + tns + "\"\n" + 
-               "               xmlns:tns=\"" + tns + "\"\n" + 
                "               elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n");
 
         rd.getChild ();
@@ -281,7 +280,7 @@ public class WSCreator extends XMLObjectWrapper
           }
 
         write (wsdl_file, "\n  </wsdl:portType>\n\n" +
-            "  <wsdl:binding name=\"" + service_name + ".PortBinding\" type=\"tns:" + service_name + ".Interface\">\n" +
+            "  <wsdl:binding name=\"" + service_name + ".Binding\" type=\"tns:" + service_name + ".Interface\">\n" +
             "    <soap:binding style=\"document\" transport=\"http://schemas.xmlsoap.org/soap/http\"/>\n");
 
         for (Method meth : methods)
@@ -321,7 +320,7 @@ public class WSCreator extends XMLObjectWrapper
 
         write (wsdl_file, "\n    </wsdl:binding>\n\n" +
             "  <wsdl:service name=\""+ service_name + "\">\n" +
-            "     <wsdl:port name=\"" + service_name + ".Port\" binding=\"tns:" + service_name + ".PortBinding\">\n" +
+            "     <wsdl:port name=\"" + service_name + ".Port\" binding=\"tns:" + service_name + ".Binding\">\n" +
             "       <soap:address location=\"" + default_url + "\"/>\n" +
             "     </wsdl:port>\n" +
             "  </wsdl:service>\n\n" +
