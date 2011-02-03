@@ -5,7 +5,7 @@ An SKS (Secure Key Store) may be self-contained like in a smart card,
 but it may also be architected as a TEE (Trusted Execution Environment)
 and SE (Security Element) combination.
 
-This very early TEE/SE draft represents SKS as described in V.60.
+This very early TEE/SE draft represents SKS as described in V.61.
 
 SE Characteristics
 ------------------
@@ -47,7 +47,7 @@ SE_createProvisioningSession ()
       TEEProv          // New: Sealed provisioning object with SessionKey et al stored in TEE
 
 
-SE_createKeyPair ()
+SE_createKeyEntry ()
 
    Input:
       TEEProv          // New: Current session.  Given by the TEE
@@ -207,5 +207,5 @@ Mozilla NSS, this scheme represents a major improvement since it combines
 HW-secured key storage with secure provisioning.
 
 Anders Rundgren,
-V0.13, December 19, 2010
+V0.14, December 24, 2010
 
