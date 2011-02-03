@@ -20,12 +20,10 @@ import javax.xml.ws.ResponseWrapper;
 
 import org.webpki.sks.SKSException;
 
-import com.sun.xml.ws.developer.SchemaValidation;
-
-@SchemaValidation
+@com.sun.xml.ws.developer.SchemaValidation
 @WebService(targetNamespace="http://xmlns.webpki.org/sks/v0.61",
-            name="SKSWS.Interface",
             serviceName="SKSWS",
+            name="SKSWS.Interface",
             portName="SKSWS.Port",
             wsdlLocation="META-INF/SKSWS.wsdl")
 /*
@@ -61,14 +59,19 @@ public class SKSWSImplementation
         @WebParam(name = "ProtectionStatus", targetNamespace = "", mode = WebParam.Mode.OUT)
         Holder<String> protectionStatus,
         @WebParam(name = "blah", targetNamespace = "", mode = WebParam.Mode.OUT)
-        Holder<Byte> blah)
+        Holder<Byte> blah,
+        @WebParam(name = "X509Certificate", targetNamespace = "", mode = WebParam.Mode.OUT)
+        Holder<List<byte[]>> x509_certificate)
       throws SKSException
     {
       protectionStatus.value = "yes";
       blah.value = (byte)(keyHandle + 2);
-      // TODO Auto-generated method stub
-      
+      List certs = new ArrayList ();
+      certs.add (new byte[]{3,4,5});
+      certs.add (new byte[]{3,4,8,9});
+      x509_certificate.value = certs;
     }
+
     @WebMethod
     public void setCertificatePath(
         @WebParam(name = "KeyHandle", targetNamespace = "")
@@ -90,12 +93,13 @@ public class SKSWSImplementation
       return "0.00001";
     }
 
-    public static void main (String[] args) throws Exception
+    public static void main (String[] args)
       {
         if (args.length != 1)
           {
             System.out.println ("Missing URL");
           }
+/*
         URL wsdlResource = SKSWSImplementation.class.getResource ("/META-INF/SKSWS.wsdl");
 
         List<Source> metadata = new ArrayList<Source> ();
@@ -108,7 +112,8 @@ public class SKSWSImplementation
 
         properties.put (Endpoint.WSDL_PORT, new QName ("http://xmlns.webpki.org/sks/v0.61", "SKSWS.Port"));
         properties.put (Endpoint.WSDL_SERVICE, new QName ("http://xmlns.webpki.org/sks/v0.61", "SKSWS"));
-
+*/
+        
         Endpoint endpoint = Endpoint.create (new SKSWSImplementation ());
 //        endpoint.setMetadata (metadata);
 //        endpoint.setProperties (properties);

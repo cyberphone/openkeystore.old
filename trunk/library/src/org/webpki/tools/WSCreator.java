@@ -16,14 +16,29 @@
  */
 package org.webpki.tools;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
+import javax.jws.WebParam;
+import javax.jws.WebResult;
+import javax.jws.WebService;
+import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.ws.Endpoint;
+
+import org.webpki.sks.ws.server.SKSWSImplementation;
 import org.webpki.util.ArrayUtil;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.DOMReaderHelper;
@@ -53,14 +68,95 @@ public class WSCreator extends XMLObjectWrapper
     
     private FileOutputStream wsdl_file;
     
+    
+    abstract class Package
+    {
+      FileOutputStream jfile;
+      String class_name;
+      String package_name;
+      String path;
+      boolean next;
+      boolean schema_validation;
+      
+      abstract String decoration ();
+      
+      abstract String class_interface ();
+      
+      Package ()
+      {
+        String canonicalized_class_name = attr.getString ("ClassName");
+        class_name = canonicalized_class_name;
+        path = output_directory;
+        int i = canonicalized_class_name.lastIndexOf ('.');
+        if (i > 0)
+          {
+            class_name = canonicalized_class_name.substring (i + 1);
+            package_name = canonicalized_class_name.substring (0, i);
+            path += File.separatorChar;
+            for (int j = 0; j < i; j++)
+              {
+                path += canonicalized_class_name.charAt (j) == '.' ? File.separatorChar : canonicalized_class_name.charAt (j);  
+              }
+          }
+      }
+    }
+    
+    class ServerPack extends Package
+    {
+      ServerPack ()
+      {
+        super ();
+        schema_validation = attr.getBoolean ("SchemaValidation");
+      }
+      String decoration ()
+        {
+          return ",\n" + "" +
+                 "            name=\"" + service_name + ".Interface\",\n" +
+                 "            portName=\"" + service_name + ".Port\",\n" +
+                 "            wsdlLocation=\"" +wsdl_location + "\"";
+        }
+
+      String class_interface ()
+        {
+          return "class";
+        }
+     
+    }
+    class ClientPack extends Package
+    {
+      String decoration ()
+        {
+          return "";
+        }
+
+      String class_interface ()
+        {
+          return "interface";
+        }
+
+    }
+   
+    ServerPack jserver_pck;
+
+    ClientPack jclient_pck;
+    
+    TreeSet<String> jimports = new TreeSet<String> ();
+  
     DOMAttributeReaderHelper attr;
     
     private String tns;
+    
+    private boolean qualified_ns;
+    
+    String wsdl_location;
+
+    String sub_target_ns;
     
     private String service_name;
     
     private String default_url;
     
+   
     static class DataType
     {
       boolean nullable;
@@ -68,13 +164,15 @@ public class WSCreator extends XMLObjectWrapper
       String enum_name;
       String csname;
       String jname;
-      DataType (boolean nullable, String xsd_name, String enum_name, String csname, String jname)
+      String jholder;
+      DataType (boolean nullable, String xsd_name, String enum_name, String csname, String jname, String jholder)
       {
         this.nullable = nullable;
         this.xsd_name = xsd_name;
         this.enum_name = enum_name;
         this.csname = csname;
         this.jname = jname;
+        this.jholder = jholder;
       }
     }
     
@@ -82,23 +180,26 @@ public class WSCreator extends XMLObjectWrapper
     
     static
     {
-      types.add (new DataType (false, "xs:int",          "int",     "int",     "int"));
-      types.add (new DataType (false, "xs:short",        "short",   "short",   "short"));
-      types.add (new DataType (false, "xs:byte",         "byte",    "sbyte",   "byte"));
-      types.add (new DataType (false, "xs:boolean",      "boolean", "boolean", "boolean"));
-      types.add (new DataType (true,  "xs:string",       "string",  "string",  "String"));
-      types.add (new DataType (true,  "xs:base64Binary", "binary",  "byte[]",  "byte[]"));
+      types.add (new DataType (false, "xs:int",          "int",     "int",     "int",     "Integer"));
+      types.add (new DataType (false, "xs:short",        "short",   "short",   "short",   "Short"));
+      types.add (new DataType (false, "xs:byte",         "byte",    "sbyte",   "byte",    "Byte"));
+      types.add (new DataType (false, "xs:boolean",      "boolean", "boolean", "boolean", "Boolean"));
+      types.add (new DataType (true,  "xs:string",       "string",  "string",  "String",  "String"));
+      types.add (new DataType (true,  "xs:base64Binary", "binary",  "byte[]",  "byte[]",  "byte[]"));
     }
   
     class Property extends Container
       {
-        String type;
-        
-        String xsd_name;
+        DataType data_type;
         
         boolean nullable;
         
         boolean listtype;
+        
+        String jName (boolean object_type)
+          {
+            return object_type || listtype ? (listtype ? "List<" + data_type.jholder + ">" : data_type.jholder) : data_type.jname;
+          }
       }
     
     abstract class Container
@@ -117,9 +218,11 @@ public class WSCreator extends XMLObjectWrapper
       {
         String[] execptions;
         
+        String code;
+        
         public String getXMLResponseName ()
           {
-            return getXMLName () + "Response";
+            return getXMLName () + ".Response";
           }
         Collection<Property> inputs;
         Collection<Property> outputs;
@@ -134,6 +237,7 @@ public class WSCreator extends XMLObjectWrapper
     private HashSet<String> xml_names = new HashSet <String> ();
     private LinkedHashMap<String,WSException> exceptions = new LinkedHashMap<String,WSException> ();
     private Vector<Method> methods = new Vector<Method> ();
+    private boolean add_main;
 
   @Override
   protected boolean hasQualifiedElements ()
@@ -151,10 +255,16 @@ public class WSCreator extends XMLObjectWrapper
     protected void fromXML (DOMReaderHelper rd) throws IOException
       {
         attr = rd.getAttributeHelper ();
-        wsdl_file = open (wsdl_gen);
+        if (wsdl_gen)
+          {
+            wsdl_file = new FileOutputStream (output_directory);
+          }
         tns = attr.getString ("NameSpace");
         default_url = attr.getString ("DefaultURL");
         service_name = attr.getString ("Service");
+        qualified_ns = attr.getBoolean ("Qualified");
+        wsdl_location = attr.getString ("WSDLLocation");
+        sub_target_ns = qualified_ns ? "\", targetNamespace=\"" + tns + "\"" : "\"";
         write (wsdl_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
                "<wsdl:definitions targetNamespace=\"" + tns + "\"\n" + 
                "                  xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\"\n" + 
@@ -163,9 +273,42 @@ public class WSCreator extends XMLObjectWrapper
                "                  xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\">\n\n" +
                "  <wsdl:types>\n\n" + 
                "    <xs:schema targetNamespace=\"" + tns + "\"\n" + 
-               "               elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n");
+               "               elementFormDefault=\"" + (qualified_ns ? "qualified" : "unqualified") + "\" attributeFormDefault=\"unqualified\">\n");
 
         rd.getChild ();
+        
+        addImport ("javax.jws.WebMethod");
+        addImport ("javax.jws.WebService");
+        
+        addImport("javax.xml.ws.RequestWrapper");
+        addImport("javax.xml.ws.ResponseWrapper");
+
+
+        if (rd.hasNext ("JavaServer"))
+          {
+            rd.getNext ("JavaServer");
+            jserver_pck = new ServerPack ();
+            if (jserver)
+              {
+                open (jserver_pck, true);
+                String[] imports = attr.getListConditional ("Imports");
+                if (imports != null)
+                  {
+                    for (String string : imports)
+                      {
+                        addImport (string);
+                      }
+                  }
+                if (add_main = attr.getBooleanConditional ("AddMain"))
+                  {
+                    addImport ("javax.xml.ws.Endpoint");
+                  }
+              }
+          }
+        else if (jserver)
+          {
+            bad ("The '" + JSERVER + "' option requires a \"JavaServer\" definition!");
+          }
         while (rd.hasNext ("Exception"))
           {
             rd.getNext ("Exception");
@@ -188,6 +331,17 @@ public class WSCreator extends XMLObjectWrapper
             rd.getChild ();
             method.inputs = getProperties (rd, "Input");
             method.outputs = getProperties (rd, "Output");
+            if (method.outputs.size () == 1)
+              {
+                addImport ("javax.jws.WebResult");
+              }
+            else if (method.outputs.size () > 1)
+              {
+                addImport ("javax.jws.WebParam");
+                addImport ("javax.xml.ws.Holder");
+              }
+            String code = rd.getStringConditional ("Code");
+            method.code = jserver ? "\n      {" + (code == null? "\n" : code) + "      }" : ";";
             rd.getParent ();
             for (String exception : method.execptions)
               {
@@ -215,6 +369,7 @@ public class WSCreator extends XMLObjectWrapper
 
         for (Method meth : methods)
           {
+
             write (wsdl_file, "\n" + 
                 "      <xs:element name=\"" + meth.getXMLName () + "\">\n" + 
                 "        <xs:complexType>\n" + 
@@ -282,9 +437,14 @@ public class WSCreator extends XMLObjectWrapper
         write (wsdl_file, "\n  </wsdl:portType>\n\n" +
             "  <wsdl:binding name=\"" + service_name + ".Binding\" type=\"tns:" + service_name + ".Interface\">\n" +
             "    <soap:binding style=\"document\" transport=\"http://schemas.xmlsoap.org/soap/http\"/>\n");
+        
+        javaHeader (jserver_pck);
+        javaHeader (jclient_pck);
 
-        for (Method meth : methods)
+         for (Method meth : methods)
           {
+            javaMethod (jserver_pck, meth);
+            javaMethod (jclient_pck, meth);
             write (wsdl_file, "\n" + 
                 "      <wsdl:operation name=\"" + meth.getXMLName () + "\">\n" + 
                 "        <wsdl:input>\n" +
@@ -326,7 +486,164 @@ public class WSCreator extends XMLObjectWrapper
             "  </wsdl:service>\n\n" +
             "</wsdl:definitions>\n");
         close (wsdl_file);
+        javaTerminate (jserver_pck);
+        javaTerminate (jclient_pck);
       }
+
+      private void addImport (String string)
+    {
+      jimports.add (string);
+    }
+
+      private void javaHeader (Package pck) throws IOException
+    {
+      if (pck == null) return;
+      FileOutputStream jfile = pck.jfile;
+      if (pck.package_name != null)
+        {
+          writeln (jfile,"package " + pck.package_name + ";");
+        }
+      String last_import_pack ="";
+      for (String impstr : jimports)
+        {
+          int i = impstr.lastIndexOf ('.');
+          if (!last_import_pack.equals (impstr.substring (0, i)))
+            {
+              write (jfile, "\n");
+              last_import_pack = impstr.substring (0, i);
+            }
+          writeln (jfile, "import " + impstr + ";");
+        }
+      if (pck.schema_validation)
+        {
+          write (jfile,"\n@com.sun.xml.ws.developer.SchemaValidation");
+        }
+      writeln (jfile, "\n" +
+                      "@WebService(serviceName=\"" + service_name + "\",\n" +
+                      "            targetNamespace=\"" + tns + "\"" + pck.decoration () + ")\npublic " + pck.class_interface () + " " +
+                      pck.class_name + "\n  {");
+      }
+
+      private void javaTerminate (Package pck) throws IOException
+    {
+      if (pck != null)
+        {
+          if (add_main)
+            {
+              writeln (pck.jfile, "\n" +
+                                  "    public static void main (String[] args)\n" +
+                                  "      {\n" +
+                                  "        if (args.length != 1)\n" +
+                                  "          {\n" +
+                                  "            System.out.println (\"Missing URL\");\n" +
+                                  "          }\n" +
+                                  "        Endpoint endpoint = Endpoint.create (new " + pck.class_name + " ());\n" +
+                                  "        endpoint.publish (args[0]);\n" +
+                                  "      }");
+
+            }
+          write (pck.jfile, "  }\n");
+        close (pck.jfile);
+        }
+       
+    }
+
+      void javaMethod (Package pck, Method meth) throws IOException
+      {
+        if (pck == null) return;
+        FileOutputStream jfile = pck.jfile;
+        if (pck.next)
+          {
+            write (jfile, "\n");
+          }
+        pck.next = true;
+  writeln (jfile,
+      "    @WebMethod(operationName=\"" + meth.getXMLName () +"\")\n" +
+      "    @RequestWrapper(localName=\"" + meth.getXMLName () + "\", targetNamespace=\"" + tns + "\")\n" +
+      "    @ResponseWrapper(localName=\"" + meth.getXMLResponseName () + "\", targetNamespace=\"" + tns + "\")");
+  int indent = 4;
+  if (meth.outputs.isEmpty () || meth.outputs.size () > 1)
+    {
+      write (jfile, "    public void");
+    }
+  if (meth.outputs.size () == 1)
+    {
+      Property prop = meth.outputs.iterator ().next ();
+      write (jfile, "    @WebResult(name=\"" + prop.getXMLName () + sub_target_ns  + ")\n    public ");
+      write (jfile, prop.jName (false));
+      indent = prop.jName (false).length ();
+    }
+  write (jfile, " " + meth.name + " (");
+  indent += meth.name.length ();
+  boolean next = false;
+  for (Property prop : meth.inputs)
+    {
+      if (next)
+        {
+          writeln (jfile, ",");
+          for (int i = -14; i < indent; i++)
+            {
+              write (jfile, " ");
+            }
+        }
+      writeln (jfile, "@WebParam(name=\"" + prop.getXMLName () + sub_target_ns + ")");
+      for (int i = -14; i < indent; i++)
+            {
+              write (jfile, " ");
+            }
+          write (jfile, prop.jName (false) + " " + prop.name);
+      next = true;
+    }
+  if (meth.outputs.size () > 1) for (Property prop : meth.outputs)
+    {
+      if (next)
+        {
+          writeln (jfile, ",");
+          for (int i = -14; i < indent; i++)
+            {
+              write (jfile, " ");
+            }
+        }
+      writeln (jfile, "@WebParam(name=\"" + prop.getXMLName () + sub_target_ns + ", mode=WebParam.Mode.OUT)");
+      for (int i = -14; i < indent; i++)
+            {
+              write (jfile, " ");
+            }
+          write (jfile, "Holder<" + prop.jName (true) + "> " + prop.name);
+      next = true;
+    }
+  write (jfile, ")");
+  next = false; 
+  for (String ex : meth.execptions)
+    {
+      if (next)
+        {
+          write (jfile, ", ");
+        }
+      else
+        {
+      next = true;
+      write (jfile, "\n    throws ");
+        }
+      write (jfile, ex);
+    }
+  write (jfile, meth.code + "\n");
+/*
+  if (meth.outputs.size () > 1)
+    {
+      
+    }
+*/
+      }
+
+  private void open (Package pck, boolean java) throws IOException
+    {
+      if (pck != null)
+        {
+          new File (pck.path).mkdirs ();
+          pck.jfile = new FileOutputStream (pck.path + File.separatorChar + pck.class_name + (java ? ".java" : ".cs"));
+        }
+    }
 
   private void writeWSDLProperties (Collection<Property> properties) throws IOException
     {
@@ -334,7 +651,7 @@ public class WSCreator extends XMLObjectWrapper
         {
           write (wsdl_file,
               "            <xs:element name=\"" + property.getXMLName () +
-                   "\" type=\"" + property.xsd_name + "\"" + 
+                   "\" type=\"" + property.data_type.xsd_name + "\"" + 
                    (property.nullable ? " minOccurs=\"0\"" : "") +
                    (property.listtype ? " maxOccurs=\"unbounded\"" : "") +
                    "/>\n");
@@ -351,24 +668,28 @@ public class WSCreator extends XMLObjectWrapper
           Property prop = new Property ();
           prop.name = attr.getString ("Name");
           prop.xml_name = attr.getStringConditional ("XMLName");
-          if (xsd_names.add (prop.getXMLName ()))
+          if (!xsd_names.add (prop.getXMLName ()))
             {
               bad ("Duplicate XML name: " + prop.getXMLName ());
             }
-          prop.type = attr.getString ("Type");
+          String type = attr.getString ("Type");
           prop.nullable = attr.getBoolean ("Null");
-          prop.listtype = attr.getBoolean ("List");
-          for (DataType type : types)
+          if (prop.listtype = attr.getBoolean ("List"))
             {
-              if (type.enum_name.equals (prop.type))
+              addImport ("java.util.List");
+            }
+
+          for (DataType dtype : types)
+            {
+              if (dtype.enum_name.equals (type))
                 {
-                  prop.xsd_name = type.xsd_name;
+                  prop.data_type = dtype;
                   break;
                 }
             }
-          if (prop.xsd_name == null)
+          if (prop.data_type == null)
             {
-              bad ("Type '" + prop.type + "' not found");
+              bad ("Type '" + type + "' not found");
             }
           if (props.put (prop.name, prop) != null)
             {
@@ -389,31 +710,18 @@ public class WSCreator extends XMLObjectWrapper
     }
 
   private void write (FileOutputStream file, String data) throws IOException
-    {
-      if (file != null)
-        {
-          file.write (data.getBytes ("UTF-8"));
-        }
-    }
-  
-    private FileOutputStream open (boolean open_it) throws IOException
+  {
+    if (file != null)
       {
-        if (open_it)
-          {
-            return new FileOutputStream (output_directory);
-          }
-        return null;
+        file.write (data.getBytes ("UTF-8"));
       }
+  }
 
-  private FileOutputStream open (String base_file_name, boolean open_it) throws IOException
-    {
-System.out.println ("f=" + output_directory + File.separatorChar + base_file_name);
-      if (open_it)
-        {
-          return new FileOutputStream (output_directory + File.separatorChar + base_file_name);
-        }
-      return null;
-    }
+  private void writeln (FileOutputStream file, String data) throws IOException
+  {
+    write (file, data + "\n");
+  }
+
 
   @Override
   protected void toXML (DOMWriterHelper ws) throws IOException

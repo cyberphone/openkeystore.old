@@ -77,14 +77,19 @@ public class SKSWSClient
 
         Holder<Byte> blah = new Holder<Byte> ();
         Holder<String> prot = new Holder<String> ();
+        Holder<List<byte[]>> certls = new Holder<List<byte[]>> ();
         try
           {
-            proxy.getKeyProtectionInf (4, prot, blah);
+            proxy.getKeyProtectionInf (4, prot, blah, certls);
             if (!prot.value.equals ("yes"))
               {
                 bad ();
               }
             if (blah.value != 6)
+              {
+                bad ();
+              }
+            if (certls.value.size () != 2)
               {
                 bad ();
               }

@@ -120,6 +120,7 @@
       <xs:sequence>
         <xs:element name="ProtectionStatus" type="xs:string"/>
         <xs:element name="blah" type="xs:byte"/>
+        <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>

@@ -153,7 +153,9 @@ public interface SKSWSProxy {
         @WebParam(name = "ProtectionStatus", targetNamespace = "", mode = WebParam.Mode.OUT)
         Holder<String> protection,
         @WebParam(name = "blah", targetNamespace = "", mode = WebParam.Mode.OUT)
-        Holder<Byte> blah)
+        Holder<Byte> blah,
+        @WebParam(name = "X509Certificate", targetNamespace = "", mode = WebParam.Mode.OUT)
+        Holder<List<byte[]>> x509_certificate)
         throws SKSException_Exception
     ;
 

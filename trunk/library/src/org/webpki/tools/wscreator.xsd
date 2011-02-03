@@ -31,6 +31,10 @@
       <xs:complexType>
          <xs:sequence>
 
+            <xs:element ref="wsc:JavaServer" minOccurs="0"/>
+
+            <xs:element ref="wsc:JavaClient" minOccurs="0"/>
+
             <xs:element ref="wsc:Exception" minOccurs="0" maxOccurs="unbounded"/>
             
             <xs:element ref="wsc:Method" maxOccurs="unbounded"/>
@@ -46,8 +50,45 @@
          <!-- WSDL Default URL -->
          <xs:attribute name="DefaultURL" type="xs:anyURI" use="required"/>
 
+         <!-- WSDL Location -->
+         <xs:attribute name="WSDLLocation" type="xs:string" use="required"/>
+
+         <!-- Qualified name space -->
+         <xs:attribute name="Qualified" type="xs:boolean" use="optional" default="true"/>
+
       </xs:complexType>
 
+   </xs:element>
+
+   <xs:element name="JavaServer">
+      <xs:complexType>
+         <xs:sequence>
+         </xs:sequence> 
+
+         <!-- Java Class Name -->
+         <xs:attribute name="ClassName" type="wsc:xmlid" use="required"/>
+
+         <!-- Imports -->
+         <xs:attribute name="Imports" type="wsc:importList" use="optional"/>
+
+         <!-- SUN Special -->
+         <xs:attribute name="SchemaValidation" type="xs:boolean" use="optional" default="true"/>
+
+         <!-- Main -->
+         <xs:attribute name="AddMain" type="xs:boolean" use="optional" default="true"/>
+
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="JavaClient">
+      <xs:complexType>
+         <xs:sequence>
+         </xs:sequence> 
+
+         <!-- Java Class Name -->
+         <xs:attribute name="ClassName" type="wsc:xmlid" use="required"/>
+
+      </xs:complexType>
    </xs:element>
 
    <xs:element name="Exception">
@@ -70,6 +111,7 @@
          <xs:sequence>
             <xs:element name="Input" type="wsc:property" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="Output" type="wsc:property" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Code" type="xs:string" minOccurs="0"/>
          </xs:sequence> 
 
          <!-- Method Name -->
@@ -80,6 +122,9 @@
 
          <!-- Exceptions -->
          <xs:attribute name="Throws" type="wsc:exceptionList" use="optional"/>
+
+         <!-- Java Server Code -->
+         <xs:attribute name="Code" type="xs:string" use="optional"/>
 
       </xs:complexType>
    </xs:element>
@@ -93,9 +138,24 @@
       </xs:restriction>
    </xs:simpleType>
 
+   <xs:simpleType name="importList">
+      <xs:restriction>
+         <xs:simpleType>
+            <xs:list itemType="wsc:xmlid"/>
+         </xs:simpleType>
+         <xs:minLength value="1"/>
+      </xs:restriction>
+   </xs:simpleType>
+
    <xs:simpleType name="id">
       <xs:restriction base="xs:NCName">
          <xs:pattern value="[0-9,a-z,A-Z,_]*"/>
+       </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="xmlid">
+      <xs:restriction base="xs:NCName">
+         <xs:pattern value="[0-9,a-z,A-Z,_,\.]*"/>
        </xs:restriction>
    </xs:simpleType>
 
@@ -106,6 +166,9 @@
 
       <!-- XML -->
       <xs:attribute name="XMLName" type="wsc:id" use="optional"/>
+
+      <!-- Comment -->
+      <xs:attribute name="Comment" type="xs:string" use="optional"/>
 
       <!-- Null -->
       <xs:attribute name="Null" type="xs:boolean" use="optional" default="false"/>

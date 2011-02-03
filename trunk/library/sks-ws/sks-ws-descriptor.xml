@@ -3,17 +3,35 @@
 <WebService NameSpace="http://xmlns.webpki.org/sksws"
             Service="SKSWS"
             DefaultURL="http://localhost:8080/securekeystore"
+            WSDLLocation="META-INF/SKSWS.wsdl"
             xmlns="http://xmlns.webpki.org/wscreator.1.00">
 
+   <JavaServer ClassName="org.MySRV" Imports="org.webpki.sks.Exception"/>
    <Exception Name="Ex5"/>
    <Exception Name="Shit" XMLName="XML_Shit">
      <Property Name="baddy" Type="string" List="true" Null="true"/>
-     <Property Name="int_y" XMLName="inty" Type="int"/>
+     <Property Name="int_y" XMLName="int" Type="int"/>
    </Exception>
    <Method Name="kurt">
      <Input Name="glub" Type="string"/>
      <Input Name="bolg" Type="binary" List="true"/>
      <Output Name="kurt" Type="int"/>
    </Method>
-   <Method Name="akurt" Throws="Ex5 Shit"/>
+   <Method Name="kurt2">
+     <Input Name="glub" Type="string"/>
+     <Input Name="bolg" Type="binary" List="true"/>
+     <Output Name="kurt" Type="int"/>
+     <Output Name="d_urt" Type="short" XMLName="Durt"/>
+   </Method>
+   <Method Name="akurt" Throws="Ex5 Shit">
+   <Code><![CDATA[
+        if (a < b && a < 0) then
+          {
+            return 1;
+          }
+        else
+          {
+            return 0;
+          }
+]]></Code></Method>
 </WebService>

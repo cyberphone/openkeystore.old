@@ -1,14 +1,11 @@
 
 package org.webpki.sks.ws.client;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceFeature;
+
 
 
 /**
@@ -22,23 +19,9 @@ public class SKSWS
     extends Service
 {
 
-    private final static URL SKSWS_WSDL_LOCATION;
-    private final static QName SKSWS_QNAME = new QName("http://xmlns.webpki.org/sks/v0.61", "SKSWS");
-
-    static {
-        SKSWS_WSDL_LOCATION = SKSWS.class.getResource ("/META-INF/SKSWS.wsdl");
-    }
 
     public SKSWS() {
-        super(__getWsdlLocation(), SKSWS_QNAME);
-    }
-
-    public SKSWS(URL wsdlLocation) {
-        super(wsdlLocation, SKSWS_QNAME);
-    }
-
-    public SKSWS(URL wsdlLocation, QName serviceName) {
-        super(wsdlLocation, serviceName);
+        super(SKSWS.class.getResource ("/META-INF/SKSWS.wsdl"), new QName("http://xmlns.webpki.org/sks/v0.61", "SKSWS"));
     }
 
     /**
@@ -50,24 +33,4 @@ public class SKSWS
     public SKSWSProxy getSKSWSPort() {
         return super.getPort(new QName("http://xmlns.webpki.org/sks/v0.61", "SKSWS.Port"), SKSWSProxy.class);
     }
-
-    /**
-     * 
-     * @param features
-     *     A list of {@link javax.xml.ws.WebServiceFeature} to configure on the proxy.  Supported features not in the <code>features</code> parameter will have their default values.
-     * @return
-     *     returns SKSWSInterface
-     */
-    @WebEndpoint(name = "SKSWS.Port")
-    public SKSWSProxy getSKSWSPort(WebServiceFeature... features) {
-        return super.getPort(new QName("http://xmlns.webpki.org/sks/v0.61", "SKSWS.Port"), SKSWSProxy.class, features);
-    }
-
-    private static URL __getWsdlLocation() {
-        if (SKSWS_WSDL_LOCATION == null) {
-            throw new WebServiceException ("Can't find WSDL");
-        }
-        return SKSWS_WSDL_LOCATION;
-    }
-
 }
