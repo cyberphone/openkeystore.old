@@ -63,6 +63,7 @@
    <xs:element name="JavaServer">
       <xs:complexType>
          <xs:sequence>
+            <xs:element name="SupportCode" type="xs:string" minOccurs="0"/>
          </xs:sequence> 
 
          <!-- Java Class Name -->
@@ -122,9 +123,6 @@
 
          <!-- Exceptions -->
          <xs:attribute name="Throws" type="wsc:exceptionList" use="optional"/>
-
-         <!-- Java Server Code -->
-         <xs:attribute name="Code" type="xs:string" use="optional"/>
 
       </xs:complexType>
    </xs:element>

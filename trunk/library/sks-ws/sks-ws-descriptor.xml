@@ -6,7 +6,14 @@
             WSDLLocation="META-INF/SKSWS.wsdl"
             xmlns="http://xmlns.webpki.org/wscreator.1.00">
 
-   <JavaServer ClassName="org.MySRV" Imports="org.webpki.sks.Exception"/>
+   <JavaServer ClassName="org.MySRV" Imports="org.webpki.sks.Exception">
+     <SupportCode><![CDATA[
+	   void localMethod (String epub)
+	     {
+	     }
+]]></SupportCode>
+   </JavaServer>
+   <JavaClient ClassName="org.cli.MyCLI"/>
    <Exception Name="Ex5"/>
    <Exception Name="Shit" XMLName="XML_Shit">
      <Property Name="baddy" Type="string" List="true" Null="true"/>

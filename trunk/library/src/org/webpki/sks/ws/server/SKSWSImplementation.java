@@ -66,7 +66,7 @@ public class SKSWSImplementation
     {
       protectionStatus.value = "yes";
       blah.value = (byte)(keyHandle + 2);
-      List certs = new ArrayList ();
+      List<byte[]> certs = new ArrayList<byte[]> ();
       certs.add (new byte[]{3,4,5});
       certs.add (new byte[]{3,4,8,9});
       x509_certificate.value = certs;

@@ -25,21 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.Vector;
+
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.xml.namespace.QName;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.ws.Endpoint;
-
-import org.webpki.sks.ws.server.SKSWSImplementation;
 import org.webpki.util.ArrayUtil;
+
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
@@ -77,6 +69,7 @@ public class WSCreator extends XMLObjectWrapper
       String path;
       boolean next;
       boolean schema_validation;
+      String support_code ="";
       
       abstract String decoration ();
       
@@ -230,6 +223,16 @@ public class WSCreator extends XMLObjectWrapper
 
     class WSException extends Container
       {
+        String getName ()
+          {
+            return jclient ? name + "_Exception" : name;
+          }
+        
+        String getBeanName ()
+          {
+            return name + "Bean";
+          }
+        
         Collection<Property> properties;
     
       }
@@ -304,10 +307,29 @@ public class WSCreator extends XMLObjectWrapper
                     addImport ("javax.xml.ws.Endpoint");
                   }
               }
+            rd.getChild ();
+            if (rd.hasNext ("SupportCode"))
+              {
+                jserver_pck.support_code = rd.getString ("SupportCode");
+              }
+            rd.getParent ();
           }
         else if (jserver)
           {
             bad ("The '" + JSERVER + "' option requires a \"JavaServer\" definition!");
+          }
+        if (rd.hasNext ("JavaClient"))
+          {
+            rd.getNext ("JavaClient");
+            jclient_pck = new ClientPack ();
+            if (jclient)
+              {
+                open (jclient_pck, true);
+              }
+          }
+        else if (jclient)
+          {
+            bad ("The '" + JCLIENT + "' option requires a \"JavaClient\" definition!");
           }
         while (rd.hasNext ("Exception"))
           {
@@ -488,6 +510,18 @@ public class WSCreator extends XMLObjectWrapper
         close (wsdl_file);
         javaTerminate (jserver_pck);
         javaTerminate (jclient_pck);
+        if (jclient)
+          {
+            for (WSException wse : exceptions.values ())
+              {
+                FileOutputStream fis = new FileOutputStream (jclient_pck.path + File.separatorChar + wse.getBeanName () + ".java");
+                fis.write ("crap".getBytes ("UTF-8"));
+                fis.close ();
+                fis = new FileOutputStream (jclient_pck.path + File.separatorChar + wse.getName () + ".java");
+                fis.write ("bcrap".getBytes ("UTF-8"));
+                fis.close ();
+              }
+          }
       }
 
       private void addImport (String string)
@@ -518,10 +552,10 @@ public class WSCreator extends XMLObjectWrapper
         {
           write (jfile,"\n@com.sun.xml.ws.developer.SchemaValidation");
         }
-      writeln (jfile, "\n" +
+      write (jfile, "\n" +
                       "@WebService(serviceName=\"" + service_name + "\",\n" +
                       "            targetNamespace=\"" + tns + "\"" + pck.decoration () + ")\npublic " + pck.class_interface () + " " +
-                      pck.class_name + "\n  {");
+                      pck.class_name + "\n  {\n" + pck.support_code);
       }
 
       private void javaTerminate (Package pck) throws IOException
@@ -625,7 +659,7 @@ public class WSCreator extends XMLObjectWrapper
       next = true;
       write (jfile, "\n    throws ");
         }
-      write (jfile, ex);
+      write (jfile, exceptions.get (ex).getName ());
     }
   write (jfile, meth.code + "\n");
 /*
