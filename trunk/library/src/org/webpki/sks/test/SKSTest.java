@@ -534,7 +534,7 @@ public class SKSTest
           {
             try
               {
-                device.sks.signHashedData (key.key_handle, "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", null, (ok_pin + "4").getBytes ("UTF-8"), HashAlgorithms.SHA256.digest (TEST_STRING));
+                key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin + "4", TEST_STRING);
                 assertTrue ("PIN fail", i < 3);
               }
             catch (SKSException e)
@@ -544,7 +544,7 @@ public class SKSTest
           }
         try
           {
-            device.sks.signHashedData (key.key_handle, "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", null, ok_pin.getBytes ("UTF-8"), HashAlgorithms.SHA256.digest (TEST_STRING));
+            key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             fail ("PIN fail");
           }
         catch (SKSException e)
@@ -558,7 +558,7 @@ public class SKSTest
         boolean sa = s_pin.equals (a_pin);
         boolean ae = a_pin.equals (e_pin);
         boolean se = s_pin.equals (e_pin);
-        byte[] other_pin = { '5', '5', '5', '5' };
+        String other_pin = "5555";
         for (Grouping pg : Grouping.values ())
           {
             String puk_ok = "17644";
@@ -592,14 +592,10 @@ public class SKSTest
             GenKey key4 = sess.createRSAKey ("Key.4", 1024, s_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.SIGNATURE).setCertificate ("CN=" + name.getMethodName ());
             GenKey key5 = sess.createRSAKey ("Key.5", 1024, e_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName ());
             sess.closeSession ();
-            device.sks.changePIN (key4.key_handle, s_pin.getBytes ("UTF-8"), other_pin);
+            device.sks.changePIN (key4.key_handle, s_pin.getBytes ("UTF-8"), other_pin.getBytes ("UTF-8"));
             try
               {
-                device.sks.signHashedData (key1.key_handle, 
-                                           "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-                                           null,
-                                           other_pin, 
-                                           HashAlgorithms.SHA256.digest (TEST_STRING));
+                key1.signData (SignatureAlgorithms.RSA_SHA256, other_pin, TEST_STRING);
               }
             catch (SKSException e)
               {
@@ -810,11 +806,7 @@ public class SKSTest
                                        null /* pin_policy */,
                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
-        byte[] result = device.sks.signHashedData (key.key_handle, 
-                                                   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                                   null,
-                                                   null, 
-                                                   HashAlgorithms.SHA256.digest (TEST_STRING));
+        byte[] result = key.signData (SignatureAlgorithms.ECDSA_SHA256, null, TEST_STRING);
         Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
         verify.initVerify (key.cert_path[0]);
         verify.update (TEST_STRING);
@@ -841,21 +833,13 @@ public class SKSTest
                                         AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
 
-        byte[] result = device.sks.signHashedData (key.key_handle, 
-                                                   "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                                   null,
-                                                   null, 
-                                                   HashAlgorithms.SHA256.digest (TEST_STRING));
+        byte[] result = key.signData (SignatureAlgorithms.RSA_SHA256, null, TEST_STRING);
         Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
         verify.initVerify (key.cert_path[0]);
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
 
-        result = device.sks.signHashedData (key.key_handle, 
-                                            "http://www.w3.org/2000/09/xmldsig#rsa-sha1", 
-                                            null,
-                                            null, 
-                                            HashAlgorithms.SHA1.digest (TEST_STRING));
+        result = key.signData (SignatureAlgorithms.RSA_SHA1, null, TEST_STRING);
         verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA1.getJCEName ());
         verify.initVerify (key.cert_path[0]);
         verify.update (TEST_STRING);
@@ -1257,11 +1241,7 @@ public class SKSTest
         assertFalse ("Managed sessions MUST be deleted", sess.exists ());
         try
           {
-            device.sks.signHashedData (key2.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       new byte[0], 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            key2.signData (SignatureAlgorithms.RSA_SHA256, "1111", TEST_STRING);
             fail ("Bad PIN should not work");
           }
         catch (SKSException e)
@@ -1270,20 +1250,12 @@ public class SKSTest
           }
         try
           {
-            byte[] result = device.sks.signHashedData (key2.key_handle, 
-                                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                                       null,
-                                                       ok_pin.getBytes ("UTF-8"), 
-                                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            byte[] result = key2.signData (SignatureAlgorithms.RSA_SHA256, ok_pin, TEST_STRING);
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
             verify.initVerify (key2.cert_path[0]);
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key2", verify.verify (result));
-            result = device.sks.signHashedData (key1.key_handle,
-                                                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                                null,
-                                                ok_pin.getBytes ("UTF-8"), 
-                                                HashAlgorithms.SHA256.digest (TEST_STRING));
+            result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
             verify.initVerify (key1.cert_path[0]);
             verify.update (TEST_STRING);
@@ -1333,11 +1305,7 @@ public class SKSTest
         assertFalse ("Managed sessions MUST be deleted", sess.exists ());
         try
           {
-            device.sks.signHashedData (key3.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       new byte[0], 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            key3.signData (SignatureAlgorithms.RSA_SHA256, "1111", TEST_STRING);
             fail ("Bad PIN should not work");
           }
         catch (SKSException e)
@@ -1346,20 +1314,12 @@ public class SKSTest
           }
         try
           {
-            byte[] result = device.sks.signHashedData (key3.key_handle, 
-                                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                                       null,
-                                                       ok_pin.getBytes ("UTF-8"), 
-                                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            byte[] result = key3.signData (SignatureAlgorithms.RSA_SHA256, ok_pin, TEST_STRING);
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
             verify.initVerify (key3.cert_path[0]);
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key3", verify.verify (result));
-            result = device.sks.signHashedData (key1.key_handle, 
-                                                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                                null,
-                                                ok_pin.getBytes ("UTF-8"), 
-                                                HashAlgorithms.SHA256.digest (TEST_STRING));
+            result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
             verify.initVerify (key1.cert_path[0]);
             verify.update (TEST_STRING);
@@ -1477,11 +1437,7 @@ public class SKSTest
           }
         try
           {
-            device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
-                                             null,
-                                             (ok_pin + "4").getBytes ("UTF-8"), 
-                                             enc);
+            key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, ok_pin + "4", enc);
             fail ("PIN error");
           }
         catch (SKSException e)
@@ -1490,11 +1446,7 @@ public class SKSTest
           }
         try
           {
-            device.sks.asymmetricKeyDecrypt (key2.key_handle, 
-                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
-                                             null,
-                                             ok_pin.getBytes ("UTF-8"), 
-                                             enc);
+            key2.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, ok_pin, enc);
             fail ("PKCS #1 error");
           }
         catch (SKSException e)
@@ -1550,11 +1502,7 @@ public class SKSTest
           {
             try
               {
-                device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                                 AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
-                                                 null,
-                                                 (ok_pin + "4").getBytes ("UTF-8"), 
-                                                 enc);
+                key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, ok_pin + "4", enc);
                 fail ("PIN error");
               }
             catch (SKSException e)
@@ -1565,11 +1513,7 @@ public class SKSTest
           }
         try
           {
-            device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
-                                             null,
-                                             ok_pin.getBytes ("UTF-8"), 
-                                             enc);
+            key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, ok_pin, enc);
             fail ("PIN lock error");
           }
         catch (SKSException e)
@@ -1614,11 +1558,10 @@ public class SKSTest
             authorizationErrorCheck (e);
           }
         device.sks.setPIN (key.key_handle, puk_ok.getBytes ("UTF-8"), (ok_pin + "2").getBytes ("UTF-8"));
-        assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
-                                                                                            null,
-                                                                                            (ok_pin + "2").getBytes ("UTF-8"), 
-                                                                                            enc), TEST_STRING));
+        assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, 
+                                                                                     ok_pin + "2", 
+                                                                                     enc),
+                                                           TEST_STRING));
       }
 
     @Test
@@ -1643,15 +1586,11 @@ public class SKSTest
                                                       (short) 3 /* retry_limit*/, 
                                                       null /* puk_policy */);
             GenKey key = sess.createECKey ("Key.1",
-                                            ok_pin /* pin_value */,
-                                            pin_policy,
-                                            AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                           ok_pin /* pin_value */,
+                                           pin_policy,
+                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
             sess.closeSession ();
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                       null,
-                                       ok_pin.getBytes ("UTF-8"), 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             try
               {
                 device.sks.changePIN (key.key_handle, ok_pin.getBytes ("UTF-8"), "8437".getBytes ("UTF-8"));
@@ -1679,10 +1618,10 @@ public class SKSTest
       {
         ProvSess sess = new ProvSess (device);
         GenKey key = sess.createRSAKey ("Key.1",
-                           1024 /* rsa_size */,
-                           null /* pin_value */,
-                           null /* pin_policy */,
-                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
+                                        1024 /* rsa_size */,
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
         sess.closeSession ();
         try
           {
@@ -1701,10 +1640,10 @@ public class SKSTest
         ProvSess sess = new ProvSess (device);
         sess.overrideExportProtection (ExportProtection.NONE.getSKSValue ());
         GenKey key = sess.createRSAKey ("Key.1",
-                           1024 /* rsa_size */,
-                           null /* pin_value */,
-                           null /* pin_policy */,
-                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
+                                        1024 /* rsa_size */,
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
         sess.closeSession ();
         try
           {
@@ -1724,10 +1663,10 @@ public class SKSTest
         try
           {
             sess.createRSAKey ("Key.1",
-                           1024 /* rsa_size */,
-                           null /* pin_value */,
-                           null /* pin_policy */,
-                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
+                               1024 /* rsa_size */,
+                               null /* pin_value */,
+                               null /* pin_policy */,
+                               AppUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
             fail ("Missing PIN");
           }
         catch (SKSException e)
@@ -1878,11 +1817,11 @@ public class SKSTest
                                                       (short) 3 /* retry_limit*/, 
                                                       null /* puk_policy */);
             GenKey key = sess.createECKey ("Key.1",
-                                            ok_pin /* pin_value */,
-                                            pin_policy,
-                                            key_usage,
-                                            new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate ("CN=TEST18");
-            sess.setSymmetricKey (key, symmetric_key);
+                                           ok_pin /* pin_value */,
+                                           pin_policy,
+                                           key_usage,
+                                           new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate ("CN=TEST18");
+            key.setSymmetricKey (symmetric_key);
             sess.closeSession ();
           }
       }
@@ -1902,11 +1841,11 @@ public class SKSTest
                                                   (short) 3 /* retry_limit*/, 
                                                   null /* puk_policy */);
         GenKey key = sess.createECKey ("Key.1",
-                                        ok_pin /* pin_value */,
-                                        pin_policy,
-                                        AppUsage.AUTHENTICATION,
-                                        new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate ("CN=TEST18");
-        sess.setSymmetricKey (key, symmetric_key);
+                                       ok_pin /* pin_value */,
+                                       pin_policy,
+                                       AppUsage.AUTHENTICATION,
+                                       new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate ("CN=TEST18");
+        key.setSymmetricKey (symmetric_key);
         sess.closeSession ();
         assertTrue ("Not symmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetric ());
         byte[] result = sess.sks.performHMAC (key.key_handle, MacAlgorithms.HMAC_SHA1.getURI (), ok_pin.getBytes ("UTF-8"), TEST_STRING);
@@ -1964,7 +1903,7 @@ public class SKSTest
                                         pin_policy,
                                         AppUsage.AUTHENTICATION,
                                         new String[]{sym_enc.getURI ()}).setCertificate ("CN=TEST18");
-                sess.setSymmetricKey (key, symmetric_key);
+                key.setSymmetricKey (symmetric_key);
               }
             catch (SKSException e)
               {
@@ -1975,12 +1914,11 @@ public class SKSTest
             sess.closeSession ();
             byte[] iv_val = new byte[16];
             new SecureRandom ().nextBytes (iv_val);
-            byte[] result = sess.sks.symmetricKeyEncrypt (key.key_handle,
-                                                          sym_enc.getURI (),
-                                                          true,
-                                                          sym_enc.needsIV () && !sym_enc.internalIV () ? iv_val : null,
-                                                          ok_pin.getBytes ("UTF-8"),
-                                                          data);
+            byte[] result = key.symmetricKeyEncrypt (sym_enc,
+                                                     true,
+                                                     sym_enc.needsIV () && !sym_enc.internalIV () ? iv_val : null,
+                                                     ok_pin,
+                                                     data);
             byte[] res2 = result.clone ();
             Cipher crypt = Cipher.getInstance (sym_enc.getJCEName ());
             if (sym_enc.needsIV ())
@@ -1999,20 +1937,18 @@ public class SKSTest
                 crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (symmetric_key, "AES"));
               }
             assertTrue ("encrypt error", ArrayUtil.compare (res2, crypt.doFinal (data)));
-            assertTrue ("decrypt error", ArrayUtil.compare (data, sess.sks.symmetricKeyEncrypt (key.key_handle, 
-                                                                                                sym_enc.getURI (),
-                                                                                                false,
-                                                                                                sym_enc.needsIV () && !sym_enc.internalIV () ? iv_val : null,
-                                                                                                ok_pin.getBytes ("UTF-8"),
-                                                                                                result)));
+            assertTrue ("decrypt error", ArrayUtil.compare (data, key.symmetricKeyEncrypt (sym_enc,
+                                                                                           false,
+                                                                                           sym_enc.needsIV () && !sym_enc.internalIV () ? iv_val : null,
+                                                                                           ok_pin,
+                                                                                           result)));
             try
               {
-                sess.sks.symmetricKeyEncrypt (key.key_handle,
-                                              sym_enc.getURI (),
-                                              true,
-                                              sym_enc.needsIV () && !sym_enc.internalIV () ? null : iv_val,
-                                              ok_pin.getBytes ("UTF-8"),
-                                              data);
+                key.symmetricKeyEncrypt (sym_enc,
+                                         true,
+                                         sym_enc.needsIV () && !sym_enc.internalIV () ? null : iv_val,
+                                         ok_pin,
+                                         data);
                 fail ("Incorrect IV must fail");
               }
             catch (SKSException e)
@@ -2048,7 +1984,7 @@ public class SKSTest
                                         pin_policy,
                                         AppUsage.AUTHENTICATION,
                                         new String[]{hmac.getURI ()}).setCertificate ("CN=TEST18");
-                sess.setSymmetricKey (key, symmetric_key);
+                key.setSymmetricKey (symmetric_key);
               }
             catch (SKSException e)
               {
@@ -2080,13 +2016,13 @@ public class SKSTest
                                                   (short) 3 /* retry_limit*/, 
                                                   null /* puk_policy */);
         GenKey key = sess.createECKey ("Key.1",
-                                        ok_pin /* pin_value */,
-                                        pin_policy,
-                                        AppUsage.AUTHENTICATION,
-                                        new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate ("CN=TEST18");
+                                       ok_pin /* pin_value */,
+                                       pin_policy,
+                                       AppUsage.AUTHENTICATION,
+                                       new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate ("CN=TEST18");
         try
           {
-            sess.setSymmetricKey (key, symmetric_key);
+            key.setSymmetricKey (symmetric_key);
             sess.closeSession ();
             fail ("Wrong key size");
           }
@@ -2115,7 +2051,7 @@ public class SKSTest
                                        pin_policy /* pin_policy */,
                                        AppUsage.AUTHENTICATION,
                                        new String[]{KeyGen2URIs.ALGORITHMS.NONE}).setCertificate ("CN=" + name.getMethodName());
-        sess.setSymmetricKey (key, symmetric_key);
+       key.setSymmetricKey (symmetric_key);
         sess.closeSession ();
         try
           {
@@ -2233,16 +2169,10 @@ public class SKSTest
             Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
             cipher.init (Cipher.ENCRYPT_MODE, key.cert_path[0]);
             byte[] enc = cipher.doFinal (TEST_STRING);
-            assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                                AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
-                                                                                                null,
-                                                                                                ok_pin.getBytes ("UTF-8"), 
-                                                                                                enc), TEST_STRING));
-            byte[] result = device.sks.signHashedData (key.key_handle, 
-                                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                                       null,
-                                                       ok_pin.getBytes ("UTF-8"), 
-                                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, 
+                                                                                         ok_pin, 
+                                                                                         enc), TEST_STRING));
+            byte[] result = key.signData (SignatureAlgorithms.RSA_SHA256, ok_pin, TEST_STRING);
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
             verify.initVerify (key.cert_path[0]);
             verify.update (TEST_STRING);
@@ -2283,13 +2213,13 @@ public class SKSTest
                                                   (short) 3 /* retry_limit*/, 
                                                   null /* puk_policy */);
         GenKey key = sess.createECKey ("Key.1",
-                                        ok_pin /* pin_value */,
-                                        pin_policy,
-                                        AppUsage.ENCRYPTION,
-                                        new String[]{SymEncryptionAlgorithms.AES192_CBC.getURI ()}).setCertificate ("CN=TEST18");
+                                       ok_pin /* pin_value */,
+                                       pin_policy,
+                                       AppUsage.ENCRYPTION,
+                                       new String[]{SymEncryptionAlgorithms.AES192_CBC.getURI ()}).setCertificate ("CN=TEST18");
         try
           {
-            sess.setSymmetricKey (key, symmetric_key);
+            key.setSymmetricKey (symmetric_key);
             sess.closeSession ();
             fail ("Wrong length");
           }
@@ -2313,9 +2243,9 @@ public class SKSTest
                                                   (short) 3 /* retry_limit*/, 
                                                   null /* puk_policy */);
         GenKey key = sess.createECKey ("Key.1",
-                                        ok_pin /* pin_value */,
-                                        pin_policy,
-                                        AppUsage.ENCRYPTION).setCertificate ("CN=TEST18");
+                                       ok_pin /* pin_value */,
+                                       pin_policy,
+                                       AppUsage.ENCRYPTION).setCertificate ("CN=TEST18");
         sess.closeSession ();
         KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
         ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
@@ -2347,14 +2277,14 @@ public class SKSTest
                                                   (short) 3 /* retry_limit*/, 
                                                   null /* puk_policy */);
         GenKey key = sess.createECKey ("Key.1",
-                                        ok_pin /* pin_value */,
-                                        pin_policy,
-                                        AppUsage.ENCRYPTION).setCertificate ("CN=TEST18");
+                                       ok_pin /* pin_value */,
+                                       pin_policy,
+                                       AppUsage.ENCRYPTION).setCertificate ("CN=TEST18");
         sess.closeSession ();
         ProvSess sess2 = new ProvSess (device);
         try
           {
-            sess2.setSymmetricKey (key, new byte[]{0,1,2,3,4,5,6,7,8,9});
+            key.setSymmetricKey (new byte[]{0,1,2,3,4,5,6,7,8,9});
             fail("Not open key");
           }
         catch (SKSException e)
@@ -2377,19 +2307,15 @@ public class SKSTest
                                                   (short) 3 /* retry_limit*/, 
                                                   null /* puk_policy */);
         GenKey key = sess.createECKey ("Key.1",
-                                        ok_pin /* pin_value */,
-                                        pin_policy,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                       ok_pin /* pin_value */,
+                                       pin_policy,
+                                       AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
         sess.closeSession ();
         lockECKey (key, ok_pin);
         ProvSess sess2 = new ProvSess (device);
         sess2.postUnlockKey (key);
         sess2.closeSession ();
-        device.sks.signHashedData (key.key_handle, 
-                                   "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                   null,
-                                   ok_pin.getBytes ("UTF-8"), 
-                                   HashAlgorithms.SHA256.digest (TEST_STRING));
+        key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
       }
 
     @Test
@@ -2408,9 +2334,9 @@ public class SKSTest
                                                       (short) 3 /* retry_limit*/, 
                                                       null /* puk_policy */);
             GenKey key = sess.createECKey ("Key.1",
-                                            ok_pin /* pin_value */,
-                                            pin_policy,
-                                            AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                           ok_pin /* pin_value */,
+                                           pin_policy,
+                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
             sess.closeSession ();
             lockECKey (key, ok_pin);
             ProvSess sess2 = new ProvSess (device);
@@ -2422,11 +2348,7 @@ public class SKSTest
             sess2.postUnlockKey (key);
             if (i == 1) sess2.postUpdateKey (new_key, key);
             sess2.closeSession ();
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                       null,
-                                       ok_pin.getBytes ("UTF-8"), 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             assertFalse ("taken", new_key.exists ());
           }
       }
@@ -2447,9 +2369,9 @@ public class SKSTest
                                                       (short) 3 /* retry_limit*/, 
                                                       null /* puk_policy */);
             GenKey key = sess.createECKey ("Key.1",
-                                            ok_pin /* pin_value */,
-                                            pin_policy,
-                                            AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                           ok_pin /* pin_value */,
+                                           pin_policy,
+                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
             sess.closeSession ();
             lockECKey (key, ok_pin);
             ProvSess sess2 = new ProvSess (device);
@@ -2461,16 +2383,8 @@ public class SKSTest
             sess2.postUnlockKey (key);
             if (i == 1) sess2.postCloneKey (new_key, key);
             sess2.closeSession ();
-            device.sks.signHashedData (new_key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                       null,
-                                       ok_pin.getBytes ("UTF-8"), 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                       null,
-                                       ok_pin.getBytes ("UTF-8"), 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            new_key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
+            key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
           }
       }
   }

@@ -33,6 +33,7 @@ import org.webpki.xml.ServerCookie;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSymKeyVerifier;
 
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SymKeyVerifierInterface;
 
@@ -92,6 +93,12 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
       }
     
 
+    public byte[] getServerCertificateFingerprint ()
+      {
+        return server_certificate_fingerprint;
+      }
+    
+
     class XMLSignVer implements SymKeyVerifierInterface
       {
         ServerCryptoInterface server_crypto_interface;
@@ -110,7 +117,8 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
 
 
     public void verifyAndGenerateSessionKey (ServerCryptoInterface server_crypto_interface,
-                                             ProvisioningInitializationRequestEncoder prov_sess_request) throws IOException
+                                             ProvisioningInitializationRequestEncoder prov_sess_request,
+                                             X509Certificate server_certificate) throws IOException
       {
         try
           {
@@ -130,10 +138,15 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
             session_key_mac_data.addShort (prov_sess_request.session_key_limit);
 
             server_crypto_interface.generateAndVerifySessionKey (client_ephemeral_key,
-                                                                kdf.getResult (),
-                                                                session_key_mac_data.getResult (),
-                                                                device_certificate_path[0],
-                                                                attestation);
+                                                                 kdf.getResult (),
+                                                                 session_key_mac_data.getResult (),
+                                                                 device_certificate_path[0],
+                                                                 attestation);
+            if (((server_certificate == null ^ server_certificate_fingerprint == null)) ||
+                (server_certificate != null && !ArrayUtil.compare (server_certificate_fingerprint, HashAlgorithms.SHA256.digest (server_certificate.getEncoded ()))))
+              {
+                throw new IOException ("Attribute '" + SERVER_CERT_FP_ATTR + "' is missing or is invalid");
+              }
           }
         catch (GeneralSecurityException e)
           {
@@ -150,7 +163,6 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
         /////////////////////////////////////////////////////////////////////////////////////////
         // Read the top level attributes
         /////////////////////////////////////////////////////////////////////////////////////////
-
         client_session_id = ah.getString (ID_ATTR);
 
         server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
@@ -160,6 +172,8 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
         client_time = ah.getDateTime (CLIENT_TIME_ATTR).getTime ();
 
         attestation = ah.getBinary (ATTESTATION_ATTR);
+        
+        server_certificate_fingerprint = ah.getBinaryConditional (SERVER_CERT_FP_ATTR);
         
         rd.getChild ();
 
@@ -192,5 +206,4 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
         /////////////////////////////////////////////////////////////////////////////////////////
         signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
       }
-
   }

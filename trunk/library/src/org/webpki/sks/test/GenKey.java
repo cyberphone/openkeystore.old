@@ -16,7 +16,10 @@
  */
 package org.webpki.sks.test;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
@@ -34,14 +37,19 @@ import org.webpki.asn1.cert.DistinguishedName;
 import org.webpki.ca.CA;
 import org.webpki.ca.CertSpec;
 
+import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
+import org.webpki.sks.SecureKeyStore;
 import org.webpki.sks.test.ProvSess.MacGenerator;
+import org.webpki.util.ArrayUtil;
 
 public class GenKey
   {
@@ -102,6 +110,14 @@ public class GenKey
         return this;
       }
     
+    void setSymmetricKey (byte[] symmetric_key) throws IOException, GeneralSecurityException
+      {
+        MacGenerator symk_mac = getEECertMacBuilder ();
+        byte[] encrypted_symmetric_key = prov_sess.server_sess_key.encrypt (symmetric_key);
+        symk_mac.addArray (encrypted_symmetric_key);
+        prov_sess.sks.setSymmetricKey (key_handle, encrypted_symmetric_key, prov_sess.mac4call (symk_mac.getResult (), SecureKeyStore.METHOD_SET_SYMMETRIC_KEY));
+      }
+
     public byte[] getPostProvMac (MacGenerator upd_mac, ProvSess current) throws IOException, GeneralSecurityException
       {
         Integer kmk_id = prov_sess.kmk_id;
@@ -158,5 +174,33 @@ public class GenKey
       {
         prov_sess.sks.changePIN (key_handle, old_pin.getBytes ("UTF-8"), new_pin.getBytes ("UTF-8"));
       }
-        
+    
+    public byte[] signData (SignatureAlgorithms sig_alg, String pin, byte[] data) throws IOException
+      {
+        return prov_sess.sks.signHashedData (key_handle,
+                                             sig_alg.getURI (),
+                                             null,
+                                             pin == null ? null : pin.getBytes ("UTF-8"),
+                                             sig_alg.getDigestAlgorithm ().digest (data));
+      }
+
+    public byte[] asymmetricKeyDecrypt (AsymEncryptionAlgorithms crypt_alg, String pin, byte[] data) throws IOException
+      {
+        return prov_sess.sks.asymmetricKeyDecrypt (key_handle,
+                                                   crypt_alg.getURI (), 
+                                                   null,
+                                                   pin == null ? null : pin.getBytes ("UTF-8"), 
+                                                   data);
+      }
+
+    public byte[] symmetricKeyEncrypt (SymEncryptionAlgorithms crypt_alg, boolean mode, byte[] iv, String pin, byte[] data) throws IOException
+      {
+        return prov_sess.sks.symmetricKeyEncrypt (key_handle,
+                                                  crypt_alg.getURI (),
+                                                  mode,
+                                                  iv,
+                                                  pin == null ? null : pin.getBytes ("UTF-8"),
+                                                  data);
+      }
+
   }

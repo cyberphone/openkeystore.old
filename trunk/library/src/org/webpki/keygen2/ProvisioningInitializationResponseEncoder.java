@@ -20,6 +20,8 @@ import java.io.IOException;
 
 import java.util.Date;
 
+import java.security.GeneralSecurityException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 
@@ -30,6 +32,7 @@ import org.webpki.xml.ServerCookie;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSymKeySigner;
 
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -65,8 +68,20 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
         return super.server_cookie = server_cookie;
       }
 
+    
+    public void setServerCertificate (X509Certificate server_certificate) throws IOException
+      {
+        try
+          {
+            server_certificate_fingerprint = HashAlgorithms.SHA256.digest (server_certificate.getEncoded ());
+          }
+        catch (GeneralSecurityException gse)
+          {
+            throw new IOException (gse);
+          }
+      }
 
-
+    
     public void setPrefix (String prefix)
       {
         this.prefix = prefix;
@@ -102,6 +117,11 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
         wr.setDateTimeAttribute (CLIENT_TIME_ATTR, client_time);
         
         wr.setBinaryAttribute (ATTESTATION_ATTR, attestation);
+        
+        if (server_certificate_fingerprint != null)
+          {
+            wr.setBinaryAttribute (SERVER_CERT_FP_ATTR, server_certificate_fingerprint);
+          }
 
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key

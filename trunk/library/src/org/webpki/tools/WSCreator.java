@@ -16,19 +16,17 @@
  */
 package org.webpki.tools;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.TreeSet;
 import java.util.Vector;
 
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.IOException;
+
+import javax.xml.bind.annotation.XmlElement;
 
 import org.webpki.util.ArrayUtil;
 
@@ -38,7 +36,7 @@ import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.XMLSchemaCache;
 
-/*
+/**
  * From an XML description file create Web Services artifacts.
  * @author Anders Rundgren
  */
@@ -46,9 +44,10 @@ public class WSCreator extends XMLObjectWrapper
   {
     private static final String JCLIENT = "jclient";
     private static final String JSERVER = "jserver";
-    private static final String JCOMMON = "jcommon";
     private static final String WSDL = "wsdl";
     private static final String DOTNETCLIENT = "dotnetclient";
+    
+    private static final String VERSION = "1.0";
     
     private static boolean jclient;
     private static boolean jserver;
@@ -60,11 +59,13 @@ public class WSCreator extends XMLObjectWrapper
     
     private FileOutputStream wsdl_file;
     
+    private String license_header = "";
     
     abstract class Package
     {
       FileOutputStream jfile;
       String class_name;
+      String class_header = "";
       String package_name;
       String path;
       boolean next;
@@ -75,8 +76,10 @@ public class WSCreator extends XMLObjectWrapper
       
       abstract String class_interface ();
       
-      Package ()
+      Package (DOMReaderHelper rd, String elem)
       {
+        rd.getNext (elem);
+        schema_validation = attr.getBooleanConditional ("SchemaValidation");
         String canonicalized_class_name = attr.getString ("ClassName");
         class_name = canonicalized_class_name;
         path = output_directory;
@@ -91,15 +94,56 @@ public class WSCreator extends XMLObjectWrapper
                 path += canonicalized_class_name.charAt (j) == '.' ? File.separatorChar : canonicalized_class_name.charAt (j);  
               }
           }
+        rd.getChild ();
+        if (rd.hasNext ())
+          {
+            class_header = rd.getString ("ClassHeader");
+          }
+        rd.getParent ();
+      }
+
+      void genSlashes (String gen) throws IOException 
+        {
+          for (int i = 0; i < gen.length (); i++)
+            {
+              write (jfile, "/");
+            }
+          write (jfile, "\n");
+        }
+      public void writePackage () throws IOException
+      {
+        write (jfile, license_header);
+        if (package_name != null)
+          {
+            writeln (jfile, "package " + package_name + ";");
+          }
+        String gen = "// Created by " + WSCreator.class.getSimpleName () + " " + VERSION + " - Do not edit! //";
+        write (jfile, "\n");
+        genSlashes (gen);
+        writeln (jfile, gen);
+        genSlashes (gen);
+      }
+      public void writeImports () throws IOException
+      {
+        String last_import_pack ="";
+        for (String impstr : jimports)
+          {
+            int i = impstr.lastIndexOf ('.');
+            if (!last_import_pack.equals (impstr.substring (0, i)))
+              {
+                write (jfile, "\n");
+                last_import_pack = impstr.substring (0, i);
+              }
+            writeln (jfile, "import " + impstr + ";");
+          }
       }
     }
     
     class ServerPack extends Package
     {
-      ServerPack ()
+      ServerPack (DOMReaderHelper rd)
       {
-        super ();
-        schema_validation = attr.getBoolean ("SchemaValidation");
+        super (rd, "JavaServer");
       }
       String decoration ()
         {
@@ -117,6 +161,11 @@ public class WSCreator extends XMLObjectWrapper
     }
     class ClientPack extends Package
     {
+      ClientPack (DOMReaderHelper rd)
+        {
+          super (rd, "JavaClient");
+        }
+
       String decoration ()
         {
           return "";
@@ -125,6 +174,13 @@ public class WSCreator extends XMLObjectWrapper
       String class_interface ()
         {
           return "interface";
+        }
+
+      public void openAddedClass (String class_name) throws IOException
+        {
+          jimports.clear ();
+          jfile = new FileOutputStream (path + File.separatorChar + class_name + ".java");
+          writePackage ();
         }
 
     }
@@ -223,6 +279,8 @@ public class WSCreator extends XMLObjectWrapper
 
     class WSException extends Container
       {
+        String class_name;
+        
         String getName ()
           {
             return jclient ? name + "_Exception" : name;
@@ -286,11 +344,14 @@ public class WSCreator extends XMLObjectWrapper
         addImport("javax.xml.ws.RequestWrapper");
         addImport("javax.xml.ws.ResponseWrapper");
 
+        if (rd.hasNext ("LicenseHeader"))
+          {
+            license_header = rd.getString ("LicenseHeader");
+          }
 
         if (rd.hasNext ("JavaServer"))
           {
-            rd.getNext ("JavaServer");
-            jserver_pck = new ServerPack ();
+            jserver_pck = new ServerPack (rd);
             if (jserver)
               {
                 open (jserver_pck, true);
@@ -320,8 +381,7 @@ public class WSCreator extends XMLObjectWrapper
           }
         if (rd.hasNext ("JavaClient"))
           {
-            rd.getNext ("JavaClient");
-            jclient_pck = new ClientPack ();
+            jclient_pck = new ClientPack (rd);
             if (jclient)
               {
                 open (jclient_pck, true);
@@ -335,7 +395,16 @@ public class WSCreator extends XMLObjectWrapper
           {
             rd.getNext ("Exception");
             WSException exception = new WSException ();
-            exception.name = attr.getString ("Name");
+            exception.name = exception.class_name = attr.getString ("ClassName");
+            if (jserver)
+              {
+                addImport (exception.name);
+              }
+            int i = exception.name.lastIndexOf ('.');
+            if (i++ > 0)
+              {
+                exception.name = exception.name.substring (i);
+              }
             exception.xml_name = attr.getStringConditional ("XMLName");
             rd.getChild ();
             exception.properties = getProperties (rd, "Property");
@@ -484,20 +553,6 @@ public class WSCreator extends XMLObjectWrapper
                         "        </wsdl:fault>\n");
                   }
                 write (wsdl_file, "      </wsdl:operation>\n");
-            /*
-    <wsdl:operation name="getVersion">
-      <soap:operation soapAction=""/>
-      <wsdl:input>
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="SKSException">
-        <soap:fault name="SKSException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-             */
           }
 
         write (wsdl_file, "\n    </wsdl:binding>\n\n" +
@@ -514,15 +569,111 @@ public class WSCreator extends XMLObjectWrapper
           {
             for (WSException wse : exceptions.values ())
               {
-                FileOutputStream fis = new FileOutputStream (jclient_pck.path + File.separatorChar + wse.getBeanName () + ".java");
-                fis.write ("crap".getBytes ("UTF-8"));
-                fis.close ();
-                fis = new FileOutputStream (jclient_pck.path + File.separatorChar + wse.getName () + ".java");
-                fis.write ("bcrap".getBytes ("UTF-8"));
-                fis.close ();
+                jclient_pck.openAddedClass (wse.getBeanName ());
+                addImport ("javax.xml.bind.annotation.XmlAccessType");
+                addImport ("javax.xml.bind.annotation.XmlAccessorType");
+                addImport ("javax.xml.bind.annotation.XmlElement");
+                addImport ("javax.xml.bind.annotation.XmlType");
+                for (Property prop : wse.properties)
+                  {
+                    if (prop.listtype)
+                      {
+                        addImport ("java.util.List");
+                      }
+                  }
+                jclient_pck.writeImports ();
+                write (jclient_pck.jfile, "\n" +
+                    "@XmlAccessorType(XmlAccessType.NONE)\n" +
+                    "@XmlType(propOrder={");
+                boolean next = false;
+                for (Property prop : wse.properties)
+                  {
+                    if (next)
+                      {
+                        write (jclient_pck.jfile, ",\n                    ");
+                      }
+                    else
+                      {
+                        next = true;
+                      }
+                    write (jclient_pck.jfile, "\"" + prop.name + "\"");
+                  }
+                writeln (jclient_pck.jfile, "})\npublic class " +
+                    wse.getBeanName () + "\n  {");
+                next = false;
+                for (Property prop : wse.properties)
+                  {
+                    if (next) write (jclient_pck.jfile, "\n");
+                    next = true;
+                    writeln (jclient_pck.jfile, "    @XmlElement(required=" + (!prop.nullable) + ", name=\"" +
+                                              prop.getXMLName () + "\")\n    " +
+                                              prop.jName (false) + " " + prop.name + ";");
+                  }
+                for (Property prop : wse.properties)
+                  {
+                    if (next) write (jclient_pck.jfile, "\n");
+                    next = true;
+                    String methn = prop.name;
+                    writeln (jclient_pck.jfile, "    public " +
+                        prop.jName (false) + " get" +
+                        methn.substring (0,1).toUpperCase () + methn.substring (1) +
+                        " ()\n      {\n        return " + prop.name + ";\n      }"); 
+                  }
+                writeln (jclient_pck.jfile, "  }");
+                close (jclient_pck);
+                jclient_pck.openAddedClass (wse.getName ());
+                addImport ("javax.xml.ws.WebFault");
+                jclient_pck.writeImports ();
+                write (jclient_pck.jfile, "\n" +
+          "@SuppressWarnings(\"serial\")\n" +
+          "@WebFault(name=\"" + wse.getXMLName () + "\",\n" +
+          "          targetNamespace=\"" + tns + "\")\n" +
+          "public class " + wse.getName () + " extends Exception\n" +
+          "  {\n" +
+          "    /**\n" +
+          "     * Java type that goes as soapenv:Fault detail element.\n" +
+          "     */\n" +
+          "    private " + wse.getBeanName () + " faultInfo;\n" +
+          "\n"+
+          "    /**\n" +
+          "     * @param message\n" +
+          "     * @param faultInfo\n" +
+          "     */\n" +
+          "    public " + wse.getName () + " (String message, " + wse.getBeanName () + " faultInfo)\n"+
+          "      {\n" +
+          "         super (message);\n" +
+          "         this.faultInfo = faultInfo;\n" +
+          "      }\n" +
+          "\n" +
+          "    /**\n" +
+          "     * @param message\n" +
+          "     * @param faultInfo\n" +
+          "     * @param cause\n" +
+          "     */\n" +
+          "    public " + wse.getName () + " (String message, " + wse.getBeanName () + " faultInfo, Throwable cause)\n" +
+          "      {\n" +
+          "        super (message, cause);\n" +
+          "        this.faultInfo = faultInfo;\n" +
+          "      }\n" +
+          "\n" +
+          "    /**\n" +
+          "     * @return fault bean: " + wse.name + "\n" +
+          "     */\n" +
+          "    public " + wse.getBeanName () + " getFaultInfo ()\n" +
+          "      {\n" +
+          "        return faultInfo;\n" +
+          "      }\n" +
+          "  }\n");
+                
+                close (jclient_pck);
               }
           }
       }
+
+      private void close (Package pck) throws IOException
+    {
+      close (pck.jfile);
+    }
 
       private void addImport (String string)
     {
@@ -533,29 +684,20 @@ public class WSCreator extends XMLObjectWrapper
     {
       if (pck == null) return;
       FileOutputStream jfile = pck.jfile;
-      if (pck.package_name != null)
-        {
-          writeln (jfile,"package " + pck.package_name + ";");
-        }
-      String last_import_pack ="";
-      for (String impstr : jimports)
-        {
-          int i = impstr.lastIndexOf ('.');
-          if (!last_import_pack.equals (impstr.substring (0, i)))
-            {
-              write (jfile, "\n");
-              last_import_pack = impstr.substring (0, i);
-            }
-          writeln (jfile, "import " + impstr + ";");
-        }
+      pck.writePackage ();
+      pck.writeImports ();
+      write (jfile,"\n" + pck.class_header);
       if (pck.schema_validation)
         {
-          write (jfile,"\n@com.sun.xml.ws.developer.SchemaValidation");
+          write (jfile,"@com.sun.xml.ws.developer.SchemaValidation\n");
         }
-      write (jfile, "\n" +
-                      "@WebService(serviceName=\"" + service_name + "\",\n" +
-                      "            targetNamespace=\"" + tns + "\"" + pck.decoration () + ")\npublic " + pck.class_interface () + " " +
-                      pck.class_name + "\n  {\n" + pck.support_code);
+      if (pck.support_code.length () > 0)
+        {
+          pck.next = true;
+        }
+      write (jfile, "@WebService(serviceName=\"" + service_name + "\",\n" +
+                    "            targetNamespace=\"" + tns + "\"" + pck.decoration () + ")\npublic " + pck.class_interface () + " " +
+                    pck.class_name + "\n  {\n" + pck.support_code);
       }
 
       private void javaTerminate (Package pck) throws IOException
@@ -577,7 +719,7 @@ public class WSCreator extends XMLObjectWrapper
 
             }
           write (pck.jfile, "  }\n");
-        close (pck.jfile);
+        close (pck);
         }
        
     }
@@ -780,7 +922,6 @@ public class WSCreator extends XMLObjectWrapper
     {
       System.out.println (WSCreator.class.getName () + " '" + JCLIENT + "'|'" +
                                                               JSERVER + "'|'" +
-                                                              JCOMMON + "'|'" +
                                                               WSDL + "'|'" +
                                                               DOTNETCLIENT + "' input-file output-directory\n" +
                              "Note: output-directory is actually file-name for the '" + WSDL + "' option");
@@ -792,7 +933,6 @@ public class WSCreator extends XMLObjectWrapper
       if (args.length != 3) show ();
       if (args[0].equals (JCLIENT)) jclient = true;
       else if (args[0].equals (JSERVER)) jserver = true;
-      else if (args[0].equals (JCOMMON)) jcommon = true;
       else if (args[0].equals (WSDL)) wsdl_gen = true;
       else if (args[0].equals (DOTNETCLIENT)) dotnet_gen = true;
       else show ();

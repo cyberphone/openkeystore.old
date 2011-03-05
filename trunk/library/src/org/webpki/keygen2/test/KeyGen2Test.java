@@ -31,6 +31,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
 
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPrivateKey;
@@ -180,6 +181,8 @@ public class KeyGen2Test
     
     boolean encrypted_extension;
     
+    boolean https;  // Use server-cert
+    
     boolean ask_for_4096;
     
     ExportProtection export_protection;
@@ -202,7 +205,9 @@ public class KeyGen2Test
     
     static final byte[] USER_DEFINED_PIN = {'0','1','5','3','5','4'};
 
-    int round;    
+    static X509Certificate server_certificate;
+
+    int round;
    
     @BeforeClass
     public static void openFile () throws Exception
@@ -219,6 +224,7 @@ public class KeyGen2Test
           }
         Security.insertProviderAt (new BouncyCastleProvider(), 1);
         sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
+        server_certificate = (X509Certificate) CertificateFactory.getInstance ("X.509").generateCertificate (KeyGen2Test.class.getResourceAsStream ("server-certificate.der"));
       }
 
     @AfterClass
@@ -382,6 +388,10 @@ public class KeyGen2Test
                                                           client_time,
                                                           sess.getAttestation (),
                                                           device_info.getDeviceCertificatePath ());
+            if (https)
+              {
+                prov_sess_response.setServerCertificate (server_certificate);
+              }
             prov_sess_response.signRequest (new SymKeySignerInterface ()
               {
                 public MacAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
@@ -814,7 +824,9 @@ public class KeyGen2Test
             // Begin with creating the "SessionKey" that holds just about everything
             ////////////////////////////////////////////////////////////////////////////////////
             prov_sess_response = (ProvisioningInitializationResponseDecoder) xml_object;
-            prov_sess_response.verifyAndGenerateSessionKey (server_sess_key, prov_sess_request);
+            prov_sess_response.verifyAndGenerateSessionKey (server_sess_key,
+                                                            prov_sess_request,
+                                                            https ? server_certificate : null);
 
             ////////////////////////////////////////////////////////////////////////////////////
             // Here we could/should introduce an SKS identity/brand check
@@ -872,10 +884,10 @@ public class KeyGen2Test
           {
             PlatformNegotiationResponseDecoder platform_response = (PlatformNegotiationResponseDecoder) server_xml_cache.parse (xmldata);
             prov_sess_request =  new ProvisioningInitializationRequestEncoder (server_sess_key.generateEphemeralKey (),
-                                                                        server_session_id,
-                                                                        ISSUER_URI,
-                                                                        10000,
-                                                                        (short)50);
+                                                                               server_session_id,
+                                                                               ISSUER_URI,
+                                                                               10000,
+                                                                               (short)50);
             if (updatable)
               {
                 prov_sess_request.setKeyManagementKey(server_km = server_sess_key.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
@@ -1258,6 +1270,7 @@ public class KeyGen2Test
             writeOption ("DeleteKey", delete_key != null);
             writeOption ("UnlockKey", plain_unlock_key != null);
             writeOption ("ECC KMK", ecc_kmk);
+            writeOption ("HTTPS server certificate", https);
             server = new Server ();
             client = new Client ();
             byte[] xml;
@@ -1294,14 +1307,14 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test1 () throws Exception
+    public void CryptoPreferences () throws Exception
       {
         ask_for_4096 = true;
         new Doer ().perform ();
       }
 
     @Test
-    public void test2 () throws Exception
+    public void ImagePreferences () throws Exception
       {
         Doer doer = new Doer ();
         image_prefs = true;
@@ -1310,28 +1323,37 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test3 () throws Exception
+    public void PINPatterns () throws Exception
       {
         Doer doer = new Doer ();
         pin_protection = true;
         add_pin_pattern = true;
         ecc_key = true;
+        https = true;
         doer.perform ();
       }
 
     @Test
-    public void test4 () throws Exception
+    public void ServerCertificate () throws Exception
       {
         Doer doer = new Doer ();
         pin_protection = true;
-        private_key_backup = true;
         ecc_key = true;
+        https = true;
+        doer.perform ();
+      }
+
+    @Test
+    public void ServerSeed () throws Exception
+      {
+        Doer doer = new Doer ();
+        pin_protection = true;
         server_seed = true;
         doer.perform ();
       }
 
     @Test
-    public void test5 () throws Exception
+    public void PrivateKeyBackup () throws Exception
       {
         Doer doer = new Doer ();
         pin_protection = true;
@@ -1340,7 +1362,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test6 () throws Exception
+    public void EncryptedExtension () throws Exception
       {
         Doer doer = new Doer ();
         pin_protection = true;
@@ -1352,7 +1374,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test7 () throws Exception
+    public void InputMethod () throws Exception
       {
         Doer doer = new Doer ();
         pin_protection = true;
@@ -1362,7 +1384,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test8 () throws Exception
+    public void PropertyBag () throws Exception
       {
         Doer doer = new Doer ();
         pin_protection = true;
@@ -1412,7 +1434,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test9 () throws Exception
+    public void SymmetricEncryptionKey () throws Exception
       {
         Doer doer = new Doer ();
         pin_protection = true;
@@ -1446,7 +1468,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test10 () throws Exception
+    public void DevicePIN () throws Exception
       {
         Doer doer = new Doer ();
         device_pin_protection = true;
@@ -1454,7 +1476,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test11 () throws Exception
+    public void PresetPIN () throws Exception
       {
         Doer doer = new Doer ();
         pin_protection = true;
@@ -1463,7 +1485,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test12 () throws Exception
+    public void CloneKeyProtection () throws Exception
       {
         Doer doer1 = new Doer ();
         updatable = true;
@@ -1501,7 +1523,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test13 () throws Exception
+    public void UpdateKey () throws Exception
       {
         Doer doer1 = new Doer ();
         updatable = true;
@@ -1538,7 +1560,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test14 () throws Exception
+    public void DeleteKey () throws Exception
       {
         Doer doer1 = new Doer ();
         updatable = true;
@@ -1560,7 +1582,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test15 () throws Exception
+    public void SetPrivateKey () throws Exception
       {
         Doer doer = new Doer ();
         set_private_key = true;
@@ -1589,7 +1611,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test16 () throws Exception
+    public void ExportProtection () throws Exception
       {
         for (ExportProtection exp_pol : ExportProtection.values ())
           {
@@ -1609,7 +1631,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test17 () throws Exception
+    public void DeleteProtection () throws Exception
       {
         for (DeleteProtection del_pol : DeleteProtection.values ())
           {
@@ -1629,7 +1651,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void test18 () throws Exception
+    public void KeyAgreement () throws Exception
       {
         Doer doer = new Doer ();
         pin_protection = true;
@@ -1637,8 +1659,9 @@ public class KeyGen2Test
         key_agreement = true;
         doer.perform ();
       }
+
     @Test
-    public void test19 () throws Exception
+    public void UnlockKey () throws Exception
       {
         Doer doer1 = new Doer ();
         updatable = true;

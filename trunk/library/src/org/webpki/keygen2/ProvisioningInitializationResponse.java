@@ -52,6 +52,8 @@ abstract class ProvisioningInitializationResponse extends XMLObjectWrapper
     ServerCookie server_cookie;
     
     X509Certificate[] device_certificate_path;
+    
+    byte[] server_certificate_fingerprint;  // Optional
 
     public void init () throws IOException
       {

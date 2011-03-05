@@ -28,32 +28,24 @@ import javax.xml.bind.annotation.XmlType;
  * 
  * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlType(propOrder = {
     "error",
     "message"
 })
-@XmlRootElement(name = "SKSException")
 public class SKSExceptionBean {
-
-    protected int error;
-    @XmlElement(required = true)
-    protected String message;
+  
+  @XmlElement(required = true, name="error")
+    int error;
+  @XmlElement(required = true, name="message")
+    String message;
 
     /**
      * Gets the value of the error property.
      * 
      */
-    public int getError() {
+   public int getErrors() {
         return error;
-    }
-
-    /**
-     * Sets the value of the error property.
-     * 
-     */
-    public void setError(int value) {
-        this.error = value;
     }
 
     /**
@@ -67,17 +59,4 @@ public class SKSExceptionBean {
     public String getMessage() {
         return message;
     }
-
-    /**
-     * Sets the value of the message property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setMessage(String value) {
-        this.message = value;
-    }
-
 }

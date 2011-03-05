@@ -736,16 +736,6 @@ public class ProvSess
                                 mac4call (set_certificate.getResult (), SecureKeyStore.METHOD_SET_CERTIFICATE_PATH));
       }
     
-    void setSymmetricKey (GenKey key, byte[] symmetric_key) throws IOException, GeneralSecurityException
-      {
-        MacGenerator symk_mac = key.getEECertMacBuilder ();
-        byte[] encrypted_symmetric_key = server_sess_key.encrypt (symmetric_key);
-        symk_mac.addArray (encrypted_symmetric_key);
-        sks.setSymmetricKey (key.key_handle,
-                             encrypted_symmetric_key,
-                             mac4call (symk_mac.getResult (), SecureKeyStore.METHOD_SET_SYMMETRIC_KEY));
-      }
-
     public void restorePrivateKey (GenKey key, PrivateKey private_key) throws IOException, GeneralSecurityException
       {
         MacGenerator privk_mac = key.getEECertMacBuilder ();
@@ -801,6 +791,11 @@ public class ProvSess
               }
           }
         return false;
+      }
+
+    protected void finalize() throws Throwable
+      {
+        abortSession ();
       }
 
   }
