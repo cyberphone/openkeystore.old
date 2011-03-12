@@ -16,16 +16,15 @@
  */
 package org.webpki.sks.test;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
@@ -39,17 +38,18 @@ import org.webpki.ca.CertSpec;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
-import org.webpki.crypto.HashAlgorithms;
+import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
+
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
+
 import org.webpki.sks.test.ProvSess.MacGenerator;
-import org.webpki.util.ArrayUtil;
 
 public class GenKey
   {
@@ -175,32 +175,60 @@ public class GenKey
         prov_sess.sks.changePIN (key_handle, old_pin.getBytes ("UTF-8"), new_pin.getBytes ("UTF-8"));
       }
     
-    public byte[] signData (SignatureAlgorithms sig_alg, String pin, byte[] data) throws IOException
+    public byte[] signData (SignatureAlgorithms alg_id, String pin, byte[] data) throws IOException
       {
         return prov_sess.sks.signHashedData (key_handle,
-                                             sig_alg.getURI (),
+                                             alg_id.getURI (),
                                              null,
                                              pin == null ? null : pin.getBytes ("UTF-8"),
-                                             sig_alg.getDigestAlgorithm ().digest (data));
+                                             alg_id.getDigestAlgorithm ().digest (data));
       }
 
-    public byte[] asymmetricKeyDecrypt (AsymEncryptionAlgorithms crypt_alg, String pin, byte[] data) throws IOException
+    public byte[] asymmetricKeyDecrypt (AsymEncryptionAlgorithms alg_id, String pin, byte[] data) throws IOException
       {
         return prov_sess.sks.asymmetricKeyDecrypt (key_handle,
-                                                   crypt_alg.getURI (), 
+                                                   alg_id.getURI (), 
                                                    null,
                                                    pin == null ? null : pin.getBytes ("UTF-8"), 
                                                    data);
       }
 
-    public byte[] symmetricKeyEncrypt (SymEncryptionAlgorithms crypt_alg, boolean mode, byte[] iv, String pin, byte[] data) throws IOException
+    public byte[] symmetricKeyEncrypt (SymEncryptionAlgorithms alg_id, boolean mode, byte[] iv, String pin, byte[] data) throws IOException
       {
         return prov_sess.sks.symmetricKeyEncrypt (key_handle,
-                                                  crypt_alg.getURI (),
+                                                  alg_id.getURI (),
                                                   mode,
                                                   iv,
                                                   pin == null ? null : pin.getBytes ("UTF-8"),
                                                   data);
+      }
+
+    public byte[] performHMAC (MacAlgorithms alg_id, String pin, byte[] data) throws IOException
+      {
+        return prov_sess.sks.performHMAC (key_handle,
+                                          alg_id.getURI (),
+                                          pin == null ? null : pin.getBytes ("UTF-8"),
+                                          data);
+      }
+
+    public void postUpdateKey (GenKey target_key) throws IOException, GeneralSecurityException
+      {
+        MacGenerator upd_mac = getEECertMacBuilder ();
+        byte[] authorization = target_key.getPostProvMac (upd_mac, prov_sess);
+        prov_sess.sks.pp_updateKey (key_handle, 
+                                    target_key.key_handle,
+                                    authorization,
+                                    prov_sess.mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_UPDATE_KEY));
+      }
+  
+    public void postCloneKey (GenKey target_key) throws IOException, GeneralSecurityException
+      {
+        MacGenerator upd_mac = getEECertMacBuilder ();
+        byte[] authorization = target_key.getPostProvMac (upd_mac, prov_sess);
+        prov_sess.sks.pp_cloneKeyProtection (key_handle, 
+                                             target_key.key_handle,
+                                             authorization,
+                                             prov_sess.mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_CLONE_KEY_PROTECTION));
       }
 
   }

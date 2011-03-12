@@ -400,19 +400,19 @@ public class ProvSess
      }
     
     public ProvSess (Device device) throws GeneralSecurityException, IOException
-    {
-      this (device, (short)50, null);
-    }
+      {
+        this (device, (short) 50, null);
+      }
 
     public ProvSess (Device device, short session_key_limit) throws GeneralSecurityException, IOException
-    {
-      this (device, session_key_limit, null);
-    }
+      {
+        this (device, session_key_limit, null);
+      }
 
     public ProvSess (Device device, Integer kmk_id) throws GeneralSecurityException, IOException
-    {
-      this (device, (short)50, kmk_id);
-    }
+      {
+        this (device, (short) 50, kmk_id);
+      }
 
     public void closeSession () throws IOException, GeneralSecurityException
       {
@@ -758,26 +758,6 @@ public class ProvSess
         MacGenerator upd_mac = new MacGenerator ();
         byte[] authorization = key.getPostProvMac (upd_mac, this);
         sks.pp_unlockKey (provisioning_handle, key.key_handle, authorization, mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_UNLOCK_KEY));
-      }
-  
-    public void postUpdateKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
-      {
-        MacGenerator upd_mac = new_key.getEECertMacBuilder ();
-        byte[] authorization = old_key.getPostProvMac (upd_mac, this);
-        sks.pp_updateKey (new_key.key_handle, 
-                          old_key.key_handle,
-                          authorization,
-                          mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_UPDATE_KEY));
-      }
-    
-    public void postCloneKey (GenKey new_key, GenKey old_key) throws IOException, GeneralSecurityException
-      {
-        MacGenerator upd_mac = new_key.getEECertMacBuilder ();
-        byte[] authorization = old_key.getPostProvMac (upd_mac, this);
-        sks.pp_cloneKeyProtection (new_key.key_handle, 
-                                   old_key.key_handle,
-                                   authorization,
-                                   mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_CLONE_KEY_PROTECTION));
       }
   
     public boolean exists () throws SKSException

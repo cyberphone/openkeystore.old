@@ -4,6 +4,7 @@
             Service="SKSWS"
             DefaultURL="http://localhost:8080/securekeystore"
             WSDLLocation="META-INF/SKSWS.wsdl"
+            Qualified="false"
             xmlns="http://xmlns.webpki.org/wscreator.1.00">
 
    <LicenseHeader><![CDATA[/*

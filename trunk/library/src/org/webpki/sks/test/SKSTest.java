@@ -108,7 +108,7 @@ public class SKSTest
                                          AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
         if (post)
           {
-            sess2.postUpdateKey (key3, key1);
+            key3.postUpdateKey (key1);
           }
         else
           {
@@ -122,7 +122,7 @@ public class SKSTest
               }
             else
               {
-                sess2.postUpdateKey (key3, key1);
+                key3.postUpdateKey (key1);
               }
             sess2.closeSession ();
             fail ("Multiple updates using the same key");
@@ -192,9 +192,9 @@ public class SKSTest
                                           null /* pin_value */,
                                           null /* pin_policy */,
                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
-        if (order) sess2.postCloneKey (key3, key1);
-        sess2.postUpdateKey (key2, key1);
-        if (!order) sess2.postCloneKey (key3, key1);
+        if (order) key3.postCloneKey (key1);
+        key2.postUpdateKey (key1);
+        if (!order) key3.postCloneKey (key1);
         sess2.closeSession ();
         assertTrue ("Old key should exist after update", key1.exists ());
         assertFalse ("New key should NOT exist after update", key2.exists ());
@@ -336,115 +336,41 @@ public class SKSTest
                                         AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
     
+        for (int count = 0; count < 2; count++)
+          {
+            try
+              {
+                key.signData (SignatureAlgorithms.RSA_SHA256, ok_pin + "2", TEST_STRING);
+                fail ("Bad PIN should not work");
+              }
+            catch (SKSException e)
+              {
+                authorizationErrorCheck (e);
+              }
+          }
         try
           {
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       new byte[0], 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
-            fail ("Bad PIN should not work");
-          }
-        catch (SKSException e)
-          {
-            authorizationErrorCheck (e);
-          }
-        try
-          {
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       ok_pin.getBytes ("UTF-8"), 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            key.signData (SignatureAlgorithms.RSA_SHA256, ok_pin, TEST_STRING);
           }
         catch (SKSException e)
           {
             fail ("Good PIN should work");
           }
-        try
+        for (int count = 0; count < 3; count++)
           {
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       new byte[0], 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
-            fail ("Bad PIN should not work");
-          }
-        catch (SKSException e)
-          {
-            authorizationErrorCheck (e);
-          }
-        try
-          {
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       new byte[0], 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
-            fail ("Bad PIN should not work");
-          }
-        catch (SKSException e)
-          {
-            authorizationErrorCheck (e);
+            try
+              {
+                key.signData (SignatureAlgorithms.RSA_SHA256, ok_pin + "2", TEST_STRING);
+                fail ("Bad PIN should not work");
+              }
+            catch (SKSException e)
+              {
+                authorizationErrorCheck (e);
+              }
           }
         try
           {
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       ok_pin.getBytes ("UTF-8"), 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
-          }
-        catch (SKSException e)
-          {
-            fail ("Good PIN should work");
-          }
-        try
-          {
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       new byte[0], 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
-            fail ("Bad PIN should not work");
-          }
-        catch (SKSException e)
-          {
-            authorizationErrorCheck (e);
-          }
-        try
-          {
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       new byte[0], 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
-            fail ("Bad PIN should not work");
-          }
-        catch (SKSException e)
-          {
-            authorizationErrorCheck (e);
-          }
-        try
-          {
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       new byte[0], 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
-            fail ("Bad PIN should not work");
-          }
-        catch (SKSException e)
-          {
-            authorizationErrorCheck (e);
-          }
-        try
-          {
-            device.sks.signHashedData (key.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       ok_pin.getBytes ("UTF-8"), 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            key.signData (SignatureAlgorithms.RSA_SHA256, ok_pin, TEST_STRING);
             fail ("Good PIN but too many errors should NOT work");
           }
         catch (SKSException e)
@@ -1046,7 +972,7 @@ public class SKSTest
                                          null /* pin_value */,
                                          null /* pin_policy */,
                                          AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
-        sess2.postUpdateKey (key2, key1);
+        key2.postUpdateKey (key1);
         sess2.closeSession ();
         assertTrue ("Key should exist even after update", key1.exists ());
         assertFalse ("Key has been used and should be removed", key2.exists ());
@@ -1076,7 +1002,7 @@ public class SKSTest
                                          null /* pin_value */,
                                          null /* pin_policy */,
                                          AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
-        sess2.postUpdateKey (key2, key1);
+        key2.postUpdateKey (key1);
         sess2.closeSession ();
         assertTrue ("Key should exist even after update", key1.exists ());
         assertFalse ("Key has been used and should be removed", key2.exists ());
@@ -1084,11 +1010,7 @@ public class SKSTest
         assertFalse ("Managed sessions MUST be deleted", sess.exists ());
         try
           {
-            device.sks.signHashedData (key1.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                       null,
-                                       new byte[0], 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            key1.signData (SignatureAlgorithms.ECDSA_SHA256, "bad", TEST_STRING);
             fail ("Bad PIN should not work");
           }
         catch (SKSException e)
@@ -1097,11 +1019,7 @@ public class SKSTest
           }
         try
           {
-            byte[] result = device.sks.signHashedData (key1.key_handle, 
-                                                       "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                                       null,
-                                                       ok_pin.getBytes ("UTF-8"), 
-                                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            byte[] result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
             verify.initVerify (key2.cert_path[0]);
             verify.update (TEST_STRING);
@@ -1137,7 +1055,7 @@ public class SKSTest
                                          AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
         try
           {
-            sess2.postUpdateKey (key2, key1);
+            key2.postUpdateKey (key1);
             fail ("No PINs on update keys please");
           }
         catch (SKSException e)
@@ -1165,10 +1083,10 @@ public class SKSTest
                                          null /* pin_value */,
                                          null /* pin_policy */,
                                          AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
-        sess2.postUpdateKey (key2, key1);
+        key2.postUpdateKey (key1);
         try
           {
-            sess2.postUpdateKey (key3, key1);
+            key3.postUpdateKey (key1);
             fail ("Multiple updates of the same key");
           }
         catch (SKSException e)
@@ -1196,10 +1114,10 @@ public class SKSTest
                                          null /* pin_value */,
                                          null /* pin_policy */,
                                          AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
-        sess2.postUpdateKey (key3, key1);
+        key3.postUpdateKey (key1);
         try
           {
-            sess2.postUpdateKey (key3, key2);
+            key3.postUpdateKey (key2);
             fail ("Multiple updates using the same key");
           }
         catch (SKSException e)
@@ -1233,7 +1151,7 @@ public class SKSTest
                                           null /* pin_value */,
                                           null /* pin_policy */,
                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
-        sess2.postCloneKey (key2, key1);
+        key2.postCloneKey (key1);
         sess2.closeSession ();
         assertTrue ("Old key should exist after clone", key1.exists ());
         assertTrue ("New key should exist after clone", key2.exists ());
@@ -1296,7 +1214,7 @@ public class SKSTest
                                           null /* pin_value */,
                                           null /* pin_policy */,
                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
-        sess2.postCloneKey (key3, key1);
+        key3.postCloneKey (key1);
         sess2.closeSession ();
         assertTrue ("Old key should exist after clone", key1.exists ());
         assertTrue ("New key should exist after clone", key2.exists ());
@@ -1848,7 +1766,7 @@ public class SKSTest
         key.setSymmetricKey (symmetric_key);
         sess.closeSession ();
         assertTrue ("Not symmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetric ());
-        byte[] result = sess.sks.performHMAC (key.key_handle, MacAlgorithms.HMAC_SHA1.getURI (), ok_pin.getBytes ("UTF-8"), TEST_STRING);
+        byte[] result = key.performHMAC (MacAlgorithms.HMAC_SHA1, ok_pin, TEST_STRING);
         assertTrue ("HMAC error", ArrayUtil.compare (result, MacAlgorithms.HMAC_SHA1.digest (symmetric_key, TEST_STRING)));
         try
           {
@@ -1993,10 +1911,7 @@ public class SKSTest
                 continue;
               }
             sess.closeSession ();
-            byte[] result = sess.sks.performHMAC (key.key_handle,
-                                                  hmac.getURI (),
-                                                  ok_pin.getBytes ("UTF-8"),
-                                                  data);
+            byte[] result = key.performHMAC (hmac, ok_pin, data);
             assertTrue ("HMAC error", ArrayUtil.compare (result, hmac.digest (symmetric_key, data)));
           }
       }
@@ -2051,7 +1966,7 @@ public class SKSTest
                                        pin_policy /* pin_policy */,
                                        AppUsage.AUTHENTICATION,
                                        new String[]{KeyGen2URIs.ALGORITHMS.NONE}).setCertificate ("CN=" + name.getMethodName());
-       key.setSymmetricKey (symmetric_key);
+        key.setSymmetricKey (symmetric_key);
         sess.closeSession ();
         try
           {
@@ -2179,7 +2094,7 @@ public class SKSTest
             assertTrue ("Bad signature", verify.verify (result));
             try
               {
-                device.sks.performHMAC (key.key_handle, MacAlgorithms.HMAC_SHA256.getURI (), ok_pin.getBytes ("UTF-8"), TEST_STRING);
+                key.performHMAC (MacAlgorithms.HMAC_SHA256, ok_pin, TEST_STRING);
                 fail ("Sym key!");
               }
             catch (SKSException e)
@@ -2344,9 +2259,9 @@ public class SKSTest
                                                 null /* pin_value */,
                                                 null /* pin_policy */,
                                                 AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
-            if (i == 0) sess2.postUpdateKey (new_key, key);
+            if (i == 0) new_key.postUpdateKey (key);
             sess2.postUnlockKey (key);
-            if (i == 1) sess2.postUpdateKey (new_key, key);
+            if (i == 1) new_key.postUpdateKey (key);
             sess2.closeSession ();
             key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             assertFalse ("taken", new_key.exists ());
@@ -2379,9 +2294,9 @@ public class SKSTest
                                                 null /* pin_value */,
                                                 null /* pin_policy */,
                                                 AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
-            if (i == 0) sess2.postCloneKey (new_key, key);
+            if (i == 0) new_key.postCloneKey (key);
             sess2.postUnlockKey (key);
-            if (i == 1) sess2.postCloneKey (new_key, key);
+            if (i == 1) new_key.postCloneKey (key);
             sess2.closeSession ();
             new_key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
