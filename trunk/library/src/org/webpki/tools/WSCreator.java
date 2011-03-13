@@ -51,7 +51,6 @@ public class WSCreator extends XMLObjectWrapper
     
     private static boolean jclient;
     private static boolean jserver;
-    private static boolean jcommon;
     private static boolean wsdl_gen;
     private static boolean dotnet_gen;
     
@@ -451,7 +450,7 @@ public class WSCreator extends XMLObjectWrapper
                 "      <xs:element name=\"" + exception.getXMLName () + "\">\n" + 
                 "        <xs:complexType>\n" + 
                 "          <xs:sequence>\n");
-            writeWSDLProperties (exception.properties);
+            writeWSDLProperties (exception.properties, qualified_ns);
             write (wsdl_file, 
                 "          </xs:sequence>\n" + 
                 "        </xs:complexType>\n" + 
@@ -465,7 +464,7 @@ public class WSCreator extends XMLObjectWrapper
                 "      <xs:element name=\"" + meth.getXMLName () + "\">\n" + 
                 "        <xs:complexType>\n" + 
                 "          <xs:sequence>\n");
-            writeWSDLProperties (meth.inputs);
+            writeWSDLProperties (meth.inputs, false);
             write (wsdl_file,
                 "          </xs:sequence>\n" + 
                 "        </xs:complexType>\n" + 
@@ -473,7 +472,7 @@ public class WSCreator extends XMLObjectWrapper
                 "      <xs:element name=\"" + meth.getXMLResponseName () + "\">\n" + 
                 "        <xs:complexType>\n" + 
                 "          <xs:sequence>\n"); 
-            writeWSDLProperties (meth.outputs);
+            writeWSDLProperties (meth.outputs, false);
             write (wsdl_file,
                 "          </xs:sequence>\n" + 
                 "        </xs:complexType>\n" + 
@@ -567,6 +566,29 @@ public class WSCreator extends XMLObjectWrapper
         javaTerminate (jclient_pck);
         if (jclient)
           {
+            jclient_pck.openAddedClass (service_name);
+            addImport ("javax.xml.ws.WebServiceClient");
+            addImport ("javax.xml.ws.WebEndpoint");
+            addImport ("javax.xml.ws.Service");
+            addImport ("javax.xml.namespace.QName");
+            jclient_pck.writeImports ();
+            writeln (jclient_pck.jfile, "\n" +
+                "@WebServiceClient(name=\"" + service_name + "\",\n" +
+                "                  targetNamespace=\"" + tns + "\")\n" +
+                "public class " + service_name + " extends Service\n  {\n" +
+                "    public " + service_name + " ()\n" +
+                "      {\n" +
+                "        super (" + service_name + ".class.getResource (\"/" + wsdl_location + "\"),\n" + 
+                "               new QName (\"" + tns + "\", \"" + service_name + "\"));\n" +
+                "       }\n\n" +
+                "    @WebEndpoint(name=\"" + service_name + ".Port\")\n" +
+                "    public " + jclient_pck.class_name + " get" + service_name + "Port ()\n" +
+                "      {\n" +
+                "        return super.getPort (new QName (\"" + tns + "\", \"" + service_name + ".Port\"),\n" +
+                "                              " + jclient_pck.class_name  + ".class);\n" +
+                "      }\n" +
+                "  }");
+            close (jclient_pck);
             for (WSException wse : exceptions.values ())
               {
                 jclient_pck.openAddedClass (wse.getBeanName ());
@@ -606,8 +628,7 @@ public class WSCreator extends XMLObjectWrapper
                     if (next) write (jclient_pck.jfile, "\n");
                     next = true;
                     writeln (jclient_pck.jfile, "    @XmlElement(required=" + (!prop.nullable) + ", name=\"" +
-                                              prop.getXMLName () + (qualified_ns ? "\", namespace=\"" + tns : "") +
-                                              "\")\n    " + 
+                                              prop.getXMLName () + "\", namespace=\"\")\n    " + 
                                               prop.jName (false) + " " + prop.name + ";");
                   }
                 for (Property prop : wse.properties)
@@ -822,13 +843,14 @@ public class WSCreator extends XMLObjectWrapper
         }
     }
 
-  private void writeWSDLProperties (Collection<Property> properties) throws IOException
+  private void writeWSDLProperties (Collection<Property> properties, boolean unqualified) throws IOException
     {
       for (Property property : properties)
         {
           write (wsdl_file,
               "            <xs:element name=\"" + property.getXMLName () +
-                   "\" type=\"" + property.data_type.xsd_name + "\"" + 
+                   "\" type=\"" + property.data_type.xsd_name + "\"" +
+                   (unqualified ? " form=\"unqualified\"" : "") +
                    (property.nullable ? " minOccurs=\"0\"" : "") +
                    (property.listtype ? " maxOccurs=\"unbounded\"" : "") +
                    "/>\n");

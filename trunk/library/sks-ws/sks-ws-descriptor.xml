@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- SKS WS Descriptor File to be used with "WSCreator" -->
-<WebService NameSpace="http://xmlns.webpki.org/sksws"
+<WebService NameSpace="http://xmlns.webpki.org/sks/v0.61"
             Service="SKSWS"
             DefaultURL="http://localhost:8080/securekeystore"
             WSDLLocation="META-INF/SKSWS.wsdl"
-            Qualified="false"
+            Qualified="true"
             xmlns="http://xmlns.webpki.org/wscreator.1.00">
 
    <LicenseHeader><![CDATA[/*
@@ -24,50 +24,67 @@
  *
  */
 ]]></LicenseHeader>
-   <JavaServer ClassName="org.MySRV" Imports="org.webpki.sks.Something">
+   <JavaServer ClassName="org.webpki.sks.ws.server.SKSWSImplementation"
+               Imports="java.util.ArrayList">
      <ClassHeader><![CDATA[/**
  *  This is the server :-)
  */
 ]]></ClassHeader>
+<!--
      <SupportCode><![CDATA[
 	   void localMethod (String epub)
 	     {
 	     }
 ]]></SupportCode>
+  -->
    </JavaServer>
-   <JavaClient ClassName="org.cli.MyCLI">
+   <JavaClient ClassName="org.webpki.sks.ws.client.SKSWSProxy">
      <ClassHeader><![CDATA[/**
  *  This is the client :-)
  */
 ]]></ClassHeader>
    </JavaClient>
-   <Exception ClassName="org.example.Ex5">
+
+   <Exception ClassName="org.webpki.sks.SKSException">
+     <Property Name="error" Type="int"/>
      <Property Name="message" Type="string"/>
    </Exception>
-   <Exception ClassName="org.blah.Shit" XMLName="XML_Shit">
-     <Property Name="baddy" Type="string" List="true" Null="true"/>
-     <Property Name="int_y" XMLName="integrat" Type="int"/>
-   </Exception>
-   <Method Name="kurt">
-     <Input Name="glub" Type="string"/>
-     <Input Name="bolg" Type="binary" List="true"/>
-     <Output Name="kurt" Type="int" Comment="something useful"/>
-   </Method>
-   <Method Name="kurt2">
-     <Input Name="glub" Type="string"/>
-     <Input Name="bolg" Type="binary" List="true"/>
-     <Output Name="kurt" Type="int"/>
-     <Output Name="d_urt" Type="short" XMLName="Durt"/>
-   </Method>
-   <Method Name="akurt" Throws="Ex5 Shit">
-   <Code><![CDATA[
-        if (a < b && a < 0) then
+
+   <Method Name="abortProvisioningSession" Throws="SKSException">
+     <Input Name="keyHandle" Type="int"/>
+     <Code><![CDATA[
+        if (keyHandle == 5)
           {
-            return 1;
-          }
-        else
-          {
-            return 0;
+            throw new SKSException ("bad",4);
           }
 ]]></Code></Method>
+
+   <Method Name="getKeyProtectionInfo" Throws="SKSException">
+     <Input Name="keyHandle" Type="int"/>
+     <Output Name="protectionStatus" Type="string" XMLName="ProtectionStatus"/>
+     <Output Name="blah" Type="byte"/>
+     <Output Name="x509_certificate" Type="binary" XMLName="X509Certificate" List="true"/>
+     <Code><![CDATA[
+        protectionStatus.value = "yes";
+        blah.value = (byte)(keyHandle + 2);
+        List<byte[]> certs = new ArrayList<byte[]> ();
+        certs.add (new byte[]{3,4,5});
+        certs.add (new byte[]{3,4,8,9});
+        x509_certificate.value = certs;
+]]></Code></Method>
+
+   <Method Name="setCertificatePath" Throws="SKSException">
+     <Input Name="key_handle" Type="int" XMLName="KeyHandle"/>
+     <Input Name="x509_certificate" Type="binary" XMLName="X509Certificate" List="true"/>
+     <Input Name="mac" Type="binary" XMLName="MAC"/>
+     <Code><![CDATA[
+        System.out.println ("Certs=" + x509_certificate.size () + " mac=" + mac.length);
+]]></Code></Method>
+
+   <Method Name="getVersion">
+     <Output Name="return" Type="string"/>
+     <Code><![CDATA[
+        return "0.00001";
+]]></Code></Method>
+
 </WebService>

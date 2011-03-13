@@ -1,394 +1,210 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wsdl:definitions targetNamespace="http://xmlns.webpki.org/sks/v0.61"
-                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
-                  xmlns:SKS="http://xmlns.webpki.org/sks/v0.61"
-                  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:tns="http://xmlns.webpki.org/sks/v0.61"
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema"
                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
 
   <wsdl:types>
 
     <xs:schema targetNamespace="http://xmlns.webpki.org/sks/v0.61"
- 		       elementFormDefault="unqualified" attributeFormDefault="unqualified">
+               elementFormDefault="qualified" attributeFormDefault="unqualified">
 
-       <xs:element name="SKSException">
-         <xs:complexType>
-            <xs:sequence>
-              <xs:element name="error" type="xs:int"/>
-              <xs:element name="message" type="xs:string"/>
-            </xs:sequence>
-          </xs:complexType>
-       </xs:element>
-
-       <xs:element name="abortProvisioningSession">
-         <xs:complexType>
-           <xs:sequence>
-             <xs:element name="keyHandle" type="xs:int"/>
-           </xs:sequence>
-         </xs:complexType>
-       </xs:element>
-
-  <xs:element name="abortProvisioningSessionResponse">
-  <xs:complexType>
-    <xs:sequence/>
-  </xs:complexType>
-       </xs:element>
-
-  <xs:element name="asymmetricKeyDecrypt">
-  <xs:complexType>
-    <xs:sequence>
-      <xs:element name="arg0" type="xs:int"/>
-      <xs:element name="arg1" type="xs:string"/>
-      <xs:element name="arg2" type="xs:base64Binary"/>
-      <xs:element name="arg3" type="xs:base64Binary"/>
-      <xs:element name="arg4" type="xs:base64Binary"/>
-    </xs:sequence>
-  </xs:complexType>
+      <xs:element name="SKSException">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="error" type="xs:int" form="unqualified"/>
+            <xs:element name="message" type="xs:string" form="unqualified"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
 
-  <xs:element name="asymmetricKeyDecryptResponse">
-  <xs:complexType>
-    <xs:sequence>
-      <xs:element name="return" type="xs:base64Binary" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
+      <xs:element name="abortProvisioningSession">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="keyHandle" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
 
+      <xs:element name="abortProvisioningSession.Response">
+        <xs:complexType>
+          <xs:sequence>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
 
-  <xs:element name="changePIN">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="KeyHandle" type="xs:int"/>
-        <xs:element name="Authorization" type="xs:base64Binary"/>
-        <xs:element name="NewPIN" type="xs:base64Binary"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
+      <xs:element name="getKeyProtectionInfo">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="keyHandle" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
 
-  <xs:element name="changePINResponse">
-  <xs:complexType>
-    <xs:sequence/>
-  </xs:complexType>
-  </xs:element>
+      <xs:element name="getKeyProtectionInfo.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProtectionStatus" type="xs:string"/>
+            <xs:element name="blah" type="xs:byte"/>
+            <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
 
-  <xs:element name="closeProvisioningSession">
- <xs:complexType>
-    <xs:sequence>
-      <xs:element name="arg0" type="xs:int"/>
-      <xs:element name="arg1" type="xs:base64Binary" minOccurs="0"/>
-      <xs:element name="arg2" type="xs:base64Binary" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-  </xs:element>
+      <xs:element name="setCertificatePath">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
 
+      <xs:element name="setCertificatePath.Response">
+        <xs:complexType>
+          <xs:sequence>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
 
-  <xs:element name="closeProvisioningSessionResponse">
-  <xs:complexType>
-    <xs:sequence>
-      <xs:element name="return" type="xs:base64Binary" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-  </xs:element>
+      <xs:element name="getVersion">
+        <xs:complexType>
+          <xs:sequence>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
 
-
-  <xs:element name="getKeyHandle">
-  <xs:complexType>
-    <xs:sequence>
-      <xs:element name="ID" type="xs:string"/>
-      <xs:element name="ProvisioningHandle" type="xs:int"/>
-    </xs:sequence>
-  </xs:complexType>
-  </xs:element>
-
-  <xs:element name="getKeyHandleResponse">
-  <xs:complexType>
-    <xs:sequence>
-      <xs:element name="return" type="xs:int"/>
-    </xs:sequence>
-  </xs:complexType>
-  </xs:element>
-
-  <xs:element name="getKeyProtectionInfo">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="keyHandle" type="xs:int"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="getKeyProtectionInfo.Response">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="ProtectionStatus" type="xs:string"/>
-        <xs:element name="blah" type="xs:byte"/>
-        <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="setCertificatePath">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="KeyHandle" type="xs:int"/>
-        <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
-        <xs:element name="MAC" type="xs:base64Binary"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="setCertificatePathResponse">
-    <xs:complexType>
-      <xs:sequence/>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="getVersion">
-  <xs:complexType>
-    <xs:sequence/>
-  </xs:complexType>
-  </xs:element>
-
-
-  <xs:element name="getVersionResponse">
-  <xs:complexType>
-    <xs:sequence>
-      <xs:element name="return" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-  </xs:element>
+      <xs:element name="getVersion.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="return" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
 
     </xs:schema>
 
   </wsdl:types>
 
-  <wsdl:message name="getVersion">
-    <wsdl:part name="parameters" element="SKS:getVersion"/>
-  </wsdl:message>
-
-  <wsdl:message name="getVersionResponse">
-    <wsdl:part name="parameters" element="SKS:getVersionResponse"/>
+  <wsdl:message name="SKSException">
+    <wsdl:part name="fault" element="tns:SKSException"/>
   </wsdl:message>
 
   <wsdl:message name="abortProvisioningSession">
-    <wsdl:part name="parameters" element="SKS:abortProvisioningSession"/>
+    <wsdl:part name="parameters" element="tns:abortProvisioningSession"/>
   </wsdl:message>
 
-  <wsdl:message name="abortProvisioningSessionResponse">
-    <wsdl:part name="parameters" element="SKS:abortProvisioningSessionResponse"/>
-  </wsdl:message>
-
-  <wsdl:message name="SKSException">
-    <wsdl:part name="fault" element="SKS:SKSException"/>
-  </wsdl:message>
-
-   <wsdl:message name="asymmetricKeyDecrypt">
-    <wsdl:part name="parameters" element="SKS:asymmetricKeyDecrypt"/>
-  </wsdl:message>
-
-  <wsdl:message name="asymmetricKeyDecryptResponse">
-    <wsdl:part name="parameters" element="SKS:asymmetricKeyDecryptResponse"/>
-  </wsdl:message>
-
-  <wsdl:message name="changePIN">
-    <wsdl:part name="parameters" element="SKS:changePIN"/>
-  </wsdl:message>
-
-  <wsdl:message name="changePINResponse">
-    <wsdl:part name="parameters" element="SKS:changePINResponse"/>
-  </wsdl:message>
-
-  <wsdl:message name="closeProvisioningSession">
-    <wsdl:part name="parameters" element="SKS:closeProvisioningSession"/>
-  </wsdl:message>
-
-  <wsdl:message name="closeProvisioningSessionResponse">
-    <wsdl:part name="parameters" element="SKS:closeProvisioningSessionResponse"/>
-  </wsdl:message>
-
-  <wsdl:message name="getKeyHandle">
-    <wsdl:part name="parameters" element="SKS:getKeyHandle"/>
-  </wsdl:message>
-
-  <wsdl:message name="getKeyHandleResponse">
-    <wsdl:part name="parameters" element="SKS:getKeyHandleResponse"/>
+  <wsdl:message name="abortProvisioningSession.Response">
+    <wsdl:part name="parameters" element="tns:abortProvisioningSession.Response"/>
   </wsdl:message>
 
   <wsdl:message name="getKeyProtectionInfo">
-    <wsdl:part name="parameters" element="SKS:getKeyProtectionInfo"/>
+    <wsdl:part name="parameters" element="tns:getKeyProtectionInfo"/>
   </wsdl:message>
 
   <wsdl:message name="getKeyProtectionInfo.Response">
-    <wsdl:part name="parameters" element="SKS:getKeyProtectionInfo.Response"/>
+    <wsdl:part name="parameters" element="tns:getKeyProtectionInfo.Response"/>
   </wsdl:message>
 
   <wsdl:message name="setCertificatePath">
-    <wsdl:part name="parameters" element="SKS:setCertificatePath"/>
+    <wsdl:part name="parameters" element="tns:setCertificatePath"/>
   </wsdl:message>
 
-  <wsdl:message name="setCertificatePathResponse">
-    <wsdl:part name="parameters" element="SKS:setCertificatePathResponse"/>
+  <wsdl:message name="setCertificatePath.Response">
+    <wsdl:part name="parameters" element="tns:setCertificatePath.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="getVersion">
+    <wsdl:part name="parameters" element="tns:getVersion"/>
+  </wsdl:message>
+
+  <wsdl:message name="getVersion.Response">
+    <wsdl:part name="parameters" element="tns:getVersion.Response"/>
   </wsdl:message>
 
   <wsdl:portType name="SKSWS.Interface">
 
-    <wsdl:operation name="getVersion">
-      <wsdl:input message="SKS:getVersion"/>
-      <wsdl:output message="SKS:getVersionResponse"/>
-    </wsdl:operation>
-
     <wsdl:operation name="abortProvisioningSession">
-      <wsdl:input message="SKS:abortProvisioningSession"/>
-      <wsdl:output message="SKS:abortProvisioningSessionResponse"/>
-      <wsdl:fault message="SKS:SKSException" name="SKSException"/>
-    </wsdl:operation>
-
-    <wsdl:operation name="asymmetricKeyDecrypt">
-      <wsdl:input message="SKS:asymmetricKeyDecrypt"/>
-      <wsdl:output message="SKS:asymmetricKeyDecryptResponse"/>
-      <wsdl:fault message="SKS:SKSException" name="SKSException"/>
-    </wsdl:operation>
-
-    <wsdl:operation name="changePIN">
-      <wsdl:input message="SKS:changePIN"/>
-      <wsdl:output message="SKS:changePINResponse"/>
-      <wsdl:fault message="SKS:SKSException" name="SKSException"/>
-    </wsdl:operation>
-
-    <wsdl:operation name="closeProvisioningSession">
-      <wsdl:input message="SKS:closeProvisioningSession"/>
-      <wsdl:output message="SKS:closeProvisioningSessionResponse"/>
-      <wsdl:fault message="SKS:SKSException" name="SKSException"/>
-    </wsdl:operation>
-
-    <wsdl:operation name="getKeyHandle">
-      <wsdl:input message="SKS:getKeyHandle"/>
-      <wsdl:output message="SKS:getKeyHandleResponse"/>
-      <wsdl:fault message="SKS:SKSException" name="SKSException"/>
+      <wsdl:input message="tns:abortProvisioningSession"/>
+      <wsdl:output message="tns:abortProvisioningSession.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
     <wsdl:operation name="getKeyProtectionInfo">
-      <wsdl:input message="SKS:getKeyProtectionInfo"/>
-      <wsdl:output message="SKS:getKeyProtectionInfo.Response"/>
-      <wsdl:fault message="SKS:SKSException" name="SKSException"/>
+      <wsdl:input message="tns:getKeyProtectionInfo"/>
+      <wsdl:output message="tns:getKeyProtectionInfo.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
     <wsdl:operation name="setCertificatePath">
-      <wsdl:input message="SKS:setCertificatePath"/>
-      <wsdl:output message="SKS:setCertificatePathResponse"/>
-      <wsdl:fault message="SKS:SKSException" name="SKSException"/>
+      <wsdl:input message="tns:setCertificatePath"/>
+      <wsdl:output message="tns:setCertificatePath.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="getVersion">
+      <wsdl:input message="tns:getVersion"/>
+      <wsdl:output message="tns:getVersion.Response"/>
     </wsdl:operation>
 
   </wsdl:portType>
 
-  <wsdl:binding name="SKSWS.Binding" type="SKS:SKSWS.Interface">
+  <wsdl:binding name="SKSWS.Binding" type="tns:SKSWS.Interface">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
 
-    <wsdl:operation name="getVersion">
-      <soap:operation soapAction=""/>
-      <wsdl:input>
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
+      <wsdl:operation name="abortProvisioningSession">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
 
-    <wsdl:operation name="abortProvisioningSession">
-      <soap:operation soapAction=""/>
-      <wsdl:input>
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="SKSException">
-        <soap:fault name="SKSException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
+      <wsdl:operation name="getKeyProtectionInfo">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
 
-    <wsdl:operation name="asymmetricKeyDecrypt">
-      <soap:operation soapAction=""/>
-      <wsdl:input>
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="SKSException">
-        <soap:fault name="SKSException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
+      <wsdl:operation name="setCertificatePath">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
 
-    <wsdl:operation name="changePIN">
-      <soap:operation soapAction=""/>
-      <wsdl:input>
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="SKSException">
-        <soap:fault name="SKSException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
+      <wsdl:operation name="getVersion">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+      </wsdl:operation>
 
-    <wsdl:operation name="closeProvisioningSession">
-      <soap:operation soapAction=""/>
-      <wsdl:input>
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="SKSException">
-        <soap:fault name="SKSException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-
-    <wsdl:operation name="getKeyHandle">
-      <soap:operation soapAction=""/>
-      <wsdl:input>
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="SKSException">
-        <soap:fault name="SKSException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-
-    <wsdl:operation name="getKeyProtectionInfo">
-      <soap:operation soapAction=""/>
-      <wsdl:input>
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="SKSException">
-        <soap:fault name="SKSException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-
-    <wsdl:operation name="setCertificatePath">
-      <soap:operation soapAction=""/>
-      <wsdl:input>
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="SKSException">
-        <soap:fault name="SKSException" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-
-  </wsdl:binding>
+    </wsdl:binding>
 
   <wsdl:service name="SKSWS">
-    <wsdl:port name="SKSWS.Port" binding="SKS:SKSWS.Binding">
-      <soap:address location="http://localhost:8080/securekeystore"/>
-    </wsdl:port>
+     <wsdl:port name="SKSWS.Port" binding="tns:SKSWS.Binding">
+       <soap:address location="http://localhost:8080/securekeystore"/>
+     </wsdl:port>
   </wsdl:service>
 
 </wsdl:definitions>

@@ -72,7 +72,7 @@ public class SKSWSClient
           }
         catch (SKSException_Exception e)
           {
-            System.out.println ("Ok e=" + e.getFaultInfo ().getErrors () + " m=" + e.getFaultInfo ().getMessage ());
+            System.out.println ("Ok e=" + e.getFaultInfo ().getError () + " m=" + e.getFaultInfo ().getMessage ());
           }
 
         Holder<Byte> blah = new Holder<Byte> ();
@@ -80,7 +80,7 @@ public class SKSWSClient
         Holder<List<byte[]>> certls = new Holder<List<byte[]>> ();
         try
           {
-            proxy.getKeyProtectionInf (4, prot, blah, certls);
+            proxy.getKeyProtectionInfo (4, prot, blah, certls);
             if (!prot.value.equals ("yes"))
               {
                 bad ();
