@@ -26,8 +26,6 @@ import java.io.FileOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMAttributeReaderHelper;
@@ -446,37 +444,13 @@ public class WSCreator extends XMLObjectWrapper
         
         for (WSException exception : exceptions.values ())
           {
-            write (wsdl_file, "\n" + 
-                "      <xs:element name=\"" + exception.getXMLName () + "\">\n" + 
-                "        <xs:complexType>\n" + 
-                "          <xs:sequence>\n");
-            writeWSDLProperties (exception.properties, qualified_ns);
-            write (wsdl_file, 
-                "          </xs:sequence>\n" + 
-                "        </xs:complexType>\n" + 
-                "      </xs:element>\n");
+            writeWSDLProperties (exception.getXMLName (), exception.properties, qualified_ns);
           }
 
         for (Method meth : methods)
           {
-
-            write (wsdl_file, "\n" + 
-                "      <xs:element name=\"" + meth.getXMLName () + "\">\n" + 
-                "        <xs:complexType>\n" + 
-                "          <xs:sequence>\n");
-            writeWSDLProperties (meth.inputs, false);
-            write (wsdl_file,
-                "          </xs:sequence>\n" + 
-                "        </xs:complexType>\n" + 
-                "      </xs:element>\n\n" + 
-                "      <xs:element name=\"" + meth.getXMLResponseName () + "\">\n" + 
-                "        <xs:complexType>\n" + 
-                "          <xs:sequence>\n"); 
-            writeWSDLProperties (meth.outputs, false);
-            write (wsdl_file,
-                "          </xs:sequence>\n" + 
-                "        </xs:complexType>\n" + 
-                "      </xs:element>\n");
+            writeWSDLProperties (meth.getXMLName (), meth.inputs, false);
+            writeWSDLProperties (meth.getXMLResponseName (), meth.outputs, false);
           }
 
         write (wsdl_file, "\n    </xs:schema>\n\n  </wsdl:types>\n");
@@ -843,18 +817,35 @@ public class WSCreator extends XMLObjectWrapper
         }
     }
 
-  private void writeWSDLProperties (Collection<Property> properties, boolean unqualified) throws IOException
+  private void writeWSDLProperties (String element_name, Collection<Property> properties, boolean unqualified) throws IOException
     {
-      for (Property property : properties)
+      write (wsdl_file, "\n" + 
+          "      <xs:element name=\"" + element_name + "\"");
+      if (properties.size () == 0)
         {
-          write (wsdl_file,
-              "            <xs:element name=\"" + property.getXMLName () +
-                   "\" type=\"" + property.data_type.xsd_name + "\"" +
-                   (unqualified ? " form=\"unqualified\"" : "") +
-                   (property.nullable ? " minOccurs=\"0\"" : "") +
-                   (property.listtype ? " maxOccurs=\"unbounded\"" : "") +
-                   "/>\n");
+          write (wsdl_file, "/");
         }
+      else
+        {
+          write (wsdl_file, ">\n" +
+          "        <xs:complexType>\n" + 
+          "          <xs:sequence>\n");
+          for (Property property : properties)
+            {
+              write (wsdl_file,
+                  "            <xs:element name=\"" + property.getXMLName () +
+                       "\" type=\"" + property.data_type.xsd_name + "\"" +
+                       (unqualified ? " form=\"unqualified\"" : "") +
+                       (property.nullable ? " minOccurs=\"0\"" : "") +
+                       (property.listtype ? " maxOccurs=\"unbounded\"" : "") +
+                       "/>\n");
+            }
+          write (wsdl_file, 
+          "          </xs:sequence>\n" + 
+          "        </xs:complexType>\n" + 
+          "      </xs:element");
+        }
+      writeln (wsdl_file, ">");
     }
 
   private Collection<Property> getProperties (DOMReaderHelper rd, String property) throws IOException

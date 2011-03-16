@@ -8,13 +8,13 @@
   <wsdl:types>
 
     <xs:schema targetNamespace="http://xmlns.webpki.org/sks/v0.61"
-               elementFormDefault="qualified" attributeFormDefault="unqualified">
+               elementFormDefault="unqualified" attributeFormDefault="unqualified">
 
       <xs:element name="SKSException">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="error" type="xs:int" form="unqualified"/>
-            <xs:element name="message" type="xs:string" form="unqualified"/>
+            <xs:element name="error" type="xs:int"/>
+            <xs:element name="message" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -27,12 +27,7 @@
         </xs:complexType>
       </xs:element>
 
-      <xs:element name="abortProvisioningSession.Response">
-        <xs:complexType>
-          <xs:sequence>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="abortProvisioningSession.Response"/>
 
       <xs:element name="getKeyProtectionInfo">
         <xs:complexType>
@@ -56,25 +51,15 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="KeyHandle" type="xs:int"/>
-            <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
+            <xs:element name="X509Certificate" type="xs:base64Binary" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
 
-      <xs:element name="setCertificatePath.Response">
-        <xs:complexType>
-          <xs:sequence>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="setCertificatePath.Response"/>
 
-      <xs:element name="getVersion">
-        <xs:complexType>
-          <xs:sequence>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="getVersion"/>
 
       <xs:element name="getVersion.Response">
         <xs:complexType>

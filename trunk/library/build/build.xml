@@ -11,6 +11,7 @@
   <property name="webpki-libext" value="webpki.org-libext-1.00.jar" />
   <property name="webpki-webutil" value="webpki.org-webutil-1.00.jar" />
   <property name="webpki-sksws" value="webpki.org-sksws-1.00.jar" />
+  <property name="ws.def" location="../sks-ws/sks-ws-descriptor.xml"/>
   <property name="doc_dir"  value="../doc" />
   <property name="debug"  value="on"/>
   <property environment="env"/>
@@ -25,16 +26,29 @@
 	  <include name="*.jar"/>
 	</fileset>
   </path> 
-	
-  <taskdef name="wsgen" classname="com.sun.tools.ws.ant.WsGen">
-  	<classpath refid="jaxws.classpath"/>
-  </taskdef>
 
-  <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
-	 <classpath refid="jaxws.classpath"/>
-  </taskdef>
+  <target name="_ws-check">
+    <condition property="wsgen.required">
+      <not>
+	    <and>
+	      <available file="${src_dir}/org/webpki/sks/ws/server/SKSWSImplementation.java"/>
+	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/server/SKSWSImplementation.java"/>
+	      <available file="${src_dir}/org/webpki/sks/ws/client/SKSWS.java"/>
+	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSWS.java"/>
+	      <available file="${src_dir}/org/webpki/sks/ws/client/SKSWSProxy.java"/>
+	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSWSProxy.java"/>
+	      <available file="${src_dir}/org/webpki/sks/ws/client/SKSExceptionBean.java"/>
+	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSExceptionBean.java"/>
+	      <available file="${src_dir}/org/webpki/sks/ws/client/SKSException_Exception.java"/>
+	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSException_Exception.java"/>
+	      <available file="${wsdl_dir}/SKSWS.wsdl"/>
+	      <uptodate srcfile="${ws.def}" targetfile="${wsdl_dir}/SKSWS.wsdl"/>
+	    </and>
+      </not>
+    </condition>
+  </target>
 
-	<path id="compile.classpath">
+  <path id="compile.classpath">
 	 <fileset dir="${ext.jar}">
 	   <include name="*.jar"/>
      </fileset>
@@ -55,16 +69,38 @@
   <target name="help">
     <echo message="Targets: help dist clean compile doc testkg2 testsks."/>
   </target>
-
-  <target name="wsgen">
- 	<wsimport destdir="${src_dir}"
-    	   package="org.webpki.sks.ws.common"
- 		   xendorsed="true"
- 		   keep="true"
- 		   xnocompile="true"
-           wsdl="${wsdl}/SKSWS.wsdl"/>
+	
+  <target name="_ws-gen">
+  	<echo message="Updating '${cmd}'"/>
+  	<java fork="yes" classname="org.webpki.tools.WSCreator">
+  		<classpath>
+            <pathelement path="${temp_dir}"/>
+  			 <fileset dir="${ext.jar}">
+  		        <include name="*.jar"/>
+  			 </fileset>
+  		</classpath>
+  	    <arg value="${cmd}"/>
+  		<arg value="../sks-ws/sks-ws-descriptor.xml"/>
+  		<arg value="${out}"/>
+  	</java>
   </target>
 
+  <target name="wsgen" depends="_ws-check" if="wsgen.required">
+  	<echo message="SKS WS needed updates"/>
+    <antcall target="_ws-gen">
+      <param name="cmd" value="wsdl"/>
+      <param name="out" value="../wsdl/SKSWS.wsdl"/>
+    </antcall>
+    <antcall target="_ws-gen">
+      <param name="cmd" value="jclient"/>
+      <param name="out" value="${src_dir}"/>
+     </antcall>
+    <antcall target="_ws-gen">
+      <param name="cmd" value="jserver"/>
+      <param name="out" value="${src_dir}"/>
+    </antcall>
+  </target>
+	
   <target name="compile">
     <fixcrlf srcdir="${src_dir}"
        tab="remove"
@@ -72,9 +108,36 @@
        eol="lf"
        eof="remove"
        includes="**/*.java, **/*.xsd"/>
-    <!-- Compile the java code from ${src_dir} into ${temp_dir} -->
     <mkdir dir="${temp_dir}" />
-    <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}" classpathref="compile.classpath" includeAntRuntime="false">
+
+  	<!-- Copy all files except .java  -->
+    <copy todir="${temp_dir}" preservelastmodified="true" includeEmptyDirs="false">
+      <fileset dir="${src_dir}">
+        <include name="**/*"/>
+        <exclude name="**/*.java"/>
+        <exclude name="**/package.html"/>
+        <exclude name="**/doc-files/*"/>
+      </fileset>
+    </copy>
+
+    <!-- Compile non-ws java code from ${src_dir} into ${temp_dir} -->
+    <javac debug="${debug}"
+    	   srcdir="${src_dir}"
+    	   destdir="${temp_dir}" 
+    	   classpathref="compile.classpath"
+    	   includeAntRuntime="false" excludes="**/sks/ws/**/*">
+       <compilerarg value="-Xlint:-path"/>
+    </javac>
+  	
+  	<!-- Now we can optionally update SKS WS code -->
+  	<antcall target="wsgen"/>
+
+  	<!-- Compile sks-ws java code from ${src_dir} into ${temp_dir} -->
+    <javac debug="${debug}"
+    	   srcdir="${src_dir}"
+    	   destdir="${temp_dir}" 
+    	   classpathref="compile.classpath"
+    	   includeAntRuntime="false" includes="**/sks/ws/**/*">
        <compilerarg value="-Xlint:-path"/>
     </javac>
   </target>
@@ -105,16 +168,6 @@
   </target>
 
   <target name="dist" depends="clean,compile">    
-    <!-- Copy all files except .java  -->
-    <copy todir="${temp_dir}" preservelastmodified="true">
-      <fileset dir="${src_dir}">
-        <include name="org/**/*"/>
-        <exclude name="org/**/*.java"/>
-        <exclude name="org/**/package.html"/>
-        <exclude name="org/**/doc-files/*"/>
-      </fileset>
-    </copy>
-
     <!-- Create the distribution directory -->
     <mkdir dir="${dist_dir}" />
 

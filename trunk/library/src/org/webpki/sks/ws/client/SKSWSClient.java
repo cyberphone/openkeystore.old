@@ -100,6 +100,7 @@ public class SKSWSClient
             certs.add (new byte[]{4,6,7});
             
             proxy.setCertificatePath (8,certs, new byte[]{4,6});
+            proxy.setCertificatePath (3,null, new byte[]{4,6,7});
             new SKSWSClient (args[0]).getSKSWS ();
           }
         catch (SKSException_Exception e)

@@ -4,7 +4,7 @@
             Service="SKSWS"
             DefaultURL="http://localhost:8080/securekeystore"
             WSDLLocation="META-INF/SKSWS.wsdl"
-            Qualified="true"
+            Qualified="false"
             xmlns="http://xmlns.webpki.org/wscreator.1.00">
 
    <LicenseHeader><![CDATA[/*
@@ -75,10 +75,10 @@
 
    <Method Name="setCertificatePath" Throws="SKSException">
      <Input Name="key_handle" Type="int" XMLName="KeyHandle"/>
-     <Input Name="x509_certificate" Type="binary" XMLName="X509Certificate" List="true"/>
+     <Input Name="x509_certificate" Type="binary" XMLName="X509Certificate" List="true" Null="true"/>
      <Input Name="mac" Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        System.out.println ("Certs=" + x509_certificate.size () + " mac=" + mac.length);
+        System.out.println ("Certs=" + (x509_certificate.size() == 0 ? "'null'" : x509_certificate.size ()) + " mac=" + mac.length);
 ]]></Code></Method>
 
    <Method Name="getVersion">

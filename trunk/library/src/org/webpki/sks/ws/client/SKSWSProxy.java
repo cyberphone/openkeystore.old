@@ -41,37 +41,37 @@ public interface SKSWSProxy
     @WebMethod(operationName="abortProvisioningSession")
     @RequestWrapper(localName="abortProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @ResponseWrapper(localName="abortProvisioningSession.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    public void abortProvisioningSession (@WebParam(name="keyHandle", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+    public void abortProvisioningSession (@WebParam(name="keyHandle")
                                           int keyHandle)
     throws SKSException_Exception;
 
     @WebMethod(operationName="getKeyProtectionInfo")
     @RequestWrapper(localName="getKeyProtectionInfo", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @ResponseWrapper(localName="getKeyProtectionInfo.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    public void getKeyProtectionInfo (@WebParam(name="keyHandle", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+    public void getKeyProtectionInfo (@WebParam(name="keyHandle")
                                       int keyHandle,
-                                      @WebParam(name="ProtectionStatus", targetNamespace="http://xmlns.webpki.org/sks/v0.61", mode=WebParam.Mode.OUT)
+                                      @WebParam(name="ProtectionStatus", mode=WebParam.Mode.OUT)
                                       Holder<String> protectionStatus,
-                                      @WebParam(name="blah", targetNamespace="http://xmlns.webpki.org/sks/v0.61", mode=WebParam.Mode.OUT)
+                                      @WebParam(name="blah", mode=WebParam.Mode.OUT)
                                       Holder<Byte> blah,
-                                      @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v0.61", mode=WebParam.Mode.OUT)
+                                      @WebParam(name="X509Certificate", mode=WebParam.Mode.OUT)
                                       Holder<List<byte[]>> x509_certificate)
     throws SKSException_Exception;
 
     @WebMethod(operationName="setCertificatePath")
     @RequestWrapper(localName="setCertificatePath", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @ResponseWrapper(localName="setCertificatePath.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    public void setCertificatePath (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+    public void setCertificatePath (@WebParam(name="KeyHandle")
                                     int key_handle,
-                                    @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+                                    @WebParam(name="X509Certificate")
                                     List<byte[]> x509_certificate,
-                                    @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+                                    @WebParam(name="MAC")
                                     byte[] mac)
     throws SKSException_Exception;
 
     @WebMethod(operationName="getVersion")
     @RequestWrapper(localName="getVersion", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @ResponseWrapper(localName="getVersion.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    @WebResult(name="return", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+    @WebResult(name="return")
     public String getVersion ();
   }
