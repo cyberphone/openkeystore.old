@@ -37,6 +37,8 @@
 
             <xs:element ref="wsc:JavaClient" minOccurs="0"/>
 
+            <xs:element ref="wsc:DotNetClient" minOccurs="0"/>
+
             <xs:element ref="wsc:Exception" minOccurs="0" maxOccurs="unbounded"/>
             
             <xs:element ref="wsc:Method" maxOccurs="unbounded"/>
@@ -96,6 +98,20 @@
          </xs:sequence> 
 
          <!-- Java Class Name -->
+         <xs:attribute name="ClassName" type="wsc:xmlid" use="required"/>
+
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="DotNetClient">
+      <xs:complexType>
+         <xs:sequence>
+
+            <xs:element name="ClassHeader" type="xs:string" minOccurs="0"/>
+
+         </xs:sequence> 
+
+         <!-- C# Class Name -->
          <xs:attribute name="ClassName" type="wsc:xmlid" use="required"/>
 
       </xs:complexType>
