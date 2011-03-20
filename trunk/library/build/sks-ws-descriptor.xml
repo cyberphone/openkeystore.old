@@ -44,6 +44,12 @@
  */
 ]]></ClassHeader>
    </JavaClient>
+   <DotNetClient ClassName="org.webpki.sks.ws.client.SKSWSProxy">
+     <ClassHeader><![CDATA[    /*
+     *  This is the .NET client :-)
+     */
+]]></ClassHeader>
+   </DotNetClient>
 
    <Exception ClassName="org.webpki.sks.SKSException">
      <Property Name="error" Type="int"/>
@@ -60,13 +66,13 @@
 ]]></Code></Method>
 
    <Method Name="getKeyProtectionInfo" Throws="SKSException">
-     <Input Name="keyHandle" Type="int"/>
-     <Output Name="protectionStatus" Type="string" XMLName="ProtectionStatus"/>
+     <Input Name="key_handle" Type="int" XMLName="keyHandle"/>
+     <Output Name="protection_status" Type="string" XMLName="ProtectionStatus"/>
      <Output Name="blah" Type="byte"/>
      <Output Name="x509_certificate" Type="binary" XMLName="X509Certificate" List="true"/>
      <Code><![CDATA[
-        protectionStatus.value = "yes";
-        blah.value = (byte)(keyHandle + 2);
+        protection_status.value = "yes";
+        blah.value = (byte)(key_handle + 2);
         List<byte[]> certs = new ArrayList<byte[]> ();
         certs.add (new byte[]{3,4,5});
         certs.add (new byte[]{3,4,8,9});

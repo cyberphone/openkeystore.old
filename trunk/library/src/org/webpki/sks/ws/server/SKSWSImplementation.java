@@ -63,17 +63,17 @@ public class SKSWSImplementation
     @RequestWrapper(localName="getKeyProtectionInfo", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @ResponseWrapper(localName="getKeyProtectionInfo.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     public void getKeyProtectionInfo (@WebParam(name="keyHandle")
-                                      int keyHandle,
+                                      int key_handle,
                                       @WebParam(name="ProtectionStatus", mode=WebParam.Mode.OUT)
-                                      Holder<String> protectionStatus,
+                                      Holder<String> protection_status,
                                       @WebParam(name="blah", mode=WebParam.Mode.OUT)
                                       Holder<Byte> blah,
                                       @WebParam(name="X509Certificate", mode=WebParam.Mode.OUT)
                                       Holder<List<byte[]>> x509_certificate)
     throws SKSException
       {
-        protectionStatus.value = "yes";
-        blah.value = (byte)(keyHandle + 2);
+        protection_status.value = "yes";
+        blah.value = (byte)(key_handle + 2);
         List<byte[]> certs = new ArrayList<byte[]> ();
         certs.add (new byte[]{3,4,5});
         certs.add (new byte[]{3,4,8,9});

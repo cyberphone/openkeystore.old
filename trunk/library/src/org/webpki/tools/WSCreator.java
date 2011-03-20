@@ -166,9 +166,9 @@ public class WSCreator extends XMLObjectWrapper
     }
     class ClientPack extends Package
     {
-      ClientPack (DOMReaderHelper rd)
+      ClientPack (DOMReaderHelper rd, String str)
         {
-          super (rd, "JavaClient");
+          super (rd, str);
         }
 
       String decoration ()
@@ -180,6 +180,7 @@ public class WSCreator extends XMLObjectWrapper
         {
           return "interface";
         }
+      
 
       public void openAddedClass (String class_name) throws IOException
         {
@@ -194,6 +195,8 @@ public class WSCreator extends XMLObjectWrapper
 
     ClientPack jclient_pck;
     
+    ClientPack dotnet_client_pck;
+
     TreeSet<String> jimports = new TreeSet<String> ();
   
     DOMAttributeReaderHelper attr;
@@ -253,6 +256,11 @@ public class WSCreator extends XMLObjectWrapper
         String jName (boolean object_type)
           {
             return object_type || listtype ? (listtype ? "List<" + data_type.jholder + ">" : data_type.jholder) : data_type.jname;
+          }
+
+        String nName ()
+          {
+            return listtype ? "List<" + data_type.csname + ">" : data_type.csname;
           }
       }
     
@@ -390,7 +398,7 @@ public class WSCreator extends XMLObjectWrapper
           }
         if (rd.hasNext ("JavaClient"))
           {
-            jclient_pck = new ClientPack (rd);
+            jclient_pck = new ClientPack (rd, "JavaClient");
             if (jclient)
               {
                 open (jclient_pck, true);
@@ -399,6 +407,18 @@ public class WSCreator extends XMLObjectWrapper
         else if (jclient)
           {
             bad ("The '" + JCLIENT + "' option requires a \"JavaClient\" definition!");
+          }
+        if (rd.hasNext ("DotNetClient"))
+          {
+            dotnet_client_pck = new ClientPack (rd, "DotNetClient");
+            if (dotnet_gen)
+              {
+                open (dotnet_client_pck, false);
+              }
+          }
+        else if (dotnet_gen)
+          {
+            bad ("The '" + DOTNETCLIENT + "' option requires a \"DotNetClient\" definition!");
           }
         while (rd.hasNext ("Exception"))
           {
@@ -676,7 +696,104 @@ public class WSCreator extends XMLObjectWrapper
                 close (jclient_pck);
               }
           }
+        if (dotnet_client_pck != null)
+          {
+            writeDotNet ();
+          }
       }
+
+      private void writeDotNet () throws IOException
+    {
+      FileOutputStream file = dotnet_client_pck.jfile;
+      writeln (file, license_header + "namespace " + dotnet_client_pck.package_name + "\n{\n");
+      writeGenerate (file);
+      write (file, "\n" +
+                   "    using System.Collections.Generic;\n\n" + dotnet_client_pck.class_header +
+                   "    [System.CodeDom.Compiler.GeneratedCodeAttribute(\"System.ServiceModel\", \"3.0.0.0\")]\n" +
+                   "    [System.ServiceModel.ServiceContractAttribute(Namespace=\"" + tns + "\")]\n" +
+                   "    public interface " + dotnet_client_pck.class_name + "Interface\n    {\n");
+      boolean next = false;
+      for (Method meth : methods)
+        {
+          if (next)
+            {
+              write (file, "\n");
+            }
+          else
+            {
+              next = true;
+            }
+          write (file, "        [System.ServiceModel.OperationContractAttribute(Action=\"\", ReplyAction=\"*\")]\n");
+          for (String ex : meth.execptions)
+            {
+              writeln (file, 
+                       "        [System.ServiceModel.FaultContractAttribute(typeof(" + exceptions.get (ex).getName () + "Attributes), Action=\"\", Name=\"" + exceptions.get (ex).getName () + "\")]");
+            }
+          write (file, "        [System.ServiceModel.XmlSerializerFormatAttribute()]\n" +
+                       "        " + meth.name + "Response " + meth.name + "(" + meth.name + "Request request);\n");
+        }
+      write (file,"    }\n\n" +
+                  "    public class " + dotnet_client_pck.class_name + " : System.ServiceModel.ClientBase<" + dotnet_client_pck.class_name + "Interface>\n" +
+                  "    {\n" +
+                  "        public " + dotnet_client_pck.class_name + "()\n" +
+                  "        {\n" +
+                  "        }\n\n" +
+                  "        public " + dotnet_client_pck.class_name + "(string endpointConfigurationName) " +
+": base(endpointConfigurationName)\n" +
+                  "        {\n" +
+                  "        }\n\n" +
+                  "        public " + dotnet_client_pck.class_name + "(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) " +
+": base(binding, remoteAddress)\n" +
+                  "        {\n" +
+                  "        }\n");
+      for (Method meth : methods)
+        {
+          write (file, "\n" + 
+                  "        public ");
+
+          if (meth.outputs.isEmpty () || meth.outputs.size () > 1)
+            {
+              write (file, "void");
+            }
+          if (meth.outputs.size () == 1)
+            {
+              Property prop = meth.outputs.iterator ().next ();
+              write (file, prop.nName ());
+            }
+          write (file, " " + meth.name + "(");
+          next = false;
+          for (Property prop : meth.inputs)
+            {
+              if (next)
+                {
+                  write (file, ", ");
+                }
+              else
+                {
+                  next = true;
+                }
+              write (file, prop.nName () + " " + prop.name);
+            }
+          if (meth.outputs.size () > 1) for (Property prop : meth.outputs)
+            {
+              if (next)
+                {
+                  write (file, ", ");
+                }
+              else
+                {
+                  next = true;
+                }
+              write (file, "out " + prop.nName () + " " + prop.name);
+            }
+          write (file, ")\n" + 
+              "        (\n");
+          write (file, 
+              "        }\n");
+        }
+      writeln (file,"    }\n}");
+      close (dotnet_client_pck);
+    }
 
       private void close (Package pck) throws IOException
     {

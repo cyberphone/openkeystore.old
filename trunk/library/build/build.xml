@@ -3,6 +3,7 @@
   <!-- set global properties for this build -->
   <property name="sks.implementation" value="org.webpki.sks.test.SKSReferenceImplementation"/>
   <property name="src_dir" value="../src" />
+  <property name="dot_net_dir" value="../sks-ws-dotnet" />
   <property name="temp_dir" value="../.tmp" />
   <property name="test_dir" value="../test" />
   <property name="dist_dir"  value="../dist" />
@@ -41,8 +42,12 @@
 	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSExceptionBean.java"/>
 	      <available file="${src_dir}/org/webpki/sks/ws/client/SKSException_Exception.java"/>
 	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSException_Exception.java"/>
+	      <available file="${dot_net_dir}/org/webpki/sks/ws/client/SKSWSProxy.cs"/>
+		  <uptodate srcfile="${ws.def}" targetfile="${dot_net_dir}/org/webpki/sks/ws/client/SKSWSProxy.cs"/>
 	      <available file="${wsdl_dir}/SKSWS.wsdl"/>
 	      <uptodate srcfile="${ws.def}" targetfile="${wsdl_dir}/SKSWS.wsdl"/>
+	      <uptodate srcfile="${src_dir}/org/webpki/tools/WSCreator.java" targetfile="${wsdl_dir}/SKSWS.wsdl"/>
+	      <uptodate srcfile="${src_dir}/org/webpki/tools/wscreator.xsd" targetfile="${wsdl_dir}/SKSWS.wsdl"/>
 	    </and>
       </not>
     </condition>
@@ -98,6 +103,10 @@
     <antcall target="_ws-gen">
       <param name="cmd" value="jserver"/>
       <param name="out" value="${src_dir}"/>
+    </antcall>
+    <antcall target="_ws-gen">
+      <param name="cmd" value="dotnetclient"/>
+      <param name="out" value="${dot_net_dir}"/>
     </antcall>
   </target>
 	

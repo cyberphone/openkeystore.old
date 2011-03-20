@@ -49,9 +49,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="getKeyProtectionInfo", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @ResponseWrapper(localName="getKeyProtectionInfo.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     public void getKeyProtectionInfo (@WebParam(name="keyHandle")
-                                      int keyHandle,
+                                      int key_handle,
                                       @WebParam(name="ProtectionStatus", mode=WebParam.Mode.OUT)
-                                      Holder<String> protectionStatus,
+                                      Holder<String> protection_status,
                                       @WebParam(name="blah", mode=WebParam.Mode.OUT)
                                       Holder<Byte> blah,
                                       @WebParam(name="X509Certificate", mode=WebParam.Mode.OUT)
