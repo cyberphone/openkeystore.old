@@ -33,21 +33,186 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(SKSExceptionAttributes), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        abortProvisioningSessionResponse abortProvisioningSession(abortProvisioningSessionRequest request);
+        abortProvisioningSession_Response abortProvisioningSession(abortProvisioningSession_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(SKSExceptionAttributes), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        getKeyProtectionInfoResponse getKeyProtectionInfo(getKeyProtectionInfoRequest request);
+        getKeyProtectionInfo_Response getKeyProtectionInfo(getKeyProtectionInfo_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(SKSExceptionAttributes), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        setCertificatePathResponse setCertificatePath(setCertificatePathRequest request);
+        setCertificatePath_Response setCertificatePath(setCertificatePath_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        getVersionResponse getVersion(getVersionRequest request);
+        getVersion_Response getVersion(getVersion_Request request);
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "3.0.0.0")]
+    public class SKSExceptionAttributes : System.Xml.Serialization.IXmlSerializable
+    {
+        private System.Xml.XmlNode[] nodes;
+
+        public System.Xml.Schema.XmlSchema GetSchema()
+        {
+            return null;
+        }
+
+        public void ReadXml(System.Xml.XmlReader reader)
+        {
+            nodes = System.Runtime.Serialization.XmlSerializableServices.ReadNodes(reader);
+        }
+
+        public void WriteXml(System.Xml.XmlWriter writer)
+        {
+            System.Runtime.Serialization.XmlSerializableServices.WriteNodes(writer, nodes);
+        }
+
+        public int getError()
+        {
+            return System.Int32.Parse(nodes[0].InnerXml);
+        }
+
+        public string getMessage()
+        {
+            return nodes[1].InnerXml;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="abortProvisioningSession", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
+    public class abortProvisioningSession_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="keyHandle", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public int keyHandle;
+
+        public abortProvisioningSession_Request()
+        {
+        }
+
+        public abortProvisioningSession_Request(int keyHandle)
+        {
+            this.keyHandle = keyHandle;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="abortProvisioningSession.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
+    public class abortProvisioningSession_Response
+    {
+        public abortProvisioningSession_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getKeyProtectionInfo", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
+    public class getKeyProtectionInfo_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="keyHandle", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public int key_handle;
+
+        public getKeyProtectionInfo_Request()
+        {
+        }
+
+        public getKeyProtectionInfo_Request(int key_handle)
+        {
+            this.key_handle = key_handle;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getKeyProtectionInfo.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
+    public class getKeyProtectionInfo_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ProtectionStatus", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public string protection_status;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="blah", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public sbyte blah;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="X509Certificate", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public List<byte[]> x509_certificate;
+
+        public getKeyProtectionInfo_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="setCertificatePath", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
+    public class setCertificatePath_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="X509Certificate", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public List<byte[]> x509_certificate;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public byte[] mac;
+
+        public setCertificatePath_Request()
+        {
+        }
+
+        public setCertificatePath_Request(int key_handle, List<byte[]> x509_certificate, byte[] mac)
+        {
+            this.key_handle = key_handle;
+            this.x509_certificate = x509_certificate;
+            this.mac = mac;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="setCertificatePath.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
+    public class setCertificatePath_Response
+    {
+        public setCertificatePath_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getVersion", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
+    public class getVersion_Request
+    {
+        public getVersion_Request()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getVersion.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
+    public class getVersion_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="return", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public string @return;
+
+        public getVersion_Response()
+        {
+        }
     }
 
     public class SKSWSProxy : System.ServiceModel.ClientBase<SKSWSProxyInterface>
@@ -65,19 +230,26 @@ namespace org.webpki.sks.ws.client
         }
 
         public void abortProvisioningSession(int keyHandle)
-        (
+        {
+            base.Channel.abortProvisioningSession(new abortProvisioningSession_Request(keyHandle));
         }
 
         public void getKeyProtectionInfo(int key_handle, out string protection_status, out sbyte blah, out List<byte[]> x509_certificate)
-        (
+        {
+            getKeyProtectionInfo_Response _res = base.Channel.getKeyProtectionInfo(new getKeyProtectionInfo_Request(key_handle));
+            protection_status = _res.protection_status;
+            blah = _res.blah;
+            x509_certificate = _res.x509_certificate;
         }
 
         public void setCertificatePath(int key_handle, List<byte[]> x509_certificate, byte[] mac)
-        (
+        {
+            base.Channel.setCertificatePath(new setCertificatePath_Request(key_handle, x509_certificate, mac));
         }
 
         public string getVersion()
-        (
+        {
+            return base.Channel.getVersion(new getVersion_Request()).@return;
         }
     }
 }
