@@ -150,7 +150,6 @@ public class XMLSchemaCache
     //
     private static void parseError (String domain, String key, XMLParseException exception) throws XNIException
       {
-        System.out.println ("baj");
         throw exception;
       }
 

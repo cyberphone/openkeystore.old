@@ -44,7 +44,7 @@
  */
 ]]></ClassHeader>
    </JavaClient>
-   <DotNetClient ClassName="org.webpki.sks.ws.client.SKSWSProxy">
+   <DotNetClient ClassName="org.webpki.sks.ws.client.SKSWSProxy" PathAsDirectory="false">
      <ClassHeader><![CDATA[    /*
      *  This is the .NET client :-)
      */

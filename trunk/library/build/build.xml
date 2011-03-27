@@ -42,8 +42,8 @@
 	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSExceptionBean.java"/>
 	      <available file="${src_dir}/org/webpki/sks/ws/client/SKSException_Exception.java"/>
 	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSException_Exception.java"/>
-	      <available file="${dot_net_dir}/org/webpki/sks/ws/client/SKSWSProxy.cs"/>
-		  <uptodate srcfile="${ws.def}" targetfile="${dot_net_dir}/org/webpki/sks/ws/client/SKSWSProxy.cs"/>
+	      <available file="${dot_net_dir}/src/SKSWSProxy.cs"/>
+		  <uptodate srcfile="${ws.def}" targetfile="${dot_net_dir}/src/SKSWSProxy.cs"/>
 	      <available file="${wsdl_dir}/SKSWS.wsdl"/>
 	      <uptodate srcfile="${ws.def}" targetfile="${wsdl_dir}/SKSWS.wsdl"/>
 	      <uptodate srcfile="${src_dir}/org/webpki/tools/WSCreator.java" targetfile="${wsdl_dir}/SKSWS.wsdl"/>
@@ -77,7 +77,7 @@
 	
   <target name="_ws-gen">
   	<echo message="Updating '${cmd}'"/>
-  	<java fork="yes" classname="org.webpki.tools.WSCreator">
+  	<java fork="yes" classname="org.webpki.tools.WSCreator" failonerror="true">
   		<classpath>
             <pathelement path="${temp_dir}"/>
   			 <fileset dir="${ext.jar}">
@@ -106,7 +106,7 @@
     </antcall>
     <antcall target="_ws-gen">
       <param name="cmd" value="dotnetclient"/>
-      <param name="out" value="${dot_net_dir}"/>
+      <param name="out" value="${dot_net_dir}/src"/>
     </antcall>
   </target>
 	

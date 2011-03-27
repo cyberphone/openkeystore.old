@@ -114,6 +114,9 @@
          <!-- C# Class Name -->
          <xs:attribute name="ClassName" type="wsc:xmlid" use="required"/>
 
+         <!-- Use path as directory like for Java -->
+         <xs:attribute name="PathAsDirectory" type="xs:boolean" use="required"/>
+
       </xs:complexType>
    </xs:element>
 

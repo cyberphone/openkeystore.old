@@ -98,6 +98,7 @@ public class WSCreator extends XMLObjectWrapper
             rd.getNext (elem);
             schema_validation = attr.getBooleanConditional ("SchemaValidation");
             String canonicalized_class_name = attr.getString ("ClassName");
+            boolean path_as_directory = attr.getBooleanConditional ("PathAsDirectory", true);
             class_name = canonicalized_class_name;
             path = output_directory;
             int i = canonicalized_class_name.lastIndexOf ('.');
@@ -105,10 +106,13 @@ public class WSCreator extends XMLObjectWrapper
               {
                 class_name = canonicalized_class_name.substring (i + 1);
                 package_name = canonicalized_class_name.substring (0, i);
-                path += File.separatorChar;
-                for (int j = 0; j < i; j++)
+                if (path_as_directory)
                   {
-                    path += canonicalized_class_name.charAt (j) == '.' ? File.separatorChar : canonicalized_class_name.charAt (j);
+                    path += File.separatorChar;
+                    for (int j = 0; j < i; j++)
+                      {
+                        path += canonicalized_class_name.charAt (j) == '.' ? File.separatorChar : canonicalized_class_name.charAt (j);
+                      }
                   }
               }
             rd.getChild ();
@@ -1008,7 +1012,7 @@ public class WSCreator extends XMLObjectWrapper
         System.exit (3);
       }
 
-    public static void main (String args[]) throws IOException
+    public static void main (String args[])
       {
         if (args.length != 3) show ();
         if (args[0].equals (JCLIENT)) jclient = true;
@@ -1018,9 +1022,17 @@ public class WSCreator extends XMLObjectWrapper
         else
           show ();
         output_directory = args[2];
-        XMLSchemaCache xsc = new XMLSchemaCache ();
-        xsc.addWrapper (WSCreator.class);
-        xsc.parse (ArrayUtil.readFile (args[1]));
+        try
+          {
+            XMLSchemaCache xsc = new XMLSchemaCache ();
+            xsc.addWrapper (WSCreator.class);
+            xsc.parse (ArrayUtil.readFile (args[1]));
+          }
+        catch (IOException iox)
+          {
+            iox.printStackTrace ();
+            System.exit (3);
+          }
       }
 
   }
