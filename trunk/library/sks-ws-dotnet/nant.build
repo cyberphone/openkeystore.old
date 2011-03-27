@@ -1,12 +1,7 @@
 <?xml version="1.0"?>
-<!--
-    This build file is intended to show off some of NAnt's capabilities in 
-    building Visual Basic.NET programs.  The .vbproj file is also located 
-    in the directory so you can compare Visual Studio's project file with 
-    this one.
--->
+<!-- NAnt build file for .NET SKSWS -->
 <project name="SKSWS" default="build">
-    <property name="basename" value="sksws"/>
+    <property name="basename" value="org.webpki.sks.ws.client"/>
     <property name="debug" value="false"/>
     <property name="build.dir" value="../dist"/>
     <property name="src.dir" value="src"/>
@@ -16,7 +11,8 @@
       <csc target="library"
            output="${build.dir}/${basename}.dll" 
            debug="${debug}"
-           rebuild="true">
+           rebuild="true"
+           keyfile="b651fd748a51c307.snk">
             <sources basedir="${src.dir}">
                 <include name="**/*.cs"/>
             </sources>

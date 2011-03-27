@@ -638,7 +638,11 @@ public class WSCreator extends XMLObjectWrapper
         FileOutputStream file = dotnet_client_pck.jfile;
         String class_name = meth.getNetWrapper (request);
 
-        write (file, "\n" + "    [System.Diagnostics.DebuggerStepThroughAttribute()]\n" + "    [System.CodeDom.Compiler.GeneratedCodeAttribute(\"System.ServiceModel\", \"3.0.0.0\")]\n" + "    [System.ServiceModel.MessageContractAttribute(WrapperName=\"" + (request ? meth.getXMLName () : meth.getXMLResponseName ()) + "\", WrapperNamespace=\"" + tns + "\", IsWrapped=true)]\n" + "    public class " + class_name + "\n" + "    {\n");
+        write (file, "\n" +
+            "    [System.Diagnostics.DebuggerStepThroughAttribute()]\n" +
+            "    [System.ServiceModel.MessageContractAttribute(WrapperName=\"" + (request ? meth.getXMLName () : meth.getXMLResponseName ()) + "\", WrapperNamespace=\"" + tns + "\", IsWrapped=true)]\n" +
+            "    public class " + class_name + "\n" +
+            "    {\n");
         int order = 0;
         for (Property prop : props)
           {
@@ -667,7 +671,11 @@ public class WSCreator extends XMLObjectWrapper
         FileOutputStream file = dotnet_client_pck.jfile;
         writeln (file, license_header + "namespace " + dotnet_client_pck.package_name + "\n{\n");
         writeGenerate (file);
-        write (file, "\n" + "    using System.Collections.Generic;\n\n" + dotnet_client_pck.class_header + "    [System.CodeDom.Compiler.GeneratedCodeAttribute(\"System.ServiceModel\", \"3.0.0.0\")]\n" + "    [System.ServiceModel.ServiceContractAttribute(Namespace=\"" + tns + "\")]\n" + "    public interface " + dotnet_client_pck.class_name + "Interface\n    {\n");
+        write (file, "\n" +
+            "    using System.Collections.Generic;\n\n" + dotnet_client_pck.class_header +
+            "    [System.ServiceModel.ServiceContractAttribute(Namespace=\"" + tns + "\")]\n" +
+            "    public interface " + dotnet_client_pck.class_name + "Interface\n" +
+            "    {\n");
         boolean next = false;
         for (Method meth : methods)
           {
@@ -690,7 +698,23 @@ public class WSCreator extends XMLObjectWrapper
         for (String ex : exceptions.keySet ())
           {
             WSException wse = exceptions.get (ex);
-            write (file, "\n" + "    [System.Diagnostics.DebuggerStepThroughAttribute()]\n" + "    [System.CodeDom.Compiler.GeneratedCodeAttribute(\"System.Runtime.Serialization\", \"3.0.0.0\")]\n" + "    public class " + wse.getName () + "Attributes : System.Xml.Serialization.IXmlSerializable\n" + "    {\n" + "        private System.Xml.XmlNode[] nodes;\n\n" + "        public System.Xml.Schema.XmlSchema GetSchema()\n" + "        {\n" + "            return null;\n" + "        }\n\n" + "        public void ReadXml(System.Xml.XmlReader reader)\n" + "        {\n" + "            nodes = System.Runtime.Serialization.XmlSerializableServices.ReadNodes(reader);\n" + "        }\n\n" + "        public void WriteXml(System.Xml.XmlWriter writer)\n" + "        {\n" + "            System.Runtime.Serialization.XmlSerializableServices.WriteNodes(writer, nodes);\n" + "        }\n");
+            write (file, "\n" +
+                "    [System.Diagnostics.DebuggerStepThroughAttribute()]\n" + 
+                "    public class " + wse.getName () + "Attributes : System.Xml.Serialization.IXmlSerializable\n" +
+                "    {\n" + 
+                "        private System.Xml.XmlNode[] nodes;\n\n" +
+                "        public System.Xml.Schema.XmlSchema GetSchema()\n" +
+                "        {\n" +
+                "            return null;\n" +
+                "        }\n\n" +
+                "        public void ReadXml(System.Xml.XmlReader reader)\n" +
+                "        {\n" +
+                "            nodes = System.Runtime.Serialization.XmlSerializableServices.ReadNodes(reader);\n" +
+                "        }\n\n" +
+                "        public void WriteXml(System.Xml.XmlWriter writer)\n" +
+                "        {\n" +
+                "            System.Runtime.Serialization.XmlSerializableServices.WriteNodes(writer, nodes);\n" +
+                "        }\n");
             int index = 0;
             for (Property prop : wse.properties)
               {

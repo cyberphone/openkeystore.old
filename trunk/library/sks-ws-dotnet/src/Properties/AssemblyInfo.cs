@@ -5,13 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("sksws")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("sksws")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2011")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyTitle("SKS Web Service for .NET V4.0")]
+[assembly: AssemblyDescription("A .NET assembly for supporting SKS (Secure Key Store) in .NET applications")]
+[assembly: AssemblyConfiguration("Windows")]
+[assembly: AssemblyCompany("WebPKI.org")]
+[assembly: AssemblyProduct("org.webpki.sks.ws.client")]
+[assembly: AssemblyCopyright("Using Apache 2.0 License")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

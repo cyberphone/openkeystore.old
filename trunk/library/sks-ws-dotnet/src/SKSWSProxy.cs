@@ -26,7 +26,6 @@ namespace org.webpki.sks.ws.client
     /*
      *  This is the .NET client :-)
      */
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
     [System.ServiceModel.ServiceContractAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61")]
     public interface SKSWSProxyInterface
     {
@@ -51,7 +50,6 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "3.0.0.0")]
     public class SKSExceptionAttributes : System.Xml.Serialization.IXmlSerializable
     {
         private System.Xml.XmlNode[] nodes;
@@ -83,7 +81,6 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
     [System.ServiceModel.MessageContractAttribute(WrapperName="abortProvisioningSession", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
     public class abortProvisioningSession_Request
     {
@@ -102,7 +99,6 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
     [System.ServiceModel.MessageContractAttribute(WrapperName="abortProvisioningSession.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
     public class abortProvisioningSession_Response
     {
@@ -112,7 +108,6 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
     [System.ServiceModel.MessageContractAttribute(WrapperName="getKeyProtectionInfo", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
     public class getKeyProtectionInfo_Request
     {
@@ -131,7 +126,6 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
     [System.ServiceModel.MessageContractAttribute(WrapperName="getKeyProtectionInfo.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
     public class getKeyProtectionInfo_Response
     {
@@ -153,7 +147,6 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
     [System.ServiceModel.MessageContractAttribute(WrapperName="setCertificatePath", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
     public class setCertificatePath_Request
     {
@@ -182,7 +175,6 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
     [System.ServiceModel.MessageContractAttribute(WrapperName="setCertificatePath.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
     public class setCertificatePath_Response
     {
@@ -192,7 +184,6 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
     [System.ServiceModel.MessageContractAttribute(WrapperName="getVersion", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
     public class getVersion_Request
     {
@@ -202,7 +193,6 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
     [System.ServiceModel.MessageContractAttribute(WrapperName="getVersion.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
     public class getVersion_Response
     {
