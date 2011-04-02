@@ -34,7 +34,7 @@ public class SKSWS extends Service
       {
         super (SKSWS.class.getResource ("/META-INF/SKSWS.wsdl"),
                new QName ("http://xmlns.webpki.org/sks/v0.61", "SKSWS"));
-       }
+      }
 
     @WebEndpoint(name="SKSWS.Port")
     public SKSWSProxy getSKSWSPort ()

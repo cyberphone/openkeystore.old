@@ -23,6 +23,8 @@ namespace org.webpki.sks.ws.client
 
     using System.Collections.Generic;
 
+    using System.Security.Cryptography.X509Certificates;
+
     /*
      *  This is the .NET client :-)
      */
@@ -139,7 +141,7 @@ namespace org.webpki.sks.ws.client
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=2)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="X509Certificate", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public List<byte[]> x509_certificate;
+        public List<byte[]> certificate_path;
 
         public getKeyProtectionInfo_Response()
         {
@@ -156,7 +158,7 @@ namespace org.webpki.sks.ws.client
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=1)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="X509Certificate", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public List<byte[]> x509_certificate;
+        public List<byte[]> certificate_path;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=2)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
@@ -166,10 +168,10 @@ namespace org.webpki.sks.ws.client
         {
         }
 
-        public setCertificatePath_Request(int key_handle, List<byte[]> x509_certificate, byte[] mac)
+        public setCertificatePath_Request(int key_handle, List<byte[]> certificate_path, byte[] mac)
         {
             this.key_handle = key_handle;
-            this.x509_certificate = x509_certificate;
+            this.certificate_path = certificate_path;
             this.mac = mac;
         }
     }
@@ -207,6 +209,27 @@ namespace org.webpki.sks.ws.client
 
     public class SKSWSProxy : System.ServiceModel.ClientBase<SKSWSProxyInterface>
     {
+	    X509Certificate2[] blist2certs (List<byte[]> blist)
+        {
+            X509Certificate2[] certs = new X509Certificate2[blist.Count];
+            int i = 0;
+            foreach (byte[] b_arr in blist)
+            {
+                certs[i++] = new X509Certificate2(b_arr);
+            }
+            return i == 0 ? null : certs;
+        }
+
+	    List<byte[]> certs2blist (X509Certificate2[] certs)
+        {
+            List<byte[]> blist = new List<byte[]>();
+            if (certs != null) foreach (X509Certificate2 cert in certs)
+            {
+                blist.Add (cert.RawData);
+            }
+            return blist;
+        }
+
         public SKSWSProxy()
         {
         }
@@ -224,17 +247,17 @@ namespace org.webpki.sks.ws.client
             base.Channel.abortProvisioningSession(new abortProvisioningSession_Request(keyHandle));
         }
 
-        public void getKeyProtectionInfo(int key_handle, out string protection_status, out sbyte blah, out List<byte[]> x509_certificate)
+        public void getKeyProtectionInfo(int key_handle, out string protection_status, out sbyte blah, out X509Certificate2[] certificate_path)
         {
             getKeyProtectionInfo_Response _res = base.Channel.getKeyProtectionInfo(new getKeyProtectionInfo_Request(key_handle));
             protection_status = _res.protection_status;
             blah = _res.blah;
-            x509_certificate = _res.x509_certificate;
+            certificate_path = blist2certs(_res.certificate_path);
         }
 
-        public void setCertificatePath(int key_handle, List<byte[]> x509_certificate, byte[] mac)
+        public void setCertificatePath(int key_handle, X509Certificate2[] certificate_path, byte[] mac)
         {
-            base.Channel.setCertificatePath(new setCertificatePath_Request(key_handle, x509_certificate, mac));
+            base.Channel.setCertificatePath(new setCertificatePath_Request(key_handle, certs2blist(certificate_path), mac));
         }
 
         public string getVersion()

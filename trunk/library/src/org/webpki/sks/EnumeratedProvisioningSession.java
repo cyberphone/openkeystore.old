@@ -23,7 +23,7 @@ import java.security.PublicKey;
 
 public class EnumeratedProvisioningSession
   {
-    private static final int INIT_EXIT = 0xFFFFFFFF;
+    private static final int INIT_EXIT = 0;
 
     int provisioning_handle;
     

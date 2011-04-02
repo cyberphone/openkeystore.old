@@ -87,18 +87,43 @@ public class WSCreator extends XMLObjectWrapper
         String path;
         boolean next;
         boolean schema_validation;
-        String support_code = "";
+        String jserver_support_code = "";
+        String dot_net_support_code = "";
 
         abstract String decoration ();
 
         abstract String class_interface ();
+        
+        abstract boolean is_server ();
 
-        Package (DOMReaderHelper rd, String elem)
+        Package (DOMReaderHelper rd, String elem, WSCreator owner, boolean dot_net) throws IOException
           {
             rd.getNext (elem);
             schema_validation = attr.getBooleanConditional ("SchemaValidation");
             String canonicalized_class_name = attr.getString ("ClassName");
             boolean path_as_directory = attr.getBooleanConditional ("PathAsDirectory", true);
+            String[] imports = attr.getListConditional ("Imports");
+            if (jserver && is_server ())
+              {
+                if (imports != null)
+                  {
+                    for (String string : imports)
+                      {
+                        owner.addImport (string);
+                      }
+                  }
+                if (add_main = attr.getBooleanConditional ("AddMain"))
+                  {
+                    owner.addImport ("javax.xml.ws.Endpoint");
+                  }
+              }
+            else if (imports != null && dot_net)
+              {
+                for (String string : imports)
+                  {
+                    dotnet_imports.add (string);
+                  }
+              }
             class_name = canonicalized_class_name;
             path = output_directory;
             int i = canonicalized_class_name.lastIndexOf ('.');
@@ -116,9 +141,30 @@ public class WSCreator extends XMLObjectWrapper
                   }
               }
             rd.getChild ();
-            if (rd.hasNext ())
+            if (rd.hasNext ("ClassHeader"))
               {
                 class_header = rd.getString ("ClassHeader");
+              }
+            if ((is_server() || dot_net) && rd.hasNext ("SupportCode")) 
+              {
+                if (is_server ())
+                  {
+                    jserver_support_code = rd.getString ("SupportCode");
+                  }
+                else
+                  {
+                    dot_net_support_code = rd.getString ("SupportCode");
+                  }
+              }
+            if (dot_net) while (rd.hasNext ("RewriteRule"))
+              {
+                rd.getNext ("RewriteRule");
+                String rule = attr.getString ("DotNetRule");
+                if (dot_net_rules.put (rule, new DotNetRule (attr.getString ("ActualType"),
+                                                             attr.getString ("Conversion"))) != null)
+                  {
+                    bad ("Duplicate rewrite rule: " + rule);
+                  }
               }
             rd.getParent ();
           }
@@ -137,7 +183,7 @@ public class WSCreator extends XMLObjectWrapper
         public void writeImports () throws IOException
           {
             String last_import_pack = "";
-            for (String impstr : jimports)
+            for (String impstr : dotnet_gen ? dotnet_imports : jimports)
               {
                 int i = impstr.lastIndexOf ('.');
                 if (!last_import_pack.equals (impstr.substring (0, i)))
@@ -145,18 +191,19 @@ public class WSCreator extends XMLObjectWrapper
                     write (jfile, "\n");
                     last_import_pack = impstr.substring (0, i);
                   }
-                writeln (jfile, "import " + impstr + ";");
+                writeln (jfile, (dotnet_gen ? "    using " : "import ") + impstr + ";");
               }
           }
       }
 
     class ServerPack extends Package
       {
-        ServerPack (DOMReaderHelper rd)
+        ServerPack (DOMReaderHelper rd, WSCreator parent) throws IOException
           {
-            super (rd, "JavaServer");
+            super (rd, "JavaServer", parent, false);
           }
 
+        @Override
         String decoration ()
           {
             return ",\n" +
@@ -165,25 +212,34 @@ public class WSCreator extends XMLObjectWrapper
                    "            wsdlLocation=\"" + wsdl_location + "\"";
           }
 
+        @Override
         String class_interface ()
           {
             return "class";
+          }
+
+        @Override
+        boolean is_server ()
+          {
+            return true;
           }
 
       }
 
     class ClientPack extends Package
       {
-        ClientPack (DOMReaderHelper rd, String str)
+        ClientPack (DOMReaderHelper rd, boolean dot_net, WSCreator parent) throws IOException
           {
-            super (rd, str);
+            super (rd, dot_net ? "DotNetClient" : "JavaClient", parent, dot_net);
           }
 
+        @Override
         String decoration ()
           {
             return "";
           }
 
+        @Override
         String class_interface ()
           {
             return "interface";
@@ -196,6 +252,12 @@ public class WSCreator extends XMLObjectWrapper
             writePackage ();
           }
 
+        @Override
+        boolean is_server ()
+          {
+            return false;
+          }
+
       }
 
     ServerPack jserver_pck;
@@ -205,6 +267,8 @@ public class WSCreator extends XMLObjectWrapper
     ClientPack dotnet_client_pck;
 
     TreeSet<String> jimports = new TreeSet<String> ();
+
+    TreeSet<String> dotnet_imports = new TreeSet<String> ();
 
     DOMAttributeReaderHelper attr;
 
@@ -259,6 +323,8 @@ public class WSCreator extends XMLObjectWrapper
         boolean nullable;
 
         boolean listtype;
+        
+        DotNetRule dot_net_rule;
 
         String jName (boolean object_type)
           {
@@ -268,6 +334,31 @@ public class WSCreator extends XMLObjectWrapper
         String nName ()
           {
             return listtype ? "List<" + data_type.csname + ">" : data_type.csname;
+          }
+        
+        String nRealTypeName ()
+          {
+            return (dot_net_rule == null ? nName () : dot_net_rule.simple_type) +
+                    ((listtype && dot_net_rule != null) ? "[] " : " ") + name;
+          }
+
+        public String nArgument (String prefix)
+          {
+            String arg = prefix  + name;
+            if (dot_net_rule != null)
+              {
+                String sub = arg;
+                arg = dot_net_rule.conversion;
+                int i = 0;
+                while (i < arg.length ())
+                  {
+                    if (arg.charAt (i++) == '$')
+                      {
+                        arg = arg.substring (0, i - 1) + sub + arg.substring (i);
+                      }
+                  }
+              }
+            return arg;
           }
       }
 
@@ -297,7 +388,7 @@ public class WSCreator extends XMLObjectWrapper
         Collection<Property> inputs;
         Collection<Property> outputs;
 
-        private void nTypedList (boolean next, boolean out, Collection<Property> props) throws IOException
+        private void nTypedList (boolean next, boolean out, boolean real_type, Collection<Property> props) throws IOException
           {
             for (Property prop : props)
               {
@@ -309,18 +400,18 @@ public class WSCreator extends XMLObjectWrapper
                   {
                     next = true;
                   }
-                write (dotnet_client_pck.jfile, (out ? "out " : "") + prop.nName () + " " + prop.name);
+                write (dotnet_client_pck.jfile, (out ? "out " : "") + (real_type ? prop.nRealTypeName () : prop.nName () + " " + prop.name));
               }
           }
 
-        public void writeNetTypedInput () throws IOException
+        public void writeNetTypedInput (boolean real_type) throws IOException
           {
-            nTypedList (false, false, inputs);
+            nTypedList (false, false, real_type, inputs);
           }
 
         public void writeNetTypedOutput () throws IOException
           {
-            nTypedList (inputs.size () != 0, true, outputs);
+            nTypedList (inputs.size () != 0, true, true, outputs);
           }
 
         public String getNetWrapper (boolean request)
@@ -344,12 +435,27 @@ public class WSCreator extends XMLObjectWrapper
           }
 
         Collection<Property> properties;
-
+      }
+    
+    class DotNetRule
+      {
+        DotNetRule (String full_path, String conversion)
+          {
+            int i = full_path.lastIndexOf ('.');
+            using_declaration = full_path.substring (0, i);
+            simple_type = full_path.substring (i + 1);
+            this.conversion = conversion;
+            dotnet_imports.add (using_declaration);
+          }
+        
+        String using_declaration;
+        String simple_type;
+        String conversion;
       }
 
-    private HashSet<String> xml_names = new HashSet<String> ();
     private LinkedHashMap<String, WSException> exceptions = new LinkedHashMap<String, WSException> ();
     private Vector<Method> methods = new Vector<Method> ();
+    private LinkedHashMap<String, DotNetRule> dot_net_rules = new LinkedHashMap<String, DotNetRule> ();
     private boolean add_main;
 
     @Override
@@ -394,33 +500,16 @@ public class WSCreator extends XMLObjectWrapper
 
         write (wsdl_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<!--\n" + license_header + "\n");
         writeGenerate (wsdl_file);
-        write (wsdl_file, "\n-->\n" + "<wsdl:definitions targetNamespace=\"" + tns + "\"\n" + "                  xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\"\n" + "                  xmlns:tns=\"" + tns + "\"\n" + "                  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" + "                  xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\">\n\n" + "  <wsdl:types>\n\n" + "    <xs:schema targetNamespace=\"" + tns + "\"\n" + "               elementFormDefault=\"" + (qualified_ns ? "qualified" : "unqualified") + "\" attributeFormDefault=\"unqualified\">\n");
+        write (wsdl_file, "\n-->\n" + "<wsdl:definitions targetNamespace=\"" + tns + "\"\n" +
+            "                  xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\"\n" + "                  xmlns:tns=\"" + tns + "\"\n" + "                  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" + "                  xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\">\n\n" + "  <wsdl:types>\n\n" + "    <xs:schema targetNamespace=\"" + tns + "\"\n" + "               elementFormDefault=\"" + (qualified_ns ? "qualified" : "unqualified") + "\" attributeFormDefault=\"unqualified\">\n");
 
         if (rd.hasNext ("JavaServer"))
           {
-            jserver_pck = new ServerPack (rd);
+            jserver_pck = new ServerPack (rd, this);
             if (jserver)
               {
                 open (jserver_pck, true);
-                String[] imports = attr.getListConditional ("Imports");
-                if (imports != null)
-                  {
-                    for (String string : imports)
-                      {
-                        addImport (string);
-                      }
-                  }
-                if (add_main = attr.getBooleanConditional ("AddMain"))
-                  {
-                    addImport ("javax.xml.ws.Endpoint");
-                  }
               }
-            rd.getChild ();
-            if (rd.hasNext ("SupportCode"))
-              {
-                jserver_pck.support_code = rd.getString ("SupportCode");
-              }
-            rd.getParent ();
           }
         else if (jserver)
           {
@@ -428,7 +517,7 @@ public class WSCreator extends XMLObjectWrapper
           }
         if (rd.hasNext ("JavaClient"))
           {
-            jclient_pck = new ClientPack (rd, "JavaClient");
+            jclient_pck = new ClientPack (rd, false, this);
             if (jclient)
               {
                 open (jclient_pck, true);
@@ -440,7 +529,8 @@ public class WSCreator extends XMLObjectWrapper
           }
         if (rd.hasNext ("DotNetClient"))
           {
-            dotnet_client_pck = new ClientPack (rd, "DotNetClient");
+            dotnet_client_pck = new ClientPack (rd, true, this);
+            dotnet_imports.add ("System.Collections.Generic");
             if (dotnet_gen)
               {
                 open (dotnet_client_pck, false);
@@ -531,7 +621,10 @@ public class WSCreator extends XMLObjectWrapper
 
         for (Method meth : methods)
           {
-            write (wsdl_file, "\n" + "    <wsdl:operation name=\"" + meth.getXMLName () + "\">\n" + "      <wsdl:input message=\"tns:" + meth.getXMLName () + "\"/>\n" + "      <wsdl:output message=\"tns:" + meth.getXMLResponseName () + "\"/>\n");
+            write (wsdl_file, "\n" + 
+                              "    <wsdl:operation name=\"" + meth.getXMLName () + "\">\n" +
+                              "      <wsdl:input message=\"tns:" + meth.getXMLName () + "\"/>\n" +
+                              "      <wsdl:output message=\"tns:" + meth.getXMLResponseName () + "\"/>\n");
             for (String exception : meth.execptions)
               {
                 String xml_name = exceptions.get (exception).getXMLName ();
@@ -570,7 +663,24 @@ public class WSCreator extends XMLObjectWrapper
             addImport ("javax.xml.ws.Service");
             addImport ("javax.xml.namespace.QName");
             jclient_pck.writeImports ();
-            writeln (jclient_pck.jfile, "\n" + "@WebServiceClient(name=\"" + service_name + "\",\n" + "                  targetNamespace=\"" + tns + "\")\n" + "public class " + service_name + " extends Service\n  {\n" + "    public " + service_name + " ()\n" + "      {\n" + "        super (" + service_name + ".class.getResource (\"/" + wsdl_location + "\"),\n" + "               new QName (\"" + tns + "\", \"" + service_name + "\"));\n" + "       }\n\n" + "    @WebEndpoint(name=\"" + service_name + ".Port\")\n" + "    public " + jclient_pck.class_name + " get" + service_name + "Port ()\n" + "      {\n" + "        return super.getPort (new QName (\"" + tns + "\", \"" + service_name + ".Port\"),\n" + "                              " + jclient_pck.class_name + ".class);\n" + "      }\n" + "  }");
+            writeln (jclient_pck.jfile, "\n" +
+                "@WebServiceClient(name=\"" + service_name + "\",\n" +
+                "                  targetNamespace=\"" + tns + "\")\n" +
+                "public class " + service_name + " extends Service\n" +
+                "  {\n" +
+                "    public " + service_name + " ()\n" +
+                "      {\n" +
+                "        super (" + service_name + ".class.getResource (\"/" + wsdl_location + "\"),\n" +
+                "               new QName (\"" + tns + "\", \"" + service_name + "\"));\n" +
+                "      }\n" +
+                "\n" +
+                "    @WebEndpoint(name=\"" + service_name + ".Port\")\n" +
+                "    public " + jclient_pck.class_name + " get" + service_name + "Port ()\n" +
+                "      {\n" +
+                "        return super.getPort (new QName (\"" + tns + "\", \"" + service_name + ".Port\"),\n" +
+                "                              " + jclient_pck.class_name + ".class);\n" +
+                "      }\n" +
+                "  }");
             close (jclient_pck);
             for (WSException wse : exceptions.values ())
               {
@@ -655,7 +765,7 @@ public class WSCreator extends XMLObjectWrapper
         if (request && props.size () != 0)
           {
             write (file, "\n        public " + class_name + "(");
-            meth.writeNetTypedInput ();
+            meth.writeNetTypedInput (false);
             write (file, ")\n        {\n");
             for (Property prop : meth.inputs)
               {
@@ -671,8 +781,8 @@ public class WSCreator extends XMLObjectWrapper
         FileOutputStream file = dotnet_client_pck.jfile;
         writeln (file, license_header + "namespace " + dotnet_client_pck.package_name + "\n{\n");
         writeGenerate (file);
-        write (file, "\n" +
-            "    using System.Collections.Generic;\n\n" + dotnet_client_pck.class_header +
+        dotnet_client_pck.writeImports ();
+        write (file, "\n" + dotnet_client_pck.class_header +
             "    [System.ServiceModel.ServiceContractAttribute(Namespace=\"" + tns + "\")]\n" +
             "    public interface " + dotnet_client_pck.class_name + "Interface\n" +
             "    {\n");
@@ -724,7 +834,11 @@ public class WSCreator extends XMLObjectWrapper
                   {
                     value = "System.Int32.Parse(" + value + ")";
                   }
-                writeln (file, "\n        public " + prop.nName () + " get" + methn.substring (0, 1).toUpperCase () + methn.substring (1) + "()\n        {\n            return " + value + ";\n        }");
+                writeln (file, "\n" +
+                               "        public " + prop.nName () + " get" + methn.substring (0, 1).toUpperCase () + methn.substring (1) + "()\n" + 
+                               "        {\n" +
+                               "            return " + value + ";\n" +
+                               "        }");
               }
             write (file, "    }\n");
           }
@@ -734,7 +848,22 @@ public class WSCreator extends XMLObjectWrapper
             writeNetWrapper (true, meth);
             writeNetWrapper (false, meth);
           }
-        write (file, "\n" + "    public class " + dotnet_client_pck.class_name + " : System.ServiceModel.ClientBase<" + dotnet_client_pck.class_name + "Interface>\n" + "    {\n" + "        public " + dotnet_client_pck.class_name + "()\n" + "        {\n" + "        }\n\n" + "        public " + dotnet_client_pck.class_name + "(string endpointConfigurationName) " + ": base(endpointConfigurationName)\n" + "        {\n" + "        }\n\n" + "        public " + dotnet_client_pck.class_name + "(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) " + ": base(binding, remoteAddress)\n" + "        {\n" + "        }\n");
+        write (file, "\n" +
+                     "    public class " + dotnet_client_pck.class_name + " : System.ServiceModel.ClientBase<" + dotnet_client_pck.class_name + "Interface>\n" +
+                     "    {" + dotnet_client_pck.dot_net_support_code + "\n" +
+                     "        public " + dotnet_client_pck.class_name + "()\n" +
+                     "        {\n" +
+                     "        }\n\n" +
+                     "        public " + dotnet_client_pck.class_name + 
+                                         "(string endpointConfigurationName) " +
+                                         ": base(endpointConfigurationName)\n" +
+                     "        {\n" +
+                     "        }\n\n" +
+                     "        public " + dotnet_client_pck.class_name + 
+                                         "(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) " + 
+                                         ": base(binding, remoteAddress)\n" +
+                     "        {\n" +
+                     "        }\n");
         for (Method meth : methods)
           {
             write (file, "\n" + "        public ");
@@ -749,12 +878,14 @@ public class WSCreator extends XMLObjectWrapper
                 write (file, prop.nName ());
               }
             write (file, " " + meth.name + "(");
-            meth.writeNetTypedInput ();
+            meth.writeNetTypedInput (true);
             if (meth.outputs.size () > 1)
               {
                 meth.writeNetTypedOutput ();
               }
-            write (file, ")\n" + "        {\n" + "            ");
+            write (file, ")\n" +
+                "        {\n" + 
+                "            ");
             if (meth.outputs.size () == 1)
               {
                 write (file, "return ");
@@ -775,7 +906,7 @@ public class WSCreator extends XMLObjectWrapper
                   {
                     next = true;
                   }
-                write (file, prop.name);
+                write (file, prop.nArgument (""));
               }
             write (file, "))");
             if (meth.outputs.size () == 1)
@@ -785,7 +916,7 @@ public class WSCreator extends XMLObjectWrapper
             writeln (file, ";");
             if (meth.outputs.size () > 1) for (Property prop : meth.outputs)
               {
-                write (file, "            " + prop.name + " = " + "_res." + prop.name + ";\n");
+                write (file, "            " + prop.name + " = " + prop.nArgument ("_res.") + ";\n");
               }
             write (file, "        }\n");
           }
@@ -814,11 +945,11 @@ public class WSCreator extends XMLObjectWrapper
           {
             write (jfile, "@com.sun.xml.ws.developer.SchemaValidation\n");
           }
-        if (pck.support_code.length () > 0)
+        if (pck.jserver_support_code.length () > 0)
           {
             pck.next = true;
           }
-        write (jfile, "@WebService(serviceName=\"" + service_name + "\",\n" + "            targetNamespace=\"" + tns + "\"" + pck.decoration () + ")\npublic " + pck.class_interface () + " " + pck.class_name + "\n  {\n" + pck.support_code);
+        write (jfile, "@WebService(serviceName=\"" + service_name + "\",\n" + "            targetNamespace=\"" + tns + "\"" + pck.decoration () + ")\npublic " + pck.class_interface () + " " + pck.class_name + "\n  {\n" + pck.jserver_support_code);
       }
 
     private void javaTerminate (Package pck) throws IOException
@@ -827,8 +958,16 @@ public class WSCreator extends XMLObjectWrapper
           {
             if (add_main)
               {
-                writeln (pck.jfile, "\n" + "    public static void main (String[] args)\n" + "      {\n" + "        if (args.length != 1)\n" + "          {\n" + "            System.out.println (\"Missing URL\");\n" + "          }\n" + "        Endpoint endpoint = Endpoint.create (new " + pck.class_name + " ());\n" + "        endpoint.publish (args[0]);\n" + "      }");
-
+                writeln (pck.jfile, "\n" + 
+                                    "    public static void main (String[] args)\n" +
+                                    "      {\n" +
+                                    "        if (args.length != 1)\n" + 
+                                    "          {\n" +
+                                    "            System.out.println (\"Missing URL\");\n" +
+                                    "          }\n" +
+                                    "        Endpoint endpoint = Endpoint.create (new " + pck.class_name + " ());\n" +
+                                    "        endpoint.publish (args[0]);\n" +
+                                    "      }");
               }
             write (pck.jfile, "  }\n");
             close (pck);
@@ -968,7 +1107,16 @@ public class WSCreator extends XMLObjectWrapper
               {
                 addImport ("java.util.List");
               }
-
+            String dotnet_rule = attr.getStringConditional ("DotNetRule");
+            if (dotnet_rule != null)
+              {
+                DotNetRule dnr = dot_net_rules.get (dotnet_rule);
+                if (dnr == null)
+                  {
+                    bad ("Unknown .NET rule: " + dotnet_rule);
+                  }
+                prop.dot_net_rule = dnr;
+              }
             for (DataType dtype : types)
               {
                 if (dtype.enum_name.equals (type))

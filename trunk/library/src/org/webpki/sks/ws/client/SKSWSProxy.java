@@ -55,7 +55,7 @@ public interface SKSWSProxy
                                       @WebParam(name="blah", mode=WebParam.Mode.OUT)
                                       Holder<Byte> blah,
                                       @WebParam(name="X509Certificate", mode=WebParam.Mode.OUT)
-                                      Holder<List<byte[]>> x509_certificate)
+                                      Holder<List<byte[]>> certificate_path)
     throws SKSException_Exception;
 
     @WebMethod(operationName="setCertificatePath")
@@ -64,7 +64,7 @@ public interface SKSWSProxy
     public void setCertificatePath (@WebParam(name="KeyHandle")
                                     int key_handle,
                                     @WebParam(name="X509Certificate")
-                                    List<byte[]> x509_certificate,
+                                    List<byte[]> certificate_path,
                                     @WebParam(name="MAC")
                                     byte[] mac)
     throws SKSException_Exception;

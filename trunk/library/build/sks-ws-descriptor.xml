@@ -25,18 +25,19 @@
  */
 ]]></LicenseHeader>
    <JavaServer ClassName="org.webpki.sks.ws.server.SKSWSImplementation"
-               Imports="java.util.ArrayList">
+               Imports="java.util.ArrayList
+                        java.security.GeneralSecurityException
+                        java.io.IOException
+                        org.webpki.crypto.test.DemoKeyStore">
      <ClassHeader><![CDATA[/**
  *  This is the server :-)
  */
 ]]></ClassHeader>
-<!--
      <SupportCode><![CDATA[
 	   void localMethod (String epub)
 	     {
 	     }
 ]]></SupportCode>
-  -->
    </JavaServer>
    <JavaClient ClassName="org.webpki.sks.ws.client.SKSWSProxy">
      <ClassHeader><![CDATA[/**
@@ -49,7 +50,35 @@
      *  This is the .NET client :-)
      */
 ]]></ClassHeader>
-   </DotNetClient>
+     <SupportCode><![CDATA[
+	    X509Certificate2[] blist2certs (List<byte[]> blist)
+        {
+            X509Certificate2[] certs = new X509Certificate2[blist.Count];
+            int i = 0;
+            foreach (byte[] b_arr in blist)
+            {
+                certs[i++] = new X509Certificate2(b_arr);
+            }
+            return i == 0 ? null : certs;
+        }
+
+	    List<byte[]> certs2blist (X509Certificate2[] certs)
+        {
+            List<byte[]> blist = new List<byte[]>();
+            if (certs != null) foreach (X509Certificate2 cert in certs)
+            {
+                blist.Add (cert.RawData);
+            }
+            return blist;
+        }
+]]></SupportCode>
+     <RewriteRule DotNetRule="Out.X509"
+                  ActualType="System.Security.Cryptography.X509Certificates.X509Certificate2"
+                  Conversion="blist2certs($)"/>
+     <RewriteRule DotNetRule="In.X509"
+                  ActualType="System.Security.Cryptography.X509Certificates.X509Certificate2"
+                  Conversion="certs2blist($)"/>
+     </DotNetClient>
 
    <Exception ClassName="org.webpki.sks.SKSException">
      <Property Name="error" Type="int"/>
@@ -69,22 +98,57 @@
      <Input Name="key_handle" Type="int" XMLName="keyHandle"/>
      <Output Name="protection_status" Type="string" XMLName="ProtectionStatus"/>
      <Output Name="blah" Type="byte"/>
-     <Output Name="x509_certificate" Type="binary" XMLName="X509Certificate" List="true"/>
+     <Output Name="certificate_path" Type="binary" XMLName="X509Certificate" DotNetRule="Out.X509" List="true"/>
      <Code><![CDATA[
         protection_status.value = "yes";
         blah.value = (byte)(key_handle + 2);
         List<byte[]> certs = new ArrayList<byte[]> ();
-        certs.add (new byte[]{3,4,5});
-        certs.add (new byte[]{3,4,8,9});
-        x509_certificate.value = certs;
+        try
+          {
+            certs.add (DemoKeyStore.getCAKeyStore ().getCertificate ("mykey").getEncoded ());
+            certs.add (DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey").getEncoded ());
+          }
+        catch (GeneralSecurityException gse)
+          {
+            throw new SKSException (gse);
+          }
+        catch (IOException iox)
+          {
+            throw new SKSException (iox);
+          }
+        certificate_path.value = certs;
 ]]></Code></Method>
 
    <Method Name="setCertificatePath" Throws="SKSException">
      <Input Name="key_handle" Type="int" XMLName="KeyHandle"/>
-     <Input Name="x509_certificate" Type="binary" XMLName="X509Certificate" List="true" Null="true"/>
+     <Input Name="certificate_path" Type="binary" XMLName="X509Certificate" DotNetRule="In.X509" List="true" Null="true"/>
      <Input Name="mac" Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        System.out.println ("Certs=" + (x509_certificate.size() == 0 ? "'null'" : x509_certificate.size ()) + " mac=" + mac.length);
+        StringBuffer res = new StringBuffer ();
+        if (certificate_path.size() == 0)
+          {
+         	res.append ("'null'");
+          }
+        else
+          {
+            int i = 0;
+          	for (byte[] b_arr : certificate_path)
+          	  {
+          	    if (i != 0)
+          	      {
+          	         res.append ("\n      ");
+          	      }
+          	    try
+          	      {
+          	  		res.append ("C[" + (i++) + "]=" + new org.webpki.crypto.CertificateInfo(org.webpki.crypto.CertificateUtil.getCertificateFromBlob (b_arr)).getSubject ());
+          	      }
+          	    catch (IOException iox)
+          	      {
+          	      	throw new SKSException (iox);
+          	      }
+          	  }
+          }
+        System.out.println ("Certs=" + res.toString () + " mac=" + mac.length);
 ]]></Code></Method>
 
    <Method Name="getVersion">

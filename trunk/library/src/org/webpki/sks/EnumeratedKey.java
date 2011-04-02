@@ -18,7 +18,7 @@ package org.webpki.sks;
 
 public class EnumeratedKey
   {
-    public static final int INIT_EXIT = 0xFFFFFFFF;
+    public static final int INIT_EXIT = 0;
     
     int key_handle;
     
