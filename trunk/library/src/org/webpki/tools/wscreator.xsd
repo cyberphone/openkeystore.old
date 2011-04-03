@@ -137,6 +137,12 @@
          <!-- Imports -->
          <xs:attribute name="Imports" type="wsc:importList" use="optional"/>
 
+         <!-- Default URL in registry -->
+         <xs:attribute name="RegistryURL" type="xs:string" use="optional"/>
+
+         <!-- Default URL -->
+         <xs:attribute name="DefaultURL" type="xs:string" use="optional"/>
+
       </xs:complexType>
    </xs:element>
 

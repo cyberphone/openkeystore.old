@@ -102,6 +102,22 @@ public class WSCreator extends XMLObjectWrapper
             schema_validation = attr.getBooleanConditional ("SchemaValidation");
             String canonicalized_class_name = attr.getString ("ClassName");
             boolean path_as_directory = attr.getBooleanConditional ("PathAsDirectory", true);
+            dot_net_registry_url = attr.getStringConditional ("RegistryURL");
+            if (dot_net_registry_url != null)
+              {
+                StringBuffer reg = new StringBuffer ();
+                for (char c : dot_net_registry_url.toCharArray ())
+                  {
+                    reg.append (c);
+                    if (c == '\\')
+                      {
+                        reg.append (c);
+                      }
+                  }
+                dot_net_registry_url = reg.toString ();
+              }
+            dot_net_default_url = attr.getStringConditional ("DefaultURL");
+
             String[] imports = attr.getListConditional ("Imports");
             if (jserver && is_server ())
               {
@@ -186,6 +202,7 @@ public class WSCreator extends XMLObjectWrapper
             for (String impstr : dotnet_gen ? dotnet_imports : jimports)
               {
                 int i = impstr.lastIndexOf ('.');
+                if (i < 0) i = impstr.length ();
                 if (!last_import_pack.equals (impstr.substring (0, i)))
                   {
                     write (jfile, "\n");
@@ -457,6 +474,8 @@ public class WSCreator extends XMLObjectWrapper
     private Vector<Method> methods = new Vector<Method> ();
     private LinkedHashMap<String, DotNetRule> dot_net_rules = new LinkedHashMap<String, DotNetRule> ();
     private boolean add_main;
+    private String dot_net_registry_url;
+    private String dot_net_default_url;
 
     @Override
     protected boolean hasQualifiedElements ()
@@ -851,8 +870,44 @@ public class WSCreator extends XMLObjectWrapper
         write (file, "\n" +
                      "    public class " + dotnet_client_pck.class_name + " : System.ServiceModel.ClientBase<" + dotnet_client_pck.class_name + "Interface>\n" +
                      "    {" + dotnet_client_pck.dot_net_support_code + "\n" +
-                     "        public " + dotnet_client_pck.class_name + "()\n" +
+                     "        public static " + dotnet_client_pck.class_name + " getDefault" + dotnet_client_pck.class_name + "()\n" +
                      "        {\n" +
+                     "            ");
+        if (dot_net_registry_url == null && dot_net_default_url == null)
+          {
+            write (file, "throw new System.ArgumentException(\"Default proxy not configured in WS definition input file!\");\n");
+          }
+        else
+          {
+            if (dot_net_registry_url != null)
+              {
+                int i = dot_net_registry_url.lastIndexOf ('\\');
+                if (i <= 0) bad ("Bad RegistryURL definition");
+                write (file, "string ws_url = (string) Microsoft.Win32.Registry.GetValue(\"" + dot_net_registry_url.substring (0, i - 1) +"\", \"" + dot_net_registry_url.substring (i + 1) + "\", null);\n" +
+                       "            if (ws_url == null)\n" +
+                       "            {\n" +
+                       "                 ");
+                if (dot_net_default_url == null)
+                  {
+                    write (file, "throw new System.ArgumentException(\"No such registry entry: " + dot_net_registry_url + "\")");
+                  }
+                else
+                  {
+                    write (file, "ws_url = \"" + dot_net_default_url + "\"");
+                  }
+                write (file, ";\n" +
+                    "            }\n" +
+                    "            ");
+              }                
+            write (file,
+                "System.ServiceModel.BasicHttpBinding ws_bind = new System.ServiceModel.BasicHttpBinding();\n" +
+                "            ws_bind.SendTimeout = System.TimeSpan.FromMinutes(5);\n" +
+                "            return new " + dotnet_client_pck.class_name +
+                  "(ws_bind, new System.ServiceModel.EndpointAddress(" +
+                  (dot_net_registry_url == null ? "\"" +  dot_net_default_url + "\"" : "ws_url") +
+                  "));\n");
+          }
+        write (file,
                      "        }\n\n" +
                      "        public " + dotnet_client_pck.class_name + 
                                          "(string endpointConfigurationName) " +

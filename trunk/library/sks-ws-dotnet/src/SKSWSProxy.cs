@@ -230,8 +230,16 @@ namespace org.webpki.sks.ws.client
             return blist;
         }
 
-        public SKSWSProxy()
+        public static SKSWSProxy getDefaultSKSWSProxy()
         {
+            string ws_url = (string) Microsoft.Win32.Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WebPKI.org", "SKSWSURL", null);
+            if (ws_url == null)
+            {
+                 throw new System.ArgumentException("No such registry entry: HKEY_LOCAL_MACHINE\\SOFTWARE\\WebPKI.org\\SKSWSURL");
+            }
+            System.ServiceModel.BasicHttpBinding ws_bind = new System.ServiceModel.BasicHttpBinding();
+            ws_bind.SendTimeout = System.TimeSpan.FromMinutes(5);
+            return new SKSWSProxy(ws_bind, new System.ServiceModel.EndpointAddress(ws_url));
         }
 
         public SKSWSProxy(string endpointConfigurationName) : base(endpointConfigurationName)

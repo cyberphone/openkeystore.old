@@ -24,6 +24,7 @@
  *
  */
 ]]></LicenseHeader>
+
    <JavaServer ClassName="org.webpki.sks.ws.server.SKSWSImplementation"
                Imports="java.util.ArrayList
                         java.security.GeneralSecurityException
@@ -39,13 +40,16 @@
 	     }
 ]]></SupportCode>
    </JavaServer>
+
    <JavaClient ClassName="org.webpki.sks.ws.client.SKSWSProxy">
      <ClassHeader><![CDATA[/**
  *  This is the client :-)
  */
 ]]></ClassHeader>
    </JavaClient>
-   <DotNetClient ClassName="org.webpki.sks.ws.client.SKSWSProxy" PathAsDirectory="false">
+   <DotNetClient ClassName="org.webpki.sks.ws.client.SKSWSProxy"
+                 RegistryURL="HKEY_LOCAL_MACHINE\SOFTWARE\WebPKI.org\SKSWSURL"
+                 PathAsDirectory="false">
      <ClassHeader><![CDATA[    /*
      *  This is the .NET client :-)
      */
