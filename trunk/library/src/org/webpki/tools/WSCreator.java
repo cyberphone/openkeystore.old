@@ -59,7 +59,37 @@ public class WSCreator extends XMLObjectWrapper
 
     private FileOutputStream wsdl_file;
 
-    private String license_header = "";
+    private String license_text;
+    
+    String getLicense (boolean jdoc)
+      {
+        if (license_text == null) return "";
+        StringBuffer out = new StringBuffer ();
+        int i = 0;
+        boolean first = true;
+        StringBuffer res = new StringBuffer ();
+        while (i < license_text.length())
+          {
+            char c = license_text.charAt (i++);
+            if (c == '\r') continue;
+            res.append (c);
+            if (c == '\n')
+              {
+                if (jdoc)
+                  {
+                    out.append (first ? "/*" : " *");
+                    first = false;
+                  }
+                out.append (res);
+                res = new StringBuffer ();
+              }
+          }
+        if (jdoc)
+          {
+            out.append (" */\n");
+          }
+       return out.toString ();
+      }
 
     void genSlashes (FileOutputStream file) throws IOException
       {
@@ -103,19 +133,6 @@ public class WSCreator extends XMLObjectWrapper
             String canonicalized_class_name = attr.getString ("ClassName");
             boolean path_as_directory = attr.getBooleanConditional ("PathAsDirectory", true);
             dot_net_registry_url = attr.getStringConditional ("RegistryURL");
-            if (dot_net_registry_url != null)
-              {
-                StringBuffer reg = new StringBuffer ();
-                for (char c : dot_net_registry_url.toCharArray ())
-                  {
-                    reg.append (c);
-                    if (c == '\\')
-                      {
-                        reg.append (c);
-                      }
-                  }
-                dot_net_registry_url = reg.toString ();
-              }
             dot_net_default_url = attr.getStringConditional ("DefaultURL");
 
             String[] imports = attr.getListConditional ("Imports");
@@ -187,7 +204,7 @@ public class WSCreator extends XMLObjectWrapper
 
         public void writePackage () throws IOException
           {
-            write (jfile, license_header);
+            write (jfile, getLicense (true));
             if (package_name != null)
               {
                 writeln (jfile, "package " + package_name + ";");
@@ -514,10 +531,10 @@ public class WSCreator extends XMLObjectWrapper
 
         if (rd.hasNext ("LicenseHeader"))
           {
-            license_header = rd.getString ("LicenseHeader");
+            license_text = rd.getString ("LicenseHeader");
           }
 
-        write (wsdl_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<!--\n" + license_header + "\n");
+        write (wsdl_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<!--\n" + getLicense (false) + "\n");
         writeGenerate (wsdl_file);
         write (wsdl_file, "\n-->\n" + "<wsdl:definitions targetNamespace=\"" + tns + "\"\n" +
             "                  xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\"\n" + "                  xmlns:tns=\"" + tns + "\"\n" + "                  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" + "                  xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\">\n\n" + "  <wsdl:types>\n\n" + "    <xs:schema targetNamespace=\"" + tns + "\"\n" + "               elementFormDefault=\"" + (qualified_ns ? "qualified" : "unqualified") + "\" attributeFormDefault=\"unqualified\">\n");
@@ -798,7 +815,7 @@ public class WSCreator extends XMLObjectWrapper
     private void writeDotNet () throws IOException
       {
         FileOutputStream file = dotnet_client_pck.jfile;
-        writeln (file, license_header + "namespace " + dotnet_client_pck.package_name + "\n{\n");
+        writeln (file, getLicense (true) + "namespace " + dotnet_client_pck.package_name + "\n{\n");
         writeGenerate (file);
         dotnet_client_pck.writeImports ();
         write (file, "\n" + dotnet_client_pck.class_header +
@@ -883,13 +900,17 @@ public class WSCreator extends XMLObjectWrapper
               {
                 int i = dot_net_registry_url.lastIndexOf ('\\');
                 if (i <= 0) bad ("Bad RegistryURL definition");
-                write (file, "string ws_url = (string) Microsoft.Win32.Registry.GetValue(\"" + dot_net_registry_url.substring (0, i - 1) +"\", \"" + dot_net_registry_url.substring (i + 1) + "\", null);\n" +
+
+                write (file, "string ws_url = (string) Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine,\n" + 
+                       "                                                                        System.Environment.Is64BitOperatingSystem ?\n" +
+                       "                                                                          Microsoft.Win32.RegistryView.Registry64 : Microsoft.Win32.RegistryView.Registry32)\n" +
+                       "                .OpenSubKey(@\"" + dot_net_registry_url.substring (0, i) + "\").GetValue (\"" + dot_net_registry_url.substring (i + 1) + "\");\n" +
                        "            if (ws_url == null)\n" +
                        "            {\n" +
                        "                 ");
                 if (dot_net_default_url == null)
                   {
-                    write (file, "throw new System.ArgumentException(\"No such registry entry: " + dot_net_registry_url + "\")");
+                    write (file, "throw new System.ArgumentException(@\"No such registry entry: " + dot_net_registry_url + "\")");
                   }
                 else
                   {

@@ -232,10 +232,13 @@ namespace org.webpki.sks.ws.client
 
         public static SKSWSProxy getDefaultSKSWSProxy()
         {
-            string ws_url = (string) Microsoft.Win32.Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WebPKI.org", "SKSWSURL", null);
+            string ws_url = (string) Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine,
+                                                                        System.Environment.Is64BitOperatingSystem ?
+                                                                          Microsoft.Win32.RegistryView.Registry64 : Microsoft.Win32.RegistryView.Registry32)
+                .OpenSubKey(@"SOFTWARE\WebPKI.org").GetValue ("SKSWSURL");
             if (ws_url == null)
             {
-                 throw new System.ArgumentException("No such registry entry: HKEY_LOCAL_MACHINE\\SOFTWARE\\WebPKI.org\\SKSWSURL");
+                 throw new System.ArgumentException(@"No such registry entry: SOFTWARE\WebPKI.org\SKSWSURL");
             }
             System.ServiceModel.BasicHttpBinding ws_bind = new System.ServiceModel.BasicHttpBinding();
             ws_bind.SendTimeout = System.TimeSpan.FromMinutes(5);
