@@ -901,10 +901,11 @@ public class WSCreator extends XMLObjectWrapper
                 int i = dot_net_registry_url.lastIndexOf ('\\');
                 if (i <= 0) bad ("Bad RegistryURL definition");
 
-                write (file, "string ws_url = (string) Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine,\n" + 
+                write (file, "Microsoft.Win32.RegistryKey reg_entry = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine,\n" + 
                        "                                                                        System.Environment.Is64BitOperatingSystem ?\n" +
                        "                                                                          Microsoft.Win32.RegistryView.Registry64 : Microsoft.Win32.RegistryView.Registry32)\n" +
-                       "                .OpenSubKey(@\"" + dot_net_registry_url.substring (0, i) + "\").GetValue (\"" + dot_net_registry_url.substring (i + 1) + "\");\n" +
+                       "                .OpenSubKey(@\"" + dot_net_registry_url.substring (0, i) + "\");\n" +
+                       "            string ws_url = reg_entry == null ? null : (string) reg_entry.GetValue (\"" + dot_net_registry_url.substring (i + 1) + "\");\n" +
                        "            if (ws_url == null)\n" +
                        "            {\n" +
                        "                 ");
