@@ -75,9 +75,20 @@
     <echo message="Targets: help dist clean compile doc testkg2 testsks."/>
   </target>
 	
+  <target name="_build_sks_ws_for_dotnet" if="dotnet.tools.available">
+    <exec executable="nant.bat"
+  	      failonerror="true">
+        <arg value="-nologo"/>
+        <arg value="-quiet"/>
+        <arg value="-buildfile:${dot_net_dir}/nant.build"/>
+    </exec>
+  </target>
+
   <target name="_ws-gen">
   	<echo message="Updating '${cmd}'"/>
-  	<java fork="yes" classname="org.webpki.tools.WSCreator" failonerror="true">
+  	<java fork="yes"
+  		  classname="org.webpki.tools.WSCreator"
+  		  failonerror="true">
   		<classpath>
             <pathelement path="${temp_dir}"/>
   			 <fileset dir="${ext.jar}">
@@ -92,6 +103,12 @@
 
   <target name="wsgen" depends="_ws-check" if="wsgen.required">
   	<echo message="SKS WS needed updates"/>
+    <fixcrlf srcdir="."
+       tab="remove"
+       tablength="4"
+       eol="lf"
+       eof="remove"
+       includes="sks-ws-descriptor.xml"/>
     <antcall target="_ws-gen">
       <param name="cmd" value="wsdl"/>
       <param name="out" value="../wsdl/SKSWS.wsdl"/>
@@ -149,6 +166,19 @@
     	   includeAntRuntime="false" includes="**/sks/ws/**/*">
        <compilerarg value="-Xlint:-path"/>
     </javac>
+
+  	<!-- Build .NET package if applicable -->
+  	<condition property="dotnet.tools.available">
+  	   <and>
+ 	   	 <os family="windows"/>
+  	   	<available file="nant.bat" type="file">
+           <filepath>
+  	         <pathelement path="${env.Path}"/>
+  	       </filepath>
+  	     </available>
+  	   </and>
+  	 </condition>
+  	<antcall target="_build_sks_ws_for_dotnet"/>
   </target>
 
   <target name="doc">

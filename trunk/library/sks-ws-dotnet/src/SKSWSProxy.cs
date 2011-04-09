@@ -209,7 +209,7 @@ namespace org.webpki.sks.ws.client
 
     public class SKSWSProxy : System.ServiceModel.ClientBase<SKSWSProxyInterface>
     {
-	    X509Certificate2[] blist2certs (List<byte[]> blist)
+        X509Certificate2[] blist2certs (List<byte[]> blist)
         {
             X509Certificate2[] certs = new X509Certificate2[blist.Count];
             int i = 0;
@@ -220,7 +220,7 @@ namespace org.webpki.sks.ws.client
             return i == 0 ? null : certs;
         }
 
-	    List<byte[]> certs2blist (X509Certificate2[] certs)
+        List<byte[]> certs2blist (X509Certificate2[] certs)
         {
             List<byte[]> blist = new List<byte[]>();
             if (certs != null) foreach (X509Certificate2 cert in certs)

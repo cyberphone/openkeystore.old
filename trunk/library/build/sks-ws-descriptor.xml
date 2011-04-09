@@ -34,9 +34,9 @@
  */
 ]]></ClassHeader>
      <SupportCode><![CDATA[
-	   void localMethod (String epub)
-	     {
-	     }
+       void localMethod (String epub)
+         {
+         }
 ]]></SupportCode>
    </JavaServer>
 
@@ -54,7 +54,7 @@
      */
 ]]></ClassHeader>
      <SupportCode><![CDATA[
-	    X509Certificate2[] blist2certs (List<byte[]> blist)
+        X509Certificate2[] blist2certs (List<byte[]> blist)
         {
             X509Certificate2[] certs = new X509Certificate2[blist.Count];
             int i = 0;
@@ -65,7 +65,7 @@
             return i == 0 ? null : certs;
         }
 
-	    List<byte[]> certs2blist (X509Certificate2[] certs)
+        List<byte[]> certs2blist (X509Certificate2[] certs)
         {
             List<byte[]> blist = new List<byte[]>();
             if (certs != null) foreach (X509Certificate2 cert in certs)
@@ -130,26 +130,26 @@
         StringBuffer res = new StringBuffer ();
         if (certificate_path.size() == 0)
           {
-         	res.append ("'null'");
+            res.append ("'null'");
           }
         else
           {
             int i = 0;
-          	for (byte[] b_arr : certificate_path)
-          	  {
-          	    if (i != 0)
-          	      {
-          	         res.append ("\n      ");
-          	      }
-          	    try
-          	      {
-          	  		res.append ("C[" + (i++) + "]=" + new org.webpki.crypto.CertificateInfo(org.webpki.crypto.CertificateUtil.getCertificateFromBlob (b_arr)).getSubject ());
-          	      }
-          	    catch (IOException iox)
-          	      {
-          	      	throw new SKSException (iox);
-          	      }
-          	  }
+            for (byte[] b_arr : certificate_path)
+              {
+                if (i != 0)
+                  {
+                     res.append ("\n      ");
+                  }
+                try
+                  {
+                    res.append ("C[" + (i++) + "]=" + new org.webpki.crypto.CertificateInfo(org.webpki.crypto.CertificateUtil.getCertificateFromBlob (b_arr)).getSubject ());
+                  }
+                catch (IOException iox)
+                  {
+                    throw new SKSException (iox);
+                  }
+              }
           }
         System.out.println ("Certs=" + res.toString () + " mac=" + mac.length);
 ]]></Code></Method>

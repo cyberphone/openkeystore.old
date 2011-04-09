@@ -53,9 +53,9 @@ import org.webpki.sks.SKSException;
 public class SKSWSImplementation
   {
 
-	   void localMethod (String epub)
-	     {
-	     }
+       void localMethod (String epub)
+         {
+         }
 
     @WebMethod(operationName="abortProvisioningSession")
     @RequestWrapper(localName="abortProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
@@ -116,26 +116,26 @@ public class SKSWSImplementation
         StringBuffer res = new StringBuffer ();
         if (certificate_path.size() == 0)
           {
-         	res.append ("'null'");
+            res.append ("'null'");
           }
         else
           {
             int i = 0;
-          	for (byte[] b_arr : certificate_path)
-          	  {
-          	    if (i != 0)
-          	      {
-          	         res.append ("\n      ");
-          	      }
-          	    try
-          	      {
-          	  		res.append ("C[" + (i++) + "]=" + new org.webpki.crypto.CertificateInfo(org.webpki.crypto.CertificateUtil.getCertificateFromBlob (b_arr)).getSubject ());
-          	      }
-          	    catch (IOException iox)
-          	      {
-          	      	throw new SKSException (iox);
-          	      }
-          	  }
+            for (byte[] b_arr : certificate_path)
+              {
+                if (i != 0)
+                  {
+                     res.append ("\n      ");
+                  }
+                try
+                  {
+                    res.append ("C[" + (i++) + "]=" + new org.webpki.crypto.CertificateInfo(org.webpki.crypto.CertificateUtil.getCertificateFromBlob (b_arr)).getSubject ());
+                  }
+                catch (IOException iox)
+                  {
+                    throw new SKSException (iox);
+                  }
+              }
           }
         System.out.println ("Certs=" + res.toString () + " mac=" + mac.length);
       }
