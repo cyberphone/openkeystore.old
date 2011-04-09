@@ -82,6 +82,7 @@
         <arg value="-quiet"/>
         <arg value="-buildfile:${dot_net_dir}/nant.build"/>
     </exec>
+  	<echo message=".NET SKS WS assembly built"/>
   </target>
 
   <target name="_ws-gen">
