@@ -2995,7 +2995,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             if (key_specifier.length < 10 || key_specifier[0] != KEY_ALGORITHM_TYPE_ECC ||
                 getShort (key_specifier, 1) != (key_specifier.length - 3))
               {
-                provisioning.abort ("Incorrect \"KeyAlgorithm\" format");
+                provisioning.abort ("Non-decodable key specifier");
               }
             StringBuffer ec_uri = new StringBuffer ();
             for (int i = 3; i < key_specifier.length; i++)
