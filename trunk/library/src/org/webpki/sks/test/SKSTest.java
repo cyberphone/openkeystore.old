@@ -85,7 +85,7 @@ public class SKSTest
       {
         EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
         int i = 0;
-        while ((eps = sks.enumerateProvisioningSessions (eps, false)).isValid ())
+        while ((eps = sks.enumerateProvisioningSessions (eps, false)) != null)
           {
             i++;
           }
@@ -564,7 +564,7 @@ public class SKSTest
       {
          writeString ("End Test\n");
          EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
-         while ((eps = sks.enumerateProvisioningSessions (eps, true)).isValid ())
+         while ((eps = sks.enumerateProvisioningSessions (eps, true)) != null)
            {
              writeString ("Deleted session: " + eps.getProvisioningHandle () + "\n");
              sks.abortProvisioningSession (eps.getProvisioningHandle ());

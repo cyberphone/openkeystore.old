@@ -142,7 +142,7 @@ public class GenKey
     public boolean exists () throws SKSException
       {
         EnumeratedKey ek = new EnumeratedKey ();
-        while ((ek = prov_sess.sks.enumerateKeys (ek)).isValid ())
+        while ((ek = prov_sess.sks.enumerateKeys (ek)) != null)
           {
             if (ek.getKeyHandle () == key_handle)
               {
@@ -155,7 +155,7 @@ public class GenKey
     public EnumeratedKey getUpdatedKeyInfo () throws SKSException
       {
         EnumeratedKey ek = new EnumeratedKey ();
-        while ((ek = prov_sess.sks.enumerateKeys (ek)).isValid ())
+        while ((ek = prov_sess.sks.enumerateKeys (ek)) != null)
           {
             if (ek.getKeyHandle () == key_handle)
               {

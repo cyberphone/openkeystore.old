@@ -18,14 +18,16 @@ package org.webpki.sks;
 
 public class EnumeratedKey
   {
-    public static final int INIT_EXIT = 0;
+    public static final int INIT_ENUMERATION = 0;
     
-    int key_handle;
+    int key_handle = INIT_ENUMERATION;
     
     public int getKeyHandle ()
       {
         return key_handle;
       }
+
+
     int provisioning_handle;
     
     public int getProvisioningHandle ()
@@ -36,14 +38,8 @@ public class EnumeratedKey
 
     public EnumeratedKey ()
       {
-        key_handle = INIT_EXIT;
       }
     
-    
-    public boolean isValid ()
-      {
-        return key_handle != INIT_EXIT;
-      }
     
     public EnumeratedKey (int key_handle, 
                           int provisioning_handle)

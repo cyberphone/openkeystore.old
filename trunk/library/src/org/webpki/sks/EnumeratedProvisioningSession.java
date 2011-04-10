@@ -23,9 +23,9 @@ import java.security.PublicKey;
 
 public class EnumeratedProvisioningSession
   {
-    private static final int INIT_EXIT = 0;
+    public static final int INIT_ENUMERATION = 0;
 
-    int provisioning_handle;
+    int provisioning_handle = INIT_ENUMERATION;
     
     public int getProvisioningHandle ()
       {
@@ -83,16 +83,9 @@ public class EnumeratedProvisioningSession
 
     public EnumeratedProvisioningSession ()
       {
-        provisioning_handle = INIT_EXIT;
       }
     
     
-    public boolean isValid ()
-      {
-        return provisioning_handle != INIT_EXIT;
-      }
-
-
     public EnumeratedProvisioningSession (PublicKey key_management_key,
                                           int client_time,
                                           int session_life_time,

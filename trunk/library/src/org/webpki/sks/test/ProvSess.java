@@ -763,7 +763,7 @@ public class ProvSess
     public boolean exists () throws SKSException
       {
         EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
-        while ((eps = sks.enumerateProvisioningSessions (eps, false)).isValid ())
+        while ((eps = sks.enumerateProvisioningSessions (eps, false)) != null)
           {
             if (eps.getProvisioningHandle () == provisioning_handle)
               {

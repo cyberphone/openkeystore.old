@@ -991,7 +991,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 return new EnumeratedKey (key_entry.key_handle, key_entry.owner.provisioning_handle);
               }
           }
-        return new EnumeratedKey ();
+        return null;
       }
 
     void deleteObject (HashMap<Integer,?> objects, Provisioning provisioning)
@@ -1023,7 +1023,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                                           provisioning.issuer_uri);
               }
           }
-        return new EnumeratedProvisioningSession ();
+        return null;
       }
 
     @Override
@@ -1965,7 +1965,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public synchronized EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException
       {
-        if (!ek.isValid ())
+        if (ek.getKeyHandle () == EnumeratedKey.INIT_ENUMERATION)
           {
             return getKey (keys.values ().iterator ());
           }
@@ -1977,7 +1977,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 return getKey (list);
               }
           }
-        return new EnumeratedKey ();
+        return null;
       }
 
 
@@ -2098,7 +2098,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     public synchronized EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
                                                                                      boolean provisioning_state) throws SKSException
       {
-        if (!eps.isValid ())
+        if (eps.getProvisioningHandle () == EnumeratedProvisioningSession.INIT_ENUMERATION)
           {
             return getProvisioning (provisionings.values ().iterator (), provisioning_state);
           }
@@ -2110,7 +2110,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 return getProvisioning (list, provisioning_state);
               }
           }
-        return new EnumeratedProvisioningSession ();
+        return null;
       }
 
 
