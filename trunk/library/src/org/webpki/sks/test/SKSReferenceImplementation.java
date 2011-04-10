@@ -2984,7 +2984,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             if (!found)
               {
-                provisioning.abort ("Unsupported RSA key size : " + size);
+                provisioning.abort ("Unsupported RSA key size: " + size);
               }
             int exponent = (getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5);
             alg_par_spec = new RSAKeyGenParameterSpec (size,
