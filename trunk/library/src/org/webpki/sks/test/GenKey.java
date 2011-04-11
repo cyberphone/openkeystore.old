@@ -110,12 +110,25 @@ public class GenKey
         return this;
       }
     
+    public PublicKey getPublicKey ()
+      {
+        return cert_path == null ? public_key : cert_path[0].getPublicKey ();
+      }
+    
     void setSymmetricKey (byte[] symmetric_key) throws IOException, GeneralSecurityException
       {
         MacGenerator symk_mac = getEECertMacBuilder ();
         byte[] encrypted_symmetric_key = prov_sess.server_sess_key.encrypt (symmetric_key);
         symk_mac.addArray (encrypted_symmetric_key);
         prov_sess.sks.setSymmetricKey (key_handle, encrypted_symmetric_key, prov_sess.mac4call (symk_mac.getResult (), SecureKeyStore.METHOD_SET_SYMMETRIC_KEY));
+      }
+
+    void restorePrivateKey (PrivateKey private_key) throws IOException, GeneralSecurityException
+      {
+        MacGenerator privk_mac = getEECertMacBuilder ();
+        byte[] encrypted_private_key = prov_sess.server_sess_key.encrypt (private_key.getEncoded ());
+        privk_mac.addArray (encrypted_private_key);
+        prov_sess.sks.restorePrivateKey (key_handle, encrypted_private_key, prov_sess.mac4call (privk_mac.getResult (), SecureKeyStore.METHOD_RESTORE_PRIVATE_KEY));
       }
 
     public byte[] getPostProvMac (MacGenerator upd_mac, ProvSess current) throws IOException, GeneralSecurityException

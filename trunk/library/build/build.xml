@@ -89,7 +89,7 @@
   	<echo message="Updating '${cmd}'"/>
   	<java fork="yes"
   		  classname="org.webpki.tools.WSCreator"
-  		  failonerror="true">
+		  failonerror="true">
   		<classpath>
             <pathelement path="${temp_dir}"/>
   			 <fileset dir="${ext.jar}">
@@ -275,7 +275,9 @@
   </target>
 	
   <target name="ws-server">
-  	<java fork="yes" classname="org.webpki.sks.ws.server.SKSWSImplementation">
+  	<java fork="yes"
+  		  classname="org.webpki.sks.ws.server.SKSWSImplementation"
+		  failonerror="true">
   		<classpath>
   		    <fileset dir="${dist_dir}">
    			   <include name="${webpki-libext}"/>
@@ -289,6 +291,42 @@
     	<jvmarg value="-Dsks.implementation=${sks.implementation}"/>
     	<jvmarg value="-Dcom.sun.xml.ws.fault.SOAPFaultBuilder.disableCaptureStackTrace=false"/>
   	    <arg value="http://localhost:8080/securekeystore"/>
+  	</java>
+  </target>
+
+  <target name="pkcs12import">
+    <fail message="-&#10;Missing one or more of mandatory:&#10;
+ -Dfile=&#10;
+ -Dpassword=&#10;&#10;
+optional:&#10;
+ -Dpin=">
+       <condition>
+         <not>
+         	<and>
+            <isset property="file"/>
+            <isset property="password"/>
+           </and>
+         </not>
+       </condition>
+     </fail>
+  	<property name="p12.filename" location="${file}"/>
+  	<property name="pin" value=""/>
+  	<java fork="yes"
+  		  classname="org.webpki.sks.test.PKCS12Import"
+		  failonerror="true">
+  		<classpath>
+  		    <fileset dir="${dist_dir}">
+   			   <include name="${webpki-libext}"/>
+  			 </fileset>
+  			 <fileset dir="${ext.jar}">
+  		        <include name="*.jar"/>
+  			 </fileset>
+  		</classpath>
+  		<jvmarg value="-Djava.endorsed.dirs=${ws}"/>
+    	<jvmarg value="-Dsks.client=${sks.implementation}"/>
+  	    <arg value="${p12.filename}"/>
+  	    <arg value="${password}"/>
+  	    <arg value="${pin}"/>
   	</java>
   </target>
 

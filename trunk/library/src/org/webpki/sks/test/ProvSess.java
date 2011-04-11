@@ -667,22 +667,22 @@ public class ProvSess
             key_pair_mac.addString (algorithm);
           }
         KeyData key_pair = sks.createKeyEntry (provisioning_handle, 
-                                              id,
-                                              attestation_algorithm, 
-                                              server_seed,
-                                              device_pin_protected,
-                                              pin_policy == null ? 0 : pin_policy.pin_policy_handle, 
-                                              encrypted_pin_value, 
-                                              biometric_protection.getSKSValue (), 
-                                              private_key_backup, 
-                                              actual_export_policy, 
-                                              delete_protection.getSKSValue (), 
-                                              enable_pin_caching, 
-                                              key_usage.getSKSValue (), 
-                                              friendly_name, 
-                                              key_algorithm.getSKSValue (),
-                                              sorted_algorithms,
-                                              mac4call (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
+                                               id,
+                                               attestation_algorithm, 
+                                               server_seed,
+                                               device_pin_protected,
+                                               pin_policy == null ? 0 : pin_policy.pin_policy_handle, 
+                                               encrypted_pin_value, 
+                                               biometric_protection.getSKSValue (), 
+                                               private_key_backup, 
+                                               actual_export_policy, 
+                                               delete_protection.getSKSValue (), 
+                                               enable_pin_caching, 
+                                               key_usage.getSKSValue (), 
+                                               friendly_name, 
+                                               key_algorithm.getSKSValue (),
+                                               sorted_algorithms,
+                                               mac4call (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
         MacGenerator key_attestation = new MacGenerator ();
         key_attestation.addString (id);
         key_attestation.addArray (key_pair.getPublicKey ().getEncoded ());
@@ -690,7 +690,7 @@ public class ProvSess
           {
             key_attestation.addArray (key_pair.getPrivateKey ());
             verifyPrivateKeyBackup (key_pair.getPrivateKey (), key_pair.getPublicKey ());
-            }
+          }
          if (!ArrayUtil.compare (attest (key_attestation.getResult ()), key_pair.getAttestation ()))
            {
              bad ("Failed key attest");

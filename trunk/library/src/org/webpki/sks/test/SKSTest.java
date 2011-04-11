@@ -223,7 +223,7 @@ public class SKSTest
                                                        ok_pin.getBytes ("UTF-8"), 
                                                        HashAlgorithms.SHA256.digest (TEST_STRING));
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
-            verify.initVerify (key3.cert_path[0]);
+            verify.initVerify (key3.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key3", verify.verify (result));
             result = device.sks.signHashedData (key1.key_handle, 
@@ -232,7 +232,7 @@ public class SKSTest
                                                 ok_pin.getBytes ("UTF-8"), 
                                                 HashAlgorithms.SHA256.digest (TEST_STRING));
             verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
-            verify.initVerify (key2.cert_path[0]);
+            verify.initVerify (key2.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key1", verify.verify (result));
           }
@@ -563,12 +563,6 @@ public class SKSTest
     public void teardown () throws Exception
       {
          writeString ("End Test\n");
-         EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
-         while ((eps = sks.enumerateProvisioningSessions (eps, true)) != null)
-           {
-             writeString ("Deleted session: " + eps.getProvisioningHandle () + "\n");
-             sks.abortProvisioningSession (eps.getProvisioningHandle ());
-           }
       }
 
     @Rule 
@@ -734,7 +728,7 @@ public class SKSTest
         sess.closeSession ();
         byte[] result = key.signData (SignatureAlgorithms.ECDSA_SHA256, null, TEST_STRING);
         Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
-        verify.initVerify (key.cert_path[0]);
+        verify.initVerify (key.getPublicKey ());
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
         try
@@ -761,13 +755,13 @@ public class SKSTest
 
         byte[] result = key.signData (SignatureAlgorithms.RSA_SHA256, null, TEST_STRING);
         Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
-        verify.initVerify (key.cert_path[0]);
+        verify.initVerify (key.getPublicKey ());
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
 
         result = key.signData (SignatureAlgorithms.RSA_SHA1, null, TEST_STRING);
         verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA1.getJCEName ());
-        verify.initVerify (key.cert_path[0]);
+        verify.initVerify (key.getPublicKey ());
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
       }
@@ -1021,7 +1015,7 @@ public class SKSTest
           {
             byte[] result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
-            verify.initVerify (key2.cert_path[0]);
+            verify.initVerify (key2.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature", verify.verify (result));
           }
@@ -1170,12 +1164,12 @@ public class SKSTest
           {
             byte[] result = key2.signData (SignatureAlgorithms.RSA_SHA256, ok_pin, TEST_STRING);
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
-            verify.initVerify (key2.cert_path[0]);
+            verify.initVerify (key2.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key2", verify.verify (result));
             result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
-            verify.initVerify (key1.cert_path[0]);
+            verify.initVerify (key1.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key1", verify.verify (result));
           }
@@ -1234,12 +1228,12 @@ public class SKSTest
           {
             byte[] result = key3.signData (SignatureAlgorithms.RSA_SHA256, ok_pin, TEST_STRING);
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
-            verify.initVerify (key3.cert_path[0]);
+            verify.initVerify (key3.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key3", verify.verify (result));
             result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
-            verify.initVerify (key1.cert_path[0]);
+            verify.initVerify (key1.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key1", verify.verify (result));
           }
@@ -1320,7 +1314,7 @@ public class SKSTest
         sess.closeSession ();
         
         Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
-        cipher.init (Cipher.ENCRYPT_MODE, key.cert_path[0]);
+        cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
         byte[] enc = cipher.doFinal (TEST_STRING);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
                                                                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
@@ -1409,7 +1403,7 @@ public class SKSTest
         key.changePin (ok_pin, ok_pin = "8463");
         
         Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
-        cipher.init (Cipher.ENCRYPT_MODE, key.cert_path[0]);
+        cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
         byte[] enc = cipher.doFinal (TEST_STRING);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
                                                                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
@@ -2082,14 +2076,14 @@ public class SKSTest
             sess.restorePrivateKey (key, key_pair.getPrivate ());
             sess.closeSession ();
             Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
-            cipher.init (Cipher.ENCRYPT_MODE, key.cert_path[0]);
+            cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
             byte[] enc = cipher.doFinal (TEST_STRING);
             assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, 
                                                                                          ok_pin, 
                                                                                          enc), TEST_STRING));
             byte[] result = key.signData (SignatureAlgorithms.RSA_SHA256, ok_pin, TEST_STRING);
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
-            verify.initVerify (key.cert_path[0]);
+            verify.initVerify (key.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature", verify.verify (result));
             try
@@ -2173,7 +2167,7 @@ public class SKSTest
                                             kp.getPublic ());
         KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
         key_agreement.init (kp.getPrivate ());
-        key_agreement.doPhase (key.cert_path[0].getPublicKey (), true);
+        key_agreement.doPhase (key.getPublicKey (), true);
         byte[] Z = key_agreement.generateSecret ();
         assertTrue ("DH fail", ArrayUtil.compare (z, Z));
       }
