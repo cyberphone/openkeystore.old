@@ -74,4 +74,10 @@ public interface SKSWSProxy
     @ResponseWrapper(localName="getVersion.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @WebResult(name="return")
     public String getVersion ();
+
+    @WebMethod(operationName="getCertPath")
+    @RequestWrapper(localName="getCertPath", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+    @ResponseWrapper(localName="getCertPath.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+    @WebResult(name="X509Certificate")
+    public List<byte[]> getCertPath ();
   }

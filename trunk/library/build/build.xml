@@ -126,6 +126,10 @@
       <param name="cmd" value="dotnetclient"/>
       <param name="out" value="${dot_net_dir}/src"/>
     </antcall>
+    <antcall target="_ws-gen">
+      <param name="cmd" value="dotnetdoc"/>
+      <param name="out" value="${dot_net_dir}/doc/doc.html"/>
+    </antcall>
   </target>
 	
   <target name="compile">

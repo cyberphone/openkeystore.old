@@ -149,6 +149,17 @@ public class SKSWSImplementation
         return "0.00001";
       }
 
+    @WebMethod(operationName="getCertPath")
+    @RequestWrapper(localName="getCertPath", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+    @ResponseWrapper(localName="getCertPath.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+    @WebResult(name="X509Certificate")
+    public List<byte[]> getCertPath ()
+      {
+        List<byte[]> res = new ArrayList<byte[]> ();
+        res.add (new byte[]{4,5});
+        return res;
+      }
+
     public static void main (String[] args)
       {
         if (args.length != 1)

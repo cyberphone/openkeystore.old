@@ -160,4 +160,12 @@
         return "0.00001";
 ]]></Code></Method>
 
+   <Method Name="getCertPath">
+     <Output Name="return" Type="binary" XMLName="X509Certificate" DotNetRule="Out.X509" List="true"/>
+     <Code><![CDATA[
+        List<byte[]> res = new ArrayList<byte[]> ();
+        res.add (new byte[]{4,5});
+        return res;
+]]></Code></Method>
+
 </WebService>

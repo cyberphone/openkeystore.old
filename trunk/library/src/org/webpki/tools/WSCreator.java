@@ -18,6 +18,7 @@ package org.webpki.tools;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -45,6 +46,7 @@ public class WSCreator extends XMLObjectWrapper
     private static final String JSERVER = "jserver";
     private static final String WSDL = "wsdl";
     private static final String DOTNETCLIENT = "dotnetclient";
+    private static final String DOTNETDOC = "dotnetdoc";
 
     private static final String VERSION = "1.0";
 
@@ -54,10 +56,12 @@ public class WSCreator extends XMLObjectWrapper
     private static boolean jserver;
     private static boolean wsdl_gen;
     private static boolean dotnet_gen;
+    private static boolean dotnet_doc;
 
     private static String output_directory;
 
     private FileOutputStream wsdl_file;
+    private FileOutputStream dotnetdoc_file;
 
     private String license_text;
     
@@ -365,20 +369,30 @@ public class WSCreator extends XMLObjectWrapper
             return object_type || listtype ? (listtype ? "List<" + data_type.jholder + ">" : data_type.jholder) : data_type.jname;
           }
 
-        String nName ()
+        String nType ()
           {
             return listtype ? "List<" + data_type.csname + ">" : data_type.csname;
           }
         
+        String nName ()
+          {
+            return name.equals ("return") ? "@return" : name;
+          }
+        
+        String nRealType ()
+          {
+            return (dot_net_rule == null ? nType () : dot_net_rule.simple_type) +
+                    ((listtype && dot_net_rule != null) ? "[]" : "");
+          }
+
         String nRealTypeName ()
           {
-            return (dot_net_rule == null ? nName () : dot_net_rule.simple_type) +
-                    ((listtype && dot_net_rule != null) ? "[] " : " ") + name;
+            return nRealType () + " " + name;
           }
 
         public String nArgument (String prefix)
           {
-            String arg = prefix  + name;
+            String arg = prefix  + nName ();
             if (dot_net_rule != null)
               {
                 String sub = arg;
@@ -434,7 +448,7 @@ public class WSCreator extends XMLObjectWrapper
                   {
                     next = true;
                   }
-                write (dotnet_client_pck.jfile, (out ? "out " : "") + (real_type ? prop.nRealTypeName () : prop.nName () + " " + prop.name));
+                write (dotnet_client_pck.jfile, (out ? "out " : "") + (real_type ? prop.nRealTypeName () : prop.nType () + " " + prop.name));
               }
           }
 
@@ -571,10 +585,14 @@ public class WSCreator extends XMLObjectWrapper
               {
                 open (dotnet_client_pck, false);
               }
+            else if (dotnet_doc)
+              {
+                dotnetdoc_file = new FileOutputStream (output_directory);
+              }
           }
-        else if (dotnet_gen)
+        else if (dotnet_gen || dotnet_doc)
           {
-            bad ("The '" + DOTNETCLIENT + "' option requires a \"DotNetClient\" definition!");
+            bad ("The '" + DOTNETCLIENT + "' and '" + DOTNETDOC + "' options require a \"DotNetClient\" definition!");
           }
         while (rd.hasNext ("Exception"))
           {
@@ -776,6 +794,68 @@ public class WSCreator extends XMLObjectWrapper
           {
             writeDotNet ();
           }
+        if (dotnetdoc_file != null)
+          {
+            writeDocNetDoc ();
+          }
+      }
+
+    private void writeDocNetDoc () throws IOException
+      {
+        write (dotnetdoc_file, "<html><body>");
+        for (Method meth : methods)
+          {
+            write (dotnetdoc_file, "<table cellpadding=\"0\" cellspacing=\"0\" border=\"1\" style=\"margin-left:50px;margin-top:50px\">" +
+                "<tr><td>" + dotnetReserved("public") + "&nbsp;");
+            if (meth.outputs.isEmpty () || meth.outputs.size () > 1)
+              {
+                write (dotnetdoc_file, dotnetReserved ("void"));
+              }
+            if (meth.outputs.size () == 1)
+              {
+                write (dotnetdoc_file, dotnetType (meth.outputs.iterator ().next ()));
+              }
+            write (dotnetdoc_file, "&nbsp;" + meth.name + "&nbsp;(</td><td>");
+            Iterator<Property> propiter = meth.inputs.iterator ();
+            int i = 0;
+            String prefix = "";
+            while (propiter.hasNext () || (prefix.length () == 0 && meth.outputs.size () > 1))
+              {
+                if (!propiter.hasNext ())
+                  {
+                    propiter = meth.outputs.iterator ();
+                    prefix = dotnetReserved ("out") + "&nbsp";
+                    continue;
+                  }
+                Property prop = propiter.next ();
+                if (i++ > 0)
+                  {
+                    write (dotnetdoc_file, ",</td></tr><tr><td>&nbsp;</td><td>");
+                  }
+                write (dotnetdoc_file, prefix + dotnetType (prop) + "&nbsp;" + prop.nName ());
+              }
+            write (dotnetdoc_file, ")</td></tr></table>");
+          }
+        write (dotnetdoc_file, "</body></html>");
+        close (dotnetdoc_file);
+      }
+
+    private String dotnetType (Property prop)
+      {
+        String ret_type = prop.nRealType ();
+        int i = ret_type.indexOf ('[');
+        String last = "";
+        if (i > 0)
+          {
+            last = ret_type.substring (i);
+            ret_type = ret_type.substring (0, i);
+          }
+        return (ret_type.equals (ret_type.toLowerCase ()) ? dotnetReserved (ret_type) : "<font color=\"lightblue\">" + ret_type + "</font>") + last;
+      }
+
+    private String dotnetReserved (String string)
+      {
+        return "<font color=\"blue\">" + string + "</font>";
       }
 
     private void writeNetWrapper (boolean request, Method meth) throws IOException
@@ -792,7 +872,9 @@ public class WSCreator extends XMLObjectWrapper
         int order = 0;
         for (Property prop : props)
           {
-            write (file, "        [System.ServiceModel.MessageBodyMemberAttribute(Namespace=\"" + tns + "\", Order=" + (order++) + ")]\n" + "        [System.Xml.Serialization.XmlElementAttribute(ElementName=\"" + prop.getXMLName () + "\", Form=System.Xml.Schema.XmlSchemaForm." + (qualified_ns ? "Q" : "Unq") + "ualified)]\n" + "        public " + prop.nName () + " " + (prop.name.equals ("return") ? "@" : "") + prop.name + ";\n\n");
+            write (file, "        [System.ServiceModel.MessageBodyMemberAttribute(Namespace=\"" + tns + "\", Order=" + (order++) + ")]\n" +
+                         "        [System.Xml.Serialization.XmlElementAttribute(ElementName=\"" + prop.getXMLName () + "\", Form=System.Xml.Schema.XmlSchemaForm." + (qualified_ns ? "Q" : "Unq") + "ualified)]\n" +
+                         "        public " + prop.nType () + " " + prop.nName() + ";\n\n");
           }
 
         write (file, "        public " + class_name + "()\n" + 
@@ -805,7 +887,7 @@ public class WSCreator extends XMLObjectWrapper
             write (file, ")\n        {\n");
             for (Property prop : meth.inputs)
               {
-                write (file, "            this." + prop.name + " = " + prop.name + ";\n");
+                write (file, "            this." + prop.nName() + " = " + prop.nName() + ";\n");
               }
             write (file, "        }\n");
           }
@@ -866,12 +948,12 @@ public class WSCreator extends XMLObjectWrapper
               {
                 String methn = prop.name;
                 String value = "nodes[" + (index++) + "].InnerXml";
-                if (!prop.nName ().equals ("string"))
+                if (!prop.nType ().equals ("string"))
                   {
                     value = "System.Int32.Parse(" + value + ")";
                   }
                 writeln (file, "\n" +
-                               "        public " + prop.nName () + " get" + methn.substring (0, 1).toUpperCase () + methn.substring (1) + "()\n" + 
+                               "        public " + prop.nType () + " get" + methn.substring (0, 1).toUpperCase () + methn.substring (1) + "()\n" + 
                                "        {\n" +
                                "            return " + value + ";\n" +
                                "        }");
@@ -952,7 +1034,7 @@ public class WSCreator extends XMLObjectWrapper
             if (meth.outputs.size () == 1)
               {
                 Property prop = meth.outputs.iterator ().next ();
-                write (file, prop.nName ());
+                write (file, prop.nRealType ());
               }
             write (file, " " + meth.name + "(");
             meth.writeNetTypedInput (true);
@@ -963,11 +1045,11 @@ public class WSCreator extends XMLObjectWrapper
             write (file, ")\n" +
                 "        {\n" + 
                 "            ");
-            if (meth.outputs.size () == 1)
+            if (meth.outputs.size () == 1 && meth.outputs.iterator ().next ().dot_net_rule == null)
               {
                 write (file, "return ");
               }
-            else if (meth.outputs.size () > 1)
+            else if (meth.outputs.size () > 0)
               {
                 write (file, meth.getNetWrapper (false) + " _res = ");
               }
@@ -988,7 +1070,15 @@ public class WSCreator extends XMLObjectWrapper
             write (file, "))");
             if (meth.outputs.size () == 1)
               {
-                write (file, ".@return");
+                if (meth.outputs.iterator ().next ().dot_net_rule == null)
+                  {
+                    write (file, "." + meth.outputs.iterator ().next ().nName ());
+                  }
+                else
+                  {
+                    write (file, ";\n"+
+                                 "            return " + meth.outputs.iterator ().next ().nArgument ("_res."));
+                  }
               }
             writeln (file, ";");
             if (meth.outputs.size () > 1) for (Property prop : meth.outputs)
@@ -1257,7 +1347,11 @@ public class WSCreator extends XMLObjectWrapper
 
     private static void show ()
       {
-        System.out.println (WSCreator.class.getName () + " '" + JCLIENT + "'|'" + JSERVER + "'|'" + WSDL + "'|'" + DOTNETCLIENT + "' input-file output-directory\n" + "Note: output-directory is actually file-name for the '" + WSDL + "' option");
+        System.out.println (WSCreator.class.getName () + " '" + JCLIENT + "'|'" +
+                                                                JSERVER + "'|'" +
+                                                                WSDL + "'|'" +
+                                                                DOTNETCLIENT + "'|'" +
+                                                                DOTNETDOC + "' input-file output-directory\n" + "Note: output-directory is actually file-name for the '" + WSDL + "' and '" + DOTNETDOC + "' options");
         System.exit (3);
       }
 
@@ -1268,6 +1362,7 @@ public class WSCreator extends XMLObjectWrapper
         else if (args[0].equals (JSERVER)) jserver = true;
         else if (args[0].equals (WSDL)) wsdl_gen = true;
         else if (args[0].equals (DOTNETCLIENT)) dotnet_gen = true;
+        else if (args[0].equals (DOTNETDOC)) dotnet_doc = true;
         else
           show ();
         output_directory = args[2];

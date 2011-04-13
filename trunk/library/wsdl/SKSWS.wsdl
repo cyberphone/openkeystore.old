@@ -91,6 +91,16 @@
         </xs:complexType>
       </xs:element>
 
+      <xs:element name="getCertPath"/>
+
+      <xs:element name="getCertPath.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
     </xs:schema>
 
   </wsdl:types>
@@ -131,6 +141,14 @@
     <wsdl:part name="parameters" element="tns:getVersion.Response"/>
   </wsdl:message>
 
+  <wsdl:message name="getCertPath">
+    <wsdl:part name="parameters" element="tns:getCertPath"/>
+  </wsdl:message>
+
+  <wsdl:message name="getCertPath.Response">
+    <wsdl:part name="parameters" element="tns:getCertPath.Response"/>
+  </wsdl:message>
+
   <wsdl:portType name="SKSWS.Interface">
 
     <wsdl:operation name="abortProvisioningSession">
@@ -154,6 +172,11 @@
     <wsdl:operation name="getVersion">
       <wsdl:input message="tns:getVersion"/>
       <wsdl:output message="tns:getVersion.Response"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="getCertPath">
+      <wsdl:input message="tns:getCertPath"/>
+      <wsdl:output message="tns:getCertPath.Response"/>
     </wsdl:operation>
 
   </wsdl:portType>
@@ -198,6 +221,15 @@
       </wsdl:operation>
 
       <wsdl:operation name="getVersion">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+      </wsdl:operation>
+
+      <wsdl:operation name="getCertPath">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

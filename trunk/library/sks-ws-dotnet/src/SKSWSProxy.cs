@@ -49,6 +49,10 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         getVersion_Response getVersion(getVersion_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        getCertPath_Response getCertPath(getCertPath_Request request);
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -207,6 +211,28 @@ namespace org.webpki.sks.ws.client
         }
     }
 
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getCertPath", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
+    public class getCertPath_Request
+    {
+        public getCertPath_Request()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getCertPath.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
+    public class getCertPath_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="X509Certificate", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public List<byte[]> @return;
+
+        public getCertPath_Response()
+        {
+        }
+    }
+
     public class SKSWSProxy : System.ServiceModel.ClientBase<SKSWSProxyInterface>
     {
         X509Certificate2[] blist2certs (List<byte[]> blist)
@@ -275,6 +301,12 @@ namespace org.webpki.sks.ws.client
         public string getVersion()
         {
             return base.Channel.getVersion(new getVersion_Request()).@return;
+        }
+
+        public X509Certificate2[] getCertPath()
+        {
+            getCertPath_Response _res = base.Channel.getCertPath(new getCertPath_Request());
+            return blist2certs(_res.@return);
         }
     }
 }
