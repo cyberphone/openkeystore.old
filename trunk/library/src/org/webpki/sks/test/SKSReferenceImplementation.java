@@ -2056,11 +2056,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                       max_length,
                                       input_method,
                                       key_entry.error_count,
+                                      key_entry.enable_pin_caching,
                                       key_entry.biometric_protection,
-                                      key_entry.private_key_backup,
                                       key_entry.export_protection,
                                       key_entry.delete_protection,
-                                      key_entry.enable_pin_caching);
+                                      key_entry.private_key_backup);
       }
 
 
@@ -2814,13 +2814,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                                 boolean device_pin_protection,
                                                 int pin_policy_handle,
                                                 byte[] pin_value,
+                                                boolean enable_pin_caching,
                                                 byte biometric_protection,
-                                                boolean private_key_backup,
                                                 byte export_protection,
                                                 byte delete_protection,
-                                                boolean enable_pin_caching,
                                                 byte app_usage,
                                                 String friendly_name,
+                                                boolean private_key_backup,
                                                 byte[] key_specifier,
                                                 String[] endorsed_algorithms,
                                                 byte[] mac) throws SKSException
@@ -2914,13 +2914,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             verifier.addString (CRYPTO_STRING_NOT_AVAILABLE);
           }
+        verifier.addBool (enable_pin_caching);
         verifier.addByte (biometric_protection);
-        verifier.addBool (private_key_backup);
         verifier.addByte (export_protection);
         verifier.addByte (delete_protection);
-        verifier.addBool (enable_pin_caching);
         verifier.addByte (app_usage);
         verifier.addString (friendly_name);
+        verifier.addBool (private_key_backup);
         verifier.addArray (key_specifier);
         LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
         for (String endorsed_algorithm : endorsed_algorithms)

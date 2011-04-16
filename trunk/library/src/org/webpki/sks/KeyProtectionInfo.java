@@ -263,11 +263,11 @@ public class KeyProtectionInfo
                               short max_length,
                               byte input_method,
                               short pin_error_count,
+                              boolean enable_pin_caching,
                               byte biometric_protection,
-                              boolean private_key_backup,
                               byte export_protection,
                               byte delete_protection,
-                              boolean enable_pin_caching) throws SKSException
+                              boolean private_key_backup) throws SKSException
 
       {
         this.protection_status = protection_status;

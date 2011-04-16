@@ -917,16 +917,16 @@ public class ServerCredentialStore implements Serializable
               {
                 key_pair_mac.addArray (getEncryptedPIN ());
               }
+            key_pair_mac.addBool (enable_pin_caching);
             key_pair_mac.addByte (biometric_protection == null ?
                        BiometricProtection.NONE.getSKSValue () : biometric_protection.getSKSValue ());
-            key_pair_mac.addBool (private_key_backup);
             key_pair_mac.addByte (export_protection == null ?
                 ExportProtection.NON_EXPORTABLE.getSKSValue () : export_protection.getSKSValue ());
             key_pair_mac.addByte (delete_protection == null ?
                        DeleteProtection.NONE.getSKSValue () : delete_protection.getSKSValue ());
-            key_pair_mac.addBool (enable_pin_caching);
             key_pair_mac.addByte (app_usage.getSKSValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
+            key_pair_mac.addBool (private_key_backup);
             key_pair_mac.addArray (key_specifier.getSKSValue ());
             if (endorsed_algorithms != null) for (String algorithm : endorsed_algorithms)
               {

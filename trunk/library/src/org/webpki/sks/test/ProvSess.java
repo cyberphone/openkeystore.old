@@ -644,13 +644,13 @@ public class ProvSess
           {
             key_pair_mac.addArray (encrypted_pin_value);
           }
+        key_pair_mac.addBool (enable_pin_caching);
         key_pair_mac.addByte (biometric_protection.getSKSValue ());
-        key_pair_mac.addBool (private_key_backup);
         key_pair_mac.addByte (actual_export_policy);
         key_pair_mac.addByte (delete_protection.getSKSValue ());
-        key_pair_mac.addBool (enable_pin_caching);
         key_pair_mac.addByte (key_usage.getSKSValue ());
         key_pair_mac.addString (friendly_name);
+        key_pair_mac.addBool (private_key_backup);
         key_pair_mac.addArray (key_algorithm.getSKSValue ());
         for (String algorithm : sorted_algorithms)
           {
@@ -663,13 +663,13 @@ public class ProvSess
                                                device_pin_protected,
                                                pin_policy == null ? 0 : pin_policy.pin_policy_handle, 
                                                encrypted_pin_value, 
+                                               enable_pin_caching, 
                                                biometric_protection.getSKSValue (), 
-                                               private_key_backup, 
                                                actual_export_policy, 
                                                delete_protection.getSKSValue (), 
-                                               enable_pin_caching, 
                                                key_usage.getSKSValue (), 
                                                friendly_name, 
+                                               private_key_backup, 
                                                key_algorithm.getSKSValue (),
                                                sorted_algorithms,
                                                mac4call (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));

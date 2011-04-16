@@ -185,13 +185,13 @@ public interface SecureKeyStore
                                    boolean device_pin_protection,
                                    int pin_policy_handle,
                                    byte[] pin_value,  // Must be null if not applicable
+                                   boolean enable_pin_caching,
                                    byte biometric_protection,
-                                   boolean private_key_backup,
                                    byte export_protection,
                                    byte delete_protection,
-                                   boolean enable_pin_caching,
                                    byte app_usage,
                                    String friendly_name,
+                                   boolean private_key_backup,
                                    byte[] key_specifier,
                                    String[] endorsed_algorithms,
                                    byte[] mac) throws SKSException;
