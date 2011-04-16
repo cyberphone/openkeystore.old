@@ -2921,7 +2921,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         verifier.addBool (enable_pin_caching);
         verifier.addByte (app_usage);
         verifier.addString (friendly_name);
-        verifier.addVerbatim (key_specifier);  // Already properly set w.r.t. SKS data types
+        verifier.addArray (key_specifier);
         LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
         for (String endorsed_algorithm : endorsed_algorithms)
           {
@@ -2970,8 +2970,16 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Decode key algorithm specifier
         ///////////////////////////////////////////////////////////////////////////////////
         AlgorithmParameterSpec alg_par_spec = null;
-        if (key_specifier.length == 7 && key_specifier[0] == KEY_ALGORITHM_TYPE_RSA)
+        if (key_specifier == null || key_specifier.length == 0)
           {
+            provisioning.abort ("Empty \"KeySpecifier\"");
+          }
+        if (key_specifier[0] == KEY_ALGORITHM_TYPE_RSA)
+          {
+            if (key_specifier.length != 7)
+              {
+                provisioning.abort ("Incorrectly formatted RSA \"KeySpecifier\"");
+              }
             int size = getShort (key_specifier, 1);
             boolean found = false;
             for (short rsa_key_size : RSA_KEY_SIZES)
@@ -2990,15 +2998,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             alg_par_spec = new RSAKeyGenParameterSpec (size,
                                                        exponent == 0 ? RSAKeyGenParameterSpec.F4 : BigInteger.valueOf (exponent));
           }
-        else
+        else if (key_specifier[0] == KEY_ALGORITHM_TYPE_ECC)
           {
-            if (key_specifier.length < 10 || key_specifier[0] != KEY_ALGORITHM_TYPE_ECC ||
-                getShort (key_specifier, 1) != (key_specifier.length - 3))
-              {
-                provisioning.abort ("Non-decodable key specifier");
-              }
             StringBuffer ec_uri = new StringBuffer ();
-            for (int i = 3; i < key_specifier.length; i++)
+            for (int i = 1; i < key_specifier.length; i++)
               {
                 ec_uri.append ((char) key_specifier[i]);
               }
@@ -3008,6 +3011,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 provisioning.abort ("Unsupported eliptic curve: " + ec_uri);
               }
             alg_par_spec = new ECGenParameterSpec (alg.jce_name);
+          }
+        else
+          {
+            provisioning.abort ("Unknown key type in \"KeySpecifier\"");
           }
 
         try

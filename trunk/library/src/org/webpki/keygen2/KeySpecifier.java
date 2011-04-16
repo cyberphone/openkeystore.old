@@ -16,15 +16,23 @@
  */
 package org.webpki.keygen2;
 
+import static org.webpki.keygen2.KeyGen2Constants.*;
+
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.webpki.crypto.ECDomains;
 import org.webpki.sks.SecureKeyStore;
 import org.webpki.util.ArrayUtil;
+import org.webpki.xml.DOMWriterHelper;
 
-public abstract class KeyAlgorithmData
+public abstract class KeySpecifier implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     public abstract byte[] getSKSValue () throws IOException;
+    
+    abstract void writeKeySpecifier (DOMWriterHelper wr) throws IOException;
     
     byte[] short2bytes (int s)
       {
@@ -32,12 +40,19 @@ public abstract class KeyAlgorithmData
       }
 
 
-    public static class RSA extends KeyAlgorithmData
+    public static class RSA extends KeySpecifier implements Serializable
       {
+        private static final long serialVersionUID = 1L;
+
         int key_size;
     
         int fixed_exponent;  // May be 0
     
+        public RSA (int key_size)
+          {
+            this.key_size = key_size;
+          }
+
         public RSA (int key_size, int fixed_exponent)
           {
             this.key_size = key_size;
@@ -58,6 +73,19 @@ public abstract class KeyAlgorithmData
 
 
         @Override
+        void writeKeySpecifier (DOMWriterHelper wr) throws IOException
+          {
+            wr.addChildElement (RSA_ELEM);
+            wr.setIntAttribute (KEY_SIZE_ATTR, key_size);
+            if (fixed_exponent != 0)
+              {
+                wr.setIntAttribute (EXPONENT_ATTR, fixed_exponent);
+              }
+            wr.getParent ();
+          }
+
+
+        @Override
         public byte[] getSKSValue () throws IOException
           {
             return ArrayUtil.add (
@@ -65,12 +93,13 @@ public abstract class KeyAlgorithmData
                 ArrayUtil.add (short2bytes (fixed_exponent >>> 16), short2bytes (fixed_exponent))
                           );
           }
-
       }
 
 
-    public static class EC extends KeyAlgorithmData
+    public static class EC extends KeySpecifier implements Serializable
       {
+        private static final long serialVersionUID = 1L;
+
         ECDomains named_curve;
     
         public EC (ECDomains named_curve)
@@ -84,16 +113,22 @@ public abstract class KeyAlgorithmData
             return named_curve;
           }
 
+
+        @Override
+        void writeKeySpecifier (DOMWriterHelper wr) throws IOException
+          {
+            wr.addChildElement (EC_ELEM);
+            wr.setStringAttribute (NAMED_CURVE_ATTR, named_curve.getURI ());
+            wr.getParent ();
+          }      
         
+
         @Override
         public byte[] getSKSValue () throws IOException
           {
-            return ArrayUtil.add (
-                ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_ECC}, short2bytes (named_curve.getURI ().length ())),
-                named_curve.getURI ().getBytes ("UTF-8")
-                          );
+            return ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_ECC},
+                                  named_curve.getURI ().getBytes ("UTF-8"));
           }
       }
-
   }
 

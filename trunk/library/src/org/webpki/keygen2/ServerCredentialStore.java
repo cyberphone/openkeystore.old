@@ -401,6 +401,7 @@ public class ServerCredentialStore implements Serializable
           }
       }
 
+
     public class PINPolicy implements Serializable
       {
         private static final long serialVersionUID = 1L;
@@ -538,99 +539,6 @@ public class ServerCredentialStore implements Serializable
           }
       }
 
-    public static abstract class KeyAlgorithmData implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        abstract void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException;
-        
-        abstract void updateKeyAlgorithmMac (MacGenerator mac_gen) throws IOException;
-
-        public static final class EC extends KeyAlgorithmData implements Serializable
-          {
-            private static final long serialVersionUID = 1L;
-
-            ECDomains named_curve;
-
-            public EC (ECDomains named_curve)
-              {
-                this.named_curve = named_curve;
-              }
-
-            void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException
-              {
-                wr.addChildElement (EC_ELEM);
-                wr.setStringAttribute (NAMED_CURVE_ATTR, named_curve.getURI ());
-                wr.getParent ();
-              }
-            
-            void updateKeyAlgorithmMac (MacGenerator mac_gen) throws IOException
-              {
-                mac_gen.addByte (SecureKeyStore.KEY_ALGORITHM_TYPE_ECC);
-                mac_gen.addString (named_curve.getURI ());
-              }
-          }
-
-        public static final class RSA extends KeyAlgorithmData implements Serializable
-          {
-            private static final long serialVersionUID = 1L;
-
-            int key_size;
-
-            int fixed_exponent;
-
-            public RSA (int key_size)
-              {
-                this.key_size = key_size;
-              }
-
-            public RSA (int key_size, int fixed_exponent)
-              {
-                this (key_size);
-                this.fixed_exponent = fixed_exponent;
-              }
-
-            void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException
-              {
-                wr.addChildElement (RSA_ELEM);
-                wr.setIntAttribute (KEY_SIZE_ATTR, key_size);
-                if (fixed_exponent != 0)
-                  {
-                    wr.setIntAttribute (EXPONENT_ATTR, fixed_exponent);
-                  }
-                wr.getParent ();
-              }
-
-            void updateKeyAlgorithmMac (MacGenerator mac_gen) throws IOException
-              {
-                mac_gen.addByte (SecureKeyStore.KEY_ALGORITHM_TYPE_RSA);
-                mac_gen.addShort (key_size);
-                mac_gen.addInt (fixed_exponent);
-              }
-          }
-
-        public static final class DSA extends KeyAlgorithmData implements Serializable
-          {
-            private static final long serialVersionUID = 1L;
-
-            int key_size;
-
-            public DSA (int key_size)
-              {
-                this.key_size = key_size;
-              }
-
-            void writeKeyAlgorithmData (DOMWriterHelper wr) throws IOException
-              {
-                bad ("DSA not implemented!");
-              }
-
-            void updateKeyAlgorithmMac (MacGenerator mac_gen)
-              {
-                 
-              }
-          }
-      }
 
     public class KeyProperties implements Serializable
       {
@@ -894,7 +802,7 @@ public class ServerCredentialStore implements Serializable
             return app_usage;
           }
 
-        KeyAlgorithmData key_alg_data;
+        KeySpecifier key_specifier;
 
         PINPolicy pin_policy;
         
@@ -962,11 +870,11 @@ public class ServerCredentialStore implements Serializable
             return this;
           }
 
-        KeyProperties (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
+        KeyProperties (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
           {
             this.id = key_prefix + ++next_key_id_suffix;
             this.app_usage = app_usage;
-            this.key_alg_data = key_alg_data;
+            this.key_specifier = key_specifier;
             this.pin_policy = pin_policy;
             this.preset_pin = preset_pin;
             this.device_pin_protection = device_pin_protection;
@@ -1019,7 +927,7 @@ public class ServerCredentialStore implements Serializable
             key_pair_mac.addBool (enable_pin_caching);
             key_pair_mac.addByte (app_usage.getSKSValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
-            key_alg_data.updateKeyAlgorithmMac (key_pair_mac);
+            key_pair_mac.addArray (key_specifier.getSKSValue ());
             if (endorsed_algorithms != null) for (String algorithm : endorsed_algorithms)
               {
                 key_pair_mac.addString (algorithm);
@@ -1076,7 +984,7 @@ public class ServerCredentialStore implements Serializable
             
             expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
             
-            key_alg_data.writeKeyAlgorithmData (wr);
+            key_specifier.writeKeySpecifier (wr);
 
             wr.getParent ();
 
@@ -1271,27 +1179,27 @@ public class ServerCredentialStore implements Serializable
       }
 
 
-    private KeyProperties addKeyProperties (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
+    private KeyProperties addKeyProperties (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
       {
-        KeyProperties key = new KeyProperties (app_usage, key_alg_data, pin_policy, preset_pin, device_pin_protection);
+        KeyProperties key = new KeyProperties (app_usage, key_specifier, pin_policy, preset_pin, device_pin_protection);
         requested_keys.put (key.getID (), key);
         return key;
       }
 
 
-    public KeyProperties createKeyWithPresetPIN (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy, byte[] encrypted_pin) throws IOException
+    public KeyProperties createKeyWithPresetPIN (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] encrypted_pin) throws IOException
       {
         if (pin_policy == null)
           {
             bad ("PresetPIN without PINPolicy is not allowed");
           }
-        return addKeyProperties (app_usage, key_alg_data, pin_policy, new PresetValue (encrypted_pin), false);
+        return addKeyProperties (app_usage, key_specifier, pin_policy, new PresetValue (encrypted_pin), false);
       }
 
 
-    public KeyProperties createKey (AppUsage app_usage, KeyAlgorithmData key_alg_data, PINPolicy pin_policy) throws IOException
+    public KeyProperties createKey (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy) throws IOException
       {
-        KeyProperties key = addKeyProperties (app_usage, key_alg_data, pin_policy, null, false);
+        KeyProperties key = addKeyProperties (app_usage, key_specifier, pin_policy, null, false);
         if (pin_policy != null)
           {
             pin_policy.user_defined = true;
@@ -1301,9 +1209,9 @@ public class ServerCredentialStore implements Serializable
       }
 
 
-    public KeyProperties createDevicePINProtectedKey (AppUsage app_usage, KeyAlgorithmData key_alg_data) throws IOException
+    public KeyProperties createDevicePINProtectedKey (AppUsage app_usage, KeySpecifier key_specifier) throws IOException
       {
-        return addKeyProperties (app_usage, key_alg_data, null, null, true);
+        return addKeyProperties (app_usage, key_specifier, null, null, true);
       }
 
   }

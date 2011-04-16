@@ -315,7 +315,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
         
         AppUsage app_usage;
 
-        KeyAlgorithmData key_algorithm_data;
+        KeySpecifier key_specifier;
         
         KeyObject (DOMReaderHelper rd, 
                    PINPolicy pin_policy,
@@ -376,7 +376,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             if (rd.hasNext (RSA_ELEM))
               {
                 rd.getNext (RSA_ELEM);
-                key_algorithm_data = new KeyAlgorithmData.RSA (ah.getInt (KEY_SIZE_ATTR), ah.getIntConditional (EXPONENT_ATTR));
+                key_specifier = new KeySpecifier.RSA (ah.getInt (KEY_SIZE_ATTR), ah.getIntConditional (EXPONENT_ATTR));
               }
             else
               {
@@ -384,7 +384,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
                 String ec_uri = ah.getString (NAMED_CURVE_ATTR);
                 if (ec_uri.startsWith ("urn:oid:"))
                   {
-                    key_algorithm_data = new KeyAlgorithmData.EC (ECDomains.getECDomainFromOID (ec_uri.substring (8)));
+                    key_specifier = new KeySpecifier.EC (ECDomains.getECDomainFromOID (ec_uri.substring (8)));
                   }
                 else
                   {
@@ -425,9 +425,9 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
 
 
-        public KeyAlgorithmData getKeyAlgorithmData ()
+        public KeySpecifier getKeySpecifier ()
           {
-            return key_algorithm_data;
+            return key_specifier;
           }
 
 

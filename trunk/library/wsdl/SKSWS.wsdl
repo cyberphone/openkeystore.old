@@ -96,7 +96,7 @@
       <xs:element name="getCertPath.Response">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
+            <xs:element name="X509Certificate" type="xs:base64Binary" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

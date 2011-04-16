@@ -32,17 +32,17 @@ namespace org.webpki.sks.ws.client
     public interface SKSWSProxyInterface
     {
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSExceptionAttributes), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         abortProvisioningSession_Response abortProvisioningSession(abortProvisioningSession_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSExceptionAttributes), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         getKeyProtectionInfo_Response getKeyProtectionInfo(getKeyProtectionInfo_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSExceptionAttributes), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         setCertificatePath_Response setCertificatePath(setCertificatePath_Request request);
 
@@ -56,7 +56,7 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    public class SKSExceptionAttributes : System.Xml.Serialization.IXmlSerializable
+    public class SKSException : System.Xml.Serialization.IXmlSerializable
     {
         private System.Xml.XmlNode[] nodes;
 

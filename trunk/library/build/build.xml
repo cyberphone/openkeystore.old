@@ -128,7 +128,7 @@
     </antcall>
     <antcall target="_ws-gen">
       <param name="cmd" value="dotnetdoc"/>
-      <param name="out" value="${dot_net_dir}/doc/doc.html"/>
+      <param name="out" value="${dot_net_dir}/doc/index.html"/>
     </antcall>
   </target>
 	

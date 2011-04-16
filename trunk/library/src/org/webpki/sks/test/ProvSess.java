@@ -51,7 +51,7 @@ import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.test.DemoKeyStore;
 
-import org.webpki.keygen2.KeyAlgorithmData;
+import org.webpki.keygen2.KeySpecifier;
 import org.webpki.keygen2.KeyGen2URIs;
 import org.webpki.keygen2.ServerCryptoInterface;
 
@@ -566,7 +566,7 @@ public class ProvSess
                           false /* enable_pin_caching */,
                           key_usage,
                           "" /* friendly_name */,
-                          new KeyAlgorithmData.RSA (2048, 0),
+                          new KeySpecifier.RSA (2048, 0),
                           endorsed_algorithm);
       }
     
@@ -598,7 +598,7 @@ public class ProvSess
                           false /* enable_pin_caching */,
                           key_usage,
                           "" /* friendly_name */,
-                          new KeyAlgorithmData.EC (ECDomains.P_256),
+                          new KeySpecifier.EC (ECDomains.P_256),
                           endorsed_algorithms);
       }
 
@@ -614,7 +614,7 @@ public class ProvSess
                              boolean enable_pin_caching,
                              AppUsage key_usage,
                              String friendly_name,
-                             KeyAlgorithmData key_algorithm,
+                             KeySpecifier key_algorithm,
                              String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
       {
         String[] sorted_algorithms = endorsed_algorithms == null ? new String[0] : getSortedAlgorithms (endorsed_algorithms);
@@ -651,17 +651,7 @@ public class ProvSess
         key_pair_mac.addBool (enable_pin_caching);
         key_pair_mac.addByte (key_usage.getSKSValue ());
         key_pair_mac.addString (friendly_name);
-        if (key_algorithm instanceof KeyAlgorithmData.RSA)
-          {
-            key_pair_mac.addByte (SecureKeyStore.KEY_ALGORITHM_TYPE_RSA);
-            key_pair_mac.addShort (((KeyAlgorithmData.RSA)key_algorithm).getKeySize ());
-            key_pair_mac.addInt (((KeyAlgorithmData.RSA)key_algorithm).getFixedExponent ());
-          }
-        else
-          {
-            key_pair_mac.addByte (SecureKeyStore.KEY_ALGORITHM_TYPE_ECC);
-            key_pair_mac.addString (((KeyAlgorithmData.EC)key_algorithm).getNamedCurve ().getURI ());
-          }
+        key_pair_mac.addArray (key_algorithm.getSKSValue ());
         for (String algorithm : sorted_algorithms)
           {
             key_pair_mac.addString (algorithm);

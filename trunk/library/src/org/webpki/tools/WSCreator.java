@@ -16,10 +16,12 @@
  */
 package org.webpki.tools;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.TreeSet;
 import java.util.Vector;
 
@@ -802,20 +804,26 @@ public class WSCreator extends XMLObjectWrapper
 
     private void writeDocNetDoc () throws IOException
       {
-        write (dotnetdoc_file, "<html><body>");
+        write (dotnetdoc_file, "<html><body><table cellpadding=\"20\" border=\"0\">");
         for (Method meth : methods)
           {
-            write (dotnetdoc_file, "<table cellpadding=\"0\" cellspacing=\"0\" border=\"1\" style=\"margin-left:50px;margin-top:50px\">" +
-                "<tr><td>" + dotnetReserved("public") + "&nbsp;");
+            List<String> null_types = new ArrayList<String> ();
+            write (dotnetdoc_file, "<tr><td>&nbsp;</td></tr><tr><td style=\"border-width:1px 1px 1px 1px;border-style:solid;border-color:black\"><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">" +
+                "<tr><td><code>" + dotnetReserved("public") + "&nbsp;");
             if (meth.outputs.isEmpty () || meth.outputs.size () > 1)
               {
                 write (dotnetdoc_file, dotnetReserved ("void"));
               }
             if (meth.outputs.size () == 1)
               {
-                write (dotnetdoc_file, dotnetType (meth.outputs.iterator ().next ()));
+                Property prop = meth.outputs.iterator ().next ();
+                if (prop.nullable)
+                  {
+                    null_types.add ("return&nbsp;value");
+                  }
+                write (dotnetdoc_file, dotnetType (prop));
               }
-            write (dotnetdoc_file, "&nbsp;" + meth.name + "&nbsp;(</td><td>");
+            write (dotnetdoc_file, "&nbsp;" + meth.name + "&nbsp;(</code></td><td><code>");
             Iterator<Property> propiter = meth.inputs.iterator ();
             int i = 0;
             String prefix = "";
@@ -828,15 +836,54 @@ public class WSCreator extends XMLObjectWrapper
                     continue;
                   }
                 Property prop = propiter.next ();
+                if (prop.nullable)
+                  {
+                    null_types.add (prop.nName ());
+                  }
                 if (i++ > 0)
                   {
-                    write (dotnetdoc_file, ",</td></tr><tr><td>&nbsp;</td><td>");
+                    write (dotnetdoc_file, ",</code></td></tr><tr><td>&nbsp;</td><td><code>");
                   }
                 write (dotnetdoc_file, prefix + dotnetType (prop) + "&nbsp;" + prop.nName ());
               }
-            write (dotnetdoc_file, ")</td></tr></table>");
+            write (dotnetdoc_file, ")</code></td></tr>");
+            if (meth.execptions.length > 0 || null_types.size () > 0)
+              {
+                write (dotnetdoc_file, "<tr><td colspan=\"2\">&nbsp;</td></tr>");
+                if (null_types.size () > 0)
+                  {
+                    write (dotnetdoc_file, "<tr><td colspan=\"2\">May&nbsp;be&nbsp;null:&nbsp;<code>");
+                    boolean next = false;
+                    for (String name : null_types)
+                      {
+                        if (next)
+                          {
+                            write (dotnetdoc_file, ",&nbsp;");
+                          }
+                        next = true;
+                        write (dotnetdoc_file, name);
+                      }
+                    write (dotnetdoc_file, "</code></td></tr>");
+                  }
+                if (meth.execptions.length > 0)
+                  {
+                    write (dotnetdoc_file, "<tr><td colspan=\"2\">Throws:&nbsp;<code>");
+                    boolean next = false;
+                    for (String ex : meth.execptions)
+                      {
+                        if (next)
+                          {
+                            write (dotnetdoc_file, ",&nbsp;");
+                          }
+                        next = true;
+                        write (dotnetdoc_file, ex);
+                      }
+                    write (dotnetdoc_file, "</code></td></tr>");
+                  }
+              }
+            write (dotnetdoc_file, "</table></td></tr>");
           }
-        write (dotnetdoc_file, "</body></html>");
+        write (dotnetdoc_file, "</table></body></html>");
         close (dotnetdoc_file);
       }
 
@@ -918,7 +965,7 @@ public class WSCreator extends XMLObjectWrapper
             write (file, "        [System.ServiceModel.OperationContractAttribute(Action=\"\", ReplyAction=\"*\")]\n");
             for (String ex : meth.execptions)
               {
-                writeln (file, "        [System.ServiceModel.FaultContractAttribute(typeof(" + exceptions.get (ex).getName () + "Attributes), Action=\"\", Name=\"" + exceptions.get (ex).getName () + "\")]");
+                writeln (file, "        [System.ServiceModel.FaultContractAttribute(typeof(" + exceptions.get (ex).getName () + "), Action=\"\", Name=\"" + exceptions.get (ex).getName () + "\")]");
               }
             write (file, "        [System.ServiceModel.XmlSerializerFormatAttribute()]\n" + "        " + meth.getNetWrapper (false) + " " + meth.name + "(" + meth.getNetWrapper (true) + " request);\n");
           }
@@ -928,7 +975,7 @@ public class WSCreator extends XMLObjectWrapper
             WSException wse = exceptions.get (ex);
             write (file, "\n" +
                 "    [System.Diagnostics.DebuggerStepThroughAttribute()]\n" + 
-                "    public class " + wse.getName () + "Attributes : System.Xml.Serialization.IXmlSerializable\n" +
+                "    public class " + wse.getName () + " : System.Xml.Serialization.IXmlSerializable\n" +
                 "    {\n" + 
                 "        private System.Xml.XmlNode[] nodes;\n\n" +
                 "        public System.Xml.Schema.XmlSchema GetSchema()\n" +

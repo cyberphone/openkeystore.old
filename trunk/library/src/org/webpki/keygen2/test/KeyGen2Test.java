@@ -83,6 +83,7 @@ import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.Action;
+import org.webpki.keygen2.KeySpecifier;
 import org.webpki.keygen2.ProvisioningFinalizationRequestDecoder;
 import org.webpki.keygen2.ProvisioningFinalizationRequestEncoder;
 import org.webpki.keygen2.ProvisioningFinalizationResponseDecoder;
@@ -380,12 +381,12 @@ public class KeyGen2Test
             
             ProvisioningInitializationResponseEncoder prov_sess_response = 
                   new ProvisioningInitializationResponseEncoder (sess.getClientEphemeralKey (),
-                                                          prov_sess_req.getServerSessionID (),
-                                                          sess.getClientSessionID (),
-                                                          prov_sess_req.getServerTime (),
-                                                          client_time,
-                                                          sess.getAttestation (),
-                                                          device_info.getDeviceCertificatePath ());
+                                                                 prov_sess_req.getServerSessionID (),
+                                                                 sess.getClientSessionID (),
+                                                                 prov_sess_req.getServerTime (),
+                                                                 client_time,
+                                                                 sess.getAttestation (),
+                                                                 device_info.getDeviceCertificatePath ());
             if (https)
               {
                 prov_sess_response.setServerCertificate (server_certificate);
@@ -514,7 +515,7 @@ public class KeyGen2Test
                                                        key.getEnablePINCachingFlag (),
                                                        key.getAppUsage ().getSKSValue (),
                                                        key.getFriendlyName (),
-                                                       key.getKeyAlgorithmData ().getSKSValue (),
+                                                       key.getKeySpecifier ().getSKSValue (),
                                                        key.getEndorsedAlgorithms (),
                                                        key.getMAC ());
                 key_init_response.addPublicKey (key_data.getPublicKey (),
@@ -958,8 +959,8 @@ public class KeyGen2Test
                     pin_policy.setInputMethod (input_method);
                   }
               }
-            ServerCredentialStore.KeyAlgorithmData key_alg =  ecc_key ?
-                 new ServerCredentialStore.KeyAlgorithmData.EC (ECDomains.P_256) : new ServerCredentialStore.KeyAlgorithmData.RSA (2048);
+            KeySpecifier key_alg =  ecc_key ?
+                 new KeySpecifier.EC (ECDomains.P_256) : new KeySpecifier.RSA (2048);
 
             ServerCredentialStore.KeyProperties kp = device_pin_protection ?
                 server_credential_store.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
