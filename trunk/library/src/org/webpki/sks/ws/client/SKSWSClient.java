@@ -1,5 +1,6 @@
 package org.webpki.sks.ws.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +8,9 @@ import java.util.Map;
 import javax.xml.ws.Holder;
 
 import javax.xml.ws.BindingProvider;
+
+import org.webpki.crypto.CertificateInfo;
+import org.webpki.crypto.CertificateUtil;
 
 public class SKSWSClient
   {
@@ -41,9 +45,9 @@ public class SKSWSClient
         return proxy;
     }
 
-    static void bad ()
+    static void bad (String msg)
     {
-     throw new RuntimeException ("baddy"); 
+     throw new RuntimeException (msg); 
     }
     
     /**
@@ -64,48 +68,89 @@ public class SKSWSClient
         SKSWSClient client = new SKSWSClient (args[0]);
         SKSWSProxy proxy = client.getSKSWS ();
         System.out.println ("Version=" + proxy.getVersion ());
-        
+
+        System.out.println ("abortProvisioningSession testing...");
         try
           {
             proxy.abortProvisioningSession (5);
-            bad ();
+            bad ("Should have thrown");
           }
         catch (SKSException_Exception e)
           {
-            System.out.println ("Ok e=" + e.getFaultInfo ().getError () + " m=" + e.getFaultInfo ().getMessage ());
+            if (e.getFaultInfo ().getError () != 4)
+              {
+                bad ("error ex");
+              }
+            if (!e.getFaultInfo ().getMessage ().equals ("bad"))
+              {
+                bad ("message ex");
+              }
           }
 
+        System.out.println ("getKeyProtectionInfo testing...");
         Holder<Byte> blah = new Holder<Byte> ();
         Holder<String> prot = new Holder<String> ();
+        prot.value = "yes";
         Holder<List<byte[]>> certls = new Holder<List<byte[]>> ();
         try
           {
-            proxy.getKeyProtectionInfo (4, prot, blah, certls);
-            if (!prot.value.equals ("yes"))
+            if (proxy.getKeyProtectionInfo (4, prot, blah, certls) != 800)
               {
-                bad ();
+                bad ("return");
+              }
+            if (!prot.value.equals ("yes@"))
+              {
+                bad ("prot");
               }
             if (blah.value != 6)
               {
-                bad ();
+                bad ("blah");
               }
-            if (certls.value.size () != 2)
+            if (certls.value == null || certls.value.size () != 2)
               {
-                bad ();
+                bad ("certs");
               }
-            System.out.println ("Ok=getkey");
-
-            List<byte[]> certs = new ArrayList<byte[]> ();
-            certs.add (new byte[]{4,6});
-            certs.add (new byte[]{4,6,7});
-            
-            proxy.setCertificatePath (8,certs, new byte[]{4,6});
-            proxy.setCertificatePath (3,null, new byte[]{4,6,7});
-            new SKSWSClient (args[0]).getSKSWS ();
+            for (byte[] cert : certls.value)
+              {
+                System.out.println ("CERT=" + new CertificateInfo (CertificateUtil.getCertificateFromBlob (cert), false).getSubject ());
+              }
           }
         catch (SKSException_Exception e)
           {
-            bad ();
+            bad (e.getMessage ());
+          }
+        catch (IOException e)
+          {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        System.out.println ("setCertificatePath testing...");
+        try
+          {
+            proxy.setCertificatePath (8,certls.value, new byte[]{4,6});
+            proxy.setCertificatePath (3,null, new byte[]{4,6,7});
+          }
+        catch (SKSException_Exception e)
+          {
+            bad (e.getMessage ());
+          }
+        System.out.println ("getCertPath testing...");
+        try
+          {
+            List<byte[]> ret = proxy.getCertPath (true);
+            if (ret.size () != 2)
+              {
+                bad("certs");
+              }
+            ret = proxy.getCertPath (false);
+            if (!ret.isEmpty ())
+              {
+                bad("certs");
+              }
+          }
+        catch (SKSException_Exception e)
+          {
+            bad (e.getMessage ());
           }
     }    
 

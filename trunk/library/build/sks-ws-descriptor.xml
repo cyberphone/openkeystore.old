@@ -89,7 +89,7 @@
    </Exception>
 
    <Method Name="abortProvisioningSession" Throws="SKSException">
-     <Input Name="keyHandle" Type="int"/>
+     <Parameter Name="keyHandle" Type="int"/>
      <Code><![CDATA[
         if (keyHandle == 5)
           {
@@ -98,12 +98,13 @@
 ]]></Code></Method>
 
    <Method Name="getKeyProtectionInfo" Throws="SKSException">
-     <Input Name="key_handle" Type="int" XMLName="keyHandle"/>
-     <Output Name="protection_status" Type="string" XMLName="ProtectionStatus"/>
-     <Output Name="blah" Type="byte"/>
-     <Output Name="certificate_path" Type="binary" XMLName="X509Certificate" DotNetRule="Out.X509" List="true"/>
+     <Returns Type="int"/>
+     <Parameter Name="key_handle" Type="int" XMLName="keyHandle"/>
+     <Parameter Name="protection_status" Mode="inout" Type="string" XMLName="ProtectionStatus"/>
+     <Parameter Name="blah" Mode="out" Type="byte"/>
+     <Parameter Name="certificate_path" Mode="out" Type="binary" XMLName="X509Certificate" DotNetRule="Out.X509" List="true"/>
      <Code><![CDATA[
-        protection_status.value = "yes";
+        protection_status.value = protection_status.value + "@";
         blah.value = (byte)(key_handle + 2);
         List<byte[]> certs = new ArrayList<byte[]> ();
         try
@@ -120,12 +121,13 @@
             throw new SKSException (iox);
           }
         certificate_path.value = certs;
+        return 800;
 ]]></Code></Method>
 
    <Method Name="setCertificatePath" Throws="SKSException">
-     <Input Name="key_handle" Type="int" XMLName="KeyHandle"/>
-     <Input Name="certificate_path" Type="binary" XMLName="X509Certificate" DotNetRule="In.X509" List="true" Null="true"/>
-     <Input Name="mac" Type="binary" XMLName="MAC"/>
+     <Parameter Name="key_handle" Type="int" XMLName="KeyHandle"/>
+     <Parameter Name="certificate_path" Type="binary" XMLName="X509Certificate" DotNetRule="In.X509" List="true" Null="true"/>
+     <Parameter Name="mac" Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
         StringBuffer res = new StringBuffer ();
         if (certificate_path.size() == 0)
@@ -155,17 +157,30 @@
 ]]></Code></Method>
 
    <Method Name="getVersion">
-     <Output Name="return" Type="string"/>
+     <Returns Type="string"/>
      <Code><![CDATA[
         return "0.00001";
 ]]></Code></Method>
 
-   <Method Name="getCertPath">
-     <Output Name="return" Type="binary" XMLName="X509Certificate" DotNetRule="Out.X509" List="true" Null="true"/>
+   <Method Name="getCertPath" Throws="SKSException">
+     <Returns Type="binary" XMLName="X509Certificate" DotNetRule="Out.X509" List="true" Null="true"/>
+     <Parameter Type="boolean" Name="want"/>
      <Code><![CDATA[
-        List<byte[]> res = new ArrayList<byte[]> ();
-        res.add (new byte[]{4,5});
-        return res;
+        List<byte[]> certs = new ArrayList<byte[]> ();
+        try
+          {
+            certs.add (DemoKeyStore.getCAKeyStore ().getCertificate ("mykey").getEncoded ());
+            certs.add (DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey").getEncoded ());
+          }
+        catch (GeneralSecurityException gse)
+          {
+            throw new SKSException (gse);
+          }
+        catch (IOException iox)
+          {
+            throw new SKSException (iox);
+          }
+        return want ? certs : null;
 ]]></Code></Method>
 
 </WebService>

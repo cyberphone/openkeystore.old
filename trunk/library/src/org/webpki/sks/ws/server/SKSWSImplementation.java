@@ -73,17 +73,18 @@ public class SKSWSImplementation
     @WebMethod(operationName="getKeyProtectionInfo")
     @RequestWrapper(localName="getKeyProtectionInfo", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @ResponseWrapper(localName="getKeyProtectionInfo.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    public void getKeyProtectionInfo (@WebParam(name="keyHandle")
-                                      int key_handle,
-                                      @WebParam(name="ProtectionStatus", mode=WebParam.Mode.OUT)
-                                      Holder<String> protection_status,
-                                      @WebParam(name="blah", mode=WebParam.Mode.OUT)
-                                      Holder<Byte> blah,
-                                      @WebParam(name="X509Certificate", mode=WebParam.Mode.OUT)
-                                      Holder<List<byte[]>> certificate_path)
+    @WebResult(name="return")
+    public int getKeyProtectionInfo (@WebParam(name="keyHandle")
+                                     int key_handle,
+                                     @WebParam(name="ProtectionStatus", mode=WebParam.Mode.INOUT)
+                                     Holder<String> protection_status,
+                                     @WebParam(name="blah", mode=WebParam.Mode.OUT)
+                                     Holder<Byte> blah,
+                                     @WebParam(name="X509Certificate", mode=WebParam.Mode.OUT)
+                                     Holder<List<byte[]>> certificate_path)
     throws SKSException
       {
-        protection_status.value = "yes";
+        protection_status.value = protection_status.value + "@";
         blah.value = (byte)(key_handle + 2);
         List<byte[]> certs = new ArrayList<byte[]> ();
         try
@@ -100,6 +101,7 @@ public class SKSWSImplementation
             throw new SKSException (iox);
           }
         certificate_path.value = certs;
+        return 800;
       }
 
     @WebMethod(operationName="setCertificatePath")
@@ -153,11 +155,25 @@ public class SKSWSImplementation
     @RequestWrapper(localName="getCertPath", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @ResponseWrapper(localName="getCertPath.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @WebResult(name="X509Certificate")
-    public List<byte[]> getCertPath ()
+    public List<byte[]> getCertPath (@WebParam(name="want")
+                                     boolean want)
+    throws SKSException
       {
-        List<byte[]> res = new ArrayList<byte[]> ();
-        res.add (new byte[]{4,5});
-        return res;
+        List<byte[]> certs = new ArrayList<byte[]> ();
+        try
+          {
+            certs.add (DemoKeyStore.getCAKeyStore ().getCertificate ("mykey").getEncoded ());
+            certs.add (DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey").getEncoded ());
+          }
+        catch (GeneralSecurityException gse)
+          {
+            throw new SKSException (gse);
+          }
+        catch (IOException iox)
+          {
+            throw new SKSException (iox);
+          }
+        return want ? certs : null;
       }
 
     public static void main (String[] args)

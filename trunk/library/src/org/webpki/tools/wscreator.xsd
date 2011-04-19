@@ -149,7 +149,7 @@
    <xs:element name="Exception">
       <xs:complexType>
          <xs:sequence>
-            <xs:element name="Property" type="wsc:property" maxOccurs="unbounded"/>
+            <xs:element name="Property" type="wsc:namedArgument" maxOccurs="unbounded"/>
          </xs:sequence> 
 
          <!-- Exception Canonicalized Name -->
@@ -164,8 +164,8 @@
    <xs:element name="Method">
       <xs:complexType>
          <xs:sequence>
-            <xs:element name="Input" type="wsc:property" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="Output" type="wsc:property" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Returns" type="wsc:argument" minOccurs="0"/>
+            <xs:element name="Parameter" type="wsc:parameter" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="Code" type="xs:string" minOccurs="0"/>
          </xs:sequence> 
 
@@ -211,10 +211,7 @@
        </xs:restriction>
    </xs:simpleType>
 
-   <xs:complexType name="property">
-
-      <!-- Method Name -->
-      <xs:attribute name="Name" type="wsc:id" use="required"/>
+   <xs:complexType name="argument">
 
       <!-- XML -->
       <xs:attribute name="XMLName" type="wsc:id" use="optional"/>
@@ -245,6 +242,40 @@
         </xs:simpleType>
       </xs:attribute>
 
+   </xs:complexType>
+
+   <xs:complexType name="namedArgument">
+      <xs:complexContent>
+
+         <xs:extension base="wsc:argument">
+
+            <!-- Argument Name -->
+            <xs:attribute name="Name" type="wsc:id" use="required"/>
+
+         </xs:extension>
+
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:complexType name="parameter">
+      <xs:complexContent>
+
+         <xs:extension base="wsc:namedArgument">
+
+            <!-- Parameter Mode -->
+            <xs:attribute name="Mode" use="optional" default="in">
+               <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                     <xs:enumeration value="in"/>
+                     <xs:enumeration value="out"/>
+                     <xs:enumeration value="inout"/>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:attribute>
+
+         </xs:extension>
+
+      </xs:complexContent>
    </xs:complexType>
 
 </xs:schema>

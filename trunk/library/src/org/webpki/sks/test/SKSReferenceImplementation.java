@@ -2174,7 +2174,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                            byte[] mac) throws SKSException
       {
         addUnlockKeyOrDeleteKey (provisioning_handle, target_key_handle, authorization, mac, true);
-
       }
 
 

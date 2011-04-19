@@ -48,14 +48,15 @@ public interface SKSWSProxy
     @WebMethod(operationName="getKeyProtectionInfo")
     @RequestWrapper(localName="getKeyProtectionInfo", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @ResponseWrapper(localName="getKeyProtectionInfo.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    public void getKeyProtectionInfo (@WebParam(name="keyHandle")
-                                      int key_handle,
-                                      @WebParam(name="ProtectionStatus", mode=WebParam.Mode.OUT)
-                                      Holder<String> protection_status,
-                                      @WebParam(name="blah", mode=WebParam.Mode.OUT)
-                                      Holder<Byte> blah,
-                                      @WebParam(name="X509Certificate", mode=WebParam.Mode.OUT)
-                                      Holder<List<byte[]>> certificate_path)
+    @WebResult(name="return")
+    public int getKeyProtectionInfo (@WebParam(name="keyHandle")
+                                     int key_handle,
+                                     @WebParam(name="ProtectionStatus", mode=WebParam.Mode.INOUT)
+                                     Holder<String> protection_status,
+                                     @WebParam(name="blah", mode=WebParam.Mode.OUT)
+                                     Holder<Byte> blah,
+                                     @WebParam(name="X509Certificate", mode=WebParam.Mode.OUT)
+                                     Holder<List<byte[]>> certificate_path)
     throws SKSException_Exception;
 
     @WebMethod(operationName="setCertificatePath")
@@ -79,5 +80,7 @@ public interface SKSWSProxy
     @RequestWrapper(localName="getCertPath", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @ResponseWrapper(localName="getCertPath.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
     @WebResult(name="X509Certificate")
-    public List<byte[]> getCertPath ();
+    public List<byte[]> getCertPath (@WebParam(name="want")
+                                     boolean want)
+    throws SKSException_Exception;
   }

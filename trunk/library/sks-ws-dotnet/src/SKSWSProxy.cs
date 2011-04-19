@@ -51,6 +51,7 @@ namespace org.webpki.sks.ws.client
         getVersion_Response getVersion(getVersion_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         getCertPath_Response getCertPath(getCertPath_Request request);
     }
@@ -121,13 +122,18 @@ namespace org.webpki.sks.ws.client
         [System.Xml.Serialization.XmlElementAttribute(ElementName="keyHandle", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
         public int key_handle;
 
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ProtectionStatus", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public string protection_status;
+
         public getKeyProtectionInfo_Request()
         {
         }
 
-        public getKeyProtectionInfo_Request(int key_handle)
+        public getKeyProtectionInfo_Request(int key_handle, ref string protection_status)
         {
             this.key_handle = key_handle;
+            this.protection_status = protection_status;
         }
     }
 
@@ -136,14 +142,18 @@ namespace org.webpki.sks.ws.client
     public class getKeyProtectionInfo_Response
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="return", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public int @return;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=1)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ProtectionStatus", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
         public string protection_status;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=1)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=2)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="blah", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
         public sbyte blah;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=2)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=3)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="X509Certificate", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
         public List<byte[]> certificate_path;
 
@@ -215,8 +225,17 @@ namespace org.webpki.sks.ws.client
     [System.ServiceModel.MessageContractAttribute(WrapperName="getCertPath", WrapperNamespace="http://xmlns.webpki.org/sks/v0.61", IsWrapped=true)]
     public class getCertPath_Request
     {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v0.61", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="want", Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public bool want;
+
         public getCertPath_Request()
         {
+        }
+
+        public getCertPath_Request(bool want)
+        {
+            this.want = want;
         }
     }
 
@@ -285,12 +304,13 @@ namespace org.webpki.sks.ws.client
             base.Channel.abortProvisioningSession(new abortProvisioningSession_Request(keyHandle));
         }
 
-        public void getKeyProtectionInfo(int key_handle, out string protection_status, out sbyte blah, out X509Certificate2[] certificate_path)
+        public int getKeyProtectionInfo(int key_handle, ref string protection_status, out sbyte blah, out X509Certificate2[] certificate_path)
         {
-            getKeyProtectionInfo_Response _res = base.Channel.getKeyProtectionInfo(new getKeyProtectionInfo_Request(key_handle));
+            getKeyProtectionInfo_Response _res = base.Channel.getKeyProtectionInfo(new getKeyProtectionInfo_Request(key_handle, ref protection_status));
             protection_status = _res.protection_status;
             blah = _res.blah;
             certificate_path = blist2certs(_res.certificate_path);
+            return _res.@return;
         }
 
         public void setCertificatePath(int key_handle, X509Certificate2[] certificate_path, byte[] mac)
@@ -300,12 +320,13 @@ namespace org.webpki.sks.ws.client
 
         public string getVersion()
         {
-            return base.Channel.getVersion(new getVersion_Request()).@return;
+            getVersion_Response _res = base.Channel.getVersion(new getVersion_Request());
+            return _res.@return;
         }
 
-        public X509Certificate2[] getCertPath()
+        public X509Certificate2[] getCertPath(bool want)
         {
-            getCertPath_Response _res = base.Channel.getCertPath(new getCertPath_Request());
+            getCertPath_Response _res = base.Channel.getCertPath(new getCertPath_Request(want));
             return blist2certs(_res.@return);
         }
     }

@@ -55,6 +55,7 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="keyHandle" type="xs:int"/>
+            <xs:element name="ProtectionStatus" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -62,6 +63,7 @@
       <xs:element name="getKeyProtectionInfo.Response">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="return" type="xs:int"/>
             <xs:element name="ProtectionStatus" type="xs:string"/>
             <xs:element name="blah" type="xs:byte"/>
             <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
@@ -91,7 +93,13 @@
         </xs:complexType>
       </xs:element>
 
-      <xs:element name="getCertPath"/>
+      <xs:element name="getCertPath">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="want" type="xs:boolean"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
 
       <xs:element name="getCertPath.Response">
         <xs:complexType>
@@ -177,6 +185,7 @@
     <wsdl:operation name="getCertPath">
       <wsdl:input message="tns:getCertPath"/>
       <wsdl:output message="tns:getCertPath.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
   </wsdl:portType>
@@ -236,6 +245,9 @@
         <wsdl:output>
           <soap:body use="literal"/>
         </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
       </wsdl:operation>
 
     </wsdl:binding>

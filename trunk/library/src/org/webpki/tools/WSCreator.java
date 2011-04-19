@@ -348,12 +348,13 @@ public class WSCreator extends XMLObjectWrapper
 
     static
       {
-        types.add (new DataType (false, "xs:int", "int", "int", "int", "Integer"));
-        types.add (new DataType (false, "xs:short", "short", "short", "short", "Short"));
-        types.add (new DataType (false, "xs:byte", "byte", "sbyte", "byte", "Byte"));
-        types.add (new DataType (false, "xs:boolean", "boolean", "boolean", "boolean", "Boolean"));
-        types.add (new DataType (true, "xs:string", "string", "string", "String", "String"));
-        types.add (new DataType (true, "xs:base64Binary", "binary", "byte[]", "byte[]", "byte[]"));
+        //                       NULL    WSDL               DESC       C#        Java       Holder
+        types.add (new DataType (false, "xs:int",          "int",     "int",    "int",     "Integer"));
+        types.add (new DataType (false, "xs:short",        "short",   "short",  "short",   "Short"));
+        types.add (new DataType (false, "xs:byte",         "byte",    "sbyte",  "byte",    "Byte"));
+        types.add (new DataType (false, "xs:boolean",      "boolean", "bool",   "boolean", "Boolean"));
+        types.add (new DataType (true,  "xs:string",       "string",  "string", "String",  "String"));
+        types.add (new DataType (true,  "xs:base64Binary", "binary",  "byte[]", "byte[]",  "byte[]"));
       }
 
     class Property extends Container
@@ -365,6 +366,10 @@ public class WSCreator extends XMLObjectWrapper
         boolean listtype;
         
         DotNetRule dot_net_rule;
+        
+        boolean input_mode;
+        
+        boolean output_mode;
 
         String jName (boolean object_type)
           {
@@ -410,6 +415,11 @@ public class WSCreator extends XMLObjectWrapper
               }
             return arg;
           }
+
+        public String nPrefix ()
+          {
+            return output_mode ? (input_mode ? "ref " : "out ") : "";
+          }
       }
 
     abstract class Container
@@ -427,6 +437,8 @@ public class WSCreator extends XMLObjectWrapper
     class Method extends Container
       {
         String[] execptions;
+        
+        Property return_prop; 
 
         String code;
 
@@ -435,12 +447,12 @@ public class WSCreator extends XMLObjectWrapper
             return getXMLName () + ".Response";
           }
 
-        Collection<Property> inputs;
-        Collection<Property> outputs;
+        Collection<Property> parameters;
 
-        private void nTypedList (boolean next, boolean out, boolean real_type, Collection<Property> props) throws IOException
+        public void writeNetTypedList (boolean actual) throws IOException
           {
-            for (Property prop : props)
+            boolean next = false;
+            for (Property prop : actual ? parameters : filteredParameters (false))
               {
                 if (next)
                   {
@@ -450,23 +462,30 @@ public class WSCreator extends XMLObjectWrapper
                   {
                     next = true;
                   }
-                write (dotnet_client_pck.jfile, (out ? "out " : "") + (real_type ? prop.nRealTypeName () : prop.nType () + " " + prop.name));
+                write (dotnet_client_pck.jfile, prop.nPrefix () + (actual ? prop.nRealTypeName () : prop.nType () + " " + prop.name));
               }
-          }
-
-        public void writeNetTypedInput (boolean real_type) throws IOException
-          {
-            nTypedList (false, false, real_type, inputs);
-          }
-
-        public void writeNetTypedOutput () throws IOException
-          {
-            nTypedList (inputs.size () != 0, true, true, outputs);
           }
 
         public String getNetWrapper (boolean request)
           {
             return name + (request ? "_Request" : "_Response");
+          }
+
+        public Collection<Property> filteredParameters (boolean output)
+          {
+            Collection<Property> props = new Vector<Property> ();
+            if (output && return_prop != null)
+              {
+                props.add (return_prop);
+              }
+            for (Property prop : parameters)
+              {
+                if (output ? prop.output_mode : prop.input_mode)
+                  {
+                    props.add (prop);
+                  }
+              }
+            return props;
           }
       }
 
@@ -625,16 +644,19 @@ public class WSCreator extends XMLObjectWrapper
             method.execptions = attr.getListConditional ("Throws");
             if (method.execptions == null) method.execptions = new String[0];
             rd.getChild ();
-            method.inputs = getProperties (rd, "Input");
-            method.outputs = getProperties (rd, "Output");
-            if (method.outputs.size () == 1)
+            method.return_prop = getPropertyConditional (rd, "Returns");
+            method.parameters = getProperties (rd, "Parameter");
+            if (method.return_prop != null)
               {
                 addImport ("javax.jws.WebResult");
               }
-            else if (method.outputs.size () > 1)
+            for (Property prop : method.parameters)
               {
                 addImport ("javax.jws.WebParam");
-                addImport ("javax.xml.ws.Holder");
+                if (prop.output_mode)
+                  {
+                    addImport ("javax.xml.ws.Holder");
+                  }
               }
             String code = rd.getStringConditional ("Code");
             method.code = jserver ? "\n      {" + (code == null ? "\n" : code) + "      }" : ";";
@@ -657,8 +679,8 @@ public class WSCreator extends XMLObjectWrapper
 
         for (Method meth : methods)
           {
-            writeWSDLProperties (meth.getXMLName (), meth.inputs, false);
-            writeWSDLProperties (meth.getXMLResponseName (), meth.outputs, false);
+            writeWSDLProperties (meth.getXMLName (), meth.filteredParameters (false), false);
+            writeWSDLProperties (meth.getXMLResponseName (), meth.filteredParameters (true), false);
           }
 
         write (wsdl_file, "\n    </xs:schema>\n\n  </wsdl:types>\n");
@@ -810,41 +832,28 @@ public class WSCreator extends XMLObjectWrapper
             List<String> null_types = new ArrayList<String> ();
             write (dotnetdoc_file, "<tr><td>&nbsp;</td></tr><tr><td style=\"border-width:1px 1px 1px 1px;border-style:solid;border-color:black\"><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">" +
                 "<tr><td><code>" + dotnetReserved("public") + "&nbsp;");
-            if (meth.outputs.isEmpty () || meth.outputs.size () > 1)
+            if (meth.return_prop == null)
               {
                 write (dotnetdoc_file, dotnetReserved ("void"));
               }
-            if (meth.outputs.size () == 1)
+            else
               {
-                Property prop = meth.outputs.iterator ().next ();
-                if (prop.nullable)
+                if (meth.return_prop.nullable)
                   {
                     null_types.add ("return&nbsp;value");
                   }
-                write (dotnetdoc_file, dotnetType (prop));
+                write (dotnetdoc_file, dotnetType (meth.return_prop));
               }
             write (dotnetdoc_file, "&nbsp;" + meth.name + "&nbsp;(</code></td><td><code>");
-            Iterator<Property> propiter = meth.inputs.iterator ();
-            int i = 0;
-            String prefix = "";
-            while (propiter.hasNext () || (prefix.length () == 0 && meth.outputs.size () > 1))
+            boolean next = false;
+            for (Property prop : meth.parameters)
               {
-                if (!propiter.hasNext ())
-                  {
-                    propiter = meth.outputs.iterator ();
-                    prefix = dotnetReserved ("out") + "&nbsp";
-                    continue;
-                  }
-                Property prop = propiter.next ();
-                if (prop.nullable)
-                  {
-                    null_types.add (prop.nName ());
-                  }
-                if (i++ > 0)
+                if (next)
                   {
                     write (dotnetdoc_file, ",</code></td></tr><tr><td>&nbsp;</td><td><code>");
                   }
-                write (dotnetdoc_file, prefix + dotnetType (prop) + "&nbsp;" + prop.nName ());
+                next = true;
+                write (dotnetdoc_file, dotnetReserved (prop.nPrefix ()) + dotnetType (prop) + "&nbsp;" + prop.nName ());
               }
             write (dotnetdoc_file, ")</code></td></tr>");
             if (meth.execptions.length > 0 || null_types.size () > 0)
@@ -853,7 +862,7 @@ public class WSCreator extends XMLObjectWrapper
                 if (null_types.size () > 0)
                   {
                     write (dotnetdoc_file, "<tr><td colspan=\"2\">May&nbsp;be&nbsp;null:&nbsp;<code>");
-                    boolean next = false;
+                    next = false;
                     for (String name : null_types)
                       {
                         if (next)
@@ -868,7 +877,7 @@ public class WSCreator extends XMLObjectWrapper
                 if (meth.execptions.length > 0)
                   {
                     write (dotnetdoc_file, "<tr><td colspan=\"2\">Throws:&nbsp;<code>");
-                    boolean next = false;
+                    next = false;
                     for (String ex : meth.execptions)
                       {
                         if (next)
@@ -907,7 +916,7 @@ public class WSCreator extends XMLObjectWrapper
 
     private void writeNetWrapper (boolean request, Method meth) throws IOException
       {
-        Collection<Property> props = request ? meth.inputs : meth.outputs;
+        Collection<Property> props = meth.filteredParameters (!request);
         FileOutputStream file = dotnet_client_pck.jfile;
         String class_name = meth.getNetWrapper (request);
 
@@ -927,12 +936,12 @@ public class WSCreator extends XMLObjectWrapper
         write (file, "        public " + class_name + "()\n" + 
                      "        {\n" + 
                      "        }\n");
-        if (request && props.size () != 0)
+        if (request && !props.isEmpty ())
           {
             write (file, "\n        public " + class_name + "(");
-            meth.writeNetTypedInput (false);
+            meth.writeNetTypedList (false);
             write (file, ")\n        {\n");
-            for (Property prop : meth.inputs)
+            for (Property prop : props)
               {
                 write (file, "            this." + prop.nName() + " = " + prop.nName() + ";\n");
               }
@@ -1073,36 +1082,19 @@ public class WSCreator extends XMLObjectWrapper
         for (Method meth : methods)
           {
             write (file, "\n" + "        public ");
-
-            if (meth.outputs.isEmpty () || meth.outputs.size () > 1)
-              {
-                write (file, "void");
-              }
-            if (meth.outputs.size () == 1)
-              {
-                Property prop = meth.outputs.iterator ().next ();
-                write (file, prop.nRealType ());
-              }
+            write (file, meth.return_prop == null ? "void" : meth.return_prop.nRealType ());
             write (file, " " + meth.name + "(");
-            meth.writeNetTypedInput (true);
-            if (meth.outputs.size () > 1)
-              {
-                meth.writeNetTypedOutput ();
-              }
+            meth.writeNetTypedList (true);
             write (file, ")\n" +
                 "        {\n" + 
                 "            ");
-            if (meth.outputs.size () == 1 && meth.outputs.iterator ().next ().dot_net_rule == null)
-              {
-                write (file, "return ");
-              }
-            else if (meth.outputs.size () > 0)
+            if (!meth.filteredParameters (true).isEmpty ())
               {
                 write (file, meth.getNetWrapper (false) + " _res = ");
               }
             write (file, "base.Channel." + meth.name + "(new " + meth.getNetWrapper (true) + "(");
             next = false;
-            for (Property prop : meth.inputs)
+            for (Property prop : meth.filteredParameters (false))
               {
                 if (next)
                   {
@@ -1112,25 +1104,19 @@ public class WSCreator extends XMLObjectWrapper
                   {
                     next = true;
                   }
-                write (file, prop.nArgument (""));
+                write (file, prop.nPrefix () + prop.nArgument (""));
               }
-            write (file, "))");
-            if (meth.outputs.size () == 1)
+            write (file, "));\n");
+            for (Property prop : meth.parameters)
               {
-                if (meth.outputs.iterator ().next ().dot_net_rule == null)
+                if (prop.output_mode)
                   {
-                    write (file, "." + meth.outputs.iterator ().next ().nName ());
-                  }
-                else
-                  {
-                    write (file, ";\n"+
-                                 "            return " + meth.outputs.iterator ().next ().nArgument ("_res."));
+                    write (file, "            " + prop.name + " = " + prop.nArgument ("_res.") + ";\n");
                   }
               }
-            writeln (file, ";");
-            if (meth.outputs.size () > 1) for (Property prop : meth.outputs)
+            if (meth.return_prop != null)
               {
-                write (file, "            " + prop.name + " = " + prop.nArgument ("_res.") + ";\n");
+                write (file, "            return " + meth.return_prop.nArgument ("_res.") + ";\n");
               }
             write (file, "        }\n");
           }
@@ -1200,21 +1186,20 @@ public class WSCreator extends XMLObjectWrapper
         pck.next = true;
         writeln (jfile, "    @WebMethod(operationName=\"" + meth.getXMLName () + "\")\n" + "    @RequestWrapper(localName=\"" + meth.getXMLName () + "\", targetNamespace=\"" + tns + "\")\n" + "    @ResponseWrapper(localName=\"" + meth.getXMLResponseName () + "\", targetNamespace=\"" + tns + "\")");
         int indent = 4;
-        if (meth.outputs.isEmpty () || meth.outputs.size () > 1)
+        if (meth.return_prop == null)
           {
             write (jfile, "    public void");
           }
-        if (meth.outputs.size () == 1)
+        else
           {
-            Property prop = meth.outputs.iterator ().next ();
-            write (jfile, "    @WebResult(name=\"" + prop.getXMLName () + sub_target_ns + ")\n    public ");
-            write (jfile, prop.jName (false));
-            indent = prop.jName (false).length ();
+            write (jfile, "    @WebResult(name=\"" + meth.return_prop.getXMLName () + sub_target_ns + ")\n    public ");
+            write (jfile, meth.return_prop.jName (false));
+            indent = meth.return_prop.jName (false).length ();
           }
         write (jfile, " " + meth.name + " (");
         indent += meth.name.length ();
         boolean next = false;
-        for (Property prop : meth.inputs)
+        for (Property prop : meth.parameters)
           {
             if (next)
               {
@@ -1224,30 +1209,13 @@ public class WSCreator extends XMLObjectWrapper
                     write (jfile, " ");
                   }
               }
-            writeln (jfile, "@WebParam(name=\"" + prop.getXMLName () + sub_target_ns + ")");
+            writeln (jfile, "@WebParam(name=\"" + prop.getXMLName () + sub_target_ns +
+                (prop.output_mode ? ", mode=WebParam.Mode." + (prop.input_mode ? "INOUT" : "OUT" ) : "") +")");
             for (int i = -14; i < indent; i++)
               {
                 write (jfile, " ");
               }
-            write (jfile, prop.jName (false) + " " + prop.name);
-            next = true;
-          }
-        if (meth.outputs.size () > 1) for (Property prop : meth.outputs)
-          {
-            if (next)
-              {
-                writeln (jfile, ",");
-                for (int i = -14; i < indent; i++)
-                  {
-                    write (jfile, " ");
-                  }
-              }
-            writeln (jfile, "@WebParam(name=\"" + prop.getXMLName () + sub_target_ns + ", mode=WebParam.Mode.OUT)");
-            for (int i = -14; i < indent; i++)
-              {
-                write (jfile, " ");
-              }
-            write (jfile, "Holder<" + prop.jName (true) + "> " + prop.name);
+            write (jfile, (prop.output_mode ? "Holder<" + prop.jName (true) + ">" : prop.jName (false)) + " " + prop.name);
             next = true;
           }
         write (jfile, ")");
@@ -1300,21 +1268,18 @@ public class WSCreator extends XMLObjectWrapper
           }
         writeln (wsdl_file, ">");
       }
-
-    private Collection<Property> getProperties (DOMReaderHelper rd, String property) throws IOException
+    
+    private Property getPropertyConditional (DOMReaderHelper rd, String property) throws IOException
       {
-        LinkedHashMap<String, Property> props = new LinkedHashMap<String, Property> ();
-        HashSet<String> xsd_names = new HashSet<String> ();
-        while (rd.hasNext (property))
+        if (rd.hasNext (property))
           {
             rd.getNext ();
             Property prop = new Property ();
-            prop.name = attr.getString ("Name");
+            prop.name = attr.getStringConditional ("Name", "return");
+            String mode = attr.getStringConditional ("Mode", "out");
+            prop.input_mode = !mode.equals ("out");
+            prop.output_mode = !mode.equals ("in");
             prop.xml_name = attr.getStringConditional ("XMLName");
-            if (!xsd_names.add (prop.getXMLName ()))
-              {
-                bad ("Duplicate XML name: " + prop.getXMLName ());
-              }
             String type = attr.getString ("Type");
             prop.nullable = attr.getBoolean ("Null");
             if (prop.listtype = attr.getBoolean ("List"))
@@ -1343,6 +1308,17 @@ public class WSCreator extends XMLObjectWrapper
               {
                 bad ("Type '" + type + "' not found");
               }
+            return prop;
+          }
+        return null;      
+      }
+
+    private Collection<Property> getProperties (DOMReaderHelper rd, String property) throws IOException
+      {
+        LinkedHashMap<String, Property> props = new LinkedHashMap<String, Property> ();
+        while (rd.hasNext (property))
+          {
+            Property prop = getPropertyConditional (rd, property);
             if (props.put (prop.name, prop) != null)
               {
                 bad ("Duplicate property: " + prop.name);
