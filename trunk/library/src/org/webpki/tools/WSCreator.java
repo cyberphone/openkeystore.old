@@ -572,7 +572,13 @@ public class WSCreator extends XMLObjectWrapper
         write (wsdl_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<!--\n" + getLicense (false) + "\n");
         writeGenerate (wsdl_file);
         write (wsdl_file, "\n-->\n" + "<wsdl:definitions targetNamespace=\"" + tns + "\"\n" +
-            "                  xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\"\n" + "                  xmlns:tns=\"" + tns + "\"\n" + "                  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" + "                  xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\">\n\n" + "  <wsdl:types>\n\n" + "    <xs:schema targetNamespace=\"" + tns + "\"\n" + "               elementFormDefault=\"" + (qualified_ns ? "qualified" : "unqualified") + "\" attributeFormDefault=\"unqualified\">\n");
+            "                  xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\"\n" +
+            "                  xmlns:tns=\"" + tns + "\"\n" +
+            "                  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
+            "                  xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\">\n\n" +
+            "  <wsdl:types>\n\n" +
+            "    <xs:schema targetNamespace=\"" + tns + "\"\n" +
+            "               elementFormDefault=\"" + (qualified_ns ? "qualified" : "unqualified") + "\" attributeFormDefault=\"unqualified\">\n");
 
         if (rd.hasNext ("JavaServer"))
           {
@@ -692,7 +698,13 @@ public class WSCreator extends XMLObjectWrapper
 
         for (Method meth : methods)
           {
-            write (wsdl_file, "\n" + "  <wsdl:message name=\"" + meth.getXMLName () + "\">\n" + "    <wsdl:part name=\"parameters\" element=\"tns:" + meth.getXMLName () + "\"/>\n" + "  </wsdl:message>\n\n" + "  <wsdl:message name=\"" + meth.getXMLResponseName () + "\">\n" + "    <wsdl:part name=\"parameters\" element=\"tns:" + meth.getXMLResponseName () + "\"/>\n" + "  </wsdl:message>\n");
+            write (wsdl_file, "\n" +
+                "  <wsdl:message name=\"" + meth.getXMLName () + "\">\n" +
+                "    <wsdl:part name=\"parameters\" element=\"tns:" + meth.getXMLName () + "\"/>\n" +
+                "  </wsdl:message>\n\n" +
+                "  <wsdl:message name=\"" + meth.getXMLResponseName () + "\">\n" +
+                "    <wsdl:part name=\"parameters\" element=\"tns:" + meth.getXMLResponseName () + "\"/>\n" +
+                "  </wsdl:message>\n");
           }
 
         write (wsdl_file, "\n  <wsdl:portType name=\"" + service_name + ".Interface\">\n");
@@ -711,7 +723,9 @@ public class WSCreator extends XMLObjectWrapper
             write (wsdl_file, "    </wsdl:operation>\n");
           }
 
-        write (wsdl_file, "\n  </wsdl:portType>\n\n" + "  <wsdl:binding name=\"" + service_name + ".Binding\" type=\"tns:" + service_name + ".Interface\">\n" + "    <soap:binding style=\"document\" transport=\"http://schemas.xmlsoap.org/soap/http\"/>\n");
+        write (wsdl_file, "\n  </wsdl:portType>\n\n" +
+            "  <wsdl:binding name=\"" + service_name + ".Binding\" type=\"tns:" + service_name + ".Interface\">\n" +
+            "    <soap:binding style=\"document\" transport=\"http://schemas.xmlsoap.org/soap/http\"/>\n");
 
         javaHeader (jserver_pck);
         javaHeader (jclient_pck);
@@ -720,7 +734,14 @@ public class WSCreator extends XMLObjectWrapper
           {
             javaMethod (jserver_pck, meth);
             javaMethod (jclient_pck, meth);
-            write (wsdl_file, "\n" + "      <wsdl:operation name=\"" + meth.getXMLName () + "\">\n" + "        <wsdl:input>\n" + "          <soap:body use=\"literal\"/>\n" + "        </wsdl:input>\n" + "        <wsdl:output>\n" + "          <soap:body use=\"literal\"/>\n" + "        </wsdl:output>\n");
+            write (wsdl_file, "\n" +
+                "      <wsdl:operation name=\"" + meth.getXMLName () + "\">\n" +
+                "        <wsdl:input>\n" +
+                "          <soap:body use=\"literal\"/>\n" +
+                "        </wsdl:input>\n" +
+                "        <wsdl:output>\n" +
+                "          <soap:body use=\"literal\"/>\n" +
+                "        </wsdl:output>\n");
             for (String exception : meth.execptions)
               {
                 String xml_name = exceptions.get (exception).getXMLName ();
@@ -729,7 +750,12 @@ public class WSCreator extends XMLObjectWrapper
             write (wsdl_file, "      </wsdl:operation>\n");
           }
 
-        write (wsdl_file, "\n    </wsdl:binding>\n\n" + "  <wsdl:service name=\"" + service_name + "\">\n" + "     <wsdl:port name=\"" + service_name + ".Port\" binding=\"tns:" + service_name + ".Binding\">\n" + "       <soap:address location=\"" + default_url + "\"/>\n" + "     </wsdl:port>\n" + "  </wsdl:service>\n\n" + "</wsdl:definitions>\n");
+        write (wsdl_file, "\n    </wsdl:binding>\n\n" +
+            "  <wsdl:service name=\"" + service_name + "\">\n" +
+            "     <wsdl:port name=\"" + service_name + ".Port\" binding=\"tns:" + service_name + ".Binding\">\n" +
+            "       <soap:address location=\"" + default_url + "\"/>\n" +
+            "     </wsdl:port>\n" +
+            "  </wsdl:service>\n\n" + "</wsdl:definitions>\n");
         close (wsdl_file);
         javaTerminate (jserver_pck);
         javaTerminate (jclient_pck);
@@ -1260,7 +1286,7 @@ public class WSCreator extends XMLObjectWrapper
                               "          <xs:sequence>\n");
             for (Property property : properties)
               {
-                write (wsdl_file, "            <xs:element name=\"" + property.getXMLName () + "\" type=\"" + property.data_type.xsd_name + "\"" + (unqualified ? " form=\"unqualified\"" : "") + (property.nullable ? " minOccurs=\"0\"" : "") + (property.listtype ? " maxOccurs=\"unbounded\"" : "") + "/>\n");
+                write (wsdl_file, "            <xs:element name=\"" + property.getXMLName () + "\" type=\"" + property.data_type.xsd_name + "\"" + (unqualified ? " form=\"unqualified\"" : "") + (property.nullable ? " nillable=\"true\" minOccurs=\"0\"" : "") + (property.listtype ? " maxOccurs=\"unbounded\"" : "") + "/>\n");
               }
             write (wsdl_file, "          </xs:sequence>\n" +
                               "        </xs:complexType>\n" +

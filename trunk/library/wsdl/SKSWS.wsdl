@@ -21,22 +21,48 @@
         ///////////////////////////////////////////////
 
 -->
-<wsdl:definitions targetNamespace="http://xmlns.webpki.org/sks/v0.61"
+<wsdl:definitions targetNamespace="http://xmlns.webpki.org/sks/v1.00"
                   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-                  xmlns:tns="http://xmlns.webpki.org/sks/v0.61"
+                  xmlns:tns="http://xmlns.webpki.org/sks/v1.00"
                   xmlns:xs="http://www.w3.org/2001/XMLSchema"
                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
 
   <wsdl:types>
 
-    <xs:schema targetNamespace="http://xmlns.webpki.org/sks/v0.61"
-               elementFormDefault="unqualified" attributeFormDefault="unqualified">
+    <xs:schema targetNamespace="http://xmlns.webpki.org/sks/v1.00"
+               elementFormDefault="qualified" attributeFormDefault="unqualified">
 
       <xs:element name="SKSException">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="error" type="xs:int"/>
-            <xs:element name="message" type="xs:string"/>
+            <xs:element name="error" type="xs:int" form="unqualified"/>
+            <xs:element name="message" type="xs:string" form="unqualified"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="createProvisioningSession">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Algorithm" type="xs:string"/>
+            <xs:element name="ServerSessionID" type="xs:string"/>
+            <xs:element name="ServerEphemeralKey" type="xs:base64Binary"/>
+            <xs:element name="IssuerURI" type="xs:string"/>
+            <xs:element name="KeyManagementKey" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="ClientTime" type="xs:int"/>
+            <xs:element name="SessionLifeTime" type="xs:int"/>
+            <xs:element name="SessionKeyLimit" type="xs:short"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="createProvisioningSession.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ClientSessionID" type="xs:string"/>
+            <xs:element name="ClientEphemeralKey" type="xs:base64Binary"/>
+            <xs:element name="Attestation" type="xs:base64Binary"/>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -44,12 +70,29 @@
       <xs:element name="abortProvisioningSession">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="keyHandle" type="xs:int"/>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
 
       <xs:element name="abortProvisioningSession.Response"/>
+
+      <xs:element name="enumerateKeys">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="enumerateKeys.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
 
       <xs:element name="getKeyProtectionInfo">
         <xs:complexType>
@@ -75,7 +118,7 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="KeyHandle" type="xs:int"/>
-            <xs:element name="X509Certificate" type="xs:base64Binary" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="X509Certificate" type="xs:base64Binary" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
@@ -104,7 +147,7 @@
       <xs:element name="getCertPath.Response">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="X509Certificate" type="xs:base64Binary" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="X509Certificate" type="xs:base64Binary" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -117,12 +160,28 @@
     <wsdl:part name="fault" element="tns:SKSException"/>
   </wsdl:message>
 
+  <wsdl:message name="createProvisioningSession">
+    <wsdl:part name="parameters" element="tns:createProvisioningSession"/>
+  </wsdl:message>
+
+  <wsdl:message name="createProvisioningSession.Response">
+    <wsdl:part name="parameters" element="tns:createProvisioningSession.Response"/>
+  </wsdl:message>
+
   <wsdl:message name="abortProvisioningSession">
     <wsdl:part name="parameters" element="tns:abortProvisioningSession"/>
   </wsdl:message>
 
   <wsdl:message name="abortProvisioningSession.Response">
     <wsdl:part name="parameters" element="tns:abortProvisioningSession.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="enumerateKeys">
+    <wsdl:part name="parameters" element="tns:enumerateKeys"/>
+  </wsdl:message>
+
+  <wsdl:message name="enumerateKeys.Response">
+    <wsdl:part name="parameters" element="tns:enumerateKeys.Response"/>
   </wsdl:message>
 
   <wsdl:message name="getKeyProtectionInfo">
@@ -159,9 +218,21 @@
 
   <wsdl:portType name="SKSWS.Interface">
 
+    <wsdl:operation name="createProvisioningSession">
+      <wsdl:input message="tns:createProvisioningSession"/>
+      <wsdl:output message="tns:createProvisioningSession.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
     <wsdl:operation name="abortProvisioningSession">
       <wsdl:input message="tns:abortProvisioningSession"/>
       <wsdl:output message="tns:abortProvisioningSession.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="enumerateKeys">
+      <wsdl:input message="tns:enumerateKeys"/>
+      <wsdl:output message="tns:enumerateKeys.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -193,7 +264,31 @@
   <wsdl:binding name="SKSWS.Binding" type="tns:SKSWS.Interface">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
 
+      <wsdl:operation name="createProvisioningSession">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
       <wsdl:operation name="abortProvisioningSession">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="enumerateKeys">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

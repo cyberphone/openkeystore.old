@@ -27,19 +27,19 @@ import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
 
 @WebServiceClient(name="SKSWS",
-                  targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+                  targetNamespace="http://xmlns.webpki.org/sks/v1.00")
 public class SKSWS extends Service
   {
     public SKSWS ()
       {
         super (SKSWS.class.getResource ("/META-INF/SKSWS.wsdl"),
-               new QName ("http://xmlns.webpki.org/sks/v0.61", "SKSWS"));
+               new QName ("http://xmlns.webpki.org/sks/v1.00", "SKSWS"));
       }
 
     @WebEndpoint(name="SKSWS.Port")
     public SKSWSProxy getSKSWSPort ()
       {
-        return super.getPort (new QName ("http://xmlns.webpki.org/sks/v0.61", "SKSWS.Port"),
+        return super.getPort (new QName ("http://xmlns.webpki.org/sks/v1.00", "SKSWS.Port"),
                               SKSWSProxy.class);
       }
   }

@@ -24,7 +24,7 @@ import javax.xml.ws.WebFault;
 
 @SuppressWarnings("serial")
 @WebFault(name="SKSException",
-          targetNamespace="http://xmlns.webpki.org/sks/v0.61")
+          targetNamespace="http://xmlns.webpki.org/sks/v1.00")
 public class SKSException_Exception extends Exception
   {
     /**

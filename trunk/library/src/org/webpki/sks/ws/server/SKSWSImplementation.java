@@ -23,6 +23,16 @@ package org.webpki.sks.ws.server;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.Security;
+
+import java.security.cert.X509Certificate;
+
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
+
+import java.security.spec.X509EncodedKeySpec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,50 +47,191 @@ import javax.xml.ws.Holder;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import org.webpki.crypto.test.DemoKeyStore;
 
+import org.webpki.sks.DeviceInfo;
+import org.webpki.sks.EnumeratedKey;
+import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
+import org.webpki.sks.SecureKeyStore;
 
 /**
- *  This is the server :-)
- */
+ * SKS Web Service Implementation.
+ *
+ * The purpose of the Web Service is creating a "singleton"
+ * service that can concurrently be called by arbitrary
+ * SKS-using applications.  The Web Service can be connected
+ * to any conformant SKS implementation.
+ */ 
 @com.sun.xml.ws.developer.SchemaValidation
 @WebService(serviceName="SKSWS",
-            targetNamespace="http://xmlns.webpki.org/sks/v0.61",
+            targetNamespace="http://xmlns.webpki.org/sks/v1.00",
             name="SKSWS.Interface",
             portName="SKSWS.Port",
             wsdlLocation="META-INF/SKSWS.wsdl")
 public class SKSWSImplementation
   {
 
-       void localMethod (String epub)
-         {
-         }
+    static SecureKeyStore sks;
+    
+    static DeviceInfo device_info;
+    
+    static
+      {
+        try
+          {
+            Security.insertProviderAt (new BouncyCastleProvider(), 1);
+            sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
+            device_info = sks.getDeviceInfo ();
+            System.out.println ("Device: " + device_info.getVendorDescription ());
+            System.out.println ("Vendor: " + device_info.getVendorName ());
+            System.out.println ("API Version: " + device_info.getAPILevel () + "\n");
+          }
+        catch (ClassNotFoundException e)
+          {
+            throw new RuntimeException (e);
+          }
+        catch (InstantiationException e)
+          {
+            throw new RuntimeException (e);
+          }
+        catch (IllegalAccessException e)
+          {
+            throw new RuntimeException (e);
+          }
+        catch (SKSException e)
+          {
+            throw new RuntimeException (e);
+          }
+      }
+    
+    PublicKey createPublicKeyFromBlob (byte[] blob) throws SKSException
+      {
+        X509EncodedKeySpec ks = new X509EncodedKeySpec (blob);
+        KeyFactory kf = null;
+        try
+          {
+            kf = KeyFactory.getInstance ("RSA");
+            return kf.generatePublic(ks);
+          }
+        catch (GeneralSecurityException e1)
+          {
+            try
+              {
+                kf = KeyFactory.getInstance ("EC");
+                return kf.generatePublic(ks);
+              }
+            catch (GeneralSecurityException e2)
+              {
+                throw new SKSException (e2);
+              }
+          }
+      }
+      
+    ECPublicKey getECPublicKey (byte[] blob) throws SKSException
+      {
+        PublicKey public_key = createPublicKeyFromBlob (blob);
+        if (public_key instanceof ECPublicKey)
+          {
+            return (ECPublicKey) public_key;
+          }
+        throw new SKSException ("Expected EC key");
+      }
 
-    @WebMethod(operationName="abortProvisioningSession")
-    @RequestWrapper(localName="abortProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    @ResponseWrapper(localName="abortProvisioningSession.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    public void abortProvisioningSession (@WebParam(name="keyHandle")
-                                          int keyHandle)
+    @WebMethod(operationName="createProvisioningSession")
+    @RequestWrapper(localName="createProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="createProvisioningSession.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void createProvisioningSession (@WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                           String algorithm,
+                                           @WebParam(name="ServerSessionID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                           String server_session_id,
+                                           @WebParam(name="ServerEphemeralKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                           byte[] server_ephemeral_key,
+                                           @WebParam(name="IssuerURI", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                           String issuer_uri,
+                                           @WebParam(name="KeyManagementKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                           byte[] key_management_key,
+                                           @WebParam(name="ClientTime", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                           int client_time,
+                                           @WebParam(name="SessionLifeTime", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                           int session_life_time,
+                                           @WebParam(name="SessionKeyLimit", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                           short session_key_limit,
+                                           @WebParam(name="ClientSessionID", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                           Holder<String> client_session_id,
+                                           @WebParam(name="ClientEphemeralKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                           Holder<byte[]> client_ephemeral_key,
+                                           @WebParam(name="Attestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                           Holder<byte[]> attestation,
+                                           @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                           Holder<Integer> provisioning_handle)
     throws SKSException
       {
-        if (keyHandle == 5)
+        System.out.println ("SERV=" + (server_ephemeral_key == null ? "NULL" : server_ephemeral_key.length) + " KMK=" + (key_management_key == null ? "NULL" : key_management_key.length));
+        try
+          {
+        org.webpki.asn1.BaseASN1Object o = org.webpki.asn1.DerDecoder.decode(server_ephemeral_key, 0);
+        System.out.println(o.toString (true, true));
+          }
+        catch (IOException e)
+          {
+            System.out.println ("ASN1" + e.getMessage ());
+          }
+        ProvisioningSession sess = sks.createProvisioningSession (algorithm,
+                                                                  server_session_id,
+                                                                  getECPublicKey (server_ephemeral_key),
+                                                                  issuer_uri,
+                                                                  key_management_key == null ? null : createPublicKeyFromBlob (key_management_key),
+                                                                  client_time,
+                                                                  session_life_time,
+                                                                  session_key_limit);
+        client_session_id.value = sess.getClientSessionID ();
+        client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
+        attestation.value = sess.getAttestation ();
+        provisioning_handle.value = sess.getProvisioningHandle ();
+      }
+
+    @WebMethod(operationName="abortProvisioningSession")
+    @RequestWrapper(localName="abortProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="abortProvisioningSession.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void abortProvisioningSession (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                          int provisioning_handle)
+    throws SKSException
+      {
+        if (provisioning_handle == 5)
           {
             throw new SKSException ("bad",4);
           }
+        sks.abortProvisioningSession (provisioning_handle);
+      }
+
+    @WebMethod(operationName="enumerateKeys")
+    @RequestWrapper(localName="enumerateKeys", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="enumerateKeys.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void enumerateKeys (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.INOUT)
+                               Holder<Integer> key_handle,
+                               @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<Integer> provisioning_handle)
+    throws SKSException
+      {
+        EnumeratedKey ek = sks.enumerateKeys (new EnumeratedKey (key_handle.value, 0));
+        key_handle.value = ek.getKeyHandle ();
+        provisioning_handle.value = ek.getProvisioningHandle ();
       }
 
     @WebMethod(operationName="getKeyProtectionInfo")
-    @RequestWrapper(localName="getKeyProtectionInfo", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    @ResponseWrapper(localName="getKeyProtectionInfo.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    @WebResult(name="return")
-    public int getKeyProtectionInfo (@WebParam(name="keyHandle")
+    @RequestWrapper(localName="getKeyProtectionInfo", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="getKeyProtectionInfo.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="return", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public int getKeyProtectionInfo (@WebParam(name="keyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                      int key_handle,
-                                     @WebParam(name="ProtectionStatus", mode=WebParam.Mode.INOUT)
+                                     @WebParam(name="ProtectionStatus", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.INOUT)
                                      Holder<String> protection_status,
-                                     @WebParam(name="blah", mode=WebParam.Mode.OUT)
+                                     @WebParam(name="blah", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                      Holder<Byte> blah,
-                                     @WebParam(name="X509Certificate", mode=WebParam.Mode.OUT)
+                                     @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                      Holder<List<byte[]>> certificate_path)
     throws SKSException
       {
@@ -105,13 +256,13 @@ public class SKSWSImplementation
       }
 
     @WebMethod(operationName="setCertificatePath")
-    @RequestWrapper(localName="setCertificatePath", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    @ResponseWrapper(localName="setCertificatePath.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    public void setCertificatePath (@WebParam(name="KeyHandle")
+    @RequestWrapper(localName="setCertificatePath", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="setCertificatePath.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void setCertificatePath (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                     int key_handle,
-                                    @WebParam(name="X509Certificate")
+                                    @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                     List<byte[]> certificate_path,
-                                    @WebParam(name="MAC")
+                                    @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                     byte[] mac)
     throws SKSException
       {
@@ -143,19 +294,19 @@ public class SKSWSImplementation
       }
 
     @WebMethod(operationName="getVersion")
-    @RequestWrapper(localName="getVersion", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    @ResponseWrapper(localName="getVersion.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    @WebResult(name="return")
+    @RequestWrapper(localName="getVersion", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="getVersion.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="return", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     public String getVersion ()
       {
         return "0.00001";
       }
 
     @WebMethod(operationName="getCertPath")
-    @RequestWrapper(localName="getCertPath", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    @ResponseWrapper(localName="getCertPath.Response", targetNamespace="http://xmlns.webpki.org/sks/v0.61")
-    @WebResult(name="X509Certificate")
-    public List<byte[]> getCertPath (@WebParam(name="want")
+    @RequestWrapper(localName="getCertPath", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="getCertPath.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public List<byte[]> getCertPath (@WebParam(name="want", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                      boolean want)
     throws SKSException
       {

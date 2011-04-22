@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- SKS WS Descriptor File to be used with "WSCreator" -->
-<WebService NameSpace="http://xmlns.webpki.org/sks/v0.61"
+<WebService NameSpace="http://xmlns.webpki.org/sks/v1.00"
             Service="SKSWS"
             DefaultURL="http://localhost:8080/securekeystore"
             WSDLLocation="META-INF/SKSWS.wsdl"
-            Qualified="false"
+            Qualified="true"
             xmlns="http://xmlns.webpki.org/wscreator.1.00">
 
    <LicenseHeader><![CDATA[
@@ -27,22 +27,101 @@
    <JavaServer ClassName="org.webpki.sks.ws.server.SKSWSImplementation"
                Imports="java.util.ArrayList
                         java.security.GeneralSecurityException
+                        java.security.Security
+                        java.security.spec.X509EncodedKeySpec
+                        java.security.KeyFactory
+                        java.security.PublicKey
+                        java.security.cert.X509Certificate
+                        java.security.interfaces.ECPublicKey
+                        java.security.interfaces.RSAPublicKey
                         java.io.IOException
-                        org.webpki.crypto.test.DemoKeyStore">
+                        org.bouncycastle.jce.provider.BouncyCastleProvider
+                        org.webpki.crypto.test.DemoKeyStore
+                        org.webpki.sks.EnumeratedKey
+                        org.webpki.sks.ProvisioningSession
+                        org.webpki.sks.DeviceInfo
+                        org.webpki.sks.SecureKeyStore">
      <ClassHeader><![CDATA[/**
- *  This is the server :-)
- */
+ * SKS Web Service Implementation.
+ *
+ * The purpose of the Web Service is creating a "singleton"
+ * service that can concurrently be called by arbitrary
+ * SKS-using applications.  The Web Service can be connected
+ * to any conformant SKS implementation.
+ */ 
 ]]></ClassHeader>
      <SupportCode><![CDATA[
-       void localMethod (String epub)
-         {
-         }
+    static SecureKeyStore sks;
+    
+    static DeviceInfo device_info;
+    
+    static
+      {
+        try
+          {
+            Security.insertProviderAt (new BouncyCastleProvider(), 1);
+            sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
+            device_info = sks.getDeviceInfo ();
+            System.out.println ("Device: " + device_info.getVendorDescription ());
+            System.out.println ("Vendor: " + device_info.getVendorName ());
+            System.out.println ("API Version: " + device_info.getAPILevel () + "\n");
+          }
+        catch (ClassNotFoundException e)
+          {
+            throw new RuntimeException (e);
+          }
+        catch (InstantiationException e)
+          {
+            throw new RuntimeException (e);
+          }
+        catch (IllegalAccessException e)
+          {
+            throw new RuntimeException (e);
+          }
+        catch (SKSException e)
+          {
+            throw new RuntimeException (e);
+          }
+      }
+    
+    PublicKey createPublicKeyFromBlob (byte[] blob) throws SKSException
+      {
+        X509EncodedKeySpec ks = new X509EncodedKeySpec (blob);
+        KeyFactory kf = null;
+        try
+          {
+            kf = KeyFactory.getInstance ("RSA");
+            return kf.generatePublic(ks);
+          }
+        catch (GeneralSecurityException e1)
+          {
+            try
+              {
+                kf = KeyFactory.getInstance ("EC");
+                return kf.generatePublic(ks);
+              }
+            catch (GeneralSecurityException e2)
+              {
+                throw new SKSException (e2);
+              }
+          }
+      }
+      
+    ECPublicKey getECPublicKey (byte[] blob) throws SKSException
+      {
+        PublicKey public_key = createPublicKeyFromBlob (blob);
+        if (public_key instanceof ECPublicKey)
+          {
+            return (ECPublicKey) public_key;
+          }
+        throw new SKSException ("Expected EC key");
+      }
 ]]></SupportCode>
    </JavaServer>
 
    <JavaClient ClassName="org.webpki.sks.ws.client.SKSWSProxy">
      <ClassHeader><![CDATA[/**
- *  This is the client :-)
+ * This is the client :-)
  */
 ]]></ClassHeader>
    </JavaClient>
@@ -50,10 +129,14 @@
                  RegistryURL="SOFTWARE\WebPKI.org\SKSWSURL"
                  PathAsDirectory="false">
      <ClassHeader><![CDATA[    /*
-     *  This is the .NET client :-)
+     *  This is the .NET SKS client.
      */
 ]]></ClassHeader>
      <SupportCode><![CDATA[
+        public static string ALGORITHM_SESSION_KEY_ATTEST_1 = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
+
+        public static string ALGORITHM_KEY_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
+
         X509Certificate2[] blist2certs (List<byte[]> blist)
         {
             X509Certificate2[] certs = new X509Certificate2[blist.Count];
@@ -88,13 +171,61 @@
      <Property Name="message" Type="string"/>
    </Exception>
 
-   <Method Name="abortProvisioningSession" Throws="SKSException">
-     <Parameter Name="keyHandle" Type="int"/>
+   <Method Name="createProvisioningSession" Throws="SKSException">
+     <Parameter Name="algorithm"            Type="string" XMLName="Algorithm"       />
+     <Parameter Name="server_session_id"    Type="string" XMLName="ServerSessionID"/>
+     <Parameter Name="server_ephemeral_key" Type="binary" XMLName="ServerEphemeralKey"/>
+     <Parameter Name="issuer_uri"           Type="string" XMLName="IssuerURI"/>
+     <Parameter Name="key_management_key"   Type="binary" XMLName="KeyManagementKey" Null="true"/>
+     <Parameter Name="client_time"          Type="int"    XMLName="ClientTime"/>
+     <Parameter Name="session_life_time"    Type="int"    XMLName="SessionLifeTime"/>
+     <Parameter Name="session_key_limit"    Type="short"  XMLName="SessionKeyLimit"/>
+     <Parameter Name="client_session_id"    Type="string" XMLName="ClientSessionID"    Mode="out"/>
+     <Parameter Name="client_ephemeral_key" Type="binary" XMLName="ClientEphemeralKey" Mode="out"/>
+     <Parameter Name="attestation"          Type="binary" XMLName="Attestation"        Mode="out"/>
+     <Parameter Name="provisioning_handle"  Type="int"    XMLName="ProvisioningHandle" Mode="out"/>
      <Code><![CDATA[
-        if (keyHandle == 5)
+        System.out.println ("SERV=" + (server_ephemeral_key == null ? "NULL" : server_ephemeral_key.length) + " KMK=" + (key_management_key == null ? "NULL" : key_management_key.length));
+        try
+          {
+        org.webpki.asn1.BaseASN1Object o = org.webpki.asn1.DerDecoder.decode(server_ephemeral_key, 0);
+        System.out.println(o.toString (true, true));
+          }
+        catch (IOException e)
+          {
+            System.out.println ("ASN1" + e.getMessage ());
+          }
+        ProvisioningSession sess = sks.createProvisioningSession (algorithm,
+                                                                  server_session_id,
+                                                                  getECPublicKey (server_ephemeral_key),
+                                                                  issuer_uri,
+                                                                  key_management_key == null ? null : createPublicKeyFromBlob (key_management_key),
+                                                                  client_time,
+                                                                  session_life_time,
+                                                                  session_key_limit);
+        client_session_id.value = sess.getClientSessionID ();
+        client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
+        attestation.value = sess.getAttestation ();
+        provisioning_handle.value = sess.getProvisioningHandle ();
+]]></Code></Method>
+
+   <Method Name="abortProvisioningSession" Throws="SKSException">
+     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
+     <Code><![CDATA[
+        if (provisioning_handle == 5)
           {
             throw new SKSException ("bad",4);
           }
+        sks.abortProvisioningSession (provisioning_handle);
+]]></Code></Method>
+
+   <Method Name="enumerateKeys" Throws="SKSException">
+     <Parameter Name="key_handle" XMLName="KeyHandle" Type="int" Mode="inout"/>
+     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int" Mode="out"/>
+     <Code><![CDATA[
+        EnumeratedKey ek = sks.enumerateKeys (new EnumeratedKey (key_handle.value, 0));
+        key_handle.value = ek.getKeyHandle ();
+        provisioning_handle.value = ek.getProvisioningHandle ();
 ]]></Code></Method>
 
    <Method Name="getKeyProtectionInfo" Throws="SKSException">

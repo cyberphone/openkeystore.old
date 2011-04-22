@@ -2,7 +2,6 @@
 
   <!-- set global properties for this build -->
   <property name="sks.implementation" value="org.webpki.sks.test.SKSReferenceImplementation"/>
-  <property name="sks.ws.client" value="org.webpki.sks.ws.client.SKSWSClient"/>
   <property name="src_dir" value="../src" />
   <property name="dot_net_dir" value="../sks-ws-dotnet" />
   <property name="temp_dir" value="../.tmp" />
@@ -321,15 +320,14 @@ optional:&#10;
 		  failonerror="true">
   		<classpath>
   		    <fileset dir="${dist_dir}">
-    			   <include name="${webpki-libext}"/>
-    			   <include name="${webpki-sksws}"/>
+   			   <include name="${webpki-libext}"/>
   			 </fileset>
   			 <fileset dir="${ext.jar}">
   		        <include name="*.jar"/>
   			 </fileset>
   		</classpath>
   		<jvmarg value="-Djava.endorsed.dirs=${ws}"/>
-    	<jvmarg value="-Dsks.client=${sks.ws.client}"/>
+    	<jvmarg value="-Dsks.client=${sks.implementation}"/>
   	    <arg value="${p12.filename}"/>
   	    <arg value="${password}"/>
   	    <arg value="${pin}"/>

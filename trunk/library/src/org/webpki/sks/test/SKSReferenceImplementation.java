@@ -804,12 +804,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final int ALG_ASYM_KA  = 0x100000;
     static final int ALG_AES_PAD  = 0x200000;
 
-    static final String ALGORITHM_KEY_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
-
-    static final String ALGORITHM_SESSION_KEY_ATTEST_1 = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
-
-    static final short[] RSA_KEY_SIZES = {1024, 2048};
-    
     static final int AES_CBC_PKCS5_PADDING = 32;
     
     static
@@ -1944,7 +1938,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                    getDeviceCertificatePath (),
                                    new HashSet<String> (algorithms.keySet ()),
                                    SKS_RSA_EXPONENT_SUPPORT,
-                                   RSA_KEY_SIZES,
+                                   SKS_DEFAULT_RSA_SUPPORT,
                                    MAX_LENGTH_CRYPTO_DATA,
                                    MAX_LENGTH_EXTENSION_DATA,
                                    SKS_DEVICE_PIN_SUPPORT,
@@ -2770,7 +2764,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             byte[] modulus = ((RSAPublicKey) public_key).getModulus ().toByteArray ();
             int rsa_key_size = (modulus[0] == 0 ? modulus.length - 1 : modulus.length) * 8;
-            for (int size : RSA_KEY_SIZES)
+            for (int size : SKS_DEFAULT_RSA_SUPPORT)
               {
                 if (size == rsa_key_size)
                   {
@@ -2981,7 +2975,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             int size = getShort (key_specifier, 1);
             boolean found = false;
-            for (short rsa_key_size : RSA_KEY_SIZES)
+            for (short rsa_key_size : SKS_DEFAULT_RSA_SUPPORT)
               {
                 if (size == rsa_key_size)
                   {
