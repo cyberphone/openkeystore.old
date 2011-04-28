@@ -49,10 +49,14 @@ import javax.xml.ws.ResponseWrapper;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import org.webpki.crypto.CertificateUtil;
+
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
+import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.KeyData;
 import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
@@ -87,7 +91,7 @@ public class SKSWSImplementation
             device_info = sks.getDeviceInfo ();
             System.out.println ("Device: " + device_info.getVendorDescription ());
             System.out.println ("Vendor: " + device_info.getVendorName ());
-            System.out.println ("API Version: " + device_info.getAPILevel () + "\n");
+            System.out.println ("API Version: " + device_info.getAPILevel ());
           }
         catch (ClassNotFoundException e)
           {
@@ -107,6 +111,11 @@ public class SKSWSImplementation
           }
       }
     
+    void log (String message)
+      {
+        System.out.println (message);
+      }
+
     PublicKey createPublicKeyFromBlob (byte[] blob) throws SKSException
       {
         X509EncodedKeySpec ks = new X509EncodedKeySpec (blob);
@@ -169,6 +178,7 @@ public class SKSWSImplementation
                                            Holder<Integer> provisioning_handle)
     throws SKSException
       {
+/*
         System.out.println ("SERV=" + (server_ephemeral_key == null ? "NULL" : server_ephemeral_key.length) + " KMK=" + (key_management_key == null ? "NULL" : key_management_key.length));
         try
           {
@@ -179,6 +189,8 @@ public class SKSWSImplementation
           {
             System.out.println ("ASN1" + e.getMessage ());
           }
+*/
+        log ("createProvisioningSession ()");
         ProvisioningSession sess = sks.createProvisioningSession (algorithm,
                                                                   server_session_id,
                                                                   getECPublicKey (server_ephemeral_key),
@@ -191,6 +203,187 @@ public class SKSWSImplementation
         client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
         attestation.value = sess.getAttestation ();
         provisioning_handle.value = sess.getProvisioningHandle ();
+        log ("createProvisioningSession () returned: " + provisioning_handle.value);
+      }
+
+    @WebMethod(operationName="getDeviceInfo")
+    @RequestWrapper(localName="getDeviceInfo", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="getDeviceInfo.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void getDeviceInfo (@WebParam(name="APILevel", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<Short> api_level,
+                               @WebParam(name="UpdateURL", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<String> update_url,
+                               @WebParam(name="VendorName", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<String> vendor_name,
+                               @WebParam(name="VendorDescription", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<String> vendor_description,
+                               @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<List<byte[]>> certificate_path,
+                               @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<List<String>> algorithms,
+                               @WebParam(name="RSAExponentSupport", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<Boolean> rsa_exponent_support,
+                               @WebParam(name="RSAKeySize", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<List<Short>> rsa_key_sizes,
+                               @WebParam(name="CryptoDataSize", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<Integer> crypto_data_size,
+                               @WebParam(name="ExtensionDataSize", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<Integer> extension_data_size,
+                               @WebParam(name="DevicePINSupport", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<Boolean> device_pin_support,
+                               @WebParam(name="BiometricSupport", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<Boolean> biometric_support)
+    throws SKSException
+      {
+        log ("getDeviceInfo ()");
+        try
+          {
+            DeviceInfo device_info = sks.getDeviceInfo ();
+            api_level.value = device_info.getAPILevel ();
+            update_url.value = device_info.getUpdateURL ();
+            vendor_name.value = device_info.getVendorName ();
+            vendor_description.value = device_info.getVendorDescription ();
+            certificate_path.value = new ArrayList<byte[]> ();
+            for (X509Certificate cert : device_info.getCertificatePath ())
+              {
+                certificate_path.value.add (cert.getEncoded ());
+              }
+            algorithms.value = new ArrayList<String> (device_info.getAlgorithms ());
+            rsa_exponent_support.value = device_info.getRSAExponentSupport ();
+            rsa_key_sizes.value = new ArrayList<Short> ();
+            for (short size : device_info.getRSAKeySizes ())
+              {
+                rsa_key_sizes.value.add (size);
+              }
+            crypto_data_size.value = device_info.getCryptoDataSize ();
+            extension_data_size.value = device_info.getExtensionDataSize ();
+            device_pin_support.value = device_info.getDevicePINSupport ();
+            biometric_support.value = device_info.getBiometricSupport ();
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new SKSException (e);
+          }
+      }
+
+    @WebMethod(operationName="createPINPolicy")
+    @RequestWrapper(localName="createPINPolicy", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="createPINPolicy.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="PINPolicyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public int createPINPolicy (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                int provisioning_handle,
+                                @WebParam(name="ID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                String id,
+                                @WebParam(name="PUKPolicyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                int puk_policy_handle,
+                                @WebParam(name="UserDefined", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                boolean user_defined,
+                                @WebParam(name="UserModifiable", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                boolean user_modifiable,
+                                @WebParam(name="Format", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte format,
+                                @WebParam(name="RetryLimit", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                short retry_limit,
+                                @WebParam(name="Grouping", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte grouping,
+                                @WebParam(name="PatternRestrictions", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte pattern_restrictions,
+                                @WebParam(name="MinLength", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                short min_length,
+                                @WebParam(name="MaxLength", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                short max_length,
+                                @WebParam(name="InputMethod", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte input_method,
+                                @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte[] mac)
+    throws SKSException
+      {
+        log ("createPINPolicy ()");
+        return sks.createPINPolicy (provisioning_handle,
+                                    id,
+                                    puk_policy_handle,
+                                    user_defined,
+                                    user_modifiable,
+                                    format,
+                                    retry_limit,
+                                    grouping,
+                                    pattern_restrictions,
+                                    min_length,
+                                    max_length,
+                                    input_method,
+                                    mac);
+      }
+
+    @WebMethod(operationName="createKeyEntry")
+    @RequestWrapper(localName="createKeyEntry", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="createKeyEntry.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void createKeyEntry (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                int provisioning_handle,
+                                @WebParam(name="ID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                String id,
+                                @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                String algorithm,
+                                @WebParam(name="ServerSeed", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte[] server_seed,
+                                @WebParam(name="DevicePINProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                boolean device_pin_protection,
+                                @WebParam(name="PINPolicyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                int pin_policy_handle,
+                                @WebParam(name="PINValue", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte[] pin_value,
+                                @WebParam(name="EnablePINCaching", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                boolean enable_pin_caching,
+                                @WebParam(name="BiometricProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte biometric_protection,
+                                @WebParam(name="ExportProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte export_protection,
+                                @WebParam(name="DeleteProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte delete_protection,
+                                @WebParam(name="AppUsage", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte app_usage,
+                                @WebParam(name="FriendlyName", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                String friendly_name,
+                                @WebParam(name="PrivateKeyBackup", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                boolean private_key_backup,
+                                @WebParam(name="KeySpecifier", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte[] key_specifier,
+                                @WebParam(name="EndorsedAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                List<String> endorsed_algorithms,
+                                @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte[] mac,
+                                @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                Holder<Integer> key_handle,
+                                @WebParam(name="PublicKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                Holder<byte[]> public_key,
+                                @WebParam(name="Attestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                Holder<byte[]> attestation,
+                                @WebParam(name="PrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                Holder<byte[]> private_key)
+    throws SKSException
+      {
+        log ("createKeyEntry ()");
+        KeyData kd = sks.createKeyEntry (provisioning_handle,
+                                         id,
+                                         algorithm,
+                                         server_seed,
+                                         device_pin_protection,
+                                         pin_policy_handle,
+                                         pin_value,
+                                         enable_pin_caching,
+                                         biometric_protection,
+                                         export_protection,
+                                         delete_protection,
+                                         app_usage,
+                                         friendly_name,
+                                         private_key_backup,
+                                         key_specifier,
+                                         endorsed_algorithms.toArray (new String[0]),
+                                         mac);
+        key_handle.value = kd.getKeyHandle ();
+        public_key.value = kd.getPublicKey ().getEncoded ();
+        attestation.value = kd.getAttestation ();
+        private_key.value = kd.getPrivateKey ();
+        log ("createKeyEntry () returned: " + key_handle.value);
       }
 
     @WebMethod(operationName="abortProvisioningSession")
@@ -200,25 +393,68 @@ public class SKSWSImplementation
                                           int provisioning_handle)
     throws SKSException
       {
-        if (provisioning_handle == 5)
-          {
-            throw new SKSException ("bad",4);
-          }
+        log ("abortProvisioningSession ()");
         sks.abortProvisioningSession (provisioning_handle);
       }
 
     @WebMethod(operationName="enumerateKeys")
     @RequestWrapper(localName="enumerateKeys", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="enumerateKeys.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void enumerateKeys (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.INOUT)
-                               Holder<Integer> key_handle,
-                               @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                               Holder<Integer> provisioning_handle)
+    @WebResult(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public int enumerateKeys (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              int key_handle,
+                              @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                              Holder<Integer> provisioning_handle)
     throws SKSException
       {
-        EnumeratedKey ek = sks.enumerateKeys (new EnumeratedKey (key_handle.value, 0));
-        key_handle.value = ek.getKeyHandle ();
+        log ("enumerateKeys ()");
+        EnumeratedKey ek = sks.enumerateKeys (key_handle);
+        if (ek == null)
+          {
+            ek = new EnumeratedKey ();  // Back to square #1
+          }
         provisioning_handle.value = ek.getProvisioningHandle ();
+        return ek.getKeyHandle ();
+      }
+
+    @WebMethod(operationName="enumerateProvisioningSessions")
+    @RequestWrapper(localName="enumerateProvisioningSessions", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="enumerateProvisioningSessions.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public int enumerateProvisioningSessions (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                              int provisioning_handle,
+                                              @WebParam(name="ProvisioningState", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                              boolean provisioning_state,
+                                              @WebParam(name="KeyManagementKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                              Holder<byte[]> key_management_key,
+                                              @WebParam(name="ClientTime", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                              Holder<Integer> client_time,
+                                              @WebParam(name="SessionLifeTime", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                              Holder<Integer> session_life_time,
+                                              @WebParam(name="ServerSessionID", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                              Holder<String> server_session_id,
+                                              @WebParam(name="ClientSessionID", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                              Holder<String> client_session_id,
+                                              @WebParam(name="IssuerURI", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                              Holder<String> issuer_uri)
+    throws SKSException
+      {
+        log ("enumerateProvisioningSessions ()");
+        EnumeratedProvisioningSession eps = sks.enumerateProvisioningSessions (provisioning_handle, provisioning_state);
+        if (eps == null)
+          {
+            eps = new EnumeratedProvisioningSession ();  // Back to square #1
+          }
+        else
+          {
+            key_management_key.value = eps.getKeyManagementKey () == null ? null : eps.getKeyManagementKey ().getEncoded ();
+            client_time.value = eps.getClientTime ();
+            session_life_time.value = eps.getSessionLifeTime ();
+            server_session_id.value = eps.getServerSessionID ();
+            client_session_id.value = eps.getClientSessionID ();
+            issuer_uri.value = eps.getIssuerURI ();
+          }
+        return eps.getProvisioningHandle ();
       }
 
     @WebMethod(operationName="getKeyProtectionInfo")
@@ -266,31 +502,48 @@ public class SKSWSImplementation
                                     byte[] mac)
     throws SKSException
       {
-        StringBuffer res = new StringBuffer ();
-        if (certificate_path.size() == 0)
+        log ("setCertificatePath (KeyHandle=" + key_handle + ")");
+        try
           {
-            res.append ("'null'");
+            sks.setCertificatePath (key_handle,
+                                    CertificateUtil.getSortedPathFromBlobs (certificate_path),
+                                    mac);
           }
-        else
+        catch (IOException e)
           {
-            int i = 0;
-            for (byte[] b_arr : certificate_path)
-              {
-                if (i != 0)
-                  {
-                     res.append ("\n      ");
-                  }
-                try
-                  {
-                    res.append ("C[" + (i++) + "]=" + new org.webpki.crypto.CertificateInfo(org.webpki.crypto.CertificateUtil.getCertificateFromBlob (b_arr)).getSubject ());
-                  }
-                catch (IOException iox)
-                  {
-                    throw new SKSException (iox);
-                  }
-              }
+            throw new SKSException (e);
           }
-        System.out.println ("Certs=" + res.toString () + " mac=" + mac.length);
+      }
+
+    @WebMethod(operationName="restorePrivateKey")
+    @RequestWrapper(localName="restorePrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="restorePrivateKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void restorePrivateKey (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                   int key_handle,
+                                   @WebParam(name="PrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                   byte[] private_key,
+                                   @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                   byte[] mac)
+    throws SKSException
+      {
+        log ("restorePrivateKey (KeyHandle=" + key_handle + ")");
+        sks.restorePrivateKey (key_handle, private_key, mac);
+      }
+
+    @WebMethod(operationName="closeProvisioningSession")
+    @RequestWrapper(localName="closeProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="closeProvisioningSession.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Attestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] closeProvisioningSession (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                            int provisioning_handle,
+                                            @WebParam(name="Nonce", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                            byte[] nonce,
+                                            @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                            byte[] mac)
+    throws SKSException
+      {
+        log ("closeProvisioningSession (ProvisioningHandle=" + provisioning_handle + ")");
+        return sks.closeProvisioningSession (provisioning_handle, nonce, mac);
       }
 
     @WebMethod(operationName="getVersion")

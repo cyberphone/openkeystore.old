@@ -102,7 +102,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final short SKS_API_LEVEL                       = 0x0001;
     static final String SKS_VENDOR_NAME                    = "WebPKI.org";
     static final String SKS_VENDOR_DESCRIPTION             = "SKS Reference - Java Emulator Edition";
-    static final String SKS_UPDATE_URL                     = "";
+    static final String SKS_UPDATE_URL                     = null;  // Change here to test or disable
     static final boolean SKS_DEVICE_PIN_SUPPORT            = true;  // Change here to test or disable
     static final boolean SKS_BIOMETRIC_SUPPORT             = true;  // Change here to test or disable
     static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
@@ -1008,12 +1008,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             Provisioning provisioning = iter.next ();
             if (provisioning.open == provisioning_state)
               {
-                return new EnumeratedProvisioningSession (provisioning.key_management_key,
+                return new EnumeratedProvisioningSession (provisioning.provisioning_handle,
+                                                          provisioning.key_management_key,
                                                           provisioning.client_time,
                                                           provisioning.session_life_time,
-                                                          provisioning.provisioning_handle, 
-                                                          provisioning.client_session_id,
                                                           provisioning.server_session_id,
+                                                          provisioning.client_session_id,
                                                           provisioning.issuer_uri);
               }
           }
@@ -1957,16 +1957,16 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException
+    public synchronized EnumeratedKey enumerateKeys (int key_handle) throws SKSException
       {
-        if (ek.getKeyHandle () == EnumeratedKey.INIT_ENUMERATION)
+        if (key_handle == EnumeratedKey.INIT_ENUMERATION)
           {
             return getKey (keys.values ().iterator ());
           }
         Iterator<KeyEntry> list = keys.values ().iterator ();
         while (list.hasNext ())
           {
-            if (list.next ().key_handle == ek.getKeyHandle ())
+            if (list.next ().key_handle == key_handle)
               {
                 return getKey (list);
               }
@@ -2089,17 +2089,17 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
+    public synchronized EnumeratedProvisioningSession enumerateProvisioningSessions (int provisioning_handle,
                                                                                      boolean provisioning_state) throws SKSException
       {
-        if (eps.getProvisioningHandle () == EnumeratedProvisioningSession.INIT_ENUMERATION)
+        if (provisioning_handle == EnumeratedProvisioningSession.INIT_ENUMERATION)
           {
             return getProvisioning (provisionings.values ().iterator (), provisioning_state);
           }
         Iterator<Provisioning> list = provisionings.values ().iterator ();
         while (list.hasNext ())
           {
-            if (list.next ().provisioning_handle == eps.getProvisioningHandle ())
+            if (list.next ().provisioning_handle == provisioning_handle)
               {
                 return getProvisioning (list, provisioning_state);
               }

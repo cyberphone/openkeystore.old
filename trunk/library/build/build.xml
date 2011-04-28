@@ -314,11 +314,11 @@ optional:&#10;
          </not>
        </condition>
      </fail>
-  	<property name="p12.filename" location="${file}"/>
-  	<property name="pin" value=""/>
+  	<property name="pin" value='""'/>
   	<java fork="yes"
   		  classname="org.webpki.sks.test.PKCS12Import"
-		  failonerror="true">
+		  failonerror="true"
+		  dir="${user.dir}">
   		<classpath>
   		    <fileset dir="${dist_dir}">
     			   <include name="${webpki-libext}"/>
@@ -330,7 +330,7 @@ optional:&#10;
   		</classpath>
   		<jvmarg value="-Djava.endorsed.dirs=${ws}"/>
     	<jvmarg value="-Dsks.client=${sks.ws.client}"/>
-  	    <arg value="${p12.filename}"/>
+  	    <arg value="${file}"/>
   	    <arg value="${password}"/>
   	    <arg value="${pin}"/>
   	</java>

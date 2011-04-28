@@ -140,7 +140,7 @@ public class GenKey
           }
         PublicKey kmk = current.server_sess_key.enumerateKeyManagementKeys ()[kmk_id];
         byte[] authorization = current.server_sess_key.generateKeyManagementAuthorization (kmk, current.mac (cert_path[0].getEncoded (),
-                                                                                                  prov_sess.device.device_info.getDeviceCertificatePath ()[0].getEncoded ()));
+                                                                                                  prov_sess.device.device_info.getCertificatePath ()[0].getEncoded ()));
         upd_mac.addArray (authorization);
         return authorization;
       }
@@ -155,7 +155,7 @@ public class GenKey
     public boolean exists () throws SKSException
       {
         EnumeratedKey ek = new EnumeratedKey ();
-        while ((ek = prov_sess.sks.enumerateKeys (ek)) != null)
+        while ((ek = prov_sess.sks.enumerateKeys (ek.getKeyHandle ())) != null)
           {
             if (ek.getKeyHandle () == key_handle)
               {
@@ -168,7 +168,7 @@ public class GenKey
     public EnumeratedKey getUpdatedKeyInfo () throws SKSException
       {
         EnumeratedKey ek = new EnumeratedKey ();
-        while ((ek = prov_sess.sks.enumerateKeys (ek)) != null)
+        while ((ek = prov_sess.sks.enumerateKeys (ek.getKeyHandle ())) != null)
           {
             if (ek.getKeyHandle () == key_handle)
               {

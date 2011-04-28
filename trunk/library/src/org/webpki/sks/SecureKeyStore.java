@@ -179,7 +179,7 @@ public interface SecureKeyStore
                                             byte[] nonce,
                                             byte[] mac) throws SKSException;
 
-    public EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps,
+    public EnumeratedProvisioningSession enumerateProvisioningSessions (int provisioning_handle,
                                                                         boolean provisioning_state) throws SKSException;
 
     public byte[] signProvisioningSessionData (int provisioning_handle,
@@ -278,7 +278,7 @@ public interface SecureKeyStore
 
     public KeyAttributes getKeyAttributes (int key_handle) throws SKSException;
     
-    public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException;
+    public EnumeratedKey enumerateKeys (int key_handle) throws SKSException;
 
     public byte[] signHashedData (int key_handle,
                                   String algorithm,

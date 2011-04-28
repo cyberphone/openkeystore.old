@@ -26,17 +26,17 @@ public class KeyData
     
     private byte[] attestation;
     
-    private byte[] encrypted_private_key;
+    private byte[] private_key; // Wrapped PKCS #8
     
     public KeyData (int key_handle,
                     PublicKey public_key, 
                     byte[] attestation,
-                    byte[] encrypted_private_key)
+                    byte[] private_key)
       {
         this.key_handle = key_handle;
         this.public_key = public_key;
         this.attestation = attestation;
-        this.encrypted_private_key = encrypted_private_key;
+        this.private_key = private_key;
       }
     
     public PublicKey getPublicKey ()
@@ -56,7 +56,7 @@ public class KeyData
     
     public byte[] getPrivateKey ()
       {
-        return encrypted_private_key;
+        return private_key;
       }
 
   }

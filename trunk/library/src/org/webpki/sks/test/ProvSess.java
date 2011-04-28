@@ -381,7 +381,7 @@ public class ProvSess
            kdf.addString (client_session_id);
            kdf.addString (server_session_id);
            kdf.addString (ISSUER_URI);
-           kdf.addArray (device.device_info.getDeviceCertificatePath ()[0].getEncoded ());
+           kdf.addArray (device.device_info.getCertificatePath ()[0].getEncoded ());
 
            MacGenerator session_key_mac_data = new MacGenerator ();
            session_key_mac_data.addString (session_key_algorithm);
@@ -395,7 +395,7 @@ public class ProvSess
            server_sess_key.generateAndVerifySessionKey (sess.getClientEphemeralKey (),
                                                         kdf.getResult (),
                                                         session_key_mac_data.getResult (),
-                                                        device.device_info.getDeviceCertificatePath ()[0],
+                                                        device.device_info.getCertificatePath ()[0],
                                                         sess.getAttestation ());
      }
     
@@ -753,7 +753,7 @@ public class ProvSess
     public boolean exists () throws SKSException
       {
         EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
-        while ((eps = sks.enumerateProvisioningSessions (eps, false)) != null)
+        while ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), false)) != null)
           {
             if (eps.getProvisioningHandle () == provisioning_handle)
               {

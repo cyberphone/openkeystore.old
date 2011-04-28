@@ -279,7 +279,7 @@ public class KeyGen2Test
             EnumeratedProvisioningSession old_provisioning_session = new EnumeratedProvisioningSession ();
             while (true)
               {
-                if ((old_provisioning_session = sks.enumerateProvisioningSessions (old_provisioning_session, false)) == null)
+                if ((old_provisioning_session = sks.enumerateProvisioningSessions (old_provisioning_session.getProvisioningHandle (), false)) == null)
                   {
                     abort ("Old provisioning session not found:" + 
                         post_operation.getClientSessionID () + "/" +
@@ -294,7 +294,7 @@ public class KeyGen2Test
             EnumeratedKey ek = new EnumeratedKey ();
             while (true)
               {
-                if ((ek = sks.enumerateKeys (ek)) == null)
+                if ((ek = sks.enumerateKeys (ek.getKeyHandle ())) == null)
                   {
                     abort ("Old key not found");
                   }
@@ -386,7 +386,7 @@ public class KeyGen2Test
                                                                  prov_sess_req.getServerTime (),
                                                                  client_time,
                                                                  sess.getAttestation (),
-                                                                 device_info.getDeviceCertificatePath ());
+                                                                 device_info.getCertificatePath ());
             if (https)
               {
                 prov_sess_response.setServerCertificate (server_certificate);
@@ -417,12 +417,12 @@ public class KeyGen2Test
               {
                 CredentialDiscoveryResponseEncoder.LookupResult lr = cdre.addLookupResult (ls.getID ());
                 EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
-                while ((eps = sks.enumerateProvisioningSessions (eps, false)) != null)
+                while ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), false)) != null)
                   {
                     if (ls.getKeyManagementKey ().equals (eps.getKeyManagementKey ()))
                       {
                         EnumeratedKey ek = new EnumeratedKey ();
-                        while ((ek = sks.enumerateKeys (ek)) != null)
+                        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
                           {
                             if (ek.getProvisioningHandle () == eps.getProvisioningHandle ())
                               {
@@ -541,7 +541,7 @@ public class KeyGen2Test
             EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
             while (true)
               {
-                if ((eps = sks.enumerateProvisioningSessions (eps, true)) == null)
+                if ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), true)) == null)
                   {
                     abort ("Provisioning session not found:" + 
                         fin_prov_request.getClientSessionID () + "/" +
@@ -1291,7 +1291,7 @@ public class KeyGen2Test
             server.creFinalizeResponse (xml);
             writeString ("\n");
             EnumeratedKey ek = new EnumeratedKey ();
-            while ((ek = sks.enumerateKeys (ek)) != null)
+            while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
               {
                 if (ek.getProvisioningHandle () == client.provisioning_handle)
                   {
@@ -1392,7 +1392,7 @@ public class KeyGen2Test
         ServerCredentialStore.PropertyBag prop_bag = doer.server.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getPropertyBags ()[0];
         EnumeratedKey ek = new EnumeratedKey ();
         int j = 0;
-        while ((ek = sks.enumerateKeys (ek)) != null)
+        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
           {
             if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
               {
@@ -1441,7 +1441,7 @@ public class KeyGen2Test
         doer.perform ();
         EnumeratedKey ek = new EnumeratedKey ();
         int j = 0;
-        while ((ek = sks.enumerateKeys (ek)) != null)
+        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
           {
             if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
               {
@@ -1500,7 +1500,7 @@ public class KeyGen2Test
         doer2.perform ();
         EnumeratedKey ek = new EnumeratedKey ();
         int j = 0;
-        while ((ek = sks.enumerateKeys (ek)) != null)
+        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
           {
             if (ek.getProvisioningHandle () == doer2.client.provisioning_handle)
               {
@@ -1537,7 +1537,7 @@ public class KeyGen2Test
         doer2.perform ();
         EnumeratedKey ek = new EnumeratedKey ();
         int j = 0;
-        while ((ek = sks.enumerateKeys (ek)) != null)
+        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
           {
             if (ek.getProvisioningHandle () == doer2.client.provisioning_handle)
               {
@@ -1569,7 +1569,7 @@ public class KeyGen2Test
         doer2.perform ();
         EnumeratedKey ek = new EnumeratedKey ();
         int j = 0;
-        while ((ek = sks.enumerateKeys (ek)) != null)
+        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
           {
             if (ek.getProvisioningHandle () == doer1.client.provisioning_handle)
               {
@@ -1589,7 +1589,7 @@ public class KeyGen2Test
         doer.perform ();
         EnumeratedKey ek = new EnumeratedKey ();
         int j = 0;
-        while ((ek = sks.enumerateKeys (ek)) != null)
+        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
           {
             if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
               {
@@ -1668,7 +1668,7 @@ public class KeyGen2Test
         doer1.perform ();
         EnumeratedKey ek = new EnumeratedKey ();
         int j = 0;
-        while ((ek = sks.enumerateKeys (ek)) != null)
+        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
           {
             if (ek.getProvisioningHandle () == doer1.client.provisioning_handle)
               {

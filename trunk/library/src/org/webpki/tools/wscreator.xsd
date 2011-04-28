@@ -235,7 +235,7 @@
              <xs:enumeration value="int"/>
              <xs:enumeration value="short"/>
              <xs:enumeration value="byte"/>
-             <xs:enumeration value="boolean"/>
+             <xs:enumeration value="bool"/>
              <xs:enumeration value="string"/>
              <xs:enumeration value="binary"/>
           </xs:restriction>

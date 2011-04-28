@@ -31,7 +31,7 @@ public class DeviceInfo
     
     String update_url;
     
-    String getUpdateURL ()
+    public String getUpdateURL ()
       {
         return update_url;
       }
@@ -52,7 +52,7 @@ public class DeviceInfo
     
     X509Certificate[] certificate_path;
     
-    public X509Certificate[] getDeviceCertificatePath ()
+    public X509Certificate[] getCertificatePath ()
       {
         return certificate_path;
       }
@@ -108,7 +108,7 @@ public class DeviceInfo
     
     
     public DeviceInfo (short api_level,
-                       String update_url,
+                       String update_url,  // May be null
                        String vendor_name,
                        String vendor_description,
                        X509Certificate[] certificate_path,

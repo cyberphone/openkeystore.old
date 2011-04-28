@@ -41,6 +41,11 @@
         </xs:complexType>
       </xs:element>
 
+<!--
+      #########################################################
+      #               createProvisioningSession               #
+      #########################################################
+-->
       <xs:element name="createProvisioningSession">
         <xs:complexType>
           <xs:sequence>
@@ -55,7 +60,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-
       <xs:element name="createProvisioningSession.Response">
         <xs:complexType>
           <xs:sequence>
@@ -67,6 +71,107 @@
         </xs:complexType>
       </xs:element>
 
+<!--
+      #########################################################
+      #                     getDeviceInfo                     #
+      #########################################################
+-->
+      <xs:element name="getDeviceInfo"/>
+      <xs:element name="getDeviceInfo.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="APILevel" type="xs:short"/>
+            <xs:element name="UpdateURL" type="xs:string" nillable="true" minOccurs="0"/>
+            <xs:element name="VendorName" type="xs:string"/>
+            <xs:element name="VendorDescription" type="xs:string"/>
+            <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
+            <xs:element name="Algorithm" type="xs:string" maxOccurs="unbounded"/>
+            <xs:element name="RSAExponentSupport" type="xs:boolean"/>
+            <xs:element name="RSAKeySize" type="xs:short" maxOccurs="unbounded"/>
+            <xs:element name="CryptoDataSize" type="xs:int"/>
+            <xs:element name="ExtensionDataSize" type="xs:int"/>
+            <xs:element name="DevicePINSupport" type="xs:boolean"/>
+            <xs:element name="BiometricSupport" type="xs:boolean"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #                    createPINPolicy                    #
+      #########################################################
+-->
+      <xs:element name="createPINPolicy">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="ID" type="xs:string"/>
+            <xs:element name="PUKPolicyHandle" type="xs:int"/>
+            <xs:element name="UserDefined" type="xs:boolean"/>
+            <xs:element name="UserModifiable" type="xs:boolean"/>
+            <xs:element name="Format" type="xs:byte"/>
+            <xs:element name="RetryLimit" type="xs:short"/>
+            <xs:element name="Grouping" type="xs:byte"/>
+            <xs:element name="PatternRestrictions" type="xs:byte"/>
+            <xs:element name="MinLength" type="xs:short"/>
+            <xs:element name="MaxLength" type="xs:short"/>
+            <xs:element name="InputMethod" type="xs:byte"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="createPINPolicy.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="PINPolicyHandle" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #                    createKeyEntry                     #
+      #########################################################
+-->
+      <xs:element name="createKeyEntry">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="ID" type="xs:string"/>
+            <xs:element name="Algorithm" type="xs:string"/>
+            <xs:element name="ServerSeed" type="xs:base64Binary"/>
+            <xs:element name="DevicePINProtection" type="xs:boolean"/>
+            <xs:element name="PINPolicyHandle" type="xs:int"/>
+            <xs:element name="PINValue" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="EnablePINCaching" type="xs:boolean"/>
+            <xs:element name="BiometricProtection" type="xs:byte"/>
+            <xs:element name="ExportProtection" type="xs:byte"/>
+            <xs:element name="DeleteProtection" type="xs:byte"/>
+            <xs:element name="AppUsage" type="xs:byte"/>
+            <xs:element name="FriendlyName" type="xs:string"/>
+            <xs:element name="PrivateKeyBackup" type="xs:boolean"/>
+            <xs:element name="KeySpecifier" type="xs:base64Binary"/>
+            <xs:element name="EndorsedAlgorithm" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="createKeyEntry.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="PublicKey" type="xs:base64Binary"/>
+            <xs:element name="Attestation" type="xs:base64Binary"/>
+            <xs:element name="PrivateKey" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #               abortProvisioningSession                #
+      #########################################################
+-->
       <xs:element name="abortProvisioningSession">
         <xs:complexType>
           <xs:sequence>
@@ -74,9 +179,13 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-
       <xs:element name="abortProvisioningSession.Response"/>
 
+<!--
+      #########################################################
+      #                     enumerateKeys                     #
+      #########################################################
+-->
       <xs:element name="enumerateKeys">
         <xs:complexType>
           <xs:sequence>
@@ -84,7 +193,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-
       <xs:element name="enumerateKeys.Response">
         <xs:complexType>
           <xs:sequence>
@@ -94,6 +202,38 @@
         </xs:complexType>
       </xs:element>
 
+<!--
+      #########################################################
+      #             enumerateProvisioningSessions             #
+      #########################################################
+-->
+      <xs:element name="enumerateProvisioningSessions">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="ProvisioningState" type="xs:boolean"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="enumerateProvisioningSessions.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="KeyManagementKey" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="ClientTime" type="xs:int"/>
+            <xs:element name="SessionLifeTime" type="xs:int"/>
+            <xs:element name="ServerSessionID" type="xs:string"/>
+            <xs:element name="ClientSessionID" type="xs:string"/>
+            <xs:element name="IssuerURI" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #                 getKeyProtectionInfo                  #
+      #########################################################
+-->
       <xs:element name="getKeyProtectionInfo">
         <xs:complexType>
           <xs:sequence>
@@ -102,7 +242,6 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-
       <xs:element name="getKeyProtectionInfo.Response">
         <xs:complexType>
           <xs:sequence>
@@ -114,20 +253,66 @@
         </xs:complexType>
       </xs:element>
 
+<!--
+      #########################################################
+      #                  setCertificatePath                   #
+      #########################################################
+-->
       <xs:element name="setCertificatePath">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="KeyHandle" type="xs:int"/>
-            <xs:element name="X509Certificate" type="xs:base64Binary" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-
       <xs:element name="setCertificatePath.Response"/>
 
-      <xs:element name="getVersion"/>
+<!--
+      #########################################################
+      #                   restorePrivateKey                   #
+      #########################################################
+-->
+      <xs:element name="restorePrivateKey">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="PrivateKey" type="xs:base64Binary"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="restorePrivateKey.Response"/>
 
+<!--
+      #########################################################
+      #               closeProvisioningSession                #
+      #########################################################
+-->
+      <xs:element name="closeProvisioningSession">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="Nonce" type="xs:base64Binary"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="closeProvisioningSession.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Attestation" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #                      getVersion                       #
+      #########################################################
+-->
+      <xs:element name="getVersion"/>
       <xs:element name="getVersion.Response">
         <xs:complexType>
           <xs:sequence>
@@ -136,6 +321,11 @@
         </xs:complexType>
       </xs:element>
 
+<!--
+      #########################################################
+      #                      getCertPath                      #
+      #########################################################
+-->
       <xs:element name="getCertPath">
         <xs:complexType>
           <xs:sequence>
@@ -143,11 +333,10 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-
       <xs:element name="getCertPath.Response">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="X509Certificate" type="xs:base64Binary" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="X509Certificate" type="xs:base64Binary" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -168,6 +357,30 @@
     <wsdl:part name="parameters" element="tns:createProvisioningSession.Response"/>
   </wsdl:message>
 
+  <wsdl:message name="getDeviceInfo">
+    <wsdl:part name="parameters" element="tns:getDeviceInfo"/>
+  </wsdl:message>
+
+  <wsdl:message name="getDeviceInfo.Response">
+    <wsdl:part name="parameters" element="tns:getDeviceInfo.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="createPINPolicy">
+    <wsdl:part name="parameters" element="tns:createPINPolicy"/>
+  </wsdl:message>
+
+  <wsdl:message name="createPINPolicy.Response">
+    <wsdl:part name="parameters" element="tns:createPINPolicy.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="createKeyEntry">
+    <wsdl:part name="parameters" element="tns:createKeyEntry"/>
+  </wsdl:message>
+
+  <wsdl:message name="createKeyEntry.Response">
+    <wsdl:part name="parameters" element="tns:createKeyEntry.Response"/>
+  </wsdl:message>
+
   <wsdl:message name="abortProvisioningSession">
     <wsdl:part name="parameters" element="tns:abortProvisioningSession"/>
   </wsdl:message>
@@ -184,6 +397,14 @@
     <wsdl:part name="parameters" element="tns:enumerateKeys.Response"/>
   </wsdl:message>
 
+  <wsdl:message name="enumerateProvisioningSessions">
+    <wsdl:part name="parameters" element="tns:enumerateProvisioningSessions"/>
+  </wsdl:message>
+
+  <wsdl:message name="enumerateProvisioningSessions.Response">
+    <wsdl:part name="parameters" element="tns:enumerateProvisioningSessions.Response"/>
+  </wsdl:message>
+
   <wsdl:message name="getKeyProtectionInfo">
     <wsdl:part name="parameters" element="tns:getKeyProtectionInfo"/>
   </wsdl:message>
@@ -198,6 +419,22 @@
 
   <wsdl:message name="setCertificatePath.Response">
     <wsdl:part name="parameters" element="tns:setCertificatePath.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="restorePrivateKey">
+    <wsdl:part name="parameters" element="tns:restorePrivateKey"/>
+  </wsdl:message>
+
+  <wsdl:message name="restorePrivateKey.Response">
+    <wsdl:part name="parameters" element="tns:restorePrivateKey.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="closeProvisioningSession">
+    <wsdl:part name="parameters" element="tns:closeProvisioningSession"/>
+  </wsdl:message>
+
+  <wsdl:message name="closeProvisioningSession.Response">
+    <wsdl:part name="parameters" element="tns:closeProvisioningSession.Response"/>
   </wsdl:message>
 
   <wsdl:message name="getVersion">
@@ -224,6 +461,24 @@
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
+    <wsdl:operation name="getDeviceInfo">
+      <wsdl:input message="tns:getDeviceInfo"/>
+      <wsdl:output message="tns:getDeviceInfo.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="createPINPolicy">
+      <wsdl:input message="tns:createPINPolicy"/>
+      <wsdl:output message="tns:createPINPolicy.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="createKeyEntry">
+      <wsdl:input message="tns:createKeyEntry"/>
+      <wsdl:output message="tns:createKeyEntry.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
     <wsdl:operation name="abortProvisioningSession">
       <wsdl:input message="tns:abortProvisioningSession"/>
       <wsdl:output message="tns:abortProvisioningSession.Response"/>
@@ -236,6 +491,12 @@
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
+    <wsdl:operation name="enumerateProvisioningSessions">
+      <wsdl:input message="tns:enumerateProvisioningSessions"/>
+      <wsdl:output message="tns:enumerateProvisioningSessions.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
     <wsdl:operation name="getKeyProtectionInfo">
       <wsdl:input message="tns:getKeyProtectionInfo"/>
       <wsdl:output message="tns:getKeyProtectionInfo.Response"/>
@@ -245,6 +506,18 @@
     <wsdl:operation name="setCertificatePath">
       <wsdl:input message="tns:setCertificatePath"/>
       <wsdl:output message="tns:setCertificatePath.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="restorePrivateKey">
+      <wsdl:input message="tns:restorePrivateKey"/>
+      <wsdl:output message="tns:restorePrivateKey.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="closeProvisioningSession">
+      <wsdl:input message="tns:closeProvisioningSession"/>
+      <wsdl:output message="tns:closeProvisioningSession.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -265,6 +538,42 @@
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
 
       <wsdl:operation name="createProvisioningSession">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="getDeviceInfo">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="createPINPolicy">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="createKeyEntry">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>
@@ -300,6 +609,18 @@
         </wsdl:fault>
       </wsdl:operation>
 
+      <wsdl:operation name="enumerateProvisioningSessions">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
       <wsdl:operation name="getKeyProtectionInfo">
         <wsdl:input>
           <soap:body use="literal"/>
@@ -313,6 +634,30 @@
       </wsdl:operation>
 
       <wsdl:operation name="setCertificatePath">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="restorePrivateKey">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="closeProvisioningSession">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

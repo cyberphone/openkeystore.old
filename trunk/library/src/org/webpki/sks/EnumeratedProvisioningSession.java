@@ -16,9 +16,6 @@
  */
 package org.webpki.sks;
 
-
-import java.util.Date;
-
 import java.security.PublicKey;
 
 public class EnumeratedProvisioningSession
@@ -43,9 +40,9 @@ public class EnumeratedProvisioningSession
 
     int client_time;
     
-    public Date getClientTime ()
+    public int getClientTime ()
       {
-        return new Date (client_time * 1000);
+        return client_time;
       }
     
 
@@ -86,12 +83,12 @@ public class EnumeratedProvisioningSession
       }
     
     
-    public EnumeratedProvisioningSession (PublicKey key_management_key,
+    public EnumeratedProvisioningSession (int provisioning_handle,
+                                          PublicKey key_management_key,
                                           int client_time,
                                           int session_life_time,
-                                          int provisioning_handle,
-                                          String client_session_id,
                                           String server_session_id,
+                                          String client_session_id,
                                           String issuer_uri)
       {
         this.key_management_key = key_management_key;

@@ -85,7 +85,7 @@ public class SKSTest
       {
         EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
         int i = 0;
-        while ((eps = sks.enumerateProvisioningSessions (eps, false)) != null)
+        while ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), false)) != null)
           {
             i++;
           }

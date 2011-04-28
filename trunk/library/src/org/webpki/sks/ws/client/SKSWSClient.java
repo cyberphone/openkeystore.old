@@ -8,10 +8,17 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
+import javax.jws.WebResult;
 import javax.xml.ws.Holder;
+import javax.xml.ws.RequestWrapper;
+import javax.xml.ws.ResponseWrapper;
 
 import javax.xml.ws.BindingProvider;
 
@@ -76,7 +83,7 @@ public class SKSWSClient implements SecureKeyStore
     /**
      * Factory method. Each WS call should use this method.
      * 
-     * @return A handle to a fresh WS instance
+     * @return A handle to a shared WS instance
      */
     private SKSWSProxy getSKSWS ()
       {
@@ -148,17 +155,56 @@ public class SKSWSClient implements SecureKeyStore
 
 
     @Override
-    public byte[] closeProvisioningSession (int provisioning_handle, byte[] nonce, byte[] mac) throws SKSException
+    public byte[] closeProvisioningSession (int provisioning_handle,
+                                            byte[] nonce,
+                                            byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return null;
+        try
+          {
+            return getSKSWS ().closeProvisioningSession (provisioning_handle, nonce, mac);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
-    public EnumeratedProvisioningSession enumerateProvisioningSessions (EnumeratedProvisioningSession eps, boolean provisioning_state) throws SKSException
+    public EnumeratedProvisioningSession enumerateProvisioningSessions (int provisioning_handle, boolean provisioning_state) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return null;
+        try
+          {
+            Holder<byte[]> key_management_key = new Holder<byte[]> ();
+            Holder<Integer> client_time = new Holder<Integer> ();
+            Holder<Integer> session_life_time = new Holder<Integer> ();
+            Holder<String> server_session_id = new Holder<String> ();
+            Holder<String> client_session_id = new Holder<String> ();
+            Holder<String> issuer_uri = new Holder<String> ();
+            provisioning_handle = getSKSWS ().enumerateProvisioningSessions (provisioning_handle,
+                                                                             provisioning_state,
+                                                                             key_management_key,
+                                                                             client_time,
+                                                                             session_life_time,
+                                                                             server_session_id,
+                                                                             client_session_id,
+                                                                             issuer_uri);
+            return provisioning_handle == EnumeratedProvisioningSession.INIT_ENUMERATION ? 
+                       null : new EnumeratedProvisioningSession (provisioning_handle,
+                                                                 key_management_key.value == null ? null : createPublicKeyFromBlob (key_management_key.value),
+                                                                 client_time.value,
+                                                                 session_life_time.value,
+                                                                 server_session_id.value,
+                                                                 client_session_id.value,
+                                                                 issuer_uri.value);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new SKSException (e);
+          }
       }
 
     @Override
@@ -169,10 +215,69 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
-    public KeyData createKeyEntry (int provisioning_handle, String id, String algorithm, byte[] server_seed, boolean device_pin_protection, int pin_policy_handle, byte[] pin_value, boolean enable_pin_caching, byte biometric_protection, byte export_protection, byte delete_protection, byte app_usage, String friendly_name, boolean private_key_backup, byte[] key_specifier, String[] endorsed_algorithms, byte[] mac) throws SKSException
+    public KeyData createKeyEntry (int provisioning_handle,
+                                   String id,
+                                   String algorithm,
+                                   byte[] server_seed,
+                                   boolean device_pin_protection,
+                                   int pin_policy_handle,
+                                   byte[] pin_value,
+                                   boolean enable_pin_caching,
+                                   byte biometric_protection,
+                                   byte export_protection,
+                                   byte delete_protection,
+                                   byte app_usage,
+                                   String friendly_name,
+                                   boolean private_key_backup,
+                                   byte[] key_specifier,
+                                   String[] endorsed_algorithms,
+                                   byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return null;
+        try
+          {
+            Holder<Integer> key_handle = new Holder<Integer> ();
+            Holder<byte[]> public_key = new Holder<byte[]> ();
+            Holder<byte[]> attestation = new Holder<byte[]> ();
+            Holder<byte[]> private_key = new Holder<byte[]> ();
+            List<String> lalg = new ArrayList<String> ();
+            for (String alg : endorsed_algorithms)
+              {
+                lalg.add (alg);
+              }
+            getSKSWS ().createKeyEntry (provisioning_handle,
+                                        id,
+                                        algorithm,
+                                        server_seed,
+                                        device_pin_protection,
+                                        pin_policy_handle,
+                                        pin_value,
+                                        enable_pin_caching,
+                                        biometric_protection,
+                                        export_protection,
+                                        delete_protection,
+                                        app_usage,
+                                        friendly_name,
+                                        private_key_backup,
+                                        key_specifier,
+                                        lalg,
+                                        mac,
+                                        key_handle,
+                                        public_key,
+                                        attestation,
+                                        private_key);
+            return new KeyData (key_handle.value,
+                                createPublicKeyFromBlob (public_key.value),
+                                attestation.value,
+                                private_key.value);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new SKSException (e);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
@@ -185,15 +290,36 @@ public class SKSWSClient implements SecureKeyStore
     @Override
     public void abortProvisioningSession (int provisioning_handle) throws SKSException
       {
-        // TODO Auto-generated method stub
-        
+        try
+          {
+            getSKSWS ().abortProvisioningSession (provisioning_handle);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
     public void setCertificatePath (int key_handle, X509Certificate[] certificate_path, byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        
+        try
+          {
+            List<byte[]> lcert_path = new ArrayList<byte[]> ();
+            for (X509Certificate cert : certificate_path)
+              {
+                lcert_path.add (cert.getEncoded ());
+              }
+            getSKSWS ().setCertificatePath (key_handle, lcert_path, mac);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new SKSException (e);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
@@ -213,15 +339,39 @@ public class SKSWSClient implements SecureKeyStore
     @Override
     public void restorePrivateKey (int key_handle, byte[] private_key, byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        
+        try
+          {
+            getSKSWS ().restorePrivateKey (key_handle, private_key, mac);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
     public int createPINPolicy (int provisioning_handle, String id, int puk_policy_handle, boolean user_defined, boolean user_modifiable, byte format, short retry_limit, byte grouping, byte pattern_restrictions, short min_length, short max_length, byte input_method, byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return 0;
+        try
+          {
+            return getSKSWS().createPINPolicy (provisioning_handle,
+                                               id,
+                                               puk_policy_handle,
+                                               user_defined,
+                                               user_modifiable,
+                                               format,
+                                               retry_limit,
+                                               grouping,
+                                               pattern_restrictions,
+                                               min_length,
+                                               max_length,
+                                               input_method,
+                                               mac);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
@@ -267,10 +417,18 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
-    public EnumeratedKey enumerateKeys (EnumeratedKey ek) throws SKSException
+    public EnumeratedKey enumerateKeys (int key_handle) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return null;
+        try
+          {
+            Holder<Integer> provisioning_handle = new Holder<Integer> ();
+            key_handle = getSKSWS ().enumerateKeys (key_handle, provisioning_handle);
+            return key_handle == EnumeratedKey.INIT_ENUMERATION ? null : new EnumeratedKey (key_handle, provisioning_handle.value);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
@@ -318,8 +476,63 @@ public class SKSWSClient implements SecureKeyStore
     @Override
     public DeviceInfo getDeviceInfo () throws SKSException
       {
-        // TODO Auto-generated method stub
-        return null;
+        try
+          {
+            Holder<Short> api_level = new Holder<Short> ();
+            Holder<String> update_url = new Holder<String> ();
+            Holder<String> vendor_name = new Holder<String> ();
+            Holder<String> vendor_description = new Holder<String> ();
+            Holder<List<byte[]>> certificate_path = new Holder<List<byte[]>> ();
+            Holder<List<String>> algorithms = new Holder<List<String>> ();
+            Holder<Boolean> rsa_exponent_support = new Holder<Boolean> ();
+            Holder<List<Short>> rsa_key_sizes = new Holder<List<Short>> ();
+            Holder<Integer> crypto_data_size = new Holder<Integer> ();
+            Holder<Integer> extension_data_size = new Holder<Integer> ();
+            Holder<Boolean> device_pin_support = new Holder<Boolean> ();
+            Holder<Boolean> biometric_support = new Holder<Boolean> ();
+            getSKSWS ().getDeviceInfo (api_level,
+                                       update_url,
+                                       vendor_name,
+                                       vendor_description,
+                                       certificate_path,
+                                       algorithms,
+                                       rsa_exponent_support,
+                                       rsa_key_sizes,
+                                       crypto_data_size,
+                                       extension_data_size,
+                                       device_pin_support,
+                                       biometric_support);
+            Vector<X509Certificate> lcert_path = new Vector<X509Certificate> ();
+            for (byte[] bcert : certificate_path.value)
+              {
+                lcert_path.add (CertificateUtil.getCertificateFromBlob (bcert));
+              }
+            short[] lsizes = new short[rsa_key_sizes.value.size ()];
+            for (int i = 0; i < rsa_key_sizes.value.size () ; i++)
+              {
+                lsizes[i] = rsa_key_sizes.value.get (i);
+              }
+            return new DeviceInfo (api_level.value,
+                                   update_url.value,
+                                   vendor_name.value,
+                                   vendor_description.value,
+                                   lcert_path.toArray (new X509Certificate[0]),
+                                   new HashSet<String> (algorithms.value),
+                                   rsa_exponent_support.value,
+                                   lsizes,
+                                   crypto_data_size.value,
+                                   extension_data_size.value,
+                                   device_pin_support.value,
+                                   biometric_support.value);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+        catch (IOException e)
+          {
+            throw new SKSException (e);
+          }
       }
 
     @Override
@@ -376,10 +589,9 @@ public class SKSWSClient implements SecureKeyStore
      * 
      * @param args
      *            Command line arguments
-     * @throws  
-     * @throws SKSExceptionBean 
+     * @throws SKSException 
      */
-    public static void main (String args[])
+    public static void main (String args[]) throws SKSException
       {
         if (args.length != 1)
           {
@@ -389,93 +601,7 @@ public class SKSWSClient implements SecureKeyStore
           }
         SKSWSClient client = args[0].equals ("default") ? new SKSWSClient () : new SKSWSClient (args[0]);
         SKSWSProxy proxy = client.getSKSWS ();
-        System.out.println ("Version=" + proxy.getVersion ());
-        /*
-
-        System.out.println ("abortProvisioningSession testing...");
-        try
-          {
-            proxy.abortProvisioningSession (5);
-            bad ("Should have thrown");
-          }
-        catch (SKSException_Exception e)
-          {
-            if (e.getFaultInfo ().getError () != 4)
-              {
-                bad ("error ex");
-              }
-            if (!e.getFaultInfo ().getMessage ().equals ("bad"))
-              {
-                bad ("message ex");
-              }
-          }
-
-        System.out.println ("getKeyProtectionInfo testing...");
-        Holder<Byte> blah = new Holder<Byte> ();
-        Holder<String> prot = new Holder<String> ();
-        prot.value = "yes";
-        Holder<List<byte[]>> certls = new Holder<List<byte[]>> ();
-        try
-          {
-            if (proxy.getKeyProtectionInfo (4, prot, blah, certls) != 800)
-              {
-                bad ("return");
-              }
-            if (!prot.value.equals ("yes@"))
-              {
-                bad ("prot");
-              }
-            if (blah.value != 6)
-              {
-                bad ("blah");
-              }
-            if (certls.value == null || certls.value.size () != 2)
-              {
-                bad ("certs");
-              }
-            for (byte[] cert : certls.value)
-              {
-                System.out.println ("CERT=" + new CertificateInfo (CertificateUtil.getCertificateFromBlob (cert), false).getSubject ());
-              }
-          }
-        catch (SKSException_Exception e)
-          {
-            bad (e.getMessage ());
-          }
-        catch (IOException e)
-          {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-        System.out.println ("setCertificatePath testing...");
-        try
-          {
-            proxy.setCertificatePath (8,certls.value, new byte[]{4,6});
-            proxy.setCertificatePath (3,null, new byte[]{4,6,7});
-          }
-        catch (SKSException_Exception e)
-          {
-            bad (e.getMessage ());
-          }
-        System.out.println ("getCertPath testing...");
-        try
-          {
-            List<byte[]> ret = proxy.getCertPath (true);
-            if (ret.size () != 2)
-              {
-                bad("certs");
-              }
-            ret = proxy.getCertPath (false);
-            if (!ret.isEmpty ())
-              {
-                bad("certs");
-              }
-          }
-        catch (SKSException_Exception e)
-          {
-            bad (e.getMessage ());
-          }
-          */
-    }
+        System.out.println ("Version=" + proxy.getVersion () + "\nDevice=" + client.getDeviceInfo ().getVendorDescription ());
+      }
 
   }

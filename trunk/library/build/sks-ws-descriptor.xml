@@ -37,9 +37,12 @@
                         java.io.IOException
                         org.bouncycastle.jce.provider.BouncyCastleProvider
                         org.webpki.crypto.test.DemoKeyStore
+                        org.webpki.crypto.CertificateUtil
                         org.webpki.sks.EnumeratedKey
                         org.webpki.sks.ProvisioningSession
+                        org.webpki.sks.EnumeratedProvisioningSession
                         org.webpki.sks.DeviceInfo
+                        org.webpki.sks.KeyData
                         org.webpki.sks.SecureKeyStore">
      <ClassHeader><![CDATA[/**
  * SKS Web Service Implementation.
@@ -64,7 +67,7 @@
             device_info = sks.getDeviceInfo ();
             System.out.println ("Device: " + device_info.getVendorDescription ());
             System.out.println ("Vendor: " + device_info.getVendorName ());
-            System.out.println ("API Version: " + device_info.getAPILevel () + "\n");
+            System.out.println ("API Version: " + device_info.getAPILevel ());
           }
         catch (ClassNotFoundException e)
           {
@@ -84,6 +87,11 @@
           }
       }
     
+    void log (String message)
+      {
+        System.out.println (message);
+      }
+
     PublicKey createPublicKeyFromBlob (byte[] blob) throws SKSException
       {
         X509EncodedKeySpec ks = new X509EncodedKeySpec (blob);
@@ -121,7 +129,7 @@
 
    <JavaClient ClassName="org.webpki.sks.ws.client.SKSWSProxy">
      <ClassHeader><![CDATA[/**
- * This is the client :-)
+ * This is the Java SKS WS client.
  */
 ]]></ClassHeader>
    </JavaClient>
@@ -129,7 +137,7 @@
                  RegistryURL="SOFTWARE\WebPKI.org\SKSWSURL"
                  PathAsDirectory="false">
      <ClassHeader><![CDATA[    /*
-     *  This is the .NET SKS client.
+     *  This is the .NET SKS WS client.
      */
 ]]></ClassHeader>
      <SupportCode><![CDATA[
@@ -185,6 +193,7 @@
      <Parameter Name="attestation"          Type="binary" XMLName="Attestation"        Mode="out"/>
      <Parameter Name="provisioning_handle"  Type="int"    XMLName="ProvisioningHandle" Mode="out"/>
      <Code><![CDATA[
+/*
         System.out.println ("SERV=" + (server_ephemeral_key == null ? "NULL" : server_ephemeral_key.length) + " KMK=" + (key_management_key == null ? "NULL" : key_management_key.length));
         try
           {
@@ -195,6 +204,8 @@
           {
             System.out.println ("ASN1" + e.getMessage ());
           }
+*/
+        log ("createProvisioningSession ()");
         ProvisioningSession sess = sks.createProvisioningSession (algorithm,
                                                                   server_session_id,
                                                                   getECPublicKey (server_ephemeral_key),
@@ -207,25 +218,183 @@
         client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
         attestation.value = sess.getAttestation ();
         provisioning_handle.value = sess.getProvisioningHandle ();
+        log ("createProvisioningSession () returned: " + provisioning_handle.value);
+]]></Code></Method>
+
+   <Method Name="getDeviceInfo" Throws="SKSException">
+     <Parameter Name="api_level"            Type="short"  XMLName="APILevel"           Mode="out"/>
+     <Parameter Name="update_url"           Type="string" XMLName="UpdateURL"          Mode="out" Null="true"/>
+     <Parameter Name="vendor_name"          Type="string" XMLName="VendorName"         Mode="out"/>
+     <Parameter Name="vendor_description"   Type="string" XMLName="VendorDescription"  Mode="out"/>
+     <Parameter Name="certificate_path"     Type="binary" XMLName="X509Certificate"    Mode="out" List="true"/>
+     <Parameter Name="algorithms"           Type="string" XMLName="Algorithm"          Mode="out" List="true"/>
+     <Parameter Name="rsa_exponent_support" Type="bool"   XMLName="RSAExponentSupport" Mode="out"/>
+     <Parameter Name="rsa_key_sizes"        Type="short"  XMLName="RSAKeySize"         Mode="out" List="true"/>
+     <Parameter Name="crypto_data_size"     Type="int"    XMLName="CryptoDataSize"     Mode="out"/>
+     <Parameter Name="extension_data_size"  Type="int"    XMLName="ExtensionDataSize"  Mode="out"/>
+     <Parameter Name="device_pin_support"   Type="bool"   XMLName="DevicePINSupport"   Mode="out"/>
+     <Parameter Name="biometric_support"    Type="bool"   XMLName="BiometricSupport"   Mode="out"/>
+     <Code><![CDATA[
+        log ("getDeviceInfo ()");
+        try
+          {
+            DeviceInfo device_info = sks.getDeviceInfo ();
+            api_level.value = device_info.getAPILevel ();
+            update_url.value = device_info.getUpdateURL ();
+            vendor_name.value = device_info.getVendorName ();
+            vendor_description.value = device_info.getVendorDescription ();
+            certificate_path.value = new ArrayList<byte[]> ();
+            for (X509Certificate cert : device_info.getCertificatePath ())
+              {
+                certificate_path.value.add (cert.getEncoded ());
+              }
+            algorithms.value = new ArrayList<String> (device_info.getAlgorithms ());
+            rsa_exponent_support.value = device_info.getRSAExponentSupport ();
+            rsa_key_sizes.value = new ArrayList<Short> ();
+            for (short size : device_info.getRSAKeySizes ())
+              {
+                rsa_key_sizes.value.add (size);
+              }
+            crypto_data_size.value = device_info.getCryptoDataSize ();
+            extension_data_size.value = device_info.getExtensionDataSize ();
+            device_pin_support.value = device_info.getDevicePINSupport ();
+            biometric_support.value = device_info.getBiometricSupport ();
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new SKSException (e);
+          }
+]]></Code></Method>
+
+   <Method Name="createPINPolicy" Throws="SKSException">
+     <Returns Type="int" XMLName="PINPolicyHandle"/>
+     <Parameter Name="provisioning_handle"  Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="id"                   Type="string" XMLName="ID"/>
+     <Parameter Name="puk_policy_handle"    Type="int"    XMLName="PUKPolicyHandle"/>
+     <Parameter Name="user_defined"         Type="bool"   XMLName="UserDefined"/>
+     <Parameter Name="user_modifiable"      Type="bool"   XMLName="UserModifiable"/>
+     <Parameter Name="format"               Type="byte"   XMLName="Format"/>
+     <Parameter Name="retry_limit"          Type="short"  XMLName="RetryLimit"/>
+     <Parameter Name="grouping"             Type="byte"   XMLName="Grouping"/>
+     <Parameter Name="pattern_restrictions" Type="byte"   XMLName="PatternRestrictions"/>
+     <Parameter Name="min_length"           Type="short"  XMLName="MinLength"/>
+     <Parameter Name="max_length"           Type="short"  XMLName="MaxLength"/>
+     <Parameter Name="input_method"         Type="byte"   XMLName="InputMethod"/>
+     <Parameter Name="mac"                  Type="binary" XMLName="MAC"/>
+     <Code><![CDATA[
+        log ("createPINPolicy ()");
+        return sks.createPINPolicy (provisioning_handle,
+                                    id,
+                                    puk_policy_handle,
+                                    user_defined,
+                                    user_modifiable,
+                                    format,
+                                    retry_limit,
+                                    grouping,
+                                    pattern_restrictions,
+                                    min_length,
+                                    max_length,
+                                    input_method,
+                                    mac);
+]]></Code></Method>
+
+   <Method Name="createKeyEntry" Throws="SKSException">
+     <Parameter Name="provisioning_handle"   Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="id"                    Type="string" XMLName="ID"/>
+     <Parameter Name="algorithm"             Type="string" XMLName="Algorithm"/>
+     <Parameter Name="server_seed"           Type="binary" XMLName="ServerSeed"/>
+     <Parameter Name="device_pin_protection" Type="bool"   XMLName="DevicePINProtection"/>
+     <Parameter Name="pin_policy_handle"     Type="int"    XMLName="PINPolicyHandle"/>
+     <Parameter Name="pin_value"             Type="binary" XMLName="PINValue"           Null="true"/>
+     <Parameter Name="enable_pin_caching"    Type="bool"   XMLName="EnablePINCaching"/>
+     <Parameter Name="biometric_protection"  Type="byte"   XMLName="BiometricProtection"/>
+     <Parameter Name="export_protection"     Type="byte"   XMLName="ExportProtection"/>
+     <Parameter Name="delete_protection"     Type="byte"   XMLName="DeleteProtection"/>
+     <Parameter Name="app_usage"             Type="byte"   XMLName="AppUsage"/>
+     <Parameter Name="friendly_name"         Type="string" XMLName="FriendlyName"/>
+     <Parameter Name="private_key_backup"    Type="bool"   XMLName="PrivateKeyBackup"/>
+     <Parameter Name="key_specifier"         Type="binary" XMLName="KeySpecifier"/>
+     <Parameter Name="endorsed_algorithms"   Type="string" XMLName="EndorsedAlgorithm"  Null="true" List="true"/>
+     <Parameter Name="mac"                   Type="binary" XMLName="MAC"/>
+     <Parameter Name="key_handle"            Type="int"    XMLName="KeyHandle"          Mode="out"/>
+     <Parameter Name="public_key"            Type="binary" XMLName="PublicKey"          Mode="out"/>
+     <Parameter Name="attestation"           Type="binary" XMLName="Attestation"        Mode="out"/>
+     <Parameter Name="private_key"           Type="binary" XMLName="PrivateKey"         Mode="out" Null="true"/>
+     <Code><![CDATA[
+        log ("createKeyEntry ()");
+        KeyData kd = sks.createKeyEntry (provisioning_handle,
+                                         id,
+                                         algorithm,
+                                         server_seed,
+                                         device_pin_protection,
+                                         pin_policy_handle,
+                                         pin_value,
+                                         enable_pin_caching,
+                                         biometric_protection,
+                                         export_protection,
+                                         delete_protection,
+                                         app_usage,
+                                         friendly_name,
+                                         private_key_backup,
+                                         key_specifier,
+                                         endorsed_algorithms.toArray (new String[0]),
+                                         mac);
+        key_handle.value = kd.getKeyHandle ();
+        public_key.value = kd.getPublicKey ().getEncoded ();
+        attestation.value = kd.getAttestation ();
+        private_key.value = kd.getPrivateKey ();
+        log ("createKeyEntry () returned: " + key_handle.value);
 ]]></Code></Method>
 
    <Method Name="abortProvisioningSession" Throws="SKSException">
      <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
      <Code><![CDATA[
-        if (provisioning_handle == 5)
-          {
-            throw new SKSException ("bad",4);
-          }
+        log ("abortProvisioningSession ()");
         sks.abortProvisioningSession (provisioning_handle);
 ]]></Code></Method>
 
    <Method Name="enumerateKeys" Throws="SKSException">
-     <Parameter Name="key_handle" XMLName="KeyHandle" Type="int" Mode="inout"/>
+     <Returns XMLName="KeyHandle" Type="int"/>
+     <Parameter Name="key_handle" XMLName="KeyHandle" Type="int"/>
      <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int" Mode="out"/>
      <Code><![CDATA[
-        EnumeratedKey ek = sks.enumerateKeys (new EnumeratedKey (key_handle.value, 0));
-        key_handle.value = ek.getKeyHandle ();
+        log ("enumerateKeys ()");
+        EnumeratedKey ek = sks.enumerateKeys (key_handle);
+        if (ek == null)
+          {
+            ek = new EnumeratedKey ();  // Back to square #1
+          }
         provisioning_handle.value = ek.getProvisioningHandle ();
+        return ek.getKeyHandle ();
+]]></Code></Method>
+
+   <Method Name="enumerateProvisioningSessions" Throws="SKSException">
+     <Returns XMLName="ProvisioningHandle" Type="int"/>
+     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
+     <Parameter Name="provisioning_state"  XMLName="ProvisioningState"  Type="bool"/>
+     <Parameter Name="key_management_key"  XMLName="KeyManagementKey"   Type="binary" Mode="out" Null="true"/>
+     <Parameter Name="client_time"         XMLName="ClientTime"         Type="int"    Mode="out"/>
+     <Parameter Name="session_life_time"   XMLName="SessionLifeTime"    Type="int"    Mode="out"/>
+     <Parameter Name="server_session_id"   XMLName="ServerSessionID"    Type="string" Mode="out"/>
+     <Parameter Name="client_session_id"   XMLName="ClientSessionID"    Type="string" Mode="out"/>
+     <Parameter Name="issuer_uri"          XMLName="IssuerURI"          Type="string" Mode="out"/>
+     <Code><![CDATA[
+        log ("enumerateProvisioningSessions ()");
+        EnumeratedProvisioningSession eps = sks.enumerateProvisioningSessions (provisioning_handle, provisioning_state);
+        if (eps == null)
+          {
+            eps = new EnumeratedProvisioningSession ();  // Back to square #1
+          }
+        else
+          {
+            key_management_key.value = eps.getKeyManagementKey () == null ? null : eps.getKeyManagementKey ().getEncoded ();
+            client_time.value = eps.getClientTime ();
+            session_life_time.value = eps.getSessionLifeTime ();
+            server_session_id.value = eps.getServerSessionID ();
+            client_session_id.value = eps.getClientSessionID ();
+            issuer_uri.value = eps.getIssuerURI ();
+          }
+        return eps.getProvisioningHandle ();
 ]]></Code></Method>
 
    <Method Name="getKeyProtectionInfo" Throws="SKSException">
@@ -256,35 +425,40 @@
 ]]></Code></Method>
 
    <Method Name="setCertificatePath" Throws="SKSException">
-     <Parameter Name="key_handle" Type="int" XMLName="KeyHandle"/>
-     <Parameter Name="certificate_path" Type="binary" XMLName="X509Certificate" DotNetRule="In.X509" List="true" Null="true"/>
-     <Parameter Name="mac" Type="binary" XMLName="MAC"/>
+     <Parameter Name="key_handle"       Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="certificate_path" Type="binary" XMLName="X509Certificate" DotNetRule="In.X509" List="true"/>
+     <Parameter Name="mac"              Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        StringBuffer res = new StringBuffer ();
-        if (certificate_path.size() == 0)
+        log ("setCertificatePath (KeyHandle=" + key_handle + ")");
+        try
           {
-            res.append ("'null'");
+            sks.setCertificatePath (key_handle,
+                                    CertificateUtil.getSortedPathFromBlobs (certificate_path),
+                                    mac);
           }
-        else
+        catch (IOException e)
           {
-            int i = 0;
-            for (byte[] b_arr : certificate_path)
-              {
-                if (i != 0)
-                  {
-                     res.append ("\n      ");
-                  }
-                try
-                  {
-                    res.append ("C[" + (i++) + "]=" + new org.webpki.crypto.CertificateInfo(org.webpki.crypto.CertificateUtil.getCertificateFromBlob (b_arr)).getSubject ());
-                  }
-                catch (IOException iox)
-                  {
-                    throw new SKSException (iox);
-                  }
-              }
+            throw new SKSException (e);
           }
-        System.out.println ("Certs=" + res.toString () + " mac=" + mac.length);
+]]></Code></Method>
+
+   <Method Name="restorePrivateKey" Throws="SKSException">
+     <Parameter Name="key_handle"       Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="private_key"      Type="binary" XMLName="PrivateKey"/>
+     <Parameter Name="mac"              Type="binary" XMLName="MAC"/>
+     <Code><![CDATA[
+        log ("restorePrivateKey (KeyHandle=" + key_handle + ")");
+        sks.restorePrivateKey (key_handle, private_key, mac);
+]]></Code></Method>
+
+   <Method Name="closeProvisioningSession" Throws="SKSException">
+     <Returns Type="binary" XMLName="Attestation"/>
+     <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="nonce"               Type="binary" XMLName="Nonce"/>
+     <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
+     <Code><![CDATA[
+        log ("closeProvisioningSession (ProvisioningHandle=" + provisioning_handle + ")");
+        return sks.closeProvisioningSession (provisioning_handle, nonce, mac);
 ]]></Code></Method>
 
    <Method Name="getVersion">
@@ -295,7 +469,7 @@
 
    <Method Name="getCertPath" Throws="SKSException">
      <Returns Type="binary" XMLName="X509Certificate" DotNetRule="Out.X509" List="true" Null="true"/>
-     <Parameter Type="boolean" Name="want"/>
+     <Parameter Type="bool" Name="want"/>
      <Code><![CDATA[
         List<byte[]> certs = new ArrayList<byte[]> ();
         try

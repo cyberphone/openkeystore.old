@@ -26,7 +26,7 @@ namespace org.webpki.sks.ws.client
     using System.Security.Cryptography.X509Certificates;
 
     /*
-     *  This is the .NET SKS client.
+     *  This is the .NET SKS WS client.
      */
     [System.ServiceModel.ServiceContractAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00")]
     public interface SKSWSProxyInterface
@@ -35,6 +35,21 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         createProvisioningSession_Response createProvisioningSession(createProvisioningSession_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        getDeviceInfo_Response getDeviceInfo(getDeviceInfo_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        createPINPolicy_Response createPINPolicy(createPINPolicy_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        createKeyEntry_Response createKeyEntry(createKeyEntry_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
@@ -49,12 +64,27 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
+        enumerateProvisioningSessions_Response enumerateProvisioningSessions(enumerateProvisioningSessions_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
         getKeyProtectionInfo_Response getKeyProtectionInfo(getKeyProtectionInfo_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         setCertificatePath_Response setCertificatePath(setCertificatePath_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        restorePrivateKey_Response restorePrivateKey(restorePrivateKey_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        closeProvisioningSession_Response closeProvisioningSession(closeProvisioningSession_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
@@ -137,7 +167,14 @@ namespace org.webpki.sks.ws.client
         {
         }
 
-        public createProvisioningSession_Request(string algorithm, string server_session_id, byte[] server_ephemeral_key, string issuer_uri, byte[] key_management_key, int client_time, int session_life_time, short session_key_limit)
+        public createProvisioningSession_Request(string algorithm,
+                                                 string server_session_id,
+                                                 byte[] server_ephemeral_key,
+                                                 string issuer_uri,
+                                                 byte[] key_management_key,
+                                                 int client_time,
+                                                 int session_life_time,
+                                                 short session_key_limit)
         {
             this.algorithm = algorithm;
             this.server_session_id = server_session_id;
@@ -171,6 +208,314 @@ namespace org.webpki.sks.ws.client
         public int provisioning_handle;
 
         public createProvisioningSession_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getDeviceInfo", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class getDeviceInfo_Request
+    {
+        public getDeviceInfo_Request()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getDeviceInfo.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class getDeviceInfo_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="APILevel", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public short api_level;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="UpdateURL", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string update_url;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="VendorName", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string vendor_name;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="VendorDescription", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string vendor_description;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="X509Certificate", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public List<byte[]> certificate_path;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Algorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public List<string> algorithms;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="RSAExponentSupport", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public bool rsa_exponent_support;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=7)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="RSAKeySize", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public List<short> rsa_key_sizes;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=8)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="CryptoDataSize", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int crypto_data_size;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=9)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ExtensionDataSize", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int extension_data_size;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=10)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="DevicePINSupport", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public bool device_pin_support;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=11)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="BiometricSupport", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public bool biometric_support;
+
+        public getDeviceInfo_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="createPINPolicy", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class createPINPolicy_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ProvisioningHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int provisioning_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string id;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PUKPolicyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int puk_policy_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="UserDefined", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public bool user_defined;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="UserModifiable", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public bool user_modifiable;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Format", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public sbyte format;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="RetryLimit", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public short retry_limit;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=7)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Grouping", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public sbyte grouping;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=8)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PatternRestrictions", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public sbyte pattern_restrictions;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=9)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="MinLength", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public short min_length;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=10)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="MaxLength", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public short max_length;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=11)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="InputMethod", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public sbyte input_method;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=12)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] mac;
+
+        public createPINPolicy_Request()
+        {
+        }
+
+        public createPINPolicy_Request(int provisioning_handle,
+                                       string id,
+                                       int puk_policy_handle,
+                                       bool user_defined,
+                                       bool user_modifiable,
+                                       sbyte format,
+                                       short retry_limit,
+                                       sbyte grouping,
+                                       sbyte pattern_restrictions,
+                                       short min_length,
+                                       short max_length,
+                                       sbyte input_method,
+                                       byte[] mac)
+        {
+            this.provisioning_handle = provisioning_handle;
+            this.id = id;
+            this.puk_policy_handle = puk_policy_handle;
+            this.user_defined = user_defined;
+            this.user_modifiable = user_modifiable;
+            this.format = format;
+            this.retry_limit = retry_limit;
+            this.grouping = grouping;
+            this.pattern_restrictions = pattern_restrictions;
+            this.min_length = min_length;
+            this.max_length = max_length;
+            this.input_method = input_method;
+            this.mac = mac;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="createPINPolicy.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class createPINPolicy_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PINPolicyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int @return;
+
+        public createPINPolicy_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="createKeyEntry", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class createKeyEntry_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ProvisioningHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int provisioning_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string id;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Algorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string algorithm;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ServerSeed", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] server_seed;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="DevicePINProtection", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public bool device_pin_protection;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PINPolicyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int pin_policy_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PINValue", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] pin_value;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=7)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="EnablePINCaching", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public bool enable_pin_caching;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=8)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="BiometricProtection", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public sbyte biometric_protection;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=9)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ExportProtection", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public sbyte export_protection;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=10)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="DeleteProtection", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public sbyte delete_protection;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=11)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="AppUsage", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public sbyte app_usage;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=12)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="FriendlyName", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string friendly_name;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=13)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivateKeyBackup", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public bool private_key_backup;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=14)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeySpecifier", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] key_specifier;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=15)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="EndorsedAlgorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public List<string> endorsed_algorithms;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=16)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] mac;
+
+        public createKeyEntry_Request()
+        {
+        }
+
+        public createKeyEntry_Request(int provisioning_handle,
+                                      string id,
+                                      string algorithm,
+                                      byte[] server_seed,
+                                      bool device_pin_protection,
+                                      int pin_policy_handle,
+                                      byte[] pin_value,
+                                      bool enable_pin_caching,
+                                      sbyte biometric_protection,
+                                      sbyte export_protection,
+                                      sbyte delete_protection,
+                                      sbyte app_usage,
+                                      string friendly_name,
+                                      bool private_key_backup,
+                                      byte[] key_specifier,
+                                      List<string> endorsed_algorithms,
+                                      byte[] mac)
+        {
+            this.provisioning_handle = provisioning_handle;
+            this.id = id;
+            this.algorithm = algorithm;
+            this.server_seed = server_seed;
+            this.device_pin_protection = device_pin_protection;
+            this.pin_policy_handle = pin_policy_handle;
+            this.pin_value = pin_value;
+            this.enable_pin_caching = enable_pin_caching;
+            this.biometric_protection = biometric_protection;
+            this.export_protection = export_protection;
+            this.delete_protection = delete_protection;
+            this.app_usage = app_usage;
+            this.friendly_name = friendly_name;
+            this.private_key_backup = private_key_backup;
+            this.key_specifier = key_specifier;
+            this.endorsed_algorithms = endorsed_algorithms;
+            this.mac = mac;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="createKeyEntry.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class createKeyEntry_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PublicKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] public_key;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Attestation", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] attestation;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivateKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] private_key;
+
+        public createKeyEntry_Response()
         {
         }
     }
@@ -214,7 +559,7 @@ namespace org.webpki.sks.ws.client
         {
         }
 
-        public enumerateKeys_Request(ref int key_handle)
+        public enumerateKeys_Request(int key_handle)
         {
             this.key_handle = key_handle;
         }
@@ -226,13 +571,74 @@ namespace org.webpki.sks.ws.client
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        public int key_handle;
+        public int @return;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ProvisioningHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         public int provisioning_handle;
 
         public enumerateKeys_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="enumerateProvisioningSessions", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class enumerateProvisioningSessions_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ProvisioningHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int provisioning_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ProvisioningState", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public bool provisioning_state;
+
+        public enumerateProvisioningSessions_Request()
+        {
+        }
+
+        public enumerateProvisioningSessions_Request(int provisioning_handle,
+                                                     bool provisioning_state)
+        {
+            this.provisioning_handle = provisioning_handle;
+            this.provisioning_state = provisioning_state;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="enumerateProvisioningSessions.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class enumerateProvisioningSessions_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ProvisioningHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int @return;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyManagementKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] key_management_key;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ClientTime", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int client_time;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="SessionLifeTime", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int session_life_time;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ServerSessionID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string server_session_id;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ClientSessionID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string client_session_id;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="IssuerURI", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string issuer_uri;
+
+        public enumerateProvisioningSessions_Response()
         {
         }
     }
@@ -253,7 +659,8 @@ namespace org.webpki.sks.ws.client
         {
         }
 
-        public getKeyProtectionInfo_Request(int key_handle, ref string protection_status)
+        public getKeyProtectionInfo_Request(int key_handle,
+                                            ref string protection_status)
         {
             this.key_handle = key_handle;
             this.protection_status = protection_status;
@@ -305,7 +712,9 @@ namespace org.webpki.sks.ws.client
         {
         }
 
-        public setCertificatePath_Request(int key_handle, List<byte[]> certificate_path, byte[] mac)
+        public setCertificatePath_Request(int key_handle,
+                                          List<byte[]> certificate_path,
+                                          byte[] mac)
         {
             this.key_handle = key_handle;
             this.certificate_path = certificate_path;
@@ -318,6 +727,88 @@ namespace org.webpki.sks.ws.client
     public class setCertificatePath_Response
     {
         public setCertificatePath_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="restorePrivateKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class restorePrivateKey_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivateKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] private_key;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] mac;
+
+        public restorePrivateKey_Request()
+        {
+        }
+
+        public restorePrivateKey_Request(int key_handle,
+                                         byte[] private_key,
+                                         byte[] mac)
+        {
+            this.key_handle = key_handle;
+            this.private_key = private_key;
+            this.mac = mac;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="restorePrivateKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class restorePrivateKey_Response
+    {
+        public restorePrivateKey_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="closeProvisioningSession", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class closeProvisioningSession_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ProvisioningHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int provisioning_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Nonce", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] nonce;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] mac;
+
+        public closeProvisioningSession_Request()
+        {
+        }
+
+        public closeProvisioningSession_Request(int provisioning_handle,
+                                                byte[] nonce,
+                                                byte[] mac)
+        {
+            this.provisioning_handle = provisioning_handle;
+            this.nonce = nonce;
+            this.mac = mac;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="closeProvisioningSession.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class closeProvisioningSession_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Attestation", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] @return;
+
+        public closeProvisioningSession_Response()
         {
         }
     }
@@ -426,13 +917,134 @@ namespace org.webpki.sks.ws.client
         {
         }
 
-        public void createProvisioningSession(string algorithm, string server_session_id, byte[] server_ephemeral_key, string issuer_uri, byte[] key_management_key, int client_time, int session_life_time, short session_key_limit, out string client_session_id, out byte[] client_ephemeral_key, out byte[] attestation, out int provisioning_handle)
+        public void createProvisioningSession(string algorithm,
+                                              string server_session_id,
+                                              byte[] server_ephemeral_key,
+                                              string issuer_uri,
+                                              byte[] key_management_key,
+                                              int client_time,
+                                              int session_life_time,
+                                              short session_key_limit,
+                                              out string client_session_id,
+                                              out byte[] client_ephemeral_key,
+                                              out byte[] attestation,
+                                              out int provisioning_handle)
         {
-            createProvisioningSession_Response _res = base.Channel.createProvisioningSession(new createProvisioningSession_Request(algorithm, server_session_id, server_ephemeral_key, issuer_uri, key_management_key, client_time, session_life_time, session_key_limit));
+            createProvisioningSession_Response _res = base.Channel.createProvisioningSession(new createProvisioningSession_Request(algorithm,
+                                                                                                                                   server_session_id,
+                                                                                                                                   server_ephemeral_key,
+                                                                                                                                   issuer_uri,
+                                                                                                                                   key_management_key,
+                                                                                                                                   client_time,
+                                                                                                                                   session_life_time,
+                                                                                                                                   session_key_limit));
             client_session_id = _res.client_session_id;
             client_ephemeral_key = _res.client_ephemeral_key;
             attestation = _res.attestation;
             provisioning_handle = _res.provisioning_handle;
+        }
+
+        public void getDeviceInfo(out short api_level,
+                                  out string update_url,
+                                  out string vendor_name,
+                                  out string vendor_description,
+                                  out List<byte[]> certificate_path,
+                                  out List<string> algorithms,
+                                  out bool rsa_exponent_support,
+                                  out List<short> rsa_key_sizes,
+                                  out int crypto_data_size,
+                                  out int extension_data_size,
+                                  out bool device_pin_support,
+                                  out bool biometric_support)
+        {
+            getDeviceInfo_Response _res = base.Channel.getDeviceInfo(new getDeviceInfo_Request());
+            api_level = _res.api_level;
+            update_url = _res.update_url;
+            vendor_name = _res.vendor_name;
+            vendor_description = _res.vendor_description;
+            certificate_path = _res.certificate_path;
+            algorithms = _res.algorithms;
+            rsa_exponent_support = _res.rsa_exponent_support;
+            rsa_key_sizes = _res.rsa_key_sizes;
+            crypto_data_size = _res.crypto_data_size;
+            extension_data_size = _res.extension_data_size;
+            device_pin_support = _res.device_pin_support;
+            biometric_support = _res.biometric_support;
+        }
+
+        public int createPINPolicy(int provisioning_handle,
+                                   string id,
+                                   int puk_policy_handle,
+                                   bool user_defined,
+                                   bool user_modifiable,
+                                   sbyte format,
+                                   short retry_limit,
+                                   sbyte grouping,
+                                   sbyte pattern_restrictions,
+                                   short min_length,
+                                   short max_length,
+                                   sbyte input_method,
+                                   byte[] mac)
+        {
+            createPINPolicy_Response _res = base.Channel.createPINPolicy(new createPINPolicy_Request(provisioning_handle,
+                                                                                                     id,
+                                                                                                     puk_policy_handle,
+                                                                                                     user_defined,
+                                                                                                     user_modifiable,
+                                                                                                     format,
+                                                                                                     retry_limit,
+                                                                                                     grouping,
+                                                                                                     pattern_restrictions,
+                                                                                                     min_length,
+                                                                                                     max_length,
+                                                                                                     input_method,
+                                                                                                     mac));
+            return _res.@return;
+        }
+
+        public void createKeyEntry(int provisioning_handle,
+                                   string id,
+                                   string algorithm,
+                                   byte[] server_seed,
+                                   bool device_pin_protection,
+                                   int pin_policy_handle,
+                                   byte[] pin_value,
+                                   bool enable_pin_caching,
+                                   sbyte biometric_protection,
+                                   sbyte export_protection,
+                                   sbyte delete_protection,
+                                   sbyte app_usage,
+                                   string friendly_name,
+                                   bool private_key_backup,
+                                   byte[] key_specifier,
+                                   List<string> endorsed_algorithms,
+                                   byte[] mac,
+                                   out int key_handle,
+                                   out byte[] public_key,
+                                   out byte[] attestation,
+                                   out byte[] private_key)
+        {
+            createKeyEntry_Response _res = base.Channel.createKeyEntry(new createKeyEntry_Request(provisioning_handle,
+                                                                                                  id,
+                                                                                                  algorithm,
+                                                                                                  server_seed,
+                                                                                                  device_pin_protection,
+                                                                                                  pin_policy_handle,
+                                                                                                  pin_value,
+                                                                                                  enable_pin_caching,
+                                                                                                  biometric_protection,
+                                                                                                  export_protection,
+                                                                                                  delete_protection,
+                                                                                                  app_usage,
+                                                                                                  friendly_name,
+                                                                                                  private_key_backup,
+                                                                                                  key_specifier,
+                                                                                                  endorsed_algorithms,
+                                                                                                  mac));
+            key_handle = _res.key_handle;
+            public_key = _res.public_key;
+            attestation = _res.attestation;
+            private_key = _res.private_key;
         }
 
         public void abortProvisioningSession(int provisioning_handle)
@@ -440,25 +1052,73 @@ namespace org.webpki.sks.ws.client
             base.Channel.abortProvisioningSession(new abortProvisioningSession_Request(provisioning_handle));
         }
 
-        public void enumerateKeys(ref int key_handle, out int provisioning_handle)
+        public int enumerateKeys(int key_handle,
+                                 out int provisioning_handle)
         {
-            enumerateKeys_Response _res = base.Channel.enumerateKeys(new enumerateKeys_Request(ref key_handle));
-            key_handle = _res.key_handle;
+            enumerateKeys_Response _res = base.Channel.enumerateKeys(new enumerateKeys_Request(key_handle));
             provisioning_handle = _res.provisioning_handle;
+            return _res.@return;
         }
 
-        public int getKeyProtectionInfo(int key_handle, ref string protection_status, out sbyte blah, out X509Certificate2[] certificate_path)
+        public int enumerateProvisioningSessions(int provisioning_handle,
+                                                 bool provisioning_state,
+                                                 out byte[] key_management_key,
+                                                 out int client_time,
+                                                 out int session_life_time,
+                                                 out string server_session_id,
+                                                 out string client_session_id,
+                                                 out string issuer_uri)
         {
-            getKeyProtectionInfo_Response _res = base.Channel.getKeyProtectionInfo(new getKeyProtectionInfo_Request(key_handle, ref protection_status));
+            enumerateProvisioningSessions_Response _res = base.Channel.enumerateProvisioningSessions(new enumerateProvisioningSessions_Request(provisioning_handle,
+                                                                                                                                               provisioning_state));
+            key_management_key = _res.key_management_key;
+            client_time = _res.client_time;
+            session_life_time = _res.session_life_time;
+            server_session_id = _res.server_session_id;
+            client_session_id = _res.client_session_id;
+            issuer_uri = _res.issuer_uri;
+            return _res.@return;
+        }
+
+        public int getKeyProtectionInfo(int key_handle,
+                                        ref string protection_status,
+                                        out sbyte blah,
+                                        out X509Certificate2[] certificate_path)
+        {
+            getKeyProtectionInfo_Response _res = base.Channel.getKeyProtectionInfo(new getKeyProtectionInfo_Request(key_handle,
+                                                                                                                    ref protection_status));
             protection_status = _res.protection_status;
             blah = _res.blah;
             certificate_path = blist2certs(_res.certificate_path);
             return _res.@return;
         }
 
-        public void setCertificatePath(int key_handle, X509Certificate2[] certificate_path, byte[] mac)
+        public void setCertificatePath(int key_handle,
+                                       X509Certificate2[] certificate_path,
+                                       byte[] mac)
         {
-            base.Channel.setCertificatePath(new setCertificatePath_Request(key_handle, certs2blist(certificate_path), mac));
+            base.Channel.setCertificatePath(new setCertificatePath_Request(key_handle,
+                                                                           certs2blist(certificate_path),
+                                                                           mac));
+        }
+
+        public void restorePrivateKey(int key_handle,
+                                      byte[] private_key,
+                                      byte[] mac)
+        {
+            base.Channel.restorePrivateKey(new restorePrivateKey_Request(key_handle,
+                                                                         private_key,
+                                                                         mac));
+        }
+
+        public byte[] closeProvisioningSession(int provisioning_handle,
+                                               byte[] nonce,
+                                               byte[] mac)
+        {
+            closeProvisioningSession_Response _res = base.Channel.closeProvisioningSession(new closeProvisioningSession_Request(provisioning_handle,
+                                                                                                                                nonce,
+                                                                                                                                mac));
+            return _res.@return;
         }
 
         public string getVersion()

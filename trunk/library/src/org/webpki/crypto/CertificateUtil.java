@@ -280,12 +280,12 @@ public class CertificateUtil
       }
 
 
-    public static X509Certificate[] getSortedPathFromBlobs (Vector<byte[]> blobvector) throws IOException
+    public static X509Certificate[] getSortedPathFromBlobs (List<byte[]> blobvector) throws IOException
       {
         X509Certificate[] inpath = new X509Certificate[blobvector.size()]; 
         for (int i = 0; i < inpath.length; i++)
           {
-            inpath[i] = getCertificateFromBlob (blobvector.elementAt(i));
+            inpath[i] = getCertificateFromBlob (blobvector.get(i));
           }
         return getSortedPath (inpath);
       }
