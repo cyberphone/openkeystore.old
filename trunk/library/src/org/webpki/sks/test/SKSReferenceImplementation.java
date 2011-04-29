@@ -26,6 +26,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -43,7 +44,6 @@ import java.security.spec.RSAKeyGenParameterSpec;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -1936,7 +1936,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                    SKS_VENDOR_NAME,
                                    SKS_VENDOR_DESCRIPTION,
                                    getDeviceCertificatePath (),
-                                   new HashSet<String> (algorithms.keySet ()),
+                                   algorithms.keySet ().toArray (new String[0]),
                                    SKS_RSA_EXPONENT_SUPPORT,
                                    SKS_DEFAULT_RSA_SUPPORT,
                                    MAX_LENGTH_CRYPTO_DATA,
@@ -2078,8 +2078,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                   key_entry.app_usage,
                                   key_entry.friendly_name,
                                   key_entry.certificate_path,
-                                  key_entry.endorsed_algorithms,
-                                  new HashSet<String> (key_entry.extensions.keySet ()));
+                                  key_entry.endorsed_algorithms.toArray (new String[0]),
+                                  key_entry.extensions.keySet ().toArray (new String[0]));
       }
 
 
@@ -2479,7 +2479,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
             ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
             generator.initialize (eccgen, new SecureRandom ());
-            java.security.KeyPair kp = generator.generateKeyPair ();
+            KeyPair kp = generator.generateKeyPair ();
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Check that the server and client ECDH keys are compatible
@@ -2916,24 +2916,26 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         verifier.addBool (private_key_backup);
         verifier.addArray (key_specifier);
         LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
+        String prev_alg = "\0";
         for (String endorsed_algorithm : endorsed_algorithms)
           {
             ///////////////////////////////////////////////////////////////////////////////////
-            // Check that the algorithms are known
+            // Check that the algorithms are sorted and known
             ///////////////////////////////////////////////////////////////////////////////////
-            if (!temp_endorsed.add (endorsed_algorithm))
+            if (prev_alg.compareTo (endorsed_algorithm) >= 0)
               {
-                provisioning.abort ("Duplicate algorithm: " + endorsed_algorithm);
+                provisioning.abort ("Duplicate or incorrectly sorted algorithm: " + endorsed_algorithm);
               }
             Algorithm alg = algorithms.get (endorsed_algorithm);
             if (alg == null)
               {
                 provisioning.abort ("Unsupported algorithm: " + endorsed_algorithm);
               }
-            if ((alg.mask & ALG_NONE) == 0 && endorsed_algorithms.length > 1)
+            if ((alg.mask & ALG_NONE) != 0 && endorsed_algorithms.length > 1)
               {
                 provisioning.abort ("Algorithm must be alone: " + endorsed_algorithm);
               }
+            temp_endorsed.add (prev_alg = endorsed_algorithm);
             verifier.addString (endorsed_algorithm);
           }
         provisioning.verifyMac (verifier, mac);
@@ -3173,7 +3175,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public synchronized int createPUKPolicy (int provisioning_handle,
                                              String id,
-                                             byte[] value,
+                                             byte[] puk_value,
                                              byte format,
                                              short retry_limit,
                                              byte[] mac) throws SKSException
@@ -3188,7 +3190,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PUK_POLICY);
         verifier.addString (id);
-        verifier.addArray (value);
+        verifier.addArray (puk_value);
         verifier.addByte (format);
         verifier.addShort (retry_limit);
         provisioning.verifyMac (verifier, mac);
@@ -3197,7 +3199,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Perform PUK "sanity" checks
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.rangeTest (format, PIN_FORMAT_NUMERIC, PIN_FORMAT_BINARY, "Format");
-        byte[] puk_value = provisioning.decrypt (value);
+        puk_value = provisioning.decrypt (puk_value);
         if (puk_value.length == 0 || puk_value.length > MAX_LENGTH_PIN_PUK)
           {
             provisioning.abort ("PUK length error");

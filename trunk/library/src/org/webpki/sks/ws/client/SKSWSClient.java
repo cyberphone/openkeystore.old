@@ -104,12 +104,6 @@ public class SKSWSClient implements SecureKeyStore
         return proxy;
       }
 
-    private static void bad (String msg)
-      {
-        throw new RuntimeException (msg); 
-      }
-    
-
     @Override
     public ProvisioningSession createProvisioningSession (String algorithm, 
                                                           String server_session_id,
@@ -125,20 +119,18 @@ public class SKSWSClient implements SecureKeyStore
             Holder<String> client_session_id = new Holder<String> ();
             Holder<byte[]>client_ephemeral_key = new Holder<byte[]> ();
             Holder<byte[]>attestation = new Holder<byte[]> ();
-            Holder<Integer>provisioning_handle = new Holder<Integer> ();
-            getSKSWS ().createProvisioningSession (algorithm,
-                                                   server_session_id,
-                                                   server_ephemeral_key.getEncoded (),
-                                                   issuer_uri,
-                                                   key_management_key == null ? null : key_management_key.getEncoded (),
-                                                   client_time,
-                                                   session_life_time,
-                                                   session_key_limit,
-                                                   client_session_id,
-                                                   client_ephemeral_key,
-                                                   attestation,
-                                                   provisioning_handle);
-            return new ProvisioningSession (provisioning_handle.value, 
+            int provisioning_handle = getSKSWS ().createProvisioningSession (algorithm,
+                                                                             server_session_id,
+                                                                             server_ephemeral_key.getEncoded (),
+                                                                             issuer_uri,
+                                                                             key_management_key == null ? null : key_management_key.getEncoded (),
+                                                                             client_time,
+                                                                             session_life_time,
+                                                                             session_key_limit,
+                                                                             client_session_id,
+                                                                             client_ephemeral_key,
+                                                                             attestation);
+            return new ProvisioningSession (provisioning_handle, 
                                             client_session_id.value,
                                             attestation.value,
                                             getECPublicKey (client_ephemeral_key.value));
@@ -210,8 +202,14 @@ public class SKSWSClient implements SecureKeyStore
     @Override
     public byte[] signProvisioningSessionData (int provisioning_handle, byte[] data) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return null;
+        try
+          {
+            return getSKSWS ().signProvisioningSessionData (provisioning_handle, data);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
@@ -235,7 +233,6 @@ public class SKSWSClient implements SecureKeyStore
       {
         try
           {
-            Holder<Integer> key_handle = new Holder<Integer> ();
             Holder<byte[]> public_key = new Holder<byte[]> ();
             Holder<byte[]> attestation = new Holder<byte[]> ();
             Holder<byte[]> private_key = new Holder<byte[]> ();
@@ -244,28 +241,27 @@ public class SKSWSClient implements SecureKeyStore
               {
                 lalg.add (alg);
               }
-            getSKSWS ().createKeyEntry (provisioning_handle,
-                                        id,
-                                        algorithm,
-                                        server_seed,
-                                        device_pin_protection,
-                                        pin_policy_handle,
-                                        pin_value,
-                                        enable_pin_caching,
-                                        biometric_protection,
-                                        export_protection,
-                                        delete_protection,
-                                        app_usage,
-                                        friendly_name,
-                                        private_key_backup,
-                                        key_specifier,
-                                        lalg,
-                                        mac,
-                                        key_handle,
-                                        public_key,
-                                        attestation,
-                                        private_key);
-            return new KeyData (key_handle.value,
+            int key_handle = getSKSWS ().createKeyEntry (provisioning_handle,
+                                                         id,
+                                                         algorithm,
+                                                         server_seed,
+                                                         device_pin_protection,
+                                                         pin_policy_handle,
+                                                         pin_value,
+                                                         enable_pin_caching,
+                                                         biometric_protection,
+                                                         export_protection,
+                                                         delete_protection,
+                                                         app_usage,
+                                                         friendly_name,
+                                                         private_key_backup,
+                                                         key_specifier,
+                                                         lalg,
+                                                         mac,
+                                                         public_key,
+                                                         attestation,
+                                                         private_key);
+            return new KeyData (key_handle,
                                 createPublicKeyFromBlob (public_key.value),
                                 attestation.value,
                                 private_key.value);
@@ -283,8 +279,14 @@ public class SKSWSClient implements SecureKeyStore
     @Override
     public int getKeyHandle (int provisioning_handle, String id) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return 0;
+        try
+          {
+            return getSKSWS ().getKeyHandle (provisioning_handle, id);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
@@ -323,17 +325,39 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
-    public void addExtension (int key_handle, String type, byte sub_type, byte[] qualifier, byte[] extension_data, byte[] mac) throws SKSException
+    public void addExtension (int key_handle, 
+                              String type,
+                              byte sub_type,
+                              byte[] qualifier,
+                              byte[] extension_data,
+                              byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        
+        try
+          {
+            getSKSWS ().addExtension (key_handle,
+                                      type,
+                                      sub_type,
+                                      qualifier,
+                                      extension_data,
+                                      mac);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
     public void setSymmetricKey (int key_handle, byte[] symmetric_key, byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        
+        try
+          {
+            getSKSWS ().setSymmetricKey (key_handle, symmetric_key, mac);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
@@ -350,7 +374,19 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
-    public int createPINPolicy (int provisioning_handle, String id, int puk_policy_handle, boolean user_defined, boolean user_modifiable, byte format, short retry_limit, byte grouping, byte pattern_restrictions, short min_length, short max_length, byte input_method, byte[] mac) throws SKSException
+    public int createPINPolicy (int provisioning_handle, 
+                                String id,
+                                int puk_policy_handle,
+                                boolean user_defined,
+                                boolean user_modifiable,
+                                byte format,
+                                short retry_limit,
+                                byte grouping,
+                                byte pattern_restrictions,
+                                short min_length,
+                                short max_length,
+                                byte input_method,
+                                byte[] mac) throws SKSException
       {
         try
           {
@@ -375,10 +411,26 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
-    public int createPUKPolicy (int provisioning_handle, String id, byte[] value, byte format, short retry_limit, byte[] mac) throws SKSException
+    public int createPUKPolicy (int provisioning_handle,
+                                String id,
+                                byte[] puk_value, 
+                                byte format, 
+                                short retry_limit, 
+                                byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return 0;
+        try
+          {
+            return getSKSWS().createPUKPolicy (provisioning_handle,
+                                               id,
+                                               puk_value,
+                                               format,
+                                               retry_limit,
+                                               mac);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
@@ -517,7 +569,7 @@ public class SKSWSClient implements SecureKeyStore
                                    vendor_name.value,
                                    vendor_description.value,
                                    lcert_path.toArray (new X509Certificate[0]),
-                                   new HashSet<String> (algorithms.value),
+                                   algorithms.value.toArray (new String[0]),
                                    rsa_exponent_support.value,
                                    lsizes,
                                    crypto_data_size.value,

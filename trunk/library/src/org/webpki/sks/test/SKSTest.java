@@ -136,8 +136,7 @@ public class SKSTest
       {
         sks.deleteKey (key.key_handle, null);
       }
-    
-    
+
     private void checkException (SKSException e, String compare_message)
       {
         String m = e.getMessage ();
@@ -157,6 +156,26 @@ public class SKSTest
           }
       }
     
+    private void algOrder (String[] algorithms, String culprit_alg) throws Exception
+      {
+        try
+          {
+            ProvSess sess = new ProvSess (device, 0);
+            sess.createRSAKey ("Key.1",
+                               1000,
+                               null /* pin_value */,
+                               null,
+                               AppUsage.AUTHENTICATION,
+                               algorithms);
+            assertTrue ("Should have thrown", culprit_alg == null);
+          }
+        catch (SKSException e)
+          {
+            assertFalse ("Should not have thrown", culprit_alg == null);
+            checkException (e, "Duplicate or incorrectly sorted algorithm: " + culprit_alg);
+          }
+      }
+
     private void authorizationErrorCheck (SKSException e)
       {
         assertTrue ("Wrong return code", e.getError () == SKSException.ERROR_AUTHORIZATION);
@@ -2295,5 +2314,19 @@ public class SKSTest
             new_key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
           }
+      }
+
+    @Test
+    public void test56 () throws Exception
+      {
+        algOrder (new String[]{SignatureAlgorithms.RSA_SHA1.getURI (),
+                               SignatureAlgorithms.RSA_SHA1.getURI ()},
+                  SignatureAlgorithms.RSA_SHA1.getURI ());
+        algOrder (new String[]{SignatureAlgorithms.RSA_SHA256.getURI (),
+                               SignatureAlgorithms.RSA_SHA1.getURI ()},
+                  SignatureAlgorithms.RSA_SHA1.getURI ());
+        algOrder (new String[]{SignatureAlgorithms.RSA_SHA1.getURI (),
+                               SignatureAlgorithms.RSA_SHA256.getURI ()},
+                  null);
       }
   }

@@ -16,8 +16,6 @@
  */
 package org.webpki.sks;
 
-import java.util.HashSet;
-
 import java.security.cert.X509Certificate;
 
 public class DeviceInfo
@@ -57,9 +55,9 @@ public class DeviceInfo
         return certificate_path;
       }
     
-    HashSet<String> algorithms;
+    String[] algorithms;
     
-    public HashSet<String> getAlgorithms ()
+    public String[] getAlgorithms ()
       {
         return algorithms;
       }
@@ -112,7 +110,7 @@ public class DeviceInfo
                        String vendor_name,
                        String vendor_description,
                        X509Certificate[] certificate_path,
-                       HashSet<String> algorithms,
+                       String[] algorithms,
                        boolean rsa_exponent_support,
                        short[] rsa_key_sizes,
                        int crypto_data_size,

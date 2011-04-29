@@ -243,7 +243,7 @@ public interface SecureKeyStore
 
     public int createPUKPolicy (int provisioning_handle,
                                 String id,
-                                byte[] value,
+                                byte[] puk_value,
                                 byte format,
                                 short retry_limit,
                                 byte[] mac) throws SKSException;

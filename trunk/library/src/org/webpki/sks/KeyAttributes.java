@@ -17,7 +17,6 @@
 package org.webpki.sks;
 
 import java.security.cert.X509Certificate;
-import java.util.HashSet;
 
 
 public class KeyAttributes
@@ -30,9 +29,9 @@ public class KeyAttributes
 
     X509Certificate[] certificate_path;
     
-    HashSet<String> endorsed_algorithms;
+    String[] endorsed_algorithms;
 
-    HashSet<String> extension_types;
+    String[] extension_types;
     
     
     public boolean isSymmetric ()
@@ -62,12 +61,12 @@ public class KeyAttributes
         return certificate_path;
       }
 
-    public HashSet<String> getEndorsedAlgorithms ()
+    public String[] getEndorsedAlgorithms ()
       {
         return extension_types;
       }
 
-    public HashSet<String> getExtensionTypes ()
+    public String[] getExtensionTypes ()
       {
         return extension_types;
       }
@@ -76,8 +75,8 @@ public class KeyAttributes
                           byte app_usage,
                           String friendly_name,
                           X509Certificate[] certificate_path,
-                          HashSet<String> endorsed_algorithms,
-                          HashSet<String> extension_types)
+                          String[] endorsed_algorithms,
+                          String[] extension_types)
       {
         this.is_symmetric_key = is_symmetric_key;
         this.app_usage = app_usage;

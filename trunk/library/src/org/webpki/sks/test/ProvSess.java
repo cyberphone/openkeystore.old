@@ -301,32 +301,6 @@ public class ProvSess
        
       }
 
-    private String[] getSortedAlgorithms (String[] algorithms) throws IOException
-      {
-        int i = 0;
-        while (true)
-          {
-            if (i < (algorithms.length - 1))
-              {
-                if (algorithms[i].compareTo (algorithms[i + 1]) > 0)
-                  {
-                    String s = algorithms[i];
-                    algorithms[i] = algorithms[i + 1];
-                    algorithms[i + 1] = s;
-                    i = 0;
-                  }
-                else
-                  {
-                    i++;
-                  }
-              }
-            else
-              {
-                break;
-              }
-          }
-        return algorithms;
-      }
 
     private byte[] getMACSequenceCounterAndUpdate ()
       {
@@ -617,7 +591,7 @@ public class ProvSess
                              KeySpecifier key_algorithm,
                              String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
       {
-        String[] sorted_algorithms = endorsed_algorithms == null ? new String[0] : getSortedAlgorithms (endorsed_algorithms);
+        String[] sorted_algorithms = endorsed_algorithms == null ? new String[0] : endorsed_algorithms;
         byte actual_export_policy = override_export_protection ? overriden_export_protection : export_protection.getSKSValue ();
         MacGenerator key_pair_mac = new MacGenerator ();
         key_pair_mac.addString (id);

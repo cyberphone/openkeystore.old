@@ -63,10 +63,10 @@
       <xs:element name="createProvisioningSession.Response">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ClientSessionID" type="xs:string"/>
             <xs:element name="ClientEphemeralKey" type="xs:base64Binary"/>
             <xs:element name="Attestation" type="xs:base64Binary"/>
-            <xs:element name="ProvisioningHandle" type="xs:int"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -92,6 +92,31 @@
             <xs:element name="ExtensionDataSize" type="xs:int"/>
             <xs:element name="DevicePINSupport" type="xs:boolean"/>
             <xs:element name="BiometricSupport" type="xs:boolean"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #                    createPUKPolicy                    #
+      #########################################################
+-->
+      <xs:element name="createPUKPolicy">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="ID" type="xs:string"/>
+            <xs:element name="PUKValue" type="xs:base64Binary"/>
+            <xs:element name="Format" type="xs:byte"/>
+            <xs:element name="RetryLimit" type="xs:short"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="createPUKPolicy.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="PUKPolicyHandle" type="xs:int"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -180,6 +205,48 @@
         </xs:complexType>
       </xs:element>
       <xs:element name="abortProvisioningSession.Response"/>
+
+<!--
+      #########################################################
+      #              signProvisioningSessionData              #
+      #########################################################
+-->
+      <xs:element name="signProvisioningSessionData">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="Data" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="signProvisioningSessionData.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #                     getKeyHandle                      #
+      #########################################################
+-->
+      <xs:element name="getKeyHandle">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="ID" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="getKeyHandle.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
 
 <!--
       #########################################################
@@ -287,6 +354,41 @@
 
 <!--
       #########################################################
+      #                    setSymmetricKey                    #
+      #########################################################
+-->
+      <xs:element name="setSymmetricKey">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="SymmetricKey" type="xs:base64Binary"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="setSymmetricKey.Response"/>
+
+<!--
+      #########################################################
+      #                     addExtension                      #
+      #########################################################
+-->
+      <xs:element name="addExtension">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="Type" type="xs:string"/>
+            <xs:element name="SubType" type="xs:byte"/>
+            <xs:element name="Qualifier" type="xs:base64Binary"/>
+            <xs:element name="ExtensionData" type="xs:base64Binary"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="addExtension.Response"/>
+
+<!--
+      #########################################################
       #               closeProvisioningSession                #
       #########################################################
 -->
@@ -365,6 +467,14 @@
     <wsdl:part name="parameters" element="tns:getDeviceInfo.Response"/>
   </wsdl:message>
 
+  <wsdl:message name="createPUKPolicy">
+    <wsdl:part name="parameters" element="tns:createPUKPolicy"/>
+  </wsdl:message>
+
+  <wsdl:message name="createPUKPolicy.Response">
+    <wsdl:part name="parameters" element="tns:createPUKPolicy.Response"/>
+  </wsdl:message>
+
   <wsdl:message name="createPINPolicy">
     <wsdl:part name="parameters" element="tns:createPINPolicy"/>
   </wsdl:message>
@@ -387,6 +497,22 @@
 
   <wsdl:message name="abortProvisioningSession.Response">
     <wsdl:part name="parameters" element="tns:abortProvisioningSession.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="signProvisioningSessionData">
+    <wsdl:part name="parameters" element="tns:signProvisioningSessionData"/>
+  </wsdl:message>
+
+  <wsdl:message name="signProvisioningSessionData.Response">
+    <wsdl:part name="parameters" element="tns:signProvisioningSessionData.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="getKeyHandle">
+    <wsdl:part name="parameters" element="tns:getKeyHandle"/>
+  </wsdl:message>
+
+  <wsdl:message name="getKeyHandle.Response">
+    <wsdl:part name="parameters" element="tns:getKeyHandle.Response"/>
   </wsdl:message>
 
   <wsdl:message name="enumerateKeys">
@@ -429,6 +555,22 @@
     <wsdl:part name="parameters" element="tns:restorePrivateKey.Response"/>
   </wsdl:message>
 
+  <wsdl:message name="setSymmetricKey">
+    <wsdl:part name="parameters" element="tns:setSymmetricKey"/>
+  </wsdl:message>
+
+  <wsdl:message name="setSymmetricKey.Response">
+    <wsdl:part name="parameters" element="tns:setSymmetricKey.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="addExtension">
+    <wsdl:part name="parameters" element="tns:addExtension"/>
+  </wsdl:message>
+
+  <wsdl:message name="addExtension.Response">
+    <wsdl:part name="parameters" element="tns:addExtension.Response"/>
+  </wsdl:message>
+
   <wsdl:message name="closeProvisioningSession">
     <wsdl:part name="parameters" element="tns:closeProvisioningSession"/>
   </wsdl:message>
@@ -467,6 +609,12 @@
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
+    <wsdl:operation name="createPUKPolicy">
+      <wsdl:input message="tns:createPUKPolicy"/>
+      <wsdl:output message="tns:createPUKPolicy.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
     <wsdl:operation name="createPINPolicy">
       <wsdl:input message="tns:createPINPolicy"/>
       <wsdl:output message="tns:createPINPolicy.Response"/>
@@ -482,6 +630,18 @@
     <wsdl:operation name="abortProvisioningSession">
       <wsdl:input message="tns:abortProvisioningSession"/>
       <wsdl:output message="tns:abortProvisioningSession.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="signProvisioningSessionData">
+      <wsdl:input message="tns:signProvisioningSessionData"/>
+      <wsdl:output message="tns:signProvisioningSessionData.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="getKeyHandle">
+      <wsdl:input message="tns:getKeyHandle"/>
+      <wsdl:output message="tns:getKeyHandle.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -512,6 +672,18 @@
     <wsdl:operation name="restorePrivateKey">
       <wsdl:input message="tns:restorePrivateKey"/>
       <wsdl:output message="tns:restorePrivateKey.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="setSymmetricKey">
+      <wsdl:input message="tns:setSymmetricKey"/>
+      <wsdl:output message="tns:setSymmetricKey.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="addExtension">
+      <wsdl:input message="tns:addExtension"/>
+      <wsdl:output message="tns:addExtension.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -561,6 +733,18 @@
         </wsdl:fault>
       </wsdl:operation>
 
+      <wsdl:operation name="createPUKPolicy">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
       <wsdl:operation name="createPINPolicy">
         <wsdl:input>
           <soap:body use="literal"/>
@@ -586,6 +770,30 @@
       </wsdl:operation>
 
       <wsdl:operation name="abortProvisioningSession">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="signProvisioningSessionData">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="getKeyHandle">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>
@@ -646,6 +854,30 @@
       </wsdl:operation>
 
       <wsdl:operation name="restorePrivateKey">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="setSymmetricKey">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="addExtension">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>
