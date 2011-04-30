@@ -133,7 +133,7 @@ public class GenKey
 
     public byte[] getPostProvMac (MacGenerator upd_mac, ProvSess current) throws IOException, GeneralSecurityException
       {
-        Integer kmk_id = prov_sess.kmk_id;
+        Integer kmk_id = current.kmk_id;
         if (kmk_id == null)
           {
             kmk_id = 0;  // Just for JUnit...

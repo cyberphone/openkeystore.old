@@ -184,10 +184,10 @@ public class ProvSess
           }
 
         @Override
-        public byte[] generateKeyManagementAuthorization (PublicKey key_management__key, byte[] data) throws IOException, GeneralSecurityException
+        public byte[] generateKeyManagementAuthorization (PublicKey key_management_key, byte[] data) throws IOException, GeneralSecurityException
           {
-            Signature km_sign = Signature.getInstance (key_management__key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
-            km_sign.initSign (key_management_keys.get (key_management__key));
+            Signature km_sign = Signature.getInstance (key_management_key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
+            km_sign.initSign (key_management_keys.get (key_management_key));
             km_sign.update (data);
             return km_sign.sign ();
           }

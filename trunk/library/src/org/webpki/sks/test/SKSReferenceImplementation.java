@@ -794,8 +794,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final int ALG_ASYM_ENC = 0x000080;
     static final int ALG_ASYM_SGN = 0x000100;
     static final int ALG_RSA_KEY  = 0x000200;
-    static final int ALG_ECC_KEY  = 0x000400;
-    static final int ALG_ECC_CRV  = 0x000800;
+    static final int ALG_EC_KEY   = 0x000400;
+    static final int ALG_EC_CRV   = 0x000800;
     static final int ALG_HASH_160 = 0x014000;
     static final int ALG_HASH_256 = 0x020000;
     static final int ALG_HASH_DIV = 0x001000;
@@ -854,7 +854,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh",
                       "ECDH",
-                      ALG_ASYM_KA | ALG_ECC_KEY);
+                      ALG_ASYM_KA | ALG_EC_KEY);
         
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Signatures
@@ -869,7 +869,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
                       "NONEwithECDSA",
-                      ALG_ASYM_SGN | ALG_ECC_KEY | ALG_HASH_256);
+                      ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_256);
 
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.none",
                       "NONEwithRSA",
@@ -877,12 +877,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdsa.none",
                       "NONEwithECDSA",
-                      ALG_ASYM_SGN | ALG_ECC_KEY);
+                      ALG_ASYM_SGN | ALG_EC_KEY);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Elliptic Curves
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("urn:oid:1.2.840.10045.3.1.7", "secp256r1", ALG_ECC_CRV);
+        addAlgorithm ("urn:oid:1.2.840.10045.3.1.7", "secp256r1", ALG_EC_CRV);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Special Algorithms
@@ -1254,7 +1254,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
         else if (key_entry.isRSA () ^ (alg.mask & ALG_RSA_KEY) != 0)
           {
-            abort ((key_entry.isRSA () ? "RSA" : "ECC") + " key #" + key_entry.key_handle + " is incompatible with: " + input_algorithm, SKSException.ERROR_ALGORITHM);
+            abort ((key_entry.isRSA () ? "RSA" : "EC") + " key #" + key_entry.key_handle + " is incompatible with: " + input_algorithm, SKSException.ERROR_ALGORITHM);
           }
         if (key_entry.endorsed_algorithms.isEmpty () || key_entry.endorsed_algorithms.contains (input_algorithm))
           {
@@ -2318,7 +2318,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                             else
                               {
                                 ///////////////////////////////////////////////////////////////////////////////////
-                                // Asymmetric.  Check that algorithms match RSA or ECC
+                                // Asymmetric.  Check that algorithms match RSA or EC
                                 ///////////////////////////////////////////////////////////////////////////////////
                                 if (((alg.mask & ALG_RSA_KEY) == 0) ^ key_entry.isRSA ())
                                   {
@@ -2326,7 +2326,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                   }
                               }
                           }
-                        key_entry.owner.abort ((key_entry.isSymmetric () ? "Symmetric" : key_entry.isRSA () ? "RSA" : "ECC") + 
+                        key_entry.owner.abort ((key_entry.isSymmetric () ? "Symmetric" : key_entry.isRSA () ? "RSA" : "EC") + 
                                                " key " + key_entry.id + " does not match algorithm: " + algorithm);
                       }
                   }
@@ -2780,7 +2780,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         else
           {
             byte[] asn1 = ((ECPublicKey) public_key).getEncoded ();
-            //TODO ECC
+            //TODO EC
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2993,7 +2993,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             alg_par_spec = new RSAKeyGenParameterSpec (size,
                                                        exponent == 0 ? RSAKeyGenParameterSpec.F4 : BigInteger.valueOf (exponent));
           }
-        else if (key_specifier[0] == KEY_ALGORITHM_TYPE_ECC)
+        else if (key_specifier[0] == KEY_ALGORITHM_TYPE_EC)
           {
             StringBuffer ec_uri = new StringBuffer ();
             for (int i = 1; i < key_specifier.length; i++)
@@ -3001,7 +3001,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 ec_uri.append ((char) key_specifier[i]);
               }
             Algorithm alg = algorithms.get (ec_uri.toString ());
-            if (alg == null || (alg.mask & ALG_ECC_CRV) == 0)
+            if (alg == null || (alg.mask & ALG_EC_CRV) == 0)
               {
                 provisioning.abort ("Unsupported eliptic curve: " + ec_uri);
               }

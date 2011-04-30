@@ -135,7 +135,7 @@ public interface SecureKeyStore
     // SKS key algorithm IDs used in "createKeyPair"
     ///////////////////////////////////////////////////////////////////////////////////
     public byte KEY_ALGORITHM_TYPE_RSA               = 0x00;
-    public byte KEY_ALGORITHM_TYPE_ECC               = 0x01;
+    public byte KEY_ALGORITHM_TYPE_EC                = 0x01;
 
     ///////////////////////////////////////////////////////////////////////////////////
     // "ProtectionStatus" constants

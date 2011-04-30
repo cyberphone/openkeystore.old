@@ -81,7 +81,7 @@ public class SKSTest
     
     Device device;
     
-    private int sessionCount () throws Exception
+    int sessionCount () throws Exception
       {
         EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
         int i = 0;
@@ -92,7 +92,7 @@ public class SKSTest
         return i;
       }
     
-    private void edgeDeleteCase (boolean post) throws Exception
+    void edgeDeleteCase (boolean post) throws Exception
       {
         ProvSess sess = new ProvSess (device, 0);
         GenKey key1 = sess.createECKey ("Key.1",
@@ -132,12 +132,12 @@ public class SKSTest
           }
       }
 
-    private void deleteKey (GenKey key) throws SKSException
+    void deleteKey (GenKey key) throws SKSException
       {
         sks.deleteKey (key.key_handle, null);
       }
 
-    private void checkException (SKSException e, String compare_message)
+    void checkException (SKSException e, String compare_message)
       {
         String m = e.getMessage ();
         if (reference_implementation && m != null && compare_message.indexOf ('#') == m.indexOf ('#'))
@@ -156,7 +156,7 @@ public class SKSTest
           }
       }
     
-    private void algOrder (String[] algorithms, String culprit_alg) throws Exception
+    void algOrder (String[] algorithms, String culprit_alg) throws Exception
       {
         try
           {
@@ -176,13 +176,13 @@ public class SKSTest
           }
       }
 
-    private void authorizationErrorCheck (SKSException e)
+    void authorizationErrorCheck (SKSException e)
       {
         assertTrue ("Wrong return code", e.getError () == SKSException.ERROR_AUTHORIZATION);
         checkException (e, "Authorization error for key #");
       }
     
-    private void updateReplace (boolean order) throws Exception
+    void updateReplace (boolean order) throws Exception
       {
         int q = sessionCount ();
         String ok_pin = "1563";
@@ -263,7 +263,7 @@ public class SKSTest
       }
 
     
-    private boolean nameCheck (String name) throws IOException, GeneralSecurityException
+    boolean nameCheck (String name) throws IOException, GeneralSecurityException
       {
         try
           {
@@ -283,7 +283,7 @@ public class SKSTest
         return true;
       }
   
-    private boolean PINCheck (PassphraseFormat format,
+    boolean PINCheck (PassphraseFormat format,
                               PatternRestriction[] patterns,
                               String pin) throws IOException, GeneralSecurityException
       {
@@ -319,7 +319,7 @@ public class SKSTest
         return true;
       }
 
-    private boolean PUKCheck (PassphraseFormat format,
+    boolean PUKCheck (PassphraseFormat format,
                               String puk) throws IOException, GeneralSecurityException
       {
         try
@@ -338,7 +338,7 @@ public class SKSTest
         return true;
       }
 
-    private void PINstress(ProvSess sess) throws Exception
+    void PINstress(ProvSess sess) throws Exception
       {
         String ok_pin = "1563";
         PINPol pin_policy = sess.createPINPolicy ("PIN",
@@ -398,7 +398,7 @@ public class SKSTest
           }
       }
      
-    private void sessionLimitTest (int limit, boolean encrypted_pin, boolean fail_hard) throws Exception
+    void sessionLimitTest (int limit, boolean encrypted_pin, boolean fail_hard) throws Exception
       {
         ProvSess sess = new ProvSess (device, (short)limit);
         GenKey key = null;
@@ -430,7 +430,7 @@ public class SKSTest
           }
       }
 
-    private boolean PINGroupCheck (boolean same_pin, Grouping grouping) throws IOException, GeneralSecurityException
+    boolean PINGroupCheck (boolean same_pin, Grouping grouping) throws IOException, GeneralSecurityException
       {
         try
           {
@@ -587,7 +587,7 @@ public class SKSTest
     @Rule 
     public TestName name = new TestName();
    
-    private void write (byte[] data) throws Exception
+    void write (byte[] data) throws Exception
       {
         if (fos != null)
           {
@@ -596,7 +596,7 @@ public class SKSTest
       }
     
   
-    private void writeString (String message) throws Exception
+    void writeString (String message) throws Exception
       {
         write (message.getBytes ("UTF-8"));
       }
@@ -2055,7 +2055,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "ECC key Key.1 does not match algorithm: http://www.w3.org/2001/04/xmlenc#aes128-cbc");
+            checkException (e, "EC key Key.1 does not match algorithm: http://www.w3.org/2001/04/xmlenc#aes128-cbc");
           }
       }
 
@@ -2224,26 +2224,55 @@ public class SKSTest
     @Test
     public void test53 () throws Exception
       {
-        String ok_pin = "1563";
-        ProvSess sess = new ProvSess (device, 0);
-        PINPol pin_policy = sess.createPINPolicy ("PIN",
-                                                  PassphraseFormat.NUMERIC,
-                                                  EnumSet.noneOf (PatternRestriction.class),
-                                                  Grouping.SHARED,
-                                                  4 /* min_length */, 
-                                                  8 /* max_length */,
-                                                  (short) 3 /* retry_limit*/, 
-                                                  null /* puk_policy */);
-        GenKey key = sess.createECKey ("Key.1",
-                                       ok_pin /* pin_value */,
-                                       pin_policy,
-                                       AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
-        sess.closeSession ();
-        lockECKey (key, ok_pin);
-        ProvSess sess2 = new ProvSess (device);
-        sess2.postUnlockKey (key);
-        sess2.closeSession ();
-        key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
+        for (int i = 0; i < 2; i++)
+          {
+            String ok_pin = "1563";
+            ProvSess sess = new ProvSess (device, i);
+            PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                      PassphraseFormat.NUMERIC,
+                                                      EnumSet.noneOf (PatternRestriction.class),
+                                                      Grouping.SHARED,
+                                                      4 /* min_length */, 
+                                                      8 /* max_length */,
+                                                      (short) 3 /* retry_limit*/, 
+                                                      null /* puk_policy */);
+            GenKey key = sess.createECKey ("Key.1",
+                                           ok_pin /* pin_value */,
+                                           pin_policy,
+                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+            sess.closeSession ();
+            lockECKey (key, ok_pin);
+            ProvSess sess2 = new ProvSess (device);
+            try
+              {
+                sess2.postUnlockKey (key);
+                assertTrue ("Bad kmk should throw", i == 0);
+              }
+            catch (SKSException e)
+              {
+                assertFalse ("Good kmk should not throw", i == 0);
+                checkException (e, "\"Authorization\" signature did not verify for key #");
+              }
+            try
+              {
+                sess2.closeSession ();
+                assertTrue ("Bad kmk should throw", i == 0);
+              }
+            catch (SKSException e)
+              {
+                assertFalse ("Good kmk should not throw", i == 0);
+              }
+            try
+              {
+                key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
+                assertTrue ("Bad kmk should throw", i == 0);
+              }
+            catch (SKSException e)
+              {
+                assertFalse ("Good kmk should not throw", i == 0);
+                authorizationErrorCheck (e);
+              }
+          }
       }
 
     @Test

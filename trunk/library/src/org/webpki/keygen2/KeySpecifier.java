@@ -126,7 +126,7 @@ public abstract class KeySpecifier implements Serializable
         @Override
         public byte[] getSKSValue () throws IOException
           {
-            return ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_ECC},
+            return ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_EC},
                                   named_curve.getURI ().getBytes ("UTF-8"));
           }
       }
