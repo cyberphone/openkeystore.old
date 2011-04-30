@@ -314,6 +314,25 @@ public interface SKSWSProxy
                               byte[] mac)
     throws SKSException_Exception;
 
+    @WebMethod(operationName="getKeyAttributes")
+    @RequestWrapper(localName="getKeyAttributes", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="getKeyAttributes.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void getKeyAttributes (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  int key_handle,
+                                  @WebParam(name="IsSymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<Boolean> is_symmetric_key,
+                                  @WebParam(name="AppUsage", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<Byte> app_usage,
+                                  @WebParam(name="FriendlyName", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<String> friendly_name,
+                                  @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<List<byte[]>> certificate_path,
+                                  @WebParam(name="EndorsedAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<List<String>> endorsed_algorithms,
+                                  @WebParam(name="ExtensionType", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<List<String>> extension_types)
+    throws SKSException_Exception;
+
     @WebMethod(operationName="closeProvisioningSession")
     @RequestWrapper(localName="closeProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="closeProvisioningSession.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
