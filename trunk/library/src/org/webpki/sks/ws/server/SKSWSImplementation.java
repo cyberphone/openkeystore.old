@@ -56,6 +56,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.KeyAttributes;
 import org.webpki.sks.KeyData;
 import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
@@ -625,6 +626,54 @@ public class SKSWSImplementation
                           extension_data,
                           mac);
       }
+
+    @WebMethod(operationName="getKeyAttributes")
+    @RequestWrapper(localName="getKeyAttributes", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="getKeyAttributes.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void getKeyAttributes (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  int key_handle,
+                                  @WebParam(name="IsSymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<Boolean> is_symmetric_key,
+                                  @WebParam(name="AppUsage", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<Byte> app_usage,
+                                  @WebParam(name="FriendlyName", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<String> friendly_name,
+                                  @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<List<byte[]>> certificate_path,
+                                  @WebParam(name="EndorsedAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<List<String>> endorsed_algorithms,
+                                  @WebParam(name="ExtensionType", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<List<String>> extension_types)
+    throws SKSException
+      {
+        log ("getKeyAttributes (KeyHandle=" + key_handle + ")");
+        try
+          {
+            KeyAttributes ka = sks.getKeyAttributes (key_handle);
+            is_symmetric_key.value = ka.isSymmetricKey ();
+            app_usage.value = ka.getAppUsage ().getSKSValue ();
+            friendly_name.value = ka.getFriendlyName ();
+            certificate_path.value = new ArrayList<byte[]> ();
+            for (X509Certificate cert : ka.getCertificatePath ())
+              {
+                certificate_path.value.add (cert.getEncoded ());
+              }
+            endorsed_algorithms.value = new ArrayList<String> ();
+            for (String alg :   ka.getEndorsedAlgorithms ())
+              {
+                endorsed_algorithms.value.add (alg);
+              }
+            extension_types.value = new ArrayList<String> ();
+            for (String type :  ka.getExtensionTypes ())
+              {
+                extension_types.value.add (type);
+              }
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new SKSException (e);
+          }
+       }
 
     @WebMethod(operationName="closeProvisioningSession")
     @RequestWrapper(localName="closeProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v1.00")

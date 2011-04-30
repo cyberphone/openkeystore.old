@@ -464,8 +464,41 @@ public class SKSWSClient implements SecureKeyStore
     @Override
     public KeyAttributes getKeyAttributes (int key_handle) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return null;
+        try
+          {
+            Holder<Boolean> is_symmetric_key = new Holder<Boolean> ();
+            Holder<Byte> app_usage = new Holder<Byte> ();
+            Holder<String> friendly_name = new Holder<String> ();
+            Holder<List<byte[]>> certificate_path = new Holder<List<byte[]>> ();
+            Holder<List<String>> endorsed_algorithms = new Holder<List<String>> ();
+            Holder<List<String>> extension_types= new Holder<List<String>> ();
+            getSKSWS ().getKeyAttributes (key_handle,
+                                          is_symmetric_key,
+                                          app_usage,
+                                          friendly_name,
+                                          certificate_path,
+                                          endorsed_algorithms,
+                                          extension_types);
+            Vector<X509Certificate> lcert_path = new Vector<X509Certificate> ();
+            for (byte[] bcert : certificate_path.value)
+              {
+                lcert_path.add (CertificateUtil.getCertificateFromBlob (bcert));
+              }
+            return new KeyAttributes (is_symmetric_key.value,
+                                      app_usage.value,
+                                      friendly_name.value,
+                                      lcert_path.toArray (new X509Certificate[0]),
+                                      endorsed_algorithms.value.toArray (new String[0]),
+                                      extension_types.value.toArray (new String[0]));
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+        catch (IOException e)
+          {
+            throw new SKSException (e);
+          }
       }
 
     @Override

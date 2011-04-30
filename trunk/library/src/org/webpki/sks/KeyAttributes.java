@@ -34,7 +34,7 @@ public class KeyAttributes
     String[] extension_types;
     
     
-    public boolean isSymmetric ()
+    public boolean isSymmetricKey ()
       {
         return is_symmetric_key;
       }

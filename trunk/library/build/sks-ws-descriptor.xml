@@ -42,6 +42,7 @@
                         org.webpki.sks.ProvisioningSession
                         org.webpki.sks.EnumeratedProvisioningSession
                         org.webpki.sks.DeviceInfo
+                        org.webpki.sks.KeyAttributes
                         org.webpki.sks.KeyData
                         org.webpki.sks.SecureKeyStore">
      <ClassHeader><![CDATA[/**
@@ -514,6 +515,44 @@
                           extension_data,
                           mac);
 ]]></Code></Method>
+
+   <Method Name="getKeyAttributes" Throws="SKSException">
+     <Parameter Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="is_symmetric_key"    Type="bool"   XMLName="IsSymmetricKey"    Mode="out"/>
+     <Parameter Name="app_usage"           Type="byte"   XMLName="AppUsage"          Mode="out"/>
+     <Parameter Name="friendly_name"       Type="string" XMLName="FriendlyName"      Mode="out"/>
+     <Parameter Name="certificate_path"    Type="binary" XMLName="X509Certificate"   Mode="out" List="true"/>
+     <Parameter Name="endorsed_algorithms" Type="string" XMLName="EndorsedAlgorithm" Mode="out" List="true" Null="true"/>
+     <Parameter Name="extension_types"     Type="string" XMLName="ExtensionType"     Mode="out" List="true" Null="true"/>
+     <Code><![CDATA[
+        log ("getKeyAttributes (KeyHandle=" + key_handle + ")");
+        try
+          {
+            KeyAttributes ka = sks.getKeyAttributes (key_handle);
+            is_symmetric_key.value = ka.isSymmetricKey ();
+            app_usage.value = ka.getAppUsage ().getSKSValue ();
+            friendly_name.value = ka.getFriendlyName ();
+            certificate_path.value = new ArrayList<byte[]> ();
+            for (X509Certificate cert : ka.getCertificatePath ())
+              {
+                certificate_path.value.add (cert.getEncoded ());
+              }
+            endorsed_algorithms.value = new ArrayList<String> ();
+            for (String alg :   ka.getEndorsedAlgorithms ())
+              {
+                endorsed_algorithms.value.add (alg);
+              }
+            extension_types.value = new ArrayList<String> ();
+            for (String type :  ka.getExtensionTypes ())
+              {
+                extension_types.value.add (type);
+              }
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new SKSException (e);
+          }
+ ]]></Code></Method>
 
    <Method Name="closeProvisioningSession" Throws="SKSException">
      <Returns Type="binary" XMLName="Attestation"/>

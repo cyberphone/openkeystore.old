@@ -1698,7 +1698,7 @@ public class SKSTest
                                         pin_policy /* pin_policy */,
                                         AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
-        assertFalse ("Not asymmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetric ());
+        assertFalse ("Not asymmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetricKey ());
         try
           {
             device.sks.exportKey (key.key_handle, new byte[0]);
@@ -1778,7 +1778,7 @@ public class SKSTest
                                        new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate ("CN=TEST18");
         key.setSymmetricKey (symmetric_key);
         sess.closeSession ();
-        assertTrue ("Not symmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetric ());
+        assertTrue ("Not symmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetricKey ());
         byte[] result = key.performHMAC (MacAlgorithms.HMAC_SHA1, ok_pin, TEST_STRING);
         assertTrue ("HMAC error", ArrayUtil.compare (result, MacAlgorithms.HMAC_SHA1.digest (symmetric_key, TEST_STRING)));
         try
