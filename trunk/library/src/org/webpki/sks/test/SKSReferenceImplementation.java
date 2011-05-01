@@ -774,14 +774,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         String jce_name;
       }
 
-    static HashMap<String,Algorithm> algorithms = new HashMap<String,Algorithm> ();
+    static HashMap<String,Algorithm> supported_algorithms = new HashMap<String,Algorithm> ();
 
     static void addAlgorithm (String uri, String jce_name, int mask)
       {
         Algorithm alg = new Algorithm ();
         alg.mask = mask;
         alg.jce_name = jce_name;
-        algorithms.put (uri, alg);
+        supported_algorithms.put (uri, alg);
       }
 
     static final int ALG_SYM_ENC  = 0x000001;
@@ -1291,7 +1291,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     Algorithm getAlgorithm (String algorithm_uri) throws SKSException
       {
-        Algorithm alg = algorithms.get (algorithm_uri);
+        Algorithm alg = supported_algorithms.get (algorithm_uri);
         if (alg == null)
           {
             abort ("Unsupported algorithm: " + algorithm_uri, SKSException.ERROR_ALGORITHM);
@@ -1936,7 +1936,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                    SKS_VENDOR_NAME,
                                    SKS_VENDOR_DESCRIPTION,
                                    getDeviceCertificatePath (),
-                                   algorithms.keySet ().toArray (new String[0]),
+                                   supported_algorithms.keySet ().toArray (new String[0]),
                                    SKS_RSA_EXPONENT_SUPPORT,
                                    SKS_DEFAULT_RSA_SUPPORT,
                                    MAX_LENGTH_CRYPTO_DATA,
@@ -2926,7 +2926,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 provisioning.abort ("Duplicate or incorrectly sorted algorithm: " + endorsed_algorithm);
               }
-            Algorithm alg = algorithms.get (endorsed_algorithm);
+            Algorithm alg = supported_algorithms.get (endorsed_algorithm);
             if (alg == null)
               {
                 provisioning.abort ("Unsupported algorithm: " + endorsed_algorithm);
@@ -3000,7 +3000,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 ec_uri.append ((char) key_specifier[i]);
               }
-            Algorithm alg = algorithms.get (ec_uri.toString ());
+            Algorithm alg = supported_algorithms.get (ec_uri.toString ());
             if (alg == null || (alg.mask & ALG_EC_CRV) == 0)
               {
                 provisioning.abort ("Unsupported eliptic curve: " + ec_uri);

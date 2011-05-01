@@ -36,7 +36,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import javax.crypto.Cipher;
@@ -74,26 +74,33 @@ import org.webpki.util.DebugFormatter;
 
 public class ProvSess
   {
-    class SoftHSM implements ServerCryptoInterface
+    static class SoftHSM implements ServerCryptoInterface
       {
         ////////////////////////////////////////////////////////////////////////////////////////
         // Private and secret keys would in a HSM implementation be represented as handles
         ////////////////////////////////////////////////////////////////////////////////////////
-        HashMap<PublicKey,PrivateKey> key_management_keys = new HashMap<PublicKey,PrivateKey> ();
+        private static LinkedHashMap<PublicKey,PrivateKey> key_management_keys = new LinkedHashMap<PublicKey,PrivateKey> ();
         
-        private void addKMK (KeyStore km_keystore) throws IOException, GeneralSecurityException
+        static private void addKMK (KeyStore km_keystore) throws IOException, GeneralSecurityException
           {
             key_management_keys.put (km_keystore.getCertificate ("mykey").getPublicKey (),
                                      (PrivateKey) km_keystore.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
           }
         
-        SoftHSM () throws IOException, GeneralSecurityException
+        static
           {
-            addKMK (DemoKeyStore.getMybankDotComKeyStore ());
-            addKMK (DemoKeyStore.getSubCAKeyStore ());
-            addKMK (DemoKeyStore.getECDSAStore ());
+            try
+              {
+                addKMK (DemoKeyStore.getMybankDotComKeyStore ());
+                addKMK (DemoKeyStore.getSubCAKeyStore ());
+                addKMK (DemoKeyStore.getECDSAStore ());
+              }
+            catch (Exception e)
+              {
+                throw new RuntimeException (e);
+              }
           }
-
+        
         ECPrivateKey server_ec_private_key;
         
         byte[] session_key;

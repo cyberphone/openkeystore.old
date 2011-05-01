@@ -1,29 +1,28 @@
 package org.webpki.sks.ws.client;
 
 import java.io.IOException;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
+
 import java.security.spec.X509EncodedKeySpec;
+
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebResult;
 import javax.xml.ws.Holder;
-import javax.xml.ws.RequestWrapper;
-import javax.xml.ws.ResponseWrapper;
 
 import javax.xml.ws.BindingProvider;
 
-import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.CertificateUtil;
+
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
@@ -37,7 +36,7 @@ import org.webpki.sks.SecureKeyStore;
 
 public class SKSWSClient implements SecureKeyStore
   {
-    private static final String DEFAULT_URL_PROPERTY = "org.webpki.sks.ws.client.url";
+    public static final String DEFAULT_URL_PROPERTY = "org.webpki.sks.ws.client.url";
     
     private SKSWSProxy proxy;
     
@@ -68,6 +67,16 @@ public class SKSWSClient implements SecureKeyStore
             kf = KeyFactory.getInstance ("EC");
             return kf.generatePublic(ks);
           }
+      }
+    
+    private X509Certificate[] getCertArrayFromBlobs (List<byte[]> blobs) throws IOException
+      {
+        Vector<X509Certificate> certs = new Vector<X509Certificate> ();
+        for (byte[] bcert : blobs)
+          {
+            certs.add (CertificateUtil.getCertificateFromBlob (bcert));
+          }
+        return certs.toArray (new X509Certificate[0]);
       }
     
     private ECPublicKey getECPublicKey (byte[] blob) throws GeneralSecurityException
@@ -436,29 +445,65 @@ public class SKSWSClient implements SecureKeyStore
     @Override
     public void pp_deleteKey (int provisioning_handle, int target_key_handle, byte[] authorization, byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        
+        try
+          {
+            getSKSWS ().pp_deleteKey (provisioning_handle,
+                                      target_key_handle,
+                                      authorization,
+                                      mac);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
     public void pp_unlockKey (int provisioning_handle, int target_key_handle, byte[] authorization, byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        
+        try
+          {
+            getSKSWS ().pp_unlockKey (provisioning_handle,
+                                      target_key_handle,
+                                      authorization,
+                                      mac);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
     public void pp_updateKey (int key_handle, int target_key_handle, byte[] authorization, byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        
+        try
+          {
+            getSKSWS ().pp_updateKey (key_handle,
+                                      target_key_handle,
+                                      authorization,
+                                      mac);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
     public void pp_cloneKeyProtection (int key_handle, int target_key_handle, byte[] authorization, byte[] mac) throws SKSException
       {
-        // TODO Auto-generated method stub
-        
+        try
+          {
+            getSKSWS ().pp_cloneKeyProtection (key_handle,
+                                               target_key_handle,
+                                               authorization,
+                                               mac);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
@@ -479,15 +524,10 @@ public class SKSWSClient implements SecureKeyStore
                                           certificate_path,
                                           endorsed_algorithms,
                                           extension_types);
-            Vector<X509Certificate> lcert_path = new Vector<X509Certificate> ();
-            for (byte[] bcert : certificate_path.value)
-              {
-                lcert_path.add (CertificateUtil.getCertificateFromBlob (bcert));
-              }
             return new KeyAttributes (is_symmetric_key.value,
                                       app_usage.value,
                                       friendly_name.value,
-                                      lcert_path.toArray (new X509Certificate[0]),
+                                      getCertArrayFromBlobs (certificate_path.value),
                                       endorsed_algorithms.value.toArray (new String[0]),
                                       extension_types.value.toArray (new String[0]));
           }
@@ -568,7 +608,7 @@ public class SKSWSClient implements SecureKeyStore
             Holder<String> vendor_name = new Holder<String> ();
             Holder<String> vendor_description = new Holder<String> ();
             Holder<List<byte[]>> certificate_path = new Holder<List<byte[]>> ();
-            Holder<List<String>> algorithms = new Holder<List<String>> ();
+            Holder<List<String>> supported_algorithms = new Holder<List<String>> ();
             Holder<Boolean> rsa_exponent_support = new Holder<Boolean> ();
             Holder<List<Short>> rsa_key_sizes = new Holder<List<Short>> ();
             Holder<Integer> crypto_data_size = new Holder<Integer> ();
@@ -580,18 +620,13 @@ public class SKSWSClient implements SecureKeyStore
                                        vendor_name,
                                        vendor_description,
                                        certificate_path,
-                                       algorithms,
+                                       supported_algorithms,
                                        rsa_exponent_support,
                                        rsa_key_sizes,
                                        crypto_data_size,
                                        extension_data_size,
                                        device_pin_support,
                                        biometric_support);
-            Vector<X509Certificate> lcert_path = new Vector<X509Certificate> ();
-            for (byte[] bcert : certificate_path.value)
-              {
-                lcert_path.add (CertificateUtil.getCertificateFromBlob (bcert));
-              }
             short[] lsizes = new short[rsa_key_sizes.value.size ()];
             for (int i = 0; i < rsa_key_sizes.value.size () ; i++)
               {
@@ -601,8 +636,8 @@ public class SKSWSClient implements SecureKeyStore
                                    update_url.value,
                                    vendor_name.value,
                                    vendor_description.value,
-                                   lcert_path.toArray (new X509Certificate[0]),
-                                   algorithms.value.toArray (new String[0]),
+                                   getCertArrayFromBlobs (certificate_path.value),
+                                   supported_algorithms.value.toArray (new String[0]),
                                    rsa_exponent_support.value,
                                    lsizes,
                                    crypto_data_size.value,
@@ -672,8 +707,7 @@ public class SKSWSClient implements SecureKeyStore
     /**
      * Test method. Use empty argument list for help.
      * 
-     * @param args
-     *            Command line arguments
+     * @param args Command line arguments
      * @throws SKSException 
      */
     public static void main (String args[]) throws SKSException
@@ -688,5 +722,4 @@ public class SKSWSClient implements SecureKeyStore
         SKSWSProxy proxy = client.getSKSWS ();
         System.out.println ("Version=" + proxy.getVersion () + "\nDevice=" + client.getDeviceInfo ().getVendorDescription ());
       }
-
   }

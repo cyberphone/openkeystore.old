@@ -279,7 +279,7 @@
      </antcall>
   </target>
 	
-  <target name="ws-server">
+  <target name="sks-service">
   	<java fork="yes"
   		  classname="org.webpki.sks.ws.server.SKSWSImplementation"
 		  failonerror="true">

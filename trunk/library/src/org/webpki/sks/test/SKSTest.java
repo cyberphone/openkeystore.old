@@ -59,6 +59,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.keygen2.KeyGen2URIs;
 
 import org.webpki.sks.AppUsage;
+import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.ExportProtection;
 import org.webpki.sks.Grouping;
@@ -559,7 +560,15 @@ public class SKSTest
           }
         Security.insertProviderAt (new BouncyCastleProvider(), 1);
         sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
-        reference_implementation = sks instanceof SKSReferenceImplementation;
+        DeviceInfo dev = sks.getDeviceInfo ();
+        reference_implementation = SKSReferenceImplementation.SKS_VENDOR_DESCRIPTION.equals (dev.getVendorDescription ());
+        if (reference_implementation)
+          {
+            System.out.println ("Reference Implementation");
+          }
+        System.out.println ("Description: " + dev.getVendorDescription ());
+        System.out.println ("Vendor: " + dev.getVendorName ());
+        System.out.println ("API Level: " + dev.getAPILevel ());
       }
 
     @AfterClass

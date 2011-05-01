@@ -227,7 +227,7 @@
      <Parameter Name="vendor_name"          Type="string" XMLName="VendorName"         Mode="out"/>
      <Parameter Name="vendor_description"   Type="string" XMLName="VendorDescription"  Mode="out"/>
      <Parameter Name="certificate_path"     Type="binary" XMLName="X509Certificate"    Mode="out" List="true"/>
-     <Parameter Name="algorithms"           Type="string" XMLName="Algorithm"          Mode="out" List="true"/>
+     <Parameter Name="supported_algorithms" Type="string" XMLName="SupportedAlgorithm" Mode="out" List="true"/>
      <Parameter Name="rsa_exponent_support" Type="bool"   XMLName="RSAExponentSupport" Mode="out"/>
      <Parameter Name="rsa_key_sizes"        Type="short"  XMLName="RSAKeySize"         Mode="out" List="true"/>
      <Parameter Name="crypto_data_size"     Type="int"    XMLName="CryptoDataSize"     Mode="out"/>
@@ -248,10 +248,10 @@
               {
                 certificate_path.value.add (cert.getEncoded ());
               }
-            algorithms.value = new ArrayList<String> ();
-            for (String alg : device_info.getAlgorithms ())
+            supported_algorithms.value = new ArrayList<String> ();
+            for (String alg : device_info.getSupportedAlgorithms ())
               {
-                algorithms.value.add (alg);
+                supported_algorithms.value.add (alg);
               }
             rsa_exponent_support.value = device_info.getRSAExponentSupport ();
             rsa_key_sizes.value = new ArrayList<Short> ();
@@ -403,7 +403,7 @@
             ek = new EnumeratedKey ();  // Back to square #1
           }
         provisioning_handle.value = ek.getProvisioningHandle ();
-        log ("enumerateKeys (KeyHandle=" + provisioning_handle + ") returns: KeyHandle=" + ek.getKeyHandle ());
+        log ("enumerateKeys (KeyHandle=" + key_handle + ") : KeyHandle=" + ek.getKeyHandle ());
         return ek.getKeyHandle ();
 ]]></Code></Method>
 
@@ -432,7 +432,7 @@
             client_session_id.value = eps.getClientSessionID ();
             issuer_uri.value = eps.getIssuerURI ();
           }
-        log ("enumerateProvisioningSessions (ProvisioningHandle=" + provisioning_handle + ") returns: ProvisioningHandle=" + eps.getProvisioningHandle ());
+        log ("enumerateProvisioningSessions (ProvisioningHandle=" + provisioning_handle + ") : ProvisioningHandle=" + eps.getProvisioningHandle ());
         return eps.getProvisioningHandle ();
 ]]></Code></Method>
 
@@ -514,6 +514,46 @@
                           qualifier,
                           extension_data,
                           mac);
+]]></Code></Method>
+
+   <Method Name="pp_deleteKey" Throws="SKSException">
+     <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="target_key_handle"   Type="int"    XMLName="TargetKeyHandle"/>
+     <Parameter Name="authorization"       Type="binary" XMLName="Authorization"/>
+     <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
+     <Code><![CDATA[
+        log ("pp_deleteKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        sks.pp_deleteKey (provisioning_handle, target_key_handle, authorization, mac);
+]]></Code></Method>
+
+   <Method Name="pp_unlockKey" Throws="SKSException">
+     <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="target_key_handle"   Type="int"    XMLName="TargetKeyHandle"/>
+     <Parameter Name="authorization"       Type="binary" XMLName="Authorization"/>
+     <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
+     <Code><![CDATA[
+        log ("pp_unlockKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        sks.pp_unlockKey (provisioning_handle, target_key_handle, authorization, mac);
+]]></Code></Method>
+
+   <Method Name="pp_updateKey" Throws="SKSException">
+     <Parameter Name="key_handle"            Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="target_key_handle"     Type="int"    XMLName="TargetKeyHandle"/>
+     <Parameter Name="authorization"         Type="binary" XMLName="Authorization"/>
+     <Parameter Name="mac"                   Type="binary" XMLName="MAC"/>
+     <Code><![CDATA[
+        log ("pp_updateKey (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        sks.pp_updateKey (key_handle, target_key_handle, authorization, mac);
+]]></Code></Method>
+
+   <Method Name="pp_cloneKeyProtection" Throws="SKSException">
+     <Parameter Name="key_handle"            Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="target_key_handle"     Type="int"    XMLName="TargetKeyHandle"/>
+     <Parameter Name="authorization"         Type="binary" XMLName="Authorization"/>
+     <Parameter Name="mac"                   Type="binary" XMLName="MAC"/>
+     <Code><![CDATA[
+        log ("pp_cloneKeyProtection (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        sks.pp_cloneKeyProtection (key_handle, target_key_handle, authorization, mac);
 ]]></Code></Method>
 
    <Method Name="getKeyAttributes" Throws="SKSException">

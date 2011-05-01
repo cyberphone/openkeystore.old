@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Security;
 
 import java.security.cert.Certificate;
@@ -32,6 +33,8 @@ import java.util.Vector;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.sks.AppUsage;
+import org.webpki.sks.EnumeratedKey;
+import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.SecureKeyStore;
 
@@ -70,9 +73,41 @@ public class PKCS12Import
             throw new IOException ("No private key!");
           }
         SecureKeyStore sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.client")).newInstance ();
-        boolean reference_implementation = sks instanceof SKSReferenceImplementation;
+        EnumeratedKey ek = new EnumeratedKey ();
+        GenKey old_key = null;
+        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
+          {
+            if (sks.getKeyAttributes (ek.getKeyHandle ()).getCertificatePath ()[0].equals (cert_path.get (0)))
+              {
+                System.out.println ("Duplicate entry - Replace key #" + ek.getKeyHandle ());
+                EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
+                while ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), false)) != null)
+                  {
+                    if (eps.getProvisioningHandle () == ek.getProvisioningHandle ())
+                      {
+                        PublicKey kmk = eps.getKeyManagementKey ();
+                        if (kmk != null && new ProvSess.SoftHSM ().enumerateKeyManagementKeys ()[0].equals (kmk))
+                          {
+                            old_key = new GenKey ();
+                            old_key.key_handle = ek.getKeyHandle ();
+                            old_key.cert_path = cert_path.toArray (new X509Certificate[0]);
+                            System.out.println ("KMK!");
+                          }
+                        else
+                          {
+                          }
+                        break;
+                      }
+                  }
+                break;
+              }
+          }
         Device device = new Device (sks);
-        ProvSess sess = new ProvSess (device);
+        ProvSess sess = new ProvSess (device, 0);
+        if (old_key != null)
+          {
+            sess.postDeleteKey (old_key);
+          }
         PINPol pin_policy = null;
         String pin = argc[2].trim ();
         if (pin.length () > 0)

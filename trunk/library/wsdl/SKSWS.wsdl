@@ -85,7 +85,7 @@
             <xs:element name="VendorName" type="xs:string"/>
             <xs:element name="VendorDescription" type="xs:string"/>
             <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
-            <xs:element name="Algorithm" type="xs:string" maxOccurs="unbounded"/>
+            <xs:element name="SupportedAlgorithm" type="xs:string" maxOccurs="unbounded"/>
             <xs:element name="RSAExponentSupport" type="xs:boolean"/>
             <xs:element name="RSAKeySize" type="xs:short" maxOccurs="unbounded"/>
             <xs:element name="CryptoDataSize" type="xs:int"/>
@@ -389,6 +389,99 @@
 
 <!--
       #########################################################
+      #                     pp_deleteKey                      #
+      #########################################################
+-->
+      <xs:element name="pp_deleteKey">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="TargetKeyHandle" type="xs:int"/>
+            <xs:element name="Authorization" type="xs:base64Binary"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_deleteKey.Response"/>
+
+<!--
+      #########################################################
+      #                     pp_unlockKey                      #
+      #########################################################
+-->
+      <xs:element name="pp_unlockKey">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="TargetKeyHandle" type="xs:int"/>
+            <xs:element name="Authorization" type="xs:base64Binary"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_unlockKey.Response"/>
+
+<!--
+      #########################################################
+      #                     pp_updateKey                      #
+      #########################################################
+-->
+      <xs:element name="pp_updateKey">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="TargetKeyHandle" type="xs:int"/>
+            <xs:element name="Authorization" type="xs:base64Binary"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_updateKey.Response"/>
+
+<!--
+      #########################################################
+      #                 pp_cloneKeyProtection                 #
+      #########################################################
+-->
+      <xs:element name="pp_cloneKeyProtection">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="TargetKeyHandle" type="xs:int"/>
+            <xs:element name="Authorization" type="xs:base64Binary"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="pp_cloneKeyProtection.Response"/>
+
+<!--
+      #########################################################
+      #                   getKeyAttributes                    #
+      #########################################################
+-->
+      <xs:element name="getKeyAttributes">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="getKeyAttributes.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="IsSymmetricKey" type="xs:boolean"/>
+            <xs:element name="AppUsage" type="xs:byte"/>
+            <xs:element name="FriendlyName" type="xs:string"/>
+            <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
+            <xs:element name="EndorsedAlgorithm" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="ExtensionType" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
       #               closeProvisioningSession                #
       #########################################################
 -->
@@ -571,6 +664,46 @@
     <wsdl:part name="parameters" element="tns:addExtension.Response"/>
   </wsdl:message>
 
+  <wsdl:message name="pp_deleteKey">
+    <wsdl:part name="parameters" element="tns:pp_deleteKey"/>
+  </wsdl:message>
+
+  <wsdl:message name="pp_deleteKey.Response">
+    <wsdl:part name="parameters" element="tns:pp_deleteKey.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="pp_unlockKey">
+    <wsdl:part name="parameters" element="tns:pp_unlockKey"/>
+  </wsdl:message>
+
+  <wsdl:message name="pp_unlockKey.Response">
+    <wsdl:part name="parameters" element="tns:pp_unlockKey.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="pp_updateKey">
+    <wsdl:part name="parameters" element="tns:pp_updateKey"/>
+  </wsdl:message>
+
+  <wsdl:message name="pp_updateKey.Response">
+    <wsdl:part name="parameters" element="tns:pp_updateKey.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="pp_cloneKeyProtection">
+    <wsdl:part name="parameters" element="tns:pp_cloneKeyProtection"/>
+  </wsdl:message>
+
+  <wsdl:message name="pp_cloneKeyProtection.Response">
+    <wsdl:part name="parameters" element="tns:pp_cloneKeyProtection.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="getKeyAttributes">
+    <wsdl:part name="parameters" element="tns:getKeyAttributes"/>
+  </wsdl:message>
+
+  <wsdl:message name="getKeyAttributes.Response">
+    <wsdl:part name="parameters" element="tns:getKeyAttributes.Response"/>
+  </wsdl:message>
+
   <wsdl:message name="closeProvisioningSession">
     <wsdl:part name="parameters" element="tns:closeProvisioningSession"/>
   </wsdl:message>
@@ -684,6 +817,36 @@
     <wsdl:operation name="addExtension">
       <wsdl:input message="tns:addExtension"/>
       <wsdl:output message="tns:addExtension.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="pp_deleteKey">
+      <wsdl:input message="tns:pp_deleteKey"/>
+      <wsdl:output message="tns:pp_deleteKey.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="pp_unlockKey">
+      <wsdl:input message="tns:pp_unlockKey"/>
+      <wsdl:output message="tns:pp_unlockKey.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="pp_updateKey">
+      <wsdl:input message="tns:pp_updateKey"/>
+      <wsdl:output message="tns:pp_updateKey.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="pp_cloneKeyProtection">
+      <wsdl:input message="tns:pp_cloneKeyProtection"/>
+      <wsdl:output message="tns:pp_cloneKeyProtection.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="getKeyAttributes">
+      <wsdl:input message="tns:getKeyAttributes"/>
+      <wsdl:output message="tns:getKeyAttributes.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -878,6 +1041,66 @@
       </wsdl:operation>
 
       <wsdl:operation name="addExtension">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="pp_deleteKey">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="pp_unlockKey">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="pp_updateKey">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="pp_cloneKeyProtection">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="getKeyAttributes">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

@@ -55,11 +55,11 @@ public class DeviceInfo
         return certificate_path;
       }
     
-    String[] algorithms;
+    String[] supported_algorithms;
     
-    public String[] getAlgorithms ()
+    public String[] getSupportedAlgorithms ()
       {
-        return algorithms;
+        return supported_algorithms;
       }
 
     boolean rsa_exponent_support;
@@ -110,7 +110,7 @@ public class DeviceInfo
                        String vendor_name,
                        String vendor_description,
                        X509Certificate[] certificate_path,
-                       String[] algorithms,
+                       String[] supported_algorithms,
                        boolean rsa_exponent_support,
                        short[] rsa_key_sizes,
                        int crypto_data_size,
@@ -123,7 +123,7 @@ public class DeviceInfo
         this.vendor_name = vendor_name;
         this.vendor_description = vendor_description;
         this.certificate_path = certificate_path;
-        this.algorithms = algorithms;
+        this.supported_algorithms = supported_algorithms;
         this.rsa_exponent_support = rsa_exponent_support;
         this.rsa_key_sizes = rsa_key_sizes;
         this.crypto_data_size = crypto_data_size;

@@ -79,8 +79,8 @@ public interface SKSWSProxy
                                Holder<String> vendor_description,
                                @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<List<byte[]>> certificate_path,
-                               @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                               Holder<List<String>> algorithms,
+                               @WebParam(name="SupportedAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<List<String>> supported_algorithms,
                                @WebParam(name="RSAExponentSupport", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<Boolean> rsa_exponent_support,
                                @WebParam(name="RSAKeySize", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
@@ -312,6 +312,58 @@ public interface SKSWSProxy
                               byte[] extension_data,
                               @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               byte[] mac)
+    throws SKSException_Exception;
+
+    @WebMethod(operationName="pp_deleteKey")
+    @RequestWrapper(localName="pp_deleteKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="pp_deleteKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void pp_deleteKey (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              int provisioning_handle,
+                              @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              int target_key_handle,
+                              @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              byte[] authorization,
+                              @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              byte[] mac)
+    throws SKSException_Exception;
+
+    @WebMethod(operationName="pp_unlockKey")
+    @RequestWrapper(localName="pp_unlockKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="pp_unlockKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void pp_unlockKey (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              int provisioning_handle,
+                              @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              int target_key_handle,
+                              @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              byte[] authorization,
+                              @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              byte[] mac)
+    throws SKSException_Exception;
+
+    @WebMethod(operationName="pp_updateKey")
+    @RequestWrapper(localName="pp_updateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="pp_updateKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void pp_updateKey (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              int key_handle,
+                              @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              int target_key_handle,
+                              @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              byte[] authorization,
+                              @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              byte[] mac)
+    throws SKSException_Exception;
+
+    @WebMethod(operationName="pp_cloneKeyProtection")
+    @RequestWrapper(localName="pp_cloneKeyProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="pp_cloneKeyProtection.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void pp_cloneKeyProtection (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       int key_handle,
+                                       @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       int target_key_handle,
+                                       @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       byte[] authorization,
+                                       @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       byte[] mac)
     throws SKSException_Exception;
 
     @WebMethod(operationName="getKeyAttributes")
