@@ -17,7 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
 import javax.xml.ws.Holder;
+import javax.xml.ws.RequestWrapper;
+import javax.xml.ws.ResponseWrapper;
 
 import javax.xml.ws.BindingProvider;
 
@@ -658,22 +662,107 @@ public class SKSWSClient implements SecureKeyStore
     @Override
     public Extension getExtension (int key_handle, String type) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return null;
+        try
+          {
+            Holder<Byte> sub_type = new Holder<Byte> ();
+            Holder<byte[]> qualifier = new Holder<byte[]> ();
+            Holder<byte[]> extension_data = new Holder<byte[]> ();
+            getSKSWS ().getExtension (key_handle,
+                                      type,
+                                      sub_type,
+                                      qualifier,
+                                      extension_data);
+            return new Extension (sub_type.value,
+                                  qualifier.value,
+                                  extension_data.value);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
     public KeyProtectionInfo getKeyProtectionInfo (int key_handle) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return null;
+        try
+          {
+            Holder<Byte> protection_status = new Holder<Byte> ();
+            Holder<Byte> puk_format = new Holder<Byte> ();
+            Holder<Short> puk_retry_limit = new Holder<Short> ();
+            Holder<Short> puk_error_count = new Holder<Short> ();
+            Holder<Boolean> user_defined = new Holder<Boolean> ();
+            Holder<Boolean> user_modifiable = new Holder<Boolean> ();
+            Holder<Byte> format = new Holder<Byte> ();
+            Holder<Short> retry_limit = new Holder<Short> ();
+            Holder<Byte> grouping = new Holder<Byte> ();
+            Holder<Byte> pattern_restrictions = new Holder<Byte> ();
+            Holder<Short> min_length = new Holder<Short> ();
+            Holder<Short> max_length = new Holder<Short> ();
+            Holder<Byte> input_method = new Holder<Byte> ();
+            Holder<Short> pin_error_count = new Holder<Short> ();
+            Holder<Boolean> enable_pin_caching = new Holder<Boolean> ();
+            Holder<Byte> biometric_protection = new Holder<Byte> ();
+            Holder<Byte> export_protection = new Holder<Byte> ();
+            Holder<Byte> delete_protection = new Holder<Byte> ();
+            Holder<Boolean> private_key_backup = new Holder<Boolean> ();
+            getSKSWS ().getKeyProtectionInfo (key_handle,
+                                              protection_status,
+                                              puk_format,
+                                              puk_retry_limit,
+                                              puk_error_count,
+                                              user_defined,
+                                              user_modifiable,
+                                              format,
+                                              retry_limit,
+                                              grouping,
+                                              pattern_restrictions,
+                                              min_length,
+                                              max_length,
+                                              input_method,
+                                              pin_error_count,
+                                              enable_pin_caching,
+                                              biometric_protection,
+                                              export_protection,
+                                              delete_protection,
+                                              private_key_backup);
+            return new KeyProtectionInfo (protection_status.value,
+                                          puk_format.value,
+                                          puk_retry_limit.value,
+                                          puk_error_count.value,
+                                          user_defined.value,
+                                          user_modifiable.value,
+                                          format.value,
+                                          retry_limit.value,
+                                          grouping.value,
+                                          pattern_restrictions.value,
+                                          min_length.value,
+                                          max_length.value,
+                                          input_method.value,
+                                          pin_error_count.value,
+                                          enable_pin_caching.value,
+                                          biometric_protection.value,
+                                          export_protection.value,
+                                          delete_protection.value,
+                                          private_key_backup.value);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
     public void setProperty (int key_handle, String type, byte[] name, byte[] value) throws SKSException
       {
-        // TODO Auto-generated method stub
-        
+        try
+          {
+            getSKSWS ().setProperty (key_handle, type, name, value);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override

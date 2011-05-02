@@ -43,7 +43,10 @@
                         org.webpki.sks.EnumeratedProvisioningSession
                         org.webpki.sks.DeviceInfo
                         org.webpki.sks.KeyAttributes
+                        org.webpki.sks.PatternRestriction
+                        org.webpki.sks.KeyProtectionInfo
                         org.webpki.sks.KeyData
+                        org.webpki.sks.Extension
                         org.webpki.sks.SecureKeyStore">
      <ClassHeader><![CDATA[/**
  * SKS Web Service Implementation.
@@ -180,47 +183,6 @@
      <Property Name="message" Type="string"/>
    </Exception>
 
-   <Method Name="createProvisioningSession" Throws="SKSException">
-     <Returns Type="int" XMLName="ProvisioningHandle"/>
-     <Parameter Name="algorithm"            Type="string" XMLName="Algorithm"       />
-     <Parameter Name="server_session_id"    Type="string" XMLName="ServerSessionID"/>
-     <Parameter Name="server_ephemeral_key" Type="binary" XMLName="ServerEphemeralKey"/>
-     <Parameter Name="issuer_uri"           Type="string" XMLName="IssuerURI"/>
-     <Parameter Name="key_management_key"   Type="binary" XMLName="KeyManagementKey" Null="true"/>
-     <Parameter Name="client_time"          Type="int"    XMLName="ClientTime"/>
-     <Parameter Name="session_life_time"    Type="int"    XMLName="SessionLifeTime"/>
-     <Parameter Name="session_key_limit"    Type="short"  XMLName="SessionKeyLimit"/>
-     <Parameter Name="client_session_id"    Type="string" XMLName="ClientSessionID"    Mode="out"/>
-     <Parameter Name="client_ephemeral_key" Type="binary" XMLName="ClientEphemeralKey" Mode="out"/>
-     <Parameter Name="attestation"          Type="binary" XMLName="Attestation"        Mode="out"/>
-     <Code><![CDATA[
-/*
-        System.out.println ("SERV=" + (server_ephemeral_key == null ? "NULL" : server_ephemeral_key.length) + " KMK=" + (key_management_key == null ? "NULL" : key_management_key.length));
-        try
-          {
-        org.webpki.asn1.BaseASN1Object o = org.webpki.asn1.DerDecoder.decode(server_ephemeral_key, 0);
-        System.out.println(o.toString (true, true));
-          }
-        catch (IOException e)
-          {
-            System.out.println ("ASN1" + e.getMessage ());
-          }
-*/
-        ProvisioningSession sess = sks.createProvisioningSession (algorithm,
-                                                                  server_session_id,
-                                                                  getECPublicKey (server_ephemeral_key),
-                                                                  issuer_uri,
-                                                                  key_management_key == null ? null : createPublicKeyFromBlob (key_management_key),
-                                                                  client_time,
-                                                                  session_life_time,
-                                                                  session_key_limit);
-        client_session_id.value = sess.getClientSessionID ();
-        client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
-        attestation.value = sess.getAttestation ();
-        log ("createProvisioningSession () : ProvisioningHandle=" + sess.getProvisioningHandle ());
-        return sess.getProvisioningHandle ();
-]]></Code></Method>
-
    <Method Name="getDeviceInfo" Throws="SKSException">
      <Parameter Name="api_level"            Type="short"  XMLName="APILevel"           Mode="out"/>
      <Parameter Name="update_url"           Type="string" XMLName="UpdateURL"          Mode="out" Null="true"/>
@@ -268,6 +230,102 @@
           {
             throw new SKSException (e);
           }
+]]></Code></Method>
+
+   <Method Name="createProvisioningSession" Throws="SKSException">
+     <Returns Type="int" XMLName="ProvisioningHandle"/>
+     <Parameter Name="algorithm"            Type="string" XMLName="Algorithm"       />
+     <Parameter Name="server_session_id"    Type="string" XMLName="ServerSessionID"/>
+     <Parameter Name="server_ephemeral_key" Type="binary" XMLName="ServerEphemeralKey"/>
+     <Parameter Name="issuer_uri"           Type="string" XMLName="IssuerURI"/>
+     <Parameter Name="key_management_key"   Type="binary" XMLName="KeyManagementKey" Null="true"/>
+     <Parameter Name="client_time"          Type="int"    XMLName="ClientTime"/>
+     <Parameter Name="session_life_time"    Type="int"    XMLName="SessionLifeTime"/>
+     <Parameter Name="session_key_limit"    Type="short"  XMLName="SessionKeyLimit"/>
+     <Parameter Name="client_session_id"    Type="string" XMLName="ClientSessionID"    Mode="out"/>
+     <Parameter Name="client_ephemeral_key" Type="binary" XMLName="ClientEphemeralKey" Mode="out"/>
+     <Parameter Name="attestation"          Type="binary" XMLName="Attestation"        Mode="out"/>
+     <Code><![CDATA[
+/*
+        System.out.println ("SERV=" + (server_ephemeral_key == null ? "NULL" : server_ephemeral_key.length) + " KMK=" + (key_management_key == null ? "NULL" : key_management_key.length));
+        try
+          {
+        org.webpki.asn1.BaseASN1Object o = org.webpki.asn1.DerDecoder.decode(server_ephemeral_key, 0);
+        System.out.println(o.toString (true, true));
+          }
+        catch (IOException e)
+          {
+            System.out.println ("ASN1" + e.getMessage ());
+          }
+*/
+        ProvisioningSession sess = sks.createProvisioningSession (algorithm,
+                                                                  server_session_id,
+                                                                  getECPublicKey (server_ephemeral_key),
+                                                                  issuer_uri,
+                                                                  key_management_key == null ? null : createPublicKeyFromBlob (key_management_key),
+                                                                  client_time,
+                                                                  session_life_time,
+                                                                  session_key_limit);
+        client_session_id.value = sess.getClientSessionID ();
+        client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
+        attestation.value = sess.getAttestation ();
+        log ("createProvisioningSession () : ProvisioningHandle=" + sess.getProvisioningHandle ());
+        return sess.getProvisioningHandle ();
+]]></Code></Method>
+
+   <Method Name="closeProvisioningSession" Throws="SKSException">
+     <Returns Type="binary" XMLName="Attestation"/>
+     <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="nonce"               Type="binary" XMLName="Nonce"/>
+     <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
+     <Code><![CDATA[
+        log ("closeProvisioningSession (ProvisioningHandle=" + provisioning_handle + ")");
+        return sks.closeProvisioningSession (provisioning_handle, nonce, mac);
+]]></Code></Method>
+
+   <Method Name="enumerateProvisioningSessions" Throws="SKSException">
+     <Returns XMLName="ProvisioningHandle" Type="int"/>
+     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
+     <Parameter Name="provisioning_state"  XMLName="ProvisioningState"  Type="bool"/>
+     <Parameter Name="key_management_key"  XMLName="KeyManagementKey"   Type="binary" Mode="out" Null="true"/>
+     <Parameter Name="client_time"         XMLName="ClientTime"         Type="int"    Mode="out"/>
+     <Parameter Name="session_life_time"   XMLName="SessionLifeTime"    Type="int"    Mode="out"/>
+     <Parameter Name="server_session_id"   XMLName="ServerSessionID"    Type="string" Mode="out"/>
+     <Parameter Name="client_session_id"   XMLName="ClientSessionID"    Type="string" Mode="out"/>
+     <Parameter Name="issuer_uri"          XMLName="IssuerURI"          Type="string" Mode="out"/>
+     <Code><![CDATA[
+        EnumeratedProvisioningSession eps = sks.enumerateProvisioningSessions (provisioning_handle, provisioning_state);
+        if (eps == null)
+          {
+            eps = new EnumeratedProvisioningSession ();  // Back to square #1
+          }
+        else
+          {
+            key_management_key.value = eps.getKeyManagementKey () == null ? null : eps.getKeyManagementKey ().getEncoded ();
+            client_time.value = eps.getClientTime ();
+            session_life_time.value = eps.getSessionLifeTime ();
+            server_session_id.value = eps.getServerSessionID ();
+            client_session_id.value = eps.getClientSessionID ();
+            issuer_uri.value = eps.getIssuerURI ();
+          }
+        log ("enumerateProvisioningSessions (ProvisioningHandle=" + provisioning_handle + ") : ProvisioningHandle=" + eps.getProvisioningHandle ());
+        return eps.getProvisioningHandle ();
+]]></Code></Method>
+
+   <Method Name="abortProvisioningSession" Throws="SKSException">
+     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
+     <Code><![CDATA[
+        log ("abortProvisioningSession (ProvisioningHandle=" + provisioning_handle + ")");
+        sks.abortProvisioningSession (provisioning_handle);
+]]></Code></Method>
+
+   <Method Name="signProvisioningSessionData" Throws="SKSException">
+     <Returns XMLName="Result" Type="binary"/>
+     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
+     <Parameter Name="data"                XMLName="Data"               Type="binary"/>
+     <Code><![CDATA[
+        log ("signProvisioningSessionData (ProvisioningHandle=" + provisioning_handle + ")");
+        return sks.signProvisioningSessionData (provisioning_handle, data);
 ]]></Code></Method>
 
    <Method Name="createPUKPolicy" Throws="SKSException">
@@ -367,100 +425,13 @@
         return kd.getKeyHandle ();
 ]]></Code></Method>
 
-   <Method Name="abortProvisioningSession" Throws="SKSException">
-     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
-     <Code><![CDATA[
-        log ("abortProvisioningSession ()");
-        sks.abortProvisioningSession (provisioning_handle);
-]]></Code></Method>
-
-   <Method Name="signProvisioningSessionData" Throws="SKSException">
-     <Returns XMLName="Result" Type="binary"/>
-     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
-     <Parameter Name="data"                XMLName="Data"               Type="binary"/>
-     <Code><![CDATA[
-        log ("signProvisioningSessionData ()");
-        return sks.signProvisioningSessionData (provisioning_handle, data);
-]]></Code></Method>
-
    <Method Name="getKeyHandle" Throws="SKSException">
      <Returns XMLName="KeyHandle" Type="int"/>
      <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
      <Parameter Name="id"                  XMLName="ID"                 Type="string"/>
      <Code><![CDATA[
-        log ("getKeyHandle ()");
+        log ("getKeyHandle (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")");
         return sks.getKeyHandle (provisioning_handle, id);
-]]></Code></Method>
-
-   <Method Name="enumerateKeys" Throws="SKSException">
-     <Returns XMLName="KeyHandle" Type="int"/>
-     <Parameter Name="key_handle" XMLName="KeyHandle" Type="int"/>
-     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int" Mode="out"/>
-     <Code><![CDATA[
-        EnumeratedKey ek = sks.enumerateKeys (key_handle);
-        if (ek == null)
-          {
-            ek = new EnumeratedKey ();  // Back to square #1
-          }
-        provisioning_handle.value = ek.getProvisioningHandle ();
-        log ("enumerateKeys (KeyHandle=" + key_handle + ") : KeyHandle=" + ek.getKeyHandle ());
-        return ek.getKeyHandle ();
-]]></Code></Method>
-
-   <Method Name="enumerateProvisioningSessions" Throws="SKSException">
-     <Returns XMLName="ProvisioningHandle" Type="int"/>
-     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
-     <Parameter Name="provisioning_state"  XMLName="ProvisioningState"  Type="bool"/>
-     <Parameter Name="key_management_key"  XMLName="KeyManagementKey"   Type="binary" Mode="out" Null="true"/>
-     <Parameter Name="client_time"         XMLName="ClientTime"         Type="int"    Mode="out"/>
-     <Parameter Name="session_life_time"   XMLName="SessionLifeTime"    Type="int"    Mode="out"/>
-     <Parameter Name="server_session_id"   XMLName="ServerSessionID"    Type="string" Mode="out"/>
-     <Parameter Name="client_session_id"   XMLName="ClientSessionID"    Type="string" Mode="out"/>
-     <Parameter Name="issuer_uri"          XMLName="IssuerURI"          Type="string" Mode="out"/>
-     <Code><![CDATA[
-        EnumeratedProvisioningSession eps = sks.enumerateProvisioningSessions (provisioning_handle, provisioning_state);
-        if (eps == null)
-          {
-            eps = new EnumeratedProvisioningSession ();  // Back to square #1
-          }
-        else
-          {
-            key_management_key.value = eps.getKeyManagementKey () == null ? null : eps.getKeyManagementKey ().getEncoded ();
-            client_time.value = eps.getClientTime ();
-            session_life_time.value = eps.getSessionLifeTime ();
-            server_session_id.value = eps.getServerSessionID ();
-            client_session_id.value = eps.getClientSessionID ();
-            issuer_uri.value = eps.getIssuerURI ();
-          }
-        log ("enumerateProvisioningSessions (ProvisioningHandle=" + provisioning_handle + ") : ProvisioningHandle=" + eps.getProvisioningHandle ());
-        return eps.getProvisioningHandle ();
-]]></Code></Method>
-
-   <Method Name="getKeyProtectionInfo" Throws="SKSException">
-     <Returns Type="int"/>
-     <Parameter Name="key_handle" Type="int" XMLName="keyHandle"/>
-     <Parameter Name="protection_status" Mode="inout" Type="string" XMLName="ProtectionStatus"/>
-     <Parameter Name="blah" Mode="out" Type="byte"/>
-     <Parameter Name="certificate_path" Mode="out" Type="binary" XMLName="X509Certificate" DotNetRule="Out.X509" List="true"/>
-     <Code><![CDATA[
-        protection_status.value = protection_status.value + "@";
-        blah.value = (byte)(key_handle + 2);
-        List<byte[]> certs = new ArrayList<byte[]> ();
-        try
-          {
-            certs.add (DemoKeyStore.getCAKeyStore ().getCertificate ("mykey").getEncoded ());
-            certs.add (DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey").getEncoded ());
-          }
-        catch (GeneralSecurityException gse)
-          {
-            throw new SKSException (gse);
-          }
-        catch (IOException iox)
-          {
-            throw new SKSException (iox);
-          }
-        certificate_path.value = certs;
-        return 800;
 ]]></Code></Method>
 
    <Method Name="setCertificatePath" Throws="SKSException">
@@ -479,15 +450,6 @@
           {
             throw new SKSException (e);
           }
-]]></Code></Method>
-
-   <Method Name="restorePrivateKey" Throws="SKSException">
-     <Parameter Name="key_handle"  Type="int"    XMLName="KeyHandle"/>
-     <Parameter Name="private_key" Type="binary" XMLName="PrivateKey"/>
-     <Parameter Name="mac"         Type="binary" XMLName="MAC"/>
-     <Code><![CDATA[
-        log ("restorePrivateKey (KeyHandle=" + key_handle + ")");
-        sks.restorePrivateKey (key_handle, private_key, mac);
 ]]></Code></Method>
 
    <Method Name="setSymmetricKey" Throws="SKSException">
@@ -514,6 +476,15 @@
                           qualifier,
                           extension_data,
                           mac);
+]]></Code></Method>
+
+   <Method Name="restorePrivateKey" Throws="SKSException">
+     <Parameter Name="key_handle"  Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="private_key" Type="binary" XMLName="PrivateKey"/>
+     <Parameter Name="mac"         Type="binary" XMLName="MAC"/>
+     <Code><![CDATA[
+        log ("restorePrivateKey (KeyHandle=" + key_handle + ")");
+        sks.restorePrivateKey (key_handle, private_key, mac);
 ]]></Code></Method>
 
    <Method Name="pp_deleteKey" Throws="SKSException">
@@ -556,6 +527,21 @@
         sks.pp_cloneKeyProtection (key_handle, target_key_handle, authorization, mac);
 ]]></Code></Method>
 
+   <Method Name="enumerateKeys" Throws="SKSException">
+     <Returns XMLName="KeyHandle" Type="int"/>
+     <Parameter Name="key_handle" XMLName="KeyHandle" Type="int"/>
+     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int" Mode="out"/>
+     <Code><![CDATA[
+        EnumeratedKey ek = sks.enumerateKeys (key_handle);
+        if (ek == null)
+          {
+            ek = new EnumeratedKey ();  // Back to square #1
+          }
+        provisioning_handle.value = ek.getProvisioningHandle ();
+        log ("enumerateKeys (KeyHandle=" + key_handle + ") : KeyHandle=" + ek.getKeyHandle ());
+        return ek.getKeyHandle ();
+]]></Code></Method>
+
    <Method Name="getKeyAttributes" Throws="SKSException">
      <Parameter Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="is_symmetric_key"    Type="bool"   XMLName="IsSymmetricKey"    Mode="out"/>
@@ -594,41 +580,79 @@
           }
  ]]></Code></Method>
 
-   <Method Name="closeProvisioningSession" Throws="SKSException">
-     <Returns Type="binary" XMLName="Attestation"/>
-     <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
-     <Parameter Name="nonce"               Type="binary" XMLName="Nonce"/>
-     <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
+   <Method Name="getKeyProtectionInfo" Throws="SKSException">
+     <Parameter Name="key_handle"           Type="int"   XMLName="KeyHandle"/>
+     <Parameter Name="protection_status"    Type="byte"  XMLName="ProtectionStatus"    Mode="out"/>
+     <Parameter Name="puk_format"           Type="byte"  XMLName="PUKFormat"           Mode="out"/>
+     <Parameter Name="puk_retry_limit"      Type="short" XMLName="PUKRetryLimit"       Mode="out"/>
+     <Parameter Name="puk_error_count"      Type="short" XMLName="PUKErrorCount"       Mode="out"/>
+     <Parameter Name="user_defined"         Type="bool"  XMLName="UserDefined"         Mode="out"/>
+     <Parameter Name="user_modifiable"      Type="bool"  XMLName="UserModifiable"      Mode="out"/>
+     <Parameter Name="format"               Type="byte"  XMLName="Format"              Mode="out"/>
+     <Parameter Name="retry_limit"          Type="short" XMLName="RetryLimit"          Mode="out"/>
+     <Parameter Name="grouping"             Type="byte"  XMLName="Grouping"            Mode="out"/>
+     <Parameter Name="pattern_restrictions" Type="byte"  XMLName="PatternRestrictions" Mode="out"/>
+     <Parameter Name="min_length"           Type="short" XMLName="MinLength"           Mode="out"/>
+     <Parameter Name="max_length"           Type="short" XMLName="MaxLength"           Mode="out"/>
+     <Parameter Name="input_method"         Type="byte"  XMLName="InputMethod"         Mode="out"/>
+     <Parameter Name="pin_error_count"      Type="short" XMLName="PINErrorCount"       Mode="out"/>
+     <Parameter Name="enable_pin_caching"   Type="bool"  XMLName="EnablePINCaching"    Mode="out"/>
+     <Parameter Name="biometric_protection" Type="byte"  XMLName="BiometricProtection" Mode="out"/>
+     <Parameter Name="export_protection"    Type="byte"  XMLName="ExportProtection"    Mode="out"/>
+     <Parameter Name="delete_protection"    Type="byte"  XMLName="DeleteProtection"    Mode="out"/>
+     <Parameter Name="private_key_backup"   Type="bool"  XMLName="PrivateKeyBackup"    Mode="out"/>
      <Code><![CDATA[
-        log ("closeProvisioningSession (ProvisioningHandle=" + provisioning_handle + ")");
-        return sks.closeProvisioningSession (provisioning_handle, nonce, mac);
+        log ("getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
+        KeyProtectionInfo kpi      = sks.getKeyProtectionInfo (key_handle);
+        protection_status.value    = kpi.getSKSProtectionStatus ();
+        puk_format.value           = kpi.getPUKFormat ().getSKSValue ();
+        puk_retry_limit.value      = kpi.getPUKRetryLimit ();
+        puk_error_count.value      = kpi.getPUKErrorCount ();
+        user_defined.value         = kpi.getPINUserDefinedFlag ();
+        user_modifiable.value      = kpi.getPINUserModifiableFlag ();
+        format.value               = kpi.getPINFormat ().getSKSValue ();
+        retry_limit.value          = kpi.getPINRetryLimit ();
+        grouping.value             = kpi.getPINGrouping ().getSKSValue ();
+        pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPINPatternRestrictions ());
+        min_length.value           = kpi.getPINMinLength ();
+        max_length.value           = kpi.getPINMaxLength ();
+        input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
+        pin_error_count.value      = kpi.getPINErrorCount ();
+        enable_pin_caching.value   = kpi.getEnablePINCachingFlag ();
+        biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
+        export_protection.value    = kpi.getExportProtection ().getSKSValue ();
+        delete_protection.value    = kpi.getDeleteProtection ().getSKSValue ();
+        private_key_backup.value   = kpi.getPrivateKeyBackupFlag ();
+]]></Code></Method>
+
+   <Method Name="getExtension" Throws="SKSException">
+     <Parameter Name="key_handle"     Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="type"           Type="string" XMLName="Type"/>
+     <Parameter Name="sub_type"       Type="byte"   XMLName="SubType"       Mode="out"/>
+     <Parameter Name="qualifier"      Type="binary" XMLName="Qualifier"     Mode="out"/>
+     <Parameter Name="extension_data" Type="binary" XMLName="ExtensionData" Mode="out"/>
+     <Code><![CDATA[
+        log ("getExtension (KeyHandle=" + key_handle + ", Type=" + type + ")");
+        Extension ext = sks.getExtension (key_handle, type);
+        sub_type.value       = ext.getSubType ();
+        qualifier.value      = ext.getQualifier ();
+        extension_data.value = ext.getExtensionData ();
+]]></Code></Method>
+
+   <Method Name="setProperty" Throws="SKSException">
+     <Parameter Name="key_handle" Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="type"       Type="string" XMLName="Type"/>
+     <Parameter Name="name"       Type="binary" XMLName="Name" />
+     <Parameter Name="value"      Type="binary" XMLName="Value"/>
+     <Code><![CDATA[
+        log ("setProperty (KeyHandle=" + key_handle + ", Type=" + type + ")");
+        sks.setProperty (key_handle, type, name, value);
 ]]></Code></Method>
 
    <Method Name="getVersion">
      <Returns Type="string"/>
      <Code><![CDATA[
         return "0.00001";
-]]></Code></Method>
-
-   <Method Name="getCertPath" Throws="SKSException">
-     <Returns Type="binary" XMLName="X509Certificate" DotNetRule="Out.X509" List="true" Null="true"/>
-     <Parameter Type="bool" Name="want"/>
-     <Code><![CDATA[
-        List<byte[]> certs = new ArrayList<byte[]> ();
-        try
-          {
-            certs.add (DemoKeyStore.getCAKeyStore ().getCertificate ("mykey").getEncoded ());
-            certs.add (DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey").getEncoded ());
-          }
-        catch (GeneralSecurityException gse)
-          {
-            throw new SKSException (gse);
-          }
-        catch (IOException iox)
-          {
-            throw new SKSException (iox);
-          }
-        return want ? certs : null;
 ]]></Code></Method>
 
 </WebService>

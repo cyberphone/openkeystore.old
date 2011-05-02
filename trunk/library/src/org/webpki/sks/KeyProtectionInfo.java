@@ -62,6 +62,11 @@ public class KeyProtectionInfo
     
     private DeleteProtection delete_protection;
     
+    public byte getSKSProtectionStatus ()
+      {
+        return protection_status;
+      }
+
     public boolean isPUKProtected ()
       {
         return (protection_status & PROTECTION_STATUS_PUK_PROTECTED) != 0;
@@ -147,7 +152,7 @@ public class KeyProtectionInfo
         return pin_retry_limit;
       }
     
-    public Set<PatternRestriction> getPINPatterRestrictions ()
+    public Set<PatternRestriction> getPINPatternRestrictions ()
       {
         return pin_pattern_restrictions;
       }
@@ -172,7 +177,7 @@ public class KeyProtectionInfo
         return delete_protection;
       }
     
-    public boolean getPINCachingFlag ()
+    public boolean getEnablePINCachingFlag ()
       {
         return enable_pin_caching;
       }
