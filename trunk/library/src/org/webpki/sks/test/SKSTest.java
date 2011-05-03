@@ -80,6 +80,8 @@ public class SKSTest
     
     static boolean reference_implementation;
     
+    static boolean standalone_testing;
+    
     Device device;
     
     int sessionCount () throws Exception
@@ -91,6 +93,14 @@ public class SKSTest
             i++;
           }
         return i;
+      }
+    
+    void sessionTest (int sess_nr) throws Exception
+      {
+        if (sess_nr != sessionCount () && standalone_testing)
+          {
+            fail ("Session count failed, are you actually running a stand-alone test?");
+          }
       }
     
     void edgeDeleteCase (boolean post) throws Exception
@@ -260,7 +270,7 @@ public class SKSTest
           {
             fail ("Good PIN should work");
           }
-        assertTrue ("Session count", ++q == sessionCount ());
+        sessionTest (++q);
       }
 
     
@@ -554,6 +564,7 @@ public class SKSTest
     public static void openFile () throws Exception
       {
         String dir = System.getProperty ("test.dir");
+        standalone_testing = new Boolean (System.getProperty ("sks.standalone"));
         if (dir.length () > 0)
           {
             fos = new FileOutputStream (dir + "/" + SKSTest.class.getCanonicalName () + ".txt");
@@ -569,6 +580,7 @@ public class SKSTest
         System.out.println ("Description: " + dev.getVendorDescription ());
         System.out.println ("Vendor: " + dev.getVendorName ());
         System.out.println ("API Level: " + dev.getAPILevel ());
+        System.out.println ("Testing mode: " + (standalone_testing ? "StandAlone" : "MultiThreaded"));
       }
 
     @AfterClass
@@ -616,7 +628,7 @@ public class SKSTest
       {
         int q = sessionCount ();
         new ProvSess (device).closeSession ();
-        assertTrue ("Session count", q == sessionCount ());
+        sessionTest (q);
       }
 
     @Test
@@ -639,7 +651,7 @@ public class SKSTest
           {
             checkException (e, "Unreferenced object \"ID\" : PIN");
           }
-        assertTrue ("Session count", q == sessionCount ());
+        sessionTest (q);
       }
 
     @Test
@@ -872,7 +884,7 @@ public class SKSTest
         assertTrue (PINGroupCheck (false, Grouping.UNIQUE));
         assertFalse (PINGroupCheck (true, Grouping.SIGNATURE_PLUS_STANDARD));
         assertTrue (PINGroupCheck (false, Grouping.SIGNATURE_PLUS_STANDARD));
-        assertTrue ("Session Count", q == sessionCount ());
+        sessionTest (q);
       }
 
     @Test
@@ -898,7 +910,7 @@ public class SKSTest
         assertFalse ("Key was not deleted", key1.exists ());
         assertTrue ("Ownership error", key2.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
         assertFalse ("Managed sessions MUST be deleted", sess.exists ());
-        assertTrue ("Session count", ++q == sessionCount ());
+        sessionTest (++q);
       }
 
     @Test
@@ -938,7 +950,7 @@ public class SKSTest
               }
             assertTrue ("Key was not deleted", key1.exists () ^ updatable);
             assertTrue ("Managed sessions MUST be deleted", sess.exists () ^ updatable);
-            assertTrue ("Session count",q == sessionCount () - (updatable ? 0 : 1));
+            sessionTest (q + (updatable ? 0 : 1));
           }
       }
 
@@ -960,7 +972,7 @@ public class SKSTest
         deleteKey (key1);
         assertFalse ("Key was not deleted", key1.exists ());
         assertTrue ("Key did not exist", key2.exists ());
-        assertTrue ("Session count", ++q == sessionCount ());
+        sessionTest (++q);
       }
 
     @Test
@@ -976,7 +988,7 @@ public class SKSTest
         assertTrue (sess.exists ());
         deleteKey (key1);
         assertFalse ("Key was not deleted", key1.exists ());
-        assertTrue ("Session count", q == sessionCount ());
+        sessionTest (q);
       }
 
     @Test
@@ -1314,7 +1326,7 @@ public class SKSTest
         sess2.postDeleteKey (key2);
         sks.deleteKey (key1.key_handle, null);
         sess2.closeSession ();
-        assertTrue ("Session count", q == sessionCount ());
+        sessionTest (q);
       }
 
     @Test

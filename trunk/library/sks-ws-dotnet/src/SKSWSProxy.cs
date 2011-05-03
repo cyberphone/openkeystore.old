@@ -147,6 +147,56 @@ namespace org.webpki.sks.ws.client
         setProperty_Response setProperty(setProperty_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        deleteKey_Response deleteKey(deleteKey_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        exportKey_Response exportKey(exportKey_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        unlockKey_Response unlockKey(unlockKey_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        changePIN_Response changePIN(changePIN_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        setPIN_Response setPIN(setPIN_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        signHashedData_Response signHashedData(signHashedData_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        asymmetricKeyDecrypt_Response asymmetricKeyDecrypt(asymmetricKeyDecrypt_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        keyAgreement_Response keyAgreement(keyAgreement_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        performHMAC_Response performHMAC(performHMAC_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
+        symmetricKeyEncrypt_Response symmetricKeyEncrypt(symmetricKeyEncrypt_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         getVersion_Response getVersion(getVersion_Request request);
     }
@@ -1475,6 +1525,462 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="deleteKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class deleteKey_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] authorization;
+
+        public deleteKey_Request()
+        {
+        }
+
+        public deleteKey_Request(int key_handle,
+                                 byte[] authorization)
+        {
+            this.key_handle = key_handle;
+            this.authorization = authorization;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="deleteKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class deleteKey_Response
+    {
+        public deleteKey_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="exportKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class exportKey_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] authorization;
+
+        public exportKey_Request()
+        {
+        }
+
+        public exportKey_Request(int key_handle,
+                                 byte[] authorization)
+        {
+            this.key_handle = key_handle;
+            this.authorization = authorization;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="exportKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class exportKey_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Key", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] @return;
+
+        public exportKey_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="unlockKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class unlockKey_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] authorization;
+
+        public unlockKey_Request()
+        {
+        }
+
+        public unlockKey_Request(int key_handle,
+                                 byte[] authorization)
+        {
+            this.key_handle = key_handle;
+            this.authorization = authorization;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="unlockKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class unlockKey_Response
+    {
+        public unlockKey_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="changePIN", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class changePIN_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="NewPIN", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] new_pin;
+
+        public changePIN_Request()
+        {
+        }
+
+        public changePIN_Request(int key_handle,
+                                 byte[] authorization,
+                                 byte[] new_pin)
+        {
+            this.key_handle = key_handle;
+            this.authorization = authorization;
+            this.new_pin = new_pin;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="changePIN.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class changePIN_Response
+    {
+        public changePIN_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="setPIN", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class setPIN_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="NewPIN", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] new_pin;
+
+        public setPIN_Request()
+        {
+        }
+
+        public setPIN_Request(int key_handle,
+                              byte[] authorization,
+                              byte[] new_pin)
+        {
+            this.key_handle = key_handle;
+            this.authorization = authorization;
+            this.new_pin = new_pin;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="setPIN.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class setPIN_Response
+    {
+        public setPIN_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="signHashedData", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class signHashedData_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Algorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string algorithm;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Parameters", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] parameters;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Data", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] data;
+
+        public signHashedData_Request()
+        {
+        }
+
+        public signHashedData_Request(int key_handle,
+                                      string algorithm,
+                                      byte[] parameters,
+                                      byte[] authorization,
+                                      byte[] data)
+        {
+            this.key_handle = key_handle;
+            this.algorithm = algorithm;
+            this.parameters = parameters;
+            this.authorization = authorization;
+            this.data = data;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="signHashedData.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class signHashedData_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Result", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] @return;
+
+        public signHashedData_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="asymmetricKeyDecrypt", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class asymmetricKeyDecrypt_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Algorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string algorithm;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Parameters", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] parameters;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Data", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] data;
+
+        public asymmetricKeyDecrypt_Request()
+        {
+        }
+
+        public asymmetricKeyDecrypt_Request(int key_handle,
+                                            string algorithm,
+                                            byte[] parameters,
+                                            byte[] authorization,
+                                            byte[] data)
+        {
+            this.key_handle = key_handle;
+            this.algorithm = algorithm;
+            this.parameters = parameters;
+            this.authorization = authorization;
+            this.data = data;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="asymmetricKeyDecrypt.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class asymmetricKeyDecrypt_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Result", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] @return;
+
+        public asymmetricKeyDecrypt_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="keyAgreement", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class keyAgreement_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Algorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string algorithm;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Parameters", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] parameters;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PublicKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] public_key;
+
+        public keyAgreement_Request()
+        {
+        }
+
+        public keyAgreement_Request(int key_handle,
+                                    string algorithm,
+                                    byte[] parameters,
+                                    byte[] authorization,
+                                    byte[] public_key)
+        {
+            this.key_handle = key_handle;
+            this.algorithm = algorithm;
+            this.parameters = parameters;
+            this.authorization = authorization;
+            this.public_key = public_key;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="keyAgreement.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class keyAgreement_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Key", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] @return;
+
+        public keyAgreement_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="performHMAC", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class performHMAC_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Algorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string algorithm;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Data", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] data;
+
+        public performHMAC_Request()
+        {
+        }
+
+        public performHMAC_Request(int key_handle,
+                                   string algorithm,
+                                   byte[] authorization,
+                                   byte[] data)
+        {
+            this.key_handle = key_handle;
+            this.algorithm = algorithm;
+            this.authorization = authorization;
+            this.data = data;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="performHMAC.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class performHMAC_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Result", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] @return;
+
+        public performHMAC_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="symmetricKeyEncrypt", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class symmetricKeyEncrypt_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public int key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Algorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public string algorithm;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Mode", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public bool mode;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="IV", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] iv;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Data", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] data;
+
+        public symmetricKeyEncrypt_Request()
+        {
+        }
+
+        public symmetricKeyEncrypt_Request(int key_handle,
+                                           string algorithm,
+                                           bool mode,
+                                           byte[] iv,
+                                           byte[] authorization,
+                                           byte[] data)
+        {
+            this.key_handle = key_handle;
+            this.algorithm = algorithm;
+            this.mode = mode;
+            this.iv = iv;
+            this.authorization = authorization;
+            this.data = data;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="symmetricKeyEncrypt.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class symmetricKeyEncrypt_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Result", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public byte[] @return;
+
+        public symmetricKeyEncrypt_Response()
+        {
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ServiceModel.MessageContractAttribute(WrapperName="getVersion", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
     public class getVersion_Request
     {
@@ -1551,7 +2057,7 @@ namespace org.webpki.sks.ws.client
                                   out string update_url,
                                   out string vendor_name,
                                   out string vendor_description,
-                                  out List<byte[]> certificate_path,
+                                  out X509Certificate2[] certificate_path,
                                   out List<string> supported_algorithms,
                                   out bool rsa_exponent_support,
                                   out List<short> rsa_key_sizes,
@@ -1565,7 +2071,7 @@ namespace org.webpki.sks.ws.client
             update_url = _res.update_url;
             vendor_name = _res.vendor_name;
             vendor_description = _res.vendor_description;
-            certificate_path = _res.certificate_path;
+            certificate_path = blist2certs(_res.certificate_path);
             supported_algorithms = _res.supported_algorithms;
             rsa_exponent_support = _res.rsa_exponent_support;
             rsa_key_sizes = _res.rsa_key_sizes;
@@ -1705,7 +2211,7 @@ namespace org.webpki.sks.ws.client
                                   string friendly_name,
                                   bool private_key_backup,
                                   byte[] key_specifier,
-                                  List<string> endorsed_algorithms,
+                                  string[] endorsed_algorithms,
                                   byte[] mac,
                                   out byte[] public_key,
                                   out byte[] attestation,
@@ -1726,7 +2232,7 @@ namespace org.webpki.sks.ws.client
                                                                                                   friendly_name,
                                                                                                   private_key_backup,
                                                                                                   key_specifier,
-                                                                                                  endorsed_algorithms,
+                                                                                                  new List<string>(endorsed_algorithms),
                                                                                                   mac));
             public_key = _res.public_key;
             attestation = _res.attestation;
@@ -1840,17 +2346,17 @@ namespace org.webpki.sks.ws.client
                                      out bool is_symmetric_key,
                                      out sbyte app_usage,
                                      out string friendly_name,
-                                     out List<byte[]> certificate_path,
-                                     out List<string> endorsed_algorithms,
-                                     out List<string> extension_types)
+                                     out X509Certificate2[] certificate_path,
+                                     out string[] endorsed_algorithms,
+                                     out string[] extension_types)
         {
             getKeyAttributes_Response _res = base.Channel.getKeyAttributes(new getKeyAttributes_Request(key_handle));
             is_symmetric_key = _res.is_symmetric_key;
             app_usage = _res.app_usage;
             friendly_name = _res.friendly_name;
-            certificate_path = _res.certificate_path;
-            endorsed_algorithms = _res.endorsed_algorithms;
-            extension_types = _res.extension_types;
+            certificate_path = blist2certs(_res.certificate_path);
+            endorsed_algorithms = _res.endorsed_algorithms.ToArray();
+            extension_types = _res.extension_types.ToArray();
         }
 
         public void getKeyProtectionInfo(int key_handle,
@@ -1918,6 +2424,116 @@ namespace org.webpki.sks.ws.client
                                                              type,
                                                              name,
                                                              value));
+        }
+
+        public void deleteKey(int key_handle,
+                              byte[] authorization)
+        {
+            base.Channel.deleteKey(new deleteKey_Request(key_handle,
+                                                         authorization));
+        }
+
+        public byte[] exportKey(int key_handle,
+                                byte[] authorization)
+        {
+            exportKey_Response _res = base.Channel.exportKey(new exportKey_Request(key_handle,
+                                                                                   authorization));
+            return _res.@return;
+        }
+
+        public void unlockKey(int key_handle,
+                              byte[] authorization)
+        {
+            base.Channel.unlockKey(new unlockKey_Request(key_handle,
+                                                         authorization));
+        }
+
+        public void changePIN(int key_handle,
+                              byte[] authorization,
+                              byte[] new_pin)
+        {
+            base.Channel.changePIN(new changePIN_Request(key_handle,
+                                                         authorization,
+                                                         new_pin));
+        }
+
+        public void setPIN(int key_handle,
+                           byte[] authorization,
+                           byte[] new_pin)
+        {
+            base.Channel.setPIN(new setPIN_Request(key_handle,
+                                                   authorization,
+                                                   new_pin));
+        }
+
+        public byte[] signHashedData(int key_handle,
+                                     string algorithm,
+                                     byte[] parameters,
+                                     byte[] authorization,
+                                     byte[] data)
+        {
+            signHashedData_Response _res = base.Channel.signHashedData(new signHashedData_Request(key_handle,
+                                                                                                  algorithm,
+                                                                                                  parameters,
+                                                                                                  authorization,
+                                                                                                  data));
+            return _res.@return;
+        }
+
+        public byte[] asymmetricKeyDecrypt(int key_handle,
+                                           string algorithm,
+                                           byte[] parameters,
+                                           byte[] authorization,
+                                           byte[] data)
+        {
+            asymmetricKeyDecrypt_Response _res = base.Channel.asymmetricKeyDecrypt(new asymmetricKeyDecrypt_Request(key_handle,
+                                                                                                                    algorithm,
+                                                                                                                    parameters,
+                                                                                                                    authorization,
+                                                                                                                    data));
+            return _res.@return;
+        }
+
+        public byte[] keyAgreement(int key_handle,
+                                   string algorithm,
+                                   byte[] parameters,
+                                   byte[] authorization,
+                                   byte[] public_key)
+        {
+            keyAgreement_Response _res = base.Channel.keyAgreement(new keyAgreement_Request(key_handle,
+                                                                                            algorithm,
+                                                                                            parameters,
+                                                                                            authorization,
+                                                                                            public_key));
+            return _res.@return;
+        }
+
+        public byte[] performHMAC(int key_handle,
+                                  string algorithm,
+                                  byte[] authorization,
+                                  byte[] data)
+        {
+            performHMAC_Response _res = base.Channel.performHMAC(new performHMAC_Request(key_handle,
+                                                                                         algorithm,
+                                                                                         authorization,
+                                                                                         data));
+            return _res.@return;
+        }
+
+        public byte[] symmetricKeyEncrypt(int key_handle,
+                                          string algorithm,
+                                          bool mode,
+                                          byte[] iv,
+                                          byte[] authorization,
+                                          byte[] data)
+        {
+            symmetricKeyEncrypt_Response _res = base.Channel.symmetricKeyEncrypt(new symmetricKeyEncrypt_Request(key_handle,
+                                                                                                                 algorithm,
+                                                                                                                 mode,
+                                                                                                                 iv,
+                                                                                                                 authorization,
+                                                                                                                 data));
+            return _res.@return;
         }
 
         public string getVersion()

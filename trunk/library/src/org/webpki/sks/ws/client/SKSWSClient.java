@@ -17,11 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
 import javax.xml.ws.Holder;
-import javax.xml.ws.RequestWrapper;
-import javax.xml.ws.ResponseWrapper;
 
 import javax.xml.ws.BindingProvider;
 
@@ -115,6 +111,63 @@ public class SKSWSClient implements SecureKeyStore
               }
           }
         return proxy;
+      }
+
+    @Override
+    public DeviceInfo getDeviceInfo () throws SKSException
+      {
+        try
+          {
+            Holder<Short> api_level = new Holder<Short> ();
+            Holder<String> update_url = new Holder<String> ();
+            Holder<String> vendor_name = new Holder<String> ();
+            Holder<String> vendor_description = new Holder<String> ();
+            Holder<List<byte[]>> certificate_path = new Holder<List<byte[]>> ();
+            Holder<List<String>> supported_algorithms = new Holder<List<String>> ();
+            Holder<Boolean> rsa_exponent_support = new Holder<Boolean> ();
+            Holder<List<Short>> rsa_key_sizes = new Holder<List<Short>> ();
+            Holder<Integer> crypto_data_size = new Holder<Integer> ();
+            Holder<Integer> extension_data_size = new Holder<Integer> ();
+            Holder<Boolean> device_pin_support = new Holder<Boolean> ();
+            Holder<Boolean> biometric_support = new Holder<Boolean> ();
+            getSKSWS ().getDeviceInfo (api_level,
+                                       update_url,
+                                       vendor_name,
+                                       vendor_description,
+                                       certificate_path,
+                                       supported_algorithms,
+                                       rsa_exponent_support,
+                                       rsa_key_sizes,
+                                       crypto_data_size,
+                                       extension_data_size,
+                                       device_pin_support,
+                                       biometric_support);
+            short[] lsizes = new short[rsa_key_sizes.value.size ()];
+            for (int i = 0; i < rsa_key_sizes.value.size () ; i++)
+              {
+                lsizes[i] = rsa_key_sizes.value.get (i);
+              }
+            return new DeviceInfo (api_level.value,
+                                   update_url.value,
+                                   vendor_name.value,
+                                   vendor_description.value,
+                                   getCertArrayFromBlobs (certificate_path.value),
+                                   supported_algorithms.value.toArray (new String[0]),
+                                   rsa_exponent_support.value,
+                                   lsizes,
+                                   crypto_data_size.value,
+                                   extension_data_size.value,
+                                   device_pin_support.value,
+                                   biometric_support.value);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+        catch (IOException e)
+          {
+            throw new SKSException (e);
+          }
       }
 
     @Override
@@ -213,11 +266,84 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
+    public void abortProvisioningSession (int provisioning_handle) throws SKSException
+      {
+        try
+          {
+            getSKSWS ().abortProvisioningSession (provisioning_handle);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
     public byte[] signProvisioningSessionData (int provisioning_handle, byte[] data) throws SKSException
       {
         try
           {
             return getSKSWS ().signProvisioningSessionData (provisioning_handle, data);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
+    public int createPUKPolicy (int provisioning_handle,
+                                String id,
+                                byte[] puk_value, 
+                                byte format, 
+                                short retry_limit, 
+                                byte[] mac) throws SKSException
+      {
+        try
+          {
+            return getSKSWS().createPUKPolicy (provisioning_handle,
+                                               id,
+                                               puk_value,
+                                               format,
+                                               retry_limit,
+                                               mac);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
+    public int createPINPolicy (int provisioning_handle, 
+                                String id,
+                                int puk_policy_handle,
+                                boolean user_defined,
+                                boolean user_modifiable,
+                                byte format,
+                                short retry_limit,
+                                byte grouping,
+                                byte pattern_restrictions,
+                                short min_length,
+                                short max_length,
+                                byte input_method,
+                                byte[] mac) throws SKSException
+      {
+        try
+          {
+            return getSKSWS().createPINPolicy (provisioning_handle,
+                                               id,
+                                               puk_policy_handle,
+                                               user_defined,
+                                               user_modifiable,
+                                               format,
+                                               retry_limit,
+                                               grouping,
+                                               pattern_restrictions,
+                                               min_length,
+                                               max_length,
+                                               input_method,
+                                               mac);
           }
         catch (SKSException_Exception e)
           {
@@ -303,19 +429,6 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
-    public void abortProvisioningSession (int provisioning_handle) throws SKSException
-      {
-        try
-          {
-            getSKSWS ().abortProvisioningSession (provisioning_handle);
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
-          }
-      }
-
-    @Override
     public void setCertificatePath (int key_handle, X509Certificate[] certificate_path, byte[] mac) throws SKSException
       {
         try
@@ -330,6 +443,19 @@ public class SKSWSClient implements SecureKeyStore
         catch (GeneralSecurityException e)
           {
             throw new SKSException (e);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
+    public void setSymmetricKey (int key_handle, byte[] symmetric_key, byte[] mac) throws SKSException
+      {
+        try
+          {
+            getSKSWS ().setSymmetricKey (key_handle, symmetric_key, mac);
           }
         catch (SKSException_Exception e)
           {
@@ -361,84 +487,11 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
-    public void setSymmetricKey (int key_handle, byte[] symmetric_key, byte[] mac) throws SKSException
-      {
-        try
-          {
-            getSKSWS ().setSymmetricKey (key_handle, symmetric_key, mac);
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
-          }
-      }
-
-    @Override
     public void restorePrivateKey (int key_handle, byte[] private_key, byte[] mac) throws SKSException
       {
         try
           {
             getSKSWS ().restorePrivateKey (key_handle, private_key, mac);
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
-          }
-      }
-
-    @Override
-    public int createPINPolicy (int provisioning_handle, 
-                                String id,
-                                int puk_policy_handle,
-                                boolean user_defined,
-                                boolean user_modifiable,
-                                byte format,
-                                short retry_limit,
-                                byte grouping,
-                                byte pattern_restrictions,
-                                short min_length,
-                                short max_length,
-                                byte input_method,
-                                byte[] mac) throws SKSException
-      {
-        try
-          {
-            return getSKSWS().createPINPolicy (provisioning_handle,
-                                               id,
-                                               puk_policy_handle,
-                                               user_defined,
-                                               user_modifiable,
-                                               format,
-                                               retry_limit,
-                                               grouping,
-                                               pattern_restrictions,
-                                               min_length,
-                                               max_length,
-                                               input_method,
-                                               mac);
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
-          }
-      }
-
-    @Override
-    public int createPUKPolicy (int provisioning_handle,
-                                String id,
-                                byte[] puk_value, 
-                                byte format, 
-                                short retry_limit, 
-                                byte[] mac) throws SKSException
-      {
-        try
-          {
-            return getSKSWS().createPUKPolicy (provisioning_handle,
-                                               id,
-                                               puk_value,
-                                               format,
-                                               retry_limit,
-                                               mac);
           }
         catch (SKSException_Exception e)
           {
@@ -511,6 +564,21 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
+    public EnumeratedKey enumerateKeys (int key_handle) throws SKSException
+      {
+        try
+          {
+            Holder<Integer> provisioning_handle = new Holder<Integer> ();
+            key_handle = getSKSWS ().enumerateKeys (key_handle, provisioning_handle);
+            return key_handle == EnumeratedKey.INIT_ENUMERATION ? null : new EnumeratedKey (key_handle, provisioning_handle.value);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
     public KeyAttributes getKeyAttributes (int key_handle) throws SKSException
       {
         try
@@ -542,143 +610,6 @@ public class SKSWSClient implements SecureKeyStore
         catch (IOException e)
           {
             throw new SKSException (e);
-          }
-      }
-
-    @Override
-    public EnumeratedKey enumerateKeys (int key_handle) throws SKSException
-      {
-        try
-          {
-            Holder<Integer> provisioning_handle = new Holder<Integer> ();
-            key_handle = getSKSWS ().enumerateKeys (key_handle, provisioning_handle);
-            return key_handle == EnumeratedKey.INIT_ENUMERATION ? null : new EnumeratedKey (key_handle, provisioning_handle.value);
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
-          }
-      }
-
-    @Override
-    public byte[] signHashedData (int key_handle, String algorithm, byte[] parameters, byte[] authorization, byte[] data) throws SKSException
-      {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-    @Override
-    public byte[] performHMAC (int key_handle, String algorithm, byte[] authorization, byte[] data) throws SKSException
-      {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-    @Override
-    public byte[] symmetricKeyEncrypt (int key_handle, String algorithm, boolean mode, byte[] iv, byte[] authorization, byte[] data) throws SKSException
-      {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-    @Override
-    public byte[] asymmetricKeyDecrypt (int key_handle, String algorithm, byte[] parameters, byte[] authorization, byte[] data) throws SKSException
-      {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-    @Override
-    public byte[] keyAgreement (int key_handle, String algorithm, byte[] parameters, byte[] authorization, PublicKey public_key) throws SKSException
-      {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-    @Override
-    public void deleteKey (int key_handle, byte[] authorization) throws SKSException
-      {
-        // TODO Auto-generated method stub
-        
-      }
-
-    @Override
-    public DeviceInfo getDeviceInfo () throws SKSException
-      {
-        try
-          {
-            Holder<Short> api_level = new Holder<Short> ();
-            Holder<String> update_url = new Holder<String> ();
-            Holder<String> vendor_name = new Holder<String> ();
-            Holder<String> vendor_description = new Holder<String> ();
-            Holder<List<byte[]>> certificate_path = new Holder<List<byte[]>> ();
-            Holder<List<String>> supported_algorithms = new Holder<List<String>> ();
-            Holder<Boolean> rsa_exponent_support = new Holder<Boolean> ();
-            Holder<List<Short>> rsa_key_sizes = new Holder<List<Short>> ();
-            Holder<Integer> crypto_data_size = new Holder<Integer> ();
-            Holder<Integer> extension_data_size = new Holder<Integer> ();
-            Holder<Boolean> device_pin_support = new Holder<Boolean> ();
-            Holder<Boolean> biometric_support = new Holder<Boolean> ();
-            getSKSWS ().getDeviceInfo (api_level,
-                                       update_url,
-                                       vendor_name,
-                                       vendor_description,
-                                       certificate_path,
-                                       supported_algorithms,
-                                       rsa_exponent_support,
-                                       rsa_key_sizes,
-                                       crypto_data_size,
-                                       extension_data_size,
-                                       device_pin_support,
-                                       biometric_support);
-            short[] lsizes = new short[rsa_key_sizes.value.size ()];
-            for (int i = 0; i < rsa_key_sizes.value.size () ; i++)
-              {
-                lsizes[i] = rsa_key_sizes.value.get (i);
-              }
-            return new DeviceInfo (api_level.value,
-                                   update_url.value,
-                                   vendor_name.value,
-                                   vendor_description.value,
-                                   getCertArrayFromBlobs (certificate_path.value),
-                                   supported_algorithms.value.toArray (new String[0]),
-                                   rsa_exponent_support.value,
-                                   lsizes,
-                                   crypto_data_size.value,
-                                   extension_data_size.value,
-                                   device_pin_support.value,
-                                   biometric_support.value);
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
-          }
-        catch (IOException e)
-          {
-            throw new SKSException (e);
-          }
-      }
-
-    @Override
-    public Extension getExtension (int key_handle, String type) throws SKSException
-      {
-        try
-          {
-            Holder<Byte> sub_type = new Holder<Byte> ();
-            Holder<byte[]> qualifier = new Holder<byte[]> ();
-            Holder<byte[]> extension_data = new Holder<byte[]> ();
-            getSKSWS ().getExtension (key_handle,
-                                      type,
-                                      sub_type,
-                                      qualifier,
-                                      extension_data);
-            return new Extension (sub_type.value,
-                                  qualifier.value,
-                                  extension_data.value);
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
           }
       }
 
@@ -753,6 +684,29 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
+    public Extension getExtension (int key_handle, String type) throws SKSException
+      {
+        try
+          {
+            Holder<Byte> sub_type = new Holder<Byte> ();
+            Holder<byte[]> qualifier = new Holder<byte[]> ();
+            Holder<byte[]> extension_data = new Holder<byte[]> ();
+            getSKSWS ().getExtension (key_handle,
+                                      type,
+                                      sub_type,
+                                      qualifier,
+                                      extension_data);
+            return new Extension (sub_type.value,
+                                  qualifier.value,
+                                  extension_data.value);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
     public void setProperty (int key_handle, String type, byte[] name, byte[] value) throws SKSException
       {
         try
@@ -766,32 +720,134 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
-    public void unlockKey (int key_handle, byte[] authorization) throws SKSException
+    public void deleteKey (int key_handle, byte[] authorization) throws SKSException
       {
-        // TODO Auto-generated method stub
-        
-      }
-
-    @Override
-    public void changePIN (int key_handle, byte[] authorization, byte[] new_pin) throws SKSException
-      {
-        // TODO Auto-generated method stub
-        
-      }
-
-    @Override
-    public void setPIN (int key_handle, byte[] authorization, byte[] new_pin) throws SKSException
-      {
-        // TODO Auto-generated method stub
-        
+        try
+          {
+            getSKSWS ().deleteKey (key_handle, authorization);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }
 
     @Override
     public byte[] exportKey (int key_handle, byte[] authorization) throws SKSException
       {
-        // TODO Auto-generated method stub
-        return null;
+        try
+          {
+            return getSKSWS ().exportKey (key_handle, authorization);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
       }    
+
+    @Override
+    public void unlockKey (int key_handle, byte[] authorization) throws SKSException
+      {
+        try
+          {
+            getSKSWS ().unlockKey (key_handle, authorization);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
+    public void changePIN (int key_handle, byte[] authorization, byte[] new_pin) throws SKSException
+      {
+        try
+          {
+            getSKSWS ().changePIN (key_handle, authorization, new_pin);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
+    public void setPIN (int key_handle, byte[] authorization, byte[] new_pin) throws SKSException
+      {
+        try
+          {
+            getSKSWS ().setPIN (key_handle, authorization, new_pin);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
+    public byte[] signHashedData (int key_handle, String algorithm, byte[] parameters, byte[] authorization, byte[] data) throws SKSException
+      {
+        try
+          {
+            return getSKSWS ().signHashedData (key_handle, algorithm, parameters, authorization, data);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
+    public byte[] asymmetricKeyDecrypt (int key_handle, String algorithm, byte[] parameters, byte[] authorization, byte[] data) throws SKSException
+      {
+        try
+          {
+            return getSKSWS ().asymmetricKeyDecrypt (key_handle, algorithm, parameters, authorization, data);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
+    public byte[] keyAgreement (int key_handle, String algorithm, byte[] parameters, byte[] authorization, PublicKey public_key) throws SKSException
+      {
+        try
+          {
+            return getSKSWS ().keyAgreement (key_handle, algorithm, parameters, authorization, public_key.getEncoded ());
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
+    public byte[] performHMAC (int key_handle, String algorithm, byte[] authorization, byte[] data) throws SKSException
+      {
+        try
+          {
+            return getSKSWS ().performHMAC (key_handle, algorithm, authorization, data);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
+    public byte[] symmetricKeyEncrypt (int key_handle, String algorithm, boolean mode, byte[] iv, byte[] authorization, byte[] data) throws SKSException
+      {
+        try
+          {
+            return getSKSWS ().symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
 
     /**
      * Test method. Use empty argument list for help.

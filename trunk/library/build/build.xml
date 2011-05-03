@@ -66,7 +66,8 @@
   <path id="junit.classpath">
     <fileset dir="${dist_dir}">
 	   <include name="${webpki-libext}"/>
-	    </fileset>
+	   <include name="${webpki-sksws}"/>
+    </fileset>
 	 <fileset dir="${ext.jar}">
         <include name="*.jar"/>
 	 </fileset>
@@ -243,6 +244,7 @@
   </target>
 
   <target name="_test">
+  	<property name="sks.standalone" value="true"/>
     <mkdir dir="${test_dir}"/>
   	<condition property="test.dir" value="">
       <not>
@@ -261,6 +263,7 @@
     	<sysproperty key="sks.implementation" value="${sks.implementation}"/>
     	<sysproperty key="test.dir" value="${test.dir}"/>
     	<sysproperty key="html.mode" value="${test.out.html}"/>
+    	<sysproperty key="sks.standalone" value="${sks.standalone}"/>
       <formatter type="plain" usefile="false"/>
       <jvmarg value="-Djava.endorsed.dirs=${ws}"/>
       <classpath refid="junit.classpath" />

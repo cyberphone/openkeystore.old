@@ -2912,7 +2912,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         verifier.addByte (export_protection);
         verifier.addByte (delete_protection);
         verifier.addByte (app_usage);
-        verifier.addString (friendly_name);
+        if (friendly_name == null)
+          {
+            verifier.addShort (0);
+          }
+        else
+          {
+            verifier.addString (friendly_name);
+          }
         verifier.addBool (private_key_backup);
         verifier.addArray (key_specifier);
         LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();

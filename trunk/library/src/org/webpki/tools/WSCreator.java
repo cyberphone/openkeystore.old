@@ -518,10 +518,14 @@ public class WSCreator extends XMLObjectWrapper
         DotNetRule (String full_path, String conversion)
           {
             int i = full_path.lastIndexOf ('.');
-            using_declaration = full_path.substring (0, i);
-            simple_type = full_path.substring (i + 1);
             this.conversion = conversion;
-            dotnet_imports.add (using_declaration);
+            simple_type = full_path;
+            if (i >  0)
+              {
+                using_declaration = full_path.substring (0, i);
+                simple_type = full_path.substring (i + 1);
+                dotnet_imports.add (using_declaration);
+              }
           }
         
         String using_declaration;
@@ -883,7 +887,7 @@ public class WSCreator extends XMLObjectWrapper
               }
             else
               {
-                if (meth.return_prop.nullable)
+                if (meth.return_prop.nullable && !meth.return_prop.listtype) 
                   {
                     null_types.add ("return&nbsp;value");
                   }
@@ -891,22 +895,28 @@ public class WSCreator extends XMLObjectWrapper
               }
             write (dotnetdoc_file, "&nbsp;" + meth.name + "&nbsp;(</code></td><td><code>");
             boolean next = false;
+            String null_comment = "";
             for (Property prop : meth.parameters)
               {
                 if (next)
                   {
-                    write (dotnetdoc_file, ",</code></td></tr><tr><td>&nbsp;</td><td><code>");
+                    write (dotnetdoc_file, ",</code></td><td><code>" + null_comment + "</code></td></tr><tr><td>&nbsp;</td><td><code>");
+                    null_comment = "";
                   }
                 next = true;
+                if (prop.nullable && !prop.listtype)
+                  {
+                    null_comment = "&nbsp;<font color=\"grey\">// May be null</font>";
+                  }
                 write (dotnetdoc_file, dotnetReserved (prop.nPrefix ()) + dotnetType (prop) + "&nbsp;" + prop.nName ());
               }
-            write (dotnetdoc_file, ")</code></td></tr>");
+            write (dotnetdoc_file, ")</code></td><td><code>" + null_comment + "</code></td></tr>");
             if (meth.execptions.length > 0 || null_types.size () > 0)
               {
-                write (dotnetdoc_file, "<tr><td colspan=\"2\">&nbsp;</td></tr>");
+                write (dotnetdoc_file, "<tr><td colspan=\"3\">&nbsp;</td></tr>");
                 if (null_types.size () > 0)
                   {
-                    write (dotnetdoc_file, "<tr><td colspan=\"2\">May&nbsp;be&nbsp;null:&nbsp;<code>");
+                    write (dotnetdoc_file, "<tr><td colspan=\"3\">May&nbsp;be&nbsp;null:&nbsp;<code>");
                     next = false;
                     for (String name : null_types)
                       {
@@ -951,7 +961,7 @@ public class WSCreator extends XMLObjectWrapper
             last = ret_type.substring (i);
             ret_type = ret_type.substring (0, i);
           }
-        return (ret_type.equals (ret_type.toLowerCase ()) ? dotnetReserved (ret_type) : "<font color=\"lightblue\">" + ret_type + "</font>") + last;
+        return (ret_type.equals (ret_type.toLowerCase ()) ? dotnetReserved (ret_type) : "<font color=\"green\">" + ret_type + "</font>") + last;
       }
 
     String dotnetReserved (String string)

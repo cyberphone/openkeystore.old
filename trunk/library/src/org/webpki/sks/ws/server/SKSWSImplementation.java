@@ -371,7 +371,7 @@ public class SKSWSImplementation
                                 byte[] mac)
     throws SKSException
       {
-        log ("createPUKPolicy ()");
+        log ("createPUKPolicy (ID=" + id + ")");
         return sks.createPUKPolicy (provisioning_handle,
                                     id,
                                     puk_value,
@@ -412,7 +412,7 @@ public class SKSWSImplementation
                                 byte[] mac)
     throws SKSException
       {
-        log ("createPINPolicy ()");
+        log ("createPINPolicy (ID=" + id + ")");
         return sks.createPINPolicy (provisioning_handle,
                                     id,
                                     puk_policy_handle,
@@ -494,7 +494,7 @@ public class SKSWSImplementation
         public_key.value = kd.getPublicKey ().getEncoded ();
         attestation.value = kd.getAttestation ();
         private_key.value = kd.getPrivateKey ();
-        log ("createKeyEntry () : KeyHandle=" + kd.getKeyHandle ());
+        log ("createKeyEntry (ID=" + id + ") : KeyHandle=" + kd.getKeyHandle ());
         return kd.getKeyHandle ();
       }
 
@@ -675,7 +675,10 @@ public class SKSWSImplementation
           {
             ek = new EnumeratedKey ();  // Back to square #1
           }
-        provisioning_handle.value = ek.getProvisioningHandle ();
+        else
+          {
+            provisioning_handle.value = ek.getProvisioningHandle ();
+          }
         log ("enumerateKeys (KeyHandle=" + key_handle + ") : KeyHandle=" + ek.getKeyHandle ());
         return ek.getKeyHandle ();
       }
@@ -776,19 +779,25 @@ public class SKSWSImplementation
         log ("getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
         KeyProtectionInfo kpi      = sks.getKeyProtectionInfo (key_handle);
         protection_status.value    = kpi.getSKSProtectionStatus ();
-        puk_format.value           = kpi.getPUKFormat ().getSKSValue ();
-        puk_retry_limit.value      = kpi.getPUKRetryLimit ();
-        puk_error_count.value      = kpi.getPUKErrorCount ();
-        user_defined.value         = kpi.getPINUserDefinedFlag ();
-        user_modifiable.value      = kpi.getPINUserModifiableFlag ();
-        format.value               = kpi.getPINFormat ().getSKSValue ();
-        retry_limit.value          = kpi.getPINRetryLimit ();
-        grouping.value             = kpi.getPINGrouping ().getSKSValue ();
-        pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPINPatternRestrictions ());
-        min_length.value           = kpi.getPINMinLength ();
-        max_length.value           = kpi.getPINMaxLength ();
-        input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
-        pin_error_count.value      = kpi.getPINErrorCount ();
+        if (kpi.hasLocalPUKProtection ())
+          {
+            puk_format.value           = kpi.getPUKFormat ().getSKSValue ();
+            puk_retry_limit.value      = kpi.getPUKRetryLimit ();
+            puk_error_count.value      = kpi.getPUKErrorCount ();
+          }
+        if (kpi.hasLocalPINProtection ())
+          {
+            user_defined.value         = kpi.getPINUserDefinedFlag ();
+            user_modifiable.value      = kpi.getPINUserModifiableFlag ();
+            format.value               = kpi.getPINFormat ().getSKSValue ();
+            retry_limit.value          = kpi.getPINRetryLimit ();
+            grouping.value             = kpi.getPINGrouping ().getSKSValue ();
+            pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPINPatternRestrictions ());
+            min_length.value           = kpi.getPINMinLength ();
+            max_length.value           = kpi.getPINMaxLength ();
+            input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
+            pin_error_count.value      = kpi.getPINErrorCount ();
+          }
         enable_pin_caching.value   = kpi.getEnablePINCachingFlag ();
         biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
         export_protection.value    = kpi.getExportProtection ().getSKSValue ();
@@ -833,6 +842,191 @@ public class SKSWSImplementation
       {
         log ("setProperty (KeyHandle=" + key_handle + ", Type=" + type + ")");
         sks.setProperty (key_handle, type, name, value);
+      }
+
+    @WebMethod(operationName="deleteKey")
+    @RequestWrapper(localName="deleteKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="deleteKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void deleteKey (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                           int key_handle,
+                           @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                           byte[] authorization)
+    throws SKSException
+      {
+        log ("deleteKey (KeyHandle=" + key_handle + ")");
+        sks.deleteKey (key_handle, authorization);
+      }
+
+    @WebMethod(operationName="exportKey")
+    @RequestWrapper(localName="exportKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="exportKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Key", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] exportKey (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                             int key_handle,
+                             @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                             byte[] authorization)
+    throws SKSException
+      {
+        log ("exportKey (KeyHandle=" + key_handle + ")");
+        return sks.exportKey (key_handle, authorization);
+      }
+
+    @WebMethod(operationName="unlockKey")
+    @RequestWrapper(localName="unlockKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="unlockKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void unlockKey (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                           int key_handle,
+                           @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                           byte[] authorization)
+    throws SKSException
+      {
+        log ("unlockKey (KeyHandle=" + key_handle + ")");
+        sks.unlockKey (key_handle, authorization);
+      }
+
+    @WebMethod(operationName="changePIN")
+    @RequestWrapper(localName="changePIN", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="changePIN.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void changePIN (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                           int key_handle,
+                           @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                           byte[] authorization,
+                           @WebParam(name="NewPIN", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                           byte[] new_pin)
+    throws SKSException
+      {
+        log ("changePIN (KeyHandle=" + key_handle + ")");
+        sks.changePIN (key_handle, authorization, new_pin);
+      }
+
+    @WebMethod(operationName="setPIN")
+    @RequestWrapper(localName="setPIN", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="setPIN.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void setPIN (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                        int key_handle,
+                        @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                        byte[] authorization,
+                        @WebParam(name="NewPIN", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                        byte[] new_pin)
+    throws SKSException
+      {
+        log ("setPIN (KeyHandle=" + key_handle + ")");
+        sks.setPIN (key_handle, authorization, new_pin);
+      }
+
+    @WebMethod(operationName="signHashedData")
+    @RequestWrapper(localName="signHashedData", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="signHashedData.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] signHashedData (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  int key_handle,
+                                  @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  String algorithm,
+                                  @WebParam(name="Parameters", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  byte[] parameters,
+                                  @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  byte[] authorization,
+                                  @WebParam(name="Data", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  byte[] data)
+    throws SKSException
+      {
+        log ("signHashedData (KeyHandle=" + key_handle + ")");
+        return sks.signHashedData (key_handle,
+                                   algorithm,
+                                   parameters,
+                                   authorization,
+                                   data);
+      }
+
+    @WebMethod(operationName="asymmetricKeyDecrypt")
+    @RequestWrapper(localName="asymmetricKeyDecrypt", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="asymmetricKeyDecrypt.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] asymmetricKeyDecrypt (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        int key_handle,
+                                        @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        String algorithm,
+                                        @WebParam(name="Parameters", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        byte[] parameters,
+                                        @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        byte[] authorization,
+                                        @WebParam(name="Data", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        byte[] data)
+    throws SKSException
+      {
+        log ("asymmetricKeyDecrypt (KeyHandle=" + key_handle + ")");
+        return sks.asymmetricKeyDecrypt (key_handle, 
+                                         algorithm,
+                                         parameters,
+                                         authorization, 
+                                         data);
+      }
+
+    @WebMethod(operationName="keyAgreement")
+    @RequestWrapper(localName="keyAgreement", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="keyAgreement.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Key", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] keyAgreement (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                int key_handle,
+                                @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                String algorithm,
+                                @WebParam(name="Parameters", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte[] parameters,
+                                @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte[] authorization,
+                                @WebParam(name="PublicKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte[] public_key)
+    throws SKSException
+      {
+        log ("keyAgreement (KeyHandle=" + key_handle + ")");
+        return sks.keyAgreement (key_handle, 
+                                 algorithm, 
+                                 parameters, 
+                                 authorization, 
+                                 createPublicKeyFromBlob (public_key));
+      }
+
+    @WebMethod(operationName="performHMAC")
+    @RequestWrapper(localName="performHMAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="performHMAC.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] performHMAC (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               int key_handle,
+                               @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               String algorithm,
+                               @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               byte[] authorization,
+                               @WebParam(name="Data", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               byte[] data)
+    throws SKSException
+      {
+        log ("performHMAC (KeyHandle=" + key_handle + ")");
+        return sks.performHMAC (key_handle, 
+                                algorithm,
+                                authorization,
+                                data);
+      }
+
+    @WebMethod(operationName="symmetricKeyEncrypt")
+    @RequestWrapper(localName="symmetricKeyEncrypt", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="symmetricKeyEncrypt.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] symmetricKeyEncrypt (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       int key_handle,
+                                       @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       String algorithm,
+                                       @WebParam(name="Mode", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       boolean mode,
+                                       @WebParam(name="IV", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       byte[] iv,
+                                       @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       byte[] authorization,
+                                       @WebParam(name="Data", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       byte[] data)
+    throws SKSException
+      {
+        log ("symmetricKeyEncrypt (KeyHandle=" + key_handle + ")");
+        return sks.symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
       }
 
     @WebMethod(operationName="getVersion")

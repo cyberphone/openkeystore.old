@@ -335,7 +335,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
             mac = ah.getBinary (MAC_ATTR);
 
-            friendly_name = ah.getStringConditional (FRIENDLY_NAME_ATTR, "");
+            friendly_name = ah.getStringConditional (FRIENDLY_NAME_ATTR);
 
             app_usage = AppUsage.getKeyUsageFromString (ah.getString (APP_USAGE_ATTR));
 

@@ -176,6 +176,12 @@
      <RewriteRule DotNetRule="In.X509"
                   ActualType="System.Security.Cryptography.X509Certificates.X509Certificate2"
                   Conversion="certs2blist($)"/>
+     <RewriteRule DotNetRule="In.StringArray"
+                  ActualType="string"
+                  Conversion="new List&lt;string&gt;($)"/>
+     <RewriteRule DotNetRule="Out.StringArray"
+                  ActualType="string"
+                  Conversion="$.ToArray()"/>
      </DotNetClient>
 
    <Exception ClassName="org.webpki.sks.SKSException">
@@ -188,7 +194,7 @@
      <Parameter Name="update_url"           Type="string" XMLName="UpdateURL"          Mode="out" Null="true"/>
      <Parameter Name="vendor_name"          Type="string" XMLName="VendorName"         Mode="out"/>
      <Parameter Name="vendor_description"   Type="string" XMLName="VendorDescription"  Mode="out"/>
-     <Parameter Name="certificate_path"     Type="binary" XMLName="X509Certificate"    Mode="out" List="true"/>
+     <Parameter Name="certificate_path"     Type="binary" XMLName="X509Certificate"    Mode="out" List="true" DotNetRule="Out.X509"/>
      <Parameter Name="supported_algorithms" Type="string" XMLName="SupportedAlgorithm" Mode="out" List="true"/>
      <Parameter Name="rsa_exponent_support" Type="bool"   XMLName="RSAExponentSupport" Mode="out"/>
      <Parameter Name="rsa_key_sizes"        Type="short"  XMLName="RSAKeySize"         Mode="out" List="true"/>
@@ -288,11 +294,11 @@
      <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
      <Parameter Name="provisioning_state"  XMLName="ProvisioningState"  Type="bool"/>
      <Parameter Name="key_management_key"  XMLName="KeyManagementKey"   Type="binary" Mode="out" Null="true"/>
-     <Parameter Name="client_time"         XMLName="ClientTime"         Type="int"    Mode="out"/>
-     <Parameter Name="session_life_time"   XMLName="SessionLifeTime"    Type="int"    Mode="out"/>
-     <Parameter Name="server_session_id"   XMLName="ServerSessionID"    Type="string" Mode="out"/>
-     <Parameter Name="client_session_id"   XMLName="ClientSessionID"    Type="string" Mode="out"/>
-     <Parameter Name="issuer_uri"          XMLName="IssuerURI"          Type="string" Mode="out"/>
+     <Parameter Name="client_time"         XMLName="ClientTime"         Type="int"    Mode="out" Null="true"/>
+     <Parameter Name="session_life_time"   XMLName="SessionLifeTime"    Type="int"    Mode="out" Null="true"/>
+     <Parameter Name="server_session_id"   XMLName="ServerSessionID"    Type="string" Mode="out" Null="true"/>
+     <Parameter Name="client_session_id"   XMLName="ClientSessionID"    Type="string" Mode="out" Null="true"/>
+     <Parameter Name="issuer_uri"          XMLName="IssuerURI"          Type="string" Mode="out" Null="true"/>
      <Code><![CDATA[
         EnumeratedProvisioningSession eps = sks.enumerateProvisioningSessions (provisioning_handle, provisioning_state);
         if (eps == null)
@@ -337,7 +343,7 @@
      <Parameter Name="retry_limit"          Type="short"  XMLName="RetryLimit"/>
      <Parameter Name="mac"                  Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log ("createPUKPolicy ()");
+        log ("createPUKPolicy (ID=" + id + ")");
         return sks.createPUKPolicy (provisioning_handle,
                                     id,
                                     puk_value,
@@ -362,7 +368,7 @@
      <Parameter Name="input_method"         Type="byte"   XMLName="InputMethod"/>
      <Parameter Name="mac"                  Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log ("createPINPolicy ()");
+        log ("createPINPolicy (ID=" + id + ")");
         return sks.createPINPolicy (provisioning_handle,
                                     id,
                                     puk_policy_handle,
@@ -392,10 +398,10 @@
      <Parameter Name="export_protection"     Type="byte"   XMLName="ExportProtection"/>
      <Parameter Name="delete_protection"     Type="byte"   XMLName="DeleteProtection"/>
      <Parameter Name="app_usage"             Type="byte"   XMLName="AppUsage"/>
-     <Parameter Name="friendly_name"         Type="string" XMLName="FriendlyName"/>
+     <Parameter Name="friendly_name"         Type="string" XMLName="FriendlyName"       Null="true"/>
      <Parameter Name="private_key_backup"    Type="bool"   XMLName="PrivateKeyBackup"/>
      <Parameter Name="key_specifier"         Type="binary" XMLName="KeySpecifier"/>
-     <Parameter Name="endorsed_algorithms"   Type="string" XMLName="EndorsedAlgorithm"  Null="true" List="true"/>
+     <Parameter Name="endorsed_algorithms"   Type="string" XMLName="EndorsedAlgorithm"  Null="true" List="true" DotNetRule="In.StringArray"/>
      <Parameter Name="mac"                   Type="binary" XMLName="MAC"/>
      <Parameter Name="public_key"            Type="binary" XMLName="PublicKey"          Mode="out"/>
      <Parameter Name="attestation"           Type="binary" XMLName="Attestation"        Mode="out"/>
@@ -421,7 +427,7 @@
         public_key.value = kd.getPublicKey ().getEncoded ();
         attestation.value = kd.getAttestation ();
         private_key.value = kd.getPrivateKey ();
-        log ("createKeyEntry () : KeyHandle=" + kd.getKeyHandle ());
+        log ("createKeyEntry (ID=" + id + ") : KeyHandle=" + kd.getKeyHandle ());
         return kd.getKeyHandle ();
 ]]></Code></Method>
 
@@ -529,15 +535,18 @@
 
    <Method Name="enumerateKeys" Throws="SKSException">
      <Returns XMLName="KeyHandle" Type="int"/>
-     <Parameter Name="key_handle" XMLName="KeyHandle" Type="int"/>
-     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int" Mode="out"/>
+     <Parameter Name="key_handle"          XMLName="KeyHandle" Type="int"/>
+     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int" Mode="out"  Null="true"/>
      <Code><![CDATA[
         EnumeratedKey ek = sks.enumerateKeys (key_handle);
         if (ek == null)
           {
             ek = new EnumeratedKey ();  // Back to square #1
           }
-        provisioning_handle.value = ek.getProvisioningHandle ();
+        else
+          {
+            provisioning_handle.value = ek.getProvisioningHandle ();
+          }
         log ("enumerateKeys (KeyHandle=" + key_handle + ") : KeyHandle=" + ek.getKeyHandle ());
         return ek.getKeyHandle ();
 ]]></Code></Method>
@@ -546,10 +555,10 @@
      <Parameter Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="is_symmetric_key"    Type="bool"   XMLName="IsSymmetricKey"    Mode="out"/>
      <Parameter Name="app_usage"           Type="byte"   XMLName="AppUsage"          Mode="out"/>
-     <Parameter Name="friendly_name"       Type="string" XMLName="FriendlyName"      Mode="out"/>
-     <Parameter Name="certificate_path"    Type="binary" XMLName="X509Certificate"   Mode="out" List="true"/>
-     <Parameter Name="endorsed_algorithms" Type="string" XMLName="EndorsedAlgorithm" Mode="out" List="true" Null="true"/>
-     <Parameter Name="extension_types"     Type="string" XMLName="ExtensionType"     Mode="out" List="true" Null="true"/>
+     <Parameter Name="friendly_name"       Type="string" XMLName="FriendlyName"      Mode="out" Null="true"/>
+     <Parameter Name="certificate_path"    Type="binary" XMLName="X509Certificate"   Mode="out" List="true" DotNetRule="Out.X509"/>
+     <Parameter Name="endorsed_algorithms" Type="string" XMLName="EndorsedAlgorithm" Mode="out" List="true" Null="true" DotNetRule="Out.StringArray"/>
+     <Parameter Name="extension_types"     Type="string" XMLName="ExtensionType"     Mode="out" List="true" Null="true" DotNetRule="Out.StringArray"/>
      <Code><![CDATA[
         log ("getKeyAttributes (KeyHandle=" + key_handle + ")");
         try
@@ -583,20 +592,20 @@
    <Method Name="getKeyProtectionInfo" Throws="SKSException">
      <Parameter Name="key_handle"           Type="int"   XMLName="KeyHandle"/>
      <Parameter Name="protection_status"    Type="byte"  XMLName="ProtectionStatus"    Mode="out"/>
-     <Parameter Name="puk_format"           Type="byte"  XMLName="PUKFormat"           Mode="out"/>
-     <Parameter Name="puk_retry_limit"      Type="short" XMLName="PUKRetryLimit"       Mode="out"/>
-     <Parameter Name="puk_error_count"      Type="short" XMLName="PUKErrorCount"       Mode="out"/>
-     <Parameter Name="user_defined"         Type="bool"  XMLName="UserDefined"         Mode="out"/>
-     <Parameter Name="user_modifiable"      Type="bool"  XMLName="UserModifiable"      Mode="out"/>
-     <Parameter Name="format"               Type="byte"  XMLName="Format"              Mode="out"/>
-     <Parameter Name="retry_limit"          Type="short" XMLName="RetryLimit"          Mode="out"/>
-     <Parameter Name="grouping"             Type="byte"  XMLName="Grouping"            Mode="out"/>
-     <Parameter Name="pattern_restrictions" Type="byte"  XMLName="PatternRestrictions" Mode="out"/>
-     <Parameter Name="min_length"           Type="short" XMLName="MinLength"           Mode="out"/>
-     <Parameter Name="max_length"           Type="short" XMLName="MaxLength"           Mode="out"/>
-     <Parameter Name="input_method"         Type="byte"  XMLName="InputMethod"         Mode="out"/>
-     <Parameter Name="pin_error_count"      Type="short" XMLName="PINErrorCount"       Mode="out"/>
-     <Parameter Name="enable_pin_caching"   Type="bool"  XMLName="EnablePINCaching"    Mode="out"/>
+     <Parameter Name="puk_format"           Type="byte"  XMLName="PUKFormat"           Mode="out" Null="true"/>
+     <Parameter Name="puk_retry_limit"      Type="short" XMLName="PUKRetryLimit"       Mode="out" Null="true"/>
+     <Parameter Name="puk_error_count"      Type="short" XMLName="PUKErrorCount"       Mode="out" Null="true"/>
+     <Parameter Name="user_defined"         Type="bool"  XMLName="UserDefined"         Mode="out" Null="true"/>
+     <Parameter Name="user_modifiable"      Type="bool"  XMLName="UserModifiable"      Mode="out" Null="true"/>
+     <Parameter Name="format"               Type="byte"  XMLName="Format"              Mode="out" Null="true"/>
+     <Parameter Name="retry_limit"          Type="short" XMLName="RetryLimit"          Mode="out" Null="true"/>
+     <Parameter Name="grouping"             Type="byte"  XMLName="Grouping"            Mode="out" Null="true"/>
+     <Parameter Name="pattern_restrictions" Type="byte"  XMLName="PatternRestrictions" Mode="out" Null="true"/>
+     <Parameter Name="min_length"           Type="short" XMLName="MinLength"           Mode="out" Null="true"/>
+     <Parameter Name="max_length"           Type="short" XMLName="MaxLength"           Mode="out" Null="true"/>
+     <Parameter Name="input_method"         Type="byte"  XMLName="InputMethod"         Mode="out" Null="true"/>
+     <Parameter Name="pin_error_count"      Type="short" XMLName="PINErrorCount"       Mode="out" Null="true"/>
+     <Parameter Name="enable_pin_caching"   Type="bool"  XMLName="EnablePINCaching"    Mode="out" Null="true"/>
      <Parameter Name="biometric_protection" Type="byte"  XMLName="BiometricProtection" Mode="out"/>
      <Parameter Name="export_protection"    Type="byte"  XMLName="ExportProtection"    Mode="out"/>
      <Parameter Name="delete_protection"    Type="byte"  XMLName="DeleteProtection"    Mode="out"/>
@@ -605,19 +614,25 @@
         log ("getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
         KeyProtectionInfo kpi      = sks.getKeyProtectionInfo (key_handle);
         protection_status.value    = kpi.getSKSProtectionStatus ();
-        puk_format.value           = kpi.getPUKFormat ().getSKSValue ();
-        puk_retry_limit.value      = kpi.getPUKRetryLimit ();
-        puk_error_count.value      = kpi.getPUKErrorCount ();
-        user_defined.value         = kpi.getPINUserDefinedFlag ();
-        user_modifiable.value      = kpi.getPINUserModifiableFlag ();
-        format.value               = kpi.getPINFormat ().getSKSValue ();
-        retry_limit.value          = kpi.getPINRetryLimit ();
-        grouping.value             = kpi.getPINGrouping ().getSKSValue ();
-        pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPINPatternRestrictions ());
-        min_length.value           = kpi.getPINMinLength ();
-        max_length.value           = kpi.getPINMaxLength ();
-        input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
-        pin_error_count.value      = kpi.getPINErrorCount ();
+        if (kpi.hasLocalPUKProtection ())
+          {
+            puk_format.value           = kpi.getPUKFormat ().getSKSValue ();
+            puk_retry_limit.value      = kpi.getPUKRetryLimit ();
+            puk_error_count.value      = kpi.getPUKErrorCount ();
+          }
+        if (kpi.hasLocalPINProtection ())
+          {
+            user_defined.value         = kpi.getPINUserDefinedFlag ();
+            user_modifiable.value      = kpi.getPINUserModifiableFlag ();
+            format.value               = kpi.getPINFormat ().getSKSValue ();
+            retry_limit.value          = kpi.getPINRetryLimit ();
+            grouping.value             = kpi.getPINGrouping ().getSKSValue ();
+            pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPINPatternRestrictions ());
+            min_length.value           = kpi.getPINMinLength ();
+            max_length.value           = kpi.getPINMaxLength ();
+            input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
+            pin_error_count.value      = kpi.getPINErrorCount ();
+          }
         enable_pin_caching.value   = kpi.getEnablePINCachingFlag ();
         biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
         export_protection.value    = kpi.getExportProtection ().getSKSValue ();
@@ -647,6 +662,124 @@
      <Code><![CDATA[
         log ("setProperty (KeyHandle=" + key_handle + ", Type=" + type + ")");
         sks.setProperty (key_handle, type, name, value);
+]]></Code></Method>
+
+   <Method Name="deleteKey" Throws="SKSException">
+     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
+     <Code><![CDATA[
+        log ("deleteKey (KeyHandle=" + key_handle + ")");
+        sks.deleteKey (key_handle, authorization);
+]]></Code></Method>
+
+   <Method Name="exportKey" Throws="SKSException">
+     <Returns Type="binary" XMLName="Key"/>
+     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
+     <Code><![CDATA[
+        log ("exportKey (KeyHandle=" + key_handle + ")");
+        return sks.exportKey (key_handle, authorization);
+]]></Code></Method>
+
+   <Method Name="unlockKey" Throws="SKSException">
+     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="authorization" Type="binary" XMLName="Authorization"/>
+     <Code><![CDATA[
+        log ("unlockKey (KeyHandle=" + key_handle + ")");
+        sks.unlockKey (key_handle, authorization);
+]]></Code></Method>
+
+   <Method Name="changePIN" Throws="SKSException">
+     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="authorization" Type="binary" XMLName="Authorization"/>
+     <Parameter Name="new_pin"       Type="binary" XMLName="NewPIN"/>
+     <Code><![CDATA[
+        log ("changePIN (KeyHandle=" + key_handle + ")");
+        sks.changePIN (key_handle, authorization, new_pin);
+]]></Code></Method>
+
+   <Method Name="setPIN" Throws="SKSException">
+     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="authorization" Type="binary" XMLName="Authorization"/>
+     <Parameter Name="new_pin"       Type="binary" XMLName="NewPIN"/>
+     <Code><![CDATA[
+        log ("setPIN (KeyHandle=" + key_handle + ")");
+        sks.setPIN (key_handle, authorization, new_pin);
+]]></Code></Method>
+
+   <Method Name="signHashedData" Throws="SKSException">
+     <Returns Type="binary" XMLName="Result"/>
+     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
+     <Parameter Name="parameters"    Type="binary" XMLName="Parameters"    Null="true"/>
+     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
+     <Parameter Name="data"          Type="binary" XMLName="Data"/>
+     <Code><![CDATA[
+        log ("signHashedData (KeyHandle=" + key_handle + ")");
+        return sks.signHashedData (key_handle,
+                                   algorithm,
+                                   parameters,
+                                   authorization,
+                                   data);
+]]></Code></Method>
+
+   <Method Name="asymmetricKeyDecrypt" Throws="SKSException">
+     <Returns Type="binary" XMLName="Result"/>
+     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
+     <Parameter Name="parameters"    Type="binary" XMLName="Parameters"    Null="true"/>
+     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
+     <Parameter Name="data"          Type="binary" XMLName="Data"/>
+     <Code><![CDATA[
+        log ("asymmetricKeyDecrypt (KeyHandle=" + key_handle + ")");
+        return sks.asymmetricKeyDecrypt (key_handle, 
+                                         algorithm,
+                                         parameters,
+                                         authorization, 
+                                         data);
+]]></Code></Method>
+
+   <Method Name="keyAgreement" Throws="SKSException">
+     <Returns Type="binary" XMLName="Key"/>
+     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
+     <Parameter Name="parameters"    Type="binary" XMLName="Parameters"    Null="true"/>
+     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
+     <Parameter Name="public_key"    Type="binary" XMLName="PublicKey"/>
+     <Code><![CDATA[
+        log ("keyAgreement (KeyHandle=" + key_handle + ")");
+        return sks.keyAgreement (key_handle, 
+                                 algorithm, 
+                                 parameters, 
+                                 authorization, 
+                                 createPublicKeyFromBlob (public_key));
+]]></Code></Method>
+
+   <Method Name="performHMAC" Throws="SKSException">
+     <Returns Type="binary" XMLName="Result"/>
+     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
+     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
+     <Parameter Name="data"          Type="binary" XMLName="Data"/>
+     <Code><![CDATA[
+        log ("performHMAC (KeyHandle=" + key_handle + ")");
+        return sks.performHMAC (key_handle, 
+                                algorithm,
+                                authorization,
+                                data);
+]]></Code></Method>
+
+   <Method Name="symmetricKeyEncrypt" Throws="SKSException">
+     <Returns Type="binary" XMLName="Result"/>
+     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
+     <Parameter Name="mode"          Type="bool"   XMLName="Mode"/>
+     <Parameter Name="iv"            Type="binary" XMLName="IV"            Null="true"/>
+     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
+     <Parameter Name="data"          Type="binary" XMLName="Data"/>
+     <Code><![CDATA[
+        log ("symmetricKeyEncrypt (KeyHandle=" + key_handle + ")");
+        return sks.symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
 ]]></Code></Method>
 
    <Method Name="getVersion">

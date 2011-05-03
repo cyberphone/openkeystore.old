@@ -197,7 +197,7 @@ public interface SecureKeyStore
                                    byte export_protection,
                                    byte delete_protection,
                                    byte app_usage,
-                                   String friendly_name,
+                                   String friendly_name,  // May be null
                                    boolean private_key_backup,
                                    byte[] key_specifier,
                                    String[] endorsed_algorithms,

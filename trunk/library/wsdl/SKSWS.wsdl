@@ -136,11 +136,11 @@
           <xs:sequence>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="KeyManagementKey" type="xs:base64Binary" nillable="true" minOccurs="0"/>
-            <xs:element name="ClientTime" type="xs:int"/>
-            <xs:element name="SessionLifeTime" type="xs:int"/>
-            <xs:element name="ServerSessionID" type="xs:string"/>
-            <xs:element name="ClientSessionID" type="xs:string"/>
-            <xs:element name="IssuerURI" type="xs:string"/>
+            <xs:element name="ClientTime" type="xs:int" nillable="true" minOccurs="0"/>
+            <xs:element name="SessionLifeTime" type="xs:int" nillable="true" minOccurs="0"/>
+            <xs:element name="ServerSessionID" type="xs:string" nillable="true" minOccurs="0"/>
+            <xs:element name="ClientSessionID" type="xs:string" nillable="true" minOccurs="0"/>
+            <xs:element name="IssuerURI" type="xs:string" nillable="true" minOccurs="0"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -257,7 +257,7 @@
             <xs:element name="ExportProtection" type="xs:byte"/>
             <xs:element name="DeleteProtection" type="xs:byte"/>
             <xs:element name="AppUsage" type="xs:byte"/>
-            <xs:element name="FriendlyName" type="xs:string"/>
+            <xs:element name="FriendlyName" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="PrivateKeyBackup" type="xs:boolean"/>
             <xs:element name="KeySpecifier" type="xs:base64Binary"/>
             <xs:element name="EndorsedAlgorithm" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
@@ -448,7 +448,7 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="KeyHandle" type="xs:int"/>
-            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="ProvisioningHandle" type="xs:int" nillable="true" minOccurs="0"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -470,7 +470,7 @@
           <xs:sequence>
             <xs:element name="IsSymmetricKey" type="xs:boolean"/>
             <xs:element name="AppUsage" type="xs:byte"/>
-            <xs:element name="FriendlyName" type="xs:string"/>
+            <xs:element name="FriendlyName" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
             <xs:element name="EndorsedAlgorithm" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="ExtensionType" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
@@ -494,20 +494,20 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="ProtectionStatus" type="xs:byte"/>
-            <xs:element name="PUKFormat" type="xs:byte"/>
-            <xs:element name="PUKRetryLimit" type="xs:short"/>
-            <xs:element name="PUKErrorCount" type="xs:short"/>
-            <xs:element name="UserDefined" type="xs:boolean"/>
-            <xs:element name="UserModifiable" type="xs:boolean"/>
-            <xs:element name="Format" type="xs:byte"/>
-            <xs:element name="RetryLimit" type="xs:short"/>
-            <xs:element name="Grouping" type="xs:byte"/>
-            <xs:element name="PatternRestrictions" type="xs:byte"/>
-            <xs:element name="MinLength" type="xs:short"/>
-            <xs:element name="MaxLength" type="xs:short"/>
-            <xs:element name="InputMethod" type="xs:byte"/>
-            <xs:element name="PINErrorCount" type="xs:short"/>
-            <xs:element name="EnablePINCaching" type="xs:boolean"/>
+            <xs:element name="PUKFormat" type="xs:byte" nillable="true" minOccurs="0"/>
+            <xs:element name="PUKRetryLimit" type="xs:short" nillable="true" minOccurs="0"/>
+            <xs:element name="PUKErrorCount" type="xs:short" nillable="true" minOccurs="0"/>
+            <xs:element name="UserDefined" type="xs:boolean" nillable="true" minOccurs="0"/>
+            <xs:element name="UserModifiable" type="xs:boolean" nillable="true" minOccurs="0"/>
+            <xs:element name="Format" type="xs:byte" nillable="true" minOccurs="0"/>
+            <xs:element name="RetryLimit" type="xs:short" nillable="true" minOccurs="0"/>
+            <xs:element name="Grouping" type="xs:byte" nillable="true" minOccurs="0"/>
+            <xs:element name="PatternRestrictions" type="xs:byte" nillable="true" minOccurs="0"/>
+            <xs:element name="MinLength" type="xs:short" nillable="true" minOccurs="0"/>
+            <xs:element name="MaxLength" type="xs:short" nillable="true" minOccurs="0"/>
+            <xs:element name="InputMethod" type="xs:byte" nillable="true" minOccurs="0"/>
+            <xs:element name="PINErrorCount" type="xs:short" nillable="true" minOccurs="0"/>
+            <xs:element name="EnablePINCaching" type="xs:boolean" nillable="true" minOccurs="0"/>
             <xs:element name="BiometricProtection" type="xs:byte"/>
             <xs:element name="ExportProtection" type="xs:byte"/>
             <xs:element name="DeleteProtection" type="xs:byte"/>
@@ -555,6 +555,209 @@
         </xs:complexType>
       </xs:element>
       <xs:element name="setProperty.Response"/>
+
+<!--
+      #########################################################
+      #                       deleteKey                       #
+      #########################################################
+-->
+      <xs:element name="deleteKey">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="Authorization" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="deleteKey.Response"/>
+
+<!--
+      #########################################################
+      #                       exportKey                       #
+      #########################################################
+-->
+      <xs:element name="exportKey">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="Authorization" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="exportKey.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Key" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #                       unlockKey                       #
+      #########################################################
+-->
+      <xs:element name="unlockKey">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="Authorization" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="unlockKey.Response"/>
+
+<!--
+      #########################################################
+      #                       changePIN                       #
+      #########################################################
+-->
+      <xs:element name="changePIN">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="Authorization" type="xs:base64Binary"/>
+            <xs:element name="NewPIN" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="changePIN.Response"/>
+
+<!--
+      #########################################################
+      #                        setPIN                         #
+      #########################################################
+-->
+      <xs:element name="setPIN">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="Authorization" type="xs:base64Binary"/>
+            <xs:element name="NewPIN" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="setPIN.Response"/>
+
+<!--
+      #########################################################
+      #                    signHashedData                     #
+      #########################################################
+-->
+      <xs:element name="signHashedData">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="Algorithm" type="xs:string"/>
+            <xs:element name="Parameters" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="Authorization" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="Data" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="signHashedData.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #                 asymmetricKeyDecrypt                  #
+      #########################################################
+-->
+      <xs:element name="asymmetricKeyDecrypt">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="Algorithm" type="xs:string"/>
+            <xs:element name="Parameters" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="Authorization" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="Data" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="asymmetricKeyDecrypt.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #                     keyAgreement                      #
+      #########################################################
+-->
+      <xs:element name="keyAgreement">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="Algorithm" type="xs:string"/>
+            <xs:element name="Parameters" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="Authorization" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="PublicKey" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="keyAgreement.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Key" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #                      performHMAC                      #
+      #########################################################
+-->
+      <xs:element name="performHMAC">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="Algorithm" type="xs:string"/>
+            <xs:element name="Authorization" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="Data" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="performHMAC.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
+      #                  symmetricKeyEncrypt                  #
+      #########################################################
+-->
+      <xs:element name="symmetricKeyEncrypt">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="Algorithm" type="xs:string"/>
+            <xs:element name="Mode" type="xs:boolean"/>
+            <xs:element name="IV" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="Authorization" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="Data" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="symmetricKeyEncrypt.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
 
 <!--
       #########################################################
@@ -762,6 +965,86 @@
     <wsdl:part name="parameters" element="tns:setProperty.Response"/>
   </wsdl:message>
 
+  <wsdl:message name="deleteKey">
+    <wsdl:part name="parameters" element="tns:deleteKey"/>
+  </wsdl:message>
+
+  <wsdl:message name="deleteKey.Response">
+    <wsdl:part name="parameters" element="tns:deleteKey.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="exportKey">
+    <wsdl:part name="parameters" element="tns:exportKey"/>
+  </wsdl:message>
+
+  <wsdl:message name="exportKey.Response">
+    <wsdl:part name="parameters" element="tns:exportKey.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="unlockKey">
+    <wsdl:part name="parameters" element="tns:unlockKey"/>
+  </wsdl:message>
+
+  <wsdl:message name="unlockKey.Response">
+    <wsdl:part name="parameters" element="tns:unlockKey.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="changePIN">
+    <wsdl:part name="parameters" element="tns:changePIN"/>
+  </wsdl:message>
+
+  <wsdl:message name="changePIN.Response">
+    <wsdl:part name="parameters" element="tns:changePIN.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="setPIN">
+    <wsdl:part name="parameters" element="tns:setPIN"/>
+  </wsdl:message>
+
+  <wsdl:message name="setPIN.Response">
+    <wsdl:part name="parameters" element="tns:setPIN.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="signHashedData">
+    <wsdl:part name="parameters" element="tns:signHashedData"/>
+  </wsdl:message>
+
+  <wsdl:message name="signHashedData.Response">
+    <wsdl:part name="parameters" element="tns:signHashedData.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="asymmetricKeyDecrypt">
+    <wsdl:part name="parameters" element="tns:asymmetricKeyDecrypt"/>
+  </wsdl:message>
+
+  <wsdl:message name="asymmetricKeyDecrypt.Response">
+    <wsdl:part name="parameters" element="tns:asymmetricKeyDecrypt.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="keyAgreement">
+    <wsdl:part name="parameters" element="tns:keyAgreement"/>
+  </wsdl:message>
+
+  <wsdl:message name="keyAgreement.Response">
+    <wsdl:part name="parameters" element="tns:keyAgreement.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="performHMAC">
+    <wsdl:part name="parameters" element="tns:performHMAC"/>
+  </wsdl:message>
+
+  <wsdl:message name="performHMAC.Response">
+    <wsdl:part name="parameters" element="tns:performHMAC.Response"/>
+  </wsdl:message>
+
+  <wsdl:message name="symmetricKeyEncrypt">
+    <wsdl:part name="parameters" element="tns:symmetricKeyEncrypt"/>
+  </wsdl:message>
+
+  <wsdl:message name="symmetricKeyEncrypt.Response">
+    <wsdl:part name="parameters" element="tns:symmetricKeyEncrypt.Response"/>
+  </wsdl:message>
+
   <wsdl:message name="getVersion">
     <wsdl:part name="parameters" element="tns:getVersion"/>
   </wsdl:message>
@@ -907,6 +1190,66 @@
     <wsdl:operation name="setProperty">
       <wsdl:input message="tns:setProperty"/>
       <wsdl:output message="tns:setProperty.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="deleteKey">
+      <wsdl:input message="tns:deleteKey"/>
+      <wsdl:output message="tns:deleteKey.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="exportKey">
+      <wsdl:input message="tns:exportKey"/>
+      <wsdl:output message="tns:exportKey.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="unlockKey">
+      <wsdl:input message="tns:unlockKey"/>
+      <wsdl:output message="tns:unlockKey.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="changePIN">
+      <wsdl:input message="tns:changePIN"/>
+      <wsdl:output message="tns:changePIN.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="setPIN">
+      <wsdl:input message="tns:setPIN"/>
+      <wsdl:output message="tns:setPIN.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="signHashedData">
+      <wsdl:input message="tns:signHashedData"/>
+      <wsdl:output message="tns:signHashedData.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="asymmetricKeyDecrypt">
+      <wsdl:input message="tns:asymmetricKeyDecrypt"/>
+      <wsdl:output message="tns:asymmetricKeyDecrypt.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="keyAgreement">
+      <wsdl:input message="tns:keyAgreement"/>
+      <wsdl:output message="tns:keyAgreement.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="performHMAC">
+      <wsdl:input message="tns:performHMAC"/>
+      <wsdl:output message="tns:performHMAC.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="symmetricKeyEncrypt">
+      <wsdl:input message="tns:symmetricKeyEncrypt"/>
+      <wsdl:output message="tns:symmetricKeyEncrypt.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -1185,6 +1528,126 @@
       </wsdl:operation>
 
       <wsdl:operation name="setProperty">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="deleteKey">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="exportKey">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="unlockKey">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="changePIN">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="setPIN">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="signHashedData">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="asymmetricKeyDecrypt">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="keyAgreement">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="performHMAC">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="symmetricKeyEncrypt">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

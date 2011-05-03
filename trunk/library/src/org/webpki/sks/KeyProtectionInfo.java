@@ -67,7 +67,7 @@ public class KeyProtectionInfo
         return protection_status;
       }
 
-    public boolean isPUKProtected ()
+    public boolean hasLocalPUKProtection ()
       {
         return (protection_status & PROTECTION_STATUS_PUK_PROTECTED) != 0;
       }
@@ -92,7 +92,7 @@ public class KeyProtectionInfo
         return (protection_status & PROTECTION_STATUS_PUK_BLOCKED) != 0;
       }
 
-    public boolean isPINProtected ()
+    public boolean hasLocalPINProtection ()
       {
         return (protection_status & PROTECTION_STATUS_PIN_PROTECTED) != 0;
       }
@@ -137,7 +137,7 @@ public class KeyProtectionInfo
         return (protection_status & PROTECTION_STATUS_PIN_BLOCKED) != 0;
       }
 
-    public boolean isDevicePINProtected ()
+    public boolean hasDevicePINProtection ()
       {
         return (protection_status & PROTECTION_STATUS_DEVICE_PIN) != 0;
       }
@@ -255,20 +255,20 @@ public class KeyProtectionInfo
       }
 
     public KeyProtectionInfo (byte protection_status,
-                              byte puk_format,
-                              short puk_retry_limit,
-                              short puk_error_count,
-                              boolean user_defined,
-                              boolean user_modifiable,
-                              byte format,
-                              short retry_limit,
-                              byte grouping,
-                              byte pattern_restrictions,
-                              short min_length,
-                              short max_length,
-                              byte input_method,
-                              short pin_error_count,
-                              boolean enable_pin_caching,
+                              Byte puk_format,
+                              Short puk_retry_limit,
+                              Short puk_error_count,
+                              Boolean user_defined,
+                              Boolean user_modifiable,
+                              Byte format,
+                              Short retry_limit,
+                              Byte grouping,
+                              Byte pattern_restrictions,
+                              Short min_length,
+                              Short max_length,
+                              Byte input_method,
+                              Short pin_error_count,
+                              Boolean enable_pin_caching,
                               byte biometric_protection,
                               byte export_protection,
                               byte delete_protection,
@@ -276,13 +276,13 @@ public class KeyProtectionInfo
 
       {
         this.protection_status = protection_status;
-        if (isPUKProtected ())
+        if (hasLocalPUKProtection ())
           {
             this.puk_format = convertFormat (puk_format);
             this.puk_error_count = puk_error_count;
             this.puk_retry_limit = puk_retry_limit;
           }
-        if (isPINProtected ())
+        if (hasLocalPINProtection ())
           {
             this.pin_user_defined = user_defined;
             this.pin_user_modifiable = user_modifiable;
@@ -301,6 +301,9 @@ public class KeyProtectionInfo
             this.pin_max_length = max_length;
             this.pin_input_method = convertInputMethod (input_method);
             this.pin_error_count = pin_error_count;
+          }
+        if (hasLocalPINProtection () || hasDevicePINProtection ())
+          {
             this.enable_pin_caching = enable_pin_caching;
           }
         this.private_key_backup = private_key_backup;

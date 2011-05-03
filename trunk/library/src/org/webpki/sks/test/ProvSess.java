@@ -630,7 +630,7 @@ public class ProvSess
         key_pair_mac.addByte (actual_export_policy);
         key_pair_mac.addByte (delete_protection.getSKSValue ());
         key_pair_mac.addByte (key_usage.getSKSValue ());
-        key_pair_mac.addString (friendly_name);
+        key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
         key_pair_mac.addBool (private_key_backup);
         key_pair_mac.addArray (key_algorithm.getSKSValue ());
         for (String algorithm : sorted_algorithms)
