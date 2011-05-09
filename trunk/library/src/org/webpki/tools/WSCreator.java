@@ -443,6 +443,8 @@ public class WSCreator extends XMLObjectWrapper
         Property return_prop; 
 
         String code;
+        
+        String dot_net_return_class;
 
         public String getXMLResponseName ()
           {
@@ -475,7 +477,8 @@ public class WSCreator extends XMLObjectWrapper
 
         public String getNetWrapper (boolean request)
           {
-            return name + (request ? "_Request" : "_Response");
+            return request || dot_net_return_class == null ?
+                   (name + (request ? "_Request" : "_Response")) : dot_net_return_class;
           }
 
         public Collection<Property> filteredParameters (boolean output)
@@ -658,6 +661,7 @@ public class WSCreator extends XMLObjectWrapper
             Method method = new Method ();
             method.name = attr.getString ("Name");
             method.xml_name = attr.getStringConditional ("XMLName");
+            method.dot_net_return_class = attr.getStringConditional ("DotNetReturnClass");
             method.execptions = attr.getListConditional ("Throws");
             if (method.execptions == null) method.execptions = new String[0];
             rd.getChild ();
@@ -981,16 +985,21 @@ public class WSCreator extends XMLObjectWrapper
             "    public class " + class_name + "\n" +
             "    {\n");
         int order = 0;
+        String warn = request ? "" : "        #pragma warning disable 0649\n";
+        String warnoff = request ? "" : "        #pragma warning restore 0649\n";
         for (Property prop : props)
           {
+            if (order != 0)
+              {
+                write (file,"\n");
+              }
             write (file, "        [System.ServiceModel.MessageBodyMemberAttribute(Namespace=\"" + tns + "\", Order=" + (order++) + ")]\n" +
                          "        [System.Xml.Serialization.XmlElementAttribute(ElementName=\"" + prop.getXMLName () + "\", Form=System.Xml.Schema.XmlSchemaForm." + (qualified_ns ? "Q" : "Unq") + "ualified)]\n" +
-                         "        public " + prop.nType () + " " + prop.nName() + ";\n\n");
+                         warn +
+                         "        internal " + prop.nType () + " " + prop.nName() + ";\n" +
+                         warnoff);
           }
 
-        write (file, "        public " + class_name + "()\n" + 
-                     "        {\n" + 
-                     "        }\n");
         if (request && !props.isEmpty ())
           {
             write (file, "\n        public " + class_name + "(");

@@ -589,6 +589,12 @@ public interface SKSWSProxy
     @WebMethod(operationName="getVersion")
     @RequestWrapper(localName="getVersion", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="getVersion.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @WebResult(name="return", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="version", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     public String getVersion ();
+
+    @WebMethod(operationName="logEvent")
+    @RequestWrapper(localName="logEvent", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="logEvent.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void logEvent (@WebParam(name="description", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                          String description);
   }

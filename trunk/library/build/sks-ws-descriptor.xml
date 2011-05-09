@@ -182,6 +182,9 @@
      <RewriteRule DotNetRule="Out.StringArray"
                   ActualType="string"
                   Conversion="$.ToArray()"/>
+     <RewriteRule DotNetRule="Out.ShortArray"
+                  ActualType="short"
+                  Conversion="$.ToArray()"/>
      </DotNetClient>
 
    <Exception ClassName="org.webpki.sks.SKSException">
@@ -189,15 +192,15 @@
      <Property Name="message" Type="string"/>
    </Exception>
 
-   <Method Name="getDeviceInfo" Throws="SKSException">
+   <Method Name="getDeviceInfo" DotNetReturnClass="DeviceInfo" Throws="SKSException">
      <Parameter Name="api_level"            Type="short"  XMLName="APILevel"           Mode="out"/>
      <Parameter Name="update_url"           Type="string" XMLName="UpdateURL"          Mode="out" Null="true"/>
      <Parameter Name="vendor_name"          Type="string" XMLName="VendorName"         Mode="out"/>
      <Parameter Name="vendor_description"   Type="string" XMLName="VendorDescription"  Mode="out"/>
      <Parameter Name="certificate_path"     Type="binary" XMLName="X509Certificate"    Mode="out" List="true" DotNetRule="Out.X509"/>
-     <Parameter Name="supported_algorithms" Type="string" XMLName="SupportedAlgorithm" Mode="out" List="true"/>
+     <Parameter Name="supported_algorithms" Type="string" XMLName="SupportedAlgorithm" Mode="out" List="true" DotNetRule="Out.StringArray"/>
      <Parameter Name="rsa_exponent_support" Type="bool"   XMLName="RSAExponentSupport" Mode="out"/>
-     <Parameter Name="rsa_key_sizes"        Type="short"  XMLName="RSAKeySize"         Mode="out" List="true"/>
+     <Parameter Name="rsa_key_sizes"        Type="short"  XMLName="RSAKeySize"         Mode="out" List="true" DotNetRule="Out.ShortArray"/>
      <Parameter Name="crypto_data_size"     Type="int"    XMLName="CryptoDataSize"     Mode="out"/>
      <Parameter Name="extension_data_size"  Type="int"    XMLName="ExtensionDataSize"  Mode="out"/>
      <Parameter Name="device_pin_support"   Type="bool"   XMLName="DevicePINSupport"   Mode="out"/>
@@ -239,7 +242,7 @@
 ]]></Code></Method>
 
    <Method Name="createProvisioningSession" Throws="SKSException">
-     <Returns Type="int" XMLName="ProvisioningHandle"/>
+     <Returns   Name="provisioning_handle"  Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="algorithm"            Type="string" XMLName="Algorithm"       />
      <Parameter Name="server_session_id"    Type="string" XMLName="ServerSessionID"/>
      <Parameter Name="server_ephemeral_key" Type="binary" XMLName="ServerEphemeralKey"/>
@@ -280,7 +283,7 @@
 ]]></Code></Method>
 
    <Method Name="closeProvisioningSession" Throws="SKSException">
-     <Returns Type="binary" XMLName="Attestation"/>
+     <Returns   Name="attestation"         Type="binary" XMLName="Attestation"/>
      <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="nonce"               Type="binary" XMLName="Nonce"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
@@ -290,15 +293,15 @@
 ]]></Code></Method>
 
    <Method Name="enumerateProvisioningSessions" Throws="SKSException">
-     <Returns XMLName="ProvisioningHandle" Type="int"/>
-     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
-     <Parameter Name="provisioning_state"  XMLName="ProvisioningState"  Type="bool"/>
-     <Parameter Name="key_management_key"  XMLName="KeyManagementKey"   Type="binary" Mode="out" Null="true"/>
-     <Parameter Name="client_time"         XMLName="ClientTime"         Type="int"    Mode="out" Null="true"/>
-     <Parameter Name="session_life_time"   XMLName="SessionLifeTime"    Type="int"    Mode="out" Null="true"/>
-     <Parameter Name="server_session_id"   XMLName="ServerSessionID"    Type="string" Mode="out" Null="true"/>
-     <Parameter Name="client_session_id"   XMLName="ClientSessionID"    Type="string" Mode="out" Null="true"/>
-     <Parameter Name="issuer_uri"          XMLName="IssuerURI"          Type="string" Mode="out" Null="true"/>
+     <Returns   Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="provisioning_state"  Type="bool"   XMLName="ProvisioningState"/>
+     <Parameter Name="key_management_key"  Type="binary" XMLName="KeyManagementKey"   Mode="out" Null="true"/>
+     <Parameter Name="client_time"         Type="int"    XMLName="ClientTime"         Mode="out" Null="true"/>
+     <Parameter Name="session_life_time"   Type="int"    XMLName="SessionLifeTime"    Mode="out" Null="true"/>
+     <Parameter Name="server_session_id"   Type="string" XMLName="ServerSessionID"    Mode="out" Null="true"/>
+     <Parameter Name="client_session_id"   Type="string" XMLName="ClientSessionID"    Mode="out" Null="true"/>
+     <Parameter Name="issuer_uri"          Type="string" XMLName="IssuerURI"          Mode="out" Null="true"/>
      <Code><![CDATA[
         EnumeratedProvisioningSession eps = sks.enumerateProvisioningSessions (provisioning_handle, provisioning_state);
         if (eps == null)
@@ -326,22 +329,22 @@
 ]]></Code></Method>
 
    <Method Name="signProvisioningSessionData" Throws="SKSException">
-     <Returns XMLName="Result" Type="binary"/>
-     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
-     <Parameter Name="data"                XMLName="Data"               Type="binary"/>
+     <Returns   Name="result"              Type="binary" XMLName="Result"/>
+     <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="data"                Type="binary" XMLName="Data"               />
      <Code><![CDATA[
         log ("signProvisioningSessionData (ProvisioningHandle=" + provisioning_handle + ")");
         return sks.signProvisioningSessionData (provisioning_handle, data);
 ]]></Code></Method>
 
    <Method Name="createPUKPolicy" Throws="SKSException">
-     <Returns Type="int" XMLName="PUKPolicyHandle"/>
-     <Parameter Name="provisioning_handle"  Type="int"    XMLName="ProvisioningHandle"/>
-     <Parameter Name="id"                   Type="string" XMLName="ID"/>
-     <Parameter Name="puk_value"            Type="binary" XMLName="PUKValue"/>
-     <Parameter Name="format"               Type="byte"   XMLName="Format"/>
-     <Parameter Name="retry_limit"          Type="short"  XMLName="RetryLimit"/>
-     <Parameter Name="mac"                  Type="binary" XMLName="MAC"/>
+     <Returns   Name="puk_policy_handle"   Type="int"    XMLName="PUKPolicyHandle"/>
+     <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="id"                  Type="string" XMLName="ID"/>
+     <Parameter Name="puk_value"           Type="binary" XMLName="PUKValue"/>
+     <Parameter Name="format"              Type="byte"   XMLName="Format"/>
+     <Parameter Name="retry_limit"         Type="short"  XMLName="RetryLimit"/>
+     <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
         log ("createPUKPolicy (ID=" + id + ")");
         return sks.createPUKPolicy (provisioning_handle,
@@ -353,7 +356,7 @@
 ]]></Code></Method>
 
    <Method Name="createPINPolicy" Throws="SKSException">
-     <Returns Type="int" XMLName="PINPolicyHandle"/>
+     <Returns   Name="pin_policy_handle"    Type="int"    XMLName="PINPolicyHandle"/>
      <Parameter Name="provisioning_handle"  Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="id"                   Type="string" XMLName="ID"/>
      <Parameter Name="puk_policy_handle"    Type="int"    XMLName="PUKPolicyHandle"/>
@@ -385,7 +388,7 @@
 ]]></Code></Method>
 
    <Method Name="createKeyEntry" Throws="SKSException">
-     <Returns Type="int" XMLName="KeyHandle"/>
+     <Returns   Name="key_handle"            Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="provisioning_handle"   Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="id"                    Type="string" XMLName="ID"/>
      <Parameter Name="algorithm"             Type="string" XMLName="Algorithm"/>
@@ -432,9 +435,9 @@
 ]]></Code></Method>
 
    <Method Name="getKeyHandle" Throws="SKSException">
-     <Returns XMLName="KeyHandle" Type="int"/>
-     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int"/>
-     <Parameter Name="id"                  XMLName="ID"                 Type="string"/>
+     <Returns   Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="id"                  Type="string" XMLName="ID"/>
      <Code><![CDATA[
         log ("getKeyHandle (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")");
         return sks.getKeyHandle (provisioning_handle, id);
@@ -534,9 +537,9 @@
 ]]></Code></Method>
 
    <Method Name="enumerateKeys" Throws="SKSException">
-     <Returns XMLName="KeyHandle" Type="int"/>
-     <Parameter Name="key_handle"          XMLName="KeyHandle" Type="int"/>
-     <Parameter Name="provisioning_handle" XMLName="ProvisioningHandle" Type="int" Mode="out"  Null="true"/>
+     <Returns   Name="key_handle"          Type="int" XMLName="KeyHandle"/>
+     <Parameter Name="key_handle"          Type="int" XMLName="KeyHandle"/>
+     <Parameter Name="provisioning_handle" Type="int" XMLName="ProvisioningHandle" Mode="out" Null="true"/>
      <Code><![CDATA[
         EnumeratedKey ek = sks.enumerateKeys (key_handle);
         if (ek == null)
@@ -673,7 +676,7 @@
 ]]></Code></Method>
 
    <Method Name="exportKey" Throws="SKSException">
-     <Returns Type="binary" XMLName="Key"/>
+     <Returns   Name="key"           Type="binary" XMLName="Key"/>
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
      <Code><![CDATA[
@@ -708,7 +711,7 @@
 ]]></Code></Method>
 
    <Method Name="signHashedData" Throws="SKSException">
-     <Returns Type="binary" XMLName="Result"/>
+     <Returns   Name="result"        Type="binary" XMLName="Result"/>
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
      <Parameter Name="parameters"    Type="binary" XMLName="Parameters"    Null="true"/>
@@ -724,7 +727,7 @@
 ]]></Code></Method>
 
    <Method Name="asymmetricKeyDecrypt" Throws="SKSException">
-     <Returns Type="binary" XMLName="Result"/>
+     <Returns   Name="result"        Type="binary" XMLName="Result"/>
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
      <Parameter Name="parameters"    Type="binary" XMLName="Parameters"    Null="true"/>
@@ -740,7 +743,7 @@
 ]]></Code></Method>
 
    <Method Name="keyAgreement" Throws="SKSException">
-     <Returns Type="binary" XMLName="Key"/>
+     <Returns   Name="key"           Type="binary" XMLName="Key"/>
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
      <Parameter Name="parameters"    Type="binary" XMLName="Parameters"    Null="true"/>
@@ -756,7 +759,7 @@
 ]]></Code></Method>
 
    <Method Name="performHMAC" Throws="SKSException">
-     <Returns Type="binary" XMLName="Result"/>
+     <Returns   Name="result"        Type="binary" XMLName="Result"/>
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
      <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
@@ -770,7 +773,7 @@
 ]]></Code></Method>
 
    <Method Name="symmetricKeyEncrypt" Throws="SKSException">
-     <Returns Type="binary" XMLName="Result"/>
+     <Returns   Name="result"        Type="binary" XMLName="Result"/>
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
      <Parameter Name="mode"          Type="bool"   XMLName="Mode"/>
@@ -782,10 +785,16 @@
         return sks.symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
 ]]></Code></Method>
 
-   <Method Name="getVersion">
-     <Returns Type="string"/>
+   <Method Name="getVersion" Public="false">
+     <Returns Name="version" Type="string"/>
      <Code><![CDATA[
         return "0.00001";
+]]></Code></Method>
+
+   <Method Name="logEvent" Public="false">
+     <Parameter Name="description" Type="string"/>
+     <Code><![CDATA[
+        log ("LOG: " + description);
 ]]></Code></Method>
 
 </WebService>
