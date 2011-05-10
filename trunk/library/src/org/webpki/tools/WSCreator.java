@@ -445,6 +445,8 @@ public class WSCreator extends XMLObjectWrapper
         String code;
         
         String dot_net_return_class;
+        
+        boolean public_method;
 
         public String getXMLResponseName ()
           {
@@ -662,6 +664,7 @@ public class WSCreator extends XMLObjectWrapper
             method.name = attr.getString ("Name");
             method.xml_name = attr.getStringConditional ("XMLName");
             method.dot_net_return_class = attr.getStringConditional ("DotNetReturnClass");
+            method.public_method = attr.getBoolean ("Public");
             method.execptions = attr.getListConditional ("Throws");
             if (method.execptions == null) method.execptions = new String[0];
             rd.getChild ();
@@ -882,6 +885,10 @@ public class WSCreator extends XMLObjectWrapper
         write (dotnetdoc_file, "<html><body><table cellpadding=\"20\" border=\"0\">");
         for (Method meth : methods)
           {
+            if (!meth.public_method)
+              {
+                continue;
+              }
             List<String> null_types = new ArrayList<String> ();
             write (dotnetdoc_file, "<tr><td>&nbsp;</td></tr><tr><td style=\"border-width:1px 1px 1px 1px;border-style:solid;border-color:black\"><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">" +
                 "<tr><td><code>" + dotnetReserved("public") + "&nbsp;");
