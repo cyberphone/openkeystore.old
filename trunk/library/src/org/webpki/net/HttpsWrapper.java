@@ -38,6 +38,7 @@ import java.security.cert.CertificateException;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.HostnameVerifier;
@@ -155,33 +156,38 @@ public class HttpsWrapper
           {
             try
               {
-                if (key_store != null || trust_store != null || allow_invalidcert)
+                /////////////////////////////////////
+                // Do we have a trust store?
+                /////////////////////////////////////
+                TrustManager[] trust_managers = null;
+                if (allow_invalidcert)
                   {
-                    /////////////////////////////////////
-                    // Do we have a trust store?
-                    /////////////////////////////////////
+                    trust_managers = new TrustManager[]{new HttpsWrapperTrustManager ()};
                     if (trust_store == null)
-                      {      
-                        /////////////////////////////////////////
-                        // No, open default trust store.
-                        /////////////////////////////////////////
-                        String sep = System.getProperty ("file.separator");
-                        String password = System.getProperty ("javax.net.ssl.trustStorePassword");
-                        setTrustStore (System.getProperty ("java.home").concat (sep + "lib" + sep + "security" + sep + "cacerts"),
-                                       password == null ? "" : password);
-                      }
-
-                    KeyManager[] key_managers = null;
-                    if (key_store != null)
                       {
-                        KeyManagerFactory kmf = KeyManagerFactory.getInstance ("SunX509");
-                        kmf.init (key_store, key_store_password.toCharArray ());
-                        key_managers = kmf.getKeyManagers ();
+                        trust_store = KeyStore.getInstance ("JKS");
                       }
-                    SSLContext ctx = SSLContext.getInstance ("TLS");
-                    ctx.init (key_managers, new TrustManager[]{new HttpsWrapperTrustManager ()}, null);
-                    socket_factory = ctx.getSocketFactory ();
                   }
+                else if (trust_store != null)
+                  {
+                    TrustManagerFactory tmf = TrustManagerFactory.getInstance ("SunX509");
+                    tmf.init (trust_store);
+                    trust_managers = tmf.getTrustManagers ();
+                  }
+
+                /////////////////////////////////////
+                // Do we have a key store?
+                /////////////////////////////////////
+                KeyManager[] key_managers = null;
+                if (key_store != null)
+                  {
+                    KeyManagerFactory kmf = KeyManagerFactory.getInstance ("SunX509");
+                    kmf.init (key_store, key_store_password.toCharArray ());
+                    key_managers = kmf.getKeyManagers ();
+                  }
+                SSLContext ctx = SSLContext.getInstance ("TLS");
+                ctx.init (key_managers, trust_managers, null);
+                socket_factory = ctx.getSocketFactory ();
               }
             catch (GeneralSecurityException gse)
               {

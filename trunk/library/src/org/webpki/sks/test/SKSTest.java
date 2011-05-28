@@ -34,6 +34,7 @@ import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
+
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -295,8 +296,8 @@ public class SKSTest
       }
   
     boolean PINCheck (PassphraseFormat format,
-                              PatternRestriction[] patterns,
-                              String pin) throws IOException, GeneralSecurityException
+                      PatternRestriction[] patterns,
+                      String pin) throws IOException, GeneralSecurityException
       {
         try
           {
@@ -449,32 +450,32 @@ public class SKSTest
             String pin2 = "4567";
             ProvSess sess = new ProvSess (device);
             PINPol pin_pol = sess.createPINPolicy ("PIN",
-                                         PassphraseFormat.NUMERIC,
-                                         EnumSet.noneOf (PatternRestriction.class),
-                                         grouping,
-                                         4 /* min_length */, 
-                                         8 /* max_length */,
-                                         (short) 3 /* retry_limit*/, 
-                                         null /* puk_policy */);
+                                                   PassphraseFormat.NUMERIC,
+                                                   EnumSet.noneOf (PatternRestriction.class),
+                                                   grouping,
+                                                   4 /* min_length */, 
+                                                   8 /* max_length */,
+                                                   (short) 3 /* retry_limit*/, 
+                                                   null /* puk_policy */);
             sess.createECKey ("Key.1",
-                pin1 /* pin_value */,
-                pin_pol /* pin_policy */,
-                AppUsage.AUTHENTICATION).setCertificate ("CN=TEST");
+                              pin1 /* pin_value */,
+                              pin_pol /* pin_policy */,
+                              AppUsage.AUTHENTICATION).setCertificate ("CN=TEST");
             if (grouping == Grouping.SIGNATURE_PLUS_STANDARD)
               {
                 sess.createECKey ("Key.1s",
-                    pin1 /* pin_value */,
-                    pin_pol /* pin_policy */,
-                    AppUsage.UNIVERSAL).setCertificate ("CN=TEST");
+                                  pin1 /* pin_value */,
+                                  pin_pol /* pin_policy */,
+                                  AppUsage.UNIVERSAL).setCertificate ("CN=TEST");
                 sess.createECKey ("Key.2s",
-                    same_pin ? pin1 : pin2 /* pin_value */,
-                    pin_pol /* pin_policy */,
-                    AppUsage.SIGNATURE).setCertificate ("CN=TEST");
+                                  same_pin ? pin1 : pin2 /* pin_value */,
+                                  pin_pol /* pin_policy */,
+                                  AppUsage.SIGNATURE).setCertificate ("CN=TEST");
               }
             sess.createECKey ("Key.2",
-                same_pin ? pin1 : pin2 /* pin_value */,
-                pin_pol /* pin_policy */,
-                AppUsage.SIGNATURE).setCertificate ("CN=TEST");
+                              same_pin ? pin1 : pin2 /* pin_value */,
+                              pin_pol /* pin_policy */,
+                              AppUsage.SIGNATURE).setCertificate ("CN=TEST");
             sess.abortSession ();
           }
         catch (SKSException e)

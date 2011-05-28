@@ -149,7 +149,7 @@
 
         public static string ALGORITHM_KEY_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
 
-        X509Certificate2[] blist2certs (List<byte[]> blist)
+        internal static X509Certificate2[] blist2certs (List<byte[]> blist)
         {
             X509Certificate2[] certs = new X509Certificate2[blist.Count];
             int i = 0;
@@ -160,7 +160,7 @@
             return i == 0 ? null : certs;
         }
 
-        List<byte[]> certs2blist (X509Certificate2[] certs)
+        internal static List<byte[]> certs2blist (X509Certificate2[] certs)
         {
             List<byte[]> blist = new List<byte[]>();
             if (certs != null) foreach (X509Certificate2 cert in certs)
@@ -172,10 +172,10 @@
 ]]></SupportCode>
      <RewriteRule DotNetRule="Out.X509"
                   ActualType="System.Security.Cryptography.X509Certificates.X509Certificate2"
-                  Conversion="blist2certs($)"/>
+                  Conversion="SKSWSProxy.blist2certs($)"/>
      <RewriteRule DotNetRule="In.X509"
                   ActualType="System.Security.Cryptography.X509Certificates.X509Certificate2"
-                  Conversion="certs2blist($)"/>
+                  Conversion="SKSWSProxy.certs2blist($)"/>
      <RewriteRule DotNetRule="In.StringArray"
                   ActualType="string"
                   Conversion="new List&lt;string&gt;($)"/>
@@ -241,7 +241,7 @@
           }
 ]]></Code></Method>
 
-   <Method Name="createProvisioningSession" Throws="SKSException">
+   <Method Name="createProvisioningSession" DotNetReturnClass="ProvisioningSession" Throws="SKSException">
      <Returns   Name="provisioning_handle"  Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="algorithm"            Type="string" XMLName="Algorithm"       />
      <Parameter Name="server_session_id"    Type="string" XMLName="ServerSessionID"/>
@@ -292,7 +292,7 @@
         return sks.closeProvisioningSession (provisioning_handle, nonce, mac);
 ]]></Code></Method>
 
-   <Method Name="enumerateProvisioningSessions" Throws="SKSException">
+   <Method Name="enumerateProvisioningSessions" DotNetReturnClass="EnumeratedProvisioningSession" Throws="SKSException">
      <Returns   Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="provisioning_state"  Type="bool"   XMLName="ProvisioningState"/>
@@ -387,7 +387,7 @@
                                     mac);
 ]]></Code></Method>
 
-   <Method Name="createKeyEntry" Throws="SKSException">
+   <Method Name="createKeyEntry" DotNetReturnClass="KeyData" Throws="SKSException">
      <Returns   Name="key_handle"            Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="provisioning_handle"   Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="id"                    Type="string" XMLName="ID"/>
@@ -536,7 +536,7 @@
         sks.pp_cloneKeyProtection (key_handle, target_key_handle, authorization, mac);
 ]]></Code></Method>
 
-   <Method Name="enumerateKeys" Throws="SKSException">
+   <Method Name="enumerateKeys" DotNetReturnClass="EnumeratedKey" Throws="SKSException">
      <Returns   Name="key_handle"          Type="int" XMLName="KeyHandle"/>
      <Parameter Name="key_handle"          Type="int" XMLName="KeyHandle"/>
      <Parameter Name="provisioning_handle" Type="int" XMLName="ProvisioningHandle" Mode="out" Null="true"/>
@@ -554,7 +554,7 @@
         return ek.getKeyHandle ();
 ]]></Code></Method>
 
-   <Method Name="getKeyAttributes" Throws="SKSException">
+   <Method Name="getKeyAttributes" DotNetReturnClass="KeyAttributes" Throws="SKSException">
      <Parameter Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="is_symmetric_key"    Type="bool"   XMLName="IsSymmetricKey"    Mode="out"/>
      <Parameter Name="app_usage"           Type="byte"   XMLName="AppUsage"          Mode="out"/>
@@ -592,7 +592,7 @@
           }
  ]]></Code></Method>
 
-   <Method Name="getKeyProtectionInfo" Throws="SKSException">
+   <Method Name="getKeyProtectionInfo" DotNetReturnClass="KeyProtectionInfo" Throws="SKSException">
      <Parameter Name="key_handle"           Type="int"   XMLName="KeyHandle"/>
      <Parameter Name="protection_status"    Type="byte"  XMLName="ProtectionStatus"    Mode="out"/>
      <Parameter Name="puk_format"           Type="byte"  XMLName="PUKFormat"           Mode="out" Null="true"/>
