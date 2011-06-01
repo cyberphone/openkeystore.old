@@ -223,6 +223,8 @@ public class SKSWSImplementation
     @WebResult(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     public int createProvisioningSession (@WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                           String algorithm,
+                                          @WebParam(name="PrivacyEnabled", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                          boolean privacy_enabled,
                                           @WebParam(name="ServerSessionID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                           String server_session_id,
                                           @WebParam(name="ServerEphemeralKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -258,6 +260,7 @@ public class SKSWSImplementation
           }
 */
         ProvisioningSession sess = sks.createProvisioningSession (algorithm,
+                                                                  privacy_enabled,
                                                                   server_session_id,
                                                                   getECPublicKey (server_ephemeral_key),
                                                                   issuer_uri,
@@ -296,6 +299,10 @@ public class SKSWSImplementation
                                               int provisioning_handle,
                                               @WebParam(name="ProvisioningState", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                               boolean provisioning_state,
+                                              @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                              Holder<String> algorithm,
+                                              @WebParam(name="PrivacyEnabled", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                              Holder<Boolean> privacy_enabled,
                                               @WebParam(name="KeyManagementKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                               Holder<byte[]> key_management_key,
                                               @WebParam(name="ClientTime", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
@@ -317,6 +324,8 @@ public class SKSWSImplementation
           }
         else
           {
+            algorithm.value = eps.getAlgorithm ();
+            privacy_enabled.value = eps.getPrivacyEnabled ();
             key_management_key.value = eps.getKeyManagementKey () == null ? null : eps.getKeyManagementKey ().getEncoded ();
             client_time.value = eps.getClientTime ();
             session_life_time.value = eps.getSessionLifeTime ();

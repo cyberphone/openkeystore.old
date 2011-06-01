@@ -1112,7 +1112,7 @@ public class ServerCredentialStore implements Serializable
         this.client_session_id = prov_sess_response.client_session_id;
         this.server_session_id = prov_sess_request.server_session_id;
         this.issuer_uri = prov_sess_request.submit_url;
-        this.device_certificate = prov_sess_response.device_certificate_path[0];
+        this.device_certificate = prov_sess_response.device_certificate_path == null ? null : prov_sess_response.device_certificate_path[0];
        }
     
     

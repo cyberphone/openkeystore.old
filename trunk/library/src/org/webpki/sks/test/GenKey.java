@@ -140,7 +140,7 @@ public class GenKey
           }
         PublicKey kmk = current.server_sess_key.enumerateKeyManagementKeys ()[kmk_id];
         byte[] authorization = current.server_sess_key.generateKeyManagementAuthorization (kmk, current.mac (cert_path[0].getEncoded (),
-                                                                                                  current.device.device_info.getCertificatePath ()[0].getEncoded ()));
+                                                                                                  current.getDeviceID ()));
         upd_mac.addArray (authorization);
         return authorization;
       }

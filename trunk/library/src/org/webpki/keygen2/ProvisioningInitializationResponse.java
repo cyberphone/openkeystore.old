@@ -51,7 +51,7 @@ abstract class ProvisioningInitializationResponse extends XMLObjectWrapper
     
     ServerCookie server_cookie;
     
-    X509Certificate[] device_certificate_path;
+    X509Certificate[] device_certificate_path;  // Is null for the privacy_enabled mode
     
     byte[] server_certificate_fingerprint;  // Optional
 

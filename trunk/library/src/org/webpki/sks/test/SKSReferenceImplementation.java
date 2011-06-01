@@ -412,6 +412,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                          Provisioning provisioning) throws SKSException
           {
             ///////////////////////////////////////////////////////////////////////////////////
+            // "Sanity check"
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (provisioning.privacy_enabled ^ owner.privacy_enabled)
+              {
+                provisioning.abort ("Inconsistent use of the \"PrivacyEnabled\" attribute for key #" + key_handle);
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
             // Verify MAC
             ///////////////////////////////////////////////////////////////////////////////////
             verifier.addArray (authorization);
@@ -425,7 +433,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 Signature km_verify = Signature.getInstance (owner.key_management_key instanceof RSAPublicKey ? 
                                                                                               "SHA256WithRSA" : "SHA256WithECDSA");
                 km_verify.initVerify (owner.key_management_key);
-                km_verify.update (provisioning.getMacBuilder (getDeviceCertificatePath ()[0].getEncoded ()).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
+                km_verify.update (provisioning.getMacBuilder (getDeviceID (provisioning.privacy_enabled)).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
                 if (!km_verify.verify (authorization))
                   {
                     provisioning.abort ("\"Authorization\" signature did not verify for key #" + key_handle);
@@ -526,6 +534,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Post provisioning management
         Vector<PostProvisioningObject> post_provisioning_objects = new Vector<PostProvisioningObject> ();
 
+        boolean privacy_enabled;
         String client_session_id;
         String server_session_id;
         String issuer_uri;
@@ -922,6 +931,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
       {
         return new X509Certificate[]{(X509Certificate)getAttestationKeyStore ().getCertificate (ATTESTATION_KEY_ALIAS)};
       }
+    
+    byte[] getDeviceID (boolean privacy_enabled) throws GeneralSecurityException
+      {
+        return privacy_enabled ? KDF_ANONYMOUS : getDeviceCertificatePath ()[0].getEncoded ();
+      }
 
     PrivateKey getAttestationKey () throws GeneralSecurityException
       {
@@ -1009,6 +1023,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             if (provisioning.open == provisioning_state)
               {
                 return new EnumeratedProvisioningSession (provisioning.provisioning_handle,
+                                                          ALGORITHM_SESSION_KEY_ATTEST_1,
+                                                          provisioning.privacy_enabled,
                                                           provisioning.key_management_key,
                                                           provisioning.client_time,
                                                           provisioning.session_life_time,
@@ -2451,6 +2467,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public synchronized ProvisioningSession createProvisioningSession (String algorithm,
+                                                                       boolean privacy_enabled,
                                                                        String server_session_id,
                                                                        ECPublicKey server_ephemeral_key,
                                                                        String issuer_uri,
@@ -2506,7 +2523,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             kdf.addString (client_session_id);
             kdf.addString (server_session_id);
             kdf.addString (issuer_uri);
-            kdf.addArray (getDeviceCertificatePath ()[0].getEncoded ());
+            kdf.addArray (getDeviceID (privacy_enabled));
             session_key = kdf.getResult ();
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -2520,21 +2537,25 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ska.addInt (client_time);
             ska.addInt (session_life_time);
             ska.addShort (session_key_limit);
-            byte[] session_key_attest = ska.getResult ();
+            attestation = ska.getResult ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Sign attestation
+            // Optionally sign attestation
             ///////////////////////////////////////////////////////////////////////////////////
-            Signature signer = Signature.getInstance ("SHA256withRSA");
-            signer.initSign (getAttestationKey ());
-            signer.update (session_key_attest);
-            attestation = signer.sign ();
+            if (!privacy_enabled)
+              {
+                Signature signer = Signature.getInstance ("SHA256withRSA");
+                signer.initSign (getAttestationKey ());
+                signer.update (attestation);
+                attestation = signer.sign ();
+              }
           }
         catch (Exception e)
           {
             throw new SKSException (e);
           }
         Provisioning p = new Provisioning ();
+        p.privacy_enabled = privacy_enabled;
         p.server_session_id = server_session_id;
         p.client_session_id = client_session_id;
         p.issuer_uri = issuer_uri;

@@ -53,6 +53,8 @@ abstract class ProvisioningInitializationRequest extends XMLObjectWrapper
     ServerCookie server_cookie;
 
     String algorithm = KeyGen2URIs.ALGORITHMS.SESSION_KEY_1;
+    
+    boolean privacy_enabled;
 
 
     public void init () throws IOException

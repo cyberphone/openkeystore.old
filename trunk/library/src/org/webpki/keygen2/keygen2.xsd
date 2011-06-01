@@ -39,7 +39,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 04-December-2010 
+    Revised: 01-June-2011 
     Author: Anders Rundgren
 
     Copyright 2006-2011 WebPKI.org (http://webpki.org).
@@ -57,11 +57,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20101204#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20110601#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20101204#"
+           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20110601#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -252,6 +252,15 @@
 
          </xs:sequence> 
 
+         <!-- "Algorithm" specifies the algorithm to use for creating an
+              SKS "SessionKey".  Currently the only documented algorithm URI is:
+              "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1" -->
+         <xs:attribute name="Algorithm" type="xs:anyURI" use="required"/>
+
+         <!-- "PrivacyEnabled" specifies if the SKS privacy enabled provisioning
+              mode is to be used.  Default: false -->
+         <xs:attribute name="PrivacyEnabled" type="xs:anyURI" use="optional"/>
+
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
@@ -281,11 +290,6 @@
                </xs:restriction>
             </xs:simpleType>
          </xs:attribute>
-
-         <!-- "Algorithm" specifies the algorithm to use for creating an
-              SKS "SessionKey".  Currently the only documented algorithm URI is:
-              "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1" -->
-         <xs:attribute name="Algorithm" type="xs:anyURI" use="required"/>
 
          <!-- Where to HTTP POST the provisioning session response.
               Note that applicable session cookies MUST be submitted
@@ -324,8 +328,10 @@
                </xs:complexType>
             </xs:element>
 
-            <!-- "DeviceCertificatePath" holds the SKS device certificate path -->
-            <xs:element name="DeviceCertificatePath">
+            <!-- "DeviceCertificatePath" holds the SKS device certificate path.
+                 Note: This element MUST be defined when "PrivacyEnabled" is false
+                 whereas it MUST NOT be defined when "PrivacyEnabled" is true  -->
+            <xs:element name="DeviceCertificatePath" minOccurs="0">
                <xs:complexType>
                   <xs:sequence>
 

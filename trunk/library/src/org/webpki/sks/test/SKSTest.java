@@ -2370,6 +2370,41 @@ public class SKSTest
     @Test
     public void test56 () throws Exception
       {
+        for (int i = 0; i < 2; i++)
+          {
+            String ok_pin = "1563";
+            ProvSess sess = new ProvSess (device, (short) 50, 0, true);
+            PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                      PassphraseFormat.NUMERIC,
+                                                      EnumSet.noneOf (PatternRestriction.class),
+                                                      Grouping.SHARED,
+                                                      4 /* min_length */, 
+                                                      8 /* max_length */,
+                                                      (short) 3 /* retry_limit*/, 
+                                                      null /* puk_policy */);
+            GenKey key = sess.createECKey ("Key.1",
+                                           ok_pin /* pin_value */,
+                                           pin_policy,
+                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+            sess.closeSession ();
+            lockECKey (key, ok_pin);
+            ProvSess sess2 = new ProvSess (device, (short) 50, null, true);
+            GenKey new_key = sess2.createECKey ("Key.1",
+                                                null /* pin_value */,
+                                                null /* pin_policy */,
+                                                AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+            if (i == 0) new_key.postCloneKey (key);
+            sess2.postUnlockKey (key);
+            if (i == 1) new_key.postCloneKey (key);
+            sess2.closeSession ();
+            new_key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
+            key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
+          }
+      }
+
+    @Test
+    public void test57 () throws Exception
+      {
         algOrder (new String[]{SignatureAlgorithms.RSA_SHA1.getURI (),
                                SignatureAlgorithms.RSA_SHA1.getURI ()},
                   SignatureAlgorithms.RSA_SHA1.getURI ());

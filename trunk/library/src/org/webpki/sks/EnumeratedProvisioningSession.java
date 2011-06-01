@@ -30,6 +30,22 @@ public class EnumeratedProvisioningSession
       }
     
 
+    String algorithm;
+    
+    public String getAlgorithm ()
+      {
+        return algorithm;
+      }
+
+
+    boolean privacy_enabled;
+    
+    public boolean getPrivacyEnabled ()
+      {
+        return privacy_enabled;
+      }
+
+
     PublicKey key_management_key;
     
     public PublicKey getKeyManagementKey ()
@@ -84,6 +100,8 @@ public class EnumeratedProvisioningSession
     
     
     public EnumeratedProvisioningSession (int provisioning_handle,
+                                          String algorithm,
+                                          boolean privacy_enabled,
                                           PublicKey key_management_key,
                                           int client_time,
                                           int session_life_time,
@@ -91,6 +109,8 @@ public class EnumeratedProvisioningSession
                                           String client_session_id,
                                           String issuer_uri)
       {
+        this.algorithm = algorithm;
+        this.privacy_enabled = privacy_enabled;
         this.key_management_key = key_management_key;
         this.client_time = client_time;
         this.session_life_time = session_life_time;

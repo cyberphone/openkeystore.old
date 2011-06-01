@@ -168,6 +168,8 @@ public class KeyGen2Test
     
     boolean device_pin_protection;
     
+    boolean privacy_enabled;
+    
     boolean pin_group_shared;
     
     boolean puk_protection;
@@ -370,6 +372,7 @@ public class KeyGen2Test
             Date client_time = new Date ();
             ProvisioningSession sess = 
                   sks.createProvisioningSession (prov_sess_req.getSessionKeyAlgorithm (),
+                                                 prov_sess_req.getPrivacyEnabledFlag(),
                                                  prov_sess_req.getServerSessionID (),
                                                  prov_sess_req.getServerEphemeralKey (),
                                                  prov_sess_req.getSubmitURL (), /* IssuerURI */
@@ -386,7 +389,7 @@ public class KeyGen2Test
                                                                  prov_sess_req.getServerTime (),
                                                                  client_time,
                                                                  sess.getAttestation (),
-                                                                 device_info.getCertificatePath ());
+                                                                 prov_sess_req.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
             if (https)
               {
                 prov_sess_response.setServerCertificate (server_certificate);
@@ -738,17 +741,29 @@ public class KeyGen2Test
                 mac.init (new SecretKeySpec (session_key, "RAW"));
                 byte[] session_key_attest = mac.doFinal (session_key_mac_data);
                 
-                PublicKey device_public_key = device_certificate.getPublicKey ();
-                SignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
-                    SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256;
-
-                // Verify that the session key signature was signed by the device key
-                Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
-                verifier.initVerify (device_public_key);
-                verifier.update (session_key_attest);
-                if (!verifier.verify (session_attestation))
+                if (device_certificate == null)
                   {
-                    throw new IOException ("Verify provisioning signature failed");
+                    // Privacy enabled mode
+                    if (!ArrayUtil.compare (session_key_attest, session_attestation))
+                      {
+                        throw new IOException ("Verify attestation failed");
+                      }
+                  }
+                else
+                  {
+                    // E2ES mode
+                    PublicKey device_public_key = device_certificate.getPublicKey ();
+                    SignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
+                        SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256;
+    
+                    // Verify that the session key signature was signed by the device key
+                    Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
+                    verifier.initVerify (device_public_key);
+                    verifier.update (session_key_attest);
+                    if (!verifier.verify (session_attestation))
+                      {
+                        throw new IOException ("Verify provisioning signature failed");
+                      }
                   }
               }
 
@@ -889,6 +904,10 @@ public class KeyGen2Test
             if (updatable)
               {
                 prov_sess_request.setKeyManagementKey(server_km = server_sess_key.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
+              }
+            if (privacy_enabled)
+              {
+                prov_sess_request.setPrivacyEnabled (true);
               }
             return prov_sess_request.writeXML ();
           }
@@ -1252,6 +1271,7 @@ public class KeyGen2Test
             writeOption ("Device PIN", device_pin_protection);
             writeOption ("Preset PIN", preset_pin);
             writeOption ("PIN patterns", add_pin_pattern);
+            writeOption ("Privacy Enabled", privacy_enabled);
             writeOption ("ECC Key", ecc_key);
             writeOption ("Server Seed", server_seed);
             writeOption ("PropertyBag", property_bag);
@@ -1701,5 +1721,52 @@ public class KeyGen2Test
         Doer doer2 = new Doer ();
         doer2.perform ();
         assertFalse ("UnLocked", sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());
+      }
+
+    @Test
+    public void PrivacyEnabled () throws Exception
+      {
+        Doer doer1 = new Doer ();
+        privacy_enabled = true;
+        updatable = true;
+        pin_protection = true;
+        ecc_key = true;
+        doer1.perform ();
+        EnumeratedKey ek = new EnumeratedKey ();
+        int j = 0;
+        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
+          {
+            if (ek.getProvisioningHandle () == doer1.client.provisioning_handle)
+              {
+                j++;
+                break;
+              }
+          }
+        assertTrue ("Missing keys", j == 1);
+        for (int i = 1; i <= doer1.server.pin_retry_limit; i++)
+          {
+            try
+              {
+                sks.signHashedData (ek.getKeyHandle (),
+                                    SignatureAlgorithms.ECDSA_SHA256.getURI (),
+                                    null,
+                                    doer1.server.bad_pin,
+                                    HashAlgorithms.SHA256.digest (TEST_STRING));
+                fail ("Bad PIN should not work");
+              }
+            catch (SKSException e)
+              {
+                assertFalse ("Locked", sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked () ^ (i == doer1.server.pin_retry_limit));
+              }
+          }
+
+        updatable = false;
+        pin_protection = false;
+        ecc_key = false;
+        plain_unlock_key= doer1.server;
+        Doer doer2 = new Doer ();
+        doer2.perform ();
+        assertFalse ("UnLocked", sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());
+        privacy_enabled = false;
       }
   }

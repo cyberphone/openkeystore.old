@@ -60,6 +60,7 @@ public interface SecureKeyStore
     public byte[] KDF_DEVICE_ATTESTATION             = {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
     public byte[] KDF_ENCRYPTION_KEY                 = {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
     public byte[] KDF_EXTERNAL_SIGNATURE             = {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
+    public byte[] KDF_ANONYMOUS                      = {'A','n','o','n','y','m','o','u','s'};
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Predefined PIN and PUK policy IDs for MAC operations
@@ -167,6 +168,7 @@ public interface SecureKeyStore
     ///////////////////////////////////////////////////////////////////////////////////
 
     public ProvisioningSession createProvisioningSession (String algorithm,
+                                                          boolean privacy_enabled,
                                                           String server_session_id,
                                                           ECPublicKey server_ephemeral_key,
                                                           String issuer_uri,

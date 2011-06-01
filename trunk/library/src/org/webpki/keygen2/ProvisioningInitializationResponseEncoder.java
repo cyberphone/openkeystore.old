@@ -46,12 +46,12 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
      // Constructors
 
     public ProvisioningInitializationResponseEncoder (ECPublicKey client_ephemeral_key,
-                                               String server_session_id,
-                                               String client_session_id,
-                                               Date server_time,
-                                               Date client_time,
-                                               byte[] attestation,
-                                               X509Certificate[] device_certificate_path)  throws IOException
+                                                      String server_session_id,
+                                                      String client_session_id,
+                                                      Date server_time,
+                                                      Date client_time,
+                                                      byte[] attestation,
+                                                      X509Certificate[] device_certificate_path)  throws IOException
       {
         super.client_ephemeral_key = client_ephemeral_key;
         super.server_session_id = server_session_id;
@@ -133,9 +133,12 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
         ////////////////////////////////////////////////////////////////////////
         // Device certificate path
         ////////////////////////////////////////////////////////////////////////
-        wr.addChildElement (DEVICE_CERTIFICATE_PATH_ELEM);
-        XMLSignatureWrapper.writeX509DataSubset (wr, device_certificate_path);
-        wr.getParent();
+        if (device_certificate_path != null)
+          {
+            wr.addChildElement (DEVICE_CERTIFICATE_PATH_ELEM);
+            XMLSignatureWrapper.writeX509DataSubset (wr, device_certificate_path);
+            wr.getParent();
+          }
 
         ////////////////////////////////////////////////////////////////////////
         // Optional ServerCookie

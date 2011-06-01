@@ -98,7 +98,7 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
         return server_certificate_fingerprint;
       }
     
-
+    
     class XMLSignVer implements SymKeyVerifierInterface
       {
         ServerCryptoInterface server_crypto_interface;
@@ -126,7 +126,7 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
             kdf.addString (client_session_id);
             kdf.addString (server_session_id);
             kdf.addString (prov_sess_request.submit_url);
-            kdf.addArray (device_certificate_path[0].getEncoded ());
+            kdf.addArray (device_certificate_path == null ? SecureKeyStore.KDF_ANONYMOUS : device_certificate_path[0].getEncoded ());
 
             MacGenerator session_key_mac_data = new MacGenerator ();
             session_key_mac_data.addString (prov_sess_request.algorithm);
@@ -140,7 +140,7 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
             server_crypto_interface.generateAndVerifySessionKey (client_ephemeral_key,
                                                                  kdf.getResult (),
                                                                  session_key_mac_data.getResult (),
-                                                                 device_certificate_path[0],
+                                                                 device_certificate_path == null ? null : device_certificate_path[0],
                                                                  attestation);
             if (((server_certificate == null ^ server_certificate_fingerprint == null)) ||
                 (server_certificate != null && !ArrayUtil.compare (server_certificate_fingerprint, HashAlgorithms.SHA256.digest (server_certificate.getEncoded ()))))
@@ -186,12 +186,15 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
         rd.getParent ();
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the device certificate path
+        // Get the optional device certificate path
         /////////////////////////////////////////////////////////////////////////////////////////
-        rd.getNext (DEVICE_CERTIFICATE_PATH_ELEM);
-        rd.getChild ();
-        device_certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);
-        rd.getParent ();
+        if (rd.hasNext (DEVICE_CERTIFICATE_PATH_ELEM))
+          {
+            rd.getNext (DEVICE_CERTIFICATE_PATH_ELEM);
+            rd.getChild ();
+            device_certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);
+            rd.getParent ();
+          }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional ServerCookie

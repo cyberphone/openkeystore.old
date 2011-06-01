@@ -57,8 +57,8 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
     // Constructors
 
     public ProvisioningFinalizationRequestEncoder (String submit_url, 
-                                               ServerCredentialStore server_credential_store,
-                                               ServerCryptoInterface server_crypto_interface) throws IOException
+                                                   ServerCredentialStore server_credential_store,
+                                                   ServerCryptoInterface server_crypto_interface) throws IOException
       {
         this.submit_url = submit_url;
         this.server_credential_store = server_credential_store;
@@ -107,7 +107,8 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
         wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, target_key.client_session_id);
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, target_key.server_session_id);
         wr.setBinaryAttribute (CERTIFICATE_FINGERPRINT_ATTR, HashAlgorithms.SHA256.digest (target_key.certificate_data));
-        byte[] key_id = server_crypto_interface.mac (target_key.certificate_data, server_credential_store.device_certificate.getEncoded ());
+        byte[] device_id = server_credential_store.device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : server_credential_store.device_certificate.getEncoded ();
+        byte[] key_id = server_crypto_interface.mac (target_key.certificate_data, device_id);
         byte[] authorization = server_crypto_interface.generateKeyManagementAuthorization (target_key.key_management_key, key_id);
         wr.setBinaryAttribute (AUTHORIZATION_ATTR, authorization);
         post_op_mac.addArray (authorization);

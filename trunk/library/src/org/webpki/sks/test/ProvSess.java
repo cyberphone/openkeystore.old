@@ -27,6 +27,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -139,18 +140,28 @@ public class ProvSess
             mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
             mac.init (new SecretKeySpec (session_key, "RAW"));
             byte[] session_key_attest = mac.doFinal (session_key_mac_data);
-  
-            PublicKey device_public_key = device_certificate.getPublicKey ();
-            SignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
-                SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256;
-
-            // Verify that the session key signature was signed by the device key
-            Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
-            verifier.initVerify (device_public_key);
-            verifier.update (session_key_attest);
-            if (!verifier.verify (session_attestation))
+            
+            if (device_certificate == null)
               {
-                throw new IOException ("Verify provisioning signature failed");
+                if (!ArrayUtil.compare (session_key_attest, session_attestation))
+                  {
+                    throw new IOException ("Verify attestation failed");
+                  }
+              }
+            else
+              {
+                PublicKey device_public_key = device_certificate.getPublicKey ();
+                SignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
+                    SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256;
+    
+                // Verify that the session key signature was signed by the device key
+                Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
+                verifier.initVerify (device_public_key);
+                verifier.update (session_key_attest);
+                if (!verifier.verify (session_attestation))
+                  {
+                    throw new IOException ("Verify provisioning signature failed");
+                  }
               }
           }
   
@@ -234,6 +245,8 @@ public class ProvSess
     SecureKeyStore sks;
     
     Device device;
+    
+    boolean privacy_enabled;
     
     boolean override_export_protection;
     
@@ -338,16 +351,18 @@ public class ProvSess
     ///////////////////////////////////////////////////////////////////////////////////
     // Create provisioning session
     ///////////////////////////////////////////////////////////////////////////////////
-    public ProvSess (Device device, short session_key_limit, Integer kmk_id) throws GeneralSecurityException, IOException
+    public ProvSess (Device device, short session_key_limit, Integer kmk_id, boolean privacy_enabled) throws GeneralSecurityException, IOException
       {
         this.device = device;
         this.kmk_id = kmk_id;
+        this.privacy_enabled = privacy_enabled;
         PublicKey key_management_key = kmk_id == null ? null : server_sess_key.enumerateKeyManagementKeys ()[kmk_id];
         sks = device.sks;
         server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
         client_time = new Date ();
            ProvisioningSession sess = 
                 device.sks.createProvisioningSession (session_key_algorithm,
+                                                      privacy_enabled,
                                                       server_session_id,
                                                       server_ephemeral_key = server_sess_key.generateEphemeralKey (),
                                                       ISSUER_URI,
@@ -362,7 +377,7 @@ public class ProvSess
            kdf.addString (client_session_id);
            kdf.addString (server_session_id);
            kdf.addString (ISSUER_URI);
-           kdf.addArray (device.device_info.getCertificatePath ()[0].getEncoded ());
+           kdf.addArray (getDeviceID ());
 
            MacGenerator session_key_mac_data = new MacGenerator ();
            session_key_mac_data.addString (session_key_algorithm);
@@ -376,9 +391,14 @@ public class ProvSess
            server_sess_key.generateAndVerifySessionKey (sess.getClientEphemeralKey (),
                                                         kdf.getResult (),
                                                         session_key_mac_data.getResult (),
-                                                        device.device_info.getCertificatePath ()[0],
+                                                        privacy_enabled ? null : device.device_info.getCertificatePath ()[0],
                                                         sess.getAttestation ());
      }
+    
+    public ProvSess (Device device, short session_key_limit, Integer kmk_id) throws GeneralSecurityException, IOException
+      {
+        this (device, session_key_limit, kmk_id, false);
+      }
     
     public ProvSess (Device device) throws GeneralSecurityException, IOException
       {
@@ -747,6 +767,11 @@ public class ProvSess
     protected void finalize() throws Throwable
       {
         abortSession ();
+      }
+
+    public byte[] getDeviceID () throws GeneralSecurityException
+      {
+        return privacy_enabled ? SecureKeyStore.KDF_ANONYMOUS : device.device_info.getCertificatePath ()[0].getEncoded ();
       }
 
   }

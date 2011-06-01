@@ -243,7 +243,8 @@
 
    <Method Name="createProvisioningSession" DotNetReturnClass="ProvisioningSession" Throws="SKSException">
      <Returns   Name="provisioning_handle"  Type="int"    XMLName="ProvisioningHandle"/>
-     <Parameter Name="algorithm"            Type="string" XMLName="Algorithm"       />
+     <Parameter Name="algorithm"            Type="string" XMLName="Algorithm"/>
+     <Parameter Name="privacy_enabled"      Type="bool"   XMLName="PrivacyEnabled"/>
      <Parameter Name="server_session_id"    Type="string" XMLName="ServerSessionID"/>
      <Parameter Name="server_ephemeral_key" Type="binary" XMLName="ServerEphemeralKey"/>
      <Parameter Name="issuer_uri"           Type="string" XMLName="IssuerURI"/>
@@ -268,6 +269,7 @@
           }
 */
         ProvisioningSession sess = sks.createProvisioningSession (algorithm,
+                                                                  privacy_enabled,
                                                                   server_session_id,
                                                                   getECPublicKey (server_ephemeral_key),
                                                                   issuer_uri,
@@ -296,6 +298,8 @@
      <Returns   Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="provisioning_state"  Type="bool"   XMLName="ProvisioningState"/>
+     <Parameter Name="algorithm"           Type="string" XMLName="Algorithm"          Mode="out" Null="true"/>
+     <Parameter Name="privacy_enabled"     Type="bool"   XMLName="PrivacyEnabled"     Mode="out" Null="true"/>
      <Parameter Name="key_management_key"  Type="binary" XMLName="KeyManagementKey"   Mode="out" Null="true"/>
      <Parameter Name="client_time"         Type="int"    XMLName="ClientTime"         Mode="out" Null="true"/>
      <Parameter Name="session_life_time"   Type="int"    XMLName="SessionLifeTime"    Mode="out" Null="true"/>
@@ -310,6 +314,8 @@
           }
         else
           {
+            algorithm.value = eps.getAlgorithm ();
+            privacy_enabled.value = eps.getPrivacyEnabled ();
             key_management_key.value = eps.getKeyManagementKey () == null ? null : eps.getKeyManagementKey ().getEncoded ();
             client_time.value = eps.getClientTime ();
             session_life_time.value = eps.getSessionLifeTime ();

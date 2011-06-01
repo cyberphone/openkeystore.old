@@ -388,34 +388,39 @@ namespace org.webpki.sks.ws.client
         internal string _algorithm;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivacyEnabled", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal bool _privacy_enabled;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ServerSessionID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal string _server_session_id;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ServerEphemeralKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _server_ephemeral_key;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="IssuerURI", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal string _issuer_uri;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyManagementKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _key_management_key;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ClientTime", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal int _client_time;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=7)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="SessionLifeTime", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal int _session_life_time;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=7)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=8)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="SessionKeyLimit", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal short _session_key_limit;
 
         public createProvisioningSession_Request(string Algorithm,
+                                                 bool PrivacyEnabled,
                                                  string ServerSessionID,
                                                  byte[] ServerEphemeralKey,
                                                  string IssuerURI,
@@ -425,6 +430,7 @@ namespace org.webpki.sks.ws.client
                                                  short SessionKeyLimit)
         {
             _algorithm = Algorithm;
+            _privacy_enabled = PrivacyEnabled;
             _server_session_id = ServerSessionID;
             _server_ephemeral_key = ServerEphemeralKey;
             _issuer_uri = IssuerURI;
@@ -552,36 +558,48 @@ namespace org.webpki.sks.ws.client
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Algorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        #pragma warning disable 0649
+        internal string _algorithm;
+        #pragma warning restore 0649
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivacyEnabled", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        #pragma warning disable 0649
+        internal bool _privacy_enabled;
+        #pragma warning restore 0649
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyManagementKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal byte[] _key_management_key;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ClientTime", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal int _client_time;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="SessionLifeTime", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal int _session_life_time;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ServerSessionID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal string _server_session_id;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=7)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ClientSessionID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal string _client_session_id;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=8)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="IssuerURI", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal string _issuer_uri;
@@ -590,6 +608,16 @@ namespace org.webpki.sks.ws.client
         public int ProvisioningHandle
         {
             get { return _provisioning_handle; }
+        }
+
+        public string Algorithm
+        {
+            get { return _algorithm; }
+        }
+
+        public bool PrivacyEnabled
+        {
+            get { return _privacy_enabled; }
         }
 
         public byte[] KeyManagementKey
@@ -2236,6 +2264,7 @@ namespace org.webpki.sks.ws.client
         }
 
         public ProvisioningSession createProvisioningSession(string Algorithm,
+                                                             bool PrivacyEnabled,
                                                              string ServerSessionID,
                                                              byte[] ServerEphemeralKey,
                                                              string IssuerURI,
@@ -2245,6 +2274,7 @@ namespace org.webpki.sks.ws.client
                                                              short SessionKeyLimit)
         {
             ProvisioningSession _res = base.Channel.createProvisioningSession(new createProvisioningSession_Request(Algorithm,
+                                                                                                                    PrivacyEnabled,
                                                                                                                     ServerSessionID,
                                                                                                                     ServerEphemeralKey,
                                                                                                                     IssuerURI,

@@ -75,6 +75,7 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="Algorithm" type="xs:string"/>
+            <xs:element name="PrivacyEnabled" type="xs:boolean"/>
             <xs:element name="ServerSessionID" type="xs:string"/>
             <xs:element name="ServerEphemeralKey" type="xs:base64Binary"/>
             <xs:element name="IssuerURI" type="xs:string"/>
@@ -135,6 +136,8 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="Algorithm" type="xs:string" nillable="true" minOccurs="0"/>
+            <xs:element name="PrivacyEnabled" type="xs:boolean" nillable="true" minOccurs="0"/>
             <xs:element name="KeyManagementKey" type="xs:base64Binary" nillable="true" minOccurs="0"/>
             <xs:element name="ClientTime" type="xs:int" nillable="true" minOccurs="0"/>
             <xs:element name="SessionLifeTime" type="xs:int" nillable="true" minOccurs="0"/>

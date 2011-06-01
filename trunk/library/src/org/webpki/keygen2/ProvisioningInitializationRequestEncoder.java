@@ -46,10 +46,10 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
     // Constructors
 
     public ProvisioningInitializationRequestEncoder (ECPublicKey server_ephemeral_key,
-                                              String server_session_id,
-                                              String submit_url,
-                                              int session_life_time,
-                                              short session_key_limit)  throws IOException
+                                                     String server_session_id,
+                                                     String submit_url,
+                                                     int session_life_time,
+                                                     short session_key_limit)  throws IOException
       {
         super.server_ephemeral_key = server_ephemeral_key;
         super.server_session_id = server_session_id;
@@ -65,9 +65,18 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
       }
 
 
-    public void setKeyManagementKey (PublicKey key_management_key) throws IOException, GeneralSecurityException
+    public void setKeyManagementKey (PublicKey key_management_key)
       {
         super.key_management_key = key_management_key;
+      }
+
+
+    boolean privacy_enabled_set;
+    
+    public void setPrivacyEnabled (boolean flag) throws IOException, GeneralSecurityException
+      {
+        privacy_enabled_set = true;
+        super.privacy_enabled = flag;
       }
 
 
@@ -125,6 +134,11 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
         wr.setIntAttribute (SESSION_KEY_LIMIT_ATTR, session_key_limit);
 
         wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, algorithm);
+        
+        if (privacy_enabled_set)
+          {
+            wr.setBooleanAttribute (PRIVACY_ENABLED_ATTR, privacy_enabled);
+          }
 
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key

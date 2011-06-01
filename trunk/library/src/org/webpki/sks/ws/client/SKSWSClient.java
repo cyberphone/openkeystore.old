@@ -187,7 +187,8 @@ public class SKSWSClient implements SecureKeyStore
       }
 
     @Override
-    public ProvisioningSession createProvisioningSession (String algorithm, 
+    public ProvisioningSession createProvisioningSession (String algorithm,
+                                                          boolean privacy_enabled,
                                                           String server_session_id,
                                                           ECPublicKey server_ephemeral_key,
                                                           String issuer_uri,
@@ -202,6 +203,7 @@ public class SKSWSClient implements SecureKeyStore
             Holder<byte[]>client_ephemeral_key = new Holder<byte[]> ();
             Holder<byte[]>attestation = new Holder<byte[]> ();
             int provisioning_handle = getSKSWS ().createProvisioningSession (algorithm,
+                                                                             privacy_enabled,
                                                                              server_session_id,
                                                                              server_ephemeral_key.getEncoded (),
                                                                              issuer_uri,
@@ -248,6 +250,8 @@ public class SKSWSClient implements SecureKeyStore
       {
         try
           {
+            Holder<String> algorithm = new Holder<String> ();
+            Holder<Boolean> privacy_enabled = new Holder<Boolean> ();
             Holder<byte[]> key_management_key = new Holder<byte[]> ();
             Holder<Integer> client_time = new Holder<Integer> ();
             Holder<Integer> session_life_time = new Holder<Integer> ();
@@ -256,6 +260,8 @@ public class SKSWSClient implements SecureKeyStore
             Holder<String> issuer_uri = new Holder<String> ();
             provisioning_handle = getSKSWS ().enumerateProvisioningSessions (provisioning_handle,
                                                                              provisioning_state,
+                                                                             algorithm,
+                                                                             privacy_enabled,
                                                                              key_management_key,
                                                                              client_time,
                                                                              session_life_time,
@@ -264,6 +270,8 @@ public class SKSWSClient implements SecureKeyStore
                                                                              issuer_uri);
             return provisioning_handle == EnumeratedProvisioningSession.INIT_ENUMERATION ? 
                        null : new EnumeratedProvisioningSession (provisioning_handle,
+                                                                 algorithm.value,
+                                                                 privacy_enabled.value,
                                                                  key_management_key.value == null ? null : createPublicKeyFromBlob (key_management_key.value),
                                                                  client_time.value,
                                                                  session_life_time.value,
