@@ -381,6 +381,7 @@ public class ProvSess
 
            MacGenerator session_key_mac_data = new MacGenerator ();
            session_key_mac_data.addString (session_key_algorithm);
+           session_key_mac_data.addBool (privacy_enabled);
            session_key_mac_data.addArray (server_ephemeral_key.getEncoded ());
            session_key_mac_data.addArray (sess.getClientEphemeralKey ().getEncoded ());
            session_key_mac_data.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());

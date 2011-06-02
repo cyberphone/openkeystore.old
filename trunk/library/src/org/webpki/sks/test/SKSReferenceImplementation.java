@@ -2531,6 +2531,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder ska = new MacBuilder (session_key);
             ska.addString (algorithm);
+            ska.addBool (privacy_enabled);
             ska.addArray (server_ephemeral_key.getEncoded ());
             ska.addArray (client_ephemeral_key.getEncoded ());
             ska.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
