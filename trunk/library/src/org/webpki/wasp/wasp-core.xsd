@@ -562,7 +562,7 @@
       <xs:attribute name="ContentID" type="wasp:cidURI" use="required"/>
 
       <!-- The MIME-type of the data object.  MUST NOT contain character encoding. -->
-      <xs:attribute name="MimeType" use="required">
+      <xs:attribute name="MIMEType" use="required">
          <xs:simpleType>
             <xs:restriction base="xs:string">
                <xs:pattern value="[^;]+"/>

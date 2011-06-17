@@ -75,8 +75,6 @@ public class SKSTest
   {
     static final byte[] TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','o','t','?'};
   
-    static FileOutputStream fos;
-    
     static SecureKeyStore sks;
     
     static boolean reference_implementation;
@@ -564,12 +562,7 @@ public class SKSTest
     @BeforeClass
     public static void openFile () throws Exception
       {
-        String dir = System.getProperty ("test.dir");
         standalone_testing = new Boolean (System.getProperty ("sks.standalone"));
-        if (dir.length () > 0)
-          {
-            fos = new FileOutputStream (dir + "/" + SKSTest.class.getCanonicalName () + ".txt");
-          }
         Security.insertProviderAt (new BouncyCastleProvider(), 1);
         sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
         DeviceInfo dev = sks.getDeviceInfo ();
@@ -587,43 +580,22 @@ public class SKSTest
     @AfterClass
     public static void closeFile () throws Exception
       {
-        if (fos != null)
-          {
-            fos.close ();
-          }
       }
     
     @Before
     public void setup () throws Exception
       {
          device = new Device (sks);
-         writeString ("Begin Test\n");
       }
         
     @After
     public void teardown () throws Exception
       {
-         writeString ("End Test\n");
       }
 
     @Rule 
     public TestName name = new TestName();
-   
-    void write (byte[] data) throws Exception
-      {
-        if (fos != null)
-          {
-            fos.write (data);
-          }
-      }
-    
   
-    void writeString (String message) throws Exception
-      {
-        write (message.getBytes ("UTF-8"));
-      }
-    
-      
     @Test
     public void test1 () throws Exception
       {

@@ -72,7 +72,7 @@ public interface WASPConstants
 
     String SERVER_CERT_SHA1_ATTR           = "ServerCertificateSHA1";
 
-    String MIME_TYPE_ATTR                  = "MimeType";
+    String MIME_TYPE_ATTR                  = "MIMEType";
 
     String CONTENT_ID_ATTR                 = "ContentID";
 

@@ -3,7 +3,7 @@ package org.webpki.util;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.webpki.net.HttpsWrapper;
+import org.webpki.net.HTTPSWrapper;
 
 
 public class URLDereferencer implements MimeTypedObject, Serializable
@@ -17,7 +17,7 @@ public class URLDereferencer implements MimeTypedObject, Serializable
 
     public URLDereferencer (String url) throws IOException
       {
-        HttpsWrapper wrap = new HttpsWrapper ();
+        HTTPSWrapper wrap = new HTTPSWrapper ();
         wrap.setRequireSuccess (true);
         wrap.makeGetRequest (url);
         ct = wrap.getContentType ();
