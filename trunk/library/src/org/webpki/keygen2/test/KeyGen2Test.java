@@ -256,6 +256,8 @@ public class KeyGen2Test
         
         ProvisioningInitializationRequestDecoder prov_sess_req;
         
+        PlatformNegotiationRequestDecoder platform_req;
+
         CredentialDiscoveryRequestDecoder cre_disc_req;
         
         DeviceInfo device_info;
@@ -333,7 +335,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] platformResponse (byte[] xmldata) throws IOException
           {
-            PlatformNegotiationRequestDecoder platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (xmldata);
+            platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (xmldata);
             device_info = sks.getDeviceInfo ();
             PlatformNegotiationResponseEncoder platform_response = 
               new PlatformNegotiationResponseEncoder (platform_req);
@@ -372,7 +374,7 @@ public class KeyGen2Test
             Date client_time = new Date ();
             ProvisioningSession sess = 
                   sks.createProvisioningSession (prov_sess_req.getSessionKeyAlgorithm (),
-                                                 prov_sess_req.getPrivacyEnabledFlag(),
+                                                 platform_req.getPrivacyEnabledFlag(),
                                                  prov_sess_req.getServerSessionID (),
                                                  prov_sess_req.getServerEphemeralKey (),
                                                  prov_sess_req.getSubmitURL (), /* IssuerURI */
@@ -389,7 +391,7 @@ public class KeyGen2Test
                                                                  prov_sess_req.getServerTime (),
                                                                  client_time,
                                                                  sess.getAttestation (),
-                                                                 prov_sess_req.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
+                                                                 platform_req.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
             if (https)
               {
                 prov_sess_response.setServerCertificate (server_certificate);
@@ -887,6 +889,10 @@ public class KeyGen2Test
               {
                 platform_request.setAction (Action.UNLOCK);
               }
+            if (privacy_enabled)
+              {
+                platform_request.setPrivacyEnabled (true);
+              }
             return platform_request.writeXML ();
           }
 
@@ -904,10 +910,6 @@ public class KeyGen2Test
             if (updatable)
               {
                 prov_sess_request.setKeyManagementKey(server_km = server_sess_key.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
-              }
-            if (privacy_enabled)
-              {
-                prov_sess_request.setPrivacyEnabled (true);
               }
             return prov_sess_request.writeXML ();
           }

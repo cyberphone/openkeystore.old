@@ -88,12 +88,6 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
       }
 
 
-    public boolean getPrivacyEnabledFlag ()
-      {
-        return privacy_enabled;
-      }
-
-
     public PublicKey getKeyManagementKey ()
       {
         return key_management_key;
@@ -131,8 +125,6 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
         
         session_life_time = ah.getInt (SESSION_LIFE_TIME_ATTR);
         
-        privacy_enabled = ah.getBooleanConditional (PRIVACY_ENABLED_ATTR);
-
         rd.getChild ();
 
 

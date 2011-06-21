@@ -71,15 +71,6 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
       }
 
 
-    boolean privacy_enabled_set;
-    
-    public void setPrivacyEnabled (boolean flag) throws IOException, GeneralSecurityException
-      {
-        privacy_enabled_set = true;
-        super.privacy_enabled = flag;
-      }
-
-
     public void setSessionKeyAlgorithm (String session_key_algorithm)
       {
         super.algorithm = session_key_algorithm;
@@ -135,11 +126,6 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
 
         wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, algorithm);
         
-        if (privacy_enabled_set)
-          {
-            wr.setBooleanAttribute (PRIVACY_ENABLED_ATTR, privacy_enabled);
-          }
-
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////

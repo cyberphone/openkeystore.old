@@ -117,6 +117,12 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
         return basic_capabilities;
       }
 
+    
+    public boolean getPrivacyEnabledFlag ()
+      {
+        return privacy_enabled;
+      }
+
 
     protected void fromXML (DOMReaderHelper rd) throws IOException
       {
@@ -129,6 +135,8 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
         server_session_id = ah.getString (ID_ATTR);
 
         submit_url = ah.getString (SUBMIT_URL_ATTR);
+        
+        privacy_enabled = ah.getBooleanConditional (PRIVACY_ENABLED_ATTR);
 
         rd.getChild ();
 

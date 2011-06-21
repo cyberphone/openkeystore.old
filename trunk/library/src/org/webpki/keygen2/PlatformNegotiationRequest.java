@@ -35,6 +35,8 @@ abstract class PlatformNegotiationRequest extends XMLObjectWrapper
 
     ServerCookie server_cookie;
     
+    boolean privacy_enabled;
+    
     PlatformNegotiationRequest () {}
 
 

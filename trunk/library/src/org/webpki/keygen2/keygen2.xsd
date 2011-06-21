@@ -126,6 +126,10 @@
          <!-- GUI notification -->
          <xs:attribute name="Action" type="kgen:action" use="required"/>
 
+         <!-- "PrivacyEnabled" specifies if the SKS privacy enabled provisioning
+              mode is to be used.  Default: false -->
+         <xs:attribute name="PrivacyEnabled" type="xs:anyURI" use="optional"/>
+
          <!-- GUI language in preference order.  Primarily for public computers -->
          <xs:attribute name="Languages" type="kgen:languageList" use="optional"/>
 
@@ -256,10 +260,6 @@
               SKS "SessionKey".  Currently the only documented algorithm URI is:
               "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1" -->
          <xs:attribute name="Algorithm" type="xs:anyURI" use="required"/>
-
-         <!-- "PrivacyEnabled" specifies if the SKS privacy enabled provisioning
-              mode is to be used.  Default: false -->
-         <xs:attribute name="PrivacyEnabled" type="xs:anyURI" use="optional"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->

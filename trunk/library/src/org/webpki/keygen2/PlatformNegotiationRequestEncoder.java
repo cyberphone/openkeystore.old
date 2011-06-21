@@ -73,6 +73,15 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
       {
         return this.server_cookie = server_cookie;
       }
+    
+
+    boolean privacy_enabled_set;
+    
+    public void setPrivacyEnabled (boolean flag)
+      {
+        privacy_enabled_set = true;
+        privacy_enabled = flag;
+      }
 
 
     public void setPrefix (String prefix)
@@ -126,6 +135,11 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         wr.setStringAttribute (ID_ATTR, server_session_id);
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
+        
+        if (privacy_enabled_set)
+          {
+            wr.setBooleanAttribute (PRIVACY_ENABLED_ATTR, privacy_enabled);
+          }
         
         if (needs_dsig_ns) XMLSignatureWrapper.addXMLSignatureNS (wr);
 
