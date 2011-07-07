@@ -52,6 +52,9 @@ public class SKSException extends IOException
     /* Internal error */
     public static final int ERROR_INTERNAL       = 0x0A;
 
+    /* External error */
+    public static final int ERROR_EXTERNAL       = 0x0B;
+
     int error;
     
     public SKSException (String e, int error)

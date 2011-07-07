@@ -99,7 +99,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS version and configuration data
     /////////////////////////////////////////////////////////////////////////////////////////////
-    static final short SKS_API_LEVEL                       = 0x0001;
     static final String SKS_VENDOR_NAME                    = "WebPKI.org";
     static final String SKS_VENDOR_DESCRIPTION             = "SKS Reference - Java Emulator Edition";
     static final String SKS_UPDATE_URL                     = null;  // Change here to test or disable
@@ -574,7 +573,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         byte[] encrypt (byte[] data) throws SKSException, GeneralSecurityException
           {
-            byte[] key = getMacBuilder (new byte[0]).addVerbatim (KDF_ENCRYPTION_KEY).getResult ();
+            byte[] key = getMacBuilder (ZERO_LENGTH_ARRAY).addVerbatim (KDF_ENCRYPTION_KEY).getResult ();
             Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
             byte[] iv = new byte[16];
             new SecureRandom ().nextBytes (iv);
@@ -584,7 +583,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         byte[] decrypt (byte[] data) throws SKSException
           {
-            byte[] key = getMacBuilder (new byte[0]).addVerbatim (KDF_ENCRYPTION_KEY).getResult ();
+            byte[] key = getMacBuilder (ZERO_LENGTH_ARRAY).addVerbatim (KDF_ENCRYPTION_KEY).getResult ();
             try
               {
                 Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
@@ -2534,7 +2533,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ska.addBool (privacy_enabled);
             ska.addArray (server_ephemeral_key.getEncoded ());
             ska.addArray (client_ephemeral_key.getEncoded ());
-            ska.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
+            ska.addArray (key_management_key == null ? ZERO_LENGTH_ARRAY : key_management_key.getEncoded ());
             ska.addInt (client_time);
             ska.addInt (session_life_time);
             ska.addShort (session_key_limit);
@@ -2934,14 +2933,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         verifier.addByte (export_protection);
         verifier.addByte (delete_protection);
         verifier.addByte (app_usage);
-        if (friendly_name == null)
-          {
-            verifier.addShort (0);
-          }
-        else
-          {
-            verifier.addString (friendly_name);
-          }
+        verifier.addString (friendly_name == null ? "" : friendly_name);
         verifier.addBool (private_key_backup);
         verifier.addArray (key_specifier);
         LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
@@ -3049,7 +3041,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             SecureRandom secure_random = new SecureRandom (server_seed);
             KeyPairGenerator kpg = KeyPairGenerator.getInstance (alg_par_spec instanceof RSAKeyGenParameterSpec ? "RSA" : "EC");
             kpg.initialize (alg_par_spec, secure_random);
-            java.security.KeyPair key_pair = kpg.generateKeyPair ();
+            KeyPair key_pair = kpg.generateKeyPair ();
             PublicKey public_key = key_pair.getPublic ();
             PrivateKey private_key = key_pair.getPrivate ();
 
@@ -3064,10 +3056,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             MacBuilder attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
             attestation.addString (id);
             attestation.addArray (public_key.getEncoded ());
-            if (private_key_backup)
-              {
-                attestation.addArray (encrypted_private_key);
-              }
+            attestation.addArray (private_key_backup? encrypted_private_key : ZERO_LENGTH_ARRAY);
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Finally, create a key entry

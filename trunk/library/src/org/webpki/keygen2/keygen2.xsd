@@ -1016,17 +1016,16 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- SKS Specification: createKeyEntry.KeyAlgorithmType -->
+            <!-- SKS Specification: createKeyEntry.KeySpecifier -->
             <xs:choice>
 
                <xs:element name="RSA">
                   <xs:complexType>
 
-                     <!-- SKS Reference: createKeyEntry.RSAKeySize -->
+                     <!-- RSA key size in bits -->
                      <xs:attribute name="KeySize" type="xs:positiveInteger" use="required"/>
 
-                     <!-- SKS Reference: createKeyEntry.RSAExponent 
-                          Default: 0 => Use SKS default -->
+                     <!-- RSA exponent.  Default: 0 => Use SKS default -->
                     <xs:attribute name="Exponent" type="xs:positiveInteger" use="optional"/>
 
                   </xs:complexType>
@@ -1035,17 +1034,8 @@
                <xs:element name="EC">
                   <xs:complexType>
 
-                     <!-- SKS Reference: createKeyEntry.NamedCurve -->
+                     <!-- Name of curve -->
                      <xs:attribute name="NamedCurve" type="xs:anyURI" use="required"/>
-
-                  </xs:complexType>
-               </xs:element>
-
-               <xs:element name="DSA">
-                  <xs:complexType>
-
-                     <!-- The length of the key -->
-                     <xs:attribute name="KeySize" type="xs:integer" use="required"/>
 
                   </xs:complexType>
                </xs:element>

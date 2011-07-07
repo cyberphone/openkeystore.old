@@ -62,8 +62,8 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
     // Constructors
 
     public KeyCreationRequestEncoder (String submit_url,
-                                            ServerCredentialStore server_credential_store,
-                                            ServerCryptoInterface server_crypto_interface) throws IOException
+                                      ServerCredentialStore server_credential_store,
+                                      ServerCryptoInterface server_crypto_interface) throws IOException
       {
         this.submit_url = submit_url;
         this.server_credential_store = server_credential_store;

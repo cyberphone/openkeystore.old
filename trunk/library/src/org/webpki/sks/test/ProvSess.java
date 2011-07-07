@@ -683,10 +683,14 @@ public class ProvSess
             key_attestation.addArray (key_pair.getPrivateKey ());
             verifyPrivateKeyBackup (key_pair.getPrivateKey (), key_pair.getPublicKey ());
           }
-         if (!ArrayUtil.compare (attest (key_attestation.getResult ()), key_pair.getAttestation ()))
-           {
-             bad ("Failed key attest");
-           }
+        else
+          {
+            key_attestation.addArray (SecureKeyStore.ZERO_LENGTH_ARRAY);
+          }
+        if (!ArrayUtil.compare (attest (key_attestation.getResult ()), key_pair.getAttestation ()))
+          {
+            bad ("Failed key attest");
+          }
         GenKey key = new GenKey ();
         key.id = id;
         key.key_handle = key_pair.getKeyHandle ();
