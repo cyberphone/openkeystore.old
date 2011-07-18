@@ -282,7 +282,6 @@ public class InfoCardWriter
       {
         sts_certificate = signer.prepareSigning (false)[0];
         XMLSigner xmls = new XMLSigner (signer);
-        xmls.setPrettyPrinting (false);
         return xmls.signXMLWrapper (card, "_Object_InfoCard").writeXML ();
       }
 

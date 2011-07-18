@@ -42,8 +42,6 @@ abstract class XMLSignerCore
 
     private boolean remove_xml_ns;
 
-    private boolean pretty_printing = true;
-
 
     public void setDigestAlgorithm (HashAlgorithms digest_algorithm)
       {
@@ -93,12 +91,6 @@ abstract class XMLSignerCore
       }
 
 
-    public void setPrettyPrinting (boolean flag)
-      {
-        pretty_printing = flag;
-      }
-
-
     private void updateBase64Field (Text node, byte[] data) throws IOException
       {
         node.setNodeValue (new Base64(false).getBase64StringFromBinary (data));
@@ -113,7 +105,6 @@ abstract class XMLSignerCore
     private void setupSignatureData () throws GeneralSecurityException, IOException
       {
         dsig_wrapper = new XMLSignatureWrapper ();
-        dsig_wrapper.pretty_printing = pretty_printing;
         dsig_wrapper.KeyInfo_Reference_create = write_keyinfo_ref_flag;
         if (this instanceof XMLSymKeySigner)
           {

@@ -173,8 +173,6 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
     boolean KeyInfo_Reference_create;
 
-    boolean pretty_printing;
-
 
     private static final String DUMMY_SIGNATURE = "dbp88TOVgyQ0xWyj4vFwMApimrk=";
     private static final String DUMMY_DIGEST    = "dbp88TOVgyQ0xWyj4vFwMApimrk=";
@@ -564,7 +562,6 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
     protected void toXML (DOMWriterHelper wr) throws IOException
       {
-        wr.setPrettyPrinting (pretty_printing);
         String base_id = Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
 
         root = wr.initializeRootObject (XML_DSIG_NS_PREFIX);

@@ -206,8 +206,8 @@
         <include name="org/**"/>
         <exclude name="org/**/test/**"/>
       </packageset>
-      <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="${env.JAVA_HOME}\docs\api"/>
-      <link offline="true" href="http://tomcat.apache.org/tomcat-5.5-doc/servletapi" packagelistLoc="${env.JAVA_HOME}\eedocs\docs\api"/>
+      <link offline="true" href="http://download.oracle.com/javase/6/docs/api/" packagelistLoc="${env.JAVA_HOME}\jsedocs\api"/>
+      <link offline="true" href="http://download.oracle.com/javaee/6/api/" packagelistLoc="${env.JAVA_HOME}\jeedocs\api"/>
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
       <bottom><![CDATA[<i>2005-2011 WebPKI.org.</i>]]></bottom>
     </javadoc>
