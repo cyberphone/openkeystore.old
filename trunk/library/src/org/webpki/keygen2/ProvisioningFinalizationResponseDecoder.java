@@ -44,18 +44,6 @@ public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinaliz
       }
 
     
-    public String getServerSessionID ()
-      {
-        return server_session_id;
-      }
-
-
-    public String getClientSessionID ()
-      {
-        return client_session_id;
-      }
-
-
     public ServerCookie getServerCookie ()
       {
         return server_cookie;

@@ -30,36 +30,54 @@ abstract class ProvisioningFinalizationResponse extends XMLObjectWrapper
     ProvisioningFinalizationResponse () {}
 
 
+    /**
+     * Internal Use Only
+     */
     public void init () throws IOException
       {
         addSchema (KEYGEN2_SCHEMA_FILE);
       }
 
 
+    /**
+     * Internal Use Only
+     */
     protected boolean hasQualifiedElements ()
       {
         return true;
       }
 
 
+    /**
+     * Internal Use Only
+     */
     public String namespace ()
       {
         return KEYGEN2_NS;
       }
 
     
+    /**
+     * Internal Use Only
+     */
     public String element ()
       {
         return PROVISIONING_FINALIZATION_RESPONSE_ELEM;
       }
 
 
+    /**
+     * Internal Use Only
+     */
     protected void fromXML (DOMReaderHelper helper) throws IOException
       {
         throw new IOException ("Should have been implemented in derived class");
       }
 
 
+    /**
+     * Internal Use Only
+     */
     protected void toXML (DOMWriterHelper helper) throws IOException
       {
         throw new IOException ("Should have been implemented in derived class");
