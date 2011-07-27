@@ -2851,7 +2851,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             provisioning.abort ("Unsupported \"Algorithm\" : " + algorithm, SKSException.ERROR_ALGORITHM);
           }
-        if (server_seed.length != 32)
+        if (server_seed != null && (server_seed.length == 0 || server_seed.length > 32))
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
           }
@@ -2913,7 +2913,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_ENTRY);
         verifier.addString (id);
         verifier.addString (algorithm);
-        verifier.addArray (server_seed);
+        verifier.addArray (server_seed == null ? ZERO_LENGTH_ARRAY : server_seed);
         verifier.addString (pin_policy_id);
         if (decrypt_pin)
           {
@@ -3038,7 +3038,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             // At last, generate the desired key-pair
             ///////////////////////////////////////////////////////////////////////////////////
-            SecureRandom secure_random = new SecureRandom (server_seed);
+            SecureRandom secure_random = server_seed == null ? new SecureRandom () : new SecureRandom (server_seed);
             KeyPairGenerator kpg = KeyPairGenerator.getInstance (alg_par_spec instanceof RSAKeyGenParameterSpec ? "RSA" : "EC");
             kpg.initialize (alg_par_spec, secure_random);
             KeyPair key_pair = kpg.generateKeyPair ();

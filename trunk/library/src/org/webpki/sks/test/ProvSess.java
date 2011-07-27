@@ -586,11 +586,9 @@ public class ProvSess
                                AppUsage key_usage,
                                String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
       {
-        byte[] server_seed = new byte[32];
-        new SecureRandom ().nextBytes (server_seed);
         return createKey (id,
                           KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1,
-                          server_seed,
+                          null /* server_seed */,
                           pin_policy,
                           pin_value,
                           BiometricProtection.NONE /* biometric_protection */,
@@ -624,7 +622,7 @@ public class ProvSess
         MacGenerator key_pair_mac = new MacGenerator ();
         key_pair_mac.addString (id);
         key_pair_mac.addString (attestation_algorithm);
-        key_pair_mac.addArray (server_seed);
+        key_pair_mac.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
         byte[] encrypted_pin_value = null;
         if (pin_policy != null)
           {

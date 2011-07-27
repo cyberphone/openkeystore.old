@@ -149,11 +149,6 @@ public interface SecureKeyStore
     public byte PROTECTION_STATUS_DEVICE_PIN         = 0x10;
  
     ///////////////////////////////////////////////////////////////////////////////////
-    // If there is no ServerSeed, this is the default
-    ///////////////////////////////////////////////////////////////////////////////////
-    public byte[] DEFAULT_SEED = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    
-    ///////////////////////////////////////////////////////////////////////////////////
     // Default algorithms
     ///////////////////////////////////////////////////////////////////////////////////
     public short[] SKS_DEFAULT_RSA_SUPPORT       = {1024, 2048};
@@ -197,7 +192,7 @@ public interface SecureKeyStore
     public KeyData createKeyEntry (int provisioning_handle,
                                    String id,
                                    String algorithm,
-                                   byte[] server_seed,
+                                   byte[] server_seed,  // May be null
                                    boolean device_pin_protection,
                                    int pin_policy_handle,
                                    byte[] pin_value,  // Must be null if not applicable

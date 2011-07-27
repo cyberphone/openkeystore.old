@@ -251,7 +251,7 @@
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ID" type="xs:string"/>
             <xs:element name="Algorithm" type="xs:string"/>
-            <xs:element name="ServerSeed" type="xs:base64Binary"/>
+            <xs:element name="ServerSeed" type="xs:base64Binary" nillable="true" minOccurs="0"/>
             <xs:element name="DevicePINProtection" type="xs:boolean"/>
             <xs:element name="PINPolicyHandle" type="xs:int"/>
             <xs:element name="PINValue" type="xs:base64Binary" nillable="true" minOccurs="0"/>

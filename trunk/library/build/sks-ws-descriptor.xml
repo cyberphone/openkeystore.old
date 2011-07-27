@@ -398,7 +398,7 @@
      <Parameter Name="provisioning_handle"   Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="id"                    Type="string" XMLName="ID"/>
      <Parameter Name="algorithm"             Type="string" XMLName="Algorithm"/>
-     <Parameter Name="server_seed"           Type="binary" XMLName="ServerSeed"/>
+     <Parameter Name="server_seed"           Type="binary" XMLName="ServerSeed"         Null="true"/>
      <Parameter Name="device_pin_protection" Type="bool"   XMLName="DevicePINProtection"/>
      <Parameter Name="pin_policy_handle"     Type="int"    XMLName="PINPolicyHandle"/>
      <Parameter Name="pin_value"             Type="binary" XMLName="PINValue"           Null="true"/>

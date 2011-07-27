@@ -31,8 +31,6 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Vector;
 
-import org.webpki.crypto.ECDomains;
-
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
 import org.webpki.sks.DeleteProtection;
@@ -718,12 +716,14 @@ public class ServerCredentialStore implements Serializable
           }
         
         
-        byte[] server_seed = SecureKeyStore.DEFAULT_SEED;
-        boolean server_seed_set;
+        byte[] server_seed;
         
-        public KeyProperties setServerSeed (byte[] server_seed)
+        public KeyProperties setServerSeed (byte[] server_seed) throws IOException
           {
-            server_seed_set = true;
+            if (server_seed.length > 32 || server_seed.length == 0)
+              {
+                bad ("Server seed must be 1-32 bytes");
+              }
             this.server_seed = server_seed;
             return this;
           }
@@ -901,7 +901,7 @@ public class ServerCredentialStore implements Serializable
             MacGenerator key_pair_mac = new MacGenerator ();
             key_pair_mac.addString (id);
             key_pair_mac.addString (key_attestation_algorithm);
-            key_pair_mac.addArray (server_seed);
+            key_pair_mac.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
             key_pair_mac.addString (pin_policy == null ? 
                                       device_pin_protection ?
                                           SecureKeyStore.CRYPTO_STRING_DEVICE_PIN
@@ -971,12 +971,8 @@ public class ServerCredentialStore implements Serializable
                 wr.setStringAttribute (DELETE_PROTECTION_ATTR, delete_protection.getXMLName ());
               }
             
-            if (server_seed_set)
+            if (server_seed != null)
               {
-                if (server_seed.length != 32)
-                  {
-                    bad ("Sever seed must be 32 bytes");
-                  }
                 wr.setBinaryAttribute (SERVER_SEED_ATTR, server_seed);
               }
 

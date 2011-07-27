@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
+import org.webpki.sks.SecureKeyStore;
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMReaderHelper;
@@ -80,7 +81,7 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
                 // Write key attestation data
                 attestation.addString (gpk.id);
                 attestation.addArray (gpk.public_key.getEncoded ());
-                attestation.addArray (kp.private_key_backup ? kp.backup_private_key : new byte[0]);
+                attestation.addArray (kp.private_key_backup ? kp.backup_private_key : SecureKeyStore.ZERO_LENGTH_ARRAY);
                 if (!ArrayUtil.compare (key_init_request.server_credential_store.attest (attestation.getResult (),
                                                                                           kp.expected_attest_mac_count,
                                                                                           server_crypto_interface),

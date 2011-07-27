@@ -354,14 +354,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
               }
 
             server_seed = ah.getBinaryConditional (SERVER_SEED_ATTR);
-            if (server_seed == null)
-              {
-                server_seed = SecureKeyStore.DEFAULT_SEED;
-              }
-            else if (server_seed.length != 32)
-              {
-                bad ("Sever seed must be 32 bytes");
-              }
 
             biometric_protection = BiometricProtection.getBiometricProtectionFromString (ah.getStringConditional (BIOMETRIC_PROTECTION_ATTR, 
                                                                                          BiometricProtection.NONE.getXMLName ()));

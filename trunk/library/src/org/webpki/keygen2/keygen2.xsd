@@ -1048,8 +1048,15 @@
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
 
          <!-- SKS Reference: createKeyEntry.ServerSeed 
-              Default: 32 zero bytes -->
-         <xs:attribute name="ServerSeed" type="xs:base64Binary" use="optional"/>
+              Default: 0 bytes -->
+         <xs:attribute name="ServerSeed" use="optional">
+            <xs:simpleType>
+               <xs:restriction base="xs:base64Binary">
+                  <xs:minLength value="1"/>
+                  <xs:maxLength value="32"/>
+               </xs:restriction>
+            </xs:simpleType>
+         </xs:attribute>
 
          <!-- SKS Reference: createKeyEntry.BiometricProtection 
               Default: "none" -->
