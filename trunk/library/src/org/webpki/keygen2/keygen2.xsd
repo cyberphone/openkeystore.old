@@ -512,7 +512,7 @@
                     that manages the device -->
                <xs:element ref="kgen:DevicePINProtection"/>
 
-           </xs:choice>
+            </xs:choice>
 
             <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
@@ -785,7 +785,7 @@
                  be rejected -->
             <xs:element ref="ds:X509Data"/>
 
-             <xs:choice minOccurs="0">
+            <xs:choice minOccurs="0">
  
                <!-- SKS Reference: setSymmetricKey 
                     Optional "piggybacked" symmetric key -->
@@ -819,7 +819,7 @@
 
             </xs:choice>
 
-             <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
 
                <!-- SKS Reference: addExtension 
                     Some credentials like OTP seeds need additional attributes
@@ -898,17 +898,17 @@
                   </xs:complexType>
                </xs:element>
 
-           </xs:choice>
+            </xs:choice>
            
-           <xs:choice minOccurs="0">
+            <xs:choice minOccurs="0">
 
-              <!-- SKS Reference: pp_updateKey -->
-              <xs:element name="UpdateKey" type="kgen:targetKey"/>
+               <!-- SKS Reference: pp_updateKey -->
+               <xs:element name="UpdateKey" type="kgen:targetKey"/>
 
-              <!-- SKS Reference: pp_cloneKeyProtection -->
-              <xs:element name="CloneKeyProtection" type="kgen:targetKey"/>
+               <!-- SKS Reference: pp_cloneKeyProtection -->
+               <xs:element name="CloneKeyProtection" type="kgen:targetKey"/>
 
-           </xs:choice>
+            </xs:choice>
 
          </xs:sequence>
 
@@ -1091,7 +1091,7 @@
          <!-- SKS Reference: createKeyEntry.EndorsedAlgorithm -->
          <xs:attribute name="EndorsedAlgorithms" type="kgen:uriList" use="optional"/>
         
-       </xs:complexType>
+      </xs:complexType>
    </xs:element>
 
 
