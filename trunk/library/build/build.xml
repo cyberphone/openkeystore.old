@@ -21,14 +21,22 @@
     <isset property="env.JAVA_HOME"/>
   </condition>
   <fail message="JAVA_HOME must be set to environment!" unless="java.home"/>
-  <property name="ws" location="../../resources/jax-ws"/>
+  <property name="wslibdummy" location="../../resources"/>
+  <property name="wslibext" location="../../resources/jax-ws"/>
 
-  <path id="jaxws.classpath">
-	<fileset dir="${ws}">
-	  <include name="*.jar"/>
-	</fileset>
-  </path> 
+  <!-- If you want non-local SKS WS access you must bind to non-local IP --> 
+  <property name="sksws.url" value="http://localhost:8080/securekeystore"/>
 
+  <condition property="jdk7" else="false">
+    <equals arg1="1.7" arg2="${ant.java.version}"/>
+  </condition>
+
+  <!-- JDK 7 does not need (or work with) the externally supplied WS library -->
+  <condition property="jax.ws.lib.dir" value="${wslibdummy}" else="${wslibext}">
+    <istrue value="${jdk7}"/>
+  </condition>
+
+  <!-- check dependecies that should force WS recreation -->
   <target name="_ws-check">
     <condition property="wsgen.required">
       <not>
@@ -58,9 +66,9 @@
 	 <fileset dir="${ext.jar}">
 	   <include name="*.jar"/>
      </fileset>
-		<fileset dir="${ws}">
-		  <include name="*.jar"/>
-		</fileset>
+	 <fileset dir="${jax.ws.lib.dir}">
+	   <include name="*.jar"/>
+	 </fileset>
   </path>
 
   <path id="junit.classpath">
@@ -74,9 +82,10 @@
   </path>
 
   <target name="help">
-    <echo message="Targets: help dist clean compile doc testkg2 testsks."/>
+    <echo message="Targets: help dist doc testkg2 testsks pkcs12import sks-service."/>
   </target>
 	
+  <!-- .NET assumes that NAnt is installed, together with Windows SDK 7.1 and .NET 4 -->
   <target name="_build_sks_ws_for_dotnet" if="dotnet.tools.available">
     <exec executable="nant.bat"
   	      failonerror="true">
@@ -102,6 +111,13 @@
   		<arg value="${ws.def}"/>
   		<arg value="${out}"/>
   	</java>
+  </target>
+	
+  <target name="_jdk7wsfix" if="${jdk7}">
+    <replace summary="true" dir="${temp_dir}" value="@com.sun.xml.internal.ws.developer.SchemaValidation">
+       <include name="**/*.java"/>
+       <replacetoken><![CDATA[@com.sun.xml.ws.developer.SchemaValidation]]></replacetoken>
+     </replace>
   </target>
 
   <target name="wsgen" depends="_ws-check" if="wsgen.required">
@@ -165,13 +181,22 @@
   	<!-- Now we can optionally update SKS WS code -->
   	<antcall target="wsgen"/>
 
-  	<!-- Compile sks-ws java code from ${src_dir} into ${temp_dir} -->
+  	<!-- Make a copy that we can patch... -->
+    <copy todir="${temp_dir}" preservelastmodified="true">
+      <fileset dir="${src_dir}">
+        <include name="org/webpki/sks/ws/**/*.java"/>
+      </fileset>
+    </copy>
+  	<antcall target="_jdk7wsfix"/>
+
+  	<!-- Compile sks-ws java code from ${temp_dir} into ${temp_dir} -->
     <javac debug="${debug}"
-    	   srcdir="${src_dir}"
+    	   srcdir="${temp_dir}"
     	   destdir="${temp_dir}" 
     	   classpathref="compile.classpath"
-    	   includeAntRuntime="false" includes="**/sks/ws/**/*">
-       <compilerarg value="-Xlint:-path"/>
+    	   includeAntRuntime="false">
+        <compilerarg value="-Xlint:-path"/>
+        <compilerarg value="-XDignore.symbol.file"/>
     </javac>
 
   	<!-- Build .NET package if applicable -->
@@ -233,6 +258,7 @@
     <jar jarfile="${dist_dir}/${webpki-sksws}">
       <fileset dir="${temp_dir}">
         <include name="org/webpki/sks/ws/**"/>
+        <exclude name="org/webpki/sks/ws/**/*.java"/>
       </fileset>
       <metainf dir="${wsdl_dir}"/>
     </jar>
@@ -264,25 +290,31 @@
     	<sysproperty key="test.dir" value="${test.dir}"/>
     	<sysproperty key="html.mode" value="${test.out.html}"/>
     	<sysproperty key="sks.standalone" value="${sks.standalone}"/>
+    	<sysproperty key="org.webpki.sks.ws.client.url" value="${sksws.url}"/>
       <formatter type="plain" usefile="false"/>
-      <jvmarg value="-Djava.endorsed.dirs=${ws}"/>
+      <jvmarg value="-Djava.endorsed.dirs=${jax.ws.lib.dir}"/>
       <classpath refid="junit.classpath" />
     </junit>
   </target>
-	
+
+  <!-- JUnit test of the KeyGen2 protocol and the SKS API -->
   <target name="testkg2">
     <antcall target="_test">
        <param name="test.class" value="org.webpki.keygen2.test.KeyGen2Test"/>
      </antcall>
   </target>
 
+  <!-- JUnit test of the SKS API -->
   <target name="testsks">
     <antcall target="_test">
        <param name="test.class" value="org.webpki.sks.test.SKSTest"/>
      </antcall>
   </target>
-	
+
+  <!-- A web service that accepts SKS WS calls from applications and in turn
+       calls the designated SKS implementation -->
   <target name="sks-service">
+  	<echo message="SKS WS - Bind Address: ${sksws.url}"/>
   	<java fork="yes"
   		  classname="org.webpki.sks.ws.server.SKSWSImplementation"
 		  failonerror="true">
@@ -295,10 +327,10 @@
   		        <include name="*.jar"/>
   			 </fileset>
   		</classpath>
-  		<jvmarg value="-Djava.endorsed.dirs=${ws}"/>
+  		<jvmarg value="-Djava.endorsed.dirs=${jax.ws.lib.dir}"/>
     	<jvmarg value="-Dsks.implementation=${sks.implementation}"/>
     	<jvmarg value="-Dcom.sun.xml.ws.fault.SOAPFaultBuilder.disableCaptureStackTrace=false"/>
-  	    <arg value="http://localhost:8080/securekeystore"/>
+  	    <arg value="${sksws.url}"/>
   	</java>
   </target>
 
@@ -331,8 +363,9 @@ optional:&#10;
   		        <include name="*.jar"/>
   			 </fileset>
   		</classpath>
-  		<jvmarg value="-Djava.endorsed.dirs=${ws}"/>
+  		<jvmarg value="-Djava.endorsed.dirs=${jax.ws.lib.dir}"/>
     	<jvmarg value="-Dsks.client=${sks.ws.client}"/>
+    	<jvmarg value="-Dorg.webpki.sks.ws.client.url=${sksws.url}"/>
   	    <arg value="${file}"/>
   	    <arg value="${password}"/>
   	    <arg value="${pin}"/>

@@ -118,7 +118,7 @@ public class SKSWSClient implements SecureKeyStore
               {
                 SKSWS service = new SKSWS ();
                 SKSWSProxy temp_proxy = service.getSKSWSPort ();
-                if (port != null)
+                if (port != null && port.length () > 0)
                   {
                     Map<String,Object> request_object = ((BindingProvider) temp_proxy).getRequestContext ();
                     request_object.put (BindingProvider.ENDPOINT_ADDRESS_PROPERTY, port);
