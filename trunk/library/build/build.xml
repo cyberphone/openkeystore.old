@@ -36,7 +36,12 @@
     <istrue value="${jdk7}"/>
   </condition>
 
-  <!-- check dependecies that should force WS recreation -->
+  <!-- JDK 7 has a different JavaDoc -->
+  <condition property="javadoc-version" value="7" else="6">
+    <istrue value="${jdk7}"/>
+  </condition>
+
+	<!-- check dependecies that should force WS recreation -->
   <target name="_ws-check">
     <condition property="wsgen.required">
       <not>
@@ -217,7 +222,22 @@
     <!-- Create the distribution directory -->
     <mkdir dir="${doc_dir}" />
 
-    <!-- Make documentation -->
+  	<!-- Create temp directory -->
+    <delete dir="${temp_dir}"/>
+    <mkdir dir="${temp_dir}" />
+
+  	<!-- Copy all files  -->
+    <copy todir="${temp_dir}">
+      <fileset dir="${src_dir}"/>
+  	</copy>
+  	
+  	<!-- Remove reference to SUN class  -->
+    <replace dir="${temp_dir}" value="">
+       <include name="org/webpki/sks/**/*.java"/>
+       <replacetoken><![CDATA[@com.sun.xml.ws.developer.SchemaValidation]]></replacetoken>
+     </replace>
+
+  	<!-- Make documentation -->
     <javadoc destdir="${doc_dir}"
              author="true"
              version="true"
@@ -227,11 +247,11 @@
              nodeprecatedlist="true"
              classpathref="compile.classpath"
              windowtitle="WebPKI.org Support">
-      <packageset dir="${src_dir}">
+      <packageset dir="${temp_dir}">
         <include name="org/**"/>
         <exclude name="org/**/test/**"/>
       </packageset>
-      <link offline="true" href="http://download.oracle.com/javase/6/docs/api/" packagelistLoc="${env.JAVA_HOME}\jsedocs\api"/>
+      <link offline="true" href="http://download.oracle.com/javase/${javadoc-version}/docs/api/" packagelistLoc="${env.JAVA_HOME}\jsedocs\api"/>
       <link offline="true" href="http://download.oracle.com/javaee/6/api/" packagelistLoc="${env.JAVA_HOME}\jeedocs\api"/>
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
       <bottom><![CDATA[<i>2005-2011 WebPKI.org.</i>]]></bottom>
@@ -284,7 +304,7 @@
       </not>
   	</condition>
 	<property name="test.out.html" value="true"/>
-    <junit fork="yes" haltonfailure="yes">
+    <junit fork="yes" forkmode="once" haltonfailure="yes">
       <test name="${test.class}"/>
     	<sysproperty key="sks.implementation" value="${sks.implementation}"/>
     	<sysproperty key="test.dir" value="${test.dir}"/>
