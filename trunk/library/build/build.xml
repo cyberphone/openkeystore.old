@@ -5,6 +5,7 @@
   <property name="sks.ws.client" value="org.webpki.sks.ws.client.SKSWSClient"/>
   <property name="src_dir" value="../src" />
   <property name="dot_net_dir" value="../sks-ws-dotnet" />
+  <property name="cpp_dir" value="../sks-ws-cpp" />
   <property name="temp_dir" value="../.tmp" />
   <property name="test_dir" value="../test" />
   <property name="dist_dir"  value="../dist" />
@@ -58,6 +59,10 @@
 	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSException_Exception.java"/>
 	      <available file="${dot_net_dir}/src/SKSWSProxy.cs"/>
 		  <uptodate srcfile="${ws.def}" targetfile="${dot_net_dir}/src/SKSWSProxy.cs"/>
+	      <available file="${cpp_dir}/src/SKSWSProxy.cpp"/>
+		  <uptodate srcfile="${ws.def}" targetfile="${cpp_dir}/src/SKSWSProxy.cpp"/>
+	      <available file="${cpp_dir}/src/SKSWSProxy.h"/>
+		  <uptodate srcfile="${ws.def}" targetfile="${cpp_dir}/src/SKSWSProxy.h"/>
 	      <available file="${wsdl_dir}/SKSWS.wsdl"/>
 	      <uptodate srcfile="${ws.def}" targetfile="${wsdl_dir}/SKSWS.wsdl"/>
 	      <uptodate srcfile="${src_dir}/org/webpki/tools/WSCreator.java" targetfile="${wsdl_dir}/SKSWS.wsdl"/>
@@ -148,6 +153,10 @@
     <antcall target="_ws-gen">
       <param name="cmd" value="dotnetclient"/>
       <param name="out" value="${dot_net_dir}/src"/>
+    </antcall>
+    <antcall target="_ws-gen">
+      <param name="cmd" value="cppclient"/>
+      <param name="out" value="${cpp_dir}/src"/>
     </antcall>
     <antcall target="_ws-gen">
       <param name="cmd" value="dotnetdoc"/>

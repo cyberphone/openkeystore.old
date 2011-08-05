@@ -39,6 +39,8 @@
 
             <xs:element ref="wsc:DotNetClient" minOccurs="0"/>
 
+            <xs:element ref="wsc:CppClient" minOccurs="0"/>
+
             <xs:element ref="wsc:Exception" minOccurs="0" maxOccurs="unbounded"/>
             
             <xs:element ref="wsc:Method" maxOccurs="unbounded"/>
@@ -136,6 +138,21 @@
 
          <!-- Imports -->
          <xs:attribute name="Imports" type="wsc:importList" use="optional"/>
+
+         <!-- Default URL in registry -->
+         <xs:attribute name="RegistryURL" type="xs:string" use="optional"/>
+
+         <!-- Default URL -->
+         <xs:attribute name="DefaultURL" type="xs:string" use="optional"/>
+
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="CppClient">
+      <xs:complexType>
+
+         <!-- C# Class Name -->
+         <xs:attribute name="ClassName" type="wsc:xmlid" use="required"/>
 
          <!-- Default URL in registry -->
          <xs:attribute name="RegistryURL" type="xs:string" use="optional"/>

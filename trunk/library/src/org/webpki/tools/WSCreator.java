@@ -48,6 +48,7 @@ public class WSCreator extends XMLObjectWrapper
     static final String JSERVER = "jserver";
     static final String WSDL = "wsdl";
     static final String DOTNETCLIENT = "dotnetclient";
+    static final String CPPCLIENT = "cppclient";
     static final String DOTNETDOC = "dotnetdoc";
 
     static final String VERSION = "1.0";
@@ -58,6 +59,7 @@ public class WSCreator extends XMLObjectWrapper
     static boolean jserver;
     static boolean wsdl_gen;
     static boolean dotnet_gen;
+    static boolean cpp_gen;
     static boolean dotnet_doc;
 
     static String output_directory;
@@ -302,11 +304,46 @@ public class WSCreator extends XMLObjectWrapper
 
       }
 
+    class CppPackage
+      {
+        FileOutputStream jfile;
+        String class_name;
+        String class_header = "";
+        String package_name;
+        String path;
+        String cpp_registry_url;
+        String cpp_default_url;
+        boolean next;
+
+        CppPackage (DOMReaderHelper rd) throws IOException
+          {
+            path = output_directory;
+            rd.getNext ();
+            class_name = attr.getString ("ClassName");
+            cpp_registry_url = attr.getStringConditional ("RegistryURL");
+            cpp_default_url = attr.getStringConditional ("DefaultURL");
+
+          }
+
+        public void writePackage () throws IOException
+          {
+            write (jfile, getLicense (true));
+            if (package_name != null)
+              {
+                writeln (jfile, "package " + package_name + ";");
+              }
+            write (jfile, "\n");
+            writeGenerate (jfile);
+          }
+      }
+
     ServerPack jserver_pck;
 
     ClientPack jclient_pck;
 
     ClientPack dotnet_client_pck;
+
+    CppPackage cpp_client_pck;
 
     TreeSet<String> jimports = new TreeSet<String> ();
 
@@ -660,6 +697,18 @@ public class WSCreator extends XMLObjectWrapper
           {
             bad ("The '" + DOTNETCLIENT + "' and '" + DOTNETDOC + "' options require a \"DotNetClient\" definition!");
           }
+        if (rd.hasNext ("CppClient"))
+          {
+            cpp_client_pck = new CppPackage (rd);
+            if (cpp_gen)
+              {
+                open (cpp_client_pck, false);
+              }
+          }
+        else if (cpp_gen)
+          {
+            bad ("The '" + CPPCLIENT + "' option requires a \"CppClient\" definition!");
+          }
         while (rd.hasNext ("Exception"))
           {
             rd.getNext ("Exception");
@@ -897,10 +946,27 @@ public class WSCreator extends XMLObjectWrapper
           {
             writeDotNet ();
           }
+        if (cpp_client_pck != null)
+          {
+            writeCpp ();
+          }
         if (dotnetdoc_file != null)
           {
             writeDocNetDoc ();
           }
+      }
+
+    void writeCpp () throws IOException
+      {
+        writeOneCpp (cpp_client_pck, false);
+        if (cpp_gen) open (cpp_client_pck, true);
+        writeOneCpp (cpp_client_pck, true);
+      }
+
+    void writeOneCpp (CppPackage pck, boolean body) throws IOException
+      {
+        write (pck.jfile, body ? "body" : "header");
+        if (cpp_gen) close (pck.jfile);
       }
 
     void writeDocNetDoc () throws IOException
@@ -1369,6 +1435,15 @@ public class WSCreator extends XMLObjectWrapper
           }
       }
 
+    void open (CppPackage pck, boolean body) throws IOException
+      {
+        if (pck != null)
+          {
+            new File (pck.path).mkdirs ();
+            pck.jfile = new FileOutputStream (pck.path + File.separatorChar + pck.class_name + (body ? ".cpp" : ".h"));
+          }
+      }
+
     void writeWSDLProperties (String element_name, Collection<Property> properties, boolean unqualified) throws IOException
       {
         write (wsdl_file, "      <xs:element name=\"" + element_name + "\"");
@@ -1506,6 +1581,7 @@ public class WSCreator extends XMLObjectWrapper
                                                                 JSERVER + "'|'" +
                                                                 WSDL + "'|'" +
                                                                 DOTNETCLIENT + "'|'" +
+                                                                CPPCLIENT + "'|'" +
                                                                 DOTNETDOC + "' input-file output-directory\n" + "Note: output-directory is actually file-name for the '" + WSDL + "' and '" + DOTNETDOC + "' options");
         System.exit (3);
       }
@@ -1517,6 +1593,7 @@ public class WSCreator extends XMLObjectWrapper
         else if (args[0].equals (JSERVER)) jserver = true;
         else if (args[0].equals (WSDL)) wsdl_gen = true;
         else if (args[0].equals (DOTNETCLIENT)) dotnet_gen = true;
+        else if (args[0].equals (CPPCLIENT)) cpp_gen = true;
         else if (args[0].equals (DOTNETDOC)) dotnet_doc = true;
         else
           show ();

@@ -185,7 +185,9 @@
      <RewriteRule DotNetRule="Out.ShortArray"
                   ActualType="short"
                   Conversion="$.ToArray()"/>
-     </DotNetClient>
+   </DotNetClient>
+
+   <CppClient ClassName="SKSWSProxy"/>
 
    <Exception ClassName="org.webpki.sks.SKSException">
      <Property Name="error" Type="int"/>
