@@ -50,7 +50,9 @@ import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
 
-public class SKSWSClient implements SecureKeyStore
+import org.webpki.sks.ws.WSSpecific;
+
+public class SKSWSClient implements SecureKeyStore, WSSpecific
   {
     public static final String DEFAULT_URL_PROPERTY = "org.webpki.sks.ws.client.url";
     
@@ -873,6 +875,18 @@ public class SKSWSClient implements SecureKeyStore
           }
       }
 
+    @Override
+    public String getVersion ()
+      {
+        return getSKSWS ().getVersion ();
+      }
+
+    @Override
+    public void logEvent (String event)
+      {
+        getSKSWS ().logEvent (event);
+      }
+
     /**
      * Test method. Use empty argument list for help.
      * 
@@ -888,7 +902,7 @@ public class SKSWSClient implements SecureKeyStore
             System.exit (3);
           }
         SKSWSClient client = args[0].equals ("default") ? new SKSWSClient () : new SKSWSClient (args[0]);
-        SKSWSProxy proxy = client.getSKSWS ();
-        System.out.println ("Version=" + proxy.getVersion () + "\nDevice=" + client.getDeviceInfo ().getVendorDescription ());
+        System.out.println ("Version=" + client.getVersion () + "\nDevice=" + client.getDeviceInfo ().getVendorDescription ());
       }
+
   }
