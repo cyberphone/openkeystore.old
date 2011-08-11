@@ -225,6 +225,28 @@ namespace org.webpki.sks.ws.client
             System.Runtime.Serialization.XmlSerializableServices.WriteNodes(writer, nodes);
         }
 
+        public static int ERROR_AUTHORIZATION { get { return 0x01;}}
+
+        public static int ERROR_NOT_ALLOWED { get { return 0x02;}}
+
+        public static int ERROR_STORAGE { get { return 0x03;}}
+
+        public static int ERROR_MAC { get { return 0x04;}}
+
+        public static int ERROR_CRYPTO { get { return 0x05;}}
+
+        public static int ERROR_NO_SESSION { get { return 0x06;}}
+
+        public static int ERROR_NO_KEY { get { return 0x07;}}
+
+        public static int ERROR_ALGORITHM { get { return 0x08;}}
+
+        public static int ERROR_OPTION { get { return 0x09;}}
+
+        public static int ERROR_INTERNAL { get { return 0x0A;}}
+
+        public static int ERROR_EXTERNAL { get { return 0x0B;}}
+
         public int getError()
         {
             return System.Int32.Parse(nodes[0].InnerXml);

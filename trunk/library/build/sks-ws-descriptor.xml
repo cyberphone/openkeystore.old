@@ -192,6 +192,17 @@
    <Exception ClassName="org.webpki.sks.SKSException">
      <Property Name="error" Type="int"/>
      <Property Name="message" Type="string"/>
+     <Constant Name="ERROR_AUTHORIZATION" Type="int" Value="0x01"/>
+     <Constant Name="ERROR_NOT_ALLOWED"   Type="int" Value="0x02"/>
+     <Constant Name="ERROR_STORAGE"       Type="int" Value="0x03"/>
+     <Constant Name="ERROR_MAC"           Type="int" Value="0x04"/>
+     <Constant Name="ERROR_CRYPTO"        Type="int" Value="0x05"/>
+     <Constant Name="ERROR_NO_SESSION"    Type="int" Value="0x06"/>
+     <Constant Name="ERROR_NO_KEY"        Type="int" Value="0x07"/>
+     <Constant Name="ERROR_ALGORITHM"     Type="int" Value="0x08"/>
+     <Constant Name="ERROR_OPTION"        Type="int" Value="0x09"/>
+     <Constant Name="ERROR_INTERNAL"      Type="int" Value="0x0A"/>
+     <Constant Name="ERROR_EXTERNAL"      Type="int" Value="0x0B"/>
    </Exception>
 
    <ReturnClass ClassName="org.webpki.sks.DeviceInfo"/>

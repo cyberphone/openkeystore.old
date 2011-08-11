@@ -18,8 +18,6 @@ package org.webpki.tools;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TreeSet;
@@ -565,6 +563,12 @@ public class WSCreator extends XMLObjectWrapper
             return props;
           }
       }
+    
+    class Constant
+      {
+        String type;
+        String value;
+      }
 
     class WSException extends Container
       {
@@ -581,6 +585,8 @@ public class WSCreator extends XMLObjectWrapper
           }
 
         Collection<Property> properties;
+
+        LinkedHashMap<String, Constant> constants;
       }
     
     class DotNetRule
@@ -610,6 +616,8 @@ public class WSCreator extends XMLObjectWrapper
         String name;
         
         String null_value;  // May be null
+
+        LinkedHashMap<String, Constant> constants;
       }
 
     LinkedHashMap<String, WSException> exceptions = new LinkedHashMap<String, WSException> ();
@@ -741,6 +749,7 @@ public class WSCreator extends XMLObjectWrapper
             exception.xml_name = attr.getStringConditional ("XMLName");
             rd.getChild ();
             exception.properties = getProperties (rd, "Property");
+            exception.constants = getConstants (rd);
             rd.getParent ();
             exceptions.put (exception.name, exception);
           }
@@ -753,6 +762,9 @@ public class WSCreator extends XMLObjectWrapper
             if (i < 0) i = -1;
             return_class.name = name.substring (i + 1);
             return_class.null_value = attr.getStringConditional ("NullValue");
+            rd.getChild ();
+            return_class.constants = getConstants (rd);
+            rd.getParent ();
             return_classes.put (return_class.name, return_class);
           }
         do
@@ -989,6 +1001,21 @@ public class WSCreator extends XMLObjectWrapper
           }
       }
 
+    LinkedHashMap<String, Constant> getConstants (DOMReaderHelper rd)
+      {
+        LinkedHashMap<String, Constant> constants = new LinkedHashMap<String, Constant> ();
+        while (rd.hasNext ("Constant"))
+          {
+            rd.getNext ();
+            Constant constant = new Constant ();
+            String name = attr.getString ("Name");
+            constant.type = attr.getString ("Type");
+            constant.value = attr.getString ("Value");
+            constants.put (name, constant);
+          }
+        return constants;
+      }
+
     void writeCpp () throws IOException
       {
         writeOneCpp (cpp_client_pck, false);
@@ -1207,6 +1234,12 @@ public class WSCreator extends XMLObjectWrapper
                 "        {\n" +
                 "            System.Runtime.Serialization.XmlSerializableServices.WriteNodes(writer, nodes);\n" +
                 "        }\n");
+            for (String constant : wse.constants.keySet ())
+              {
+                Constant tv = wse.constants.get (constant);
+                write (file, "\n" +
+                "        public static " + tv.type + " " + constant + " { get { return " + tv.value + ";}}\n"); 
+              }
             int index = 0;
             for (Property prop : wse.properties)
               {

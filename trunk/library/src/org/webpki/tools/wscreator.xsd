@@ -169,6 +169,7 @@
       <xs:complexType>
          <xs:sequence>
             <xs:element name="Property" type="wsc:argument" maxOccurs="unbounded"/>
+            <xs:element ref="wsc:Constant" minOccurs="0" maxOccurs="unbounded"/>
          </xs:sequence> 
 
          <!-- Exception Canonicalized Name -->
@@ -216,6 +217,21 @@
 
          <!-- If we don't want to publish -->
          <xs:attribute name="Public" type="xs:boolean" default="true" use="optional"/>
+
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="Constant">
+      <xs:complexType>
+
+         <!-- Name -->
+         <xs:attribute name="Name" type="wsc:id" use="required"/>
+
+         <!-- Value -->
+         <xs:attribute name="Value" type="xs:string" use="required"/>
+
+         <!-- Type -->
+         <xs:attribute name="Type" type="xs:string" use="required"/>
 
       </xs:complexType>
    </xs:element>
