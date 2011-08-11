@@ -2300,7 +2300,7 @@ namespace org.webpki.sks.ws.client
         {
             EnumeratedProvisioningSession _res = base.Channel.enumerateProvisioningSessions(new enumerateProvisioningSessions_Request(ProvisioningHandle,
                                                                                                                                       ProvisioningState));
-            return _res;
+            return _res._provisioning_handle == 0 ? null : _res;
         }
 
         public void abortProvisioningSession(int ProvisioningHandle)
@@ -2497,7 +2497,7 @@ namespace org.webpki.sks.ws.client
         public EnumeratedKey enumerateKeys(int KeyHandle)
         {
             EnumeratedKey _res = base.Channel.enumerateKeys(new enumerateKeys_Request(KeyHandle));
-            return _res;
+            return _res._key_handle == 0 ? null : _res;
         }
 
         public KeyAttributes getKeyAttributes(int KeyHandle)

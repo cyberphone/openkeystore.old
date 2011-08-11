@@ -43,6 +43,8 @@
 
             <xs:element ref="wsc:Exception" minOccurs="0" maxOccurs="unbounded"/>
             
+            <xs:element ref="wsc:ReturnClass" minOccurs="0" maxOccurs="unbounded"/>
+
             <xs:element ref="wsc:Method" maxOccurs="unbounded"/>
 
          </xs:sequence> 
@@ -178,6 +180,20 @@
       </xs:complexType>
    </xs:element>
 
+   <xs:element name="ReturnClass">
+      <xs:complexType>
+
+         <!-- Full java path class name.  The .NET generator only uses the
+              class part, while the JNI driver needs the entire path -->
+         <xs:attribute name="ClassName" type="wsc:xmlid" use="required"/>
+
+         <!-- If the method has a "Returns" the entire return should
+              be null if the return value equals to NullValue -->
+         <xs:attribute name="NullValue" type="xs:string" use="optional"/>
+
+      </xs:complexType>
+   </xs:element>
+
    <xs:element name="Method">
       <xs:complexType>
          <xs:sequence>
@@ -195,8 +211,8 @@
          <!-- Exceptions -->
          <xs:attribute name="Throws" type="wsc:exceptionList" use="optional"/>
 
-         <!-- The .NET generator is a bit smarter than the Java version -->
-         <xs:attribute name="DotNetReturnClass" type="wsc:id" use="optional"/>
+         <!-- Class name of ReturnClass -->
+         <xs:attribute name="ReturnClass" type="wsc:id" use="optional"/>
 
          <!-- If we don't want to publish -->
          <xs:attribute name="Public" type="xs:boolean" default="true" use="optional"/>

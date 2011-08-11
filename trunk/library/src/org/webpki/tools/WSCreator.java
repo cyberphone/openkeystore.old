@@ -504,7 +504,7 @@ public class WSCreator extends XMLObjectWrapper
 
         String code;
         
-        String dot_net_return_class;
+        ReturnClass return_class;
         
         boolean public_method;
 
@@ -514,6 +514,11 @@ public class WSCreator extends XMLObjectWrapper
           }
 
         Collection<Property> parameters;
+        
+        public String dotNetReturnClass ()
+          {
+            return return_class == null ? null : return_class.name;
+          }
 
         public void writeNetTypedList (boolean actual) throws IOException
           {
@@ -523,7 +528,7 @@ public class WSCreator extends XMLObjectWrapper
                 spaces.append (' ');
               }
             boolean next = false;
-            for (Property prop : (actual && dot_net_return_class == null) ? parameters : filteredParameters (false))
+            for (Property prop : (actual && return_class == null) ? parameters : filteredParameters (false))
               {
                 if (next)
                   {
@@ -539,8 +544,8 @@ public class WSCreator extends XMLObjectWrapper
 
         public String getNetWrapper (boolean request)
           {
-            return request || dot_net_return_class == null ?
-                   (name + (request ? "_Request" : "_Response")) : dot_net_return_class;
+            return request || return_class == null ?
+                   (name + (request ? "_Request" : "_Response")) : dotNetReturnClass ();
           }
 
         public Collection<Property> filteredParameters (boolean output)
@@ -597,10 +602,20 @@ public class WSCreator extends XMLObjectWrapper
         String simple_type;
         String conversion;
       }
+    
+    class ReturnClass
+      {
+        String class_name;
+        
+        String name;
+        
+        String null_value;  // May be null
+      }
 
     LinkedHashMap<String, WSException> exceptions = new LinkedHashMap<String, WSException> ();
     Vector<Method> methods = new Vector<Method> ();
     LinkedHashMap<String, DotNetRule> dot_net_rules = new LinkedHashMap<String, DotNetRule> ();
+    LinkedHashMap<String, ReturnClass> return_classes = new LinkedHashMap<String, ReturnClass> ();
     boolean add_main;
     String dot_net_registry_url;
     String dot_net_default_url;
@@ -711,7 +726,7 @@ public class WSCreator extends XMLObjectWrapper
           }
         while (rd.hasNext ("Exception"))
           {
-            rd.getNext ("Exception");
+            rd.getNext ();
             WSException exception = new WSException ();
             exception.name = exception.class_name = attr.getString ("ClassName");
             if (jserver)
@@ -729,13 +744,31 @@ public class WSCreator extends XMLObjectWrapper
             rd.getParent ();
             exceptions.put (exception.name, exception);
           }
+        while (rd.hasNext ("ReturnClass"))
+          {
+            rd.getNext ();
+            ReturnClass return_class = new ReturnClass ();
+            String name = return_class.class_name = attr.getString ("ClassName");
+            int i = name.lastIndexOf ('.');
+            if (i < 0) i = -1;
+            return_class.name = name.substring (i + 1);
+            return_class.null_value = attr.getStringConditional ("NullValue");
+            return_classes.put (return_class.name, return_class);
+          }
         do
           {
             rd.getNext ("Method");
             Method method = new Method ();
             method.name = attr.getString ("Name");
             method.xml_name = attr.getStringConditional ("XMLName");
-            method.dot_net_return_class = attr.getStringConditional ("DotNetReturnClass");
+            String return_class = attr.getStringConditional ("ReturnClass");
+            if (return_class != null)
+              {
+                if ((method.return_class = return_classes.get (return_class)) == null)
+                  {
+                    bad ("Return class '" + return_class + "' missing");
+                  }
+              }
             method.public_method = attr.getBoolean ("Public");
             method.execptions = attr.getListConditional ("Throws");
             if (method.execptions == null) method.execptions = new String[0];
@@ -1110,7 +1143,7 @@ public class WSCreator extends XMLObjectWrapper
                 write (file, "        }\n");
               }
           }
-        else if (meth.dot_net_return_class != null)
+        else if (meth.return_class != null)
           {
             for (Property prop : props)
               {
@@ -1257,10 +1290,10 @@ public class WSCreator extends XMLObjectWrapper
         for (Method meth : methods)
           {
             write (file, "\n" + "        public ");
-            write (file, meth.dot_net_return_class == null ? 
+            write (file, meth.return_class == null ? 
                                     (meth.return_prop == null ? "void" : meth.return_prop.nRealType ())
                                                            :
-                                     meth.dot_net_return_class);
+                                     meth.dotNetReturnClass ());
             write (file, " " + meth.name + "(");
             meth.writeNetTypedList (true);
             write (file, ")\n" +
@@ -1290,7 +1323,7 @@ public class WSCreator extends XMLObjectWrapper
                 write (file, prop.nPrefix () + prop.nArgument ("", true));
               }
             write (file, "));\n");
-            if (meth.dot_net_return_class == null)
+            if (meth.return_class == null)
               {
                 for (Property prop : meth.parameters)
                   {
@@ -1306,7 +1339,12 @@ public class WSCreator extends XMLObjectWrapper
               }
             else
               {
-                write (file, "            return _res;\n");
+                write (file, "            return ");
+                if (meth.return_class.null_value != null)
+                  {
+                    write (file, "_res._" + meth.return_prop.name + " == " + meth.return_class.null_value + " ? null : ");
+                  }
+                write (file, "_res;\n");
               }
             write (file, "        }\n");
           }

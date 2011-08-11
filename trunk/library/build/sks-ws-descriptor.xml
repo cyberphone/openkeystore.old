@@ -194,7 +194,21 @@
      <Property Name="message" Type="string"/>
    </Exception>
 
-   <Method Name="getDeviceInfo" DotNetReturnClass="DeviceInfo" Throws="SKSException">
+   <ReturnClass ClassName="org.webpki.sks.DeviceInfo"/>
+
+   <ReturnClass ClassName="org.webpki.sks.ProvisioningSession"/>
+
+   <ReturnClass ClassName="org.webpki.sks.KeyData"/>
+
+   <ReturnClass ClassName="org.webpki.sks.EnumeratedKey" NullValue="0"/>
+   
+   <ReturnClass ClassName="org.webpki.sks.EnumeratedProvisioningSession" NullValue="0"/>
+   
+   <ReturnClass ClassName="org.webpki.sks.KeyAttributes"/>
+   
+   <ReturnClass ClassName="org.webpki.sks.KeyProtectionInfo"/>
+ 
+   <Method Name="getDeviceInfo" ReturnClass="DeviceInfo" Throws="SKSException">
      <Parameter Name="api_level"            Type="short"  XMLName="APILevel"           Mode="out"/>
      <Parameter Name="update_url"           Type="string" XMLName="UpdateURL"          Mode="out" Null="true"/>
      <Parameter Name="vendor_name"          Type="string" XMLName="VendorName"         Mode="out"/>
@@ -243,7 +257,7 @@
           }
 ]]></Code></Method>
 
-   <Method Name="createProvisioningSession" DotNetReturnClass="ProvisioningSession" Throws="SKSException">
+   <Method Name="createProvisioningSession" ReturnClass="ProvisioningSession" Throws="SKSException">
      <Returns   Name="provisioning_handle"  Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="algorithm"            Type="string" XMLName="Algorithm"/>
      <Parameter Name="privacy_enabled"      Type="bool"   XMLName="PrivacyEnabled"/>
@@ -296,7 +310,7 @@
         return sks.closeProvisioningSession (provisioning_handle, nonce, mac);
 ]]></Code></Method>
 
-   <Method Name="enumerateProvisioningSessions" DotNetReturnClass="EnumeratedProvisioningSession" Throws="SKSException">
+   <Method Name="enumerateProvisioningSessions" ReturnClass="EnumeratedProvisioningSession" Throws="SKSException">
      <Returns   Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="provisioning_state"  Type="bool"   XMLName="ProvisioningState"/>
@@ -395,7 +409,7 @@
                                     mac);
 ]]></Code></Method>
 
-   <Method Name="createKeyEntry" DotNetReturnClass="KeyData" Throws="SKSException">
+   <Method Name="createKeyEntry" ReturnClass="KeyData" Throws="SKSException">
      <Returns   Name="key_handle"            Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="provisioning_handle"   Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="id"                    Type="string" XMLName="ID"/>
@@ -544,7 +558,7 @@
         sks.pp_cloneKeyProtection (key_handle, target_key_handle, authorization, mac);
 ]]></Code></Method>
 
-   <Method Name="enumerateKeys" DotNetReturnClass="EnumeratedKey" Throws="SKSException">
+   <Method Name="enumerateKeys" ReturnClass="EnumeratedKey" Throws="SKSException">
      <Returns   Name="key_handle"          Type="int" XMLName="KeyHandle"/>
      <Parameter Name="key_handle"          Type="int" XMLName="KeyHandle"/>
      <Parameter Name="provisioning_handle" Type="int" XMLName="ProvisioningHandle" Mode="out" Null="true"/>
@@ -562,7 +576,7 @@
         return ek.getKeyHandle ();
 ]]></Code></Method>
 
-   <Method Name="getKeyAttributes" DotNetReturnClass="KeyAttributes" Throws="SKSException">
+   <Method Name="getKeyAttributes" ReturnClass="KeyAttributes" Throws="SKSException">
      <Parameter Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="is_symmetric_key"    Type="bool"   XMLName="IsSymmetricKey"    Mode="out"/>
      <Parameter Name="app_usage"           Type="byte"   XMLName="AppUsage"          Mode="out"/>
@@ -600,7 +614,7 @@
           }
  ]]></Code></Method>
 
-   <Method Name="getKeyProtectionInfo" DotNetReturnClass="KeyProtectionInfo" Throws="SKSException">
+   <Method Name="getKeyProtectionInfo" ReturnClass="KeyProtectionInfo" Throws="SKSException">
      <Parameter Name="key_handle"           Type="int"   XMLName="KeyHandle"/>
      <Parameter Name="protection_status"    Type="byte"  XMLName="ProtectionStatus"    Mode="out"/>
      <Parameter Name="puk_format"           Type="byte"  XMLName="PUKFormat"           Mode="out" Null="true"/>
