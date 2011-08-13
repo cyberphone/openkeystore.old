@@ -33,6 +33,14 @@
 
             <xs:element name="LicenseHeader" type="xs:string" minOccurs="0"/>
 
+            <xs:element name="GlobalClientConstants" minOccurs="0">
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element ref="wsc:Constant" maxOccurs="unbounded"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+
             <xs:element ref="wsc:JavaServer" minOccurs="0"/>
 
             <xs:element ref="wsc:JavaClient" minOccurs="0"/>
@@ -112,8 +120,6 @@
          <xs:sequence>
 
             <xs:element name="ClassHeader" type="xs:string" minOccurs="0"/>
-
-            <xs:element name="SupportCode" type="xs:string" minOccurs="0"/>
 
             <xs:element name="RewriteRule" minOccurs="0" maxOccurs="unbounded">
                <xs:complexType>

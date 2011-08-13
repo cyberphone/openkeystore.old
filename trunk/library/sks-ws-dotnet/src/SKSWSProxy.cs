@@ -362,7 +362,7 @@ namespace org.webpki.sks.ws.client
 
         public X509Certificate2[] CertificatePath
         {
-            get { return SKSWSProxy.blist2certs(_certificate_path); }
+            get { return Conversions.blist2certs(_certificate_path); }
         }
 
         public string[] SupportedAlgorithms
@@ -1476,7 +1476,7 @@ namespace org.webpki.sks.ws.client
 
         public X509Certificate2[] CertificatePath
         {
-            get { return SKSWSProxy.blist2certs(_certificate_path); }
+            get { return Conversions.blist2certs(_certificate_path); }
         }
 
         public string[] EndorsedAlgorithms
@@ -1627,9 +1627,9 @@ namespace org.webpki.sks.ws.client
             get { return _protection_status; }
         }
 
-        public sbyte PUKFormat
+        public PassphraseFormat PUKFormat
         {
-            get { return _puk_format; }
+            get { return (PassphraseFormat)_puk_format; }
         }
 
         public short PUKRetryLimit
@@ -1652,9 +1652,9 @@ namespace org.webpki.sks.ws.client
             get { return _user_modifiable; }
         }
 
-        public sbyte Format
+        public PassphraseFormat Format
         {
-            get { return _format; }
+            get { return (PassphraseFormat)_format; }
         }
 
         public short RetryLimit
@@ -1662,14 +1662,14 @@ namespace org.webpki.sks.ws.client
             get { return _retry_limit; }
         }
 
-        public sbyte Grouping
+        public Grouping Grouping
         {
-            get { return _grouping; }
+            get { return (Grouping)_grouping; }
         }
 
-        public sbyte PatternRestrictions
+        public HashSet<PatternRestriction> PatternRestrictions
         {
-            get { return _pattern_restrictions; }
+            get { return _PatternRestrictions.convert(_pattern_restrictions); }
         }
 
         public short MinLength
@@ -2230,30 +2230,9 @@ namespace org.webpki.sks.ws.client
 
     public class SKSWSProxy : System.ServiceModel.ClientBase<SKSWSProxyInterface>
     {
-        public static string ALGORITHM_SESSION_KEY_ATTEST_1 = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
+        public static string ALGORITHM_SESSION_KEY_ATTEST_1 { get { return "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";}}
 
-        public static string ALGORITHM_KEY_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
-
-        internal static X509Certificate2[] blist2certs (List<byte[]> blist)
-        {
-            X509Certificate2[] certs = new X509Certificate2[blist.Count];
-            int i = 0;
-            foreach (byte[] b_arr in blist)
-            {
-                certs[i++] = new X509Certificate2(b_arr);
-            }
-            return i == 0 ? null : certs;
-        }
-
-        internal static List<byte[]> certs2blist (X509Certificate2[] certs)
-        {
-            List<byte[]> blist = new List<byte[]>();
-            if (certs != null) foreach (X509Certificate2 cert in certs)
-            {
-                blist.Add (cert.RawData);
-            }
-            return blist;
-        }
+        public static string ALGORITHM_KEY_ATTEST_1 { get { return "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";}}
 
         public static SKSWSProxy getDefaultSKSWSProxy()
         {
@@ -2288,9 +2267,9 @@ namespace org.webpki.sks.ws.client
         public ProvisioningSession createProvisioningSession(string Algorithm,
                                                              bool PrivacyEnabled,
                                                              string ServerSessionID,
-                                                             byte[] ServerEphemeralKey,
+                                                             PublicKey ServerEphemeralKey,
                                                              string IssuerURI,
-                                                             byte[] KeyManagementKey,
+                                                             PublicKey KeyManagementKey,
                                                              int ClientTime,
                                                              int SessionLifeTime,
                                                              short SessionKeyLimit)
@@ -2298,9 +2277,9 @@ namespace org.webpki.sks.ws.client
             ProvisioningSession _res = base.Channel.createProvisioningSession(new createProvisioningSession_Request(Algorithm,
                                                                                                                     PrivacyEnabled,
                                                                                                                     ServerSessionID,
-                                                                                                                    ServerEphemeralKey,
+                                                                                                                    Conversions.encode_x509_ec_public_key(ServerEphemeralKey),
                                                                                                                     IssuerURI,
-                                                                                                                    KeyManagementKey,
+                                                                                                                    Conversions.encode_x509_public_key(KeyManagementKey),
                                                                                                                     ClientTime,
                                                                                                                     SessionLifeTime,
                                                                                                                     SessionKeyLimit));
@@ -2435,7 +2414,7 @@ namespace org.webpki.sks.ws.client
                                        byte[] MAC)
         {
             base.Channel.setCertificatePath(new setCertificatePath_Request(KeyHandle,
-                                                                           SKSWSProxy.certs2blist(CertificatePath),
+                                                                           Conversions.certs2blist(CertificatePath),
                                                                            MAC));
         }
 

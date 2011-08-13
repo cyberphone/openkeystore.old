@@ -37,6 +37,7 @@ import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.SecureKeyStore;
+import org.webpki.sks.ws.WSSpecific;
 
 public class PKCS12Import
   {
@@ -92,6 +93,10 @@ public class PKCS12Import
                             old_key.key_handle = ek.getKeyHandle ();
                             old_key.cert_path = cert_path.toArray (new X509Certificate[0]);
                             System.out.println ("KMK!");
+                            if (sks instanceof WSSpecific)
+                              {
+                                 ((WSSpecific)sks).logEvent ("Updating");
+                              }
                           }
                         else
                           {

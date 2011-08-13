@@ -24,6 +24,11 @@
 
 ]]></LicenseHeader>
 
+   <GlobalClientConstants>
+      <Constant Name="ALGORITHM_SESSION_KEY_ATTEST_1" Type="string" Value="http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1"/>
+      <Constant Name="ALGORITHM_KEY_ATTEST_1"         Type="string" Value="http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1"/>
+   </GlobalClientConstants>
+
    <JavaServer ClassName="org.webpki.sks.ws.server.SKSWSImplementation"
                Imports="java.util.ArrayList
                         java.security.GeneralSecurityException
@@ -144,38 +149,18 @@
      *  This is the .NET SKS WS client.
      */
 ]]></ClassHeader>
-     <SupportCode><![CDATA[
-        public static string ALGORITHM_SESSION_KEY_ATTEST_1 = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
-
-        public static string ALGORITHM_KEY_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
-
-        internal static X509Certificate2[] blist2certs (List<byte[]> blist)
-        {
-            X509Certificate2[] certs = new X509Certificate2[blist.Count];
-            int i = 0;
-            foreach (byte[] b_arr in blist)
-            {
-                certs[i++] = new X509Certificate2(b_arr);
-            }
-            return i == 0 ? null : certs;
-        }
-
-        internal static List<byte[]> certs2blist (X509Certificate2[] certs)
-        {
-            List<byte[]> blist = new List<byte[]>();
-            if (certs != null) foreach (X509Certificate2 cert in certs)
-            {
-                blist.Add (cert.RawData);
-            }
-            return blist;
-        }
-]]></SupportCode>
      <RewriteRule DotNetRule="Out.X509"
                   ActualType="System.Security.Cryptography.X509Certificates.X509Certificate2"
-                  Conversion="SKSWSProxy.blist2certs($)"/>
+                  Conversion="Conversions.blist2certs($)"/>
      <RewriteRule DotNetRule="In.X509"
                   ActualType="System.Security.Cryptography.X509Certificates.X509Certificate2"
-                  Conversion="SKSWSProxy.certs2blist($)"/>
+                  Conversion="Conversions.certs2blist($)"/>
+     <RewriteRule DotNetRule="In.PublicKey"
+                  ActualType="System.Security.Cryptography.X509Certificates.PublicKey"
+                  Conversion="Conversions.encode_x509_public_key($)"/>
+     <RewriteRule DotNetRule="In.ECPublicKey"
+                  ActualType="System.Security.Cryptography.X509Certificates.PublicKey"
+                  Conversion="Conversions.encode_x509_ec_public_key($)"/>
      <RewriteRule DotNetRule="In.StringArray"
                   ActualType="string"
                   Conversion="new List&lt;string&gt;($)"/>
@@ -185,6 +170,15 @@
      <RewriteRule DotNetRule="Out.ShortArray"
                   ActualType="short"
                   Conversion="$.ToArray()"/>
+     <RewriteRule DotNetRule="Out.PassphraseFormat"
+                  ActualType="PassphraseFormat"
+                  Conversion="(PassphraseFormat)$"/>
+     <RewriteRule DotNetRule="Out.Grouping"
+                  ActualType="Grouping"
+                  Conversion="(Grouping)$"/>
+     <RewriteRule DotNetRule="Out.PatternRestrictions"
+                  ActualType="HashSet&lt;PatternRestriction&gt;"
+                  Conversion="_PatternRestrictions.convert($)"/>
    </DotNetClient>
 
    <CppClient ClassName="SKSWSProxy"/>
@@ -273,9 +267,9 @@
      <Parameter Name="algorithm"            Type="string" XMLName="Algorithm"/>
      <Parameter Name="privacy_enabled"      Type="bool"   XMLName="PrivacyEnabled"/>
      <Parameter Name="server_session_id"    Type="string" XMLName="ServerSessionID"/>
-     <Parameter Name="server_ephemeral_key" Type="binary" XMLName="ServerEphemeralKey"/>
+     <Parameter Name="server_ephemeral_key" Type="binary" XMLName="ServerEphemeralKey"             DotNetRule="In.ECPublicKey"/>
      <Parameter Name="issuer_uri"           Type="string" XMLName="IssuerURI"/>
-     <Parameter Name="key_management_key"   Type="binary" XMLName="KeyManagementKey" Null="true"/>
+     <Parameter Name="key_management_key"   Type="binary" XMLName="KeyManagementKey"   Null="true" DotNetRule="In.PublicKey"/>
      <Parameter Name="client_time"          Type="int"    XMLName="ClientTime"/>
      <Parameter Name="session_life_time"    Type="int"    XMLName="SessionLifeTime"/>
      <Parameter Name="session_key_limit"    Type="short"  XMLName="SessionKeyLimit"/>
@@ -628,15 +622,15 @@
    <Method Name="getKeyProtectionInfo" ReturnClass="KeyProtectionInfo" Throws="SKSException">
      <Parameter Name="key_handle"           Type="int"   XMLName="KeyHandle"/>
      <Parameter Name="protection_status"    Type="byte"  XMLName="ProtectionStatus"    Mode="out"/>
-     <Parameter Name="puk_format"           Type="byte"  XMLName="PUKFormat"           Mode="out" Null="true"/>
+     <Parameter Name="puk_format"           Type="byte"  XMLName="PUKFormat"           Mode="out" Null="true" DotNetRule="Out.PassphraseFormat"/>
      <Parameter Name="puk_retry_limit"      Type="short" XMLName="PUKRetryLimit"       Mode="out" Null="true"/>
      <Parameter Name="puk_error_count"      Type="short" XMLName="PUKErrorCount"       Mode="out" Null="true"/>
      <Parameter Name="user_defined"         Type="bool"  XMLName="UserDefined"         Mode="out" Null="true"/>
      <Parameter Name="user_modifiable"      Type="bool"  XMLName="UserModifiable"      Mode="out" Null="true"/>
-     <Parameter Name="format"               Type="byte"  XMLName="Format"              Mode="out" Null="true"/>
+     <Parameter Name="format"               Type="byte"  XMLName="Format"              Mode="out" Null="true" DotNetRule="Out.PassphraseFormat"/>
      <Parameter Name="retry_limit"          Type="short" XMLName="RetryLimit"          Mode="out" Null="true"/>
-     <Parameter Name="grouping"             Type="byte"  XMLName="Grouping"            Mode="out" Null="true"/>
-     <Parameter Name="pattern_restrictions" Type="byte"  XMLName="PatternRestrictions" Mode="out" Null="true"/>
+     <Parameter Name="grouping"             Type="byte"  XMLName="Grouping"            Mode="out" Null="true" DotNetRule="Out.Grouping"/>
+     <Parameter Name="pattern_restrictions" Type="byte"  XMLName="PatternRestrictions" Mode="out" Null="true" DotNetRule="Out.PatternRestrictions"/>
      <Parameter Name="min_length"           Type="short" XMLName="MinLength"           Mode="out" Null="true"/>
      <Parameter Name="max_length"           Type="short" XMLName="MaxLength"           Mode="out" Null="true"/>
      <Parameter Name="input_method"         Type="byte"  XMLName="InputMethod"         Mode="out" Null="true"/>

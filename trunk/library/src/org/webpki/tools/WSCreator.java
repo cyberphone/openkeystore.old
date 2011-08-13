@@ -69,6 +69,9 @@ public class WSCreator extends XMLObjectWrapper
 
     String license_text;
     
+    LinkedHashMap<String, Constant> global_client_constants;
+   
+    
     String getLicense (boolean jdoc)
       {
         if (license_text == null) return "";
@@ -126,7 +129,6 @@ public class WSCreator extends XMLObjectWrapper
         boolean next;
         boolean schema_validation;
         String jserver_support_code = "";
-        String dot_net_support_code = "";
 
         abstract String decoration ();
 
@@ -186,16 +188,9 @@ public class WSCreator extends XMLObjectWrapper
               {
                 class_header = rd.getString ("ClassHeader");
               }
-            if ((is_server() || dot_net) && rd.hasNext ("SupportCode")) 
+            if (rd.hasNext ("SupportCode")) 
               {
-                if (is_server ())
-                  {
-                    jserver_support_code = rd.getString ("SupportCode");
-                  }
-                else
-                  {
-                    dot_net_support_code = rd.getString ("SupportCode");
-                  }
+                jserver_support_code = rd.getString ("SupportCode");
               }
             if (dot_net) while (rd.hasNext ("RewriteRule"))
               {
@@ -666,6 +661,14 @@ public class WSCreator extends XMLObjectWrapper
         if (rd.hasNext ("LicenseHeader"))
           {
             license_text = rd.getString ("LicenseHeader");
+          }
+
+        if (rd.hasNext ("GlobalClientConstants"))
+          {
+            rd.getNext ();
+            rd.getChild ();
+            global_client_constants = getConstants (rd);
+            rd.getParent ();
           }
 
         write (wsdl_file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<!--\n" + getLicense (false) + "\n");
@@ -1234,12 +1237,7 @@ public class WSCreator extends XMLObjectWrapper
                 "        {\n" +
                 "            System.Runtime.Serialization.XmlSerializableServices.WriteNodes(writer, nodes);\n" +
                 "        }\n");
-            for (String constant : wse.constants.keySet ())
-              {
-                Constant tv = wse.constants.get (constant);
-                write (file, "\n" +
-                "        public static " + tv.type + " " + constant + " { get { return " + tv.value + ";}}\n"); 
-              }
+            writeConstants (file, wse.constants);
             int index = 0;
             for (Property prop : wse.properties)
               {
@@ -1265,7 +1263,11 @@ public class WSCreator extends XMLObjectWrapper
           }
         write (file, "\n" +
                      "    public class " + dotnet_client_pck.class_name + " : System.ServiceModel.ClientBase<" + dotnet_client_pck.class_name + "Interface>\n" +
-                     "    {" + dotnet_client_pck.dot_net_support_code + "\n" +
+                     "    {");
+
+        writeConstants (file, global_client_constants);
+
+        write (file, "\n" +
                      "        public static " + dotnet_client_pck.class_name + " getDefault" + dotnet_client_pck.class_name + "()\n" +
                      "        {\n" +
                      "            ");
@@ -1383,6 +1385,17 @@ public class WSCreator extends XMLObjectWrapper
           }
         writeln (file, "    }\n}");
         close (dotnet_client_pck);
+      }
+
+    void writeConstants (FileOutputStream file, LinkedHashMap<String, Constant> constants) throws IOException
+      {
+        for (String constant : constants.keySet ())
+          {
+            Constant tv = constants.get (constant);
+            write (file, "\n" +
+            "        public static " + tv.type + " " + constant +
+            " { get { return " + (tv.type.equals ("string") ? "\"" : "") + tv.value + (tv.type.equals ("string") ? "\"" : "") + ";}}\n"); 
+          }
       }
 
     void close (Package pck) throws IOException
