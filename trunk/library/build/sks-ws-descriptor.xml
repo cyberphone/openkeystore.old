@@ -151,16 +151,22 @@
 ]]></ClassHeader>
      <RewriteRule DotNetRule="Out.X509"
                   ActualType="System.Security.Cryptography.X509Certificates.X509Certificate2"
-                  Conversion="Conversions.blist2certs($)"/>
+                  Conversion="Conversions.BinaryListToCertificates($)"/>
      <RewriteRule DotNetRule="In.X509"
                   ActualType="System.Security.Cryptography.X509Certificates.X509Certificate2"
-                  Conversion="Conversions.certs2blist($)"/>
+                  Conversion="Conversions.CertificatesToBinaryList($)"/>
      <RewriteRule DotNetRule="In.PublicKey"
                   ActualType="System.Security.Cryptography.X509Certificates.PublicKey"
-                  Conversion="Conversions.encode_x509_public_key($)"/>
+                  Conversion="Conversions.EncodeX509PublicKey($)"/>
+     <RewriteRule DotNetRule="Out.PublicKey"
+                  ActualType="System.Security.Cryptography.X509Certificates.PublicKey"
+                  Conversion="Conversions.DecodeX509PublicKey($)"/>
      <RewriteRule DotNetRule="In.ECPublicKey"
                   ActualType="System.Security.Cryptography.X509Certificates.PublicKey"
-                  Conversion="Conversions.encode_x509_ec_public_key($)"/>
+                  Conversion="Conversions.EncodeX509ECPublicKey($)"/>
+     <RewriteRule DotNetRule="Out.ECPublicKey"
+                  ActualType="System.Security.Cryptography.X509Certificates.PublicKey"
+                  Conversion="Conversions.DecodeX509ECPublicKey($)"/>
      <RewriteRule DotNetRule="In.StringArray"
                   ActualType="string"
                   Conversion="new List&lt;string&gt;($)"/>
@@ -274,7 +280,7 @@
      <Parameter Name="session_life_time"    Type="int"    XMLName="SessionLifeTime"/>
      <Parameter Name="session_key_limit"    Type="short"  XMLName="SessionKeyLimit"/>
      <Parameter Name="client_session_id"    Type="string" XMLName="ClientSessionID"    Mode="out"/>
-     <Parameter Name="client_ephemeral_key" Type="binary" XMLName="ClientEphemeralKey" Mode="out"/>
+     <Parameter Name="client_ephemeral_key" Type="binary" XMLName="ClientEphemeralKey" Mode="out" DotNetRule="Out.ECPublicKey"/>
      <Parameter Name="attestation"          Type="binary" XMLName="Attestation"        Mode="out"/>
      <Code><![CDATA[
 /*
@@ -321,7 +327,7 @@
      <Parameter Name="provisioning_state"  Type="bool"   XMLName="ProvisioningState"/>
      <Parameter Name="algorithm"           Type="string" XMLName="Algorithm"          Mode="out" Null="true"/>
      <Parameter Name="privacy_enabled"     Type="bool"   XMLName="PrivacyEnabled"     Mode="out" Null="true"/>
-     <Parameter Name="key_management_key"  Type="binary" XMLName="KeyManagementKey"   Mode="out" Null="true"/>
+     <Parameter Name="key_management_key"  Type="binary" XMLName="KeyManagementKey"   Mode="out" Null="true" DotNetRule="Out.PublicKey"/>
      <Parameter Name="client_time"         Type="int"    XMLName="ClientTime"         Mode="out" Null="true"/>
      <Parameter Name="session_life_time"   Type="int"    XMLName="SessionLifeTime"    Mode="out" Null="true"/>
      <Parameter Name="server_session_id"   Type="string" XMLName="ServerSessionID"    Mode="out" Null="true"/>
@@ -433,7 +439,7 @@
      <Parameter Name="key_specifier"         Type="binary" XMLName="KeySpecifier"/>
      <Parameter Name="endorsed_algorithms"   Type="string" XMLName="EndorsedAlgorithm"  Null="true" List="true" DotNetRule="In.StringArray"/>
      <Parameter Name="mac"                   Type="binary" XMLName="MAC"/>
-     <Parameter Name="public_key"            Type="binary" XMLName="PublicKey"          Mode="out"/>
+     <Parameter Name="public_key"            Type="binary" XMLName="PublicKey"          Mode="out" DotNetRule="Out.PublicKey"/>
      <Parameter Name="attestation"           Type="binary" XMLName="Attestation"        Mode="out"/>
      <Parameter Name="private_key"           Type="binary" XMLName="PrivateKey"         Mode="out" Null="true"/>
      <Code><![CDATA[

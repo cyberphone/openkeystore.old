@@ -362,7 +362,7 @@ namespace org.webpki.sks.ws.client
 
         public X509Certificate2[] CertificatePath
         {
-            get { return Conversions.blist2certs(_certificate_path); }
+            get { return Conversions.BinaryListToCertificates(_certificate_path); }
         }
 
         public string[] SupportedAlgorithms
@@ -501,9 +501,9 @@ namespace org.webpki.sks.ws.client
             get { return _client_session_id; }
         }
 
-        public byte[] ClientEphemeralKey
+        public PublicKey ClientEphemeralKey
         {
-            get { return _client_ephemeral_key; }
+            get { return Conversions.DecodeX509ECPublicKey(_client_ephemeral_key); }
         }
 
         public byte[] Attestation
@@ -642,9 +642,9 @@ namespace org.webpki.sks.ws.client
             get { return _privacy_enabled; }
         }
 
-        public byte[] KeyManagementKey
+        public PublicKey KeyManagementKey
         {
-            get { return _key_management_key; }
+            get { return Conversions.DecodeX509PublicKey(_key_management_key); }
         }
 
         public int ClientTime
@@ -1019,9 +1019,9 @@ namespace org.webpki.sks.ws.client
             get { return _key_handle; }
         }
 
-        public byte[] PublicKey
+        public PublicKey PublicKey
         {
-            get { return _public_key; }
+            get { return Conversions.DecodeX509PublicKey(_public_key); }
         }
 
         public byte[] Attestation
@@ -1476,7 +1476,7 @@ namespace org.webpki.sks.ws.client
 
         public X509Certificate2[] CertificatePath
         {
-            get { return Conversions.blist2certs(_certificate_path); }
+            get { return Conversions.BinaryListToCertificates(_certificate_path); }
         }
 
         public string[] EndorsedAlgorithms
@@ -2277,9 +2277,9 @@ namespace org.webpki.sks.ws.client
             ProvisioningSession _res = base.Channel.createProvisioningSession(new createProvisioningSession_Request(Algorithm,
                                                                                                                     PrivacyEnabled,
                                                                                                                     ServerSessionID,
-                                                                                                                    Conversions.encode_x509_ec_public_key(ServerEphemeralKey),
+                                                                                                                    Conversions.EncodeX509ECPublicKey(ServerEphemeralKey),
                                                                                                                     IssuerURI,
-                                                                                                                    Conversions.encode_x509_public_key(KeyManagementKey),
+                                                                                                                    Conversions.EncodeX509PublicKey(KeyManagementKey),
                                                                                                                     ClientTime,
                                                                                                                     SessionLifeTime,
                                                                                                                     SessionKeyLimit));
@@ -2414,7 +2414,7 @@ namespace org.webpki.sks.ws.client
                                        byte[] MAC)
         {
             base.Channel.setCertificatePath(new setCertificatePath_Request(KeyHandle,
-                                                                           Conversions.certs2blist(CertificatePath),
+                                                                           Conversions.CertificatesToBinaryList(CertificatePath),
                                                                            MAC));
         }
 

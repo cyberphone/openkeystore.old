@@ -16,55 +16,89 @@
  */
 namespace org.webpki.sks.ws.client
 {
-    using System.Collections.Generic;
-
-    using System.Security.Cryptography.X509Certificates;
-    
     using org.webpki.sks.ws.client.BouncyCastle.Asn1;
     
-    internal class Conversions
+    public static class Conversions
     {
-        internal static byte[] encode_x509_public_key (PublicKey public_key, bool ec_flag)
+        // Extension method to the .NET PublicKey class
+        public static string Format(this System.Security.Cryptography.X509Certificates.PublicKey public_key)
+        {
+            return org.webpki.sks.ws.client.BouncyCastle.Asn1.Utilities.Asn1Dump.DumpAsString (Asn1Object.FromByteArray (EncodeX509PublicKey (public_key)), true);
+        }
+
+        internal static byte[] EncodeX509PublicKey (System.Security.Cryptography.X509Certificates.PublicKey public_key, bool ec_flag)
         {
             if (public_key == null)
             {
                 return null;
             }
-            DerSequence inside = new DerSequence (new DerObjectIdentifier(public_key.Oid.Value));
+            if (ec_flag && public_key.Oid.Value != "1.2.840.10045.2.1")
+            {
+                throw new System.ArgumentException("Not EC Public key");
+            }
+            DerSequence algorithm = new DerSequence (new DerObjectIdentifier(public_key.Oid.Value));
             Asn1StreamParser asp = new Asn1StreamParser(public_key.EncodedParameters.RawData);
             IAsn1Convertible ro;
             while ((ro = asp.ReadObject()) != null)
             {
-                inside.AddObject(ro.ToAsn1Object());
+                algorithm.AddObject(ro.ToAsn1Object());
             }
-            return new DerSequence(inside, new DerBitString(public_key.EncodedKeyValue.RawData)).GetEncoded();
+            return new DerSequence(algorithm, new DerBitString(public_key.EncodedKeyValue.RawData)).GetEncoded();
         }
 
-        public static byte[] encode_x509_public_key (PublicKey public_key)
+        public static byte[] EncodeX509PublicKey (System.Security.Cryptography.X509Certificates.PublicKey public_key)
         {
-            return encode_x509_public_key (public_key, false);
+            return EncodeX509PublicKey (public_key, false);
         }
 
-        public static byte[] encode_x509_ec_public_key (PublicKey public_key)
+        public static byte[] EncodeX509ECPublicKey (System.Security.Cryptography.X509Certificates.PublicKey public_key)
         {
-            return encode_x509_public_key (public_key, true);
+            return EncodeX509PublicKey (public_key, true);
         }
 
-        public static X509Certificate2[] blist2certs (List<byte[]> blist)
+        internal static System.Security.Cryptography.X509Certificates.PublicKey DecodeX509PublicKey (byte[] public_key_blob, bool ec_flag)
         {
-            X509Certificate2[] certs = new X509Certificate2[blist.Count];
+            if (public_key_blob == null)
+            {
+                return null;
+            }
+            Asn1Sequence inner = Asn1Sequence.GetInstance(Asn1Object.FromByteArray (public_key_blob));
+            Asn1Sequence algorithm = Asn1Sequence.GetInstance (inner[0]);
+            DerObjectIdentifier oid = DerObjectIdentifier.GetInstance(algorithm[0]);
+            if (ec_flag && oid.Id != "1.2.840.10045.2.1")
+            {
+                throw new System.ArgumentException("Not EC Public key");
+            }
+            return new System.Security.Cryptography.X509Certificates.PublicKey (new System.Security.Cryptography.Oid (oid.Id),
+                                                                                new System.Security.Cryptography.AsnEncodedData (algorithm[1].GetEncoded()),
+                                                                                new System.Security.Cryptography.AsnEncodedData (DerBitString.GetInstance (inner[1]).GetBytes ()));
+        }
+
+        public static System.Security.Cryptography.X509Certificates.PublicKey DecodeX509PublicKey (byte[] public_key_blob)
+        {
+            return DecodeX509PublicKey (public_key_blob, false);
+        }
+
+        public static System.Security.Cryptography.X509Certificates.PublicKey DecodeX509ECPublicKey (byte[] public_key_blob)
+        {
+            return DecodeX509PublicKey (public_key_blob, true);
+        }
+
+        public static System.Security.Cryptography.X509Certificates.X509Certificate2[] BinaryListToCertificates (System.Collections.Generic.List<byte[]> blist)
+        {
+            System.Security.Cryptography.X509Certificates.X509Certificate2[] certs = new System.Security.Cryptography.X509Certificates.X509Certificate2[blist.Count];
             int i = 0;
             foreach (byte[] b_arr in blist)
             {
-                certs[i++] = new X509Certificate2(b_arr);
+                certs[i++] = new System.Security.Cryptography.X509Certificates.X509Certificate2(b_arr);
             }
             return i == 0 ? null : certs;
         }
 
-        public static List<byte[]> certs2blist (X509Certificate2[] certs)
+        public static System.Collections.Generic.List<byte[]> CertificatesToBinaryList (System.Security.Cryptography.X509Certificates.X509Certificate2[] certs)
         {
-            List<byte[]> blist = new List<byte[]>();
-            if (certs != null) foreach (X509Certificate2 cert in certs)
+            System.Collections.Generic.List<byte[]> blist = new System.Collections.Generic.List<byte[]>();
+            if (certs != null) foreach (System.Security.Cryptography.X509Certificates.X509Certificate2 cert in certs)
             {
                 blist.Add (cert.RawData);
             }
