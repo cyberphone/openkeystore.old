@@ -1044,23 +1044,34 @@ public class WSCreator extends XMLObjectWrapper
             List<String> null_types = new ArrayList<String> ();
             write (dotnetdoc_file, "<tr><td>&nbsp;</td></tr><tr><td style=\"border-width:1px 1px 1px 1px;border-style:solid;border-color:black\"><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">" +
                 "<tr><td><code>" + dotnetReserved("public") + "&nbsp;");
-            if (meth.return_prop == null)
+            if (meth.return_class == null)
               {
-                write (dotnetdoc_file, dotnetReserved ("void"));
+                if (meth.return_prop == null)
+                  {
+                    write (dotnetdoc_file, dotnetReserved ("void"));
+                  }
+                else
+                  {
+                    write (dotnetdoc_file, dotnetType (meth.return_prop));
+                  }
               }
             else
               {
-                if (meth.return_prop.nullable && !meth.return_prop.listtype) 
-                  {
-                    null_types.add ("return&nbsp;value");
-                  }
-                write (dotnetdoc_file, dotnetType (meth.return_prop));
+                write (dotnetdoc_file, meth.return_class.name);
+              }
+            if (meth.return_prop != null && meth.return_prop.nullable && !meth.return_prop.listtype) 
+              {
+                null_types.add ("return&nbsp;value");
               }
             write (dotnetdoc_file, "&nbsp;" + meth.name + "&nbsp;(</code></td><td><code>");
             boolean next = false;
             String null_comment = "";
             for (Property prop : meth.parameters)
               {
+                if (prop.output_mode && meth.return_class!= null)
+                  {
+                    break;
+                  }
                 if (next)
                   {
                     write (dotnetdoc_file, ",</code></td><td><code>" + null_comment + "</code></td></tr><tr><td>&nbsp;</td><td><code>");

@@ -17,13 +17,46 @@
 namespace org.webpki.sks.ws.client
 {
     using org.webpki.sks.ws.client.BouncyCastle.Asn1;
+
+    using org.webpki.sks.ws.client.BouncyCastle.Utilities.Encoders;
     
     public static class Conversions
     {
+        public const string EC_PUBLIC_KEY  = "1.2.840.10045.2.1";
+        
+        public const string RSA_PUBLIC_KEY = "1.2.840.113549.1.1.1";
+        
+        internal static void TestKey (string oid, bool ec_flag)
+        {
+            if (oid == RSA_PUBLIC_KEY)
+            {
+                if (ec_flag)
+                {
+                    throw new System.ArgumentException ("EC key expected");
+                }
+            }
+            else if (oid != EC_PUBLIC_KEY)
+            {
+                throw new System.ArgumentException ("Unknown key type: " + oid);
+            }
+        }
+        
         // Extension method to the .NET PublicKey class
         public static string Format(this System.Security.Cryptography.X509Certificates.PublicKey public_key)
         {
-            return org.webpki.sks.ws.client.BouncyCastle.Asn1.Utilities.Asn1Dump.DumpAsString (Asn1Object.FromByteArray (EncodeX509PublicKey (public_key)), true);
+            Asn1Sequence inner = Asn1Sequence.GetInstance(Asn1Object.FromByteArray (EncodeX509PublicKey (public_key)));
+            byte[] raw_key = DerBitString.GetInstance (inner[1]).GetBytes ();
+            Asn1Sequence algorithm = Asn1Sequence.GetInstance (inner[0]);
+            if (DerObjectIdentifier.GetInstance(algorithm[0]).Id == RSA_PUBLIC_KEY)
+            {
+               Asn1Sequence rsa_values = Asn1Sequence.GetInstance(Asn1Object.FromByteArray (raw_key));
+               return "RSA Public Key (" + Hex.ToHexString (DerInteger.GetInstance (rsa_values[0]).Value.ToByteArrayUnsigned ()) + ", " +
+                      DerInteger.GetInstance (rsa_values[1]).ToString () + ")";
+            }
+            else
+            {
+               return "EC Public Key (" + DerObjectIdentifier.GetInstance(algorithm[1]).Id + ", " + Hex.ToHexString (raw_key) + ")";
+            }
         }
 
         internal static byte[] EncodeX509PublicKey (System.Security.Cryptography.X509Certificates.PublicKey public_key, bool ec_flag)
@@ -32,10 +65,7 @@ namespace org.webpki.sks.ws.client
             {
                 return null;
             }
-            if (ec_flag && public_key.Oid.Value != "1.2.840.10045.2.1")
-            {
-                throw new System.ArgumentException("Not EC Public key");
-            }
+            TestKey (public_key.Oid.Value, ec_flag);
             DerSequence algorithm = new DerSequence (new DerObjectIdentifier(public_key.Oid.Value));
             Asn1StreamParser asp = new Asn1StreamParser(public_key.EncodedParameters.RawData);
             IAsn1Convertible ro;
@@ -65,10 +95,7 @@ namespace org.webpki.sks.ws.client
             Asn1Sequence inner = Asn1Sequence.GetInstance(Asn1Object.FromByteArray (public_key_blob));
             Asn1Sequence algorithm = Asn1Sequence.GetInstance (inner[0]);
             DerObjectIdentifier oid = DerObjectIdentifier.GetInstance(algorithm[0]);
-            if (ec_flag && oid.Id != "1.2.840.10045.2.1")
-            {
-                throw new System.ArgumentException("Not EC Public key");
-            }
+            TestKey (oid.Id, ec_flag);
             return new System.Security.Cryptography.X509Certificates.PublicKey (new System.Security.Cryptography.Oid (oid.Id),
                                                                                 new System.Security.Cryptography.AsnEncodedData (algorithm[1].GetEncoded()),
                                                                                 new System.Security.Cryptography.AsnEncodedData (DerBitString.GetInstance (inner[1]).GetBytes ()));
