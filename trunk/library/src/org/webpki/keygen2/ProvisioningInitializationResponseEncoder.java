@@ -21,11 +21,13 @@ import java.io.IOException;
 import java.util.Date;
 
 import java.security.GeneralSecurityException;
-import java.security.cert.CertificateEncodingException;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 
 import org.w3c.dom.Document;
+
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.ServerCookie;
 

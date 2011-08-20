@@ -56,7 +56,7 @@ public class KeyProtectionInfo
     
     private BiometricProtection biometric_protection;
     
-    private boolean private_key_backup;
+    private boolean key_backup;
     
     private ExportProtection export_protection;
     
@@ -162,9 +162,9 @@ public class KeyProtectionInfo
         return biometric_protection;
       }
 
-    public boolean getPrivateKeyBackupFlag ()
+    public boolean getKeyBackupFlag ()
       {
-        return private_key_backup;
+        return key_backup;
       }
 
     public ExportProtection getExportProtection ()
@@ -272,7 +272,7 @@ public class KeyProtectionInfo
                               byte biometric_protection,
                               byte export_protection,
                               byte delete_protection,
-                              boolean private_key_backup) throws SKSException
+                              boolean key_backup) throws SKSException
 
       {
         this.protection_status = protection_status;
@@ -306,7 +306,7 @@ public class KeyProtectionInfo
           {
             this.enable_pin_caching = enable_pin_caching;
           }
-        this.private_key_backup = private_key_backup;
+        this.key_backup = key_backup;
         this.biometric_protection = convertBiometricProtection (biometric_protection);
         this.export_protection = convertExportProtection (export_protection);
         this.delete_protection = convertDeleteProtection (delete_protection);

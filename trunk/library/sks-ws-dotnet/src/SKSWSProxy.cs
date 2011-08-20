@@ -933,18 +933,14 @@ namespace org.webpki.sks.ws.client
         internal string _friendly_name;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=13)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivateKeyBackup", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal bool _private_key_backup;
-
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=14)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="KeySpecifier", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _key_specifier;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=15)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=14)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="EndorsedAlgorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal List<string> _endorsed_algorithms;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=16)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=15)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _mac;
 
@@ -961,7 +957,6 @@ namespace org.webpki.sks.ws.client
                                       sbyte DeleteProtection,
                                       sbyte AppUsage,
                                       string FriendlyName,
-                                      bool PrivateKeyBackup,
                                       byte[] KeySpecifier,
                                       List<string> EndorsedAlgorithms,
                                       byte[] MAC)
@@ -979,7 +974,6 @@ namespace org.webpki.sks.ws.client
             _delete_protection = DeleteProtection;
             _app_usage = AppUsage;
             _friendly_name = FriendlyName;
-            _private_key_backup = PrivateKeyBackup;
             _key_specifier = KeySpecifier;
             _endorsed_algorithms = EndorsedAlgorithms;
             _mac = MAC;
@@ -1008,12 +1002,6 @@ namespace org.webpki.sks.ws.client
         internal byte[] _attestation;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivateKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        #pragma warning disable 0649
-        internal byte[] _private_key;
-        #pragma warning restore 0649
-
         public int KeyHandle
         {
             get { return _key_handle; }
@@ -1027,11 +1015,6 @@ namespace org.webpki.sks.ws.client
         public byte[] Attestation
         {
             get { return _attestation; }
-        }
-
-        public byte[] PrivateKey
-        {
-            get { return _private_key; }
         }
     }
 
@@ -1617,9 +1600,9 @@ namespace org.webpki.sks.ws.client
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=18)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivateKeyBackup", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyBackup", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
-        internal bool _private_key_backup;
+        internal bool _key_backup;
         #pragma warning restore 0649
 
         public sbyte ProtectionStatus
@@ -1712,9 +1695,9 @@ namespace org.webpki.sks.ws.client
             get { return _delete_protection; }
         }
 
-        public bool PrivateKeyBackup
+        public bool KeyBackup
         {
-            get { return _private_key_backup; }
+            get { return _key_backup; }
         }
     }
 
@@ -2376,7 +2359,6 @@ namespace org.webpki.sks.ws.client
                                       sbyte DeleteProtection,
                                       sbyte AppUsage,
                                       string FriendlyName,
-                                      bool PrivateKeyBackup,
                                       byte[] KeySpecifier,
                                       string[] EndorsedAlgorithms,
                                       byte[] MAC)
@@ -2394,7 +2376,6 @@ namespace org.webpki.sks.ws.client
                                                                                   DeleteProtection,
                                                                                   AppUsage,
                                                                                   FriendlyName,
-                                                                                  PrivateKeyBackup,
                                                                                   KeySpecifier,
                                                                                   new List<string>(EndorsedAlgorithms),
                                                                                   MAC));

@@ -2,7 +2,7 @@
 <!-- SKS WS Descriptor File to be used with "WSCreator" -->
 <WebService NameSpace="http://xmlns.webpki.org/sks/v1.00"
             Service="SKSWS"
-            DefaultURL="http://localhost:8080/securekeystore"
+            DefaultURL="http://localhost:9982/securekeystore"
             WSDLLocation="META-INF/SKSWS.wsdl"
             Qualified="true"
             xmlns="http://xmlns.webpki.org/wscreator.1.00">
@@ -435,13 +435,11 @@
      <Parameter Name="delete_protection"     Type="byte"   XMLName="DeleteProtection"/>
      <Parameter Name="app_usage"             Type="byte"   XMLName="AppUsage"/>
      <Parameter Name="friendly_name"         Type="string" XMLName="FriendlyName"       Null="true"/>
-     <Parameter Name="private_key_backup"    Type="bool"   XMLName="PrivateKeyBackup"/>
      <Parameter Name="key_specifier"         Type="binary" XMLName="KeySpecifier"/>
      <Parameter Name="endorsed_algorithms"   Type="string" XMLName="EndorsedAlgorithm"  Null="true" List="true" DotNetRule="In.StringArray"/>
      <Parameter Name="mac"                   Type="binary" XMLName="MAC"/>
      <Parameter Name="public_key"            Type="binary" XMLName="PublicKey"          Mode="out" DotNetRule="Out.PublicKey"/>
      <Parameter Name="attestation"           Type="binary" XMLName="Attestation"        Mode="out"/>
-     <Parameter Name="private_key"           Type="binary" XMLName="PrivateKey"         Mode="out" Null="true"/>
      <Code><![CDATA[
         KeyData kd = sks.createKeyEntry (provisioning_handle,
                                          id,
@@ -456,13 +454,11 @@
                                          delete_protection,
                                          app_usage,
                                          friendly_name,
-                                         private_key_backup,
                                          key_specifier,
                                          endorsed_algorithms.toArray (new String[0]),
                                          mac);
         public_key.value = kd.getPublicKey ().getEncoded ();
         attestation.value = kd.getAttestation ();
-        private_key.value = kd.getPrivateKey ();
         log ("createKeyEntry (ID=" + id + ") : KeyHandle=" + kd.getKeyHandle ());
         return kd.getKeyHandle ();
 ]]></Code></Method>
@@ -645,7 +641,7 @@
      <Parameter Name="biometric_protection" Type="byte"  XMLName="BiometricProtection" Mode="out"/>
      <Parameter Name="export_protection"    Type="byte"  XMLName="ExportProtection"    Mode="out"/>
      <Parameter Name="delete_protection"    Type="byte"  XMLName="DeleteProtection"    Mode="out"/>
-     <Parameter Name="private_key_backup"   Type="bool"  XMLName="PrivateKeyBackup"    Mode="out"/>
+     <Parameter Name="key_backup"           Type="bool"  XMLName="KeyBackup"           Mode="out"/>
      <Code><![CDATA[
         log ("getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
         KeyProtectionInfo kpi      = sks.getKeyProtectionInfo (key_handle);
@@ -673,7 +669,7 @@
         biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
         export_protection.value    = kpi.getExportProtection ().getSKSValue ();
         delete_protection.value    = kpi.getDeleteProtection ().getSKSValue ();
-        private_key_backup.value   = kpi.getPrivateKeyBackupFlag ();
+        key_backup.value           = kpi.getKeyBackupFlag ();
 ]]></Code></Method>
 
    <Method Name="getExtension" Throws="SKSException">

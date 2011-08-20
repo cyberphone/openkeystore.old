@@ -39,7 +39,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 17-June-2011 
+    Revised: 20-Aug-2011 
     Author: Anders Rundgren
 
     Copyright 2006-2011 WebPKI.org (http://webpki.org).
@@ -57,11 +57,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20110617#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20110820#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20110617#"
+           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20110820#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -993,9 +993,6 @@
 
             </xs:choice>
 
-            <!-- SKS Reference: createKeyEntry.PrivateKey -->
-            <xs:element name="PrivateKey" type="xs:base64Binary" minOccurs="0"/>
- 
          </xs:sequence>
 
          <!-- SKS Reference: createKeyEntry.Attestation -->
@@ -1061,10 +1058,6 @@
          <!-- SKS Reference: createKeyEntry.BiometricProtection 
               Default: "none" -->
          <xs:attribute name="BiometricProtection" type="kgen:biomProtTypes" use="optional"/>
-
-         <!-- SKS Reference: createKeyEntry.PrivateKeyBackup 
-              Default: false -->
-         <xs:attribute name="PrivateKeyBackup" type="xs:boolean" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.ExportProtection 
               Default: "non-exportable" -->

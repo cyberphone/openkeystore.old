@@ -23,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
-import org.webpki.sks.SecureKeyStore;
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMReaderHelper;
@@ -47,9 +46,6 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
         PublicKey public_key;
 
         byte[] attestation;
-        
-        byte[] backup_private_key;
-
       }
 
 
@@ -76,13 +72,11 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
                     ServerCredentialStore.bad ("Missing key id:" + gpk.id);
                   }
                 kp.public_key = gpk.public_key;
-                kp.backup_private_key = gpk.backup_private_key;
                 MacGenerator attestation = new MacGenerator ();
                 // Write key attestation data
                 attestation.addString (gpk.id);
                 attestation.addArray (gpk.public_key.getEncoded ());
-                attestation.addArray (kp.private_key_backup ? kp.backup_private_key : SecureKeyStore.ZERO_LENGTH_ARRAY);
-                if (!ArrayUtil.compare (key_init_request.server_credential_store.attest (attestation.getResult (),
+                 if (!ArrayUtil.compare (key_init_request.server_credential_store.attest (attestation.getResult (),
                                                                                           kp.expected_attest_mac_count,
                                                                                           server_crypto_interface),
                                          kp.attestation = gpk.attestation))
@@ -125,10 +119,6 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
             gk.attestation = ah.getBinaryConditional (ATTESTATION_ATTR);
             rd.getChild ();
             gk.public_key = XMLSignatureWrapper.readPublicKey (rd);
-            if (rd.hasNext ())
-              {
-                gk.backup_private_key = rd.getBinary (PRIVATE_KEY_ELEM);
-              }
             rd.getParent ();
             if (generated_keys.put (gk.id, gk) != null)
               {

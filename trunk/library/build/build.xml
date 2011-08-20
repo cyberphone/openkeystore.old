@@ -26,7 +26,7 @@
   <property name="wslibext" location="../../resources/jax-ws"/>
 
   <!-- If you want non-local SKS WS access you must bind to non-local IP --> 
-  <property name="sksws.url" value="http://localhost:8080/securekeystore"/>
+  <property name="sksws.url" value="http://localhost:9982/securekeystore"/>
 
   <condition property="jdk7" else="false">
     <equals arg1="1.7" arg2="${ant.java.version}"/>

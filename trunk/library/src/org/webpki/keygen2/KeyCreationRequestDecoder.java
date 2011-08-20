@@ -30,7 +30,7 @@ import org.webpki.sks.InputMethod;
 import org.webpki.sks.Grouping;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.PatternRestriction;
-import org.webpki.sks.SecureKeyStore;
+
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
@@ -339,8 +339,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
             app_usage = AppUsage.getKeyUsageFromString (ah.getString (APP_USAGE_ATTR));
 
-            private_key_backup = ah.getBooleanConditional (PRIVATE_KEY_BACKUP_ATTR);
-
             enable_pin_caching = ah.getBooleanConditional (ENABLE_PIN_CACHING_ATTR);
             
             endorsed_algorithms = ah.getListConditional (ENDORSED_ALGORITHMS_ATTR);
@@ -456,14 +454,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
 
         
-        boolean private_key_backup;
-        
-        public boolean getPrivateKeyBackupFlag ()
-          {
-            return private_key_backup;
-          }
-        
-
         ExportProtection export_protection;
         
         public ExportProtection getExportProtection ()

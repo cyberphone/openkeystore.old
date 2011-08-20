@@ -195,7 +195,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         byte export_protection;
         byte delete_protection;
         
-        boolean private_key_backup;
+        boolean key_backup;
 
 
         HashMap<String,ExtObject> extensions = new HashMap<String,ExtObject> ();
@@ -1551,6 +1551,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         key_entry.authorizeExportOrDeleteOperation (key_entry.export_protection, authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Mark as "copied"
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.key_backup = true;
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Export key in raw unencrypted format
         ///////////////////////////////////////////////////////////////////////////////////
         return key_entry.isSymmetric () ? key_entry.symmetric_key : key_entry.private_key.getEncoded ();
@@ -2069,7 +2074,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                       key_entry.biometric_protection,
                                       key_entry.export_protection,
                                       key_entry.delete_protection,
-                                      key_entry.private_key_backup);
+                                      key_entry.key_backup);
       }
 
 
@@ -2688,7 +2693,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (key_entry.owner.decrypt (private_key));
             key_entry.private_key = KeyFactory.getInstance (key_entry.isRSA () ? "RSA" : "EC").generatePrivate (key_spec);
-            key_entry.private_key_backup = true;
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Mark as "copied"
+            ///////////////////////////////////////////////////////////////////////////////////
+            key_entry.key_backup = true;
           }
         catch (GeneralSecurityException e)
           {
@@ -2834,7 +2843,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                                 byte delete_protection,
                                                 byte app_usage,
                                                 String friendly_name,
-                                                boolean private_key_backup,
                                                 byte[] key_specifier,
                                                 String[] endorsed_algorithms,
                                                 byte[] mac) throws SKSException
@@ -2934,7 +2942,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         verifier.addByte (delete_protection);
         verifier.addByte (app_usage);
         verifier.addString (friendly_name == null ? "" : friendly_name);
-        verifier.addBool (private_key_backup);
         verifier.addArray (key_specifier);
         LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
         String prev_alg = "\0";
@@ -3046,17 +3053,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             PrivateKey private_key = key_pair.getPrivate ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // If private key backup was requested, wrap a copy of the private key
-            ///////////////////////////////////////////////////////////////////////////////////
-            byte[] encrypted_private_key = private_key_backup ? provisioning.encrypt (private_key.getEncoded ()) : null;
-
-            ///////////////////////////////////////////////////////////////////////////////////
             // Create key attestation data
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
             attestation.addString (id);
             attestation.addArray (public_key.getEncoded ());
-            attestation.addArray (private_key_backup? encrypted_private_key : ZERO_LENGTH_ARRAY);
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Finally, create a key entry
@@ -3075,11 +3076,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             key_entry.export_protection = export_protection;
             key_entry.delete_protection = delete_protection;
             key_entry.endorsed_algorithms = temp_endorsed;
-            key_entry.private_key_backup = private_key_backup;
             return new KeyData (key_entry.key_handle,
                                 public_key,
-                                attestation.getResult (),
-                                encrypted_private_key);
+                                attestation.getResult ());
           }
         catch (GeneralSecurityException e)
           {

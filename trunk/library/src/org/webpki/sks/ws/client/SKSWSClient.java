@@ -391,7 +391,6 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                    byte delete_protection,
                                    byte app_usage,
                                    String friendly_name,
-                                   boolean private_key_backup,
                                    byte[] key_specifier,
                                    String[] endorsed_algorithms,
                                    byte[] mac) throws SKSException
@@ -419,17 +418,14 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                                          delete_protection,
                                                          app_usage,
                                                          friendly_name,
-                                                         private_key_backup,
                                                          key_specifier,
                                                          lalg,
                                                          mac,
                                                          public_key,
-                                                         attestation,
-                                                         private_key);
+                                                         attestation);
             return new KeyData (key_handle,
                                 createPublicKeyFromBlob (public_key.value),
-                                attestation.value,
-                                private_key.value);
+                                attestation.value);
           }
         catch (GeneralSecurityException e)
           {
@@ -662,7 +658,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             Holder<Byte> biometric_protection = new Holder<Byte> ();
             Holder<Byte> export_protection = new Holder<Byte> ();
             Holder<Byte> delete_protection = new Holder<Byte> ();
-            Holder<Boolean> private_key_backup = new Holder<Boolean> ();
+            Holder<Boolean> key_backup = new Holder<Boolean> ();
             getSKSWS ().getKeyProtectionInfo (key_handle,
                                               protection_status,
                                               puk_format,
@@ -682,7 +678,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                               biometric_protection,
                                               export_protection,
                                               delete_protection,
-                                              private_key_backup);
+                                              key_backup);
             return new KeyProtectionInfo (protection_status.value,
                                           puk_format.value,
                                           puk_retry_limit.value,
@@ -701,7 +697,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                           biometric_protection.value,
                                           export_protection.value,
                                           delete_protection.value,
-                                          private_key_backup.value);
+                                          key_backup.value);
           }
         catch (SKSException_Exception e)
           {

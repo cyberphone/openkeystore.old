@@ -694,14 +694,6 @@ public class ServerCredentialStore implements Serializable
           }
 
 
-        byte[] backup_private_key;
-
-        public byte[] getBackupPrivateKey ()
-          {
-            return backup_private_key;
-          }
-        
-
         ExportProtection export_protection;
         
         public KeyProperties setExportProtection (ExportProtection export_protection)
@@ -728,20 +720,6 @@ public class ServerCredentialStore implements Serializable
             return this;
           }
         
-
-        boolean private_key_backup;
-        
-        public KeyProperties setPrivateKeyBackup (boolean flag)
-          {
-            private_key_backup = flag;
-            return this;
-          }
-        
-        public boolean getPrivateKeyBackupFlag ()
-          {
-            return private_key_backup;
-          }
-
 
         boolean enable_pin_caching;
         
@@ -926,7 +904,6 @@ public class ServerCredentialStore implements Serializable
                        DeleteProtection.NONE.getSKSValue () : delete_protection.getSKSValue ());
             key_pair_mac.addByte (app_usage.getSKSValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
-            key_pair_mac.addBool (private_key_backup);
             key_pair_mac.addArray (key_specifier.getSKSValue ());
             if (endorsed_algorithms != null) for (String algorithm : endorsed_algorithms)
               {
@@ -954,11 +931,6 @@ public class ServerCredentialStore implements Serializable
             if (endorsed_algorithms != null)
               {
                 wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, endorsed_algorithms);
-              }
-
-            if (private_key_backup)
-              {
-                wr.setBooleanAttribute (PRIVATE_KEY_BACKUP_ATTR, private_key_backup);
               }
 
             if (biometric_protection != null)

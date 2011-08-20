@@ -261,7 +261,6 @@
             <xs:element name="DeleteProtection" type="xs:byte"/>
             <xs:element name="AppUsage" type="xs:byte"/>
             <xs:element name="FriendlyName" type="xs:string" nillable="true" minOccurs="0"/>
-            <xs:element name="PrivateKeyBackup" type="xs:boolean"/>
             <xs:element name="KeySpecifier" type="xs:base64Binary"/>
             <xs:element name="EndorsedAlgorithm" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
@@ -274,7 +273,6 @@
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="PublicKey" type="xs:base64Binary"/>
             <xs:element name="Attestation" type="xs:base64Binary"/>
-            <xs:element name="PrivateKey" type="xs:base64Binary" nillable="true" minOccurs="0"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -514,7 +512,7 @@
             <xs:element name="BiometricProtection" type="xs:byte"/>
             <xs:element name="ExportProtection" type="xs:byte"/>
             <xs:element name="DeleteProtection" type="xs:byte"/>
-            <xs:element name="PrivateKeyBackup" type="xs:boolean"/>
+            <xs:element name="KeyBackup" type="xs:boolean"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -1711,7 +1709,7 @@
 
   <wsdl:service name="SKSWS">
      <wsdl:port name="SKSWS.Port" binding="tns:SKSWS.Binding">
-       <soap:address location="http://localhost:8080/securekeystore"/>
+       <soap:address location="http://localhost:9982/securekeystore"/>
      </wsdl:port>
   </wsdl:service>
 

@@ -232,8 +232,6 @@ public interface SKSWSProxy
                                byte app_usage,
                                @WebParam(name="FriendlyName", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                String friendly_name,
-                               @WebParam(name="PrivateKeyBackup", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                               boolean private_key_backup,
                                @WebParam(name="KeySpecifier", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                byte[] key_specifier,
                                @WebParam(name="EndorsedAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -243,9 +241,7 @@ public interface SKSWSProxy
                                @WebParam(name="PublicKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<byte[]> public_key,
                                @WebParam(name="Attestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                               Holder<byte[]> attestation,
-                               @WebParam(name="PrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                               Holder<byte[]> private_key)
+                               Holder<byte[]> attestation)
     throws SKSException_Exception;
 
     @WebMethod(operationName="getKeyHandle")
@@ -430,8 +426,8 @@ public interface SKSWSProxy
                                       Holder<Byte> export_protection,
                                       @WebParam(name="DeleteProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                       Holder<Byte> delete_protection,
-                                      @WebParam(name="PrivateKeyBackup", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                                      Holder<Boolean> private_key_backup)
+                                      @WebParam(name="KeyBackup", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                      Holder<Boolean> key_backup)
     throws SKSException_Exception;
 
     @WebMethod(operationName="getExtension")

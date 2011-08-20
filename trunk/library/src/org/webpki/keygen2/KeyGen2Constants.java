@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20110617#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20110820#";
 
     String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
 
@@ -112,8 +112,6 @@ public interface KeyGen2Constants
     String PATTERN_RESTRICTIONS_ATTR                 = "PatternRestrictions";
 
     String PRIVACY_ENABLED_ATTR                      = "PrivacyEnabled";
-
-    String PRIVATE_KEY_BACKUP_ATTR                   = "PrivateKeyBackup";
 
     String POLICY_ATTR                               = "Policy";
 

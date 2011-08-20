@@ -202,7 +202,6 @@ public interface SecureKeyStore
                                    byte delete_protection,
                                    byte app_usage,
                                    String friendly_name,  // May be null
-                                   boolean private_key_backup,
                                    byte[] key_specifier,
                                    String[] endorsed_algorithms,
                                    byte[] mac) throws SKSException;

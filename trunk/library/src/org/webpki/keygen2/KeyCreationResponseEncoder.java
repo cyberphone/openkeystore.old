@@ -49,23 +49,16 @@ public class KeyCreationResponseEncoder extends KeyCreationResponse
 
         byte[] key_attestation;
 
-        byte[] encrypted_private_key;                 // defined for archivalable keys only
-
         GeneratedPublicKey (String id)
           {
             this.id = id;
             generated_keys.add (this);
           }
 
-        public String getID ()
-          {
-            return id; 
-          }
-
       }
 
 
-    public void addPublicKey (PublicKey public_key, byte[] key_attestation, String id, byte[] encrypted_private_key) throws IOException
+    public void addPublicKey (PublicKey public_key, byte[] key_attestation, String id) throws IOException
       {
         GeneratedPublicKey gk = new GeneratedPublicKey (id);
         gk.public_key = public_key;
@@ -74,7 +67,6 @@ public class KeyCreationResponseEncoder extends KeyCreationResponse
             need_ds11_namespace = true;
           }
         gk.key_attestation = key_attestation;
-        gk.encrypted_private_key = encrypted_private_key;
       }
 
 
@@ -124,10 +116,6 @@ public class KeyCreationResponseEncoder extends KeyCreationResponse
             wr.setStringAttribute (ID_ATTR, gk.id);
             wr.setBinaryAttribute (ATTESTATION_ATTR, gk.key_attestation);
             XMLSignatureWrapper.writePublicKey (wr, gk.public_key);
-            if (gk.encrypted_private_key != null)
-              {
-                wr.addBinary(PRIVATE_KEY_ELEM, gk.encrypted_private_key);
-              }
             wr.getParent ();
           }
 

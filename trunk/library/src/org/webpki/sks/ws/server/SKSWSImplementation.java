@@ -467,8 +467,6 @@ public class SKSWSImplementation
                                byte app_usage,
                                @WebParam(name="FriendlyName", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                String friendly_name,
-                               @WebParam(name="PrivateKeyBackup", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                               boolean private_key_backup,
                                @WebParam(name="KeySpecifier", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                byte[] key_specifier,
                                @WebParam(name="EndorsedAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -478,9 +476,7 @@ public class SKSWSImplementation
                                @WebParam(name="PublicKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<byte[]> public_key,
                                @WebParam(name="Attestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                               Holder<byte[]> attestation,
-                               @WebParam(name="PrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                               Holder<byte[]> private_key)
+                               Holder<byte[]> attestation)
     throws SKSException
       {
         KeyData kd = sks.createKeyEntry (provisioning_handle,
@@ -496,13 +492,11 @@ public class SKSWSImplementation
                                          delete_protection,
                                          app_usage,
                                          friendly_name,
-                                         private_key_backup,
                                          key_specifier,
                                          endorsed_algorithms.toArray (new String[0]),
                                          mac);
         public_key.value = kd.getPublicKey ().getEncoded ();
         attestation.value = kd.getAttestation ();
-        private_key.value = kd.getPrivateKey ();
         log ("createKeyEntry (ID=" + id + ") : KeyHandle=" + kd.getKeyHandle ());
         return kd.getKeyHandle ();
       }
@@ -781,8 +775,8 @@ public class SKSWSImplementation
                                       Holder<Byte> export_protection,
                                       @WebParam(name="DeleteProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                       Holder<Byte> delete_protection,
-                                      @WebParam(name="PrivateKeyBackup", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                                      Holder<Boolean> private_key_backup)
+                                      @WebParam(name="KeyBackup", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                      Holder<Boolean> key_backup)
     throws SKSException
       {
         log ("getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
@@ -811,7 +805,7 @@ public class SKSWSImplementation
         biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
         export_protection.value    = kpi.getExportProtection ().getSKSValue ();
         delete_protection.value    = kpi.getDeleteProtection ().getSKSValue ();
-        private_key_backup.value   = kpi.getPrivateKeyBackupFlag ();
+        key_backup.value           = kpi.getKeyBackupFlag ();
       }
 
     @WebMethod(operationName="getExtension")

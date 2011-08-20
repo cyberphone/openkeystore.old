@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -39,7 +38,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.ECGenParameterSpec;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
 import java.util.Date;
@@ -141,8 +139,6 @@ public class KeyGen2Test
     static final byte[] TEST_STRING = {'S','u','c','c','e','s','s',' ','o','r',' ','n','o','t','?'};
 
     boolean pin_protection;
-    
-    boolean private_key_backup;
     
     boolean ecc_key;
     
@@ -519,14 +515,12 @@ public class KeyGen2Test
                                                        key.getDeleteProtection ().getSKSValue (),
                                                        key.getAppUsage ().getSKSValue (),
                                                        key.getFriendlyName (),
-                                                       key.getPrivateKeyBackupFlag (),
                                                        key.getKeySpecifier ().getSKSValue (),
                                                        key.getEndorsedAlgorithms (),
                                                        key.getMAC ());
                 key_init_response.addPublicKey (key_data.getPublicKey (),
                                                 key_data.getAttestation (),
-                                                key.getID (),
-                                                key_data.getPrivateKey ());
+                                                key.getID ());
               }
             return key_init_response.writeXML ();
           }
@@ -855,24 +849,6 @@ public class KeyGen2Test
 
           }
         
-        void verifyPrivateKeyBackup (ServerCredentialStore.KeyProperties key_prop) throws IOException, GeneralSecurityException
-          {
-            PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (server_sess_key.decrypt (key_prop.getBackupPrivateKey ()));
-            boolean rsa = key_prop.getPublicKey () instanceof RSAPublicKey;
-            PrivateKey private_key = KeyFactory.getInstance (rsa ? "RSA" : "EC").generatePrivate (key_spec);
-            Signature sign = Signature.getInstance ((rsa ? SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256).getJCEName ());
-            sign.initSign (private_key);
-            sign.update (TEST_STRING);
-            byte[] key_archival_verify = sign.sign ();
-            Signature verify = Signature.getInstance ((rsa ? SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256).getJCEName ());
-            verify.initVerify (key_prop.getPublicKey ());
-            verify.update (TEST_STRING);
-            if (!verify.verify (key_archival_verify))
-              {
-                throw new GeneralSecurityException ("Archived private key validation failed");
-              }
-          }
-
         //////////////////////////////////////////////////////////////////////////////////
         // Create platform negotiation request for the client
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1011,10 +987,6 @@ public class KeyGen2Test
               {
                 kp.addEncryptedExtension ("http://host/ee", server_sess_key.encrypt (new byte[]{0,5}));
               }
-            if (private_key_backup)
-              {
-                kp.setPrivateKeyBackup (true);
-              }
             if (export_protection != null)
               {
                 kp.setExportProtection (export_protection);
@@ -1066,10 +1038,6 @@ public class KeyGen2Test
                 key_init_response.validateAndPopulate (key_init_request, server_sess_key);
                 for (ServerCredentialStore.KeyProperties key_prop : server_credential_store.getKeyProperties ())
                   {
-                    if (key_prop.getPrivateKeyBackupFlag ())
-                      {
-                        verifyPrivateKeyBackup (key_prop);
-                      }
                     boolean otp = symmetric_key && !encryption_key;
                     boolean auth = key_prop.getAppUsage () == AppUsage.AUTHENTICATION;
                     CertSpec cert_spec = new CertSpec ();
@@ -1280,7 +1248,6 @@ public class KeyGen2Test
             writeOption ("Symmetric Key", symmetric_key);
             writeOption ("Encryption Key", encryption_key);
             writeOption ("Encrypted Extension", encrypted_extension);
-            writeOption ("Private Key Backup", private_key_backup);
             writeOption ("Delete Protection", delete_protection != null);
             writeOption ("Export Protection", export_protection != null);
             writeOption ("Private Key Restore", set_private_key);
@@ -1369,15 +1336,6 @@ public class KeyGen2Test
         Doer doer = new Doer ();
         pin_protection = true;
         server_seed = true;
-        doer.perform ();
-      }
-
-    @Test
-    public void PrivateKeyBackup () throws Exception
-      {
-        Doer doer = new Doer ();
-        pin_protection = true;
-        private_key_backup = true;
         doer.perform ();
       }
 

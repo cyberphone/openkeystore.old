@@ -20,20 +20,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
-import java.security.spec.PKCS8EncodedKeySpec;
 
 import java.util.Date;
 import java.util.EnumSet;
@@ -220,8 +217,6 @@ public class ProvSess
     
     SoftHSM server_sess_key = new SoftHSM ();
 
-    static final byte[] KEY_BACKUP_TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','t','?'};
-    
     String session_key_algorithm = KeyGen2URIs.ALGORITHMS.SESSION_KEY_1;
     
     static final String ISSUER_URI = "http://issuer.example.com/provsess";
@@ -562,7 +557,6 @@ public class ProvSess
                           pin_policy,
                           pin_value,
                           BiometricProtection.NONE /* biometric_protection */,
-                          false /* boolean private_key_backup */,
                           ExportProtection.NON_EXPORTABLE /* export_policy */,
                           DeleteProtection.NONE /* delete_policy */,
                           false /* enable_pin_caching */,
@@ -592,7 +586,6 @@ public class ProvSess
                           pin_policy,
                           pin_value,
                           BiometricProtection.NONE /* biometric_protection */,
-                          false /* boolean private_key_backup */,
                           ExportProtection.NON_EXPORTABLE /* export_policy */,
                           DeleteProtection.NONE /* delete_policy */,
                           false /* enable_pin_caching */,
@@ -608,7 +601,6 @@ public class ProvSess
                              PINPol pin_policy,
                              String pin_value,
                              BiometricProtection biometric_protection,
-                             boolean private_key_backup,
                              ExportProtection export_protection,
                              DeleteProtection delete_protection,
                              boolean enable_pin_caching,
@@ -650,7 +642,6 @@ public class ProvSess
         key_pair_mac.addByte (delete_protection.getSKSValue ());
         key_pair_mac.addByte (key_usage.getSKSValue ());
         key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
-        key_pair_mac.addBool (private_key_backup);
         key_pair_mac.addArray (key_algorithm.getSKSValue ());
         for (String algorithm : sorted_algorithms)
           {
@@ -669,22 +660,12 @@ public class ProvSess
                                                delete_protection.getSKSValue (), 
                                                key_usage.getSKSValue (), 
                                                friendly_name, 
-                                               private_key_backup, 
                                                key_algorithm.getSKSValue (),
                                                sorted_algorithms,
                                                mac4call (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
         MacGenerator key_attestation = new MacGenerator ();
         key_attestation.addString (id);
         key_attestation.addArray (key_pair.getPublicKey ().getEncoded ());
-        if (private_key_backup)
-          {
-            key_attestation.addArray (key_pair.getPrivateKey ());
-            verifyPrivateKeyBackup (key_pair.getPrivateKey (), key_pair.getPublicKey ());
-          }
-        else
-          {
-            key_attestation.addArray (SecureKeyStore.ZERO_LENGTH_ARRAY);
-          }
         if (!ArrayUtil.compare (attest (key_attestation.getResult ()), key_pair.getAttestation ()))
           {
             bad ("Failed key attest");
@@ -697,24 +678,6 @@ public class ProvSess
         return key;
       }
 
-    void verifyPrivateKeyBackup (byte[] encrypted_private_key, PublicKey public_key) throws IOException, GeneralSecurityException
-      {
-        PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (server_sess_key.decrypt (encrypted_private_key));
-        boolean rsa = public_key instanceof RSAPublicKey;
-        PrivateKey private_key = KeyFactory.getInstance (rsa ? "RSA" : "EC").generatePrivate (key_spec);
-        Signature sign = Signature.getInstance ((rsa ? SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256).getJCEName ());
-        sign.initSign (private_key);
-        sign.update (KEY_BACKUP_TEST_STRING);
-        byte[] key_archival_verify = sign.sign ();
-        Signature verify = Signature.getInstance ((rsa ? SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256).getJCEName ());
-        verify.initVerify (public_key);
-        verify.update (KEY_BACKUP_TEST_STRING);
-        if (!verify.verify (key_archival_verify))
-          {
-            throw new GeneralSecurityException ("Archived private key validation failed");
-          }
-      }
-    
     void setCertificate (int key_handle, String id, PublicKey public_key, X509Certificate[] certificate_path) throws IOException, GeneralSecurityException
       {
         MacGenerator set_certificate = new MacGenerator ();
