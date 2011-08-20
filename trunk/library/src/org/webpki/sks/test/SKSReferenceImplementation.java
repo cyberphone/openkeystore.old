@@ -2814,6 +2814,18 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Test that there are no collisions
+        ///////////////////////////////////////////////////////////////////////////////////
+        for (KeyEntry key_entry_temp : keys.values ())
+          {
+            if (key_entry_temp.key_handle != key_handle && key_entry_temp.certificate_path != null &&
+                key_entry_temp.certificate_path[0].equals (certificate_path[0]))
+              {
+                key_entry.owner.abort ("Duplicate certificate in \"setCertificatePath\" for: " + key_entry.id);
+              }
+          }
+          
+        ///////////////////////////////////////////////////////////////////////////////////
         // Store certificate path
         ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.certificate_path != null)
