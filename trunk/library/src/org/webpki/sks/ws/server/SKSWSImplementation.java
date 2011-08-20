@@ -527,16 +527,16 @@ public class SKSWSImplementation
     throws SKSException
       {
         log ("setCertificatePath (KeyHandle=" + key_handle + ")");
+        X509Certificate[] cp = null;
         try
           {
-            sks.setCertificatePath (key_handle,
-                                    CertificateUtil.getSortedPathFromBlobs (certificate_path),
-                                    mac);
+            cp = CertificateUtil.getSortedPathFromBlobs (certificate_path);
           }
         catch (IOException e)
           {
             throw new SKSException (e);
           }
+        sks.setCertificatePath (key_handle, cp, mac);
       }
 
     @WebMethod(operationName="setSymmetricKey")
