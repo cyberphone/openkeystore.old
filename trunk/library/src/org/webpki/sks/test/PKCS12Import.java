@@ -132,7 +132,7 @@ public class PKCS12Import
                                        pin /* pin_value */,
                                        pin_policy /* pin_policy */,
                                        AppUsage.AUTHENTICATION);
-        key.setCertificate (cert_path.toArray (new X509Certificate[0]));
+        key.setCertificatePath (cert_path.toArray (new X509Certificate[0]));
         key.restorePrivateKey (private_key);
         sess.closeSession ();
       }

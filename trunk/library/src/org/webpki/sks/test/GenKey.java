@@ -100,10 +100,10 @@ public class GenKey
                 }
               
             }, public_key);
-        return setCertificate (new X509Certificate[]{certificate});
+        return setCertificatePath (new X509Certificate[]{certificate});
       }
     
-    public GenKey setCertificate (X509Certificate[] cert_path) throws IOException, GeneralSecurityException
+    public GenKey setCertificatePath (X509Certificate[] cert_path) throws IOException, GeneralSecurityException
       {
         this.cert_path = cert_path;
         prov_sess.setCertificate (key_handle, id, public_key, cert_path);
@@ -113,6 +113,11 @@ public class GenKey
     public PublicKey getPublicKey ()
       {
         return cert_path == null ? public_key : cert_path[0].getPublicKey ();
+      }
+
+    public X509Certificate[] getCertificatePath ()
+      {
+        return cert_path;
       }
     
     void setSymmetricKey (byte[] symmetric_key) throws IOException, GeneralSecurityException

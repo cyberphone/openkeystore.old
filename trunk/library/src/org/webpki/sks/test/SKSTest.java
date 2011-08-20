@@ -2387,4 +2387,52 @@ public class SKSTest
                                SignatureAlgorithms.RSA_SHA256.getURI ()},
                   null);
       }
+    @Test
+    public void test58 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        GenKey key = sess.createECKey ("Key.1",
+                                       null /* pin_value */,
+                                       null /* pin_policy */,
+                                       AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+        try
+          {
+            sess.createECKey ("Key.2",
+                              null /* pin_value */,
+                              null /* pin_policy */,
+                              AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
+            fail ("Not allowed");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Duplicate certificate in \"setCertificatePath\" for: Key.2");
+          }
+        try
+          {
+            sess.closeSession ();
+            fail ("Not allowed");
+          }
+        catch (SKSException e)
+          {
+          }
+        sess = new ProvSess (device);
+        key = sess.createECKey ("Key.3",
+                                null /* pin_value */,
+                                null /* pin_policy */,
+                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+        sess.closeSession ();
+        sess = new ProvSess (device);
+        try
+          {
+            sess.createECKey ("Key.4",
+                              null /* pin_value */,
+                              null /* pin_policy */,
+                              AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
+            fail ("Not allowed");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Duplicate certificate in \"setCertificatePath\" for: Key.4");
+          }
+      }
   }
