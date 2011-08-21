@@ -2395,25 +2395,18 @@ public class SKSTest
                                        null /* pin_value */,
                                        null /* pin_policy */,
                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
-        try
-          {
-            sess.createECKey ("Key.2",
-                              null /* pin_value */,
-                              null /* pin_policy */,
-                              AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
-            fail ("Not allowed");
-          }
-        catch (SKSException e)
-          {
-            checkException (e, "Duplicate certificate in \"setCertificatePath\" for: Key.2");
-          }
+        sess.createECKey ("Key.2",
+                          null /* pin_value */,
+                          null /* pin_policy */,
+                          AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
         try
           {
             sess.closeSession ();
             fail ("Not allowed");
-          }
+           }
         catch (SKSException e)
           {
+            checkException (e, "Duplicate certificate in \"setCertificatePath\" for: Key.1");
           }
         sess = new ProvSess (device);
         key = sess.createECKey ("Key.3",
@@ -2422,17 +2415,44 @@ public class SKSTest
                                 AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
         sess = new ProvSess (device);
+        sess.createECKey ("Key.4",
+                          null /* pin_value */,
+                          null /* pin_policy */,
+                          AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
         try
           {
-            sess.createECKey ("Key.4",
-                              null /* pin_value */,
-                              null /* pin_policy */,
-                              AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
+            sess.closeSession ();
             fail ("Not allowed");
           }
         catch (SKSException e)
           {
             checkException (e, "Duplicate certificate in \"setCertificatePath\" for: Key.4");
           }
+        sess = new ProvSess (device, 0);
+        key = sess.createECKey ("Key.3",
+                                null /* pin_value */,
+                                null /* pin_policy */,
+                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+        sess.closeSession ();
+        ProvSess sess2 = new ProvSess (device);
+        GenKey new_key = sess2.createECKey ("Key.4",
+                                            null /* pin_value */,
+                                            null /* pin_policy */,
+                                            AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
+        new_key.postUpdateKey (key);
+        sess2.closeSession ();
+        sess = new ProvSess (device, 0);
+        key = sess.createECKey ("Key.3",
+                                null /* pin_value */,
+                                null /* pin_policy */,
+                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+        sess.closeSession ();
+        sess2 = new ProvSess (device);
+        new_key = sess2.createECKey ("Key.4",
+                                     null /* pin_value */,
+                                     null /* pin_policy */,
+                                     AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
+        sess2.postDeleteKey (key);
+        sess2.closeSession ();
       }
   }

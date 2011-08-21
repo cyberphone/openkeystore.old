@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Vector;
 
@@ -107,7 +108,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
 
     int next_key_handle = 1;
-    HashMap<Integer,KeyEntry> keys = new HashMap<Integer,KeyEntry> ();
+    LinkedHashMap<Integer,KeyEntry> keys = new LinkedHashMap<Integer,KeyEntry> ();
 
     int next_prov_handle = 1;
     HashMap<Integer,Provisioning> provisionings = new HashMap<Integer,Provisioning> ();
@@ -2315,6 +2316,32 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                   }
 
                 ///////////////////////////////////////////////////////////////////////////////////
+                // Test that there are no collisions
+                ///////////////////////////////////////////////////////////////////////////////////
+                for (KeyEntry key_entry_temp : keys.values ())
+                  {
+                    if (key_entry_temp.key_handle != key_entry.key_handle && key_entry_temp.certificate_path != null &&
+                        key_entry_temp.certificate_path[0].equals (key_entry.certificate_path[0]))
+                      {
+                        ///////////////////////////////////////////////////////////////////////////////////
+                        // There was a conflict, ignore updates/deletes
+                        ///////////////////////////////////////////////////////////////////////////////////
+                        boolean collision = true;
+                        for (PostProvisioningObject post_op : provisioning.post_provisioning_objects)
+                          {
+                            if (post_op.target_key_entry == key_entry_temp && post_op.upd_or_del)
+                              {
+                                collision = false;
+                              }
+                          }
+                        if (collision)
+                          {
+                            provisioning.abort ("Duplicate certificate in \"setCertificatePath\" for: " + key_entry.id);
+                          }
+                      }
+                  }
+                  
+                ///////////////////////////////////////////////////////////////////////////////////
                 // Check that possible endorsed algorithms match key material
                 ///////////////////////////////////////////////////////////////////////////////////
                 for (String algorithm : key_entry.endorsed_algorithms)
@@ -2813,18 +2840,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             //TODO EC
           }
 
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Test that there are no collisions
-        ///////////////////////////////////////////////////////////////////////////////////
-        for (KeyEntry key_entry_temp : keys.values ())
-          {
-            if (key_entry_temp.key_handle != key_handle && key_entry_temp.certificate_path != null &&
-                key_entry_temp.certificate_path[0].equals (certificate_path[0]))
-              {
-                key_entry.owner.abort ("Duplicate certificate in \"setCertificatePath\" for: " + key_entry.id);
-              }
-          }
-          
         ///////////////////////////////////////////////////////////////////////////////////
         // Store certificate path
         ///////////////////////////////////////////////////////////////////////////////////
