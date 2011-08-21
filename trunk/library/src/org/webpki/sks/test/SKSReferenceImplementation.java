@@ -45,7 +45,6 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Vector;
@@ -111,13 +110,13 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     LinkedHashMap<Integer,KeyEntry> keys = new LinkedHashMap<Integer,KeyEntry> ();
 
     int next_prov_handle = 1;
-    HashMap<Integer,Provisioning> provisionings = new HashMap<Integer,Provisioning> ();
+    LinkedHashMap<Integer,Provisioning> provisionings = new LinkedHashMap<Integer,Provisioning> ();
 
     int next_pin_handle = 1;
-    HashMap<Integer,PINPolicy> pin_policies = new HashMap<Integer,PINPolicy> ();
+    LinkedHashMap<Integer,PINPolicy> pin_policies = new LinkedHashMap<Integer,PINPolicy> ();
 
     int next_puk_handle = 1;
-    HashMap<Integer,PUKPolicy> puk_policies = new HashMap<Integer,PUKPolicy> ();
+    LinkedHashMap<Integer,PUKPolicy> puk_policies = new LinkedHashMap<Integer,PUKPolicy> ();
 
 
     abstract class NameSpace implements Serializable
@@ -199,7 +198,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         boolean key_backup;
 
 
-        HashMap<String,ExtObject> extensions = new HashMap<String,ExtObject> ();
+        LinkedHashMap<String,ExtObject> extensions = new LinkedHashMap<String,ExtObject> ();
 
         KeyEntry (Provisioning owner, String id) throws SKSException
           {
@@ -529,7 +528,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         int provisioning_handle;
 
         // The virtual/shared name-space
-        HashMap<String,Boolean> names = new HashMap<String,Boolean> ();
+        LinkedHashMap<String,Boolean> names = new LinkedHashMap<String,Boolean> ();
 
         // Post provisioning management
         Vector<PostProvisioningObject> post_provisioning_objects = new Vector<PostProvisioningObject> ();
@@ -783,7 +782,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         String jce_name;
       }
 
-    static HashMap<String,Algorithm> supported_algorithms = new HashMap<String,Algorithm> ();
+    static LinkedHashMap<String,Algorithm> supported_algorithms = new LinkedHashMap<String,Algorithm> ();
 
     static void addAlgorithm (String uri, String jce_name, int mask)
       {
@@ -1002,7 +1001,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         return null;
       }
 
-    void deleteObject (HashMap<Integer,?> objects, Provisioning provisioning)
+    void deleteObject (LinkedHashMap<Integer,?> objects, Provisioning provisioning)
       {
         Iterator<?> list = objects.values ().iterator ();
         while (list.hasNext ())

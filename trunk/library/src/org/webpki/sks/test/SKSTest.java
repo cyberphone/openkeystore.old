@@ -16,17 +16,13 @@
  */
 package org.webpki.sks.test;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
-import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 
 import java.util.EnumSet;
@@ -55,7 +51,6 @@ import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
-import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.KeyGen2URIs;
 
