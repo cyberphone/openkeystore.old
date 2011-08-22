@@ -995,7 +995,7 @@ public class ServerCredentialStore implements Serializable
     
     String key_attestation_algorithm;
     
-    byte[] saved_close_mac;
+    byte[] saved_close_nonce;
     
     X509Certificate device_certificate;
     
@@ -1055,7 +1055,7 @@ public class ServerCredentialStore implements Serializable
     void checkFinalResult (byte[] close_session_attestation,  ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
       {
         MacGenerator check = new MacGenerator ();
-        check.addArray (saved_close_mac);
+        check.addArray (saved_close_nonce);
         check.addString (KeyGen2URIs.ALGORITHMS.SESSION_KEY_1);
         if (!ArrayUtil.compare (attest (check.getResult (),
                                         getMACSequenceCounterAndUpdate (),

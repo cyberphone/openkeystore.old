@@ -2288,7 +2288,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Generate the attestation in advance => checking SessionKeyLimit before "commit"
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder close_attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
-        close_attestation.addArray (mac);
+        close_attestation.addArray (nonce);
         close_attestation.addString (ALGORITHM_SESSION_KEY_ATTEST_1);
         byte[] attestation = close_attestation.getResult ();
 

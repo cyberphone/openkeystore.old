@@ -419,13 +419,12 @@ public class ProvSess
         close.addString (server_session_id);
         close.addString (ISSUER_URI);
         close.addArray (nonce);
-        byte[] close_mac;
         byte[] result = sks.closeProvisioningSession (provisioning_handle,
                                                       nonce,
-                                                      close_mac = mac4call (close.getResult (),
+                                                      mac4call (close.getResult (),
                                                       SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION));
         MacGenerator check = new MacGenerator ();
-        check.addArray (close_mac);
+        check.addArray (nonce);
         check.addString (KeyGen2URIs.ALGORITHMS.SESSION_KEY_1);
         if (!ArrayUtil.compare (attest (check.getResult ()), result))
           {

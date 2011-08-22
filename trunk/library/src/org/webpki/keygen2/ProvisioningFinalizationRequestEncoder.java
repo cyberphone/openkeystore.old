@@ -240,10 +240,10 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             close.addString (server_credential_store.client_session_id);
             close.addString (server_credential_store.server_session_id);
             close.addString (server_credential_store.issuer_uri);
-            close.addArray (nonce);
+            close.addArray (server_credential_store.saved_close_nonce = nonce);
             top.setAttribute (MAC_ATTR,
-                              new Base64 ().getBase64StringFromBinary (server_credential_store.saved_close_mac = mac (close.getResult (),
-                                                                              SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION)));
+                              new Base64 ().getBase64StringFromBinary (mac (close.getResult (),
+                                                                            SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION)));
           }
         catch (GeneralSecurityException e)
           {
