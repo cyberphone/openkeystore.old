@@ -427,7 +427,7 @@ public interface SKSWSProxy
                                       @WebParam(name="DeleteProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                       Holder<Byte> delete_protection,
                                       @WebParam(name="KeyBackup", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                                      Holder<Boolean> key_backup)
+                                      Holder<Byte> key_backup)
     throws SKSException_Exception;
 
     @WebMethod(operationName="getExtension")

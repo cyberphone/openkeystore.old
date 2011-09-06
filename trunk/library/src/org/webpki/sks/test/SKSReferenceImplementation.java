@@ -89,6 +89,8 @@ import org.webpki.sks.SecureKeyStore;
  *  Compared to the SKS specification, the Reference Implementation uses a slightly
  *  more java-centric way of passing parameters, including "null" arguments, but the
  *  content is supposed to be identical.
+ *  
+ *  Note that persistence is not supported by the Reference Implementation.
  *
  *  Author: Anders Rundgren
  */
@@ -195,7 +197,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         byte export_protection;
         byte delete_protection;
         
-        boolean key_backup;
+        byte key_backup;
 
 
         LinkedHashMap<String,ExtObject> extensions = new LinkedHashMap<String,ExtObject> ();
@@ -1551,9 +1553,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         key_entry.authorizeExportOrDeleteOperation (key_entry.export_protection, authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Mark as "copied"
+        // Mark as "copied" locally
         ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.key_backup = true;
+        key_entry.key_backup |= KEY_BACKUP_LOCAL;
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Export key in raw unencrypted format
@@ -2721,9 +2723,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             key_entry.private_key = KeyFactory.getInstance (key_entry.isRSA () ? "RSA" : "EC").generatePrivate (key_spec);
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Mark as "copied"
+            // Mark as "copied" by the server
             ///////////////////////////////////////////////////////////////////////////////////
-            key_entry.key_backup = true;
+            key_entry.key_backup |= KEY_BACKUP_SERVER;
           }
         catch (GeneralSecurityException e)
           {
@@ -2770,6 +2772,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Decrypt and store symmetric key
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.symmetric_key = key_entry.owner.decrypt (symmetric_key);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Mark as "copied" by the server
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.key_backup |= KEY_BACKUP_SERVER;
       }
 
 

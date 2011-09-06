@@ -147,6 +147,12 @@ public interface SecureKeyStore
     public byte PROTECTION_STATUS_PUK_PROTECTED      = 0x02;
     public byte PROTECTION_STATUS_PUK_BLOCKED        = 0x08;
     public byte PROTECTION_STATUS_DEVICE_PIN         = 0x10;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // "KeyBackup" bit-field constants
+    ///////////////////////////////////////////////////////////////////////////////////
+    public byte KEY_BACKUP_SERVER                    = 0x01;
+    public byte KEY_BACKUP_LOCAL                     = 0x02;
  
     ///////////////////////////////////////////////////////////////////////////////////
     // Default algorithms

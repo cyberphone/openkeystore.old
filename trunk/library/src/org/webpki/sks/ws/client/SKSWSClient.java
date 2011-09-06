@@ -658,7 +658,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             Holder<Byte> biometric_protection = new Holder<Byte> ();
             Holder<Byte> export_protection = new Holder<Byte> ();
             Holder<Byte> delete_protection = new Holder<Byte> ();
-            Holder<Boolean> key_backup = new Holder<Boolean> ();
+            Holder<Byte> key_backup = new Holder<Byte> ();
             getSKSWS ().getKeyProtectionInfo (key_handle,
                                               protection_status,
                                               puk_format,

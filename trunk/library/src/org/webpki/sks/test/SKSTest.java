@@ -59,6 +59,7 @@ import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.ExportProtection;
 import org.webpki.sks.Grouping;
+import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.SKSException;
@@ -760,6 +761,7 @@ public class SKSTest
                                         null /* pin_policy */,
                                         AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
         sess.closeSession ();
+        assertTrue ("Must be 0", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == 0);
 
         byte[] result = key.signData (SignatureAlgorithms.RSA_SHA256, null, TEST_STRING);
         Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
@@ -1567,7 +1569,11 @@ public class SKSTest
         sess.closeSession ();
         try
           {
+            KeyProtectionInfo kpi = device.sks.getKeyProtectionInfo (key.key_handle);
+            assertTrue ("No flags should be set", kpi.getKeyBackup () == 0);
             device.sks.exportKey (key.key_handle, null);
+            kpi = device.sks.getKeyProtectionInfo (key.key_handle);
+            assertTrue ("Flag must be set", kpi.getKeyBackup () == SecureKeyStore.KEY_BACKUP_LOCAL);
           }
         catch (SKSException e)
           {
@@ -1743,6 +1749,7 @@ public class SKSTest
                                            new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate ("CN=TEST18");
             key.setSymmetricKey (symmetric_key);
             sess.closeSession ();
+            assertTrue ("Server must be set", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == SecureKeyStore.KEY_BACKUP_SERVER);
           }
       }
 
@@ -2083,6 +2090,7 @@ public class SKSTest
                                            key_usage).setCertificate ("CN=TEST18", key_pair.getPublic ());
             sess.restorePrivateKey (key, key_pair.getPrivate ());
             sess.closeSession ();
+            assertTrue ("Server must be set", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == SecureKeyStore.KEY_BACKUP_SERVER);
             Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
             cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
             byte[] enc = cipher.doFinal (TEST_STRING);

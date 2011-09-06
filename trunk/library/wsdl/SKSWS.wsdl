@@ -512,7 +512,7 @@
             <xs:element name="BiometricProtection" type="xs:byte"/>
             <xs:element name="ExportProtection" type="xs:byte"/>
             <xs:element name="DeleteProtection" type="xs:byte"/>
-            <xs:element name="KeyBackup" type="xs:boolean"/>
+            <xs:element name="KeyBackup" type="xs:byte"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

@@ -1602,7 +1602,7 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=18)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyBackup", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
-        internal bool _key_backup;
+        internal sbyte _key_backup;
         #pragma warning restore 0649
 
         public sbyte ProtectionStatus
@@ -1695,7 +1695,7 @@ namespace org.webpki.sks.ws.client
             get { return _delete_protection; }
         }
 
-        public bool KeyBackup
+        public sbyte KeyBackup
         {
             get { return _key_backup; }
         }

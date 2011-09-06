@@ -56,7 +56,7 @@ public class KeyProtectionInfo
     
     private BiometricProtection biometric_protection;
     
-    private boolean key_backup;
+    private byte key_backup;
     
     private ExportProtection export_protection;
     
@@ -162,7 +162,7 @@ public class KeyProtectionInfo
         return biometric_protection;
       }
 
-    public boolean getKeyBackupFlag ()
+    public byte getKeyBackup ()
       {
         return key_backup;
       }
@@ -272,7 +272,7 @@ public class KeyProtectionInfo
                               byte biometric_protection,
                               byte export_protection,
                               byte delete_protection,
-                              boolean key_backup) throws SKSException
+                              byte key_backup) throws SKSException
 
       {
         this.protection_status = protection_status;

@@ -478,16 +478,16 @@
      <Parameter Name="mac"              Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
         log ("setCertificatePath (KeyHandle=" + key_handle + ")");
+        X509Certificate[] cp = null;
         try
           {
-            sks.setCertificatePath (key_handle,
-                                    CertificateUtil.getSortedPathFromBlobs (certificate_path),
-                                    mac);
+            cp = CertificateUtil.getSortedPathFromBlobs (certificate_path);
           }
         catch (IOException e)
           {
             throw new SKSException (e);
           }
+        sks.setCertificatePath (key_handle, cp, mac);
 ]]></Code></Method>
 
    <Method Name="setSymmetricKey" Throws="SKSException">
@@ -641,7 +641,7 @@
      <Parameter Name="biometric_protection" Type="byte"  XMLName="BiometricProtection" Mode="out"/>
      <Parameter Name="export_protection"    Type="byte"  XMLName="ExportProtection"    Mode="out"/>
      <Parameter Name="delete_protection"    Type="byte"  XMLName="DeleteProtection"    Mode="out"/>
-     <Parameter Name="key_backup"           Type="bool"  XMLName="KeyBackup"           Mode="out"/>
+     <Parameter Name="key_backup"           Type="byte"  XMLName="KeyBackup"           Mode="out"/>
      <Code><![CDATA[
         log ("getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
         KeyProtectionInfo kpi      = sks.getKeyProtectionInfo (key_handle);
@@ -669,7 +669,7 @@
         biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
         export_protection.value    = kpi.getExportProtection ().getSKSValue ();
         delete_protection.value    = kpi.getDeleteProtection ().getSKSValue ();
-        key_backup.value           = kpi.getKeyBackupFlag ();
+        key_backup.value           = kpi.getKeyBackup ();
 ]]></Code></Method>
 
    <Method Name="getExtension" Throws="SKSException">

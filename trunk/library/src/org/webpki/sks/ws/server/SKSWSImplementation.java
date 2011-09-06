@@ -776,7 +776,7 @@ public class SKSWSImplementation
                                       @WebParam(name="DeleteProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                       Holder<Byte> delete_protection,
                                       @WebParam(name="KeyBackup", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                                      Holder<Boolean> key_backup)
+                                      Holder<Byte> key_backup)
     throws SKSException
       {
         log ("getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
@@ -805,7 +805,7 @@ public class SKSWSImplementation
         biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
         export_protection.value    = kpi.getExportProtection ().getSKSValue ();
         delete_protection.value    = kpi.getDeleteProtection ().getSKSValue ();
-        key_backup.value           = kpi.getKeyBackupFlag ();
+        key_backup.value           = kpi.getKeyBackup ();
       }
 
     @WebMethod(operationName="getExtension")
