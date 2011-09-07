@@ -92,14 +92,10 @@ public class PKCS12Import
                             old_key = new GenKey ();
                             old_key.key_handle = ek.getKeyHandle ();
                             old_key.cert_path = cert_path.toArray (new X509Certificate[0]);
-                            System.out.println ("KMK!");
                             if (sks instanceof WSSpecific)
                               {
                                  ((WSSpecific)sks).logEvent ("Updating");
                               }
-                          }
-                        else
-                          {
                           }
                         break;
                       }

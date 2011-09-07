@@ -239,7 +239,9 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            return getSKSWS ().closeProvisioningSession (provisioning_handle, nonce, mac);
+            return getSKSWS ().closeProvisioningSession (provisioning_handle,
+                                                         nonce,
+                                                         mac);
           }
         catch (SKSException_Exception e)
           {
@@ -305,11 +307,13 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public byte[] signProvisioningSessionData (int provisioning_handle, byte[] data) throws SKSException
+    public byte[] signProvisioningSessionData (int provisioning_handle,
+                                               byte[] data) throws SKSException
       {
         try
           {
-            return getSKSWS ().signProvisioningSessionData (provisioning_handle, data);
+            return getSKSWS ().signProvisioningSessionData (provisioning_handle,
+                                                            data);
           }
         catch (SKSException_Exception e)
           {
@@ -399,7 +403,6 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
           {
             Holder<byte[]> public_key = new Holder<byte[]> ();
             Holder<byte[]> attestation = new Holder<byte[]> ();
-            Holder<byte[]> private_key = new Holder<byte[]> ();
             List<String> lalg = new ArrayList<String> ();
             for (String alg : endorsed_algorithms)
               {
@@ -438,11 +441,13 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public int getKeyHandle (int provisioning_handle, String id) throws SKSException
+    public int getKeyHandle (int provisioning_handle,
+                             String id) throws SKSException
       {
         try
           {
-            return getSKSWS ().getKeyHandle (provisioning_handle, id);
+            return getSKSWS ().getKeyHandle (provisioning_handle,
+                                             id);
           }
         catch (SKSException_Exception e)
           {
@@ -451,7 +456,9 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void setCertificatePath (int key_handle, X509Certificate[] certificate_path, byte[] mac) throws SKSException
+    public void setCertificatePath (int key_handle,
+                                    X509Certificate[] certificate_path,
+                                    byte[] mac) throws SKSException
       {
         try
           {
@@ -460,7 +467,9 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
               {
                 lcert_path.add (cert.getEncoded ());
               }
-            getSKSWS ().setCertificatePath (key_handle, lcert_path, mac);
+            getSKSWS ().setCertificatePath (key_handle,
+                                            lcert_path,
+                                            mac);
           }
         catch (GeneralSecurityException e)
           {
@@ -473,11 +482,15 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void setSymmetricKey (int key_handle, byte[] symmetric_key, byte[] mac) throws SKSException
+    public void setSymmetricKey (int key_handle,
+                                 byte[] symmetric_key,
+                                 byte[] mac) throws SKSException
       {
         try
           {
-            getSKSWS ().setSymmetricKey (key_handle, symmetric_key, mac);
+            getSKSWS ().setSymmetricKey (key_handle,
+                                         symmetric_key,
+                                         mac);
           }
         catch (SKSException_Exception e)
           {
@@ -509,7 +522,9 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void restorePrivateKey (int key_handle, byte[] private_key, byte[] mac) throws SKSException
+    public void restorePrivateKey (int key_handle,
+                                   byte[] private_key,
+                                   byte[] mac) throws SKSException
       {
         try
           {
@@ -522,7 +537,10 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void pp_deleteKey (int provisioning_handle, int target_key_handle, byte[] authorization, byte[] mac) throws SKSException
+    public void pp_deleteKey (int provisioning_handle,
+                              int target_key_handle,
+                              byte[] authorization,
+                              byte[] mac) throws SKSException
       {
         try
           {
@@ -538,7 +556,10 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void pp_unlockKey (int provisioning_handle, int target_key_handle, byte[] authorization, byte[] mac) throws SKSException
+    public void pp_unlockKey (int provisioning_handle,
+                              int target_key_handle,
+                              byte[] authorization,
+                              byte[] mac) throws SKSException
       {
         try
           {
@@ -554,7 +575,10 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void pp_updateKey (int key_handle, int target_key_handle, byte[] authorization, byte[] mac) throws SKSException
+    public void pp_updateKey (int key_handle,
+                              int target_key_handle,
+                              byte[] authorization,
+                              byte[] mac) throws SKSException
       {
         try
           {
@@ -570,7 +594,10 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void pp_cloneKeyProtection (int key_handle, int target_key_handle, byte[] authorization, byte[] mac) throws SKSException
+    public void pp_cloneKeyProtection (int key_handle,
+                                       int target_key_handle,
+                                       byte[] authorization,
+                                       byte[] mac) throws SKSException
       {
         try
           {
@@ -706,7 +733,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public Extension getExtension (int key_handle, String type) throws SKSException
+    public Extension getExtension (int key_handle,
+                                   String type) throws SKSException
       {
         try
           {
@@ -729,11 +757,17 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void setProperty (int key_handle, String type, byte[] name, byte[] value) throws SKSException
+    public void setProperty (int key_handle,
+                             String type,
+                             byte[] name,
+                             byte[] value) throws SKSException
       {
         try
           {
-            getSKSWS ().setProperty (key_handle, type, name, value);
+            getSKSWS ().setProperty (key_handle,
+                                     type,
+                                     name,
+                                     value);
           }
         catch (SKSException_Exception e)
           {
@@ -742,11 +776,13 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void deleteKey (int key_handle, byte[] authorization) throws SKSException
+    public void deleteKey (int key_handle,
+                           byte[] authorization) throws SKSException
       {
         try
           {
-            getSKSWS ().deleteKey (key_handle, authorization);
+            getSKSWS ().deleteKey (key_handle,
+                                   authorization);
           }
         catch (SKSException_Exception e)
           {
@@ -755,11 +791,13 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public byte[] exportKey (int key_handle, byte[] authorization) throws SKSException
+    public byte[] exportKey (int key_handle,
+                             byte[] authorization) throws SKSException
       {
         try
           {
-            return getSKSWS ().exportKey (key_handle, authorization);
+            return getSKSWS ().exportKey (key_handle,
+                                          authorization);
           }
         catch (SKSException_Exception e)
           {
@@ -768,11 +806,13 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }    
 
     @Override
-    public void unlockKey (int key_handle, byte[] authorization) throws SKSException
+    public void unlockKey (int key_handle,
+                           byte[] authorization) throws SKSException
       {
         try
           {
-            getSKSWS ().unlockKey (key_handle, authorization);
+            getSKSWS ().unlockKey (key_handle,
+                                   authorization);
           }
         catch (SKSException_Exception e)
           {
@@ -781,11 +821,15 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void changePIN (int key_handle, byte[] authorization, byte[] new_pin) throws SKSException
+    public void changePIN (int key_handle,
+                           byte[] authorization,
+                           byte[] new_pin) throws SKSException
       {
         try
           {
-            getSKSWS ().changePIN (key_handle, authorization, new_pin);
+            getSKSWS ().changePIN (key_handle,
+                                   authorization,
+                                   new_pin);
           }
         catch (SKSException_Exception e)
           {
@@ -794,11 +838,15 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void setPIN (int key_handle, byte[] authorization, byte[] new_pin) throws SKSException
+    public void setPIN (int key_handle,
+                        byte[] authorization,
+                        byte[] new_pin) throws SKSException
       {
         try
           {
-            getSKSWS ().setPIN (key_handle, authorization, new_pin);
+            getSKSWS ().setPIN (key_handle,
+                                authorization,
+                                new_pin);
           }
         catch (SKSException_Exception e)
           {
@@ -807,11 +855,19 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public byte[] signHashedData (int key_handle, String algorithm, byte[] parameters, byte[] authorization, byte[] data) throws SKSException
+    public byte[] signHashedData (int key_handle,
+                                  String algorithm,
+                                  byte[] parameters,
+                                  byte[] authorization,
+                                  byte[] data) throws SKSException
       {
         try
           {
-            return getSKSWS ().signHashedData (key_handle, algorithm, parameters, authorization, data);
+            return getSKSWS ().signHashedData (key_handle,
+                                               algorithm,
+                                               parameters,
+                                               authorization,
+                                               data);
           }
         catch (SKSException_Exception e)
           {
@@ -820,11 +876,19 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public byte[] asymmetricKeyDecrypt (int key_handle, String algorithm, byte[] parameters, byte[] authorization, byte[] data) throws SKSException
+    public byte[] asymmetricKeyDecrypt (int key_handle, 
+                                        String algorithm,
+                                        byte[] parameters,
+                                        byte[] authorization,
+                                        byte[] data) throws SKSException
       {
         try
           {
-            return getSKSWS ().asymmetricKeyDecrypt (key_handle, algorithm, parameters, authorization, data);
+            return getSKSWS ().asymmetricKeyDecrypt (key_handle,
+                                                     algorithm,
+                                                     parameters,
+                                                     authorization,
+                                                     data);
           }
         catch (SKSException_Exception e)
           {
@@ -833,11 +897,19 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public byte[] keyAgreement (int key_handle, String algorithm, byte[] parameters, byte[] authorization, PublicKey public_key) throws SKSException
+    public byte[] keyAgreement (int key_handle,
+                                String algorithm,
+                                byte[] parameters,
+                                byte[] authorization,
+                                PublicKey public_key) throws SKSException
       {
         try
           {
-            return getSKSWS ().keyAgreement (key_handle, algorithm, parameters, authorization, public_key.getEncoded ());
+            return getSKSWS ().keyAgreement (key_handle,
+                                             algorithm,
+                                             parameters,
+                                             authorization,
+                                             public_key.getEncoded ());
           }
         catch (SKSException_Exception e)
           {
@@ -846,11 +918,17 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public byte[] performHMAC (int key_handle, String algorithm, byte[] authorization, byte[] data) throws SKSException
+    public byte[] performHMAC (int key_handle,
+                               String algorithm,
+                               byte[] authorization,
+                               byte[] data) throws SKSException
       {
         try
           {
-            return getSKSWS ().performHMAC (key_handle, algorithm, authorization, data);
+            return getSKSWS ().performHMAC (key_handle, 
+                                            algorithm,
+                                            authorization,
+                                            data);
           }
         catch (SKSException_Exception e)
           {
@@ -859,11 +937,21 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public byte[] symmetricKeyEncrypt (int key_handle, String algorithm, boolean mode, byte[] iv, byte[] authorization, byte[] data) throws SKSException
+    public byte[] symmetricKeyEncrypt (int key_handle,
+                                       String algorithm,
+                                       boolean mode,
+                                       byte[] iv,
+                                       byte[] authorization,
+                                       byte[] data) throws SKSException
       {
         try
           {
-            return getSKSWS ().symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
+            return getSKSWS ().symmetricKeyEncrypt (key_handle,
+                                                    algorithm,
+                                                    mode,
+                                                    iv,
+                                                    authorization,
+                                                    data);
           }
         catch (SKSException_Exception e)
           {

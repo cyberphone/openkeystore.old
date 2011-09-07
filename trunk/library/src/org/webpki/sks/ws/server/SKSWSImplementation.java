@@ -30,7 +30,6 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.X509EncodedKeySpec;
 
@@ -50,8 +49,6 @@ import javax.xml.ws.ResponseWrapper;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.crypto.CertificateUtil;
-
-import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;

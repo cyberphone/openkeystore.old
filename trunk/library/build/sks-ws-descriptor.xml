@@ -38,10 +38,8 @@
                         java.security.PublicKey
                         java.security.cert.X509Certificate
                         java.security.interfaces.ECPublicKey
-                        java.security.interfaces.RSAPublicKey
                         java.io.IOException
                         org.bouncycastle.jce.provider.BouncyCastleProvider
-                        org.webpki.crypto.test.DemoKeyStore
                         org.webpki.crypto.CertificateUtil
                         org.webpki.sks.EnumeratedKey
                         org.webpki.sks.ProvisioningSession
