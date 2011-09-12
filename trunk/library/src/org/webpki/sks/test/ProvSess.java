@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -109,7 +110,7 @@ public class ProvSess
             KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
             ECGenParameterSpec eccgen = new ECGenParameterSpec (ECDomains.P_256.getJCEName ());
             generator.initialize (eccgen, new SecureRandom ());
-            java.security.KeyPair kp = generator.generateKeyPair();
+            KeyPair kp = generator.generateKeyPair();
             server_ec_private_key = (ECPrivateKey) kp.getPrivate ();
             return (ECPublicKey) kp.getPublic ();
           }

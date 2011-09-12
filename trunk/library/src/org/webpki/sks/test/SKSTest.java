@@ -19,6 +19,7 @@ package org.webpki.sks.test;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -2071,7 +2072,7 @@ public class SKSTest
       {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
         kpg.initialize (1024);
-        java.security.KeyPair key_pair = kpg.generateKeyPair ();
+        KeyPair key_pair = kpg.generateKeyPair ();
         String ok_pin = "1563";
         for (AppUsage key_usage : AppUsage.values ())
           {
@@ -2175,7 +2176,7 @@ public class SKSTest
         KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
         ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
         generator.initialize (eccgen, new SecureRandom ());
-        java.security.KeyPair kp = generator.generateKeyPair ();
+        KeyPair kp = generator.generateKeyPair ();
         byte[] z = device.sks.keyAgreement (key.key_handle,
                                             KeyGen2URIs.ALGORITHMS.ECDH,
                                             null,

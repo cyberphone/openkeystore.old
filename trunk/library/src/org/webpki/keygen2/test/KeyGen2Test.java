@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -142,6 +143,8 @@ public class KeyGen2Test
     
     boolean ecc_key;
     
+    boolean two_keys;
+    
     boolean key_agreement;
     
     boolean server_seed;
@@ -248,7 +251,7 @@ public class KeyGen2Test
         
         int provisioning_handle;
         
-        KeyCreationRequestDecoder key_init_request;
+        KeyCreationRequestDecoder key_create_request;
         
         ProvisioningInitializationRequestDecoder prov_sess_req;
         
@@ -453,14 +456,14 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key initialization request and respond with freshly generated public keys
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] KeyInitResponse (byte[] xmldata) throws IOException
+        byte[] keyCreResponse (byte[] xmldata) throws IOException
           {
-            key_init_request = (KeyCreationRequestDecoder) client_xml_cache.parse (xmldata);
+            key_create_request = (KeyCreationRequestDecoder) client_xml_cache.parse (xmldata);
             KeyCreationResponseEncoder key_init_response = 
-                  new KeyCreationResponseEncoder (key_init_request);
+                  new KeyCreationResponseEncoder (key_create_request);
             int pin_policy_handle = 0;
             int puk_policy_handle = 0;
-            for (KeyCreationRequestDecoder.KeyObject key : key_init_request.getKeyObjects ())
+            for (KeyCreationRequestDecoder.KeyObject key : key_create_request.getKeyObjects ())
               {
                 byte[] pin_value = key.getPresetPIN ();
                 if (key.getPINPolicy () == null)
@@ -504,7 +507,7 @@ public class KeyGen2Test
                   }
                 KeyData key_data = sks.createKeyEntry (provisioning_handle,
                                                        key.getID (),
-                                                       key_init_request.getAlgorithm (),
+                                                       key_create_request.getAlgorithm (),
                                                        key.getServerSeed (),
                                                        key.isDevicePINProtected (),
                                                        pin_policy_handle,
@@ -664,7 +667,7 @@ public class KeyGen2Test
 
         PlatformNegotiationRequestEncoder platform_request;
 
-        KeyCreationRequestEncoder key_init_request;
+        KeyCreationRequestEncoder key_create_request;
         
         ProvisioningInitializationRequestEncoder prov_sess_request;
 
@@ -708,7 +711,7 @@ public class KeyGen2Test
                 KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
                 ECGenParameterSpec eccgen = new ECGenParameterSpec (ECDomains.P_256.getJCEName ());
                 generator.initialize (eccgen, new SecureRandom ());
-                java.security.KeyPair kp = generator.generateKeyPair();
+                KeyPair kp = generator.generateKeyPair();
                 server_ec_private_key = (ECPrivateKey) kp.getPrivate ();
                 return (ECPublicKey) kp.getPublic ();
               }
@@ -912,9 +915,9 @@ public class KeyGen2Test
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Create a key init request for the client
+        // Create a key creation request for the client
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] keyInitRequest (byte[] xmldata) throws IOException, GeneralSecurityException
+        byte[] keyCreRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             XMLObjectWrapper xml_object = server_xml_cache.parse (xmldata);
             if (xml_object instanceof ProvisioningInitializationResponseDecoder)
@@ -965,9 +968,9 @@ public class KeyGen2Test
                                                                                key_alg, pin_policy,
                                                                                server_sess_key.encrypt (predef_server_pin))
                              :
-                server_credential_store.createKey (encryption_key || key_agreement? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
-                                                   key_alg,
-                                                   pin_policy);
+            server_credential_store.createKey (encryption_key || key_agreement? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
+                                               key_alg,
+                                               pin_policy);
             if (symmetric_key || encryption_key)
               {
                 kp.setEndorsedAlgorithms (new String[]{encryption_key ? SymEncryptionAlgorithms.AES256_CBC.getURI () : MacAlgorithms.HMAC_SHA1.getURI ()});
@@ -1022,23 +1025,31 @@ public class KeyGen2Test
                                                                       delete_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
                                                                       delete_key.server_km);
               }
-            key_init_request = new KeyCreationRequestEncoder (KEY_INIT_URL, server_credential_store, server_sess_key);
-            return key_init_request.writeXML ();
+            key_create_request = new KeyCreationRequestEncoder (KEY_INIT_URL, server_credential_store, server_sess_key);
+            if (two_keys)
+              {
+                server_credential_store.createKey (AppUsage.SIGNATURE,
+                                                   new KeySpecifier.EC (ECDomains.P_256),
+                                                   pin_policy);
+
+              }
+            return key_create_request.writeXML ();
           }
 
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Get the key init response and respond with certified public keys and attributes
+        // Get the key create response and respond with certified public keys and attributes
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] creFinalizeRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             if (plain_unlock_key == null)
               {
+                boolean temp_set_private_key = set_private_key;
+                boolean otp = symmetric_key && !encryption_key;
                 KeyCreationResponseDecoder key_init_response = (KeyCreationResponseDecoder) server_xml_cache.parse (xmldata);
-                key_init_response.validateAndPopulate (key_init_request, server_sess_key);
+                key_init_response.validateAndPopulate (key_create_request, server_sess_key);
                 for (ServerCredentialStore.KeyProperties key_prop : server_credential_store.getKeyProperties ())
                   {
-                    boolean otp = symmetric_key && !encryption_key;
                     boolean auth = key_prop.getAppUsage () == AppUsage.AUTHENTICATION;
                     CertSpec cert_spec = new CertSpec ();
                     if (!otp)
@@ -1058,6 +1069,7 @@ public class KeyGen2Test
                       }
                     cert_spec.setSubject ("CN=JUnit " + _name.getMethodName() + ", E=john.doe@example.com" +
                                           (otp ? ", OU=OTP Key" : ""));
+                    otp = false;
     
                     GregorianCalendar start = new GregorianCalendar ();
                     GregorianCalendar end = (GregorianCalendar) start.clone ();
@@ -1065,7 +1077,7 @@ public class KeyGen2Test
     
                     PublicKey pub_key =  key_prop.getPublicKey ();
     
-                    if (set_private_key)
+                    if (temp_set_private_key)
                       {
                         KeyPairGenerator generator = KeyPairGenerator.getInstance (ecc_key ? "EC" :"RSA");
                         if (ecc_key)
@@ -1076,7 +1088,7 @@ public class KeyGen2Test
                           {
                             generator.initialize (new RSAKeyGenParameterSpec (1024, RSAKeyGenParameterSpec.F4), new SecureRandom ());
                           }
-                        java.security.KeyPair kp = generator.generateKeyPair();
+                        KeyPair kp = generator.generateKeyPair();
                         pub_key = kp.getPublic ();
                         gen_private_key = kp.getPrivate ();
                       }
@@ -1109,9 +1121,10 @@ public class KeyGen2Test
                         }, pub_key);
                     key_prop.setCertificatePath (new X509Certificate[]{certificate});
     
-                    if (set_private_key)
+                    if (temp_set_private_key)
                       {
                         key_prop.setEncryptedPrivateKey (server_sess_key.encrypt (gen_private_key.getEncoded ()));
+                        temp_set_private_key = false;
                       }
     
                   }
@@ -1257,6 +1270,7 @@ public class KeyGen2Test
             writeOption ("DeleteKey", delete_key != null);
             writeOption ("UnlockKey", plain_unlock_key != null);
             writeOption ("ECC KMK", ecc_kmk);
+            writeOption ("Multiple keys", two_keys);
             writeOption ("HTTPS server certificate", https);
             server = new Server ();
             client = new Client ();
@@ -1272,8 +1286,8 @@ public class KeyGen2Test
               }
             if (plain_unlock_key == null)
               {
-                xml = fileLogger (server.keyInitRequest (xml));
-                xml = fileLogger (client.KeyInitResponse (xml));
+                xml = fileLogger (server.keyCreRequest (xml));
+                xml = fileLogger (client.keyCreResponse (xml));
               }
             xml = fileLogger (server.creFinalizeRequest (xml));
             xml = fileLogger (client.creFinalizeResponse (xml));
@@ -1336,6 +1350,15 @@ public class KeyGen2Test
         Doer doer = new Doer ();
         pin_protection = true;
         server_seed = true;
+        doer.perform ();
+      }
+
+    @Test
+    public void MultipleKeys () throws Exception
+      {
+        Doer doer = new Doer ();
+        pin_protection = true;
+        two_keys = true;
         doer.perform ();
       }
 
@@ -1636,6 +1659,32 @@ public class KeyGen2Test
         ecc_key = true;
         key_agreement = true;
         doer.perform ();
+        EnumeratedKey ek = new EnumeratedKey ();
+        int j = 0;
+        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
+          {
+            if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
+              {
+                j++;
+                break;
+              }
+          }
+        assertTrue ("Missing keys", j == 1);
+        KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
+        ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
+        generator.initialize (eccgen, new SecureRandom ());
+        KeyPair kp = generator.generateKeyPair ();
+        KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
+        byte[] z = sks.keyAgreement (ek.getKeyHandle (),
+                                     KeyGen2URIs.ALGORITHMS.ECDH,
+                                     null,
+                                     USER_DEFINED_PIN, 
+                                     kp.getPublic ());
+        KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
+        key_agreement.init (kp.getPrivate ());
+        key_agreement.doPhase (ka.getCertificatePath ()[0].getPublicKey (), true);
+        byte[] Z = key_agreement.generateSecret ();
+        assertTrue ("DH fail", ArrayUtil.compare (z, Z));
       }
 
     @Test
