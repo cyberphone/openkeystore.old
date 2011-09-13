@@ -157,6 +157,8 @@ public class KeyGen2Test
     
     boolean ecc_kmk;
     
+    boolean fixed_pin;
+    
     Server clone_key_protection;
     
     Server update_key;
@@ -207,6 +209,10 @@ public class KeyGen2Test
     
     static final byte[] USER_DEFINED_PIN = {'0','1','5','3','5','4'};
 
+    static final byte[] PREDEF_SERVER_PIN = {'3','1','2','5','8','9'};
+    
+    static final byte[] BAD_PIN = {0x03, 0x33, 0x03, 0x04};
+    
     static X509Certificate server_certificate;
 
     int round;
@@ -659,10 +665,6 @@ public class KeyGen2Test
 
         ServerCredentialStore.PUKPolicy puk_policy;
         
-        byte[] predef_server_pin = {'3','1','2','5','8','9'};
-        
-        byte[] bad_pin = {0x03, 0x33, 0x03, 0x04};
-        
         int pin_retry_limit = 3;
 
         PlatformNegotiationRequestEncoder platform_request;
@@ -958,6 +960,10 @@ public class KeyGen2Test
                   {
                     pin_policy.setInputMethod (input_method);
                   }
+                if (fixed_pin)
+                  {
+                    pin_policy.setUserModifiable (false);
+                  }
               }
             KeySpecifier key_alg =  ecc_key ?
                  new KeySpecifier.EC (ECDomains.P_256) : new KeySpecifier.RSA (2048);
@@ -966,7 +972,7 @@ public class KeyGen2Test
                 server_credential_store.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
                   preset_pin ? server_credential_store.createKeyWithPresetPIN (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                                                key_alg, pin_policy,
-                                                                               server_sess_key.encrypt (predef_server_pin))
+                                                                               server_sess_key.encrypt (PREDEF_SERVER_PIN))
                              :
             server_credential_store.createKey (encryption_key || key_agreement? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                key_alg,
@@ -1254,6 +1260,7 @@ public class KeyGen2Test
             writeOption ("Device PIN", device_pin_protection);
             writeOption ("Preset PIN", preset_pin);
             writeOption ("PIN patterns", add_pin_pattern);
+            writeOption ("Fixed PIN", fixed_pin);
             writeOption ("Privacy Enabled", privacy_enabled);
             writeOption ("ECC Key", ecc_key);
             writeOption ("Server Seed", server_seed);
@@ -1305,6 +1312,23 @@ public class KeyGen2Test
             writeString ("\n\n");
          }
         
+        int getFirstKey () throws Exception
+          {
+            EnumeratedKey ek = new EnumeratedKey ();
+            int q = 0;
+            while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
+              {
+                if (ek.getProvisioningHandle () == client.provisioning_handle)
+                  {
+                    q++;
+                    break;
+                  }
+              }
+            assertTrue ("Missing keys", q == 1);
+            return ek.getKeyHandle ();
+          }
+
+        
       }
 
     @Test
@@ -1349,8 +1373,10 @@ public class KeyGen2Test
       {
         Doer doer = new Doer ();
         pin_protection = true;
+        fixed_pin = true;
         server_seed = true;
         doer.perform ();
+        assertFalse ("PIN Not User Modifiable", sks.getKeyProtectionInfo (doer.getFirstKey ()).getPINUserModifiableFlag ());
       }
 
     @Test
@@ -1392,46 +1418,37 @@ public class KeyGen2Test
         symmetric_key = true;
         property_bag = true;
         doer.perform ();
+        int key_handle = doer.getFirstKey ();
         ServerCredentialStore.PropertyBag prop_bag = doer.server.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getPropertyBags ()[0];
-        EnumeratedKey ek = new EnumeratedKey ();
-        int j = 0;
-        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
+        Property[] props1 = sks.getExtension (key_handle, prop_bag.getType ()).getProperties ();
+        ServerCredentialStore.Property[] props2 = prop_bag.getProperties ();
+        assertTrue ("Prop len error", props1.length == props2.length);
+        int w = 0;
+        for (int i = 0; i < props1.length; i++)
           {
-            if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
+            if (props2[i].isWritable ())
               {
-                j++;
-                Property[] props1 = sks.getExtension (ek.getKeyHandle (), prop_bag.getType ()).getProperties ();
-                ServerCredentialStore.Property[] props2 = prop_bag.getProperties ();
-                assertTrue ("Prop len error", props1.length == props2.length);
-                int w = 0;
-                for (int i = 0; i < props1.length; i++)
-                  {
-                    if (props2[i].isWritable ())
-                      {
-                        w = i;
-                      }
-                    assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
-                    assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
-                  }
-                sks.setProperty (ek.getKeyHandle (), prop_bag.getType (), props2[w].getName ().getBytes ("UTF-8"), (props2[w].getValue () + "w2").getBytes ("UTF-8"));
-                props1 = sks.getExtension (ek.getKeyHandle (), prop_bag.getType ()).getProperties ();
-                for (int i = 0; i < props1.length; i++)
-                  {
-                    assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
-                    assertTrue ("Prop value error", (i == w) ^ props1[i].getValue ().equals (props2[i].getValue ()));
-                  }
-                sks.setProperty (ek.getKeyHandle (), prop_bag.getType (), props2[w].getName ().getBytes ("UTF-8"), props2[w].getValue ().getBytes ("UTF-8"));
-                props1 = sks.getExtension (ek.getKeyHandle (), prop_bag.getType ()).getProperties ();
-                for (int i = 0; i < props1.length; i++)
-                  {
-                    assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
-                    assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
-                  }
-                assertTrue ("HMAC error", ArrayUtil.compare (sks.performHMAC (ek.getKeyHandle (), MacAlgorithms.HMAC_SHA1.getURI (), USER_DEFINED_PIN, TEST_STRING),
-                                                             MacAlgorithms.HMAC_SHA1.digest (OTP_SEED, TEST_STRING)));
+                w = i;
               }
+            assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
+            assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
           }
-        assertTrue ("Missing keys", j == 1);
+        sks.setProperty (key_handle, prop_bag.getType (), props2[w].getName ().getBytes ("UTF-8"), (props2[w].getValue () + "w2").getBytes ("UTF-8"));
+        props1 = sks.getExtension (key_handle, prop_bag.getType ()).getProperties ();
+        for (int i = 0; i < props1.length; i++)
+          {
+            assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
+            assertTrue ("Prop value error", (i == w) ^ props1[i].getValue ().equals (props2[i].getValue ()));
+          }
+        sks.setProperty (key_handle, prop_bag.getType (), props2[w].getName ().getBytes ("UTF-8"), props2[w].getValue ().getBytes ("UTF-8"));
+        props1 = sks.getExtension (key_handle, prop_bag.getType ()).getProperties ();
+        for (int i = 0; i < props1.length; i++)
+          {
+            assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
+            assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
+          }
+        assertTrue ("HMAC error", ArrayUtil.compare (sks.performHMAC (key_handle, MacAlgorithms.HMAC_SHA1.getURI (), USER_DEFINED_PIN, TEST_STRING),
+                                                     MacAlgorithms.HMAC_SHA1.digest (OTP_SEED, TEST_STRING)));
       }
 
     @Test
@@ -1442,30 +1459,21 @@ public class KeyGen2Test
         encryption_key = true;
         symmetric_key = true;
         doer.perform ();
-        EnumeratedKey ek = new EnumeratedKey ();
-        int j = 0;
-        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
-          {
-            if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
-              {
-                j++;
-                byte[] iv = null;
-                byte[] enc = sks.symmetricKeyEncrypt (ek.getKeyHandle (),
-                                                      SymEncryptionAlgorithms.AES256_CBC.getURI (),
-                                                      true,
-                                                      iv,
-                                                      USER_DEFINED_PIN,
-                                                      TEST_STRING);
-                assertTrue ("Encrypt/decrypt error", ArrayUtil.compare (sks.symmetricKeyEncrypt (ek.getKeyHandle (),
-                                                                                                 SymEncryptionAlgorithms.AES256_CBC.getURI (),
-                                                                                                 false,
-                                                                                                 iv,
-                                                                                                 USER_DEFINED_PIN, 
-                                                                                                 enc),
-                                                                                                 TEST_STRING));
-              }
-          }
-        assertTrue ("Missing keys", j == 1);
+        int key_handle = doer.getFirstKey ();
+        byte[] iv = null;
+        byte[] enc = sks.symmetricKeyEncrypt (key_handle,
+                                              SymEncryptionAlgorithms.AES256_CBC.getURI (),
+                                              true,
+                                              iv,
+                                              USER_DEFINED_PIN,
+                                              TEST_STRING);
+        assertTrue ("Encrypt/decrypt error", ArrayUtil.compare (sks.symmetricKeyEncrypt (key_handle,
+                                                                                         SymEncryptionAlgorithms.AES256_CBC.getURI (),
+                                                                                         false,
+                                                                                         iv,
+                                                                                         USER_DEFINED_PIN, 
+                                                                                         enc),
+                                                                                         TEST_STRING));
       }
 
     @Test
@@ -1483,6 +1491,7 @@ public class KeyGen2Test
         pin_protection = true;
         preset_pin = true;
         doer.perform ();
+        assertFalse ("PIN Not User Modifiable", sks.getKeyProtectionInfo (doer.getFirstKey ()).getPINUserModifiableFlag ());
       }
 
     @Test
@@ -1512,7 +1521,7 @@ public class KeyGen2Test
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
                                                     SignatureAlgorithms.RSA_SHA256.getURI (),
                                                     null,
-                                                    doer2.server.predef_server_pin,
+                                                    PREDEF_SERVER_PIN,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
                 Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
                 verify.initVerify (ka.getCertificatePath ()[0]);
@@ -1538,26 +1547,17 @@ public class KeyGen2Test
         update_key= doer1.server;
         Doer doer2 = new Doer ();
         doer2.perform ();
-        EnumeratedKey ek = new EnumeratedKey ();
-        int j = 0;
-        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
-          {
-            if (ek.getProvisioningHandle () == doer2.client.provisioning_handle)
-              {
-                j++;
-                KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
-                byte[] result = sks.signHashedData (ek.getKeyHandle (),
-                                                    SignatureAlgorithms.RSA_SHA256.getURI (),
-                                                    null,
-                                                    doer2.server.predef_server_pin,
-                                                    HashAlgorithms.SHA256.digest (TEST_STRING));
-                Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
-                verify.initVerify (ka.getCertificatePath ()[0]);
-                verify.update (TEST_STRING);
-                assertTrue ("Bad signature", verify.verify (result));
-              }
-          }
-        assertTrue ("Missing keys", j == 1);
+        int key_handle = doer2.getFirstKey ();
+        KeyAttributes ka = sks.getKeyAttributes (key_handle);
+        byte[] result = sks.signHashedData (key_handle,
+                                            SignatureAlgorithms.RSA_SHA256.getURI (),
+                                            null,
+                                            PREDEF_SERVER_PIN,
+                                            HashAlgorithms.SHA256.digest (TEST_STRING));
+        Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+        verify.initVerify (ka.getCertificatePath ()[0]);
+        verify.update (TEST_STRING);
+        assertTrue ("Bad signature", verify.verify (result));
       }
 
     @Test
@@ -1588,27 +1588,17 @@ public class KeyGen2Test
         Doer doer = new Doer ();
         set_private_key = true;
         pin_protection = true;
-        preset_pin = true;
         doer.perform ();
-        EnumeratedKey ek = new EnumeratedKey ();
-        int j = 0;
-        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
-          {
-            if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
-              {
-                j++;
-                byte[] result = sks.signHashedData (ek.getKeyHandle (),
-                                                    SignatureAlgorithms.RSA_SHA256.getURI (),
-                                                    null,
-                                                    doer.server.predef_server_pin,
-                                                    HashAlgorithms.SHA256.digest (TEST_STRING));
-                Signature sign = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
-                sign.initSign (doer.server.gen_private_key);
-                sign.update (TEST_STRING);
-                assertTrue ("Bad signature", ArrayUtil.compare (sign.sign (), result));
-              }
-          }
-        assertTrue ("Missing keys", j == 1);
+        int key_handle = doer.getFirstKey ();
+        byte[] result = sks.signHashedData (key_handle,
+                                            SignatureAlgorithms.RSA_SHA256.getURI (),
+                                            null,
+                                            USER_DEFINED_PIN,
+                                            HashAlgorithms.SHA256.digest (TEST_STRING));
+        Signature sign = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+        sign.initSign (doer.server.gen_private_key);
+        sign.update (TEST_STRING);
+        assertTrue ("Bad signature", ArrayUtil.compare (sign.sign (), result));
       }
 
     @Test
@@ -1659,23 +1649,13 @@ public class KeyGen2Test
         ecc_key = true;
         key_agreement = true;
         doer.perform ();
-        EnumeratedKey ek = new EnumeratedKey ();
-        int j = 0;
-        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
-          {
-            if (ek.getProvisioningHandle () == doer.client.provisioning_handle)
-              {
-                j++;
-                break;
-              }
-          }
-        assertTrue ("Missing keys", j == 1);
+        int key_handle = doer.getFirstKey ();
         KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
         ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
         generator.initialize (eccgen, new SecureRandom ());
         KeyPair kp = generator.generateKeyPair ();
-        KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
-        byte[] z = sks.keyAgreement (ek.getKeyHandle (),
+        KeyAttributes ka = sks.getKeyAttributes (key_handle);
+        byte[] z = sks.keyAgreement (key_handle,
                                      KeyGen2URIs.ALGORITHMS.ECDH,
                                      null,
                                      USER_DEFINED_PIN, 
@@ -1695,41 +1675,31 @@ public class KeyGen2Test
         pin_protection = true;
         ecc_key = true;
         doer1.perform ();
-        EnumeratedKey ek = new EnumeratedKey ();
-        int j = 0;
-        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
-          {
-            if (ek.getProvisioningHandle () == doer1.client.provisioning_handle)
-              {
-                j++;
-                break;
-              }
-          }
-        assertTrue ("Missing keys", j == 1);
+        int key_handle = doer1.getFirstKey ();
         for (int i = 1; i <= doer1.server.pin_retry_limit; i++)
           {
             try
               {
-                sks.signHashedData (ek.getKeyHandle (),
+                sks.signHashedData (key_handle,
                                     SignatureAlgorithms.ECDSA_SHA256.getURI (),
                                     null,
-                                    doer1.server.bad_pin,
+                                    BAD_PIN,
                                     HashAlgorithms.SHA256.digest (TEST_STRING));
                 fail ("Bad PIN should not work");
               }
             catch (SKSException e)
               {
-                assertFalse ("Locked", sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked () ^ (i == doer1.server.pin_retry_limit));
+                assertFalse ("Locked", sks.getKeyProtectionInfo (key_handle).isPINBlocked () ^ (i == doer1.server.pin_retry_limit));
               }
           }
 
         updatable = false;
         pin_protection = false;
         ecc_key = false;
-        plain_unlock_key= doer1.server;
+        plain_unlock_key = doer1.server;
         Doer doer2 = new Doer ();
         doer2.perform ();
-        assertFalse ("UnLocked", sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());
+        assertFalse ("UnLocked", sks.getKeyProtectionInfo (key_handle).isPINBlocked ());
       }
 
     @Test
@@ -1741,31 +1711,21 @@ public class KeyGen2Test
         pin_protection = true;
         ecc_key = true;
         doer1.perform ();
-        EnumeratedKey ek = new EnumeratedKey ();
-        int j = 0;
-        while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
-          {
-            if (ek.getProvisioningHandle () == doer1.client.provisioning_handle)
-              {
-                j++;
-                break;
-              }
-          }
-        assertTrue ("Missing keys", j == 1);
+        int key_handle = doer1.getFirstKey ();
         for (int i = 1; i <= doer1.server.pin_retry_limit; i++)
           {
             try
               {
-                sks.signHashedData (ek.getKeyHandle (),
+                sks.signHashedData (key_handle,
                                     SignatureAlgorithms.ECDSA_SHA256.getURI (),
                                     null,
-                                    doer1.server.bad_pin,
+                                    BAD_PIN,
                                     HashAlgorithms.SHA256.digest (TEST_STRING));
                 fail ("Bad PIN should not work");
               }
             catch (SKSException e)
               {
-                assertFalse ("Locked", sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked () ^ (i == doer1.server.pin_retry_limit));
+                assertFalse ("Locked", sks.getKeyProtectionInfo (key_handle).isPINBlocked () ^ (i == doer1.server.pin_retry_limit));
               }
           }
 
@@ -1775,7 +1735,8 @@ public class KeyGen2Test
         plain_unlock_key= doer1.server;
         Doer doer2 = new Doer ();
         doer2.perform ();
-        assertFalse ("UnLocked", sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());
+        assertFalse ("UnLocked", sks.getKeyProtectionInfo (key_handle).isPINBlocked ());
+        assertTrue ("PIN User Modifiable", sks.getKeyProtectionInfo (key_handle).getPINUserModifiableFlag ());
         privacy_enabled = false;
       }
   }

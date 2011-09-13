@@ -1171,7 +1171,10 @@ public class ServerCredentialStore implements Serializable
         if (pin_policy != null)
           {
             pin_policy.user_defined = true;
-            pin_policy.user_modifiable = true;  // A default
+            if (!pin_policy.user_modifiable_set)
+              {
+                pin_policy.user_modifiable = true;  // Default for user-defined PINs using KeyGen2
+              }
           }
         return key;
       }
