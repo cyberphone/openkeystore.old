@@ -24,7 +24,7 @@ public interface KeyGen2URIs
 
         String SESSION_KEY_1               = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
 
-        String ECDH                        = "http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh";
+        String ECDH_RAW                    = "http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh.raw";
 
         String NONE                        = "http://xmlns.webpki.org/keygen2/1.0#algorithm.none";
 

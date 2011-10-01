@@ -2178,7 +2178,7 @@ public class SKSTest
         generator.initialize (eccgen, new SecureRandom ());
         KeyPair kp = generator.generateKeyPair ();
         byte[] z = device.sks.keyAgreement (key.key_handle,
-                                            KeyGen2URIs.ALGORITHMS.ECDH,
+                                            KeyGen2URIs.ALGORITHMS.ECDH_RAW,
                                             null,
                                             ok_pin.getBytes ("UTF-8"), 
                                             kp.getPublic ());

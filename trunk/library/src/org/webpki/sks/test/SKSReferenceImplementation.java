@@ -862,7 +862,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         //////////////////////////////////////////////////////////////////////////////////////
         //  Diffie-Hellman Key Agreement
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh",
+        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh.raw",
                       "ECDH",
                       ALG_ASYM_KA | ALG_EC_KEY);
         

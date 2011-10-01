@@ -984,7 +984,7 @@ public class KeyGen2Test
               }
             if (key_agreement)
               {
-                kp.setEndorsedAlgorithms (new String[]{KeyGen2URIs.ALGORITHMS.ECDH});
+                kp.setEndorsedAlgorithms (new String[]{KeyGen2URIs.ALGORITHMS.ECDH_RAW});
               }
             if (property_bag)
               {
@@ -1656,7 +1656,7 @@ public class KeyGen2Test
         KeyPair kp = generator.generateKeyPair ();
         KeyAttributes ka = sks.getKeyAttributes (key_handle);
         byte[] z = sks.keyAgreement (key_handle,
-                                     KeyGen2URIs.ALGORITHMS.ECDH,
+                                     KeyGen2URIs.ALGORITHMS.ECDH_RAW,
                                      null,
                                      USER_DEFINED_PIN, 
                                      kp.getPublic ());
