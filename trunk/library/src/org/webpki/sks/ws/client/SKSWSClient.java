@@ -43,6 +43,7 @@ import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.Extension;
+import org.webpki.sks.InputMethod;
 import org.webpki.sks.KeyAttributes;
 import org.webpki.sks.KeyData;
 import org.webpki.sks.KeyProtectionInfo;
@@ -50,6 +51,7 @@ import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
 
+import org.webpki.sks.ws.TrustedGUIAuthorization;
 import org.webpki.sks.ws.WSSpecific;
 
 public class SKSWSClient implements SecureKeyStore, WSSpecific
@@ -59,6 +61,47 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
     private SKSWSProxy proxy;
     
     private String port;
+    
+    private TrustedGUIAuthorization tga;
+    
+    private class AuthorizationHolder
+      {
+        byte[] value;
+        
+        AuthorizationHolder (byte[] authorization)
+          {
+            value = authorization;
+          }
+      }
+    
+    boolean getTrustedGUIAuthorization (int key_handle, AuthorizationHolder authorization_holder) throws SKSException
+      {
+        if (tga != null)
+          {
+            KeyProtectionInfo kpi = getKeyProtectionInfo (key_handle);
+            if (kpi.hasLocalPINProtection ())
+              {
+                if (kpi.getPINInputMethod () == InputMethod.TRUSTED_GUI)
+                  {
+                    if (authorization_holder.value != null)
+                      {
+                        throw new SKSException ("Redundant \"Authorization\"", SKSException.ERROR_AUTHORIZATION);
+                      }
+                  }
+                else if (kpi.getPINInputMethod () == InputMethod.PROGRAMMATIC || authorization_holder.value != null)
+                  {
+                    return false;
+                  }
+                KeyAttributes ka = getKeyAttributes (key_handle);
+                authorization_holder.value = tga.getTrustedAuthorization (kpi.getPINFormat (),
+                                                                          kpi.getPINGrouping (),
+                                                                          ka.getAppUsage (),
+                                                                          ka.getFriendlyName ());
+                return true;
+              }
+          }
+        return false;
+      }
     
     
     public SKSWSClient (String port)
@@ -863,10 +906,13 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
+            AuthorizationHolder auth;
             return getSKSWS ().signHashedData (key_handle,
                                                algorithm,
                                                parameters,
-                                               authorization,
+                                               getTrustedGUIAuthorization (key_handle,
+                                                                           auth = new AuthorizationHolder (authorization)),
+                                               auth.value,
                                                data);
           }
         catch (SKSException_Exception e)
@@ -970,6 +1016,14 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         getSKSWS ().logEvent (event);
       }
+
+    @Override
+    public boolean setTrustedGUIAuthorizationProvider (TrustedGUIAuthorization tga)
+      {
+        this.tga = tga;
+        return true;
+      }
+
 
     /**
      * Test method. Use empty argument list for help.

@@ -16,4 +16,9 @@ public interface WSSpecific
      * @param event
      */
     void logEvent (String event);
+
+    /**
+     * Setup WS driver property
+     */
+    boolean setTrustedGUIAuthorizationProvider (TrustedGUIAuthorization tga);
   }

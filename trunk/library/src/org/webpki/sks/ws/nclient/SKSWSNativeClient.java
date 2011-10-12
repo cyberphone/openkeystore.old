@@ -17,6 +17,7 @@ import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
 
+import org.webpki.sks.ws.TrustedGUIAuthorization;
 import org.webpki.sks.ws.WSSpecific;
 
 public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
@@ -224,4 +225,11 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
 
     @Override
     native public void logEvent (String event);
+
+    @Override
+    public boolean setTrustedGUIAuthorizationProvider (TrustedGUIAuthorization tga)
+      {
+        return false;
+      }
+
   }

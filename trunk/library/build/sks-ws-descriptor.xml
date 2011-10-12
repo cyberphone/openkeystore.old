@@ -41,11 +41,13 @@
                         java.io.IOException
                         org.bouncycastle.jce.provider.BouncyCastleProvider
                         org.webpki.crypto.CertificateUtil
+                        org.webpki.sks.ws.TrustedGUIAuthorization
                         org.webpki.sks.EnumeratedKey
                         org.webpki.sks.ProvisioningSession
                         org.webpki.sks.EnumeratedProvisioningSession
                         org.webpki.sks.DeviceInfo
                         org.webpki.sks.KeyAttributes
+                        org.webpki.sks.InputMethod
                         org.webpki.sks.PatternRestriction
                         org.webpki.sks.KeyProtectionInfo
                         org.webpki.sks.KeyData
@@ -63,6 +65,8 @@
      <SupportCode><![CDATA[
     static SecureKeyStore sks;
     
+    static TrustedGUIAuthorization tga;
+    
     static DeviceInfo device_info;
     
     static
@@ -71,10 +75,12 @@
           {
             Security.insertProviderAt (new BouncyCastleProvider(), 1);
             sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
+            tga = (TrustedGUIAuthorization) Class.forName (System.getProperty ("sks.auth.gui")).newInstance ();
             device_info = sks.getDeviceInfo ();
             System.out.println ("Device: " + device_info.getVendorDescription ());
             System.out.println ("Vendor: " + device_info.getVendorName ());
             System.out.println ("API Version: " + device_info.getAPILevel ());
+            System.out.println ("Trusted GUI: " + tga.getImplementation ());
           }
         catch (ClassNotFoundException e)
           {
@@ -121,7 +127,7 @@
               }
           }
       }
-      
+
     ECPublicKey getECPublicKey (byte[] blob) throws SKSException
       {
         PublicKey public_key = createPublicKeyFromBlob (blob);
@@ -130,6 +136,26 @@
             return (ECPublicKey) public_key;
           }
         throw new SKSException ("Expected EC key");
+      }
+
+    byte[] checkAuthorization (boolean trusted_gui_authorization,
+                               int key_handle,
+                               byte[] authorization) throws SKSException
+      {
+        KeyProtectionInfo kpi = sks.getKeyProtectionInfo (key_handle);
+        if (kpi.hasLocalPINProtection ())
+          {
+            if (kpi.getPINInputMethod () == InputMethod.TRUSTED_GUI && !trusted_gui_authorization)
+              {
+                throw new SKSException ("Missing required \"TrustedGUIAuthorization\" for key #" + key_handle);
+              }
+            if (trusted_gui_authorization)
+              {
+                log ("Restore authorization for KeyHandle=" + key_handle);
+                authorization = tga.restoreTrustedAuthorization (authorization);
+              }
+          }
+        return authorization;
       }
 ]]></SupportCode>
    </JavaServer>
@@ -738,13 +764,17 @@
 ]]></Code></Method>
 
    <Method Name="signHashedData" Throws="SKSException">
-     <Returns   Name="result"        Type="binary" XMLName="Result"/>
-     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
-     <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
-     <Parameter Name="parameters"    Type="binary" XMLName="Parameters"    Null="true"/>
-     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
-     <Parameter Name="data"          Type="binary" XMLName="Data"/>
+     <Returns   Name="result"                    Type="binary" XMLName="Result"/>
+     <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
+     <Parameter Name="parameters"                Type="binary" XMLName="Parameters"    Null="true"/>
+     <Parameter Name="trusted_gui_authorization" Type="bool"   XMLName="TrustedGUIAuthorization"/>
+     <Parameter Name="authorization"             Type="binary" XMLName="Authorization" Null="true"/>
+     <Parameter Name="data"                      Type="binary" XMLName="Data"/>
      <Code><![CDATA[
+        authorization = checkAuthorization (trusted_gui_authorization,
+                                            key_handle,
+                                            authorization);
         log ("signHashedData (KeyHandle=" + key_handle + ")");
         return sks.signHashedData (key_handle,
                                    algorithm,

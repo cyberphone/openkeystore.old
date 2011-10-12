@@ -60,12 +60,15 @@ import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.ExportProtection;
 import org.webpki.sks.Grouping;
+import org.webpki.sks.InputMethod;
 import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
 import org.webpki.sks.test.SKSReferenceImplementation;
+import org.webpki.sks.ws.TrustedGUIAuthorization;
+import org.webpki.sks.ws.WSSpecific;
 import org.webpki.util.ArrayUtil;
 
 public class SKSTest
@@ -73,6 +76,8 @@ public class SKSTest
     static final byte[] TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','o','t','?'};
   
     static SecureKeyStore sks;
+    
+    static TrustedGUIAuthorization tga;
     
     static boolean reference_implementation;
     
@@ -562,6 +567,11 @@ public class SKSTest
         standalone_testing = new Boolean (System.getProperty ("sks.standalone"));
         Security.insertProviderAt (new BouncyCastleProvider(), 1);
         sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
+        if (sks instanceof WSSpecific)
+          {
+            tga = (TrustedGUIAuthorization) Class.forName (System.getProperty ("sks.auth.gui")).newInstance ();
+            ((WSSpecific) sks).setTrustedGUIAuthorizationProvider (tga);
+          }
         DeviceInfo dev = sks.getDeviceInfo ();
         reference_implementation = SKSReferenceImplementation.SKS_VENDOR_DESCRIPTION.equals (dev.getVendorDescription ());
         if (reference_implementation)
@@ -571,6 +581,7 @@ public class SKSTest
         System.out.println ("Description: " + dev.getVendorDescription ());
         System.out.println ("Vendor: " + dev.getVendorName ());
         System.out.println ("API Level: " + dev.getAPILevel ());
+        System.out.println ("Trusted GUI: " + (tga == null ? "N/A" : tga.getImplementation ()));
         System.out.println ("Testing mode: " + (standalone_testing ? "StandAlone" : "MultiThreaded"));
       }
 
@@ -2458,5 +2469,34 @@ public class SKSTest
                                      AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
         sess2.postDeleteKey (key);
         sess2.closeSession ();
+      }
+
+    @Test
+    public void test59 () throws Exception
+      {
+        if (tga != null) for (InputMethod input_method : InputMethod.values ())
+          {
+            String ok_pin = DemoTrustedGUIAuthorization.GOOD_TRUSTED_GUI_PIN;
+            ProvSess sess = new ProvSess (device);
+            sess.setInputMethod (input_method);
+            PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                      PassphraseFormat.NUMERIC,
+                                                      EnumSet.noneOf (PatternRestriction.class),
+                                                      Grouping.SHARED,
+                                                      4 /* min_length */, 
+                                                      8 /* max_length */,
+                                                      (short) 3 /* retry_limit*/, 
+                                                      null /* puk_policy */);
+            GenKey key = sess.createECKey ("Key.1",
+                                           ok_pin /* pin_value */,
+                                           pin_policy,
+                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+            sess.closeSession ();
+            key.signData (SignatureAlgorithms.ECDSA_SHA256, input_method == InputMethod.TRUSTED_GUI ? null : ok_pin, TEST_STRING);
+            if (input_method == InputMethod.ANY)
+              {
+                key.signData (SignatureAlgorithms.ECDSA_SHA256, null, TEST_STRING);
+              }
+          }
       }
   }

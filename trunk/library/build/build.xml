@@ -2,6 +2,7 @@
 
   <!-- set global properties for this build -->
   <property name="sks.implementation" value="org.webpki.sks.test.SKSReferenceImplementation"/>
+  <property name="sks.auth.gui" value="org.webpki.sks.test.DemoTrustedGUIAuthorization"/>
   <property name="sks.ws.client" value="org.webpki.sks.ws.client.SKSWSClient"/>
   <property name="src_dir" value="../src" />
   <property name="dot_net_dir" value="../sks-ws-dotnet" />
@@ -316,6 +317,7 @@
     <junit fork="yes" forkmode="once" haltonfailure="yes">
       <test name="${test.class}"/>
     	<sysproperty key="sks.implementation" value="${sks.implementation}"/>
+    	<sysproperty key="sks.auth.gui" value="${sks.auth.gui}"/>
     	<sysproperty key="test.dir" value="${test.dir}"/>
     	<sysproperty key="html.mode" value="${test.out.html}"/>
     	<sysproperty key="sks.standalone" value="${sks.standalone}"/>
@@ -358,6 +360,7 @@
   		</classpath>
   		<jvmarg value="-Djava.endorsed.dirs=${jax.ws.lib.dir}"/>
     	<jvmarg value="-Dsks.implementation=${sks.implementation}"/>
+    	<jvmarg value="-Dsks.auth.gui=${sks.auth.gui}"/>
     	<jvmarg value="-Dcom.sun.xml.ws.fault.SOAPFaultBuilder.disableCaptureStackTrace=false"/>
   	    <arg value="${sksws.url}"/>
   	</java>

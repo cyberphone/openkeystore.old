@@ -54,6 +54,7 @@ import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.Extension;
+import org.webpki.sks.InputMethod;
 import org.webpki.sks.KeyAttributes;
 import org.webpki.sks.KeyData;
 import org.webpki.sks.KeyProtectionInfo;
@@ -61,6 +62,8 @@ import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
+
+import org.webpki.sks.ws.TrustedGUIAuthorization;
 
 /**
  * SKS Web Service Implementation.
@@ -81,6 +84,8 @@ public class SKSWSImplementation
 
     static SecureKeyStore sks;
     
+    static TrustedGUIAuthorization tga;
+    
     static DeviceInfo device_info;
     
     static
@@ -89,10 +94,12 @@ public class SKSWSImplementation
           {
             Security.insertProviderAt (new BouncyCastleProvider(), 1);
             sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
+            tga = (TrustedGUIAuthorization) Class.forName (System.getProperty ("sks.auth.gui")).newInstance ();
             device_info = sks.getDeviceInfo ();
             System.out.println ("Device: " + device_info.getVendorDescription ());
             System.out.println ("Vendor: " + device_info.getVendorName ());
             System.out.println ("API Version: " + device_info.getAPILevel ());
+            System.out.println ("Trusted GUI: " + tga.getImplementation ());
           }
         catch (ClassNotFoundException e)
           {
@@ -139,7 +146,7 @@ public class SKSWSImplementation
               }
           }
       }
-      
+
     ECPublicKey getECPublicKey (byte[] blob) throws SKSException
       {
         PublicKey public_key = createPublicKeyFromBlob (blob);
@@ -148,6 +155,26 @@ public class SKSWSImplementation
             return (ECPublicKey) public_key;
           }
         throw new SKSException ("Expected EC key");
+      }
+
+    byte[] checkAuthorization (boolean trusted_gui_authorization,
+                               int key_handle,
+                               byte[] authorization) throws SKSException
+      {
+        KeyProtectionInfo kpi = sks.getKeyProtectionInfo (key_handle);
+        if (kpi.hasLocalPINProtection ())
+          {
+            if (kpi.getPINInputMethod () == InputMethod.TRUSTED_GUI && !trusted_gui_authorization)
+              {
+                throw new SKSException ("Missing required \"TrustedGUIAuthorization\" for key #" + key_handle);
+              }
+            if (trusted_gui_authorization)
+              {
+                log ("Restore authorization for KeyHandle=" + key_handle);
+                authorization = tga.restoreTrustedAuthorization (authorization);
+              }
+          }
+        return authorization;
       }
 
     @WebMethod(operationName="getDeviceInfo")
@@ -924,6 +951,8 @@ public class SKSWSImplementation
                                   String algorithm,
                                   @WebParam(name="Parameters", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                   byte[] parameters,
+                                  @WebParam(name="TrustedGUIAuthorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  boolean trusted_gui_authorization,
                                   @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                   byte[] authorization,
                                   @WebParam(name="Data", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -931,6 +960,9 @@ public class SKSWSImplementation
     throws SKSException
       {
         log ("signHashedData (KeyHandle=" + key_handle + ")");
+        authorization = checkAuthorization (trusted_gui_authorization,
+                                            key_handle,
+                                            authorization);
         return sks.signHashedData (key_handle,
                                    algorithm,
                                    parameters,
