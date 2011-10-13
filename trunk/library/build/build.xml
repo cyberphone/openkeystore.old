@@ -2,7 +2,7 @@
 
   <!-- set global properties for this build -->
   <property name="sks.implementation" value="org.webpki.sks.test.SKSReferenceImplementation"/>
-  <property name="sks.auth.gui" value="org.webpki.sks.test.DemoTrustedGUIAuthorization"/>
+  <property name="sks.auth.gui" value="org.webpki.sks.test.DummyTrustedGUIAuthorization"/>
   <property name="sks.ws.client" value="org.webpki.sks.ws.client.SKSWSClient"/>
   <property name="src_dir" value="../src" />
   <property name="dot_net_dir" value="../sks-ws-dotnet" />

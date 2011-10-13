@@ -2476,7 +2476,7 @@ public class SKSTest
       {
         if (tga != null) for (InputMethod input_method : InputMethod.values ())
           {
-            String ok_pin = DemoTrustedGUIAuthorization.GOOD_TRUSTED_GUI_PIN;
+            String ok_pin = DummyTrustedGUIAuthorization.GOOD_TRUSTED_GUI_PIN;
             ProvSess sess = new ProvSess (device);
             sess.setInputMethod (input_method);
             PINPol pin_policy = sess.createPINPolicy ("PIN",

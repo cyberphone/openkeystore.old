@@ -959,10 +959,10 @@ public class SKSWSImplementation
                                   byte[] data)
     throws SKSException
       {
-        log ("signHashedData (KeyHandle=" + key_handle + ")");
         authorization = checkAuthorization (trusted_gui_authorization,
                                             key_handle,
                                             authorization);
+        log ("signHashedData (KeyHandle=" + key_handle + ")");
         return sks.signHashedData (key_handle,
                                    algorithm,
                                    parameters,

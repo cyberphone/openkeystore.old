@@ -16,27 +16,20 @@
  */
 package org.webpki.sks.test;
 
-import java.io.IOException;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.Grouping;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.SKSException;
 
-import org.webpki.sks.ws.TrustedGUIAuthorization;
-
-public class DemoTrustedGUIAuthorization implements TrustedGUIAuthorization
+public class DemoTrustedGUIAuthorization extends DummyTrustedGUIAuthorization
   {
-    static final String GOOD_TRUSTED_GUI_PIN = "1234";
-    
-    static final byte[] SHARED_SECRET_32 = {0,1,2,3,4,5,6,7,8,9,1,0,3,2,5,4,7,6,9,8,9,8,7,6,5,4,3,2,1,0,3,2};
-
-    @Override
-    public byte[] restoreTrustedAuthorization (byte[] value) throws SKSException
-      {
-        return value;
-      }
-
     @Override
     public byte[] getTrustedAuthorization (PassphraseFormat format,
                                            Grouping grouping,
@@ -44,12 +37,30 @@ public class DemoTrustedGUIAuthorization implements TrustedGUIAuthorization
                                            String friendly_name) throws SKSException
       {
         byte[] authorization = null;
-        try
+        JPasswordField pwd = new JPasswordField (10);
+        pwd.addAncestorListener (new AncestorListener ()
           {
-            authorization = GOOD_TRUSTED_GUI_PIN.getBytes ("UTF-8");
-          }
-        catch (IOException e)
+            @Override
+            public void ancestorAdded (AncestorEvent e)
+              {
+                JComponent component = e.getComponent ();
+                component.requestFocusInWindow();
+              }
+
+            @Override
+            public void ancestorMoved (AncestorEvent e) {}
+
+            @Override
+            public void ancestorRemoved (AncestorEvent e) {}
+          });
+
+        int action = JOptionPane.showConfirmDialog (null,
+                                                    pwd,
+                                                    "Enter PIN",
+                                                    JOptionPane.OK_CANCEL_OPTION);   
+        if (action == JOptionPane.OK_OPTION)
           {
+            authorization = convertToUTF8 (format, new String (pwd.getPassword ()));
           }
         return authorization;
       }
@@ -57,6 +68,6 @@ public class DemoTrustedGUIAuthorization implements TrustedGUIAuthorization
     @Override
     public String getImplementation ()
       {
-        return "Non-functional mockup version";
+        return "Primitive (non-secure) GUI version";
       }
   }

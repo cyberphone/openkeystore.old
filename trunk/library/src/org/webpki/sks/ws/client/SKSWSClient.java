@@ -97,7 +97,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                                                           kpi.getPINGrouping (),
                                                                           ka.getAppUsage (),
                                                                           ka.getFriendlyName ());
-                return true;
+                return authorization_holder.value != null;
               }
           }
         return false;
