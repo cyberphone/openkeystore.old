@@ -168,54 +168,56 @@
    </JavaClient>
    <DotNetClient ClassName="org.webpki.sks.ws.client.SKSWSProxy"
                  RegistryURL="SOFTWARE\WebPKI.org\SKSWSURL"
-                 PathAsDirectory="false">
+                 PathAsDirectory="false"
+                 Partial="true">
      <ClassHeader><![CDATA[    /*
      *  This is the .NET SKS WS client.
      */
 ]]></ClassHeader>
-     <RewriteRule DotNetRule="Out.X509"
+     <RewriteRule Name="Out.X509"
                   ActualType="System.Security.Cryptography.X509Certificates.X509Certificate2"
                   Conversion="Conversions.BinaryListToCertificates($)"/>
-     <RewriteRule DotNetRule="In.X509"
+     <RewriteRule Name="In.X509"
                   ActualType="System.Security.Cryptography.X509Certificates.X509Certificate2"
                   Conversion="Conversions.CertificatesToBinaryList($)"/>
-     <RewriteRule DotNetRule="In.PublicKey"
+     <RewriteRule Name="In.PublicKey"
                   ActualType="System.Security.Cryptography.X509Certificates.PublicKey"
                   Conversion="Conversions.EncodeX509PublicKey($)"/>
-     <RewriteRule DotNetRule="Out.PublicKey"
+     <RewriteRule Name="Out.PublicKey"
                   ActualType="System.Security.Cryptography.X509Certificates.PublicKey"
                   Conversion="Conversions.DecodeX509PublicKey($)"/>
-     <RewriteRule DotNetRule="In.ECPublicKey"
+     <RewriteRule Name="In.ECPublicKey"
                   ActualType="System.Security.Cryptography.X509Certificates.PublicKey"
                   Conversion="Conversions.EncodeX509ECPublicKey($)"/>
-     <RewriteRule DotNetRule="Out.ECPublicKey"
+     <RewriteRule Name="Out.ECPublicKey"
                   ActualType="System.Security.Cryptography.X509Certificates.PublicKey"
                   Conversion="Conversions.DecodeX509ECPublicKey($)"/>
-     <RewriteRule DotNetRule="In.StringArray"
+     <RewriteRule Name="In.StringArray"
                   ActualType="string"
                   Conversion="new List&lt;string&gt;($)"/>
-     <RewriteRule DotNetRule="Out.StringArray"
+     <RewriteRule Name="Out.StringArray"
                   ActualType="string"
                   Conversion="$.ToArray()"/>
-     <RewriteRule DotNetRule="Out.ShortArray"
+     <RewriteRule Name="Out.ShortArray"
                   ActualType="short"
                   Conversion="$.ToArray()"/>
-     <RewriteRule DotNetRule="Out.PassphraseFormat"
+     <RewriteRule Name="Out.PassphraseFormat"
                   ActualType="PassphraseFormat"
                   Conversion="(PassphraseFormat)$"/>
-     <RewriteRule DotNetRule="Out.Grouping"
+     <RewriteRule Name="Out.Grouping"
                   ActualType="Grouping"
                   Conversion="(Grouping)$"/>
-     <RewriteRule DotNetRule="Out.PatternRestrictions"
+     <RewriteRule Name="Out.PatternRestrictions"
                   ActualType="HashSet&lt;PatternRestriction&gt;"
                   Conversion="_PatternRestrictions.convert($)"/>
+     <SuppressRule Name="TGA">GetTrustedGUIAuthorization(KeyHandle, ref Authorization)</SuppressRule>
    </DotNetClient>
 
    <CppClient ClassName="SKSWSProxy"/>
 
    <Exception ClassName="org.webpki.sks.SKSException">
-     <Property Name="error" Type="int"/>
-     <Property Name="message" Type="string"/>
+     <Property Name="error"               Type="int"/>
+     <Property Name="message"             Type="string"/>
      <Constant Name="ERROR_AUTHORIZATION" Type="int" Value="0x01"/>
      <Constant Name="ERROR_NOT_ALLOWED"   Type="int" Value="0x02"/>
      <Constant Name="ERROR_STORAGE"       Type="int" Value="0x03"/>
@@ -248,10 +250,10 @@
      <Parameter Name="update_url"           Type="string" XMLName="UpdateURL"          Mode="out" Null="true"/>
      <Parameter Name="vendor_name"          Type="string" XMLName="VendorName"         Mode="out"/>
      <Parameter Name="vendor_description"   Type="string" XMLName="VendorDescription"  Mode="out"/>
-     <Parameter Name="certificate_path"     Type="binary" XMLName="X509Certificate"    Mode="out" List="true" DotNetRule="Out.X509"/>
-     <Parameter Name="supported_algorithms" Type="string" XMLName="SupportedAlgorithm" Mode="out" List="true" DotNetRule="Out.StringArray"/>
+     <Parameter Name="certificate_path"     Type="binary" XMLName="X509Certificate"    Mode="out" List="true" RewriteRule="Out.X509"/>
+     <Parameter Name="supported_algorithms" Type="string" XMLName="SupportedAlgorithm" Mode="out" List="true" RewriteRule="Out.StringArray"/>
      <Parameter Name="rsa_exponent_support" Type="bool"   XMLName="RSAExponentSupport" Mode="out"/>
-     <Parameter Name="rsa_key_sizes"        Type="short"  XMLName="RSAKeySize"         Mode="out" List="true" DotNetRule="Out.ShortArray"/>
+     <Parameter Name="rsa_key_sizes"        Type="short"  XMLName="RSAKeySize"         Mode="out" List="true" RewriteRule="Out.ShortArray"/>
      <Parameter Name="crypto_data_size"     Type="int"    XMLName="CryptoDataSize"     Mode="out"/>
      <Parameter Name="extension_data_size"  Type="int"    XMLName="ExtensionDataSize"  Mode="out"/>
      <Parameter Name="device_pin_support"   Type="bool"   XMLName="DevicePINSupport"   Mode="out"/>
@@ -297,14 +299,14 @@
      <Parameter Name="algorithm"            Type="string" XMLName="Algorithm"/>
      <Parameter Name="privacy_enabled"      Type="bool"   XMLName="PrivacyEnabled"/>
      <Parameter Name="server_session_id"    Type="string" XMLName="ServerSessionID"/>
-     <Parameter Name="server_ephemeral_key" Type="binary" XMLName="ServerEphemeralKey"             DotNetRule="In.ECPublicKey"/>
+     <Parameter Name="server_ephemeral_key" Type="binary" XMLName="ServerEphemeralKey"             RewriteRule="In.ECPublicKey"/>
      <Parameter Name="issuer_uri"           Type="string" XMLName="IssuerURI"/>
-     <Parameter Name="key_management_key"   Type="binary" XMLName="KeyManagementKey"   Null="true" DotNetRule="In.PublicKey"/>
+     <Parameter Name="key_management_key"   Type="binary" XMLName="KeyManagementKey"   Null="true" RewriteRule="In.PublicKey"/>
      <Parameter Name="client_time"          Type="int"    XMLName="ClientTime"/>
      <Parameter Name="session_life_time"    Type="int"    XMLName="SessionLifeTime"/>
      <Parameter Name="session_key_limit"    Type="short"  XMLName="SessionKeyLimit"/>
      <Parameter Name="client_session_id"    Type="string" XMLName="ClientSessionID"    Mode="out"/>
-     <Parameter Name="client_ephemeral_key" Type="binary" XMLName="ClientEphemeralKey" Mode="out" DotNetRule="Out.ECPublicKey"/>
+     <Parameter Name="client_ephemeral_key" Type="binary" XMLName="ClientEphemeralKey" Mode="out" RewriteRule="Out.ECPublicKey"/>
      <Parameter Name="attestation"          Type="binary" XMLName="Attestation"        Mode="out"/>
      <Code><![CDATA[
 /*
@@ -351,7 +353,7 @@
      <Parameter Name="provisioning_state"  Type="bool"   XMLName="ProvisioningState"/>
      <Parameter Name="algorithm"           Type="string" XMLName="Algorithm"          Mode="out" Null="true"/>
      <Parameter Name="privacy_enabled"     Type="bool"   XMLName="PrivacyEnabled"     Mode="out" Null="true"/>
-     <Parameter Name="key_management_key"  Type="binary" XMLName="KeyManagementKey"   Mode="out" Null="true" DotNetRule="Out.PublicKey"/>
+     <Parameter Name="key_management_key"  Type="binary" XMLName="KeyManagementKey"   Mode="out" Null="true" RewriteRule="Out.PublicKey"/>
      <Parameter Name="client_time"         Type="int"    XMLName="ClientTime"         Mode="out" Null="true"/>
      <Parameter Name="session_life_time"   Type="int"    XMLName="SessionLifeTime"    Mode="out" Null="true"/>
      <Parameter Name="server_session_id"   Type="string" XMLName="ServerSessionID"    Mode="out" Null="true"/>
@@ -460,9 +462,9 @@
      <Parameter Name="app_usage"             Type="byte"   XMLName="AppUsage"/>
      <Parameter Name="friendly_name"         Type="string" XMLName="FriendlyName"       Null="true"/>
      <Parameter Name="key_specifier"         Type="binary" XMLName="KeySpecifier"/>
-     <Parameter Name="endorsed_algorithms"   Type="string" XMLName="EndorsedAlgorithm"  Null="true" List="true" DotNetRule="In.StringArray"/>
+     <Parameter Name="endorsed_algorithms"   Type="string" XMLName="EndorsedAlgorithm"  Null="true" List="true" RewriteRule="In.StringArray"/>
      <Parameter Name="mac"                   Type="binary" XMLName="MAC"/>
-     <Parameter Name="public_key"            Type="binary" XMLName="PublicKey"          Mode="out" DotNetRule="Out.PublicKey"/>
+     <Parameter Name="public_key"            Type="binary" XMLName="PublicKey"          Mode="out" RewriteRule="Out.PublicKey"/>
      <Parameter Name="attestation"           Type="binary" XMLName="Attestation"        Mode="out"/>
      <Code><![CDATA[
         KeyData kd = sks.createKeyEntry (provisioning_handle,
@@ -498,7 +500,7 @@
 
    <Method Name="setCertificatePath" Throws="SKSException">
      <Parameter Name="key_handle"       Type="int"    XMLName="KeyHandle"/>
-     <Parameter Name="certificate_path" Type="binary" XMLName="X509Certificate" DotNetRule="In.X509" List="true"/>
+     <Parameter Name="certificate_path" Type="binary" XMLName="X509Certificate" RewriteRule="In.X509" List="true"/>
      <Parameter Name="mac"              Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
         log ("setCertificatePath (KeyHandle=" + key_handle + ")");
@@ -612,9 +614,9 @@
      <Parameter Name="is_symmetric_key"    Type="bool"   XMLName="IsSymmetricKey"    Mode="out"/>
      <Parameter Name="app_usage"           Type="byte"   XMLName="AppUsage"          Mode="out"/>
      <Parameter Name="friendly_name"       Type="string" XMLName="FriendlyName"      Mode="out" Null="true"/>
-     <Parameter Name="certificate_path"    Type="binary" XMLName="X509Certificate"   Mode="out" List="true" DotNetRule="Out.X509"/>
-     <Parameter Name="endorsed_algorithms" Type="string" XMLName="EndorsedAlgorithm" Mode="out" List="true" Null="true" DotNetRule="Out.StringArray"/>
-     <Parameter Name="extension_types"     Type="string" XMLName="ExtensionType"     Mode="out" List="true" Null="true" DotNetRule="Out.StringArray"/>
+     <Parameter Name="certificate_path"    Type="binary" XMLName="X509Certificate"   Mode="out" List="true" RewriteRule="Out.X509"/>
+     <Parameter Name="endorsed_algorithms" Type="string" XMLName="EndorsedAlgorithm" Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
+     <Parameter Name="extension_types"     Type="string" XMLName="ExtensionType"     Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
      <Code><![CDATA[
         log ("getKeyAttributes (KeyHandle=" + key_handle + ")");
         try
@@ -648,15 +650,15 @@
    <Method Name="getKeyProtectionInfo" ReturnClass="KeyProtectionInfo" Throws="SKSException">
      <Parameter Name="key_handle"           Type="int"   XMLName="KeyHandle"/>
      <Parameter Name="protection_status"    Type="byte"  XMLName="ProtectionStatus"    Mode="out"/>
-     <Parameter Name="puk_format"           Type="byte"  XMLName="PUKFormat"           Mode="out" Null="true" DotNetRule="Out.PassphraseFormat"/>
+     <Parameter Name="puk_format"           Type="byte"  XMLName="PUKFormat"           Mode="out" Null="true" RewriteRule="Out.PassphraseFormat"/>
      <Parameter Name="puk_retry_limit"      Type="short" XMLName="PUKRetryLimit"       Mode="out" Null="true"/>
      <Parameter Name="puk_error_count"      Type="short" XMLName="PUKErrorCount"       Mode="out" Null="true"/>
      <Parameter Name="user_defined"         Type="bool"  XMLName="UserDefined"         Mode="out" Null="true"/>
      <Parameter Name="user_modifiable"      Type="bool"  XMLName="UserModifiable"      Mode="out" Null="true"/>
-     <Parameter Name="format"               Type="byte"  XMLName="Format"              Mode="out" Null="true" DotNetRule="Out.PassphraseFormat"/>
+     <Parameter Name="format"               Type="byte"  XMLName="Format"              Mode="out" Null="true" RewriteRule="Out.PassphraseFormat"/>
      <Parameter Name="retry_limit"          Type="short" XMLName="RetryLimit"          Mode="out" Null="true"/>
-     <Parameter Name="grouping"             Type="byte"  XMLName="Grouping"            Mode="out" Null="true" DotNetRule="Out.Grouping"/>
-     <Parameter Name="pattern_restrictions" Type="byte"  XMLName="PatternRestrictions" Mode="out" Null="true" DotNetRule="Out.PatternRestrictions"/>
+     <Parameter Name="grouping"             Type="byte"  XMLName="Grouping"            Mode="out" Null="true" RewriteRule="Out.Grouping"/>
+     <Parameter Name="pattern_restrictions" Type="byte"  XMLName="PatternRestrictions" Mode="out" Null="true" RewriteRule="Out.PatternRestrictions"/>
      <Parameter Name="min_length"           Type="short" XMLName="MinLength"           Mode="out" Null="true"/>
      <Parameter Name="max_length"           Type="short" XMLName="MaxLength"           Mode="out" Null="true"/>
      <Parameter Name="input_method"         Type="byte"  XMLName="InputMethod"         Mode="out" Null="true"/>
@@ -768,7 +770,7 @@
      <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
      <Parameter Name="parameters"                Type="binary" XMLName="Parameters"    Null="true"/>
-     <Parameter Name="trusted_gui_authorization" Type="bool"   XMLName="TrustedGUIAuthorization"/>
+     <Parameter Name="trusted_gui_authorization" Type="bool"   XMLName="TrustedGUIAuthorization" SuppressRule="TGA"/>
      <Parameter Name="authorization"             Type="binary" XMLName="Authorization" Null="true"/>
      <Parameter Name="data"                      Type="binary" XMLName="Data"/>
      <Code><![CDATA[

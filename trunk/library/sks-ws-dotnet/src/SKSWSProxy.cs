@@ -2217,7 +2217,7 @@ namespace org.webpki.sks.ws.client
     {
     }
 
-    public class SKSWSProxy : System.ServiceModel.ClientBase<SKSWSProxyInterface>
+    public partial class SKSWSProxy : System.ServiceModel.ClientBase<SKSWSProxyInterface>
     {
         public static string ALGORITHM_SESSION_KEY_ATTEST_1 { get { return "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";}}
 
@@ -2567,14 +2567,13 @@ namespace org.webpki.sks.ws.client
         public byte[] signHashedData(int KeyHandle,
                                      string Algorithm,
                                      byte[] Parameters,
-                                     bool TrustedGUIAuthorization,
                                      byte[] Authorization,
                                      byte[] Data)
         {
             signHashedData_Response _res = base.Channel.signHashedData(new signHashedData_Request(KeyHandle,
                                                                                                   Algorithm,
                                                                                                   Parameters,
-                                                                                                  TrustedGUIAuthorization,
+                                                                                                  GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
                                                                                                   Authorization,
                                                                                                   Data));
             return _res._result;

@@ -125,7 +125,7 @@
                <xs:complexType>
 
                   <!-- Rewrite rule name -->
-                  <xs:attribute name="DotNetRule" type="wsc:xmlid" use="required"/>
+                  <xs:attribute name="Name" type="wsc:xmlid" use="required"/>
 
                   <!-- Full .NET type -->
                   <xs:attribute name="ActualType" type="xs:string" use="required"/>
@@ -136,6 +136,16 @@
                </xs:complexType>
             </xs:element>
 
+            <xs:element name="SuppressRule" minOccurs="0" maxOccurs="unbounded">
+               <xs:complexType>
+                  <xs:simpleContent>
+                     <xs:extension base="xs:string">
+                        <xs:attribute name="Name" type="wsc:xmlid" use="required"/>
+                     </xs:extension>
+                  </xs:simpleContent>
+               </xs:complexType>
+            </xs:element>
+
          </xs:sequence> 
 
          <!-- C# Class Name -->
@@ -143,6 +153,9 @@
 
          <!-- Use path as directory like for Java -->
          <xs:attribute name="PathAsDirectory" type="xs:boolean" use="required"/>
+
+         <!-- Make the class partial -->
+         <xs:attribute name="Partial" type="xs:boolean" use="optional"/>
 
          <!-- Imports -->
          <xs:attribute name="Imports" type="wsc:importList" use="optional"/>
@@ -287,7 +300,10 @@
       <xs:attribute name="List" type="xs:boolean" use="optional" default="false"/>
 
       <!-- Rewrite rule name -->
-      <xs:attribute name="DotNetRule" type="wsc:xmlid" use="optional"/>
+      <xs:attribute name="RewriteRule" type="wsc:xmlid" use="optional"/>
+
+      <!-- Suppress rule name -->
+      <xs:attribute name="SuppressRule" type="wsc:xmlid" use="optional"/>
 
       <!-- Argument Name -->
       <xs:attribute name="Name" type="wsc:id" use="required"/>

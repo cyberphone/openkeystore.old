@@ -142,6 +142,7 @@ public class WSCreator extends XMLObjectWrapper
             schema_validation = attr.getBooleanConditional ("SchemaValidation");
             String canonicalized_class_name = attr.getString ("ClassName");
             boolean path_as_directory = attr.getBooleanConditional ("PathAsDirectory", true);
+            dot_net_partial = attr.getBooleanConditional ("Partial", true);
             dot_net_registry_url = attr.getStringConditional ("RegistryURL");
             dot_net_default_url = attr.getStringConditional ("DefaultURL");
 
@@ -194,12 +195,21 @@ public class WSCreator extends XMLObjectWrapper
               }
             if (dot_net) while (rd.hasNext ("RewriteRule"))
               {
-                rd.getNext ("RewriteRule");
-                String rule = attr.getString ("DotNetRule");
-                if (dot_net_rules.put (rule, new DotNetRule (attr.getString ("ActualType"),
-                                                             attr.getString ("Conversion"))) != null)
+                rd.getNext ();
+                String rule = attr.getString ("Name");
+                if (dotnet_rewrite_rules.put (rule, new RewriteRule (attr.getString ("ActualType"),
+                                                                     attr.getString ("Conversion"))) != null)
                   {
                     bad ("Duplicate rewrite rule: " + rule);
+                  }
+              }
+            if (dot_net) while (rd.hasNext ("SuppressRule"))
+              {
+                String code = rd.getString ();
+                String rule = attr.getString ("Name");
+                if (dotnet_suppress_rules.put (rule, new SuppressRule (code)) != null)
+                  {
+                    bad ("Duplicate suppress rule: " + rule);
                   }
               }
             rd.getParent ();
@@ -397,7 +407,9 @@ public class WSCreator extends XMLObjectWrapper
 
         boolean listtype;
         
-        DotNetRule dot_net_rule;
+        RewriteRule dotnet_rewrite_rule;
+
+        SuppressRule dotnet_suppress_rule;
         
         boolean input_mode;
         
@@ -443,8 +455,8 @@ public class WSCreator extends XMLObjectWrapper
         
         String nRealType ()
           {
-            return (dot_net_rule == null ? nType () : dot_net_rule.simple_type) +
-                    ((listtype && dot_net_rule != null) ? "[]" : "");
+            return (dotnet_rewrite_rule == null ? nType () : dotnet_rewrite_rule.simple_type) +
+                    ((listtype && dotnet_rewrite_rule != null) ? "[]" : "");
           }
 
         String nRealTypeName ()
@@ -455,10 +467,10 @@ public class WSCreator extends XMLObjectWrapper
         public String nArgument (String prefix, boolean request)
           {
             String arg = prefix + nName (request);
-            if (dot_net_rule != null)
+            if (dotnet_rewrite_rule != null)
               {
                 String sub = arg;
-                arg = dot_net_rule.conversion;
+                arg = dotnet_rewrite_rule.conversion;
                 int i = 0;
                 while (i < arg.length ())
                   {
@@ -523,6 +535,7 @@ public class WSCreator extends XMLObjectWrapper
             boolean next = false;
             for (Property prop : (actual && return_class == null) ? parameters : filteredParameters (false))
               {
+                if (actual && prop.dotnet_suppress_rule != null) continue;
                 if (next)
                   {
                     write (dotnet_client_pck.jfile, spaces.toString ());
@@ -584,9 +597,9 @@ public class WSCreator extends XMLObjectWrapper
         LinkedHashMap<String, Constant> constants;
       }
     
-    class DotNetRule
+    class RewriteRule
       {
-        DotNetRule (String full_path, String conversion)
+        RewriteRule (String full_path, String conversion)
           {
             int i = full_path.lastIndexOf ('.');
             this.conversion = conversion;
@@ -604,6 +617,16 @@ public class WSCreator extends XMLObjectWrapper
         String conversion;
       }
     
+    class SuppressRule
+      {
+        SuppressRule (String header_code)
+          {
+            this.header_code = header_code;
+          }
+
+        String header_code;
+      }
+
     class ReturnClass
       {
         String class_name;
@@ -617,11 +640,13 @@ public class WSCreator extends XMLObjectWrapper
 
     LinkedHashMap<String, WSException> exceptions = new LinkedHashMap<String, WSException> ();
     Vector<Method> methods = new Vector<Method> ();
-    LinkedHashMap<String, DotNetRule> dot_net_rules = new LinkedHashMap<String, DotNetRule> ();
+    LinkedHashMap<String, RewriteRule> dotnet_rewrite_rules = new LinkedHashMap<String, RewriteRule> ();
+    LinkedHashMap<String, SuppressRule> dotnet_suppress_rules = new LinkedHashMap<String, SuppressRule> ();
     LinkedHashMap<String, ReturnClass> return_classes = new LinkedHashMap<String, ReturnClass> ();
     boolean add_main;
     String dot_net_registry_url;
     String dot_net_default_url;
+    boolean dot_net_partial;
 
     @Override
     protected boolean hasQualifiedElements ()
@@ -1273,7 +1298,7 @@ public class WSCreator extends XMLObjectWrapper
             writeNetWrapper (false, meth);
           }
         write (file, "\n" +
-                     "    public class " + dotnet_client_pck.class_name + " : System.ServiceModel.ClientBase<" + dotnet_client_pck.class_name + "Interface>\n" +
+                     "    public " + (dot_net_partial ? "partial " : "") + "class " + dotnet_client_pck.class_name + " : System.ServiceModel.ClientBase<" + dotnet_client_pck.class_name + "Interface>\n" +
                      "    {");
 
         writeConstants (file, global_client_constants);
@@ -1366,7 +1391,14 @@ public class WSCreator extends XMLObjectWrapper
                   {
                     next = true;
                   }
-                write (file, prop.nPrefix () + prop.nArgument ("", true));
+                if (prop.dotnet_suppress_rule == null)
+                  {
+                    write (file, prop.nPrefix () + prop.nArgument ("", true));
+                  }
+                else
+                  {
+                    write (file, prop.dotnet_suppress_rule.header_code);
+                  }
               }
             write (file, "));\n");
             if (meth.return_class == null)
@@ -1577,21 +1609,6 @@ public class WSCreator extends XMLObjectWrapper
             prop.output_mode = !mode.equals ("in");
             prop.xml_name = attr.getStringConditional ("XMLName");
             String type = attr.getString ("Type");
-            prop.nullable = attr.getBoolean ("Null");
-            if (prop.listtype = attr.getBoolean ("List"))
-              {
-                addImport ("java.util.List");
-              }
-            String dotnet_rule = attr.getStringConditional ("DotNetRule");
-            if (dotnet_rule != null)
-              {
-                DotNetRule dnr = dot_net_rules.get (dotnet_rule);
-                if (dnr == null)
-                  {
-                    bad ("Unknown .NET rule: " + dotnet_rule);
-                  }
-                prop.dot_net_rule = dnr;
-              }
             for (DataType dtype : types)
               {
                 if (dtype.enum_name.equals (type))
@@ -1603,6 +1620,31 @@ public class WSCreator extends XMLObjectWrapper
             if (prop.data_type == null)
               {
                 bad ("Type '" + type + "' not found");
+              }
+            prop.nullable = attr.getBoolean ("Null");
+            if (prop.listtype = attr.getBoolean ("List"))
+              {
+                addImport ("java.util.List");
+              }
+            String rewrite_rule = attr.getStringConditional ("RewriteRule");
+            if (rewrite_rule != null)
+              {
+                RewriteRule dnr = dotnet_rewrite_rules.get (rewrite_rule);
+                if (dnr == null)
+                  {
+                    bad ("Unknown .NET rewrite rule: " + rewrite_rule);
+                  }
+                prop.dotnet_rewrite_rule = dnr;
+              }
+            String suppress_rule = attr.getStringConditional ("SuppressRule");
+            if (suppress_rule != null)
+              {
+                SuppressRule dnr = dotnet_suppress_rules.get (suppress_rule);
+                if (dnr == null)
+                  {
+                    bad ("Unknown .NET suppress rule: " + suppress_rule);
+                  }
+                prop.dotnet_suppress_rule = dnr;
               }
             return prop;
           }
