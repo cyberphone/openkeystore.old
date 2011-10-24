@@ -19,7 +19,6 @@ namespace org.webpki.sks.ws.client
     using System;
     using System.Collections.Generic;
     
-    [Flags]
     public enum PatternRestriction : sbyte
     {
         TWO_IN_A_ROW   = 0x01,    // "11342" is flagged
@@ -30,9 +29,9 @@ namespace org.webpki.sks.ws.client
                                   // letters, digits and punctuation characters 
     }
     
-    internal class _PatternRestrictions
+    public static partial class Conversions
     {
-        public static HashSet<PatternRestriction> convert (sbyte flags)
+        public static HashSet<PatternRestriction> SKSToPatternRestrictions (sbyte flags)
         {
             HashSet<PatternRestriction> pr = new HashSet<PatternRestriction> ();
             foreach(sbyte b in Enum.GetValues(typeof(PatternRestriction)))
@@ -43,6 +42,20 @@ namespace org.webpki.sks.ws.client
                 }
             }
             return pr;
+        }
+
+        public static sbyte PatternRestrictionsToSKS (HashSet<PatternRestriction> PatternRestrictions)
+        {
+            if (PatternRestrictions == null)
+            {
+            	return 0;
+            }
+            sbyte sks = 0;
+            foreach(PatternRestriction pr in PatternRestrictions)
+            {
+            	sks += (sbyte) pr;
+            }
+            return sks;
         }
     }
 }

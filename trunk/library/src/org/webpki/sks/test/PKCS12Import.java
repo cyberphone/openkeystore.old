@@ -35,6 +35,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.InputMethod;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.SecureKeyStore;
 import org.webpki.sks.ws.WSSpecific;
@@ -43,10 +44,10 @@ public class PKCS12Import
   {
     public static void main (String[] argc) throws Exception
       {
-        if (argc.length != 3)
+        if (argc.length != 4)
           {
             System.out.println ("\nUsage: " + PKCS12Import.class.getCanonicalName () + 
-                                " file password pin-or-zero-length-arg");
+                                " file password pin-or-zero-length-arg trusted-gui");
             System.exit (-3);
           }
         char[] password = argc[1].toCharArray ();
@@ -111,8 +112,10 @@ public class PKCS12Import
           }
         PINPol pin_policy = null;
         String pin = argc[2].trim ();
+        InputMethod input_method = argc[3].equals ("true") ? InputMethod.TRUSTED_GUI : InputMethod.ANY;
         if (pin.length () > 0)
           {
+            sess.setInputMethod (input_method);
             pin_policy = sess.createPINPolicy ("PIN",
                                                PassphraseFormat.STRING,
                                                1 /* min_length */, 
@@ -131,5 +134,6 @@ public class PKCS12Import
         key.setCertificatePath (cert_path.toArray (new X509Certificate[0]));
         key.restorePrivateKey (private_key);
         sess.closeSession ();
+        System.out.println ("PIN=" + (pin == null ? "None" : "Set" + (input_method == InputMethod.TRUSTED_GUI ? "/TrustedGUI":"")));
       }
   }

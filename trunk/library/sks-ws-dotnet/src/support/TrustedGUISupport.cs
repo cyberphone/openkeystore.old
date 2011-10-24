@@ -109,14 +109,14 @@ namespace org.webpki.sks.ws.client
            KeyProtectionInfo kpi = getKeyProtectionInfo(KeyHandle);
            if (kpi.ProtectionStatus != 0)
            {
-                if (kpi.InputMethod == (sbyte)InputMethod.TRUSTED_GUI)
+                if (kpi.InputMethod == InputMethod.TRUSTED_GUI)
                 {
                     if (Authorization != null)
                     {
                         throw new System.ArgumentException ("Redundant \"Authorization\"");
                     }
                 }
-                else if (kpi.InputMethod == (sbyte)InputMethod.PROGRAMMATIC || Authorization != null)
+                else if (kpi.InputMethod == InputMethod.PROGRAMMATIC || Authorization != null)
                 {
                     return false;
                 }

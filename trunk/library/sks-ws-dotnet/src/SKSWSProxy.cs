@@ -139,7 +139,7 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        getExtension_Response getExtension(getExtension_Request request);
+        Extension getExtension(getExtension_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
@@ -1652,7 +1652,7 @@ namespace org.webpki.sks.ws.client
 
         public HashSet<PatternRestriction> PatternRestrictions
         {
-            get { return _PatternRestrictions.convert(_pattern_restrictions); }
+            get { return Conversions.SKSToPatternRestrictions(_pattern_restrictions); }
         }
 
         public short MinLength
@@ -1665,9 +1665,9 @@ namespace org.webpki.sks.ws.client
             get { return _max_length; }
         }
 
-        public sbyte InputMethod
+        public InputMethod InputMethod
         {
-            get { return _input_method; }
+            get { return (InputMethod)_input_method; }
         }
 
         public short PINErrorCount
@@ -1723,7 +1723,7 @@ namespace org.webpki.sks.ws.client
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ServiceModel.MessageContractAttribute(WrapperName="getExtension.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class getExtension_Response
+    public class Extension
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="SubType", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -1742,6 +1742,21 @@ namespace org.webpki.sks.ws.client
         #pragma warning disable 0649
         internal byte[] _extension_data;
         #pragma warning restore 0649
+
+        public sbyte SubType
+        {
+            get { return _sub_type; }
+        }
+
+        public byte[] Qualifier
+        {
+            get { return _qualifier; }
+        }
+
+        public byte[] ExtensionData
+        {
+            get { return _extension_data; }
+        }
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -2001,22 +2016,28 @@ namespace org.webpki.sks.ws.client
         internal byte[] _parameters;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="TrustedGUIAuthorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal bool _trusted_gui_authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _authorization;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Data", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _data;
 
         public asymmetricKeyDecrypt_Request(int KeyHandle,
                                             string Algorithm,
                                             byte[] Parameters,
+                                            bool TrustedGUIAuthorization,
                                             byte[] Authorization,
                                             byte[] Data)
         {
             _key_handle = KeyHandle;
             _algorithm = Algorithm;
             _parameters = Parameters;
+            _trusted_gui_authorization = TrustedGUIAuthorization;
             _authorization = Authorization;
             _data = Data;
         }
@@ -2050,22 +2071,28 @@ namespace org.webpki.sks.ws.client
         internal byte[] _parameters;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="TrustedGUIAuthorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal bool _trusted_gui_authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _authorization;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="PublicKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _public_key;
 
         public keyAgreement_Request(int KeyHandle,
                                     string Algorithm,
                                     byte[] Parameters,
+                                    bool TrustedGUIAuthorization,
                                     byte[] Authorization,
                                     byte[] PublicKey)
         {
             _key_handle = KeyHandle;
             _algorithm = Algorithm;
             _parameters = Parameters;
+            _trusted_gui_authorization = TrustedGUIAuthorization;
             _authorization = Authorization;
             _public_key = PublicKey;
         }
@@ -2095,20 +2122,26 @@ namespace org.webpki.sks.ws.client
         internal string _algorithm;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="TrustedGUIAuthorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal bool _trusted_gui_authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _authorization;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Data", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _data;
 
         public performHMAC_Request(int KeyHandle,
                                    string Algorithm,
+                                   bool TrustedGUIAuthorization,
                                    byte[] Authorization,
                                    byte[] Data)
         {
             _key_handle = KeyHandle;
             _algorithm = Algorithm;
+            _trusted_gui_authorization = TrustedGUIAuthorization;
             _authorization = Authorization;
             _data = Data;
         }
@@ -2146,10 +2179,14 @@ namespace org.webpki.sks.ws.client
         internal byte[] _iv;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="TrustedGUIAuthorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal bool _trusted_gui_authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _authorization;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Data", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _data;
 
@@ -2157,6 +2194,7 @@ namespace org.webpki.sks.ws.client
                                            string Algorithm,
                                            bool Mode,
                                            byte[] IV,
+                                           bool TrustedGUIAuthorization,
                                            byte[] Authorization,
                                            byte[] Data)
         {
@@ -2164,6 +2202,7 @@ namespace org.webpki.sks.ws.client
             _algorithm = Algorithm;
             _mode = Mode;
             _iv = IV;
+            _trusted_gui_authorization = TrustedGUIAuthorization;
             _authorization = Authorization;
             _data = Data;
         }
@@ -2309,14 +2348,14 @@ namespace org.webpki.sks.ws.client
         public int createPUKPolicy(int ProvisioningHandle,
                                    string ID,
                                    byte[] PUKValue,
-                                   sbyte Format,
+                                   PassphraseFormat Format,
                                    short RetryLimit,
                                    byte[] MAC)
         {
             createPUKPolicy_Response _res = base.Channel.createPUKPolicy(new createPUKPolicy_Request(ProvisioningHandle,
                                                                                                      ID,
                                                                                                      PUKValue,
-                                                                                                     Format,
+                                                                                                     (sbyte)Format,
                                                                                                      RetryLimit,
                                                                                                      MAC));
             return _res._puk_policy_handle;
@@ -2327,13 +2366,13 @@ namespace org.webpki.sks.ws.client
                                    int PUKPolicyHandle,
                                    bool UserDefined,
                                    bool UserModifiable,
-                                   sbyte Format,
+                                   PassphraseFormat Format,
                                    short RetryLimit,
-                                   sbyte Grouping,
-                                   sbyte PatternRestrictions,
+                                   Grouping Grouping,
+                                   HashSet<PatternRestriction> PatternRestrictions,
                                    short MinLength,
                                    short MaxLength,
-                                   sbyte InputMethod,
+                                   InputMethod InputMethod,
                                    byte[] MAC)
         {
             createPINPolicy_Response _res = base.Channel.createPINPolicy(new createPINPolicy_Request(ProvisioningHandle,
@@ -2341,13 +2380,13 @@ namespace org.webpki.sks.ws.client
                                                                                                      PUKPolicyHandle,
                                                                                                      UserDefined,
                                                                                                      UserModifiable,
-                                                                                                     Format,
+                                                                                                     (sbyte)Format,
                                                                                                      RetryLimit,
-                                                                                                     Grouping,
-                                                                                                     PatternRestrictions,
+                                                                                                     (sbyte)Grouping,
+                                                                                                     Conversions.PatternRestrictionsToSKS(PatternRestrictions),
                                                                                                      MinLength,
                                                                                                      MaxLength,
-                                                                                                     InputMethod,
+                                                                                                     (sbyte)InputMethod,
                                                                                                      MAC));
             return _res._pin_policy_handle;
         }
@@ -2500,17 +2539,12 @@ namespace org.webpki.sks.ws.client
             return _res;
         }
 
-        public void getExtension(int KeyHandle,
-                                 string Type,
-                                 out sbyte SubType,
-                                 out byte[] Qualifier,
-                                 out byte[] ExtensionData)
+        public Extension getExtension(int KeyHandle,
+                                      string Type)
         {
-            getExtension_Response _res = base.Channel.getExtension(new getExtension_Request(KeyHandle,
-                                                                                            Type));
-            SubType = _res._sub_type;
-            Qualifier = _res._qualifier;
-            ExtensionData = _res._extension_data;
+            Extension _res = base.Channel.getExtension(new getExtension_Request(KeyHandle,
+                                                                                Type));
+            return _res;
         }
 
         public void setProperty(int KeyHandle,
@@ -2588,6 +2622,7 @@ namespace org.webpki.sks.ws.client
             asymmetricKeyDecrypt_Response _res = base.Channel.asymmetricKeyDecrypt(new asymmetricKeyDecrypt_Request(KeyHandle,
                                                                                                                     Algorithm,
                                                                                                                     Parameters,
+                                                                                                                    GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
                                                                                                                     Authorization,
                                                                                                                     Data));
             return _res._result;
@@ -2602,6 +2637,7 @@ namespace org.webpki.sks.ws.client
             keyAgreement_Response _res = base.Channel.keyAgreement(new keyAgreement_Request(KeyHandle,
                                                                                             Algorithm,
                                                                                             Parameters,
+                                                                                            GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
                                                                                             Authorization,
                                                                                             PublicKey));
             return _res._key;
@@ -2614,6 +2650,7 @@ namespace org.webpki.sks.ws.client
         {
             performHMAC_Response _res = base.Channel.performHMAC(new performHMAC_Request(KeyHandle,
                                                                                          Algorithm,
+                                                                                         GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
                                                                                          Authorization,
                                                                                          Data));
             return _res._result;
@@ -2630,6 +2667,7 @@ namespace org.webpki.sks.ws.client
                                                                                                                  Algorithm,
                                                                                                                  Mode,
                                                                                                                  IV,
+                                                                                                                 GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
                                                                                                                  Authorization,
                                                                                                                  Data));
             return _res._result;

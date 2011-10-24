@@ -201,15 +201,30 @@
      <RewriteRule Name="Out.ShortArray"
                   ActualType="short"
                   Conversion="$.ToArray()"/>
+     <RewriteRule Name="In.PassphraseFormat"
+                  ActualType="PassphraseFormat"
+                  Conversion="(sbyte)$"/>
      <RewriteRule Name="Out.PassphraseFormat"
                   ActualType="PassphraseFormat"
                   Conversion="(PassphraseFormat)$"/>
+     <RewriteRule Name="In.InputMethod"
+                  ActualType="InputMethod"
+                  Conversion="(sbyte)$"/>
+     <RewriteRule Name="Out.InputMethod"
+                  ActualType="InputMethod"
+                  Conversion="(InputMethod)$"/>
+     <RewriteRule Name="In.Grouping"
+                  ActualType="Grouping"
+                  Conversion="(sbyte)$"/>
      <RewriteRule Name="Out.Grouping"
                   ActualType="Grouping"
                   Conversion="(Grouping)$"/>
+     <RewriteRule Name="In.PatternRestrictions"
+                  ActualType="HashSet&lt;PatternRestriction&gt;"
+                  Conversion="Conversions.PatternRestrictionsToSKS($)"/>
      <RewriteRule Name="Out.PatternRestrictions"
                   ActualType="HashSet&lt;PatternRestriction&gt;"
-                  Conversion="_PatternRestrictions.convert($)"/>
+                  Conversion="Conversions.SKSToPatternRestrictions($)"/>
      <SuppressRule Name="TGA">GetTrustedGUIAuthorization(KeyHandle, ref Authorization)</SuppressRule>
    </DotNetClient>
 
@@ -237,6 +252,8 @@
 
    <ReturnClass ClassName="org.webpki.sks.KeyData"/>
 
+   <ReturnClass ClassName="org.webpki.sks.Extension"/>
+   
    <ReturnClass ClassName="org.webpki.sks.EnumeratedKey" NullValue="0"/>
    
    <ReturnClass ClassName="org.webpki.sks.EnumeratedProvisioningSession" NullValue="0"/>
@@ -401,7 +418,7 @@
      <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="id"                  Type="string" XMLName="ID"/>
      <Parameter Name="puk_value"           Type="binary" XMLName="PUKValue"/>
-     <Parameter Name="format"              Type="byte"   XMLName="Format"/>
+     <Parameter Name="format"              Type="byte"   XMLName="Format"             RewriteRule="In.PassphraseFormat"/>
      <Parameter Name="retry_limit"         Type="short"  XMLName="RetryLimit"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
@@ -421,13 +438,13 @@
      <Parameter Name="puk_policy_handle"    Type="int"    XMLName="PUKPolicyHandle"/>
      <Parameter Name="user_defined"         Type="bool"   XMLName="UserDefined"/>
      <Parameter Name="user_modifiable"      Type="bool"   XMLName="UserModifiable"/>
-     <Parameter Name="format"               Type="byte"   XMLName="Format"/>
+     <Parameter Name="format"               Type="byte"   XMLName="Format"              RewriteRule="In.PassphraseFormat"/>
      <Parameter Name="retry_limit"          Type="short"  XMLName="RetryLimit"/>
-     <Parameter Name="grouping"             Type="byte"   XMLName="Grouping"/>
-     <Parameter Name="pattern_restrictions" Type="byte"   XMLName="PatternRestrictions"/>
+     <Parameter Name="grouping"             Type="byte"   XMLName="Grouping"            RewriteRule="In.Grouping"/>
+     <Parameter Name="pattern_restrictions" Type="byte"   XMLName="PatternRestrictions" RewriteRule="In.PatternRestrictions"/>
      <Parameter Name="min_length"           Type="short"  XMLName="MinLength"/>
      <Parameter Name="max_length"           Type="short"  XMLName="MaxLength"/>
-     <Parameter Name="input_method"         Type="byte"   XMLName="InputMethod"/>
+     <Parameter Name="input_method"         Type="byte"   XMLName="InputMethod"         RewriteRule="In.InputMethod"/>
      <Parameter Name="mac"                  Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
         log ("createPINPolicy (ID=" + id + ")");
@@ -661,7 +678,7 @@
      <Parameter Name="pattern_restrictions" Type="byte"  XMLName="PatternRestrictions" Mode="out" Null="true" RewriteRule="Out.PatternRestrictions"/>
      <Parameter Name="min_length"           Type="short" XMLName="MinLength"           Mode="out" Null="true"/>
      <Parameter Name="max_length"           Type="short" XMLName="MaxLength"           Mode="out" Null="true"/>
-     <Parameter Name="input_method"         Type="byte"  XMLName="InputMethod"         Mode="out" Null="true"/>
+     <Parameter Name="input_method"         Type="byte"  XMLName="InputMethod"         Mode="out" Null="true" RewriteRule="Out.InputMethod"/>
      <Parameter Name="pin_error_count"      Type="short" XMLName="PINErrorCount"       Mode="out" Null="true"/>
      <Parameter Name="enable_pin_caching"   Type="bool"  XMLName="EnablePINCaching"    Mode="out" Null="true"/>
      <Parameter Name="biometric_protection" Type="byte"  XMLName="BiometricProtection" Mode="out"/>
@@ -698,7 +715,7 @@
         key_backup.value           = kpi.getKeyBackup ();
 ]]></Code></Method>
 
-   <Method Name="getExtension" Throws="SKSException">
+   <Method Name="getExtension" ReturnClass="Extension" Throws="SKSException">
      <Parameter Name="key_handle"     Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="type"           Type="string" XMLName="Type"/>
      <Parameter Name="sub_type"       Type="byte"   XMLName="SubType"       Mode="out"/>
@@ -786,12 +803,13 @@
 ]]></Code></Method>
 
    <Method Name="asymmetricKeyDecrypt" Throws="SKSException">
-     <Returns   Name="result"        Type="binary" XMLName="Result"/>
-     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
-     <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
-     <Parameter Name="parameters"    Type="binary" XMLName="Parameters"    Null="true"/>
-     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
-     <Parameter Name="data"          Type="binary" XMLName="Data"/>
+     <Returns   Name="result"                    Type="binary" XMLName="Result"/>
+     <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
+     <Parameter Name="parameters"                Type="binary" XMLName="Parameters"    Null="true"/>
+     <Parameter Name="trusted_gui_authorization" Type="bool"   XMLName="TrustedGUIAuthorization" SuppressRule="TGA"/>
+     <Parameter Name="authorization"             Type="binary" XMLName="Authorization" Null="true"/>
+     <Parameter Name="data"                      Type="binary" XMLName="Data"/>
      <Code><![CDATA[
         log ("asymmetricKeyDecrypt (KeyHandle=" + key_handle + ")");
         return sks.asymmetricKeyDecrypt (key_handle, 
@@ -802,12 +820,13 @@
 ]]></Code></Method>
 
    <Method Name="keyAgreement" Throws="SKSException">
-     <Returns   Name="key"           Type="binary" XMLName="Key"/>
-     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
-     <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
-     <Parameter Name="parameters"    Type="binary" XMLName="Parameters"    Null="true"/>
-     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
-     <Parameter Name="public_key"    Type="binary" XMLName="PublicKey"/>
+     <Returns   Name="key"                       Type="binary" XMLName="Key"/>
+     <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
+     <Parameter Name="parameters"                Type="binary" XMLName="Parameters"    Null="true"/>
+     <Parameter Name="trusted_gui_authorization" Type="bool"   XMLName="TrustedGUIAuthorization" SuppressRule="TGA"/>
+     <Parameter Name="authorization"             Type="binary" XMLName="Authorization" Null="true"/>
+     <Parameter Name="public_key"                Type="binary" XMLName="PublicKey"/>
      <Code><![CDATA[
         log ("keyAgreement (KeyHandle=" + key_handle + ")");
         return sks.keyAgreement (key_handle, 
@@ -818,11 +837,12 @@
 ]]></Code></Method>
 
    <Method Name="performHMAC" Throws="SKSException">
-     <Returns   Name="result"        Type="binary" XMLName="Result"/>
-     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
-     <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
-     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
-     <Parameter Name="data"          Type="binary" XMLName="Data"/>
+     <Returns   Name="result"                    Type="binary" XMLName="Result"/>
+     <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
+     <Parameter Name="trusted_gui_authorization" Type="bool"   XMLName="TrustedGUIAuthorization" SuppressRule="TGA"/>
+     <Parameter Name="authorization"             Type="binary" XMLName="Authorization" Null="true"/>
+     <Parameter Name="data"                      Type="binary" XMLName="Data"/>
      <Code><![CDATA[
         log ("performHMAC (KeyHandle=" + key_handle + ")");
         return sks.performHMAC (key_handle, 
@@ -832,13 +852,14 @@
 ]]></Code></Method>
 
    <Method Name="symmetricKeyEncrypt" Throws="SKSException">
-     <Returns   Name="result"        Type="binary" XMLName="Result"/>
-     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
-     <Parameter Name="algorithm"     Type="string" XMLName="Algorithm"/>
-     <Parameter Name="mode"          Type="bool"   XMLName="Mode"/>
-     <Parameter Name="iv"            Type="binary" XMLName="IV"            Null="true"/>
-     <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
-     <Parameter Name="data"          Type="binary" XMLName="Data"/>
+     <Returns   Name="result"                    Type="binary" XMLName="Result"/>
+     <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
+     <Parameter Name="mode"                      Type="bool"   XMLName="Mode"/>
+     <Parameter Name="iv"                        Type="binary" XMLName="IV"            Null="true"/>
+     <Parameter Name="trusted_gui_authorization" Type="bool"   XMLName="TrustedGUIAuthorization" SuppressRule="TGA"/>
+     <Parameter Name="authorization"             Type="binary" XMLName="Authorization" Null="true"/>
+     <Parameter Name="data"                      Type="binary" XMLName="Data"/>
      <Code><![CDATA[
         log ("symmetricKeyEncrypt (KeyHandle=" + key_handle + ")");
         return sks.symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);

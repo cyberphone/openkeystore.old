@@ -98,10 +98,16 @@
 	
   <!-- .NET assumes that NAnt is installed, together with Windows SDK 7.1 and .NET 4 -->
   <target name="_build_sks_ws_for_dotnet" if="dotnet.tools.available">
+  	
+  	<condition property="quiet.nant.build" value="-quiet" else="-D:justignore=5">
+      <not>
+        <isset property="nant.verbose"/>
+      </not>
+  	</condition>
     <exec executable="nant.bat"
   	      failonerror="true">
         <arg value="-nologo"/>
-        <arg value="-quiet"/>
+        <arg value="${quiet.nant.build}"/>
         <arg value="-buildfile:${dot_net_dir}/nant.build"/>
     </exec>
   	<echo message=".NET SKS WS assembly built"/>
@@ -371,7 +377,8 @@
  -Dfile=&#10;
  -Dpassword=&#10;&#10;
 optional:&#10;
- -Dpin=">
+ -Dpin=          [default: none]&#10;
+ -Dtrusted-gui=  [default: false]">
        <condition>
          <not>
          	<and>
@@ -382,6 +389,7 @@ optional:&#10;
        </condition>
      </fail>
   	<property name="pin" value='""'/>
+  	<property name="trusted-gui" value="false"/>
   	<java fork="yes"
   		  classname="org.webpki.sks.test.PKCS12Import"
 		  failonerror="true"
@@ -401,6 +409,7 @@ optional:&#10;
   	    <arg value="${file}"/>
   	    <arg value="${password}"/>
   	    <arg value="${pin}"/>
+  	    <arg value="${trusted-gui}"/>
   	</java>
   </target>
 

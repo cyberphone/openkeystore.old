@@ -536,6 +536,8 @@ public interface SKSWSProxy
                                         String algorithm,
                                         @WebParam(name="Parameters", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                         byte[] parameters,
+                                        @WebParam(name="TrustedGUIAuthorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        boolean trusted_gui_authorization,
                                         @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                         byte[] authorization,
                                         @WebParam(name="Data", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -552,6 +554,8 @@ public interface SKSWSProxy
                                 String algorithm,
                                 @WebParam(name="Parameters", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                 byte[] parameters,
+                                @WebParam(name="TrustedGUIAuthorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                boolean trusted_gui_authorization,
                                 @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                 byte[] authorization,
                                 @WebParam(name="PublicKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -566,6 +570,8 @@ public interface SKSWSProxy
                                int key_handle,
                                @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                String algorithm,
+                               @WebParam(name="TrustedGUIAuthorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               boolean trusted_gui_authorization,
                                @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                byte[] authorization,
                                @WebParam(name="Data", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -584,6 +590,8 @@ public interface SKSWSProxy
                                        boolean mode,
                                        @WebParam(name="IV", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                        byte[] iv,
+                                       @WebParam(name="TrustedGUIAuthorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       boolean trusted_gui_authorization,
                                        @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                        byte[] authorization,
                                        @WebParam(name="Data", targetNamespace="http://xmlns.webpki.org/sks/v1.00")

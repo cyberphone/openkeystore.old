@@ -1093,6 +1093,7 @@ public class WSCreator extends XMLObjectWrapper
             String null_comment = "";
             for (Property prop : meth.parameters)
               {
+                if (prop.dotnet_suppress_rule != null) continue;
                 if (prop.output_mode && meth.return_class!= null)
                   {
                     break;

@@ -930,10 +930,13 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
+            AuthorizationHolder auth;
             return getSKSWS ().asymmetricKeyDecrypt (key_handle,
                                                      algorithm,
                                                      parameters,
-                                                     authorization,
+                                                     getTrustedGUIAuthorization (key_handle,
+                                                                                 auth = new AuthorizationHolder (authorization)),
+                                                     auth.value,
                                                      data);
           }
         catch (SKSException_Exception e)
@@ -951,10 +954,13 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
+            AuthorizationHolder auth;
             return getSKSWS ().keyAgreement (key_handle,
                                              algorithm,
                                              parameters,
-                                             authorization,
+                                             getTrustedGUIAuthorization (key_handle,
+                                                                         auth = new AuthorizationHolder (authorization)),
+                                             auth.value,
                                              public_key.getEncoded ());
           }
         catch (SKSException_Exception e)
@@ -971,9 +977,12 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
+            AuthorizationHolder auth;
             return getSKSWS ().performHMAC (key_handle, 
                                             algorithm,
-                                            authorization,
+                                            getTrustedGUIAuthorization (key_handle,
+                                                                        auth = new AuthorizationHolder (authorization)),
+                                            auth.value,
                                             data);
           }
         catch (SKSException_Exception e)
@@ -992,11 +1001,14 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
+            AuthorizationHolder auth;
             return getSKSWS ().symmetricKeyEncrypt (key_handle,
                                                     algorithm,
                                                     mode,
                                                     iv,
-                                                    authorization,
+                                                    getTrustedGUIAuthorization (key_handle,
+                                                                                auth = new AuthorizationHolder (authorization)),
+                                                    auth.value,
                                                     data);
           }
         catch (SKSException_Exception e)

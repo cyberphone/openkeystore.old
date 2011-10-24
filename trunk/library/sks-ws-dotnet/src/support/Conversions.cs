@@ -20,7 +20,7 @@ namespace org.webpki.sks.ws.client
 
     using org.webpki.sks.ws.client.BouncyCastle.Utilities.Encoders;
     
-    public static class Conversions
+    public static partial class Conversions
     {
         public const string EC_PUBLIC_KEY  = "1.2.840.10045.2.1";
         
