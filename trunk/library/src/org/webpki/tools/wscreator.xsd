@@ -202,6 +202,10 @@
 
    <xs:element name="ReturnClass">
       <xs:complexType>
+      
+         <xs:sequence>
+            <xs:element ref="wsc:Constant" minOccurs="0" maxOccurs="unbounded"/>
+         </xs:sequence>
 
          <!-- Full java path class name.  The .NET generator only uses the
               class part, while the JNI driver needs the entire path -->

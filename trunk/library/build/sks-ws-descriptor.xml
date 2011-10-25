@@ -260,7 +260,9 @@
    
    <ReturnClass ClassName="org.webpki.sks.KeyAttributes"/>
    
-   <ReturnClass ClassName="org.webpki.sks.KeyProtectionInfo"/>
+   <ReturnClass ClassName="org.webpki.sks.KeyProtectionInfo">
+     <Constant Name="PROTSTAT_PIN_PROTECTED" Type="byte" Value="0x01"/>
+   </ReturnClass>
  
    <Method Name="getDeviceInfo" ReturnClass="DeviceInfo" Throws="SKSException">
      <Parameter Name="api_level"            Type="short"  XMLName="APILevel"           Mode="out"/>

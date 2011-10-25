@@ -1605,6 +1605,8 @@ namespace org.webpki.sks.ws.client
         internal sbyte _key_backup;
         #pragma warning restore 0649
 
+        public static byte PROTSTAT_PIN_PROTECTED { get { return 0x01;}}
+
         public sbyte ProtectionStatus
         {
             get { return _protection_status; }

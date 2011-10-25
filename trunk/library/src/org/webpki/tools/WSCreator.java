@@ -1212,6 +1212,7 @@ public class WSCreator extends XMLObjectWrapper
           }
         else if (meth.return_class != null)
           {
+            writeConstants (file, meth.return_class.constants);
             for (Property prop : props)
               {
                 write (file, "\n" +
@@ -1433,7 +1434,7 @@ public class WSCreator extends XMLObjectWrapper
 
     void writeConstants (FileOutputStream file, LinkedHashMap<String, Constant> constants) throws IOException
       {
-        for (String constant : constants.keySet ())
+        if (constants != null) for (String constant : constants.keySet ())
           {
             Constant tv = constants.get (constant);
             write (file, "\n" +

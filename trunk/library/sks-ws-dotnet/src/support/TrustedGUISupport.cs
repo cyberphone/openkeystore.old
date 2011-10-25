@@ -16,7 +16,11 @@
  */
 namespace org.webpki.sks.ws.client
 {
-    internal class Form1 : System.Windows.Forms.Form
+    using System.Security.Cryptography;
+    using System.Windows.Forms;
+    using System.IO;
+
+    internal class Form1 : Form
     {
         internal string password;
 
@@ -60,8 +64,8 @@ namespace org.webpki.sks.ws.client
         /// </summary>
         private void InitializeComponent()
         {
-            this.button1 = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.button1 = new Button();
+            this.textBox1 = new TextBox();
             this.SuspendLayout();
             // 
             // button1
@@ -72,6 +76,7 @@ namespace org.webpki.sks.ws.client
             this.button1.TabIndex = 1;
             this.button1.Text = "OK";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.DialogResult = DialogResult.OK;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // textBox1
@@ -85,12 +90,12 @@ namespace org.webpki.sks.ws.client
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 130);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button1);
             this.Name = "Form1";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.StartPosition = FormStartPosition.CenterParent;
             this.Text = "PIN Code";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
@@ -98,16 +103,18 @@ namespace org.webpki.sks.ws.client
 
         }
 
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.TextBox textBox1;
+        private Button button1;
+        private TextBox textBox1;
     }
 
     public partial class SKSWSProxy
     {
+        private static byte[] SHARED_SECRET_32 = {0,1,2,3,4,5,6,7,8,9,1,0,3,2,5,4,7,6,9,8,9,8,7,6,5,4,3,2,1,0,3,2};
+        
         public bool GetTrustedGUIAuthorization (int KeyHandle, ref byte[] Authorization)
         {
            KeyProtectionInfo kpi = getKeyProtectionInfo(KeyHandle);
-           if (kpi.ProtectionStatus != 0)
+           if ((kpi.ProtectionStatus & KeyProtectionInfo.PROTSTAT_PIN_PROTECTED) != 0)
            {
                 if (kpi.InputMethod == InputMethod.TRUSTED_GUI)
                 {
@@ -121,10 +128,47 @@ namespace org.webpki.sks.ws.client
                     return false;
                 }
                 Form1 f1 = new Form1();
-                f1.ShowDialog();
-                Authorization = System.Text.Encoding.UTF8.GetBytes(f1.password);
-           }
-           return false;
+                if (f1.ShowDialog() == DialogResult.OK)
+                {
+                	Authorization = System.Text.Encoding.UTF8.GetBytes(f1.password);
+                    using (AesManaged aes = new AesManaged())
+                    {
+	                    byte[] IV = new byte[16];
+	                    using (RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider())
+	                    {
+			            	rngCsp.GetBytes(IV);
+			            }
+	                    aes.Key = SHARED_SECRET_32;
+	                    aes.IV = IV;
+	                    byte[] encrypted;
+	                    using (MemoryStream total = new MemoryStream())
+	                    {
+		                    using (MemoryStream msEncrypt = new MemoryStream())
+		                    {
+		                        using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, aes.CreateEncryptor(), CryptoStreamMode.Write))
+		                        {
+		 	                        csEncrypt.Write(Authorization, 0, Authorization.Length);
+		 	                        csEncrypt.FlushFinalBlock(); 
+		                    	}
+		                    	msEncrypt.Flush();
+	        	                encrypted = msEncrypt.ToArray();
+		                 	}
+		                 	total.Write (IV, 0, IV.Length);
+		                 	total.Write (encrypted, 0, encrypted.Length);
+		                 	encrypted = total.ToArray();
+		                 	total.SetLength(0);
+	                        using (HMACSHA256 hmac = new HMACSHA256(SHARED_SECRET_32))
+	    				    {
+	    				    	total.Write(hmac.ComputeHash(encrypted), 0, 32);
+	    				    	total.Write(encrypted, 0, encrypted.Length);
+	    				    }
+	    				    Authorization = total.ToArray();
+	                 	}
+                 	}
+                 	return true;
+           		}
+           	}
+            return false;
         }
     }
 }
