@@ -262,6 +262,10 @@
    
    <ReturnClass ClassName="org.webpki.sks.KeyProtectionInfo">
      <Constant Name="PROTSTAT_PIN_PROTECTED" Type="byte" Value="0x01"/>
+     <Constant Name="PROTSTAT_PUK_PROTECTED" Type="byte" Value="0x02"/>
+     <Constant Name="PROTSTAT_PIN_BLOCKED"   Type="byte" Value="0x04"/>
+     <Constant Name="PROTSTAT_PUK_BLOCKED"   Type="byte" Value="0x08"/>
+     <Constant Name="PROTSTAT_DEVICE_PIN"    Type="byte" Value="0x10"/>
    </ReturnClass>
  
    <Method Name="getDeviceInfo" ReturnClass="DeviceInfo" Throws="SKSException">

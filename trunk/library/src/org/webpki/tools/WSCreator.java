@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.TreeSet;
 import java.util.Vector;
 
@@ -384,6 +385,7 @@ public class WSCreator extends XMLObjectWrapper
             this.jname = jname;
             this.jholder = jholder;
           }
+        
       }
 
     static Vector<DataType> types = new Vector<DataType> ();
@@ -397,6 +399,24 @@ public class WSCreator extends XMLObjectWrapper
         types.add (new DataType (false, "xs:boolean",      "bool",    "bool",   "boolean", "Boolean"));
         types.add (new DataType (true,  "xs:string",       "string",  "string", "String",  "String"));
         types.add (new DataType (true,  "xs:base64Binary", "binary",  "byte[]", "byte[]",  "byte[]"));
+      }
+    
+    DataType getDataType (String descr_type) throws IOException
+      {
+        DataType data_type = null;
+        for (DataType dtype : types)
+          {
+            if (dtype.enum_name.equals (descr_type))
+              {
+                data_type = dtype;
+                break;
+              }
+          }
+        if (data_type == null)
+          {
+            bad ("Type '" + descr_type + "' not found");
+          }
+        return data_type;
       }
 
     class Property extends Container
@@ -574,7 +594,7 @@ public class WSCreator extends XMLObjectWrapper
     
     class Constant
       {
-        String type;
+        DataType type;
         String value;
       }
 
@@ -1029,7 +1049,7 @@ public class WSCreator extends XMLObjectWrapper
           }
       }
 
-    LinkedHashMap<String, Constant> getConstants (DOMReaderHelper rd)
+    LinkedHashMap<String, Constant> getConstants (DOMReaderHelper rd) throws IOException
       {
         LinkedHashMap<String, Constant> constants = new LinkedHashMap<String, Constant> ();
         while (rd.hasNext ("Constant"))
@@ -1037,7 +1057,7 @@ public class WSCreator extends XMLObjectWrapper
             rd.getNext ();
             Constant constant = new Constant ();
             String name = attr.getString ("Name");
-            constant.type = attr.getString ("Type");
+            constant.type = getDataType (attr.getString ("Type"));
             constant.value = attr.getString ("Value");
             constants.put (name, constant);
           }
@@ -1212,7 +1232,7 @@ public class WSCreator extends XMLObjectWrapper
           }
         else if (meth.return_class != null)
           {
-            writeConstants (file, meth.return_class.constants);
+            writeDotNetConstants (file, meth.return_class.constants);
             for (Property prop : props)
               {
                 write (file, "\n" +
@@ -1275,7 +1295,7 @@ public class WSCreator extends XMLObjectWrapper
                 "        {\n" +
                 "            System.Runtime.Serialization.XmlSerializableServices.WriteNodes(writer, nodes);\n" +
                 "        }\n");
-            writeConstants (file, wse.constants);
+            writeDotNetConstants (file, wse.constants);
             int index = 0;
             for (Property prop : wse.properties)
               {
@@ -1303,7 +1323,7 @@ public class WSCreator extends XMLObjectWrapper
                      "    public " + (dot_net_partial ? "partial " : "") + "class " + dotnet_client_pck.class_name + " : System.ServiceModel.ClientBase<" + dotnet_client_pck.class_name + "Interface>\n" +
                      "    {");
 
-        writeConstants (file, global_client_constants);
+        writeDotNetConstants (file, global_client_constants);
 
         write (file, "\n" +
                      "        public static " + dotnet_client_pck.class_name + " getDefault" + dotnet_client_pck.class_name + "()\n" +
@@ -1432,14 +1452,14 @@ public class WSCreator extends XMLObjectWrapper
         close (dotnet_client_pck);
       }
 
-    void writeConstants (FileOutputStream file, LinkedHashMap<String, Constant> constants) throws IOException
+    void writeDotNetConstants (FileOutputStream file, LinkedHashMap<String, Constant> constants) throws IOException
       {
         if (constants != null) for (String constant : constants.keySet ())
           {
             Constant tv = constants.get (constant);
             write (file, "\n" +
-            "        public static " + tv.type + " " + constant +
-            " { get { return " + (tv.type.equals ("string") ? "\"" : "") + tv.value + (tv.type.equals ("string") ? "\"" : "") + ";}}\n"); 
+            "        public static " + tv.type.csname + " " + constant +
+            " { get { return " + (tv.type.enum_name.equals ("string") ? "\"" : "") + tv.value + (tv.type.enum_name.equals ("string") ? "\"" : "") + ";}}\n"); 
           }
       }
 
@@ -1610,19 +1630,7 @@ public class WSCreator extends XMLObjectWrapper
             prop.input_mode = !mode.equals ("out");
             prop.output_mode = !mode.equals ("in");
             prop.xml_name = attr.getStringConditional ("XMLName");
-            String type = attr.getString ("Type");
-            for (DataType dtype : types)
-              {
-                if (dtype.enum_name.equals (type))
-                  {
-                    prop.data_type = dtype;
-                    break;
-                  }
-              }
-            if (prop.data_type == null)
-              {
-                bad ("Type '" + type + "' not found");
-              }
+            prop.data_type = getDataType (attr.getString ("Type"));
             prop.nullable = attr.getBoolean ("Null");
             if (prop.listtype = attr.getBoolean ("List"))
               {

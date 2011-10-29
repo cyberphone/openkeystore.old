@@ -39,11 +39,61 @@
            </imports>
           <code>
             <![CDATA[
-              public static void ScriptMain(Project project)
-              {
-                  SKSWSProxy ws = SKSWSProxy.getDefaultSKSWSProxy();
-                  project.Log(Level.Info, "WS version: " + ws.getVersion ());
-              }
+public static void ScriptMain(Project project)
+{
+    SKSWSProxy ws = SKSWSProxy.getDefaultSKSWSProxy();
+    project.Log(Level.Info, "WS version: " + ws.getVersion ());
+}
+            ]]>
+          </code>
+      </script>
+    </target>
+
+    <target name="sign" depends="build">
+      <script language="C#">
+          <references>
+                <include name="System.Data.dll"/>
+                <include name="System.dll"/>
+                 <include name="System.Runtime.Serialization.dll"/>
+                <include name="System.ServiceModel.dll"/>
+                <include name="System.Xml.dll"/>
+              <include name="../dist/${basename}.dll" />
+          </references>
+          <imports>
+              <import namespace="${basename}" />
+              <import namespace="System.Security.Cryptography" />
+           </imports>
+          <code>
+            <![CDATA[
+public static void ScriptMain(Project project)
+{
+    SKSWSProxy ws = SKSWSProxy.getDefaultSKSWSProxy();
+    EnumeratedKey ek = new EnumeratedKey();
+    while ((ek = ws.enumerateKeys(ek.KeyHandle)) != null)
+    {
+       try
+       {
+           KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
+           if (ka.IsSymmetricKey) continue;
+           if (!(ka.CertificatePath[0].PublicKey.Key is RSACryptoServiceProvider)) continue;
+           byte[] test_string = Encoding.UTF8.GetBytes("hi there!");
+           byte[] res = ws.signHashedData(ek.KeyHandle,
+                              "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+                              null,
+                              null,
+                              new SHA256Managed().ComputeHash(test_string));
+           RSACryptoServiceProvider rsaCSP = (RSACryptoServiceProvider)ka.CertificatePath[0].PublicKey.Key;
+           System.Console.WriteLine(rsaCSP.VerifyData(test_string, CryptoConfig.MapNameToOID("SHA256"), res) ?
+              "Success" : "Bad signature");
+       }
+       catch (System.ServiceModel.FaultException<SKSException> e)
+       {
+           System.Console.WriteLine("Signing: " + e.Detail.getMessage() + " code=" + e.Detail.getError());
+       }
+       return;
+    }
+    System.Console.WriteLine("No suitable key found...");
+}
             ]]>
           </code>
       </script>

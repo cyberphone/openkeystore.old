@@ -20,35 +20,35 @@ namespace org.webpki.sks.ws.client
     using System.Windows.Forms;
     using System.IO;
 
-    internal class Form1 : Form
+    internal class SKSAuthorizationDialog : Form
     {
         internal string password;
+        private bool retry_warning;
+        private int retriesleft; 
 
-        internal Form1()
+        internal SKSAuthorizationDialog(PassphraseFormat format,
+                                        Grouping grouping,
+                                        AppUsage app_usage,
+                                        int zero_or_retriesleft)
         {
+            retry_warning = zero_or_retriesleft != 0;
+            retriesleft = zero_or_retriesleft;
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, System.EventArgs e)
+        private void SKSAuthorizationDialog_Load(object sender, System.EventArgs e)
         {
 
         }
 
-        private void button1_Click(object sender, System.EventArgs e)
+        private void authorization_OK_Button_Click(object sender, System.EventArgs e)
         {
-            password = textBox1.Text;
+            password = authorization_TextBox.Text;
             Close();
         }
 
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -58,53 +58,92 @@ namespace org.webpki.sks.ws.client
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            this.button1 = new Button();
-            this.textBox1 = new TextBox();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            
+            authorization_ToolTip = new ToolTip(components);
+            
+            authorization_Cancel_Button = new Button();
+            authorization_OK_Button = new Button();
+            authorization_TextBox = new TextBox();
+            authorization_ToolTip.SetToolTip(authorization_TextBox, "This it it!");
+            if (retry_warning)
+            {
+            	retry_warning_Label = new Label();
+            }
+            SuspendLayout();
+            if (retry_warning)
+            {
+                retry_warning_Label.AutoSize = true;
+                retry_warning_Label.Font =  new System.Drawing.Font(retry_warning_Label.Font, retry_warning_Label.Font.Style | System.Drawing.FontStyle.Bold);
+                retry_warning_Label.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+                retry_warning_Label.Location = new System.Drawing.Point(101, 13);
+                retry_warning_Label.Name = "retry_warning_Label";
+                retry_warning_Label.TabIndex = 3;
+                retry_warning_Label.Text = "Bad stuff =" + retriesleft;
+            }
             // 
-            // button1
+            // authorization_OK_Button
+            //
+            int lower_margin; 
+            authorization_OK_Button.Location = new System.Drawing.Point(lower_margin = authorization_OK_Button.Size.Width / 3, 80);
+            authorization_OK_Button.Name = "authorization_OK_Button";
+            authorization_OK_Button.TabIndex = 1;
+            authorization_OK_Button.Text = "OK";
+            authorization_OK_Button.UseVisualStyleBackColor = true;
+            authorization_OK_Button.DialogResult = DialogResult.OK;
+            authorization_OK_Button.Click += new System.EventHandler(authorization_OK_Button_Click);
+			int total_width = authorization_OK_Button.Size.Width * 4;
             // 
-            this.button1.Location = new System.Drawing.Point(101, 80);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "OK";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.DialogResult = DialogResult.OK;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // authorization_Cancel_Button
             // 
-            // textBox1
+            authorization_Cancel_Button.DialogResult = DialogResult.Cancel;
+            authorization_Cancel_Button.Location = new System.Drawing.Point((authorization_OK_Button.Size.Width * 8) / 3, 80);
+            authorization_Cancel_Button.Name = "authorization_Cancel_Button";
+            authorization_Cancel_Button.TabIndex = 2;
+            authorization_Cancel_Button.Text = "Cancel";
+            authorization_Cancel_Button.UseVisualStyleBackColor = true;
             // 
-            this.textBox1.Location = new System.Drawing.Point(86, 42);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(100, 20);
-            this.textBox1.TabIndex = 0;
-            this.textBox1.UseSystemPasswordChar = true;
+            // authorization_TextBox
+            //
+            authorization_TextBox.Width = authorization_OK_Button.Size.Width * 2;
+            authorization_TextBox.PasswordChar = '\u25CF';            
+            authorization_TextBox.Location = new System.Drawing.Point((total_width - authorization_TextBox.Size.Width) / 2, 42);
+            authorization_TextBox.Name = "authorization_TextBox";
+            authorization_TextBox.TabIndex = 0;
             // 
-            // Form1
+            // SKSAuthorizationDialog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 130);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.button1);
-            this.Name = "Form1";
-            this.StartPosition = FormStartPosition.CenterParent;
-            this.Text = "PIN Code";
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+			CancelButton = authorization_Cancel_Button;
+            AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(total_width, authorization_OK_Button.Size.Height + lower_margin + authorization_OK_Button.Top);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Controls.Add(authorization_TextBox);
+            Controls.Add(authorization_OK_Button);
+            Controls.Add(authorization_Cancel_Button);
+            if (retry_warning)
+            {
+	            Controls.Add(retry_warning_Label);
+            }
+            Name = "SKSAuthorizationDialog";
+            StartPosition = FormStartPosition.CenterParent;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Text = "PIN Code";
+            Load += new System.EventHandler(SKSAuthorizationDialog_Load);
+            TopMost = true;
+            ResumeLayout(false);
+            PerformLayout();
         }
 
-        private Button button1;
-        private TextBox textBox1;
+        private Button authorization_Cancel_Button;
+        private Button authorization_OK_Button;
+        private TextBox authorization_TextBox;
+        private ToolTip authorization_ToolTip;
+        private Label retry_warning_Label;
+        
     }
 
     public partial class SKSWSProxy
@@ -113,9 +152,9 @@ namespace org.webpki.sks.ws.client
         
         public bool GetTrustedGUIAuthorization (int KeyHandle, ref byte[] Authorization)
         {
-           KeyProtectionInfo kpi = getKeyProtectionInfo(KeyHandle);
-           if ((kpi.ProtectionStatus & KeyProtectionInfo.PROTSTAT_PIN_PROTECTED) != 0)
-           {
+            KeyProtectionInfo kpi = getKeyProtectionInfo(KeyHandle);
+            if ((kpi.ProtectionStatus & KeyProtectionInfo.PROTSTAT_PIN_PROTECTED) != 0)
+            {
                 if (kpi.InputMethod == InputMethod.TRUSTED_GUI)
                 {
                     if (Authorization != null)
@@ -127,31 +166,43 @@ namespace org.webpki.sks.ws.client
                 {
                     return false;
                 }
-                Form1 f1 = new Form1();
-                if (f1.ShowDialog() == DialogResult.OK)
+	            if ((kpi.ProtectionStatus & KeyProtectionInfo.PROTSTAT_PIN_BLOCKED) != 0)
+	            {
+	                MessageBox.Show("The key is blocked due to previous PIN errors",
+	                                "Authorization Error",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Exclamation);
+	            	return false;
+	            }
+	            KeyAttributes ka = getKeyAttributes (KeyHandle);
+                SKSAuthorizationDialog authorization_form = new SKSAuthorizationDialog((PassphraseFormat)kpi.Format,
+                                                                                       (Grouping)kpi.Grouping,
+                                                                                       (AppUsage)ka.AppUsage,
+                                                                                       kpi.PINErrorCount == 0 ? 0 : kpi.RetryLimit - kpi.PINErrorCount);
+                if (authorization_form.ShowDialog() == DialogResult.OK)
                 {
-                	Authorization = System.Text.Encoding.UTF8.GetBytes(f1.password);
+                	Authorization = System.Text.Encoding.UTF8.GetBytes(authorization_form.password);
                     using (AesManaged aes = new AesManaged())
                     {
 	                    byte[] IV = new byte[16];
-	                    using (RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider())
+	                    using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
 	                    {
-			            	rngCsp.GetBytes(IV);
+			            	rng.GetBytes(IV);
 			            }
 	                    aes.Key = SHARED_SECRET_32;
 	                    aes.IV = IV;
 	                    byte[] encrypted;
 	                    using (MemoryStream total = new MemoryStream())
 	                    {
-		                    using (MemoryStream msEncrypt = new MemoryStream())
+		                    using (MemoryStream ms_encrypt = new MemoryStream())
 		                    {
-		                        using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, aes.CreateEncryptor(), CryptoStreamMode.Write))
+		                        using (CryptoStream cs_encrypt = new CryptoStream(ms_encrypt, aes.CreateEncryptor(), CryptoStreamMode.Write))
 		                        {
-		 	                        csEncrypt.Write(Authorization, 0, Authorization.Length);
-		 	                        csEncrypt.FlushFinalBlock(); 
+		 	                        cs_encrypt.Write(Authorization, 0, Authorization.Length);
+		 	                        cs_encrypt.FlushFinalBlock(); 
 		                    	}
-		                    	msEncrypt.Flush();
-	        	                encrypted = msEncrypt.ToArray();
+		                    	ms_encrypt.Flush();
+	        	                encrypted = ms_encrypt.ToArray();
 		                 	}
 		                 	total.Write (IV, 0, IV.Length);
 		                 	total.Write (encrypted, 0, encrypted.Length);

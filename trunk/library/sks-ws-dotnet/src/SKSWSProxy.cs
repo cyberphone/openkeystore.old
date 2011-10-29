@@ -1605,7 +1605,15 @@ namespace org.webpki.sks.ws.client
         internal sbyte _key_backup;
         #pragma warning restore 0649
 
-        public static byte PROTSTAT_PIN_PROTECTED { get { return 0x01;}}
+        public static sbyte PROTSTAT_PIN_PROTECTED { get { return 0x01;}}
+
+        public static sbyte PROTSTAT_PUK_PROTECTED { get { return 0x02;}}
+
+        public static sbyte PROTSTAT_PIN_BLOCKED { get { return 0x04;}}
+
+        public static sbyte PROTSTAT_PUK_BLOCKED { get { return 0x08;}}
+
+        public static sbyte PROTSTAT_DEVICE_PIN { get { return 0x10;}}
 
         public sbyte ProtectionStatus
         {
