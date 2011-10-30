@@ -47,7 +47,7 @@ public enum InputMethod
       }
 
 
-    public static InputMethod getMethodFromString (String xml_name) throws IOException
+    public static InputMethod getInputMethodFromString (String xml_name) throws IOException
       {
         for (InputMethod type : InputMethod.values ())
           {

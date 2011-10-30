@@ -48,7 +48,7 @@ public enum AppUsage
       }
 
 
-    public static AppUsage getKeyUsageFromString (String xml_name) throws IOException
+    public static AppUsage getAppUsageFromString (String xml_name) throws IOException
       {
         for (AppUsage key_type : AppUsage.values ())
           {

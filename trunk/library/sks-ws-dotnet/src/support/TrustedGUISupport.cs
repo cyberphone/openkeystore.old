@@ -18,12 +18,14 @@ namespace org.webpki.sks.ws.client
 {
     using System.Security.Cryptography;
     using System.Windows.Forms;
+    using System.Reflection;
     using System.IO;
 
     internal class SKSAuthorizationDialog : Form
     {
         internal string password;
         private bool retry_warning;
+        private bool signature_icon;
         private int retriesleft; 
 
         internal SKSAuthorizationDialog(PassphraseFormat format,
@@ -33,6 +35,7 @@ namespace org.webpki.sks.ws.client
         {
             retry_warning = zero_or_retriesleft != 0;
             retriesleft = zero_or_retriesleft;
+            signature_icon = app_usage == AppUsage.SIGNATURE;
             InitializeComponent();
         }
 
@@ -67,7 +70,11 @@ namespace org.webpki.sks.ws.client
             authorization_Cancel_Button = new Button();
             authorization_OK_Button = new Button();
             authorization_TextBox = new TextBox();
-            authorization_ToolTip.SetToolTip(authorization_TextBox, "This it it!");
+            authorization_ToolTip.SetToolTip(authorization_TextBox, "The authorization PIN");
+            if (signature_icon)
+            {
+	            attention_PictureBox = new PictureBox();
+	        }
             if (retry_warning)
             {
             	retry_warning_Label = new Label();
@@ -81,8 +88,20 @@ namespace org.webpki.sks.ws.client
                 retry_warning_Label.Location = new System.Drawing.Point(101, 13);
                 retry_warning_Label.Name = "retry_warning_Label";
                 retry_warning_Label.TabIndex = 3;
-                retry_warning_Label.Text = "Bad stuff =" + retriesleft;
+                retry_warning_Label.Text = "You have " + retriesleft + " retries left";
             }
+            
+            if (signature_icon)
+            {
+	            Assembly assembly = Assembly.GetExecutingAssembly();
+	            Stream image_stream = assembly.GetManifestResourceStream("sks.signsymb.gif");
+	            attention_PictureBox.Image = new System.Drawing.Bitmap(image_stream);
+	            attention_PictureBox.Location = new System.Drawing.Point(0, 0);
+	            attention_PictureBox.Name = "attention_PictureBox";
+	            attention_PictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
+	            attention_PictureBox.TabIndex = 5;
+	            attention_PictureBox.TabStop = false;
+	        }
             // 
             // authorization_OK_Button
             //
@@ -124,6 +143,10 @@ namespace org.webpki.sks.ws.client
             Controls.Add(authorization_TextBox);
             Controls.Add(authorization_OK_Button);
             Controls.Add(authorization_Cancel_Button);
+            if (signature_icon)
+            {
+	            Controls.Add(attention_PictureBox);
+	        }
             if (retry_warning)
             {
 	            Controls.Add(retry_warning_Label);
@@ -143,6 +166,8 @@ namespace org.webpki.sks.ws.client
         private TextBox authorization_TextBox;
         private ToolTip authorization_ToolTip;
         private Label retry_warning_Label;
+        private PictureBox attention_PictureBox;
+        
         
     }
 

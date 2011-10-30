@@ -185,10 +185,10 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
             format = PassphraseFormat.getPassphraseFormatFromString (ah.getString (FORMAT_ATTR));
 
-            group = Grouping.getPINGroupingFromString (ah.getStringConditional (GROUPING_ATTR,
+            group = Grouping.getGroupingFromString (ah.getStringConditional (GROUPING_ATTR,
                                                                                    Grouping.NONE.getXMLName ()));
 
-            input_method = InputMethod.getMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR,
+            input_method = InputMethod.getInputMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR,
                                                                                      InputMethod.ANY.getXMLName ()));
             
             read_user_modifiable = ah.getStringConditional (USER_MODIFIABLE_ATTR) != null;
@@ -337,7 +337,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
             friendly_name = ah.getStringConditional (FRIENDLY_NAME_ATTR);
 
-            app_usage = AppUsage.getKeyUsageFromString (ah.getString (APP_USAGE_ATTR));
+            app_usage = AppUsage.getAppUsageFromString (ah.getString (APP_USAGE_ATTR));
 
             enable_pin_caching = ah.getBooleanConditional (ENABLE_PIN_CACHING_ATTR);
             

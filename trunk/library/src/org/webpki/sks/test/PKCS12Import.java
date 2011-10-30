@@ -27,6 +27,7 @@ import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -35,8 +36,10 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.Grouping;
 import org.webpki.sks.InputMethod;
 import org.webpki.sks.PassphraseFormat;
+import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.SecureKeyStore;
 import org.webpki.sks.ws.WSSpecific;
 
@@ -44,11 +47,24 @@ public class PKCS12Import
   {
     public static void main (String[] argc) throws Exception
       {
-        if (argc.length != 4)
+        if (argc.length != 2 && argc.length != 7)
           {
             System.out.println ("\nUsage: " + PKCS12Import.class.getCanonicalName () + 
-                                " file password pin-or-zero-length-arg trusted-gui");
+                                " file password [pin format imputmethod grouping appusage]");
             System.exit (-3);
+          }
+        String pin = null;
+        AppUsage app_usage = AppUsage.UNIVERSAL;
+        PassphraseFormat format = null;
+        InputMethod input_method = null;
+        Grouping grouping = null;
+        if (argc.length > 2)
+          {
+            pin = argc[2];
+            format = PassphraseFormat.valueOf (argc[3]);
+            input_method = InputMethod.valueOf (argc[4]);
+            grouping = Grouping.valueOf (argc[5]);
+            app_usage = AppUsage.valueOf (argc[6]);
           }
         char[] password = argc[1].toCharArray ();
         Security.insertProviderAt (new BouncyCastleProvider(), 1);
@@ -111,29 +127,28 @@ public class PKCS12Import
             sess.postDeleteKey (old_key);
           }
         PINPol pin_policy = null;
-        String pin = argc[2].trim ();
-        InputMethod input_method = argc[3].equals ("true") ? InputMethod.TRUSTED_GUI : InputMethod.ANY;
-        if (pin.length () > 0)
+        String prot = "NO PIN";
+        if (argc.length > 2)
           {
+            pin = argc[2];
             sess.setInputMethod (input_method);
+            prot ="PIN [Format=" + format + ", InputMode=" + input_method + ", Grouping=" + grouping + ", AppUsage=" + app_usage + "]";
             pin_policy = sess.createPINPolicy ("PIN",
-                                               PassphraseFormat.STRING,
+                                               format,
+                                               EnumSet.noneOf (PatternRestriction.class),
+                                               grouping,
                                                1 /* min_length */, 
                                                50 /* max_length */,
                                                (short) 3 /* retry_limit*/, 
-                                               null /* puk_policy */);            
-          }
-        else
-          {
-            pin = null;
+                                               null /* puk_policy */);
           }
         GenKey key = sess.createECKey ("Key",
                                        pin /* pin_value */,
                                        pin_policy /* pin_policy */,
-                                       AppUsage.AUTHENTICATION);
+                                       app_usage);
         key.setCertificatePath (cert_path.toArray (new X509Certificate[0]));
         key.restorePrivateKey (private_key);
         sess.closeSession ();
-        System.out.println ("PIN=" + (pin == null ? "None" : "Set" + (input_method == InputMethod.TRUSTED_GUI ? "/TrustedGUI":"")));
+        System.out.println (prot);
       }
   }

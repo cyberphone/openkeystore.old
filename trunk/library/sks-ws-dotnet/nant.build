@@ -3,14 +3,17 @@
 <project name="SKSWS" default="build">
     <property name="basename" value="org.webpki.sks.ws.client"/>
     <property name="debug" value="false"/>
+    <property name="rebuild" value="false" overwrite="false"/>
     <property name="build.dir" value="../dist"/>
     <property name="src.dir" value="src"/>
+    <property name="res.dir" value="res"/>
     <property name="nant.settings.currentframework" value="net-4.0"/>
 
     <target name="build">
       <csc target="library"
            output="${build.dir}/${basename}.dll" 
            debug="${debug}"
+           rebuild="${rebuild}"
            keyfile="b651fd748a51c307.snk">
             <sources basedir="${src.dir}">
                 <include name="**/*.cs"/>
@@ -22,6 +25,9 @@
                 <include name="System.Runtime.Serialization.dll"/>
                 <include name="System.Xml.dll"/>
             </references>
+            <resources prefix="sks" basedir="${res.dir}">
+                <include name="*.*"/>
+            </resources>
         </csc>
     </target>
     

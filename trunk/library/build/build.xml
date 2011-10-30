@@ -104,10 +104,16 @@
         <isset property="nant.verbose"/>
       </not>
   	</condition>
+  	<condition property="rebuild.nant.build" value="false" else="true">
+      <not>
+        <isset property="nant.verbose"/>
+      </not>
+  	</condition>
     <exec executable="nant.bat"
   	      failonerror="true">
         <arg value="-nologo"/>
         <arg value="${quiet.nant.build}"/>
+    	<arg value="-D:rebuild=${rebuild.nant.build}"/>
         <arg value="-buildfile:${dot_net_dir}/nant.build"/>
     </exec>
   	<echo message=".NET SKS WS assembly built"/>
@@ -373,12 +379,20 @@
   </target>
 
   <target name="pkcs12import">
+  	<property name="format" value="NUMERIC"/>
+  	<property name="inputmethod" value="TRUSTED_GUI"/>
+  	<property name="grouping" value="NONE"/>
+  	<property name="appusage" value="UNIVERSAL"/>
     <fail message="-&#10;Missing one or more of mandatory:&#10;
  -Dfile=&#10;
  -Dpassword=&#10;&#10;
 optional:&#10;
- -Dpin=          [default: none]&#10;
- -Dtrusted-gui=  [default: false]">
+ -Dpin=          [default: none]&#10;&#10;
+applicable if pin has been set:&#10;
+ -Dformat=  [default: ${format}]&#10;
+ -Dinputmethod=  [default: ${inputmethod}]&#10;
+ -Dgrouping=  [default: ${grouping}]&#10;
+ -Dappusage=  [default: ${appusage}]">
        <condition>
          <not>
          	<and>
@@ -388,8 +402,9 @@ optional:&#10;
          </not>
        </condition>
      </fail>
-  	<property name="pin" value='""'/>
-  	<property name="trusted-gui" value="false"/>
+  	<condition property="pinandparams" value=" ${pin} ${format} ${inputmethod} ${grouping} ${appusage}" else="">
+      <isset property="pin"/>
+    </condition>
   	<java fork="yes"
   		  classname="org.webpki.sks.test.PKCS12Import"
 		  failonerror="true"
@@ -406,10 +421,7 @@ optional:&#10;
   		<jvmarg value="-Djava.endorsed.dirs=${jax.ws.lib.dir}"/>
     	<jvmarg value="-Dsks.client=${sks.ws.client}"/>
     	<jvmarg value="-Dorg.webpki.sks.ws.client.url=${sksws.url}"/>
-  	    <arg value="${file}"/>
-  	    <arg value="${password}"/>
-  	    <arg value="${pin}"/>
-  	    <arg value="${trusted-gui}"/>
+  	    <arg line="${file} ${password}${pinandparams}"/>
   	</java>
   </target>
 

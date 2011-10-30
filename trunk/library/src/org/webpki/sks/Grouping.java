@@ -48,7 +48,7 @@ public enum Grouping
       }
 
 
-    public static Grouping getPINGroupingFromString (String xml_name) throws IOException
+    public static Grouping getGroupingFromString (String xml_name) throws IOException
       {
         for (Grouping option : Grouping.values ())
           {
