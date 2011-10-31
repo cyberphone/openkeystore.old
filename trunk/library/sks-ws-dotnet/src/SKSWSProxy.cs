@@ -2614,13 +2614,29 @@ namespace org.webpki.sks.ws.client
                                      byte[] Authorization,
                                      byte[] Data)
         {
+            bool tga = false;
+            do
+            {
+                try
+                {
             signHashedData_Response _res = base.Channel.signHashedData(new signHashedData_Request(KeyHandle,
                                                                                                   Algorithm,
                                                                                                   Parameters,
-                                                                                                  GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
+                                                                                                  tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
                                                                                                   Authorization,
                                                                                                   Data));
             return _res._result;
+                }
+                catch (System.ServiceModel.FaultException<SKSException> e)
+                {
+                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    {
+                        throw e;
+                    }
+                    Authorization = null;
+                }
+            }
+            while (true);
         }
 
         public byte[] asymmetricKeyDecrypt(int KeyHandle,
@@ -2629,13 +2645,29 @@ namespace org.webpki.sks.ws.client
                                            byte[] Authorization,
                                            byte[] Data)
         {
+            bool tga = false;
+            do
+            {
+                try
+                {
             asymmetricKeyDecrypt_Response _res = base.Channel.asymmetricKeyDecrypt(new asymmetricKeyDecrypt_Request(KeyHandle,
                                                                                                                     Algorithm,
                                                                                                                     Parameters,
-                                                                                                                    GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
+                                                                                                                    tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
                                                                                                                     Authorization,
                                                                                                                     Data));
             return _res._result;
+                }
+                catch (System.ServiceModel.FaultException<SKSException> e)
+                {
+                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    {
+                        throw e;
+                    }
+                    Authorization = null;
+                }
+            }
+            while (true);
         }
 
         public byte[] keyAgreement(int KeyHandle,
@@ -2644,13 +2676,29 @@ namespace org.webpki.sks.ws.client
                                    byte[] Authorization,
                                    byte[] PublicKey)
         {
+            bool tga = false;
+            do
+            {
+                try
+                {
             keyAgreement_Response _res = base.Channel.keyAgreement(new keyAgreement_Request(KeyHandle,
                                                                                             Algorithm,
                                                                                             Parameters,
-                                                                                            GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
+                                                                                            tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
                                                                                             Authorization,
                                                                                             PublicKey));
             return _res._key;
+                }
+                catch (System.ServiceModel.FaultException<SKSException> e)
+                {
+                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    {
+                        throw e;
+                    }
+                    Authorization = null;
+                }
+            }
+            while (true);
         }
 
         public byte[] performHMAC(int KeyHandle,
@@ -2658,12 +2706,28 @@ namespace org.webpki.sks.ws.client
                                   byte[] Authorization,
                                   byte[] Data)
         {
+            bool tga = false;
+            do
+            {
+                try
+                {
             performHMAC_Response _res = base.Channel.performHMAC(new performHMAC_Request(KeyHandle,
                                                                                          Algorithm,
-                                                                                         GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
+                                                                                         tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
                                                                                          Authorization,
                                                                                          Data));
             return _res._result;
+                }
+                catch (System.ServiceModel.FaultException<SKSException> e)
+                {
+                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    {
+                        throw e;
+                    }
+                    Authorization = null;
+                }
+            }
+            while (true);
         }
 
         public byte[] symmetricKeyEncrypt(int KeyHandle,
@@ -2673,14 +2737,30 @@ namespace org.webpki.sks.ws.client
                                           byte[] Authorization,
                                           byte[] Data)
         {
+            bool tga = false;
+            do
+            {
+                try
+                {
             symmetricKeyEncrypt_Response _res = base.Channel.symmetricKeyEncrypt(new symmetricKeyEncrypt_Request(KeyHandle,
                                                                                                                  Algorithm,
                                                                                                                  Mode,
                                                                                                                  IV,
-                                                                                                                 GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
+                                                                                                                 tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
                                                                                                                  Authorization,
                                                                                                                  Data));
             return _res._result;
+                }
+                catch (System.ServiceModel.FaultException<SKSException> e)
+                {
+                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    {
+                        throw e;
+                    }
+                    Authorization = null;
+                }
+            }
+            while (true);
         }
 
         public string getVersion()

@@ -9,6 +9,13 @@
     <property name="res.dir" value="res"/>
     <property name="nant.settings.currentframework" value="net-4.0"/>
 
+<!--
+######################################################################
+#            Builds the .NET SKS WS Client Assembly DLL              #
+#                                                                    #
+#    This library is self-contained and only depends on V4 of .NET   #
+######################################################################
+-->
     <target name="build">
       <csc target="library"
            output="${build.dir}/${basename}.dll" 
@@ -31,39 +38,25 @@
         </csc>
     </target>
     
-    <target name="run" depends="build">
-      <script language="C#">
-          <references>
-                <include name="System.Data.dll"/>
-                 <include name="System.Runtime.Serialization.dll"/>
-                <include name="System.ServiceModel.dll"/>
-                <include name="System.Xml.dll"/>
-              <include name="../dist/${basename}.dll" />
-          </references>
-          <imports>
-              <import namespace="${basename}" />
-           </imports>
-          <code>
-            <![CDATA[
-public static void ScriptMain(Project project)
-{
-    SKSWSProxy ws = SKSWSProxy.getDefaultSKSWSProxy();
-    project.Log(Level.Info, "WS version: " + ws.getVersion ());
-}
-            ]]>
-          </code>
-      </script>
-    </target>
-
+<!--
+######################################################################
+#   A small test program that signs data using the first available   #
+#   key or a key specified by the command line option "-D:key=nnn".  #
+#                                                                    #
+#   Depends on the BouncyCastle library for signature verification.  #
+######################################################################
+-->
     <target name="sign" depends="build">
       <script language="C#">
           <references>
                 <include name="System.Data.dll"/>
                 <include name="System.dll"/>
+                <include name="System.Core.dll"/>
                  <include name="System.Runtime.Serialization.dll"/>
                 <include name="System.ServiceModel.dll"/>
                 <include name="System.Xml.dll"/>
               <include name="../dist/${basename}.dll" />
+              <include name="third-party-dlls/BouncyCastle.Crypto.dll" />
           </references>
           <imports>
               <import namespace="${basename}" />
@@ -81,24 +74,31 @@ public static void ScriptMain(Project project)
        {
            KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
            if (ka.IsSymmetricKey) continue;
-           if (!(ka.CertificatePath[0].PublicKey.Key is RSACryptoServiceProvider)) continue;
+           if (project.Properties["key"] != null && Int32.Parse(project.Properties["key"]) != ek.KeyHandle) continue;
+           bool rsa = ka.CertificatePath[0].PublicKey.IsRSA();
+           System.Console.WriteLine((rsa ? "RSA" : "EC") + " Key ID=#" + ek.KeyHandle + ", Subject: " + ka.CertificatePath[0].Subject);
+           string sign_alg = rsa ? "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" : "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256";
            byte[] test_string = Encoding.UTF8.GetBytes("hi there!");
            byte[] res = ws.signHashedData(ek.KeyHandle,
-                              "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-                              null,
-                              null,
-                              new SHA256Managed().ComputeHash(test_string));
-           RSACryptoServiceProvider rsaCSP = (RSACryptoServiceProvider)ka.CertificatePath[0].PublicKey.Key;
-           System.Console.WriteLine(rsaCSP.VerifyData(test_string, CryptoConfig.MapNameToOID("SHA256"), res) ?
-              "Success" : "Bad signature");
+			                              sign_alg,
+			                              null,
+			                              null,
+			                              new SHA256Managed().ComputeHash(test_string));
+           Org.BouncyCastle.Crypto.ISigner verify = Org.BouncyCastle.Security.SignerUtilities.GetSigner(rsa? "SHA256WithRSA" : "SHA256WithECDSA");
+           verify.Init(false, Org.BouncyCastle.Security.PublicKeyFactory.CreateKey(ka.CertificatePath[0].PublicKey.X509Encoding()));
+           verify.BlockUpdate(test_string, 0, test_string.Length);
+           if (!verify.VerifySignature(res))
+             {
+	             throw new NAnt.Core.BuildException ("FAILED SIGNATURE VERIFICATION!!!");
+             }
        }
        catch (System.ServiceModel.FaultException<SKSException> e)
        {
-           System.Console.WriteLine("Signing: " + e.Detail.getMessage() + " code=" + e.Detail.getError());
+           throw new NAnt.Core.BuildException("Signing: " + e.Detail.getMessage() + " code=" + e.Detail.getError());
        }
        return;
     }
-    System.Console.WriteLine("No suitable key found...");
+    throw new NAnt.Core.BuildException ("NO SUITABLE KEY FOUND!!!");
 }
             ]]>
           </code>

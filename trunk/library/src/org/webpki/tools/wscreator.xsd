@@ -146,6 +146,16 @@
                </xs:complexType>
             </xs:element>
 
+            <xs:element name="EmbedRule" minOccurs="0" maxOccurs="unbounded">
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="Before" type="xs:string" minOccurs="0"/>
+                     <xs:element name="After" type="xs:string" minOccurs="0"/>
+                  </xs:sequence>
+                  <xs:attribute name="Name" type="wsc:xmlid" use="required"/>
+               </xs:complexType>
+            </xs:element>
+
          </xs:sequence> 
 
          <!-- C# Class Name -->
@@ -237,6 +247,9 @@
 
          <!-- Class name of ReturnClass -->
          <xs:attribute name="ReturnClass" type="wsc:id" use="optional"/>
+
+         <!-- Possible embed rule  -->
+         <xs:attribute name="EmbedRule" type="wsc:id" use="optional"/>
 
          <!-- If we don't want to publish -->
          <xs:attribute name="Public" type="xs:boolean" default="true" use="optional"/>

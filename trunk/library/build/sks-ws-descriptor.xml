@@ -225,7 +225,27 @@
      <RewriteRule Name="Out.PatternRestrictions"
                   ActualType="HashSet&lt;PatternRestriction&gt;"
                   Conversion="Conversions.SKSToPatternRestrictions($)"/>
-     <SuppressRule Name="TGA">GetTrustedGUIAuthorization(KeyHandle, ref Authorization)</SuppressRule>
+     <SuppressRule Name="TGA">tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization)</SuppressRule>
+     <EmbedRule Name="TGA">
+        <Before>            bool tga = false;
+            do
+            {
+                try
+                {
+</Before>
+        <After><![CDATA[                }
+                catch (System.ServiceModel.FaultException<SKSException> e)
+                {
+                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    {
+                        throw e;
+                    }
+                    Authorization = null;
+                }
+            }
+            while (true);
+]]></After>
+     </EmbedRule>
    </DotNetClient>
 
    <CppClient ClassName="SKSWSProxy"/>
@@ -788,7 +808,7 @@
         sks.setPIN (key_handle, authorization, new_pin);
 ]]></Code></Method>
 
-   <Method Name="signHashedData" Throws="SKSException">
+   <Method Name="signHashedData" Throws="SKSException" EmbedRule="TGA">
      <Returns   Name="result"                    Type="binary" XMLName="Result"/>
      <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
@@ -808,7 +828,7 @@
                                    data);
 ]]></Code></Method>
 
-   <Method Name="asymmetricKeyDecrypt" Throws="SKSException">
+   <Method Name="asymmetricKeyDecrypt" Throws="SKSException" EmbedRule="TGA">
      <Returns   Name="result"                    Type="binary" XMLName="Result"/>
      <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
@@ -825,7 +845,7 @@
                                          data);
 ]]></Code></Method>
 
-   <Method Name="keyAgreement" Throws="SKSException">
+   <Method Name="keyAgreement" Throws="SKSException" EmbedRule="TGA">
      <Returns   Name="key"                       Type="binary" XMLName="Key"/>
      <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
@@ -842,7 +862,7 @@
                                  createPublicKeyFromBlob (public_key));
 ]]></Code></Method>
 
-   <Method Name="performHMAC" Throws="SKSException">
+   <Method Name="performHMAC" Throws="SKSException" EmbedRule="TGA">
      <Returns   Name="result"                    Type="binary" XMLName="Result"/>
      <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
@@ -857,7 +877,7 @@
                                 data);
 ]]></Code></Method>
 
-   <Method Name="symmetricKeyEncrypt" Throws="SKSException">
+   <Method Name="symmetricKeyEncrypt" Throws="SKSException" EmbedRule="TGA">
      <Returns   Name="result"                    Type="binary" XMLName="Result"/>
      <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>

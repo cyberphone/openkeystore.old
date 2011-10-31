@@ -59,6 +59,18 @@ namespace org.webpki.sks.ws.client
             }
         }
 
+        // Extension method to the .NET PublicKey class
+        public static byte[] X509Encoding(this System.Security.Cryptography.X509Certificates.PublicKey public_key)
+        {
+            return EncodeX509PublicKey (public_key);
+        }
+
+        // Extension method to the .NET PublicKey class
+        public static bool IsRSA(this System.Security.Cryptography.X509Certificates.PublicKey public_key)
+        {
+            return public_key.Oid.Value == Conversions.RSA_PUBLIC_KEY;
+        }
+
         internal static byte[] EncodeX509PublicKey (System.Security.Cryptography.X509Certificates.PublicKey public_key, bool ec_flag)
         {
             if (public_key == null)

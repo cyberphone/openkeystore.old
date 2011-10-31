@@ -26,6 +26,7 @@ import java.security.Security;
 
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -33,6 +34,9 @@ import java.util.Vector;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import org.webpki.crypto.AsymEncryptionAlgorithms;
+import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.keygen2.KeyGen2URIs;
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
@@ -58,6 +62,7 @@ public class PKCS12Import
         PassphraseFormat format = null;
         InputMethod input_method = null;
         Grouping grouping = null;
+        String[] endorsed_algs = new String[0];
         if (argc.length > 2)
           {
             pin = argc[2];
@@ -86,9 +91,24 @@ public class PKCS12Import
                 break;
               }
           }
+        boolean rsa_flag = cert_path.firstElement ().getPublicKey () instanceof RSAPublicKey;
         if (private_key == null)
           {
             throw new IOException ("No private key!");
+          }
+        if (app_usage == AppUsage.ENCRYPTION)
+          {
+            endorsed_algs = new String[]{rsa_flag ? 
+                    AsymEncryptionAlgorithms.RSA_PKCS_1.getURI ()
+                                                  :
+                    KeyGen2URIs.ALGORITHMS.ECDH_RAW};
+          }
+        else if (app_usage == AppUsage.SIGNATURE)
+          {
+            endorsed_algs = rsa_flag ? 
+                    new String[]{SignatureAlgorithms.RSA_SHA1.getURI (), SignatureAlgorithms.RSA_SHA256.getURI ()}
+                                     :
+                    new String[]{SignatureAlgorithms.ECDSA_SHA256.getURI ()};
           }
         SecureKeyStore sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.client")).newInstance ();
         EnumeratedKey ek = new EnumeratedKey ();
@@ -145,10 +165,12 @@ public class PKCS12Import
         GenKey key = sess.createECKey ("Key",
                                        pin /* pin_value */,
                                        pin_policy /* pin_policy */,
-                                       app_usage);
+                                       app_usage,
+                                       endorsed_algs);
         key.setCertificatePath (cert_path.toArray (new X509Certificate[0]));
         key.restorePrivateKey (private_key);
         sess.closeSession ();
-        System.out.println (prot);
+        System.out.println ("Imported Subject: " + cert_path.firstElement ().getSubjectX500Principal ().getName () + "\nID=#" + key.key_handle +
+                            ", "+ (rsa_flag ? "RSA" : "EC") + " Key with " + prot);
       }
   }

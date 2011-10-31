@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.TreeSet;
 import java.util.Vector;
 
@@ -209,6 +208,27 @@ public class WSCreator extends XMLObjectWrapper
                 String code = rd.getString ();
                 String rule = attr.getString ("Name");
                 if (dotnet_suppress_rules.put (rule, new SuppressRule (code)) != null)
+                  {
+                    bad ("Duplicate suppress rule: " + rule);
+                  }
+              }
+            if (dot_net) while (rd.hasNext ("EmbedRule"))
+              {
+                rd.getNext ();
+                String rule = attr.getString ("Name");
+                String before = null;
+                String after = null;
+                rd.getChild ();
+                if (rd.hasNext ("Before"))
+                  {
+                    before = rd.getString ();
+                  }
+                if (rd.hasNext ("After"))
+                  {
+                    after = rd.getString ();
+                  }
+                rd.getParent ();
+                if (dotnet_embed_rules.put (rule, new EmbedRule (before, after)) != null)
                   {
                     bad ("Duplicate suppress rule: " + rule);
                   }
@@ -531,6 +551,8 @@ public class WSCreator extends XMLObjectWrapper
         
         ReturnClass return_class;
         
+        EmbedRule dotnet_embed_rule;
+        
         boolean public_method;
 
         public String getXMLResponseName ()
@@ -646,6 +668,17 @@ public class WSCreator extends XMLObjectWrapper
 
         String header_code;
       }
+    
+    class EmbedRule
+      {
+        EmbedRule (String before, String after)
+          {
+            this.before = before;
+            this.after = after;
+          }
+        String before;
+        String after;
+      }
 
     class ReturnClass
       {
@@ -662,6 +695,7 @@ public class WSCreator extends XMLObjectWrapper
     Vector<Method> methods = new Vector<Method> ();
     LinkedHashMap<String, RewriteRule> dotnet_rewrite_rules = new LinkedHashMap<String, RewriteRule> ();
     LinkedHashMap<String, SuppressRule> dotnet_suppress_rules = new LinkedHashMap<String, SuppressRule> ();
+    LinkedHashMap<String, EmbedRule> dotnet_embed_rules = new LinkedHashMap<String, EmbedRule> ();
     LinkedHashMap<String, ReturnClass> return_classes = new LinkedHashMap<String, ReturnClass> ();
     boolean add_main;
     String dot_net_registry_url;
@@ -827,6 +861,14 @@ public class WSCreator extends XMLObjectWrapper
                 if ((method.return_class = return_classes.get (return_class)) == null)
                   {
                     bad ("Return class '" + return_class + "' missing");
+                  }
+              }
+            String embed_rule = attr.getStringConditional ("EmbedRule");
+            if (embed_rule != null)
+              {
+                if ((method.dotnet_embed_rule = dotnet_embed_rules.get (embed_rule)) == null)
+                  {
+                    bad ("Embed rule '" + embed_rule + "' missing");
                   }
               }
             method.public_method = attr.getBoolean ("Public");
@@ -1390,7 +1432,12 @@ public class WSCreator extends XMLObjectWrapper
             write (file, " " + meth.name + "(");
             meth.writeNetTypedList (true);
             write (file, ")\n" +
-                "        {\n" + 
+                "        {\n");
+            if (meth.dotnet_embed_rule != null && meth.dotnet_embed_rule.before != null)
+              {
+                write (file, meth.dotnet_embed_rule.before);
+              }
+            write (file, 
                 "            ");
             if (!meth.filteredParameters (true).isEmpty ())
               {
@@ -1445,6 +1492,10 @@ public class WSCreator extends XMLObjectWrapper
                     write (file, "_res._" + meth.return_prop.name + " == " + meth.return_class.null_value + " ? null : ");
                   }
                 write (file, "_res;\n");
+              }
+            if (meth.dotnet_embed_rule != null && meth.dotnet_embed_rule.after != null)
+              {
+                write (file, meth.dotnet_embed_rule.after);
               }
             write (file, "        }\n");
           }

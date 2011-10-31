@@ -20,14 +20,16 @@ namespace org.webpki.sks.ws.client
     using System.Windows.Forms;
     using System.Reflection;
     using System.IO;
+    using org.webpki.sks.ws.client.BouncyCastle.Utilities.Encoders;
 
     internal class SKSAuthorizationDialog : Form
     {
         internal string password;
         private bool retry_warning;
         private bool signature_icon;
-        private int retriesleft; 
-
+        private int retriesleft;
+        private bool hex_test;
+ 
         internal SKSAuthorizationDialog(PassphraseFormat format,
                                         Grouping grouping,
                                         AppUsage app_usage,
@@ -36,18 +38,33 @@ namespace org.webpki.sks.ws.client
             retry_warning = zero_or_retriesleft != 0;
             retriesleft = zero_or_retriesleft;
             signature_icon = app_usage == AppUsage.SIGNATURE;
+            hex_test = format == PassphraseFormat.BINARY;
             InitializeComponent();
         }
 
         private void SKSAuthorizationDialog_Load(object sender, System.EventArgs e)
         {
-
         }
 
         private void authorization_OK_Button_Click(object sender, System.EventArgs e)
         {
             password = authorization_TextBox.Text;
-            Close();
+            if (hex_test)
+            {
+            	if (!System.Text.RegularExpressions.Regex.IsMatch(password,"^([a-fA-F0-9][a-fA-F0-9])+$"))
+            	{
+            		password = "";
+            	}
+            }
+            if (password.Length > 0)
+            {
+	            DialogResult = DialogResult.OK;
+	            Close();
+            }
+            else
+            {
+                System.Media.SystemSounds.Exclamation.Play();
+            }
         }
 
         private System.ComponentModel.IContainer components = null;
@@ -96,7 +113,7 @@ namespace org.webpki.sks.ws.client
 	            Assembly assembly = Assembly.GetExecutingAssembly();
 	            Stream image_stream = assembly.GetManifestResourceStream("sks.signsymb.gif");
 	            attention_PictureBox.Image = new System.Drawing.Bitmap(image_stream);
-	            attention_PictureBox.Location = new System.Drawing.Point(0, 0);
+	            attention_PictureBox.Location = new System.Drawing.Point(5, 5);
 	            attention_PictureBox.Name = "attention_PictureBox";
 	            attention_PictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
 	            attention_PictureBox.TabIndex = 5;
@@ -111,7 +128,7 @@ namespace org.webpki.sks.ws.client
             authorization_OK_Button.TabIndex = 1;
             authorization_OK_Button.Text = "OK";
             authorization_OK_Button.UseVisualStyleBackColor = true;
-            authorization_OK_Button.DialogResult = DialogResult.OK;
+ //           authorization_OK_Button.DialogResult = DialogResult.OK;
             authorization_OK_Button.Click += new System.EventHandler(authorization_OK_Button_Click);
 			int total_width = authorization_OK_Button.Size.Width * 4;
             // 
@@ -159,6 +176,12 @@ namespace org.webpki.sks.ws.client
             TopMost = true;
             ResumeLayout(false);
             PerformLayout();
+            
+            if (retry_warning)
+            {
+            	System.Media.SystemSounds.Hand.Play();
+            }
+            
         }
 
         private Button authorization_Cancel_Button;
@@ -206,7 +229,11 @@ namespace org.webpki.sks.ws.client
                                                                                        kpi.PINErrorCount == 0 ? 0 : kpi.RetryLimit - kpi.PINErrorCount);
                 if (authorization_form.ShowDialog() == DialogResult.OK)
                 {
-                	Authorization = System.Text.Encoding.UTF8.GetBytes(authorization_form.password);
+                	Authorization = 
+                	   ((PassphraseFormat)kpi.Format == PassphraseFormat.BINARY) ?
+                	                                                Hex.Decode (authorization_form.password)
+                	                                                             :
+                	                                                System.Text.Encoding.UTF8.GetBytes(authorization_form.password);
                     using (AesManaged aes = new AesManaged())
                     {
 	                    byte[] IV = new byte[16];
