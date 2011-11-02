@@ -35,8 +35,8 @@
       <xs:element name="SKSException">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="error" type="xs:int" form="unqualified"/>
             <xs:element name="message" type="xs:string" form="unqualified"/>
+            <xs:element name="error" type="xs:int" form="unqualified"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

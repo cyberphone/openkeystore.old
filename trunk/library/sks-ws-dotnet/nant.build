@@ -92,9 +92,9 @@ public static void ScriptMain(Project project)
 	             throw new NAnt.Core.BuildException ("FAILED SIGNATURE VERIFICATION!!!");
              }
        }
-       catch (System.ServiceModel.FaultException<SKSException> e)
+       catch (SKSException e)
        {
-           throw new NAnt.Core.BuildException("Signing: " + e.Detail.getMessage() + " code=" + e.Detail.getError());
+           throw new NAnt.Core.BuildException("Signing: " + e.Message + " code=" + e.Error);
        }
        return;
     }

@@ -225,20 +225,20 @@
      <RewriteRule Name="Out.PatternRestrictions"
                   ActualType="HashSet&lt;PatternRestriction&gt;"
                   Conversion="Conversions.SKSToPatternRestrictions($)"/>
-     <SuppressRule Name="TGA">tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization)</SuppressRule>
+     <SuppressRule Name="TGA">tga</SuppressRule>
      <EmbedRule Name="TGA">
-        <Before>            bool tga = false;
-            do
+        <Before>            do
             {
+                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
                 try
                 {
 </Before>
         <After><![CDATA[                }
-                catch (System.ServiceModel.FaultException<SKSException> e)
+                catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
-                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    if (!tga || (e.Detail.error != SKSException.ERROR_AUTHORIZATION))
                     {
-                        throw e;
+                        throw new SKSException(e);
                     }
                     Authorization = null;
                 }
@@ -251,8 +251,8 @@
    <CppClient ClassName="SKSWSProxy"/>
 
    <Exception ClassName="org.webpki.sks.SKSException">
-     <Property Name="error"               Type="int"/>
      <Property Name="message"             Type="string"/>
+     <Property Name="error"               Type="int"/>
      <Constant Name="ERROR_AUTHORIZATION" Type="int" Value="0x01"/>
      <Constant Name="ERROR_NOT_ALLOWED"   Type="int" Value="0x02"/>
      <Constant Name="ERROR_STORAGE"       Type="int" Value="0x03"/>
@@ -264,6 +264,7 @@
      <Constant Name="ERROR_OPTION"        Type="int" Value="0x09"/>
      <Constant Name="ERROR_INTERNAL"      Type="int" Value="0x0A"/>
      <Constant Name="ERROR_EXTERNAL"      Type="int" Value="0x0B"/>
+     <Constant Name="ERROR_USER_ABORT"    Type="int" Value="0x0C"/>
    </Exception>
 
    <ReturnClass ClassName="org.webpki.sks.DeviceInfo"/>

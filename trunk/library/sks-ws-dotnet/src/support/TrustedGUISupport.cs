@@ -26,9 +26,12 @@ namespace org.webpki.sks.ws.client
     {
         internal string password;
         private bool retry_warning;
-        private bool signature_icon;
+        private bool show_picture;
+        private string picture_resource;
+        private string picture_tooltip_text;
         private int retriesleft;
         private bool hex_test;
+        private string add_on_dialog_header = "";
  
         internal SKSAuthorizationDialog(PassphraseFormat format,
                                         Grouping grouping,
@@ -37,15 +40,37 @@ namespace org.webpki.sks.ws.client
         {
             retry_warning = zero_or_retriesleft != 0;
             retriesleft = zero_or_retriesleft;
-            signature_icon = app_usage == AppUsage.SIGNATURE;
+            if (app_usage == AppUsage.SIGNATURE &&
+                (grouping == Grouping.UNIQUE || grouping == Grouping.SIGNATURE_PLUS_STANDARD))
+            {
+            	show_picture = true;
+            	add_on_dialog_header = " - SIGNATURE";
+            	picture_resource = "sks.signsymb.gif";
+            	picture_tooltip_text = "Signature operation requiring a specific PIN"; 
+            } 
+            if (app_usage == AppUsage.AUTHENTICATION && grouping == Grouping.UNIQUE)
+            {
+            	show_picture = true;
+            	add_on_dialog_header = " - AUTHENTICATION";
+            	picture_resource = "sks.idcard.gif";
+            	picture_tooltip_text = "Authentication operation requiring a specific PIN"; 
+            } 
+            if (app_usage == AppUsage.ENCRYPTION && grouping == Grouping.UNIQUE)
+            {
+            	show_picture = true;
+            	add_on_dialog_header = " - ENCRYPTION";
+            	picture_resource = "sks.encrypt.gif";
+            	picture_tooltip_text = "Encryption operation requiring a specific PIN"; 
+            } 
             hex_test = format == PassphraseFormat.BINARY;
             InitializeComponent();
         }
 
+/*
         private void SKSAuthorizationDialog_Load(object sender, System.EventArgs e)
         {
         }
-
+*/
         private void authorization_OK_Button_Click(object sender, System.EventArgs e)
         {
             password = authorization_TextBox.Text;
@@ -88,9 +113,10 @@ namespace org.webpki.sks.ws.client
             authorization_OK_Button = new Button();
             authorization_TextBox = new TextBox();
             authorization_ToolTip.SetToolTip(authorization_TextBox, "The authorization PIN");
-            if (signature_icon)
+            if (show_picture)
             {
 	            attention_PictureBox = new PictureBox();
+                authorization_ToolTip.SetToolTip(attention_PictureBox, picture_tooltip_text);
 	        }
             if (retry_warning)
             {
@@ -108,10 +134,10 @@ namespace org.webpki.sks.ws.client
                 retry_warning_Label.Text = "You have " + retriesleft + " retries left";
             }
             
-            if (signature_icon)
+            if (show_picture)
             {
 	            Assembly assembly = Assembly.GetExecutingAssembly();
-	            Stream image_stream = assembly.GetManifestResourceStream("sks.signsymb.gif");
+	            Stream image_stream = assembly.GetManifestResourceStream(picture_resource);
 	            attention_PictureBox.Image = new System.Drawing.Bitmap(image_stream);
 	            attention_PictureBox.Location = new System.Drawing.Point(5, 5);
 	            attention_PictureBox.Name = "attention_PictureBox";
@@ -160,7 +186,7 @@ namespace org.webpki.sks.ws.client
             Controls.Add(authorization_TextBox);
             Controls.Add(authorization_OK_Button);
             Controls.Add(authorization_Cancel_Button);
-            if (signature_icon)
+            if (show_picture)
             {
 	            Controls.Add(attention_PictureBox);
 	        }
@@ -171,8 +197,8 @@ namespace org.webpki.sks.ws.client
             Name = "SKSAuthorizationDialog";
             StartPosition = FormStartPosition.CenterParent;
             FormBorderStyle = FormBorderStyle.FixedDialog;
-            Text = "PIN Code";
-            Load += new System.EventHandler(SKSAuthorizationDialog_Load);
+            Text = "PIN Code" + add_on_dialog_header;
+  //          Load += new System.EventHandler(SKSAuthorizationDialog_Load);
             TopMost = true;
             ResumeLayout(false);
             PerformLayout();
@@ -220,7 +246,7 @@ namespace org.webpki.sks.ws.client
 	                                "Authorization Error",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Exclamation);
-	            	return false;
+	                throw new SKSException("Key locked", SKSException.ERROR_USER_ABORT);
 	            }
 	            KeyAttributes ka = getKeyAttributes (KeyHandle);
                 SKSAuthorizationDialog authorization_form = new SKSAuthorizationDialog((PassphraseFormat)kpi.Format,
@@ -270,6 +296,7 @@ namespace org.webpki.sks.ws.client
                  	}
                  	return true;
            		}
+                throw new SKSException("Cancel", SKSException.ERROR_USER_ABORT);
            	}
             return false;
         }

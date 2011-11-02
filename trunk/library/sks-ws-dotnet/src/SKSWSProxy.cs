@@ -32,167 +32,167 @@ namespace org.webpki.sks.ws.client
     public interface SKSWSProxyInterface
     {
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         DeviceInfo getDeviceInfo(getDeviceInfo_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         ProvisioningSession createProvisioningSession(createProvisioningSession_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         closeProvisioningSession_Response closeProvisioningSession(closeProvisioningSession_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         EnumeratedProvisioningSession enumerateProvisioningSessions(enumerateProvisioningSessions_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         abortProvisioningSession_Response abortProvisioningSession(abortProvisioningSession_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         signProvisioningSessionData_Response signProvisioningSessionData(signProvisioningSessionData_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         createPUKPolicy_Response createPUKPolicy(createPUKPolicy_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         createPINPolicy_Response createPINPolicy(createPINPolicy_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         KeyData createKeyEntry(createKeyEntry_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         getKeyHandle_Response getKeyHandle(getKeyHandle_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         setCertificatePath_Response setCertificatePath(setCertificatePath_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         setSymmetricKey_Response setSymmetricKey(setSymmetricKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         addExtension_Response addExtension(addExtension_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         restorePrivateKey_Response restorePrivateKey(restorePrivateKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         pp_deleteKey_Response pp_deleteKey(pp_deleteKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         pp_unlockKey_Response pp_unlockKey(pp_unlockKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         pp_updateKey_Response pp_updateKey(pp_updateKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         pp_cloneKeyProtection_Response pp_cloneKeyProtection(pp_cloneKeyProtection_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         EnumeratedKey enumerateKeys(enumerateKeys_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         KeyAttributes getKeyAttributes(getKeyAttributes_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         KeyProtectionInfo getKeyProtectionInfo(getKeyProtectionInfo_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         Extension getExtension(getExtension_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         setProperty_Response setProperty(setProperty_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         deleteKey_Response deleteKey(deleteKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         exportKey_Response exportKey(exportKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         unlockKey_Response unlockKey(unlockKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         changePIN_Response changePIN(changePIN_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         setPIN_Response setPIN(setPIN_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         signHashedData_Response signHashedData(signHashedData_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         asymmetricKeyDecrypt_Response asymmetricKeyDecrypt(asymmetricKeyDecrypt_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         keyAgreement_Response keyAgreement(keyAgreement_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         performHMAC_Response performHMAC(performHMAC_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
-        [System.ServiceModel.FaultContractAttribute(typeof(SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
         symmetricKeyEncrypt_Response symmetricKeyEncrypt(symmetricKeyEncrypt_Request request);
 
@@ -206,7 +206,7 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    public class SKSException : System.Xml.Serialization.IXmlSerializable
+    public class _SKSException : System.Xml.Serialization.IXmlSerializable
     {
         private System.Xml.XmlNode[] nodes;
 
@@ -223,6 +223,47 @@ namespace org.webpki.sks.ws.client
         public void WriteXml(System.Xml.XmlWriter writer)
         {
             System.Runtime.Serialization.XmlSerializableServices.WriteNodes(writer, nodes);
+        }
+        
+        int _error;
+        string _message;
+        bool readit;
+        
+        void f ()
+        {
+          for (int i = 0; i < nodes.Length; i++)
+          {
+ System.Console.WriteLine("XML[" + i + "]=" + nodes[i].InnerXml);
+          }
+          if (readit) return;
+          _message =  nodes[1].InnerXml;
+          _error = System.Int32.Parse(nodes[0].InnerXml);
+          readit = true;
+           
+        }
+
+        internal string message
+        {
+            get { f(); return _message; }
+        }
+
+        internal int error
+        {
+            get { f(); return _error; }
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    public class SKSException : System.Exception
+    {
+        public SKSException (string message, int error) : base(message)
+        {
+            this.error = error;
+        }
+
+        public SKSException (System.ServiceModel.FaultException<_SKSException> e) : base(e.Detail.message, e)
+        {
+            this.error = e.Detail.error;
         }
 
         public static int ERROR_AUTHORIZATION { get { return 0x01;}}
@@ -247,14 +288,13 @@ namespace org.webpki.sks.ws.client
 
         public static int ERROR_EXTERNAL { get { return 0x0B;}}
 
-        public int getError()
-        {
-            return System.Int32.Parse(nodes[0].InnerXml);
-        }
+        public static int ERROR_USER_ABORT { get { return 0x0C;}}
 
-        public string getMessage()
+        private int error;
+
+        public int Error
         {
-            return nodes[1].InnerXml;
+            get {return error; }
         }
     }
 
@@ -2298,8 +2338,15 @@ namespace org.webpki.sks.ws.client
 
         public DeviceInfo getDeviceInfo()
         {
-            DeviceInfo _res = base.Channel.getDeviceInfo(new getDeviceInfo_Request());
-            return _res;
+            try
+            {
+                DeviceInfo _res = base.Channel.getDeviceInfo(new getDeviceInfo_Request());
+                return _res;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public ProvisioningSession createProvisioningSession(string Algorithm,
@@ -2312,47 +2359,82 @@ namespace org.webpki.sks.ws.client
                                                              int SessionLifeTime,
                                                              short SessionKeyLimit)
         {
-            ProvisioningSession _res = base.Channel.createProvisioningSession(new createProvisioningSession_Request(Algorithm,
-                                                                                                                    PrivacyEnabled,
-                                                                                                                    ServerSessionID,
-                                                                                                                    Conversions.EncodeX509ECPublicKey(ServerEphemeralKey),
-                                                                                                                    IssuerURI,
-                                                                                                                    Conversions.EncodeX509PublicKey(KeyManagementKey),
-                                                                                                                    ClientTime,
-                                                                                                                    SessionLifeTime,
-                                                                                                                    SessionKeyLimit));
-            return _res;
+            try
+            {
+                ProvisioningSession _res = base.Channel.createProvisioningSession(new createProvisioningSession_Request(Algorithm,
+                                                                                                                        PrivacyEnabled,
+                                                                                                                        ServerSessionID,
+                                                                                                                        Conversions.EncodeX509ECPublicKey(ServerEphemeralKey),
+                                                                                                                        IssuerURI,
+                                                                                                                        Conversions.EncodeX509PublicKey(KeyManagementKey),
+                                                                                                                        ClientTime,
+                                                                                                                        SessionLifeTime,
+                                                                                                                        SessionKeyLimit));
+                return _res;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public byte[] closeProvisioningSession(int ProvisioningHandle,
                                                byte[] Nonce,
                                                byte[] MAC)
         {
-            closeProvisioningSession_Response _res = base.Channel.closeProvisioningSession(new closeProvisioningSession_Request(ProvisioningHandle,
-                                                                                                                                Nonce,
-                                                                                                                                MAC));
-            return _res._attestation;
+            try
+            {
+                closeProvisioningSession_Response _res = base.Channel.closeProvisioningSession(new closeProvisioningSession_Request(ProvisioningHandle,
+                                                                                                                                    Nonce,
+                                                                                                                                    MAC));
+                return _res._attestation;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public EnumeratedProvisioningSession enumerateProvisioningSessions(int ProvisioningHandle,
                                                                            bool ProvisioningState)
         {
-            EnumeratedProvisioningSession _res = base.Channel.enumerateProvisioningSessions(new enumerateProvisioningSessions_Request(ProvisioningHandle,
-                                                                                                                                      ProvisioningState));
-            return _res._provisioning_handle == 0 ? null : _res;
+            try
+            {
+                EnumeratedProvisioningSession _res = base.Channel.enumerateProvisioningSessions(new enumerateProvisioningSessions_Request(ProvisioningHandle,
+                                                                                                                                          ProvisioningState));
+                return _res._provisioning_handle == 0 ? null : _res;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void abortProvisioningSession(int ProvisioningHandle)
         {
-            base.Channel.abortProvisioningSession(new abortProvisioningSession_Request(ProvisioningHandle));
+            try
+            {
+                base.Channel.abortProvisioningSession(new abortProvisioningSession_Request(ProvisioningHandle));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public byte[] signProvisioningSessionData(int ProvisioningHandle,
                                                   byte[] Data)
         {
-            signProvisioningSessionData_Response _res = base.Channel.signProvisioningSessionData(new signProvisioningSessionData_Request(ProvisioningHandle,
-                                                                                                                                         Data));
-            return _res._result;
+            try
+            {
+                signProvisioningSessionData_Response _res = base.Channel.signProvisioningSessionData(new signProvisioningSessionData_Request(ProvisioningHandle,
+                                                                                                                                             Data));
+                return _res._result;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public int createPUKPolicy(int ProvisioningHandle,
@@ -2362,13 +2444,20 @@ namespace org.webpki.sks.ws.client
                                    short RetryLimit,
                                    byte[] MAC)
         {
-            createPUKPolicy_Response _res = base.Channel.createPUKPolicy(new createPUKPolicy_Request(ProvisioningHandle,
-                                                                                                     ID,
-                                                                                                     PUKValue,
-                                                                                                     (sbyte)Format,
-                                                                                                     RetryLimit,
-                                                                                                     MAC));
-            return _res._puk_policy_handle;
+            try
+            {
+                createPUKPolicy_Response _res = base.Channel.createPUKPolicy(new createPUKPolicy_Request(ProvisioningHandle,
+                                                                                                         ID,
+                                                                                                         PUKValue,
+                                                                                                         (sbyte)Format,
+                                                                                                         RetryLimit,
+                                                                                                         MAC));
+                return _res._puk_policy_handle;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public int createPINPolicy(int ProvisioningHandle,
@@ -2385,20 +2474,27 @@ namespace org.webpki.sks.ws.client
                                    InputMethod InputMethod,
                                    byte[] MAC)
         {
-            createPINPolicy_Response _res = base.Channel.createPINPolicy(new createPINPolicy_Request(ProvisioningHandle,
-                                                                                                     ID,
-                                                                                                     PUKPolicyHandle,
-                                                                                                     UserDefined,
-                                                                                                     UserModifiable,
-                                                                                                     (sbyte)Format,
-                                                                                                     RetryLimit,
-                                                                                                     (sbyte)Grouping,
-                                                                                                     Conversions.PatternRestrictionsToSKS(PatternRestrictions),
-                                                                                                     MinLength,
-                                                                                                     MaxLength,
-                                                                                                     (sbyte)InputMethod,
-                                                                                                     MAC));
-            return _res._pin_policy_handle;
+            try
+            {
+                createPINPolicy_Response _res = base.Channel.createPINPolicy(new createPINPolicy_Request(ProvisioningHandle,
+                                                                                                         ID,
+                                                                                                         PUKPolicyHandle,
+                                                                                                         UserDefined,
+                                                                                                         UserModifiable,
+                                                                                                         (sbyte)Format,
+                                                                                                         RetryLimit,
+                                                                                                         (sbyte)Grouping,
+                                                                                                         Conversions.PatternRestrictionsToSKS(PatternRestrictions),
+                                                                                                         MinLength,
+                                                                                                         MaxLength,
+                                                                                                         (sbyte)InputMethod,
+                                                                                                         MAC));
+                return _res._pin_policy_handle;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public KeyData createKeyEntry(int ProvisioningHandle,
@@ -2418,49 +2514,77 @@ namespace org.webpki.sks.ws.client
                                       string[] EndorsedAlgorithms,
                                       byte[] MAC)
         {
-            KeyData _res = base.Channel.createKeyEntry(new createKeyEntry_Request(ProvisioningHandle,
-                                                                                  ID,
-                                                                                  Algorithm,
-                                                                                  ServerSeed,
-                                                                                  DevicePINProtection,
-                                                                                  PINPolicyHandle,
-                                                                                  PINValue,
-                                                                                  EnablePINCaching,
-                                                                                  BiometricProtection,
-                                                                                  ExportProtection,
-                                                                                  DeleteProtection,
-                                                                                  AppUsage,
-                                                                                  FriendlyName,
-                                                                                  KeySpecifier,
-                                                                                  new List<string>(EndorsedAlgorithms),
-                                                                                  MAC));
-            return _res;
+            try
+            {
+                KeyData _res = base.Channel.createKeyEntry(new createKeyEntry_Request(ProvisioningHandle,
+                                                                                      ID,
+                                                                                      Algorithm,
+                                                                                      ServerSeed,
+                                                                                      DevicePINProtection,
+                                                                                      PINPolicyHandle,
+                                                                                      PINValue,
+                                                                                      EnablePINCaching,
+                                                                                      BiometricProtection,
+                                                                                      ExportProtection,
+                                                                                      DeleteProtection,
+                                                                                      AppUsage,
+                                                                                      FriendlyName,
+                                                                                      KeySpecifier,
+                                                                                      new List<string>(EndorsedAlgorithms),
+                                                                                      MAC));
+                return _res;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public int getKeyHandle(int ProvisioningHandle,
                                 string ID)
         {
-            getKeyHandle_Response _res = base.Channel.getKeyHandle(new getKeyHandle_Request(ProvisioningHandle,
-                                                                                            ID));
-            return _res._key_handle;
+            try
+            {
+                getKeyHandle_Response _res = base.Channel.getKeyHandle(new getKeyHandle_Request(ProvisioningHandle,
+                                                                                                ID));
+                return _res._key_handle;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void setCertificatePath(int KeyHandle,
                                        X509Certificate2[] CertificatePath,
                                        byte[] MAC)
         {
-            base.Channel.setCertificatePath(new setCertificatePath_Request(KeyHandle,
-                                                                           Conversions.CertificatesToBinaryList(CertificatePath),
-                                                                           MAC));
+            try
+            {
+                base.Channel.setCertificatePath(new setCertificatePath_Request(KeyHandle,
+                                                                               Conversions.CertificatesToBinaryList(CertificatePath),
+                                                                               MAC));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void setSymmetricKey(int KeyHandle,
                                     byte[] SymmetricKey,
                                     byte[] MAC)
         {
-            base.Channel.setSymmetricKey(new setSymmetricKey_Request(KeyHandle,
-                                                                     SymmetricKey,
-                                                                     MAC));
+            try
+            {
+                base.Channel.setSymmetricKey(new setSymmetricKey_Request(KeyHandle,
+                                                                         SymmetricKey,
+                                                                         MAC));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void addExtension(int KeyHandle,
@@ -2470,21 +2594,35 @@ namespace org.webpki.sks.ws.client
                                  byte[] ExtensionData,
                                  byte[] MAC)
         {
-            base.Channel.addExtension(new addExtension_Request(KeyHandle,
-                                                               Type,
-                                                               SubType,
-                                                               Qualifier,
-                                                               ExtensionData,
-                                                               MAC));
+            try
+            {
+                base.Channel.addExtension(new addExtension_Request(KeyHandle,
+                                                                   Type,
+                                                                   SubType,
+                                                                   Qualifier,
+                                                                   ExtensionData,
+                                                                   MAC));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void restorePrivateKey(int KeyHandle,
                                       byte[] PrivateKey,
                                       byte[] MAC)
         {
-            base.Channel.restorePrivateKey(new restorePrivateKey_Request(KeyHandle,
-                                                                         PrivateKey,
-                                                                         MAC));
+            try
+            {
+                base.Channel.restorePrivateKey(new restorePrivateKey_Request(KeyHandle,
+                                                                             PrivateKey,
+                                                                             MAC));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void pp_deleteKey(int ProvisioningHandle,
@@ -2492,10 +2630,17 @@ namespace org.webpki.sks.ws.client
                                  byte[] Authorization,
                                  byte[] MAC)
         {
-            base.Channel.pp_deleteKey(new pp_deleteKey_Request(ProvisioningHandle,
-                                                               TargetKeyHandle,
-                                                               Authorization,
-                                                               MAC));
+            try
+            {
+                base.Channel.pp_deleteKey(new pp_deleteKey_Request(ProvisioningHandle,
+                                                                   TargetKeyHandle,
+                                                                   Authorization,
+                                                                   MAC));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void pp_unlockKey(int ProvisioningHandle,
@@ -2503,10 +2648,17 @@ namespace org.webpki.sks.ws.client
                                  byte[] Authorization,
                                  byte[] MAC)
         {
-            base.Channel.pp_unlockKey(new pp_unlockKey_Request(ProvisioningHandle,
-                                                               TargetKeyHandle,
-                                                               Authorization,
-                                                               MAC));
+            try
+            {
+                base.Channel.pp_unlockKey(new pp_unlockKey_Request(ProvisioningHandle,
+                                                                   TargetKeyHandle,
+                                                                   Authorization,
+                                                                   MAC));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void pp_updateKey(int KeyHandle,
@@ -2514,10 +2666,17 @@ namespace org.webpki.sks.ws.client
                                  byte[] Authorization,
                                  byte[] MAC)
         {
-            base.Channel.pp_updateKey(new pp_updateKey_Request(KeyHandle,
-                                                               TargetKeyHandle,
-                                                               Authorization,
-                                                               MAC));
+            try
+            {
+                base.Channel.pp_updateKey(new pp_updateKey_Request(KeyHandle,
+                                                                   TargetKeyHandle,
+                                                                   Authorization,
+                                                                   MAC));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void pp_cloneKeyProtection(int KeyHandle,
@@ -2525,36 +2684,71 @@ namespace org.webpki.sks.ws.client
                                           byte[] Authorization,
                                           byte[] MAC)
         {
-            base.Channel.pp_cloneKeyProtection(new pp_cloneKeyProtection_Request(KeyHandle,
-                                                                                 TargetKeyHandle,
-                                                                                 Authorization,
-                                                                                 MAC));
+            try
+            {
+                base.Channel.pp_cloneKeyProtection(new pp_cloneKeyProtection_Request(KeyHandle,
+                                                                                     TargetKeyHandle,
+                                                                                     Authorization,
+                                                                                     MAC));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public EnumeratedKey enumerateKeys(int KeyHandle)
         {
-            EnumeratedKey _res = base.Channel.enumerateKeys(new enumerateKeys_Request(KeyHandle));
-            return _res._key_handle == 0 ? null : _res;
+            try
+            {
+                EnumeratedKey _res = base.Channel.enumerateKeys(new enumerateKeys_Request(KeyHandle));
+                return _res._key_handle == 0 ? null : _res;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public KeyAttributes getKeyAttributes(int KeyHandle)
         {
-            KeyAttributes _res = base.Channel.getKeyAttributes(new getKeyAttributes_Request(KeyHandle));
-            return _res;
+            try
+            {
+                KeyAttributes _res = base.Channel.getKeyAttributes(new getKeyAttributes_Request(KeyHandle));
+                return _res;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public KeyProtectionInfo getKeyProtectionInfo(int KeyHandle)
         {
-            KeyProtectionInfo _res = base.Channel.getKeyProtectionInfo(new getKeyProtectionInfo_Request(KeyHandle));
-            return _res;
+            try
+            {
+                KeyProtectionInfo _res = base.Channel.getKeyProtectionInfo(new getKeyProtectionInfo_Request(KeyHandle));
+                return _res;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public Extension getExtension(int KeyHandle,
                                       string Type)
         {
-            Extension _res = base.Channel.getExtension(new getExtension_Request(KeyHandle,
-                                                                                Type));
-            return _res;
+            try
+            {
+                Extension _res = base.Channel.getExtension(new getExtension_Request(KeyHandle,
+                                                                                    Type));
+                return _res;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void setProperty(int KeyHandle,
@@ -2562,50 +2756,92 @@ namespace org.webpki.sks.ws.client
                                 byte[] Name,
                                 byte[] Value)
         {
-            base.Channel.setProperty(new setProperty_Request(KeyHandle,
-                                                             Type,
-                                                             Name,
-                                                             Value));
+            try
+            {
+                base.Channel.setProperty(new setProperty_Request(KeyHandle,
+                                                                 Type,
+                                                                 Name,
+                                                                 Value));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void deleteKey(int KeyHandle,
                               byte[] Authorization)
         {
-            base.Channel.deleteKey(new deleteKey_Request(KeyHandle,
-                                                         Authorization));
+            try
+            {
+                base.Channel.deleteKey(new deleteKey_Request(KeyHandle,
+                                                             Authorization));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public byte[] exportKey(int KeyHandle,
                                 byte[] Authorization)
         {
-            exportKey_Response _res = base.Channel.exportKey(new exportKey_Request(KeyHandle,
-                                                                                   Authorization));
-            return _res._key;
+            try
+            {
+                exportKey_Response _res = base.Channel.exportKey(new exportKey_Request(KeyHandle,
+                                                                                       Authorization));
+                return _res._key;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void unlockKey(int KeyHandle,
                               byte[] Authorization)
         {
-            base.Channel.unlockKey(new unlockKey_Request(KeyHandle,
-                                                         Authorization));
+            try
+            {
+                base.Channel.unlockKey(new unlockKey_Request(KeyHandle,
+                                                             Authorization));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void changePIN(int KeyHandle,
                               byte[] Authorization,
                               byte[] NewPIN)
         {
-            base.Channel.changePIN(new changePIN_Request(KeyHandle,
-                                                         Authorization,
-                                                         NewPIN));
+            try
+            {
+                base.Channel.changePIN(new changePIN_Request(KeyHandle,
+                                                             Authorization,
+                                                             NewPIN));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public void setPIN(int KeyHandle,
                            byte[] Authorization,
                            byte[] NewPIN)
         {
-            base.Channel.setPIN(new setPIN_Request(KeyHandle,
-                                                   Authorization,
-                                                   NewPIN));
+            try
+            {
+                base.Channel.setPIN(new setPIN_Request(KeyHandle,
+                                                       Authorization,
+                                                       NewPIN));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public byte[] signHashedData(int KeyHandle,
@@ -2614,24 +2850,25 @@ namespace org.webpki.sks.ws.client
                                      byte[] Authorization,
                                      byte[] Data)
         {
-            bool tga = false;
             do
             {
+                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
                 try
                 {
-            signHashedData_Response _res = base.Channel.signHashedData(new signHashedData_Request(KeyHandle,
-                                                                                                  Algorithm,
-                                                                                                  Parameters,
-                                                                                                  tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
-                                                                                                  Authorization,
-                                                                                                  Data));
-            return _res._result;
+                    signHashedData_Response _res = base.Channel.signHashedData(new signHashedData_Request(KeyHandle,
+                                                                                                          Algorithm,
+                                                                                                          Parameters,
+                                                                                                          tga,
+                                                                                                          Authorization,
+                                                                                                          Data));
+                    return _res._result;
                 }
-                catch (System.ServiceModel.FaultException<SKSException> e)
+                catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
-                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    if (!tga || (e.Detail.error != SKSException.ERROR_AUTHORIZATION))
                     {
-                        throw e;
+System.Console.WriteLine("MSG=" + e.Detail.message);
+                        throw new SKSException(e);
                     }
                     Authorization = null;
                 }
@@ -2645,24 +2882,24 @@ namespace org.webpki.sks.ws.client
                                            byte[] Authorization,
                                            byte[] Data)
         {
-            bool tga = false;
             do
             {
+                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
                 try
                 {
-            asymmetricKeyDecrypt_Response _res = base.Channel.asymmetricKeyDecrypt(new asymmetricKeyDecrypt_Request(KeyHandle,
-                                                                                                                    Algorithm,
-                                                                                                                    Parameters,
-                                                                                                                    tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
-                                                                                                                    Authorization,
-                                                                                                                    Data));
-            return _res._result;
+                    asymmetricKeyDecrypt_Response _res = base.Channel.asymmetricKeyDecrypt(new asymmetricKeyDecrypt_Request(KeyHandle,
+                                                                                                                            Algorithm,
+                                                                                                                            Parameters,
+                                                                                                                            tga,
+                                                                                                                            Authorization,
+                                                                                                                            Data));
+                    return _res._result;
                 }
-                catch (System.ServiceModel.FaultException<SKSException> e)
+                catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
-                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    if (!tga || (e.Detail.error != SKSException.ERROR_AUTHORIZATION))
                     {
-                        throw e;
+                        throw new SKSException(e);
                     }
                     Authorization = null;
                 }
@@ -2676,24 +2913,24 @@ namespace org.webpki.sks.ws.client
                                    byte[] Authorization,
                                    byte[] PublicKey)
         {
-            bool tga = false;
             do
             {
+                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
                 try
                 {
-            keyAgreement_Response _res = base.Channel.keyAgreement(new keyAgreement_Request(KeyHandle,
-                                                                                            Algorithm,
-                                                                                            Parameters,
-                                                                                            tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
-                                                                                            Authorization,
-                                                                                            PublicKey));
-            return _res._key;
+                    keyAgreement_Response _res = base.Channel.keyAgreement(new keyAgreement_Request(KeyHandle,
+                                                                                                    Algorithm,
+                                                                                                    Parameters,
+                                                                                                    tga,
+                                                                                                    Authorization,
+                                                                                                    PublicKey));
+                    return _res._key;
                 }
-                catch (System.ServiceModel.FaultException<SKSException> e)
+                catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
-                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    if (!tga || (e.Detail.error != SKSException.ERROR_AUTHORIZATION))
                     {
-                        throw e;
+                        throw new SKSException(e);
                     }
                     Authorization = null;
                 }
@@ -2706,23 +2943,23 @@ namespace org.webpki.sks.ws.client
                                   byte[] Authorization,
                                   byte[] Data)
         {
-            bool tga = false;
             do
             {
+                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
                 try
                 {
-            performHMAC_Response _res = base.Channel.performHMAC(new performHMAC_Request(KeyHandle,
-                                                                                         Algorithm,
-                                                                                         tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
-                                                                                         Authorization,
-                                                                                         Data));
-            return _res._result;
+                    performHMAC_Response _res = base.Channel.performHMAC(new performHMAC_Request(KeyHandle,
+                                                                                                 Algorithm,
+                                                                                                 tga,
+                                                                                                 Authorization,
+                                                                                                 Data));
+                    return _res._result;
                 }
-                catch (System.ServiceModel.FaultException<SKSException> e)
+                catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
-                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    if (!tga || (e.Detail.error != SKSException.ERROR_AUTHORIZATION))
                     {
-                        throw e;
+                        throw new SKSException(e);
                     }
                     Authorization = null;
                 }
@@ -2737,25 +2974,25 @@ namespace org.webpki.sks.ws.client
                                           byte[] Authorization,
                                           byte[] Data)
         {
-            bool tga = false;
             do
             {
+                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
                 try
                 {
-            symmetricKeyEncrypt_Response _res = base.Channel.symmetricKeyEncrypt(new symmetricKeyEncrypt_Request(KeyHandle,
-                                                                                                                 Algorithm,
-                                                                                                                 Mode,
-                                                                                                                 IV,
-                                                                                                                 tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization),
-                                                                                                                 Authorization,
-                                                                                                                 Data));
-            return _res._result;
+                    symmetricKeyEncrypt_Response _res = base.Channel.symmetricKeyEncrypt(new symmetricKeyEncrypt_Request(KeyHandle,
+                                                                                                                         Algorithm,
+                                                                                                                         Mode,
+                                                                                                                         IV,
+                                                                                                                         tga,
+                                                                                                                         Authorization,
+                                                                                                                         Data));
+                    return _res._result;
                 }
-                catch (System.ServiceModel.FaultException<SKSException> e)
+                catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
-                    if (!tga || (e.Detail.getError() != SKSException.ERROR_AUTHORIZATION))
+                    if (!tga || (e.Detail.error != SKSException.ERROR_AUTHORIZATION))
                     {
-                        throw e;
+                        throw new SKSException(e);
                     }
                     Authorization = null;
                 }

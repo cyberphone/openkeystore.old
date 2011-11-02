@@ -503,7 +503,7 @@ public class WSCreator extends XMLObjectWrapper
           {
             return nRealType () + " " + nName (true);
           }
-
+        
         public String nArgument (String prefix, boolean request)
           {
             String arg = prefix + nName (request);
@@ -622,6 +622,19 @@ public class WSCreator extends XMLObjectWrapper
 
     class WSException extends Container
       {
+        Collection<Property> getPropsMinusMessage ()
+          {
+            Collection<Property> filtered = new ArrayList<Property> ();
+            for (Property prop : properties)
+              {
+                if (!prop.name.equals ("message"))
+                  {
+                    filtered.add (prop);
+                  }
+              }
+            return filtered;
+          }
+
         String class_name;
 
         String getName ()
@@ -831,6 +844,26 @@ public class WSCreator extends XMLObjectWrapper
             exception.xml_name = attr.getStringConditional ("XMLName");
             rd.getChild ();
             exception.properties = getProperties (rd, "Property");
+            boolean mess_found = false;
+            for (Property prop : exception.properties)
+              {
+                if (!prop.name.equals (prop.name.toLowerCase ()))
+                  {
+                    bad ("JAX-WS requires that all exception properties are lowercase:" + prop.name);
+                  }
+                if (prop.name.equals ("message"))
+                  {
+                    mess_found = true;
+                    if (!prop.nType ().equals ("string"))
+                      {
+                        bad ("Message must be a string");
+                      }
+                  }
+              }
+            if (!mess_found)
+              {
+                
+              }
             exception.constants = getConstants (rd);
             rd.getParent ();
             exceptions.put (exception.name, exception);
@@ -1312,17 +1345,19 @@ public class WSCreator extends XMLObjectWrapper
             write (file, "        [System.ServiceModel.OperationContractAttribute(Action=\"\", ReplyAction=\"*\")]\n");
             for (String ex : meth.execptions)
               {
-                writeln (file, "        [System.ServiceModel.FaultContractAttribute(typeof(" + exceptions.get (ex).getName () + "), Action=\"\", Name=\"" + exceptions.get (ex).getName () + "\")]");
+                writeln (file, "        [System.ServiceModel.FaultContractAttribute(typeof(_" + exceptions.get (ex).getName () + "), Action=\"\", Name=\"" + exceptions.get (ex).getName () + "\")]");
               }
             write (file, "        [System.ServiceModel.XmlSerializerFormatAttribute()]\n" + "        " + meth.getNetWrapper (false) + " " + meth.name + "(" + meth.getNetWrapper (true) + " request);\n");
           }
         write (file, "    }\n");
+
+        // WS Exception
         for (String ex : exceptions.keySet ())
           {
             WSException wse = exceptions.get (ex);
             write (file, "\n" +
                 "    [System.Diagnostics.DebuggerStepThroughAttribute()]\n" + 
-                "    public class " + wse.getName () + " : System.Xml.Serialization.IXmlSerializable\n" +
+                "    public class _" + wse.getName () + " : System.Xml.Serialization.IXmlSerializable\n" +
                 "    {\n" + 
                 "        private System.Xml.XmlNode[] nodes;\n\n" +
                 "        public System.Xml.Schema.XmlSchema GetSchema()\n" +
@@ -1337,20 +1372,68 @@ public class WSCreator extends XMLObjectWrapper
                 "        {\n" +
                 "            System.Runtime.Serialization.XmlSerializableServices.WriteNodes(writer, nodes);\n" +
                 "        }\n");
-            writeDotNetConstants (file, wse.constants);
             int index = 0;
             for (Property prop : wse.properties)
               {
-                String methn = prop.name;
                 String value = "nodes[" + (index++) + "].InnerXml";
                 if (!prop.nType ().equals ("string"))
                   {
                     value = "System.Int32.Parse(" + value + ")";
                   }
                 writeln (file, "\n" +
-                               "        public " + prop.nType () + " get" + methn.substring (0, 1).toUpperCase () + methn.substring (1) + "()\n" + 
+                               "        internal " + prop.nRealTypeName () + "\n" + 
                                "        {\n" +
-                               "            return " + value + ";\n" +
+                               "            get { return " + value + "; }\n" +
+                               "        }");
+              }
+            write (file, "    }\n");
+          }
+
+        // The rethrown real exceptions
+        for (String ex : exceptions.keySet ())
+          {
+            WSException wse = exceptions.get (ex);
+            write (file, "\n" +
+                "    [System.Diagnostics.DebuggerStepThroughAttribute()]\n" + 
+                "    public class " + wse.getName () + " : System.Exception\n" +
+                "    {\n" +
+                "        public " + wse.getName () + " (");
+            next = false;
+            for (Property prop : wse.properties)
+              {
+                if (next)
+                  {
+                    write (file, ", ");
+                  }
+                next = true;
+                write (file, prop.nRealTypeName ());
+              }
+            write (file, ") : base(message)\n" +
+                "        {\n");
+            for (Property prop : wse.getPropsMinusMessage ())
+              {
+                write (file, "            this." + prop.name + " = " + prop.name + ";\n");
+              }
+            write (file,
+                "        }\n\n" +
+                "        public " + wse.getName () + " (System.ServiceModel.FaultException<_" + wse.getName () + "> e) : base(e.Detail.message, e)\n" +
+                "        {\n");
+            for (Property prop : wse.getPropsMinusMessage ())
+              {
+                write (file, "            this." + prop.name + " = e.Detail." + prop.name + ";\n");
+              }
+            write (file,
+                "        }\n");
+            writeDotNetConstants (file, wse.constants);
+
+            for (Property prop : wse.getPropsMinusMessage ())
+              {
+                String prop_name = prop.name.substring (0, 1).toUpperCase () + prop.name.substring (1);
+                writeln (file, "\n" +
+                               "        private " + prop.nType () + " " + prop.name + ";\n\n" +
+                               "        public " + prop.nType () + " " + prop_name + "\n" + 
+                               "        {\n" +
+                               "            get {return " + prop.name + "; }\n" +
                                "        }");
               }
             write (file, "    }\n");
@@ -1433,12 +1516,29 @@ public class WSCreator extends XMLObjectWrapper
             meth.writeNetTypedList (true);
             write (file, ")\n" +
                 "        {\n");
+            int indent = 12;
             if (meth.dotnet_embed_rule != null && meth.dotnet_embed_rule.before != null)
               {
+                for (int q = 0; q < meth.dotnet_embed_rule.before.length (); q++)
+                  {
+                    char c = meth.dotnet_embed_rule.before.charAt (q);
+                    if (c == '{') indent += 4;
+                    else if (c == '}') indent -= 4;
+                  }
                 write (file, meth.dotnet_embed_rule.before);
               }
-            write (file, 
-                "            ");
+            else if (meth.execptions.length > 0)
+              {
+                write (file, "            try\n"+
+                             "            {\n");
+                indent += 4;
+              }
+            StringBuffer added_indent = new StringBuffer ();
+            for (int q = 0; q < indent; q++)
+              {
+                added_indent.append (' ');
+              }
+            write (file, added_indent.toString ());
             if (!meth.filteredParameters (true).isEmpty ())
               {
                 write (file, meth.getNetWrapper (false) + " _res = ");
@@ -1476,17 +1576,17 @@ public class WSCreator extends XMLObjectWrapper
                   {
                     if (prop.output_mode)
                       {
-                        write (file, "            " + prop.nName (true) + " = " + prop.nArgument ("_res._", false) + ";\n");
+                        write (file, added_indent + prop.nName (true) + " = " + prop.nArgument ("_res._", false) + ";\n");
                       }
                   }
                 if (meth.return_prop != null)
                   {
-                    write (file, "            return " + meth.return_prop.nArgument ("_res._", false) + ";\n");
+                    write (file, added_indent + "return " + meth.return_prop.nArgument ("_res._", false) + ";\n");
                   }
               }
             else
               {
-                write (file, "            return ");
+                write (file, added_indent + "return ");
                 if (meth.return_class.null_value != null)
                   {
                     write (file, "_res._" + meth.return_prop.name + " == " + meth.return_class.null_value + " ? null : ");
@@ -1496,6 +1596,17 @@ public class WSCreator extends XMLObjectWrapper
             if (meth.dotnet_embed_rule != null && meth.dotnet_embed_rule.after != null)
               {
                 write (file, meth.dotnet_embed_rule.after);
+              }
+            else if (meth.execptions.length > 0)
+              {
+                write (file, "            }\n");
+                for (String exn : meth.execptions)
+                  {
+                    write (file, "            catch (System.ServiceModel.FaultException<_" + exn + "> e)\n" +
+                                 "            {\n" +
+                                 "                throw new " + exn + "(e);\n" +
+                                 "            }\n");
+                  }
               }
             write (file, "        }\n");
           }

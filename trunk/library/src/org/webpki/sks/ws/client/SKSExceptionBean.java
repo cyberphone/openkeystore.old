@@ -26,23 +26,23 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(propOrder={"error",
-                    "message"})
+@XmlType(propOrder={"message",
+                    "error"})
 public class SKSExceptionBean
   {
-    @XmlElement(required=true, name="error", namespace="")
-    int error;
-
     @XmlElement(required=true, name="message", namespace="")
     String message;
 
-    public int getError ()
-      {
-        return error;
-      }
+    @XmlElement(required=true, name="error", namespace="")
+    int error;
 
     public String getMessage ()
       {
         return message;
+      }
+
+    public int getError ()
+      {
+        return error;
       }
   }
