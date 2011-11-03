@@ -224,32 +224,10 @@ namespace org.webpki.sks.ws.client
         {
             System.Runtime.Serialization.XmlSerializableServices.WriteNodes(writer, nodes);
         }
-        
-        int _error;
-        string _message;
-        bool readit;
-        
-        void f ()
-        {
-          for (int i = 0; i < nodes.Length; i++)
-          {
- System.Console.WriteLine("XML[" + i + "]=" + nodes[i].InnerXml);
-          }
-          if (readit) return;
-          _message =  nodes[1].InnerXml;
-          _error = System.Int32.Parse(nodes[0].InnerXml);
-          readit = true;
-           
-        }
-
-        internal string message
-        {
-            get { f(); return _message; }
-        }
 
         internal int error
         {
-            get { f(); return _error; }
+            get { return System.Int32.Parse(nodes[0].InnerXml); }
         }
     }
 
@@ -261,7 +239,7 @@ namespace org.webpki.sks.ws.client
             this.error = error;
         }
 
-        public SKSException (System.ServiceModel.FaultException<_SKSException> e) : base(e.Detail.message, e)
+        public SKSException (System.ServiceModel.FaultException<_SKSException> e) : base(e.Message, e)
         {
             this.error = e.Detail.error;
         }
@@ -294,7 +272,7 @@ namespace org.webpki.sks.ws.client
 
         public int Error
         {
-            get {return error; }
+            get { return error; }
         }
     }
 
@@ -1655,6 +1633,10 @@ namespace org.webpki.sks.ws.client
 
         public static sbyte PROTSTAT_DEVICE_PIN { get { return 0x10;}}
 
+        public static sbyte KEYBACKUP_SERVER { get { return 0x01;}}
+
+        public static sbyte KEYBACKUP_LOCAL { get { return 0x02;}}
+
         public sbyte ProtectionStatus
         {
             get { return _protection_status; }
@@ -2867,7 +2849,6 @@ namespace org.webpki.sks.ws.client
                 {
                     if (!tga || (e.Detail.error != SKSException.ERROR_AUTHORIZATION))
                     {
-System.Console.WriteLine("MSG=" + e.Detail.message);
                         throw new SKSException(e);
                     }
                     Authorization = null;

@@ -246,7 +246,7 @@ namespace org.webpki.sks.ws.client
 	                                "Authorization Error",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Exclamation);
-	                throw new SKSException("Key locked", SKSException.ERROR_USER_ABORT);
+	                throw new SKSException("Key locked, user message", SKSException.ERROR_USER_ABORT);
 	            }
 	            KeyAttributes ka = getKeyAttributes (KeyHandle);
                 SKSAuthorizationDialog authorization_form = new SKSAuthorizationDialog((PassphraseFormat)kpi.Format,
@@ -296,7 +296,7 @@ namespace org.webpki.sks.ws.client
                  	}
                  	return true;
            		}
-                throw new SKSException("Cancel", SKSException.ERROR_USER_ABORT);
+                throw new SKSException("Canceled by user", SKSException.ERROR_USER_ABORT);
            	}
             return false;
         }

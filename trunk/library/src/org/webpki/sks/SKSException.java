@@ -55,6 +55,9 @@ public class SKSException extends IOException
     /* External error */
     public static final int ERROR_EXTERNAL       = 0x0B;
 
+    /* User aborting PIN (or similar) error */
+    public static final int ERROR_USER_ABORT     = 0x0C;
+
     int error;
     
     public SKSException (String e, int error)

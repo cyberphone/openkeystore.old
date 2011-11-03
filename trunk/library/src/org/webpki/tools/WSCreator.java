@@ -625,12 +625,14 @@ public class WSCreator extends XMLObjectWrapper
         Collection<Property> getPropsMinusMessage ()
           {
             Collection<Property> filtered = new ArrayList<Property> ();
+            boolean next = false;
             for (Property prop : properties)
               {
-                if (!prop.name.equals ("message"))
+                if (next)
                   {
                     filtered.add (prop);
                   }
+                next = true;
               }
             return filtered;
           }
@@ -844,25 +846,25 @@ public class WSCreator extends XMLObjectWrapper
             exception.xml_name = attr.getStringConditional ("XMLName");
             rd.getChild ();
             exception.properties = getProperties (rd, "Property");
-            boolean mess_found = false;
+            Property first = null;
             for (Property prop : exception.properties)
               {
+                if (first == null)
+                  {
+                    first = prop;
+                  }
                 if (!prop.name.equals (prop.name.toLowerCase ()))
                   {
                     bad ("JAX-WS requires that all exception properties are lowercase:" + prop.name);
                   }
-                if (prop.name.equals ("message"))
-                  {
-                    mess_found = true;
-                    if (!prop.nType ().equals ("string"))
-                      {
-                        bad ("Message must be a string");
-                      }
-                  }
               }
-            if (!mess_found)
+            if (!first.name.equals ("message"))
               {
-                
+                bad ("Exceptions must have a first attribute \"message\"");
+              }
+            if (!first.nType ().equals ("string"))
+              {
+                bad ("\"message\" must be a \"string\"");
               }
             exception.constants = getConstants (rd);
             rd.getParent ();
@@ -1373,7 +1375,7 @@ public class WSCreator extends XMLObjectWrapper
                 "            System.Runtime.Serialization.XmlSerializableServices.WriteNodes(writer, nodes);\n" +
                 "        }\n");
             int index = 0;
-            for (Property prop : wse.properties)
+            for (Property prop : wse.getPropsMinusMessage ())
               {
                 String value = "nodes[" + (index++) + "].InnerXml";
                 if (!prop.nType ().equals ("string"))
@@ -1416,7 +1418,7 @@ public class WSCreator extends XMLObjectWrapper
               }
             write (file,
                 "        }\n\n" +
-                "        public " + wse.getName () + " (System.ServiceModel.FaultException<_" + wse.getName () + "> e) : base(e.Detail.message, e)\n" +
+                "        public " + wse.getName () + " (System.ServiceModel.FaultException<_" + wse.getName () + "> e) : base(e.Message, e)\n" +
                 "        {\n");
             for (Property prop : wse.getPropsMinusMessage ())
               {
@@ -1433,7 +1435,7 @@ public class WSCreator extends XMLObjectWrapper
                                "        private " + prop.nType () + " " + prop.name + ";\n\n" +
                                "        public " + prop.nType () + " " + prop_name + "\n" + 
                                "        {\n" +
-                               "            get {return " + prop.name + "; }\n" +
+                               "            get { return " + prop.name + "; }\n" +
                                "        }");
               }
             write (file, "    }\n");
