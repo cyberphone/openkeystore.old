@@ -1075,7 +1075,7 @@ public class SKSWSImplementation
     @WebResult(name="version", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     public String getVersion ()
       {
-        return "0.00001";
+        return "1.0";
       }
 
     @WebMethod(operationName="logEvent")
