@@ -6,7 +6,7 @@
     <property name="rebuild" value="false" overwrite="false"/>
     <property name="build.dir" value="../dist"/>
     <property name="src.dir" value="src"/>
-    <property name="res.dir" value="res"/>
+    <property name="image.dir" value="../../resources/images"/>
     <property name="nant.settings.currentframework" value="net-4.0"/>
 
 <!--
@@ -32,8 +32,11 @@
                 <include name="System.Runtime.Serialization.dll"/>
                 <include name="System.Xml.dll"/>
             </references>
-            <resources prefix="sks" basedir="${res.dir}">
-                <include name="*.*"/>
+            <resources prefix="sks" basedir="${image.dir}">
+                <include name="encrypt.gif"/>
+                <include name="idcard.gif"/>
+                <include name="signsymb.gif"/>
+                <include name="keyinfo.png"/>
             </resources>
         </csc>
     </target>
@@ -70,33 +73,33 @@ public static void ScriptMain(Project project)
     EnumeratedKey ek = new EnumeratedKey();
     while ((ek = ws.enumerateKeys(ek.KeyHandle)) != null)
     {
-       try
-       {
-           KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
-           if (ka.IsSymmetricKey) continue;
-           if (project.Properties["key"] != null && Int32.Parse(project.Properties["key"]) != ek.KeyHandle) continue;
-           bool rsa = ka.CertificatePath[0].PublicKey.IsRSA();
-           System.Console.WriteLine((rsa ? "RSA" : "EC") + " Key ID=#" + ek.KeyHandle + ", Subject: " + ka.CertificatePath[0].Subject);
-           string sign_alg = rsa ? "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" : "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256";
-           byte[] test_string = Encoding.UTF8.GetBytes("hi there!");
-           byte[] res = ws.signHashedData(ek.KeyHandle,
-			                              sign_alg,
-			                              null,
-			                              null,
-			                              new SHA256Managed().ComputeHash(test_string));
-           Org.BouncyCastle.Crypto.ISigner verify = Org.BouncyCastle.Security.SignerUtilities.GetSigner(rsa? "SHA256WithRSA" : "SHA256WithECDSA");
-           verify.Init(false, Org.BouncyCastle.Security.PublicKeyFactory.CreateKey(ka.CertificatePath[0].PublicKey.X509Encoding()));
-           verify.BlockUpdate(test_string, 0, test_string.Length);
-           if (!verify.VerifySignature(res))
-             {
-	             throw new NAnt.Core.BuildException ("FAILED SIGNATURE VERIFICATION!!!");
-             }
-       }
-       catch (SKSException e)
-       {
-           throw new NAnt.Core.BuildException("Signing: " + e.Message + " code=" + e.Error);
-       }
-       return;
+		try
+		{
+		    KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
+		    if (ka.IsSymmetricKey) continue;
+		    if (project.Properties["key"] != null && Int32.Parse(project.Properties["key"]) != ek.KeyHandle) continue;
+		    bool rsa = ka.CertificatePath[0].PublicKey.IsRSA();
+		    System.Console.WriteLine((rsa ? "RSA" : "EC") + " Key ID=#" + ek.KeyHandle + ", Subject: " + ka.CertificatePath[0].Subject);
+		    string sign_alg = rsa ? "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" : "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256";
+		    byte[] test_string = Encoding.UTF8.GetBytes("hi there!");
+		    byte[] res = ws.signHashedData(ek.KeyHandle,
+		                          		   sign_alg,
+		                          	       null,
+		                                   null,
+		                                   new SHA256Managed().ComputeHash(test_string));
+		    Org.BouncyCastle.Crypto.ISigner verify = Org.BouncyCastle.Security.SignerUtilities.GetSigner(rsa? "SHA256WithRSA" : "SHA256WithECDSA");
+		    verify.Init(false, Org.BouncyCastle.Security.PublicKeyFactory.CreateKey(ka.CertificatePath[0].PublicKey.X509Encoding()));
+		    verify.BlockUpdate(test_string, 0, test_string.Length);
+		    if (!verify.VerifySignature(res))
+			{
+				throw new NAnt.Core.BuildException ("FAILED SIGNATURE VERIFICATION!!!");
+			}
+		}
+		catch (SKSException e)
+		{
+		    throw new NAnt.Core.BuildException("Signing: " + e.Message + " code=" + e.Error);
+		}
+		return;
     }
     throw new NAnt.Core.BuildException ("NO SUITABLE KEY FOUND!!!");
 }

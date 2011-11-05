@@ -30,7 +30,7 @@ namespace org.webpki.sks.ws.client
         private string picture_resource;
         private string picture_tooltip_text;
         private int retriesleft;
-        private bool hex_test;
+        private PassphraseFormat pin_format;
         private string add_on_dialog_header = "";
  
         internal SKSAuthorizationDialog(PassphraseFormat format,
@@ -40,6 +40,7 @@ namespace org.webpki.sks.ws.client
         {
             retry_warning = zero_or_retriesleft != 0;
             retriesleft = zero_or_retriesleft;
+            pin_format = format;
             if (app_usage == AppUsage.SIGNATURE &&
                 (grouping == Grouping.UNIQUE || grouping == Grouping.SIGNATURE_PLUS_STANDARD))
             {
@@ -62,24 +63,23 @@ namespace org.webpki.sks.ws.client
             	picture_resource = "sks.encrypt.gif";
             	picture_tooltip_text = "Encryption operation requiring a specific PIN"; 
             } 
-            hex_test = format == PassphraseFormat.BINARY;
+            pin_format = format;
             InitializeComponent();
         }
 
-/*
-        private void SKSAuthorizationDialog_Load(object sender, System.EventArgs e)
-        {
-        }
-*/
         private void authorization_OK_Button_Click(object sender, System.EventArgs e)
         {
             password = authorization_TextBox.Text;
-            if (hex_test)
+            if (pin_format == PassphraseFormat.BINARY)
             {
             	if (!System.Text.RegularExpressions.Regex.IsMatch(password,"^([a-fA-F0-9][a-fA-F0-9])+$"))
             	{
             		password = "";
             	}
+            }
+            else if (pin_format == PassphraseFormat.ALPHANUMERIC)
+            {
+            	password = password.ToUpper();
             }
             if (password.Length > 0)
             {
@@ -154,7 +154,6 @@ namespace org.webpki.sks.ws.client
             authorization_OK_Button.TabIndex = 1;
             authorization_OK_Button.Text = "OK";
             authorization_OK_Button.UseVisualStyleBackColor = true;
- //           authorization_OK_Button.DialogResult = DialogResult.OK;
             authorization_OK_Button.Click += new System.EventHandler(authorization_OK_Button_Click);
 			int total_width = authorization_OK_Button.Size.Width * 4;
             // 
@@ -198,7 +197,6 @@ namespace org.webpki.sks.ws.client
             StartPosition = FormStartPosition.CenterParent;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             Text = "PIN Code" + add_on_dialog_header;
-  //          Load += new System.EventHandler(SKSAuthorizationDialog_Load);
             TopMost = true;
             ResumeLayout(false);
             PerformLayout();
