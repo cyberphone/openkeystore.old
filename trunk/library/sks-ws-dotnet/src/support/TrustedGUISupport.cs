@@ -24,6 +24,16 @@ namespace org.webpki.sks.ws.client
 
     internal class SKSAuthorizationDialog : Form
     {
+        private System.ComponentModel.IContainer components = null;
+
+        private Button authorization_Cancel_Button;
+        private Button authorization_OK_Button;
+        private TextBox authorization_TextBox;
+        private ToolTip authorization_ToolTip;
+        private Label retry_warning_Label;
+        private PictureBox attention_PictureBox;
+        private PictureBox key_info_PictureBox;
+        
         internal string password;
         private bool retry_warning;
         private bool show_picture;
@@ -92,7 +102,13 @@ namespace org.webpki.sks.ws.client
             }
         }
 
-        private System.ComponentModel.IContainer components = null;
+        private void key_info_PictureBox_Click(object sender, System.EventArgs e)
+        {
+            MessageBox.Show("Not yet implemented :-(",
+                            "Key Information",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Exclamation);
+        }
 
         protected override void Dispose(bool disposing)
         {
@@ -112,7 +128,9 @@ namespace org.webpki.sks.ws.client
             authorization_Cancel_Button = new Button();
             authorization_OK_Button = new Button();
             authorization_TextBox = new TextBox();
+            key_info_PictureBox = new PictureBox();
             authorization_ToolTip.SetToolTip(authorization_TextBox, "The authorization PIN");
+            authorization_ToolTip.SetToolTip(key_info_PictureBox, "Get more information about the key");
             if (show_picture)
             {
 	            attention_PictureBox = new PictureBox();
@@ -134,17 +152,15 @@ namespace org.webpki.sks.ws.client
                 retry_warning_Label.Text = "You have " + retriesleft + " retries left";
             }
             
-            if (show_picture)
-            {
-	            Assembly assembly = Assembly.GetExecutingAssembly();
-	            Stream image_stream = assembly.GetManifestResourceStream(picture_resource);
-	            attention_PictureBox.Image = new System.Drawing.Bitmap(image_stream);
-	            attention_PictureBox.Location = new System.Drawing.Point(5, 5);
-	            attention_PictureBox.Name = "attention_PictureBox";
-	            attention_PictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
-	            attention_PictureBox.TabIndex = 5;
-	            attention_PictureBox.TabStop = false;
-	        }
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Stream image_stream = assembly.GetManifestResourceStream("sks.keyinfo.png");
+            key_info_PictureBox.Image = new System.Drawing.Bitmap(image_stream);
+            key_info_PictureBox.Name = "key_info_PictureBox";
+            key_info_PictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
+            key_info_PictureBox.TabIndex = 6;
+            key_info_PictureBox.TabStop = false;
+            key_info_PictureBox.Click += new System.EventHandler(key_info_PictureBox_Click);
+          
             // 
             // authorization_OK_Button
             //
@@ -156,6 +172,7 @@ namespace org.webpki.sks.ws.client
             authorization_OK_Button.UseVisualStyleBackColor = true;
             authorization_OK_Button.Click += new System.EventHandler(authorization_OK_Button_Click);
 			int total_width = authorization_OK_Button.Size.Width * 4;
+            key_info_PictureBox.Location = new System.Drawing.Point(total_width - 5 - key_info_PictureBox.Width, 5);
             // 
             // authorization_Cancel_Button
             // 
@@ -173,6 +190,18 @@ namespace org.webpki.sks.ws.client
             authorization_TextBox.Location = new System.Drawing.Point((total_width - authorization_TextBox.Size.Width) / 2, 42);
             authorization_TextBox.Name = "authorization_TextBox";
             authorization_TextBox.TabIndex = 0;
+			//
+            if (show_picture)
+            {
+	            image_stream = assembly.GetManifestResourceStream(picture_resource);
+	            attention_PictureBox.Image = new System.Drawing.Bitmap(image_stream);
+	            attention_PictureBox.Name = "attention_PictureBox";
+	            attention_PictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
+	            attention_PictureBox.TabIndex = 5;
+	            attention_PictureBox.TabStop = false;
+	            attention_PictureBox.Location = new System.Drawing.Point(authorization_TextBox.Left - 10 - attention_PictureBox.Width,
+	                                                                     authorization_TextBox.Top + authorization_TextBox.Height - attention_PictureBox.Height);
+	        }
             // 
             // SKSAuthorizationDialog
             // 
@@ -185,6 +214,7 @@ namespace org.webpki.sks.ws.client
             Controls.Add(authorization_TextBox);
             Controls.Add(authorization_OK_Button);
             Controls.Add(authorization_Cancel_Button);
+            Controls.Add(key_info_PictureBox);
             if (show_picture)
             {
 	            Controls.Add(attention_PictureBox);
@@ -208,14 +238,6 @@ namespace org.webpki.sks.ws.client
             
         }
 
-        private Button authorization_Cancel_Button;
-        private Button authorization_OK_Button;
-        private TextBox authorization_TextBox;
-        private ToolTip authorization_ToolTip;
-        private Label retry_warning_Label;
-        private PictureBox attention_PictureBox;
-        
-        
     }
 
     public partial class SKSWSProxy
