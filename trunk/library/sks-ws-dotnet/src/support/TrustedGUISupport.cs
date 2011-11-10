@@ -35,6 +35,7 @@ namespace org.webpki.sks.ws.client
         private PictureBox key_info_PictureBox;
         
         internal string password;
+        private int key_handle;
         private bool retry_warning;
         private bool show_picture;
         private string picture_resource;
@@ -43,14 +44,16 @@ namespace org.webpki.sks.ws.client
         private PassphraseFormat pin_format;
         private string add_on_dialog_header = "";
  
-        internal SKSAuthorizationDialog(PassphraseFormat format,
+        internal SKSAuthorizationDialog(int key_handle,
+                                        PassphraseFormat format,
                                         Grouping grouping,
                                         AppUsage app_usage,
                                         int zero_or_retriesleft)
         {
-            retry_warning = zero_or_retriesleft != 0;
-            retriesleft = zero_or_retriesleft;
-            pin_format = format;
+        	this.key_handle = key_handle;
+            this.retry_warning = zero_or_retriesleft != 0;
+            this.retriesleft = zero_or_retriesleft;
+            this.pin_format = format;
             if (app_usage == AppUsage.SIGNATURE &&
                 (grouping == Grouping.UNIQUE || grouping == Grouping.SIGNATURE_PLUS_STANDARD))
             {
@@ -105,7 +108,7 @@ namespace org.webpki.sks.ws.client
         private void key_info_PictureBox_Click(object sender, System.EventArgs e)
         {
             MessageBox.Show("Not yet implemented :-(",
-                            "Key Information",
+                            "Key Information key #" + key_handle,
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Exclamation);
         }
@@ -244,38 +247,39 @@ namespace org.webpki.sks.ws.client
     {
         private static byte[] SHARED_SECRET_32 = {0,1,2,3,4,5,6,7,8,9,1,0,3,2,5,4,7,6,9,8,9,8,7,6,5,4,3,2,1,0,3,2};
         
-        public bool GetTrustedGUIAuthorization (int KeyHandle, ref byte[] Authorization)
+        public bool GetTrustedGUIAuthorization (int key_handle, ref byte[] authorization)
         {
-            KeyProtectionInfo kpi = getKeyProtectionInfo(KeyHandle);
+            KeyProtectionInfo kpi = getKeyProtectionInfo(key_handle);
             if ((kpi.ProtectionStatus & KeyProtectionInfo.PROTSTAT_PIN_PROTECTED) != 0)
             {
                 if (kpi.InputMethod == InputMethod.TRUSTED_GUI)
                 {
-                    if (Authorization != null)
+                    if (authorization != null)
                     {
-                        throw new System.ArgumentException ("Redundant \"Authorization\"");
+                        throw new System.ArgumentException ("Redundant \"authorization\"");
                     }
                 }
-                else if (kpi.InputMethod == InputMethod.PROGRAMMATIC || Authorization != null)
+                else if (kpi.InputMethod == InputMethod.PROGRAMMATIC || authorization != null)
                 {
                     return false;
                 }
 	            if ((kpi.ProtectionStatus & KeyProtectionInfo.PROTSTAT_PIN_BLOCKED) != 0)
 	            {
-	                MessageBox.Show("The key is blocked due to previous PIN errors",
-	                                "Authorization Error",
+	                MessageBox.Show("Key #" + key_handle + " is blocked due to previous PIN errors",
+	                                "authorization Error",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Exclamation);
 	                throw new SKSException("Key locked, user message", SKSException.ERROR_USER_ABORT);
 	            }
-	            KeyAttributes ka = getKeyAttributes (KeyHandle);
-                SKSAuthorizationDialog authorization_form = new SKSAuthorizationDialog((PassphraseFormat)kpi.Format,
+	            KeyAttributes ka = getKeyAttributes (key_handle);
+                SKSAuthorizationDialog authorization_form = new SKSAuthorizationDialog(key_handle,
+                                                                                       (PassphraseFormat)kpi.Format,
                                                                                        (Grouping)kpi.Grouping,
                                                                                        (AppUsage)ka.AppUsage,
                                                                                        kpi.PINErrorCount == 0 ? 0 : kpi.RetryLimit - kpi.PINErrorCount);
                 if (authorization_form.ShowDialog() == DialogResult.OK)
                 {
-                	Authorization = 
+                	authorization = 
                 	   ((PassphraseFormat)kpi.Format == PassphraseFormat.BINARY) ?
                 	                                                Hex.Decode (authorization_form.password)
                 	                                                             :
@@ -296,7 +300,7 @@ namespace org.webpki.sks.ws.client
 		                    {
 		                        using (CryptoStream cs_encrypt = new CryptoStream(ms_encrypt, aes.CreateEncryptor(), CryptoStreamMode.Write))
 		                        {
-		 	                        cs_encrypt.Write(Authorization, 0, Authorization.Length);
+		 	                        cs_encrypt.Write(authorization, 0, authorization.Length);
 		 	                        cs_encrypt.FlushFinalBlock(); 
 		                    	}
 		                    	ms_encrypt.Flush();
@@ -311,7 +315,7 @@ namespace org.webpki.sks.ws.client
 	    				    	total.Write(hmac.ComputeHash(encrypted), 0, 32);
 	    				    	total.Write(encrypted, 0, encrypted.Length);
 	    				    }
-	    				    Authorization = total.ToArray();
+	    				    authorization = total.ToArray();
 	                 	}
                  	}
                  	return true;
