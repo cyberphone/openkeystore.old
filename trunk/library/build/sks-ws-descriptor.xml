@@ -275,9 +275,9 @@
 
    <ReturnClass ClassName="org.webpki.sks.Extension"/>
    
-   <ReturnClass ClassName="org.webpki.sks.EnumeratedKey" NullValue="0"/>
+   <ReturnClass ClassName="org.webpki.sks.EnumeratedKey" NullValue="0" NullConstructor="true"/>
    
-   <ReturnClass ClassName="org.webpki.sks.EnumeratedProvisioningSession" NullValue="0"/>
+   <ReturnClass ClassName="org.webpki.sks.EnumeratedProvisioningSession" NullValue="0" NullConstructor="true"/>
    
    <ReturnClass ClassName="org.webpki.sks.KeyAttributes"/>
    

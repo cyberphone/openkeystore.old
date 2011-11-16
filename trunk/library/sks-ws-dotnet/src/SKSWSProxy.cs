@@ -244,29 +244,29 @@ namespace org.webpki.sks.ws.client
             this.error = e.Detail.error;
         }
 
-        public static int ERROR_AUTHORIZATION { get { return 0x01;}}
+        public const int ERROR_AUTHORIZATION = 0x01;
 
-        public static int ERROR_NOT_ALLOWED { get { return 0x02;}}
+        public const int ERROR_NOT_ALLOWED = 0x02;
 
-        public static int ERROR_STORAGE { get { return 0x03;}}
+        public const int ERROR_STORAGE = 0x03;
 
-        public static int ERROR_MAC { get { return 0x04;}}
+        public const int ERROR_MAC = 0x04;
 
-        public static int ERROR_CRYPTO { get { return 0x05;}}
+        public const int ERROR_CRYPTO = 0x05;
 
-        public static int ERROR_NO_SESSION { get { return 0x06;}}
+        public const int ERROR_NO_SESSION = 0x06;
 
-        public static int ERROR_NO_KEY { get { return 0x07;}}
+        public const int ERROR_NO_KEY = 0x07;
 
-        public static int ERROR_ALGORITHM { get { return 0x08;}}
+        public const int ERROR_ALGORITHM = 0x08;
 
-        public static int ERROR_OPTION { get { return 0x09;}}
+        public const int ERROR_OPTION = 0x09;
 
-        public static int ERROR_INTERNAL { get { return 0x0A;}}
+        public const int ERROR_INTERNAL = 0x0A;
 
-        public static int ERROR_EXTERNAL { get { return 0x0B;}}
+        public const int ERROR_EXTERNAL = 0x0B;
 
-        public static int ERROR_USER_ABORT { get { return 0x0C;}}
+        public const int ERROR_USER_ABORT = 0x0C;
 
         private int error;
 
@@ -357,6 +357,8 @@ namespace org.webpki.sks.ws.client
         #pragma warning disable 0649
         internal bool _biometric_support;
         #pragma warning restore 0649
+
+        internal DeviceInfo () {}
 
         public short APILevel
         {
@@ -508,6 +510,8 @@ namespace org.webpki.sks.ws.client
         #pragma warning disable 0649
         internal byte[] _attestation;
         #pragma warning restore 0649
+
+        internal ProvisioningSession () {}
 
         public int ProvisioningHandle
         {
@@ -1020,6 +1024,8 @@ namespace org.webpki.sks.ws.client
         internal byte[] _attestation;
         #pragma warning restore 0649
 
+        internal KeyData () {}
+
         public int KeyHandle
         {
             get { return _key_handle; }
@@ -1460,6 +1466,8 @@ namespace org.webpki.sks.ws.client
         internal List<string> _extension_types;
         #pragma warning restore 0649
 
+        internal KeyAttributes () {}
+
         public bool IsSymmetricKey
         {
             get { return _is_symmetric_key; }
@@ -1623,19 +1631,21 @@ namespace org.webpki.sks.ws.client
         internal sbyte _key_backup;
         #pragma warning restore 0649
 
-        public static sbyte PROTSTAT_PIN_PROTECTED { get { return 0x01;}}
+        internal KeyProtectionInfo () {}
 
-        public static sbyte PROTSTAT_PUK_PROTECTED { get { return 0x02;}}
+        public const sbyte PROTSTAT_PIN_PROTECTED = 0x01;
 
-        public static sbyte PROTSTAT_PIN_BLOCKED { get { return 0x04;}}
+        public const sbyte PROTSTAT_PUK_PROTECTED = 0x02;
 
-        public static sbyte PROTSTAT_PUK_BLOCKED { get { return 0x08;}}
+        public const sbyte PROTSTAT_PIN_BLOCKED = 0x04;
 
-        public static sbyte PROTSTAT_DEVICE_PIN { get { return 0x10;}}
+        public const sbyte PROTSTAT_PUK_BLOCKED = 0x08;
 
-        public static sbyte KEYBACKUP_SERVER { get { return 0x01;}}
+        public const sbyte PROTSTAT_DEVICE_PIN = 0x10;
 
-        public static sbyte KEYBACKUP_LOCAL { get { return 0x02;}}
+        public const sbyte KEYBACKUP_SERVER = 0x01;
+
+        public const sbyte KEYBACKUP_LOCAL = 0x02;
 
         public sbyte ProtectionStatus
         {
@@ -1774,6 +1784,8 @@ namespace org.webpki.sks.ws.client
         #pragma warning disable 0649
         internal byte[] _extension_data;
         #pragma warning restore 0649
+
+        internal Extension () {}
 
         public sbyte SubType
         {
@@ -2290,9 +2302,9 @@ namespace org.webpki.sks.ws.client
 
     public partial class SKSWSProxy : System.ServiceModel.ClientBase<SKSWSProxyInterface>
     {
-        public static string ALGORITHM_SESSION_KEY_ATTEST_1 { get { return "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";}}
+        public const string ALGORITHM_SESSION_KEY_ATTEST_1 = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
 
-        public static string ALGORITHM_KEY_ATTEST_1 { get { return "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";}}
+        public const string ALGORITHM_KEY_ATTEST_1 = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
 
         public static SKSWSProxy getDefaultSKSWSProxy()
         {

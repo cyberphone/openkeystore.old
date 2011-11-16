@@ -702,6 +702,8 @@ public class WSCreator extends XMLObjectWrapper
         String name;
         
         String null_value;  // May be null
+        
+        boolean has_null_constructor;
 
         LinkedHashMap<String, Constant> constants;
       }
@@ -879,6 +881,7 @@ public class WSCreator extends XMLObjectWrapper
             if (i < 0) i = -1;
             return_class.name = name.substring (i + 1);
             return_class.null_value = attr.getStringConditional ("NullValue");
+            return_class.has_null_constructor = attr.getBooleanConditional ("NullConstructor");
             rd.getChild ();
             return_class.constants = getConstants (rd);
             rd.getParent ();
@@ -1309,6 +1312,11 @@ public class WSCreator extends XMLObjectWrapper
           }
         else if (meth.return_class != null)
           {
+            if (!meth.return_class.has_null_constructor)
+              {
+                write (file, "\n" +
+                             "        internal " + class_name + " () {}\n");
+              }
             writeDotNetConstants (file, meth.return_class.constants);
             for (Property prop : props)
               {
@@ -1622,8 +1630,8 @@ public class WSCreator extends XMLObjectWrapper
           {
             Constant tv = constants.get (constant);
             write (file, "\n" +
-            "        public static " + tv.type.csname + " " + constant +
-            " { get { return " + (tv.type.enum_name.equals ("string") ? "\"" : "") + tv.value + (tv.type.enum_name.equals ("string") ? "\"" : "") + ";}}\n"); 
+            "        public const " + tv.type.csname + " " + constant +
+            " = " + (tv.type.enum_name.equals ("string") ? "\"" : "") + tv.value + (tv.type.enum_name.equals ("string") ? "\"" : "") + ";\n"); 
           }
       }
 

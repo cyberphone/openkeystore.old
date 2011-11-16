@@ -117,6 +117,7 @@ import org.webpki.sks.InputMethod;
 import org.webpki.sks.KeyAttributes;
 import org.webpki.sks.KeyData;
 import org.webpki.sks.Grouping;
+import org.webpki.sks.KeyProtectionInfo;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.PatternRestriction;
 import org.webpki.sks.Property;
@@ -1143,7 +1144,7 @@ public class KeyGen2Test
                                                                       plain_unlock_key.server_km);
               }
             ProvisioningFinalizationRequestEncoder fin_prov_request 
-                           = new ProvisioningFinalizationRequestEncoder (FIN_PROV_URL, 
+                       = new ProvisioningFinalizationRequestEncoder (FIN_PROV_URL, 
                                                                      server_credential_store,
                                                                      server_sess_key);
 
@@ -1315,16 +1316,14 @@ public class KeyGen2Test
         int getFirstKey () throws Exception
           {
             EnumeratedKey ek = new EnumeratedKey ();
-            int q = 0;
             while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
               {
                 if (ek.getProvisioningHandle () == client.provisioning_handle)
                   {
-                    q++;
                     break;
                   }
               }
-            assertTrue ("Missing keys", q == 1);
+            assertTrue ("Missing keys", ek != null);
             return ek.getKeyHandle ();
           }
 
@@ -1608,16 +1607,12 @@ public class KeyGen2Test
           {
             Doer doer = new Doer ();
             export_protection = exp_pol;
-            if (exp_pol == ExportProtection.PIN || exp_pol == ExportProtection.PUK)
-              {
-                pin_protection = true;
-              }
-            if (exp_pol == ExportProtection.PUK)
-              {
-                puk_protection = true;
-              }
+            pin_protection = exp_pol == ExportProtection.PIN || exp_pol == ExportProtection.PUK;
+            puk_protection = exp_pol == ExportProtection.PUK;
             ecc_key = true;
             doer.perform ();
+            KeyProtectionInfo kpi = sks.getKeyProtectionInfo (doer.getFirstKey ());
+            assertTrue ("Export prot", kpi.getExportProtection () == exp_pol);
           }
       }
 
@@ -1627,17 +1622,13 @@ public class KeyGen2Test
         for (DeleteProtection del_pol : DeleteProtection.values ())
           {
             Doer doer = new Doer ();
-            if (del_pol == DeleteProtection.PIN || del_pol == DeleteProtection.PUK)
-              {
-                pin_protection = true;
-              }
-            if (del_pol == DeleteProtection.PUK)
-              {
-                puk_protection = true;
-              }
+            pin_protection = del_pol == DeleteProtection.PIN || del_pol == DeleteProtection.PUK;
+            puk_protection = del_pol == DeleteProtection.PUK;
             delete_protection = del_pol;
             ecc_key = true;
             doer.perform ();
+            KeyProtectionInfo kpi = sks.getKeyProtectionInfo (doer.getFirstKey ());
+            assertTrue ("Delete prot", kpi.getDeleteProtection () == del_pol);
           }
       }
 
@@ -1737,6 +1728,5 @@ public class KeyGen2Test
         doer2.perform ();
         assertFalse ("UnLocked", sks.getKeyProtectionInfo (key_handle).isPINBlocked ());
         assertTrue ("PIN User Modifiable", sks.getKeyProtectionInfo (key_handle).getPINUserModifiableFlag ());
-        privacy_enabled = false;
       }
   }

@@ -225,6 +225,10 @@
               be null if the return value equals to NullValue -->
          <xs:attribute name="NullValue" type="xs:string" use="optional"/>
 
+         <!-- If the return class may be created outside of WS using
+              an empty constructor.  Default: false -->
+         <xs:attribute name="NullConstructor" type="xs:boolean" use="optional"/>
+
       </xs:complexType>
    </xs:element>
 
