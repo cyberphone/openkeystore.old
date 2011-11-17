@@ -276,6 +276,46 @@ namespace org.webpki.sks.ws.client
         }
     }
 
+    public enum AppUsage : sbyte
+    {
+        SIGNATURE = 0x00,
+        AUTHENTICATION = 0x01,
+        ENCRYPTION = 0x02,
+        UNIVERSAL = 0x03
+    }
+
+    public enum Grouping : sbyte
+    {
+        NONE = 0x00,
+        SHARED = 0x01,
+        SIGNATURE_PLUS_STANDARD = 0x02,
+        UNIQUE = 0x03
+    }
+
+    public enum InputMethod : sbyte
+    {
+        PROGRAMMATIC = 0x01,
+        TRUSTED_GUI = 0x02,
+        ANY = 0x03
+    }
+
+    public enum PassphraseFormat : sbyte
+    {
+        NUMERIC = 0x00,
+        ALPHANUMERIC = 0x01,
+        STRING = 0x02,
+        BINARY = 0x03
+    }
+
+    public enum PatternRestriction : sbyte
+    {
+        TWO_IN_A_ROW = 0x01,
+        THREE_IN_A_ROW = 0x02,
+        SEQUENCE = 0x04,
+        REPEATED = 0x08,
+        MISSING_GROUP = 0x10
+    }
+
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ServiceModel.MessageContractAttribute(WrapperName="getDeviceInfo", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
     public class getDeviceInfo_Request

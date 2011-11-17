@@ -20,7 +20,11 @@ namespace org.webpki.sks.ws.client
 
     using org.webpki.sks.ws.client.BouncyCastle.Utilities.Encoders;
     
-    public static partial class Conversions
+    using System;
+    
+    using System.Collections.Generic; 
+    
+    public static class Conversions
     {
         public const string EC_PUBLIC_KEY  = "1.2.840.10045.2.1";
         
@@ -142,6 +146,33 @@ namespace org.webpki.sks.ws.client
                 blist.Add (cert.RawData);
             }
             return blist;
+        }
+
+        public static HashSet<PatternRestriction> SKSToPatternRestrictions (sbyte flags)
+        {
+            HashSet<PatternRestriction> pr = new HashSet<PatternRestriction> ();
+            foreach(sbyte b in Enum.GetValues(typeof(PatternRestriction)))
+            {
+                if ((b & flags) != 0)
+                {
+                    pr.Add ((PatternRestriction) b);
+                }
+            }
+            return pr;
+        }
+
+        public static sbyte PatternRestrictionsToSKS (HashSet<PatternRestriction> PatternRestrictions)
+        {
+            if (PatternRestrictions == null)
+            {
+            	return 0;
+            }
+            sbyte sks = 0;
+            foreach(PatternRestriction pr in PatternRestrictions)
+            {
+            	sks |= (sbyte) pr;
+            }
+            return sks;
         }
     }
 }

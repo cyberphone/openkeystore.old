@@ -50,6 +50,8 @@
             <xs:element ref="wsc:CppClient" minOccurs="0"/>
 
             <xs:element ref="wsc:Exception" minOccurs="0" maxOccurs="unbounded"/>
+
+            <xs:element ref="wsc:Enumeration" minOccurs="0" maxOccurs="unbounded"/>
             
             <xs:element ref="wsc:ReturnClass" minOccurs="0" maxOccurs="unbounded"/>
 
@@ -194,6 +196,26 @@
       </xs:complexType>
    </xs:element>
 
+   <xs:element name="Enumeration">
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="Entry" maxOccurs="unbounded">
+               <xs:complexType>
+                  <xs:attribute name="Name" type="wsc:id" use="required"/>
+                  <xs:attribute name="Value" type="xs:string" use="required"/>
+               </xs:complexType>
+            </xs:element>
+         </xs:sequence> 
+
+         <!-- Exception Canonicalized Name -->
+         <xs:attribute name="ClassName" type="wsc:id" use="required"/>
+
+         <!-- Type -->
+         <xs:attribute name="Type" type="xs:string" use="required"/>
+
+      </xs:complexType>
+   </xs:element>
+
    <xs:element name="Exception">
       <xs:complexType>
          <xs:sequence>
@@ -202,7 +224,7 @@
          </xs:sequence> 
 
          <!-- Exception Canonicalized Name -->
-         <xs:attribute name="ClassName" type="wsc:xmlid" use="required"/>
+         <xs:attribute name="ClassName" type="wsc:id" use="required"/>
 
          <!-- XML -->
          <xs:attribute name="XMLName" type="wsc:id" use="optional"/>
@@ -219,7 +241,7 @@
 
          <!-- Full java path class name.  The .NET generator only uses the
               class part, while the JNI driver needs the entire path -->
-         <xs:attribute name="ClassName" type="wsc:xmlid" use="required"/>
+         <xs:attribute name="ClassName" type="wsc:id" use="required"/>
 
          <!-- If the method has a "Returns" the entire return should
               be null if the return value equals to NullValue -->

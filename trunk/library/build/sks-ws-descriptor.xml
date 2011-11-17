@@ -42,6 +42,7 @@
                         org.bouncycastle.jce.provider.BouncyCastleProvider
                         org.webpki.crypto.CertificateUtil
                         org.webpki.sks.ws.TrustedGUIAuthorization
+                        org.webpki.sks.SKSException
                         org.webpki.sks.EnumeratedKey
                         org.webpki.sks.ProvisioningSession
                         org.webpki.sks.EnumeratedProvisioningSession
@@ -250,7 +251,7 @@
 
    <CppClient ClassName="SKSWSProxy"/>
 
-   <Exception ClassName="org.webpki.sks.SKSException">
+   <Exception ClassName="SKSException">
      <Property Name="message"             Type="string"/>
      <Property Name="error"               Type="int"/>
      <Constant Name="ERROR_AUTHORIZATION" Type="int" Value="0x01"/>
@@ -266,22 +267,57 @@
      <Constant Name="ERROR_EXTERNAL"      Type="int" Value="0x0B"/>
      <Constant Name="ERROR_USER_ABORT"    Type="int" Value="0x0C"/>
    </Exception>
-
-   <ReturnClass ClassName="org.webpki.sks.DeviceInfo"/>
-
-   <ReturnClass ClassName="org.webpki.sks.ProvisioningSession"/>
-
-   <ReturnClass ClassName="org.webpki.sks.KeyData"/>
-
-   <ReturnClass ClassName="org.webpki.sks.Extension"/>
    
-   <ReturnClass ClassName="org.webpki.sks.EnumeratedKey" NullValue="0" NullConstructor="true"/>
+   <Enumeration ClassName="AppUsage" Type="byte">
+     <Entry Name="SIGNATURE"      Value="0x00"/>
+     <Entry Name="AUTHENTICATION" Value="0x01"/>
+     <Entry Name="ENCRYPTION"     Value="0x02"/>
+     <Entry Name="UNIVERSAL"      Value="0x03"/>
+   </Enumeration>
+
+   <Enumeration ClassName="Grouping" Type="byte">
+     <Entry Name="NONE"                    Value="0x00"/>
+     <Entry Name="SHARED"                  Value="0x01"/>
+     <Entry Name="SIGNATURE_PLUS_STANDARD" Value="0x02"/>
+     <Entry Name="UNIQUE"                  Value="0x03"/>
+   </Enumeration>
+
+  <Enumeration ClassName="InputMethod" Type="byte">
+     <Entry Name="PROGRAMMATIC" Value="0x01"/>
+     <Entry Name="TRUSTED_GUI"  Value="0x02"/>
+     <Entry Name="ANY"          Value="0x03"/>
+   </Enumeration>
+
+   <Enumeration ClassName="PassphraseFormat" Type="byte">
+     <Entry Name="NUMERIC" Value="0x00"/>
+     <Entry Name="ALPHANUMERIC" Value="0x01"/>
+     <Entry Name="STRING" Value="0x02"/>
+     <Entry Name="BINARY" Value="0x03"/>
+   </Enumeration>
+
+   <Enumeration ClassName="PatternRestriction" Type="byte">
+     <Entry Name="TWO_IN_A_ROW"   Value="0x01"/>
+     <Entry Name="THREE_IN_A_ROW" Value="0x02"/>
+     <Entry Name="SEQUENCE"       Value="0x04"/>
+     <Entry Name="REPEATED"       Value="0x08"/>
+     <Entry Name="MISSING_GROUP"  Value="0x10"/>
+   </Enumeration>
+
+   <ReturnClass ClassName="DeviceInfo"/>
+
+   <ReturnClass ClassName="ProvisioningSession"/>
+
+   <ReturnClass ClassName="KeyData"/>
+
+   <ReturnClass ClassName="Extension"/>
    
-   <ReturnClass ClassName="org.webpki.sks.EnumeratedProvisioningSession" NullValue="0" NullConstructor="true"/>
+   <ReturnClass ClassName="EnumeratedKey" NullValue="0" NullConstructor="true"/>
    
-   <ReturnClass ClassName="org.webpki.sks.KeyAttributes"/>
+   <ReturnClass ClassName="EnumeratedProvisioningSession" NullValue="0" NullConstructor="true"/>
    
-   <ReturnClass ClassName="org.webpki.sks.KeyProtectionInfo">
+   <ReturnClass ClassName="KeyAttributes"/>
+   
+   <ReturnClass ClassName="KeyProtectionInfo">
      <Constant Name="PROTSTAT_PIN_PROTECTED" Type="byte" Value="0x01"/>
      <Constant Name="PROTSTAT_PUK_PROTECTED" Type="byte" Value="0x02"/>
      <Constant Name="PROTSTAT_PIN_BLOCKED"   Type="byte" Value="0x04"/>

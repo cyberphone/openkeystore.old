@@ -564,7 +564,7 @@ public class WSCreator extends XMLObjectWrapper
         
         public String dotNetReturnClass ()
           {
-            return return_class == null ? null : return_class.name;
+            return return_class == null ? null : return_class.class_name;
           }
 
         public void writeNetTypedList (boolean actual) throws IOException
@@ -620,6 +620,13 @@ public class WSCreator extends XMLObjectWrapper
         String value;
       }
 
+    class EnumerationClass
+      {
+        LinkedHashMap<String,String> entries = new LinkedHashMap<String,String> ();
+        DataType type;
+        String class_name;
+      }
+
     class WSException extends Container
       {
         Collection<Property> getPropsMinusMessage ()
@@ -636,8 +643,6 @@ public class WSCreator extends XMLObjectWrapper
               }
             return filtered;
           }
-
-        String class_name;
 
         String getName ()
           {
@@ -699,8 +704,6 @@ public class WSCreator extends XMLObjectWrapper
       {
         String class_name;
         
-        String name;
-        
         String null_value;  // May be null
         
         boolean has_null_constructor;
@@ -714,6 +717,7 @@ public class WSCreator extends XMLObjectWrapper
     LinkedHashMap<String, SuppressRule> dotnet_suppress_rules = new LinkedHashMap<String, SuppressRule> ();
     LinkedHashMap<String, EmbedRule> dotnet_embed_rules = new LinkedHashMap<String, EmbedRule> ();
     LinkedHashMap<String, ReturnClass> return_classes = new LinkedHashMap<String, ReturnClass> ();
+    LinkedHashMap<String, EnumerationClass> enumerations = new LinkedHashMap<String, EnumerationClass> ();
     boolean add_main;
     String dot_net_registry_url;
     String dot_net_default_url;
@@ -835,16 +839,7 @@ public class WSCreator extends XMLObjectWrapper
           {
             rd.getNext ();
             WSException exception = new WSException ();
-            exception.name = exception.class_name = attr.getString ("ClassName");
-            if (jserver)
-              {
-                addImport (exception.name);
-              }
-            int i = exception.name.lastIndexOf ('.');
-            if (i++ > 0)
-              {
-                exception.name = exception.name.substring (i);
-              }
+            exception.name = attr.getString ("ClassName");
             exception.xml_name = attr.getStringConditional ("XMLName");
             rd.getChild ();
             exception.properties = getProperties (rd, "Property");
@@ -872,20 +867,35 @@ public class WSCreator extends XMLObjectWrapper
             rd.getParent ();
             exceptions.put (exception.name, exception);
           }
+        while (rd.hasNext ("Enumeration"))
+          {
+            rd.getNext ();
+            EnumerationClass enumeration = new EnumerationClass ();
+            enumeration.class_name = attr.getString ("ClassName");
+            enumeration.type = getDataType (attr.getString ("Type"));
+            rd.getChild ();
+            while (rd.hasNext ("Entry"))
+              {
+                rd.getNext ();
+                enumeration.entries.put (attr.getString ("Name"), attr.getString ("Value"));
+              }
+            rd.getParent ();
+            if (enumerations.put (enumeration.class_name, enumeration) != null)
+              {
+                bad ("Duplicate enum" + enumeration.class_name);
+              }
+          }
         while (rd.hasNext ("ReturnClass"))
           {
             rd.getNext ();
             ReturnClass return_class = new ReturnClass ();
-            String name = return_class.class_name = attr.getString ("ClassName");
-            int i = name.lastIndexOf ('.');
-            if (i < 0) i = -1;
-            return_class.name = name.substring (i + 1);
+            return_class.class_name = attr.getString ("ClassName");
             return_class.null_value = attr.getStringConditional ("NullValue");
             return_class.has_null_constructor = attr.getBooleanConditional ("NullConstructor");
             rd.getChild ();
             return_class.constants = getConstants (rd);
             rd.getParent ();
-            return_classes.put (return_class.name, return_class);
+            return_classes.put (return_class.class_name, return_class);
           }
         do
           {
@@ -1182,7 +1192,7 @@ public class WSCreator extends XMLObjectWrapper
               }
             else
               {
-                write (dotnetdoc_file, meth.return_class.name);
+                write (dotnetdoc_file, meth.return_class.class_name);
               }
             if (meth.return_prop != null && meth.return_prop.nullable && !meth.return_prop.listtype) 
               {
@@ -1449,6 +1459,25 @@ public class WSCreator extends XMLObjectWrapper
             write (file, "    }\n");
           }
 
+        for (String ex : enumerations.keySet ())
+          {
+            EnumerationClass enum_class = enumerations.get (ex);
+            write (file, "\n" + 
+                "    public enum " + enum_class.class_name + " : " + enum_class.type.csname + "\n" +
+                "    {\n");
+            next = false;
+            for (String key : enum_class.entries.keySet ())
+              {
+                if (next)
+                  {
+                    write (file, ",\n");
+                  }
+                next = true;
+                write (file, "        " + key + " = " + enum_class.entries.get (key)); 
+              }
+            write (file, "\n    }\n");
+          }
+        
         for (Method meth : methods)
           {
             writeNetWrapper (true, meth);
