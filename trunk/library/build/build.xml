@@ -59,7 +59,7 @@
 	      <available file="${src_dir}/org/webpki/sks/ws/client/SKSException_Exception.java"/>
 	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSException_Exception.java"/>
 	      <available file="${dot_net_dir}/src/SKSWSProxy.cs"/>
-		  <uptodate srcfile="${ws.def}" targetfile="${dot_net_dir}/src/SKSWSProxy.cs"/>
+		  <uptodate srcfile="${ws.def}" targetfile="${dot_net_dir}/client/SKSWSProxy.cs"/>
 	      <available file="${cpp_dir}/src/SKSWSProxy.cpp"/>
 		  <uptodate srcfile="${ws.def}" targetfile="${cpp_dir}/src/SKSWSProxy.cpp"/>
 	      <available file="${cpp_dir}/src/SKSWSProxy.h"/>
@@ -165,7 +165,7 @@
     </antcall>
     <antcall target="_ws-gen">
       <param name="cmd" value="dotnetclient"/>
-      <param name="out" value="${dot_net_dir}/src"/>
+      <param name="out" value="${dot_net_dir}/client"/>
     </antcall>
     <antcall target="_ws-gen">
       <param name="cmd" value="cppclient"/>

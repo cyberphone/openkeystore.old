@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <!-- NAnt build file for .NET SKSWS -->
 <project name="SKSWS" default="build">
-    <property name="basename" value="org.webpki.sks.ws.client"/>
+    <property name="client.library.name" value="org.webpki.sks.ws.client"/>
+    <property name="test.library.name" value="org.webpki.sks.test"/>
     <property name="debug" value="false"/>
     <property name="rebuild" value="false" overwrite="false"/>
     <property name="build.dir" value="../dist"/>
-    <property name="src.dir" value="src"/>
+    <property name="client.src.dir" value="client"/>
+    <property name="test.src.dir" value="test"/>
     <property name="image.dir" value="../../resources/images"/>
     <property name="nant.settings.currentframework" value="net-4.0"/>
 
@@ -18,11 +20,11 @@
 -->
     <target name="build">
       <csc target="library"
-           output="${build.dir}/${basename}.dll" 
+           output="${build.dir}/${client.library.name}.dll" 
            debug="${debug}"
            rebuild="${rebuild}"
            keyfile="b651fd748a51c307.snk">
-            <sources basedir="${src.dir}">
+            <sources basedir="${client.src.dir}">
                 <include name="**/*.cs"/>
             </sources>
             <references>
@@ -43,6 +45,44 @@
     
 <!--
 ######################################################################
+#            Builds the .NET SKS WS Test Assembly DLL                #
+#                                                                    #
+#    This library depends on BouncyCastle and V4 of .NET             #
+######################################################################
+-->
+    <target name="test" depends="build">
+      <csc target="library"
+           output="${build.dir}/${test.library.name}.dll" 
+           debug="${debug}"
+           rebuild="${rebuild}"
+           keyfile="b651fd748a51c307.snk">
+            <sources basedir="${test.src.dir}">
+                <include name="Device.cs"/>
+                <include name="PINPol.cs"/>
+                <include name="PUKPol.cs"/>
+            </sources>
+            <references>
+                <include name="System.dll"/>
+                <include name="System.Data.dll"/>
+                <include name="System.ServiceModel.dll"/>
+                <include name="System.Runtime.Serialization.dll"/>
+                <include name="System.Xml.dll"/>
+                <include name="../dist/${client.library.name}.dll" />
+                <include name="third-party-dlls/BouncyCastle.Crypto.dll" />
+            </references>
+<!--
+            <resources prefix="sks" basedir="${image.dir}">
+                <include name="encrypt.gif"/>
+                <include name="idcard.gif"/>
+                <include name="signsymb.gif"/>
+                <include name="keyinfo.png"/>
+            </resources>
+-->
+        </csc>
+    </target>
+
+<!--
+######################################################################
 #   A small test program that signs data using the first available   #
 #   key or a key specified by the command line option "-D:key=nnn".  #
 #                                                                    #
@@ -52,17 +92,17 @@
     <target name="sign" depends="build">
       <script language="C#">
           <references>
-                <include name="System.Data.dll"/>
-                <include name="System.dll"/>
-                <include name="System.Core.dll"/>
-                 <include name="System.Runtime.Serialization.dll"/>
-                <include name="System.ServiceModel.dll"/>
-                <include name="System.Xml.dll"/>
-              <include name="../dist/${basename}.dll" />
+              <include name="System.Data.dll"/>
+              <include name="System.dll"/>
+              <include name="System.Core.dll"/>
+              <include name="System.Runtime.Serialization.dll"/>
+              <include name="System.ServiceModel.dll"/>
+              <include name="System.Xml.dll"/>
+              <include name="../dist/${client.library.name}.dll" />
               <include name="third-party-dlls/BouncyCastle.Crypto.dll" />
           </references>
           <imports>
-              <import namespace="${basename}" />
+              <import namespace="${client.library.name}" />
               <import namespace="System.Security.Cryptography" />
            </imports>
           <code>
