@@ -232,4 +232,18 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
         return false;
       }
 
+    @Override
+    public String[] listDevices () throws SKSException
+      {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+    @Override
+    public void setDeviceID (String device_id)
+      {
+        // TODO Auto-generated method stub
+        
+      }
+
   }

@@ -41,7 +41,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="getDeviceInfo")
     @RequestWrapper(localName="getDeviceInfo", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="getDeviceInfo.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void getDeviceInfo (@WebParam(name="APILevel", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+    public void getDeviceInfo (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               String device_id,
+                               @WebParam(name="APILevel", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<Short> api_level,
                                @WebParam(name="UpdateURL", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<String> update_url,
@@ -71,7 +73,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="createProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="createProvisioningSession.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public int createProvisioningSession (@WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public int createProvisioningSession (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                          String device_id,
+                                          @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                           String algorithm,
                                           @WebParam(name="PrivacyEnabled", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                           boolean privacy_enabled,
@@ -101,7 +105,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="closeProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="closeProvisioningSession.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="Attestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public byte[] closeProvisioningSession (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] closeProvisioningSession (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                            String device_id,
+                                            @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                             int provisioning_handle,
                                             @WebParam(name="Nonce", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                             byte[] nonce,
@@ -113,7 +119,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="enumerateProvisioningSessions", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="enumerateProvisioningSessions.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public int enumerateProvisioningSessions (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public int enumerateProvisioningSessions (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                              String device_id,
+                                              @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                               int provisioning_handle,
                                               @WebParam(name="ProvisioningState", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                               boolean provisioning_state,
@@ -138,7 +146,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="abortProvisioningSession")
     @RequestWrapper(localName="abortProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="abortProvisioningSession.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void abortProvisioningSession (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void abortProvisioningSession (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                          String device_id,
+                                          @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                           int provisioning_handle)
     throws SKSException_Exception;
 
@@ -146,7 +156,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="signProvisioningSessionData", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="signProvisioningSessionData.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public byte[] signProvisioningSessionData (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] signProvisioningSessionData (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                               String device_id,
+                                               @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                                int provisioning_handle,
                                                @WebParam(name="Data", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                                byte[] data)
@@ -156,7 +168,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="createPUKPolicy", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="createPUKPolicy.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="PUKPolicyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public int createPUKPolicy (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public int createPUKPolicy (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                String device_id,
+                                @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                 int provisioning_handle,
                                 @WebParam(name="ID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                 String id,
@@ -174,7 +188,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="createPINPolicy", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="createPINPolicy.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="PINPolicyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public int createPINPolicy (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public int createPINPolicy (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                String device_id,
+                                @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                 int provisioning_handle,
                                 @WebParam(name="ID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                 String id,
@@ -206,7 +222,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="createKeyEntry", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="createKeyEntry.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public int createKeyEntry (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public int createKeyEntry (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               String device_id,
+                               @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                int provisioning_handle,
                                @WebParam(name="ID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                String id,
@@ -248,7 +266,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="getKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="getKeyHandle.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public int getKeyHandle (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public int getKeyHandle (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                             String device_id,
+                             @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                              int provisioning_handle,
                              @WebParam(name="ID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                              String id)
@@ -257,7 +277,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="setCertificatePath")
     @RequestWrapper(localName="setCertificatePath", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="setCertificatePath.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void setCertificatePath (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void setCertificatePath (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                    String device_id,
+                                    @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                     int key_handle,
                                     @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                     List<byte[]> certificate_path,
@@ -268,7 +290,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="setSymmetricKey")
     @RequestWrapper(localName="setSymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="setSymmetricKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void setSymmetricKey (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void setSymmetricKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                 String device_id,
+                                 @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                  int key_handle,
                                  @WebParam(name="SymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                  byte[] symmetric_key,
@@ -279,7 +303,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="addExtension")
     @RequestWrapper(localName="addExtension", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="addExtension.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void addExtension (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void addExtension (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              String device_id,
+                              @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               int key_handle,
                               @WebParam(name="Type", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               String type,
@@ -296,7 +322,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="restorePrivateKey")
     @RequestWrapper(localName="restorePrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="restorePrivateKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void restorePrivateKey (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void restorePrivateKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                   String device_id,
+                                   @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                    int key_handle,
                                    @WebParam(name="PrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                    byte[] private_key,
@@ -307,7 +335,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="pp_deleteKey")
     @RequestWrapper(localName="pp_deleteKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="pp_deleteKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void pp_deleteKey (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void pp_deleteKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              String device_id,
+                              @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               int provisioning_handle,
                               @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               int target_key_handle,
@@ -320,7 +350,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="pp_unlockKey")
     @RequestWrapper(localName="pp_unlockKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="pp_unlockKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void pp_unlockKey (@WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void pp_unlockKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              String device_id,
+                              @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               int provisioning_handle,
                               @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               int target_key_handle,
@@ -333,7 +365,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="pp_updateKey")
     @RequestWrapper(localName="pp_updateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="pp_updateKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void pp_updateKey (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void pp_updateKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              String device_id,
+                              @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               int key_handle,
                               @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               int target_key_handle,
@@ -346,7 +380,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="pp_cloneKeyProtection")
     @RequestWrapper(localName="pp_cloneKeyProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="pp_cloneKeyProtection.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void pp_cloneKeyProtection (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void pp_cloneKeyProtection (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       String device_id,
+                                       @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                        int key_handle,
                                        @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                        int target_key_handle,
@@ -360,7 +396,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="enumerateKeys", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="enumerateKeys.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public int enumerateKeys (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public int enumerateKeys (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              String device_id,
+                              @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               int key_handle,
                               @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                               Holder<Integer> provisioning_handle)
@@ -369,7 +407,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="getKeyAttributes")
     @RequestWrapper(localName="getKeyAttributes", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="getKeyAttributes.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void getKeyAttributes (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void getKeyAttributes (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  String device_id,
+                                  @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                   int key_handle,
                                   @WebParam(name="IsSymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                   Holder<Boolean> is_symmetric_key,
@@ -388,7 +428,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="getKeyProtectionInfo")
     @RequestWrapper(localName="getKeyProtectionInfo", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="getKeyProtectionInfo.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void getKeyProtectionInfo (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void getKeyProtectionInfo (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                      String device_id,
+                                      @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                       int key_handle,
                                       @WebParam(name="ProtectionStatus", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                       Holder<Byte> protection_status,
@@ -433,7 +475,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="getExtension")
     @RequestWrapper(localName="getExtension", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="getExtension.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void getExtension (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void getExtension (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                              String device_id,
+                              @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               int key_handle,
                               @WebParam(name="Type", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               String type,
@@ -448,7 +492,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="setProperty")
     @RequestWrapper(localName="setProperty", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="setProperty.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void setProperty (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void setProperty (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                             String device_id,
+                             @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                              int key_handle,
                              @WebParam(name="Type", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                              String type,
@@ -461,7 +507,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="deleteKey")
     @RequestWrapper(localName="deleteKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="deleteKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void deleteKey (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void deleteKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                           String device_id,
+                           @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                            int key_handle,
                            @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                            byte[] authorization)
@@ -471,7 +519,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="exportKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="exportKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="Key", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public byte[] exportKey (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] exportKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                             String device_id,
+                             @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                              int key_handle,
                              @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                              byte[] authorization)
@@ -480,7 +530,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="unlockKey")
     @RequestWrapper(localName="unlockKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="unlockKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void unlockKey (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void unlockKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                           String device_id,
+                           @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                            int key_handle,
                            @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                            byte[] authorization)
@@ -489,7 +541,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="changePIN")
     @RequestWrapper(localName="changePIN", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="changePIN.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void changePIN (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void changePIN (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                           String device_id,
+                           @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                            int key_handle,
                            @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                            byte[] authorization,
@@ -500,7 +554,9 @@ public interface SKSWSProxy
     @WebMethod(operationName="setPIN")
     @RequestWrapper(localName="setPIN", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="setPIN.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void setPIN (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void setPIN (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                        String device_id,
+                        @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                         int key_handle,
                         @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                         byte[] authorization,
@@ -512,7 +568,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="signHashedData", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="signHashedData.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public byte[] signHashedData (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] signHashedData (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  String device_id,
+                                  @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                   int key_handle,
                                   @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                   String algorithm,
@@ -530,7 +588,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="asymmetricKeyDecrypt", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="asymmetricKeyDecrypt.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public byte[] asymmetricKeyDecrypt (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] asymmetricKeyDecrypt (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        String device_id,
+                                        @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                         int key_handle,
                                         @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                         String algorithm,
@@ -548,7 +608,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="keyAgreement", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="keyAgreement.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="Key", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public byte[] keyAgreement (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] keyAgreement (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                String device_id,
+                                @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                 int key_handle,
                                 @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                 String algorithm,
@@ -566,7 +628,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="performHMAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="performHMAC.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public byte[] performHMAC (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] performHMAC (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               String device_id,
+                               @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                int key_handle,
                                @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                String algorithm,
@@ -582,7 +646,9 @@ public interface SKSWSProxy
     @RequestWrapper(localName="symmetricKeyEncrypt", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="symmetricKeyEncrypt.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public byte[] symmetricKeyEncrypt (@WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public byte[] symmetricKeyEncrypt (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       String device_id,
+                                       @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                        int key_handle,
                                        @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                        String algorithm,
@@ -598,15 +664,22 @@ public interface SKSWSProxy
                                        byte[] data)
     throws SKSException_Exception;
 
+    @WebMethod(operationName="listDevices")
+    @RequestWrapper(localName="listDevices", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="listDevices.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public List<String> listDevices ()
+    throws SKSException_Exception;
+
     @WebMethod(operationName="getVersion")
     @RequestWrapper(localName="getVersion", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="getVersion.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @WebResult(name="version", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Version", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     public String getVersion ();
 
     @WebMethod(operationName="logEvent")
     @RequestWrapper(localName="logEvent", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="logEvent.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void logEvent (@WebParam(name="description", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void logEvent (@WebParam(name="Description", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                           String description);
   }

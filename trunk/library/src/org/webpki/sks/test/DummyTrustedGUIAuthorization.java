@@ -17,7 +17,7 @@
 package org.webpki.sks.test;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 

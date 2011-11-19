@@ -46,7 +46,13 @@
       #                     getDeviceInfo                     #
       #########################################################
 -->
-      <xs:element name="getDeviceInfo"/>
+      <xs:element name="getDeviceInfo">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="getDeviceInfo.Response">
         <xs:complexType>
           <xs:sequence>
@@ -74,6 +80,7 @@
       <xs:element name="createProvisioningSession">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="Algorithm" type="xs:string"/>
             <xs:element name="PrivacyEnabled" type="xs:boolean"/>
             <xs:element name="ServerSessionID" type="xs:string"/>
@@ -105,6 +112,7 @@
       <xs:element name="closeProvisioningSession">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="Nonce" type="xs:base64Binary"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
@@ -127,6 +135,7 @@
       <xs:element name="enumerateProvisioningSessions">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ProvisioningState" type="xs:boolean"/>
           </xs:sequence>
@@ -156,6 +165,7 @@
       <xs:element name="abortProvisioningSession">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
           </xs:sequence>
         </xs:complexType>
@@ -170,6 +180,7 @@
       <xs:element name="signProvisioningSessionData">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="Data" type="xs:base64Binary"/>
           </xs:sequence>
@@ -191,6 +202,7 @@
       <xs:element name="createPUKPolicy">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ID" type="xs:string"/>
             <xs:element name="PUKValue" type="xs:base64Binary"/>
@@ -216,6 +228,7 @@
       <xs:element name="createPINPolicy">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ID" type="xs:string"/>
             <xs:element name="PUKPolicyHandle" type="xs:int"/>
@@ -248,6 +261,7 @@
       <xs:element name="createKeyEntry">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ID" type="xs:string"/>
             <xs:element name="Algorithm" type="xs:string"/>
@@ -285,6 +299,7 @@
       <xs:element name="getKeyHandle">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ID" type="xs:string"/>
           </xs:sequence>
@@ -306,6 +321,7 @@
       <xs:element name="setCertificatePath">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
@@ -322,6 +338,7 @@
       <xs:element name="setSymmetricKey">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="SymmetricKey" type="xs:base64Binary"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
@@ -338,6 +355,7 @@
       <xs:element name="addExtension">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Type" type="xs:string"/>
             <xs:element name="SubType" type="xs:byte"/>
@@ -357,6 +375,7 @@
       <xs:element name="restorePrivateKey">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="PrivateKey" type="xs:base64Binary"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
@@ -373,6 +392,7 @@
       <xs:element name="pp_deleteKey">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="TargetKeyHandle" type="xs:int"/>
             <xs:element name="Authorization" type="xs:base64Binary"/>
@@ -390,6 +410,7 @@
       <xs:element name="pp_unlockKey">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="TargetKeyHandle" type="xs:int"/>
             <xs:element name="Authorization" type="xs:base64Binary"/>
@@ -407,6 +428,7 @@
       <xs:element name="pp_updateKey">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="TargetKeyHandle" type="xs:int"/>
             <xs:element name="Authorization" type="xs:base64Binary"/>
@@ -424,6 +446,7 @@
       <xs:element name="pp_cloneKeyProtection">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="TargetKeyHandle" type="xs:int"/>
             <xs:element name="Authorization" type="xs:base64Binary"/>
@@ -441,6 +464,7 @@
       <xs:element name="enumerateKeys">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
           </xs:sequence>
         </xs:complexType>
@@ -462,6 +486,7 @@
       <xs:element name="getKeyAttributes">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
           </xs:sequence>
         </xs:complexType>
@@ -487,6 +512,7 @@
       <xs:element name="getKeyProtectionInfo">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
           </xs:sequence>
         </xs:complexType>
@@ -525,6 +551,7 @@
       <xs:element name="getExtension">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Type" type="xs:string"/>
           </xs:sequence>
@@ -548,6 +575,7 @@
       <xs:element name="setProperty">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Type" type="xs:string"/>
             <xs:element name="Name" type="xs:base64Binary"/>
@@ -565,6 +593,7 @@
       <xs:element name="deleteKey">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Authorization" type="xs:base64Binary" nillable="true" minOccurs="0"/>
           </xs:sequence>
@@ -580,6 +609,7 @@
       <xs:element name="exportKey">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Authorization" type="xs:base64Binary" nillable="true" minOccurs="0"/>
           </xs:sequence>
@@ -601,6 +631,7 @@
       <xs:element name="unlockKey">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Authorization" type="xs:base64Binary"/>
           </xs:sequence>
@@ -616,6 +647,7 @@
       <xs:element name="changePIN">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Authorization" type="xs:base64Binary"/>
             <xs:element name="NewPIN" type="xs:base64Binary"/>
@@ -632,6 +664,7 @@
       <xs:element name="setPIN">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Authorization" type="xs:base64Binary"/>
             <xs:element name="NewPIN" type="xs:base64Binary"/>
@@ -648,6 +681,7 @@
       <xs:element name="signHashedData">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Algorithm" type="xs:string"/>
             <xs:element name="Parameters" type="xs:base64Binary" nillable="true" minOccurs="0"/>
@@ -673,6 +707,7 @@
       <xs:element name="asymmetricKeyDecrypt">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Algorithm" type="xs:string"/>
             <xs:element name="Parameters" type="xs:base64Binary" nillable="true" minOccurs="0"/>
@@ -698,6 +733,7 @@
       <xs:element name="keyAgreement">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Algorithm" type="xs:string"/>
             <xs:element name="Parameters" type="xs:base64Binary" nillable="true" minOccurs="0"/>
@@ -723,6 +759,7 @@
       <xs:element name="performHMAC">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Algorithm" type="xs:string"/>
             <xs:element name="TrustedGUIAuthorization" type="xs:boolean"/>
@@ -747,6 +784,7 @@
       <xs:element name="symmetricKeyEncrypt">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Algorithm" type="xs:string"/>
             <xs:element name="Mode" type="xs:boolean"/>
@@ -767,6 +805,20 @@
 
 <!--
       #########################################################
+      #                      listDevices                      #
+      #########################################################
+-->
+      <xs:element name="listDevices"/>
+      <xs:element name="listDevices.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
       #                      getVersion                       #
       #########################################################
 -->
@@ -774,7 +826,7 @@
       <xs:element name="getVersion.Response">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="version" type="xs:string"/>
+            <xs:element name="Version" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -787,7 +839,7 @@
       <xs:element name="logEvent">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="description" type="xs:string"/>
+            <xs:element name="Description" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -1065,6 +1117,14 @@
     <wsdl:part name="parameters" element="tns:symmetricKeyEncrypt.Response"/>
   </wsdl:message>
 
+  <wsdl:message name="listDevices">
+    <wsdl:part name="parameters" element="tns:listDevices"/>
+  </wsdl:message>
+
+  <wsdl:message name="listDevices.Response">
+    <wsdl:part name="parameters" element="tns:listDevices.Response"/>
+  </wsdl:message>
+
   <wsdl:message name="getVersion">
     <wsdl:part name="parameters" element="tns:getVersion"/>
   </wsdl:message>
@@ -1278,6 +1338,12 @@
     <wsdl:operation name="symmetricKeyEncrypt">
       <wsdl:input message="tns:symmetricKeyEncrypt"/>
       <wsdl:output message="tns:symmetricKeyEncrypt.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="listDevices">
+      <wsdl:input message="tns:listDevices"/>
+      <wsdl:output message="tns:listDevices.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -1681,6 +1747,18 @@
       </wsdl:operation>
 
       <wsdl:operation name="symmetricKeyEncrypt">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="listDevices">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

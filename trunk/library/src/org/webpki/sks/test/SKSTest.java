@@ -571,6 +571,11 @@ public class SKSTest
           {
             tga = (TrustedGUIAuthorization) Class.forName (System.getProperty ("sks.auth.gui")).newInstance ();
             ((WSSpecific) sks).setTrustedGUIAuthorizationProvider (tga);
+            String device_id = System.getProperty ("sks.device");
+            if (device_id != null && device_id.length () != 0)
+              {
+                ((WSSpecific) sks).setDeviceID (device_id);
+              }
           }
         DeviceInfo dev = sks.getDeviceInfo ();
         reference_implementation = SKSReferenceImplementation.SKS_VENDOR_DESCRIPTION.equals (dev.getVendorDescription ());

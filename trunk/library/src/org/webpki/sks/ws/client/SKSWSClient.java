@@ -64,6 +64,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
     
     private TrustedGUIAuthorization tga;
     
+    private String device_id;
+    
     private class AuthorizationHolder
       {
         byte[] value;
@@ -191,7 +193,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             Holder<Integer> extension_data_size = new Holder<Integer> ();
             Holder<Boolean> device_pin_support = new Holder<Boolean> ();
             Holder<Boolean> biometric_support = new Holder<Boolean> ();
-            getSKSWS ().getDeviceInfo (api_level,
+            getSKSWS ().getDeviceInfo (device_id,
+                                       api_level,
                                        update_url,
                                        vendor_name,
                                        vendor_description,
@@ -247,7 +250,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             Holder<String> client_session_id = new Holder<String> ();
             Holder<byte[]>client_ephemeral_key = new Holder<byte[]> ();
             Holder<byte[]>attestation = new Holder<byte[]> ();
-            int provisioning_handle = getSKSWS ().createProvisioningSession (algorithm,
+            int provisioning_handle = getSKSWS ().createProvisioningSession (device_id,
+                                                                             algorithm,
                                                                              privacy_enabled,
                                                                              server_session_id,
                                                                              server_ephemeral_key.getEncoded (),
@@ -282,7 +286,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            return getSKSWS ().closeProvisioningSession (provisioning_handle,
+            return getSKSWS ().closeProvisioningSession (device_id,
+                                                         provisioning_handle,
                                                          nonce,
                                                          mac);
           }
@@ -305,7 +310,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             Holder<String> server_session_id = new Holder<String> ();
             Holder<String> client_session_id = new Holder<String> ();
             Holder<String> issuer_uri = new Holder<String> ();
-            provisioning_handle = getSKSWS ().enumerateProvisioningSessions (provisioning_handle,
+            provisioning_handle = getSKSWS ().enumerateProvisioningSessions (device_id,
+                                                                             provisioning_handle,
                                                                              provisioning_state,
                                                                              algorithm,
                                                                              privacy_enabled,
@@ -341,7 +347,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().abortProvisioningSession (provisioning_handle);
+            getSKSWS ().abortProvisioningSession (device_id,
+                                                  provisioning_handle);
           }
         catch (SKSException_Exception e)
           {
@@ -355,7 +362,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            return getSKSWS ().signProvisioningSessionData (provisioning_handle,
+            return getSKSWS ().signProvisioningSessionData (device_id,
+                                                            provisioning_handle,
                                                             data);
           }
         catch (SKSException_Exception e)
@@ -374,7 +382,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            return getSKSWS().createPUKPolicy (provisioning_handle,
+            return getSKSWS().createPUKPolicy (device_id,
+                                               provisioning_handle,
                                                id,
                                                puk_value,
                                                format,
@@ -404,7 +413,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            return getSKSWS().createPINPolicy (provisioning_handle,
+            return getSKSWS().createPINPolicy (device_id,
+                                               provisioning_handle,
                                                id,
                                                puk_policy_handle,
                                                user_defined,
@@ -451,7 +461,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
               {
                 lalg.add (alg);
               }
-            int key_handle = getSKSWS ().createKeyEntry (provisioning_handle,
+            int key_handle = getSKSWS ().createKeyEntry (device_id,
+                                                         provisioning_handle,
                                                          id,
                                                          algorithm,
                                                          server_seed,
@@ -489,7 +500,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            return getSKSWS ().getKeyHandle (provisioning_handle,
+            return getSKSWS ().getKeyHandle (device_id,
+                                             provisioning_handle,
                                              id);
           }
         catch (SKSException_Exception e)
@@ -510,7 +522,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
               {
                 lcert_path.add (cert.getEncoded ());
               }
-            getSKSWS ().setCertificatePath (key_handle,
+            getSKSWS ().setCertificatePath (device_id,
+                                            key_handle,
                                             lcert_path,
                                             mac);
           }
@@ -531,7 +544,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().setSymmetricKey (key_handle,
+            getSKSWS ().setSymmetricKey (device_id,
+                                         key_handle,
                                          symmetric_key,
                                          mac);
           }
@@ -551,7 +565,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().addExtension (key_handle,
+            getSKSWS ().addExtension (device_id,
+                                      key_handle,
                                       type,
                                       sub_type,
                                       qualifier,
@@ -571,7 +586,10 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().restorePrivateKey (key_handle, private_key, mac);
+            getSKSWS ().restorePrivateKey (device_id,
+                                           key_handle,
+                                           private_key,
+                                           mac);
           }
         catch (SKSException_Exception e)
           {
@@ -587,7 +605,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().pp_deleteKey (provisioning_handle,
+            getSKSWS ().pp_deleteKey (device_id,
+                                      provisioning_handle,
                                       target_key_handle,
                                       authorization,
                                       mac);
@@ -606,7 +625,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().pp_unlockKey (provisioning_handle,
+            getSKSWS ().pp_unlockKey (device_id,
+                                      provisioning_handle,
                                       target_key_handle,
                                       authorization,
                                       mac);
@@ -625,7 +645,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().pp_updateKey (key_handle,
+            getSKSWS ().pp_updateKey (device_id,
+                                      key_handle,
                                       target_key_handle,
                                       authorization,
                                       mac);
@@ -644,7 +665,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().pp_cloneKeyProtection (key_handle,
+            getSKSWS ().pp_cloneKeyProtection (device_id,
+                                               key_handle,
                                                target_key_handle,
                                                authorization,
                                                mac);
@@ -661,7 +683,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         try
           {
             Holder<Integer> provisioning_handle = new Holder<Integer> ();
-            key_handle = getSKSWS ().enumerateKeys (key_handle, provisioning_handle);
+            key_handle = getSKSWS ().enumerateKeys (device_id, key_handle, provisioning_handle);
             return key_handle == EnumeratedKey.INIT_ENUMERATION ? null : new EnumeratedKey (key_handle, provisioning_handle.value);
           }
         catch (SKSException_Exception e)
@@ -681,7 +703,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             Holder<List<byte[]>> certificate_path = new Holder<List<byte[]>> ();
             Holder<List<String>> endorsed_algorithms = new Holder<List<String>> ();
             Holder<List<String>> extension_types= new Holder<List<String>> ();
-            getSKSWS ().getKeyAttributes (key_handle,
+            getSKSWS ().getKeyAttributes (device_id,
+                                          key_handle,
                                           is_symmetric_key,
                                           app_usage,
                                           friendly_name,
@@ -729,7 +752,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             Holder<Byte> export_protection = new Holder<Byte> ();
             Holder<Byte> delete_protection = new Holder<Byte> ();
             Holder<Byte> key_backup = new Holder<Byte> ();
-            getSKSWS ().getKeyProtectionInfo (key_handle,
+            getSKSWS ().getKeyProtectionInfo (device_id,
+                                              key_handle,
                                               protection_status,
                                               puk_format,
                                               puk_retry_limit,
@@ -784,7 +808,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             Holder<Byte> sub_type = new Holder<Byte> ();
             Holder<byte[]> qualifier = new Holder<byte[]> ();
             Holder<byte[]> extension_data = new Holder<byte[]> ();
-            getSKSWS ().getExtension (key_handle,
+            getSKSWS ().getExtension (device_id,
+                                      key_handle,
                                       type,
                                       sub_type,
                                       qualifier,
@@ -807,7 +832,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().setProperty (key_handle,
+            getSKSWS ().setProperty (device_id,
+                                     key_handle,
                                      type,
                                      name,
                                      value);
@@ -824,7 +850,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().deleteKey (key_handle,
+            getSKSWS ().deleteKey (device_id,
+                                   key_handle,
                                    authorization);
           }
         catch (SKSException_Exception e)
@@ -839,7 +866,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            return getSKSWS ().exportKey (key_handle,
+            return getSKSWS ().exportKey (device_id,
+                                          key_handle,
                                           authorization);
           }
         catch (SKSException_Exception e)
@@ -854,7 +882,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().unlockKey (key_handle,
+            getSKSWS ().unlockKey (device_id,
+                                   key_handle,
                                    authorization);
           }
         catch (SKSException_Exception e)
@@ -870,7 +899,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().changePIN (key_handle,
+            getSKSWS ().changePIN (device_id,
+                                   key_handle,
                                    authorization,
                                    new_pin);
           }
@@ -887,7 +917,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            getSKSWS ().setPIN (key_handle,
+            getSKSWS ().setPIN (device_id,
+                                key_handle,
                                 authorization,
                                 new_pin);
           }
@@ -907,7 +938,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         try
           {
             AuthorizationHolder auth;
-            return getSKSWS ().signHashedData (key_handle,
+            return getSKSWS ().signHashedData (device_id,
+                                               key_handle,
                                                algorithm,
                                                parameters,
                                                getTrustedGUIAuthorization (key_handle,
@@ -931,7 +963,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         try
           {
             AuthorizationHolder auth;
-            return getSKSWS ().asymmetricKeyDecrypt (key_handle,
+            return getSKSWS ().asymmetricKeyDecrypt (device_id,
+                                                     key_handle,
                                                      algorithm,
                                                      parameters,
                                                      getTrustedGUIAuthorization (key_handle,
@@ -955,7 +988,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         try
           {
             AuthorizationHolder auth;
-            return getSKSWS ().keyAgreement (key_handle,
+            return getSKSWS ().keyAgreement (device_id,
+                                             key_handle,
                                              algorithm,
                                              parameters,
                                              getTrustedGUIAuthorization (key_handle,
@@ -978,7 +1012,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         try
           {
             AuthorizationHolder auth;
-            return getSKSWS ().performHMAC (key_handle, 
+            return getSKSWS ().performHMAC (device_id,
+                                            key_handle, 
                                             algorithm,
                                             getTrustedGUIAuthorization (key_handle,
                                                                         auth = new AuthorizationHolder (authorization)),
@@ -1002,7 +1037,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         try
           {
             AuthorizationHolder auth;
-            return getSKSWS ().symmetricKeyEncrypt (key_handle,
+            return getSKSWS ().symmetricKeyEncrypt (device_id,
+                                                    key_handle,
                                                     algorithm,
                                                     mode,
                                                     iv,
@@ -1010,6 +1046,19 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                                                                 auth = new AuthorizationHolder (authorization)),
                                                     auth.value,
                                                     data);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
+    public String[] listDevices () throws SKSException
+      {
+        try
+          {
+             return getSKSWS ().listDevices ().toArray (new String[0]);
           }
         catch (SKSException_Exception e)
           {
@@ -1036,6 +1085,11 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         return true;
       }
 
+    @Override
+    public void setDeviceID (String device_id)
+      {
+        this.device_id = device_id;
+      }
 
     /**
      * Test method. Use empty argument list for help.

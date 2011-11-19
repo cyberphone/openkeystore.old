@@ -245,6 +245,14 @@ namespace org.webpki.sks.ws.client
 
     public partial class SKSWSProxy
     {
+        private string device_id;
+        
+        public string DeviceID
+        {
+            get { return device_id; }
+            set { device_id = value; }
+        } 
+        
         private static byte[] SHARED_SECRET_32 = {0,1,2,3,4,5,6,7,8,9,1,0,3,2,5,4,7,6,9,8,9,8,7,6,5,4,3,2,1,0,3,2};
         
         public bool GetTrustedGUIAuthorization (int key_handle, ref byte[] authorization)

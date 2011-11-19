@@ -125,6 +125,8 @@ import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
 
+import org.webpki.sks.ws.WSSpecific;
+
 import org.webpki.tools.XML2HTMLPrinter;
 
 import org.webpki.util.ArrayUtil;
@@ -232,8 +234,16 @@ public class KeyGen2Test
               }
           }
         Security.insertProviderAt (new BouncyCastleProvider(), 1);
-        sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
         server_certificate = (X509Certificate) CertificateFactory.getInstance ("X.509").generateCertificate (KeyGen2Test.class.getResourceAsStream ("server-certificate.der"));
+        sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
+        if (sks instanceof WSSpecific)
+          {
+            String device_id = System.getProperty ("sks.device");
+            if (device_id != null && device_id.length () != 0)
+              {
+                ((WSSpecific) sks).setDeviceID (device_id);
+              }
+          }
       }
 
     @AfterClass

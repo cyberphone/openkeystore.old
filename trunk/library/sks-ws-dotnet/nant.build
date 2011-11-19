@@ -109,12 +109,21 @@
             <![CDATA[
 public static void ScriptMain(Project project)
 {
-    SKSWSProxy ws = SKSWSProxy.getDefaultSKSWSProxy();
-    EnumeratedKey ek = new EnumeratedKey();
-    while ((ek = ws.enumerateKeys(ek.KeyHandle)) != null)
-    {
-		try
-		{
+   try
+	{
+        SKSWSProxy ws = SKSWSProxy.getDefaultSKSWSProxy();
+        string device = project.Properties["device"];
+        if (device != null)
+        {
+            foreach (string device_id in ws.listDevices ())
+            {
+               System.Console.WriteLine ("Device: " + device_id);
+            }
+            ws.DeviceID = device;
+        }
+        EnumeratedKey ek = new EnumeratedKey();
+        while ((ek = ws.enumerateKeys(ek.KeyHandle)) != null)
+        {
 		    KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
 		    if (ka.IsSymmetricKey) continue;
 		    if (project.Properties["key"] != null && Int32.Parse(project.Properties["key"]) != ek.KeyHandle) continue;
@@ -134,14 +143,14 @@ public static void ScriptMain(Project project)
 			{
 				throw new NAnt.Core.BuildException ("FAILED SIGNATURE VERIFICATION!!!");
 			}
-		}
-		catch (SKSException e)
-		{
-		    throw new NAnt.Core.BuildException("Signing: " + e.Message + " code=" + e.Error);
-		}
-		return;
+		    return;
+        }
+        throw new NAnt.Core.BuildException ("NO SUITABLE KEY FOUND!!!");
     }
-    throw new NAnt.Core.BuildException ("NO SUITABLE KEY FOUND!!!");
+	catch (SKSException e)
+	{
+        throw new NAnt.Core.BuildException("Signing: " + e.Message + " code=" + e.Error);
+	}
 }
             ]]>
           </code>

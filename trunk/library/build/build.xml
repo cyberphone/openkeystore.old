@@ -4,6 +4,7 @@
   <property name="sks.implementation" value="org.webpki.sks.test.SKSReferenceImplementation"/>
   <property name="sks.auth.gui" value="org.webpki.sks.test.DummyTrustedGUIAuthorization"/>
   <property name="sks.ws.client" value="org.webpki.sks.ws.client.SKSWSClient"/>
+  <property name="sks.device" value=""/>
   <property name="src_dir" value="../src" />
   <property name="dot_net_dir" value="../sks-ws-dotnet" />
   <property name="cpp_dir" value="../sks-ws-cpp" />
@@ -58,7 +59,7 @@
 	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSExceptionBean.java"/>
 	      <available file="${src_dir}/org/webpki/sks/ws/client/SKSException_Exception.java"/>
 	      <uptodate srcfile="${ws.def}" targetfile="${src_dir}/org/webpki/sks/ws/client/SKSException_Exception.java"/>
-	      <available file="${dot_net_dir}/src/SKSWSProxy.cs"/>
+	      <available file="${dot_net_dir}/client/SKSWSProxy.cs"/>
 		  <uptodate srcfile="${ws.def}" targetfile="${dot_net_dir}/client/SKSWSProxy.cs"/>
 	      <available file="${cpp_dir}/src/SKSWSProxy.cpp"/>
 		  <uptodate srcfile="${ws.def}" targetfile="${cpp_dir}/src/SKSWSProxy.cpp"/>
@@ -329,6 +330,7 @@
     <junit fork="yes" forkmode="once" haltonfailure="yes">
       <test name="${test.class}"/>
     	<sysproperty key="sks.implementation" value="${sks.implementation}"/>
+    	<sysproperty key="sks.device" value="${sks.device}"/>
     	<sysproperty key="sks.auth.gui" value="${sks.auth.gui}"/>
     	<sysproperty key="test.dir" value="${test.dir}"/>
     	<sysproperty key="html.mode" value="${test.out.html}"/>
