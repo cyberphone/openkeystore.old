@@ -182,6 +182,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         try
           {
             Holder<Short> api_level = new Holder<Short> ();
+            Holder<Byte> device_type = new Holder<Byte> ();
             Holder<String> update_url = new Holder<String> ();
             Holder<String> vendor_name = new Holder<String> ();
             Holder<String> vendor_description = new Holder<String> ();
@@ -193,8 +194,10 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             Holder<Integer> extension_data_size = new Holder<Integer> ();
             Holder<Boolean> device_pin_support = new Holder<Boolean> ();
             Holder<Boolean> biometric_support = new Holder<Boolean> ();
+            Holder<String> connection_port = new Holder<String> ();
             getSKSWS ().getDeviceInfo (device_id,
                                        api_level,
+                                       device_type,
                                        update_url,
                                        vendor_name,
                                        vendor_description,
@@ -205,13 +208,15 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                        crypto_data_size,
                                        extension_data_size,
                                        device_pin_support,
-                                       biometric_support);
+                                       biometric_support,
+                                       connection_port);
             short[] lsizes = new short[rsa_key_sizes.value.size ()];
             for (int i = 0; i < rsa_key_sizes.value.size () ; i++)
               {
                 lsizes[i] = rsa_key_sizes.value.get (i);
               }
             return new DeviceInfo (api_level.value,
+                                   device_type.value,
                                    update_url.value,
                                    vendor_name.value,
                                    vendor_description.value,
@@ -222,7 +227,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                    crypto_data_size.value,
                                    extension_data_size.value,
                                    device_pin_support.value,
-                                   biometric_support.value);
+                                   biometric_support.value,
+                                   connection_port.value);
           }
         catch (SKSException_Exception e)
           {
@@ -1054,6 +1060,20 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
+    public String updateFirmware (byte[] chunk) throws SKSException
+      {
+        try
+          {
+             return getSKSWS ().updateFirmware (device_id,
+                                                chunk);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+    
+    @Override
     public String[] listDevices () throws SKSException
       {
         try
@@ -1108,5 +1128,6 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         SKSWSClient client = args[0].equals ("default") ? new SKSWSClient () : new SKSWSClient (args[0]);
         System.out.println ("Version=" + client.getVersion () + "\nDevice=" + client.getDeviceInfo ().getVendorDescription ());
       }
+
 
   }

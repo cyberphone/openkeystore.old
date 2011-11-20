@@ -57,6 +57,7 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="APILevel" type="xs:short"/>
+            <xs:element name="DeviceType" type="xs:byte"/>
             <xs:element name="UpdateURL" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="VendorName" type="xs:string"/>
             <xs:element name="VendorDescription" type="xs:string"/>
@@ -68,6 +69,7 @@
             <xs:element name="ExtensionDataSize" type="xs:int"/>
             <xs:element name="DevicePINSupport" type="xs:boolean"/>
             <xs:element name="BiometricSupport" type="xs:boolean"/>
+            <xs:element name="ConnectionPort" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -805,6 +807,27 @@
 
 <!--
       #########################################################
+      #                    updateFirmware                     #
+      #########################################################
+-->
+      <xs:element name="updateFirmware">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
+            <xs:element name="Chunk" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="updateFirmware.Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Result" type="xs:string" nillable="true" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+<!--
+      #########################################################
       #                      listDevices                      #
       #########################################################
 -->
@@ -1117,6 +1140,14 @@
     <wsdl:part name="parameters" element="tns:symmetricKeyEncrypt.Response"/>
   </wsdl:message>
 
+  <wsdl:message name="updateFirmware">
+    <wsdl:part name="parameters" element="tns:updateFirmware"/>
+  </wsdl:message>
+
+  <wsdl:message name="updateFirmware.Response">
+    <wsdl:part name="parameters" element="tns:updateFirmware.Response"/>
+  </wsdl:message>
+
   <wsdl:message name="listDevices">
     <wsdl:part name="parameters" element="tns:listDevices"/>
   </wsdl:message>
@@ -1338,6 +1369,12 @@
     <wsdl:operation name="symmetricKeyEncrypt">
       <wsdl:input message="tns:symmetricKeyEncrypt"/>
       <wsdl:output message="tns:symmetricKeyEncrypt.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="updateFirmware">
+      <wsdl:input message="tns:updateFirmware"/>
+      <wsdl:output message="tns:updateFirmware.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -1747,6 +1784,18 @@
       </wsdl:operation>
 
       <wsdl:operation name="symmetricKeyEncrypt">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="updateFirmware">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

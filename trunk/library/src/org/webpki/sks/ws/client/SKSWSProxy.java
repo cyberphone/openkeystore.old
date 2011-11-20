@@ -45,6 +45,8 @@ public interface SKSWSProxy
                                String device_id,
                                @WebParam(name="APILevel", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<Short> api_level,
+                               @WebParam(name="DeviceType", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<Byte> device_type,
                                @WebParam(name="UpdateURL", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<String> update_url,
                                @WebParam(name="VendorName", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
@@ -66,7 +68,9 @@ public interface SKSWSProxy
                                @WebParam(name="DevicePINSupport", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<Boolean> device_pin_support,
                                @WebParam(name="BiometricSupport", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                               Holder<Boolean> biometric_support)
+                               Holder<Boolean> biometric_support,
+                               @WebParam(name="ConnectionPort", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<String> connection_port)
     throws SKSException_Exception;
 
     @WebMethod(operationName="createProvisioningSession")
@@ -662,6 +666,16 @@ public interface SKSWSProxy
                                        byte[] authorization,
                                        @WebParam(name="Data", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                        byte[] data)
+    throws SKSException_Exception;
+
+    @WebMethod(operationName="updateFirmware")
+    @RequestWrapper(localName="updateFirmware", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="updateFirmware.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public String updateFirmware (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  String device_id,
+                                  @WebParam(name="Chunk", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  byte[] chunk)
     throws SKSException_Exception;
 
     @WebMethod(operationName="listDevices")

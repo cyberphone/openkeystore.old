@@ -246,4 +246,11 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
         
       }
 
+    @Override
+    public String updateFirmware (byte[] chunk) throws SKSException
+      {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
   }

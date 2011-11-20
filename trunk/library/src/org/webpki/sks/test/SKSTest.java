@@ -1590,7 +1590,7 @@ public class SKSTest
             assertTrue ("No flags should be set", kpi.getKeyBackup () == 0);
             device.sks.exportKey (key.key_handle, null);
             kpi = device.sks.getKeyProtectionInfo (key.key_handle);
-            assertTrue ("Flag must be set", kpi.getKeyBackup () == SecureKeyStore.KEY_BACKUP_LOCAL);
+            assertTrue ("Flag must be set", kpi.getKeyBackup () == KeyProtectionInfo.KEYBACKUP_LOCAL);
           }
         catch (SKSException e)
           {
@@ -1766,7 +1766,7 @@ public class SKSTest
                                            new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate ("CN=TEST18");
             key.setSymmetricKey (symmetric_key);
             sess.closeSession ();
-            assertTrue ("Server must be set", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == SecureKeyStore.KEY_BACKUP_SERVER);
+            assertTrue ("Server must be set", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == KeyProtectionInfo.KEYBACKUP_SERVER);
           }
       }
 
@@ -2107,7 +2107,7 @@ public class SKSTest
                                            key_usage).setCertificate ("CN=TEST18", key_pair.getPublic ());
             sess.restorePrivateKey (key, key_pair.getPrivate ());
             sess.closeSession ();
-            assertTrue ("Server must be set", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == SecureKeyStore.KEY_BACKUP_SERVER);
+            assertTrue ("Server must be set", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == KeyProtectionInfo.KEYBACKUP_SERVER);
             Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
             cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
             byte[] enc = cipher.doFinal (TEST_STRING);
@@ -2223,7 +2223,7 @@ public class SKSTest
                                        pin_policy,
                                        AppUsage.ENCRYPTION).setCertificate ("CN=TEST18");
         sess.closeSession ();
-        ProvSess sess2 = new ProvSess (device);
+        new ProvSess (device);
         try
           {
             key.setSymmetricKey (new byte[]{0,1,2,3,4,5,6,7,8,9});

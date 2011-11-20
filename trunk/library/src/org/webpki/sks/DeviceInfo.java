@@ -20,6 +20,21 @@ import java.security.cert.X509Certificate;
 
 public class DeviceInfo
   {
+    ///////////////////////////////////////////////////////////////////////////////////
+    // "DeviceType" constants
+    ///////////////////////////////////////////////////////////////////////////////////
+    public static final byte LOCATION_EXTERNAL           = 0x00;
+    public static final byte LOCATION_EMBEDDED           = 0x01;
+    public static final byte LOCATION_SOCKETED           = 0x02;
+    public static final byte LOCATION_SIM                = 0x03;
+    public static final byte LOCATION_MASK               = 0x03;
+    
+    public static final byte TYPE_SOFTWARE               = 0x00;
+    public static final byte TYPE_HARDWARE               = 0x04;
+    public static final byte TYPE_HSM                    = 0x08;
+    public static final byte TYPE_CPU                    = 0x0C;
+    public static final byte TYPE_MASK                   = 0x0C;
+    
     short api_level;
     
     public short getAPILevel ()
@@ -27,6 +42,13 @@ public class DeviceInfo
         return api_level;
       }
     
+    private byte device_type;
+
+    public byte getDeviceType ()
+      {
+        return device_type;
+      }
+
     String update_url;
     
     public String getUpdateURL ()
@@ -104,8 +126,15 @@ public class DeviceInfo
         return biometric_support;
       }
     
+    String connection_port;
+    public String getConnectionPort ()
+      {
+        return connection_port;
+      }
+
     
     public DeviceInfo (short api_level,
+                       byte device_type,
                        String update_url,  // May be null
                        String vendor_name,
                        String vendor_description,
@@ -116,9 +145,11 @@ public class DeviceInfo
                        int crypto_data_size,
                        int extension_data_size,
                        boolean device_pin_support,
-                       boolean biometric_support)
+                       boolean biometric_support,
+                       String connection_port)
       {
         this.api_level = api_level;
+        this.device_type = device_type;
         this.update_url = update_url;
         this.vendor_name = vendor_name;
         this.vendor_description = vendor_description;
@@ -130,5 +161,6 @@ public class DeviceInfo
         this.extension_data_size = extension_data_size;
         this.device_pin_support = device_pin_support;
         this.biometric_support = biometric_support;
+        this.connection_port = connection_port;
       }
   }

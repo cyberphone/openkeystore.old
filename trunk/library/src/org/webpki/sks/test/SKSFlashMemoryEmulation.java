@@ -72,29 +72,11 @@ import org.webpki.sks.SecureKeyStore;
  *                          #  SKS - Secure Key Store #
  *                          ###########################
  *
- *  SKS is a cryptographic module that supports On-line Provisioning and Management
- *  of PKI, Symmetric keys, PINs, PUKs and Extension data.
- *  
- *  VSDs (Virtual Security Domains), E2ES (End To End Security), and Transaction
- *  Oriented Provisioning enable multiple credential providers to securely and
- *  reliable share a key container, something which will become a necessity in
- *  mobile phones with embedded security hardware.
- *
- *  The following SKS Reference Implementation is intended to complement the
- *  specification by showing how the different constructs can be implemented.
- *
- *  In addition to the Reference Implementation there is a set of SKS JUnit tests
- *  that should work identical on a "real" SKS token.
- *
- *  Compared to the SKS specification, the Reference Implementation uses a slightly
- *  more java-centric way of passing parameters, including "null" arguments, but the
- *  content is supposed to be identical.
- *  
- *  Note that persistence is not supported by the Reference Implementation.
+ *  NOT READY. Expected to keep an RI using a Flash memory emulation model...
  *
  *  Author: Anders Rundgren
  */
-public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Serializable
+public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serializable
   {
     private static final long serialVersionUID = 1L;
 
@@ -102,7 +84,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     // SKS version and configuration data
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final String SKS_VENDOR_NAME                    = "WebPKI.org";
-    static final String SKS_VENDOR_DESCRIPTION             = "SKS Reference - Java Emulator Edition";
+    static final String SKS_VENDOR_DESCRIPTION             = "SKS Reference - Flash Emulator Edition";
     static final String SKS_UPDATE_URL                     = null;  // Change here to test or disable
     static final boolean SKS_DEVICE_PIN_SUPPORT            = true;  // Change here to test or disable
     static final boolean SKS_BIOMETRIC_SUPPORT             = true;  // Change here to test or disable

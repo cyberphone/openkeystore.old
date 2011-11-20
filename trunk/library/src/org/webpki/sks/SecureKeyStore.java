@@ -139,22 +139,6 @@ public interface SecureKeyStore
     byte KEY_ALGORITHM_TYPE_EC                = 0x01;
 
     ///////////////////////////////////////////////////////////////////////////////////
-    // "ProtectionStatus" constants
-    ///////////////////////////////////////////////////////////////////////////////////
-    byte PROTECTION_STATUS_NO_PIN             = 0x00;
-    byte PROTECTION_STATUS_PIN_PROTECTED      = 0x01;
-    byte PROTECTION_STATUS_PIN_BLOCKED        = 0x04;
-    byte PROTECTION_STATUS_PUK_PROTECTED      = 0x02;
-    byte PROTECTION_STATUS_PUK_BLOCKED        = 0x08;
-    byte PROTECTION_STATUS_DEVICE_PIN         = 0x10;
-
-    ///////////////////////////////////////////////////////////////////////////////////
-    // "KeyBackup" bit-field constants
-    ///////////////////////////////////////////////////////////////////////////////////
-    byte KEY_BACKUP_SERVER                    = 0x01;
-    byte KEY_BACKUP_LOCAL                     = 0x02;
- 
-    ///////////////////////////////////////////////////////////////////////////////////
     // Default algorithms
     ///////////////////////////////////////////////////////////////////////////////////
     short[] SKS_DEFAULT_RSA_SUPPORT       = {1024, 2048};
@@ -352,5 +336,7 @@ public interface SecureKeyStore
 
     byte[] exportKey (int key_handle,
                       byte[] authorization /* Must be null if not applicable */) throws SKSException;
+    
+    String updateFirmware (byte[] chunk) throws SKSException;
 
   }

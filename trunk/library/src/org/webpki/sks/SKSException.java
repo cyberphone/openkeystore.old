@@ -52,11 +52,14 @@ public class SKSException extends IOException
     /* Internal error */
     public static final int ERROR_INTERNAL       = 0x0A;
 
-    /* External error */
+    /* External: Arbitrary error */
     public static final int ERROR_EXTERNAL       = 0x0B;
 
-    /* User aborting PIN (or similar) error */
+    /* External: User aborting PIN (or similar) error */
     public static final int ERROR_USER_ABORT     = 0x0C;
+
+    /* External: Device not available  */
+    public static final int ERROR_NOT_AVAILABLE  = 0x0D;
 
     int error;
     

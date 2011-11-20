@@ -20,10 +20,24 @@ package org.webpki.sks;
 import java.util.EnumSet;
 import java.util.Set;
 
-import static org.webpki.sks.SecureKeyStore.*;
-
 public class KeyProtectionInfo
   {
+    ///////////////////////////////////////////////////////////////////////////////////
+    // "ProtectionStatus" constants
+    ///////////////////////////////////////////////////////////////////////////////////
+    public static final byte PROTSTAT_NO_PIN             = 0x00;
+    public static final byte PROTSTAT_PIN_PROTECTED      = 0x01;
+    public static final byte PROTSTAT_PIN_BLOCKED        = 0x04;
+    public static final byte PROTSTAT_PUK_PROTECTED      = 0x02;
+    public static final byte PROTSTAT_PUK_BLOCKED        = 0x08;
+    public static final byte PROTSTAT_DEVICE_PIN         = 0x10;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // "KeyBackup" bit-field constants
+    ///////////////////////////////////////////////////////////////////////////////////
+    public static final byte KEYBACKUP_SERVER            = 0x01;
+    public static final byte KEYBACKUP_LOCAL             = 0x02;
+ 
     private PassphraseFormat puk_format;
     
     private short puk_error_count;
@@ -69,7 +83,7 @@ public class KeyProtectionInfo
 
     public boolean hasLocalPUKProtection ()
       {
-        return (protection_status & PROTECTION_STATUS_PUK_PROTECTED) != 0;
+        return (protection_status & PROTSTAT_PUK_PROTECTED) != 0;
       }
     
     public PassphraseFormat getPUKFormat () throws SKSException
@@ -89,12 +103,12 @@ public class KeyProtectionInfo
 
     public boolean isPUKBlocked ()
       {
-        return (protection_status & PROTECTION_STATUS_PUK_BLOCKED) != 0;
+        return (protection_status & PROTSTAT_PUK_BLOCKED) != 0;
       }
 
     public boolean hasLocalPINProtection ()
       {
-        return (protection_status & PROTECTION_STATUS_PIN_PROTECTED) != 0;
+        return (protection_status & PROTSTAT_PIN_PROTECTED) != 0;
       }
 
     public PassphraseFormat getPINFormat () throws SKSException
@@ -134,12 +148,12 @@ public class KeyProtectionInfo
 
     public boolean isPINBlocked ()
       {
-        return (protection_status & PROTECTION_STATUS_PIN_BLOCKED) != 0;
+        return (protection_status & PROTSTAT_PIN_BLOCKED) != 0;
       }
 
     public boolean hasDevicePINProtection ()
       {
-        return (protection_status & PROTECTION_STATUS_DEVICE_PIN) != 0;
+        return (protection_status & PROTSTAT_DEVICE_PIN) != 0;
       }
 
     public short getPINErrorCount ()

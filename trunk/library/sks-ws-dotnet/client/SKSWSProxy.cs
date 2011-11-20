@@ -199,6 +199,11 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
+        updateFirmware_Response updateFirmware(updateFirmware_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
         listDevices_Response listDevices(listDevices_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
@@ -273,6 +278,8 @@ namespace org.webpki.sks.ws.client
 
         public const int ERROR_USER_ABORT = 0x0C;
 
+        public const int ERROR_NOT_AVAILABLE = 0x0D;
+
         private int error;
 
         public int Error
@@ -346,76 +353,113 @@ namespace org.webpki.sks.ws.client
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="DeviceType", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        #pragma warning disable 0649
+        internal sbyte _device_type;
+        #pragma warning restore 0649
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="UpdateURL", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal string _update_url;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="VendorName", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal string _vendor_name;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="VendorDescription", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal string _vendor_description;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="X509Certificate", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal List<byte[]> _certificate_path;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="SupportedAlgorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal List<string> _supported_algorithms;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=7)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="RSAExponentSupport", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal bool _rsa_exponent_support;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=7)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=8)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="RSAKeySize", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal List<short> _rsa_key_sizes;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=8)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=9)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="CryptoDataSize", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal int _crypto_data_size;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=9)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=10)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ExtensionDataSize", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal int _extension_data_size;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=10)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=11)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="DevicePINSupport", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal bool _device_pin_support;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=11)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=12)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="BiometricSupport", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal bool _biometric_support;
         #pragma warning restore 0649
 
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=13)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ConnectionPort", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        #pragma warning disable 0649
+        internal string _connection_port;
+        #pragma warning restore 0649
+
         internal DeviceInfo () {}
+
+        public const sbyte LOCATION_EXTERNAL = 0x00;
+
+        public const sbyte LOCATION_EMBEDDED = 0x01;
+
+        public const sbyte LOCATION_SOCKETED = 0x02;
+
+        public const sbyte LOCATION_SIM = 0x03;
+
+        public const sbyte LOCATION_MASK = 0x03;
+
+        public const sbyte TYPE_SOFTWARE = 0x00;
+
+        public const sbyte TYPE_HARDWARE = 0x04;
+
+        public const sbyte TYPE_HSM = 0x08;
+
+        public const sbyte TYPE_CPU = 0x0C;
+
+        public const sbyte TYPE_MASK = 0x0C;
 
         public short APILevel
         {
             get { return _api_level; }
+        }
+
+        public sbyte DeviceType
+        {
+            get { return _device_type; }
         }
 
         public string UpdateURL
@@ -471,6 +515,11 @@ namespace org.webpki.sks.ws.client
         public bool BiometricSupport
         {
             get { return _biometric_support; }
+        }
+
+        public string ConnectionPort
+        {
+            get { return _connection_port; }
         }
     }
 
@@ -2509,6 +2558,37 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="updateFirmware", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class updateFirmware_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="DeviceID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal string _device_id;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Chunk", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _chunk;
+
+        public updateFirmware_Request(string DeviceID,
+                                      byte[] Chunk)
+        {
+            _device_id = DeviceID;
+            _chunk = Chunk;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="updateFirmware.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class updateFirmware_Response
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Result", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        #pragma warning disable 0649
+        internal string _result;
+        #pragma warning restore 0649
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ServiceModel.MessageContractAttribute(WrapperName="listDevices", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
     public class listDevices_Request
     {
@@ -3285,6 +3365,20 @@ namespace org.webpki.sks.ws.client
                 }
             }
             while (true);
+        }
+
+        public string updateFirmware(byte[] Chunk)
+        {
+            try
+            {
+                updateFirmware_Response _res = base.Channel.updateFirmware(new updateFirmware_Request(device_id,
+                                                                                                      Chunk));
+                return _res._result;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
         }
 
         public List<string> listDevices()

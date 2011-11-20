@@ -130,7 +130,7 @@
         SecureKeyStore sks = devices.get (device_id);
         if (sks == null)
           {
-             throw new SKSException ("No such device: " + device_id, SKSException.ERROR_EXTERNAL);
+             throw new SKSException ("No such device: " + device_id, SKSException.ERROR_NOT_AVAILABLE);
           }
         return sks;
       }
@@ -298,6 +298,7 @@
      <Constant Name="ERROR_INTERNAL"      Type="int" Value="0x0A"/>
      <Constant Name="ERROR_EXTERNAL"      Type="int" Value="0x0B"/>
      <Constant Name="ERROR_USER_ABORT"    Type="int" Value="0x0C"/>
+     <Constant Name="ERROR_NOT_AVAILABLE" Type="int" Value="0x0D"/>
    </Exception>
    
    <Enumeration ClassName="AppUsage" Type="byte">
@@ -335,7 +336,18 @@
      <Entry Name="MISSING_GROUP"  Value="0x10"/>
    </Enumeration>
 
-   <ReturnClass ClassName="DeviceInfo"/>
+   <ReturnClass ClassName="DeviceInfo">
+     <Constant Name="LOCATION_EXTERNAL" Type="byte" Value="0x00"/>
+     <Constant Name="LOCATION_EMBEDDED" Type="byte" Value="0x01"/>
+     <Constant Name="LOCATION_SOCKETED" Type="byte" Value="0x02"/>
+     <Constant Name="LOCATION_SIM"      Type="byte" Value="0x03"/>
+     <Constant Name="LOCATION_MASK"     Type="byte" Value="0x03"/>
+     <Constant Name="TYPE_SOFTWARE"     Type="byte" Value="0x00"/>
+     <Constant Name="TYPE_HARDWARE"     Type="byte" Value="0x04"/>
+     <Constant Name="TYPE_HSM"          Type="byte" Value="0x08"/>
+     <Constant Name="TYPE_CPU"          Type="byte" Value="0x0C"/>
+     <Constant Name="TYPE_MASK"         Type="byte" Value="0x0C"/>
+   </ReturnClass>
 
    <ReturnClass ClassName="ProvisioningSession"/>
 
@@ -362,6 +374,7 @@
    <Method Name="getDeviceInfo" ReturnClass="DeviceInfo" Throws="SKSException">
      <Parameter Name="device_id"            Type="string" XMLName="DeviceID"           Null="true" SuppressRule="DEV"/>
      <Parameter Name="api_level"            Type="short"  XMLName="APILevel"           Mode="out"/>
+     <Parameter Name="device_type"          Type="byte"   XMLName="DeviceType"         Mode="out"/>
      <Parameter Name="update_url"           Type="string" XMLName="UpdateURL"          Mode="out" Null="true"/>
      <Parameter Name="vendor_name"          Type="string" XMLName="VendorName"         Mode="out"/>
      <Parameter Name="vendor_description"   Type="string" XMLName="VendorDescription"  Mode="out"/>
@@ -373,12 +386,14 @@
      <Parameter Name="extension_data_size"  Type="int"    XMLName="ExtensionDataSize"  Mode="out"/>
      <Parameter Name="device_pin_support"   Type="bool"   XMLName="DevicePINSupport"   Mode="out"/>
      <Parameter Name="biometric_support"    Type="bool"   XMLName="BiometricSupport"   Mode="out"/>
+     <Parameter Name="connection_port"      Type="string" XMLName="ConnectionPort"     Mode="out"/>
      <Code><![CDATA[
         log (device_id, "getDeviceInfo ()");
         try
           {
             DeviceInfo device_info = getDevice (device_id).getDeviceInfo ();
             api_level.value = device_info.getAPILevel ();
+            device_type.value= device_info.getDeviceType ();
             update_url.value = device_info.getUpdateURL ();
             vendor_name.value = device_info.getVendorName ();
             vendor_description.value = device_info.getVendorDescription ();
@@ -402,6 +417,7 @@
             extension_data_size.value = device_info.getExtensionDataSize ();
             device_pin_support.value = device_info.getDevicePINSupport ();
             biometric_support.value = device_info.getBiometricSupport ();
+            connection_port.value = device_info.getConnectionPort ();
           }
         catch (GeneralSecurityException e)
           {
@@ -1010,6 +1026,15 @@
                                             authorization);
         log (device_id, "symmetricKeyEncrypt (KeyHandle=" + key_handle + ")");
         return getDevice (device_id).symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
+]]></Code></Method>
+
+   <Method Name="updateFirmware" Throws="SKSException">
+     <Returns   Name="result"                    Type="string" XMLName="Result"        Null="true"/>
+     <Parameter Name="device_id"                 Type="string" XMLName="DeviceID"      Null="true" SuppressRule="DEV"/>
+     <Parameter Name="chunk"                     Type="binary" XMLName="Chunk"/>
+     <Code><![CDATA[
+        log (device_id, "updateFirmware (Chunk.length=" + chunk.length + ")");
+        return getDevice (device_id).updateFirmware (chunk);
 ]]></Code></Method>
 
    <Method Name="listDevices" Throws="SKSException">

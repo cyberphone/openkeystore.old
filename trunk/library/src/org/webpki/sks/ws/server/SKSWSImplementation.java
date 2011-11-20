@@ -149,7 +149,7 @@ public class SKSWSImplementation
         SecureKeyStore sks = devices.get (device_id);
         if (sks == null)
           {
-             throw new SKSException ("No such device: " + device_id, SKSException.ERROR_EXTERNAL);
+             throw new SKSException ("No such device: " + device_id, SKSException.ERROR_NOT_AVAILABLE);
           }
         return sks;
       }
@@ -216,6 +216,8 @@ public class SKSWSImplementation
                                String device_id,
                                @WebParam(name="APILevel", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<Short> api_level,
+                               @WebParam(name="DeviceType", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<Byte> device_type,
                                @WebParam(name="UpdateURL", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<String> update_url,
                                @WebParam(name="VendorName", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
@@ -237,7 +239,9 @@ public class SKSWSImplementation
                                @WebParam(name="DevicePINSupport", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<Boolean> device_pin_support,
                                @WebParam(name="BiometricSupport", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                               Holder<Boolean> biometric_support)
+                               Holder<Boolean> biometric_support,
+                               @WebParam(name="ConnectionPort", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<String> connection_port)
     throws SKSException
       {
         log (device_id, "getDeviceInfo ()");
@@ -245,6 +249,7 @@ public class SKSWSImplementation
           {
             DeviceInfo device_info = getDevice (device_id).getDeviceInfo ();
             api_level.value = device_info.getAPILevel ();
+            device_type.value= device_info.getDeviceType ();
             update_url.value = device_info.getUpdateURL ();
             vendor_name.value = device_info.getVendorName ();
             vendor_description.value = device_info.getVendorDescription ();
@@ -268,6 +273,7 @@ public class SKSWSImplementation
             extension_data_size.value = device_info.getExtensionDataSize ();
             device_pin_support.value = device_info.getDevicePINSupport ();
             biometric_support.value = device_info.getBiometricSupport ();
+            connection_port.value = device_info.getConnectionPort ();
           }
         catch (GeneralSecurityException e)
           {
@@ -1182,6 +1188,20 @@ public class SKSWSImplementation
                                             authorization);
         log (device_id, "symmetricKeyEncrypt (KeyHandle=" + key_handle + ")");
         return getDevice (device_id).symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
+      }
+
+    @WebMethod(operationName="updateFirmware")
+    @RequestWrapper(localName="updateFirmware", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="updateFirmware.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public String updateFirmware (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  String device_id,
+                                  @WebParam(name="Chunk", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  byte[] chunk)
+    throws SKSException
+      {
+        log (device_id, "updateFirmware (Chunk.length=" + chunk.length + ")");
+        return getDevice (device_id).updateFirmware (chunk);
       }
 
     @WebMethod(operationName="listDevices")
