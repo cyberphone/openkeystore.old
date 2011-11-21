@@ -79,14 +79,33 @@
           {
             Security.insertProviderAt (new BouncyCastleProvider(), 1);
             tga = (TrustedGUIAuthorization) Class.forName (System.getProperty ("sks.auth.gui")).newInstance ();
-            SecureKeyStore sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
-            default_device = sks;
-            DeviceInfo device_info = sks.getDeviceInfo ();
-            String device_id = DebugFormatter.getHexString (MessageDigest.getInstance ("SHA1").digest (device_info.getCertificatePath ()[0].getEncoded ()));
-            devices.put (device_id, sks);
-            System.out.println ("Device: " + device_info.getVendorDescription ());
-            System.out.println ("Vendor: " + device_info.getVendorName ());
-            System.out.println ("API Version: " + device_info.getAPILevel ());
+            String implementations = System.getProperty ("sks.implementation");
+            while (implementations != null)
+              {
+                String impl = implementations;
+                int next = implementations.indexOf (':');
+                if (next > 0)
+                  {
+                    impl = implementations.substring (0, next);
+                    implementations = implementations.substring (next + 1);
+                  }
+                else
+                  {
+                    implementations = null;
+                  }
+                SecureKeyStore sks = (SecureKeyStore) Class.forName (impl).newInstance ();
+                if (default_device == null)
+                  {
+                    default_device = sks;
+                  }
+                DeviceInfo device_info = sks.getDeviceInfo ();
+                String device_id = DebugFormatter.getHexString (MessageDigest.getInstance ("SHA1").digest (device_info.getCertificatePath ()[0].getEncoded ()));
+                devices.put (device_id, sks);
+                System.out.println ("Device: " + device_info.getVendorDescription ());
+                System.out.println ("Vendor: " + device_info.getVendorName ());
+                System.out.println ("API Version: " + device_info.getAPILevel ());
+                System.out.println ("DeviceID: " + device_id);
+              }
             System.out.println ("Trusted GUI: " + tga.getImplementation ());
           }
         catch (ClassNotFoundException e)

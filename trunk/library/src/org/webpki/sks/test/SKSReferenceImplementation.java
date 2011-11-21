@@ -35,6 +35,7 @@ import java.security.Signature;
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.AlgorithmParameterSpec;
@@ -2591,8 +2592,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             if (!privacy_enabled)
               {
-                Signature signer = Signature.getInstance ("SHA256withRSA");
-                signer.initSign (getAttestationKey ());
+                PrivateKey attester = getAttestationKey ();
+                Signature signer = Signature.getInstance (attester instanceof RSAPrivateKey ? "SHA256withRSA" : "SHA256withECDSA");
+                signer.initSign (attester);
                 signer.update (attestation);
                 attestation = signer.sign ();
               }

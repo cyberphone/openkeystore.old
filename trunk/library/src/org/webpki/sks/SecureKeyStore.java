@@ -141,18 +141,18 @@ public interface SecureKeyStore
     ///////////////////////////////////////////////////////////////////////////////////
     // Default algorithms
     ///////////////////////////////////////////////////////////////////////////////////
-    short[] SKS_DEFAULT_RSA_SUPPORT       = {1024, 2048};
+    short[] SKS_DEFAULT_RSA_SUPPORT           = {1024, 2048};
 
-    String ALGORITHM_KEY_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
+    String ALGORITHM_KEY_ATTEST_1             = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
 
-    String ALGORITHM_SESSION_KEY_ATTEST_1 = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
+    String ALGORITHM_SESSION_KEY_ATTEST_1     = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Miscellaneous
     ///////////////////////////////////////////////////////////////////////////////////
-    byte[] ZERO_LENGTH_ARRAY              = new byte[0];
+    byte[] ZERO_LENGTH_ARRAY                  = new byte[0];
     
-    short SKS_API_LEVEL                   = 0x0001;
+    short SKS_API_LEVEL                       = 100;
 
 
     ///////////////////////////////////////////////////////////////////////////////////
