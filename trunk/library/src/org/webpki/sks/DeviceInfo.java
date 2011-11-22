@@ -56,7 +56,7 @@ public class DeviceInfo
         return update_url;
       }
 
-    public String vendor_name;
+    String vendor_name;
     
     public String getVendorName ()
       {
@@ -127,9 +127,25 @@ public class DeviceInfo
       }
     
     String connection_port;
+    /**
+     * Holds an optional system-dependent string telling which logical
+     * or physical port the SKS is connected to.  This information is
+     * not gathered from the SKS device itself, but from the calling
+     * environment.  Suitable strings include "USB:4", "COM3", "TCP:192.168.0.45",
+     * "/dev/term3", "PCI:2", "Embedded", "SIM", "http://net-hsm/sks", etc.
+     */
     public String getConnectionPort ()
       {
         return connection_port;
+      }
+
+    /**
+     * 
+     * @see #getConnectionPort()
+     */
+    public void setConnectionPort (String connection_port)
+      {
+        this.connection_port = connection_port;
       }
 
     
@@ -145,8 +161,7 @@ public class DeviceInfo
                        int crypto_data_size,
                        int extension_data_size,
                        boolean device_pin_support,
-                       boolean biometric_support,
-                       String connection_port)
+                       boolean biometric_support)
       {
         this.api_level = api_level;
         this.device_type = device_type;
@@ -161,6 +176,5 @@ public class DeviceInfo
         this.extension_data_size = extension_data_size;
         this.device_pin_support = device_pin_support;
         this.biometric_support = biometric_support;
-        this.connection_port = connection_port;
       }
   }

@@ -328,6 +328,30 @@ namespace org.webpki.sks.ws.client
         MISSING_GROUP = 0x10
     }
 
+    public enum DeleteProtection : sbyte
+    {
+        NONE = 0x00,
+        PIN = 0x01,
+        PUK = 0x02,
+        NON_DELETABLE = 0x03
+    }
+
+    public enum ExportProtection : sbyte
+    {
+        NONE = 0x00,
+        PIN = 0x01,
+        PUK = 0x02,
+        NON_EXPORTABLE = 0x03
+    }
+
+    public enum BiometricProtection : sbyte
+    {
+        NONE = 0x00,
+        ALTERNATIVE = 0x01,
+        COMBINED = 0x02,
+        EXCLUSIVE = 0x03
+    }
+
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ServiceModel.MessageContractAttribute(WrapperName="getDeviceInfo", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
     public class getDeviceInfo_Request
@@ -1689,9 +1713,9 @@ namespace org.webpki.sks.ws.client
             get { return _is_symmetric_key; }
         }
 
-        public sbyte AppUsage
+        public AppUsage AppUsage
         {
-            get { return _app_usage; }
+            get { return (AppUsage)_app_usage; }
         }
 
         public string FriendlyName
@@ -1944,19 +1968,19 @@ namespace org.webpki.sks.ws.client
             get { return _enable_pin_caching; }
         }
 
-        public sbyte BiometricProtection
+        public BiometricProtection BiometricProtection
         {
-            get { return _biometric_protection; }
+            get { return (BiometricProtection)_biometric_protection; }
         }
 
-        public sbyte ExportProtection
+        public ExportProtection ExportProtection
         {
-            get { return _export_protection; }
+            get { return (ExportProtection)_export_protection; }
         }
 
-        public sbyte DeleteProtection
+        public DeleteProtection DeleteProtection
         {
-            get { return _delete_protection; }
+            get { return (DeleteProtection)_delete_protection; }
         }
 
         public sbyte KeyBackup
@@ -2848,10 +2872,10 @@ namespace org.webpki.sks.ws.client
                                       int PINPolicyHandle,
                                       byte[] PINValue,
                                       bool EnablePINCaching,
-                                      sbyte BiometricProtection,
-                                      sbyte ExportProtection,
-                                      sbyte DeleteProtection,
-                                      sbyte AppUsage,
+                                      BiometricProtection BiometricProtection,
+                                      ExportProtection ExportProtection,
+                                      DeleteProtection DeleteProtection,
+                                      AppUsage AppUsage,
                                       string FriendlyName,
                                       byte[] KeySpecifier,
                                       string[] EndorsedAlgorithms,
@@ -2868,10 +2892,10 @@ namespace org.webpki.sks.ws.client
                                                                                       PINPolicyHandle,
                                                                                       PINValue,
                                                                                       EnablePINCaching,
-                                                                                      BiometricProtection,
-                                                                                      ExportProtection,
-                                                                                      DeleteProtection,
-                                                                                      AppUsage,
+                                                                                      (sbyte)BiometricProtection,
+                                                                                      (sbyte)ExportProtection,
+                                                                                      (sbyte)DeleteProtection,
+                                                                                      (sbyte)AppUsage,
                                                                                       FriendlyName,
                                                                                       KeySpecifier,
                                                                                       new List<string>(EndorsedAlgorithms),
@@ -3381,12 +3405,12 @@ namespace org.webpki.sks.ws.client
             }
         }
 
-        public List<string> listDevices()
+        public string[] listDevices()
         {
             try
             {
                 listDevices_Response _res = base.Channel.listDevices(new listDevices_Request());
-                return _res._devices;
+                return _res._devices.ToArray();
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {

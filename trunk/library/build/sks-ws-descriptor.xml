@@ -103,8 +103,15 @@
                 devices.put (device_id, sks);
                 System.out.println ("Device: " + device_info.getVendorDescription ());
                 System.out.println ("Vendor: " + device_info.getVendorName ());
-                System.out.println ("API Version: " + device_info.getAPILevel ());
+                System.out.println ("API Version: " + device_info.getAPILevel () / 100 + "." + 
+                                                     (device_info.getAPILevel () / 10) % 10 + 
+                                                     (device_info.getAPILevel () % 10 == 0 ? "" : "" + device_info.getAPILevel () % 10));
                 System.out.println ("DeviceID: " + device_id);
+              }
+            if (default_device == null)
+              {
+                System.out.println ("No devices found, ABORT!");
+                System.exit (3);
               }
             System.out.println ("Trusted GUI: " + tga.getImplementation ());
           }
@@ -152,6 +159,11 @@
              throw new SKSException ("No such device: " + device_id, SKSException.ERROR_NOT_AVAILABLE);
           }
         return sks;
+      }
+
+    String getConnectionPort (String device_id) throws SKSException
+      {
+        return null;  // Not implemented
       }
 
     PublicKey createPublicKeyFromBlob (byte[] blob) throws SKSException
@@ -270,6 +282,30 @@
      <RewriteRule Name="Out.Grouping"
                   ActualType="Grouping"
                   Conversion="(Grouping)$"/>
+     <RewriteRule Name="In.AppUsage"
+                  ActualType="AppUsage"
+                  Conversion="(sbyte)$"/>
+     <RewriteRule Name="Out.AppUsage"
+                  ActualType="AppUsage"
+                  Conversion="(AppUsage)$"/>
+     <RewriteRule Name="In.ExportProtection"
+                  ActualType="ExportProtection"
+                  Conversion="(sbyte)$"/>
+     <RewriteRule Name="Out.ExportProtection"
+                  ActualType="ExportProtection"
+                  Conversion="(ExportProtection)$"/>
+     <RewriteRule Name="In.DeleteProtection"
+                  ActualType="DeleteProtection"
+                  Conversion="(sbyte)$"/>
+     <RewriteRule Name="Out.DeleteProtection"
+                  ActualType="DeleteProtection"
+                  Conversion="(DeleteProtection)$"/>
+     <RewriteRule Name="In.BiometricProtection"
+                  ActualType="BiometricProtection"
+                  Conversion="(sbyte)$"/>
+     <RewriteRule Name="Out.BiometricProtection"
+                  ActualType="BiometricProtection"
+                  Conversion="(BiometricProtection)$"/>
      <RewriteRule Name="In.PatternRestrictions"
                   ActualType="HashSet&lt;PatternRestriction&gt;"
                   Conversion="Conversions.PatternRestrictionsToSKS($)"/>
@@ -355,6 +391,27 @@
      <Entry Name="MISSING_GROUP"  Value="0x10"/>
    </Enumeration>
 
+   <Enumeration ClassName="DeleteProtection" Type="byte">
+     <Entry Name="NONE"          Value="0x00"/>
+     <Entry Name="PIN"           Value="0x01"/>
+     <Entry Name="PUK"           Value="0x02"/>
+     <Entry Name="NON_DELETABLE" Value="0x03"/>
+   </Enumeration>
+
+   <Enumeration ClassName="ExportProtection" Type="byte">
+     <Entry Name="NONE"           Value="0x00"/>
+     <Entry Name="PIN"            Value="0x01"/>
+     <Entry Name="PUK"            Value="0x02"/>
+     <Entry Name="NON_EXPORTABLE" Value="0x03"/>
+   </Enumeration>
+
+   <Enumeration ClassName="BiometricProtection" Type="byte">
+     <Entry Name="NONE"        Value="0x00"/>
+     <Entry Name="ALTERNATIVE" Value="0x01"/>
+     <Entry Name="COMBINED"    Value="0x02"/>
+     <Entry Name="EXCLUSIVE"   Value="0x03"/>
+   </Enumeration>
+
    <ReturnClass ClassName="DeviceInfo">
      <Constant Name="LOCATION_EXTERNAL" Type="byte" Value="0x00"/>
      <Constant Name="LOCATION_EMBEDDED" Type="byte" Value="0x01"/>
@@ -405,7 +462,7 @@
      <Parameter Name="extension_data_size"  Type="int"    XMLName="ExtensionDataSize"  Mode="out"/>
      <Parameter Name="device_pin_support"   Type="bool"   XMLName="DevicePINSupport"   Mode="out"/>
      <Parameter Name="biometric_support"    Type="bool"   XMLName="BiometricSupport"   Mode="out"/>
-     <Parameter Name="connection_port"      Type="string" XMLName="ConnectionPort"     Mode="out"/>
+     <Parameter Name="connection_port"      Type="string" XMLName="ConnectionPort"     Mode="out" Null="true"/>
      <Code><![CDATA[
         log (device_id, "getDeviceInfo ()");
         try
@@ -436,7 +493,7 @@
             extension_data_size.value = device_info.getExtensionDataSize ();
             device_pin_support.value = device_info.getDevicePINSupport ();
             biometric_support.value = device_info.getBiometricSupport ();
-            connection_port.value = device_info.getConnectionPort ();
+            connection_port.value = getConnectionPort (device_id);
           }
         catch (GeneralSecurityException e)
           {
@@ -614,10 +671,10 @@
      <Parameter Name="pin_policy_handle"     Type="int"    XMLName="PINPolicyHandle"/>
      <Parameter Name="pin_value"             Type="binary" XMLName="PINValue"           Null="true"/>
      <Parameter Name="enable_pin_caching"    Type="bool"   XMLName="EnablePINCaching"/>
-     <Parameter Name="biometric_protection"  Type="byte"   XMLName="BiometricProtection"/>
-     <Parameter Name="export_protection"     Type="byte"   XMLName="ExportProtection"/>
-     <Parameter Name="delete_protection"     Type="byte"   XMLName="DeleteProtection"/>
-     <Parameter Name="app_usage"             Type="byte"   XMLName="AppUsage"/>
+     <Parameter Name="biometric_protection"  Type="byte"   XMLName="BiometricProtection"                        RewriteRule="In.BiometricProtection"/>
+     <Parameter Name="export_protection"     Type="byte"   XMLName="ExportProtection"                           RewriteRule="In.ExportProtection"/>
+     <Parameter Name="delete_protection"     Type="byte"   XMLName="DeleteProtection"                           RewriteRule="In.DeleteProtection"/>
+     <Parameter Name="app_usage"             Type="byte"   XMLName="AppUsage"                                   RewriteRule="In.AppUsage"/>
      <Parameter Name="friendly_name"         Type="string" XMLName="FriendlyName"       Null="true"/>
      <Parameter Name="key_specifier"         Type="binary" XMLName="KeySpecifier"/>
      <Parameter Name="endorsed_algorithms"   Type="string" XMLName="EndorsedAlgorithm"  Null="true" List="true" RewriteRule="In.StringArray"/>
@@ -781,9 +838,9 @@
      <Parameter Name="device_id"           Type="string" XMLName="DeviceID"          Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="is_symmetric_key"    Type="bool"   XMLName="IsSymmetricKey"    Mode="out"/>
-     <Parameter Name="app_usage"           Type="byte"   XMLName="AppUsage"          Mode="out"/>
+     <Parameter Name="app_usage"           Type="byte"   XMLName="AppUsage"          Mode="out"                         RewriteRule="Out.AppUsage"/>
      <Parameter Name="friendly_name"       Type="string" XMLName="FriendlyName"      Mode="out" Null="true"/>
-     <Parameter Name="certificate_path"    Type="binary" XMLName="X509Certificate"   Mode="out" List="true" RewriteRule="Out.X509"/>
+     <Parameter Name="certificate_path"    Type="binary" XMLName="X509Certificate"   Mode="out" List="true"             RewriteRule="Out.X509"/>
      <Parameter Name="endorsed_algorithms" Type="string" XMLName="EndorsedAlgorithm" Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
      <Parameter Name="extension_types"     Type="string" XMLName="ExtensionType"     Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
      <Code><![CDATA[
@@ -834,9 +891,9 @@
      <Parameter Name="input_method"         Type="byte"   XMLName="InputMethod"         Mode="out" Null="true" RewriteRule="Out.InputMethod"/>
      <Parameter Name="pin_error_count"      Type="short"  XMLName="PINErrorCount"       Mode="out" Null="true"/>
      <Parameter Name="enable_pin_caching"   Type="bool"   XMLName="EnablePINCaching"    Mode="out" Null="true"/>
-     <Parameter Name="biometric_protection" Type="byte"   XMLName="BiometricProtection" Mode="out"/>
-     <Parameter Name="export_protection"    Type="byte"   XMLName="ExportProtection"    Mode="out"/>
-     <Parameter Name="delete_protection"    Type="byte"   XMLName="DeleteProtection"    Mode="out"/>
+     <Parameter Name="biometric_protection" Type="byte"   XMLName="BiometricProtection" Mode="out"             RewriteRule="Out.BiometricProtection"/>
+     <Parameter Name="export_protection"    Type="byte"   XMLName="ExportProtection"    Mode="out"             RewriteRule="Out.ExportProtection"/>
+     <Parameter Name="delete_protection"    Type="byte"   XMLName="DeleteProtection"    Mode="out"             RewriteRule="Out.DeleteProtection"/>
      <Parameter Name="key_backup"           Type="byte"   XMLName="KeyBackup"           Mode="out"/>
      <Code><![CDATA[
         log (device_id, "getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
@@ -1057,7 +1114,7 @@
 ]]></Code></Method>
 
    <Method Name="listDevices" Throws="SKSException">
-     <Returns Name="devices" Type="string" List="true"  XMLName="DeviceID"/>
+     <Returns Name="devices" Type="string" List="true"  XMLName="DeviceID" RewriteRule="Out.StringArray"/>
      <Code><![CDATA[
         List<String> device_list = new ArrayList<String> ();
         for (String device : devices.keySet ())

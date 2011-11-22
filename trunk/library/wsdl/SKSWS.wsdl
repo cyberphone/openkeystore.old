@@ -69,7 +69,7 @@
             <xs:element name="ExtensionDataSize" type="xs:int"/>
             <xs:element name="DevicePINSupport" type="xs:boolean"/>
             <xs:element name="BiometricSupport" type="xs:boolean"/>
-            <xs:element name="ConnectionPort" type="xs:string"/>
+            <xs:element name="ConnectionPort" type="xs:string" nillable="true" minOccurs="0"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

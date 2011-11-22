@@ -1948,8 +1948,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                                    MAX_LENGTH_CRYPTO_DATA,
                                    MAX_LENGTH_EXTENSION_DATA,
                                    SKS_DEVICE_PIN_SUPPORT,
-                                   SKS_BIOMETRIC_SUPPORT,
-                                   "Software");
+                                   SKS_BIOMETRIC_SUPPORT);
           }
         catch (GeneralSecurityException e)
           {

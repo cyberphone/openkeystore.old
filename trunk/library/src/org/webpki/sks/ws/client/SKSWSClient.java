@@ -215,20 +215,21 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
               {
                 lsizes[i] = rsa_key_sizes.value.get (i);
               }
-            return new DeviceInfo (api_level.value,
-                                   device_type.value,
-                                   update_url.value,
-                                   vendor_name.value,
-                                   vendor_description.value,
-                                   getCertArrayFromBlobs (certificate_path.value),
-                                   supported_algorithms.value.toArray (new String[0]),
-                                   rsa_exponent_support.value,
-                                   lsizes,
-                                   crypto_data_size.value,
-                                   extension_data_size.value,
-                                   device_pin_support.value,
-                                   biometric_support.value,
-                                   connection_port.value);
+            DeviceInfo device_info = new DeviceInfo (api_level.value,
+                                                     device_type.value,
+                                                     update_url.value,
+                                                     vendor_name.value,
+                                                     vendor_description.value,
+                                                     getCertArrayFromBlobs (certificate_path.value),
+                                                     supported_algorithms.value.toArray (new String[0]),
+                                                     rsa_exponent_support.value,
+                                                     lsizes,
+                                                     crypto_data_size.value,
+                                                     extension_data_size.value,
+                                                     device_pin_support.value,
+                                                     biometric_support.value);
+            device_info.setConnectionPort (connection_port.value);
+            return device_info;
           }
         catch (SKSException_Exception e)
           {

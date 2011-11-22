@@ -122,8 +122,15 @@ public class SKSWSImplementation
                 devices.put (device_id, sks);
                 System.out.println ("Device: " + device_info.getVendorDescription ());
                 System.out.println ("Vendor: " + device_info.getVendorName ());
-                System.out.println ("API Version: " + device_info.getAPILevel ());
+                System.out.println ("API Version: " + device_info.getAPILevel () / 100 + "." + 
+                                                     (device_info.getAPILevel () / 10) % 10 + 
+                                                     (device_info.getAPILevel () % 10 == 0 ? "" : "" + device_info.getAPILevel () % 10));
                 System.out.println ("DeviceID: " + device_id);
+              }
+            if (default_device == null)
+              {
+                System.out.println ("No devices found, ABORT!");
+                System.exit (3);
               }
             System.out.println ("Trusted GUI: " + tga.getImplementation ());
           }
@@ -171,6 +178,11 @@ public class SKSWSImplementation
              throw new SKSException ("No such device: " + device_id, SKSException.ERROR_NOT_AVAILABLE);
           }
         return sks;
+      }
+
+    String getConnectionPort (String device_id) throws SKSException
+      {
+        return null;  // Not implemented
       }
 
     PublicKey createPublicKeyFromBlob (byte[] blob) throws SKSException
@@ -292,7 +304,7 @@ public class SKSWSImplementation
             extension_data_size.value = device_info.getExtensionDataSize ();
             device_pin_support.value = device_info.getDevicePINSupport ();
             biometric_support.value = device_info.getBiometricSupport ();
-            connection_port.value = device_info.getConnectionPort ();
+            connection_port.value = getConnectionPort (device_id);
           }
         catch (GeneralSecurityException e)
           {
