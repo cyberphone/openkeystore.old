@@ -1051,7 +1051,7 @@
      <Parameter Name="parameters"                Type="binary" XMLName="Parameters"    Null="true"/>
      <Parameter Name="trusted_gui_authorization" Type="bool"   XMLName="TrustedGUIAuthorization" SuppressRule="TGA"/>
      <Parameter Name="authorization"             Type="binary" XMLName="Authorization" Null="true"/>
-     <Parameter Name="public_key"                Type="binary" XMLName="PublicKey"/>
+     <Parameter Name="public_key"                Type="binary" XMLName="PublicKey"               RewriteRule="In.PublicKey"/>
      <Code><![CDATA[
         authorization = checkAuthorization (device_id,
                                             trusted_gui_authorization,

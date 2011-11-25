@@ -3299,7 +3299,7 @@ namespace org.webpki.sks.ws.client
                                    string Algorithm,
                                    byte[] Parameters,
                                    byte[] Authorization,
-                                   byte[] PublicKey)
+                                   PublicKey PublicKey)
         {
             do
             {
@@ -3312,7 +3312,7 @@ namespace org.webpki.sks.ws.client
                                                                                                     Parameters,
                                                                                                     tga,
                                                                                                     Authorization,
-                                                                                                    PublicKey));
+                                                                                                    Conversions.EncodeX509PublicKey(PublicKey)));
                     return _res._key;
                 }
                 catch (System.ServiceModel.FaultException<_SKSException> e)

@@ -157,4 +157,88 @@ public static void ScriptMain(Project project)
       </script>
     </target>
 
+<!--
+######################################################################
+#   A small test program that performs ECHD using the first found    #
+#   key or a key specified by the command line option "-D:key=nnn".  #
+#                                                                    #
+#   Depends on the BouncyCastle library for all...                   #
+######################################################################
+-->
+    <target name="ecdh" depends="build">
+      <script language="C#">
+          <references>
+              <include name="System.Data.dll"/>
+              <include name="System.dll"/>
+              <include name="System.Core.dll"/>
+              <include name="System.Runtime.Serialization.dll"/>
+              <include name="System.ServiceModel.dll"/>
+              <include name="System.Xml.dll"/>
+              <include name="../dist/${client.library.name}.dll" />
+              <include name="third-party-dlls/BouncyCastle.Crypto.dll" />
+          </references>
+          <imports>
+              <import namespace="${client.library.name}" />
+              <import namespace="System.Linq" />
+              <import namespace="System.Security.Cryptography" />
+              <import namespace="System.Security.Cryptography.X509Certificates" />"
+           </imports>
+          <code>
+            <![CDATA[
+public static void ScriptMain(Project project)
+{
+   try
+	{
+        SKSWSProxy ws = SKSWSProxy.getDefaultSKSWSProxy();
+        string device = project.Properties["device"];
+        if (device != null)
+        {
+            foreach (string device_id in ws.listDevices ())
+            {
+               System.Console.WriteLine ("Device: " + device_id);
+            }
+            ws.DeviceID = device;
+        }
+        EnumeratedKey ek = new EnumeratedKey();
+        while ((ek = ws.enumerateKeys(ek.KeyHandle)) != null)
+        {
+		    KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
+		    if (ka.IsSymmetricKey || ka.CertificatePath[0].PublicKey.IsRSA()) continue;
+		    if (project.Properties["key"] != null && Int32.Parse(project.Properties["key"]) != ek.KeyHandle) continue;
+		    System.Console.WriteLine("EC Key ID=#" + ek.KeyHandle + ", Subject: " + ka.CertificatePath[0].Subject);
+            // Generate key-pair		    
+			Org.BouncyCastle.Crypto.Generators.ECKeyPairGenerator g = new Org.BouncyCastle.Crypto.Generators.ECKeyPairGenerator();
+			g.Init(new Org.BouncyCastle.Crypto.Parameters.ECKeyGenerationParameters(new Org.BouncyCastle.Asn1.DerObjectIdentifier("1.2.840.10045.3.1.7"), new Org.BouncyCastle.Security.SecureRandom()));
+			Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair kp = g.GenerateKeyPair();
+			Org.BouncyCastle.Asn1.X509.SubjectPublicKeyInfo gensubinfo = Org.BouncyCastle.X509.SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo((Org.BouncyCastle.Crypto.Parameters.ECPublicKeyParameters)kp.Public);
+			PublicKey genpubkey = Conversions.DecodeX509PublicKey(gensubinfo.ToAsn1Object().GetEncoded());
+            // Do SKS side
+		    byte[] res = ws.keyAgreement(ek.KeyHandle,
+		                          	     "http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh.raw",
+		                          	     null,
+		                                 null,
+		                                 genpubkey);
+            // Do caller side
+		    Org.BouncyCastle.Asn1.X509.SubjectPublicKeyInfo skssubinfo = Org.BouncyCastle.Asn1.X509.SubjectPublicKeyInfo.GetInstance (Org.BouncyCastle.Asn1.Asn1Sequence.GetInstance(Org.BouncyCastle.Asn1.Asn1Object.FromByteArray (Conversions.EncodeX509PublicKey(ka.CertificatePath[0].PublicKey))));
+		    Org.BouncyCastle.Crypto.Parameters.ECPublicKeyParameters skspubkey = (Org.BouncyCastle.Crypto.Parameters.ECPublicKeyParameters)Org.BouncyCastle.Security.PublicKeyFactory.CreateKey (skssubinfo);
+		    Org.BouncyCastle.Crypto.Agreement.ECDHBasicAgreement agreement = new Org.BouncyCastle.Crypto.Agreement.ECDHBasicAgreement();
+		    agreement.Init(kp.Private);
+            if (!res.SequenceEqual(agreement.CalculateAgreement(skspubkey).ToByteArrayUnsigned()))
+			{
+				throw new NAnt.Core.BuildException ("FAILED KEY AGREEMENT!!!");
+			}
+		    return;
+        }
+        throw new NAnt.Core.BuildException ("NO SUITABLE KEY FOUND!!!");
+    }
+	catch (SKSException e)
+	{
+        throw new NAnt.Core.BuildException("ECDHing: " + e.Message + " code=" + e.Error);
+	}
+}
+            ]]>
+          </code>
+      </script>
+    </target>
+
 </project>

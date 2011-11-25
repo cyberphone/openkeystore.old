@@ -148,12 +148,12 @@ namespace org.webpki.sks.ws.client
             return blist;
         }
 
-        public static HashSet<PatternRestriction> SKSToPatternRestrictions (sbyte flags)
+        public static HashSet<PatternRestriction> SKSToPatternRestrictions (sbyte sks_value)
         {
             HashSet<PatternRestriction> pr = new HashSet<PatternRestriction> ();
             foreach(sbyte b in Enum.GetValues(typeof(PatternRestriction)))
             {
-                if ((b & flags) != 0)
+                if ((b & sks_value) != 0)
                 {
                     pr.Add ((PatternRestriction) b);
                 }
@@ -167,12 +167,12 @@ namespace org.webpki.sks.ws.client
             {
             	return 0;
             }
-            sbyte sks = 0;
+            sbyte sks_value = 0;
             foreach(PatternRestriction pr in PatternRestrictions)
             {
-            	sks |= (sbyte) pr;
+            	sks_value |= (sbyte) pr;
             }
-            return sks;
+            return sks_value;
         }
     }
 }
