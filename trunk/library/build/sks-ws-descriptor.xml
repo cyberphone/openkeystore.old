@@ -315,9 +315,10 @@
      <SuppressRule Name="TGA">tga</SuppressRule>
      <SuppressRule Name="DEV">device_id</SuppressRule>
      <EmbedRule Name="TGA">
-        <Before>            do
+        <Before>            bool tga = false;
+            do
             {
-                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
+                PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
                 {
 </Before>

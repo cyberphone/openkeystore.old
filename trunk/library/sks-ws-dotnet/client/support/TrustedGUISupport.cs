@@ -255,7 +255,7 @@ namespace org.webpki.sks.ws.client
         
         private static byte[] SHARED_SECRET_32 = {0,1,2,3,4,5,6,7,8,9,1,0,3,2,5,4,7,6,9,8,9,8,7,6,5,4,3,2,1,0,3,2};
         
-        public bool GetTrustedGUIAuthorization (int key_handle, ref byte[] authorization)
+        public void PerformTrustedGUIAuthorization (int key_handle, ref byte[] authorization, ref bool tga)
         {
             KeyProtectionInfo kpi = getKeyProtectionInfo(key_handle);
             if ((kpi.ProtectionStatus & KeyProtectionInfo.PROTSTAT_PIN_PROTECTED) != 0)
@@ -269,7 +269,8 @@ namespace org.webpki.sks.ws.client
                 }
                 else if (kpi.InputMethod == InputMethod.PROGRAMMATIC || authorization != null)
                 {
-                    return false;
+					tga = false;
+                    return;
                 }
 	            if ((kpi.ProtectionStatus & KeyProtectionInfo.PROTSTAT_PIN_BLOCKED) != 0)
 	            {
@@ -280,6 +281,11 @@ namespace org.webpki.sks.ws.client
 	                throw new SKSException("Key locked, user message", SKSException.ERROR_USER_ABORT);
 	            }
 	            KeyAttributes ka = getKeyAttributes (key_handle);
+	            if (kpi.EnablePINCaching && !tga)
+	            {
+// TODO check the cache!
+                    System.Media.SystemSounds.Exclamation.Play();
+	            }
                 SKSAuthorizationDialog authorization_form = new SKSAuthorizationDialog(key_handle,
                                                                                        (PassphraseFormat)kpi.Format,
                                                                                        (Grouping)kpi.Grouping,
@@ -326,11 +332,17 @@ namespace org.webpki.sks.ws.client
 	    				    authorization = total.ToArray();
 	                 	}
                  	}
-                 	return true;
+					tga = true;
            		}
-                throw new SKSException("Canceled by user", SKSException.ERROR_USER_ABORT);
+           		else
+           		{
+                    throw new SKSException("Canceled by user", SKSException.ERROR_USER_ABORT);
+                }
            	}
-            return false;
-        }
+           	else
+           	{
+                tga = false;
+            }
+         }
     }
 }

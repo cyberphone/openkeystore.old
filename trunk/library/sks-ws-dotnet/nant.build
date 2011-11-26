@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- NAnt build file for .NET SKSWS -->
-<project name="SKSWS" default="build">
+<project name="SKSWS" default="help">
     <property name="client.library.name" value="org.webpki.sks.ws.client"/>
     <property name="test.library.name" value="org.webpki.sks.test"/>
     <property name="debug" value="false"/>
@@ -10,6 +10,10 @@
     <property name="test.src.dir" value="test"/>
     <property name="image.dir" value="../../resources/images"/>
     <property name="nant.settings.currentframework" value="net-4.0"/>
+    
+    <target name="help">
+      <echo message="Commands: build, sign, ecdh, test"/>
+    </target>
 
 <!--
 ######################################################################
@@ -60,6 +64,8 @@
                 <include name="Device.cs"/>
                 <include name="PINPol.cs"/>
                 <include name="PUKPol.cs"/>
+                <include name="BC2MS.cs"/>
+                <include name="MS2BC.cs"/>
             </sources>
             <references>
                 <include name="System.dll"/>
@@ -113,6 +119,9 @@ public static void ScriptMain(Project project)
 	{
         SKSWSProxy ws = SKSWSProxy.getDefaultSKSWSProxy();
         string device = project.Properties["device"];
+        byte[] pin = project.Properties["pin"] == null ? null : System.Text.Encoding.UTF8.GetBytes (project.Properties["pin"]);
+        bool looping = project.Properties["loop"] != null;
+        int round = 0;
         if (device != null)
         {
             foreach (string device_id in ws.listDevices ())
@@ -125,24 +134,34 @@ public static void ScriptMain(Project project)
         while ((ek = ws.enumerateKeys(ek.KeyHandle)) != null)
         {
 		    KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
-		    if (ka.IsSymmetricKey) continue;
-		    if (project.Properties["key"] != null && Int32.Parse(project.Properties["key"]) != ek.KeyHandle) continue;
+		    if (project.Properties["key"] == null)
+		    {
+         	    if (ka.IsSymmetricKey) continue;
+         	}
+         	else
+         	{
+		        if (Int32.Parse(project.Properties["key"]) != ek.KeyHandle) continue;
+		    }
 		    bool rsa = ka.CertificatePath[0].PublicKey.IsRSA();
-		    System.Console.WriteLine((rsa ? "RSA" : "EC") + " Key ID=#" + ek.KeyHandle + ", Subject: " + ka.CertificatePath[0].Subject);
-		    string sign_alg = rsa ? "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" : "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256";
-		    byte[] test_string = Encoding.UTF8.GetBytes("hi there!");
-		    byte[] res = ws.signHashedData(ek.KeyHandle,
-		                          		   sign_alg,
-		                          	       null,
-		                                   null,
-		                                   new SHA256Managed().ComputeHash(test_string));
-		    Org.BouncyCastle.Crypto.ISigner verify = Org.BouncyCastle.Security.SignerUtilities.GetSigner(rsa? "SHA256WithRSA" : "SHA256WithECDSA");
-		    verify.Init(false, Org.BouncyCastle.Security.PublicKeyFactory.CreateKey(ka.CertificatePath[0].PublicKey.X509Encoding()));
-		    verify.BlockUpdate(test_string, 0, test_string.Length);
-		    if (!verify.VerifySignature(res))
-			{
-				throw new NAnt.Core.BuildException ("FAILED SIGNATURE VERIFICATION!!!");
+		    do
+		    {
+			    System.Console.WriteLine("Signature: " + (looping ? "Round[" + ++round + "] " : "") + (rsa ? "RSA" : "EC") + " Key ID=#" + ek.KeyHandle + ", Subject: " + ka.CertificatePath[0].Subject);
+			    string sign_alg = rsa ? "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" : "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256";
+			    byte[] test_string = Encoding.UTF8.GetBytes("hi there!");
+			    byte[] res = ws.signHashedData(ek.KeyHandle,
+			                          		   sign_alg,
+			                          	       null,
+			                                   pin,
+			                                   new SHA256Managed().ComputeHash(test_string));
+			    Org.BouncyCastle.Crypto.ISigner verify = Org.BouncyCastle.Security.SignerUtilities.GetSigner(rsa? "SHA256WithRSA" : "SHA256WithECDSA");
+			    verify.Init(false, Org.BouncyCastle.Security.PublicKeyFactory.CreateKey(ka.CertificatePath[0].PublicKey.X509Encoding()));
+			    verify.BlockUpdate(test_string, 0, test_string.Length);
+			    if (!verify.VerifySignature(res))
+				{
+					throw new NAnt.Core.BuildException ("FAILED SIGNATURE VERIFICATION!!!");
+				}
 			}
+			while (looping);
 		    return;
         }
         throw new NAnt.Core.BuildException ("NO SUITABLE KEY FOUND!!!");
@@ -191,6 +210,9 @@ public static void ScriptMain(Project project)
 	{
         SKSWSProxy ws = SKSWSProxy.getDefaultSKSWSProxy();
         string device = project.Properties["device"];
+        byte[] pin = project.Properties["pin"] == null ? null : System.Text.Encoding.UTF8.GetBytes (project.Properties["pin"]);
+        bool looping = project.Properties["loop"] != null;
+        int round = 0;
         if (device != null)
         {
             foreach (string device_id in ws.listDevices ())
@@ -203,32 +225,50 @@ public static void ScriptMain(Project project)
         while ((ek = ws.enumerateKeys(ek.KeyHandle)) != null)
         {
 		    KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
-		    if (ka.IsSymmetricKey || ka.CertificatePath[0].PublicKey.IsRSA()) continue;
-		    if (project.Properties["key"] != null && Int32.Parse(project.Properties["key"]) != ek.KeyHandle) continue;
-		    System.Console.WriteLine("EC Key ID=#" + ek.KeyHandle + ", Subject: " + ka.CertificatePath[0].Subject);
-            // Generate key-pair		    
-			Org.BouncyCastle.Crypto.Generators.ECKeyPairGenerator g = new Org.BouncyCastle.Crypto.Generators.ECKeyPairGenerator();
-			g.Init(new Org.BouncyCastle.Crypto.Parameters.ECKeyGenerationParameters(new Org.BouncyCastle.Asn1.DerObjectIdentifier("1.2.840.10045.3.1.7"), new Org.BouncyCastle.Security.SecureRandom()));
-			Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair kp = g.GenerateKeyPair();
-			Org.BouncyCastle.Asn1.X509.SubjectPublicKeyInfo gensubinfo = Org.BouncyCastle.X509.SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo((Org.BouncyCastle.Crypto.Parameters.ECPublicKeyParameters)kp.Public);
-			PublicKey genpubkey = Conversions.DecodeX509PublicKey(gensubinfo.ToAsn1Object().GetEncoded());
-            // Do SKS side
-		    byte[] res = ws.keyAgreement(ek.KeyHandle,
-		                          	     "http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh.raw",
-		                          	     null,
-		                                 null,
-		                                 genpubkey);
-            // Do caller side
-		    Org.BouncyCastle.Asn1.X509.SubjectPublicKeyInfo skssubinfo = Org.BouncyCastle.Asn1.X509.SubjectPublicKeyInfo.GetInstance (Org.BouncyCastle.Asn1.Asn1Sequence.GetInstance(Org.BouncyCastle.Asn1.Asn1Object.FromByteArray (Conversions.EncodeX509PublicKey(ka.CertificatePath[0].PublicKey))));
-		    Org.BouncyCastle.Crypto.Parameters.ECPublicKeyParameters skspubkey = (Org.BouncyCastle.Crypto.Parameters.ECPublicKeyParameters)Org.BouncyCastle.Security.PublicKeyFactory.CreateKey (skssubinfo);
-		    Org.BouncyCastle.Crypto.Agreement.ECDHBasicAgreement agreement = new Org.BouncyCastle.Crypto.Agreement.ECDHBasicAgreement();
-		    agreement.Init(kp.Private);
-            if (!res.SequenceEqual(agreement.CalculateAgreement(skspubkey).ToByteArrayUnsigned()))
-			{
-				throw new NAnt.Core.BuildException ("FAILED KEY AGREEMENT!!!");
+		    if (project.Properties["key"] == null)
+		    {
+                if (ka.IsSymmetricKey || ka.CertificatePath[0].PublicKey.IsRSA()) continue;
+            }
+            else
+            {
+		        if (Int32.Parse(project.Properties["key"]) != ek.KeyHandle) continue;
+		    }
+		    do
+		    {
+			    System.Console.WriteLine("ECDH: " + (looping ? "Round[" + ++round + "] " : "") + "EC Key ID=#" + ek.KeyHandle + ", Subject: " + ka.CertificatePath[0].Subject);
+	            // Generate key-pair		    
+				Org.BouncyCastle.Crypto.Generators.ECKeyPairGenerator g = new Org.BouncyCastle.Crypto.Generators.ECKeyPairGenerator();
+				g.Init(new Org.BouncyCastle.Crypto.Parameters.ECKeyGenerationParameters(new Org.BouncyCastle.Asn1.DerObjectIdentifier("1.2.840.10045.3.1.7"), new Org.BouncyCastle.Security.SecureRandom()));
+				Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair kp = g.GenerateKeyPair();
+				Org.BouncyCastle.Asn1.X509.SubjectPublicKeyInfo gensubinfo = Org.BouncyCastle.X509.SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(kp.Public);
+				PublicKey genpubkey = Conversions.DecodeX509PublicKey(gensubinfo.ToAsn1Object().GetEncoded());
+	            // Do SKS side
+			    byte[] sks_res = ws.keyAgreement(ek.KeyHandle,
+			                          	         "http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh.raw",
+			                          	         null,
+			                                     pin,
+			                                     genpubkey);
+	            // Do caller side
+			    Org.BouncyCastle.Asn1.X509.SubjectPublicKeyInfo skssubinfo = Org.BouncyCastle.Asn1.X509.SubjectPublicKeyInfo.GetInstance (Org.BouncyCastle.Asn1.Asn1Sequence.GetInstance(Org.BouncyCastle.Asn1.Asn1Object.FromByteArray (Conversions.EncodeX509PublicKey(ka.CertificatePath[0].PublicKey))));
+			    Org.BouncyCastle.Crypto.Parameters.ECPublicKeyParameters skspubkey = (Org.BouncyCastle.Crypto.Parameters.ECPublicKeyParameters)Org.BouncyCastle.Security.PublicKeyFactory.CreateKey (skssubinfo);
+			    Org.BouncyCastle.Crypto.Agreement.ECDHBasicAgreement agreement = new Org.BouncyCastle.Crypto.Agreement.ECDHBasicAgreement();
+			    agreement.Init(kp.Private);
+			    byte[] gen_res = agreement.CalculateAgreement(skspubkey).ToByteArrayUnsigned();
+			    if (gen_res.Length % 2 != 0)
+			    {
+			       gen_res = new byte[]{0}.Concat(gen_res).ToArray();
+			    }
+			    // Do we agree?
+	            if (!sks_res.SequenceEqual(gen_res))
+				{
+				    System.Console.WriteLine(org.webpki.sks.ws.client.BouncyCastle.Utilities.Encoders.Hex.ToHexString (gen_res) + "\n" +
+				                             org.webpki.sks.ws.client.BouncyCastle.Utilities.Encoders.Hex.ToHexString (sks_res));
+					throw new NAnt.Core.BuildException ("FAILED KEY AGREEMENT!!!");
+				}
 			}
+			while (looping);
 		    return;
-        }
+		}
         throw new NAnt.Core.BuildException ("NO SUITABLE KEY FOUND!!!");
     }
 	catch (SKSException e)

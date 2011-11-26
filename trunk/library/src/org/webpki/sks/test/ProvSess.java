@@ -552,7 +552,7 @@ public class ProvSess
                                 int rsa_size,
                                 String pin_value,
                                 PINPol pin_policy,
-                                AppUsage key_usage,
+                                AppUsage app_usage,
                                 String[] endorsed_algorithm) throws SKSException, IOException, GeneralSecurityException
       {
         byte[] server_seed = new byte[32];
@@ -566,7 +566,7 @@ public class ProvSess
                           ExportProtection.NON_EXPORTABLE /* export_policy */,
                           DeleteProtection.NONE /* delete_policy */,
                           false /* enable_pin_caching */,
-                          key_usage,
+                          app_usage,
                           "" /* friendly_name */,
                           new KeySpecifier.RSA (2048, 0),
                           endorsed_algorithm);
@@ -575,15 +575,15 @@ public class ProvSess
     public GenKey createECKey (String id,
                                String pin_value,
                                PINPol pin_policy,
-                               AppUsage key_usage) throws SKSException, IOException, GeneralSecurityException
+                               AppUsage app_usage) throws SKSException, IOException, GeneralSecurityException
       {
-        return createECKey (id, pin_value, pin_policy, key_usage, null);
+        return createECKey (id, pin_value, pin_policy, app_usage, null);
       }
 
     public GenKey createECKey (String id,
                                String pin_value,
                                PINPol pin_policy,
-                               AppUsage key_usage,
+                               AppUsage app_usage,
                                String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
       {
         return createKey (id,
@@ -595,7 +595,7 @@ public class ProvSess
                           ExportProtection.NON_EXPORTABLE /* export_policy */,
                           DeleteProtection.NONE /* delete_policy */,
                           false /* enable_pin_caching */,
-                          key_usage,
+                          app_usage,
                           "" /* friendly_name */,
                           new KeySpecifier.EC (ECDomains.P_256),
                           endorsed_algorithms);
@@ -610,7 +610,7 @@ public class ProvSess
                              ExportProtection export_protection,
                              DeleteProtection delete_protection,
                              boolean enable_pin_caching,
-                             AppUsage key_usage,
+                             AppUsage app_usage,
                              String friendly_name,
                              KeySpecifier key_algorithm,
                              String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
@@ -646,7 +646,7 @@ public class ProvSess
         key_pair_mac.addByte (biometric_protection.getSKSValue ());
         key_pair_mac.addByte (actual_export_policy);
         key_pair_mac.addByte (delete_protection.getSKSValue ());
-        key_pair_mac.addByte (key_usage.getSKSValue ());
+        key_pair_mac.addByte (app_usage.getSKSValue ());
         key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
         key_pair_mac.addArray (key_algorithm.getSKSValue ());
         for (String algorithm : sorted_algorithms)
@@ -664,7 +664,7 @@ public class ProvSess
                                                biometric_protection.getSKSValue (), 
                                                actual_export_policy, 
                                                delete_protection.getSKSValue (), 
-                                               key_usage.getSKSValue (), 
+                                               app_usage.getSKSValue (), 
                                                friendly_name, 
                                                key_algorithm.getSKSValue (),
                                                sorted_algorithms,

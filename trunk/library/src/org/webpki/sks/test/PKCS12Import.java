@@ -35,11 +35,18 @@ import java.util.Vector;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
+import org.webpki.crypto.ECDomains;
 import org.webpki.crypto.SignatureAlgorithms;
+
 import org.webpki.keygen2.KeyGen2URIs;
+import org.webpki.keygen2.KeySpecifier;
+
 import org.webpki.sks.AppUsage;
+import org.webpki.sks.BiometricProtection;
+import org.webpki.sks.DeleteProtection;
 import org.webpki.sks.EnumeratedKey;
 import org.webpki.sks.EnumeratedProvisioningSession;
+import org.webpki.sks.ExportProtection;
 import org.webpki.sks.Grouping;
 import org.webpki.sks.InputMethod;
 import org.webpki.sks.PassphraseFormat;
@@ -51,25 +58,27 @@ public class PKCS12Import
   {
     public static void main (String[] argc) throws Exception
       {
-        if (argc.length != 2 && argc.length != 7)
+        if (argc.length != 2 && argc.length != 8)
           {
             System.out.println ("\nUsage: " + PKCS12Import.class.getCanonicalName () + 
-                                " file password [pin format imputmethod grouping appusage]");
+                                " file password [pin format imputmethod grouping appusage pincaching]");
             System.exit (-3);
           }
-        String pin = null;
+        String pin_value = null;
         AppUsage app_usage = AppUsage.UNIVERSAL;
         PassphraseFormat format = null;
         InputMethod input_method = null;
         Grouping grouping = null;
         String[] endorsed_algs = new String[0];
+        boolean pin_caching = false;
         if (argc.length > 2)
           {
-            pin = argc[2];
+            pin_value = argc[2];
             format = PassphraseFormat.valueOf (argc[3]);
             input_method = InputMethod.valueOf (argc[4]);
             grouping = Grouping.valueOf (argc[5]);
             app_usage = AppUsage.valueOf (argc[6]);
+            pin_caching = new Boolean (argc[7]);
           }
         char[] password = argc[1].toCharArray ();
         Security.insertProviderAt (new BouncyCastleProvider(), 1);
@@ -150,9 +159,10 @@ public class PKCS12Import
         String prot = "NO PIN";
         if (argc.length > 2)
           {
-            pin = argc[2];
+            pin_value = argc[2];
             sess.setInputMethod (input_method);
-            prot ="PIN [Format=" + format + ", InputMode=" + input_method + ", Grouping=" + grouping + ", AppUsage=" + app_usage + "]";
+            prot ="PIN [Format=" + format + ", InputMode=" + input_method + ", Grouping=" + grouping + 
+                                            ", AppUsage=" + app_usage + ", PINCaching=" + pin_caching + "]";
             pin_policy = sess.createPINPolicy ("PIN",
                                                format,
                                                EnumSet.noneOf (PatternRestriction.class),
@@ -162,11 +172,19 @@ public class PKCS12Import
                                                (short) 3 /* retry_limit*/, 
                                                null /* puk_policy */);
           }
-        GenKey key = sess.createECKey ("Key",
-                                       pin /* pin_value */,
-                                       pin_policy /* pin_policy */,
-                                       app_usage,
-                                       endorsed_algs);
+        GenKey key = sess.createKey ("Key",
+                                     KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1,
+                                     null /* server_seed */,
+                                     pin_policy,
+                                     pin_value,
+                                     BiometricProtection.NONE /* biometric_protection */,
+                                     ExportProtection.NON_EXPORTABLE /* export_policy */,
+                                     DeleteProtection.NONE /* delete_policy */,
+                                     pin_caching /* enable_pin_caching */,
+                                     app_usage,
+                                     "" /* friendly_name */,
+                                     new KeySpecifier.EC (ECDomains.P_256),
+                                     endorsed_algs);
         key.setCertificatePath (cert_path.toArray (new X509Certificate[0]));
         key.restorePrivateKey (private_key);
         sess.closeSession ();

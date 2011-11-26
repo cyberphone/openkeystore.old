@@ -112,6 +112,7 @@
   	</condition>
     <exec executable="nant.bat"
   	      failonerror="true">
+        <arg value="build"/>
         <arg value="-nologo"/>
         <arg value="${quiet.nant.build}"/>
     	<arg value="-D:rebuild=${rebuild.nant.build}"/>
@@ -385,6 +386,7 @@
   	<property name="inputmethod" value="TRUSTED_GUI"/>
   	<property name="grouping" value="NONE"/>
   	<property name="appusage" value="UNIVERSAL"/>
+  	<property name="pincaching" value="false"/>
     <fail message="-&#10;Missing one or more of mandatory:&#10;
  -Dfile=&#10;
  -Dpassword=&#10;&#10;
@@ -394,7 +396,8 @@ applicable if pin has been set:&#10;
  -Dformat=  [default: ${format}]&#10;
  -Dinputmethod=  [default: ${inputmethod}]&#10;
  -Dgrouping=  [default: ${grouping}]&#10;
- -Dappusage=  [default: ${appusage}]">
+ -Dappusage=  [default: ${appusage}]&#10;
+ -Dpincaching=  [default: ${pincaching}]">
        <condition>
          <not>
          	<and>
@@ -404,7 +407,7 @@ applicable if pin has been set:&#10;
          </not>
        </condition>
      </fail>
-  	<condition property="pinandparams" value=" ${pin} ${format} ${inputmethod} ${grouping} ${appusage}" else="">
+  	<condition property="pinandparams" value=" ${pin} ${format} ${inputmethod} ${grouping} ${appusage} ${pincaching}" else="">
       <isset property="pin"/>
     </condition>
   	<java fork="yes"

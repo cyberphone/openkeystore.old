@@ -140,6 +140,19 @@ public class PKCS12Import
                                        pin_policy /* pin_policy */,
                                        app_usage,
                                        endorsed_algs);
+        GenKey key = sess.createKey ("Key",
+                                     KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1,
+			                         null /* server_seed */,
+            		                 pin_policy,
+               			             pin,
+                                     BiometricProtection.NONE /* biometric_protection */,
+                                     ExportProtection.NON_EXPORTABLE /* export_policy */,
+                                     DeleteProtection.NONE /* delete_policy */,
+                                     false /* enable_pin_caching */,
+                                     app_usage,
+                          "" /* friendly_name */,
+                          new KeySpecifier.EC (ECDomains.P_256),
+                          endorsed_algs);
         key.setCertificatePath (cert_path.toArray (new X509Certificate[0]));
         key.restorePrivateKey (private_key);
         sess.closeSession ();

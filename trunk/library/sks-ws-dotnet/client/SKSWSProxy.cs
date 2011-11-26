@@ -3237,9 +3237,10 @@ namespace org.webpki.sks.ws.client
                                      byte[] Authorization,
                                      byte[] Data)
         {
+            bool tga = false;
             do
             {
-                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
+                PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
                 {
                     signHashedData_Response _res = base.Channel.signHashedData(new signHashedData_Request(device_id,
@@ -3269,9 +3270,10 @@ namespace org.webpki.sks.ws.client
                                            byte[] Authorization,
                                            byte[] Data)
         {
+            bool tga = false;
             do
             {
-                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
+                PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
                 {
                     asymmetricKeyDecrypt_Response _res = base.Channel.asymmetricKeyDecrypt(new asymmetricKeyDecrypt_Request(device_id,
@@ -3301,9 +3303,10 @@ namespace org.webpki.sks.ws.client
                                    byte[] Authorization,
                                    PublicKey PublicKey)
         {
+            bool tga = false;
             do
             {
-                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
+                PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
                 {
                     keyAgreement_Response _res = base.Channel.keyAgreement(new keyAgreement_Request(device_id,
@@ -3332,9 +3335,10 @@ namespace org.webpki.sks.ws.client
                                   byte[] Authorization,
                                   byte[] Data)
         {
+            bool tga = false;
             do
             {
-                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
+                PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
                 {
                     performHMAC_Response _res = base.Channel.performHMAC(new performHMAC_Request(device_id,
@@ -3364,9 +3368,10 @@ namespace org.webpki.sks.ws.client
                                           byte[] Authorization,
                                           byte[] Data)
         {
+            bool tga = false;
             do
             {
-                bool tga = GetTrustedGUIAuthorization(KeyHandle, ref Authorization);
+                PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
                 {
                     symmetricKeyEncrypt_Response _res = base.Channel.symmetricKeyEncrypt(new symmetricKeyEncrypt_Request(device_id,
