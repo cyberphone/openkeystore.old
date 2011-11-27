@@ -62,7 +62,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
     
     private String port;
     
-    private TrustedGUIAuthorization tga;
+    private TrustedGUIAuthorization tga_provider;
     
     private String device_id;
     
@@ -78,7 +78,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
     
     boolean getTrustedGUIAuthorization (int key_handle, AuthorizationHolder authorization_holder) throws SKSException
       {
-        if (tga != null)
+        if (tga_provider != null)
           {
             KeyProtectionInfo kpi = getKeyProtectionInfo (key_handle);
             if (kpi.hasLocalPINProtection ())
@@ -95,7 +95,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                     return false;
                   }
                 KeyAttributes ka = getKeyAttributes (key_handle);
-                authorization_holder.value = tga.getTrustedAuthorization (kpi.getPINFormat (),
+                authorization_holder.value = tga_provider.getTrustedAuthorization (kpi.getPINFormat (),
                                                                           kpi.getPINGrouping (),
                                                                           ka.getAppUsage (),
                                                                           ka.getFriendlyName ());
@@ -1100,9 +1100,9 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public boolean setTrustedGUIAuthorizationProvider (TrustedGUIAuthorization tga)
+    public boolean setTrustedGUIAuthorizationProvider (TrustedGUIAuthorization tga_provider)
       {
-        this.tga = tga;
+        this.tga_provider = tga_provider;
         return true;
       }
 

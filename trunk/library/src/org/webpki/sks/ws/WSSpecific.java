@@ -29,7 +29,7 @@ public interface WSSpecific
     /**
      * Setup WS driver property
      */
-    boolean setTrustedGUIAuthorizationProvider (TrustedGUIAuthorization tga);
+    boolean setTrustedGUIAuthorizationProvider (TrustedGUIAuthorization tga_provider);
 
     /**
      * Setup WS device property

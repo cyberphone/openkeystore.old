@@ -20,6 +20,7 @@ namespace org.webpki.sks.ws.client
     using System.Windows.Forms;
     using System.Reflection;
     using System.IO;
+    using System.Collections.Generic;
     using org.webpki.sks.ws.client.BouncyCastle.Utilities.Encoders;
 
     internal class SKSAuthorizationDialog : Form
@@ -245,6 +246,8 @@ namespace org.webpki.sks.ws.client
 
     public partial class SKSWSProxy
     {
+        Dictionary<int, byte[]> pin_cache =  new Dictionary<int, byte[]>();  // key_handle, pin
+        
         private string device_id;
         
         public string DeviceID
@@ -254,6 +257,44 @@ namespace org.webpki.sks.ws.client
         } 
         
         private static byte[] SHARED_SECRET_32 = {0,1,2,3,4,5,6,7,8,9,1,0,3,2,5,4,7,6,9,8,9,8,7,6,5,4,3,2,1,0,3,2};
+        
+        private byte[] GetEncryptedAuthorization (byte[] authorization)
+        {
+            using (AesManaged aes = new AesManaged())
+            {
+                byte[] IV = new byte[16];
+                using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+                {
+	            	rng.GetBytes(IV);
+	            }
+                aes.Key = SHARED_SECRET_32;
+                aes.IV = IV;
+                byte[] encrypted;
+                using (MemoryStream total = new MemoryStream())
+                {
+                    using (MemoryStream ms_encrypt = new MemoryStream())
+                    {
+                        using (CryptoStream cs_encrypt = new CryptoStream(ms_encrypt, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                        {
+ 	                        cs_encrypt.Write(authorization, 0, authorization.Length);
+ 	                        cs_encrypt.FlushFinalBlock(); 
+                    	}
+                    	ms_encrypt.Flush();
+    	                encrypted = ms_encrypt.ToArray();
+                 	}
+                 	total.Write (IV, 0, IV.Length);
+                 	total.Write (encrypted, 0, encrypted.Length);
+                 	encrypted = total.ToArray();
+                 	total.SetLength(0);
+                    using (HMACSHA256 hmac = new HMACSHA256(SHARED_SECRET_32))
+				    {
+				    	total.Write(hmac.ComputeHash(encrypted), 0, 32);
+				    	total.Write(encrypted, 0, encrypted.Length);
+				    }
+				    return total.ToArray();
+             	}
+         	}
+        }
         
         public void PerformTrustedGUIAuthorization (int key_handle, ref byte[] authorization, ref bool tga)
         {
@@ -281,10 +322,20 @@ namespace org.webpki.sks.ws.client
 	                throw new SKSException("Key locked, user message", SKSException.ERROR_USER_ABORT);
 	            }
 	            KeyAttributes ka = getKeyAttributes (key_handle);
-	            if (kpi.EnablePINCaching && !tga)
+	            if (kpi.EnablePINCaching)
 	            {
-// TODO check the cache!
-                    System.Media.SystemSounds.Exclamation.Play();
+	                if (tga)
+	                {
+						// Failed to authenticate - Clear cache
+	                    pin_cache.Remove (key_handle);
+	                }
+	                else if (pin_cache.ContainsKey (key_handle))
+	                {
+	                    // First try and we do have a cache - Use it
+	                    tga = true;
+	                    authorization = GetEncryptedAuthorization (pin_cache[key_handle]);
+	                    return;
+	                }
 	            }
                 SKSAuthorizationDialog authorization_form = new SKSAuthorizationDialog(key_handle,
                                                                                        (PassphraseFormat)kpi.Format,
@@ -298,40 +349,13 @@ namespace org.webpki.sks.ws.client
                 	                                                Hex.Decode (authorization_form.password)
                 	                                                             :
                 	                                                System.Text.Encoding.UTF8.GetBytes(authorization_form.password);
-                    using (AesManaged aes = new AesManaged())
-                    {
-	                    byte[] IV = new byte[16];
-	                    using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
-	                    {
-			            	rng.GetBytes(IV);
-			            }
-	                    aes.Key = SHARED_SECRET_32;
-	                    aes.IV = IV;
-	                    byte[] encrypted;
-	                    using (MemoryStream total = new MemoryStream())
-	                    {
-		                    using (MemoryStream ms_encrypt = new MemoryStream())
-		                    {
-		                        using (CryptoStream cs_encrypt = new CryptoStream(ms_encrypt, aes.CreateEncryptor(), CryptoStreamMode.Write))
-		                        {
-		 	                        cs_encrypt.Write(authorization, 0, authorization.Length);
-		 	                        cs_encrypt.FlushFinalBlock(); 
-		                    	}
-		                    	ms_encrypt.Flush();
-	        	                encrypted = ms_encrypt.ToArray();
-		                 	}
-		                 	total.Write (IV, 0, IV.Length);
-		                 	total.Write (encrypted, 0, encrypted.Length);
-		                 	encrypted = total.ToArray();
-		                 	total.SetLength(0);
-	                        using (HMACSHA256 hmac = new HMACSHA256(SHARED_SECRET_32))
-	    				    {
-	    				    	total.Write(hmac.ComputeHash(encrypted), 0, 32);
-	    				    	total.Write(encrypted, 0, encrypted.Length);
-	    				    }
-	    				    authorization = total.ToArray();
-	                 	}
-                 	}
+    	            if (kpi.EnablePINCaching)
+	                {
+	                	// Although the authorization may be incorrect we will just be
+	                	// prompted again so we can save it in the cache anyway
+                    	pin_cache[key_handle] = authorization;
+                    }
+                    authorization = GetEncryptedAuthorization (authorization); 
 					tga = true;
            		}
            		else

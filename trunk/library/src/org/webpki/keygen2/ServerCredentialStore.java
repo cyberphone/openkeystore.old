@@ -942,6 +942,10 @@ public class ServerCredentialStore implements Serializable
 
             if (enable_pin_caching_set)
               {
+                if (enable_pin_caching && (pin_policy == null || pin_policy.input_method != InputMethod.TRUSTED_GUI))
+                  {
+                    bad ("\"" + ENABLE_PIN_CACHING_ATTR +"\" must be combined with " + InputMethod.TRUSTED_GUI.toString ());
+                  }
                 wr.setBooleanAttribute (ENABLE_PIN_CACHING_ATTR, enable_pin_caching);
               }
 
