@@ -1508,6 +1508,7 @@ public class KeyGen2Test
         pin_protection = true;
         preset_pin = true;
         enable_pin_caching = true;
+        input_method = InputMethod.TRUSTED_GUI;
         doer.perform ();
         assertFalse ("PIN Not User Modifiable", sks.getKeyProtectionInfo (doer.getFirstKey ()).getPINUserModifiableFlag ());
         assertTrue ("PIN Not Cached", sks.getKeyProtectionInfo (doer.getFirstKey ()).getEnablePINCachingFlag ());

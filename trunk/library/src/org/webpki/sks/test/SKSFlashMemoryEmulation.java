@@ -2920,6 +2920,10 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
               {
                 provisioning.abort ("Referenced PIN policy object not found");
               }
+            if (enable_pin_caching && pin_policy.input_method != INPUT_METHOD_TRUSTED_GUI)
+              {
+                provisioning.abort ("\"EnablePINCaching\" must be combined with \"trusted-gui\"");
+              }
             pin_policy_id = pin_policy.id;
             provisioning.names.put (pin_policy_id, true); // Referenced
             decrypt_pin = !pin_policy.user_defined;
