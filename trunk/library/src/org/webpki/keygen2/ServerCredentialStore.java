@@ -722,10 +722,12 @@ public class ServerCredentialStore implements Serializable
         
 
         boolean enable_pin_caching;
+        boolean enable_pin_caching_set;
         
         public KeyProperties setEnablePINCaching (boolean flag)
           {
             enable_pin_caching = flag;
+            enable_pin_caching_set = true;
             return this;
           }
         
@@ -937,7 +939,12 @@ public class ServerCredentialStore implements Serializable
               {
                 wr.setStringAttribute (BIOMETRIC_PROTECTION_ATTR, biometric_protection.getXMLName ());
               }
-            
+
+            if (enable_pin_caching_set)
+              {
+                wr.setBooleanAttribute (ENABLE_PIN_CACHING_ATTR, enable_pin_caching);
+              }
+
             if (delete_protection != null)
               {
                 wr.setStringAttribute (DELETE_PROTECTION_ATTR, delete_protection.getXMLName ());

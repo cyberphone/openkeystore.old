@@ -172,6 +172,8 @@ public class KeyGen2Test
     
     boolean device_pin_protection;
     
+    boolean enable_pin_caching;
+    
     boolean privacy_enabled;
     
     boolean pin_group_shared;
@@ -1015,6 +1017,10 @@ public class KeyGen2Test
               {
                 kp.setDeleteProtection (delete_protection);
               }
+            if (enable_pin_caching)
+              {
+                kp.setEnablePINCaching (true);
+              }
             if (server_seed)
               {
                 byte[] seed = new byte[32];
@@ -1270,6 +1276,7 @@ public class KeyGen2Test
             writeOption ("PIN Input Method ", input_method != null);
             writeOption ("Device PIN", device_pin_protection);
             writeOption ("Preset PIN", preset_pin);
+            writeOption ("Enable PIN Caching", enable_pin_caching);
             writeOption ("PIN patterns", add_pin_pattern);
             writeOption ("Fixed PIN", fixed_pin);
             writeOption ("Privacy Enabled", privacy_enabled);
@@ -1483,6 +1490,7 @@ public class KeyGen2Test
                                                                                          USER_DEFINED_PIN, 
                                                                                          enc),
                                                                                          TEST_STRING));
+        assertFalse ("PIN Cached", sks.getKeyProtectionInfo (key_handle).getEnablePINCachingFlag ());
       }
 
     @Test
@@ -1499,8 +1507,10 @@ public class KeyGen2Test
         Doer doer = new Doer ();
         pin_protection = true;
         preset_pin = true;
+        enable_pin_caching = true;
         doer.perform ();
         assertFalse ("PIN Not User Modifiable", sks.getKeyProtectionInfo (doer.getFirstKey ()).getPINUserModifiableFlag ());
+        assertTrue ("PIN Not Cached", sks.getKeyProtectionInfo (doer.getFirstKey ()).getEnablePINCachingFlag ());
       }
 
     @Test

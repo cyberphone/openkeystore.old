@@ -31,7 +31,6 @@ import org.webpki.sks.Grouping;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.SKSException;
 
-import org.webpki.sks.test.SKSReferenceImplementation.MacBuilder;
 import org.webpki.sks.ws.TrustedGUIAuthorization;
 import org.webpki.util.ArrayUtil;
 
