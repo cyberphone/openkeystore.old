@@ -1677,21 +1677,21 @@ namespace org.webpki.sks.ws.client
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="X509Certificate", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        #pragma warning disable 0649
+        internal List<byte[]> _certificate_path;
+        #pragma warning restore 0649
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="AppUsage", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal sbyte _app_usage;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="FriendlyName", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal string _friendly_name;
-        #pragma warning restore 0649
-
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="X509Certificate", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        #pragma warning disable 0649
-        internal List<byte[]> _certificate_path;
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
@@ -1713,6 +1713,11 @@ namespace org.webpki.sks.ws.client
             get { return _is_symmetric_key; }
         }
 
+        public X509Certificate2[] CertificatePath
+        {
+            get { return Conversions.BinaryListToCertificates(_certificate_path); }
+        }
+
         public AppUsage AppUsage
         {
             get { return (AppUsage)_app_usage; }
@@ -1721,11 +1726,6 @@ namespace org.webpki.sks.ws.client
         public string FriendlyName
         {
             get { return _friendly_name; }
-        }
-
-        public X509Certificate2[] CertificatePath
-        {
-            get { return Conversions.BinaryListToCertificates(_certificate_path); }
         }
 
         public string[] EndorsedAlgorithms

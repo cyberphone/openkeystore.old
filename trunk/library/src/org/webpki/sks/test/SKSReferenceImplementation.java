@@ -2111,9 +2111,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Return core key entry metadata
         ///////////////////////////////////////////////////////////////////////////////////
         return new KeyAttributes (key_entry.isSymmetric (),
+                                  key_entry.certificate_path,
                                   key_entry.app_usage,
                                   key_entry.friendly_name,
-                                  key_entry.certificate_path,
                                   key_entry.endorsed_algorithms.toArray (new String[0]),
                                   key_entry.extensions.keySet ().toArray (new String[0]));
       }

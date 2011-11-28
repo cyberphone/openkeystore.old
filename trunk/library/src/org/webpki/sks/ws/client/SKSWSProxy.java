@@ -417,12 +417,12 @@ public interface SKSWSProxy
                                   int key_handle,
                                   @WebParam(name="IsSymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                   Holder<Boolean> is_symmetric_key,
+                                  @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<List<byte[]>> certificate_path,
                                   @WebParam(name="AppUsage", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                   Holder<Byte> app_usage,
                                   @WebParam(name="FriendlyName", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                   Holder<String> friendly_name,
-                                  @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                                  Holder<List<byte[]>> certificate_path,
                                   @WebParam(name="EndorsedAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                   Holder<List<String>> endorsed_algorithms,
                                   @WebParam(name="ExtensionType", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)

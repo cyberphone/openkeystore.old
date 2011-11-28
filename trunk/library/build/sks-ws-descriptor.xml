@@ -839,9 +839,9 @@
      <Parameter Name="device_id"           Type="string" XMLName="DeviceID"          Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="is_symmetric_key"    Type="bool"   XMLName="IsSymmetricKey"    Mode="out"/>
+     <Parameter Name="certificate_path"    Type="binary" XMLName="X509Certificate"   Mode="out" List="true"             RewriteRule="Out.X509"/>
      <Parameter Name="app_usage"           Type="byte"   XMLName="AppUsage"          Mode="out"                         RewriteRule="Out.AppUsage"/>
      <Parameter Name="friendly_name"       Type="string" XMLName="FriendlyName"      Mode="out" Null="true"/>
-     <Parameter Name="certificate_path"    Type="binary" XMLName="X509Certificate"   Mode="out" List="true"             RewriteRule="Out.X509"/>
      <Parameter Name="endorsed_algorithms" Type="string" XMLName="EndorsedAlgorithm" Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
      <Parameter Name="extension_types"     Type="string" XMLName="ExtensionType"     Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
      <Code><![CDATA[
@@ -850,13 +850,13 @@
           {
             KeyAttributes ka = getDevice (device_id).getKeyAttributes (key_handle);
             is_symmetric_key.value = ka.isSymmetricKey ();
-            app_usage.value = ka.getAppUsage ().getSKSValue ();
-            friendly_name.value = ka.getFriendlyName ();
             certificate_path.value = new ArrayList<byte[]> ();
             for (X509Certificate cert : ka.getCertificatePath ())
               {
                 certificate_path.value.add (cert.getEncoded ());
               }
+            app_usage.value = ka.getAppUsage ().getSKSValue ();
+            friendly_name.value = ka.getFriendlyName ();
             endorsed_algorithms.value = new ArrayList<String> ();
             for (String alg :   ka.getEndorsedAlgorithms ())
               {

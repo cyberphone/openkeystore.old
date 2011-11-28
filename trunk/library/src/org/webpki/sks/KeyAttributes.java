@@ -23,12 +23,12 @@ public class KeyAttributes
   {
     boolean is_symmetric_key;
     
+    X509Certificate[] certificate_path;
+    
     byte app_usage;
     
     String friendly_name;
 
-    X509Certificate[] certificate_path;
-    
     String[] endorsed_algorithms;
 
     String[] extension_types;
@@ -39,6 +39,11 @@ public class KeyAttributes
         return is_symmetric_key;
       }
     
+    public X509Certificate[] getCertificatePath ()
+      {
+        return certificate_path;
+      }
+
     public AppUsage getAppUsage () throws SKSException
       {
         for (AppUsage au : AppUsage.values ())
@@ -56,11 +61,6 @@ public class KeyAttributes
         return friendly_name;
       }
 
-    public X509Certificate[] getCertificatePath ()
-      {
-        return certificate_path;
-      }
-
     public String[] getEndorsedAlgorithms ()
       {
         return extension_types;
@@ -72,16 +72,16 @@ public class KeyAttributes
       }
     
     public KeyAttributes (boolean is_symmetric_key,
+                          X509Certificate[] certificate_path,
                           byte app_usage,
                           String friendly_name,
-                          X509Certificate[] certificate_path,
                           String[] endorsed_algorithms,
                           String[] extension_types)
       {
         this.is_symmetric_key = is_symmetric_key;
+        this.certificate_path = certificate_path;
         this.app_usage = app_usage;
         this.friendly_name = friendly_name;
-        this.certificate_path = certificate_path;
         this.endorsed_algorithms = endorsed_algorithms;
         this.extension_types = extension_types;
       }
