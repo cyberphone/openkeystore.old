@@ -1580,7 +1580,14 @@ public class WSCreator extends XMLObjectWrapper
             write (file, added_indent.toString ());
             if (!meth.filteredParameters (true).isEmpty ())
               {
-                write (file, meth.getNetWrapper (false) + " _res = ");
+                if (meth.return_class != null && meth.return_class.null_value != null)
+                  {
+                    write (file, meth.getNetWrapper (false) + " _res = ");
+                  }
+                else
+                  {
+                    write (file, "return ");
+                  }
               }
             write (file, "base.Channel." + meth.name + "(new " + meth.getNetWrapper (true) + "(");
             next = false;
@@ -1608,29 +1615,30 @@ public class WSCreator extends XMLObjectWrapper
                     write (file, prop.dotnet_suppress_rule.header_code);
                   }
               }
-            write (file, "));\n");
+            write (file, "))");
             if (meth.return_class == null)
               {
                 for (Property prop : meth.parameters)
                   {
                     if (prop.output_mode)
                       {
+                        bad ("Not Implemented Yet! Method=" + meth.name);
                         write (file, added_indent + prop.nName (true) + " = " + prop.nArgument ("_res._", false) + ";\n");
                       }
                   }
                 if (meth.return_prop != null)
                   {
-                    write (file, added_indent + "return " + meth.return_prop.nArgument ("_res._", false) + ";\n");
+                    write (file, meth.return_prop.nArgument ("._", false));
                   }
+                write (file, ";\n");
               }
             else
               {
-                write (file, added_indent + "return ");
+                write (file, ";\n");
                 if (meth.return_class.null_value != null)
                   {
-                    write (file, "_res._" + meth.return_prop.name + " == " + meth.return_class.null_value + " ? null : ");
+                    write (file, added_indent + "return _res._" + meth.return_prop.name + " == " + meth.return_class.null_value + " ? null : _res;\n");
                   }
-                write (file, "_res;\n");
               }
             if (meth.dotnet_embed_rule != null && meth.dotnet_embed_rule.after != null)
               {

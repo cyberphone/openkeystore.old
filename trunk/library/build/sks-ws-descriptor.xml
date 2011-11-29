@@ -316,7 +316,7 @@
      <SuppressRule Name="DEV">device_id</SuppressRule>
      <EmbedRule Name="TGA">
         <Before>            bool tga = false;
-            do
+            while (true)
             {
                 PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
@@ -332,7 +332,6 @@
                     Authorization = null;
                 }
             }
-            while (true);
 ]]></After>
      </EmbedRule>
    </DotNetClient>

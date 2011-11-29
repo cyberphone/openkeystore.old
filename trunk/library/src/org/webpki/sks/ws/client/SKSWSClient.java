@@ -76,31 +76,35 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
           }
       }
     
-    boolean getTrustedGUIAuthorization (int key_handle, AuthorizationHolder authorization_holder) throws SKSException
+    boolean getTrustedGUIAuthorization (int key_handle,
+                                        AuthorizationHolder authorization_holder,
+                                        boolean auth_error) throws SKSException
       {
-        if (tga_provider != null)
+        if (tga_provider == null)
           {
-            KeyProtectionInfo kpi = getKeyProtectionInfo (key_handle);
-            if (kpi.hasLocalPINProtection ())
+            return false;
+          }
+        
+        KeyProtectionInfo kpi = getKeyProtectionInfo (key_handle);
+        if (kpi.hasLocalPINProtection ())
+          {
+            if (kpi.getPINInputMethod () == InputMethod.TRUSTED_GUI)
               {
-                if (kpi.getPINInputMethod () == InputMethod.TRUSTED_GUI)
+                if (authorization_holder.value != null)
                   {
-                    if (authorization_holder.value != null)
-                      {
-                        throw new SKSException ("Redundant \"Authorization\"", SKSException.ERROR_AUTHORIZATION);
-                      }
+                    throw new SKSException ("Redundant \"Authorization\"", SKSException.ERROR_AUTHORIZATION);
                   }
-                else if (kpi.getPINInputMethod () == InputMethod.PROGRAMMATIC || authorization_holder.value != null)
-                  {
-                    return false;
-                  }
-                KeyAttributes ka = getKeyAttributes (key_handle);
-                authorization_holder.value = tga_provider.getTrustedAuthorization (kpi.getPINFormat (),
-                                                                          kpi.getPINGrouping (),
-                                                                          ka.getAppUsage (),
-                                                                          ka.getFriendlyName ());
-                return authorization_holder.value != null;
               }
+            else if (kpi.getPINInputMethod () == InputMethod.PROGRAMMATIC || authorization_holder.value != null)
+              {
+                return false;
+              }
+            KeyAttributes ka = getKeyAttributes (key_handle);
+            authorization_holder.value = tga_provider.getTrustedAuthorization (kpi.getPINFormat (),
+                                                                      kpi.getPINGrouping (),
+                                                                      ka.getAppUsage (),
+                                                                      ka.getFriendlyName ());
+            return authorization_holder.value != null;
           }
         return false;
       }
@@ -942,22 +946,30 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                   byte[] authorization,
                                   byte[] data) throws SKSException
       {
-        try
+        boolean tga = false;
+        while (true)
           {
-            AuthorizationHolder auth;
-            return getSKSWS ().signHashedData (device_id,
-                                               key_handle,
-                                               algorithm,
-                                               parameters,
-                                               getTrustedGUIAuthorization (key_handle,
-                                                                           auth = new AuthorizationHolder (authorization)),
-                                               auth.value,
-                                               data);
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
-          }
+            try
+              {
+                AuthorizationHolder auth = new AuthorizationHolder (authorization);
+                tga = getTrustedGUIAuthorization (key_handle, auth, tga);
+                return getSKSWS ().signHashedData (device_id,
+                                                   key_handle,
+                                                   algorithm,
+                                                   parameters,
+                                                   tga,
+                                                   auth.value,
+                                                   data);
+              }
+            catch (SKSException_Exception e)
+              {
+                if (!tga || (e.getFaultInfo ().getError () != SKSException.ERROR_AUTHORIZATION))
+                  {
+                    throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+                  }
+                authorization = null;
+              }
+          } 
       }
 
     @Override
@@ -967,22 +979,30 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                         byte[] authorization,
                                         byte[] data) throws SKSException
       {
-        try
+        boolean tga = false;
+        while (true)
           {
-            AuthorizationHolder auth;
-            return getSKSWS ().asymmetricKeyDecrypt (device_id,
-                                                     key_handle,
-                                                     algorithm,
-                                                     parameters,
-                                                     getTrustedGUIAuthorization (key_handle,
-                                                                                 auth = new AuthorizationHolder (authorization)),
-                                                     auth.value,
-                                                     data);
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
-          }
+            try
+              {
+                AuthorizationHolder auth = new AuthorizationHolder (authorization);
+                tga = getTrustedGUIAuthorization (key_handle, auth, tga);
+                return getSKSWS ().asymmetricKeyDecrypt (device_id,
+                                                         key_handle,
+                                                         algorithm,
+                                                         parameters,
+                                                         tga,
+                                                         auth.value,
+                                                         data);
+              }
+            catch (SKSException_Exception e)
+              {
+                if (!tga || (e.getFaultInfo ().getError () != SKSException.ERROR_AUTHORIZATION))
+                  {
+                    throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+                  }
+                authorization = null;
+              }
+          } 
       }
 
     @Override
@@ -992,22 +1012,30 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                 byte[] authorization,
                                 PublicKey public_key) throws SKSException
       {
-        try
+        boolean tga = false;
+        while (true)
           {
-            AuthorizationHolder auth;
-            return getSKSWS ().keyAgreement (device_id,
-                                             key_handle,
-                                             algorithm,
-                                             parameters,
-                                             getTrustedGUIAuthorization (key_handle,
-                                                                         auth = new AuthorizationHolder (authorization)),
-                                             auth.value,
-                                             public_key.getEncoded ());
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
-          }
+            try
+              {
+                AuthorizationHolder auth = new AuthorizationHolder (authorization);
+                tga = getTrustedGUIAuthorization (key_handle, auth, tga);
+                return getSKSWS ().keyAgreement (device_id,
+                                                 key_handle,
+                                                 algorithm,
+                                                 parameters,
+                                                 tga,
+                                                 auth.value,
+                                                 public_key.getEncoded ());
+              }
+            catch (SKSException_Exception e)
+              {
+                if (!tga || (e.getFaultInfo ().getError () != SKSException.ERROR_AUTHORIZATION))
+                  {
+                    throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+                  }
+                authorization = null;
+              }
+          } 
       }
 
     @Override
@@ -1016,20 +1044,28 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                byte[] authorization,
                                byte[] data) throws SKSException
       {
-        try
+        boolean tga = false;
+        while (true)
           {
-            AuthorizationHolder auth;
-            return getSKSWS ().performHMAC (device_id,
-                                            key_handle, 
-                                            algorithm,
-                                            getTrustedGUIAuthorization (key_handle,
-                                                                        auth = new AuthorizationHolder (authorization)),
-                                            auth.value,
-                                            data);
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+            try
+              {
+                AuthorizationHolder auth = new AuthorizationHolder (authorization);
+                tga = getTrustedGUIAuthorization (key_handle, auth, tga);
+                return getSKSWS ().performHMAC (device_id,
+                                                key_handle, 
+                                                algorithm,
+                                                tga,
+                                                auth.value,
+                                                data);
+              }
+            catch (SKSException_Exception e)
+              {
+                if (!tga || (e.getFaultInfo ().getError () != SKSException.ERROR_AUTHORIZATION))
+                  {
+                    throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+                  }
+                authorization = null;
+              }
           }
       }
 
@@ -1041,22 +1077,30 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                        byte[] authorization,
                                        byte[] data) throws SKSException
       {
-        try
+        boolean tga = false;
+        while (true)
           {
-            AuthorizationHolder auth;
-            return getSKSWS ().symmetricKeyEncrypt (device_id,
-                                                    key_handle,
-                                                    algorithm,
-                                                    mode,
-                                                    iv,
-                                                    getTrustedGUIAuthorization (key_handle,
-                                                                                auth = new AuthorizationHolder (authorization)),
-                                                    auth.value,
-                                                    data);
-          }
-        catch (SKSException_Exception e)
-          {
-            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+            try
+              {
+                AuthorizationHolder auth = new AuthorizationHolder (authorization);
+                tga = getTrustedGUIAuthorization (key_handle, auth, tga);
+                return getSKSWS ().symmetricKeyEncrypt (device_id,
+                                                        key_handle,
+                                                        algorithm,
+                                                        mode,
+                                                        iv,
+                                                        tga,
+                                                        auth.value,
+                                                        data);
+              }
+            catch (SKSException_Exception e)
+              {
+                if (!tga || (e.getFaultInfo ().getError () != SKSException.ERROR_AUTHORIZATION))
+                  {
+                    throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+                  }
+                authorization = null;
+              }
           }
       }
 
@@ -1129,6 +1173,5 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         SKSWSClient client = args[0].equals ("default") ? new SKSWSClient () : new SKSWSClient (args[0]);
         System.out.println ("Version=" + client.getVersion () + "\nDevice=" + client.getDeviceInfo ().getVendorDescription ());
       }
-
 
   }

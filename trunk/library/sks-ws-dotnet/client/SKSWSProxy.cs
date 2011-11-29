@@ -2700,8 +2700,7 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                DeviceInfo _res = base.Channel.getDeviceInfo(new getDeviceInfo_Request(device_id));
-                return _res;
+                return base.Channel.getDeviceInfo(new getDeviceInfo_Request(device_id));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -2721,17 +2720,16 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                ProvisioningSession _res = base.Channel.createProvisioningSession(new createProvisioningSession_Request(device_id,
-                                                                                                                        Algorithm,
-                                                                                                                        PrivacyEnabled,
-                                                                                                                        ServerSessionID,
-                                                                                                                        Conversions.EncodeX509ECPublicKey(ServerEphemeralKey),
-                                                                                                                        IssuerURI,
-                                                                                                                        Conversions.EncodeX509PublicKey(KeyManagementKey),
-                                                                                                                        ClientTime,
-                                                                                                                        SessionLifeTime,
-                                                                                                                        SessionKeyLimit));
-                return _res;
+                return base.Channel.createProvisioningSession(new createProvisioningSession_Request(device_id,
+                                                                                                    Algorithm,
+                                                                                                    PrivacyEnabled,
+                                                                                                    ServerSessionID,
+                                                                                                    Conversions.EncodeX509ECPublicKey(ServerEphemeralKey),
+                                                                                                    IssuerURI,
+                                                                                                    Conversions.EncodeX509PublicKey(KeyManagementKey),
+                                                                                                    ClientTime,
+                                                                                                    SessionLifeTime,
+                                                                                                    SessionKeyLimit));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -2745,11 +2743,10 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                closeProvisioningSession_Response _res = base.Channel.closeProvisioningSession(new closeProvisioningSession_Request(device_id,
-                                                                                                                                    ProvisioningHandle,
-                                                                                                                                    Nonce,
-                                                                                                                                    MAC));
-                return _res._attestation;
+                return base.Channel.closeProvisioningSession(new closeProvisioningSession_Request(device_id,
+                                                                                                  ProvisioningHandle,
+                                                                                                  Nonce,
+                                                                                                  MAC))._attestation;
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -2791,10 +2788,9 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                signProvisioningSessionData_Response _res = base.Channel.signProvisioningSessionData(new signProvisioningSessionData_Request(device_id,
-                                                                                                                                             ProvisioningHandle,
-                                                                                                                                             Data));
-                return _res._result;
+                return base.Channel.signProvisioningSessionData(new signProvisioningSessionData_Request(device_id,
+                                                                                                        ProvisioningHandle,
+                                                                                                        Data))._result;
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -2811,14 +2807,13 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                createPUKPolicy_Response _res = base.Channel.createPUKPolicy(new createPUKPolicy_Request(device_id,
-                                                                                                         ProvisioningHandle,
-                                                                                                         ID,
-                                                                                                         PUKValue,
-                                                                                                         (sbyte)Format,
-                                                                                                         RetryLimit,
-                                                                                                         MAC));
-                return _res._puk_policy_handle;
+                return base.Channel.createPUKPolicy(new createPUKPolicy_Request(device_id,
+                                                                                ProvisioningHandle,
+                                                                                ID,
+                                                                                PUKValue,
+                                                                                (sbyte)Format,
+                                                                                RetryLimit,
+                                                                                MAC))._puk_policy_handle;
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -2842,21 +2837,20 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                createPINPolicy_Response _res = base.Channel.createPINPolicy(new createPINPolicy_Request(device_id,
-                                                                                                         ProvisioningHandle,
-                                                                                                         ID,
-                                                                                                         PUKPolicyHandle,
-                                                                                                         UserDefined,
-                                                                                                         UserModifiable,
-                                                                                                         (sbyte)Format,
-                                                                                                         RetryLimit,
-                                                                                                         (sbyte)Grouping,
-                                                                                                         Conversions.PatternRestrictionsToSKS(PatternRestrictions),
-                                                                                                         MinLength,
-                                                                                                         MaxLength,
-                                                                                                         (sbyte)InputMethod,
-                                                                                                         MAC));
-                return _res._pin_policy_handle;
+                return base.Channel.createPINPolicy(new createPINPolicy_Request(device_id,
+                                                                                ProvisioningHandle,
+                                                                                ID,
+                                                                                PUKPolicyHandle,
+                                                                                UserDefined,
+                                                                                UserModifiable,
+                                                                                (sbyte)Format,
+                                                                                RetryLimit,
+                                                                                (sbyte)Grouping,
+                                                                                Conversions.PatternRestrictionsToSKS(PatternRestrictions),
+                                                                                MinLength,
+                                                                                MaxLength,
+                                                                                (sbyte)InputMethod,
+                                                                                MAC))._pin_policy_handle;
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -2883,24 +2877,23 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                KeyData _res = base.Channel.createKeyEntry(new createKeyEntry_Request(device_id,
-                                                                                      ProvisioningHandle,
-                                                                                      ID,
-                                                                                      Algorithm,
-                                                                                      ServerSeed,
-                                                                                      DevicePINProtection,
-                                                                                      PINPolicyHandle,
-                                                                                      PINValue,
-                                                                                      EnablePINCaching,
-                                                                                      (sbyte)BiometricProtection,
-                                                                                      (sbyte)ExportProtection,
-                                                                                      (sbyte)DeleteProtection,
-                                                                                      (sbyte)AppUsage,
-                                                                                      FriendlyName,
-                                                                                      KeySpecifier,
-                                                                                      new List<string>(EndorsedAlgorithms),
-                                                                                      MAC));
-                return _res;
+                return base.Channel.createKeyEntry(new createKeyEntry_Request(device_id,
+                                                                              ProvisioningHandle,
+                                                                              ID,
+                                                                              Algorithm,
+                                                                              ServerSeed,
+                                                                              DevicePINProtection,
+                                                                              PINPolicyHandle,
+                                                                              PINValue,
+                                                                              EnablePINCaching,
+                                                                              (sbyte)BiometricProtection,
+                                                                              (sbyte)ExportProtection,
+                                                                              (sbyte)DeleteProtection,
+                                                                              (sbyte)AppUsage,
+                                                                              FriendlyName,
+                                                                              KeySpecifier,
+                                                                              new List<string>(EndorsedAlgorithms),
+                                                                              MAC));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -2913,10 +2906,9 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                getKeyHandle_Response _res = base.Channel.getKeyHandle(new getKeyHandle_Request(device_id,
-                                                                                                ProvisioningHandle,
-                                                                                                ID));
-                return _res._key_handle;
+                return base.Channel.getKeyHandle(new getKeyHandle_Request(device_id,
+                                                                          ProvisioningHandle,
+                                                                          ID))._key_handle;
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -3092,9 +3084,8 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                KeyAttributes _res = base.Channel.getKeyAttributes(new getKeyAttributes_Request(device_id,
-                                                                                                KeyHandle));
-                return _res;
+                return base.Channel.getKeyAttributes(new getKeyAttributes_Request(device_id,
+                                                                                  KeyHandle));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -3106,9 +3097,8 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                KeyProtectionInfo _res = base.Channel.getKeyProtectionInfo(new getKeyProtectionInfo_Request(device_id,
-                                                                                                            KeyHandle));
-                return _res;
+                return base.Channel.getKeyProtectionInfo(new getKeyProtectionInfo_Request(device_id,
+                                                                                          KeyHandle));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -3121,10 +3111,9 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                Extension _res = base.Channel.getExtension(new getExtension_Request(device_id,
-                                                                                    KeyHandle,
-                                                                                    Type));
-                return _res;
+                return base.Channel.getExtension(new getExtension_Request(device_id,
+                                                                          KeyHandle,
+                                                                          Type));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -3171,10 +3160,9 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                exportKey_Response _res = base.Channel.exportKey(new exportKey_Request(device_id,
-                                                                                       KeyHandle,
-                                                                                       Authorization));
-                return _res._key;
+                return base.Channel.exportKey(new exportKey_Request(device_id,
+                                                                    KeyHandle,
+                                                                    Authorization))._key;
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -3238,19 +3226,18 @@ namespace org.webpki.sks.ws.client
                                      byte[] Data)
         {
             bool tga = false;
-            do
+            while (true)
             {
                 PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
                 {
-                    signHashedData_Response _res = base.Channel.signHashedData(new signHashedData_Request(device_id,
-                                                                                                          KeyHandle,
-                                                                                                          Algorithm,
-                                                                                                          Parameters,
-                                                                                                          tga,
-                                                                                                          Authorization,
-                                                                                                          Data));
-                    return _res._result;
+                    return base.Channel.signHashedData(new signHashedData_Request(device_id,
+                                                                                  KeyHandle,
+                                                                                  Algorithm,
+                                                                                  Parameters,
+                                                                                  tga,
+                                                                                  Authorization,
+                                                                                  Data))._result;
                 }
                 catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
@@ -3261,7 +3248,6 @@ namespace org.webpki.sks.ws.client
                     Authorization = null;
                 }
             }
-            while (true);
         }
 
         public byte[] asymmetricKeyDecrypt(int KeyHandle,
@@ -3271,19 +3257,18 @@ namespace org.webpki.sks.ws.client
                                            byte[] Data)
         {
             bool tga = false;
-            do
+            while (true)
             {
                 PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
                 {
-                    asymmetricKeyDecrypt_Response _res = base.Channel.asymmetricKeyDecrypt(new asymmetricKeyDecrypt_Request(device_id,
-                                                                                                                            KeyHandle,
-                                                                                                                            Algorithm,
-                                                                                                                            Parameters,
-                                                                                                                            tga,
-                                                                                                                            Authorization,
-                                                                                                                            Data));
-                    return _res._result;
+                    return base.Channel.asymmetricKeyDecrypt(new asymmetricKeyDecrypt_Request(device_id,
+                                                                                              KeyHandle,
+                                                                                              Algorithm,
+                                                                                              Parameters,
+                                                                                              tga,
+                                                                                              Authorization,
+                                                                                              Data))._result;
                 }
                 catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
@@ -3294,7 +3279,6 @@ namespace org.webpki.sks.ws.client
                     Authorization = null;
                 }
             }
-            while (true);
         }
 
         public byte[] keyAgreement(int KeyHandle,
@@ -3304,19 +3288,18 @@ namespace org.webpki.sks.ws.client
                                    PublicKey PublicKey)
         {
             bool tga = false;
-            do
+            while (true)
             {
                 PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
                 {
-                    keyAgreement_Response _res = base.Channel.keyAgreement(new keyAgreement_Request(device_id,
-                                                                                                    KeyHandle,
-                                                                                                    Algorithm,
-                                                                                                    Parameters,
-                                                                                                    tga,
-                                                                                                    Authorization,
-                                                                                                    Conversions.EncodeX509PublicKey(PublicKey)));
-                    return _res._key;
+                    return base.Channel.keyAgreement(new keyAgreement_Request(device_id,
+                                                                              KeyHandle,
+                                                                              Algorithm,
+                                                                              Parameters,
+                                                                              tga,
+                                                                              Authorization,
+                                                                              Conversions.EncodeX509PublicKey(PublicKey)))._key;
                 }
                 catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
@@ -3327,7 +3310,6 @@ namespace org.webpki.sks.ws.client
                     Authorization = null;
                 }
             }
-            while (true);
         }
 
         public byte[] performHMAC(int KeyHandle,
@@ -3336,18 +3318,17 @@ namespace org.webpki.sks.ws.client
                                   byte[] Data)
         {
             bool tga = false;
-            do
+            while (true)
             {
                 PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
                 {
-                    performHMAC_Response _res = base.Channel.performHMAC(new performHMAC_Request(device_id,
-                                                                                                 KeyHandle,
-                                                                                                 Algorithm,
-                                                                                                 tga,
-                                                                                                 Authorization,
-                                                                                                 Data));
-                    return _res._result;
+                    return base.Channel.performHMAC(new performHMAC_Request(device_id,
+                                                                            KeyHandle,
+                                                                            Algorithm,
+                                                                            tga,
+                                                                            Authorization,
+                                                                            Data))._result;
                 }
                 catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
@@ -3358,7 +3339,6 @@ namespace org.webpki.sks.ws.client
                     Authorization = null;
                 }
             }
-            while (true);
         }
 
         public byte[] symmetricKeyEncrypt(int KeyHandle,
@@ -3369,20 +3349,19 @@ namespace org.webpki.sks.ws.client
                                           byte[] Data)
         {
             bool tga = false;
-            do
+            while (true)
             {
                 PerformTrustedGUIAuthorization(KeyHandle, ref Authorization, ref tga);
                 try
                 {
-                    symmetricKeyEncrypt_Response _res = base.Channel.symmetricKeyEncrypt(new symmetricKeyEncrypt_Request(device_id,
-                                                                                                                         KeyHandle,
-                                                                                                                         Algorithm,
-                                                                                                                         Mode,
-                                                                                                                         IV,
-                                                                                                                         tga,
-                                                                                                                         Authorization,
-                                                                                                                         Data));
-                    return _res._result;
+                    return base.Channel.symmetricKeyEncrypt(new symmetricKeyEncrypt_Request(device_id,
+                                                                                            KeyHandle,
+                                                                                            Algorithm,
+                                                                                            Mode,
+                                                                                            IV,
+                                                                                            tga,
+                                                                                            Authorization,
+                                                                                            Data))._result;
                 }
                 catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
@@ -3393,16 +3372,14 @@ namespace org.webpki.sks.ws.client
                     Authorization = null;
                 }
             }
-            while (true);
         }
 
         public string updateFirmware(byte[] Chunk)
         {
             try
             {
-                updateFirmware_Response _res = base.Channel.updateFirmware(new updateFirmware_Request(device_id,
-                                                                                                      Chunk));
-                return _res._result;
+                return base.Channel.updateFirmware(new updateFirmware_Request(device_id,
+                                                                              Chunk))._result;
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -3414,8 +3391,7 @@ namespace org.webpki.sks.ws.client
         {
             try
             {
-                listDevices_Response _res = base.Channel.listDevices(new listDevices_Request());
-                return _res._devices.ToArray();
+                return base.Channel.listDevices(new listDevices_Request())._devices.ToArray();
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -3425,8 +3401,7 @@ namespace org.webpki.sks.ws.client
 
         public string getVersion()
         {
-            getVersion_Response _res = base.Channel.getVersion(new getVersion_Request());
-            return _res._version;
+            return base.Channel.getVersion(new getVersion_Request())._version;
         }
 
         public void logEvent(string Description)
