@@ -1133,7 +1133,7 @@ public class SKSWSImplementation
     @WebMethod(operationName="keyAgreement")
     @RequestWrapper(localName="keyAgreement", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="keyAgreement.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @WebResult(name="Key", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     public byte[] keyAgreement (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                 String device_id,
                                 @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")

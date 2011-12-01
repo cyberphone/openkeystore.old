@@ -1044,7 +1044,7 @@
 ]]></Code></Method>
 
    <Method Name="keyAgreement" Throws="SKSException" EmbedRule="TGA">
-     <Returns   Name="key"                       Type="binary" XMLName="Key"/>
+     <Returns   Name="result"                    Type="binary" XMLName="Result"/>
      <Parameter Name="device_id"                 Type="string" XMLName="DeviceID"      Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>

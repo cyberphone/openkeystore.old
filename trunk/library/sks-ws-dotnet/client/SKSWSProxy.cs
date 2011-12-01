@@ -2453,9 +2453,9 @@ namespace org.webpki.sks.ws.client
     public class keyAgreement_Response
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="Key", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Result", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
-        internal byte[] _key;
+        internal byte[] _result;
         #pragma warning restore 0649
     }
 
@@ -3299,7 +3299,7 @@ namespace org.webpki.sks.ws.client
                                                                               Parameters,
                                                                               tga,
                                                                               Authorization,
-                                                                              Conversions.EncodeX509PublicKey(PublicKey)))._key;
+                                                                              Conversions.EncodeX509PublicKey(PublicKey)))._result;
                 }
                 catch (System.ServiceModel.FaultException<_SKSException> e)
                 {
