@@ -191,7 +191,7 @@
       <xs:element name="signProvisioningSessionData.Response">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="Result" type="xs:base64Binary"/>
+            <xs:element name="Signature" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -821,7 +821,7 @@
       <xs:element name="updateFirmware.Response">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="Result" type="xs:string" nillable="true" minOccurs="0"/>
+            <xs:element name="NextURL" type="xs:string" nillable="true" minOccurs="0"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

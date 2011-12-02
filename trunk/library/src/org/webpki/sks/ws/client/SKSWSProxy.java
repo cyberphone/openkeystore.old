@@ -159,7 +159,7 @@ public interface SKSWSProxy
     @WebMethod(operationName="signProvisioningSessionData")
     @RequestWrapper(localName="signProvisioningSessionData", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="signProvisioningSessionData.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="Signature", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     public byte[] signProvisioningSessionData (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                                String device_id,
                                                @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -671,7 +671,7 @@ public interface SKSWSProxy
     @WebMethod(operationName="updateFirmware")
     @RequestWrapper(localName="updateFirmware", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="updateFirmware.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @WebResult(name="Result", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="NextURL", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     public String updateFirmware (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                   String device_id,
                                   @WebParam(name="Chunk", targetNamespace="http://xmlns.webpki.org/sks/v1.00")

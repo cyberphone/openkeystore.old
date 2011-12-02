@@ -896,9 +896,9 @@ namespace org.webpki.sks.ws.client
     public class signProvisioningSessionData_Response
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="Result", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Signature", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
-        internal byte[] _result;
+        internal byte[] _signature;
         #pragma warning restore 0649
     }
 
@@ -2606,9 +2606,9 @@ namespace org.webpki.sks.ws.client
     public class updateFirmware_Response
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="Result", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="NextURL", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
-        internal string _result;
+        internal string _next_url;
         #pragma warning restore 0649
     }
 
@@ -2790,7 +2790,7 @@ namespace org.webpki.sks.ws.client
             {
                 return base.Channel.signProvisioningSessionData(new signProvisioningSessionData_Request(device_id,
                                                                                                         ProvisioningHandle,
-                                                                                                        Data))._result;
+                                                                                                        Data))._signature;
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -3379,7 +3379,7 @@ namespace org.webpki.sks.ws.client
             try
             {
                 return base.Channel.updateFirmware(new updateFirmware_Request(device_id,
-                                                                              Chunk))._result;
+                                                                              Chunk))._next_url;
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
