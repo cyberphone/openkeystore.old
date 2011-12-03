@@ -34,7 +34,7 @@
      - Mandatory: ProvisioningFinalization *
 
     * Note that a deferred certification process ends after the KeyCreation (Response)
-      and resumes with a ProvisioningFinalization (Request) invoked by the client
+      and resumes with a PlatformNegotiation (Request) invoked by the client
       using an URL supplied OOB.
 
     "Perfection is achieved, not when there is nothing more to add, but when
