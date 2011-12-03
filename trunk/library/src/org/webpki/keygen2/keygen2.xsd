@@ -14,7 +14,7 @@
     issued and maintained without changing the protocol engine.
 
     Historical note: KeyGen2 started its life as a 4-pass stand-alone
-    key-provisioning protocol back in 2007 but ended up as a KeyGen2/SKS
+    key-provisioning protocol back in 2007 but ended up as a SKS/KeyGen2
     10-pass "combo" three years later.
 
     Properly implemented the current incarnation provides E2ES (End to End Security),
@@ -22,18 +22,20 @@
     primarily intended for mobile phones with embedded security hardware hosting
     credentials from multiple and independent issuers.
 
-    KeyGen2 may be used in the following modes:
+    KeyGen2 may be used in the following modes and associated protocol steps:
 
      - Mandatory: PlatformNegotiation
 
      - Action="create": ProvisioningInitialization KeyCreation   
      - Action="unlock": ProvisioningInitialization [CredentialDiscovery] 
      - Action="manage": ProvisioningInitialization [CredentialDiscovery] [KeyCreation] 
-     - Action="resume": N/A
+     - Action="resume": *
 
      - Mandatory: ProvisioningFinalization *
 
-    * Note that a deferred certification process ends after KeyCreation.
+    * Note that a deferred certification process ends after the KeyCreation (Response)
+      and resumes with a ProvisioningFinalization (Request) invoked by the client
+      using an URL supplied OOB.
 
     "Perfection is achieved, not when there is nothing more to add, but when
     there is nothing left to take away" [Antoine de Saint-Exupery]
@@ -1491,6 +1493,7 @@
          <xs:pattern value="https?://.*"/>
       </xs:restriction>
    </xs:simpleType>
+
    <xs:simpleType name="uriList">
       <xs:restriction>
          <xs:simpleType>
