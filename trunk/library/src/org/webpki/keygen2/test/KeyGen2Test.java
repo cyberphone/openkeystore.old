@@ -304,8 +304,8 @@ public class KeyGen2Test
                 if ((old_provisioning_session = sks.enumerateProvisioningSessions (old_provisioning_session.getProvisioningHandle (), false)) == null)
                   {
                     abort ("Old provisioning session not found:" + 
-                        post_operation.getClientSessionID () + "/" +
-                        post_operation.getServerSessionID ());
+                           post_operation.getClientSessionID () + "/" +
+                           post_operation.getServerSessionID ());
                   }
                 if (old_provisioning_session.getClientSessionID ().equals(post_operation.getClientSessionID ()) &&
                     old_provisioning_session.getServerSessionID ().equals (post_operation.getServerSessionID ()))
@@ -478,8 +478,7 @@ public class KeyGen2Test
         byte[] keyCreResponse (byte[] xmldata) throws IOException
           {
             key_create_request = (KeyCreationRequestDecoder) client_xml_cache.parse (xmldata);
-            KeyCreationResponseEncoder key_init_response = 
-                  new KeyCreationResponseEncoder (key_create_request);
+            KeyCreationResponseEncoder key_init_response = new KeyCreationResponseEncoder (key_create_request);
             int pin_policy_handle = 0;
             int puk_policy_handle = 0;
             for (KeyCreationRequestDecoder.KeyObject key : key_create_request.getKeyObjects ())
@@ -565,8 +564,8 @@ public class KeyGen2Test
                 if ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), true)) == null)
                   {
                     abort ("Provisioning session not found:" + 
-                        fin_prov_request.getClientSessionID () + "/" +
-                        fin_prov_request.getServerSessionID ());
+                           fin_prov_request.getClientSessionID () + "/" +
+                           fin_prov_request.getServerSessionID ());
                   }
                 if (eps.getClientSessionID ().equals(fin_prov_request.getClientSessionID ()) &&
                     eps.getServerSessionID ().equals (fin_prov_request.getServerSessionID ()))
@@ -646,10 +645,10 @@ public class KeyGen2Test
             // Create final and attested message
             //////////////////////////////////////////////////////////////////////////
             ProvisioningFinalizationResponseEncoder fin_prov_response = 
-                      new ProvisioningFinalizationResponseEncoder (fin_prov_request,
-                                                               sks.closeProvisioningSession (eps.getProvisioningHandle (),
-                                                                                             fin_prov_request.getCloseSessionNonce (),
-                                                                                             fin_prov_request.getCloseSessionMAC ()));
+                new ProvisioningFinalizationResponseEncoder (fin_prov_request,
+                                                             sks.closeProvisioningSession (eps.getProvisioningHandle (),
+                                                                                           fin_prov_request.getCloseSessionNonce (),
+                                                                                           fin_prov_request.getCloseSessionMAC ()));
             return fin_prov_response.writeXML ();
           }
       }
