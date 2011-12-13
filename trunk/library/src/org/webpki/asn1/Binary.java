@@ -103,6 +103,7 @@ public abstract class Binary extends Simple
               {
                 StringBuffer enc = new StringBuffer ();
                 DerDecoder dd = new DerDecoder(value);
+                dd.extractfromoctetstrings = decoder.extractfromoctetstrings;
                 dd.bytenumbers = decoder.bytenumbers;
                 dd.bytenumlistoffset = blobOffset + encodedLength - value.length;
                 dd.readNext().toString(enc, prefix + "    ");
