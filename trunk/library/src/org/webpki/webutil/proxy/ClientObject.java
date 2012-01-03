@@ -14,12 +14,23 @@
  *  limitations under the License.
  *
  */
-package org.webpki.wasp;
+package org.webpki.webutil.proxy;
+
+import java.io.Serializable;
 
 /**
- * Interface for WASP "SignatureProfile" XML encoder objects
- *
+ * HTTP proxy object containing the super class for all client-operations. Only
+ * for proxy-internal use.
  */
-public interface SignatureProfileEncoder
+public abstract class ClientObject implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
+    String client_id;
+
+    ClientObject (String client_id)
+      {
+        this.client_id = client_id;
+      }
+
   }

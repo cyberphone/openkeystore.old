@@ -1,0 +1,583 @@
+/*
+ *  Copyright 2006-2012 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+package org.webpki.webutil.proxy;
+
+import java.io.IOException;
+import java.io.DataInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
+
+import java.util.Vector;
+
+import java.util.logging.Logger;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+
+/**
+ * HTTP proxy server core logic. Called by the proxy servlet application.
+ */
+public class ProxyServer
+  {
+
+    private ProxyServer ()
+      {
+      } // Cannot be initiated from the outside
+
+    static final String SOAP12_MIME = "application/soap+xml; charset=\"utf-8\"";
+
+    static Logger logger = Logger.getLogger (ProxyServer.class.getName ());
+
+    static ProxyServer global = new ProxyServer ();
+
+    static Vector<RequestDescriptor> response_queue = new Vector<RequestDescriptor> ();
+
+    static Vector<RequestDescriptor> waiting_callers = new Vector<RequestDescriptor> ();
+
+    static Vector<ProxyRequest> proxies = new Vector<ProxyRequest> ();
+
+    static long next_caller_id;
+
+    static long next_proxy_id;
+
+    static ServerConfiguration server_configuration;
+
+    static RequestObject last_request;
+
+    static int response_timeout_errors;
+
+    static int request_timeout_errors;
+
+    class Synchronizer
+      {
+
+        boolean touched;
+        boolean timeout_flag;
+
+        synchronized boolean perform (int timeout)
+          {
+            while (!touched && !timeout_flag)
+              {
+                try
+                  {
+                    wait (timeout);
+                  }
+                catch (InterruptedException e)
+                  {
+                    return false;
+                  }
+                timeout_flag = true;
+              }
+            return touched;
+          }
+
+        synchronized void haveData4You ()
+          {
+            touched = true;
+            notify ();
+          }
+
+      }
+
+    abstract class Caller
+      {
+        abstract boolean transactRequest () throws IOException, ServletException;
+
+        abstract void transactResponse () throws IOException, ServletException;
+
+        abstract void transactProxy () throws IOException, ServletException;
+      }
+
+    class RequestDescriptor extends Caller
+      {
+        HttpServletResponse response;
+        RequestObject request_object;
+        ResponseObject response_object;
+        ProxyRequest proxy;
+        Synchronizer request_waiter = new Synchronizer ();
+        Synchronizer response_waiter = new Synchronizer ();
+
+        void setProxyWorker (ProxyRequest proxy)
+          {
+            this.proxy = proxy;
+            this.proxy.request_descriptor = this;
+          }
+
+        boolean transactRequest () throws IOException, ServletException
+          {
+            // ////////////////////////////////////////////////
+            // No proxy available, wait for one (or die)...
+            // ////////////////////////////////////////////////
+            if (request_waiter.perform (server_configuration.request_timeout))
+              {
+                return true;
+              }
+            else
+              {
+                request_timeout_errors++;
+                cleanUpAfterFailedCall (this, "Call request timeout");
+                return false;
+              }
+          }
+
+        void transactProxy () throws IOException, ServletException
+          {
+            // //////////////////////////////////////////////////////////////
+            // We have a request and a now freed proxy.
+            // //////////////////////////////////////////////////////////////
+            request_waiter.haveData4You (); // Get out of the hanging
+            proxy.proxy_worker.haveData4You (); // Proxy: just do it!
+            proxy.transactProxy ();
+          }
+
+        void transactResponse () throws IOException, ServletException
+          {
+            if (response_waiter.perform (server_configuration.response_timeout))
+              {
+                // ////////////////////////////////////////
+                // Normal response, output HTTP headers
+                // ////////////////////////////////////////
+                response.setContentLength (response_object.data.length);
+                response.setContentType (response_object.mime_type);
+                response.getOutputStream ().write (response_object.data);
+              }
+            else
+              {
+                response_timeout_errors++;
+                cleanUpAfterFailedCall (this, "Call response timeout");
+              }
+          }
+
+      }
+
+    class ProxyRequest extends Caller
+      {
+        HttpServletResponse proxy_response;
+        long proxy_id;
+        Synchronizer proxy_worker = new Synchronizer ();
+        RequestDescriptor request_descriptor;
+
+        void setCaller (RequestDescriptor request_descriptor)
+          {
+            this.request_descriptor = request_descriptor;
+          }
+
+        boolean transactRequest () throws IOException, ServletException
+          {
+            // ////////////////////////////////////////////////////////
+            // We had a free proxy to serve the request in question!
+            // ////////////////////////////////////////////////////////
+            proxy_worker.haveData4You (); // Proxy: just do it!
+            return true;
+          }
+
+        void transactProxy () throws IOException, ServletException
+          {
+            // ////////////////////////////////////////////////////////
+            // We have a proxy but no one is currently requesting it.
+            // We simpy have to wait for a timeout or a real task.
+            // ////////////////////////////////////////////////////////
+            synchronized (proxy_worker)
+              {
+                if (proxy_worker.perform (server_configuration.proxy_timeout))
+                  {
+                    // We got some real data!
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+                    new ObjectOutputStream (baos).writeObject (request_descriptor.request_object);
+                    proxy_response.getOutputStream ().write (baos.toByteArray ());
+                  }
+                else
+                  {
+                    // We never got a hit and have to remove this proxy from the
+                    // list...
+                    int q = 0;
+                    for (ProxyRequest proxy : proxies)
+                      {
+                        if (proxy.proxy_id == proxy_id)
+                          {
+                            proxies.remove (q);
+                            break;
+                          }
+                        q++;
+                      }
+                  }
+              }
+          }
+
+        void transactResponse () throws IOException, ServletException
+          {
+            request_descriptor.transactResponse ();
+          }
+
+      }
+
+    private static void returnFailure (HttpServletResponse response, String message) throws IOException
+      {
+        logger.severe (message);
+        response.setContentType (SOAP12_MIME);
+        response.getWriter ().write ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<soap12:Envelope xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">" + "<soap12:Body>" + "<soap12:Fault>" + "<soap12:Code>" + "<soap12:Value>soap12:Receiver</soap12:Value>" + "</soap12:Code>" + "<soap12:Reason>" + "<soap12:Text xml:lang=\"en\">" + message + "</soap12:Text>" + "</soap12:Reason>" + "</soap12:Fault>" + "</soap12:Body>" + "</soap12:Envelope>");
+      }
+
+    static byte[] getData (HttpServletRequest request) throws IOException
+      {
+        int n = request.getContentLength ();
+        ServletInputStream is = request.getInputStream ();
+        if (n >= 0)
+          {
+            byte[] data = new byte[n];
+            new DataInputStream (is).readFully (data);
+            return data;
+          }
+        else
+          {
+            byte[] t = new byte[4096];
+            ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+            while ((n = is.read (t)) != -1)
+              {
+                baos.write (t, 0, n);
+              }
+            return baos.toByteArray ();
+          }
+      }
+
+    /**
+     * Proxy server status method.
+     * <p>
+     * 
+     * @return The number of proxy channels that are in a waiting state.
+     */
+    public static int getProxyQueueLength ()
+      {
+        synchronized (global)
+          {
+            return proxies.size ();
+          }
+      }
+
+    /**
+     * Proxy server status method.
+     * <p>
+     * 
+     * @return The number of request timeout errors occurred so far.
+     */
+    public static int getRequestTimeouts ()
+      {
+        return request_timeout_errors;
+      }
+
+    /**
+     * Proxy server status method.
+     * <p>
+     * 
+     * @return The number of response timeout errors occurred so far.
+     */
+    public static int getResponseTimeouts ()
+      {
+        return response_timeout_errors;
+      }
+
+    /**
+     * Proxy server status method.
+     * <p>
+     * 
+     * @return The last (if any) request object. Will be <code>null</code> if
+     *         there has been no external access yet.
+     */
+    public static RequestObject getLastRequestObject ()
+      {
+        synchronized (global)
+          {
+            return last_request;
+          }
+      }
+
+    /**
+     * Proxy server status method.
+     * <p>
+     * 
+     * @return The instance ID of the proxy client. Will be <code>null</code> if
+     *         the proxy client has not yet called the proxy server.
+     */
+    public static String getProxyClientID ()
+      {
+        synchronized (global)
+          {
+            return server_configuration == null ? null : server_configuration.client_id;
+          }
+      }
+
+    private synchronized void cleanUpAfterFailedCall (RequestDescriptor request_descriptor, String err) throws IOException
+      {
+        long caller_id = request_descriptor.request_object.caller_id;
+        int q = 0;
+        for (RequestDescriptor rd : waiting_callers)
+          {
+            if (rd.request_object.caller_id == caller_id)
+              {
+                waiting_callers.remove (q);
+                logger.info ("Request queue object removed after fail");
+                break;
+              }
+            q++;
+          }
+        q = 0;
+        for (RequestDescriptor rd : response_queue)
+          {
+            if (rd.request_object.caller_id == caller_id)
+              {
+                response_queue.remove (q);
+                logger.info ("Response queue object removed after fail");
+                break;
+              }
+            q++;
+          }
+        returnFailure (request_descriptor.response, "Internal server error");
+      }
+
+    private synchronized Caller _processRequest (HttpServletResponse response, RequestObject request_object) throws IOException, ServletException
+      {
+        // Create a descriptor
+        RequestDescriptor rd = new RequestDescriptor ();
+        request_object.caller_id = next_caller_id++;
+        rd.response = response;
+        rd.request_object = last_request = request_object;
+        response_queue.add (rd);
+
+        // Now check if there is a proxy that can take this request
+        if (proxies.isEmpty ())
+          {
+            // No - put in waiting list
+            waiting_callers.add (rd);
+            return rd;
+          }
+        // Yes - take it!
+        ProxyRequest preq = proxies.remove (0);
+        preq.setCaller (rd);
+        return preq;
+      }
+
+    /**
+     * Proxy external call handler.
+     * <p>
+     * This method forwards an external call through the proxy tunnel, as well
+     * as returning the associated response data.
+     * 
+     * @param response
+     *          The response object of the external call Servlet.
+     */
+    public static void processCall (byte[] xml_data, HttpServletResponse response) throws IOException, ServletException
+      {
+        // //////////////////////////////////////////////////////////////////////////////
+        // Perform as much as possible of the "heavy" stuff outside of
+        // synchronization
+        // //////////////////////////////////////////////////////////////////////////////
+
+        if (server_configuration == null)
+          {
+            returnFailure (response, "Proxy not started yet!");
+            return;
+          }
+
+        // //////////////////////////////////////////////////////////////////
+        // Insert request into queues etc.
+        // //////////////////////////////////////////////////////////////////
+        Caller ci = global._processRequest (response, new RequestObject (xml_data));
+
+        // /////////////////////////////////////////////////
+        // Now process the action of the request part
+        // /////////////////////////////////////////////////
+        if (ci.transactRequest ())
+          {
+
+            // //////////////////////////////////////////////////////
+            // Success! Now process the action of the response part
+            // //////////////////////////////////////////////////////
+            ci.transactResponse ();
+          }
+      }
+
+    private synchronized RequestDescriptor _findProxyRequest (long caller_id)
+      {
+        int q = 0;
+        for (RequestDescriptor rd : response_queue)
+          {
+            if (rd.request_object.caller_id == caller_id)
+              {
+                response_queue.remove (q);
+                return rd;
+              }
+            q++;
+          }
+        return null;
+      }
+
+    private synchronized Caller _addProxyWorker (HttpServletResponse response) throws IOException, ServletException
+      {
+        // Create a descriptor
+        ProxyRequest preq = new ProxyRequest ();
+        preq.proxy_response = response;
+        preq.proxy_id = next_proxy_id++;
+
+        // Now check if there is a caller in need for some help
+        if (waiting_callers.isEmpty ())
+          {
+            // No - just go and wait
+            proxies.add (preq);
+            return preq;
+          }
+        // Yes - take it!
+        RequestDescriptor pd = waiting_callers.remove (0);
+        pd.setProxyWorker (preq);
+        return pd;
+      }
+
+    private static void resetProxy (ServerConfiguration server_conf)
+      {
+        synchronized (global)
+          {
+            next_caller_id = 0;
+            next_proxy_id = 0;
+            response_timeout_errors = 0;
+            request_timeout_errors = 0;
+            last_request = null;
+            proxies.clear ();
+            response_queue.clear ();
+            waiting_callers.clear ();
+            server_configuration = server_conf;
+          }
+        logger.info ("Proxy " + (server_conf == null ? "RESET" : "INIT: proxy-timeout=" + server_conf.proxy_timeout) + " client-id=" + server_conf.client_id);
+      }
+
+    /**
+     * Proxy server reset. Clears all internal variables and states. Typically
+     * called by context destruction/reload in Servlets.
+     */
+    public static void resetProxy ()
+      {
+        resetProxy (null);
+      }
+
+    /**
+     * Proxy server initialization. Called from "Init".
+     */
+    public static void initializeProxy ()
+      {
+        logger.info ("Proxy started");
+      }
+
+    private static boolean wrongClientID (ClientObject client_object, HttpServletResponse response) throws IOException
+      {
+        if (server_configuration == null)
+          {
+            returnFailure (response, "Proxy server not ready");
+            return true;
+          }
+        if (server_configuration.client_id.equals (client_object.client_id))
+          {
+            return false;
+          }
+        returnFailure (response, "Proxy client ID error " + server_configuration.client_id + " versus " + client_object.client_id);
+        return true;
+      }
+
+    /**
+     * Proxy client call handler.
+     * <p>
+     * This method processes a call from the proxy client.
+     * 
+     * @param request
+     *          The request object of the proxy server Servlet.
+     * @param response
+     *          The response object of the proxy server Servlet.
+     */
+    public static void processProxyCall (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+      {
+        // //////////////////////////////////////////////////////////////////////////////
+        // Perform as much as possible of the "heavy" stuff outside of
+        // synchronization
+        // //////////////////////////////////////////////////////////////////////////////
+        byte[] data = getData (request);
+
+        // ///////////////////////////////////////////////
+        // Ready to process an authenticated call
+        // ///////////////////////////////////////////////
+        try
+          {
+            Object object = new ObjectInputStream (new ByteArrayInputStream (data)).readObject ();
+            if (object instanceof ServerConfiguration)
+              {
+
+                // //////////////////////////////////////////////
+                // First call. Reset all, get configuration
+                // //////////////////////////////////////////////
+                resetProxy ((ServerConfiguration) object);
+              }
+            else if (object instanceof ResponseObject)
+              {
+                // //////////////////////////////////////////////
+                // Data to process!
+                // //////////////////////////////////////////////
+                ResponseObject ro = (ResponseObject) object;
+                if (wrongClientID (ro, response))
+                  {
+                    return;
+                  }
+                RequestDescriptor rd = global._findProxyRequest (ro.caller_id);
+                if (rd != null)
+                  {
+                    rd.response_object = ro;
+                    rd.response_waiter.haveData4You ();
+                  }
+              }
+            else if (object instanceof UploadObject)
+              {
+                // //////////////////////////////////////////////
+                // Must be an "Upload" object
+                // //////////////////////////////////////////////
+                UploadObject upload = (UploadObject) object;
+                if (wrongClientID (upload, response))
+                  {
+                    return;
+                  }
+                return;
+              }
+            else
+              {
+                // //////////////////////////////////////////////
+                // Must be an "Idle" object
+                // //////////////////////////////////////////////
+                IdleObject idle = (IdleObject) object;
+                if (wrongClientID (idle, response))
+                  {
+                    return;
+                  }
+              }
+          }
+        catch (ClassNotFoundException cnfe)
+          {
+            returnFailure (response, "Unrecognized object (check versions)");
+            return;
+          }
+        Caller ci = global._addProxyWorker (response);
+        ci.transactProxy ();
+      }
+
+  }

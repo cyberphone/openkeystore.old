@@ -14,12 +14,25 @@
  *  limitations under the License.
  *
  */
-package org.webpki.wasp;
+package org.webpki.webutil.proxy;
+
+import java.io.Serializable;
 
 /**
- * Interface for WASP "SignatureProfile" XML encoder objects
- *
+ * HTTP proxy object containing an idle operation. Only for proxy-internal use.
  */
-public interface SignatureProfileEncoder
+public class IdleObject extends ClientObject implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
+    // /////////////////////////////////////////////////////////////////////
+    // Since an idle object is sent when there is nothing to do
+    // it comes to no big surprise that it is pretty free from content...
+    // /////////////////////////////////////////////////////////////////////
+
+    public IdleObject (String client_id)
+      {
+        super (client_id);
+      }
+
   }
