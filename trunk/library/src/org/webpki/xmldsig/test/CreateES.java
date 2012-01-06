@@ -57,7 +57,7 @@ public class CreateES
 
         XMLSchemaCache sc = new XMLSchemaCache ();
         sc.addWrapper (XMLSignatureWrapper.class);
-        sc.addWrapper (Class.forName(args[WRAPPER], true, ClassLoader.getSystemClassLoader()));
+        sc.addWrapper (Class.forName(args[WRAPPER], true, ClassLoader.getSystemClassLoader()).asSubclass (XMLObjectWrapper.class));
 
         XMLObjectWrapper o = sc.parse (ArrayUtil.readFile (args[INFILE]));
 

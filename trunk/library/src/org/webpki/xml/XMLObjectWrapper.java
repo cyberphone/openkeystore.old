@@ -78,7 +78,7 @@ public abstract class XMLObjectWrapper
         schemaCache.addSchema (getResource (localname), localname);
       }
     
-    protected void addWrapper (Class<?> wrapperClass) throws IOException
+    protected void addWrapper (Class<? extends XMLObjectWrapper> wrapperClass) throws IOException
       {
         schemaCache.addWrapper (wrapperClass);
       }

@@ -350,11 +350,11 @@ public class XMLSchemaCache
     /**
      * Add a {@link XMLObjectWrapper wrapper class}.
      */
-    public void addWrapper (Class<?> wrapperClass) throws IOException
+    public void addWrapper (Class<? extends XMLObjectWrapper> wrapperClass) throws IOException
       {
         try
           {
-            addWrapper ((XMLObjectWrapper)wrapperClass.newInstance ());
+            addWrapper (wrapperClass.newInstance ());
           }
         catch (InstantiationException ie)
           {
@@ -376,7 +376,7 @@ public class XMLSchemaCache
       {
         try
           {
-            addWrapper (Class.forName (wrapperClass));
+            addWrapper (Class.forName (wrapperClass).asSubclass (XMLObjectWrapper.class));
           }
         catch (ClassNotFoundException cnfe)
           {
