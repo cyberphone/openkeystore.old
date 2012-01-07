@@ -27,7 +27,7 @@ import org.webpki.util.ArrayUtil;
 import org.webpki.xml.XMLSchemaCache;
 import org.webpki.xml.XMLObjectWrapper;
 
-import org.webpki.crypto.JKSSignCertStore;
+import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSigner;
 import org.webpki.xmldsig.XMLEnvelopedInput;
@@ -64,7 +64,7 @@ public class CreateES
         KeyStore ks = KeyStore.getInstance (args[STORETYPE]);
         ks.load (new FileInputStream (args[KEYSTORE]), args[STOREPASS].toCharArray ());
 
-        JKSSignCertStore signer = new JKSSignCertStore (ks, null);
+        KeyStoreSigner signer = new KeyStoreSigner (ks, null);
         signer.setKey (args[KEYALIAS], args[SIGNPASS]);
 
         XMLSigner xmlsign = new XMLSigner (signer);

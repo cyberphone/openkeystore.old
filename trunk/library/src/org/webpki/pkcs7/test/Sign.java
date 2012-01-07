@@ -16,7 +16,7 @@
  */
 package org.webpki.pkcs7.test;
 
-import org.webpki.crypto.JKSSignCertStore;
+import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.util.ArrayUtil;
@@ -35,7 +35,7 @@ public class Sign
                                 "   -d        : detached signature\n");
             System.exit (3);
           }
-        JKSSignCertStore signer = new JKSSignCertStore (DemoKeyStore.getMarionKeyStore (), null);
+        KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getMarionKeyStore (), null);
         signer.setKey (null, DemoKeyStore.getSignerPassword ());
         PKCS7Signer pkcs7 = new PKCS7Signer (signer);
 //        pkcs7.setSignatureAlgorithm (org.webpki.crypto.SignatureAlgorithms.RSA_SHA256);

@@ -20,7 +20,7 @@ import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.XMLSchemaCache;
 
-import org.webpki.crypto.JKSCAVerifier;
+import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.wasp.AuthenticationResponseDecoder;
@@ -44,7 +44,7 @@ public class AresDec
 
         AuthenticationResponseDecoder ares = (AuthenticationResponseDecoder) schema_cache.parse (data);
 
-        JKSCAVerifier verifier = new JKSCAVerifier (DemoKeyStore.getCAKeyStore ());
+        KeyStoreVerifier verifier = new KeyStoreVerifier (DemoKeyStore.getCAKeyStore ());
         verifier.setTrustedRequired (false);
 
         ares.verifySignature (verifier);

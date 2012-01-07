@@ -29,7 +29,7 @@ import org.webpki.util.ArrayUtil;
 import org.webpki.xml.XMLSchemaCache;
 
 import org.webpki.crypto.test.DemoKeyStore;
-import org.webpki.crypto.JKSSignCertStore;
+import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.SignerInterface;
 
 import org.webpki.wasp.AuthenticationRequestDecoder;
@@ -143,7 +143,7 @@ public class AresEnc
         String in_file = argtest (args, 0);
         String out_file = argtest (args, 1);
 
-        JKSSignCertStore signer = new JKSSignCertStore (ks, null);
+        KeyStoreSigner signer = new KeyStoreSigner (ks, null);
         signer.setKey (key_alias, signpassword);
 
         test (in_file, out_file, signer, localfixed, false);

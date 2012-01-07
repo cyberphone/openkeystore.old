@@ -14,31 +14,23 @@
  *  limitations under the License.
  *
  */
-package org.webpki.infocard.test;
+package org.webpki.webproxy.test.intextcommon;
 
-import org.webpki.util.ArrayUtil;
+import org.webpki.webproxy.ProxyServer;
 
-import org.webpki.crypto.test.DemoKeyStore;
-
-import org.webpki.crypto.KeyStoreVerifier;
-
-import org.webpki.infocard.InfoCardReader;
-
-public class readcard
+/**
+ * Proxy server singleton object.
+ * 
+ * Each proxy server channel usage MUST define such an object unless it
+ * uses the same HTTP port for internal and external proxy operations.
+ *
+ */
+public class IntExtCommon
   {
-
-    private static void show ()
+    static ProxyServer ps = new ProxyServer ();
+    
+    public static ProxyServer getProxy ()
       {
-        System.out.println ("readcard in_file\n");
-        System.exit (3);
-      }
-
-    public static void main (String args[]) throws Exception
-      {
-        if (args.length < 1) show ();
-        KeyStoreVerifier verifier = new KeyStoreVerifier (DemoKeyStore.getCAKeyStore ());
-        verifier.setTrustedRequired (false);
-        new InfoCardReader (ArrayUtil.readFile (args[0]), verifier);
-
+        return ps;
       }
   }

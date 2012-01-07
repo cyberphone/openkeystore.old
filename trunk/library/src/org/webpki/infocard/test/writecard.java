@@ -25,7 +25,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.wasp.test.BankLogo;
 
-import org.webpki.crypto.JKSSignCertStore;
+import org.webpki.crypto.KeyStoreSigner;
 
 import org.webpki.infocard.InfoCardWriter;
 import org.webpki.infocard.TokenType;
@@ -62,7 +62,7 @@ public class writecard
            .addTokenType (TokenType.SAML_2_0);
 
 
-        JKSSignCertStore signer = new JKSSignCertStore (DemoKeyStore.getExampleDotComKeyStore (), null);
+        KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setKey (null, DemoKeyStore.getSignerPassword ());
         ArrayUtil.writeFile (args[0], icw.getInfoCard (signer));
       }

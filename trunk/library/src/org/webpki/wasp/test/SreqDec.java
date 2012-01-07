@@ -24,7 +24,7 @@ import org.webpki.util.DebugFormatter;
 import org.webpki.xml.XMLSchemaCache;
 import org.webpki.xml.XMLCookie;
 
-import org.webpki.crypto.JKSCAVerifier;
+import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.crypto.KeyContainerTypes;
@@ -105,7 +105,7 @@ public class SreqDec
 
         boolean signed = sreq.isSigned ();
 
-        JKSCAVerifier verifier = new JKSCAVerifier (DemoKeyStore.getCAKeyStore ());
+        KeyStoreVerifier verifier = new KeyStoreVerifier (DemoKeyStore.getCAKeyStore ());
         verifier.setTrustedRequired (false);
 
         if (signed)

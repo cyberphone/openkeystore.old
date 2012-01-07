@@ -23,7 +23,11 @@ import java.security.KeyStore;
 import java.security.GeneralSecurityException;
 
 
-public class JKSCAVerifier implements VerifierInterface
+/**
+ * Verify data using the KeyStore interface. 
+ *
+ */
+public class KeyStoreVerifier implements VerifierInterface
   {
     private X509Store ca_certificates;
 
@@ -35,7 +39,10 @@ public class JKSCAVerifier implements VerifierInterface
 
     private X509Certificate[] certificate_path;
 
-    public JKSCAVerifier (KeyStore caCertsKS) throws IOException
+    /**
+     * Verifier based on a specific keystore.
+     */
+    public KeyStoreVerifier (KeyStore caCertsKS) throws IOException
       {
         try
           {
@@ -47,8 +54,10 @@ public class JKSCAVerifier implements VerifierInterface
           }
       }
 
-
-    public JKSCAVerifier () throws IOException
+    /**
+     * Dummy verifier accepting any certificate.
+     */
+    public KeyStoreVerifier () throws IOException
       {
         try
           {

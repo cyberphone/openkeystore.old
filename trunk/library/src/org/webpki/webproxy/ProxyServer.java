@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * HTTP proxy server core logic. Called by the proxy servlet application.
+ * HTTP proxy server core logic. Called by a proxy servlet application.
  */
 public class ProxyServer
   {
@@ -69,6 +69,17 @@ public class ProxyServer
     public ProxyServer (Class<? extends ServerErrorObject> error_container)
       {
         this.error_container = error_container;
+        logger.info ("ProxyServer initialized");
+      }
+    
+    public synchronized void addUploadEventHandler (UploadEventHandler ueh)
+      {
+        upload_event_subscribers.add (ueh);
+      }
+    
+    public synchronized void deleteUploadEventHandler (UploadEventHandler ueh)
+      {
+        upload_event_subscribers.remove (ueh);
       }
 
     class Synchronizer
@@ -477,14 +488,6 @@ public class ProxyServer
     public void resetProxy ()
       {
         resetProxy (null);
-      }
-
-    /**
-     * Proxy server initialization. Called from "Init".
-     */
-    public void initializeProxy ()
-      {
-        logger.info ("Proxy started");
       }
 
     private boolean wrongClientID (ClientObject client_object, HttpServletResponse response) throws IOException

@@ -20,13 +20,9 @@
   <property name="ws.def" location="sks-ws-descriptor.xml"/>
   <property name="doc_dir"  value="../doc" />
   <property name="debug"  value="on"/>
-  <property environment="env"/>
-  <condition property="java.home">
-    <isset property="env.JAVA_HOME"/>
-  </condition>
-  <fail message="JAVA_HOME must be set to environment!" unless="java.home"/>
   <property name="wslibdummy" location="../../resources"/>
   <property name="wslibext" location="../../resources/jax-ws"/>
+  <property environment="env"/>
 
   <!-- If you want non-local SKS WS access you must bind to non-local IP --> 
   <property name="sksws.url" value="http://localhost:9982/securekeystore"/>
@@ -244,7 +240,9 @@
   </target>
 
   <target name="doc">
-    <!-- Create the distribution directory -->
+    <fail message="JAVA_HOME must be set to environment!" unless="env.JAVA_HOME"/>
+
+  	<!-- Create the distribution directory -->
     <mkdir dir="${doc_dir}" />
 
   	<!-- Create temp directory -->
@@ -279,7 +277,7 @@
       <link offline="true" href="http://download.oracle.com/javase/${javadoc-version}/docs/api/" packagelistLoc="${env.JAVA_HOME}\jsedocs\api"/>
       <link offline="true" href="http://download.oracle.com/javaee/6/api/" packagelistLoc="${env.JAVA_HOME}\jeedocs\api"/>
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
-      <bottom><![CDATA[<i>2005-2011 WebPKI.org.</i>]]></bottom>
+      <bottom><![CDATA[<i>2005-2012 WebPKI.org.</i>]]></bottom>
     </javadoc>
   </target>
 
@@ -305,6 +303,7 @@
   	<jar jarfile="${dist_dir}/${webpki-webproxy}">
       <fileset dir="${temp_dir}">
         <include name="org/webpki/webproxy/**"/>
+        <exclude name="org/webpki/webproxy/test/**"/>
       </fileset>
     </jar>
 

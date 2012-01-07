@@ -21,7 +21,7 @@ import org.webpki.util.ArrayUtil;
 import org.webpki.xml.XMLSchemaCache;
 
 import org.webpki.crypto.test.DemoKeyStore;
-import org.webpki.crypto.JKSCAVerifier;
+import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.AuthorityInfoAccessCAIssuersCache;
 
 import org.webpki.wasp.prof.xds.XDSProfileResponseDecoder;  // Mandatory profile
@@ -50,7 +50,7 @@ public class SresDec
 
         SignatureProfileResponseDecoder prdec = sres.getSignatureProfileResponseDecoder ();
 
-        JKSCAVerifier verifier = new JKSCAVerifier (DemoKeyStore.getCAKeyStore ());
+        KeyStoreVerifier verifier = new KeyStoreVerifier (DemoKeyStore.getCAKeyStore ());
         verifier.setTrustedRequired (false);
         if (aia_support)
           {

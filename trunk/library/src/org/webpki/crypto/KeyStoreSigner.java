@@ -28,8 +28,11 @@ import java.security.PrivateKey;
 import java.security.GeneralSecurityException;
 import java.security.UnrecoverableKeyException;
 
-
-public class JKSSignCertStore implements SignerInterface, CertificateSelectorSpi
+/**
+ * Sign data using the KeyStore interface. 
+ *
+ */
+public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
   {
     private PrivateKey private_key;
 
@@ -164,7 +167,7 @@ public class JKSSignCertStore implements SignerInterface, CertificateSelectorSpi
       }
 
  
-    public JKSSignCertStore (KeyStore signer_cert_keystore, KeyContainerTypes container_type)
+    public KeyStoreSigner (KeyStore signer_cert_keystore, KeyContainerTypes container_type)
       {
         this.signer_cert_keystore = signer_cert_keystore;
         this.container_type = container_type;

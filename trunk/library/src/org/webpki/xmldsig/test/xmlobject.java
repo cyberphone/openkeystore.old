@@ -35,8 +35,8 @@ import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 
-import org.webpki.crypto.JKSSignCertStore;
-import org.webpki.crypto.JKSCAVerifier;
+import org.webpki.crypto.KeyStoreSigner;
+import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
@@ -212,7 +212,7 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
               }
             else if (args[0].equals ("-x509"))
               {
-                JKSSignCertStore signer = new JKSSignCertStore (DemoKeyStore.getMarionKeyStore (), null);
+                KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getMarionKeyStore (), null);
                 signer.setKey (null, DemoKeyStore.getSignerPassword ());
                 XMLSigner xmls = new XMLSigner (signer);
                 xmls.createEnvelopedSignature (o);
@@ -255,7 +255,7 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
               }
             else if (args[0].equals ("-x509"))
               {
-                XMLVerifier verifier = new XMLVerifier (new JKSCAVerifier (DemoKeyStore.getMarionKeyStore ()));
+                XMLVerifier verifier = new XMLVerifier (new KeyStoreVerifier (DemoKeyStore.getMarionKeyStore ()));
                 verifier.validateEnvelopedSignature (o);
               }
             else

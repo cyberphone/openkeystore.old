@@ -22,7 +22,7 @@ import java.io.IOException;
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.crypto.test.DemoKeyStore;
-import org.webpki.crypto.JKSSignCertStore;
+import org.webpki.crypto.KeyStoreSigner;
 
 import org.webpki.pdf.PDFSigner;
 
@@ -45,7 +45,7 @@ public class Sign
                                 "   m = Marion Anderson is signing, e = Example.com is signing");
             System.exit (3);
           }
-        JKSSignCertStore signer = new JKSSignCertStore (argv[3].equals ("m") ?
+        KeyStoreSigner signer = new KeyStoreSigner (argv[3].equals ("m") ?
                                           DemoKeyStore.getMarionKeyStore () :
                                           DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setKey (null, DemoKeyStore.getSignerPassword ());

@@ -25,7 +25,7 @@ import java.text.SimpleDateFormat;
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.crypto.test.DemoKeyStore;
-import org.webpki.crypto.JKSCAVerifier;
+import org.webpki.crypto.KeyStoreVerifier;
 
 import org.webpki.pdf.PDFVerifier;
 
@@ -41,7 +41,7 @@ public class Verify
                                                           "  (default is the whole-document signature)");
             System.exit (3);
           }
-        JKSCAVerifier verifier = new JKSCAVerifier (DemoKeyStore.getCAKeyStore ());
+        KeyStoreVerifier verifier = new KeyStoreVerifier (DemoKeyStore.getCAKeyStore ());
         verifier.setTrustedRequired (false);
         PDFVerifier pdf_verifier = new PDFVerifier (verifier);
         if (argv.length == 2)

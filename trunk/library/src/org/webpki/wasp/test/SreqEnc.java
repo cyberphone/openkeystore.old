@@ -37,7 +37,7 @@ import org.webpki.xml.XMLConfiguration;
 
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.CertificateSelection;
-import org.webpki.crypto.JKSSignCertStore;
+import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.AuthorityInfoAccessCAIssuersCache;
@@ -329,7 +329,7 @@ public class SreqEnc
 
         if (signrequest)
           {
-            JKSSignCertStore signer = new JKSSignCertStore (simplesign ?
+            KeyStoreSigner signer = new KeyStoreSigner (simplesign ?
                                                          DemoKeyStore.getExampleDotComKeyStore ()
                                                                   :
                                                          DemoKeyStore.getMybankDotComKeyStore (), null);
@@ -371,7 +371,7 @@ public class SreqEnc
               }
           }
 
-        JKSSignCertStore signer = new JKSSignCertStore (ks, KeyContainerTypes.FILE);
+        KeyStoreSigner signer = new KeyStoreSigner (ks, KeyContainerTypes.FILE);
         signer.setAuthorityInfoAccessCAIssuersHandler (aia_cache);
         CertificateFilter[] cf = SreqDec.test (args[0], false).getCertificateFilters ();
         CertificateSelection cs = signer.getCertificateSelection (cf, new CertificateFilter.KeyUsage ().require (KeyUsageBits.nonRepudiation));

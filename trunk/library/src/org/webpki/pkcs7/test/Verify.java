@@ -17,7 +17,7 @@
 package org.webpki.pkcs7.test;
 
 import org.webpki.crypto.VerifierInterface;
-import org.webpki.crypto.JKSCAVerifier;
+import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.util.ArrayUtil;
@@ -36,7 +36,7 @@ public class Verify
                                 "   -d            : detached signature\n");
             System.exit (3);
           }
-        VerifierInterface verifier = new JKSCAVerifier (DemoKeyStore.getCAKeyStore ());
+        VerifierInterface verifier = new KeyStoreVerifier (DemoKeyStore.getCAKeyStore ());
         PKCS7Verifier pkcs7 = new PKCS7Verifier (verifier);
         verifier.setTrustedRequired (false);
         if (args.length == 2)

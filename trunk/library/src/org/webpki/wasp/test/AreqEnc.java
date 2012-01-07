@@ -23,7 +23,7 @@ import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.XMLSchemaCache;
 
-import org.webpki.crypto.JKSSignCertStore;
+import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.crypto.HashAlgorithms;
@@ -177,7 +177,7 @@ public class AreqEnc
           }
         if (signrequest)
           {
-            JKSSignCertStore req_signer = new JKSSignCertStore (simpledoc ?
+            KeyStoreSigner req_signer = new KeyStoreSigner (simpledoc ?
                                                          DemoKeyStore.getExampleDotComKeyStore ()
                                                                   :
                                                          DemoKeyStore.getMybankDotComKeyStore (), null);
@@ -195,7 +195,7 @@ public class AreqEnc
 
         // Simulate receival and transmit of data at the client
 
-        JKSSignCertStore signer = new JKSSignCertStore (DemoKeyStore.getMarionKeyStore (), null);
+        KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getMarionKeyStore (), null);
         signer.setKey (null, DemoKeyStore.getSignerPassword ());
         AresEnc.test (args[0], authfile, signer, fixed_client_time, respprefix);
 
