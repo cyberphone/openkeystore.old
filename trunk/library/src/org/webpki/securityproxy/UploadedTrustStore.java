@@ -14,24 +14,29 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
+package org.webpki.securityproxy;
 
-import java.io.IOException;
+import java.security.cert.X509Certificate;
+
+import java.util.Vector;
 
 /**
- * HTTP proxy server object for returning internal errors.
+ * Predefined trust-anchor upload payload
  */
-public abstract class ServerErrorObject
-  {
-    protected String message;
+public class UploadedTrustStore extends UploadPayloadObject
+{
+    private static final long serialVersionUID = 1L;
     
-    public abstract byte[] getContent () throws IOException;
+    Vector<X509Certificate> certs = new Vector<X509Certificate> ();
     
-    public abstract String getMIMEtype ();
+    public void addCertificate (X509Certificate cert)
+    {
+        certs.add (cert);
+    }
     
-    public void setMessage (String message)
-      {
-        this.message = message;
-      }
-
-  }
+    public X509Certificate[] getCertificates ()
+    {
+        return certs.toArray (new X509Certificate[0]);
+    }
+ 
+}

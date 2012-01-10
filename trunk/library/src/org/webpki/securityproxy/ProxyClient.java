@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
+package org.webpki.securityproxy;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,22 +50,30 @@ import javax.net.ssl.TrustManagerFactory;
 import org.webpki.crypto.KeyStoreReader;
 
 /**
- * HTTP proxy client.
+ * Security proxy local service (client).
  */
-public abstract class ProxyClient
+public class ProxyClient
   {
-    static Logger logger = Logger.getLogger (ProxyClient.class.getCanonicalName ());
-
-    protected ProxyClient (String init)
+    private static Logger logger = Logger.getLogger (ProxyClient.class.getCanonicalName ());
+    
+    private ProxyRequestHandler request_handler;
+    
+    /**
+     * Creates an empty security proxy.
+     * @see #initProxy
+     * 
+     * @param request_handler the proxy user's interface
+     */
+    public ProxyClient (ProxyRequestHandler request_handler)
       {
-
+        this.request_handler = request_handler;
       }
 
     private class ProxyChannel implements Runnable
       {
-        // //////////////////////////////////
+        ////////////////////////////////////
         // Instance variables
-        // //////////////////////////////////
+        ////////////////////////////////////
         long proxy_id;
 
         ClientObject send_object;
@@ -96,23 +104,20 @@ public abstract class ProxyClient
                 HttpURLConnection conn = null;
                 try
                   {
-                    // //////////////////////////////////////////////////////////////////////////////////
-                    // This how the proxy client starts its work-day, by
-                    // launching a call to
-                    // the proxy server. Usually the call contains nothing but
-                    // sometimes
-                    // there is a response from the local service included. The
-                    // very first call
-                    // contains a "master reset" which clears any resuidal
-                    // proxies in the server
+                    ////////////////////////////////////////////////////////////////////////////////////
+                    // This how the proxy client starts its work-day, by launching a call to
+                    // the proxy server. Usually the call contains nothing but sometimes
+                    // there is a response from the local service included. The very first call
+                    // contains a "master reset" which clears any resuidal proxies in the server
                     // which may be left after a network or client proxy error.
-                    // //////////////////////////////////////////////////////////////////////////////////
+                    ////////////////////////////////////////////////////////////////////////////////////
                     conn = (proxy == null) ? (HttpURLConnection) new URL (proxy_url).openConnection () : (HttpURLConnection) new URL (proxy_url).openConnection (proxy);
 
-                    if (proxy_url.startsWith ("https:") && (proxy_service_truststore != null || proxy_service_keystore != null))
+                    if (socket_factory != null)
                       {
-                        ((HttpsURLConnection) conn).setSSLSocketFactory (fixSSL (proxy_service_truststore, proxy_service_keystore, proxy_service_key_password));
+                        ((HttpsURLConnection) conn).setSSLSocketFactory (socket_factory);
                       }
+
                     if (send_object instanceof IdleObject)
                       {
                         synchronized (upload_objects)
@@ -128,37 +133,35 @@ public abstract class ProxyClient
                           }
                       }
 
-                    // //////////////////////////////////////////////////////////////////////
-                    // The following only occurrs if there is some kind of
-                    // network problem
-                    // //////////////////////////////////////////////////////////////////////
+                    ////////////////////////////////////////////////////////////////////////
+                    // The following only occurs if there is some kind of network problem
+                    ////////////////////////////////////////////////////////////////////////
                     conn.setReadTimeout ((cycle_time * 3) / 2 + 30000);
 
-                    // //////////////////////////////////////////////////////////////////////
+                    ////////////////////////////////////////////////////////////////////////
                     // Serialize the data object to send (Conf, Idle, Response)
-                    // //////////////////////////////////////////////////////////////////////
+                    ////////////////////////////////////////////////////////////////////////
                     ByteArrayOutputStream baos = new ByteArrayOutputStream ();
                     new ObjectOutputStream (baos).writeObject (send_object);
                     byte[] send_data = baos.toByteArray ();
 
-                    // //////////////////////////////////////////////////////////////////////
+                    ////////////////////////////////////////////////////////////////////////
                     // Write Serialized object
-                    // //////////////////////////////////////////////////////////////////////
+                    ////////////////////////////////////////////////////////////////////////
                     conn.setDoOutput (true);
                     OutputStream ostream = conn.getOutputStream ();
                     ostream.write (send_data);
                     ostream.flush ();
                     ostream.close ();
 
-                    // /////////////////////////////////////////////////////////////////////
+                    ///////////////////////////////////////////////////////////////////////
                     // Set the default object for the next round
-                    // /////////////////////////////////////////////////////////////////////
+                    ///////////////////////////////////////////////////////////////////////
                     send_object = idle_object;
 
-                    // //////////////////////////////////////////////////////////////////////////////////
-                    // This is where the proxy client spends most its time -
-                    // Waiting for some action
-                    // //////////////////////////////////////////////////////////////////////////////////
+                    ////////////////////////////////////////////////////////////////////////////////////
+                    // This is where the proxy client spends most its time - Waiting for some action
+                    ////////////////////////////////////////////////////////////////////////////////////
                     hanging = true;
                     BufferedInputStream istream = new BufferedInputStream (conn.getInputStream ());
                     ByteArrayOutputStream out = new ByteArrayOutputStream ();
@@ -180,9 +183,9 @@ public abstract class ProxyClient
                     throwed_an_iox = false;
                     if (data.length == 0)
                       {
-                        // ////////////////////////////////////////////////////
+                        //////////////////////////////////////////////////////
                         // No request data. See if it is time to just die..
-                        // ////////////////////////////////////////////////////
+                        //////////////////////////////////////////////////////
                         if (upload_objects.isEmpty ())
                           {
                             if (unneededProxy (proxy_id))
@@ -201,28 +204,26 @@ public abstract class ProxyClient
                       }
                     else
                       {
-                        // ///////////////////////////////////////////////////////////////////////////////////
-                        // We do have a request in progress. Check that we have
-                        // enough workers in action
-                        // ///////////////////////////////////////////////////////////////////////////////////
+                        /////////////////////////////////////////////////////////////////////////////////////
+                        // We do have a request in progress. Check that we have enough workers in action
+                        /////////////////////////////////////////////////////////////////////////////////////
                         checkForProxyDemand (false);
 
-                        // //////////////////////////////////
+                        ////////////////////////////////////
                         // Read the request object
-                        // //////////////////////////////////
-                        RequestObject ro = (RequestObject) new ObjectInputStream (new ByteArrayInputStream (data)).readObject ();
-                        ro.setClientID (client_id);
+                        ////////////////////////////////////
+                        ProxyRequestWrapper prw = (ProxyRequestWrapper) new ObjectInputStream (new ByteArrayInputStream (data)).readObject ();
 
-                        // ////////////////////////////////////////////////////
+                        //////////////////////////////////////////////////////
                         // Now do the request/response to the local server
-                        // ////////////////////////////////////////////////////
+                        //////////////////////////////////////////////////////
                         talking_to_proxy = false;
-                        send_object = handleRequest (ro);
+                        send_object = new ResponseObject (request_handler.handleProxyRequest (prw), prw.caller_id, client_id);
                       }
 
-                    // ///////////////////////////////////////////////
+                    /////////////////////////////////////////////////
                     // A round without errors. Reset error counter
-                    // ///////////////////////////////////////////////
+                    /////////////////////////////////////////////////
                     error_count = 0;
                   }
                 catch (ClassNotFoundException cnfe)
@@ -249,24 +250,23 @@ public abstract class ProxyClient
                       }
                     if (talking_to_proxy && running)
                       {
-                        // ////////////////////////////////////////////////
+                        //////////////////////////////////////////////////
                         // Kill and remove all proxy channels (threads)
-                        // ////////////////////////////////////////////////
+                        //////////////////////////////////////////////////
                         killProxy ();
 
                         if (++error_count == MAX_ERRORS)
                           {
-                            // /////////////////////////
+                            ///////////////////////////
                             // We give up completely!
-                            // /////////////////////////
+                            ///////////////////////////
                             System.out.println ("Hard error.  Shut down the proxy!");
                             return;
                           }
 
-                        // /////////////////////////////////////////////////////////////////////
-                        // It looks bad but we try restarting before shutting
-                        // down the proxy
-                        // /////////////////////////////////////////////////////////////////////
+                        ///////////////////////////////////////////////////////////////////////
+                        // It looks bad but we try restarting before shutting down the proxy
+                        ///////////////////////////////////////////////////////////////////////
                         running = true;
                         send_object = server_configuration;
                         proxies.add (this);
@@ -288,9 +288,9 @@ public abstract class ProxyClient
           }
       }
 
-    // //////////////////////////////////
+    ////////////////////////////////////
     // Configurables
-    // //////////////////////////////////
+    ////////////////////////////////////
     private String proxy_url;
 
     private Proxy proxy;
@@ -311,9 +311,11 @@ public abstract class ProxyClient
     private KeyStore proxy_service_keystore;
     private String proxy_service_key_password;
 
-    // //////////////////////////////////
+    private SSLSocketFactory socket_factory;
+    
+    ////////////////////////////////////
     // App-wide "globals"
-    // //////////////////////////////////
+    ////////////////////////////////////
     private long last_proxy_id;
 
     private String client_id;
@@ -326,43 +328,43 @@ public abstract class ProxyClient
 
     private Vector<UploadObject> upload_objects = new Vector<UploadObject> ();
 
-    // //////////////////////////////////
+    ////////////////////////////////////
     // Defaults
-    // //////////////////////////////////
+    ////////////////////////////////////
     private static final int REQUEST_TIMEOUT = 60 * 1000;
 
     private static final int MAX_ERRORS = 1000;
 
-    private SSLSocketFactory fixSSL (KeyStore trust_store, KeyStore client_key_store, String client_key_password)
+    private void prepareForSSL ()
       {
-        try
+        if (proxy_url.startsWith ("https:") && (proxy_service_truststore != null || proxy_service_keystore != null))
           {
-            TrustManager[] trust_managers = null;
-            KeyManager[] key_managers = null;
-            if (client_key_store != null)
+            try
               {
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance ("SunX509");
-                kmf.init (client_key_store, client_key_password.toCharArray ());
-                key_managers = kmf.getKeyManagers ();
+                TrustManager[] trust_managers = null;
+                KeyManager[] key_managers = null;
+                if (proxy_service_keystore != null)
+                  {
+                    KeyManagerFactory kmf = KeyManagerFactory.getInstance ("SunX509");
+                    kmf.init (proxy_service_keystore, proxy_service_key_password.toCharArray ());
+                    key_managers = kmf.getKeyManagers ();
+                  }
+                if (proxy_service_truststore != null)
+                  {
+                    TrustManagerFactory tmf = TrustManagerFactory.getInstance ("SunX509");
+                    tmf.init (proxy_service_truststore);
+                    trust_managers = tmf.getTrustManagers ();
+                  }
+                SSLContext ssl_context = SSLContext.getInstance ("TLS");
+                ssl_context.init (key_managers, trust_managers, null);
+                socket_factory =  ssl_context.getSocketFactory ();
               }
-            if (trust_store != null)
+            catch (GeneralSecurityException gse)
               {
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance ("SunX509");
-                tmf.init (trust_store);
-                trust_managers = tmf.getTrustManagers ();
+                logger.log (Level.SEVERE, "SSL setup issues", gse);
               }
-            SSLContext ssl_context = SSLContext.getInstance ("TLS");
-            ssl_context.init (key_managers, trust_managers, null);
-            return ssl_context.getSocketFactory ();
           }
-        catch (GeneralSecurityException gse)
-          {
-            logger.log (Level.SEVERE, "SSL setup issues", gse);
-          }
-        return null;
       }
-
-    public abstract ClientObject handleRequest (RequestObject ro);
 
     private static char hex (int i)
       {
@@ -393,17 +395,17 @@ public abstract class ProxyClient
             ProxyChannel proxy = new ProxyChannel ();
             proxy.proxy_id = last_proxy_id++;
 
-            // ///////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////
             // If it is the first proxy - issue a master reset + configuration
             // to the proxy server
-            // ///////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////
             if (proxy.proxy_id == 0)
               {
                 byte[] cid = new byte[10];
                 new SecureRandom ().nextBytes (cid);
                 client_id = toHexString (cid);
 
-                server_configuration = new ServerConfiguration (cycle_time, REQUEST_TIMEOUT, REQUEST_TIMEOUT, chunked_support, client_id, server_debug);
+                server_configuration = new ServerConfiguration (cycle_time, REQUEST_TIMEOUT, REQUEST_TIMEOUT, client_id, debug);
                 idle_object = new IdleObject (client_id);
                 proxy.send_object = server_configuration;
                 if (debug)
@@ -422,17 +424,16 @@ public abstract class ProxyClient
 
     private void checkForProxyDemand (boolean increase) throws IOException
       {
-        // //////////////////////////////////////////////////////////////////////////////
-        // Check that there is ample of free proxies in order to keep up with
-        // requests
-        // //////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
+        // Check that there is ample of free proxies in order to keep up with requests
+        ////////////////////////////////////////////////////////////////////////////////
         synchronized (proxies)
           {
             if (proxies.size () < proxy_max)
               {
-                // ////////////////////////////////////////
+                //////////////////////////////////////////
                 // We have not yet reached the ceiling
-                // ////////////////////////////////////////
+                //////////////////////////////////////////
                 int q = 0;
                 for (ProxyChannel proxy : proxies)
                   {
@@ -446,14 +447,14 @@ public abstract class ProxyClient
                     q -= 2;
                   }
 
-                // ////////////////////////////////////////
+                //////////////////////////////////////////
                 // The margin checker
-                // ////////////////////////////////////////
+                //////////////////////////////////////////
                 if (q < 2 || q < (proxy_max / 5))
                   {
-                    // ////////////////////////////////////////
+                    //////////////////////////////////////////
                     // We could use a helping hand here...
-                    // ////////////////////////////////////////
+                    //////////////////////////////////////////
                     spawnProxy ();
                   }
               }
@@ -466,15 +467,15 @@ public abstract class ProxyClient
           {
             if (proxies.size () == 1)
               {
-                // ////////////////////////////////////////////
+                //////////////////////////////////////////////
                 // We must at least have one living thread...
-                // ////////////////////////////////////////////
+                //////////////////////////////////////////////
                 return false;
               }
 
-            // ////////////////////////////////////////////
+            //////////////////////////////////////////////
             // Ooops. We are probably redundant...
-            // ////////////////////////////////////////////
+            //////////////////////////////////////////////
             int q = 0;
             for (ProxyChannel proxy : proxies)
               {
@@ -489,25 +490,40 @@ public abstract class ProxyClient
           }
       }
 
+    /**
+     * For HTTPS use this method as an alternative to the global truststore.
+     *  
+     * @param truststore
+     * @param password
+     * @throws IOException
+     */
     public void setProxyServiceTruststore (String truststore, String password) throws IOException
       {
+        checkOrder ();
         proxy_service_truststore = KeyStoreReader.loadKeyStore (truststore, password);
       }
 
+    /**
+     * For HTTPS client certificate authentication.
+     * 
+     * @param keystore
+     * @param key_password
+     * @throws IOException
+     */
     public void setProxyServiceClientKey (String keystore, String key_password) throws IOException
       {
+        checkOrder ();
         proxy_service_keystore = KeyStoreReader.loadKeyStore (keystore, key_password);
         proxy_service_key_password = key_password;
       }
 
     /**
-     * Sets proxy web-proxy parameters. This method needs to be called for usage
-     * of the proxy scheme where local LAN rules require outbound HTTP calls to
-     * go through a web-proxy server.
+     * Sets HTTP web-proxy parameters. This method needs to be called for usage
+     * of the security proxy scheme where local LAN rules require outbound HTTP
+     * calls to through a web-proxy server.
      * <p>
-     * Note: <i>The proxy scheme does currently not support web-proxy
-     * authentication.</i>
-     * 
+     * Note: <i>The proxy scheme does currently not support web-proxy authentication.</i>
+     *
      * @param address
      *          The host name or IP address of the web-proxy server.
      * @param port
@@ -515,15 +531,21 @@ public abstract class ProxyClient
      */
     public void setWebProxy (String address, int port) throws IOException
       {
-        if (proxy_url != null)
-          {
-            throw new IOException ("setWebProxy must be called before initProxy!");
-          }
+        checkOrder ();
         proxy = new Proxy (Proxy.Type.HTTP, new InetSocketAddress (InetAddress.getByName (address), port));
       }
 
+    private void checkOrder () throws IOException
+      {
+        if (proxy_url != null)
+          {
+            throw new IOException ("This method must be called before initProxy!");
+          }
+      }
+
     /**
-     * Terminates and clears the proxy connection&nbsp;(s).
+     * Terminates and clears the proxy connection(s).
+     * A well-behaved client service should call this before terminating.
      */
     public void killProxy ()
       {
@@ -545,6 +567,9 @@ public abstract class ProxyClient
     /**
      * Sets proxy core parameters and initializes the proxy channel.
      * <p>
+     *
+     * @see #setProxyServiceTruststore
+     * @see #setProxyServiceClientKey
      * 
      * @param proxy_url
      *          The URL to the proxy channel.
@@ -552,12 +577,12 @@ public abstract class ProxyClient
      *          The maximum number of parallel proxy channels to use.
      * @param cycle_time
      *          The timeout in seconds for the &quot;waiting&quot; state.
+     * @param retry_timeout
+     *          The timeout in seconds for resuming operation after a failure.
      * @param debug
      *          Defines if debug output is to be created or not.
-     * @param chunked_support
-     *          Defines if &quot;chunked&quot; HTTP is to be supported or not.
      */
-    public void initProxy (String proxy_url, int proxy_max, int cycle_time, int retry_timeout, boolean debug, boolean server_debug, boolean chunked_support) throws IOException
+    public void initProxy (String proxy_url, int proxy_max, int cycle_time, int retry_timeout, boolean debug) throws IOException
       {
         killProxy ();
         last_proxy_id = 0;
@@ -566,11 +591,14 @@ public abstract class ProxyClient
         this.cycle_time = cycle_time * 1000;
         this.retry_timeout = retry_timeout * 1000;
         this.debug = debug;
-        this.server_debug = server_debug;
-        this.chunked_support = chunked_support;
+        prepareForSSL ();
         spawnProxy ();
       }
-
+    
+    /**
+     * Put an object for upload in a queue.
+     * @param upload_payload_object a derived object
+     */
     public void addUploadObject (UploadPayloadObject upload_payload_object) throws IOException
       {
         synchronized (upload_objects)

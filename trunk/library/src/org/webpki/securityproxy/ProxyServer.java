@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
+package org.webpki.securityproxy;
 
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
@@ -33,40 +33,40 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * HTTP proxy server core logic. Called by a proxy servlet application.
+ * Security proxy server core logic. Called by a proxy servlet application.
  */
 public class ProxyServer
   {
-    static Logger logger = Logger.getLogger (ProxyServer.class.getName ());
+    private static Logger logger = Logger.getLogger (ProxyServer.class.getName ());
 
-    Vector<RequestDescriptor> response_queue = new Vector<RequestDescriptor> ();
+    private Vector<RequestDescriptor> response_queue = new Vector<RequestDescriptor> ();
 
-    Vector<RequestDescriptor> waiting_callers = new Vector<RequestDescriptor> ();
+    private Vector<RequestDescriptor> waiting_callers = new Vector<RequestDescriptor> ();
     
-    Vector<UploadEventHandler> upload_event_subscribers = new Vector<UploadEventHandler> ();
+    private Vector<UploadEventHandler> upload_event_subscribers = new Vector<UploadEventHandler> ();
 
-    Vector<ProxyRequest> proxies = new Vector<ProxyRequest> ();
+    private Vector<ProxyRequest> proxies = new Vector<ProxyRequest> ();
 
-    long next_caller_id;
+    private long next_caller_id;
 
-    long next_proxy_id;
+    private long next_proxy_id;
 
-    ServerConfiguration server_configuration;
+    private ServerConfiguration server_configuration;
 
-    RequestObject last_request;
+    private ProxyRequestWrapper last_request;
 
-    int response_timeout_errors;
+    private int response_timeout_errors;
 
-    int request_timeout_errors;
+    private int request_timeout_errors;
     
-    Class<? extends ServerErrorObject> error_container;
+    private Class<? extends ProxyServerErrorFactory> error_container;
     
     public ProxyServer ()
       {
         this (null);
       }
     
-    public ProxyServer (Class<? extends ServerErrorObject> error_container)
+    public ProxyServer (Class<? extends ProxyServerErrorFactory> error_container)
       {
         this.error_container = error_container;
         logger.info ("ProxyServer initialized");
@@ -82,7 +82,7 @@ public class ProxyServer
         upload_event_subscribers.remove (ueh);
       }
 
-    class Synchronizer
+    private class Synchronizer
       {
 
         boolean touched;
@@ -113,7 +113,7 @@ public class ProxyServer
 
       }
 
-    abstract class Caller
+    private abstract class Caller
       {
         abstract boolean transactRequest () throws IOException, ServletException;
 
@@ -122,10 +122,10 @@ public class ProxyServer
         abstract void transactProxy () throws IOException, ServletException;
       }
 
-    class RequestDescriptor extends Caller
+    private class RequestDescriptor extends Caller
       {
         HttpServletResponse response;
-        RequestObject request_object;
+        ProxyRequestWrapper request_object;
         ResponseObject response_object;
         ProxyRequest proxy;
         Synchronizer request_waiter = new Synchronizer ();
@@ -139,9 +139,9 @@ public class ProxyServer
 
         boolean transactRequest () throws IOException, ServletException
           {
-            // ////////////////////////////////////////////////
+            //////////////////////////////////////////////////
             // No proxy available, wait for one (or die)...
-            // ////////////////////////////////////////////////
+            //////////////////////////////////////////////////
             if (request_waiter.perform (server_configuration.request_timeout))
               {
                 return true;
@@ -156,9 +156,9 @@ public class ProxyServer
 
         void transactProxy () throws IOException, ServletException
           {
-            // //////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////
             // We have a request and a now freed proxy.
-            // //////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////
             request_waiter.haveData4You (); // Get out of the hanging
             proxy.proxy_worker.haveData4You (); // Proxy: just do it!
             proxy.transactProxy ();
@@ -168,12 +168,16 @@ public class ProxyServer
           {
             if (response_waiter.perform (server_configuration.response_timeout))
               {
-                // ////////////////////////////////////////
+                //////////////////////////////////////////
                 // Normal response, output HTTP headers
-                // ////////////////////////////////////////
-                response.setContentLength (response_object.data.length);
-                response.setContentType (response_object.mime_type);
-                response.getOutputStream ().write (response_object.data);
+                //////////////////////////////////////////
+                response.setContentLength (response_object.response_data.data.length);
+                response.setContentType (response_object.response_data.mime_type);
+                for (String name : response_object.response_data.headers.keySet ())
+                  {
+                    response.setHeader (name, response_object.response_data.headers.get (name));
+                  }
+                response.getOutputStream ().write (response_object.response_data.data);
               }
             else
               {
@@ -184,7 +188,7 @@ public class ProxyServer
 
       }
 
-    class ProxyRequest extends Caller
+    private class ProxyRequest extends Caller
       {
         HttpServletResponse proxy_response;
         long proxy_id;
@@ -198,19 +202,19 @@ public class ProxyServer
 
         boolean transactRequest () throws IOException, ServletException
           {
-            // ////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////
             // We had a free proxy to serve the request in question!
-            // ////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////
             proxy_worker.haveData4You (); // Proxy: just do it!
             return true;
           }
 
         void transactProxy () throws IOException, ServletException
           {
-            // ////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////
             // We have a proxy but no one is currently requesting it.
             // We simpy have to wait for a timeout or a real task.
-            // ////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////
             synchronized (proxy_worker)
               {
                 if (proxy_worker.perform (server_configuration.proxy_timeout))
@@ -256,7 +260,7 @@ public class ProxyServer
           {
             try
               {
-                ServerErrorObject server_error = error_container.newInstance ();
+                ProxyServerErrorFactory server_error = error_container.newInstance ();
                 server_error.setMessage (message);
                 response.setContentType (server_error.getMIMEtype ());
                 response.getOutputStream ().write (server_error.getContent ());
@@ -271,19 +275,6 @@ public class ProxyServer
               }
           }
       }
-
-    byte[] getData (HttpServletRequest request) throws IOException
-      {
-        ServletInputStream is = request.getInputStream ();
-        byte[] buf = new byte[4096];
-        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-        int n;
-        while ((n = is.read (buf)) != -1)
-          {
-            baos.write (buf, 0, n);
-          }
-        return baos.toByteArray ();
-       }
 
     /**
      * Proxy server status method.
@@ -325,7 +316,7 @@ public class ProxyServer
      * @return The last (if any) request object. Will be <code>null</code> if
      *         there has been no external access yet.
      */
-    public synchronized RequestObject getLastRequestObject ()
+    public synchronized ProxyRequestWrapper getLastRequestObject ()
       {
         return last_request;
       }
@@ -370,7 +361,7 @@ public class ProxyServer
         returnInternalFailure (request_descriptor.response, "Internal server error");
       }
 
-    private synchronized Caller processRequest (HttpServletResponse response, RequestObject request_object) throws IOException, ServletException
+    private synchronized Caller processRequest (HttpServletResponse response, ProxyRequestWrapper request_object) throws IOException, ServletException
       {
         // Create a descriptor
         RequestDescriptor rd = new RequestDescriptor ();
@@ -401,12 +392,12 @@ public class ProxyServer
      * @param response
      *          The response object of the external call Servlet.
      */
-    public void processCall (RequestObject ro, HttpServletResponse response) throws IOException, ServletException
+    public void processCall (ProxyRequestWrapper ro, HttpServletResponse response) throws IOException, ServletException
       {
-        // //////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
         // Perform as much as possible of the "heavy" stuff outside of
         // synchronization
-        // //////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
 
         if (server_configuration == null)
           {
@@ -414,20 +405,20 @@ public class ProxyServer
             return;
           }
 
-        // //////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////
         // Insert request into queues etc.
-        // //////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////
         Caller ci = processRequest (response, ro);
 
-        // /////////////////////////////////////////////////
+        ///////////////////////////////////////////////////
         // Now process the action of the request part
-        // /////////////////////////////////////////////////
+        ///////////////////////////////////////////////////
         if (ci.transactRequest ())
           {
 
-            // //////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////
             // Success! Now process the action of the response part
-            // //////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////
             ci.transactResponse ();
           }
       }
@@ -517,31 +508,39 @@ public class ProxyServer
      */
     public void processProxyCall (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        // //////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
         // Perform as much as possible of the "heavy" stuff outside of
         // synchronization
-        // //////////////////////////////////////////////////////////////////////////////
-        byte[] data = getData (request);
+        ////////////////////////////////////////////////////////////////////////////////
+        ServletInputStream is = request.getInputStream ();
+        byte[] buf = new byte[4096];
+        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+        int n;
+        while ((n = is.read (buf)) != -1)
+          {
+            baos.write (buf, 0, n);
+          }
+        byte[] data = baos.toByteArray ();
 
-        // ///////////////////////////////////////////////
+        /////////////////////////////////////////////////
         // Ready to process an authenticated call
-        // ///////////////////////////////////////////////
+        /////////////////////////////////////////////////
         try
           {
             Object object = new ObjectInputStream (new ByteArrayInputStream (data)).readObject ();
             if (object instanceof ServerConfiguration)
               {
 
-                // //////////////////////////////////////////////
+                ////////////////////////////////////////////////
                 // First call. Reset all, get configuration
-                // //////////////////////////////////////////////
+                ////////////////////////////////////////////////
                 resetProxy ((ServerConfiguration) object);
               }
             else if (object instanceof ResponseObject)
               {
-                // //////////////////////////////////////////////
+                ////////////////////////////////////////////////
                 // Data to process!
-                // //////////////////////////////////////////////
+                ////////////////////////////////////////////////
                 ResponseObject ro = (ResponseObject) object;
                 if (wrongClientID (ro, response))
                   {
@@ -556,9 +555,9 @@ public class ProxyServer
               }
             else if (object instanceof UploadObject)
               {
-                // //////////////////////////////////////////////
+                ////////////////////////////////////////////////
                 // Must be an "Upload" object
-                // //////////////////////////////////////////////
+                ////////////////////////////////////////////////
                 UploadObject upload = (UploadObject) object;
                 if (wrongClientID (upload, response))
                   {
@@ -566,15 +565,15 @@ public class ProxyServer
                   }
                 for (UploadEventHandler handler : upload_event_subscribers)
                   {
-                    handler.handleData (upload.getPayload ());
+                    handler.handleUploadedData (upload.getPayload ());
                   }
                 return;
               }
             else
               {
-                // //////////////////////////////////////////////
+                ////////////////////////////////////////////////
                 // Must be an "Idle" object
-                // //////////////////////////////////////////////
+                ////////////////////////////////////////////////
                 IdleObject idle = (IdleObject) object;
                 if (wrongClientID (idle, response))
                   {

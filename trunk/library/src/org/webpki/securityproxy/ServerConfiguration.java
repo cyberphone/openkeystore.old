@@ -14,15 +14,15 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
+package org.webpki.securityproxy;
 
 import java.io.Serializable;
 
 /**
- * HTTP proxy object containing a serialized server configuration which is sent
+ * Security proxy object containing a serialized server configuration which is sent
  * from the client proxy to the server proxy during startup.
  */
-public class ServerConfiguration extends ClientObject implements Serializable
+class ServerConfiguration extends ClientObject implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
@@ -34,7 +34,7 @@ public class ServerConfiguration extends ClientObject implements Serializable
      * 
      * @return A proxy version string.
      */
-    public static String getVersion ()
+    static String getVersion ()
       {
         return "1.0";
       }
@@ -42,21 +42,18 @@ public class ServerConfiguration extends ClientObject implements Serializable
     int proxy_timeout;
     int request_timeout;
     int response_timeout;
-    boolean chunked_support;
     boolean debug;
 
-    public ServerConfiguration (int proxy_timeout,
-                                int request_timeout,
-                                int response_timeout, 
-                                boolean chunked_support,
-                                String client_id,
-                                boolean debug)
+    ServerConfiguration (int proxy_timeout,
+                         int request_timeout,
+                         int response_timeout, 
+                         String client_id,
+                         boolean debug)
       {
         super (client_id);
         this.proxy_timeout = proxy_timeout;
         this.request_timeout = request_timeout;
         this.response_timeout = response_timeout;
-        this.chunked_support = chunked_support;
         this.debug = debug;
       }
 

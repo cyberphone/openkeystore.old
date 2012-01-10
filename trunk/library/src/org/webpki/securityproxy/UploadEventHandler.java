@@ -14,9 +14,13 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy.test.extservice;
+package org.webpki.securityproxy;
 
-public class ExtService
+/**
+ * Security proxy upload event handler.
+ * Implement in proxy-using servlet.
+ */
+public interface UploadEventHandler
   {
-
+    void handleUploadedData (UploadPayloadObject upload_payload);
   }

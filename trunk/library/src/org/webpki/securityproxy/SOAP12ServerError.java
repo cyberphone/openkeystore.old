@@ -14,14 +14,14 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
+package org.webpki.securityproxy;
 
 import java.io.IOException;
 
 /**
- * Sample HTTP proxy server object for returning internal errors in SOAP 1.2 format.
+ * Sample factory for returning internal security proxy errors in SOAP 1.2 format.
  */
-public class SOAP12ServerError extends ServerErrorObject
+public class SOAP12ServerError extends ProxyServerErrorFactory
   {
     static final String SOAP12_MIME = "application/soap+xml; charset=\"utf-8\"";
 

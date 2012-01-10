@@ -14,11 +14,28 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy.test.client;
+package org.webpki.securityproxy;
 
-import org.webpki.webproxy.UploadPayloadObject;
+import java.io.Serializable;
 
-public class MyUpload extends UploadPayloadObject
+/**
+ * Security proxy object containing an upload operation. 
+ * Only for proxy-internal use.
+ */
+class UploadObject extends ClientObject implements Serializable
   {
-    public long last_time_stamp;
+    private static final long serialVersionUID = 1L;
+
+    private UploadPayloadObject payload;
+
+    UploadPayloadObject getPayload ()
+      {
+        return payload;
+      }
+
+    UploadObject (String client_id, UploadPayloadObject payload)
+      {
+        super (client_id);
+        this.payload = payload;
+      }
   }

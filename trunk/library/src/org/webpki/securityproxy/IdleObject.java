@@ -14,13 +14,25 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
+package org.webpki.securityproxy;
+
+import java.io.Serializable;
 
 /**
- * HTTP proxy upload event handler.
- * Implement in proxy-using servlet.
+ * Security proxy object containing an idle operation. Only for proxy-internal use.
  */
-public interface UploadEventHandler
+class IdleObject extends ClientObject implements Serializable
   {
-    void handleData (UploadPayloadObject upload_payload);
+    private static final long serialVersionUID = 1L;
+
+    ///////////////////////////////////////////////////////////////////////
+    // Since an idle object is sent when there is nothing to do
+    // it comes to no big surprise that it is pretty free from content...
+    ///////////////////////////////////////////////////////////////////////
+
+    IdleObject (String client_id)
+      {
+        super (client_id);
+      }
+
   }

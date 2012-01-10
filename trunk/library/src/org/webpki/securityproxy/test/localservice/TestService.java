@@ -14,15 +14,12 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
-
-import java.io.Serializable;
+package org.webpki.securityproxy.test.localservice;
 
 /**
- * HTTP proxy payload data object containing an upload operation. Extend to own
- * usage.
+ * Test service using the security proxy system. 
  */
-public abstract class UploadPayloadObject implements Serializable
+public class TestService
   {
-    private static final long serialVersionUID = 1L;
+
   }

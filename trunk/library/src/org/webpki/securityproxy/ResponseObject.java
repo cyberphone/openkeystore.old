@@ -14,28 +14,30 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
+package org.webpki.securityproxy;
 
 import java.io.Serializable;
 
 /**
- * HTTP proxy object containing an upload operation. 
- * Only for proxy-internal use.
+ * Security proxy object containing a serialized HTTP response.
+ * Internal use only.  Data is tunneled through the proxy out to the requester.
  */
-class UploadObject extends ClientObject implements Serializable
+class ResponseObject extends ClientObject implements Serializable
   {
     private static final long serialVersionUID = 1L;
+    
+    ProxyResponseWrapper response_data;
 
-    private UploadPayloadObject payload;
+    ////////////////////////////////////////////////////////
+    // Due to the multi-channel proxy, calls need IDs
+    ////////////////////////////////////////////////////////
+    long caller_id;
 
-    UploadPayloadObject getPayload ()
-      {
-        return payload;
-      }
-
-    UploadObject (String client_id, UploadPayloadObject payload)
+    ResponseObject (ProxyResponseWrapper response_data, long caller_id, String client_id)
       {
         super (client_id);
-        this.payload = payload;
+        this.caller_id = caller_id;
+        this.response_data = response_data;
       }
+
   }

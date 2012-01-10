@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy.test.intservice;
+package org.webpki.securityproxy.test.intservice;
 
 import java.io.IOException;
 
@@ -24,10 +24,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServlet;
 
-import org.webpki.webproxy.test.intextcommon.IntExtCommon;
+import org.webpki.securityproxy.test.intextcommon.IntExtCommon;
 
 /**
- * Internal proxy service.
+ * Internal security proxy service.
  * 
  * This is the actual proxy channel servlet that forwards client proxy requests
  * into proxy server logic.
@@ -37,11 +37,13 @@ public class IntService extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
 
+    @Override
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
         throw new IOException ("Not allowed");
       }
 
+    @Override
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
         IntExtCommon.getProxy ().processProxyCall (request, response);

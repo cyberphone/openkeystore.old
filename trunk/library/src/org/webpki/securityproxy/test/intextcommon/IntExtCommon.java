@@ -14,30 +14,23 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
+package org.webpki.securityproxy.test.intextcommon;
 
-import java.security.cert.X509Certificate;
-
-import java.util.Vector;
+import org.webpki.securityproxy.ProxyServer;
 
 /**
- * Predefined trust-anchor upload payload
+ * Security proxy server singleton object.
+ * 
+ * Each proxy server channel usage MUST define such an object unless it
+ * uses the same HTTP port for internal and external proxy operations.
  *
  */
-public class UploadedTrustStore extends UploadPayloadObject
-{
-    private static final long serialVersionUID = 1L;
+public class IntExtCommon
+  {
+    static ProxyServer ps = new ProxyServer ();
     
-    Vector<X509Certificate> certs = new Vector<X509Certificate> ();
-    
-    public void addCertificate (X509Certificate cert)
-    {
-        certs.add (cert);
-    }
-    
-    public X509Certificate[] getCertificates ()
-    {
-        return certs.toArray (new X509Certificate[0]);
-    }
- 
-}
+    public static ProxyServer getProxy ()
+      {
+        return ps;
+      }
+  }

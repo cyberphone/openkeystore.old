@@ -14,23 +14,15 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy.test.intextcommon;
+package org.webpki.securityproxy;
 
-import org.webpki.webproxy.ProxyServer;
+import java.io.Serializable;
 
 /**
- * Proxy server singleton object.
- * 
- * Each proxy server channel usage MUST define such an object unless it
- * uses the same HTTP port for internal and external proxy operations.
- *
+ * Security proxy payload data object containing an upload operation.
+ * Extend to own usage.
  */
-public class IntExtCommon
+public abstract class UploadPayloadObject implements Serializable
   {
-    static ProxyServer ps = new ProxyServer ();
-    
-    public static ProxyServer getProxy ()
-      {
-        return ps;
-      }
+    private static final long serialVersionUID = 1L;
   }

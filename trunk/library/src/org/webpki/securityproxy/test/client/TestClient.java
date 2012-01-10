@@ -14,23 +14,13 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
-
-import java.io.Serializable;
+package org.webpki.securityproxy.test.client;
 
 /**
- * HTTP proxy object containing the super class for all client-operations. Only
- * for proxy-internal use.
+ * Security proxy test client. 
+ *
  */
-public abstract class ClientObject implements Serializable
+public class TestClient
   {
-    private static final long serialVersionUID = 1L;
-
-    String client_id;
-
-    ClientObject (String client_id)
-      {
-        this.client_id = client_id;
-      }
 
   }

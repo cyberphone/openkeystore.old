@@ -14,33 +14,33 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
+package org.webpki.securityproxy;
 
 import java.io.Serializable;
 
+import java.util.LinkedHashMap;
+
 /**
- * HTTP proxy object containing a serialized HTTP response which is tunneled
- * through the proxy out to the requester.
+ * Security proxy object containing the local service's response.
  */
-public class ResponseObject extends ClientObject implements Serializable
+public class ProxyResponseWrapper implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
     byte[] data;
-
+    
     String mime_type;
-
-    // //////////////////////////////////////////////////////
-    // Due to the multi-channel proxy, calls need IDs
-    // //////////////////////////////////////////////////////
-    long caller_id;
-
-    public ResponseObject (byte[] data, String mime_type, RequestObject ro)
+    
+    LinkedHashMap<String,String> headers = new LinkedHashMap<String,String> ();
+    
+    public ProxyResponseWrapper (byte[] data, String mime_type)
       {
-        super (ro.client_id);
         this.data = data;
         this.mime_type = mime_type;
-        this.caller_id = ro.caller_id;
       }
-
+    
+    public void addHeader (String name, String value)
+      {
+        headers.put (name, value);
+      }
   }

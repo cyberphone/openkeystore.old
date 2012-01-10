@@ -14,38 +14,31 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
+package org.webpki.securityproxy;
 
 import java.io.Serializable;
 
 /**
- * Proxy object containing a serialized request which is to be delivered to the
+ * Security proxy object containing a serialized request which is to be delivered to the
  * local service (client).
  */
-public class RequestObject implements Serializable
+public class ProxyRequestWrapper implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
     byte[] data;
 
-    // //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
     // Due to the multi-channel proxy, calls need IDs
-    // //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
     long caller_id;
-
-    String client_id;
 
     public byte[] getData ()
       {
         return data;
       }
 
-    public void setClientID (String client_id)
-      {
-        this.client_id = client_id;
-      }
-
-    public RequestObject (byte[] data)
+    public ProxyRequestWrapper (byte[] data)
       {
         this.data = data;
       }

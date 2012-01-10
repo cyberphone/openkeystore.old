@@ -14,13 +14,19 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy.test.client;
+package org.webpki.securityproxy;
 
 /**
- * Web Proxy test client. 
- *
+ * Security proxy client request handler interface.
+ * 
+ * Note that errors should be taken care of by the handler implementation
+ * and for non-fatal situations return an error object to the actual caller.
  */
-public class TestClient
+public interface ProxyRequestHandler
   {
-
+    /**
+     * @param proxy_req_wrapper the request
+     * @return a suitable return to the external caller
+     */
+    public ProxyResponseWrapper handleProxyRequest (ProxyRequestWrapper proxy_req_wrapper);
   }

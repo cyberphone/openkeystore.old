@@ -14,25 +14,23 @@
  *  limitations under the License.
  *
  */
-package org.webpki.webproxy;
+package org.webpki.securityproxy;
 
 import java.io.Serializable;
 
 /**
- * HTTP proxy object containing an idle operation. Only for proxy-internal use.
+ * Security proxy object containing the super class for all client-operations. Only
+ * for proxy-internal use.
  */
-public class IdleObject extends ClientObject implements Serializable
+abstract class ClientObject implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    // /////////////////////////////////////////////////////////////////////
-    // Since an idle object is sent when there is nothing to do
-    // it comes to no big surprise that it is pretty free from content...
-    // /////////////////////////////////////////////////////////////////////
+    String client_id;
 
-    public IdleObject (String client_id)
+    ClientObject (String client_id)
       {
-        super (client_id);
+        this.client_id = client_id;
       }
 
   }
