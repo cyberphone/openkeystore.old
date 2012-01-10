@@ -303,10 +303,6 @@ public class ProxyClient
 
     private boolean debug;
 
-    private boolean server_debug;
-
-    private boolean chunked_support;
-
     private KeyStore proxy_service_truststore;
     private KeyStore proxy_service_keystore;
     private String proxy_service_key_password;
