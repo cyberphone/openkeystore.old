@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app version="2.5"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://java.sun.com/xml/ns/javaee" 
+    xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+    http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+    <display-name>External Service (For Testing Only)</display-name>
+    
+    <servlet>
+        <servlet-name>ExtService</servlet-name>
+        <servlet-class>org.webpki.securityproxy.test.extservice.ExtService</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ExtService</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>

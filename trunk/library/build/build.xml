@@ -12,6 +12,7 @@
   <property name="test_dir" value="../test" />
   <property name="dist_dir"  value="../dist" />
   <property name="wsdl_dir"  value="../wsdl" />
+  <property name="spts_dir"  value="../securityproxy-test" />
   <property name="ext.jar"  value="../../resources/third-party-jars"/>
   <property name="webpki-libext" value="webpki.org-libext-1.00.jar" />
   <property name="webpki-webutil" value="webpki.org-webutil-1.00.jar" />
@@ -300,13 +301,6 @@
       </fileset>
     </jar>
 
-  	<jar jarfile="${dist_dir}/${webpki-securityproxy}">
-      <fileset dir="${temp_dir}">
-        <include name="org/webpki/securityproxy/**"/>
-        <exclude name="org/webpki/securityproxy/test/**"/>
-      </fileset>
-    </jar>
-
   	<jar jarfile="${dist_dir}/${webpki-sksws}">
       <fileset dir="${temp_dir}">
         <include name="org/webpki/sks/ws/**"/>
@@ -314,11 +308,60 @@
       </fileset>
       <metainf dir="${wsdl_dir}"/>
     </jar>
+
+  	<jar jarfile="${dist_dir}/${webpki-securityproxy}">
+      <fileset dir="${temp_dir}">
+        <include name="org/webpki/securityproxy/**"/>
+        <exclude name="org/webpki/securityproxy/test/**"/>
+      </fileset>
+    </jar>
+
   </target>
 
   <target name="clean">
     <delete dir="${temp_dir}"/>
     <delete dir="${dist_dir}"/>
+  </target>
+
+  <target name="_tomcat-deploy" if="tomcat-deploy">
+  	<echo message="TOMCAT DEPLOY"/>
+    <fail message="CATALINA_HOME must be set to environment!" unless="env.CATALINA_HOME"/>
+    <copy todir="${env.CATALINA_HOME}/conf" preservelastmodified="true" overwrite="true" file="${spts_dir}/server.xml"/>
+    <copy todir="${env.CATALINA_HOME}/lib" preservelastmodified="true" overwrite="true" file="${dist_dir}/${webpki-securityproxy}"/>
+    <copy todir="${env.CATALINA_HOME}/webapps" preservelastmodified="true" overwrite="true" file="${dist_dir}/spts-intproxy.war"/>
+    <copy todir="${env.CATALINA_HOME}/webapps" preservelastmodified="true" overwrite="true" file="${dist_dir}/spts-extservice.war"/>
+  </target>
+
+  <target name="spts" description="Security Proxy Test Suite" depends="dist">
+
+  	<jar jarfile="${dist_dir}/spts-service.jar">
+  	  <metainf dir="${spts_dir}">
+        <include name="securityproxy.properties"/>
+   	  </metainf>
+      <manifest>
+		<attribute name="Class-path" value="${webpki-libext} ${webpki-securityproxy}"/>
+		<attribute name="Main-Class" value="org.webpki.securityproxy.test.localservice.TestService"/>
+      </manifest>
+      <fileset dir="${temp_dir}">
+        <include name="org/webpki/securityproxy/test/localservice/**"/>
+      </fileset>
+    </jar>
+
+  	<war warfile="${dist_dir}/spts-intproxy.war" webxml="${spts_dir}/intproxy-web.xml">
+      <classes dir="${temp_dir}">
+        <include name="org/webpki/securityproxy/test/intproxy/**"/>
+      </classes>
+    </war>
+
+  	<war warfile="${dist_dir}/spts-extservice.war" webxml="${spts_dir}/extservice-web.xml">
+      <classes dir="${temp_dir}">
+        <include name="org/webpki/securityproxy/test/extservice/**"/>
+        <include name="org/webpki/securityproxy/test/localservice/MyUpload.class"/>
+      </classes>
+    </war>
+
+    <antcall target="_tomcat-deploy"/>
+
   </target>
 
   <target name="_test">

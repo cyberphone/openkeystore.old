@@ -295,7 +295,7 @@ public class ProxyClient
 
     private Proxy proxy;
 
-    private int proxy_max;
+    private int max_workers;
 
     private int cycle_time;
 
@@ -384,7 +384,7 @@ public class ProxyClient
         return res.toString ();
       }
 
-    private void spawnProxy () throws IOException
+    private void spawnProxy ()
       {
         synchronized (proxies)
           {
@@ -418,14 +418,14 @@ public class ProxyClient
           }
       }
 
-    private void checkForProxyDemand (boolean increase) throws IOException
+    private void checkForProxyDemand (boolean increase)
       {
         ////////////////////////////////////////////////////////////////////////////////
         // Check that there is ample of free proxies in order to keep up with requests
         ////////////////////////////////////////////////////////////////////////////////
         synchronized (proxies)
           {
-            if (proxies.size () < proxy_max)
+            if (proxies.size () < max_workers)
               {
                 //////////////////////////////////////////
                 // We have not yet reached the ceiling
@@ -446,7 +446,7 @@ public class ProxyClient
                 //////////////////////////////////////////
                 // The margin checker
                 //////////////////////////////////////////
-                if (q < 2 || q < (proxy_max / 5))
+                if (q < 2 || q < (max_workers / 5))
                   {
                     //////////////////////////////////////////
                     // We could use a helping hand here...
@@ -569,7 +569,7 @@ public class ProxyClient
      * 
      * @param proxy_url
      *          The URL to the proxy channel.
-     * @param proxy_max
+     * @param max_workers
      *          The maximum number of parallel proxy channels to use.
      * @param cycle_time
      *          The timeout in seconds for the &quot;waiting&quot; state.
@@ -578,12 +578,12 @@ public class ProxyClient
      * @param debug
      *          Defines if debug output is to be created or not.
      */
-    public void initProxy (String proxy_url, int proxy_max, int cycle_time, int retry_timeout, boolean debug) throws IOException
+    public void initProxy (String proxy_url, int max_workers, int cycle_time, int retry_timeout, boolean debug) throws IOException
       {
         killProxy ();
         last_proxy_id = 0;
         this.proxy_url = proxy_url;
-        this.proxy_max = proxy_max;
+        this.max_workers = max_workers;
         this.cycle_time = cycle_time * 1000;
         this.retry_timeout = retry_timeout * 1000;
         this.debug = debug;
@@ -595,7 +595,7 @@ public class ProxyClient
      * Put an object for upload in a queue.
      * @param upload_payload_object a derived object
      */
-    public void addUploadObject (UploadPayloadObject upload_payload_object) throws IOException
+    public void addUploadObject (ProxyUploadWrapper upload_payload_object)
       {
         synchronized (upload_objects)
           {

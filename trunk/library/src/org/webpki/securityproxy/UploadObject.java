@@ -26,14 +26,15 @@ class UploadObject extends ClientObject implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    private UploadPayloadObject payload;
+    private ProxyUploadWrapper payload;
 
-    UploadPayloadObject getPayload ()
+    ProxyUploadWrapper getPayload (UploadEventHandler handler)
       {
+        payload.handler = handler;
         return payload;
       }
 
-    UploadObject (String client_id, UploadPayloadObject payload)
+    UploadObject (String client_id, ProxyUploadWrapper payload)
       {
         super (client_id);
         this.payload = payload;

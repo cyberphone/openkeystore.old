@@ -17,7 +17,10 @@
 package org.webpki.securityproxy.test.extservice;
 
 import java.io.IOException;
+
 import java.util.Date;
+import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -26,12 +29,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServlet;
 
+import org.webpki.securityproxy.ProxyServer;
 import org.webpki.securityproxy.UploadEventHandler;
-import org.webpki.securityproxy.UploadPayloadObject;
-import org.webpki.securityproxy.test.intextcommon.IntExtCommon;
+import org.webpki.securityproxy.ProxyUploadWrapper;
+
 import org.webpki.securityproxy.test.localservice.MyUpload;
-
-
 
 /**
  * External security proxy service.
@@ -43,25 +45,50 @@ public class ExtService extends HttpServlet implements UploadEventHandler
   {
     private static final long serialVersionUID = 1L;
 
-    MyUpload my_upload;
+    private static final int HISTORY = 20;
+
+    private static Logger logger = Logger.getLogger (ExtService.class.getName ());
+
+    private ProxyServer proxy_server;
+    
+    private Vector<MyUpload> uploads = new Vector<MyUpload> ();
 
     @Override
     public void init (ServletConfig config) throws ServletException
       {
         super.init (config);
-        IntExtCommon.getProxy ().addUploadEventHandler (this);
+        proxy_server = ProxyServer.getInstance ("testing-testing...");
+        proxy_server.addUploadEventHandler (this);
       }
 
     @Override
     public void destroy ()
       {
-        IntExtCommon.getProxy ().deleteUploadEventHandler (this);
+        proxy_server.deleteUploadEventHandler (this);
       }
 
     @Override
-    public void handleUploadedData (UploadPayloadObject upload_payload)
+    public void handleUploadedData (ProxyUploadWrapper upload_payload)
       {
-        my_upload = (MyUpload) upload_payload;
+        try
+          {
+            uploads.add (0, (MyUpload) upload_payload.getObject ());
+            if (uploads.size () > HISTORY)
+              {
+                uploads.setSize (HISTORY);
+              }
+          }
+        catch (ClassNotFoundException e)
+          {
+            logger.severe ("Class not found: " + e.getMessage ());
+            throw new RuntimeException (e);
+          }
+        catch (Exception e)
+          {
+            logger.severe (e.getMessage ());
+            throw new RuntimeException (e);
+          }
+        logger.info ("Uploaded data reached service");
       }
 
     @Override
@@ -70,10 +97,27 @@ public class ExtService extends HttpServlet implements UploadEventHandler
         response.setContentType ("text/html; charset=utf-8");
         response.setHeader ("Pragma", "No-Cache");
         response.setDateHeader ("EXPIRES", 0);
-        response.getWriter ().print ("<html><head><meta http-equiv=\"refresh\" content=\"60\"></head>" +
-                                     "<body>Last Proxy Upload: " +
-                                     (my_upload == null ? "UNKNOWN" : new Date (my_upload.last_time_stamp).toString ()) +
-                                     "</body></html>");
+        StringBuffer s = new StringBuffer ("<html><head><meta http-equiv=\"refresh\" content=\"20\"></head><body>Last Proxy Upload: ");
+        int l = uploads.size ();
+        if (l == 0)
+          {
+            s.append ("UNKNOWN");
+          }
+        else
+          {
+            printElem (s, 0);
+            for (int q = 1; q < l; q++)
+              {
+                s.append ("<br>Previous Proxy Upload: ");
+                printElem (s, q);
+              }
+          }
+        response.getWriter ().print (s.append ("</body></html>").toString ());
+      }
+
+    private void printElem (StringBuffer s, int index)
+      {
+        s.append (new Date (uploads.elementAt (index).getTimeStamp ()).toString ());
       }
 
     @Override
@@ -82,9 +126,7 @@ public class ExtService extends HttpServlet implements UploadEventHandler
         response.setContentType ("text/html; charset=utf-8");
         response.setHeader ("Pragma", "No-Cache");
         response.setDateHeader ("EXPIRES", 0);
-        response.getWriter ().print ("<html><head><meta http-equiv=\"refresh\" content=\"60\"></head>" +
-                                     "<body>Last Proxy Upload: " +
-                                     (my_upload == null ? "UNKNOWN" : new Date (my_upload.last_time_stamp).toString ()) +
-                                     "</body></html>");
+        response.getWriter ().print ("<html><head><meta http-equiv=\"refresh\" content=\"20\"></head>" +
+                                     "<body>hi</body></html>");
       }
   }

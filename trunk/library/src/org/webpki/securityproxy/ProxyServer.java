@@ -22,6 +22,7 @@ import java.io.ObjectOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 
+import java.util.HashMap;
 import java.util.Vector;
 
 import java.util.logging.Logger;
@@ -38,6 +39,8 @@ import javax.servlet.http.HttpServletRequest;
 public class ProxyServer
   {
     private static Logger logger = Logger.getLogger (ProxyServer.class.getName ());
+
+    private static HashMap<String,ProxyServer> instances = new HashMap<String,ProxyServer> (); 
 
     private Vector<RequestDescriptor> response_queue = new Vector<RequestDescriptor> ();
 
@@ -61,15 +64,22 @@ public class ProxyServer
     
     private Class<? extends ProxyServerErrorFactory> error_container;
     
-    public ProxyServer ()
+    public static ProxyServer getInstance (String name_of_instance)
       {
-        this (null);
+        synchronized (instances)
+          {
+            ProxyServer instance = instances.get (name_of_instance);
+            if (instance == null)
+              {
+                instances.put (name_of_instance, instance = new ProxyServer ());
+              }
+            return instance;
+          }
       }
     
-    public ProxyServer (Class<? extends ProxyServerErrorFactory> error_container)
+    public void setProxyServerErrorFactory (Class<? extends ProxyServerErrorFactory> error_container)
       {
         this.error_container = error_container;
-        logger.info ("ProxyServer initialized");
       }
     
     public synchronized void addUploadEventHandler (UploadEventHandler ueh)
@@ -110,7 +120,6 @@ public class ProxyServer
             touched = true;
             notify ();
           }
-
       }
 
     private abstract class Caller
@@ -185,7 +194,6 @@ public class ProxyServer
                 cleanUpAfterFailedCall (this, "Call response timeout");
               }
           }
-
       }
 
     private class ProxyRequest extends Caller
@@ -246,7 +254,6 @@ public class ProxyServer
           {
             request_descriptor.transactResponse ();
           }
-
       }
 
     private void returnInternalFailure (HttpServletResponse response, String message) throws IOException
@@ -565,7 +572,7 @@ public class ProxyServer
                   }
                 for (UploadEventHandler handler : upload_event_subscribers)
                   {
-                    handler.handleUploadedData (upload.getPayload ());
+                    handler.handleUploadedData (upload.getPayload (handler));
                   }
                 return;
               }
@@ -583,6 +590,7 @@ public class ProxyServer
           }
         catch (ClassNotFoundException cnfe)
           {
+            logger.severe (cnfe.getMessage ());
             returnInternalFailure (response, "Unrecognized object (check versions)");
             return;
           }

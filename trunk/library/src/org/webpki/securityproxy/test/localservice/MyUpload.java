@@ -16,11 +16,21 @@
  */
 package org.webpki.securityproxy.test.localservice;
 
-import org.webpki.securityproxy.UploadPayloadObject;
+import java.io.Serializable;
 
-public class MyUpload extends UploadPayloadObject
+public class MyUpload implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    public long last_time_stamp;
+    private long last_time_stamp;
+    
+    public long getTimeStamp ()
+      {
+        return last_time_stamp;
+      }
+    
+    public MyUpload (long last_time_stamp)
+      {
+        this.last_time_stamp = last_time_stamp;
+      }
   }
