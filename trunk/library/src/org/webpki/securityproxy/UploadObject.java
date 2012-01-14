@@ -16,6 +16,10 @@
  */
 package org.webpki.securityproxy;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
@@ -26,17 +30,18 @@ class UploadObject extends ClientObject implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    private ProxyUploadWrapper payload;
-
-    ProxyUploadWrapper getPayload (UploadEventHandler handler)
+    private byte[] data;
+    
+    UploadPayloadObject getPayload (UploadEventHandler handler) throws IOException, ClassNotFoundException
       {
-        payload.handler = handler;
-        return payload;
+        return (UploadPayloadObject)new ProxyObjectInputStream (new ByteArrayInputStream (data), handler).readObject ();
       }
 
-    UploadObject (String client_id, ProxyUploadWrapper payload)
+    UploadObject (String client_id, UploadPayloadObject payload) throws IOException
       {
         super (client_id);
-        this.payload = payload;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+        new ObjectOutputStream (baos).writeObject (payload);
+        this.data = baos.toByteArray ();
       }
   }

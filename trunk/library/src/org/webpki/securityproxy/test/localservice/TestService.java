@@ -28,7 +28,6 @@ import org.webpki.securityproxy.ProxyClient;
 import org.webpki.securityproxy.ProxyRequestHandler;
 import org.webpki.securityproxy.ProxyRequestWrapper;
 import org.webpki.securityproxy.ProxyResponseWrapper;
-import org.webpki.securityproxy.ProxyUploadWrapper;
 
 /**
  * Test service using the security proxy system. 
@@ -135,7 +134,7 @@ public class TestService implements ProxyRequestHandler
               {
                 Thread.sleep (200000L);
                 logger.info ("Uploaded Data");
-                proxy_client.addUploadObject (new ProxyUploadWrapper (new MyUpload (new Date ().getTime ())));
+                proxy_client.addUploadObject (new MyUpload (new Date ().getTime ()));
               }
             catch (InterruptedException e)
               {

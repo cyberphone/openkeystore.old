@@ -14,23 +14,15 @@
  *  limitations under the License.
  *
  */
-package org.webpki.securityproxy.test.localservice;
+package org.webpki.securityproxy;
 
-import org.webpki.securityproxy.UploadPayloadObject;
+import java.io.Serializable;
 
-public class MyUpload extends UploadPayloadObject
+/**
+ * Security proxy payload data object containing an upload operation.
+ * Extended by actual user.
+ */
+public abstract class UploadPayloadObject implements Serializable
   {
     private static final long serialVersionUID = 1L;
-
-    private long last_time_stamp;
-    
-    public long getTimeStamp ()
-      {
-        return last_time_stamp;
-      }
-    
-    public MyUpload (long last_time_stamp)
-      {
-        this.last_time_stamp = last_time_stamp;
-      }
   }

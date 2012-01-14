@@ -595,11 +595,17 @@ public class ProxyClient
      * Put an object for upload in a queue.
      * @param upload_payload_object a derived object
      */
-    public void addUploadObject (ProxyUploadWrapper upload_payload_object)
+    public void addUploadObject (UploadPayloadObject upload_payload_object)
       {
         synchronized (upload_objects)
           {
-            upload_objects.add (new UploadObject (client_id, upload_payload_object));
+            try
+              {
+                upload_objects.add (new UploadObject (client_id, upload_payload_object));
+              }
+            catch (IOException e)
+              {
+              }
           }
         checkForProxyDemand (true);
       }

@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServlet;
 
 import org.webpki.securityproxy.ProxyServer;
 import org.webpki.securityproxy.UploadEventHandler;
-import org.webpki.securityproxy.ProxyUploadWrapper;
+import org.webpki.securityproxy.UploadPayloadObject;
 
 import org.webpki.securityproxy.test.localservice.MyUpload;
 
@@ -68,25 +68,12 @@ public class ExtService extends HttpServlet implements UploadEventHandler
       }
 
     @Override
-    public void handleUploadedData (ProxyUploadWrapper upload_payload)
+    public void handleUploadedData (UploadPayloadObject upload_payload)
       {
-        try
+        uploads.add (0, (MyUpload) upload_payload);
+        if (uploads.size () > HISTORY)
           {
-            uploads.add (0, (MyUpload) upload_payload.getObject ());
-            if (uploads.size () > HISTORY)
-              {
-                uploads.setSize (HISTORY);
-              }
-          }
-        catch (ClassNotFoundException e)
-          {
-            logger.severe ("Class not found: " + e.getMessage ());
-            throw new RuntimeException (e);
-          }
-        catch (Exception e)
-          {
-            logger.severe (e.getMessage ());
-            throw new RuntimeException (e);
+            uploads.setSize (HISTORY);
           }
         logger.info ("Uploaded data reached service");
       }

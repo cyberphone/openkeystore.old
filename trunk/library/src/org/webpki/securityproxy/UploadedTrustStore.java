@@ -23,7 +23,7 @@ import java.util.Vector;
 /**
  * Predefined trust-anchor upload payload
  */
-public class UploadedTrustStore
+public class UploadedTrustStore extends UploadPayloadObject
 {
     private static final long serialVersionUID = 1L;
     

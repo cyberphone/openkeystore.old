@@ -22,5 +22,5 @@ package org.webpki.securityproxy;
  */
 public interface UploadEventHandler
   {
-    public void handleUploadedData (ProxyUploadWrapper upload_payload);
+    public void handleUploadedData (UploadPayloadObject upload_payload);
   }
