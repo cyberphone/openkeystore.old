@@ -18,7 +18,7 @@ package org.webpki.securityproxy.test.localservice;
 
 import org.webpki.securityproxy.UploadPayloadObject;
 
-public class MyUpload extends UploadPayloadObject
+public class MyUpload implements UploadPayloadObject
   {
     private static final long serialVersionUID = 1L;
 

@@ -22,7 +22,6 @@ import java.io.Serializable;
  * Security proxy payload data object containing an upload operation.
  * Extended by actual user.
  */
-public abstract class UploadPayloadObject implements Serializable
+public interface UploadPayloadObject extends Serializable
   {
-    private static final long serialVersionUID = 1L;
   }
