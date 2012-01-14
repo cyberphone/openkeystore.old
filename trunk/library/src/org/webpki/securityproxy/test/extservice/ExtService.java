@@ -84,20 +84,28 @@ public class ExtService extends HttpServlet implements UploadEventHandler
         response.setContentType ("text/html; charset=utf-8");
         response.setHeader ("Pragma", "No-Cache");
         response.setDateHeader ("EXPIRES", 0);
-        StringBuffer s = new StringBuffer ("<html><head><meta http-equiv=\"refresh\" content=\"20\"></head><body>Last Proxy Upload: ");
-        int l = uploads.size ();
-        if (l == 0)
+        StringBuffer s = new StringBuffer ("<html><head><meta http-equiv=\"refresh\" content=\"20\"></head><body>");
+        if (proxy_server.isReady ())
           {
-            s.append ("UNKNOWN");
+            s.append ("Last Proxy Upload: ");
+            int l = uploads.size ();
+            if (l == 0)
+              {
+                s.append ("UNKNOWN");
+              }
+            else
+              {
+                printElem (s, 0);
+                for (int q = 1; q < l; q++)
+                  {
+                    s.append ("<br>Previous Proxy Upload: ");
+                    printElem (s, q);
+                  }
+              }
           }
         else
           {
-            printElem (s, 0);
-            for (int q = 1; q < l; q++)
-              {
-                s.append ("<br>Previous Proxy Upload: ");
-                printElem (s, q);
-              }
+            s.append ("PROXY SERVER NOT READY"); 
           }
         response.getWriter ().print (s.append ("</body></html>").toString ());
       }

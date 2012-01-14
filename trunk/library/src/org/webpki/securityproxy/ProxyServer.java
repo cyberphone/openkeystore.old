@@ -91,6 +91,11 @@ public class ProxyServer
       {
         upload_event_subscribers.remove (ueh);
       }
+    
+    public synchronized boolean isReady ()
+      {
+        return server_configuration != null;
+      }
 
     private class Synchronizer
       {

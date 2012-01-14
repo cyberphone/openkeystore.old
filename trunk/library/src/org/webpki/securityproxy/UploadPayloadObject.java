@@ -20,7 +20,7 @@ import java.io.Serializable;
 
 /**
  * Security proxy payload data object containing an upload operation.
- * Extended by actual user.
+ * Implement by actual user.
  */
 public interface UploadPayloadObject extends Serializable
   {
