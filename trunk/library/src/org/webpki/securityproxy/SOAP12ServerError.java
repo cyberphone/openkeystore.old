@@ -46,5 +46,4 @@ public class SOAP12ServerError extends ProxyServerErrorFactory
       {
         return SOAP12_MIME;
       }
-    
   }

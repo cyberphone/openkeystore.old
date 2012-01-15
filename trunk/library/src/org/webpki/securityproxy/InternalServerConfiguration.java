@@ -22,7 +22,7 @@ import java.io.Serializable;
  * Security proxy object containing a serialized server configuration which is sent
  * from the client proxy to the server proxy during startup.
  */
-class ServerConfiguration extends ClientObject implements Serializable
+class InternalServerConfiguration extends InternalClientObject implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
@@ -44,7 +44,7 @@ class ServerConfiguration extends ClientObject implements Serializable
     int response_timeout;
     boolean debug;
 
-    ServerConfiguration (int proxy_timeout,
+    InternalServerConfiguration (int proxy_timeout,
                          int request_timeout,
                          int response_timeout, 
                          String client_id,

@@ -16,11 +16,21 @@
  */
 package org.webpki.securityproxy;
 
+import java.io.Serializable;
+
 /**
- * Security proxy upload event handler.
- * Implement in proxy-using servlet.
+ * Security proxy object containing the super class for all client-operations. Only
+ * for proxy-internal use.
  */
-public interface UploadEventHandler
+abstract class InternalClientObject implements Serializable
   {
-    public void handleUploadedData (UploadPayloadObject upload_payload);
+    private static final long serialVersionUID = 1L;
+
+    String client_id;
+
+    InternalClientObject (String client_id)
+      {
+        this.client_id = client_id;
+      }
+
   }

@@ -18,9 +18,6 @@ package org.webpki.securityproxy;
 
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -46,17 +43,19 @@ public class ProxyServer
 
     private Vector<RequestDescriptor> waiting_callers = new Vector<RequestDescriptor> ();
     
-    private Vector<UploadEventHandler> upload_event_subscribers = new Vector<UploadEventHandler> ();
+    private Vector<ProxyUploadHandler> upload_event_subscribers = new Vector<ProxyUploadHandler> ();
 
     private Vector<ProxyRequest> proxies = new Vector<ProxyRequest> ();
 
     private long next_caller_id;
 
     private long next_proxy_id;
+    
+    private String instance_name;  // Optional
 
-    private ServerConfiguration server_configuration;
+    private InternalServerConfiguration server_configuration;
 
-    private ProxyRequestWrapper last_request;
+    private ProxyRequestInterface last_request;
 
     private int response_timeout_errors;
 
@@ -72,6 +71,7 @@ public class ProxyServer
             if (instance == null)
               {
                 instances.put (name_of_instance, instance = new ProxyServer ());
+                instance.instance_name = name_of_instance;
               }
             return instance;
           }
@@ -82,12 +82,12 @@ public class ProxyServer
         this.error_container = error_container;
       }
     
-    public synchronized void addUploadEventHandler (UploadEventHandler ueh)
+    public synchronized void addUploadEventHandler (ProxyUploadHandler ueh)
       {
         upload_event_subscribers.add (ueh);
       }
     
-    public synchronized void deleteUploadEventHandler (UploadEventHandler ueh)
+    public synchronized void deleteUploadEventHandler (ProxyUploadHandler ueh)
       {
         upload_event_subscribers.remove (ueh);
       }
@@ -139,8 +139,8 @@ public class ProxyServer
     private class RequestDescriptor extends Caller
       {
         HttpServletResponse response;
-        ProxyRequestWrapper request_object;
-        ResponseObject response_object;
+        InternalRequestObject request_object;
+        InternalResponseObject response_object;
         ProxyRequest proxy;
         Synchronizer request_waiter = new Synchronizer ();
         Synchronizer response_waiter = new Synchronizer ();
@@ -233,14 +233,11 @@ public class ProxyServer
                 if (proxy_worker.perform (server_configuration.proxy_timeout))
                   {
                     // We got some real data!
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-                    new ObjectOutputStream (baos).writeObject (request_descriptor.request_object);
-                    proxy_response.getOutputStream ().write (baos.toByteArray ());
+                    proxy_response.getOutputStream ().write (InternalObjectStream.writeObject (request_descriptor.request_object));
                   }
                 else
                   {
-                    // We never got a hit and have to remove this proxy from the
-                    // list...
+                    // We never got a hit and have to remove this proxy from the list...
                     int q = 0;
                     for (ProxyRequest proxy : proxies)
                       {
@@ -328,7 +325,7 @@ public class ProxyServer
      * @return The last (if any) request object. Will be <code>null</code> if
      *         there has been no external access yet.
      */
-    public synchronized ProxyRequestWrapper getLastRequestObject ()
+    public synchronized ProxyRequestInterface getLastRequestObject ()
       {
         return last_request;
       }
@@ -373,13 +370,12 @@ public class ProxyServer
         returnInternalFailure (request_descriptor.response, "Internal server error");
       }
 
-    private synchronized Caller processRequest (HttpServletResponse response, ProxyRequestWrapper request_object) throws IOException, ServletException
+    private synchronized Caller processRequest (HttpServletResponse response, ProxyRequestInterface request_object) throws IOException, ServletException
       {
         // Create a descriptor
         RequestDescriptor rd = new RequestDescriptor ();
-        request_object.caller_id = next_caller_id++;
         rd.response = response;
-        rd.request_object = last_request = request_object;
+        rd.request_object = new InternalRequestObject (last_request = request_object, next_caller_id++);
         response_queue.add (rd);
 
         // Now check if there is a proxy that can take this request
@@ -403,12 +399,13 @@ public class ProxyServer
      * 
      * @param response
      *          The response object of the external call Servlet.
+     * @param proxy_request_object
+     *          The request data object.
      */
-    public void processCall (ProxyRequestWrapper ro, HttpServletResponse response) throws IOException, ServletException
+    public void processCall (ProxyRequestInterface proxy_request_object, HttpServletResponse response) throws IOException, ServletException
       {
         ////////////////////////////////////////////////////////////////////////////////
-        // Perform as much as possible of the "heavy" stuff outside of
-        // synchronization
+        // Perform as much as possible of the "heavy" stuff outside of synchronization
         ////////////////////////////////////////////////////////////////////////////////
 
         if (server_configuration == null)
@@ -420,7 +417,7 @@ public class ProxyServer
         ////////////////////////////////////////////////////////////////////
         // Insert request into queues etc.
         ////////////////////////////////////////////////////////////////////
-        Caller ci = processRequest (response, ro);
+        Caller ci = processRequest (response, proxy_request_object);
 
         ///////////////////////////////////////////////////
         // Now process the action of the request part
@@ -470,7 +467,7 @@ public class ProxyServer
         return pd;
       }
 
-    private synchronized void resetProxy (ServerConfiguration server_conf)
+    private synchronized void resetProxy (InternalServerConfiguration server_conf)
       {
         next_caller_id = 0;
         next_proxy_id = 0;
@@ -481,7 +478,7 @@ public class ProxyServer
         response_queue.clear ();
         waiting_callers.clear ();
         server_configuration = server_conf;
-        logger.info ("Proxy " + (server_conf == null ? "RESET" : "INIT: proxy-timeout=" + server_conf.proxy_timeout) + " client-id=" + server_conf.client_id);
+        logger.info ("Proxy " + (server_conf == null ? "RESET" : "INIT" + (instance_name == null ? "" : " Name=" + instance_name) + " proxy-cycle=" + server_conf.proxy_timeout/1000 + "s") + " client-id=" + server_conf.client_id);
       }
 
     /**
@@ -493,7 +490,7 @@ public class ProxyServer
         resetProxy (null);
       }
 
-    private boolean wrongClientID (ClientObject client_object, HttpServletResponse response) throws IOException
+    private boolean wrongClientID (InternalClientObject client_object, HttpServletResponse response) throws IOException
       {
         if (server_configuration == null)
           {
@@ -539,21 +536,21 @@ public class ProxyServer
         /////////////////////////////////////////////////
         try
           {
-            Object object = new ObjectInputStream (new ByteArrayInputStream (data)).readObject ();
-            if (object instanceof ServerConfiguration)
+            Object object = InternalObjectStream.readObject (data, this);
+            if (object instanceof InternalServerConfiguration)
               {
 
                 ////////////////////////////////////////////////
                 // First call. Reset all, get configuration
                 ////////////////////////////////////////////////
-                resetProxy ((ServerConfiguration) object);
+                resetProxy ((InternalServerConfiguration) object);
               }
-            else if (object instanceof ResponseObject)
+            else if (object instanceof InternalResponseObject)
               {
                 ////////////////////////////////////////////////
                 // Data to process!
                 ////////////////////////////////////////////////
-                ResponseObject ro = (ResponseObject) object;
+                InternalResponseObject ro = (InternalResponseObject) object;
                 if (wrongClientID (ro, response))
                   {
                     return;
@@ -565,37 +562,36 @@ public class ProxyServer
                     rd.response_waiter.haveData4You ();
                   }
               }
-            else if (object instanceof UploadObject)
+            else if (object instanceof InternalUploadObject)
               {
                 ////////////////////////////////////////////////
                 // Must be an "Upload" object
                 ////////////////////////////////////////////////
-                UploadObject upload = (UploadObject) object;
+                InternalUploadObject upload = (InternalUploadObject) object;
                 if (wrongClientID (upload, response))
                   {
                     return;
                   }
-                for (UploadEventHandler handler : upload_event_subscribers)
+                for (ProxyUploadHandler handler : upload_event_subscribers)
                   {
                     handler.handleUploadedData (upload.getPayload (handler));
                   }
-                return;
               }
             else
               {
                 ////////////////////////////////////////////////
                 // Must be an "Idle" object
                 ////////////////////////////////////////////////
-                IdleObject idle = (IdleObject) object;
+                InternalIdleObject idle = (InternalIdleObject) object;
                 if (wrongClientID (idle, response))
                   {
                     return;
                   }
               }
           }
-        catch (ClassNotFoundException cnfe)
+        catch (ClassNotFoundException e)
           {
-            logger.severe (cnfe.getMessage ());
+            logger.severe (e.getMessage ());
             returnInternalFailure (response, "Unrecognized object (check versions)");
             return;
           }

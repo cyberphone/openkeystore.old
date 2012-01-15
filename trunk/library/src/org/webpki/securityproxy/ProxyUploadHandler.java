@@ -16,12 +16,11 @@
  */
 package org.webpki.securityproxy;
 
-import java.io.Serializable;
-
 /**
- * Security proxy payload data object containing an upload operation.
- * Implement by actual user.
+ * Security proxy upload event handler.
+ * Implement in proxy-using servlet.
  */
-public interface UploadPayloadObject extends Serializable
+public interface ProxyUploadHandler
   {
+    public void handleUploadedData (ProxyUploadInterface upload_payload);
   }

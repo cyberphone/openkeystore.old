@@ -16,17 +16,12 @@
  */
 package org.webpki.securityproxy;
 
+import java.io.Serializable;
+
 /**
- * Security proxy client request handler interface.
- * 
- * Note that errors should be taken care of by the handler implementation
- * and for non-fatal situations return an error object to the actual caller.
+ * Security proxy data object containing an upload operation.
+ * Implemented by the actual user-defined object.
  */
-public interface ProxyRequestHandler
+public interface ProxyUploadInterface extends Serializable
   {
-    /**
-     * @param request_object the request
-     * @return suitable HTTP return data to the external caller
-     */
-    public ProxyResponseWrapper handleProxyRequest (ProxyRequestInterface request_object);
   }

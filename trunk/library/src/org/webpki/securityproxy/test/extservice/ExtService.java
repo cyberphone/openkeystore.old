@@ -30,8 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServlet;
 
 import org.webpki.securityproxy.ProxyServer;
-import org.webpki.securityproxy.UploadEventHandler;
-import org.webpki.securityproxy.UploadPayloadObject;
+import org.webpki.securityproxy.ProxyUploadHandler;
+import org.webpki.securityproxy.ProxyUploadInterface;
 
 import org.webpki.securityproxy.test.localservice.MyUpload;
 
@@ -41,7 +41,7 @@ import org.webpki.securityproxy.test.localservice.MyUpload;
  * This is the external service.
  * 
  */
-public class ExtService extends HttpServlet implements UploadEventHandler
+public class ExtService extends HttpServlet implements ProxyUploadHandler
   {
     private static final long serialVersionUID = 1L;
 
@@ -68,7 +68,7 @@ public class ExtService extends HttpServlet implements UploadEventHandler
       }
 
     @Override
-    public void handleUploadedData (UploadPayloadObject upload_payload)
+    public void handleUploadedData (ProxyUploadInterface upload_payload)
       {
         uploads.add (0, (MyUpload) upload_payload);
         if (uploads.size () > HISTORY)

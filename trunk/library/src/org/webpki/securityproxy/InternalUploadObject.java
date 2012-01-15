@@ -17,33 +17,26 @@
 package org.webpki.securityproxy;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
+import java.io.Serializable;
 
 /**
- * Internal class for dealing with classloader serialization issues.
+ * Security proxy object containing an upload operation. 
+ * Only for proxy-internal use.
  */
-class ProxyObjectInputStream extends ObjectInputStream
+class InternalUploadObject extends InternalClientObject implements Serializable
   {
-    UploadEventHandler handler;
+    private static final long serialVersionUID = 1L;
+
+    private byte[] data;
     
-    @Override
-    public Class<?> resolveClass (ObjectStreamClass desc) throws IOException, ClassNotFoundException
+    ProxyUploadInterface getPayload (ProxyUploadHandler handler) throws IOException, ClassNotFoundException
       {
-        try
-          {
-            return handler.getClass ().getClassLoader ().loadClass (desc.getName ());
-          }
-        catch (Exception e)
-          {
-          }
-        return super.resolveClass (desc);
+        return (ProxyUploadInterface)InternalObjectStream.readObject (data, handler);
       }
 
-    ProxyObjectInputStream (InputStream in, UploadEventHandler handler) throws IOException
+    InternalUploadObject (String client_id, ProxyUploadInterface payload) throws IOException
       {
-        super (in);
-        this.handler = handler;
+        super (client_id);
+        data = InternalObjectStream.writeObject (payload);
       }
   }

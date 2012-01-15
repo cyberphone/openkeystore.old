@@ -19,20 +19,23 @@ package org.webpki.securityproxy;
 import java.io.Serializable;
 
 /**
- * Security proxy object containing an idle operation. Only for proxy-internal use.
+ * Security proxy object containing a serialized request.
+ * Internal usage only.
  */
-class IdleObject extends ClientObject implements Serializable
+class InternalRequestObject implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    ///////////////////////////////////////////////////////////////////////
-    // Since an idle object is sent when there is nothing to do
-    // it comes to no big surprise that it is pretty free from content...
-    ///////////////////////////////////////////////////////////////////////
+    ProxyRequestInterface proxy_request;
 
-    IdleObject (String client_id)
+    ////////////////////////////////////////////////////////
+    // Due to the multi-channel proxy, calls need IDs
+    ////////////////////////////////////////////////////////
+    long caller_id;
+
+    InternalRequestObject (ProxyRequestInterface proxy_request, long caller_id)
       {
-        super (client_id);
+        this.proxy_request = proxy_request;
+        this.caller_id = caller_id;
       }
-
   }

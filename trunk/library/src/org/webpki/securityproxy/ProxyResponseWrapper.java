@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 
 /**
- * Security proxy object containing the local service's response.
+ * Security proxy object containing the local service's HTTP response.
  */
 public class ProxyResponseWrapper implements Serializable
   {

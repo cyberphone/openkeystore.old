@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 
 import org.webpki.securityproxy.ProxyClient;
 import org.webpki.securityproxy.ProxyRequestHandler;
-import org.webpki.securityproxy.ProxyRequestWrapper;
+import org.webpki.securityproxy.ProxyRequestInterface;
 import org.webpki.securityproxy.ProxyResponseWrapper;
 
 /**
@@ -76,7 +76,7 @@ public class TestService implements ProxyRequestHandler
       }
 
     @Override
-    public ProxyResponseWrapper handleProxyRequest (ProxyRequestWrapper proxy_req_wrapper)
+    public ProxyResponseWrapper handleProxyRequest (ProxyRequestInterface proxy_req_wrapper)
       {
         // TODO Auto-generated method stub
         return null;

@@ -20,9 +20,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 import java.util.Vector;
 
@@ -76,7 +73,7 @@ public class ProxyClient
         ////////////////////////////////////
         long proxy_id;
 
-        ClientObject send_object;
+        InternalClientObject send_object;
 
         boolean hanging;
 
@@ -86,7 +83,7 @@ public class ProxyClient
           {
             if (running)
               {
-                System.out.println (what + " Proxy id: " + proxy_id);
+                logger.severe ("Channel[" + proxy_id + "] returned: " + what);
               }
           }
 
@@ -95,11 +92,10 @@ public class ProxyClient
             int error_count = 0;
             if (debug)
               {
-                logger.info ("Proxy channel[" + proxy_id + "] started");
+                logger.info ("Channel[" + proxy_id + "] started");
               }
             while (running)
               {
-                boolean talking_to_proxy = true;
                 boolean throwed_an_iox = true;
                 HttpURLConnection conn = null;
                 try
@@ -118,7 +114,7 @@ public class ProxyClient
                         ((HttpsURLConnection) conn).setSSLSocketFactory (socket_factory);
                       }
 
-                    if (send_object instanceof IdleObject)
+                    if (send_object instanceof InternalIdleObject)
                       {
                         synchronized (upload_objects)
                           {
@@ -141,9 +137,7 @@ public class ProxyClient
                     ////////////////////////////////////////////////////////////////////////
                     // Serialize the data object to send (Conf, Idle, Response)
                     ////////////////////////////////////////////////////////////////////////
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-                    new ObjectOutputStream (baos).writeObject (send_object);
-                    byte[] send_data = baos.toByteArray ();
+                    byte[] send_data = InternalObjectStream.writeObject (send_object);
 
                     ////////////////////////////////////////////////////////////////////////
                     // Write Serialized object
@@ -192,13 +186,13 @@ public class ProxyClient
                               {
                                 if (debug)
                                   {
-                                    logger.info ("No data. Channel[" + proxy_id + "] deleted");
+                                    logger.info ("Channel[" + proxy_id + "] was deleted");
                                   }
                                 return;
                               }
                             if (debug)
                               {
-                                logger.info ("No data but keep channel[" + proxy_id + "] going");
+                                logger.info ("Channel[" + proxy_id + "] continues");
                               }
                           }
                       }
@@ -212,13 +206,12 @@ public class ProxyClient
                         ////////////////////////////////////
                         // Read the request object
                         ////////////////////////////////////
-                        ProxyRequestWrapper prw = (ProxyRequestWrapper) new ObjectInputStream (new ByteArrayInputStream (data)).readObject ();
+                        InternalRequestObject request_object = (InternalRequestObject) InternalObjectStream.readObject (data, request_handler);
 
                         //////////////////////////////////////////////////////
                         // Now do the request/response to the local server
                         //////////////////////////////////////////////////////
-                        talking_to_proxy = false;
-                        send_object = new ResponseObject (request_handler.handleProxyRequest (prw), prw.caller_id, client_id);
+                        send_object = new InternalResponseObject (request_handler.handleProxyRequest (request_object.proxy_request), request_object.caller_id, client_id);
                       }
 
                     /////////////////////////////////////////////////
@@ -232,11 +225,11 @@ public class ProxyClient
                   }
                 catch (IOException ioe)
                   {
-                    badReturn ("IOX when talking to " + (talking_to_proxy ? "proxy=" : "local service=") + ioe.getMessage ());
+                    badReturn (ioe.getMessage ());
                     ioe.printStackTrace ();
                     try
                       {
-                        if (talking_to_proxy && throwed_an_iox && running)
+                        if (throwed_an_iox && running)
                           {
                             String err = conn.getResponseMessage ();
                             if (err != null)
@@ -248,7 +241,7 @@ public class ProxyClient
                     catch (IOException ioe2)
                       {
                       }
-                    if (talking_to_proxy && running)
+                    if (running)
                       {
                         //////////////////////////////////////////////////
                         // Kill and remove all proxy channels (threads)
@@ -260,7 +253,7 @@ public class ProxyClient
                             ///////////////////////////
                             // We give up completely!
                             ///////////////////////////
-                            System.out.println ("Hard error.  Shut down the proxy!");
+                            logger.severe ("Hard error.  Shut down the proxy!");
                             return;
                           }
 
@@ -274,7 +267,7 @@ public class ProxyClient
                           {
                             if (debug)
                               {
-                                logger.info ("Proxy: " + proxy_id + " waits " + retry_timeout + " ms for a new try...");
+                                logger.info ("Channel[" + proxy_id + "] resumes (after waiting " + retry_timeout/1000 + "s) for a new try...");
                               }
                             Thread.sleep (retry_timeout);
                           }
@@ -316,13 +309,13 @@ public class ProxyClient
 
     private String client_id;
 
-    private ServerConfiguration server_configuration;
+    private InternalServerConfiguration server_configuration;
 
-    private IdleObject idle_object;
+    private InternalIdleObject idle_object;
 
     private Vector<ProxyChannel> proxies = new Vector<ProxyChannel> ();
 
-    private Vector<UploadObject> upload_objects = new Vector<UploadObject> ();
+    private Vector<InternalUploadObject> upload_objects = new Vector<InternalUploadObject> ();
 
     ////////////////////////////////////
     // Defaults
@@ -392,8 +385,7 @@ public class ProxyClient
             proxy.proxy_id = last_proxy_id++;
 
             /////////////////////////////////////////////////////////////////////////////////////////
-            // If it is the first proxy - issue a master reset + configuration
-            // to the proxy server
+            // If it is the first proxy - issue a master reset + configuration to the proxy server
             /////////////////////////////////////////////////////////////////////////////////////////
             if (proxy.proxy_id == 0)
               {
@@ -401,8 +393,8 @@ public class ProxyClient
                 new SecureRandom ().nextBytes (cid);
                 client_id = toHexString (cid);
 
-                server_configuration = new ServerConfiguration (cycle_time, REQUEST_TIMEOUT, REQUEST_TIMEOUT, client_id, debug);
-                idle_object = new IdleObject (client_id);
+                server_configuration = new InternalServerConfiguration (cycle_time, REQUEST_TIMEOUT, REQUEST_TIMEOUT, client_id, debug);
+                idle_object = new InternalIdleObject (client_id);
                 proxy.send_object = server_configuration;
                 if (debug)
                   {
@@ -553,7 +545,7 @@ public class ProxyClient
                 pc.running = false;
                 if (debug)
                   {
-                    System.out.println ("Killing proxy: " + pc.proxy_id);
+                    logger.info ("Channel[" + pc.proxy_id + "] was relased");
                   }
               }
           }
@@ -595,13 +587,13 @@ public class ProxyClient
      * Put an object for upload in a queue.
      * @param upload_payload_object a derived object
      */
-    public void addUploadObject (UploadPayloadObject upload_payload_object)
+    public void addUploadObject (ProxyUploadInterface upload_payload_object)
       {
         synchronized (upload_objects)
           {
             try
               {
-                upload_objects.add (new UploadObject (client_id, upload_payload_object));
+                upload_objects.add (new InternalUploadObject (client_id, upload_payload_object));
               }
             catch (IOException e)
               {
