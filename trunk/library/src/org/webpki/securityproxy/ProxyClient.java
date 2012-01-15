@@ -71,7 +71,7 @@ public class ProxyClient
         ////////////////////////////////////
         // Instance variables
         ////////////////////////////////////
-        long proxy_id;
+        long channel_id;
 
         InternalClientObject send_object;
 
@@ -83,7 +83,7 @@ public class ProxyClient
           {
             if (running)
               {
-                logger.severe ("Channel[" + proxy_id + "] returned: " + what);
+                logger.severe ("Channel[" + channel_id + "] returned: " + what);
               }
           }
 
@@ -92,7 +92,7 @@ public class ProxyClient
             int error_count = 0;
             if (debug)
               {
-                logger.info ("Channel[" + proxy_id + "] started");
+                logger.info ("Channel[" + channel_id + "] started");
               }
             while (running)
               {
@@ -104,7 +104,7 @@ public class ProxyClient
                     // This how the proxy client starts its work-day, by launching a call to
                     // the proxy server. Usually the call contains nothing but sometimes
                     // there is a response from the local service included. The very first call
-                    // contains a "master reset" which clears any resuidal proxies in the server
+                    // contains a "master reset" which clears any resuidal objects in the server
                     // which may be left after a network or client proxy error.
                     ////////////////////////////////////////////////////////////////////////////////////
                     conn = (proxy == null) ? (HttpURLConnection) new URL (proxy_url).openConnection () : (HttpURLConnection) new URL (proxy_url).openConnection (proxy);
@@ -182,17 +182,17 @@ public class ProxyClient
                         //////////////////////////////////////////////////////
                         if (upload_objects.isEmpty ())
                           {
-                            if (unneededProxy (proxy_id))
+                            if (unneededProxy (channel_id))
                               {
                                 if (debug)
                                   {
-                                    logger.info ("Channel[" + proxy_id + "] was deleted");
+                                    logger.info ("Channel[" + channel_id + "] was deleted");
                                   }
                                 return;
                               }
                             if (debug)
                               {
-                                logger.info ("Channel[" + proxy_id + "] continues");
+                                logger.info ("Channel[" + channel_id + "] continues");
                               }
                           }
                       }
@@ -262,12 +262,12 @@ public class ProxyClient
                         ///////////////////////////////////////////////////////////////////////
                         running = true;
                         send_object = server_configuration;
-                        proxies.add (this);
+                        channels.add (this);
                         try
                           {
                             if (debug)
                               {
-                                logger.info ("Channel[" + proxy_id + "] resumes (after waiting " + retry_timeout/1000 + "s) for a new try...");
+                                logger.info ("Channel[" + channel_id + "] resumes (after waiting " + retry_timeout/1000 + "s) for a new try...");
                               }
                             Thread.sleep (retry_timeout);
                           }
@@ -305,7 +305,7 @@ public class ProxyClient
     ////////////////////////////////////
     // App-wide "globals"
     ////////////////////////////////////
-    private long last_proxy_id;
+    private long last_channel_id;
 
     private String client_id;
 
@@ -313,7 +313,7 @@ public class ProxyClient
 
     private InternalIdleObject idle_object;
 
-    private Vector<ProxyChannel> proxies = new Vector<ProxyChannel> ();
+    private Vector<ProxyChannel> channels = new Vector<ProxyChannel> ();
 
     private Vector<InternalUploadObject> upload_objects = new Vector<InternalUploadObject> ();
 
@@ -379,15 +379,15 @@ public class ProxyClient
 
     private void spawnProxy ()
       {
-        synchronized (proxies)
+        synchronized (channels)
           {
-            ProxyChannel proxy = new ProxyChannel ();
-            proxy.proxy_id = last_proxy_id++;
+            ProxyChannel channel = new ProxyChannel ();
+            channel.channel_id = last_channel_id++;
 
             /////////////////////////////////////////////////////////////////////////////////////////
-            // If it is the first proxy - issue a master reset + configuration to the proxy server
+            // If it is the first channel - issue a master reset + configuration to the proxy server
             /////////////////////////////////////////////////////////////////////////////////////////
-            if (proxy.proxy_id == 0)
+            if (channel.channel_id == 0)
               {
                 byte[] cid = new byte[10];
                 new SecureRandom ().nextBytes (cid);
@@ -395,7 +395,7 @@ public class ProxyClient
 
                 server_configuration = new InternalServerConfiguration (cycle_time, REQUEST_TIMEOUT, REQUEST_TIMEOUT, client_id, debug);
                 idle_object = new InternalIdleObject (client_id);
-                proxy.send_object = server_configuration;
+                channel.send_object = server_configuration;
                 if (debug)
                   {
                     logger.info ("Proxy " + client_id + " initiated");
@@ -403,29 +403,29 @@ public class ProxyClient
               }
             else
               {
-                proxy.send_object = idle_object;
+                channel.send_object = idle_object;
               }
-            proxies.add (proxy);
-            new Thread (proxy).start ();
+            channels.add (channel);
+            new Thread (channel).start ();
           }
       }
 
     private void checkForProxyDemand (boolean increase)
       {
         ////////////////////////////////////////////////////////////////////////////////
-        // Check that there is ample of free proxies in order to keep up with requests
+        // Check that there is ample of free channels in order to keep up with requests
         ////////////////////////////////////////////////////////////////////////////////
-        synchronized (proxies)
+        synchronized (channels)
           {
-            if (proxies.size () < max_workers)
+            if (channels.size () < max_workers)
               {
                 //////////////////////////////////////////
                 // We have not yet reached the ceiling
                 //////////////////////////////////////////
                 int q = 0;
-                for (ProxyChannel proxy : proxies)
+                for (ProxyChannel channel : channels)
                   {
-                    if (proxy.hanging) // = Most likely to be idle
+                    if (channel.hanging) // = Most likely to be idle
                       {
                         q++;
                       }
@@ -449,11 +449,11 @@ public class ProxyClient
           }
       }
 
-    private boolean unneededProxy (long test_proxy_id) throws IOException
+    private boolean unneededProxy (long test_channel_id) throws IOException
       {
-        synchronized (proxies)
+        synchronized (channels)
           {
-            if (proxies.size () == 1)
+            if (channels.size () == 1)
               {
                 //////////////////////////////////////////////
                 // We must at least have one living thread...
@@ -465,16 +465,16 @@ public class ProxyClient
             // Ooops. We are probably redundant...
             //////////////////////////////////////////////
             int q = 0;
-            for (ProxyChannel proxy : proxies)
+            for (ProxyChannel channel : channels)
               {
-                if (proxy.proxy_id == test_proxy_id)
+                if (channel.channel_id == test_channel_id)
                   {
-                    proxies.remove (q);
+                    channels.remove (q);
                     return true;
                   }
                 q++;
               }
-            throw new IOException ("Internal error.  Missing proxy_id: " + test_proxy_id);
+            throw new IOException ("Internal error.  Missing channel_id: " + test_channel_id);
           }
       }
 
@@ -537,15 +537,15 @@ public class ProxyClient
      */
     public void killProxy ()
       {
-        synchronized (proxies)
+        synchronized (channels)
           {
-            while (!proxies.isEmpty ())
+            while (!channels.isEmpty ())
               {
-                ProxyChannel pc = proxies.remove (0);
-                pc.running = false;
+                ProxyChannel channel = channels.remove (0);
+                channel.running = false;
                 if (debug)
                   {
-                    logger.info ("Channel[" + pc.proxy_id + "] was relased");
+                    logger.info ("Channel[" + channel.channel_id + "] was relased");
                   }
               }
           }
@@ -573,7 +573,7 @@ public class ProxyClient
     public void initProxy (String proxy_url, int max_workers, int cycle_time, int retry_timeout, boolean debug) throws IOException
       {
         killProxy ();
-        last_proxy_id = 0;
+        last_channel_id = 0;
         this.proxy_url = proxy_url;
         this.max_workers = max_workers;
         this.cycle_time = cycle_time * 1000;
