@@ -347,6 +347,16 @@
       </fileset>
     </jar>
 
+  	<jar jarfile="${dist_dir}/spts-testclient.jar">
+  	  <metainf dir="${spts_dir}">
+        <include name="securityproxy.properties"/>
+   	  </metainf>
+      <manifest>
+		<attribute name="Class-path" value="${webpki-libext}"/>
+		<attribute name="Main-Class" value="org.webpki.securityproxy.test.client.TestClient"/>
+      </manifest>
+    </jar>
+
   	<war warfile="${dist_dir}/spts-intproxy.war" webxml="${spts_dir}/intproxy-web.xml">
       <classes dir="${temp_dir}">
         <include name="org/webpki/securityproxy/test/intproxy/**"/>

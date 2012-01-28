@@ -549,13 +549,13 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void setSymmetricKey (int key_handle,
+    public void importSymmetricKey (int key_handle,
                                  byte[] symmetric_key,
                                  byte[] mac) throws SKSException
       {
         try
           {
-            getSKSWS ().setSymmetricKey (device_id,
+            getSKSWS ().importSymmetricKey (device_id,
                                          key_handle,
                                          symmetric_key,
                                          mac);

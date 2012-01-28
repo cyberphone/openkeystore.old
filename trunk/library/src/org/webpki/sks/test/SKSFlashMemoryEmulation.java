@@ -34,7 +34,11 @@ import java.security.Signature;
 
 import java.security.cert.X509Certificate;
 
+import java.security.interfaces.ECKey;
+import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAMultiPrimePrivateCrtKey;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
@@ -42,6 +46,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.security.spec.ECParameterSpec;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -160,11 +165,12 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
 
         byte app_usage;
 
-        PublicKey public_key;
-        PrivateKey private_key;
+        PublicKey public_key;     // In this implementation overwritten by "setCertificatePath"
+        PrivateKey private_key;   // Overwritten if "restorePivateKey" is called
         X509Certificate[] certificate_path;
 
-        byte[] symmetric_key;
+        byte[] symmetric_key;     // Defined by "importSymmetricKey"
+
         LinkedHashSet<String> endorsed_algorithms;
 
         String friendly_name;
@@ -431,7 +437,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
 
         boolean isRSA ()
           {
-            return certificate_path[0].getPublicKey () instanceof RSAPublicKey;
+            return public_key instanceof RSAPublicKey;
           }
         
         boolean isSymmetric ()
@@ -445,6 +451,24 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
               {
                 abort ("Exceeded \"CryptoDataSize\" for key #" + key_handle);
               }
+          }
+
+        void setAndVerifyServerBackupFlag () throws SKSException
+          {
+            if ((key_backup & KeyProtectionInfo.KEYBACKUP_SERVER) != 0)
+              {
+                owner.abort ("Mutiple key imports for: " + id);
+              }
+            key_backup |= KeyProtectionInfo.KEYBACKUP_SERVER;
+          }
+
+        BigInteger getPublicRSAExponentFromPrivateKey ()
+          {
+            if (private_key instanceof RSAMultiPrimePrivateCrtKey)
+              {
+                return ((RSAMultiPrimePrivateCrtKey)private_key).getPublicExponent ();
+              }
+            return ((RSAPrivateCrtKey)private_key).getPublicExponent ();
           }
       }
 
@@ -888,6 +912,17 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
 
       }
 
+    static final byte[] RSA_ENCRYPTION_OID = {0x06, 0x09, 0x2A, (byte)0x86, 0x48, (byte)0x86, (byte)0xF7, 0x0D, 0x01, 0x01, 0x01};
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // P-256 / secp256r1
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final BigInteger secp256r1_AffineX   = new BigInteger ("48439561293906451759052585252797914202762949526041747995844080717082404635286");
+    static final BigInteger secp256r1_AffineY   = new BigInteger ("36134250956749795798585127919587881956611106672985015071877198253568414405109");
+    static final BigInteger secp256r1_A         = new BigInteger ("115792089210356248762697446949407573530086143415290314195533631308867097853948");
+    static final BigInteger secp256r1_B         = new BigInteger ("41058363725152142129326129780047268409114441015993725554835256314039467401291");
+    static final BigInteger secp256r1_Order     = new BigInteger ("115792089210356248762697446949407573529996955224135760342422259061068512044369");
+    static final int        secp256r1_Cofactor  = 1;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Utility Functions
@@ -896,13 +931,13 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
     static final char[] ATTESTATION_KEY_PASSWORD =  {'t','e','s','t','i','n','g'};
 
     static final String ATTESTATION_KEY_ALIAS = "mykey";
-
+    
     KeyStore getAttestationKeyStore () throws GeneralSecurityException
       {
         try
           {
             KeyStore ks = KeyStore.getInstance ("JKS");
-            ks.load (getClass ().getResourceAsStream ("ecattestkey.jks"), ATTESTATION_KEY_PASSWORD);
+            ks.load (getClass ().getResourceAsStream ("attestationkeystore.jks"), ATTESTATION_KEY_PASSWORD);
             return ks;
           }
         catch (IOException e)
@@ -1029,6 +1064,43 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
     void abort (String message, int option) throws SKSException
       {
         throw new SKSException (message, option);
+      }
+
+    void checkECKeyCompatibility (ECKey ec_key, SKSError sks_error, String key_id) throws SKSException
+      {
+        ECParameterSpec ec = ec_key.getParams ();
+        if (!ec.getCurve ().getA ().equals (secp256r1_A) ||
+            !ec.getCurve ().getB ().equals (secp256r1_B) ||
+            !ec.getGenerator ().getAffineX ().equals (secp256r1_AffineX) ||
+            !ec.getGenerator ().getAffineY ().equals (secp256r1_AffineY) ||
+            !ec.getOrder ().equals (secp256r1_Order) ||
+            ec.getCofactor () != secp256r1_Cofactor)
+          {
+            sks_error.abort ("EC key" + (key_id == null ? "" : " " + key_id) + " not of P-256/secp256r1 type");
+          }
+      }
+
+    void checkRSAKeyCompatibility (int rsa_key_size, BigInteger  exponent, SKSError sks_error, String key_id) throws SKSException
+      {
+        boolean found = false;
+        for (short key_size : SKS_DEFAULT_RSA_SUPPORT)
+          {
+            if (key_size == rsa_key_size)
+              {
+                found = true;
+                break;
+              }
+          }
+        if (!found)
+          {
+            sks_error.abort ("Unsupported RSA key size " + rsa_key_size + (key_id == null ? "" : " for: " + key_id));
+          }
+      }
+
+    int getRSAKeySize (BigInteger modulus)
+      {
+        byte[] modblob = modulus.toByteArray ();
+        return (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;
       }
 
     @SuppressWarnings("fallthrough")
@@ -1767,6 +1839,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
           {
             abort ("Incorrect \"PublicKey\" type");
           }
+        checkECKeyCompatibility ((ECKey)public_key, this, null);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
@@ -2309,7 +2382,28 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                 ///////////////////////////////////////////////////////////////////////////////////
                 if (key_entry.certificate_path == null)
                   {
-                    provisioning.abort ("Missing \"setCertificatePath\" for key: " + key_entry.id);
+                    provisioning.abort ("Missing \"setCertificatePath\" for: " + key_entry.id);
+                  }
+
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Check public versus private key match
+                ///////////////////////////////////////////////////////////////////////////////////
+                if (key_entry.isRSA () ^ key_entry.private_key instanceof RSAPrivateKey)
+                  {
+                    provisioning.abort ("RSA/EC mixup between public and private keys for: " + key_entry.id);
+                  }
+                if (key_entry.isRSA ())
+                  {
+                    if (!((RSAPublicKey)key_entry.public_key).getPublicExponent ().equals (key_entry.getPublicRSAExponentFromPrivateKey ()) ||
+                        !((RSAPublicKey)key_entry.public_key).getModulus ().equals (((RSAPrivateKey)key_entry.private_key).getModulus ()))
+                      {
+                        provisioning.abort ("RSA mismatch between public and private keys for: " + key_entry.id);
+                      }
+                  }
+                else
+                  {
+                    // TODO: There are way creating an EC public key from an EC private key but
+                    // right now I don't know how so this part remains a task for the future...
                   }
 
                 ///////////////////////////////////////////////////////////////////////////////////
@@ -2504,18 +2598,38 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                                                                        int session_life_time,
                                                                        short session_key_limit) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check provisioning session algorithm compatibility
+        ///////////////////////////////////////////////////////////////////////////////////
         if (!algorithm.equals (ALGORITHM_SESSION_KEY_ATTEST_1))
           {
             abort ("Unknown \"Algorithm\" : " + algorithm);
           }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check IssuerURI
+        ///////////////////////////////////////////////////////////////////////////////////
         if (issuer_uri.length () == 0 || issuer_uri.length () >  MAX_LENGTH_URI)
           {
-            abort ("URI length error: " + issuer_uri.length ());
+            abort ("\"IssuerURI\" length error: " + issuer_uri.length ());
           }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check server ECDH key compatibility
+        ///////////////////////////////////////////////////////////////////////////////////
+        checkECKeyCompatibility (server_ephemeral_key, this, null);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Create ClientSessionID
+        ///////////////////////////////////////////////////////////////////////////////////
+        String client_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Prepare for the big crypto...
+        ///////////////////////////////////////////////////////////////////////////////////
         byte[] attestation = null;
         byte[] session_key = null;
         ECPublicKey client_ephemeral_key = null;
-        String client_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////
@@ -2525,16 +2639,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
             ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
             generator.initialize (eccgen, new SecureRandom ());
             KeyPair kp = generator.generateKeyPair ();
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Check that the server and client ECDH keys are compatible
-            ///////////////////////////////////////////////////////////////////////////////////
             client_ephemeral_key = (ECPublicKey) kp.getPublic ();
-            if (!client_ephemeral_key.getParams ().getCurve ().equals (server_ephemeral_key.getParams ().getCurve ()) ||
-                (client_ephemeral_key.getParams ().getCofactor () != server_ephemeral_key.getParams ().getCofactor ()))
-              {
-                throw new GeneralSecurityException ("Non-matching ephemeral keys");
-              }
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Apply the SP800-56A ECC CDH primitive
@@ -2584,6 +2689,10 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
           {
             throw new SKSException (e);
           }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // We did it!
+        ///////////////////////////////////////////////////////////////////////////////////
         Provisioning p = new Provisioning ();
         p.privacy_enabled = privacy_enabled;
         p.server_session_id = server_session_id;
@@ -2712,17 +2821,45 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         key_entry.owner.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Decrypt and store private key.  Note: this SKS accepts multiple restores...
+        // Mark as "copied" by the server
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.setAndVerifyServerBackupFlag ();
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Decrypt and store private key
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (key_entry.owner.decrypt (private_key));
-            key_entry.private_key = KeyFactory.getInstance (key_entry.isRSA () ? "RSA" : "EC").generatePrivate (key_spec);
+            byte[] pkcs8_private_key = key_entry.owner.decrypt (private_key);
+            PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (pkcs8_private_key);
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Mark as "copied" by the server
+            // Bare-bones ASN.1 decoding to find out if it is RSA or EC 
             ///////////////////////////////////////////////////////////////////////////////////
-            key_entry.key_backup |= KeyProtectionInfo.KEYBACKUP_SERVER;
+            boolean rsa_flag = false;
+            for (int j = 8; j < 11; j++)
+              {
+                rsa_flag = true;
+                for (int i = 0; i < RSA_ENCRYPTION_OID.length; i++)
+                  {
+                    if (pkcs8_private_key[j + i] != RSA_ENCRYPTION_OID[i])
+                      {
+                        rsa_flag = false;
+                      }
+                  }
+                if (rsa_flag) break;
+              }
+            key_entry.private_key = KeyFactory.getInstance (rsa_flag ? "RSA" : "EC").generatePrivate (key_spec);
+            if (rsa_flag)
+              {
+                checkRSAKeyCompatibility (getRSAKeySize(((RSAPrivateKey) key_entry.private_key).getModulus ()),
+                                          key_entry.getPublicRSAExponentFromPrivateKey (),
+                                          key_entry.owner, key_entry.id);
+              }
+            else
+              {
+                checkECKeyCompatibility ((ECPrivateKey)key_entry.private_key, key_entry.owner, key_entry.id);
+              }
           }
         catch (GeneralSecurityException e)
           {
@@ -2733,13 +2870,13 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                            setSymmetricKey                                 //
+    //                           importSymmetricKey                               //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized void setSymmetricKey (int key_handle,
-                                              byte[] symmetric_key,
-                                              byte[] mac) throws SKSException
+    public synchronized void importSymmetricKey (int key_handle,
+                                                 byte[] symmetric_key,
+                                                 byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key and associated provisioning session
@@ -2753,15 +2890,16 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
           {
             key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
           }
-        if (key_entry.symmetric_key != null)
-          {
-            key_entry.owner.abort ("Multiple calls to \"setSymmetricKey\" for: " + key_entry.id);
-          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Mark as "copied" by the server
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.setAndVerifyServerBackupFlag ();
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_SET_SYMMETRIC_KEY);
+        MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_IMPORT_SYMMETRIC_KEY);
         verifier.addArray (symmetric_key);
         key_entry.owner.verifyMac (verifier, mac);
 
@@ -2769,11 +2907,6 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         // Decrypt and store symmetric key
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.symmetric_key = key_entry.owner.decrypt (symmetric_key);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Mark as "copied" by the server
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.key_backup |= KeyProtectionInfo.KEYBACKUP_SERVER;
       }
 
 
@@ -2817,30 +2950,22 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         key_entry.owner.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Update public key value.  It has no use after "setCertificatePath" anyway...
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.public_key = certificate_path[0].getPublicKey ();
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Check key material for SKS compliance
         ///////////////////////////////////////////////////////////////////////////////////
-        PublicKey public_key = certificate_path[0].getPublicKey ();
-        if (public_key instanceof RSAPublicKey)
+        if (key_entry.public_key instanceof RSAPublicKey)
           {
-            byte[] modulus = ((RSAPublicKey) public_key).getModulus ().toByteArray ();
-            int rsa_key_size = (modulus[0] == 0 ? modulus.length - 1 : modulus.length) * 8;
-            for (int size : SKS_DEFAULT_RSA_SUPPORT)
-              {
-                if (size == rsa_key_size)
-                  {
-                    modulus = null;
-                    break;
-                  }
-              }
-            if (modulus != null)
-              {
-                key_entry.owner.abort ("Unsupported RSA key size " + rsa_key_size + " for: " + key_entry.id);
-              }
+            checkRSAKeyCompatibility (getRSAKeySize(((RSAPublicKey) key_entry.public_key).getModulus ()),
+                                      ((RSAPublicKey) key_entry.public_key).getPublicExponent (),
+                                      key_entry.owner, key_entry.id);
           }
         else
           {
-            byte[] asn1 = ((ECPublicKey) public_key).getEncoded ();
-            //TODO EC
+            checkECKeyCompatibility ((ECPublicKey) key_entry.public_key, key_entry.owner, key_entry.id);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -3037,23 +3162,11 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
               {
                 provisioning.abort ("Incorrectly formatted RSA \"KeySpecifier\"");
               }
-            int size = getShort (key_specifier, 1);
-            boolean found = false;
-            for (short rsa_key_size : SKS_DEFAULT_RSA_SUPPORT)
-              {
-                if (size == rsa_key_size)
-                  {
-                    found = true;
-                    break;
-                  }
-              }
-            if (!found)
-              {
-                provisioning.abort ("Unsupported RSA key size: " + size);
-              }
-            int exponent = (getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5);
-            alg_par_spec = new RSAKeyGenParameterSpec (size,
-                                                       exponent == 0 ? RSAKeyGenParameterSpec.F4 : BigInteger.valueOf (exponent));
+            int rsa_key_size = getShort (key_specifier, 1);
+            BigInteger exponent = BigInteger.valueOf ((getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5));
+            checkRSAKeyCompatibility (rsa_key_size, exponent, provisioning, id);
+            alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size,
+                                                       exponent.intValue () == 0 ? RSAKeyGenParameterSpec.F4 : exponent);
           }
         else if (key_specifier[0] == KEY_ALGORITHM_TYPE_EC)
           {
@@ -3274,5 +3387,4 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         puk_policy.retry_limit = retry_limit;
         return puk_policy.puk_policy_handle;
       }
-
   }

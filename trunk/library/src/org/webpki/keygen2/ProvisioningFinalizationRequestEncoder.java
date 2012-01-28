@@ -169,7 +169,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                     MacGenerator set_symkey = new MacGenerator ();
                     set_symkey.addArray (ee_cert);
                     set_symkey.addArray (key.encrypted_symmetric_key);
-                    mac (wr, set_symkey.getResult (), SecureKeyStore.METHOD_SET_SYMMETRIC_KEY);
+                    mac (wr, set_symkey.getResult (), SecureKeyStore.METHOD_IMPORT_SYMMETRIC_KEY);
                   }
  
                 ////////////////////////////////////////////////////////////////////////

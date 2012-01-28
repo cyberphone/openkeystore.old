@@ -89,7 +89,7 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        setSymmetricKey_Response setSymmetricKey(setSymmetricKey_Request request);
+        importSymmetricKey_Response importSymmetricKey(importSymmetricKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
@@ -1292,8 +1292,8 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="setSymmetricKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class setSymmetricKey_Request
+    [System.ServiceModel.MessageContractAttribute(WrapperName="importSymmetricKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class importSymmetricKey_Request
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="DeviceID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -1311,10 +1311,10 @@ namespace org.webpki.sks.ws.client
         [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _mac;
 
-        public setSymmetricKey_Request(string DeviceID,
-                                       int KeyHandle,
-                                       byte[] SymmetricKey,
-                                       byte[] MAC)
+        public importSymmetricKey_Request(string DeviceID,
+                                          int KeyHandle,
+                                          byte[] SymmetricKey,
+                                          byte[] MAC)
         {
             _device_id = DeviceID;
             _key_handle = KeyHandle;
@@ -1324,8 +1324,8 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="setSymmetricKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class setSymmetricKey_Response
+    [System.ServiceModel.MessageContractAttribute(WrapperName="importSymmetricKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class importSymmetricKey_Response
     {
     }
 
@@ -2933,16 +2933,16 @@ namespace org.webpki.sks.ws.client
             }
         }
 
-        public void setSymmetricKey(int KeyHandle,
-                                    byte[] SymmetricKey,
-                                    byte[] MAC)
+        public void importSymmetricKey(int KeyHandle,
+                                       byte[] SymmetricKey,
+                                       byte[] MAC)
         {
             try
             {
-                base.Channel.setSymmetricKey(new setSymmetricKey_Request(device_id,
-                                                                         KeyHandle,
-                                                                         SymmetricKey,
-                                                                         MAC));
+                base.Channel.importSymmetricKey(new importSymmetricKey_Request(device_id,
+                                                                               KeyHandle,
+                                                                               SymmetricKey,
+                                                                               MAC));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {

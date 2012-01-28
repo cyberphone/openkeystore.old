@@ -87,6 +87,7 @@ public class ExtService extends HttpServlet implements ProxyUploadHandler
         StringBuffer s = new StringBuffer ("<html><head><meta http-equiv=\"refresh\" content=\"20\"></head><body>");
         if (proxy_server.isReady ())
           {
+            s.append ("Proxy Client ID = ").append (proxy_server.getProxyClientID ()).append ("<p>");
             s.append ("Last Proxy Upload: ");
             int l = uploads.size ();
             if (l == 0)

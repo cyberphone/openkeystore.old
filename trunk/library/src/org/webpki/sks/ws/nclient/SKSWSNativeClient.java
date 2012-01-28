@@ -101,9 +101,9 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
                                      byte[] mac) throws SKSException;
 
     @Override
-    native public void setSymmetricKey (int key_handle, 
-                                        byte[] symmetric_key,
-                                        byte[] mac) throws SKSException;
+    native public void importSymmetricKey (int key_handle, 
+                                           byte[] symmetric_key,
+                                           byte[] mac) throws SKSException;
 
     @Override
     native public void restorePrivateKey (int key_handle,

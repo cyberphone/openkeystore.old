@@ -291,17 +291,17 @@ public interface SKSWSProxy
                                     byte[] mac)
     throws SKSException_Exception;
 
-    @WebMethod(operationName="setSymmetricKey")
-    @RequestWrapper(localName="setSymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @ResponseWrapper(localName="setSymmetricKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void setSymmetricKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                 String device_id,
-                                 @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                 int key_handle,
-                                 @WebParam(name="SymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                 byte[] symmetric_key,
-                                 @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                 byte[] mac)
+    @WebMethod(operationName="importSymmetricKey")
+    @RequestWrapper(localName="importSymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="importSymmetricKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void importSymmetricKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                    String device_id,
+                                    @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                    int key_handle,
+                                    @WebParam(name="SymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                    byte[] symmetric_key,
+                                    @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                    byte[] mac)
     throws SKSException_Exception;
 
     @WebMethod(operationName="addExtension")

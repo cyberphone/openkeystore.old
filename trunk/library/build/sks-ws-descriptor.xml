@@ -733,14 +733,14 @@
         getDevice (device_id).setCertificatePath (key_handle, cp, mac);
 ]]></Code></Method>
 
-   <Method Name="setSymmetricKey" Throws="SKSException">
+   <Method Name="importSymmetricKey" Throws="SKSException">
      <Parameter Name="device_id"     Type="string" XMLName="DeviceID"      Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="symmetric_key" Type="binary" XMLName="SymmetricKey"/>
      <Parameter Name="mac"           Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "setSymmetricKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).setSymmetricKey (key_handle, symmetric_key, mac);
+        log (device_id, "importSymmetricKey (KeyHandle=" + key_handle + ")");
+        getDevice (device_id).importSymmetricKey (key_handle, symmetric_key, mac);
 ]]></Code></Method>
 
    <Method Name="addExtension" Throws="SKSException">

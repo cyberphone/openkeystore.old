@@ -789,7 +789,7 @@
 
             <xs:choice minOccurs="0">
  
-               <!-- SKS Reference: setSymmetricKey 
+               <!-- SKS Reference: importSymmetricKey 
                     Optional "piggybacked" symmetric key -->
                <xs:element name="SymmetricKey">
                   <xs:complexType>

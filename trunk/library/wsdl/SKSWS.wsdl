@@ -334,10 +334,10 @@
 
 <!--
       #########################################################
-      #                    setSymmetricKey                    #
+      #                  importSymmetricKey                   #
       #########################################################
 -->
-      <xs:element name="setSymmetricKey">
+      <xs:element name="importSymmetricKey">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
@@ -347,7 +347,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="setSymmetricKey.Response"/>
+      <xs:element name="importSymmetricKey.Response"/>
 
 <!--
       #########################################################
@@ -964,12 +964,12 @@
     <wsdl:part name="parameters" element="tns:setCertificatePath.Response"/>
   </wsdl:message>
 
-  <wsdl:message name="setSymmetricKey">
-    <wsdl:part name="parameters" element="tns:setSymmetricKey"/>
+  <wsdl:message name="importSymmetricKey">
+    <wsdl:part name="parameters" element="tns:importSymmetricKey"/>
   </wsdl:message>
 
-  <wsdl:message name="setSymmetricKey.Response">
-    <wsdl:part name="parameters" element="tns:setSymmetricKey.Response"/>
+  <wsdl:message name="importSymmetricKey.Response">
+    <wsdl:part name="parameters" element="tns:importSymmetricKey.Response"/>
   </wsdl:message>
 
   <wsdl:message name="addExtension">
@@ -1240,9 +1240,9 @@
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="setSymmetricKey">
-      <wsdl:input message="tns:setSymmetricKey"/>
-      <wsdl:output message="tns:setSymmetricKey.Response"/>
+    <wsdl:operation name="importSymmetricKey">
+      <wsdl:input message="tns:importSymmetricKey"/>
+      <wsdl:output message="tns:importSymmetricKey.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -1531,7 +1531,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="setSymmetricKey">
+      <wsdl:operation name="importSymmetricKey">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

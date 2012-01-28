@@ -587,9 +587,9 @@ public class KeyGen2Test
                 //////////////////////////////////////////////////////////////////////////
                 if (key.getEncryptedSymmetricKey () != null)
                   {
-                    sks.setSymmetricKey (key_handle, 
-                                         key.getEncryptedSymmetricKey (),
-                                         key.getSymmetricKeyMac ());
+                    sks.importSymmetricKey (key_handle, 
+                                            key.getEncryptedSymmetricKey (),
+                                            key.getSymmetricKeyMac ());
                   }
 
                 //////////////////////////////////////////////////////////////////////////

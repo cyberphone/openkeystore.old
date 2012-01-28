@@ -695,7 +695,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Missing \"setCertificatePath\" for key: Key.1");
+            checkException (e, "Missing \"setCertificatePath\" for: Key.1");
           }
       }
 
@@ -2502,6 +2502,161 @@ public class SKSTest
               {
                 key.signData (SignatureAlgorithms.ECDSA_SHA256, null, TEST_STRING);
               }
+          }
+      }
+    @Test
+    public void test60 () throws Exception
+      {
+        String ok_pin = "1563";
+        byte[] symmetric_key = {0,5,3,9,0,23,67,56,8,34,-45,4,2,5,6, 8};
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  Grouping.SHARED,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
+        GenKey key = sess.createECKey ("Key.1",
+                                       ok_pin /* pin_value */,
+                                       pin_policy,
+                                       AppUsage.AUTHENTICATION,
+                                       new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate ("CN=TEST18");
+        key.setSymmetricKey (symmetric_key);
+        try
+          {
+            key.setSymmetricKey (symmetric_key);
+            sess.closeSession ();
+            fail ("Duplicate import");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Mutiple key imports for: Key.1");
+          }
+      }
+
+    @Test
+    public void test61 () throws Exception
+      {
+        String ok_pin = "1563";
+        byte[] symmetric_key = { 0, 5, 3, 9, 0, 23, 67, 56, 8, 34, -45, 4, 2, 5, 6, 8 };
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  Grouping.SHARED, 4 /* min_length */,
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit */,
+                                                  null /* puk_policy */);
+        GenKey key = sess.createECKey ("Key.1",
+                                       ok_pin /* pin_value */,
+                                       pin_policy,
+                                       AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        key.setSymmetricKey (symmetric_key);
+        try
+          {
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
+            kpg.initialize (1024);
+            KeyPair key_pair = kpg.generateKeyPair ();
+            sess.restorePrivateKey (key, key_pair.getPrivate ());
+            sess.closeSession ();
+            fail ("Duplicate import");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Mutiple key imports for: Key.1");
+          }
+      }
+
+    @Test
+    public void test62 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  Grouping.SHARED, 4 /* min_length */,
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit */,
+                                                  null /* puk_policy */);
+        GenKey key = sess.createECKey ("Key.1",
+                                       ok_pin /* pin_value */,
+                                       pin_policy,
+                                       AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+        try
+          {
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
+            kpg.initialize (1024);
+            KeyPair key_pair = kpg.generateKeyPair ();
+            sess.restorePrivateKey (key, key_pair.getPrivate ());
+            sess.closeSession ();
+            fail ("Mixing RSA and EC is not possible");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "RSA/EC mixup between public and private keys for: Key.1");
+          }
+      }
+    @Test
+    public void test63 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  Grouping.SHARED, 4 /* min_length */,
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit */,
+                                                  null /* puk_policy */);
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
+        kpg.initialize (1024);
+        KeyPair key_pair = kpg.generateKeyPair ();
+        GenKey key = sess.createECKey ("Key.1",
+                                       ok_pin /* pin_value */,
+                                       pin_policy,
+                                       AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18", key_pair.getPublic ());
+        try
+          {
+            sess.closeSession ();
+            fail ("Mismatch");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "RSA/EC mixup between public and private keys for: Key.1");
+          }
+      }
+
+    @Test
+    public void test64 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  Grouping.SHARED, 4 /* min_length */,
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit */,
+                                                  null /* puk_policy */);
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
+        kpg.initialize (1024);
+        KeyPair key_pair = kpg.generateKeyPair ();
+        GenKey key = sess.createRSAKey ("Key.1",
+                                        1024,
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18", key_pair.getPublic ());
+        try
+          {
+            sess.closeSession ();
+            fail ("Mismatch");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "RSA mismatch between public and private keys for: Key.1");
           }
       }
   }

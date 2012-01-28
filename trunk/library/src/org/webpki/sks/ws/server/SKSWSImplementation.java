@@ -654,21 +654,21 @@ public class SKSWSImplementation
         getDevice (device_id).setCertificatePath (key_handle, cp, mac);
       }
 
-    @WebMethod(operationName="setSymmetricKey")
-    @RequestWrapper(localName="setSymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @ResponseWrapper(localName="setSymmetricKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void setSymmetricKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                 String device_id,
-                                 @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                 int key_handle,
-                                 @WebParam(name="SymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                 byte[] symmetric_key,
-                                 @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                 byte[] mac)
+    @WebMethod(operationName="importSymmetricKey")
+    @RequestWrapper(localName="importSymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="importSymmetricKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void importSymmetricKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                    String device_id,
+                                    @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                    int key_handle,
+                                    @WebParam(name="SymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                    byte[] symmetric_key,
+                                    @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                    byte[] mac)
     throws SKSException
       {
-        log (device_id, "setSymmetricKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).setSymmetricKey (key_handle, symmetric_key, mac);
+        log (device_id, "importSymmetricKey (KeyHandle=" + key_handle + ")");
+        getDevice (device_id).importSymmetricKey (key_handle, symmetric_key, mac);
       }
 
     @WebMethod(operationName="addExtension")
