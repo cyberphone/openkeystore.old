@@ -2192,14 +2192,14 @@ public class SKSTest
         KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
         ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
         generator.initialize (eccgen, new SecureRandom ());
-        KeyPair kp = generator.generateKeyPair ();
+        KeyPair key_pair = generator.generateKeyPair ();
         byte[] z = device.sks.keyAgreement (key.key_handle,
                                             KeyGen2URIs.ALGORITHMS.ECDH_RAW,
                                             null,
                                             ok_pin.getBytes ("UTF-8"), 
-                                            kp.getPublic ());
+                                            key_pair.getPublic ());
         KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
-        key_agreement.init (kp.getPrivate ());
+        key_agreement.init (key_pair.getPrivate ());
         key_agreement.doPhase (key.getPublicKey (), true);
         byte[] Z = key_agreement.generateSecret ();
         assertTrue ("DH fail", ArrayUtil.compare (z, Z));
@@ -2410,15 +2410,21 @@ public class SKSTest
     @Test
     public void test58 () throws Exception
       {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
+        ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
+        generator.initialize (eccgen, new SecureRandom ());
+        KeyPair key_pair = generator.generateKeyPair ();
         ProvSess sess = new ProvSess (device);
         GenKey key = sess.createECKey ("Key.1",
                                        null /* pin_value */,
                                        null /* pin_policy */,
-                                       AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
-        sess.createECKey ("Key.2",
-                          null /* pin_value */,
-                          null /* pin_policy */,
-                          AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
+                                       AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName(), key_pair.getPublic ());
+        sess.restorePrivateKey (key, key_pair.getPrivate ());
+        GenKey key2 = sess.createECKey ("Key.2",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
+        sess.restorePrivateKey (key2, key_pair.getPrivate ());
         try
           {
             sess.closeSession ();
@@ -2432,13 +2438,15 @@ public class SKSTest
         key = sess.createECKey ("Key.3",
                                 null /* pin_value */,
                                 null /* pin_policy */,
-                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName(), key_pair.getPublic ());
+        sess.restorePrivateKey (key, key_pair.getPrivate ());
         sess.closeSession ();
         sess = new ProvSess (device);
-        sess.createECKey ("Key.4",
-                          null /* pin_value */,
-                          null /* pin_policy */,
-                          AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
+        key2 = sess.createECKey ("Key.4",
+                                 null /* pin_value */,
+                                 null /* pin_policy */,
+                                 AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
+        sess.restorePrivateKey (key2, key_pair.getPrivate ());
         try
           {
             sess.closeSession ();
@@ -2452,26 +2460,30 @@ public class SKSTest
         key = sess.createECKey ("Key.3",
                                 null /* pin_value */,
                                 null /* pin_policy */,
-                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName(), key_pair.getPublic ());
+        sess.restorePrivateKey (key, key_pair.getPrivate ());
         sess.closeSession ();
         ProvSess sess2 = new ProvSess (device);
         GenKey new_key = sess2.createECKey ("Key.4",
                                             null /* pin_value */,
                                             null /* pin_policy */,
                                             AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
+        sess2.restorePrivateKey (new_key, key_pair.getPrivate ());
         new_key.postUpdateKey (key);
         sess2.closeSession ();
         sess = new ProvSess (device, 0);
         key = sess.createECKey ("Key.3",
                                 null /* pin_value */,
                                 null /* pin_policy */,
-                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName(), key_pair.getPublic ());
+        sess.restorePrivateKey (key, key_pair.getPrivate ());
         sess.closeSession ();
         sess2 = new ProvSess (device);
         new_key = sess2.createECKey ("Key.4",
                                      null /* pin_value */,
                                      null /* pin_policy */,
                                      AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
+        sess2.restorePrivateKey (new_key, key_pair.getPrivate ());
         sess2.postDeleteKey (key);
         sess2.closeSession ();
       }
@@ -2657,6 +2669,37 @@ public class SKSTest
         catch (SKSException e)
           {
             checkException (e, "RSA mismatch between public and private keys for: Key.1");
+          }
+      }
+
+    @Test
+    public void test65 () throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  Grouping.SHARED, 4 /* min_length */,
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit */,
+                                                  null /* puk_policy */);
+        KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
+        ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
+        generator.initialize (eccgen, new SecureRandom ());
+        KeyPair key_pair = generator.generateKeyPair ();
+        sess.createECKey ("Key.1",
+                          ok_pin /* pin_value */,
+                          pin_policy,
+                          AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18", key_pair.getPublic ());
+        try
+          {
+            sess.closeSession ();
+            fail ("Mismatch");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "EC mismatch between public and private keys for: Key.1");
           }
       }
   }

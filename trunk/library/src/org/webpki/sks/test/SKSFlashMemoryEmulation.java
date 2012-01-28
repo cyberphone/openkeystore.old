@@ -2402,8 +2402,24 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                   }
                 else
                   {
-                    // TODO: There are way creating an EC public key from an EC private key but
-                    // right now I don't know how so this part remains a task for the future...
+                    try
+                      {
+                        Signature ec_signer = Signature.getInstance ("SHA256withECDSA");
+                        ec_signer.initSign (key_entry.private_key);
+                        ec_signer.update (RSA_ENCRYPTION_OID);  // Any data could be used...
+                        byte[] ec_sign_data = ec_signer.sign ();
+                        Signature ec_verifier = Signature.getInstance ("SHA256withECDSA");
+                        ec_verifier.initVerify (key_entry.public_key);
+                        ec_verifier.update (RSA_ENCRYPTION_OID);
+                        if (!ec_verifier.verify (ec_sign_data))
+                          {
+                            provisioning.abort ("EC mismatch between public and private keys for: " + key_entry.id);
+                          }
+                      }
+                    catch (GeneralSecurityException e)
+                      {
+                        provisioning.abort (e.getMessage ());
+                      }
                   }
 
                 ///////////////////////////////////////////////////////////////////////////////////
