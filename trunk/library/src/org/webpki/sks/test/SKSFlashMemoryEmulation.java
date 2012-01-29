@@ -37,6 +37,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAKey;
 import java.security.interfaces.RSAMultiPrimePrivateCrtKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
@@ -1097,9 +1098,9 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
           }
       }
 
-    int getRSAKeySize (BigInteger modulus)
+    int getRSAKeySize (RSAKey rsa_key)
       {
-        byte[] modblob = modulus.toByteArray ();
+        byte[] modblob = rsa_key.getModulus ().toByteArray ();
         return (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;
       }
 
@@ -2630,7 +2631,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
           {
             if (key_management_key instanceof RSAPublicKey)
               {
-                checkRSAKeyCompatibility (getRSAKeySize (((RSAPublicKey)key_management_key).getModulus ()),
+                checkRSAKeyCompatibility (getRSAKeySize ((RSAPublicKey)key_management_key),
                                           ((RSAPublicKey)key_management_key).getPublicExponent (), this, "\"KeyManagementKey\"");
               }
             else
@@ -2873,7 +2874,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
             key_entry.private_key = KeyFactory.getInstance (rsa_flag ? "RSA" : "EC").generatePrivate (key_spec);
             if (rsa_flag)
               {
-                checkRSAKeyCompatibility (getRSAKeySize(((RSAPrivateKey) key_entry.private_key).getModulus ()),
+                checkRSAKeyCompatibility (getRSAKeySize((RSAPrivateKey) key_entry.private_key),
                                           key_entry.getPublicRSAExponentFromPrivateKey (),
                                           key_entry.owner, key_entry.id);
               }
@@ -2980,7 +2981,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         ///////////////////////////////////////////////////////////////////////////////////
         if (key_entry.public_key instanceof RSAPublicKey)
           {
-            checkRSAKeyCompatibility (getRSAKeySize(((RSAPublicKey) key_entry.public_key).getModulus ()),
+            checkRSAKeyCompatibility (getRSAKeySize((RSAPublicKey) key_entry.public_key),
                                       ((RSAPublicKey) key_entry.public_key).getPublicExponent (),
                                       key_entry.owner, key_entry.id);
           }
