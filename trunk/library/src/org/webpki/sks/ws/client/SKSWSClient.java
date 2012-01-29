@@ -1010,7 +1010,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                 String algorithm,
                                 byte[] parameters,
                                 byte[] authorization,
-                                PublicKey public_key) throws SKSException
+                                ECPublicKey public_key) throws SKSException
       {
         boolean tga = false;
         while (true)

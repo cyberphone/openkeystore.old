@@ -1834,7 +1834,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                                              String algorithm,
                                              byte[] parameters,
                                              byte[] authorization,
-                                             PublicKey public_key) throws SKSException
+                                             ECPublicKey public_key) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key (which must belong to an already fully provisioned session)
@@ -1853,11 +1853,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key type matches the algorithm
         ///////////////////////////////////////////////////////////////////////////////////
-        if (!(public_key instanceof ECPublicKey))
-          {
-            abort ("Incorrect \"PublicKey\" type");
-          }
-        checkECKeyCompatibility ((ECKey)public_key, this, "\"PublicKey\"");
+        checkECKeyCompatibility (public_key, this, "\"PublicKey\"");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)

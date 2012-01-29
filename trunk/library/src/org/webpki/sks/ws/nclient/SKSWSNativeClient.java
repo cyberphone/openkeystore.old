@@ -196,7 +196,7 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
                                        String algorithm,
                                        byte[] parameters,
                                        byte[] authorization, 
-                                       PublicKey public_key) throws SKSException;
+                                       ECPublicKey public_key) throws SKSException;
 
     @Override
     native public void deleteKey (int key_handle, 

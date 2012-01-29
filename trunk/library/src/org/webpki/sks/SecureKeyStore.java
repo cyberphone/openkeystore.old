@@ -301,7 +301,7 @@ public interface SecureKeyStore
                          String algorithm,
                          byte[] parameters,    // Must be null if not applicable
                          byte[] authorization, // Must be null if not applicable
-                         PublicKey public_key) throws SKSException;
+                         ECPublicKey public_key) throws SKSException;
 
     void deleteKey (int key_handle,
                     byte[] authorization /* Must be null if not applicable */) throws SKSException;

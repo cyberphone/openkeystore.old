@@ -1062,7 +1062,7 @@
                                                    algorithm, 
                                                    parameters, 
                                                    authorization, 
-                                                   createPublicKeyFromBlob (public_key));
+                                                   getECPublicKey (public_key));
 ]]></Code></Method>
 
    <Method Name="performHMAC" Throws="SKSException" EmbedRule="TGA">

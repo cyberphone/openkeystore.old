@@ -1159,7 +1159,7 @@ public class SKSWSImplementation
                                                    algorithm, 
                                                    parameters, 
                                                    authorization, 
-                                                   createPublicKeyFromBlob (public_key));
+                                                   getECPublicKey (public_key));
       }
 
     @WebMethod(operationName="performHMAC")

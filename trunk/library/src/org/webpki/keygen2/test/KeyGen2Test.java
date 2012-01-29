@@ -1670,7 +1670,7 @@ public class KeyGen2Test
                                      KeyGen2URIs.ALGORITHMS.ECDH_RAW,
                                      null,
                                      USER_DEFINED_PIN, 
-                                     kp.getPublic ());
+                                     (ECPublicKey)kp.getPublic ());
         KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
         key_agreement.init (kp.getPrivate ());
         key_agreement.doPhase (ka.getCertificatePath ()[0].getPublicKey (), true);

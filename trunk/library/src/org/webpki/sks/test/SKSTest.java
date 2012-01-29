@@ -24,6 +24,7 @@ import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
 
 import java.util.EnumSet;
@@ -2196,7 +2197,7 @@ public class SKSTest
                                             KeyGen2URIs.ALGORITHMS.ECDH_RAW,
                                             null,
                                             ok_pin.getBytes ("UTF-8"), 
-                                            key_pair.getPublic ());
+                                            (ECPublicKey)key_pair.getPublic ());
         KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
         key_agreement.init (key_pair.getPrivate ());
         key_agreement.doPhase (key.getPublicKey (), true);

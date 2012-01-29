@@ -1816,7 +1816,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                                              String algorithm,
                                              byte[] parameters,
                                              byte[] authorization,
-                                             PublicKey public_key) throws SKSException
+                                             ECPublicKey public_key) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key (which must belong to an already fully provisioned session)
@@ -1835,10 +1835,6 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key type matches the algorithm
         ///////////////////////////////////////////////////////////////////////////////////
-        if (!(public_key instanceof ECPublicKey))
-          {
-            abort ("Incorrect \"PublicKey\" type");
-          }
         checkECKeyCompatibility ((ECKey)public_key, this, "\"PublicKey\"");
 
         ///////////////////////////////////////////////////////////////////////////////////
