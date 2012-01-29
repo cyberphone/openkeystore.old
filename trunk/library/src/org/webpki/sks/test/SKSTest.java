@@ -764,7 +764,7 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Key # is not PIN protected");
+            checkException (e, "Redundant authorization information for key #");
           }
       }
 
@@ -1507,15 +1507,23 @@ public class SKSTest
     public void test32 () throws Exception
       {
         String ok_pin = "1563";
-        for (int i = 0; i < 2; i++)
+        String ok_puk = "234567";
+        for (int i = 0; i < 4; i++)
           {
-            boolean modifiable = i > 0;
+            boolean modifiable = i % 2 != 0;
+            boolean have_puk = i > 1;
             
             ProvSess sess = new ProvSess (device);
             if (modifiable)
               {
                 sess.makePINsUserModifiable ();
               }
+            PUKPol puk = have_puk ? sess.createPUKPolicy ("PUK",
+                                                          PassphraseFormat.NUMERIC,
+                                                         (short) 3 /* retry_limit*/, 
+                                                          ok_puk /* puk_policy */)
+                                                         
+                                   : null;
             PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                       PassphraseFormat.NUMERIC,
                                                       EnumSet.noneOf (PatternRestriction.class),
@@ -1523,7 +1531,7 @@ public class SKSTest
                                                       4 /* min_length */, 
                                                       8 /* max_length */,
                                                       (short) 3 /* retry_limit*/, 
-                                                      null /* puk_policy */);
+                                                      puk /* puk_policy */);
             GenKey key = sess.createECKey ("Key.1",
                                            ok_pin /* pin_value */,
                                            pin_policy,
@@ -1542,12 +1550,12 @@ public class SKSTest
               }
             try
               {
-                device.sks.setPIN (key.key_handle, ok_pin.getBytes ("UTF-8"), "8437".getBytes ("UTF-8"));
-                fail ("Non modifiable with set PIN");
+                device.sks.setPIN (key.key_handle, ok_puk.getBytes ("UTF-8"), "8437".getBytes ("UTF-8"));
+                assertTrue ("Non modifiable with set PIN", have_puk);
               }
             catch (SKSException e)
               {
-                checkException (e, modifiable ? "Key # has no PUK" : "PIN for key # is not user modifiable");
+                checkException (e, have_puk ? "PIN for key # is not user modifiable" : "Key # has no PUK");
               }
           }
       }
