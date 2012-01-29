@@ -1076,7 +1076,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
             !ec.getOrder ().equals (secp256r1_Order) ||
             ec.getCofactor () != secp256r1_Cofactor)
           {
-            sks_error.abort ("EC key" + (key_id == null ? "" : " " + key_id) + " not of P-256/secp256r1 type");
+            sks_error.abort ("EC key " + key_id + " not of P-256/secp256r1 type");
           }
       }
 
@@ -1093,7 +1093,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
           }
         if (!found)
           {
-            sks_error.abort ("Unsupported RSA key size " + rsa_key_size + (key_id == null ? "" : " for: " + key_id));
+            sks_error.abort ("Unsupported RSA key size " + rsa_key_size + " for: " + key_id);
           }
       }
 
@@ -1839,7 +1839,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
           {
             abort ("Incorrect \"PublicKey\" type");
           }
-        checkECKeyCompatibility ((ECKey)public_key, this, null);
+        checkECKeyCompatibility ((ECKey)public_key, this, "\"PublicKey\"");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify PIN (in any)
@@ -2633,7 +2633,23 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         ///////////////////////////////////////////////////////////////////////////////////
         // Check server ECDH key compatibility
         ///////////////////////////////////////////////////////////////////////////////////
-        checkECKeyCompatibility (server_ephemeral_key, this, null);
+        checkECKeyCompatibility (server_ephemeral_key, this, "\"ServerEphemeralKey\"");
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check optional key management key compatibility
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (key_management_key != null)
+          {
+            if (key_management_key instanceof RSAPublicKey)
+              {
+                checkRSAKeyCompatibility (getRSAKeySize (((RSAPublicKey)key_management_key).getModulus ()),
+                                          ((RSAPublicKey)key_management_key).getPublicExponent (), this, "\"KeyManagementKey\"");
+              }
+            else
+              {
+                checkECKeyCompatibility ((ECPublicKey)key_management_key, this, "\"KeyManagementKey\"");
+              }
+          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Create ClientSessionID
@@ -2835,6 +2851,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_RESTORE_PRIVATE_KEY);
         verifier.addArray (private_key);
         key_entry.owner.verifyMac (verifier, mac);
+
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Mark as "copied" by the server

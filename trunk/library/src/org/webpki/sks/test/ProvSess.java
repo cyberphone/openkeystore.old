@@ -93,6 +93,10 @@ public class ProvSess
                 addKMK (DemoKeyStore.getMybankDotComKeyStore ());
                 addKMK (DemoKeyStore.getSubCAKeyStore ());
                 addKMK (DemoKeyStore.getECDSAStore ());
+                KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
+                kpg.initialize (512);
+                KeyPair key_pair = kpg.generateKeyPair ();
+                key_management_keys.put (key_pair.getPublic (), key_pair.getPrivate ());  // INVALID
               }
             catch (Exception e)
               {

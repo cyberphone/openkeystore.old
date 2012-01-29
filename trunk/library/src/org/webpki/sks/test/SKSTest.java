@@ -413,7 +413,6 @@ public class SKSTest
     void sessionLimitTest (int limit, boolean encrypted_pin, boolean fail_hard) throws Exception
       {
         ProvSess sess = new ProvSess (device, (short)limit);
-        GenKey key = null;
         if (encrypted_pin)
           {
             sess.makePINsServerDefined ();
@@ -428,10 +427,10 @@ public class SKSTest
                                                       (short) 3 /* retry_limit*/, 
                                                       null /* puk_policy */);
       
-            key = sess.createECKey ("Key.1",
-                                    ok_pin /* pin_value */,
-                                    pin_policy /* pin_policy */,
-                                    AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+            sess.createECKey ("Key.1",
+                              ok_pin /* pin_value */,
+                              pin_policy /* pin_policy */,
+                              AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
             sess.closeSession ();
             assertFalse ("Should have failed", fail_hard);
           }
@@ -528,7 +527,7 @@ public class SKSTest
             GenKey key1 = sess.createRSAKey ("Key.1", 1024, s_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.SIGNATURE).setCertificate ("CN=" + name.getMethodName ());
             try
               {
-                GenKey key2 = sess.createRSAKey ("Key.2", 1024, a_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName ());
+                sess.createRSAKey ("Key.2", 1024, a_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName ());
                 assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, pg == Grouping.NONE || (pg == Grouping.SHARED && sa) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && !sa) || (pg == Grouping.UNIQUE && !sa));
               }
             catch (SKSException e)
@@ -538,7 +537,7 @@ public class SKSTest
               }
             try
               {
-                GenKey key3 = sess.createRSAKey ("Key.3", 1024, e_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName ());
+                sess.createRSAKey ("Key.3", 1024, e_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName ());
                 assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, pg == Grouping.NONE || (pg == Grouping.SHARED && sa && ae) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && !sa && ae && !se) || (pg == Grouping.UNIQUE && !sa && !ae && !se));
               }
             catch (SKSException e)
@@ -547,7 +546,7 @@ public class SKSTest
                 continue;
               }
             GenKey key4 = sess.createRSAKey ("Key.4", 1024, s_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.SIGNATURE).setCertificate ("CN=" + name.getMethodName ());
-            GenKey key5 = sess.createRSAKey ("Key.5", 1024, e_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName ());
+            sess.createRSAKey ("Key.5", 1024, e_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName ());
             sess.closeSession ();
             device.sks.changePIN (key4.key_handle, s_pin.getBytes ("UTF-8"), other_pin.getBytes ("UTF-8"));
             try
@@ -2626,10 +2625,10 @@ public class SKSTest
         KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
         kpg.initialize (1024);
         KeyPair key_pair = kpg.generateKeyPair ();
-        GenKey key = sess.createECKey ("Key.1",
-                                       ok_pin /* pin_value */,
-                                       pin_policy,
-                                       AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18", key_pair.getPublic ());
+        sess.createECKey ("Key.1",
+                          ok_pin /* pin_value */,
+                          pin_policy,
+                          AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18", key_pair.getPublic ());
         try
           {
             sess.closeSession ();
@@ -2656,11 +2655,11 @@ public class SKSTest
         KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
         kpg.initialize (1024);
         KeyPair key_pair = kpg.generateKeyPair ();
-        GenKey key = sess.createRSAKey ("Key.1",
-                                        1024,
-                                        ok_pin /* pin_value */,
-                                        pin_policy,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18", key_pair.getPublic ());
+        sess.createRSAKey ("Key.1",
+                           1024,
+                           ok_pin /* pin_value */,
+                           pin_policy,
+                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18", key_pair.getPublic ());
         try
           {
             sess.closeSession ();
@@ -2700,6 +2699,20 @@ public class SKSTest
         catch (SKSException e)
           {
             checkException (e, "EC mismatch between public and private keys for: Key.1");
+          }
+      }
+
+    @Test
+    public void test66 () throws Exception
+      {
+        try
+          {
+            new ProvSess (device, 3);
+            fail ("Bad KMK");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Unsupported RSA key size 512 for: \"KeyManagementKey\"");
           }
       }
   }
