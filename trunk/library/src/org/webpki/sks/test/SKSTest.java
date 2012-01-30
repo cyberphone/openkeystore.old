@@ -2724,4 +2724,22 @@ public class SKSTest
             checkException (e, "Unsupported RSA key size 512 for: \"KeyManagementKey\"");
           }
       }
+
+    @Test
+    public void test67 () throws Exception
+      {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
+        ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp192r1");  // Violating the P-256 requirement
+        generator.initialize (eccgen, new SecureRandom ());
+        KeyPair key_pair = generator.generateKeyPair ();
+        try
+          {
+            new ProvSess (device, (ECPublicKey)key_pair.getPublic ());
+            fail ("Bad server key");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "EC key \"ServerEphemeralKey\" not of P-256/secp256r1 type");
+          }
+      }
   }

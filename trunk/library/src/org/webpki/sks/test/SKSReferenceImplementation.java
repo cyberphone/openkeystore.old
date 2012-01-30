@@ -17,7 +17,6 @@
 package org.webpki.sks.test;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.io.Serializable;
 
 import java.math.BigInteger;
@@ -91,7 +90,7 @@ import org.webpki.sks.SecureKeyStore;
  *  specification by showing how the different constructs can be implemented.
  *
  *  In addition to the Reference Implementation there is a set of SKS JUnit tests
- *  that should work identical on a "real" SKS token.
+ *  that should work identical when performed on a "real" SKS token.
  *
  *  Compared to the SKS specification, the Reference Implementation uses a slightly
  *  more java-centric way of passing parameters, including "null" arguments, but the
@@ -744,7 +743,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 addArray (string.getBytes ("UTF-8"));
               }
-            catch (UnsupportedEncodingException e)
+            catch (IOException e)
               {
                 abort ("Interal UTF-8");
               }
@@ -2699,7 +2698,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             session_key = kdf.getResult ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // SessionKey attested data
+            // SessionKey attest
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder ska = new MacBuilder (session_key);
             ska.addString (algorithm);
@@ -3204,7 +3203,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             int rsa_key_size = getShort (key_specifier, 1);
             BigInteger exponent = BigInteger.valueOf ((getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5));
-            checkRSAKeyCompatibility (rsa_key_size, exponent, provisioning, id);
+            checkRSAKeyCompatibility (rsa_key_size, exponent, provisioning, "\"KeySpecifier\"");
             alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size,
                                                        exponent.intValue () == 0 ? RSAKeyGenParameterSpec.F4 : exponent);
           }
@@ -3218,7 +3217,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             Algorithm alg = supported_algorithms.get (ec_uri.toString ());
             if (alg == null || (alg.mask & ALG_EC_CRV) == 0)
               {
-                provisioning.abort ("Unsupported eliptic curve: " + ec_uri);
+                provisioning.abort ("Unsupported eliptic curve: " + ec_uri + " in \"KeySpecifier\"");
               }
             alg_par_spec = new ECGenParameterSpec (alg.jce_name);
           }
@@ -3240,11 +3239,12 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             PrivateKey private_key = key_pair.getPrivate ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Create key attestation data
+            // Create key attest
             ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
-            attestation.addString (id);
-            attestation.addArray (public_key.getEncoded ());
+            MacBuilder cka = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
+            cka.addString (id);
+            cka.addArray (public_key.getEncoded ());
+            byte[] attestation = cka.getResult ();
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Finally, create a key entry
@@ -3263,9 +3263,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             key_entry.export_protection = export_protection;
             key_entry.delete_protection = delete_protection;
             key_entry.endorsed_algorithms = temp_endorsed;
-            return new KeyData (key_entry.key_handle,
-                                public_key,
-                                attestation.getResult ());
+            return new KeyData (key_entry.key_handle, public_key, attestation);
           }
         catch (GeneralSecurityException e)
           {
