@@ -390,7 +390,7 @@
   	</condition>
 	<property name="test.out.html" value="true"/>
     <junit fork="yes" forkmode="once" haltonfailure="yes">
-      <test name="${test.class}" methods="test67"/>
+      <test name="${test.class}"/>
     	<sysproperty key="sks.implementation" value="${sks.implementation}"/>
     	<sysproperty key="sks.device" value="${sks.device}"/>
     	<sysproperty key="sks.auth.gui" value="${sks.auth.gui}"/>
