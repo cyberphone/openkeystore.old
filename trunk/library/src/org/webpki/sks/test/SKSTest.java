@@ -111,14 +111,14 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
         GenKey key3 = sess2.createECKey ("Key.1",
                                          null /* pin_value */,
                                          null /* pin_policy */,
-                                         AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         if (post)
           {
             key3.postUpdateKey (key1);
@@ -211,19 +211,19 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         ok_pin /* pin_value */,
                                         pin_policy,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
         GenKey key2 = sess2.createECKey ("Key.2",
                                          null /* pin_value */,
                                          null,
-                                         AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         GenKey key3 = sess2.createRSAKey ("Key.1",
                                           2048,
                                           null /* pin_value */,
                                           null /* pin_policy */,
-                                          AppUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
+                                          AppUsage.AUTHENTICATION).setCertificate (cn ());
         if (order) key3.postCloneKey (key1);
         key2.postUpdateKey (key1);
         if (!order) key3.postCloneKey (key1);
@@ -365,7 +365,7 @@ public class SKSTest
                                         1024,
                                         ok_pin /* pin_value */,
                                         pin_policy /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
     
         for (int count = 0; count < 2; count++)
@@ -431,7 +431,7 @@ public class SKSTest
             sess.createECKey ("Key.1",
                               ok_pin /* pin_value */,
                               pin_policy /* pin_policy */,
-                              AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                              AppUsage.AUTHENTICATION).setCertificate (cn ());
             sess.closeSession ();
             assertFalse ("Should have failed", fail_hard);
           }
@@ -510,6 +510,25 @@ public class SKSTest
           }
       }
 
+    void badKeySpec (byte[] key_specifier, String expected_message) throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        sess.setKeySpecifier (key_specifier);
+        try
+          {
+            sess.createRSAKey ("Key.1",
+                               1024,
+                               null /* pin_value */,
+                               null,
+                               AppUsage.AUTHENTICATION).setCertificate (cn ());
+            fail ("Bad ones shouldn't pass");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, expected_message);
+          }
+      }
+
     void create3Keys (String s_pin, String a_pin, String e_pin) throws Exception
       {
         boolean sa = s_pin.equals (a_pin);
@@ -522,32 +541,66 @@ public class SKSTest
             short pin_retry = 3;
             ProvSess sess = new ProvSess (device);
             sess.makePINsUserModifiable ();
-            PUKPol puk = sess.createPUKPolicy ("PUK", PassphraseFormat.NUMERIC, (short) 3 /* retry_limit */, puk_ok /* puk_policy */);
-            PINPol pin_policy = sess.createPINPolicy ("PIN", PassphraseFormat.NUMERIC, EnumSet.noneOf (PatternRestriction.class), pg, 4 /* min_length */, 8 /* max_length */, pin_retry/* retry_limit */, puk /* puk_policy */);
+            PUKPol puk = sess.createPUKPolicy ("PUK", 
+                                               PassphraseFormat.NUMERIC,
+                                               (short) 3 /* retry_limit */,
+                                               puk_ok /* puk_policy */);
+            PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                      PassphraseFormat.NUMERIC,
+                                                      EnumSet.noneOf (PatternRestriction.class),
+                                                      pg,
+                                                      4 /* min_length */,
+                                                      8 /* max_length */,
+                                                      pin_retry/* retry_limit */,
+                                                      puk /* puk_policy */);
 
-            GenKey key1 = sess.createRSAKey ("Key.1", 1024, s_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.SIGNATURE).setCertificate ("CN=" + name.getMethodName ());
+            GenKey key1 = sess.createRSAKey ("Key.1",
+                                             1024,
+                                             s_pin /* pin_value */,
+                                             pin_policy /* pin_policy */,
+                                             AppUsage.SIGNATURE).setCertificate (cn ());
             try
               {
-                sess.createRSAKey ("Key.2", 1024, a_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName ());
-                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, pg == Grouping.NONE || (pg == Grouping.SHARED && sa) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && !sa) || (pg == Grouping.UNIQUE && !sa));
+                sess.createRSAKey ("Key.2",
+                                   1024,
+                                   a_pin /* pin_value */,
+                                   pin_policy /* pin_policy */,
+                                   AppUsage.AUTHENTICATION).setCertificate (cn ());
+                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, pg == Grouping.NONE || 
+                    (pg == Grouping.SHARED && sa) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && !sa) || (pg == Grouping.UNIQUE && !sa));
               }
             catch (SKSException e)
               {
-                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, (pg == Grouping.SHARED && !sa) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && sa) || (pg == Grouping.UNIQUE && sa));
+                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, (pg == Grouping.SHARED && !sa) || 
+                    (pg == Grouping.SIGNATURE_PLUS_STANDARD && sa) || (pg == Grouping.UNIQUE && sa));
                 continue;
               }
             try
               {
-                sess.createRSAKey ("Key.3", 1024, e_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName ());
-                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, pg == Grouping.NONE || (pg == Grouping.SHARED && sa && ae) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && !sa && ae && !se) || (pg == Grouping.UNIQUE && !sa && !ae && !se));
+                sess.createRSAKey ("Key.3",
+                                   1024,
+                                   e_pin /* pin_value */,
+                                   pin_policy /* pin_policy */,
+                                   AppUsage.ENCRYPTION).setCertificate (cn ());
+                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, pg == Grouping.NONE || 
+                    (pg == Grouping.SHARED && sa && ae) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && !sa && ae && !se) || (pg == Grouping.UNIQUE && !sa && !ae && !se));
               }
             catch (SKSException e)
               {
-                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, (pg == Grouping.SHARED && (!sa || !ae)) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && (sa || !ae || se)) || (pg == Grouping.UNIQUE && (sa || ae || se)));
+                assertTrue ("Bad combo " + pg + s_pin + a_pin + e_pin, (pg == Grouping.SHARED && 
+                    (!sa || !ae)) || (pg == Grouping.SIGNATURE_PLUS_STANDARD && (sa || !ae || se)) || (pg == Grouping.UNIQUE && (sa || ae || se)));
                 continue;
               }
-            GenKey key4 = sess.createRSAKey ("Key.4", 1024, s_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.SIGNATURE).setCertificate ("CN=" + name.getMethodName ());
-            sess.createRSAKey ("Key.5", 1024, e_pin /* pin_value */, pin_policy /* pin_policy */, AppUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName ());
+            GenKey key4 = sess.createRSAKey ("Key.4", 
+                                             1024,
+                                             s_pin /* pin_value */,
+                                             pin_policy /* pin_policy */,
+                                             AppUsage.SIGNATURE).setCertificate (cn ());
+            sess.createRSAKey ("Key.5",
+                               1024,
+                               e_pin /* pin_value */,
+                               pin_policy /* pin_policy */,
+                               AppUsage.ENCRYPTION).setCertificate (cn ());
             sess.closeSession ();
             device.sks.changePIN (key4.key_handle, s_pin.getBytes ("UTF-8"), other_pin.getBytes ("UTF-8"));
             try
@@ -608,7 +661,12 @@ public class SKSTest
 
     @Rule 
     public TestName name = new TestName();
-  
+
+    public String cn ()
+      {
+        return "CN=" + name.getMethodName ();
+      }
+
     @Test
     public void test1 () throws Exception
       {
@@ -738,7 +796,7 @@ public class SKSTest
         sess.createECKey ("Key.1",
                            null /* pin_value */,
                            null /* pin_policy */,
-                           AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                           AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         
       }
@@ -750,7 +808,7 @@ public class SKSTest
         GenKey key = sess.createECKey ("Key.1",
                                        null /* pin_value */,
                                        null /* pin_policy */,
-                                       AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                       AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         byte[] result = key.signData (SignatureAlgorithms.ECDSA_SHA256, null, TEST_STRING);
         Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
@@ -776,7 +834,7 @@ public class SKSTest
                                         2048,
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue ("Must be 0", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == 0);
 
@@ -882,11 +940,11 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         GenKey key2 = sess.createECKey ("Key.2",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
@@ -911,7 +969,7 @@ public class SKSTest
             GenKey key1 = sess.createECKey ("Key.1",
                                             null /* pin_value */,
                                             null /* pin_policy */,
-                                            AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                            AppUsage.AUTHENTICATION).setCertificate (cn ());
             sess.closeSession ();
             assertTrue (sess.exists ());
             ProvSess sess2 = new ProvSess (device);
@@ -949,11 +1007,11 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         GenKey key2 = sess.createECKey ("Key.2",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST16");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         deleteKey (key1);
@@ -970,7 +1028,7 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         deleteKey (key1);
@@ -985,14 +1043,14 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
         GenKey key2 = sess2.createECKey ("Key.1",
                                          null /* pin_value */,
                                          null /* pin_policy */,
-                                         AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         key2.postUpdateKey (key1);
         sess2.closeSession ();
         assertTrue ("Key should exist even after update", key1.exists ());
@@ -1015,14 +1073,14 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         ok_pin /* pin_value */,
                                         pin_policy,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
         GenKey key2 = sess2.createECKey ("Key.1",
                                          null /* pin_value */,
                                          null /* pin_policy */,
-                                         AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         key2.postUpdateKey (key1);
         sess2.closeSession ();
         assertTrue ("Key should exist even after update", key1.exists ());
@@ -1060,7 +1118,7 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
@@ -1073,7 +1131,7 @@ public class SKSTest
         GenKey key2 = sess2.createECKey ("Key.1",
                                          ok_pin /* pin_value */,
                                          pin_policy,
-                                         AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         try
           {
             key2.postUpdateKey (key1);
@@ -1092,18 +1150,18 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
         GenKey key2 = sess2.createECKey ("Key.1",
                                          null /* pin_value */,
                                          null /* pin_policy */,
-                                         AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         GenKey key3 = sess2.createECKey ("Key.2",
                                          null /* pin_value */,
                                          null /* pin_policy */,
-                                         AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         key2.postUpdateKey (key1);
         try
           {
@@ -1123,18 +1181,18 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         GenKey key2 = sess.createECKey ("Key.2",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
         GenKey key3 = sess2.createECKey ("Key.3",
                                          null /* pin_value */,
                                          null /* pin_policy */,
-                                         AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         key3.postUpdateKey (key1);
         try
           {
@@ -1163,7 +1221,7 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         ok_pin /* pin_value */,
                                         pin_policy,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
@@ -1171,7 +1229,7 @@ public class SKSTest
                                           2048,
                                           null /* pin_value */,
                                           null /* pin_policy */,
-                                          AppUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
+                                          AppUsage.AUTHENTICATION).setCertificate (cn ());
         key2.postCloneKey (key1);
         sess2.closeSession ();
         assertTrue ("Old key should exist after clone", key1.exists ());
@@ -1222,11 +1280,11 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         ok_pin /* pin_value */,
                                         pin_policy,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         GenKey key2 = sess.createECKey ("Key.2",
                                         ok_pin /* pin_value */,
                                         pin_policy,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
@@ -1234,7 +1292,7 @@ public class SKSTest
                                           2048,
                                           null /* pin_value */,
                                           null /* pin_policy */,
-                                          AppUsage.AUTHENTICATION).setCertificate ("CN=TEST13");
+                                          AppUsage.AUTHENTICATION).setCertificate (cn ());
         key3.postCloneKey (key1);
         sess2.closeSession ();
         assertTrue ("Old key should exist after clone", key1.exists ());
@@ -1302,11 +1360,11 @@ public class SKSTest
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         GenKey key2 = sess.createECKey ("Key.2",
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
         ProvSess sess2 = new ProvSess (device);
@@ -1332,12 +1390,12 @@ public class SKSTest
                                         1024,
                                         ok_pin /* pin_value */,
                                         pin_policy /* pin_policy */,
-                                        AppUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.ENCRYPTION).setCertificate (cn ());
         GenKey key2 = sess.createRSAKey ("Key.2",
                                          1024,
                                          ok_pin /* pin_value */,
                                          pin_policy /* pin_policy */,
-                                         AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         
         Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
@@ -1416,7 +1474,7 @@ public class SKSTest
                                         1024,
                                         ok_pin /* pin_value */,
                                         pin_policy /* pin_policy */,
-                                        AppUsage.ENCRYPTION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.ENCRYPTION).setCertificate (cn ());
         sess.closeSession ();
         
         try
@@ -1535,7 +1593,7 @@ public class SKSTest
             GenKey key = sess.createECKey ("Key.1",
                                            ok_pin /* pin_value */,
                                            pin_policy,
-                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                           AppUsage.AUTHENTICATION).setCertificate (cn ());
             sess.closeSession ();
             key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             try
@@ -1643,7 +1701,7 @@ public class SKSTest
                                         1024,
                                         ok_pin /* pin_value */,
                                         pin_policy /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
 
         try
@@ -1686,7 +1744,7 @@ public class SKSTest
                                 1024,
                                 ok_pin /* pin_value */,
                                 pin_policy /* pin_policy */,
-                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                AppUsage.AUTHENTICATION).setCertificate (cn ());
             fail ("No PUK");
           }
         catch (SKSException e)
@@ -1716,7 +1774,7 @@ public class SKSTest
                                         1024,
                                         ok_pin /* pin_value */,
                                         pin_policy /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName());
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertFalse ("Not asymmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetricKey ());
         try
@@ -1771,7 +1829,7 @@ public class SKSTest
                                            ok_pin /* pin_value */,
                                            pin_policy,
                                            key_usage,
-                                           new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate ("CN=TEST18");
+                                           new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate (cn ());
             key.setSymmetricKey (symmetric_key);
             sess.closeSession ();
             assertTrue ("Server must be set", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == KeyProtectionInfo.KEYBACKUP_SERVER);
@@ -1796,7 +1854,7 @@ public class SKSTest
                                        ok_pin /* pin_value */,
                                        pin_policy,
                                        AppUsage.AUTHENTICATION,
-                                       new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate ("CN=TEST18");
+                                       new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate (cn ());
         key.setSymmetricKey (symmetric_key);
         sess.closeSession ();
         assertTrue ("Not symmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetricKey ());
@@ -1854,7 +1912,7 @@ public class SKSTest
                                         ok_pin /* pin_value */,
                                         pin_policy,
                                         AppUsage.AUTHENTICATION,
-                                        new String[]{sym_enc.getURI ()}).setCertificate ("CN=TEST18");
+                                        new String[]{sym_enc.getURI ()}).setCertificate (cn ());
                 key.setSymmetricKey (symmetric_key);
               }
             catch (SKSException e)
@@ -1935,7 +1993,7 @@ public class SKSTest
                                         ok_pin /* pin_value */,
                                         pin_policy,
                                         AppUsage.AUTHENTICATION,
-                                        new String[]{hmac.getURI ()}).setCertificate ("CN=TEST18");
+                                        new String[]{hmac.getURI ()}).setCertificate (cn ());
                 key.setSymmetricKey (symmetric_key);
               }
             catch (SKSException e)
@@ -1968,7 +2026,7 @@ public class SKSTest
                                        ok_pin /* pin_value */,
                                        pin_policy,
                                        AppUsage.AUTHENTICATION,
-                                       new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate ("CN=TEST18");
+                                       new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate (cn ());
         try
           {
             key.setSymmetricKey (symmetric_key);
@@ -1999,7 +2057,7 @@ public class SKSTest
                                        ok_pin /* pin_value */,
                                        pin_policy /* pin_policy */,
                                        AppUsage.AUTHENTICATION,
-                                       new String[]{KeyGen2URIs.ALGORITHMS.NONE}).setCertificate ("CN=" + name.getMethodName());
+                                       new String[]{KeyGen2URIs.ALGORITHMS.NONE}).setCertificate (cn ());
         key.setSymmetricKey (symmetric_key);
         sess.closeSession ();
         try
@@ -2039,7 +2097,7 @@ public class SKSTest
                           ok_pin /* pin_value */,
                           pin_policy /* pin_policy */,
                           AppUsage.AUTHENTICATION,
-                          new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate ("CN=" + name.getMethodName());
+                          new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate (cn ());
         try
           {
             sess.closeSession ();
@@ -2068,7 +2126,7 @@ public class SKSTest
                           ok_pin /* pin_value */,
                           pin_policy,
                           AppUsage.ENCRYPTION,
-                          new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate ("CN=TEST18");
+                          new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate (cn ());
          try
           {
             sess.closeSession ();
@@ -2112,7 +2170,7 @@ public class SKSTest
             GenKey key = sess.createECKey ("Key.1",
                                            ok_pin /* pin_value */,
                                            pin_policy,
-                                           key_usage).setCertificate ("CN=TEST18", key_pair.getPublic ());
+                                           key_usage).setCertificate (cn (), key_pair.getPublic ());
             sess.restorePrivateKey (key, key_pair.getPrivate ());
             sess.closeSession ();
             assertTrue ("Server must be set", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == KeyProtectionInfo.KEYBACKUP_SERVER);
@@ -2166,7 +2224,7 @@ public class SKSTest
                                        ok_pin /* pin_value */,
                                        pin_policy,
                                        AppUsage.ENCRYPTION,
-                                       new String[]{SymEncryptionAlgorithms.AES192_CBC.getURI ()}).setCertificate ("CN=TEST18");
+                                       new String[]{SymEncryptionAlgorithms.AES192_CBC.getURI ()}).setCertificate (cn ());
         try
           {
             key.setSymmetricKey (symmetric_key);
@@ -2195,7 +2253,7 @@ public class SKSTest
         GenKey key = sess.createECKey ("Key.1",
                                        ok_pin /* pin_value */,
                                        pin_policy,
-                                       AppUsage.ENCRYPTION).setCertificate ("CN=TEST18");
+                                       AppUsage.ENCRYPTION).setCertificate (cn ());
         sess.closeSession ();
         KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
         ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
@@ -2229,7 +2287,7 @@ public class SKSTest
         GenKey key = sess.createECKey ("Key.1",
                                        ok_pin /* pin_value */,
                                        pin_policy,
-                                       AppUsage.ENCRYPTION).setCertificate ("CN=TEST18");
+                                       AppUsage.ENCRYPTION).setCertificate (cn ());
         sess.closeSession ();
         new ProvSess (device);
         try
@@ -2261,7 +2319,7 @@ public class SKSTest
             GenKey key = sess.createECKey ("Key.1",
                                            ok_pin /* pin_value */,
                                            pin_policy,
-                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                           AppUsage.AUTHENTICATION).setCertificate (cn ());
             sess.closeSession ();
             lockECKey (key, ok_pin);
             ProvSess sess2 = new ProvSess (device);
@@ -2315,14 +2373,14 @@ public class SKSTest
             GenKey key = sess.createECKey ("Key.1",
                                            ok_pin /* pin_value */,
                                            pin_policy,
-                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                           AppUsage.AUTHENTICATION).setCertificate (cn ());
             sess.closeSession ();
             lockECKey (key, ok_pin);
             ProvSess sess2 = new ProvSess (device);
             GenKey new_key = sess2.createECKey ("Key.1",
                                                 null /* pin_value */,
                                                 null /* pin_policy */,
-                                                AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                                AppUsage.AUTHENTICATION).setCertificate (cn ());
             if (i == 0) new_key.postUpdateKey (key);
             sess2.postUnlockKey (key);
             if (i == 1) new_key.postUpdateKey (key);
@@ -2350,14 +2408,14 @@ public class SKSTest
             GenKey key = sess.createECKey ("Key.1",
                                            ok_pin /* pin_value */,
                                            pin_policy,
-                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                           AppUsage.AUTHENTICATION).setCertificate (cn ());
             sess.closeSession ();
             lockECKey (key, ok_pin);
             ProvSess sess2 = new ProvSess (device);
             GenKey new_key = sess2.createECKey ("Key.1",
                                                 null /* pin_value */,
                                                 null /* pin_policy */,
-                                                AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                                AppUsage.AUTHENTICATION).setCertificate (cn ());
             if (i == 0) new_key.postCloneKey (key);
             sess2.postUnlockKey (key);
             if (i == 1) new_key.postCloneKey (key);
@@ -2370,10 +2428,10 @@ public class SKSTest
     @Test
     public void test56 () throws Exception
       {
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 6; i++)
           {
             String ok_pin = "1563";
-            ProvSess sess = new ProvSess (device, (short) 50, 0, true);
+            ProvSess sess = new ProvSess (device, (short) 50, 0, i < 2);
             PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                       PassphraseFormat.NUMERIC,
                                                       EnumSet.noneOf (PatternRestriction.class),
@@ -2385,20 +2443,28 @@ public class SKSTest
             GenKey key = sess.createECKey ("Key.1",
                                            ok_pin /* pin_value */,
                                            pin_policy,
-                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                           AppUsage.AUTHENTICATION).setCertificate (cn ());
             sess.closeSession ();
             lockECKey (key, ok_pin);
-            ProvSess sess2 = new ProvSess (device, (short) 50, null, true);
+            ProvSess sess2 = new ProvSess (device, (short) 50, null, i < 2 || i > 3);
             GenKey new_key = sess2.createECKey ("Key.1",
                                                 null /* pin_value */,
                                                 null /* pin_policy */,
-                                                AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
-            if (i == 0) new_key.postCloneKey (key);
-            sess2.postUnlockKey (key);
-            if (i == 1) new_key.postCloneKey (key);
-            sess2.closeSession ();
-            new_key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
-            key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
+                                                AppUsage.AUTHENTICATION).setCertificate (cn ());
+            try
+              {
+                if (i % 2 == 0) new_key.postCloneKey (key);
+                sess2.postUnlockKey (key);
+                if (i % 2 == 1) new_key.postCloneKey (key);
+                sess2.closeSession ();
+                assertTrue ("Shouldn't", i < 4);
+                new_key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
+                key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
+              }
+            catch (SKSException e)
+              {
+                checkException (e, "Inconsistent use of the \"PrivacyEnabled\" attribute for key #");
+              }
           }
       }
 
@@ -2426,7 +2492,7 @@ public class SKSTest
         GenKey key = sess.createECKey ("Key.1",
                                        null /* pin_value */,
                                        null /* pin_policy */,
-                                       AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName(), key_pair.getPublic ());
+                                       AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
         sess.restorePrivateKey (key, key_pair.getPrivate ());
         GenKey key2 = sess.createECKey ("Key.2",
                                         null /* pin_value */,
@@ -2446,7 +2512,7 @@ public class SKSTest
         key = sess.createECKey ("Key.3",
                                 null /* pin_value */,
                                 null /* pin_policy */,
-                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName(), key_pair.getPublic ());
+                                AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
         sess.restorePrivateKey (key, key_pair.getPrivate ());
         sess.closeSession ();
         sess = new ProvSess (device);
@@ -2468,7 +2534,7 @@ public class SKSTest
         key = sess.createECKey ("Key.3",
                                 null /* pin_value */,
                                 null /* pin_policy */,
-                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName(), key_pair.getPublic ());
+                                AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
         sess.restorePrivateKey (key, key_pair.getPrivate ());
         sess.closeSession ();
         ProvSess sess2 = new ProvSess (device);
@@ -2483,7 +2549,7 @@ public class SKSTest
         key = sess.createECKey ("Key.3",
                                 null /* pin_value */,
                                 null /* pin_policy */,
-                                AppUsage.AUTHENTICATION).setCertificate ("CN=" + name.getMethodName(), key_pair.getPublic ());
+                                AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
         sess.restorePrivateKey (key, key_pair.getPrivate ());
         sess.closeSession ();
         sess2 = new ProvSess (device);
@@ -2515,7 +2581,7 @@ public class SKSTest
             GenKey key = sess.createECKey ("Key.1",
                                            ok_pin /* pin_value */,
                                            pin_policy,
-                                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                           AppUsage.AUTHENTICATION).setCertificate (cn ());
             sess.closeSession ();
             key.signData (SignatureAlgorithms.ECDSA_SHA256, input_method == InputMethod.TRUSTED_GUI ? null : ok_pin, TEST_STRING);
             if (input_method == InputMethod.ANY)
@@ -2542,7 +2608,7 @@ public class SKSTest
                                        ok_pin /* pin_value */,
                                        pin_policy,
                                        AppUsage.AUTHENTICATION,
-                                       new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate ("CN=TEST18");
+                                       new String[]{SymEncryptionAlgorithms.AES128_CBC.getURI ()}).setCertificate (cn ());
         key.setSymmetricKey (symmetric_key);
         try
           {
@@ -2572,7 +2638,7 @@ public class SKSTest
         GenKey key = sess.createECKey ("Key.1",
                                        ok_pin /* pin_value */,
                                        pin_policy,
-                                       AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                       AppUsage.AUTHENTICATION).setCertificate (cn ());
         key.setSymmetricKey (symmetric_key);
         try
           {
@@ -2604,7 +2670,7 @@ public class SKSTest
         GenKey key = sess.createECKey ("Key.1",
                                        ok_pin /* pin_value */,
                                        pin_policy,
-                                       AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18");
+                                       AppUsage.AUTHENTICATION).setCertificate (cn ());
         try
           {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
@@ -2637,7 +2703,7 @@ public class SKSTest
         sess.createECKey ("Key.1",
                           ok_pin /* pin_value */,
                           pin_policy,
-                          AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18", key_pair.getPublic ());
+                          AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
         try
           {
             sess.closeSession ();
@@ -2668,7 +2734,7 @@ public class SKSTest
                            1024,
                            ok_pin /* pin_value */,
                            pin_policy,
-                           AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18", key_pair.getPublic ());
+                           AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
         try
           {
             sess.closeSession ();
@@ -2699,7 +2765,7 @@ public class SKSTest
         sess.createECKey ("Key.1",
                           ok_pin /* pin_value */,
                           pin_policy,
-                          AppUsage.AUTHENTICATION).setCertificate ("CN=TEST18", key_pair.getPublic ());
+                          AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
         try
           {
             sess.closeSession ();
@@ -2740,6 +2806,21 @@ public class SKSTest
         catch (SKSException e)
           {
             checkException (e, "EC key \"ServerEphemeralKey\" not of P-256/secp256r1 type");
+          }
+      }
+
+    @Test
+    public void test68 () throws Exception
+      {
+        badKeySpec (new byte[0], "Empty \"KeySpecifier\"");
+        badKeySpec (new byte[]{2}, "Unknown key type in \"KeySpecifier\"");
+        badKeySpec (new byte[]{1,'M','y','E','C'}, "Unsupported eliptic curve: MyEC in \"KeySpecifier\"");
+        badKeySpec (new byte[]{0,0x40,0,0,0,0,0}, "Unsupported RSA key size 16384 for: \"KeySpecifier\"");
+        badKeySpec (new byte[]{0,0x08,0,0,0,0}, "Incorrectly formatted RSA \"KeySpecifier\"");
+        badKeySpec (new byte[]{0,0x08,0,0,0,0,0,0}, "Incorrectly formatted RSA \"KeySpecifier\"");
+        if (!device.device_info.getRSAExponentSupport ())
+          {
+            badKeySpec (new byte[]{0,0x08,0,0,0,0,3}, "Explicit RSA exponent setting not supported by this device");
           }
       }
   }

@@ -390,7 +390,8 @@
   	</condition>
 	<property name="test.out.html" value="true"/>
     <junit fork="yes" forkmode="once" haltonfailure="yes">
-      <test name="${test.class}"/>
+      <test name="${test.class}" unless="method"/>
+      <test name="${test.class}" methods="${method}" if="method"/><!-- ANT 1.8.2 and up -->
     	<sysproperty key="sks.implementation" value="${sks.implementation}"/>
     	<sysproperty key="sks.device" value="${sks.device}"/>
     	<sysproperty key="sks.auth.gui" value="${sks.auth.gui}"/>

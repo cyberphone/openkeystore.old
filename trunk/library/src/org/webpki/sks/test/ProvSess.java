@@ -259,6 +259,8 @@ public class ProvSess
     boolean device_pin_protected = false;
     
     InputMethod input_method = InputMethod.ANY;
+
+    byte[] custom_key_specifier = null;
     
     static class MacGenerator
       {
@@ -475,6 +477,11 @@ public class ProvSess
       {
         this.input_method = input_method;
       }
+    
+    public void setKeySpecifier (byte[] key_specifier)
+      {
+        custom_key_specifier = key_specifier;
+      }
 
     public byte[] getPassphraseBytes (PassphraseFormat format, String passphrase) throws IOException
       {
@@ -629,6 +636,7 @@ public class ProvSess
                              KeySpecifier key_algorithm,
                              String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
       {
+        byte[] key_specifier = custom_key_specifier == null ? key_algorithm.getSKSValue () : custom_key_specifier;
         String[] sorted_algorithms = endorsed_algorithms == null ? new String[0] : endorsed_algorithms;
         byte actual_export_policy = override_export_protection ? overriden_export_protection : export_protection.getSKSValue ();
         MacGenerator key_pair_mac = new MacGenerator ();
@@ -662,7 +670,7 @@ public class ProvSess
         key_pair_mac.addByte (delete_protection.getSKSValue ());
         key_pair_mac.addByte (app_usage.getSKSValue ());
         key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
-        key_pair_mac.addArray (key_algorithm.getSKSValue ());
+        key_pair_mac.addArray (key_specifier);
         for (String algorithm : sorted_algorithms)
           {
             key_pair_mac.addString (algorithm);
@@ -680,7 +688,7 @@ public class ProvSess
                                                delete_protection.getSKSValue (), 
                                                app_usage.getSKSValue (), 
                                                friendly_name, 
-                                               key_algorithm.getSKSValue (),
+                                               key_specifier,
                                                sorted_algorithms,
                                                mac4call (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
         MacGenerator key_attestation = new MacGenerator ();

@@ -3203,6 +3203,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             int rsa_key_size = getShort (key_specifier, 1);
             BigInteger exponent = BigInteger.valueOf ((getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5));
+            if (!SKS_RSA_EXPONENT_SUPPORT && exponent.intValue () != 0)
+              {
+                provisioning.abort ("Explicit RSA exponent setting not supported by this device");
+              }
             checkRSAKeyCompatibility (rsa_key_size, exponent, provisioning, "\"KeySpecifier\"");
             alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size,
                                                        exponent.intValue () == 0 ? RSAKeyGenParameterSpec.F4 : exponent);

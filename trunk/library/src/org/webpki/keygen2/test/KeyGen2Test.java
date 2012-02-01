@@ -1467,7 +1467,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void SymmetricEncryptionKey () throws Exception
+    public void ImportSymmetricKey () throws Exception
       {
         Doer doer = new Doer ();
         pin_protection = true;
@@ -1602,7 +1602,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void SetPrivateKey () throws Exception
+    public void RestorePrivateKey () throws Exception
       {
         Doer doer = new Doer ();
         set_private_key = true;
