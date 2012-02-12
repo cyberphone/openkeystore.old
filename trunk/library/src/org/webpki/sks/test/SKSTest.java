@@ -296,6 +296,61 @@ public class SKSTest
         return true;
       }
   
+    class userModifyPINCheck
+      {
+        GenKey key;
+        String ok_pin;
+        String ok_puk = "123456";
+        
+        userModifyPINCheck (String ok_pin, PassphraseFormat format, PatternRestriction[] restrictions) throws Exception
+          {
+            this.ok_pin = ok_pin;
+            Set<PatternRestriction> pattern_restrictions = EnumSet.noneOf (PatternRestriction.class);
+            for (PatternRestriction pattern : restrictions)
+              {
+                pattern_restrictions.add (pattern);
+              }
+            ProvSess sess = new ProvSess (device);
+            sess.makePINsUserModifiable ();
+            PUKPol puk_pol = sess.createPUKPolicy ("PUK", 
+                                                   PassphraseFormat.NUMERIC,
+                                                  (short) 3 /* retry_limit */,
+                                                   ok_puk /* puk */);
+            PINPol pin_pol = sess.createPINPolicy ("PIN", 
+                                                   format,
+                                                   pattern_restrictions,
+                                                   Grouping.NONE,
+                                                   4 /* min_length */,
+                                                   8 /* max_length */,
+                                                   (short) 3 /* retry_limit */,
+                                                   puk_pol /* puk_policy */);
+            key = sess.createECKey ("Key.1",
+                                    ok_pin /* pin_value */,
+                                    pin_pol /* pin_policy */,
+                                    AppUsage.AUTHENTICATION).setCertificate (cn());
+            sess.closeSession ();
+          }
+
+        void test (String pin, boolean pass) throws Exception
+          {
+            for (int i = 0; i < 5; i++)  // Just to make sure that error-count isn't affected
+              {
+                try
+                  {
+                    device.sks.setPIN (key.key_handle, ok_puk.getBytes ("UTF-8"), pin.getBytes ("UTF-8"));
+                    assertTrue ("Shouldn't pass", pass);
+                    key.signData (SignatureAlgorithms.ECDSA_SHA256, pin, TEST_STRING);
+                    device.sks.changePIN (key.key_handle, pin.getBytes ("UTF-8"), ok_pin.getBytes ("UTF-8"));
+                  }
+                catch (SKSException e)
+                  {
+                    assertFalse ("Should pass", pass);
+                  }
+              }
+            key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
+          }
+      }
+
     boolean PINCheck (PassphraseFormat format,
                       PatternRestriction[] patterns,
                       String pin) throws IOException, GeneralSecurityException
@@ -322,7 +377,7 @@ public class SKSTest
             sess.createECKey ("Key.1",
                               pin /* pin_value */,
                               pin_pol /* pin_policy */,
-                              AppUsage.AUTHENTICATION).setCertificate ("CN=TEST8");
+                              AppUsage.AUTHENTICATION).setCertificate (cn());
             sess.abortSession ();
           }
         catch (SKSException e)
@@ -341,7 +396,7 @@ public class SKSTest
             sess.createPUKPolicy ("PUK",
                                   format,
                                   (short) 3 /* retry_limit*/, 
-                                  puk /* puk_policy */);
+                                  puk /* puk */);
             sess.abortSession ();
           }
         catch (SKSException e)
@@ -460,22 +515,22 @@ public class SKSTest
             sess.createECKey ("Key.1",
                               pin1 /* pin_value */,
                               pin_pol /* pin_policy */,
-                              AppUsage.AUTHENTICATION).setCertificate ("CN=TEST");
+                              AppUsage.AUTHENTICATION).setCertificate (cn ());
             if (grouping == Grouping.SIGNATURE_PLUS_STANDARD)
               {
                 sess.createECKey ("Key.1s",
                                   pin1 /* pin_value */,
                                   pin_pol /* pin_policy */,
-                                  AppUsage.UNIVERSAL).setCertificate ("CN=TEST");
+                                  AppUsage.UNIVERSAL).setCertificate ( cn());
                 sess.createECKey ("Key.2s",
                                   same_pin ? pin1 : pin2 /* pin_value */,
                                   pin_pol /* pin_policy */,
-                                  AppUsage.SIGNATURE).setCertificate ("CN=TEST");
+                                  AppUsage.SIGNATURE).setCertificate (cn ());
               }
             sess.createECKey ("Key.2",
                               same_pin ? pin1 : pin2 /* pin_value */,
                               pin_pol /* pin_policy */,
-                              AppUsage.SIGNATURE).setCertificate ("CN=TEST");
+                              AppUsage.SIGNATURE).setCertificate (cn());
             sess.abortSession ();
           }
         catch (SKSException e)
@@ -544,7 +599,7 @@ public class SKSTest
             PUKPol puk = sess.createPUKPolicy ("PUK", 
                                                PassphraseFormat.NUMERIC,
                                                (short) 3 /* retry_limit */,
-                                               puk_ok /* puk_policy */);
+                                               puk_ok /* puk */);
             PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                       PassphraseFormat.NUMERIC,
                                                       EnumSet.noneOf (PatternRestriction.class),
@@ -711,23 +766,23 @@ public class SKSTest
         sess.createPUKPolicy ("PUK",
                               PassphraseFormat.NUMERIC,
                               (short) 3 /* retry_limit*/, 
-                              "012355" /* puk_policy */);
+                              "012355" /* puk */);
       }
 
     @Test
     public void test4 () throws Exception
       {
         ProvSess sess = new ProvSess (device);
-        PUKPol puk = sess.createPUKPolicy ("PUK",
-                                              PassphraseFormat.NUMERIC,
-                                              (short) 3 /* retry_limit*/, 
-                                              "012355" /* puk_policy */);
+        PUKPol puk_pol = sess.createPUKPolicy ("PUK",
+                                               PassphraseFormat.NUMERIC,
+                                               (short) 3 /* retry_limit*/, 
+                                               "012355" /* puk */);
         sess.createPINPolicy ("PIN",
                               PassphraseFormat.NUMERIC,
                               4 /* min_length */, 
                               8 /* max_length */,
                               (short) 3 /* retry_limit*/, 
-                              puk /* puk_policy */);
+                              puk_pol /* puk_policy */);
         try
           {
             sess.closeSession ();
@@ -768,7 +823,7 @@ public class SKSTest
                                rsa_key_size /* rsa_size */,
                                null /* pin_value */,
                                null /* pin_policy */,
-                               AppUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
+                               AppUsage.AUTHENTICATION).setCertificate (cn ());
           }
         if (i == 1) fail("Missing RSA");
         sess.closeSession ();
@@ -1459,16 +1514,16 @@ public class SKSTest
         short pin_retry = 3;
         ProvSess sess = new ProvSess (device);
         sess.makePINsUserModifiable ();
-        PUKPol puk = sess.createPUKPolicy ("PUK",
-                                           PassphraseFormat.NUMERIC,
-                                           (short) 3 /* retry_limit*/, 
-                                           puk_ok /* puk_policy */);
+        PUKPol puk_pol = sess.createPUKPolicy ("PUK",
+                                               PassphraseFormat.NUMERIC,
+                                               (short) 3 /* retry_limit*/, 
+                                               puk_ok /* puk */);
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
                                                   pin_retry/* retry_limit*/, 
-                                                  puk /* puk_policy */);
+                                                  puk_pol /* puk_policy */);
 
         GenKey key = sess.createRSAKey ("Key.1",
                                         1024,
@@ -1579,7 +1634,7 @@ public class SKSTest
             PUKPol puk = have_puk ? sess.createPUKPolicy ("PUK",
                                                           PassphraseFormat.NUMERIC,
                                                          (short) 3 /* retry_limit*/, 
-                                                          ok_puk /* puk_policy */)
+                                                          ok_puk /* puk */)
                                                          
                                    : null;
             PINPol pin_policy = sess.createPINPolicy ("PIN",
@@ -1626,7 +1681,7 @@ public class SKSTest
                                         1024 /* rsa_size */,
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn());
         sess.closeSession ();
         try
           {
@@ -1648,7 +1703,7 @@ public class SKSTest
                                         1024 /* rsa_size */,
                                         null /* pin_value */,
                                         null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
+                                        AppUsage.AUTHENTICATION).setCertificate (cn());
         sess.closeSession ();
         try
           {
@@ -1675,7 +1730,7 @@ public class SKSTest
                                1024 /* rsa_size */,
                                null /* pin_value */,
                                null /* pin_policy */,
-                               AppUsage.AUTHENTICATION).setCertificate ("CN=TEST6");
+                               AppUsage.AUTHENTICATION).setCertificate (cn());
             fail ("Missing PIN");
           }
         catch (SKSException e)
@@ -1760,16 +1815,16 @@ public class SKSTest
         String puk_ok = "17644";
         ProvSess sess = new ProvSess (device);
         sess.overrideExportProtection (ExportProtection.PUK.getSKSValue ());
-        PUKPol puk = sess.createPUKPolicy ("PUK",
-                                           PassphraseFormat.NUMERIC,
-                                           (short) 5 /* retry_limit*/, 
-                                           puk_ok /* puk_policy */);
+        PUKPol puk_pol = sess.createPUKPolicy ("PUK",
+                                               PassphraseFormat.NUMERIC,
+                                               (short) 5 /* retry_limit*/, 
+                                               puk_ok /* puk */);
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   4 /* min_length */, 
                                                   8 /* max_length */,
                                                   (short) 3 /* retry_limit*/, 
-                                                  puk /* puk_policy */);
+                                                  puk_pol /* puk_policy */);
         GenKey key = sess.createRSAKey ("Key.1",
                                         1024,
                                         ok_pin /* pin_value */,
@@ -2822,5 +2877,34 @@ public class SKSTest
           {
             badKeySpec (new byte[]{0,0x08,0,0,0,0,3}, "Explicit RSA exponent setting not supported by this device");
           }
+      }
+
+    @Test
+    public void test69 () throws Exception
+      {
+        userModifyPINCheck ump = new userModifyPINCheck ("A5J0",
+                                                         PassphraseFormat.ALPHANUMERIC,
+                                                         new PatternRestriction[]{PatternRestriction.SEQUENCE, 
+                                                                                  PatternRestriction.THREE_IN_A_ROW,
+                                                                                  PatternRestriction.MISSING_GROUP});
+        ump.test ("a3b4", false);        // Lowercase
+        ump.test ("A3B4", true);         // OK
+        ump.test ("A3B453CC", true);     // OK
+        ump.test ("A3B453CCD", false);   // > 8
+        ump.test ("A3B", false);         // < 4
+        ump.test ("CBAG", false);        // Missing group
+        ump.test ("3684", false);        // Missing group
+        ump.test ("333A", false);        // Repeat 3
+        ump = new userModifyPINCheck ("16923",
+                                      PassphraseFormat.NUMERIC,
+                                      new PatternRestriction[]{PatternRestriction.SEQUENCE, 
+                                                               PatternRestriction.THREE_IN_A_ROW});
+        ump.test ("A3B4", false);        // Alpha
+        ump.test ("1234", false);        // Sequence
+        ump.test ("8765", false);        // Sequence
+        ump.test ("1555", false);        // Three in a row
+        ump.test ("15554", false);       // Three in a row
+        ump.test ("5554", false);        // Three in a row
+        ump.test ("1952", true);         // OK
       }
   }

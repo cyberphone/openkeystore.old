@@ -238,8 +238,8 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
               {
                 rd.getNext (RSA_KEY_VALUE_ELEM);
                 rd.getChild ();
-                public_key = KeyFactory.getInstance ("RSA").generatePublic (new RSAPublicKeySpec (getRSA (rd, MODULUS_ELEM),
-                                                                                                  getRSA (rd, EXPONENT_ELEM)));
+                public_key = KeyFactory.getInstance ("RSA").generatePublic (new RSAPublicKeySpec (readCryptoBinary (rd, MODULUS_ELEM),
+                                                                                                  readCryptoBinary (rd, EXPONENT_ELEM)));
               }
             else
               {
@@ -359,9 +359,11 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
       }
 
 
-    private static BigInteger getRSA (DOMReaderHelper rd, String elem) throws IOException
+    public static BigInteger readCryptoBinary (DOMReaderHelper rd, String element) throws IOException
       {
-        return new BigInteger (1, rd.getBinary (elem));
+        byte[] crypto_binary = rd.getBinary (element);
+        if (crypto_binary[0] == 0x00) throw new IOException ("CryptoBinary must not contain leading zeroes");
+        return new BigInteger (1, crypto_binary);
       }
     
 
@@ -501,6 +503,19 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
       }
 
 
+    public static void writeCryptoBinary (DOMWriterHelper wr, BigInteger value, String element)
+      {
+        byte[] crypto_binary = value.toByteArray ();
+        if (crypto_binary[0] == 0x00)
+          {
+            byte[] wo_zero = new byte[crypto_binary.length - 1];
+            System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
+            crypto_binary = wo_zero;
+          }
+        wr.addBinary (element, crypto_binary);
+      }
+
+
     public static void writePublicKey (DOMWriterHelper wr, PublicKey public_key) throws IOException
       {
         if (public_key instanceof RSAPublicKey)
@@ -514,8 +529,8 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
               {
                 wr.addChildElement (RSA_KEY_VALUE_ELEM);
               }
-            wr.addBinary (MODULUS_ELEM, ((RSAPublicKey)public_key).getModulus ().toByteArray ());
-            wr.addBinary (EXPONENT_ELEM, ((RSAPublicKey)public_key).getPublicExponent ().toByteArray ());
+            writeCryptoBinary (wr, ((RSAPublicKey)public_key).getModulus (), MODULUS_ELEM);
+            writeCryptoBinary (wr, ((RSAPublicKey)public_key).getPublicExponent (), EXPONENT_ELEM);
           }
         else
           {
