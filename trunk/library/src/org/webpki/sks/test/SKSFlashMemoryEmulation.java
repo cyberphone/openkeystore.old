@@ -37,7 +37,6 @@ import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAKey;
-import java.security.interfaces.RSAMultiPrimePrivateCrtKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -464,10 +463,6 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
 
         BigInteger getPublicRSAExponentFromPrivateKey ()
           {
-            if (private_key instanceof RSAMultiPrimePrivateCrtKey)
-              {
-                return ((RSAMultiPrimePrivateCrtKey)private_key).getPublicExponent ();
-              }
             return ((RSAPrivateCrtKey)private_key).getPublicExponent ();
           }
       }
