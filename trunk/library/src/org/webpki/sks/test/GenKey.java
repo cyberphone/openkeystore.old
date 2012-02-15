@@ -233,20 +233,20 @@ public class GenKey
       {
         MacGenerator upd_mac = getEECertMacBuilder ();
         byte[] authorization = target_key.getPostProvMac (upd_mac, prov_sess);
-        prov_sess.sks.pp_updateKey (key_handle, 
+        prov_sess.sks.postUpdateKey (key_handle, 
                                     target_key.key_handle,
                                     authorization,
-                                    prov_sess.mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_UPDATE_KEY));
+                                    prov_sess.mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_POST_UPDATE_KEY));
       }
   
     public void postCloneKey (GenKey target_key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = getEECertMacBuilder ();
         byte[] authorization = target_key.getPostProvMac (upd_mac, prov_sess);
-        prov_sess.sks.pp_cloneKeyProtection (key_handle, 
+        prov_sess.sks.postCloneKeyProtection (key_handle, 
                                              target_key.key_handle,
                                              authorization,
-                                             prov_sess.mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_CLONE_KEY_PROTECTION));
+                                             prov_sess.mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_POST_CLONE_KEY_PROTECTION));
       }
 
   }

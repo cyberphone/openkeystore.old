@@ -424,9 +424,9 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
 
     private Vector<DeployedKeyEntry> deployed_key_entries = new Vector<DeployedKeyEntry> ();
     
-    private Vector<PostOperation> pp_unlock_keys = new Vector<PostOperation> ();
+    private Vector<PostOperation> post_unlock_keys = new Vector<PostOperation> ();
       
-    private Vector<PostOperation> pp_delete_keys = new Vector<PostOperation> ();
+    private Vector<PostOperation> post_delete_keys = new Vector<PostOperation> ();
     
     private String client_session_id;
 
@@ -473,15 +473,15 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
       }
     
     
-    public PostOperation[] getPostProvisioningUnlockKeys ()
+    public PostOperation[] getPostUnlockKeys ()
       {
-        return pp_unlock_keys.toArray (new PostOperation[0]);
+        return post_unlock_keys.toArray (new PostOperation[0]);
       }
 
     
-    public PostOperation[] getPostProvisioningDeleteKeys ()
+    public PostOperation[] getPostDeleteKeys ()
       {
-        return pp_delete_keys.toArray (new PostOperation[0]);
+        return post_delete_keys.toArray (new PostOperation[0]);
       }
 
 
@@ -542,7 +542,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         /////////////////////////////////////////////////////////////////////////////////////////
         while (rd.hasNext (UNLOCK_KEY_ELEM))
           {
-            pp_unlock_keys.add (readPostOperation (rd, PostOperation.UNLOCK_KEY, UNLOCK_KEY_ELEM));
+            post_unlock_keys.add (readPostOperation (rd, PostOperation.UNLOCK_KEY, UNLOCK_KEY_ELEM));
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -550,7 +550,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         /////////////////////////////////////////////////////////////////////////////////////////
         while (rd.hasNext (DELETE_KEY_ELEM))
           {
-            pp_delete_keys.add (readPostOperation (rd, PostOperation.DELETE_KEY, DELETE_KEY_ELEM));
+            post_delete_keys.add (readPostOperation (rd, PostOperation.DELETE_KEY, DELETE_KEY_ELEM));
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

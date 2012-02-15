@@ -388,10 +388,10 @@
 
 <!--
       #########################################################
-      #                     pp_deleteKey                      #
+      #                     postDeleteKey                     #
       #########################################################
 -->
-      <xs:element name="pp_deleteKey">
+      <xs:element name="postDeleteKey">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
@@ -402,14 +402,14 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="pp_deleteKey.Response"/>
+      <xs:element name="postDeleteKey.Response"/>
 
 <!--
       #########################################################
-      #                     pp_unlockKey                      #
+      #                     postUnlockKey                     #
       #########################################################
 -->
-      <xs:element name="pp_unlockKey">
+      <xs:element name="postUnlockKey">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
@@ -420,14 +420,14 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="pp_unlockKey.Response"/>
+      <xs:element name="postUnlockKey.Response"/>
 
 <!--
       #########################################################
-      #                     pp_updateKey                      #
+      #                     postUpdateKey                     #
       #########################################################
 -->
-      <xs:element name="pp_updateKey">
+      <xs:element name="postUpdateKey">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
@@ -438,14 +438,14 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="pp_updateKey.Response"/>
+      <xs:element name="postUpdateKey.Response"/>
 
 <!--
       #########################################################
-      #                 pp_cloneKeyProtection                 #
+      #                postCloneKeyProtection                 #
       #########################################################
 -->
-      <xs:element name="pp_cloneKeyProtection">
+      <xs:element name="postCloneKeyProtection">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
@@ -456,7 +456,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="pp_cloneKeyProtection.Response"/>
+      <xs:element name="postCloneKeyProtection.Response"/>
 
 <!--
       #########################################################
@@ -988,36 +988,36 @@
     <wsdl:part name="parameters" element="tns:restorePrivateKey.Response"/>
   </wsdl:message>
 
-  <wsdl:message name="pp_deleteKey">
-    <wsdl:part name="parameters" element="tns:pp_deleteKey"/>
+  <wsdl:message name="postDeleteKey">
+    <wsdl:part name="parameters" element="tns:postDeleteKey"/>
   </wsdl:message>
 
-  <wsdl:message name="pp_deleteKey.Response">
-    <wsdl:part name="parameters" element="tns:pp_deleteKey.Response"/>
+  <wsdl:message name="postDeleteKey.Response">
+    <wsdl:part name="parameters" element="tns:postDeleteKey.Response"/>
   </wsdl:message>
 
-  <wsdl:message name="pp_unlockKey">
-    <wsdl:part name="parameters" element="tns:pp_unlockKey"/>
+  <wsdl:message name="postUnlockKey">
+    <wsdl:part name="parameters" element="tns:postUnlockKey"/>
   </wsdl:message>
 
-  <wsdl:message name="pp_unlockKey.Response">
-    <wsdl:part name="parameters" element="tns:pp_unlockKey.Response"/>
+  <wsdl:message name="postUnlockKey.Response">
+    <wsdl:part name="parameters" element="tns:postUnlockKey.Response"/>
   </wsdl:message>
 
-  <wsdl:message name="pp_updateKey">
-    <wsdl:part name="parameters" element="tns:pp_updateKey"/>
+  <wsdl:message name="postUpdateKey">
+    <wsdl:part name="parameters" element="tns:postUpdateKey"/>
   </wsdl:message>
 
-  <wsdl:message name="pp_updateKey.Response">
-    <wsdl:part name="parameters" element="tns:pp_updateKey.Response"/>
+  <wsdl:message name="postUpdateKey.Response">
+    <wsdl:part name="parameters" element="tns:postUpdateKey.Response"/>
   </wsdl:message>
 
-  <wsdl:message name="pp_cloneKeyProtection">
-    <wsdl:part name="parameters" element="tns:pp_cloneKeyProtection"/>
+  <wsdl:message name="postCloneKeyProtection">
+    <wsdl:part name="parameters" element="tns:postCloneKeyProtection"/>
   </wsdl:message>
 
-  <wsdl:message name="pp_cloneKeyProtection.Response">
-    <wsdl:part name="parameters" element="tns:pp_cloneKeyProtection.Response"/>
+  <wsdl:message name="postCloneKeyProtection.Response">
+    <wsdl:part name="parameters" element="tns:postCloneKeyProtection.Response"/>
   </wsdl:message>
 
   <wsdl:message name="enumerateKeys">
@@ -1258,27 +1258,27 @@
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="pp_deleteKey">
-      <wsdl:input message="tns:pp_deleteKey"/>
-      <wsdl:output message="tns:pp_deleteKey.Response"/>
+    <wsdl:operation name="postDeleteKey">
+      <wsdl:input message="tns:postDeleteKey"/>
+      <wsdl:output message="tns:postDeleteKey.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="pp_unlockKey">
-      <wsdl:input message="tns:pp_unlockKey"/>
-      <wsdl:output message="tns:pp_unlockKey.Response"/>
+    <wsdl:operation name="postUnlockKey">
+      <wsdl:input message="tns:postUnlockKey"/>
+      <wsdl:output message="tns:postUnlockKey.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="pp_updateKey">
-      <wsdl:input message="tns:pp_updateKey"/>
-      <wsdl:output message="tns:pp_updateKey.Response"/>
+    <wsdl:operation name="postUpdateKey">
+      <wsdl:input message="tns:postUpdateKey"/>
+      <wsdl:output message="tns:postUpdateKey.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="pp_cloneKeyProtection">
-      <wsdl:input message="tns:pp_cloneKeyProtection"/>
-      <wsdl:output message="tns:pp_cloneKeyProtection.Response"/>
+    <wsdl:operation name="postCloneKeyProtection">
+      <wsdl:input message="tns:postCloneKeyProtection"/>
+      <wsdl:output message="tns:postCloneKeyProtection.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -1567,7 +1567,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="pp_deleteKey">
+      <wsdl:operation name="postDeleteKey">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>
@@ -1579,7 +1579,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="pp_unlockKey">
+      <wsdl:operation name="postUnlockKey">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>
@@ -1591,7 +1591,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="pp_updateKey">
+      <wsdl:operation name="postUpdateKey">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>
@@ -1603,7 +1603,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="pp_cloneKeyProtection">
+      <wsdl:operation name="postCloneKeyProtection">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

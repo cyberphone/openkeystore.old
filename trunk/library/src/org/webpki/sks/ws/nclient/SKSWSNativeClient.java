@@ -134,25 +134,25 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
                                        byte[] mac) throws SKSException;
 
     @Override
-    native public void pp_deleteKey (int provisioning_handle, 
+    native public void postDeleteKey (int provisioning_handle, 
                                      int target_key_handle,
                                      byte[] authorization,
                                      byte[] mac) throws SKSException;
 
     @Override
-    native public void pp_unlockKey (int provisioning_handle, 
+    native public void postUnlockKey (int provisioning_handle, 
                                      int target_key_handle,
                                      byte[] authorization,
                                      byte[] mac) throws SKSException;
 
     @Override
-    native public void pp_updateKey (int key_handle,
+    native public void postUpdateKey (int key_handle,
                                      int target_key_handle,
                                      byte[] authorization,
                                      byte[] mac) throws SKSException;
 
     @Override
-    native public void pp_cloneKeyProtection (int key_handle,
+    native public void postCloneKeyProtection (int key_handle,
                                               int target_key_handle,
                                               byte[] authorization,
                                               byte[] mac) throws SKSException;

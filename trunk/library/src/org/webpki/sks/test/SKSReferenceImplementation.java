@@ -676,11 +676,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                     ////////////////////////////////////////////////////////////////////////////////////////////////
                     // Multiple targeting of the same old key is OK but has restrictions
                     ////////////////////////////////////////////////////////////////////////////////////////////////
-                    if ((new_key == null && upd_or_del) || (post_op.new_key == null && post_op.upd_or_del)) // pp_deleteKey
+                    if ((new_key == null && upd_or_del) || (post_op.new_key == null && post_op.upd_or_del)) // postDeleteKey
                       {
                         abort ("Delete wasn't exclusive for key #" + target_key_entry.key_handle);
                       }
-                    else if (new_key == null && post_op.new_key == null) // pp_unlockKey * 2
+                    else if (new_key == null && post_op.new_key == null) // postUnlockKey * 2
                       {
                         abort ("Multiple unlocks of key #" + target_key_entry.key_handle);
                       }
@@ -691,7 +691,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                   }
               }
             ////////////////////////////////////////////////////////////////////////////////////////////////
-            // We want pp_unlockKey keys to be first in the list so that shared PINs get unlocked as well
+            // We want postUnlockKey keys to be first in the list so that shared PINs get unlocked as well
             ////////////////////////////////////////////////////////////////////////////////////////////////
             post_provisioning_objects.add (new_key == null ? 0 : post_provisioning_objects.size (),
                                            new PostProvisioningObject (target_key_entry, new_key, upd_or_del));
@@ -785,8 +785,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         private static final long serialVersionUID = 1L;
 
         KeyEntry target_key_entry;
-        KeyEntry new_key;      // null for pp_deleteKey and pp_unlockKey
-        boolean upd_or_del;    // true for pp_updateKey and pp_deleteKey
+        KeyEntry new_key;      // null for postDeleteKey and postUnlockKey
+        boolean upd_or_del;    // true for postUpdateKey and postDeleteKey
 
         PostProvisioningObject (KeyEntry target_key_entry, KeyEntry new_key, boolean upd_or_del)
           {
@@ -1431,7 +1431,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC and target key data
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = new_key.getEECertMacBuilder (update ? METHOD_PP_UPDATE_KEY : METHOD_PP_CLONE_KEY_PROTECTION);
+        MacBuilder verifier = new_key.getEECertMacBuilder (update ? METHOD_POST_UPDATE_KEY : METHOD_POST_CLONE_KEY_PROTECTION);
         target_key_entry.validateTargetKeyReference (verifier, mac, authorization, provisioning);
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1463,7 +1463,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // /////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC and target key data
         // /////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (delete ? METHOD_PP_DELETE_KEY : METHOD_PP_UNLOCK_KEY);
+        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (delete ? METHOD_POST_DELETE_KEY : METHOD_POST_UNLOCK_KEY);
         target_key_entry.validateTargetKeyReference (verifier, mac, authorization, provisioning);
 
         // /////////////////////////////////////////////////////////////////////////////////
@@ -2255,14 +2255,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                             pp_deleteKey                                   //
+    //                             postDeleteKey                                  //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized void pp_deleteKey (int provisioning_handle,
-                                           int target_key_handle,
-                                           byte[] authorization,
-                                           byte[] mac) throws SKSException
+    public synchronized void postDeleteKey (int provisioning_handle,
+                                            int target_key_handle,
+                                            byte[] authorization,
+                                            byte[] mac) throws SKSException
       {
         addUnlockKeyOrDeleteKey (provisioning_handle, target_key_handle, authorization, mac, true);
       }
@@ -2270,14 +2270,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                             pp_unlockKey                                   //
+    //                             postUnlockKey                                  //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized void pp_unlockKey (int provisioning_handle,
-                                           int target_key_handle,
-                                           byte[] authorization,
-                                           byte[] mac) throws SKSException
+    public synchronized void postUnlockKey (int provisioning_handle,
+                                            int target_key_handle,
+                                            byte[] authorization,
+                                            byte[] mac) throws SKSException
       {
         addUnlockKeyOrDeleteKey (provisioning_handle, target_key_handle, authorization, mac, false);
       }
@@ -2285,14 +2285,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                          pp_cloneKeyProtection                             //
+    //                          postCloneKeyProtection                            //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized void pp_cloneKeyProtection (int key_handle,
-                                                    int target_key_handle,
-                                                    byte[] authorization,
-                                                    byte[] mac) throws SKSException
+    public synchronized void postCloneKeyProtection (int key_handle,
+                                                     int target_key_handle,
+                                                     byte[] authorization,
+                                                     byte[] mac) throws SKSException
       {
         addUpdateKeyOrCloneKeyProtection (key_handle, target_key_handle, authorization, mac, false);
       }
@@ -2300,14 +2300,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                               pp_updateKey                                 //
+    //                              postUpdateKey                                 //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized void pp_updateKey (int key_handle,
-                                           int target_key_handle,
-                                           byte[] authorization,
-                                           byte[] mac) throws SKSException
+    public synchronized void postUpdateKey (int key_handle,
+                                            int target_key_handle,
+                                            byte[] authorization,
+                                            byte[] mac) throws SKSException
       {
         addUpdateKeyOrCloneKeyProtection (key_handle, target_key_handle, authorization, mac, true);
       }
@@ -2512,14 +2512,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 if (post_op.upd_or_del)
                   {
                     ///////////////////////////////////////////////////////////////////////////////////
-                    // pp_deleteKey
+                    // postDeleteKey
                     ///////////////////////////////////////////////////////////////////////////////////
                     localDeleteKey (key_entry);
                   }
                 else
                   {
                     ///////////////////////////////////////////////////////////////////////////////////
-                    // pp_unlockKey.  Performed before pp_updateKey and pp_cloneKeyProtection 
+                    // postUnlockKey.  Performed before postUpdateKey and postCloneKeyProtection 
                     ///////////////////////////////////////////////////////////////////////////////////
                     key_entry.setErrorCounter ((short) 0);
                     if (key_entry.pin_policy.puk_policy != null)

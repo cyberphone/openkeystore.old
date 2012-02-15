@@ -49,10 +49,10 @@ public interface SecureKeyStore
     byte[] METHOD_CREATE_PIN_POLICY           = {'c','r','e','a','t','e','P','I','N','P','o','l','i','c','y'};
     byte[] METHOD_CREATE_PUK_POLICY           = {'c','r','e','a','t','e','P','U','K','P','o','l','i','c','y'};
     byte[] METHOD_ADD_EXTENSION               = {'a','d','d','E','x','t','e','n','s','i','o','n'};
-    byte[] METHOD_PP_DELETE_KEY               = {'p','p','_','d','e','l','e','t','e','K','e','y'};
-    byte[] METHOD_PP_UNLOCK_KEY               = {'p','p','_','u','n','l','o','c','k','K','e','y'};
-    byte[] METHOD_PP_UPDATE_KEY               = {'p','p','_','u','p','d','a','t','e','K','e','y'};
-    byte[] METHOD_PP_CLONE_KEY_PROTECTION     = {'p','p','_','c','l','o','n','e','K','e','y','P','r','o','t','e','c','t','i','o','n'};
+    byte[] METHOD_POST_DELETE_KEY             = {'p','o','s','t','D','e','l','e','t','e','K','e','y'};
+    byte[] METHOD_POST_UNLOCK_KEY             = {'p','o','s','t','U','n','l','o','c','k','K','e','y'};
+    byte[] METHOD_POST_UPDATE_KEY             = {'p','o','s','t','U','p','d','a','t','e','K','e','y'};
+    byte[] METHOD_POST_CLONE_KEY_PROTECTION   = {'p','o','s','t','C','l','o','n','e','K','e','y','P','r','o','t','e','c','t','i','o','n'};
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Other KDF constants that are used "as is"
@@ -245,25 +245,25 @@ public interface SecureKeyStore
     // Post Provisioning (Management)
     ///////////////////////////////////////////////////////////////////////////////////
 
-    void pp_deleteKey (int provisioning_handle,
-                       int target_key_handle,
-                       byte[] authorization,
-                       byte[] mac) throws SKSException;
+    void postDeleteKey (int provisioning_handle,
+                        int target_key_handle,
+                        byte[] authorization,
+                        byte[] mac) throws SKSException;
 
-    void pp_unlockKey (int provisioning_handle,
-                       int target_key_handle,
-                       byte[] authorization,
-                       byte[] mac) throws SKSException;
+    void postUnlockKey (int provisioning_handle,
+                        int target_key_handle,
+                        byte[] authorization,
+                        byte[] mac) throws SKSException;
 
-    void pp_updateKey (int key_handle,
-                       int target_key_handle,
-                       byte[] authorization,
-                       byte[] mac) throws SKSException;
+    void postUpdateKey (int key_handle,
+                        int target_key_handle,
+                        byte[] authorization,
+                        byte[] mac) throws SKSException;
 
-    void pp_cloneKeyProtection (int key_handle,
-                                int target_key_handle,
-                                byte[] authorization,
-                                byte[] mac) throws SKSException;
+    void postCloneKeyProtection (int key_handle,
+                                 int target_key_handle,
+                                 byte[] authorization,
+                                 byte[] mac) throws SKSException;
 
     ///////////////////////////////////////////////////////////////////////////////////
     // "User" API

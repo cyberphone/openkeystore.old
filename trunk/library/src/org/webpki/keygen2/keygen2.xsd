@@ -602,10 +602,10 @@
             <!-- The now certified keys.  Note: optional -->
             <xs:element ref="kgen:CertificatePath" minOccurs="0" maxOccurs="unbounded"/>
 
-            <!-- SKS Reference: pp_unlockKey -->
+            <!-- SKS Reference: postUnlockKey -->
             <xs:element name="UnlockKey" type="kgen:targetKey" minOccurs="0" maxOccurs="unbounded"/>
 
-            <!-- SKS Reference: pp_deleteKey -->
+            <!-- SKS Reference: postDeleteKey -->
             <xs:element name="DeleteKey" type="kgen:targetKey" minOccurs="0" maxOccurs="unbounded"/>
 
             <!-- See "ServerCookie" definition -->
@@ -904,10 +904,10 @@
            
             <xs:choice minOccurs="0">
 
-               <!-- SKS Reference: pp_updateKey -->
+               <!-- SKS Reference: postUpdateKey -->
                <xs:element name="UpdateKey" type="kgen:targetKey"/>
 
-               <!-- SKS Reference: pp_cloneKeyProtection -->
+               <!-- SKS Reference: postCloneKeyProtection -->
                <xs:element name="CloneKeyProtection" type="kgen:targetKey"/>
 
             </xs:choice>

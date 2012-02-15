@@ -1,7 +1,11 @@
 package org.webpki.sks.test;
 
-import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.spec.ECGenParameterSpec;
 
 import org.webpki.util.ArrayUtil;
 
@@ -17,6 +21,8 @@ public class ASN1
     static final int ASN1_NULL               = 0x05;
     static final int ASN1_BISTRING           = 0x03;
     static final int ASN1_EXPLICIT_CONTEXT_0 = 0xA0;
+    static final int ASN1_EXPLICIT_CONTEXT_1 = 0xA1;
+    static final int ASN1_OCTET_STRING       = 0x04;
 
     static final int MAX_BUFFER = 16000;
 
@@ -32,26 +38,109 @@ public class ASN1
         byte[] mod_or_x;
       }
     
+    static class SKSPrivateKey
+      {
+        boolean rsa;
+        byte[] exp_or_y;
+        byte[] mod_or_x;
+      }
+
     static public void main (String[] args)
       {
-        if (args.length != 2 || !(args[0].equals ("p") || args[0].equals ("c")))
+        if (args.length != 2 || !(args[0].equals ("rp") || args[0].equals ("rc") || args[0].equals ("rk") || args[0].equals ("we") || args[0].equals ("wrs")))
           {
-            System.out.println ("ASN1 p|c input-file\n  p = public key, c = certificate");
+            System.out.println ("ASN1 rp|rc|rk|we|wrs file\n" +
+                                "      rp = read public key, rc = read certificate, rk = read private key\n" +
+                                "      we = write EC private key, wrs = write simple RSA private key");
             System.exit (3);
           }
         try
           {
-            byte[] data = ArrayUtil.readFile (args[1]);
-            System.out.println ("KEY L=" + (args[0].equals ("p") ? getPublicKey (data) : getPublicKeyFromCertificate (data)).length);
+            if (args[0].equals ("rp") || args[0].equals ("rc"))
+              {
+                byte[] data = ArrayUtil.readFile (args[1]);
+                System.out.println ("KEY L=" + (args[0].equals ("rp") ? getPublicKey (data) : getPublicKeyFromCertificate (data)).length);
+              }
+            else if (args[0].equals ("rk"))
+              {
+                byte[] data = ArrayUtil.readFile (args[1]);
+                System.out.println ("KEY L=" + getPrivateKey (data).length);
+              }
+            else if (args[0].equals ("we"))
+              {
+                fixProvider ();
+                KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
+                ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
+                generator.initialize (eccgen, new SecureRandom ());
+                KeyPair key_pair = generator.generateKeyPair ();
+                ArrayUtil.writeFile (args[1], key_pair.getPrivate ().getEncoded ());
+              }
+            else if (args[0].equals ("wrs"))
+              {
+                fixProvider ();
+                KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
+                kpg.initialize (2048);
+                KeyPair key_pair = kpg.generateKeyPair ();
+                ArrayUtil.writeFile (args[1], key_pair.getPrivate ().getEncoded ());
+              }
           }
-        catch (GeneralSecurityException e)
+        catch (Exception e)
           {
             e.printStackTrace();
           }
-        catch (IOException e)
+      }
+
+    static byte[] getPrivateKey (byte[] data) throws GeneralSecurityException
+      {
+        init (data);
+        parsePrivateKey ();
+        return data;
+      }
+
+    static SKSPrivateKey parsePrivateKey () throws GeneralSecurityException
+      {
+        SKSPrivateKey private_key = new SKSPrivateKey ();
+        getObject (ASN1_SEQUENCE);           // Outer SEQUENCE
+        getObject (ASN1_INTEGER);              // PKCS #8 version
+        if (length != 1 || buffer[index++] != 0x00) throw new GeneralSecurityException ("Unknown PKCS #8 version");
+        if (private_key.rsa = parseAlgorithmID ())
           {
-            e.printStackTrace();
+            getPrivateKeyPayload (0);
+            for (int q = 0; q < 8; q++)
+              {
+                scanObject (ASN1_INTEGER);
+              }
+         }
+        else
+          {
+            getPrivateKeyPayload (1);
+            getObject (ASN1_OCTET_STRING);
+            if (length != 32) throw new GeneralSecurityException ("Unexpected EC private key blob length: " + length);
+            index += length;
+            if (index < max_buflen && buffer[index] == (byte)ASN1_EXPLICIT_CONTEXT_0)
+              {
+                scanObject (ASN1_EXPLICIT_CONTEXT_0);
+              }
+            if (index < max_buflen && buffer[index] == (byte)ASN1_EXPLICIT_CONTEXT_1)
+              {
+                scanObject (ASN1_EXPLICIT_CONTEXT_1);
+              }
           }
+        if (index != max_buflen) throw new GeneralSecurityException ("Private key length error");
+        return private_key;
+      }
+
+    static void getPrivateKeyPayload (int version) throws GeneralSecurityException
+      {
+        getObject (ASN1_OCTET_STRING);
+        getObject (ASN1_SEQUENCE);
+        getObject (ASN1_INTEGER);
+        if (length != 1 || version != buffer[index++]) throw new GeneralSecurityException ("Unsupported private key version");
+      }
+
+    private static void fixProvider ()
+      {
+        Security.insertProviderAt (new org.bouncycastle.jce.provider.BouncyCastleProvider(), 1);
       }
 
     static byte[] getPublicKeyFromCertificate (byte[] data) throws GeneralSecurityException
@@ -85,36 +174,48 @@ public class ASN1
 
     static SKSPublicKey parsePublicKey () throws GeneralSecurityException
       {
-        SKSPublicKey pub_key = new SKSPublicKey ();
+        SKSPublicKey public_key = new SKSPublicKey ();
         getObject (ASN1_SEQUENCE);
         int i = index;
         int l = length;
-        getObject (ASN1_SEQUENCE);
-        getObject (ASN1_OBJECT_IDENTIFIER);
-        if (pub_key.rsa = oidMatch (RSA_ALGORITHM_OID))
+        if (public_key.rsa = parseAlgorithmID ())
           {
-            getObject (ASN1_NULL);
             getBitString ();
             getObject (ASN1_SEQUENCE);
             getObject (ASN1_INTEGER);
             index += length;
             getObject (ASN1_INTEGER);
           }
+        else
+          {
+            getBitString ();
+            if (length != 65) throw new GeneralSecurityException ("Incorrect ECPoint length");
+            if (buffer[index] != 0x04) throw new GeneralSecurityException ("Only uncompressed EC support");
+          }
+       index += length;
+       if (i != index - l) throw new GeneralSecurityException ("Public key length error");
+       return public_key;
+      }
+
+    private static boolean parseAlgorithmID () throws GeneralSecurityException
+      {
+        getObject (ASN1_SEQUENCE);             // SEQUENCE (AlgorithmID)
+        getObject (ASN1_OBJECT_IDENTIFIER);
+        if (oidMatch (RSA_ALGORITHM_OID))
+          {
+            getObject (ASN1_NULL);
+            return true;
+          }
         else if (oidMatch (EC_ALGORITHM_OID))
           {
             getObject (ASN1_OBJECT_IDENTIFIER);
             if (!oidMatch (EC_NAMED_CURVE_P256)) throw new GeneralSecurityException ("P-256 OID expected");
-            getBitString ();
-            if (length != 65) throw new GeneralSecurityException ("Incorrect ECPoint length");
-            if (buffer[index] != 0x04) throw new GeneralSecurityException ("Only uncompressed EC support");
+            return false;
           }
         else
           {
             throw new GeneralSecurityException ("Unexpected OID");
           }
-       index += length;
-       if (i != index - l) throw new GeneralSecurityException ("Public key length error");
-       return pub_key;
       }
 
     private static void getBitString () throws GeneralSecurityException

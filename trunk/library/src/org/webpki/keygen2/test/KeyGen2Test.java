@@ -328,19 +328,19 @@ public class KeyGen2Test
                         switch (post_operation.getPostOperation ())
                           {
                             case ProvisioningFinalizationRequestDecoder.PostOperation.CLONE_KEY_PROTECTION:
-                              sks.pp_cloneKeyProtection (handle, ek.getKeyHandle (), post_operation.getAuthorization (), post_operation.getMAC ());
+                              sks.postCloneKeyProtection (handle, ek.getKeyHandle (), post_operation.getAuthorization (), post_operation.getMAC ());
                               break;
 
                             case ProvisioningFinalizationRequestDecoder.PostOperation.UPDATE_KEY:
-                              sks.pp_updateKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMAC ());
+                              sks.postUpdateKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMAC ());
                               break;
 
                             case ProvisioningFinalizationRequestDecoder.PostOperation.UNLOCK_KEY:
-                              sks.pp_unlockKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMAC ());
+                              sks.postUnlockKey (handle, ek.getKeyHandle (),  post_operation.getAuthorization (), post_operation.getMAC ());
                               break;
 
                             default:
-                              sks.pp_deleteKey (handle, ek.getKeyHandle (), post_operation.getAuthorization (), post_operation.getMAC ());
+                              sks.postDeleteKey (handle, ek.getKeyHandle (), post_operation.getAuthorization (), post_operation.getMAC ());
                           }
                         return;
                       }
@@ -616,7 +616,7 @@ public class KeyGen2Test
                   }
 
                 //////////////////////////////////////////////////////////////////////////
-                // There may be an pp_updateKey or pp_cloneKeyProtection
+                // There may be an postUpdateKey or postCloneKeyProtection
                 //////////////////////////////////////////////////////////////////////////
                 ProvisioningFinalizationRequestDecoder.PostOperation post_operation = key.getPostOperation ();
                 if (post_operation != null)
@@ -626,19 +626,19 @@ public class KeyGen2Test
               }
 
             //////////////////////////////////////////////////////////////////////////
-            // There may be any number of pp_unlockKey
+            // There may be any number of postUnlockKey
             //////////////////////////////////////////////////////////////////////////
-            for (ProvisioningFinalizationRequestDecoder.PostOperation pp_unl : fin_prov_request.getPostProvisioningUnlockKeys ())
+            for (ProvisioningFinalizationRequestDecoder.PostOperation post_unl : fin_prov_request.getPostUnlockKeys ())
               {
-                postProvisioning (pp_unl, eps.getProvisioningHandle ());
+                postProvisioning (post_unl, eps.getProvisioningHandle ());
               }
 
             //////////////////////////////////////////////////////////////////////////
-            // There may be any number of pp_deleteKey
+            // There may be any number of postDeleteKey
             //////////////////////////////////////////////////////////////////////////
-            for (ProvisioningFinalizationRequestDecoder.PostOperation pp_del : fin_prov_request.getPostProvisioningDeleteKeys ())
+            for (ProvisioningFinalizationRequestDecoder.PostOperation post_del : fin_prov_request.getPostDeleteKeys ())
               {
-                postProvisioning (pp_del, eps.getProvisioningHandle ());
+                postProvisioning (post_del, eps.getProvisioningHandle ());
               }
 
             //////////////////////////////////////////////////////////////////////////
@@ -1042,10 +1042,10 @@ public class KeyGen2Test
               }
             if (delete_key != null)
               {
-                server_credential_store.addPostProvisioningDeleteKey (delete_key.server_credential_store.getClientSessionID (), 
-                                                                      delete_key.server_credential_store.getServerSessionID (),
-                                                                      delete_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
-                                                                      delete_key.server_km);
+                server_credential_store.addPostDeleteKey (delete_key.server_credential_store.getClientSessionID (), 
+                                                          delete_key.server_credential_store.getServerSessionID (),
+                                                          delete_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
+                                                          delete_key.server_km);
               }
             key_create_request = new KeyCreationRequestEncoder (KEY_INIT_URL, server_credential_store, server_sess_key);
             if (two_keys)
@@ -1153,10 +1153,10 @@ public class KeyGen2Test
               }
             else
               {
-                server_credential_store.addPostProvisioningUnlockKey (plain_unlock_key.server_credential_store.getClientSessionID (), 
-                                                                      plain_unlock_key.server_credential_store.getServerSessionID (),
-                                                                      plain_unlock_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
-                                                                      plain_unlock_key.server_km);
+                server_credential_store.addPostUnlockKey (plain_unlock_key.server_credential_store.getClientSessionID (), 
+                                                          plain_unlock_key.server_credential_store.getServerSessionID (),
+                                                          plain_unlock_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
+                                                          plain_unlock_key.server_km);
               }
             ProvisioningFinalizationRequestEncoder fin_prov_request 
                        = new ProvisioningFinalizationRequestEncoder (FIN_PROV_URL, 

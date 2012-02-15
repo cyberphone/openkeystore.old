@@ -735,14 +735,14 @@ public class ProvSess
       {
         MacGenerator upd_mac = new MacGenerator ();
         byte[] authorization = key.getPostProvMac (upd_mac, this);
-        sks.pp_deleteKey (provisioning_handle, key.key_handle, authorization, mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_DELETE_KEY));
+        sks.postDeleteKey (provisioning_handle, key.key_handle, authorization, mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_POST_DELETE_KEY));
       }
 
     public void postUnlockKey (GenKey key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new MacGenerator ();
         byte[] authorization = key.getPostProvMac (upd_mac, this);
-        sks.pp_unlockKey (provisioning_handle, key.key_handle, authorization, mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_PP_UNLOCK_KEY));
+        sks.postUnlockKey (provisioning_handle, key.key_handle, authorization, mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_POST_UNLOCK_KEY));
       }
   
     public boolean exists () throws SKSException

@@ -609,18 +609,18 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void pp_deleteKey (int provisioning_handle,
-                              int target_key_handle,
-                              byte[] authorization,
-                              byte[] mac) throws SKSException
+    public void postDeleteKey (int provisioning_handle,
+                               int target_key_handle,
+                               byte[] authorization,
+                               byte[] mac) throws SKSException
       {
         try
           {
-            getSKSWS ().pp_deleteKey (device_id,
-                                      provisioning_handle,
-                                      target_key_handle,
-                                      authorization,
-                                      mac);
+            getSKSWS ().postDeleteKey (device_id,
+                                       provisioning_handle,
+                                       target_key_handle,
+                                       authorization,
+                                       mac);
           }
         catch (SKSException_Exception e)
           {
@@ -629,18 +629,18 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void pp_unlockKey (int provisioning_handle,
-                              int target_key_handle,
-                              byte[] authorization,
-                              byte[] mac) throws SKSException
+    public void postUnlockKey (int provisioning_handle,
+                               int target_key_handle,
+                               byte[] authorization,
+                               byte[] mac) throws SKSException
       {
         try
           {
-            getSKSWS ().pp_unlockKey (device_id,
-                                      provisioning_handle,
-                                      target_key_handle,
-                                      authorization,
-                                      mac);
+            getSKSWS ().postUnlockKey (device_id,
+                                       provisioning_handle,
+                                       target_key_handle,
+                                       authorization,
+                                       mac);
           }
         catch (SKSException_Exception e)
           {
@@ -649,18 +649,18 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void pp_updateKey (int key_handle,
-                              int target_key_handle,
-                              byte[] authorization,
-                              byte[] mac) throws SKSException
+    public void postUpdateKey (int key_handle,
+                               int target_key_handle,
+                               byte[] authorization,
+                               byte[] mac) throws SKSException
       {
         try
           {
-            getSKSWS ().pp_updateKey (device_id,
-                                      key_handle,
-                                      target_key_handle,
-                                      authorization,
-                                      mac);
+            getSKSWS ().postUpdateKey (device_id,
+                                       key_handle,
+                                       target_key_handle,
+                                       authorization,
+                                       mac);
           }
         catch (SKSException_Exception e)
           {
@@ -669,18 +669,18 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void pp_cloneKeyProtection (int key_handle,
-                                       int target_key_handle,
-                                       byte[] authorization,
-                                       byte[] mac) throws SKSException
+    public void postCloneKeyProtection (int key_handle,
+                                        int target_key_handle,
+                                        byte[] authorization,
+                                        byte[] mac) throws SKSException
       {
         try
           {
-            getSKSWS ().pp_cloneKeyProtection (device_id,
-                                               key_handle,
-                                               target_key_handle,
-                                               authorization,
-                                               mac);
+            getSKSWS ().postCloneKeyProtection (device_id,
+                                                key_handle,
+                                                target_key_handle,
+                                                authorization,
+                                                mac);
           }
         catch (SKSException_Exception e)
           {

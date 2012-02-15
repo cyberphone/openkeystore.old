@@ -104,22 +104,22 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        pp_deleteKey_Response pp_deleteKey(pp_deleteKey_Request request);
+        postDeleteKey_Response postDeleteKey(postDeleteKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        pp_unlockKey_Response pp_unlockKey(pp_unlockKey_Request request);
+        postUnlockKey_Response postUnlockKey(postUnlockKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        pp_updateKey_Response pp_updateKey(pp_updateKey_Request request);
+        postUpdateKey_Response postUpdateKey(postUpdateKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        pp_cloneKeyProtection_Response pp_cloneKeyProtection(pp_cloneKeyProtection_Request request);
+        postCloneKeyProtection_Response postCloneKeyProtection(postCloneKeyProtection_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
@@ -1424,8 +1424,8 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="pp_deleteKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class pp_deleteKey_Request
+    [System.ServiceModel.MessageContractAttribute(WrapperName="postDeleteKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class postDeleteKey_Request
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="DeviceID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -1447,11 +1447,11 @@ namespace org.webpki.sks.ws.client
         [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _mac;
 
-        public pp_deleteKey_Request(string DeviceID,
-                                    int ProvisioningHandle,
-                                    int TargetKeyHandle,
-                                    byte[] Authorization,
-                                    byte[] MAC)
+        public postDeleteKey_Request(string DeviceID,
+                                     int ProvisioningHandle,
+                                     int TargetKeyHandle,
+                                     byte[] Authorization,
+                                     byte[] MAC)
         {
             _device_id = DeviceID;
             _provisioning_handle = ProvisioningHandle;
@@ -1462,14 +1462,14 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="pp_deleteKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class pp_deleteKey_Response
+    [System.ServiceModel.MessageContractAttribute(WrapperName="postDeleteKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class postDeleteKey_Response
     {
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="pp_unlockKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class pp_unlockKey_Request
+    [System.ServiceModel.MessageContractAttribute(WrapperName="postUnlockKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class postUnlockKey_Request
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="DeviceID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -1491,11 +1491,11 @@ namespace org.webpki.sks.ws.client
         [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _mac;
 
-        public pp_unlockKey_Request(string DeviceID,
-                                    int ProvisioningHandle,
-                                    int TargetKeyHandle,
-                                    byte[] Authorization,
-                                    byte[] MAC)
+        public postUnlockKey_Request(string DeviceID,
+                                     int ProvisioningHandle,
+                                     int TargetKeyHandle,
+                                     byte[] Authorization,
+                                     byte[] MAC)
         {
             _device_id = DeviceID;
             _provisioning_handle = ProvisioningHandle;
@@ -1506,58 +1506,14 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="pp_unlockKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class pp_unlockKey_Response
+    [System.ServiceModel.MessageContractAttribute(WrapperName="postUnlockKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class postUnlockKey_Response
     {
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="pp_updateKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class pp_updateKey_Request
-    {
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="DeviceID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal string _device_id;
-
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal int _key_handle;
-
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="TargetKeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal int _target_key_handle;
-
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _authorization;
-
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _mac;
-
-        public pp_updateKey_Request(string DeviceID,
-                                    int KeyHandle,
-                                    int TargetKeyHandle,
-                                    byte[] Authorization,
-                                    byte[] MAC)
-        {
-            _device_id = DeviceID;
-            _key_handle = KeyHandle;
-            _target_key_handle = TargetKeyHandle;
-            _authorization = Authorization;
-            _mac = MAC;
-        }
-    }
-
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="pp_updateKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class pp_updateKey_Response
-    {
-    }
-
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="pp_cloneKeyProtection", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class pp_cloneKeyProtection_Request
+    [System.ServiceModel.MessageContractAttribute(WrapperName="postUpdateKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class postUpdateKey_Request
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="DeviceID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -1579,11 +1535,11 @@ namespace org.webpki.sks.ws.client
         [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _mac;
 
-        public pp_cloneKeyProtection_Request(string DeviceID,
-                                             int KeyHandle,
-                                             int TargetKeyHandle,
-                                             byte[] Authorization,
-                                             byte[] MAC)
+        public postUpdateKey_Request(string DeviceID,
+                                     int KeyHandle,
+                                     int TargetKeyHandle,
+                                     byte[] Authorization,
+                                     byte[] MAC)
         {
             _device_id = DeviceID;
             _key_handle = KeyHandle;
@@ -1594,8 +1550,52 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="pp_cloneKeyProtection.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class pp_cloneKeyProtection_Response
+    [System.ServiceModel.MessageContractAttribute(WrapperName="postUpdateKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class postUpdateKey_Response
+    {
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="postCloneKeyProtection", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class postCloneKeyProtection_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="DeviceID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal string _device_id;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal int _key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="TargetKeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal int _target_key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _authorization;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _mac;
+
+        public postCloneKeyProtection_Request(string DeviceID,
+                                              int KeyHandle,
+                                              int TargetKeyHandle,
+                                              byte[] Authorization,
+                                              byte[] MAC)
+        {
+            _device_id = DeviceID;
+            _key_handle = KeyHandle;
+            _target_key_handle = TargetKeyHandle;
+            _authorization = Authorization;
+            _mac = MAC;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="postCloneKeyProtection.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class postCloneKeyProtection_Response
     {
     }
 
@@ -2990,18 +2990,18 @@ namespace org.webpki.sks.ws.client
             }
         }
 
-        public void pp_deleteKey(int ProvisioningHandle,
-                                 int TargetKeyHandle,
-                                 byte[] Authorization,
-                                 byte[] MAC)
+        public void postDeleteKey(int ProvisioningHandle,
+                                  int TargetKeyHandle,
+                                  byte[] Authorization,
+                                  byte[] MAC)
         {
             try
             {
-                base.Channel.pp_deleteKey(new pp_deleteKey_Request(device_id,
-                                                                   ProvisioningHandle,
-                                                                   TargetKeyHandle,
-                                                                   Authorization,
-                                                                   MAC));
+                base.Channel.postDeleteKey(new postDeleteKey_Request(device_id,
+                                                                     ProvisioningHandle,
+                                                                     TargetKeyHandle,
+                                                                     Authorization,
+                                                                     MAC));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -3009,18 +3009,18 @@ namespace org.webpki.sks.ws.client
             }
         }
 
-        public void pp_unlockKey(int ProvisioningHandle,
-                                 int TargetKeyHandle,
-                                 byte[] Authorization,
-                                 byte[] MAC)
+        public void postUnlockKey(int ProvisioningHandle,
+                                  int TargetKeyHandle,
+                                  byte[] Authorization,
+                                  byte[] MAC)
         {
             try
             {
-                base.Channel.pp_unlockKey(new pp_unlockKey_Request(device_id,
-                                                                   ProvisioningHandle,
-                                                                   TargetKeyHandle,
-                                                                   Authorization,
-                                                                   MAC));
+                base.Channel.postUnlockKey(new postUnlockKey_Request(device_id,
+                                                                     ProvisioningHandle,
+                                                                     TargetKeyHandle,
+                                                                     Authorization,
+                                                                     MAC));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -3028,18 +3028,18 @@ namespace org.webpki.sks.ws.client
             }
         }
 
-        public void pp_updateKey(int KeyHandle,
-                                 int TargetKeyHandle,
-                                 byte[] Authorization,
-                                 byte[] MAC)
+        public void postUpdateKey(int KeyHandle,
+                                  int TargetKeyHandle,
+                                  byte[] Authorization,
+                                  byte[] MAC)
         {
             try
             {
-                base.Channel.pp_updateKey(new pp_updateKey_Request(device_id,
-                                                                   KeyHandle,
-                                                                   TargetKeyHandle,
-                                                                   Authorization,
-                                                                   MAC));
+                base.Channel.postUpdateKey(new postUpdateKey_Request(device_id,
+                                                                     KeyHandle,
+                                                                     TargetKeyHandle,
+                                                                     Authorization,
+                                                                     MAC));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -3047,18 +3047,18 @@ namespace org.webpki.sks.ws.client
             }
         }
 
-        public void pp_cloneKeyProtection(int KeyHandle,
-                                          int TargetKeyHandle,
-                                          byte[] Authorization,
-                                          byte[] MAC)
+        public void postCloneKeyProtection(int KeyHandle,
+                                           int TargetKeyHandle,
+                                           byte[] Authorization,
+                                           byte[] MAC)
         {
             try
             {
-                base.Channel.pp_cloneKeyProtection(new pp_cloneKeyProtection_Request(device_id,
-                                                                                     KeyHandle,
-                                                                                     TargetKeyHandle,
-                                                                                     Authorization,
-                                                                                     MAC));
+                base.Channel.postCloneKeyProtection(new postCloneKeyProtection_Request(device_id,
+                                                                                       KeyHandle,
+                                                                                       TargetKeyHandle,
+                                                                                       Authorization,
+                                                                                       MAC));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {

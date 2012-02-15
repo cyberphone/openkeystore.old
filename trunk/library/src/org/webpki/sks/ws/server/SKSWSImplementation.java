@@ -716,80 +716,80 @@ public class SKSWSImplementation
         getDevice (device_id).restorePrivateKey (key_handle, private_key, mac);
       }
 
-    @WebMethod(operationName="pp_deleteKey")
-    @RequestWrapper(localName="pp_deleteKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @ResponseWrapper(localName="pp_deleteKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void pp_deleteKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              String device_id,
-                              @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              int provisioning_handle,
-                              @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              int target_key_handle,
-                              @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              byte[] authorization,
-                              @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              byte[] mac)
+    @WebMethod(operationName="postDeleteKey")
+    @RequestWrapper(localName="postDeleteKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="postDeleteKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void postDeleteKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               String device_id,
+                               @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               int provisioning_handle,
+                               @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               int target_key_handle,
+                               @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               byte[] authorization,
+                               @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               byte[] mac)
     throws SKSException
       {
-        log (device_id, "pp_deleteKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).pp_deleteKey (provisioning_handle, target_key_handle, authorization, mac);
+        log (device_id, "postDeleteKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        getDevice (device_id).postDeleteKey (provisioning_handle, target_key_handle, authorization, mac);
       }
 
-    @WebMethod(operationName="pp_unlockKey")
-    @RequestWrapper(localName="pp_unlockKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @ResponseWrapper(localName="pp_unlockKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void pp_unlockKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              String device_id,
-                              @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              int provisioning_handle,
-                              @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              int target_key_handle,
-                              @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              byte[] authorization,
-                              @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              byte[] mac)
+    @WebMethod(operationName="postUnlockKey")
+    @RequestWrapper(localName="postUnlockKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="postUnlockKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void postUnlockKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               String device_id,
+                               @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               int provisioning_handle,
+                               @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               int target_key_handle,
+                               @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               byte[] authorization,
+                               @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               byte[] mac)
     throws SKSException
       {
-        log (device_id, "pp_unlockKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).pp_unlockKey (provisioning_handle, target_key_handle, authorization, mac);
+        log (device_id, "postUnlockKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        getDevice (device_id).postUnlockKey (provisioning_handle, target_key_handle, authorization, mac);
       }
 
-    @WebMethod(operationName="pp_updateKey")
-    @RequestWrapper(localName="pp_updateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @ResponseWrapper(localName="pp_updateKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void pp_updateKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              String device_id,
-                              @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              int key_handle,
-                              @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              int target_key_handle,
-                              @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              byte[] authorization,
-                              @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              byte[] mac)
+    @WebMethod(operationName="postUpdateKey")
+    @RequestWrapper(localName="postUpdateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="postUpdateKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void postUpdateKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               String device_id,
+                               @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               int key_handle,
+                               @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               int target_key_handle,
+                               @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               byte[] authorization,
+                               @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               byte[] mac)
     throws SKSException
       {
-        log (device_id, "pp_updateKey (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).pp_updateKey (key_handle, target_key_handle, authorization, mac);
+        log (device_id, "postUpdateKey (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        getDevice (device_id).postUpdateKey (key_handle, target_key_handle, authorization, mac);
       }
 
-    @WebMethod(operationName="pp_cloneKeyProtection")
-    @RequestWrapper(localName="pp_cloneKeyProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @ResponseWrapper(localName="pp_cloneKeyProtection.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void pp_cloneKeyProtection (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                       String device_id,
-                                       @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                       int key_handle,
-                                       @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                       int target_key_handle,
-                                       @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                       byte[] authorization,
-                                       @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                       byte[] mac)
+    @WebMethod(operationName="postCloneKeyProtection")
+    @RequestWrapper(localName="postCloneKeyProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="postCloneKeyProtection.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void postCloneKeyProtection (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        String device_id,
+                                        @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        int key_handle,
+                                        @WebParam(name="TargetKeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        int target_key_handle,
+                                        @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        byte[] authorization,
+                                        @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        byte[] mac)
     throws SKSException
       {
-        log (device_id, "pp_cloneKeyProtection (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).pp_cloneKeyProtection (key_handle, target_key_handle, authorization, mac);
+        log (device_id, "postCloneKeyProtection (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        getDevice (device_id).postCloneKeyProtection (key_handle, target_key_handle, authorization, mac);
       }
 
     @WebMethod(operationName="enumerateKeys")

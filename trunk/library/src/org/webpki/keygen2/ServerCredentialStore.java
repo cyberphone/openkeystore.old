@@ -51,10 +51,10 @@ public class ServerCredentialStore implements Serializable
     
     enum PostOperation
       {
-        DELETE_KEY            (SecureKeyStore.METHOD_PP_DELETE_KEY,           DELETE_KEY_ELEM), 
-        UNLOCK_KEY            (SecureKeyStore.METHOD_PP_UNLOCK_KEY,           UNLOCK_KEY_ELEM), 
-        UPDATE_KEY            (SecureKeyStore.METHOD_PP_UPDATE_KEY,           UPDATE_KEY_ELEM), 
-        CLONE_KEY_PROTECTION  (SecureKeyStore.METHOD_PP_CLONE_KEY_PROTECTION, CLONE_KEY_PROTECTION_ELEM);
+        DELETE_KEY            (SecureKeyStore.METHOD_POST_DELETE_KEY,           DELETE_KEY_ELEM), 
+        UNLOCK_KEY            (SecureKeyStore.METHOD_POST_UNLOCK_KEY,           UNLOCK_KEY_ELEM), 
+        UPDATE_KEY            (SecureKeyStore.METHOD_POST_UPDATE_KEY,           UPDATE_KEY_ELEM), 
+        CLONE_KEY_PROTECTION  (SecureKeyStore.METHOD_POST_CLONE_KEY_PROTECTION, CLONE_KEY_PROTECTION_ELEM);
         
         private byte[] method;
         
@@ -823,9 +823,9 @@ public class ServerCredentialStore implements Serializable
         
      
         public KeyProperties setClonedKeyProtection (String old_client_session_id, 
-                                           String old_server_session_id,
-                                           X509Certificate old_key,
-                                           PublicKey key_management_key) throws IOException, GeneralSecurityException
+                                                     String old_server_session_id,
+                                                     X509Certificate old_key,
+                                                     PublicKey key_management_key) throws IOException, GeneralSecurityException
           {
             PostProvisioningTargetKey op = addPostOperation (old_client_session_id,
                                                              old_server_session_id,
@@ -1095,7 +1095,7 @@ public class ServerCredentialStore implements Serializable
        }
     
     
-    public void addPostProvisioningDeleteKey (String old_client_session_id,
+    public void addPostDeleteKey (String old_client_session_id,
                                               String old_server_session_id,
                                               X509Certificate old_key,
                                               PublicKey key_management_key) throws IOException, GeneralSecurityException
@@ -1108,7 +1108,7 @@ public class ServerCredentialStore implements Serializable
       }
 
   
-    public void addPostProvisioningUnlockKey (String old_client_session_id,
+    public void addPostUnlockKey (String old_client_session_id,
                                               String old_server_session_id,
                                               X509Certificate old_key,
                                               PublicKey key_management_key) throws IOException, GeneralSecurityException

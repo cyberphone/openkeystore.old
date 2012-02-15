@@ -771,48 +771,48 @@
         getDevice (device_id).restorePrivateKey (key_handle, private_key, mac);
 ]]></Code></Method>
 
-   <Method Name="pp_deleteKey" Throws="SKSException">
+   <Method Name="postDeleteKey" Throws="SKSException">
      <Parameter Name="device_id"           Type="string" XMLName="DeviceID"           Null="true" SuppressRule="DEV"/>
      <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="target_key_handle"   Type="int"    XMLName="TargetKeyHandle"/>
      <Parameter Name="authorization"       Type="binary" XMLName="Authorization"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "pp_deleteKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).pp_deleteKey (provisioning_handle, target_key_handle, authorization, mac);
+        log (device_id, "postDeleteKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        getDevice (device_id).postDeleteKey (provisioning_handle, target_key_handle, authorization, mac);
 ]]></Code></Method>
 
-   <Method Name="pp_unlockKey" Throws="SKSException">
+   <Method Name="postUnlockKey" Throws="SKSException">
      <Parameter Name="device_id"           Type="string" XMLName="DeviceID"           Null="true" SuppressRule="DEV"/>
      <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="target_key_handle"   Type="int"    XMLName="TargetKeyHandle"/>
      <Parameter Name="authorization"       Type="binary" XMLName="Authorization"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "pp_unlockKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).pp_unlockKey (provisioning_handle, target_key_handle, authorization, mac);
+        log (device_id, "postUnlockKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        getDevice (device_id).postUnlockKey (provisioning_handle, target_key_handle, authorization, mac);
 ]]></Code></Method>
 
-   <Method Name="pp_updateKey" Throws="SKSException">
+   <Method Name="postUpdateKey" Throws="SKSException">
      <Parameter Name="device_id"           Type="string" XMLName="DeviceID"           Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="target_key_handle"   Type="int"    XMLName="TargetKeyHandle"/>
      <Parameter Name="authorization"       Type="binary" XMLName="Authorization"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "pp_updateKey (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).pp_updateKey (key_handle, target_key_handle, authorization, mac);
+        log (device_id, "postUpdateKey (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        getDevice (device_id).postUpdateKey (key_handle, target_key_handle, authorization, mac);
 ]]></Code></Method>
 
-   <Method Name="pp_cloneKeyProtection" Throws="SKSException">
+   <Method Name="postCloneKeyProtection" Throws="SKSException">
      <Parameter Name="device_id"           Type="string" XMLName="DeviceID"           Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="target_key_handle"   Type="int"    XMLName="TargetKeyHandle"/>
      <Parameter Name="authorization"       Type="binary" XMLName="Authorization"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "pp_cloneKeyProtection (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).pp_cloneKeyProtection (key_handle, target_key_handle, authorization, mac);
+        log (device_id, "postCloneKeyProtection (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
+        getDevice (device_id).postCloneKeyProtection (key_handle, target_key_handle, authorization, mac);
 ]]></Code></Method>
 
    <Method Name="enumerateKeys" ReturnClass="EnumeratedKey" Throws="SKSException">
