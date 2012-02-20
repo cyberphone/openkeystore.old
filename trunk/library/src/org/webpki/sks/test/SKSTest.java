@@ -275,7 +275,19 @@ public class SKSTest
         sessionTest (++q);
       }
 
-    
+    void checkSSID (String server_session_id, boolean ok) throws Exception
+      {
+        try
+          {
+            new ProvSess (device, server_session_id);
+            assertTrue ("Should have failed", ok);
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Malformed \"ServerSessionID\" : " + server_session_id);
+          }
+      }
+
     boolean nameCheck (String name) throws IOException, GeneralSecurityException
       {
         try
@@ -2906,5 +2918,22 @@ public class SKSTest
         ump.test ("15554", false);       // Three in a row
         ump.test ("5554", false);        // Three in a row
         ump.test ("1952", true);         // OK
+      }
+
+    @Test
+    public void test70 () throws Exception
+      {
+        checkSSID ("", false);
+        checkSSID ("*", false);
+        checkSSID (" ", false);
+        checkSSID ("/", false);
+        checkSSID ("9", false);
+        checkSSID ("h09876543210987654321098765432109", false);
+        checkSSID ("h0987654321098765432109876543210", true);
+        checkSSID ("h9", true);
+        checkSSID ("J", true);
+        checkSSID ("-J", true);
+        checkSSID (".J", true);
+        checkSSID ("_J", true);
       }
   }

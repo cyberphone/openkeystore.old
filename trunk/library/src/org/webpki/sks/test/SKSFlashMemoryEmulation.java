@@ -125,33 +125,39 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
               {
                 owner.abort ("Duplicate \"ID\" : " + id);
               }
-            boolean flag = false;
-            if (id.length () == 0 || id.length () > MAX_LENGTH_ID_TYPE)
-              {
-                flag = true;
-              }
-            else for (int i = 0; i < id.length (); i++)
-              {
-                char c = id.charAt (i);
-                /////////////////////////////////////////////////
-                // The restricted XML NCName
-                /////////////////////////////////////////////////
-                if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && c != '_')
-                  {
-                    if (i == 0 || ((c < '0' || c > '9') && c != '-' && c != '.'))
-                      {
-                        flag = true;
-                        break;
-                      }
-                  }
-              }
-            if (flag)
-              {
-                owner.abort ("Malformed \"ID\" : " + id);
-              }
+            checkIDSyntax (id, "ID", owner);
             owner.names.put (id, false);
             this.owner = owner;
             this.id = id;
+          }
+      }
+
+
+    static void checkIDSyntax (String identifier, String symbolic_name, SKSError sks_error) throws SKSException
+      {
+        boolean flag = false;
+        if (identifier.length () == 0 || identifier.length () > MAX_LENGTH_ID_TYPE)
+          {
+            flag = true;
+          }
+        else for (int i = 0; i < identifier.length (); i++)
+          {
+            char c = identifier.charAt (i);
+            /////////////////////////////////////////////////
+            // The restricted XML NCName
+            /////////////////////////////////////////////////
+            if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && c != '_')
+              {
+                if (i == 0 || ((c < '0' || c > '9') && c != '-' && c != '.'))
+                  {
+                    flag = true;
+                    break;
+                  }
+              }
+          }
+        if (flag)
+          {
+            sks_error.abort ("Malformed \"" + symbolic_name + "\" : " + identifier);
           }
       }
 
@@ -2633,6 +2639,11 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                 checkECKeyCompatibility ((ECPublicKey)key_management_key, this, "\"KeyManagementKey\"");
               }
           }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check ServerSessionID
+        ///////////////////////////////////////////////////////////////////////////////////
+        checkIDSyntax (server_session_id, "ServerSessionID", this);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Create ClientSessionID

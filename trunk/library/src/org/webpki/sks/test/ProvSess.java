@@ -355,14 +355,14 @@ public class ProvSess
     ///////////////////////////////////////////////////////////////////////////////////
     // Create provisioning session
     ///////////////////////////////////////////////////////////////////////////////////
-    private ProvSess (Device device, short session_key_limit, Integer kmk_id, boolean privacy_enabled, ECPublicKey ext_epk) throws GeneralSecurityException, IOException
+    private ProvSess (Device device, short session_key_limit, Integer kmk_id, boolean privacy_enabled, ECPublicKey ext_epk, String serv_sess) throws GeneralSecurityException, IOException
       {
         this.device = device;
         this.kmk_id = kmk_id;
         this.privacy_enabled = privacy_enabled;
         PublicKey key_management_key = kmk_id == null ? null : server_sess_key.enumerateKeyManagementKeys ()[kmk_id];
         sks = device.sks;
-        server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
+        server_session_id = serv_sess == null ? "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()) : serv_sess;
         client_time = new Date ();
            ProvisioningSession sess = 
                 device.sks.createProvisioningSession (session_key_algorithm,
@@ -402,14 +402,19 @@ public class ProvSess
 
     public ProvSess (Device device, short session_key_limit, Integer kmk_id, boolean privacy_enabled) throws GeneralSecurityException, IOException
       {
-        this (device, session_key_limit, kmk_id, privacy_enabled, null);
+        this (device, session_key_limit, kmk_id, privacy_enabled, null, null);
       }
 
     public ProvSess (Device device, short session_key_limit, Integer kmk_id) throws GeneralSecurityException, IOException
       {
         this (device, session_key_limit, kmk_id, false);
       }
-    
+
+    public ProvSess (Device device, String serv_sess_id) throws GeneralSecurityException, IOException
+      {
+        this (device, (short) 50, null, false, null, serv_sess_id);
+      }
+
     public ProvSess (Device device) throws GeneralSecurityException, IOException
       {
         this (device, (short) 50, null);
@@ -422,7 +427,7 @@ public class ProvSess
 
     public ProvSess (Device device, ECPublicKey ext_epk) throws GeneralSecurityException, IOException
       {
-        this (device, (short) 50, null, false, ext_epk);
+        this (device, (short) 50, null, false, ext_epk, null);
       }
 
     public ProvSess (Device device, Integer kmk_id) throws GeneralSecurityException, IOException
