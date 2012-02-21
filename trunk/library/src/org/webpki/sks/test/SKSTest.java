@@ -2936,4 +2936,25 @@ public class SKSTest
         checkSSID (".J", true);
         checkSSID ("_J", true);
       }
+
+    @Test
+    public void test71 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        GenKey key = sess.createECKey ("Key.1",
+                                       null /* pin_value */,
+                                       null,
+                                       AppUsage.AUTHENTICATION);
+        try
+          {
+            sess.sks.importSymmetricKey (key.key_handle,
+                                         new byte[]{0,5,6,8,0,5,6,8,0,5,6,8,0,5,6,8,0,5,6,8,0,5,6,8,0,5,6,8,0,5,6,8},
+                                         new byte[]{0,5,6,8,0,5,6,8,0,5,6,8,0,5,6,8,0,5,6,8,0,5,6,8,0,5,6,8,0,5,6,8});
+            fail ("Can't import without EE");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Missing \"setCertificatePath\" for: Key.1");
+          }
+      }
   }

@@ -401,12 +401,17 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
           }
 
-        MacBuilder getEECertMacBuilder (byte[] method) throws SKSException
+        void checkEECerificateAvailablity () throws SKSException
           {
             if (certificate_path == null)
               {
-                owner.abort ("End-entity certificate missing. \"setCertificatePath\" performed?");
+                owner.abort ("Missing \"setCertificatePath\" for: " + id);
               }
+          }
+        
+        MacBuilder getEECertMacBuilder (byte[] method) throws SKSException
+          {
+            checkEECerificateAvailablity ();
             MacBuilder mac_builder = owner.getMacBuilderForMethodCall (method);
             try
               {
@@ -2387,10 +2392,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 ///////////////////////////////////////////////////////////////////////////////////
                 // A key provisioned in this session
                 ///////////////////////////////////////////////////////////////////////////////////
-                if (key_entry.certificate_path == null)
-                  {
-                    provisioning.abort ("Missing \"setCertificatePath\" for: " + key_entry.id);
-                  }
+                key_entry.checkEECerificateAvailablity ();
 
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Check public versus private key match
