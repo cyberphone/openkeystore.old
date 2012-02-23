@@ -586,16 +586,6 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
             abort (message, SKSException.ERROR_OPTION);
           }
 
-        byte[] encrypt (byte[] data) throws SKSException, GeneralSecurityException
-          {
-            byte[] key = getMacBuilder (ZERO_LENGTH_ARRAY).addVerbatim (KDF_ENCRYPTION_KEY).getResult ();
-            Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
-            byte[] iv = new byte[16];
-            new SecureRandom ().nextBytes (iv);
-            crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (iv));
-            return addArrays (iv, crypt.doFinal (data));
-          }
-
         byte[] decrypt (byte[] data) throws SKSException
           {
             byte[] key = getMacBuilder (ZERO_LENGTH_ARRAY).addVerbatim (KDF_ENCRYPTION_KEY).getResult ();

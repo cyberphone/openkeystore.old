@@ -789,15 +789,6 @@ public class KeyGen2Test
               }
 
             @Override
-            public byte[] decrypt (byte[] data) throws IOException, GeneralSecurityException
-              {
-                byte[] key = mac (SecureKeyStore.KDF_ENCRYPTION_KEY, new byte[0]);
-                Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
-                crypt.init (Cipher.DECRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (data, 0, 16));
-                return crypt.doFinal (data, 16, data.length - 16);
-              }
-
-            @Override
             public byte[] encrypt (byte[] data) throws IOException, GeneralSecurityException
               {
                 byte[] key = mac (SecureKeyStore.KDF_ENCRYPTION_KEY, new byte[0]);

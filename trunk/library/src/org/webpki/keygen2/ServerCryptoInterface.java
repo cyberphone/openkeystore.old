@@ -39,8 +39,6 @@ public interface ServerCryptoInterface
     
     public byte[] encrypt (byte[] data) throws IOException, GeneralSecurityException;
 
-    public byte[] decrypt (byte[] data) throws IOException, GeneralSecurityException;
-    
     public byte[] generateNonce () throws IOException, GeneralSecurityException;
 
     public byte[] generateKeyManagementAuthorization (PublicKey key_management_key, byte[] data) throws IOException, GeneralSecurityException;
