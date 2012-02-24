@@ -596,6 +596,104 @@ public class SKSTest
           }
       }
 
+    void updateTest (AppUsage app_usage) throws Exception
+      {
+        ProvSess sess = new ProvSess (device, 0);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        null /* pin_value */,
+                                        null /* pin_policy */,
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        GenKey key2 = sess2.createECKey ("Key.1",
+                                         null /* pin_value */,
+                                         null /* pin_policy */,
+                                         app_usage).setCertificate (cn ());
+        try
+          {
+            key2.postUpdateKey (key1);
+            sess2.closeSession ();
+            assertTrue ("Must be identical", app_usage == AppUsage.AUTHENTICATION);
+            assertTrue ("Key should exist even after update", key1.exists ());
+            assertFalse ("Key has been used and should be removed", key2.exists ());
+            assertTrue ("Ownership error", key1.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+            assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+          }
+        catch (SKSException e)
+          {
+            assertFalse ("Must not be identical", app_usage == AppUsage.AUTHENTICATION);
+            checkException (e, "Updated keys must have the same \"AppUsage\" as the target key");
+          }
+      }
+
+    void testCloning (Grouping grouping, AppUsage app_usage) throws Exception
+      {
+        String ok_pin = "1563";
+        ProvSess sess = new ProvSess (device, 0);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  EnumSet.noneOf (PatternRestriction.class),
+                                                  grouping,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
+        GenKey key1 = sess.createECKey ("Key.1",
+                                        ok_pin /* pin_value */,
+                                        pin_policy,
+                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
+        sess.closeSession ();
+        assertTrue (sess.exists ());
+        ProvSess sess2 = new ProvSess (device);
+        GenKey key2 = sess2.createRSAKey ("Key.1",
+                                          2048,
+                                          null /* pin_value */,
+                                          null /* pin_policy */,
+                                          app_usage).setCertificate (cn ());
+        try
+          {
+            key2.postCloneKey (key1);
+            sess2.closeSession ();
+            assertTrue ("Grouping must be shared", grouping == Grouping.SHARED);
+            assertTrue ("Old key should exist after clone", key1.exists ());
+            assertTrue ("New key should exist after clone", key2.exists ());
+            assertTrue ("Ownership error", key1.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
+            assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+            try
+              {
+                key2.signData (SignatureAlgorithms.RSA_SHA256, "1111", TEST_STRING);
+                fail ("Bad PIN should not work");
+              }
+            catch (SKSException e)
+              {
+                authorizationErrorCheck (e);
+              }
+            try
+              {
+                byte[] result = key2.signData (SignatureAlgorithms.RSA_SHA256, ok_pin, TEST_STRING);
+                Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+                verify.initVerify (key2.getPublicKey ());
+                verify.update (TEST_STRING);
+                assertTrue ("Bad signature key2", verify.verify (result));
+                result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
+                verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
+                verify.initVerify (key1.getPublicKey ());
+                verify.update (TEST_STRING);
+                assertTrue ("Bad signature key1", verify.verify (result));
+              }
+            catch (SKSException e)
+              {
+                fail ("Good PIN should work");
+              }
+          }
+        catch (SKSException e)
+          {
+            assertFalse ("Grouping must not be shared", grouping == Grouping.SHARED);
+            checkException (e, "A cloned key protection must have PIN grouping=\"shared\"");
+          }
+      }
+
     void create3Keys (String s_pin, String a_pin, String e_pin) throws Exception
       {
         boolean sa = s_pin.equals (a_pin);
@@ -1106,24 +1204,8 @@ public class SKSTest
     @Test
     public void test18 () throws Exception
       {
-        ProvSess sess = new ProvSess (device, 0);
-        GenKey key1 = sess.createECKey ("Key.1",
-                                        null /* pin_value */,
-                                        null /* pin_policy */,
-                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
-        sess.closeSession ();
-        assertTrue (sess.exists ());
-        ProvSess sess2 = new ProvSess (device);
-        GenKey key2 = sess2.createECKey ("Key.1",
-                                         null /* pin_value */,
-                                         null /* pin_policy */,
-                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
-        key2.postUpdateKey (key1);
-        sess2.closeSession ();
-        assertTrue ("Key should exist even after update", key1.exists ());
-        assertFalse ("Key has been used and should be removed", key2.exists ());
-        assertTrue ("Ownership error", key1.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
-        assertFalse ("Managed sessions MUST be deleted", sess.exists ());
+        updateTest (AppUsage.AUTHENTICATION);
+        updateTest (AppUsage.SIGNATURE);
       }
 
     @Test
@@ -1206,7 +1288,27 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            checkException (e, "Update/clone keys cannot have PIN codes");
+            checkException (e, "Updated/cloned keys must not define PIN protection");
+          }
+        sess2 = new ProvSess (device);
+        pin_policy = sess2.createPINPolicy ("PIN",
+                                            PassphraseFormat.NUMERIC,
+                                            4 /* min_length */, 
+                                            8 /* max_length */,
+                                            (short) 3 /* retry_limit*/, 
+                                            null /* puk_policy */);
+        key2 = sess2.createECKey ("Key.1",
+                                  ok_pin /* pin_value */,
+                                  pin_policy,
+                                  AppUsage.AUTHENTICATION).setCertificate (cn ());
+        try
+          {
+            key2.postCloneKey (key1);
+            fail ("No PINs on clone keys please");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Updated/cloned keys must not define PIN protection");
           }
       }
 
@@ -1275,60 +1377,10 @@ public class SKSTest
     @Test
     public void test23 () throws Exception
       {
-        String ok_pin = "1563";
-        ProvSess sess = new ProvSess (device, 0);
-        PINPol pin_policy = sess.createPINPolicy ("PIN",
-                                                  PassphraseFormat.NUMERIC,
-                                                  EnumSet.noneOf (PatternRestriction.class),
-                                                  Grouping.SHARED,
-                                                  4 /* min_length */, 
-                                                  8 /* max_length */,
-                                                  (short) 3 /* retry_limit*/, 
-                                                  null /* puk_policy */);
-        GenKey key1 = sess.createECKey ("Key.1",
-                                        ok_pin /* pin_value */,
-                                        pin_policy,
-                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
-        sess.closeSession ();
-        assertTrue (sess.exists ());
-        ProvSess sess2 = new ProvSess (device);
-        GenKey key2 = sess2.createRSAKey ("Key.1",
-                                          2048,
-                                          null /* pin_value */,
-                                          null /* pin_policy */,
-                                          AppUsage.AUTHENTICATION).setCertificate (cn ());
-        key2.postCloneKey (key1);
-        sess2.closeSession ();
-        assertTrue ("Old key should exist after clone", key1.exists ());
-        assertTrue ("New key should exist after clone", key2.exists ());
-        assertTrue ("Ownership error", key1.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
-        assertFalse ("Managed sessions MUST be deleted", sess.exists ());
-        try
-          {
-            key2.signData (SignatureAlgorithms.RSA_SHA256, "1111", TEST_STRING);
-            fail ("Bad PIN should not work");
-          }
-        catch (SKSException e)
-          {
-            authorizationErrorCheck (e);
-          }
-        try
-          {
-            byte[] result = key2.signData (SignatureAlgorithms.RSA_SHA256, ok_pin, TEST_STRING);
-            Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
-            verify.initVerify (key2.getPublicKey ());
-            verify.update (TEST_STRING);
-            assertTrue ("Bad signature key2", verify.verify (result));
-            result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
-            verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
-            verify.initVerify (key1.getPublicKey ());
-            verify.update (TEST_STRING);
-            assertTrue ("Bad signature key1", verify.verify (result));
-          }
-        catch (SKSException e)
-          {
-            fail ("Good PIN should work");
-          }
+        testCloning (Grouping.SHARED, AppUsage.AUTHENTICATION);
+        testCloning (Grouping.SHARED, AppUsage.SIGNATURE);
+        testCloning (Grouping.NONE, AppUsage.AUTHENTICATION);
+        testCloning (Grouping.UNIQUE, AppUsage.AUTHENTICATION);
       }
 
     @Test

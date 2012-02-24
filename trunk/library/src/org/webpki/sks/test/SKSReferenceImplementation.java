@@ -686,11 +686,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                       }
                   }
               }
-            ////////////////////////////////////////////////////////////////////////////////////////////////
-            // We want postUnlockKey keys to be first in the list so that shared PINs get unlocked as well
-            ////////////////////////////////////////////////////////////////////////////////////////////////
-            post_provisioning_objects.add (new_key == null ? 0 : post_provisioning_objects.size (),
-                                           new PostProvisioningObject (target_key_entry, new_key, upd_or_del));
+            post_provisioning_objects.add (new PostProvisioningObject (target_key_entry, new_key, upd_or_del));
           }
 
         void rangeTest (byte value, byte low_limit, byte high_limit, String object_name) throws SKSException
@@ -1407,20 +1403,23 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         if (new_key.pin_policy != null || new_key.device_pin_protection)
           {
-            provisioning.abort ("Update/clone keys cannot have PIN codes");
+            provisioning.abort ("Updated/cloned keys must not define PIN protection");
           }
-        if (target_key_entry.app_usage != new_key.app_usage)
+        if (update)
           {
-            provisioning.abort ("Update/clone keys must have the same \"AppUsage\" as the target key");
-          }
-        if (!update)
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Cloned_kp keys are constrained
-            ///////////////////////////////////////////////////////////////////////////////////
-            if (target_key_entry.pin_policy != null && target_key_entry.pin_policy.grouping == PIN_GROUPING_NONE)
+            if (target_key_entry.app_usage != new_key.app_usage)
               {
-                provisioning.abort ("Cloned key protection must not have PIN grouping=\"none\"");
+                provisioning.abort ("Updated keys must have the same \"AppUsage\" as the target key");
+              }
+          }
+        else
+          {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Cloned keys must share the PIN of its parent
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (target_key_entry.pin_policy != null && target_key_entry.pin_policy.grouping != PIN_GROUPING_SHARED)
+              {
+                provisioning.abort ("A cloned key protection must have PIN grouping=\"shared\"");
               }
           }
 
@@ -2512,7 +2511,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 else
                   {
                     ///////////////////////////////////////////////////////////////////////////////////
-                    // postUnlockKey.  Performed before postUpdateKey and postCloneKeyProtection 
+                    // postUnlockKey 
                     ///////////////////////////////////////////////////////////////////////////////////
                     key_entry.setErrorCounter ((short) 0);
                     if (key_entry.pin_policy.puk_policy != null)
@@ -2523,10 +2522,18 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             else
               {
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Inherit protection data from the old key but nothing else
+                ///////////////////////////////////////////////////////////////////////////////////
+                post_op.new_key.pin_policy = key_entry.pin_policy;
+                post_op.new_key.pin_value = key_entry.pin_value;
+                post_op.new_key.error_count = key_entry.error_count;
+                post_op.new_key.device_pin_protection = key_entry.device_pin_protection;
+
                 if (post_op.upd_or_del)
                   {
                     ///////////////////////////////////////////////////////////////////////////////////
-                    // Store new key in the place of the old (keeping the handle intact after update)
+                    // postUpdateKey. Store new key in the place of the old
                     ///////////////////////////////////////////////////////////////////////////////////
                     keys.put (key_entry.key_handle, post_op.new_key);
 
@@ -2536,16 +2543,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                     keys.remove (post_op.new_key.key_handle);
                     post_op.new_key.key_handle = key_entry.key_handle;
                   }
-
-                ///////////////////////////////////////////////////////////////////////////////////
-                // Inherit protection data from the old key but nothing else
-                ///////////////////////////////////////////////////////////////////////////////////
-                post_op.new_key.pin_policy = key_entry.pin_policy;
-                post_op.new_key.pin_value = key_entry.pin_value;
-                post_op.new_key.error_count = key_entry.error_count;
-                post_op.new_key.device_pin_protection = key_entry.device_pin_protection;
               }
-          }
+         }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Post provisioning 3: Take ownership of managed keys and their associates
