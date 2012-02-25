@@ -188,7 +188,7 @@ public class GenKey
         return prov_sess.sks.getKeyProtectionInfo (key_handle);
       }
     
-    public void changePin (String old_pin, String new_pin) throws SKSException, IOException
+    public void changePIN (String old_pin, String new_pin) throws SKSException, IOException
       {
         prov_sess.sks.changePIN (key_handle, old_pin.getBytes ("UTF-8"), new_pin.getBytes ("UTF-8"));
       }
@@ -249,4 +249,13 @@ public class GenKey
                                              prov_sess.mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_POST_CLONE_KEY_PROTECTION));
       }
 
+    public void unlockKey (String puk) throws IOException
+      {
+        prov_sess.sks.unlockKey (key_handle, puk.getBytes ("UTF-8"));
+      }
+
+    public void setPIN (String puk, String pin) throws IOException
+      {
+        prov_sess.sks.setPIN (key_handle, puk.getBytes ("UTF-8"), pin.getBytes ("UTF-8"));
+      }
   }

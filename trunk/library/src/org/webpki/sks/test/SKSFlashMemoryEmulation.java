@@ -2095,7 +2095,8 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                 puk_retry_limit = key_entry.pin_policy.puk_policy.retry_limit;
                 puk_error_count = key_entry.pin_policy.puk_policy.error_count;
                 protection_status |= KeyProtectionInfo.PROTSTAT_PUK_PROTECTED;
-                if (key_entry.pin_policy.puk_policy.error_count >= key_entry.pin_policy.puk_policy.retry_limit)
+                if (key_entry.pin_policy.puk_policy.error_count >= key_entry.pin_policy.puk_policy.retry_limit &&
+                    key_entry.pin_policy.puk_policy.retry_limit > 0)
                   {
                     protection_status |= KeyProtectionInfo.PROTSTAT_PUK_BLOCKED;
                   }

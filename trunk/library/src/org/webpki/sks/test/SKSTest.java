@@ -49,7 +49,6 @@ import static org.junit.Assert.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
-import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
@@ -236,11 +235,7 @@ public class SKSTest
         assertFalse ("Managed sessions MUST be deleted", sess.exists ());
         try
           {
-            device.sks.signHashedData (key3.key_handle, 
-                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                       null,
-                                       new byte[0], 
-                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            key3.signData (SignatureAlgorithms.RSA_SHA256, "", TEST_STRING);
             fail ("Bad PIN should not work");
           }
         catch (SKSException e)
@@ -249,20 +244,12 @@ public class SKSTest
           }
         try
           {
-            byte[] result = device.sks.signHashedData (key3.key_handle,
-                                                       "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", 
-                                                       null,
-                                                       ok_pin.getBytes ("UTF-8"), 
-                                                       HashAlgorithms.SHA256.digest (TEST_STRING));
+            byte[] result = key3.signData (SignatureAlgorithms.RSA_SHA256, ok_pin, TEST_STRING);
             Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
             verify.initVerify (key3.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key3", verify.verify (result));
-            result = device.sks.signHashedData (key1.key_handle, 
-                                                "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256", 
-                                                null,
-                                                ok_pin.getBytes ("UTF-8"), 
-                                                HashAlgorithms.SHA256.digest (TEST_STRING));
+            result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
             verify.initVerify (key2.getPublicKey ());
             verify.update (TEST_STRING);
@@ -349,10 +336,10 @@ public class SKSTest
               {
                 try
                   {
-                    device.sks.setPIN (key.key_handle, ok_puk.getBytes ("UTF-8"), pin.getBytes ("UTF-8"));
+                    key.setPIN (ok_puk, pin);
                     assertTrue ("Shouldn't pass", pass);
                     key.signData (SignatureAlgorithms.ECDSA_SHA256, pin, TEST_STRING);
-                    device.sks.changePIN (key.key_handle, pin.getBytes ("UTF-8"), ok_pin.getBytes ("UTF-8"));
+                    key.changePIN (pin, ok_pin);
                   }
                 catch (SKSException e)
                   {
@@ -702,14 +689,14 @@ public class SKSTest
         String other_pin = "5555";
         for (Grouping pg : Grouping.values ())
           {
-            String puk_ok = "17644";
+            String ok_puk = "17644";
             short pin_retry = 3;
             ProvSess sess = new ProvSess (device);
             sess.makePINsUserModifiable ();
             PUKPol puk = sess.createPUKPolicy ("PUK", 
                                                PassphraseFormat.NUMERIC,
                                                (short) 3 /* retry_limit */,
-                                               puk_ok /* puk */);
+                                               ok_puk /* puk */);
             PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                       PassphraseFormat.NUMERIC,
                                                       EnumSet.noneOf (PatternRestriction.class),
@@ -767,7 +754,7 @@ public class SKSTest
                                pin_policy /* pin_policy */,
                                AppUsage.ENCRYPTION).setCertificate (cn ());
             sess.closeSession ();
-            device.sks.changePIN (key4.key_handle, s_pin.getBytes ("UTF-8"), other_pin.getBytes ("UTF-8"));
+            key4.changePIN (s_pin, other_pin);
             try
               {
                 key1.signData (SignatureAlgorithms.RSA_SHA256, other_pin, TEST_STRING);
@@ -982,7 +969,7 @@ public class SKSTest
         assertTrue ("Bad signature", verify.verify (result));
         try
           {
-            key.changePin ("1274", "3421");
+            key.changePIN ("1274", "3421");
             fail ("Should bomb since this has no pin");
           }
         catch (SKSException e)
@@ -1001,7 +988,7 @@ public class SKSTest
                                         null /* pin_policy */,
                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
-        assertTrue ("Must be 0", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == 0);
+        assertTrue ("Must be 0", key.getKeyProtectionInfo ().getKeyBackup () == 0);
 
         byte[] result = key.signData (SignatureAlgorithms.RSA_SHA256, null, TEST_STRING);
         Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
@@ -1574,14 +1561,14 @@ public class SKSTest
     public void test31 () throws Exception
       {
         String ok_pin = "1563";
-        String puk_ok = "17644";
+        String ok_puk = "17644";
         short pin_retry = 3;
         ProvSess sess = new ProvSess (device);
         sess.makePINsUserModifiable ();
         PUKPol puk_pol = sess.createPUKPolicy ("PUK",
                                                PassphraseFormat.NUMERIC,
                                                (short) 3 /* retry_limit*/, 
-                                               puk_ok /* puk */);
+                                               ok_puk /* puk */);
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   4 /* min_length */, 
@@ -1598,13 +1585,13 @@ public class SKSTest
         
         try
           {
-            key.changePin (ok_pin, "843");
+            key.changePIN (ok_pin, "843");
           }
         catch (SKSException e)
           {
             checkException (e, "PIN length error");
           }
-        key.changePin (ok_pin, ok_pin = "8463");
+        key.changePIN (ok_pin, ok_pin = "8463");
         
         Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
         cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
@@ -1638,14 +1625,14 @@ public class SKSTest
           }
         try
           {
-            device.sks.unlockKey (key.key_handle, (puk_ok + "2").getBytes ("UTF-8"));
+            key.unlockKey (ok_puk + "2");
             fail ("PUK unlock error");
           }
         catch (SKSException e)
           {
             authorizationErrorCheck (e);
           }
-        device.sks.unlockKey (key.key_handle, puk_ok.getBytes ("UTF-8"));
+        key.unlockKey (ok_puk);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
                                                                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
                                                                                             null,
@@ -1655,7 +1642,7 @@ public class SKSTest
           {
             try
               {
-                device.sks.changePIN (key.key_handle, (ok_pin + "2").getBytes ("UTF-8"), ok_pin.getBytes ("UTF-8"));
+                key.changePIN (ok_pin + "2", ok_pin);
                 fail ("PIN error");
               }
             catch (SKSException e)
@@ -1666,14 +1653,14 @@ public class SKSTest
           }
         try
           {
-            device.sks.setPIN (key.key_handle, (puk_ok + "2").getBytes ("UTF-8"), ok_pin.getBytes ("UTF-8"));
+            key.setPIN (ok_puk + "2", ok_pin);
             fail ("PUK error");
           }
         catch (SKSException e)
           {
             authorizationErrorCheck (e);
           }
-        device.sks.setPIN (key.key_handle, puk_ok.getBytes ("UTF-8"), (ok_pin + "2").getBytes ("UTF-8"));
+        key.setPIN (ok_puk, ok_pin + "2");
         assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, 
                                                                                      ok_pin + "2", 
                                                                                      enc),
@@ -1717,7 +1704,7 @@ public class SKSTest
             key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
             try
               {
-                device.sks.changePIN (key.key_handle, ok_pin.getBytes ("UTF-8"), "8437".getBytes ("UTF-8"));
+                key.changePIN (ok_pin, "8437");
                 assertTrue ("Modifiable", modifiable);
               }
             catch (SKSException e)
@@ -1727,7 +1714,7 @@ public class SKSTest
               }
             try
               {
-                device.sks.setPIN (key.key_handle, ok_puk.getBytes ("UTF-8"), "8437".getBytes ("UTF-8"));
+                key.setPIN (ok_puk, "8437");
                 assertTrue ("Non modifiable with set PIN", have_puk);
               }
             catch (SKSException e)
@@ -1771,10 +1758,10 @@ public class SKSTest
         sess.closeSession ();
         try
           {
-            KeyProtectionInfo kpi = device.sks.getKeyProtectionInfo (key.key_handle);
+            KeyProtectionInfo kpi = key.getKeyProtectionInfo ();
             assertTrue ("No flags should be set", kpi.getKeyBackup () == 0);
             device.sks.exportKey (key.key_handle, null);
-            kpi = device.sks.getKeyProtectionInfo (key.key_handle);
+            kpi = key.getKeyProtectionInfo ();
             assertTrue ("Flag must be set", kpi.getKeyBackup () == KeyProtectionInfo.KEYBACKUP_LOCAL);
           }
         catch (SKSException e)
@@ -1876,13 +1863,13 @@ public class SKSTest
     public void test38 () throws Exception
       {
         String ok_pin = "1563";
-        String puk_ok = "17644";
+        String ok_puk = "17644";
         ProvSess sess = new ProvSess (device);
         sess.overrideExportProtection (ExportProtection.PUK.getSKSValue ());
         PUKPol puk_pol = sess.createPUKPolicy ("PUK",
                                                PassphraseFormat.NUMERIC,
                                                (short) 5 /* retry_limit*/, 
-                                               puk_ok /* puk */);
+                                               ok_puk /* puk */);
         PINPol pin_policy = sess.createPINPolicy ("PIN",
                                                   PassphraseFormat.NUMERIC,
                                                   4 /* min_length */, 
@@ -1919,7 +1906,7 @@ public class SKSTest
           }
         try
           {
-            device.sks.exportKey (key.key_handle, puk_ok.getBytes ("UTF-8"));
+            device.sks.exportKey (key.key_handle, ok_puk.getBytes ("UTF-8"));
             assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPUKErrorCount () == 0);
           }
         catch (SKSException e)
@@ -1951,7 +1938,7 @@ public class SKSTest
                                            new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate (cn ());
             key.setSymmetricKey (symmetric_key);
             sess.closeSession ();
-            assertTrue ("Server must be set", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == KeyProtectionInfo.KEYBACKUP_SERVER);
+            assertTrue ("Server must be set", key.getKeyProtectionInfo ().getKeyBackup () == KeyProtectionInfo.KEYBACKUP_SERVER);
           }
       }
 
@@ -2292,7 +2279,7 @@ public class SKSTest
                                            key_usage).setCertificate (cn (), key_pair.getPublic ());
             sess.restorePrivateKey (key, key_pair.getPrivate ());
             sess.closeSession ();
-            assertTrue ("Server must be set", device.sks.getKeyProtectionInfo (key.key_handle).getKeyBackup () == KeyProtectionInfo.KEYBACKUP_SERVER);
+            assertTrue ("Server must be set", key.getKeyProtectionInfo ().getKeyBackup () == KeyProtectionInfo.KEYBACKUP_SERVER);
             Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
             cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
             byte[] enc = cipher.doFinal (TEST_STRING);
@@ -3008,5 +2995,58 @@ public class SKSTest
           {
             checkException (e, "Missing \"setCertificatePath\" for: Key.1");
           }
+      }
+
+    @Test
+    public void test72 () throws Exception
+      {
+        String ok_pin = "1563";
+        String ok_puk = "17644";
+        ProvSess sess = new ProvSess (device);
+        PUKPol puk_pol = sess.createPUKPolicy ("PUK",
+                                               PassphraseFormat.NUMERIC,
+                                               (short) 0 /* retry_limit*/, 
+                                               ok_puk /* puk */);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  puk_pol /* puk_policy */);
+        GenKey key = sess.createECKey ("Key.1",
+                                       ok_pin /* pin_value */,
+                                       pin_policy,
+                                       AppUsage.AUTHENTICATION).setCertificate (cn ());
+        sess.closeSession ();
+        for (int i = 0; i < 3; i++)
+          {
+            try
+              {
+                key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin + "3", TEST_STRING);
+                fail ("Bad PIN should not work");
+              }
+            catch (SKSException e)
+              {
+                authorizationErrorCheck (e);
+                assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPUKErrorCount () == 0);
+              }
+          }
+        KeyProtectionInfo kpi = key.getKeyProtectionInfo ();
+        assertTrue ("Should be PIN blocked", kpi.isPINBlocked ());
+        assertFalse ("Should not be PUK blocked", kpi.isPUKBlocked ());
+        try
+          {
+            key.unlockKey (ok_puk + "34");
+            fail ("Bad PUK should not work");
+          }
+        catch (SKSException e)
+          {
+            authorizationErrorCheck (e);
+            assertTrue ("PUK Error count", key.getKeyProtectionInfo ().getPUKErrorCount () == 0);
+          }
+        assertTrue ("Should be PIN blocked", kpi.isPINBlocked ());
+        assertFalse ("Should not be PUK blocked", kpi.isPUKBlocked ());
+        key.unlockKey (ok_puk);
+        key.signData (SignatureAlgorithms.ECDSA_SHA256, ok_pin, TEST_STRING);
       }
   }
