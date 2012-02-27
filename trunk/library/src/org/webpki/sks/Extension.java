@@ -17,6 +17,7 @@
 package org.webpki.sks;
 
 import java.io.UnsupportedEncodingException;
+
 import java.util.LinkedHashMap;
 
 public class Extension
@@ -56,7 +57,7 @@ public class Extension
     public Property[] getProperties () throws SKSException
       {
         LinkedHashMap<String,Property> properties = new LinkedHashMap<String,Property> ();
-        if (sub_type != 0x02) throw new SKSException ("Not a \"PropertyBag\"");
+        if (sub_type != SecureKeyStore.SUB_TYPE_PROPERTY_BAG) throw new SKSException ("Not a \"PropertyBag\"");
         int i = 0;
         try
           {

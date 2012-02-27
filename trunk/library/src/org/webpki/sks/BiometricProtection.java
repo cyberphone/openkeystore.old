@@ -20,10 +20,10 @@ import java.io.IOException;
 
 public enum BiometricProtection
   {
-    NONE             ("none",        (byte)0x00),
-    ALTERNATIVE      ("alternative", (byte)0x01),
-    COMBINED         ("combined",    (byte)0x02),
-    EXCLUSIVE        ("exclusive",   (byte)0x03);
+    NONE             ("none",        SecureKeyStore.BIOMETRIC_PROTECTION_NONE),
+    ALTERNATIVE      ("alternative", SecureKeyStore.BIOMETRIC_PROTECTION_ALTERNATIVE),
+    COMBINED         ("combined",    SecureKeyStore.BIOMETRIC_PROTECTION_COMBINED),
+    EXCLUSIVE        ("exclusive",   SecureKeyStore.BIOMETRIC_PROTECTION_EXCLUSIVE);
 
     private final String xml_name;       // As expressed in XML
     

@@ -22,8 +22,11 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import org.webpki.crypto.ECDomains;
+
 import org.webpki.sks.SecureKeyStore;
+
 import org.webpki.util.ArrayUtil;
+
 import org.webpki.xml.DOMWriterHelper;
 
 public abstract class KeySpecifier implements Serializable
@@ -88,10 +91,8 @@ public abstract class KeySpecifier implements Serializable
         @Override
         public byte[] getSKSValue () throws IOException
           {
-            return ArrayUtil.add (
-                ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_RSA}, short2bytes (key_size)),
-                ArrayUtil.add (short2bytes (fixed_exponent >>> 16), short2bytes (fixed_exponent))
-                          );
+            return ArrayUtil.add (ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_RSA}, short2bytes (key_size)),
+                                                 ArrayUtil.add (short2bytes (fixed_exponent >>> 16), short2bytes (fixed_exponent)));
           }
       }
 
@@ -126,8 +127,7 @@ public abstract class KeySpecifier implements Serializable
         @Override
         public byte[] getSKSValue () throws IOException
           {
-            return ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_EC},
-                                  named_curve.getURI ().getBytes ("UTF-8"));
+            return ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_EC}, named_curve.getURI ().getBytes ("UTF-8"));
           }
       }
   }

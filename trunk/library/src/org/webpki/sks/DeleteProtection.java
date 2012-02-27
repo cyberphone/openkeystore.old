@@ -20,10 +20,10 @@ import java.io.IOException;
 
 public enum DeleteProtection
   {
-    NONE              ("none",          (byte)0x00),
-    PIN               ("pin",           (byte)0x01),
-    PUK               ("puk",           (byte)0x02),
-    NON_DELETABLE     ("non-deletable", (byte)0x03);
+    NONE           ("none",          SecureKeyStore.EXPORT_DELETE_PROTECTION_NONE),
+    PIN            ("pin",           SecureKeyStore.EXPORT_DELETE_PROTECTION_PIN),
+    PUK            ("puk",           SecureKeyStore.EXPORT_DELETE_PROTECTION_PUK),
+    NON_DELETABLE  ("non-deletable", SecureKeyStore.EXPORT_DELETE_PROTECTION_NOT_ALLOWED);
 
     private final String xml_name;       // As expressed in XML
     

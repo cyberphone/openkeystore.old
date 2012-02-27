@@ -20,10 +20,10 @@ import java.io.IOException;
 
 public enum PassphraseFormat
   {
-    NUMERIC       ("numeric",      (byte)0x00),
-    ALPHANUMERIC  ("alphanumeric", (byte)0x01),
-    STRING        ("string",       (byte)0x02),
-    BINARY        ("binary",       (byte)0x03);
+    NUMERIC       ("numeric",      SecureKeyStore.PASSPHRASE_FORMAT_NUMERIC),
+    ALPHANUMERIC  ("alphanumeric", SecureKeyStore.PASSPHRASE_FORMAT_ALPHANUMERIC),
+    STRING        ("string",       SecureKeyStore.PASSPHRASE_FORMAT_STRING),
+    BINARY        ("binary",       SecureKeyStore.PASSPHRASE_FORMAT_BINARY);
 
     private final String xml_name;       // As expressed in XML
     

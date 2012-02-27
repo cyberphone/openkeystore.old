@@ -144,11 +144,6 @@ public class SKSTest
           }
       }
 
-    void deleteKey (GenKey key) throws SKSException
-      {
-        sks.deleteKey (key.key_handle, null);
-      }
-
     void checkException (SKSException e, String compare_message)
       {
         String m = e.getMessage ();
@@ -386,8 +381,7 @@ public class SKSTest
         return true;
       }
 
-    boolean PUKCheck (PassphraseFormat format,
-                              String puk) throws IOException, GeneralSecurityException
+    boolean PUKCheck (PassphraseFormat format, String puk) throws IOException, GeneralSecurityException
       {
         try
           {
@@ -1166,7 +1160,7 @@ public class SKSTest
                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
-        deleteKey (key1);
+        key1.deleteKey (null);
         assertFalse ("Key was not deleted", key1.exists ());
         assertTrue ("Key did not exist", key2.exists ());
         sessionTest (++q);
@@ -1183,7 +1177,7 @@ public class SKSTest
                                         AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         assertTrue (sess.exists ());
-        deleteKey (key1);
+        key1.deleteKey (null);
         assertFalse ("Key was not deleted", key1.exists ());
         sessionTest (q);
       }

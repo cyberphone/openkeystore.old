@@ -20,10 +20,10 @@ import java.io.IOException;
 
 public enum Grouping
   {
-    NONE                     ("none",               (byte)0x00),
-    SHARED                   ("shared",             (byte)0x01),
-    SIGNATURE_PLUS_STANDARD  ("signature+standard", (byte)0x02),
-    UNIQUE                   ("unique",             (byte)0x03);
+    NONE                     ("none",               SecureKeyStore.PIN_GROUPING_NONE),
+    SHARED                   ("shared",             SecureKeyStore.PIN_GROUPING_SHARED),
+    SIGNATURE_PLUS_STANDARD  ("signature+standard", SecureKeyStore.PIN_GROUPING_SIGN_PLUS_STD),
+    UNIQUE                   ("unique",             SecureKeyStore.PIN_GROUPING_UNIQUE);
 
     private final String xml_name;       // As expressed in XML
     

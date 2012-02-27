@@ -37,6 +37,7 @@ public interface SecureKeyStore
     int MAX_LENGTH_URI                        = 1000;
     int MAX_LENGTH_CRYPTO_DATA                = 16384;
     int MAX_LENGTH_EXTENSION_DATA             = 65536;
+    int MAX_RETRY_LIMIT                       = 10000;
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Method IDs are used "as is" in the MAC KDF
@@ -96,10 +97,10 @@ public interface SecureKeyStore
     ///////////////////////////////////////////////////////////////////////////////////
     // See "PIN and PUK Formats" in the SKS specification
     ///////////////////////////////////////////////////////////////////////////////////
-    byte PIN_FORMAT_NUMERIC                   = 0x00;
-    byte PIN_FORMAT_ALPHANUMERIC              = 0x01;
-    byte PIN_FORMAT_STRING                    = 0x02;
-    byte PIN_FORMAT_BINARY                    = 0x03;
+    byte PASSPHRASE_FORMAT_NUMERIC            = 0x00;
+    byte PASSPHRASE_FORMAT_ALPHANUMERIC       = 0x01;
+    byte PASSPHRASE_FORMAT_STRING             = 0x02;
+    byte PASSPHRASE_FORMAT_BINARY             = 0x03;
 
     ///////////////////////////////////////////////////////////////////////////////////
     // See "SubType" for "addExtension" in the SKS specification
@@ -145,7 +146,7 @@ public interface SecureKeyStore
 
     String ALGORITHM_KEY_ATTEST_1             = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
 
-    String ALGORITHM_SESSION_KEY_ATTEST_1     = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
+    String ALGORITHM_SESSION_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Miscellaneous

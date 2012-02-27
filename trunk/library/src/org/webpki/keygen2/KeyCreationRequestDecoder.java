@@ -185,11 +185,9 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
             format = PassphraseFormat.getPassphraseFormatFromString (ah.getString (FORMAT_ATTR));
 
-            group = Grouping.getGroupingFromString (ah.getStringConditional (GROUPING_ATTR,
-                                                                                   Grouping.NONE.getXMLName ()));
+            group = Grouping.getGroupingFromString (ah.getStringConditional (GROUPING_ATTR, Grouping.NONE.getXMLName ()));
 
-            input_method = InputMethod.getInputMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR,
-                                                                                     InputMethod.ANY.getXMLName ()));
+            input_method = InputMethod.getInputMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR, InputMethod.ANY.getXMLName ()));
             
             read_user_modifiable = ah.getStringConditional (USER_MODIFIABLE_ATTR) != null;
             user_modifiable = ah.getBooleanConditional (USER_MODIFIABLE_ATTR, false);

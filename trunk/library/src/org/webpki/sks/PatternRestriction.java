@@ -21,12 +21,12 @@ import java.util.Set;
 
 public enum PatternRestriction
   {
-    TWO_IN_A_ROW    ("two-in-a-row",   (byte)0x01),    // "11342" is flagged
-    THREE_IN_A_ROW  ("three-in-a-row", (byte)0x02),    // "111342" is flagged
-    SEQUENCE        ("sequence",       (byte)0x04),    // "abcdef" is flagged
-    REPEATED        ("repeated",       (byte)0x08),    // "abcdec" is flagged
-    MISSING_GROUP   ("missing-group",  (byte)0x10);    // The PIN must be "alphanumeric" and contain a mix of
-                                                       // letters, digits and punctuation characters 
+    TWO_IN_A_ROW    ("two-in-a-row",   SecureKeyStore.PIN_PATTERN_TWO_IN_A_ROW),    // "11342" is flagged
+    THREE_IN_A_ROW  ("three-in-a-row", SecureKeyStore.PIN_PATTERN_THREE_IN_A_ROW),  // "111342" is flagged
+    SEQUENCE        ("sequence",       SecureKeyStore.PIN_PATTERN_SEQUENCE),        // "abcdef" is flagged
+    REPEATED        ("repeated",       SecureKeyStore.PIN_PATTERN_REPEATED),        // "abcdec" is flagged
+    MISSING_GROUP   ("missing-group",  SecureKeyStore.PIN_PATTERN_MISSING_GROUP);   // The PIN must be "alphanumeric" and contain a mix of
+                                                                                    // letters, digits and punctuation characters 
 
     private final String xml_name;       // As expressed in XML
     

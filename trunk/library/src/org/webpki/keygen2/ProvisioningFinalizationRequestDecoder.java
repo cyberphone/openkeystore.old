@@ -22,6 +22,8 @@ import java.util.Vector;
 
 import java.security.cert.X509Certificate;
 
+import org.webpki.sks.SecureKeyStore;
+
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMReaderHelper;
@@ -124,7 +126,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         public byte[] getQualifier () throws IOException
           {
-            return new byte[0];
+            return SecureKeyStore.ZERO_LENGTH_ARRAY;
           }
         
         public abstract byte[] getExtensionData () throws IOException;
@@ -153,7 +155,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         @Override
         public byte getSubType ()
           {
-            return (byte)0x00;
+            return SecureKeyStore.SUB_TYPE_EXTENSION;
           }
 
 
@@ -180,7 +182,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         @Override
         public byte getSubType ()
           {
-            return (byte)0x01;
+            return SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION;
           }
   
   
@@ -217,7 +219,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         @Override
         public byte getSubType ()
           {
-            return (byte)0x02;
+            return SecureKeyStore.SUB_TYPE_PROPERTY_BAG;
           }
 
 
@@ -259,7 +261,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         @Override
         public byte getSubType ()
           {
-            return (byte)0x03;
+            return SecureKeyStore.SUB_TYPE_LOGOTYPE;
           }
   
         @Override

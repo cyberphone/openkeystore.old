@@ -696,6 +696,19 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 abort ("Invalid \"" + object_name + "\" value=" + value);
               }
           }
+
+        void passphraseFormatTest (byte format) throws SKSException
+          {
+            rangeTest (format, PASSPHRASE_FORMAT_NUMERIC, PASSPHRASE_FORMAT_BINARY, "Format");
+          }
+
+        void retryLimitTest (short retry_limit, short min) throws SKSException
+          {
+            if (retry_limit < min || retry_limit > MAX_RETRY_LIMIT)
+              {
+                abort ("Invalid \"Retry_limit\" value=" + retry_limit);
+              }
+          }
       }
 
 
@@ -914,7 +927,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         //////////////////////////////////////////////////////////////////////////////////////
         //  Special Algorithms
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm (ALGORITHM_SESSION_KEY_ATTEST_1, null, 0);
+        addAlgorithm (ALGORITHM_SESSION_ATTEST_1, null, 0);
 
         addAlgorithm (ALGORITHM_KEY_ATTEST_1, null, 0);
 
@@ -1052,7 +1065,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             if (provisioning.open == provisioning_state)
               {
                 return new EnumeratedProvisioningSession (provisioning.provisioning_handle,
-                                                          ALGORITHM_SESSION_KEY_ATTEST_1,
+                                                          ALGORITHM_SESSION_ATTEST_1,
                                                           provisioning.privacy_enabled,
                                                           provisioning.key_management_key,
                                                           provisioning.client_time,
@@ -1151,8 +1164,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 nonalphanum = true;
               }
           }
-        if ((pin_policy.format == PIN_FORMAT_NUMERIC && (loweralpha || nonalphanum || upperalpha)) ||
-            (pin_policy.format == PIN_FORMAT_ALPHANUMERIC && (loweralpha || nonalphanum)))
+        if ((pin_policy.format == PASSPHRASE_FORMAT_NUMERIC && (loweralpha || nonalphanum || upperalpha)) ||
+            (pin_policy.format == PASSPHRASE_FORMAT_ALPHANUMERIC && (loweralpha || nonalphanum)))
           {
             sks_error.abort ("PIN syntax error");
           }
@@ -1163,7 +1176,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         if ((pin_policy.pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0)
           {
             if (!upperalpha || !number ||
-                (pin_policy.format == PIN_FORMAT_STRING && (!loweralpha || !nonalphanum)))
+                (pin_policy.format == PASSPHRASE_FORMAT_STRING && (!loweralpha || !nonalphanum)))
               {
                 sks_error.abort ("Missing character group in PIN");
               }
@@ -2362,7 +2375,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder close_attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
         close_attestation.addArray (nonce);
-        close_attestation.addString (ALGORITHM_SESSION_KEY_ATTEST_1);
+        close_attestation.addString (ALGORITHM_SESSION_ATTEST_1);
         byte[] attestation = close_attestation.getResult ();
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2616,7 +2629,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check provisioning session algorithm compatibility
         ///////////////////////////////////////////////////////////////////////////////////
-        if (!algorithm.equals (ALGORITHM_SESSION_KEY_ATTEST_1))
+        if (!algorithm.equals (ALGORITHM_SESSION_ATTEST_1))
           {
             abort ("Unknown \"Algorithm\" : " + algorithm);
           }
@@ -3305,7 +3318,8 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.rangeTest (grouping, PIN_GROUPING_NONE, PIN_GROUPING_UNIQUE, "Grouping");
         provisioning.rangeTest (input_method, INPUT_METHOD_PROGRAMMATIC, INPUT_METHOD_ANY, "InputMethod");
-        provisioning.rangeTest (format, PIN_FORMAT_NUMERIC, PIN_FORMAT_BINARY, "Format");
+        provisioning.passphraseFormatTest (format);
+        provisioning.retryLimitTest (retry_limit, (short)1);
         if ((pattern_restrictions & ~(PIN_PATTERN_TWO_IN_A_ROW | 
                                       PIN_PATTERN_THREE_IN_A_ROW |
                                       PIN_PATTERN_SEQUENCE |
@@ -3327,7 +3341,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             provisioning.names.put (puk_policy_id, true); // Referenced
           }
         if ((pattern_restrictions & PIN_PATTERN_MISSING_GROUP) != 0 &&
-            format != PIN_FORMAT_ALPHANUMERIC && format != PIN_FORMAT_STRING)
+            format != PASSPHRASE_FORMAT_ALPHANUMERIC && format != PASSPHRASE_FORMAT_STRING)
           {
             provisioning.abort ("Incorrect \"Format\" for the \"missing-group\" PIN pattern policy");
           }
@@ -3390,6 +3404,26 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Perform PUK "sanity" checks
+        ///////////////////////////////////////////////////////////////////////////////////
+        provisioning.passphraseFormatTest (format);
+        provisioning.retryLimitTest (retry_limit, (short)0);
+        byte[] decrypted_puk_value = provisioning.decrypt (puk_value);
+        if (decrypted_puk_value.length == 0 || decrypted_puk_value.length > MAX_LENGTH_PIN_PUK)
+          {
+            provisioning.abort ("PUK length error");
+          }
+        for (int i = 0; i < decrypted_puk_value.length; i++)
+          {
+            byte c = decrypted_puk_value[i];
+            if ((c < '0' || c > '9') && (format == PASSPHRASE_FORMAT_NUMERIC ||
+                                        ((c < 'A' || c > 'Z') && format == PASSPHRASE_FORMAT_ALPHANUMERIC)))
+              {
+                provisioning.abort ("PUK syntax error");
+              }
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_PUK_POLICY);
@@ -3400,29 +3434,10 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         provisioning.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Perform PUK "sanity" checks
-        ///////////////////////////////////////////////////////////////////////////////////
-        provisioning.rangeTest (format, PIN_FORMAT_NUMERIC, PIN_FORMAT_BINARY, "Format");
-        puk_value = provisioning.decrypt (puk_value);
-        if (puk_value.length == 0 || puk_value.length > MAX_LENGTH_PIN_PUK)
-          {
-            provisioning.abort ("PUK length error");
-          }
-        for (int i = 0; i < puk_value.length; i++)
-          {
-            byte c = puk_value[i];
-            if ((c < '0' || c > '9') && (format == PIN_FORMAT_NUMERIC ||
-                                        ((c < 'A' || c > 'Z') && format == PIN_FORMAT_ALPHANUMERIC)))
-              {
-                provisioning.abort ("PUK syntax error");
-              }
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
         // Success, create object
         ///////////////////////////////////////////////////////////////////////////////////
         PUKPolicy puk_policy = new PUKPolicy (provisioning, id);
-        puk_policy.puk_value = puk_value;
+        puk_policy.puk_value = decrypted_puk_value;
         puk_policy.format = format;
         puk_policy.retry_limit = retry_limit;
         return puk_policy.puk_policy_handle;

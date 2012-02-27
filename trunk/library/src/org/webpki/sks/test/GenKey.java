@@ -190,7 +190,7 @@ public class GenKey
     
     public void changePIN (String old_pin, String new_pin) throws SKSException, IOException
       {
-        prov_sess.sks.changePIN (key_handle, old_pin.getBytes ("UTF-8"), new_pin.getBytes ("UTF-8"));
+        prov_sess.sks.changePIN (key_handle, getConditionalAuthorization (old_pin), getConditionalAuthorization (new_pin));
       }
     
     public byte[] signData (SignatureAlgorithms alg_id, String pin, byte[] data) throws IOException
@@ -198,64 +198,82 @@ public class GenKey
         return prov_sess.sks.signHashedData (key_handle,
                                              alg_id.getURI (),
                                              null,
-                                             pin == null ? null : pin.getBytes ("UTF-8"),
+                                             getConditionalAuthorization (pin),
                                              alg_id.getDigestAlgorithm ().digest (data));
       }
 
-    public byte[] asymmetricKeyDecrypt (AsymEncryptionAlgorithms alg_id, String pin, byte[] data) throws IOException
+    public byte[] asymmetricKeyDecrypt (AsymEncryptionAlgorithms alg_id, String pin, byte[] data) throws SKSException
       {
         return prov_sess.sks.asymmetricKeyDecrypt (key_handle,
                                                    alg_id.getURI (), 
                                                    null,
-                                                   pin == null ? null : pin.getBytes ("UTF-8"), 
+                                                   getConditionalAuthorization (pin), 
                                                    data);
       }
 
-    public byte[] symmetricKeyEncrypt (SymEncryptionAlgorithms alg_id, boolean mode, byte[] iv, String pin, byte[] data) throws IOException
+    public byte[] symmetricKeyEncrypt (SymEncryptionAlgorithms alg_id, boolean mode, byte[] iv, String pin, byte[] data) throws SKSException
       {
         return prov_sess.sks.symmetricKeyEncrypt (key_handle,
                                                   alg_id.getURI (),
                                                   mode,
                                                   iv,
-                                                  pin == null ? null : pin.getBytes ("UTF-8"),
+                                                  getConditionalAuthorization (pin),
                                                   data);
       }
 
-    public byte[] performHMAC (MacAlgorithms alg_id, String pin, byte[] data) throws IOException
+    public byte[] performHMAC (MacAlgorithms alg_id, String pin, byte[] data) throws SKSException
       {
         return prov_sess.sks.performHMAC (key_handle,
                                           alg_id.getURI (),
-                                          pin == null ? null : pin.getBytes ("UTF-8"),
+                                          getConditionalAuthorization (pin),
                                           data);
       }
 
-    public void postUpdateKey (GenKey target_key) throws IOException, GeneralSecurityException
+    public void postUpdateKey (GenKey target_key) throws SKSException, IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = getEECertMacBuilder ();
         byte[] authorization = target_key.getPostProvMac (upd_mac, prov_sess);
         prov_sess.sks.postUpdateKey (key_handle, 
-                                    target_key.key_handle,
-                                    authorization,
-                                    prov_sess.mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_POST_UPDATE_KEY));
+                                     target_key.key_handle,
+                                     authorization,
+                                     prov_sess.mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_POST_UPDATE_KEY));
       }
   
-    public void postCloneKey (GenKey target_key) throws IOException, GeneralSecurityException
+    public void postCloneKey (GenKey target_key) throws SKSException, IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = getEECertMacBuilder ();
         byte[] authorization = target_key.getPostProvMac (upd_mac, prov_sess);
         prov_sess.sks.postCloneKeyProtection (key_handle, 
-                                             target_key.key_handle,
-                                             authorization,
-                                             prov_sess.mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_POST_CLONE_KEY_PROTECTION));
+                                              target_key.key_handle,
+                                              authorization,
+                                              prov_sess.mac4call (upd_mac.getResult (), SecureKeyStore.METHOD_POST_CLONE_KEY_PROTECTION));
       }
 
-    public void unlockKey (String puk) throws IOException
+    public void unlockKey (String puk) throws SKSException
       {
-        prov_sess.sks.unlockKey (key_handle, puk.getBytes ("UTF-8"));
+        prov_sess.sks.unlockKey (key_handle, getConditionalAuthorization (puk));
       }
 
-    public void setPIN (String puk, String pin) throws IOException
+    public void setPIN (String puk, String pin) throws SKSException
       {
-        prov_sess.sks.setPIN (key_handle, puk.getBytes ("UTF-8"), pin.getBytes ("UTF-8"));
+        prov_sess.sks.setPIN (key_handle, getConditionalAuthorization (puk), getConditionalAuthorization (pin));
+      }
+
+    public void deleteKey (String authorization) throws SKSException
+      {
+        prov_sess.sks.deleteKey (key_handle, getConditionalAuthorization (authorization));
+      }
+
+    private byte[] getConditionalAuthorization (String authorization) throws SKSException
+      {
+        if (authorization == null) return null;
+        try
+          {
+            return authorization.getBytes ("UTF-8");
+          }
+        catch (IOException e)
+          {
+            throw new SKSException (e);
+          }
       }
   }

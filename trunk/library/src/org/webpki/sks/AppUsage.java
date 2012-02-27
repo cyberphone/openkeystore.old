@@ -20,10 +20,10 @@ import java.io.IOException;
 
 public enum AppUsage
   {
-    SIGNATURE                  ("signature",      (byte)0x00),
-    AUTHENTICATION             ("authentication", (byte)0x01),
-    ENCRYPTION                 ("encryption",     (byte)0x02),
-    UNIVERSAL                  ("universal",      (byte)0x03);
+    SIGNATURE       ("signature",      SecureKeyStore.APP_USAGE_SIGNATURE),
+    AUTHENTICATION  ("authentication", SecureKeyStore.APP_USAGE_AUTHENTICATION),
+    ENCRYPTION      ("encryption",     SecureKeyStore.APP_USAGE_ENCRYPTION),
+    UNIVERSAL       ("universal",      SecureKeyStore.APP_USAGE_UNIVERSAL);
 
     private final String xml_name;       // As expressed in XML
     
