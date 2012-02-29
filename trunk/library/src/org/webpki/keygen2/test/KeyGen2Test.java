@@ -355,8 +355,7 @@ public class KeyGen2Test
           {
             platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (xmldata);
             device_info = sks.getDeviceInfo ();
-            PlatformNegotiationResponseEncoder platform_response = 
-              new PlatformNegotiationResponseEncoder (platform_req);
+            PlatformNegotiationResponseEncoder platform_response = new PlatformNegotiationResponseEncoder (platform_req);
             Vector<Short> matches = new Vector<Short> ();
             for (short key_size : platform_req.getBasicCapabilities ().getRSAKeySizes ())
               {

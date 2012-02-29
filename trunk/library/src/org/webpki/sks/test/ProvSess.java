@@ -717,16 +717,6 @@ public class ProvSess
                                 mac4call (set_certificate.getResult (), SecureKeyStore.METHOD_SET_CERTIFICATE_PATH));
       }
     
-    public void restorePrivateKey (GenKey key, PrivateKey private_key) throws IOException, GeneralSecurityException
-      {
-        MacGenerator privk_mac = key.getEECertMacBuilder ();
-        byte[] encrypted_private_key = server_sess_key.encrypt (private_key.getEncoded ());
-        privk_mac.addArray (encrypted_private_key);
-        sks.restorePrivateKey (key.key_handle,
-                               encrypted_private_key,
-                               mac4call (privk_mac.getResult (), SecureKeyStore.METHOD_RESTORE_PRIVATE_KEY));
-      }
-
     public void postDeleteKey (GenKey key) throws IOException, GeneralSecurityException
       {
         MacGenerator upd_mac = new MacGenerator ();

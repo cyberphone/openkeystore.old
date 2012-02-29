@@ -688,7 +688,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
           {
             if (retry_limit < min || retry_limit > MAX_RETRY_LIMIT)
               {
-                abort ("Invalid \"Retry_limit\" value=" + retry_limit);
+                abort ("Invalid \"RetryLimit\" value=" + retry_limit);
               }
           }
       }
@@ -2762,6 +2762,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for duplicates and length errors
         ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.owner.rangeTest (sub_type, SUB_TYPE_EXTENSION, SUB_TYPE_LOGOTYPE, "SubType");
         if (type.length () == 0 || type.length () >  MAX_LENGTH_URI)
           {
             key_entry.owner.abort ("URI length error: " + type.length ());
@@ -2771,7 +2772,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
             key_entry.owner.abort ("Duplicate \"Type\" : " + type);
           }
         if (extension_data.length > (sub_type == SUB_TYPE_ENCRYPTED_EXTENSION ? 
-                                      MAX_LENGTH_EXTENSION_DATA + AES_CBC_PKCS5_PADDING : MAX_LENGTH_EXTENSION_DATA))
+                            MAX_LENGTH_EXTENSION_DATA + AES_CBC_PKCS5_PADDING : MAX_LENGTH_EXTENSION_DATA))
           {
             key_entry.owner.abort ("Extension data exceeds " + MAX_LENGTH_EXTENSION_DATA + " bytes");
           }
