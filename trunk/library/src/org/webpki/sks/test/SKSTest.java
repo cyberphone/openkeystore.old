@@ -867,7 +867,9 @@ public class SKSTest
               }
           }
         DeviceInfo dev = sks.getDeviceInfo ();
-        reference_implementation = SKSReferenceImplementation.SKS_VENDOR_DESCRIPTION.equals (dev.getVendorDescription ());
+        reference_implementation = SKSReferenceImplementation.SKS_VENDOR_DESCRIPTION.equals (dev.getVendorDescription ())
+                                                   ||
+                                   new Boolean (System.getProperty ("sks.referenceimplementation"));
         if (reference_implementation)
           {
             System.out.println ("Reference Implementation");
