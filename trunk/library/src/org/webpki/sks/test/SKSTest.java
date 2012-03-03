@@ -993,6 +993,20 @@ public class SKSTest
           {
             checkException (e, "Missing \"setCertificatePath\" for: Key.1");
           }
+        sess = new ProvSess (device);
+        try
+          {
+            sess.createRSAKey ("Key.1",
+                               1024 /* rsa_size */,
+                               "1234" /* pin_value */,
+                               null /* pin_policy */,
+                               AppUsage.AUTHENTICATION);
+            fail ("PIN without policy");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "\"PINValue\" expected to be empty");
+          }
       }
 
     @Test

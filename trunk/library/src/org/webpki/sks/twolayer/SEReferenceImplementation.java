@@ -286,7 +286,7 @@ public class SEReferenceImplementation
       }
 
 
-    int getShort (byte[] buffer, int index)
+    static int getShort (byte[] buffer, int index)
       {
         return ((buffer[index++] << 8) & 0xFFFF) + (buffer[index] & 0xFF);
       }
@@ -960,191 +960,89 @@ public class SEReferenceImplementation
         key_entry.symmetric_key = key_entry.owner.decrypt (symmetric_key);
       }
 
-
+*/
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                           setCertificatePath                               //
+    //                       setAndVerifyCertificatePath                          //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public synchronized void setCertificatePath (int key_handle,
-                                                 X509Certificate[] certificate_path,
-                                                 byte[] mac) throws SKSException
+    public static void setAndVerifyCertificatePath (SEProvisioningState se_provisioning_state,
+                                                    SEKeyState se_key_state,
+                                                    String id,
+                                                    PublicKey public_key,
+                                                    X509Certificate[] certificate_path,
+                                                    byte[] mac) throws SKSException
       {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Get key and associated provisioning session
-        ///////////////////////////////////////////////////////////////////////////////////
-        KeyEntry key_entry = getOpenKey (key_handle);
-
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = key_entry.owner.getMacBuilderForMethodCall (METHOD_SET_CERTIFICATE_PATH);
+        MacBuilder verifier = getMacBuilderForMethodCall (se_provisioning_state, SecureKeyStore.METHOD_SET_CERTIFICATE_PATH);
         try
           {
-            verifier.addArray (key_entry.public_key.getEncoded ());
-            verifier.addString (key_entry.id);
+            verifier.addArray (public_key.getEncoded ());
+            verifier.addString (id);
             for (X509Certificate certificate : certificate_path)
               {
                 byte[] der = certificate.getEncoded ();
-                if (der.length > MAX_LENGTH_CRYPTO_DATA)
+                if (der.length > SecureKeyStore.MAX_LENGTH_CRYPTO_DATA)
                   {
-                    key_entry.owner.abort ("Certificate for: " + key_entry.id + " exceeds " + MAX_LENGTH_CRYPTO_DATA + " bytes");
+                    abort ("Certificate for: " + id + " exceeds " + SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + " bytes");
                   }
                 verifier.addArray (der);
               }
           }
         catch (GeneralSecurityException e)
           {
-            key_entry.owner.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
+            abort (e.getMessage (), SKSException.ERROR_INTERNAL);
           }
-        key_entry.owner.verifyMac (verifier, mac);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Update public key value.  It has no use after "setCertificatePath" anyway...
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.public_key = certificate_path[0].getPublicKey ();
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check key material for SKS compliance
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.public_key instanceof RSAPublicKey)
-          {
-            checkRSAKeyCompatibility (getRSAKeySize((RSAPublicKey) key_entry.public_key),
-                                      ((RSAPublicKey) key_entry.public_key).getPublicExponent (),
-                                      key_entry.owner, key_entry.id);
-          }
-        else
-          {
-            checkECKeyCompatibility ((ECPublicKey) key_entry.public_key, key_entry.owner, key_entry.id);
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Store certificate path
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.certificate_path != null)
-          {
-            key_entry.owner.abort ("Multiple calls to \"setCertificatePath\" for: " + key_entry.id);
-          }
-        key_entry.certificate_path = certificate_path.clone ();
+        verifier.verify (mac);
       }
 
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                              createKeyEntry                                //
+    //                              createKeyPair                                 //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public synchronized KeyData createKeyEntry (int provisioning_handle,
-                                                String id,
-                                                String algorithm,
-                                                byte[] server_seed,
-                                                boolean device_pin_protection,
-                                                int pin_policy_handle,
-                                                byte[] pin_value,
-                                                boolean enable_pin_caching,
-                                                byte biometric_protection,
-                                                byte export_protection,
-                                                byte delete_protection,
-                                                byte app_usage,
-                                                String friendly_name,
-                                                byte[] key_specifier,
-                                                String[] endorsed_algorithms,
-                                                byte[] mac) throws SKSException
+    public static SEKeyData createKeyPair (SEProvisioningState se_provisioning_state,
+                                           String id,
+                                           String algorithm,
+                                           byte[] server_seed,
+                                           boolean device_pin_protection,
+                                           String pin_policy_id,
+                                           byte[] encrypted_pin_value,
+                                           boolean enable_pin_caching,
+                                           byte biometric_protection,
+                                           byte export_protection,
+                                           byte delete_protection,
+                                           byte app_usage,
+                                           String friendly_name,
+                                           byte[] key_specifier,
+                                           String[] endorsed_algorithms,
+                                           byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
-        // Get provisioning session
+        // Sanity check
         ///////////////////////////////////////////////////////////////////////////////////
-        Provisioning provisioning = getOpenProvisioningSession (provisioning_handle);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Validate input as much as possible
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (!algorithm.equals (ALGORITHM_KEY_ATTEST_1))
-          {
-            provisioning.abort ("Unsupported \"Algorithm\" : " + algorithm, SKSException.ERROR_ALGORITHM);
-          }
-        if (server_seed != null && (server_seed.length == 0 || server_seed.length > 32))
-          {
-            provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
-          }
-        provisioning.rangeTest (export_protection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, "ExportProtection");
-        provisioning.rangeTest (delete_protection, EXPORT_DELETE_PROTECTION_NONE, EXPORT_DELETE_PROTECTION_NOT_ALLOWED, "DeleteProtection");
-        provisioning.rangeTest (app_usage, APP_USAGE_SIGNATURE, APP_USAGE_UNIVERSAL, "AppUsage");
-        provisioning.rangeTest (biometric_protection, BIOMETRIC_PROTECTION_NONE, BIOMETRIC_PROTECTION_EXCLUSIVE, "BiometricProtection");
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Get proper PIN policy ID
-        ///////////////////////////////////////////////////////////////////////////////////
-        PINPolicy pin_policy = null;
-        boolean decrypt_pin = false;
-        String pin_policy_id = CRYPTO_STRING_NOT_AVAILABLE;
-        boolean pin_protection = true;
-        if (device_pin_protection)
-          {
-            pin_policy_id = CRYPTO_STRING_DEVICE_PIN;
-            if (pin_policy_handle != 0)
-              {
-                provisioning.abort ("Device PIN mixed with PIN policy ojbect");
-              }
-          }
-        else if (pin_policy_handle != 0)
-          {
-            pin_policy = pin_policies.get (pin_policy_handle);
-            if (pin_policy == null || pin_policy.owner != provisioning)
-              {
-                provisioning.abort ("Referenced PIN policy object not found");
-              }
-            if (enable_pin_caching && pin_policy.input_method != INPUT_METHOD_TRUSTED_GUI)
-              {
-                provisioning.abort ("\"EnablePINCaching\" must be combined with \"trusted-gui\"");
-              }
-            pin_policy_id = pin_policy.id;
-            provisioning.names.put (pin_policy_id, true); // Referenced
-            decrypt_pin = !pin_policy.user_defined;
-          }
-        else
-          {
-            verifyExportDeleteProtection (delete_protection, EXPORT_DELETE_PROTECTION_PIN, provisioning);
-            verifyExportDeleteProtection (export_protection, EXPORT_DELETE_PROTECTION_PIN, provisioning);
-            pin_protection = false;
-            if (enable_pin_caching)
-              {
-                provisioning.abort ("\"EnablePINCaching\" without PIN");
-              }
-          }
-        if (biometric_protection != BIOMETRIC_PROTECTION_NONE &&
-            ((biometric_protection != BIOMETRIC_PROTECTION_EXCLUSIVE) ^ pin_protection))
-          {
-            provisioning.abort ("Invalid \"BiometricProtection\" and PIN combination");
-          }
-        if (pin_policy == null || pin_policy.puk_policy == null)
-          {
-            verifyExportDeleteProtection (delete_protection, EXPORT_DELETE_PROTECTION_PUK, provisioning);
-            verifyExportDeleteProtection (export_protection, EXPORT_DELETE_PROTECTION_PUK, provisioning);
-          }
+        checkIDSyntax ("ID", id);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_ENTRY);
+        MacBuilder verifier = getMacBuilderForMethodCall (se_provisioning_state, SecureKeyStore.METHOD_CREATE_KEY_ENTRY);
         verifier.addString (id);
         verifier.addString (algorithm);
-        verifier.addArray (server_seed == null ? ZERO_LENGTH_ARRAY : server_seed);
+        verifier.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
         verifier.addString (pin_policy_id);
-        if (decrypt_pin)
+        byte[] decrypted_pin_value = null;
+        if (encrypted_pin_value == null)
           {
-            verifier.addArray (pin_value);
-            pin_value = provisioning.decrypt (pin_value);
+            verifier.addString (SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE);
           }
         else
           {
-            if (pin_value != null)
-              {
-                pin_value = pin_value.clone ();
-              }
-            verifier.addString (CRYPTO_STRING_NOT_AVAILABLE);
+            verifier.addArray (encrypted_pin_value);
+            decrypted_pin_value = decrypt (se_provisioning_state, encrypted_pin_value);
           }
         verifier.addBool (enable_pin_caching);
         verifier.addByte (biometric_protection);
@@ -1153,7 +1051,6 @@ public class SEReferenceImplementation
         verifier.addByte (app_usage);
         verifier.addString (friendly_name == null ? "" : friendly_name);
         verifier.addArray (key_specifier);
-        LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
         String prev_alg = "\0";
         for (String endorsed_algorithm : endorsed_algorithms)
           {
@@ -1162,42 +1059,20 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             if (prev_alg.compareTo (endorsed_algorithm) >= 0)
               {
-                provisioning.abort ("Duplicate or incorrectly sorted algorithm: " + endorsed_algorithm);
+                abort ("Duplicate or incorrectly sorted algorithm: " + endorsed_algorithm);
               }
             Algorithm alg = supported_algorithms.get (endorsed_algorithm);
             if (alg == null)
               {
-                provisioning.abort ("Unsupported algorithm: " + endorsed_algorithm);
+                abort ("Unsupported algorithm: " + endorsed_algorithm);
               }
             if ((alg.mask & ALG_NONE) != 0 && endorsed_algorithms.length > 1)
               {
-                provisioning.abort ("Algorithm must be alone: " + endorsed_algorithm);
+                abort ("Algorithm must be alone: " + endorsed_algorithm);
               }
-            temp_endorsed.add (prev_alg = endorsed_algorithm);
             verifier.addString (endorsed_algorithm);
           }
-        provisioning.verifyMac (verifier, mac);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Perform a gazillion tests on PINs if applicable
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (pin_policy == null)
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // PIN value requires a defined PIN policy object
-            ///////////////////////////////////////////////////////////////////////////////////
-            if (pin_value != null)
-              {
-                provisioning.abort ("\"PINValue\" expected to be empty");
-              }
-          }
-        else
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Testing the actual PIN value
-            ///////////////////////////////////////////////////////////////////////////////////
-            verifyPINPolicyCompliance (false, pin_value, pin_policy, app_usage, provisioning);
-          }
+        verifier.verify (mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Decode key algorithm specifier
@@ -1205,25 +1080,25 @@ public class SEReferenceImplementation
         AlgorithmParameterSpec alg_par_spec = null;
         if (key_specifier == null || key_specifier.length == 0)
           {
-            provisioning.abort ("Empty \"KeySpecifier\"");
+            abort ("Empty \"KeySpecifier\"");
           }
-        if (key_specifier[0] == KEY_ALGORITHM_TYPE_RSA)
+        if (key_specifier[0] == SecureKeyStore.KEY_ALGORITHM_TYPE_RSA)
           {
             if (key_specifier.length != 7)
               {
-                provisioning.abort ("Incorrectly formatted RSA \"KeySpecifier\"");
+                abort ("Incorrectly formatted RSA \"KeySpecifier\"");
               }
             int rsa_key_size = getShort (key_specifier, 1);
             BigInteger exponent = BigInteger.valueOf ((getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5));
             if (!SKS_RSA_EXPONENT_SUPPORT && exponent.intValue () != 0)
               {
-                provisioning.abort ("Explicit RSA exponent setting not supported by this device");
+                abort ("Explicit RSA exponent setting not supported by this device");
               }
-            checkRSAKeyCompatibility (rsa_key_size, exponent, provisioning, "\"KeySpecifier\"");
+            checkRSAKeyCompatibility (rsa_key_size, exponent, "\"KeySpecifier\"");
             alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size,
                                                        exponent.intValue () == 0 ? RSAKeyGenParameterSpec.F4 : exponent);
           }
-        else if (key_specifier[0] == KEY_ALGORITHM_TYPE_EC)
+        else if (key_specifier[0] == SecureKeyStore.KEY_ALGORITHM_TYPE_EC)
           {
             StringBuffer ec_uri = new StringBuffer ();
             for (int i = 1; i < key_specifier.length; i++)
@@ -1233,13 +1108,13 @@ public class SEReferenceImplementation
             Algorithm alg = supported_algorithms.get (ec_uri.toString ());
             if (alg == null || (alg.mask & ALG_EC_CRV) == 0)
               {
-                provisioning.abort ("Unsupported eliptic curve: " + ec_uri + " in \"KeySpecifier\"");
+                abort ("Unsupported eliptic curve: " + ec_uri + " in \"KeySpecifier\"");
               }
             alg_par_spec = new ECGenParameterSpec (alg.jce_name);
           }
         else
           {
-            provisioning.abort ("Unknown key type in \"KeySpecifier\"");
+            abort ("Unknown key type in \"KeySpecifier\"");
           }
 
         try
@@ -1257,7 +1132,7 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Create key attest
             ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder cka = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
+            MacBuilder cka = getMacBuilderForMethodCall (se_provisioning_state, SecureKeyStore.KDF_DEVICE_ATTESTATION);
             cka.addString (id);
             cka.addArray (public_key.getEncoded ());
             byte[] attestation = cka.getResult ();
@@ -1265,30 +1140,23 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Finally, create a key entry
             ///////////////////////////////////////////////////////////////////////////////////
-            KeyEntry key_entry = new KeyEntry (provisioning, id);
-            provisioning.names.put (id, true); // Referenced (for "closeProvisioningSession")
-            key_entry.pin_policy = pin_policy;
-            key_entry.friendly_name = friendly_name;
-            key_entry.pin_value = pin_value;
-            key_entry.public_key = public_key;
-            key_entry.private_key = private_key;
-            key_entry.app_usage = app_usage;
-            key_entry.device_pin_protection = device_pin_protection;
-            key_entry.enable_pin_caching = enable_pin_caching;
-            key_entry.biometric_protection = biometric_protection;
-            key_entry.export_protection = export_protection;
-            key_entry.delete_protection = delete_protection;
-            key_entry.endorsed_algorithms = temp_endorsed;
-            return new KeyData (key_entry.key_handle, public_key, attestation);
+            SEKeyState se_key_state = new SEKeyState ();
+            se_key_state.private_key = private_key;
+            SEKeyData se_key_data = new SEKeyData ();
+            se_key_data.se_key_state = se_key_state;
+            se_key_data.attestation = attestation;
+            se_key_data.public_key = public_key;
+            se_key_data.decrypted_pin_value = decrypted_pin_value;
+            return se_key_data;
           }
         catch (GeneralSecurityException e)
           {
-            provisioning.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
+            abort (e.getMessage (), SKSException.ERROR_INTERNAL);
           }
         return null;    // For the compiler only...
       }
 
-*/
+
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
@@ -1310,6 +1178,11 @@ public class SEReferenceImplementation
                                         byte input_method,
                                         byte[] mac) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Sanity check
+        ///////////////////////////////////////////////////////////////////////////////////
+        checkIDSyntax ("ID", id);
+
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1341,6 +1214,11 @@ public class SEReferenceImplementation
                                       short retry_limit,
                                       byte[] mac) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Sanity check
+        ///////////////////////////////////////////////////////////////////////////////////
+        checkIDSyntax ("ID", id);
+
         ///////////////////////////////////////////////////////////////////////////////////
         // Get value
         ///////////////////////////////////////////////////////////////////////////////////

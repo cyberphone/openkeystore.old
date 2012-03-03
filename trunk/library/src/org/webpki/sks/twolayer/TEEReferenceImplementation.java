@@ -23,28 +23,18 @@ import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
-import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.Signature;
 
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECKey;
-import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAKey;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 
 import java.util.Arrays;
@@ -55,7 +45,6 @@ import java.util.LinkedHashSet;
 import java.util.Vector;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
 
 import javax.crypto.spec.IvParameterSpec;
@@ -175,6 +164,8 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
         byte app_usage;
 
         PublicKey public_key;     // In this implementation overwritten by "setCertificatePath"
+
+        SEKeyState se_key_state;
 /* TODO
         PrivateKey private_key;   // Overwritten if "restorePivateKey" is called
         byte[] symmetric_key;     // Defined by "importSymmetricKey"
@@ -203,6 +194,7 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
 
         LinkedHashMap<String,ExtObject> extensions = new LinkedHashMap<String,ExtObject> ();
+
 
 
         KeyEntry (Provisioning owner, String id) throws SKSException
@@ -1635,6 +1627,11 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
         KeyEntry key_entry = getStdKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (authorization);
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Check that the encryption algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
 /* TODO
@@ -1644,11 +1641,6 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
           }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify PIN (in any)
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.verifyPIN (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -1687,6 +1679,11 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
         KeyEntry key_entry = getStdKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (authorization);
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Enforce the data limit
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.checkCryptoDataSize (data);
@@ -1706,11 +1703,6 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
             abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
           }
 */
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify PIN (in any)
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.verifyPIN (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -1754,6 +1746,11 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
         KeyEntry key_entry = getStdKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (authorization);
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Check that the key agreement algorithm is known and applicable
         ///////////////////////////////////////////////////////////////////////////////////
 /* TODO
@@ -1768,11 +1765,6 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Check that the key type matches the algorithm
         ///////////////////////////////////////////////////////////////////////////////////
         checkECKeyCompatibility (public_key, this, "\"PublicKey\"");
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify PIN (in any)
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.verifyPIN (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -1813,6 +1805,11 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
         KeyEntry key_entry = getStdKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (authorization);
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Enforce the data limit
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.checkCryptoDataSize (data);
@@ -1838,11 +1835,6 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
             abort ("Data must be a multiple of 16 bytes for: " + algorithm + (mode ? " encryption" : " decryption"));
           }
 */
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify PIN (in any)
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.verifyPIN (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -1905,6 +1897,11 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
         KeyEntry key_entry = getStdKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Verify PIN (in any)
+        ///////////////////////////////////////////////////////////////////////////////////
+        key_entry.verifyPIN (authorization);
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Enforce the data limit
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.checkCryptoDataSize (data);
@@ -1915,11 +1912,6 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
 /* TODO
         Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_HMAC);
 */
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify PIN (in any)
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.verifyPIN (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -2798,47 +2790,26 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
         KeyEntry key_entry = getOpenKey (key_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
+        // Verify MAC through the SE
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = key_entry.owner.getMacBuilderForMethodCall (METHOD_SET_CERTIFICATE_PATH);
         try
           {
-            verifier.addArray (key_entry.public_key.getEncoded ());
-            verifier.addString (key_entry.id);
-            for (X509Certificate certificate : certificate_path)
-              {
-                byte[] der = certificate.getEncoded ();
-                if (der.length > MAX_LENGTH_CRYPTO_DATA)
-                  {
-                    key_entry.owner.abort ("Certificate for: " + key_entry.id + " exceeds " + MAX_LENGTH_CRYPTO_DATA + " bytes");
-                  }
-                verifier.addArray (der);
-              }
+            SEReferenceImplementation.setAndVerifyCertificatePath (key_entry.owner.se_provisioning_state,
+                                                                   key_entry.se_key_state,
+                                                                   key_entry.id,
+                                                                   key_entry.public_key,
+                                                                   certificate_path,
+                                                                   mac);
           }
-        catch (GeneralSecurityException e)
+        catch (SKSException e)
           {
-            key_entry.owner.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
+            key_entry.owner.abort (e);
           }
-        key_entry.owner.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Update public key value.  It has no use after "setCertificatePath" anyway...
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.public_key = certificate_path[0].getPublicKey ();
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check key material for SKS compliance
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (key_entry.public_key instanceof RSAPublicKey)
-          {
-            checkRSAKeyCompatibility (getRSAKeySize((RSAPublicKey) key_entry.public_key),
-                                      ((RSAPublicKey) key_entry.public_key).getPublicExponent (),
-                                      key_entry.owner, key_entry.id);
-          }
-        else
-          {
-            checkECKeyCompatibility ((ECPublicKey) key_entry.public_key, key_entry.owner, key_entry.id);
-          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Store certificate path
@@ -2934,6 +2905,10 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
               {
                 provisioning.abort ("\"EnablePINCaching\" without PIN");
               }
+            if (pin_value != null)
+              {
+                provisioning.abort ("\"PINValue\" expected to be empty");
+              }
           }
         if (biometric_protection != BIOMETRIC_PROTECTION_NONE &&
             ((biometric_protection != BIOMETRIC_PROTECTION_EXCLUSIVE) ^ pin_protection))
@@ -2947,72 +2922,45 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
+        // Verify MAC and get keys through the SE
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_ENTRY);
-        verifier.addString (id);
-        verifier.addString (algorithm);
-        verifier.addArray (server_seed == null ? ZERO_LENGTH_ARRAY : server_seed);
-        verifier.addString (pin_policy_id);
-        if (decrypt_pin)
+        SEKeyData se_key_data = null;
+        try
           {
-            verifier.addArray (pin_value);
-            pin_value = provisioning.decrypt (pin_value);
+            se_key_data = SEReferenceImplementation.createKeyPair (provisioning.se_provisioning_state,
+                                                                   id,
+                                                                   algorithm,
+                                                                   server_seed,
+                                                                   device_pin_protection,
+                                                                   pin_policy_id,
+                                                                   decrypt_pin ? pin_value : null,
+                                                                   enable_pin_caching,
+                                                                   biometric_protection,
+                                                                   export_protection,
+                                                                   delete_protection,
+                                                                   app_usage,
+                                                                   friendly_name,
+                                                                   key_specifier,
+                                                                   endorsed_algorithms,
+                                                                   mac);
           }
-        else
+        catch (SKSException e)
           {
-            if (pin_value != null)
-              {
-                pin_value = pin_value.clone ();
-              }
-            verifier.addString (CRYPTO_STRING_NOT_AVAILABLE);
+            provisioning.abort (e);
           }
-        verifier.addBool (enable_pin_caching);
-        verifier.addByte (biometric_protection);
-        verifier.addByte (export_protection);
-        verifier.addByte (delete_protection);
-        verifier.addByte (app_usage);
-        verifier.addString (friendly_name == null ? "" : friendly_name);
-        verifier.addArray (key_specifier);
-        LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
-        String prev_alg = "\0";
-        for (String endorsed_algorithm : endorsed_algorithms)
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Check that the algorithms are sorted and known
-            ///////////////////////////////////////////////////////////////////////////////////
-            if (prev_alg.compareTo (endorsed_algorithm) >= 0)
-              {
-                provisioning.abort ("Duplicate or incorrectly sorted algorithm: " + endorsed_algorithm);
-              }
-            Algorithm alg = supported_algorithms.get (endorsed_algorithm);
-            if (alg == null)
-              {
-                provisioning.abort ("Unsupported algorithm: " + endorsed_algorithm);
-              }
-            if ((alg.mask & ALG_NONE) != 0 && endorsed_algorithms.length > 1)
-              {
-                provisioning.abort ("Algorithm must be alone: " + endorsed_algorithm);
-              }
-            temp_endorsed.add (prev_alg = endorsed_algorithm);
-            verifier.addString (endorsed_algorithm);
-          }
-        provisioning.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Perform a gazillion tests on PINs if applicable
         ///////////////////////////////////////////////////////////////////////////////////
-        if (pin_policy == null)
+        if (decrypt_pin)
           {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // PIN value requires a defined PIN policy object
-            ///////////////////////////////////////////////////////////////////////////////////
-            if (pin_value != null)
-              {
-                provisioning.abort ("\"PINValue\" expected to be empty");
-              }
+            pin_value = se_key_data.decrypted_pin_value;
           }
-        else
+        else if (pin_value != null)
+          {
+            pin_value = pin_value.clone ();
+          }
+        if (pin_policy != null)
           {
             ///////////////////////////////////////////////////////////////////////////////////
             // Testing the actual PIN value
@@ -3021,94 +2969,28 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Decode key algorithm specifier
+        // Finally, create a key entry
         ///////////////////////////////////////////////////////////////////////////////////
-        AlgorithmParameterSpec alg_par_spec = null;
-        if (key_specifier == null || key_specifier.length == 0)
+        KeyEntry key_entry = new KeyEntry (provisioning, id);
+        provisioning.names.put (id, true); // Referenced (for "closeProvisioningSession")
+        key_entry.pin_policy = pin_policy;
+        key_entry.friendly_name = friendly_name;
+        key_entry.pin_value = pin_value;
+        key_entry.public_key = se_key_data.public_key;
+        key_entry.se_key_state = se_key_data.se_key_state;
+        key_entry.app_usage = app_usage;
+        key_entry.device_pin_protection = device_pin_protection;
+        key_entry.enable_pin_caching = enable_pin_caching;
+        key_entry.biometric_protection = biometric_protection;
+        key_entry.export_protection = export_protection;
+        key_entry.delete_protection = delete_protection;
+        LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
+        for (String endorsed_algorithm : endorsed_algorithms)
           {
-            provisioning.abort ("Empty \"KeySpecifier\"");
+            temp_endorsed.add (endorsed_algorithm);
           }
-        if (key_specifier[0] == KEY_ALGORITHM_TYPE_RSA)
-          {
-            if (key_specifier.length != 7)
-              {
-                provisioning.abort ("Incorrectly formatted RSA \"KeySpecifier\"");
-              }
-            int rsa_key_size = getShort (key_specifier, 1);
-            BigInteger exponent = BigInteger.valueOf ((getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5));
-            if (!SKS_RSA_EXPONENT_SUPPORT && exponent.intValue () != 0)
-              {
-                provisioning.abort ("Explicit RSA exponent setting not supported by this device");
-              }
-            checkRSAKeyCompatibility (rsa_key_size, exponent, provisioning, "\"KeySpecifier\"");
-            alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size,
-                                                       exponent.intValue () == 0 ? RSAKeyGenParameterSpec.F4 : exponent);
-          }
-        else if (key_specifier[0] == KEY_ALGORITHM_TYPE_EC)
-          {
-            StringBuffer ec_uri = new StringBuffer ();
-            for (int i = 1; i < key_specifier.length; i++)
-              {
-                ec_uri.append ((char) key_specifier[i]);
-              }
-            Algorithm alg = supported_algorithms.get (ec_uri.toString ());
-            if (alg == null || (alg.mask & ALG_EC_CRV) == 0)
-              {
-                provisioning.abort ("Unsupported eliptic curve: " + ec_uri + " in \"KeySpecifier\"");
-              }
-            alg_par_spec = new ECGenParameterSpec (alg.jce_name);
-          }
-        else
-          {
-            provisioning.abort ("Unknown key type in \"KeySpecifier\"");
-          }
-
-        try
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // At last, generate the desired key-pair
-            ///////////////////////////////////////////////////////////////////////////////////
-            SecureRandom secure_random = server_seed == null ? new SecureRandom () : new SecureRandom (server_seed);
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance (alg_par_spec instanceof RSAKeyGenParameterSpec ? "RSA" : "EC");
-            kpg.initialize (alg_par_spec, secure_random);
-            KeyPair key_pair = kpg.generateKeyPair ();
-            PublicKey public_key = key_pair.getPublic ();
-            PrivateKey private_key = key_pair.getPrivate ();
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Create key attest
-            ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder cka = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
-            cka.addString (id);
-            cka.addArray (public_key.getEncoded ());
-            byte[] attestation = cka.getResult ();
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Finally, create a key entry
-            ///////////////////////////////////////////////////////////////////////////////////
-            KeyEntry key_entry = new KeyEntry (provisioning, id);
-            provisioning.names.put (id, true); // Referenced (for "closeProvisioningSession")
-            key_entry.pin_policy = pin_policy;
-            key_entry.friendly_name = friendly_name;
-            key_entry.pin_value = pin_value;
-            key_entry.public_key = public_key;
-/* TODO
-            key_entry.private_key = private_key;
-*/
-            key_entry.app_usage = app_usage;
-            key_entry.device_pin_protection = device_pin_protection;
-            key_entry.enable_pin_caching = enable_pin_caching;
-            key_entry.biometric_protection = biometric_protection;
-            key_entry.export_protection = export_protection;
-            key_entry.delete_protection = delete_protection;
-            key_entry.endorsed_algorithms = temp_endorsed;
-            return new KeyData (key_entry.key_handle, public_key, attestation);
-          }
-        catch (GeneralSecurityException e)
-          {
-            provisioning.abort (e.getMessage (), SKSException.ERROR_INTERNAL);
-          }
-        return null;    // For the compiler only...
+        key_entry.endorsed_algorithms = temp_endorsed;
+        return new KeyData (key_entry.key_handle, se_key_data.public_key, se_key_data.attestation);
       }
 
 
@@ -3175,7 +3057,7 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Verify object through the SE
+        // Verify MAC through the SE
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
@@ -3241,7 +3123,7 @@ public class TEEReferenceImplementation implements SKSError, SecureKeyStore, Ser
         provisioning.retryLimitTest (retry_limit, (short)0);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Get the decrypted value through the SE
+        // Verify MAC and get the decrypted value through the SE
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] decrypted_puk_value = null;
         try

@@ -640,7 +640,14 @@ public class ProvSess
         key_pair_mac.addString (attestation_algorithm);
         key_pair_mac.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
         byte[] encrypted_pin_value = null;
-        if (pin_policy != null)
+        if (pin_policy == null)
+          {
+            if (pin_value != null)
+              {
+                encrypted_pin_value = pin_value.getBytes ("UTF-8");
+              }
+          }
+        else
           {
             encrypted_pin_value = getPassphraseBytes (pin_policy.format, pin_value);
             if (!pin_policy.user_defined)

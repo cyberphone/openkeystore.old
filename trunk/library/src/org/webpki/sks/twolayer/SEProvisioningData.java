@@ -4,7 +4,7 @@ import java.security.interfaces.ECPublicKey;
 
 public class SEProvisioningData
   {
-    SEProvisioningState se_provisioning_state;
+    public SEProvisioningState se_provisioning_state;
 
     public String client_session_id;
 
