@@ -1,14 +1,20 @@
 package org.webpki.sks.twolayer.se;
 
 import java.security.PrivateKey;
+import java.security.interfaces.RSAKey;
 
 public class SEKeyState
   {
-    public boolean is_symmetric_key;
+    boolean is_symmetric_key;
     
-    public boolean exportable;
+    boolean exportable;
     
-    public byte[] symmetric_key;
+    byte[] symmetric_key;
     
-    public PrivateKey private_key;
+    PrivateKey private_key;
+    
+    boolean isRSA ()
+      {
+        return private_key instanceof RSAKey;
+      }
   }

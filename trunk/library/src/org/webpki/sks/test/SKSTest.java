@@ -2378,7 +2378,7 @@ public class SKSTest
                                            good_pin /* pin_value */,
                                            pin_policy,
                                            key_usage).setCertificate (cn (), key_pair.getPublic ());
-            key.restorePrivateKey (key_pair.getPrivate ());
+            key.setPrivateKey (key_pair.getPrivate ());
             sess.closeSession ();
             assertTrue ("Server must be set", key.getKeyProtectionInfo ().getKeyBackup () == KeyProtectionInfo.KEYBACKUP_SERVER);
             Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
@@ -2700,12 +2700,12 @@ public class SKSTest
                                        null /* pin_value */,
                                        null /* pin_policy */,
                                        AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
-        key.restorePrivateKey (key_pair.getPrivate ());
+        key.setPrivateKey (key_pair.getPrivate ());
         GenKey key2 = sess.createECKey ("Key.2",
                                         null /* pin_value */,
                                         null /* pin_policy */,
                                         AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
-        key2.restorePrivateKey (key_pair.getPrivate ());
+        key2.setPrivateKey (key_pair.getPrivate ());
         try
           {
             sess.closeSession ();
@@ -2720,14 +2720,14 @@ public class SKSTest
                                 null /* pin_value */,
                                 null /* pin_policy */,
                                 AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
-        key.restorePrivateKey (key_pair.getPrivate ());
+        key.setPrivateKey (key_pair.getPrivate ());
         sess.closeSession ();
         sess = new ProvSess (device);
         key2 = sess.createECKey ("Key.4",
                                  null /* pin_value */,
                                  null /* pin_policy */,
                                  AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
-        key2.restorePrivateKey (key_pair.getPrivate ());
+        key2.setPrivateKey (key_pair.getPrivate ());
         try
           {
             sess.closeSession ();
@@ -2742,14 +2742,14 @@ public class SKSTest
                                 null /* pin_value */,
                                 null /* pin_policy */,
                                 AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
-        key.restorePrivateKey (key_pair.getPrivate ());
+        key.setPrivateKey (key_pair.getPrivate ());
         sess.closeSession ();
         ProvSess sess2 = new ProvSess (device);
         GenKey new_key = sess2.createECKey ("Key.4",
                                             null /* pin_value */,
                                             null /* pin_policy */,
                                             AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
-        new_key.restorePrivateKey (key_pair.getPrivate ());
+        new_key.setPrivateKey (key_pair.getPrivate ());
         new_key.postUpdateKey (key);
         sess2.closeSession ();
         sess = new ProvSess (device, 0);
@@ -2757,14 +2757,14 @@ public class SKSTest
                                 null /* pin_value */,
                                 null /* pin_policy */,
                                 AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
-        key.restorePrivateKey (key_pair.getPrivate ());
+        key.setPrivateKey (key_pair.getPrivate ());
         sess.closeSession ();
         sess2 = new ProvSess (device);
         new_key = sess2.createECKey ("Key.4",
                                      null /* pin_value */,
                                      null /* pin_policy */,
                                      AppUsage.AUTHENTICATION).setCertificatePath (key.getCertificatePath ());
-        new_key.restorePrivateKey (key_pair.getPrivate ());
+        new_key.setPrivateKey (key_pair.getPrivate ());
         sess2.postDeleteKey (key);
         sess2.closeSession ();
       }
@@ -2852,7 +2852,7 @@ public class SKSTest
             KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
             kpg.initialize (1024);
             KeyPair key_pair = kpg.generateKeyPair ();
-            key.restorePrivateKey (key_pair.getPrivate ());
+            key.setPrivateKey (key_pair.getPrivate ());
             sess.closeSession ();
             fail ("Duplicate import");
           }
@@ -2883,7 +2883,7 @@ public class SKSTest
             KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
             kpg.initialize (1024);
             KeyPair key_pair = kpg.generateKeyPair ();
-            key.restorePrivateKey (key_pair.getPrivate ());
+            key.setPrivateKey (key_pair.getPrivate ());
             sess.closeSession ();
             fail ("Mixing RSA and EC is not possible");
           }

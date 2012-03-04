@@ -596,7 +596,7 @@ public class KeyGen2Test
                 //////////////////////////////////////////////////////////////////////////
                 if (key.getEncryptedPrivateKey () != null)
                   {
-                    sks.restorePrivateKey (key_handle, 
+                    sks.importPrivateKey (key_handle, 
                                            key.getEncryptedPrivateKey (),
                                            key.getPrivateKeyMac ());
                   }
@@ -1277,7 +1277,7 @@ public class KeyGen2Test
             writeOption ("Encrypted Extension", encrypted_extension);
             writeOption ("Delete Protection", delete_protection != null);
             writeOption ("Export Protection", export_protection != null);
-            writeOption ("Private Key Restore", set_private_key);
+            writeOption ("Private Key Import", set_private_key);
             writeOption ("Updatable session", updatable);
             writeOption ("CloneKeyProtection", clone_key_protection != null);
             writeOption ("UpdateKey", update_key != null);
@@ -1592,7 +1592,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void RestorePrivateKey () throws Exception
+    public void ImportPrivateKey () throws Exception
       {
         Doer doer = new Doer ();
         set_private_key = true;

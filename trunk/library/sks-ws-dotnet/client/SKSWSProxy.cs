@@ -94,12 +94,12 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        addExtension_Response addExtension(addExtension_Request request);
+        importPrivateKey_Response importPrivateKey(importPrivateKey_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
-        restorePrivateKey_Response restorePrivateKey(restorePrivateKey_Request request);
+        addExtension_Response addExtension(addExtension_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
@@ -1330,6 +1330,44 @@ namespace org.webpki.sks.ws.client
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="importPrivateKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class importPrivateKey_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="DeviceID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal string _device_id;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal int _key_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivateKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _private_key;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _mac;
+
+        public importPrivateKey_Request(string DeviceID,
+                                        int KeyHandle,
+                                        byte[] PrivateKey,
+                                        byte[] MAC)
+        {
+            _device_id = DeviceID;
+            _key_handle = KeyHandle;
+            _private_key = PrivateKey;
+            _mac = MAC;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="importPrivateKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class importPrivateKey_Response
+    {
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ServiceModel.MessageContractAttribute(WrapperName="addExtension", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
     public class addExtension_Request
     {
@@ -1382,44 +1420,6 @@ namespace org.webpki.sks.ws.client
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ServiceModel.MessageContractAttribute(WrapperName="addExtension.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
     public class addExtension_Response
-    {
-    }
-
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="restorePrivateKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class restorePrivateKey_Request
-    {
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="DeviceID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal string _device_id;
-
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal int _key_handle;
-
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivateKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _private_key;
-
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _mac;
-
-        public restorePrivateKey_Request(string DeviceID,
-                                         int KeyHandle,
-                                         byte[] PrivateKey,
-                                         byte[] MAC)
-        {
-            _device_id = DeviceID;
-            _key_handle = KeyHandle;
-            _private_key = PrivateKey;
-            _mac = MAC;
-        }
-    }
-
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="restorePrivateKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
-    public class restorePrivateKey_Response
     {
     }
 
@@ -2950,6 +2950,23 @@ namespace org.webpki.sks.ws.client
             }
         }
 
+        public void importPrivateKey(int KeyHandle,
+                                     byte[] PrivateKey,
+                                     byte[] MAC)
+        {
+            try
+            {
+                base.Channel.importPrivateKey(new importPrivateKey_Request(device_id,
+                                                                           KeyHandle,
+                                                                           PrivateKey,
+                                                                           MAC));
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
+        }
+
         public void addExtension(int KeyHandle,
                                  string Type,
                                  sbyte SubType,
@@ -2966,23 +2983,6 @@ namespace org.webpki.sks.ws.client
                                                                    Qualifier,
                                                                    ExtensionData,
                                                                    MAC));
-            }
-            catch (System.ServiceModel.FaultException<_SKSException> e)
-            {
-                throw new SKSException(e);
-            }
-        }
-
-        public void restorePrivateKey(int KeyHandle,
-                                      byte[] PrivateKey,
-                                      byte[] MAC)
-        {
-            try
-            {
-                base.Channel.restorePrivateKey(new restorePrivateKey_Request(device_id,
-                                                                             KeyHandle,
-                                                                             PrivateKey,
-                                                                             MAC));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {

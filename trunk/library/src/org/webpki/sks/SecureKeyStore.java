@@ -217,9 +217,9 @@ public interface SecureKeyStore
                              byte[] symmetric_key,
                              byte[] mac) throws SKSException;
     
-    void restorePrivateKey (int key_handle,
-                            byte[] private_key,
-                            byte[] mac) throws SKSException;
+    void importPrivateKey (int key_handle,
+                           byte[] private_key,
+                           byte[] mac) throws SKSException;
 
     int createPINPolicy (int provisioning_handle,
                          String id,

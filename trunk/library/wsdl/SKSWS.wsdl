@@ -351,6 +351,23 @@
 
 <!--
       #########################################################
+      #                   importPrivateKey                    #
+      #########################################################
+-->
+      <xs:element name="importPrivateKey">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
+            <xs:element name="KeyHandle" type="xs:int"/>
+            <xs:element name="PrivateKey" type="xs:base64Binary"/>
+            <xs:element name="MAC" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="importPrivateKey.Response"/>
+
+<!--
+      #########################################################
       #                     addExtension                      #
       #########################################################
 -->
@@ -368,23 +385,6 @@
         </xs:complexType>
       </xs:element>
       <xs:element name="addExtension.Response"/>
-
-<!--
-      #########################################################
-      #                   restorePrivateKey                   #
-      #########################################################
--->
-      <xs:element name="restorePrivateKey">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
-            <xs:element name="KeyHandle" type="xs:int"/>
-            <xs:element name="PrivateKey" type="xs:base64Binary"/>
-            <xs:element name="MAC" type="xs:base64Binary"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="restorePrivateKey.Response"/>
 
 <!--
       #########################################################
@@ -972,20 +972,20 @@
     <wsdl:part name="parameters" element="tns:importSymmetricKey.Response"/>
   </wsdl:message>
 
+  <wsdl:message name="importPrivateKey">
+    <wsdl:part name="parameters" element="tns:importPrivateKey"/>
+  </wsdl:message>
+
+  <wsdl:message name="importPrivateKey.Response">
+    <wsdl:part name="parameters" element="tns:importPrivateKey.Response"/>
+  </wsdl:message>
+
   <wsdl:message name="addExtension">
     <wsdl:part name="parameters" element="tns:addExtension"/>
   </wsdl:message>
 
   <wsdl:message name="addExtension.Response">
     <wsdl:part name="parameters" element="tns:addExtension.Response"/>
-  </wsdl:message>
-
-  <wsdl:message name="restorePrivateKey">
-    <wsdl:part name="parameters" element="tns:restorePrivateKey"/>
-  </wsdl:message>
-
-  <wsdl:message name="restorePrivateKey.Response">
-    <wsdl:part name="parameters" element="tns:restorePrivateKey.Response"/>
   </wsdl:message>
 
   <wsdl:message name="postDeleteKey">
@@ -1246,15 +1246,15 @@
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="addExtension">
-      <wsdl:input message="tns:addExtension"/>
-      <wsdl:output message="tns:addExtension.Response"/>
+    <wsdl:operation name="importPrivateKey">
+      <wsdl:input message="tns:importPrivateKey"/>
+      <wsdl:output message="tns:importPrivateKey.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
-    <wsdl:operation name="restorePrivateKey">
-      <wsdl:input message="tns:restorePrivateKey"/>
-      <wsdl:output message="tns:restorePrivateKey.Response"/>
+    <wsdl:operation name="addExtension">
+      <wsdl:input message="tns:addExtension"/>
+      <wsdl:output message="tns:addExtension.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -1543,7 +1543,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="addExtension">
+      <wsdl:operation name="importPrivateKey">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>
@@ -1555,7 +1555,7 @@
         </wsdl:fault>
       </wsdl:operation>
 
-      <wsdl:operation name="restorePrivateKey">
+      <wsdl:operation name="addExtension">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

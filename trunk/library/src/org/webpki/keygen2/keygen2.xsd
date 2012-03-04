@@ -41,7 +41,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 20-Aug-2011 
+    Revised: 04-Mar-2012 
     Author: Anders Rundgren
 
     Copyright 2006-2012 WebPKI.org (http://webpki.org).
@@ -59,11 +59,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20110820#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20120304#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20110820#"
+           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20120304#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -790,7 +790,7 @@
             <xs:choice minOccurs="0">
  
                <!-- SKS Reference: importSymmetricKey 
-                    Optional "piggybacked" symmetric key -->
+                    Optional imported symmetric key -->
                <xs:element name="SymmetricKey">
                   <xs:complexType>
                      <xs:simpleContent>
@@ -804,8 +804,8 @@
                   </xs:complexType>
                </xs:element>
 
-               <!-- SKS Reference: restorePrivateKey 
-                    Optional restored private key -->
+               <!-- SKS Reference: importPrivateKey 
+                    Optional imported private key -->
                <xs:element name="PrivateKey">
                   <xs:complexType>
                      <xs:simpleContent>

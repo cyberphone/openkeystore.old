@@ -671,6 +671,23 @@ public class SKSWSImplementation
         getDevice (device_id).importSymmetricKey (key_handle, symmetric_key, mac);
       }
 
+    @WebMethod(operationName="importPrivateKey")
+    @RequestWrapper(localName="importPrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="importPrivateKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void importPrivateKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  String device_id,
+                                  @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  int key_handle,
+                                  @WebParam(name="PrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  byte[] private_key,
+                                  @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  byte[] mac)
+    throws SKSException
+      {
+        log (device_id, "importPrivateKey (KeyHandle=" + key_handle + ")");
+        getDevice (device_id).importPrivateKey (key_handle, private_key, mac);
+      }
+
     @WebMethod(operationName="addExtension")
     @RequestWrapper(localName="addExtension", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="addExtension.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -697,23 +714,6 @@ public class SKSWSImplementation
                                             qualifier,
                                             extension_data,
                                             mac);
-      }
-
-    @WebMethod(operationName="restorePrivateKey")
-    @RequestWrapper(localName="restorePrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @ResponseWrapper(localName="restorePrivateKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    public void restorePrivateKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                   String device_id,
-                                   @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                   int key_handle,
-                                   @WebParam(name="PrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                   byte[] private_key,
-                                   @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                   byte[] mac)
-    throws SKSException
-      {
-        log (device_id, "restorePrivateKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).restorePrivateKey (key_handle, private_key, mac);
       }
 
     @WebMethod(operationName="postDeleteKey")

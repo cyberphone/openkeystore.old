@@ -2474,8 +2474,8 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                                   }
                               }
                           }
-                        key_entry.owner.abort ((key_entry.isSymmetric () ? "Symmetric" : key_entry.isRSA () ? "RSA" : "EC") + 
-                                               " key " + key_entry.id + " does not match algorithm: " + algorithm);
+                        provisioning.abort ((key_entry.isSymmetric () ? "Symmetric" : key_entry.isRSA () ? "RSA" : "EC") + 
+                                            " key " + key_entry.id + " does not match algorithm: " + algorithm);
                       }
                   }
               }
@@ -2824,11 +2824,11 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                           restorePrivateKey                                //
+    //                            importPrivateKey                                //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized void restorePrivateKey (int key_handle,
+    public synchronized void importPrivateKey (int key_handle,
                                                 byte[] private_key,
                                                 byte[] mac) throws SKSException
       {
@@ -3151,7 +3151,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                 provisioning.abort ("Duplicate or incorrectly sorted algorithm: " + endorsed_algorithm);
               }
             Algorithm alg = supported_algorithms.get (endorsed_algorithm);
-            if (alg == null)
+            if (alg == null || alg.mask == 0)
               {
                 provisioning.abort ("Unsupported algorithm: " + endorsed_algorithm);
               }

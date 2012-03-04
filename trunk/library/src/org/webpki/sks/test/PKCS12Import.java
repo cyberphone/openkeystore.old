@@ -186,7 +186,7 @@ public class PKCS12Import
                                      new KeySpecifier.EC (ECDomains.P_256),
                                      endorsed_algs);
         key.setCertificatePath (cert_path.toArray (new X509Certificate[0]));
-        key.restorePrivateKey (private_key);
+        key.setPrivateKey (private_key);
         sess.closeSession ();
         System.out.println ("Imported Subject: " + cert_path.firstElement ().getSubjectX500Principal ().getName () + "\nID=#" + key.key_handle +
                             ", "+ (rsa_flag ? "RSA" : "EC") + " Key with " + prot);

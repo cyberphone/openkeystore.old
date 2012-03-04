@@ -128,12 +128,12 @@ public class GenKey
         prov_sess.sks.importSymmetricKey (key_handle, encrypted_symmetric_key, prov_sess.mac4call (symk_mac.getResult (), SecureKeyStore.METHOD_IMPORT_SYMMETRIC_KEY));
       }
 
-    void restorePrivateKey (PrivateKey private_key) throws IOException, GeneralSecurityException
+    void setPrivateKey (PrivateKey private_key) throws IOException, GeneralSecurityException
       {
         MacGenerator privk_mac = getEECertMacBuilder ();
         byte[] encrypted_private_key = prov_sess.server_sess_key.encrypt (private_key.getEncoded ());
         privk_mac.addArray (encrypted_private_key);
-        prov_sess.sks.restorePrivateKey (key_handle, encrypted_private_key, prov_sess.mac4call (privk_mac.getResult (), SecureKeyStore.METHOD_RESTORE_PRIVATE_KEY));
+        prov_sess.sks.importPrivateKey (key_handle, encrypted_private_key, prov_sess.mac4call (privk_mac.getResult (), SecureKeyStore.METHOD_RESTORE_PRIVATE_KEY));
       }
 
     void addExtension (String type, byte sub_type, byte[] qualifier, byte[] extension_data) throws IOException, GeneralSecurityException

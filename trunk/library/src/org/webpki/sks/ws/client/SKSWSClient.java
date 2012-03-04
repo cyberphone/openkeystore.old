@@ -591,16 +591,16 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public void restorePrivateKey (int key_handle,
+    public void importPrivateKey (int key_handle,
                                    byte[] private_key,
                                    byte[] mac) throws SKSException
       {
         try
           {
-            getSKSWS ().restorePrivateKey (device_id,
-                                           key_handle,
-                                           private_key,
-                                           mac);
+            getSKSWS ().importPrivateKey (device_id,
+                                          key_handle,
+                                          private_key,
+                                          mac);
           }
         catch (SKSException_Exception e)
           {

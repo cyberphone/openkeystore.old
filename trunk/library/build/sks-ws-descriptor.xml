@@ -743,6 +743,16 @@
         getDevice (device_id).importSymmetricKey (key_handle, symmetric_key, mac);
 ]]></Code></Method>
 
+   <Method Name="importPrivateKey" Throws="SKSException">
+     <Parameter Name="device_id"   Type="string" XMLName="DeviceID"       Null="true" SuppressRule="DEV"/>
+     <Parameter Name="key_handle"  Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="private_key" Type="binary" XMLName="PrivateKey"/>
+     <Parameter Name="mac"         Type="binary" XMLName="MAC"/>
+     <Code><![CDATA[
+        log (device_id, "importPrivateKey (KeyHandle=" + key_handle + ")");
+        getDevice (device_id).importPrivateKey (key_handle, private_key, mac);
+]]></Code></Method>
+
    <Method Name="addExtension" Throws="SKSException">
      <Parameter Name="device_id"      Type="string" XMLName="DeviceID"     Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"     Type="int"    XMLName="KeyHandle"/>
@@ -759,16 +769,6 @@
                                             qualifier,
                                             extension_data,
                                             mac);
-]]></Code></Method>
-
-   <Method Name="restorePrivateKey" Throws="SKSException">
-     <Parameter Name="device_id"   Type="string" XMLName="DeviceID"       Null="true" SuppressRule="DEV"/>
-     <Parameter Name="key_handle"  Type="int"    XMLName="KeyHandle"/>
-     <Parameter Name="private_key" Type="binary" XMLName="PrivateKey"/>
-     <Parameter Name="mac"         Type="binary" XMLName="MAC"/>
-     <Code><![CDATA[
-        log (device_id, "restorePrivateKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).restorePrivateKey (key_handle, private_key, mac);
 ]]></Code></Method>
 
    <Method Name="postDeleteKey" Throws="SKSException">

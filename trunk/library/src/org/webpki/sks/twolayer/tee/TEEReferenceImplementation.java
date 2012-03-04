@@ -180,6 +180,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
 
 // TODO
         boolean is_symmetric_key;
+        
+        int symmetric_key_length;
 
         LinkedHashSet<String> endorsed_algorithms;
 
@@ -423,6 +425,20 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                 owner.abort ("Mutiple key imports for: " + id);
               }
             key_backup |= KeyProtectionInfo.KEYBACKUP_SERVER;
+          }
+
+        X509Certificate getEECertificate () throws SKSException
+          {
+            checkEECerificateAvailablity ();
+            return certificate_path[0];
+          }
+
+        void checkEndorsedAlgorithmCompliance (String algorithm) throws SKSException
+          {
+            if (!endorsed_algorithms.isEmpty () && !endorsed_algorithms.contains (algorithm))
+              {
+                abort ("\"EndorsedAlgorithms\" for key #" + key_handle + " does not include: " + algorithm, SKSException.ERROR_ALGORITHM);
+              }
           }
       }
 
@@ -1695,42 +1711,18 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         key_entry.checkCryptoDataSize (data);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the signature algorithm is known and applicable
+        // Endorsed algorithm compliance is enforced at the TEE level
         ///////////////////////////////////////////////////////////////////////////////////
-/* TODO
-        Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_ASYM_SGN);
-        int hash_len = (alg.mask / ALG_HASH_DIV) & ALG_HASH_MSK;
-        if (hash_len > 0 && hash_len != data.length)
-          {
-            abort ("Incorrect length of \"Data\": " + data.length);
-          }
-        if (parameters != null)  // Only supports non-parameterized operations yet...
-          {
-            abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
-          }
-*/
+        key_entry.checkEndorsedAlgorithmCompliance (algorithm);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Finally, perform operation
+        // Execute it!
         ///////////////////////////////////////////////////////////////////////////////////
-/* TODO
-        try
-          {
-            if (key_entry.isRSA () && hash_len > 0)
-              {
-                data = addArrays (hash_len == 20 ? DIGEST_INFO_SHA1 : DIGEST_INFO_SHA256, data);
-              }
-            Signature signature = Signature.getInstance (alg.jce_name);
-            signature.initSign (key_entry.private_key);
-            signature.update (data);
-            return signature.sign ();
-          }
-        catch (Exception e)
-          {
-            throw new SKSException (e, SKSException.ERROR_CRYPTO);
-          }
-*/
-        return null;
+        return SEReferenceImplementation.executeSignHash (key_entry.se_key_state,
+                                                          key_handle,
+                                                          algorithm,
+                                                          parameters,
+                                                          data);
       }
 
 
@@ -1821,68 +1813,19 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         key_entry.checkCryptoDataSize (data);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check the key and then check that the algorithm is known and applicable
+        // Endorsed algorithm compliance is enforced at the TEE level
         ///////////////////////////////////////////////////////////////////////////////////
-/* TODO
-        Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_SYM_ENC);
-        if ((alg.mask & ALG_IV_REQ) == 0 || (alg.mask & ALG_IV_INT) != 0)
-          {
-            if (iv != null)
-              {
-                abort ("IV does not apply to: " + algorithm);
-              }
-          }
-        else if (iv == null || iv.length != 16)
-          {
-            abort ("IV must be 16 bytes for: " + algorithm);
-          }
-        if ((!mode || (alg.mask & ALG_AES_PAD) != 0) && data.length % 16 != 0)
-          {
-            abort ("Data must be a multiple of 16 bytes for: " + algorithm + (mode ? " encryption" : " decryption"));
-          }
-*/
+        key_entry.checkEndorsedAlgorithmCompliance (algorithm);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Finally, perform operation
+        // Execute it!
         ///////////////////////////////////////////////////////////////////////////////////
- /*
-        try
-          {
-            Cipher crypt = Cipher.getInstance (alg.jce_name);
-            SecretKeySpec sk = new SecretKeySpec (key_entry.symmetric_key, "AES");
-            int jce_mode = mode ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
-            if ((alg.mask & ALG_IV_INT) != 0)
-              {
-                iv = new byte[16];
-                if (mode)
-                  {
-                    new SecureRandom ().nextBytes (iv);
-                  }
-                else
-                  {
-                    byte[] temp = new byte[data.length - 16];
-                    System.arraycopy (data, 0, iv, 0, 16);
-                    System.arraycopy (data, 16, temp, 0, temp.length);
-                    data = temp;
-                  }
-              }
-            if (iv == null)
-              {
-                crypt.init (jce_mode, sk);
-              }
-            else
-              {
-                crypt.init (jce_mode, sk, new IvParameterSpec (iv));
-              }
-            data = crypt.doFinal (data);
-            return (mode && (alg.mask & ALG_IV_INT) != 0) ? addArrays (iv, data) : data;
-          }
-        catch (Exception e)
-          {
-            throw new SKSException (e, SKSException.ERROR_CRYPTO);
-          }
-*/
-        return null;
+        return SEReferenceImplementation.executeSymmetricEncryption (key_entry.se_key_state,
+                                                                     key_handle,
+                                                                     algorithm,
+                                                                     mode,
+                                                                     iv,
+                                                                     data);
       }
 
 
@@ -1913,28 +1856,17 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         key_entry.checkCryptoDataSize (data);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check the key and then check that the algorithm is known and applicable
+        // Endorsed algorithm compliance is enforced at the TEE level
         ///////////////////////////////////////////////////////////////////////////////////
-/* TODO
-        Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_HMAC);
-*/
+        key_entry.checkEndorsedAlgorithmCompliance (algorithm);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Finally, perform operation
+        // Execute it!
         ///////////////////////////////////////////////////////////////////////////////////
-/* TODO
-        try
-          {
-            Mac mac = Mac.getInstance (alg.jce_name);
-            mac.init (new SecretKeySpec (key_entry.symmetric_key, "RAW"));
-            return mac.doFinal (data);
-          }
-        catch (Exception e)
-          {
-            throw new SKSException (e, SKSException.ERROR_CRYPTO);
-          }
-*/
-        return null;
+        return SEReferenceImplementation.executeHMAC (key_entry.se_key_state,
+                                                      key_handle,
+                                                      algorithm,
+                                                      data);
       }
 
 
@@ -2306,41 +2238,16 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Check public versus private key match
                 ///////////////////////////////////////////////////////////////////////////////////
-/* TODO
-                if (key_entry.isRSA () ^ key_entry.private_key instanceof RSAPrivateKey)
+                try
                   {
-                    provisioning.abort ("RSA/EC mixup between public and private keys for: " + key_entry.id);
+                    SEReferenceImplementation.checkKeyPair (key_entry.se_key_state,
+                                                            key_entry.public_key,
+                                                            key_entry.id);
                   }
-                if (key_entry.isRSA ())
+                catch (SKSException e)
                   {
-                    if (!((RSAPublicKey)key_entry.public_key).getPublicExponent ().equals (key_entry.getPublicRSAExponentFromPrivateKey ()) ||
-                        !((RSAPublicKey)key_entry.public_key).getModulus ().equals (((RSAPrivateKey)key_entry.private_key).getModulus ()))
-                      {
-                        provisioning.abort ("RSA mismatch between public and private keys for: " + key_entry.id);
-                      }
+                    provisioning.abort (e);
                   }
-                else
-                  {
-                    try
-                      {
-                        Signature ec_signer = Signature.getInstance ("SHA256withECDSA");
-                        ec_signer.initSign (key_entry.private_key);
-                        ec_signer.update (RSA_ENCRYPTION_OID);  // Any data could be used...
-                        byte[] ec_sign_data = ec_signer.sign ();
-                        Signature ec_verifier = Signature.getInstance ("SHA256withECDSA");
-                        ec_verifier.initVerify (key_entry.public_key);
-                        ec_verifier.update (RSA_ENCRYPTION_OID);
-                        if (!ec_verifier.verify (ec_sign_data))
-                          {
-                            provisioning.abort ("EC mismatch between public and private keys for: " + key_entry.id);
-                          }
-                      }
-                    catch (GeneralSecurityException e)
-                      {
-                        provisioning.abort (e.getMessage ());
-                      }
-                  }
-*/
 
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Test that there are no collisions
@@ -2386,9 +2293,14 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                 ///////////////////////////////////////////////////////////////////////////////////
                                 // Symmetric. AES algorithms only operates on 128, 192, and 256 bit keys
                                 ///////////////////////////////////////////////////////////////////////////////////
-/* TODO
-                                testAESKey (algorithm, key_entry.symmetric_key, key_entry.id, provisioning);
-*/
+                                try
+                                  {
+                                    SEReferenceImplementation.testSymmetricKey (algorithm, key_entry.symmetric_key_length, key_entry.id);
+                                  }
+                                catch (SKSException e)
+                                  {
+                                    provisioning.abort (e);
+                                  }
                                 continue;
                               }
                             else
@@ -2402,8 +2314,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                   }
                               }
                           }
-                        key_entry.owner.abort ((key_entry.isSymmetric () ? "Symmetric" : key_entry.isRSA () ? "RSA" : "EC") + 
-                                               " key " + key_entry.id + " does not match algorithm: " + algorithm);
+                        provisioning.abort ((key_entry.isSymmetric () ? "Symmetric" : key_entry.isRSA () ? "RSA" : "EC") + 
+                                            " key " + key_entry.id + " does not match algorithm: " + algorithm);
                       }
                   }
               }
@@ -2659,7 +2571,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized void restorePrivateKey (int key_handle,
+    public synchronized void importPrivateKey (int key_handle,
                                                 byte[] private_key,
                                                 byte[] mac) throws SKSException
       {
@@ -2760,23 +2672,26 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Mark as "copied" by the server
+        // Mark as "copied" by the server and set the symmetric flag
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.setAndVerifyServerBackupFlag ();
+        key_entry.is_symmetric_key = true;
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-/* TODO
-        MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_IMPORT_SYMMETRIC_KEY);
-        verifier.addArray (symmetric_key);
-        key_entry.owner.verifyMac (verifier, mac);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Decrypt and store symmetric key
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.symmetric_key = key_entry.owner.decrypt (symmetric_key);
-*/
+        try
+          {
+            key_entry.symmetric_key_length = SEReferenceImplementation.verifyAndImportSymmetricKey (key_entry.owner.se_provisioning_state,
+                                                                                                    key_entry.se_key_state,
+                                                                                                    key_entry.getEECertificate (),
+                                                                                                    symmetric_key,
+                                                                                                    mac);
+          }
+        catch (SKSException e)
+          {
+            key_entry.owner.abort (e);
+          }
       }
 
 

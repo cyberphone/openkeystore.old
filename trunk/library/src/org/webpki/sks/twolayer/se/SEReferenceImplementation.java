@@ -295,6 +295,12 @@ public class SEReferenceImplementation
         throw new SKSException (message, option);
       }
 
+
+    static void abort (GeneralSecurityException e) throws SKSException
+      {
+        throw new SKSException (e.getMessage (), SKSException.ERROR_INTERNAL);
+      }
+
     
     static void checkECKeyCompatibility (ECKey ec_key, String key_id) throws SKSException
       {
@@ -309,6 +315,7 @@ public class SEReferenceImplementation
             abort ("EC key " + key_id + " not of P-256/secp256r1 type");
           }
       }
+
 
     static void checkRSAKeyCompatibility (int rsa_key_size, BigInteger  exponent, String key_id) throws SKSException
       {
@@ -327,11 +334,13 @@ public class SEReferenceImplementation
           }
       }
 
+
     static int getRSAKeySize (RSAKey rsa_key)
       {
         byte[] modblob = rsa_key.getModulus ().toByteArray ();
         return (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;
       }
+
 
     static byte[] addArrays (byte[] a, byte[] b)
       {
@@ -341,50 +350,6 @@ public class SEReferenceImplementation
         return r;
       }
 
-    static void testAESKey (String algorithm, byte[] symmetric_key, String key_id) throws SKSException
-      {
-        Algorithm alg = getAlgorithm (algorithm);
-        if ((alg.mask & ALG_SYM_ENC) != 0)
-          {
-            int l = symmetric_key.length;
-            if (l == 16) l = ALG_SYML_128;
-            else if (l == 24) l = ALG_SYML_192;
-            else if (l == 32) l = ALG_SYML_256;
-            else l = 0;
-            if ((l & alg.mask) == 0)
-              {
-                abort ("Key " + key_id + " has wrong size (" + symmetric_key.length + ") for algorithm: " + algorithm);
-              }
-          }
-      }
-
-    static void checkIDSyntax (String identifier, String symbolic_name) throws SKSException
-      {
-        boolean flag = false;
-        if (identifier.length () == 0 || identifier.length () > SecureKeyStore.MAX_LENGTH_ID_TYPE)
-          {
-            flag = true;
-          }
-        else for (int i = 0; i < identifier.length (); i++)
-          {
-            char c = identifier.charAt (i);
-            /////////////////////////////////////////////////
-            // The restricted XML NCName
-            /////////////////////////////////////////////////
-            if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && c != '_')
-              {
-                if (i == 0 || ((c < '0' || c > '9') && c != '-' && c != '.'))
-                  {
-                    flag = true;
-                    break;
-                  }
-              }
-          }
-        if (flag)
-          {
-            abort ("Malformed \"" + symbolic_name + "\" : " + identifier);
-          }
-      }
 
     static class MacBuilder implements Serializable
       {
@@ -466,6 +431,7 @@ public class SEReferenceImplementation
           }
       }
 
+
     static MacBuilder getMacBuilder (SEProvisioningState se_provisioning_state, byte[] key_modifier) throws SKSException
       {
         if (se_provisioning_state.session_key_limit-- <= 0)
@@ -482,11 +448,21 @@ public class SEReferenceImplementation
           }
       }
 
+
     static MacBuilder getMacBuilderForMethodCall (SEProvisioningState se_provisioning_state, byte[] method) throws SKSException
       {
         short q = se_provisioning_state.mac_sequence_counter++;
         return getMacBuilder (se_provisioning_state, addArrays (method, new byte[]{(byte)(q >>> 8), (byte)q}));
       }
+
+
+    static MacBuilder getEECertMacBuilder (SEProvisioningState se_provisioning_state, X509Certificate ee_certificate, byte[] method) throws SKSException, GeneralSecurityException
+      {
+        MacBuilder mac_builder = getMacBuilderForMethodCall (se_provisioning_state, method);
+        mac_builder.addArray (ee_certificate.getEncoded ());
+        return mac_builder;
+      }
+
 
     static byte[] decrypt (SEProvisioningState se_provisioning_state, byte[] data) throws SKSException
       {
@@ -504,6 +480,7 @@ public class SEReferenceImplementation
           }
       }
 
+
     static Algorithm getAlgorithm (String algorithm_uri) throws SKSException
       {
         Algorithm alg = supported_algorithms.get (algorithm_uri);
@@ -514,6 +491,28 @@ public class SEReferenceImplementation
         return alg;
       }
 
+
+    static Algorithm checkKeyAndAlgorithm (SEKeyState se_key_state, int key_handle, String algorithm, int expected_type) throws SKSException
+      {
+        Algorithm alg = getAlgorithm (algorithm);
+        if ((alg.mask & expected_type) == 0)
+          {
+            abort ("Algorithm does not match operation: " + algorithm, SKSException.ERROR_ALGORITHM);
+          }
+        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ se_key_state.is_symmetric_key)
+          {
+            abort ((se_key_state.is_symmetric_key ? "S" : "As") + "ymmetric key #" + key_handle + " is incompatible with: " + algorithm, SKSException.ERROR_ALGORITHM);
+          }
+        if (se_key_state.is_symmetric_key)
+          {
+            testSymmetricKey (algorithm, se_key_state.symmetric_key.length, "#" + key_handle);
+          }
+        else if (se_key_state.isRSA () ^ (alg.mask & ALG_RSA_KEY) != 0)
+          {
+            abort ((se_key_state.isRSA () ? "RSA" : "EC") + " key #" + key_handle + " is incompatible with: " + algorithm, SKSException.ERROR_ALGORITHM);
+          }
+        return alg;
+      }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // PKCS #1 Signature Support Data
@@ -549,6 +548,225 @@ public class SEReferenceImplementation
                                    SKS_BIOMETRIC_SUPPORT);
           }
         catch (GeneralSecurityException e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                              checkKeyPair                                  //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    public static void checkKeyPair (SEKeyState se_key_state, 
+                                     PublicKey public_key,
+                                     String id) throws SKSException
+      {
+        if (se_key_state.isRSA () ^ se_key_state.private_key instanceof RSAPrivateKey)
+          {
+            abort ("RSA/EC mixup between public and private keys for: " + id);
+          }
+        if (se_key_state.isRSA ())
+          {
+            if (!((RSAPublicKey)public_key).getPublicExponent ().equals (((RSAPrivateCrtKey)se_key_state.private_key).getPublicExponent ()) ||
+                !((RSAPublicKey)public_key).getModulus ().equals (((RSAPrivateKey)se_key_state.private_key).getModulus ()))
+              {
+                abort ("RSA mismatch between public and private keys for: " + id);
+              }
+          }
+        else
+          {
+            try
+              {
+                Signature ec_signer = Signature.getInstance ("SHA256withECDSA");
+                ec_signer.initSign (se_key_state.private_key);
+                ec_signer.update (RSA_ENCRYPTION_OID);  // Any data could be used...
+                byte[] ec_sign_data = ec_signer.sign ();
+                Signature ec_verifier = Signature.getInstance ("SHA256withECDSA");
+                ec_verifier.initVerify (public_key);
+                ec_verifier.update (RSA_ENCRYPTION_OID);
+                if (!ec_verifier.verify (ec_sign_data))
+                  {
+                    abort ("EC mismatch between public and private keys for: " + id);
+                  }
+              }
+            catch (GeneralSecurityException e)
+              {
+                abort (e);
+              }
+          }
+      }
+
+    
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                            testSymmetricKey                                //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    public static void testSymmetricKey (String algorithm,
+                                         int symmetric_key_length,
+                                         String key_id) throws SKSException
+      {
+        Algorithm alg = getAlgorithm (algorithm);
+        if ((alg.mask & ALG_SYM_ENC) != 0)
+          {
+            int l = 0;
+            if (symmetric_key_length == 16) l = ALG_SYML_128;
+            else if (symmetric_key_length == 24) l = ALG_SYML_192;
+            else if (symmetric_key_length == 32) l = ALG_SYML_256;
+            if ((l & alg.mask) == 0)
+              {
+                abort ("Key " + key_id + " has wrong size (" + symmetric_key_length + ") for algorithm: " + algorithm);
+              }
+          }
+      }
+
+    
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                             executeSignHash                                 //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    public static byte[] executeSignHash (SEKeyState se_key_state,
+                                          int key_handle,
+                                          String algorithm,
+                                          byte[] parameters,
+                                          byte[] data) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check input arguments
+        ///////////////////////////////////////////////////////////////////////////////////
+        Algorithm alg = checkKeyAndAlgorithm (se_key_state, key_handle, algorithm, ALG_ASYM_SGN);
+        int hash_len = (alg.mask / ALG_HASH_DIV) & ALG_HASH_MSK;
+        if (hash_len > 0 && hash_len != data.length)
+          {
+            abort ("Incorrect length of \"Data\": " + data.length);
+          }
+        if (parameters != null)  // Only supports non-parameterized operations yet...
+          {
+            abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Finally, perform operation
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            if (se_key_state.isRSA () && hash_len > 0)
+              {
+                data = addArrays (hash_len == 20 ? DIGEST_INFO_SHA1 : DIGEST_INFO_SHA256, data);
+              }
+            Signature signature = Signature.getInstance (alg.jce_name);
+            signature.initSign (se_key_state.private_key);
+            signature.update (data);
+            return signature.sign ();
+          }
+        catch (Exception e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                               executeHMAC                                  //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    public static byte[] executeHMAC (SEKeyState se_key_state,
+                                      int key_handle,
+                                      String algorithm,
+                                      byte[] data) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check input arguments
+        ///////////////////////////////////////////////////////////////////////////////////
+        Algorithm alg = checkKeyAndAlgorithm (se_key_state, key_handle, algorithm, ALG_HMAC);
+ 
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Finally, perform operation
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            Mac mac = Mac.getInstance (alg.jce_name);
+            mac.init (new SecretKeySpec (se_key_state.symmetric_key, "RAW"));
+            return mac.doFinal (data);
+          }
+        catch (Exception e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                      executeSymmetricEncryption                            //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    public static byte[] executeSymmetricEncryption (SEKeyState se_key_state,
+                                                     int key_handle,
+                                                     String algorithm,
+                                                     boolean mode,
+                                                     byte[] iv,
+                                                     byte[] data) throws SKSException
+      {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check input arguments
+        ///////////////////////////////////////////////////////////////////////////////////
+        Algorithm alg = checkKeyAndAlgorithm (se_key_state, key_handle, algorithm, ALG_SYM_ENC);
+        if ((alg.mask & ALG_IV_REQ) == 0 || (alg.mask & ALG_IV_INT) != 0)
+          {
+            if (iv != null)
+              {
+                abort ("IV does not apply to: " + algorithm);
+              }
+          }
+        else if (iv == null || iv.length != 16)
+          {
+            abort ("IV must be 16 bytes for: " + algorithm);
+          }
+        if ((!mode || (alg.mask & ALG_AES_PAD) != 0) && data.length % 16 != 0)
+          {
+            abort ("Data must be a multiple of 16 bytes for: " + algorithm + (mode ? " encryption" : " decryption"));
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Finally, perform operation
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            Cipher crypt = Cipher.getInstance (alg.jce_name);
+            SecretKeySpec sk = new SecretKeySpec (se_key_state.symmetric_key, "AES");
+            int jce_mode = mode ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
+            if ((alg.mask & ALG_IV_INT) != 0)
+              {
+                iv = new byte[16];
+                if (mode)
+                  {
+                    new SecureRandom ().nextBytes (iv);
+                  }
+                else
+                  {
+                    byte[] temp = new byte[data.length - 16];
+                    System.arraycopy (data, 0, iv, 0, 16);
+                    System.arraycopy (data, 16, temp, 0, temp.length);
+                    data = temp;
+                  }
+              }
+            if (iv == null)
+              {
+                crypt.init (jce_mode, sk);
+              }
+            else
+              {
+                crypt.init (jce_mode, sk, new IvParameterSpec (iv));
+              }
+            data = crypt.doFinal (data);
+            return (mode && (alg.mask & ALG_IV_INT) != 0) ? addArrays (iv, data) : data;
+          }
+        catch (Exception e)
           {
             throw new SKSException (e, SKSException.ERROR_CRYPTO);
           }
@@ -659,11 +877,6 @@ public class SEReferenceImplementation
                 checkECKeyCompatibility ((ECPublicKey)key_management_key, "\"KeyManagementKey\"");
               }
           }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check ServerSessionID
-        ///////////////////////////////////////////////////////////////////////////////////
-        checkIDSyntax (server_session_id, "ServerSessionID");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Create ClientSessionID
@@ -910,49 +1123,45 @@ public class SEReferenceImplementation
           }
       }
 
-
+*/
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                           importSymmetricKey                               //
+    //                       verifyAndImportSymmetricKey                          //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public synchronized void importSymmetricKey (int key_handle,
-                                                 byte[] symmetric_key,
-                                                 byte[] mac) throws SKSException
+    public static short verifyAndImportSymmetricKey (SEProvisioningState se_provisioning_state,
+                                                     SEKeyState se_key_state,
+                                                     X509Certificate ee_certificate,
+                                                     byte[] symmetric_key,
+                                                     byte[] mac) throws SKSException
       {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Get key and associated provisioning session
-        ///////////////////////////////////////////////////////////////////////////////////
-        KeyEntry key_entry = getOpenKey (key_handle);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check for various input errors
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (symmetric_key.length > (MAX_LENGTH_SYMMETRIC_KEY + AES_CBC_PKCS5_PADDING))
+        short symmetric_key_length = 0;
+        try
           {
-            key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Verify incoming MAC
+            ///////////////////////////////////////////////////////////////////////////////////
+            MacBuilder verifier = getEECertMacBuilder (se_provisioning_state,
+                                                       ee_certificate,
+                                                       SecureKeyStore.METHOD_IMPORT_SYMMETRIC_KEY);
+            verifier.addArray (symmetric_key);
+            verifier.verify (mac);
+    
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Decrypt and store symmetric key
+            ///////////////////////////////////////////////////////////////////////////////////
+            se_key_state.symmetric_key = decrypt (se_provisioning_state, symmetric_key);
+            se_key_state.is_symmetric_key = true;
+            symmetric_key_length = (short)se_key_state.symmetric_key.length; 
           }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Mark as "copied" by the server
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.setAndVerifyServerBackupFlag ();
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
-        ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_IMPORT_SYMMETRIC_KEY);
-        verifier.addArray (symmetric_key);
-        key_entry.owner.verifyMac (verifier, mac);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Decrypt and store symmetric key
-        ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.symmetric_key = key_entry.owner.decrypt (symmetric_key);
+        catch (GeneralSecurityException e)
+          {
+            abort (e);
+          }
+        return symmetric_key_length;
       }
 
-*/
+
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
     //                       setAndVerifyCertificatePath                          //
@@ -985,7 +1194,7 @@ public class SEReferenceImplementation
           }
         catch (GeneralSecurityException e)
           {
-            abort (e.getMessage (), SKSException.ERROR_INTERNAL);
+            abort (e);
           }
         verifier.verify (mac);
       }
@@ -1013,11 +1222,6 @@ public class SEReferenceImplementation
                                            String[] endorsed_algorithms,
                                            byte[] mac) throws SKSException
       {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Sanity check
-        ///////////////////////////////////////////////////////////////////////////////////
-        checkIDSyntax ("ID", id);
-
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1054,7 +1258,7 @@ public class SEReferenceImplementation
                 abort ("Duplicate or incorrectly sorted algorithm: " + endorsed_algorithm);
               }
             Algorithm alg = supported_algorithms.get (endorsed_algorithm);
-            if (alg == null)
+            if (alg == null || alg.mask == 0)
               {
                 abort ("Unsupported algorithm: " + endorsed_algorithm);
               }
@@ -1143,11 +1347,10 @@ public class SEReferenceImplementation
           }
         catch (GeneralSecurityException e)
           {
-            abort (e.getMessage (), SKSException.ERROR_INTERNAL);
+            abort (e);
           }
         return null;    // For the compiler only...
       }
-
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -1170,11 +1373,6 @@ public class SEReferenceImplementation
                                         byte input_method,
                                         byte[] mac) throws SKSException
       {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Sanity check
-        ///////////////////////////////////////////////////////////////////////////////////
-        checkIDSyntax ("ID", id);
-
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1206,11 +1404,6 @@ public class SEReferenceImplementation
                                       short retry_limit,
                                       byte[] mac) throws SKSException
       {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Sanity check
-        ///////////////////////////////////////////////////////////////////////////////////
-        checkIDSyntax ("ID", id);
-
         ///////////////////////////////////////////////////////////////////////////////////
         // Get value
         ///////////////////////////////////////////////////////////////////////////////////
