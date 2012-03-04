@@ -181,7 +181,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                     MacGenerator restore_privkey = new MacGenerator ();
                     restore_privkey.addArray (ee_cert);
                     restore_privkey.addArray (key.encrypted_private_key);
-                    mac (wr, restore_privkey.getResult (), SecureKeyStore.METHOD_RESTORE_PRIVATE_KEY);
+                    mac (wr, restore_privkey.getResult (), SecureKeyStore.METHOD_IMPORT_PRIVATE_KEY);
                   }
  
                 ////////////////////////////////////////////////////////////////////////

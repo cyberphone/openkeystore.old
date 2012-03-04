@@ -44,7 +44,7 @@ public interface SecureKeyStore
     ///////////////////////////////////////////////////////////////////////////////////
     byte[] METHOD_SET_CERTIFICATE_PATH        = {'s','e','t','C','e','r','t','i','f','i','c','a','t','e','P','a','t','h'};
     byte[] METHOD_IMPORT_SYMMETRIC_KEY        = {'i','m','p','o','r','t','S','y','m','m','e','t','r','i','c','K','e','y'};
-    byte[] METHOD_RESTORE_PRIVATE_KEY         = {'r','e','s','t','o','r','e','P','r','i','v','a','t','e','K','e','y'};
+    byte[] METHOD_IMPORT_PRIVATE_KEY          = {'i','m','p','o','r','t','P','r','i','v','a','t','e','K','e','y'};
     byte[] METHOD_CLOSE_PROVISIONING_SESSION  = {'c','l','o','s','e','P','r','o','v','i','s','i','o','n','i','n','g','S','e','s','s','i','o','n'};
     byte[] METHOD_CREATE_KEY_ENTRY            = {'c','r','e','a','t','e','K','e','y','E','n','t','r','y'};
     byte[] METHOD_CREATE_PIN_POLICY           = {'c','r','e','a','t','e','P','I','N','P','o','l','i','c','y'};

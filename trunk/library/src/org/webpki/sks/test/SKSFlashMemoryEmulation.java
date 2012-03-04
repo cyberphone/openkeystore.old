@@ -2848,7 +2848,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_RESTORE_PRIVATE_KEY);
+        MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_IMPORT_PRIVATE_KEY);
         verifier.addArray (private_key);
         key_entry.owner.verifyMac (verifier, mac);
 

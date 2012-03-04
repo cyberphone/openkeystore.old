@@ -1654,32 +1654,13 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         key_entry.verifyPIN (authorization);
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Check that the encryption algorithm is known and applicable
+        // Execute it!
         ///////////////////////////////////////////////////////////////////////////////////
-/* TODO
-        Algorithm alg = checkKeyAndAlgorithm (key_entry, algorithm, ALG_ASYM_ENC);
-*/
-        if (parameters != null)  // Only support basic RSA yet...
-          {
-            abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
-          }
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Finally, perform operation
-        ///////////////////////////////////////////////////////////////////////////////////
-/* TODO
-        try
-          {
-            Cipher cipher = Cipher.getInstance (alg.jce_name);
-            cipher.init (Cipher.DECRYPT_MODE, key_entry.private_key);
-            return cipher.doFinal (data);
-          }
-        catch (Exception e)
-          {
-            throw new SKSException (e, SKSException.ERROR_CRYPTO);
-          }
-*/
-        return null;
+        return SEReferenceImplementation.executeAsymmetricDecrypt (key_entry.se_key_state,
+                                                                   key_handle,
+                                                                   algorithm,
+                                                                   parameters,
+                                                                   data);
       }
 
 
@@ -2567,13 +2548,13 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                           restorePrivateKey                                //
+    //                           importPrivateKey                                 //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public synchronized void importPrivateKey (int key_handle,
-                                                byte[] private_key,
-                                                byte[] mac) throws SKSException
+                                               byte[] private_key,
+                                               byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key and associated provisioning session
@@ -2589,62 +2570,29 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
-        ///////////////////////////////////////////////////////////////////////////////////
-/* TODO
-        MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_RESTORE_PRIVATE_KEY);
-        verifier.addArray (private_key);
-        key_entry.owner.verifyMac (verifier, mac);
-*/
-
-
-        ///////////////////////////////////////////////////////////////////////////////////
         // Mark as "copied" by the server
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.setAndVerifyServerBackupFlag ();
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Decrypt and store private key
+        // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-  /* TODO
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify incoming MAC
+        ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            byte[] pkcs8_private_key = key_entry.owner.decrypt (private_key);
-            PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (pkcs8_private_key);
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Bare-bones ASN.1 decoding to find out if it is RSA or EC 
-            ///////////////////////////////////////////////////////////////////////////////////
-            boolean rsa_flag = false;
-            for (int j = 8; j < 11; j++)
-              {
-                rsa_flag = true;
-                for (int i = 0; i < RSA_ENCRYPTION_OID.length; i++)
-                  {
-                    if (pkcs8_private_key[j + i] != RSA_ENCRYPTION_OID[i])
-                      {
-                        rsa_flag = false;
-                      }
-                  }
-                if (rsa_flag) break;
-              }
-            key_entry.private_key = KeyFactory.getInstance (rsa_flag ? "RSA" : "EC").generatePrivate (key_spec);
-            if (rsa_flag)
-              {
-                checkRSAKeyCompatibility (getRSAKeySize((RSAPrivateKey) key_entry.private_key),
-                                          key_entry.getPublicRSAExponentFromPrivateKey (),
-                                          key_entry.owner, key_entry.id);
-              }
-            else
-              {
-                checkECKeyCompatibility ((ECPrivateKey)key_entry.private_key, key_entry.owner, key_entry.id);
-              }
+            SEReferenceImplementation.verifyAndImportPrivateKey (key_entry.owner.se_provisioning_state,
+                                                                 key_entry.se_key_state,
+                                                                 key_entry.id,
+                                                                 key_entry.getEECertificate (),
+                                                                 private_key,
+                                                                 mac);
           }
-        catch (GeneralSecurityException e)
+        catch (SKSException e)
           {
-            key_entry.owner.abort (e.getMessage (), SKSException.ERROR_CRYPTO);
+            key_entry.owner.abort (e);
           }
-*/
       }
 
 
@@ -2684,6 +2632,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
           {
             key_entry.symmetric_key_length = SEReferenceImplementation.verifyAndImportSymmetricKey (key_entry.owner.se_provisioning_state,
                                                                                                     key_entry.se_key_state,
+                                                                                                    key_entry.id,
                                                                                                     key_entry.getEECertificate (),
                                                                                                     symmetric_key,
                                                                                                     mac);

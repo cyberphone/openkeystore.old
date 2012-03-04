@@ -49,10 +49,7 @@ import java.security.spec.ECParameterSpec;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Vector;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -622,10 +619,43 @@ public class SEReferenceImplementation
           }
       }
 
-    
+
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
-    //                             executeSignHash                                 //
+    //                        executeAsymmetricDecrypt                            //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    public static byte[] executeAsymmetricDecrypt (SEKeyState se_key_state, 
+                                                   int key_handle,
+                                                   String algorithm,
+                                                   byte[] parameters,
+                                                   byte[] data) throws SKSException
+      {
+        Algorithm alg = checkKeyAndAlgorithm (se_key_state, key_handle, algorithm, ALG_ASYM_ENC);
+        if (parameters != null)  // Only support basic RSA yet...
+          {
+            abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Finally, perform operation
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            Cipher cipher = Cipher.getInstance (alg.jce_name);
+            cipher.init (Cipher.DECRYPT_MODE, se_key_state.private_key);
+            return cipher.doFinal (data);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new SKSException (e, SKSException.ERROR_CRYPTO);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                            executeSignHash                                 //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     public static byte[] executeSignHash (SEKeyState se_key_state,
@@ -662,7 +692,7 @@ public class SEReferenceImplementation
             signature.update (data);
             return signature.sign ();
           }
-        catch (Exception e)
+        catch (GeneralSecurityException e)
           {
             throw new SKSException (e, SKSException.ERROR_CRYPTO);
           }
@@ -1124,6 +1154,71 @@ public class SEReferenceImplementation
       }
 
 */
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                        verifyAndImportPrivateKey                           //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    public static void verifyAndImportPrivateKey (SEProvisioningState se_provisioning_state,
+                                                  SEKeyState se_key_state,
+                                                  String id,
+                                                  X509Certificate ee_certificate,
+                                                  byte[] private_key,
+                                                  byte[] mac) throws SKSException
+      {
+        try
+          {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Verify incoming MAC
+            ///////////////////////////////////////////////////////////////////////////////////
+            MacBuilder verifier = getEECertMacBuilder (se_provisioning_state,
+                                                       ee_certificate,
+                                                       SecureKeyStore.METHOD_IMPORT_PRIVATE_KEY);
+            verifier.addArray (private_key);
+            verifier.verify (mac);
+    
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Decrypt and store private key
+            ///////////////////////////////////////////////////////////////////////////////////
+            byte[] pkcs8_private_key = decrypt (se_provisioning_state, private_key);
+            PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (pkcs8_private_key);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Bare-bones ASN.1 decoding to find out if it is RSA or EC 
+            ///////////////////////////////////////////////////////////////////////////////////
+            boolean rsa_flag = false;
+            for (int j = 8; j < 11; j++)
+              {
+                rsa_flag = true;
+                for (int i = 0; i < RSA_ENCRYPTION_OID.length; i++)
+                  {
+                    if (pkcs8_private_key[j + i] != RSA_ENCRYPTION_OID[i])
+                      {
+                        rsa_flag = false;
+                      }
+                  }
+                if (rsa_flag) break;
+              }
+            se_key_state.private_key = KeyFactory.getInstance (rsa_flag ? "RSA" : "EC").generatePrivate (key_spec);
+            if (rsa_flag)
+              {
+                checkRSAKeyCompatibility (getRSAKeySize((RSAPrivateKey) se_key_state.private_key),
+                                          ((RSAPrivateCrtKey)se_key_state.private_key).getPublicExponent (),
+                                          id);
+              }
+            else
+              {
+                checkECKeyCompatibility ((ECPrivateKey)se_key_state.private_key, id);
+              }
+          }
+        catch (GeneralSecurityException e)
+          {
+            abort (e);
+          }
+      }
+
+    
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
     //                       verifyAndImportSymmetricKey                          //
@@ -1131,6 +1226,7 @@ public class SEReferenceImplementation
     ////////////////////////////////////////////////////////////////////////////////
     public static short verifyAndImportSymmetricKey (SEProvisioningState se_provisioning_state,
                                                      SEKeyState se_key_state,
+                                                     String id,
                                                      X509Certificate ee_certificate,
                                                      byte[] symmetric_key,
                                                      byte[] mac) throws SKSException
