@@ -3193,4 +3193,14 @@ public class SKSTest
         extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, SecureKeyStore.ZERO_LENGTH_ARRAY, 
             new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e', 's'}, false);
       }
+
+    @Test
+    public void test74 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        assertTrue ("Signature error",
+                    ArrayUtil.compare (device.sks.signProvisioningSessionData (sess.provisioning_handle, TEST_STRING),
+                                       sess.serverSessionSign (TEST_STRING)));
+        sess.closeSession ();
+      }
   }

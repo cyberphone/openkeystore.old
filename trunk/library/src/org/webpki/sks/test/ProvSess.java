@@ -760,5 +760,9 @@ public class ProvSess
       {
         return privacy_enabled ? SecureKeyStore.KDF_ANONYMOUS : device.device_info.getCertificatePath ()[0].getEncoded ();
       }
-
+    
+    public byte[] serverSessionSign (byte[] data) throws IOException, GeneralSecurityException
+      {
+        return mac (data, SecureKeyStore.KDF_EXTERNAL_SIGNATURE);
+      }
   }
