@@ -237,14 +237,159 @@ public class SEReferenceImplementation
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final byte[] MASTER_SECRET_32 = {0,1,2,3,4,5,6,7,8,9,1,0,3,2,5,4,7,6,9,8,9,8,7,6,5,4,3,2,1,0,3,2};
     
-    static final byte[] MASTER_SECRET_SESSION_KDF = {'S','e','s','s','i','o','n','K','e','y'};
+    static final byte[] SESSION_KEY_ENCRYPTION = {'S','e','s','s','i','o','n','K','e','y'};
 
-    static final byte[] MASTER_SECRET_USER_KDF    = {'U','s','e','r','K','e','y'};
+    static final byte[] USER_KEY_ENCRYPTION    = {'U','s','e','r','K','e','y'};
+
+    static final byte[] USER_KEY_INTEGRITY     = {'I','n','t','e','g','r','i','t','y'};
+
+    static SecretKeySpec user_key_wrapper_secret;
+    
+    static
+      {
+        try
+          {
+            MacBuilder mac_builder = new MacBuilder (MASTER_SECRET_32);
+            mac_builder.addVerbatim (USER_KEY_ENCRYPTION);
+            user_key_wrapper_secret = new SecretKeySpec (mac_builder.getResult (), "AES");
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new RuntimeException (e);
+          }
+      }
+
+    static SecretKeySpec session_key_wrapper_secret;
+    
+    static
+      {
+        try
+          {
+            MacBuilder mac_builder = new MacBuilder (MASTER_SECRET_32);
+            mac_builder.addVerbatim (SESSION_KEY_ENCRYPTION);
+            session_key_wrapper_secret = new SecretKeySpec (mac_builder.getResult (), "AES");
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new RuntimeException (e);
+          }
+      }
+    
+    static byte[] user_key_mac_secret;
+
+    static
+      {
+        try
+          {
+            MacBuilder mac_builder = new MacBuilder (MASTER_SECRET_32);
+            mac_builder.addVerbatim (USER_KEY_INTEGRITY);
+            user_key_mac_secret = mac_builder.getResult ();
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new RuntimeException (e);
+          }
+      }
 
     static final char[] ATTESTATION_KEY_PASSWORD =  {'t','e','s','t','i','n','g'};
 
     static final String ATTESTATION_KEY_ALIAS = "mykey";
     
+    static class UnwrappedKey
+      {
+        boolean is_symmetric;
+        
+        PrivateKey private_key;
+        
+        byte[] symmetric_key;
+        
+        boolean isRSA ()
+          {
+            return private_key instanceof RSAKey;
+          }
+      }
+
+    static class UnwrappedSessionKey
+      {
+        byte[] session_key;
+        
+        SEProvisioningState se_provisioning_state;
+      }
+    
+    static MacBuilder createKeyMac (SEKeyState se_key_state) throws GeneralSecurityException
+      {
+        MacBuilder mac_builder = new MacBuilder (user_key_mac_secret);
+        mac_builder.addBool (se_key_state.exportable);
+        mac_builder.addBool (se_key_state.is_symmetric_key);
+        mac_builder.addArray (se_key_state.wrapped_key);
+        return mac_builder;
+      }
+
+    static UnwrappedKey getUnwrappedKey (SEKeyState se_key_state) throws SKSException
+      {
+        UnwrappedKey unwrapped_key = new UnwrappedKey ();
+        try
+          {
+            createKeyMac (se_key_state).verify (se_key_state.mac);
+            byte[] data = se_key_state.wrapped_key;
+            Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+            crypt.init (Cipher.DECRYPT_MODE, user_key_wrapper_secret, new IvParameterSpec (data, 0, 16));
+            byte[] raw_key = crypt.doFinal (data, 16, data.length - 16);
+            if (se_key_state.is_symmetric_key)
+              {
+                unwrapped_key.is_symmetric = true;
+                unwrapped_key.symmetric_key = raw_key;
+              }
+            else
+              {
+                unwrapped_key.private_key = raw2PrivateKey (raw_key);
+              }
+          }
+        catch (GeneralSecurityException e)
+          {
+            abort (e);
+          }
+        return unwrapped_key;
+      }
+
+    static void wrapKey (SEKeyState se_key_state, byte[] raw_key) throws GeneralSecurityException
+      {
+        Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+        byte[] iv = new byte[16];
+        new SecureRandom ().nextBytes (iv);
+        crypt.init (Cipher.ENCRYPT_MODE, user_key_wrapper_secret, new IvParameterSpec (iv));
+        se_key_state.wrapped_key = addArrays (iv, crypt.doFinal (raw_key));
+        se_key_state.mac = createKeyMac (se_key_state).getResult ();
+      }
+
+    static UnwrappedSessionKey getUnwrappedSessionKey (SEProvisioningState se_provisioning_state) throws SKSException
+      {
+        UnwrappedSessionKey unwrapped_session_key = new UnwrappedSessionKey ();
+        unwrapped_session_key.se_provisioning_state = se_provisioning_state;
+        try
+          {
+            byte[] data = se_provisioning_state.wrapped_session_key;
+            Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+            crypt.init (Cipher.DECRYPT_MODE, session_key_wrapper_secret, new IvParameterSpec (data, 0, 16));
+            unwrapped_session_key.session_key = crypt.doFinal (data, 16, data.length - 16);
+          }
+        catch (GeneralSecurityException e)
+          {
+            abort (e);
+          }
+        return unwrapped_session_key;
+      }
+
+    static void wrapSessionKey (SEProvisioningState se_provisioning_state, byte[] raw_key, short session_key_limit) throws GeneralSecurityException
+      {
+        Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+        byte[] iv = new byte[16];
+        new SecureRandom ().nextBytes (iv);
+        crypt.init (Cipher.ENCRYPT_MODE, session_key_wrapper_secret, new IvParameterSpec (iv));
+        se_provisioning_state.wrapped_session_key = addArrays (iv, crypt.doFinal (raw_key));
+        se_provisioning_state.session_key_limit = session_key_limit;
+      }
+
     static KeyStore getAttestationKeyStore () throws GeneralSecurityException
       {
         try
@@ -289,9 +434,9 @@ public class SEReferenceImplementation
         throw new SKSException (message, option);
       }
 
-    static void abort (GeneralSecurityException e) throws SKSException
+    static void abort (Exception e) throws SKSException
       {
-        throw new SKSException (e.getMessage (), SKSException.ERROR_INTERNAL);
+        throw new SKSException (e, SKSException.ERROR_CRYPTO);
       }
   
     static void checkECKeyCompatibility (ECKey ec_key, String key_id) throws SKSException
@@ -419,15 +564,15 @@ public class SEReferenceImplementation
           }
       }
 
-    static MacBuilder getMacBuilder (SEProvisioningState se_provisioning_state, byte[] key_modifier) throws SKSException
+    static MacBuilder getMacBuilder (UnwrappedSessionKey unwrapped_session_key, byte[] key_modifier) throws SKSException
       {
-        if (se_provisioning_state.session_key_limit-- <= 0)
+        if (unwrapped_session_key.se_provisioning_state.session_key_limit-- <= 0)
           {
             abort ("\"SessionKeyLimit\" exceeded");
           }
         try
           {
-            return new MacBuilder (addArrays (se_provisioning_state.wrapped_session_key, key_modifier));
+            return new MacBuilder (addArrays (unwrapped_session_key.session_key, key_modifier));
           }
         catch (GeneralSecurityException e)
           {
@@ -435,22 +580,22 @@ public class SEReferenceImplementation
           }
       }
 
-    static MacBuilder getMacBuilderForMethodCall (SEProvisioningState se_provisioning_state, byte[] method) throws SKSException
+    static MacBuilder getMacBuilderForMethodCall (UnwrappedSessionKey unwrapped_session_key, byte[] method) throws SKSException
       {
-        short q = se_provisioning_state.mac_sequence_counter++;
-        return getMacBuilder (se_provisioning_state, addArrays (method, new byte[]{(byte)(q >>> 8), (byte)q}));
+        short q = unwrapped_session_key.se_provisioning_state.mac_sequence_counter++;
+        return getMacBuilder (unwrapped_session_key, addArrays (method, new byte[]{(byte)(q >>> 8), (byte)q}));
       }
 
-    static MacBuilder getEECertMacBuilder (SEProvisioningState se_provisioning_state, X509Certificate ee_certificate, byte[] method) throws SKSException, GeneralSecurityException
+    static MacBuilder getEECertMacBuilder (UnwrappedSessionKey unwrapped_session_key, X509Certificate ee_certificate, byte[] method) throws SKSException, GeneralSecurityException
       {
-        MacBuilder mac_builder = getMacBuilderForMethodCall (se_provisioning_state, method);
+        MacBuilder mac_builder = getMacBuilderForMethodCall (unwrapped_session_key, method);
         mac_builder.addArray (ee_certificate.getEncoded ());
         return mac_builder;
       }
 
-    static byte[] decrypt (SEProvisioningState se_provisioning_state, byte[] data) throws SKSException
+    static byte[] decrypt (UnwrappedSessionKey unwrapped_session_key, byte[] data) throws SKSException
       {
-        byte[] key = getMacBuilder (se_provisioning_state, 
+        byte[] key = getMacBuilder (unwrapped_session_key, 
                                     SecureKeyStore.ZERO_LENGTH_ARRAY).addVerbatim (SecureKeyStore.KDF_ENCRYPTION_KEY).getResult ();
         try
           {
@@ -470,7 +615,7 @@ public class SEReferenceImplementation
                                         int target_key_handle,
                                         byte[] authorization,
                                         boolean privacy_enabled,
-                                        SEProvisioningState se_provisioning_state,
+                                        UnwrappedSessionKey unwrapped_session_key,
                                         byte[] mac) throws SKSException, GeneralSecurityException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -484,7 +629,7 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         Signature km_verify = Signature.getInstance (key_management_key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
         km_verify.initVerify (key_management_key);
-        km_verify.update (getMacBuilder (se_provisioning_state, getDeviceID (privacy_enabled)).addVerbatim (target_key_ee_certificate.getEncoded ()).getResult ());
+        km_verify.update (getMacBuilder (unwrapped_session_key, getDeviceID (privacy_enabled)).addVerbatim (target_key_ee_certificate.getEncoded ()).getResult ());
         if (!km_verify.verify (authorization))
           {
             abort ("\"Authorization\" signature did not verify for key #" + target_key_handle);
@@ -521,24 +666,24 @@ public class SEReferenceImplementation
           }
       }
 
-    static Algorithm checkKeyAndAlgorithm (SEKeyState se_key_state, int key_handle, String algorithm, int expected_type) throws SKSException
+    static Algorithm checkKeyAndAlgorithm (UnwrappedKey unwrapped_key, int key_handle, String algorithm, int expected_type) throws SKSException
       {
         Algorithm alg = getAlgorithm (algorithm);
         if ((alg.mask & expected_type) == 0)
           {
             abort ("Algorithm does not match operation: " + algorithm, SKSException.ERROR_ALGORITHM);
           }
-        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ se_key_state.is_symmetric_key)
+        if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) != 0) ^ unwrapped_key.is_symmetric)
           {
-            abort ((se_key_state.is_symmetric_key ? "S" : "As") + "ymmetric key #" + key_handle + " is incompatible with: " + algorithm, SKSException.ERROR_ALGORITHM);
+            abort ((unwrapped_key.is_symmetric ? "S" : "As") + "ymmetric key #" + key_handle + " is incompatible with: " + algorithm, SKSException.ERROR_ALGORITHM);
           }
-        if (se_key_state.is_symmetric_key)
+        if (unwrapped_key.is_symmetric)
           {
-            testSymmetricKey (algorithm, se_key_state.symmetric_key, "#" + key_handle);
+            testSymmetricKey (algorithm, unwrapped_key.symmetric_key, "#" + key_handle);
           }
-        else if (se_key_state.isRSA () ^ (alg.mask & ALG_RSA_KEY) != 0)
+        else if (unwrapped_key.isRSA () ^ (alg.mask & ALG_RSA_KEY) != 0)
           {
-            abort ((se_key_state.isRSA () ? "RSA" : "EC") + " key #" + key_handle + " is incompatible with: " + algorithm, SKSException.ERROR_ALGORITHM);
+            abort ((unwrapped_key.isRSA () ? "RSA" : "EC") + " key #" + key_handle + " is incompatible with: " + algorithm, SKSException.ERROR_ALGORITHM);
           }
         return alg;
       }
@@ -548,6 +693,7 @@ public class SEReferenceImplementation
                                                       String id) throws SKSException
       {
         Algorithm alg = getAlgorithm (algorithm);
+        UnwrappedKey unwrapped_key = getUnwrappedKey (se_key_state);
         if ((alg.mask & ALG_NONE) == 0)
           {
             ///////////////////////////////////////////////////////////////////////////////////
@@ -555,12 +701,12 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             if (((alg.mask & (ALG_SYM_ENC | ALG_HMAC)) == 0) ^ se_key_state.is_symmetric_key)
               {
-                if (se_key_state.is_symmetric_key)
+                if (unwrapped_key.is_symmetric)
                   {
                     ///////////////////////////////////////////////////////////////////////////////////
                     // Symmetric. AES algorithms only operates on 128, 192, and 256 bit keys
                     ///////////////////////////////////////////////////////////////////////////////////
-                    testSymmetricKey (algorithm, se_key_state.symmetric_key, id);
+                    testSymmetricKey (algorithm, unwrapped_key.symmetric_key, id);
                     return;
                   }
                 else
@@ -568,17 +714,40 @@ public class SEReferenceImplementation
                     ///////////////////////////////////////////////////////////////////////////////////
                     // Asymmetric.  Check that algorithms match RSA or EC
                     ///////////////////////////////////////////////////////////////////////////////////
-                    if (((alg.mask & ALG_RSA_KEY) == 0) ^ se_key_state.isRSA ())
+                    if (((alg.mask & ALG_RSA_KEY) == 0) ^ unwrapped_key.isRSA ())
                       {
                         return;
                       }
                   }
               }
-            abort ((se_key_state.is_symmetric_key ? "Symmetric" : se_key_state.isRSA () ? "RSA" : "EC") + 
+            abort ((se_key_state.is_symmetric_key ? "Symmetric" : unwrapped_key.isRSA () ? "RSA" : "EC") + 
                    " key " + id + " does not match algorithm: " + algorithm);
           }
       }
+    
+    static PrivateKey raw2PrivateKey (byte[] pkcs8_private_key) throws GeneralSecurityException
+      {
+        PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (pkcs8_private_key);
 
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Bare-bones ASN.1 decoding to find out if it is RSA or EC 
+        ///////////////////////////////////////////////////////////////////////////////////
+        boolean rsa_flag = false;
+        for (int j = 8; j < 11; j++)
+          {
+            rsa_flag = true;
+            for (int i = 0; i < RSA_ENCRYPTION_OID.length; i++)
+              {
+                if (pkcs8_private_key[j + i] != RSA_ENCRYPTION_OID[i])
+                  {
+                    rsa_flag = false;
+                  }
+              }
+            if (rsa_flag) break;
+          }
+        return KeyFactory.getInstance (rsa_flag ? "RSA" : "EC").generatePrivate (key_spec);
+      }
+    
     /////////////////////////////////////////////////////////////////////////////////////////////
     // PKCS #1 Signature Support Data
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -628,14 +797,15 @@ public class SEReferenceImplementation
                                      PublicKey public_key,
                                      String id) throws SKSException
       {
-        if (public_key instanceof RSAPublicKey ^ se_key_state.isRSA ())
+        UnwrappedKey unwrapped_key = getUnwrappedKey (se_key_state);
+        if (public_key instanceof RSAPublicKey ^ unwrapped_key.isRSA ())
           {
             abort ("RSA/EC mixup between public and private keys for: " + id);
           }
-        if (se_key_state.isRSA ())
+        if (unwrapped_key.isRSA ())
           {
-            if (!((RSAPublicKey)public_key).getPublicExponent ().equals (((RSAPrivateCrtKey)se_key_state.private_key).getPublicExponent ()) ||
-                !((RSAPublicKey)public_key).getModulus ().equals (((RSAPrivateKey)se_key_state.private_key).getModulus ()))
+            if (!((RSAPublicKey)public_key).getPublicExponent ().equals (((RSAPrivateCrtKey)unwrapped_key.private_key).getPublicExponent ()) ||
+                !((RSAPublicKey)public_key).getModulus ().equals (((RSAPrivateKey)unwrapped_key.private_key).getModulus ()))
               {
                 abort ("RSA mismatch between public and private keys for: " + id);
               }
@@ -645,7 +815,7 @@ public class SEReferenceImplementation
             try
               {
                 Signature ec_signer = Signature.getInstance ("SHA256withECDSA");
-                ec_signer.initSign (se_key_state.private_key);
+                ec_signer.initSign (unwrapped_key.private_key);
                 ec_signer.update (RSA_ENCRYPTION_OID);  // Any data could be used...
                 byte[] ec_sign_data = ec_signer.sign ();
                 Signature ec_verifier = Signature.getInstance ("SHA256withECDSA");
@@ -672,7 +842,8 @@ public class SEReferenceImplementation
     public static byte[] executeSessionSign (SEProvisioningState se_provisioning_state,
                                              byte[] data) throws SKSException
       {
-        return getMacBuilder (se_provisioning_state, SecureKeyStore.KDF_EXTERNAL_SIGNATURE).addVerbatim (data).getResult ();
+        return getMacBuilder (getUnwrappedSessionKey (se_provisioning_state),
+                              SecureKeyStore.KDF_EXTERNAL_SIGNATURE).addVerbatim (data).getResult ();
       }
 
 
@@ -690,7 +861,8 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Check input arguments
         ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = checkKeyAndAlgorithm (se_key_state, key_handle, algorithm, ALG_ASYM_ENC);
+        UnwrappedKey unwrapped_key = getUnwrappedKey (se_key_state);
+        Algorithm alg = checkKeyAndAlgorithm (unwrapped_key, key_handle, algorithm, ALG_ASYM_ENC);
         if (parameters != null)  // Only support basic RSA yet...
           {
             abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
@@ -702,10 +874,10 @@ public class SEReferenceImplementation
         try
           {
             Cipher cipher = Cipher.getInstance (alg.jce_name);
-            cipher.init (Cipher.DECRYPT_MODE, se_key_state.private_key);
+            cipher.init (Cipher.DECRYPT_MODE, unwrapped_key.private_key);
             return cipher.doFinal (data);
           }
-        catch (GeneralSecurityException e)
+        catch (Exception e)
           {
             throw new SKSException (e, SKSException.ERROR_CRYPTO);
           }
@@ -726,7 +898,8 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Check input arguments
         ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = checkKeyAndAlgorithm (se_key_state, key_handle, algorithm, ALG_ASYM_SGN);
+        UnwrappedKey unwrapped_key = getUnwrappedKey (se_key_state);
+        Algorithm alg = checkKeyAndAlgorithm (unwrapped_key, key_handle, algorithm, ALG_ASYM_SGN);
         int hash_len = (alg.mask / ALG_HASH_DIV) & ALG_HASH_MSK;
         if (hash_len > 0 && hash_len != data.length)
           {
@@ -742,16 +915,16 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            if (se_key_state.isRSA () && hash_len > 0)
+            if (unwrapped_key.isRSA () && hash_len > 0)
               {
                 data = addArrays (hash_len == 20 ? DIGEST_INFO_SHA1 : DIGEST_INFO_SHA256, data);
               }
             Signature signature = Signature.getInstance (alg.jce_name);
-            signature.initSign (se_key_state.private_key);
+            signature.initSign (unwrapped_key.private_key);
             signature.update (data);
             return signature.sign ();
           }
-        catch (GeneralSecurityException e)
+        catch (Exception e)
           {
             throw new SKSException (e, SKSException.ERROR_CRYPTO);
           }
@@ -771,7 +944,8 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Check input arguments
         ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = checkKeyAndAlgorithm (se_key_state, key_handle, algorithm, ALG_HMAC);
+        UnwrappedKey unwrapped_key = getUnwrappedKey (se_key_state);
+        Algorithm alg = checkKeyAndAlgorithm (unwrapped_key, key_handle, algorithm, ALG_HMAC);
  
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -779,7 +953,7 @@ public class SEReferenceImplementation
         try
           {
             Mac mac = Mac.getInstance (alg.jce_name);
-            mac.init (new SecretKeySpec (se_key_state.symmetric_key, "RAW"));
+            mac.init (new SecretKeySpec (unwrapped_key.symmetric_key, "RAW"));
             return mac.doFinal (data);
           }
         catch (GeneralSecurityException e)
@@ -804,7 +978,8 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Check input arguments
         ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = checkKeyAndAlgorithm (se_key_state, key_handle, algorithm, ALG_SYM_ENC);
+        UnwrappedKey unwrapped_key = getUnwrappedKey (se_key_state);
+        Algorithm alg = checkKeyAndAlgorithm (unwrapped_key, key_handle, algorithm, ALG_SYM_ENC);
         if ((alg.mask & ALG_IV_REQ) == 0 || (alg.mask & ALG_IV_INT) != 0)
           {
             if (iv != null)
@@ -827,7 +1002,7 @@ public class SEReferenceImplementation
         try
           {
             Cipher crypt = Cipher.getInstance (alg.jce_name);
-            SecretKeySpec sk = new SecretKeySpec (se_key_state.symmetric_key, "AES");
+            SecretKeySpec sk = new SecretKeySpec (unwrapped_key.symmetric_key, "AES");
             int jce_mode = mode ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
             if ((alg.mask & ALG_IV_INT) != 0)
               {
@@ -876,7 +1051,8 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Check input arguments
         ///////////////////////////////////////////////////////////////////////////////////
-        Algorithm alg = checkKeyAndAlgorithm (se_key_state, key_handle, algorithm, ALG_ASYM_KA);
+        UnwrappedKey unwrapped_key = getUnwrappedKey (se_key_state);
+        Algorithm alg = checkKeyAndAlgorithm (unwrapped_key, key_handle, algorithm, ALG_ASYM_KA);
         if (parameters != null) // Only support external KDFs yet...
           {
             abort ("\"Parameters\" for key #" + key_handle + " do not match algorithm");
@@ -893,7 +1069,7 @@ public class SEReferenceImplementation
         try
           {
             KeyAgreement key_agreement = KeyAgreement.getInstance (alg.jce_name);
-            key_agreement.init (se_key_state.private_key);
+            key_agreement.init (unwrapped_key.private_key);
             key_agreement.doPhase (public_key, true);
             return key_agreement.generateSecret ();
           }
@@ -913,7 +1089,8 @@ public class SEReferenceImplementation
       {
         if (se_key_state.exportable)
           {
-            return se_key_state.is_symmetric_key ? se_key_state.symmetric_key : se_key_state.private_key.getEncoded ();
+            UnwrappedKey unwrapped_key = getUnwrappedKey (se_key_state);
+            return unwrapped_key.is_symmetric ? unwrapped_key.symmetric_key : unwrapped_key.private_key.getEncoded ();
           }
         throw new SKSException ("TEE export violation attempt");
       }
@@ -934,15 +1111,23 @@ public class SEReferenceImplementation
                                            SEProvisioningState se_provisioning_state,
                                            byte[] mac) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Retrieve session key
+        ///////////////////////////////////////////////////////////////////////////////////
+        UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (se_provisioning_state);
+
         try
           {
-            validateTargetKeyLocal (getEECertMacBuilder (se_provisioning_state, ee_certificate, method),
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Validate
+            ///////////////////////////////////////////////////////////////////////////////////
+            validateTargetKeyLocal (getEECertMacBuilder (unwrapped_session_key, ee_certificate, method),
                                     key_management_key,
                                     target_key_ee_certificate,
                                     target_key_handle,
                                     authorization,
                                     privacy_enabled,
-                                    se_provisioning_state,
+                                    unwrapped_session_key,
                                     mac);
           }
         catch (GeneralSecurityException e)
@@ -966,15 +1151,23 @@ public class SEReferenceImplementation
                                           SEProvisioningState se_provisioning_state,
                                           byte[] mac) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Retrieve session key
+        ///////////////////////////////////////////////////////////////////////////////////
+        UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (se_provisioning_state);
+
         try
           {
-            validateTargetKeyLocal (getMacBuilderForMethodCall (se_provisioning_state, method), 
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Validate
+            ///////////////////////////////////////////////////////////////////////////////////
+            validateTargetKeyLocal (getMacBuilderForMethodCall (unwrapped_session_key, method), 
                                     key_management_key,
                                     target_key_ee_certificate,
                                     target_key_handle,
                                     authorization,
                                     privacy_enabled,
-                                    se_provisioning_state,
+                                    unwrapped_session_key,
                                     mac);
           }
         catch (GeneralSecurityException e)
@@ -997,9 +1190,14 @@ public class SEReferenceImplementation
                                                   byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
+        // Retrieve session key
+        ///////////////////////////////////////////////////////////////////////////////////
+        UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (se_provisioning_state);
+        
+        ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = getMacBuilderForMethodCall (se_provisioning_state, SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION);
+        MacBuilder verifier = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION);
         verifier.addString (client_session_id);
         verifier.addString (server_session_id);
         verifier.addString (issuer_uri);
@@ -1009,7 +1207,7 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Generate the attestation in advance => checking SessionKeyLimit before "commit"
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder close_attestation = getMacBuilderForMethodCall (se_provisioning_state, SecureKeyStore.KDF_DEVICE_ATTESTATION);
+        MacBuilder close_attestation = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.KDF_DEVICE_ATTESTATION);
         close_attestation.addArray (nonce);
         close_attestation.addString (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1);
         return close_attestation.getResult ();
@@ -1079,6 +1277,7 @@ public class SEReferenceImplementation
         byte[] attestation = null;
         byte[] session_key = null;
         ECPublicKey client_ephemeral_key = null;
+        SEProvisioningState se_provisioning_state = new SEProvisioningState ();
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1133,6 +1332,7 @@ public class SEReferenceImplementation
                 signer.update (attestation);
                 attestation = signer.sign ();
               }
+            wrapSessionKey (se_provisioning_state, session_key, session_key_limit);
           }
         catch (Exception e)
           {
@@ -1142,14 +1342,11 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // We did it!
         ///////////////////////////////////////////////////////////////////////////////////
-        SEProvisioningState ps = new SEProvisioningState ();
-        ps.wrapped_session_key = session_key;
-        ps.session_key_limit = session_key_limit;
         SEProvisioningData pd = new SEProvisioningData ();
         pd.client_session_id = client_session_id;
         pd.attestation = attestation;
         pd.client_ephemeral_key = client_ephemeral_key;
-        pd.se_provisioning_state = ps;
+        pd.se_provisioning_state = se_provisioning_state;
         return pd;
       }
 
@@ -1169,9 +1366,14 @@ public class SEReferenceImplementation
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////
+            // Retrieve session key
+            ///////////////////////////////////////////////////////////////////////////////////
+            UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (se_provisioning_state);
+
+            ///////////////////////////////////////////////////////////////////////////////////
             // Verify incoming MAC
             ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder verifier = getEECertMacBuilder (se_provisioning_state,
+            MacBuilder verifier = getEECertMacBuilder (unwrapped_session_key,
                                                        ee_certificate,
                                                        SecureKeyStore.METHOD_IMPORT_PRIVATE_KEY);
             verifier.addArray (private_key);
@@ -1180,35 +1382,18 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Decrypt and store private key
             ///////////////////////////////////////////////////////////////////////////////////
-            byte[] pkcs8_private_key = decrypt (se_provisioning_state, private_key);
-            PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (pkcs8_private_key);
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Bare-bones ASN.1 decoding to find out if it is RSA or EC 
-            ///////////////////////////////////////////////////////////////////////////////////
-            boolean rsa_flag = false;
-            for (int j = 8; j < 11; j++)
+            byte[] decrypted_private_key = decrypt (unwrapped_session_key, private_key);
+            PrivateKey decoded_private_key = raw2PrivateKey (decrypted_private_key);
+            wrapKey (se_key_state, decrypted_private_key);
+            if (decoded_private_key instanceof RSAKey)
               {
-                rsa_flag = true;
-                for (int i = 0; i < RSA_ENCRYPTION_OID.length; i++)
-                  {
-                    if (pkcs8_private_key[j + i] != RSA_ENCRYPTION_OID[i])
-                      {
-                        rsa_flag = false;
-                      }
-                  }
-                if (rsa_flag) break;
-              }
-            se_key_state.private_key = KeyFactory.getInstance (rsa_flag ? "RSA" : "EC").generatePrivate (key_spec);
-            if (rsa_flag)
-              {
-                checkRSAKeyCompatibility (getRSAKeySize((RSAPrivateKey) se_key_state.private_key),
-                                          ((RSAPrivateCrtKey)se_key_state.private_key).getPublicExponent (),
+                checkRSAKeyCompatibility (getRSAKeySize((RSAPrivateKey) decoded_private_key),
+                                          ((RSAPrivateCrtKey)decoded_private_key).getPublicExponent (),
                                           id);
               }
             else
               {
-                checkECKeyCompatibility ((ECPrivateKey)se_key_state.private_key, id);
+                checkECKeyCompatibility ((ECPrivateKey)decoded_private_key, id);
               }
           }
         catch (GeneralSecurityException e)
@@ -1217,7 +1402,7 @@ public class SEReferenceImplementation
           }
       }
 
-    
+
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
     //                       verifyAndImportSymmetricKey                          //
@@ -1234,20 +1419,33 @@ public class SEReferenceImplementation
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////
+            // Retrieve session key
+            ///////////////////////////////////////////////////////////////////////////////////
+            UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (se_provisioning_state);
+
+            ///////////////////////////////////////////////////////////////////////////////////
             // Verify incoming MAC
             ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder verifier = getEECertMacBuilder (se_provisioning_state,
+            MacBuilder verifier = getEECertMacBuilder (unwrapped_session_key,
                                                        ee_certificate,
                                                        SecureKeyStore.METHOD_IMPORT_SYMMETRIC_KEY);
             verifier.addArray (symmetric_key);
             verifier.verify (mac);
     
             ///////////////////////////////////////////////////////////////////////////////////
+            // Note: This test may appear redundant but the SKS specification is quite stict
+            // and does not permit certificates and private key mismatch even if the private
+            // key is never used which is the case when a symmetric keys is imported 
+            ///////////////////////////////////////////////////////////////////////////////////
+            checkKeyPair (se_key_state, ee_certificate.getPublicKey (), id);
+
+            ///////////////////////////////////////////////////////////////////////////////////
             // Decrypt and store symmetric key
             ///////////////////////////////////////////////////////////////////////////////////
-            se_key_state.symmetric_key = decrypt (se_provisioning_state, symmetric_key);
+            byte[] raw_key = decrypt (unwrapped_session_key, symmetric_key);
             se_key_state.is_symmetric_key = true;
-            symmetric_key_length = (short)se_key_state.symmetric_key.length; 
+            wrapKey (se_key_state, raw_key);
+            symmetric_key_length = (short)raw_key.length; 
           }
         catch (GeneralSecurityException e)
           {
@@ -1271,9 +1469,17 @@ public class SEReferenceImplementation
                                                 byte[] extension_data,
                                                 byte[] mac) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Retrieve session key
+        ///////////////////////////////////////////////////////////////////////////////////
+        UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (se_provisioning_state);
+
         try
           {
-            MacBuilder verifier = getEECertMacBuilder (se_provisioning_state,
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Verify incoming MAC
+            ///////////////////////////////////////////////////////////////////////////////////
+            MacBuilder verifier = getEECertMacBuilder (unwrapped_session_key,
                                                        ee_certificate,
                                                        SecureKeyStore.METHOD_ADD_EXTENSION);
             verifier.addString (type);
@@ -1287,7 +1493,7 @@ public class SEReferenceImplementation
             abort (e);
           }
         return sub_type == SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION ?
-                        decrypt (se_provisioning_state,extension_data) : extension_data.clone ();
+                       decrypt (unwrapped_session_key, extension_data) : extension_data.clone ();
       }
 
     
@@ -1304,9 +1510,14 @@ public class SEReferenceImplementation
                                                     byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
+        // Retrieve session key
+        ///////////////////////////////////////////////////////////////////////////////////
+        UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (se_provisioning_state);
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = getMacBuilderForMethodCall (se_provisioning_state, SecureKeyStore.METHOD_SET_CERTIFICATE_PATH);
+        MacBuilder verifier = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.METHOD_SET_CERTIFICATE_PATH);
         try
           {
             verifier.addArray (public_key.getEncoded ());
@@ -1352,9 +1563,14 @@ public class SEReferenceImplementation
                                            byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
+        // Retrieve session key
+        ///////////////////////////////////////////////////////////////////////////////////
+        UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (se_provisioning_state);
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = getMacBuilderForMethodCall (se_provisioning_state, SecureKeyStore.METHOD_CREATE_KEY_ENTRY);
+        MacBuilder verifier = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.METHOD_CREATE_KEY_ENTRY);
         verifier.addString (id);
         verifier.addString (algorithm);
         verifier.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
@@ -1367,7 +1583,7 @@ public class SEReferenceImplementation
         else
           {
             verifier.addArray (encrypted_pin_value);
-            decrypted_pin_value = decrypt (se_provisioning_state, encrypted_pin_value);
+            decrypted_pin_value = decrypt (unwrapped_session_key, encrypted_pin_value);
           }
         verifier.addBool (enable_pin_caching);
         verifier.addByte (biometric_protection);
@@ -1457,7 +1673,7 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Create key attest
             ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder cka = getMacBuilderForMethodCall (se_provisioning_state, SecureKeyStore.KDF_DEVICE_ATTESTATION);
+            MacBuilder cka = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.KDF_DEVICE_ATTESTATION);
             cka.addString (id);
             cka.addArray (public_key.getEncoded ());
             byte[] attestation = cka.getResult ();
@@ -1466,8 +1682,8 @@ public class SEReferenceImplementation
             // Finally, create a key entry
             ///////////////////////////////////////////////////////////////////////////////////
             SEKeyState se_key_state = new SEKeyState ();
-            se_key_state.private_key = private_key;
             se_key_state.exportable = export_protection != SecureKeyStore.EXPORT_DELETE_PROTECTION_NOT_ALLOWED;
+            wrapKey (se_key_state, private_key.getEncoded ());
             SEKeyData se_key_data = new SEKeyData ();
             se_key_data.se_key_state = se_key_state;
             se_key_data.attestation = attestation;
@@ -1506,7 +1722,8 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = getMacBuilderForMethodCall (se_provisioning_state, SecureKeyStore.METHOD_CREATE_PIN_POLICY);
+        MacBuilder verifier = getMacBuilderForMethodCall (getUnwrappedSessionKey (se_provisioning_state), 
+                                                          SecureKeyStore.METHOD_CREATE_PIN_POLICY);
         verifier.addString (id);
         verifier.addString (puk_policy_id);
         verifier.addBool (user_defined);
@@ -1535,14 +1752,19 @@ public class SEReferenceImplementation
                                       byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
+        // Retrieve session key
+        ///////////////////////////////////////////////////////////////////////////////////
+        UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (se_provisioning_state);
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Get value
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] decrypted_puk_value = decrypt (se_provisioning_state, puk_value);
+        byte[] decrypted_puk_value = decrypt (unwrapped_session_key, puk_value);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = getMacBuilderForMethodCall (se_provisioning_state, SecureKeyStore.METHOD_CREATE_PUK_POLICY);
+        MacBuilder verifier = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.METHOD_CREATE_PUK_POLICY);
         verifier.addString (id);
         verifier.addArray (puk_value);
         verifier.addByte (format);

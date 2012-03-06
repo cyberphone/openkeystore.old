@@ -1862,15 +1862,18 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Check public versus private key match
                 ///////////////////////////////////////////////////////////////////////////////////
-                try
+                if (!key_entry.is_symmetric_key)
                   {
-                    SEReferenceImplementation.checkKeyPair (key_entry.se_key_state,
-                                                            key_entry.public_key,
-                                                            key_entry.id);
-                  }
-                catch (SKSException e)
-                  {
-                    provisioning.abort (e);
+                    try
+                      {
+                        SEReferenceImplementation.checkKeyPair (key_entry.se_key_state,
+                                                                key_entry.public_key,
+                                                                key_entry.id);
+                      }
+                    catch (SKSException e)
+                      {
+                        provisioning.abort (e);
+                      }
                   }
 
                 ///////////////////////////////////////////////////////////////////////////////////
