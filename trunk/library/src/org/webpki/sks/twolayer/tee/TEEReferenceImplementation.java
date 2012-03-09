@@ -42,7 +42,7 @@ import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.sks.twolayer.se.SEKeyData;
-import org.webpki.sks.twolayer.se.SEKeyState;
+import org.webpki.sks.twolayer.se.SealedKey;
 import org.webpki.sks.twolayer.se.SEProvisioningData;
 import org.webpki.sks.twolayer.se.SEProvisioningState;
 import org.webpki.sks.twolayer.se.SEReferenceImplementation;
@@ -70,6 +70,20 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     static final String SKS_VENDOR_NAME                    = "WebPKI.org";
     static final String SKS_VENDOR_DESCRIPTION             = "SKS Reference - Java TEE Edition";
     static final String SKS_UPDATE_URL                     = null;  // Change here to test or disable
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // In virtualized environments keys may be bound to the OS + SE so that keys are unusable
+    // outside of a particular instance.  The OS instance key must have high entropy and be
+    // protected by the operating system.  This Reference Implementation only shows how it is
+    // to be applied in a TEE/SE combo.  By setting the key to all zeros, the OS binding is
+    // neutralized assuming the exclusive OR KDF mechanism is used.  The TEE is assumed to
+    // be a part of the OS regardless if the OS is virtualized or not, while the SE is meant
+    // to be operating at hypervisor/hardware level
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static final byte[] OS_INSTANCE_KEY = {(byte)0xF4, (byte)0xC7, (byte)0x4F, (byte)0x33, (byte)0x98, (byte)0xC4, (byte)0x9C, (byte)0xF4,
+                                           (byte)0x6D, (byte)0x93, (byte)0xEC, (byte)0x98, (byte)0x18, (byte)0x83, (byte)0x26, (byte)0x61,
+                                           (byte)0xA4, (byte)0x0B, (byte)0xAE, (byte)0x4D, (byte)0x20, (byte)0x4D, (byte)0x75, (byte)0x50,
+                                           (byte)0x36, (byte)0x14, (byte)0x10, (byte)0x20, (byte)0x74, (byte)0x34, (byte)0x69, (byte)0x09};
 
     int next_key_handle = 1;
     LinkedHashMap<Integer,KeyEntry> keys = new LinkedHashMap<Integer,KeyEntry> ();
@@ -148,10 +162,11 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
 
         PublicKey public_key;     // In this implementation overwritten by "setCertificatePath"
 
-        SEKeyState se_key_state;
+        SealedKey sealed_key;
+
         X509Certificate[] certificate_path;
 
-        boolean is_symmetric_key;
+        boolean is_symmetric;
         
         int symmetric_key_length;
 
@@ -372,11 +387,6 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
               }
           }
         
-        boolean isSymmetric ()
-          {
-            return is_symmetric_key;
-          }
-
         void checkCryptoDataSize (byte[] data) throws SKSException
           {
             if (data.length > MAX_LENGTH_CRYPTO_DATA)
@@ -985,7 +995,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         X509Certificate ee_certificate = new_key.getEECertificate ();
         try
           {
-            SEReferenceImplementation.validateTargetKey2 (target_key_entry.getEECertificate (),
+            SEReferenceImplementation.validateTargetKey2 (OS_INSTANCE_KEY,
+                                                          target_key_entry.getEECertificate (),
                                                           target_key_handle,
                                                           target_key_entry.owner.key_management_key,
                                                           ee_certificate,
@@ -1031,7 +1042,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            SEReferenceImplementation.validateTargetKey (target_key_entry.getEECertificate (),
+            SEReferenceImplementation.validateTargetKey (OS_INSTANCE_KEY,
+                                                         target_key_entry.getEECertificate (),
                                                          target_key_handle,
                                                          target_key_entry.owner.key_management_key,
                                                          provisioning.privacy_enabled,
@@ -1194,7 +1206,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Export key in raw unencrypted format through the SE
         ///////////////////////////////////////////////////////////////////////////////////
-        return SEReferenceImplementation.unwrapKey (key_entry.se_key_state);
+        return SEReferenceImplementation.unwrapKey (OS_INSTANCE_KEY, key_entry.sealed_key);
       }
 
 
@@ -1306,7 +1318,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Execute it!
         ///////////////////////////////////////////////////////////////////////////////////
-        return SEReferenceImplementation.executeAsymmetricDecrypt (key_entry.se_key_state,
+        return SEReferenceImplementation.executeAsymmetricDecrypt (OS_INSTANCE_KEY,
+                                                                   key_entry.sealed_key,
                                                                    key_handle,
                                                                    algorithm,
                                                                    parameters,
@@ -1349,7 +1362,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Execute it!
         ///////////////////////////////////////////////////////////////////////////////////
-        return SEReferenceImplementation.executeSignHash (key_entry.se_key_state,
+        return SEReferenceImplementation.executeSignHash (OS_INSTANCE_KEY,
+                                                          key_entry.sealed_key,
                                                           key_handle,
                                                           algorithm,
                                                           parameters,
@@ -1387,7 +1401,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Execute it!
         ///////////////////////////////////////////////////////////////////////////////////
-        return SEReferenceImplementation.executeKeyAgreement (key_entry.se_key_state,
+        return SEReferenceImplementation.executeKeyAgreement (OS_INSTANCE_KEY,
+                                                              key_entry.sealed_key,
                                                               key_handle,
                                                               algorithm,
                                                               parameters,
@@ -1431,7 +1446,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Execute it!
         ///////////////////////////////////////////////////////////////////////////////////
-        return SEReferenceImplementation.executeSymmetricEncryption (key_entry.se_key_state,
+        return SEReferenceImplementation.executeSymmetricEncryption (OS_INSTANCE_KEY,
+                                                                     key_entry.sealed_key,
                                                                      key_handle,
                                                                      algorithm,
                                                                      mode,
@@ -1474,7 +1490,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Execute it!
         ///////////////////////////////////////////////////////////////////////////////////
-        return SEReferenceImplementation.executeHMAC (key_entry.se_key_state,
+        return SEReferenceImplementation.executeHMAC (OS_INSTANCE_KEY,
+                                                      key_entry.sealed_key,
                                                       key_handle,
                                                       algorithm,
                                                       data);
@@ -1642,7 +1659,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Return core key entry metadata
         ///////////////////////////////////////////////////////////////////////////////////
-        return new KeyAttributes (key_entry.isSymmetric (),
+        return new KeyAttributes (key_entry.is_symmetric,
                                   key_entry.certificate_path,
                                   key_entry.app_usage,
                                   key_entry.friendly_name,
@@ -1692,7 +1709,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Sign through the SE
         ///////////////////////////////////////////////////////////////////////////////////
-        return SEReferenceImplementation.executeSessionSign (provisioning.se_provisioning_state, data);
+        return SEReferenceImplementation.executeSessionSign (OS_INSTANCE_KEY, provisioning.se_provisioning_state, data);
       }
 
 
@@ -1828,7 +1845,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         byte[] attestation = null;
         try
           {
-            attestation = SEReferenceImplementation.closeProvisioningAttest (provisioning.se_provisioning_state,
+            attestation = SEReferenceImplementation.closeProvisioningAttest (OS_INSTANCE_KEY,
+                                                                             provisioning.se_provisioning_state,
                                                                              provisioning.server_session_id,
                                                                              provisioning.client_session_id,
                                                                              provisioning.issuer_uri, 
@@ -1862,11 +1880,12 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Check public versus private key match
                 ///////////////////////////////////////////////////////////////////////////////////
-                if (!key_entry.is_symmetric_key)
+                if (!key_entry.is_symmetric)
                   {
                     try
                       {
-                        SEReferenceImplementation.checkKeyPair (key_entry.se_key_state,
+                        SEReferenceImplementation.checkKeyPair (OS_INSTANCE_KEY,
+                                                                key_entry.sealed_key,
                                                                 key_entry.public_key,
                                                                 key_entry.id);
                       }
@@ -1909,7 +1928,10 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                   {
                     try
                       {
-                        SEReferenceImplementation.testKeyAndAlgorithmCompliance (key_entry.se_key_state, algorithm, key_entry.id);
+                        SEReferenceImplementation.testKeyAndAlgorithmCompliance (OS_INSTANCE_KEY,
+                                                                                 key_entry.sealed_key,
+                                                                                 algorithm,
+                                                                                 key_entry.id);
                       }
                     catch (SKSException e)
                       {
@@ -2054,7 +2076,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // The assumption here is that the SE can do crypto parameter validation...
         ///////////////////////////////////////////////////////////////////////////////////
-        SEProvisioningData se_pd = SEReferenceImplementation.createProvisioningData (algorithm,
+        SEProvisioningData se_pd = SEReferenceImplementation.createProvisioningData (OS_INSTANCE_KEY,
+                                                                                     algorithm,
                                                                                      privacy_enabled,
                                                                                      server_session_id,
                                                                                      server_ephemeral_key,
@@ -2148,8 +2171,9 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         X509Certificate ee_certificate = key_entry.getEECertificate ();
         try
           {
-            extension_data = SEReferenceImplementation.verifyAndGetExtension (key_entry.owner.se_provisioning_state,
-                                                                              key_entry.se_key_state,
+            extension_data = SEReferenceImplementation.verifyAndGetExtension (OS_INSTANCE_KEY,
+                                                                              key_entry.owner.se_provisioning_state,
+                                                                              key_entry.sealed_key,
                                                                               key_entry.id,
                                                                               ee_certificate,
                                                                               type,
@@ -2208,8 +2232,9 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         X509Certificate ee_certificate = key_entry.getEECertificate ();
         try
           {
-            SEReferenceImplementation.verifyAndImportPrivateKey (key_entry.owner.se_provisioning_state,
-                                                                 key_entry.se_key_state,
+            SEReferenceImplementation.verifyAndImportPrivateKey (OS_INSTANCE_KEY,
+                                                                 key_entry.owner.se_provisioning_state,
+                                                                 key_entry.sealed_key,
                                                                  key_entry.id,
                                                                  ee_certificate,
                                                                  private_key,
@@ -2249,7 +2274,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         // Mark as "copied" by the server and set the symmetric flag
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.setAndVerifyServerBackupFlag ();
-        key_entry.is_symmetric_key = true;
+        key_entry.is_symmetric = true;
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify MAC and import symmetric key through the SE
@@ -2257,8 +2282,9 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         X509Certificate ee_certificate = key_entry.getEECertificate ();
         try
           {
-            key_entry.symmetric_key_length = SEReferenceImplementation.verifyAndImportSymmetricKey (key_entry.owner.se_provisioning_state,
-                                                                                                    key_entry.se_key_state,
+            key_entry.symmetric_key_length = SEReferenceImplementation.verifyAndImportSymmetricKey (OS_INSTANCE_KEY,
+                                                                                                    key_entry.owner.se_provisioning_state,
+                                                                                                    key_entry.sealed_key,
                                                                                                     key_entry.id,
                                                                                                     ee_certificate,
                                                                                                     symmetric_key,
@@ -2291,8 +2317,9 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            SEReferenceImplementation.setAndVerifyCertificatePath (key_entry.owner.se_provisioning_state,
-                                                                   key_entry.se_key_state,
+            SEReferenceImplementation.setAndVerifyCertificatePath (OS_INSTANCE_KEY,
+                                                                   key_entry.owner.se_provisioning_state,
+                                                                   key_entry.sealed_key,
                                                                    key_entry.id,
                                                                    key_entry.public_key,
                                                                    certificate_path,
@@ -2424,7 +2451,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         SEKeyData se_key_data = null;
         try
           {
-            se_key_data = SEReferenceImplementation.createKeyPair (provisioning.se_provisioning_state,
+            se_key_data = SEReferenceImplementation.createKeyPair (OS_INSTANCE_KEY,
+                                                                   provisioning.se_provisioning_state,
                                                                    id,
                                                                    algorithm,
                                                                    server_seed,
@@ -2474,7 +2502,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         key_entry.friendly_name = friendly_name;
         key_entry.pin_value = pin_value;
         key_entry.public_key = se_key_data.public_key;
-        key_entry.se_key_state = se_key_data.se_key_state;
+        key_entry.sealed_key = se_key_data.sealed_key;
         key_entry.app_usage = app_usage;
         key_entry.device_pin_protection = device_pin_protection;
         key_entry.enable_pin_caching = enable_pin_caching;
@@ -2558,7 +2586,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            SEReferenceImplementation.verifyPINPolicy (provisioning.se_provisioning_state,
+            SEReferenceImplementation.verifyPINPolicy (OS_INSTANCE_KEY,
+                                                       provisioning.se_provisioning_state,
                                                        id,
                                                        puk_policy_id,
                                                        user_defined,
@@ -2625,7 +2654,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         byte[] decrypted_puk_value = null;
         try
           {
-            decrypted_puk_value = SEReferenceImplementation.getPUKValue (provisioning.se_provisioning_state,
+            decrypted_puk_value = SEReferenceImplementation.getPUKValue (OS_INSTANCE_KEY,
+                                                                         provisioning.se_provisioning_state,
                                                                          id,
                                                                          puk_value,
                                                                          format,

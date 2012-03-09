@@ -249,6 +249,8 @@ public class ProvSess
     
     boolean device_pin_protected = false;
     
+    boolean fail_mac;
+    
     InputMethod input_method = InputMethod.ANY;
 
     byte[] custom_key_specifier = null;
@@ -325,6 +327,11 @@ public class ProvSess
 
     byte[] mac4call (byte[] data, byte[] method) throws IOException, GeneralSecurityException
       {
+        if (fail_mac)
+          {
+            fail_mac = false;
+            data = ArrayUtil.add (data, new byte[]{5});
+          }
         return server_sess_key.mac (data, ArrayUtil.add (method, getMACSequenceCounterAndUpdate ()));
       }
 
@@ -450,6 +457,12 @@ public class ProvSess
     public void abortSession () throws IOException
       {
         sks.abortProvisioningSession (provisioning_handle);
+      }
+    
+    
+    public void failMAC ()
+      {
+        fail_mac = true;
       }
     
     

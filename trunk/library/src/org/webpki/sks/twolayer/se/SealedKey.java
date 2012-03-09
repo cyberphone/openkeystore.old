@@ -1,10 +1,10 @@
 package org.webpki.sks.twolayer.se;
 
-public class SEKeyState
+public class SealedKey
   {
-    boolean is_symmetric_key;
+    boolean is_symmetric;
     
-    boolean exportable;
+    boolean is_exportable;
     
     byte[] wrapped_key;
     

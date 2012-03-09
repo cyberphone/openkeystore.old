@@ -3203,4 +3203,23 @@ public class SKSTest
                                        sess.serverSessionSign (TEST_STRING)));
         sess.closeSession ();
       }
+
+    @Test
+    public void test75 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        sess.failMAC ();
+        try
+          {
+            sess.createECKey ("Key.1",
+                              null /* pin_value */,
+                              null,
+                              AppUsage.AUTHENTICATION);
+            fail ("MAC");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "MAC error");
+          }
+      }
   }

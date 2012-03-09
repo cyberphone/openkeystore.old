@@ -4,7 +4,7 @@ import java.security.PublicKey;
 
 public class SEKeyData
   {
-    public SEKeyState se_key_state;
+    public SealedKey sealed_key;
     
     public byte[] attestation;
     
