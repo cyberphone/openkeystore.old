@@ -764,11 +764,6 @@ public class ProvSess
         return false;
       }
 
-    protected void finalize() throws Throwable
-      {
-        abortSession ();
-      }
-
     public byte[] getDeviceID () throws GeneralSecurityException
       {
         return privacy_enabled ? SecureKeyStore.KDF_ANONYMOUS : device.device_info.getCertificatePath ()[0].getEncoded ();

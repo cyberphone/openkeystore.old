@@ -4,6 +4,7 @@
   <property name="sks.implementation" value="org.webpki.sks.test.SKSReferenceImplementation"/>
   <property name="sks.auth.gui" value="org.webpki.sks.test.DummyTrustedGUIAuthorization"/>
   <property name="sks.ws.client" value="org.webpki.sks.ws.client.SKSWSClient"/>
+  <property name="sks.debug" value="true"/>
   <property name="sks.device" value=""/>
   <property name="src_dir" value="../src" />
   <property name="dot_net_dir" value="../sks-ws-dotnet" />
@@ -439,6 +440,7 @@
   		<jvmarg value="-Djava.endorsed.dirs=${jax.ws.lib.dir}"/>
     	<jvmarg value="-Dsks.implementation=${sks.implementation}"/>
     	<jvmarg value="-Dsks.auth.gui=${sks.auth.gui}"/>
+    	<jvmarg value="-Dsks.debug=${sks.debug}"/>
     	<jvmarg value="-Dcom.sun.xml.ws.fault.SOAPFaultBuilder.disableCaptureStackTrace=false"/>
   	    <arg value="${sksws.url}"/>
   	</java>

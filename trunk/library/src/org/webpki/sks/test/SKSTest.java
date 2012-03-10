@@ -86,7 +86,7 @@ public class SKSTest
     
     static boolean standalone_testing;
     
-    Device device;
+    static Device device;
     
     int sessionCount () throws Exception
       {
@@ -866,7 +866,8 @@ public class SKSTest
                 ((WSSpecific) sks).setDeviceID (device_id);
               }
           }
-        DeviceInfo dev = sks.getDeviceInfo ();
+        device = new Device (sks);
+        DeviceInfo dev = device.device_info;
         reference_implementation = SKSReferenceImplementation.SKS_VENDOR_DESCRIPTION.equals (dev.getVendorDescription ())
                                                    ||
                                    new Boolean (System.getProperty ("sks.referenceimplementation"));
@@ -889,7 +890,10 @@ public class SKSTest
     @Before
     public void setup () throws Exception
       {
-         device = new Device (sks);
+         if (sks instanceof WSSpecific)
+           {
+             ((WSSpecific)sks).logEvent ("Test=" + name.getMethodName ());
+           }
       }
         
     @After

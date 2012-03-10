@@ -92,6 +92,8 @@ public class SKSWSImplementation
     
     static SecureKeyStore default_device;
     
+    static boolean debug;
+    
     static
       {
         try
@@ -99,6 +101,7 @@ public class SKSWSImplementation
             Security.insertProviderAt (new BouncyCastleProvider(), 1);
             tga = (TrustedGUIAuthorization) Class.forName (System.getProperty ("sks.auth.gui")).newInstance ();
             String implementations = System.getProperty ("sks.implementation");
+            debug = new Boolean (System.getProperty ("sks.debug"));
             while (implementations != null)
               {
                 String impl = implementations;
@@ -158,7 +161,10 @@ public class SKSWSImplementation
     
     void log (String message)
       {
-        System.out.println (message);
+        if (debug)
+          {
+            System.out.println (message);
+          }
       }
       
     void log (String device_id, String message)
@@ -386,8 +392,20 @@ public class SKSWSImplementation
                                             byte[] mac)
     throws SKSException
       {
-        log (device_id, "closeProvisioningSession (ProvisioningHandle=" + provisioning_handle + ")");
-        return getDevice (device_id).closeProvisioningSession (provisioning_handle, nonce, mac);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).closeProvisioningSession (provisioning_handle, nonce, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "closeProvisioningSession (ProvisioningHandle=\"" + provisioning_handle + "\")" + log_result);
+          }
       }
 
     @WebMethod(operationName="enumerateProvisioningSessions")
@@ -447,8 +465,20 @@ public class SKSWSImplementation
                                           int provisioning_handle)
     throws SKSException
       {
-        log (device_id, "abortProvisioningSession (ProvisioningHandle=" + provisioning_handle + ")");
-        getDevice (device_id).abortProvisioningSession (provisioning_handle);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).abortProvisioningSession (provisioning_handle);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "abortProvisioningSession (ProvisioningHandle=\"" + provisioning_handle + "\")" + log_result);
+          }
       }
 
     @WebMethod(operationName="signProvisioningSessionData")
@@ -1292,7 +1322,7 @@ public class SKSWSImplementation
     public void logEvent (@WebParam(name="Description", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                           String description)
       {
-        log ("LOG: " + description);
+        log ("logEvent (Description=\"" + description + "\")");
       }
 
     public static void main (String[] args)
