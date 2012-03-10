@@ -530,20 +530,34 @@ public class SKSWSImplementation
                                 byte[] mac)
     throws SKSException
       {
-        log (device_id, "createPINPolicy (ID=" + id + ")");
-        return getDevice (device_id).createPINPolicy (provisioning_handle,
-                                                      id,
-                                                      puk_policy_handle,
-                                                      user_defined,
-                                                      user_modifiable,
-                                                      format,
-                                                      retry_limit,
-                                                      grouping,
-                                                      pattern_restrictions,
-                                                      min_length,
-                                                      max_length,
-                                                      input_method,
-                                                      mac);
+        String log_result = null;
+        try
+          {
+            int pin_policy_handle = getDevice (device_id).createPINPolicy (provisioning_handle,
+                                                                           id,
+                                                                           puk_policy_handle,
+                                                                           user_defined,
+                                                                           user_modifiable,
+                                                                           format,
+                                                                           retry_limit,
+                                                                           grouping,
+                                                                           pattern_restrictions,
+                                                                           min_length,
+                                                                           max_length,
+                                                                           input_method,
+                                                                           mac);
+            log_result = " : PINPolicyHandle=\"" + pin_policy_handle + "\"";
+            return pin_policy_handle;
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "createPINPolicy (ID=\"" + id + "\")" + log_result);
+          }
       }
 
     @WebMethod(operationName="createKeyEntry")
@@ -590,26 +604,39 @@ public class SKSWSImplementation
                                Holder<byte[]> attestation)
     throws SKSException
       {
-        KeyData kd = getDevice (device_id).createKeyEntry (provisioning_handle,
-                                                           id,
-                                                           algorithm,
-                                                           server_seed,
-                                                           device_pin_protection,
-                                                           pin_policy_handle,
-                                                           pin_value,
-                                                           enable_pin_caching,
-                                                           biometric_protection,
-                                                           export_protection,
-                                                           delete_protection,
-                                                           app_usage,
-                                                           friendly_name,
-                                                           key_specifier,
-                                                           endorsed_algorithms.toArray (new String[0]),
-                                                           mac);
-        public_key.value = kd.getPublicKey ().getEncoded ();
-        attestation.value = kd.getAttestation ();
-        log (device_id, "createKeyEntry (ID=" + id + ") : KeyHandle=" + kd.getKeyHandle ());
-        return kd.getKeyHandle ();
+        String log_result = null;
+        try
+          {
+            KeyData kd = getDevice (device_id).createKeyEntry (provisioning_handle,
+                                                               id,
+                                                               algorithm,
+                                                               server_seed,
+                                                               device_pin_protection,
+                                                               pin_policy_handle,
+                                                               pin_value,
+                                                               enable_pin_caching,
+                                                               biometric_protection,
+                                                               export_protection,
+                                                               delete_protection,
+                                                               app_usage,
+                                                               friendly_name,
+                                                               key_specifier,
+                                                               endorsed_algorithms.toArray (new String[0]),
+                                                               mac);
+            public_key.value = kd.getPublicKey ().getEncoded ();
+            attestation.value = kd.getAttestation ();
+            log_result = " : KeyHandle=" + kd.getKeyHandle ();
+            return kd.getKeyHandle ();
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "createKeyEntry (ID=" + id + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="getKeyHandle")
