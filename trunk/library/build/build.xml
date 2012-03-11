@@ -390,7 +390,7 @@
       </not>
   	</condition>
 	<property name="test.out.html" value="true"/>
-    <junit fork="yes" forkmode="once" haltonfailure="yes">
+    <junit fork="yes" forkmode="once" haltonfailure="yes" tempdir="${test_dir}">
       <test name="${test.class}" unless="method"/>
       <test name="${test.class}" methods="${method}" if="method"/><!-- ANT 1.8.2 and up -->
     	<sysproperty key="sks.implementation" value="${sks.implementation}"/>
