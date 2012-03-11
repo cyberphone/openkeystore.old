@@ -21,7 +21,7 @@ import java.security.cert.X509Certificate;
 
 public class KeyAttributes
   {
-    boolean is_symmetric_key;
+    short symmetric_key_length;
     
     X509Certificate[] certificate_path;
     
@@ -36,7 +36,12 @@ public class KeyAttributes
     
     public boolean isSymmetricKey ()
       {
-        return is_symmetric_key;
+        return symmetric_key_length > 0;
+      }
+    
+    public short getSymmetricKeyLength ()
+      {
+        return symmetric_key_length;
       }
     
     public X509Certificate[] getCertificatePath ()
@@ -71,14 +76,14 @@ public class KeyAttributes
         return extension_types;
       }
     
-    public KeyAttributes (boolean is_symmetric_key,
+    public KeyAttributes (short symmetric_key_length,
                           X509Certificate[] certificate_path,
                           byte app_usage,
                           String friendly_name,
                           String[] endorsed_algorithms,
                           String[] extension_types)
       {
-        this.is_symmetric_key = is_symmetric_key;
+        this.symmetric_key_length = symmetric_key_length;
         this.certificate_path = certificate_path;
         this.app_usage = app_usage;
         this.friendly_name = friendly_name;

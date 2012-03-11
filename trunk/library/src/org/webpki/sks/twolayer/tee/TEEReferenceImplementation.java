@@ -166,9 +166,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
 
         X509Certificate[] certificate_path;
 
-        boolean is_symmetric;
-        
-        int symmetric_key_length;
+        short symmetric_key_length;
 
         LinkedHashSet<String> endorsed_algorithms;
 
@@ -1659,7 +1657,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Return core key entry metadata
         ///////////////////////////////////////////////////////////////////////////////////
-        return new KeyAttributes (key_entry.is_symmetric,
+        return new KeyAttributes (key_entry.symmetric_key_length,
                                   key_entry.certificate_path,
                                   key_entry.app_usage,
                                   key_entry.friendly_name,
@@ -1880,7 +1878,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                 ///////////////////////////////////////////////////////////////////////////////////
                 // Check public versus private key match
                 ///////////////////////////////////////////////////////////////////////////////////
-                if (!key_entry.is_symmetric)
+                if (key_entry.symmetric_key_length == 0)
                   {
                     try
                       {
@@ -2274,7 +2272,6 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         // Mark as "copied" by the server and set the symmetric flag
         ///////////////////////////////////////////////////////////////////////////////////
         key_entry.setAndVerifyServerBackupFlag ();
-        key_entry.is_symmetric = true;
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify MAC and import symmetric key through the SE

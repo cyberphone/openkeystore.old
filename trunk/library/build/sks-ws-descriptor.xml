@@ -892,20 +892,20 @@
 ]]></Code></Method>
 
    <Method Name="getKeyAttributes" ReturnClass="KeyAttributes" Throws="SKSException">
-     <Parameter Name="device_id"           Type="string" XMLName="DeviceID"          Null="true" SuppressRule="DEV"/>
-     <Parameter Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
-     <Parameter Name="is_symmetric_key"    Type="bool"   XMLName="IsSymmetricKey"    Mode="out"/>
-     <Parameter Name="certificate_path"    Type="binary" XMLName="X509Certificate"   Mode="out" List="true"             RewriteRule="Out.X509"/>
-     <Parameter Name="app_usage"           Type="byte"   XMLName="AppUsage"          Mode="out"                         RewriteRule="Out.AppUsage"/>
-     <Parameter Name="friendly_name"       Type="string" XMLName="FriendlyName"      Mode="out" Null="true"/>
-     <Parameter Name="endorsed_algorithms" Type="string" XMLName="EndorsedAlgorithm" Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
-     <Parameter Name="extension_types"     Type="string" XMLName="ExtensionType"     Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
+     <Parameter Name="device_id"            Type="string" XMLName="DeviceID"           Null="true" SuppressRule="DEV"/>
+     <Parameter Name="key_handle"           Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="symmetric_key_length" Type="short"  XMLName="SymmetricKeyLength" Mode="out"/>
+     <Parameter Name="certificate_path"     Type="binary" XMLName="X509Certificate"    Mode="out" List="true"             RewriteRule="Out.X509"/>
+     <Parameter Name="app_usage"            Type="byte"   XMLName="AppUsage"           Mode="out"                         RewriteRule="Out.AppUsage"/>
+     <Parameter Name="friendly_name"        Type="string" XMLName="FriendlyName"       Mode="out" Null="true"/>
+     <Parameter Name="endorsed_algorithms"  Type="string" XMLName="EndorsedAlgorithm"  Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
+     <Parameter Name="extension_types"      Type="string" XMLName="ExtensionType"      Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
      <Code><![CDATA[
         log (device_id, "getKeyAttributes (KeyHandle=" + key_handle + ")");
         try
           {
             KeyAttributes ka = getDevice (device_id).getKeyAttributes (key_handle);
-            is_symmetric_key.value = ka.isSymmetricKey ();
+            symmetric_key_length.value = ka.getSymmetricKeyLength ();
             certificate_path.value = new ArrayList<byte[]> ();
             for (X509Certificate cert : ka.getCertificatePath ())
               {

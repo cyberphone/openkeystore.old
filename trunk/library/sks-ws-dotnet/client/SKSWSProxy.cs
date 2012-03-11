@@ -1671,9 +1671,9 @@ namespace org.webpki.sks.ws.client
     public class KeyAttributes
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="IsSymmetricKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="SymmetricKeyLength", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
-        internal bool _is_symmetric_key;
+        internal short _symmetric_key_length;
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
@@ -1708,9 +1708,9 @@ namespace org.webpki.sks.ws.client
 
         internal KeyAttributes () {}
 
-        public bool IsSymmetricKey
+        public short SymmetricKeyLength
         {
-            get { return _is_symmetric_key; }
+            get { return _symmetric_key_length; }
         }
 
         public X509Certificate2[] CertificatePath

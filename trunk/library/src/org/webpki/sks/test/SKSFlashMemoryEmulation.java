@@ -2161,7 +2161,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         ///////////////////////////////////////////////////////////////////////////////////
         // Return core key entry metadata
         ///////////////////////////////////////////////////////////////////////////////////
-        return new KeyAttributes (key_entry.isSymmetric (),
+        return new KeyAttributes ((short)(key_entry.isSymmetric () ? key_entry.symmetric_key.length : 0),
                                   key_entry.certificate_path,
                                   key_entry.app_usage,
                                   key_entry.friendly_name,

@@ -708,7 +708,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            Holder<Boolean> is_symmetric_key = new Holder<Boolean> ();
+            Holder<Short> symmetric_key_length = new Holder<Short> ();
             Holder<List<byte[]>> certificate_path = new Holder<List<byte[]>> ();
             Holder<Byte> app_usage = new Holder<Byte> ();
             Holder<String> friendly_name = new Holder<String> ();
@@ -716,13 +716,13 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             Holder<List<String>> extension_types= new Holder<List<String>> ();
             getSKSWS ().getKeyAttributes (device_id,
                                           key_handle,
-                                          is_symmetric_key,
+                                          symmetric_key_length,
                                           certificate_path,
                                           app_usage,
                                           friendly_name,
                                           endorsed_algorithms,
                                           extension_types);
-            return new KeyAttributes (is_symmetric_key.value,
+            return new KeyAttributes (symmetric_key_length.value,
                                       getCertArrayFromBlobs (certificate_path.value),
                                       app_usage.value,
                                       friendly_name.value,

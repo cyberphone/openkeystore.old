@@ -415,8 +415,8 @@ public interface SKSWSProxy
                                   String device_id,
                                   @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                   int key_handle,
-                                  @WebParam(name="IsSymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                                  Holder<Boolean> is_symmetric_key,
+                                  @WebParam(name="SymmetricKeyLength", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                  Holder<Short> symmetric_key_length,
                                   @WebParam(name="X509Certificate", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                   Holder<List<byte[]>> certificate_path,
                                   @WebParam(name="AppUsage", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
