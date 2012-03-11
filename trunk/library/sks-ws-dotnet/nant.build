@@ -136,7 +136,7 @@ public static void ScriptMain(Project project)
 		    KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
 		    if (project.Properties["key"] == null)
 		    {
-         	    if (ka.IsSymmetricKey) continue;
+         	    if (ka.SymmetricKeyLength > 0) continue;
          	}
          	else
          	{
@@ -227,7 +227,7 @@ public static void ScriptMain(Project project)
 		    KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
 		    if (project.Properties["key"] == null)
 		    {
-                if (ka.IsSymmetricKey || ka.CertificatePath[0].PublicKey.IsRSA()) continue;
+                if (ka.SymmetricKeyLength > 0 || ka.CertificatePath[0].PublicKey.IsRSA()) continue;
             }
             else
             {
