@@ -377,7 +377,7 @@ public class SKSWSImplementation
           }
         finally
           {
-            log (device_id, "createProvisioningSession ()" + log_result);
+            log (device_id, "createProvisioningSession (IssuerURI=" + issuer_uri + ")" + log_result);
           }
       }
 
@@ -520,13 +520,27 @@ public class SKSWSImplementation
                                 byte[] mac)
     throws SKSException
       {
-        log (device_id, "createPUKPolicy (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")");
-        return getDevice (device_id).createPUKPolicy (provisioning_handle,
-                                                      id,
-                                                      puk_value,
-                                                      format,
-                                                      retry_limit,
-                                                      mac);
+        String log_result = null;
+        try
+          {
+            int puk_policy_handle = getDevice (device_id).createPUKPolicy (provisioning_handle,
+                                                                           id,
+                                                                           puk_value,
+                                                                           format,
+                                                                           retry_limit,
+                                                                           mac);
+            log_result = " : PUKPolicyHandle=" + puk_policy_handle;
+            return puk_policy_handle;
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "createPUKPolicy (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="createPINPolicy")
@@ -589,7 +603,7 @@ public class SKSWSImplementation
           }
         finally
           {
-            log (device_id, "createPINPolicy (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")" + log_result);
+            log (device_id, "createPINPolicy (ProvisioningHandle=" + provisioning_handle + ", PUKPolicyHandle=" + puk_policy_handle + ", ID=" + id + ")" + log_result);
           }
       }
 
@@ -668,7 +682,7 @@ public class SKSWSImplementation
           }
         finally
           {
-            log (device_id, "createKeyEntry (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")" + log_result);
+            log (device_id, "createKeyEntry (ProvisioningHandle=" + provisioning_handle + ", PINPolicyHandle=" + pin_policy_handle + ", ID=" + id + ")" + log_result);
           }
       }
 
