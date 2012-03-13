@@ -591,7 +591,7 @@
      <Parameter Name="client_session_id"   Type="string" XMLName="ClientSessionID"    Mode="out" Null="true"/>
      <Parameter Name="issuer_uri"          Type="string" XMLName="IssuerURI"          Mode="out" Null="true"/>
      <Code><![CDATA[
-        String log_result = "  : Empty";
+        String log_result = " : Empty";
         try
           {
             EnumeratedProvisioningSession eps = getDevice (device_id).enumerateProvisioningSessions (provisioning_handle, provisioning_state);
@@ -918,7 +918,7 @@
      <Parameter Name="key_handle"          Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle" Mode="out" Null="true"/>
      <Code><![CDATA[
-        String log_result = "  : Empty";
+        String log_result = " : Empty";
         try
           {
             EnumeratedKey ek = getDevice (device_id).enumerateKeys (key_handle);
