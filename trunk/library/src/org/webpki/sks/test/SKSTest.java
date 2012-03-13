@@ -29,6 +29,7 @@ import java.security.spec.ECGenParameterSpec;
 
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.Vector;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -86,27 +87,84 @@ public class SKSTest
     
     static boolean standalone_testing;
     
+    static Vector<Integer> prov_sessions = new Vector<Integer> ();
+    
     static Device device;
     
-    int sessionCount () throws Exception
+    @BeforeClass
+    public static void openFile () throws Exception
+      {
+        standalone_testing = new Boolean (System.getProperty ("sks.standalone"));
+        Security.insertProviderAt (new BouncyCastleProvider(), 1);
+        sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
+        if (sks instanceof WSSpecific)
+          {
+            tga = (TrustedGUIAuthorization) Class.forName (System.getProperty ("sks.auth.gui")).newInstance ();
+            ((WSSpecific) sks).setTrustedGUIAuthorizationProvider (tga);
+            String device_id = System.getProperty ("sks.device");
+            if (device_id != null && device_id.length () != 0)
+              {
+                ((WSSpecific) sks).setDeviceID (device_id);
+              }
+          }
+        device = new Device (sks);
+        DeviceInfo dev = device.device_info;
+        reference_implementation = SKSReferenceImplementation.SKS_VENDOR_DESCRIPTION.equals (dev.getVendorDescription ())
+                                                   ||
+                                   new Boolean (System.getProperty ("sks.referenceimplementation"));
+        if (reference_implementation)
+          {
+            System.out.println ("Reference Implementation");
+          }
+        System.out.println ("Description: " + dev.getVendorDescription ());
+        System.out.println ("Vendor: " + dev.getVendorName ());
+        System.out.println ("API Level: " + dev.getAPILevel ());
+        System.out.println ("Trusted GUI: " + (tga == null ? "N/A" : tga.getImplementation ()));
+        System.out.println ("Testing mode: " + (standalone_testing ? "StandAlone" : "MultiThreaded"));
+        EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
+        while ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), true)) != null)
+          {
+            prov_sessions.add (eps.getProvisioningHandle ());
+          }
+        if (!prov_sessions.isEmpty ())
+          {
+            System.out.println ("There were " + prov_sessions.size () + " open sessions before test started");
+          }
+      }
+
+    @AfterClass
+    public static void closeFile () throws Exception
       {
         EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
         int i = 0;
-        while ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), false)) != null)
+        while ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), true)) != null)
           {
             i++;
+            if (!prov_sessions.contains (eps.getProvisioningHandle ()))
+              {
+                fail ("Remaining session:" + eps.getProvisioningHandle ());
+              }
           }
-        return i;
+        assertTrue ("Sess mismatch", i == prov_sessions.size ());
       }
     
-    void sessionTest (int sess_nr) throws Exception
+    @Before
+    public void setup () throws Exception
       {
-        if (sess_nr != sessionCount () && standalone_testing)
-          {
-            fail ("Session count failed, are you actually running a stand-alone test?");
-          }
+         if (sks instanceof WSSpecific)
+           {
+             ((WSSpecific)sks).logEvent ("Test=" + name.getMethodName ());
+           }
       }
-    
+        
+    @After
+    public void teardown () throws Exception
+      {
+      }
+
+    @Rule 
+    public TestName name = new TestName();
+
     void edgeDeleteCase (boolean post) throws Exception
       {
         ProvSess sess = new ProvSess (device, 0);
@@ -178,6 +236,7 @@ public class SKSTest
                                AppUsage.AUTHENTICATION,
                                algorithms);
             assertTrue ("Should have thrown", culprit_alg == null);
+            sess.abortSession ();
           }
         catch (SKSException e)
           {
@@ -194,7 +253,6 @@ public class SKSTest
     
     void updateReplace (boolean order) throws Exception
       {
-        int q = sessionCount ();
         String good_pin = "1563";
         ProvSess sess = new ProvSess (device, 0);
         PINPol pin_policy = sess.createPINPolicy ("PIN",
@@ -257,7 +315,6 @@ public class SKSTest
           {
             fail ("Good PIN should work");
           }
-        sessionTest (++q);
       }
 
     Extension extensionTest (byte sub_type, byte[] qualifier, byte[] extension_data, boolean pass) throws Exception
@@ -344,6 +401,7 @@ public class SKSTest
                                   (short) retry_limit /* retry_limit*/, 
                                   null /* puk_policy */);
             assertTrue ("Not OK for PIN", pin_ok);
+            sess.abortSession ();
           }
         catch (SKSException e)
           {
@@ -356,8 +414,9 @@ public class SKSTest
       {
         try
           {
-            new ProvSess (device, id);
+            ProvSess sess = new ProvSess (device, id);
             assertTrue ("Should have failed", ok);
+            sess.closeSession ();
           }
         catch (SKSException e)
           {
@@ -373,6 +432,7 @@ public class SKSTest
                                   (short) 3 /* retry_limit*/, 
                                   null /* puk_policy */);
             assertTrue ("Should have failed", ok);
+            sess.abortSession ();
           }
         catch (SKSException e)
           {
@@ -850,60 +910,6 @@ public class SKSTest
           }
       }
 
-    @BeforeClass
-    public static void openFile () throws Exception
-      {
-        standalone_testing = new Boolean (System.getProperty ("sks.standalone"));
-        Security.insertProviderAt (new BouncyCastleProvider(), 1);
-        sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
-        if (sks instanceof WSSpecific)
-          {
-            tga = (TrustedGUIAuthorization) Class.forName (System.getProperty ("sks.auth.gui")).newInstance ();
-            ((WSSpecific) sks).setTrustedGUIAuthorizationProvider (tga);
-            String device_id = System.getProperty ("sks.device");
-            if (device_id != null && device_id.length () != 0)
-              {
-                ((WSSpecific) sks).setDeviceID (device_id);
-              }
-          }
-        device = new Device (sks);
-        DeviceInfo dev = device.device_info;
-        reference_implementation = SKSReferenceImplementation.SKS_VENDOR_DESCRIPTION.equals (dev.getVendorDescription ())
-                                                   ||
-                                   new Boolean (System.getProperty ("sks.referenceimplementation"));
-        if (reference_implementation)
-          {
-            System.out.println ("Reference Implementation");
-          }
-        System.out.println ("Description: " + dev.getVendorDescription ());
-        System.out.println ("Vendor: " + dev.getVendorName ());
-        System.out.println ("API Level: " + dev.getAPILevel ());
-        System.out.println ("Trusted GUI: " + (tga == null ? "N/A" : tga.getImplementation ()));
-        System.out.println ("Testing mode: " + (standalone_testing ? "StandAlone" : "MultiThreaded"));
-      }
-
-    @AfterClass
-    public static void closeFile () throws Exception
-      {
-      }
-    
-    @Before
-    public void setup () throws Exception
-      {
-         if (sks instanceof WSSpecific)
-           {
-             ((WSSpecific)sks).logEvent ("Test=" + name.getMethodName ());
-           }
-      }
-        
-    @After
-    public void teardown () throws Exception
-      {
-      }
-
-    @Rule 
-    public TestName name = new TestName();
-
     public String cn ()
       {
         return "CN=" + name.getMethodName ();
@@ -912,15 +918,12 @@ public class SKSTest
     @Test
     public void test1 () throws Exception
       {
-        int q = sessionCount ();
         new ProvSess (device).closeSession ();
-        sessionTest (q);
       }
 
     @Test
     public void test2 () throws Exception
       {
-        int q = sessionCount ();
         ProvSess sess = new ProvSess (device);
         sess.createPINPolicy ("PIN",
                               PassphraseFormat.NUMERIC,
@@ -937,7 +940,6 @@ public class SKSTest
           {
             checkException (e, "Unreferenced object \"ID\" : PIN");
           }
-        sessionTest (q);
       }
 
     @Test
@@ -954,6 +956,15 @@ public class SKSTest
                               PassphraseFormat.NUMERIC,
                               (short) 3 /* retry_limit*/, 
                               "012355" /* puk */);
+        try
+          {
+            sess.closeSession ();
+            fail("Shouldn't happen");
+          }
+        catch (SKSException e)
+          {
+            
+          }
       }
 
     @Test
@@ -1119,7 +1130,6 @@ public class SKSTest
     @Test
     public void test13 () throws Exception
       {
-        int q = sessionCount ();
         assertTrue (PUKCheck (PassphraseFormat.ALPHANUMERIC, "AB123"));
         assertTrue (PUKCheck (PassphraseFormat.NUMERIC, "1234"));
         assertTrue (PUKCheck (PassphraseFormat.STRING, "azAB13.\n"));
@@ -1186,13 +1196,11 @@ public class SKSTest
         assertTrue (PINGroupCheck (false, Grouping.UNIQUE));
         assertFalse (PINGroupCheck (true, Grouping.SIGNATURE_PLUS_STANDARD));
         assertTrue (PINGroupCheck (false, Grouping.SIGNATURE_PLUS_STANDARD));
-        sessionTest (q);
       }
 
     @Test
     public void test14 () throws Exception
       {
-        int q = sessionCount ();
         ProvSess sess = new ProvSess (device, 0);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
@@ -1212,7 +1220,6 @@ public class SKSTest
         assertFalse ("Key was not deleted", key1.exists ());
         assertTrue ("Ownership error", key2.getUpdatedKeyInfo ().getProvisioningHandle () == sess2.provisioning_handle);
         assertFalse ("Managed sessions MUST be deleted", sess.exists ());
-        sessionTest (++q);
       }
 
     @Test
@@ -1221,7 +1228,6 @@ public class SKSTest
         for (int i = 0; i < 2; i++)
           {
             boolean updatable = i == 0;
-            int q = sessionCount ();
             ProvSess sess = new ProvSess (device, updatable ? new Integer (0) : null);
             GenKey key1 = sess.createECKey ("Key.1",
                                             null /* pin_value */,
@@ -1252,14 +1258,12 @@ public class SKSTest
               }
             assertTrue ("Key was not deleted", key1.exists () ^ updatable);
             assertTrue ("Managed sessions MUST be deleted", sess.exists () ^ updatable);
-            sessionTest (q + (updatable ? 0 : 1));
           }
       }
 
     @Test
     public void test16 () throws Exception
       {
-        int q = sessionCount ();
         ProvSess sess = new ProvSess (device);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
@@ -1274,13 +1278,11 @@ public class SKSTest
         key1.deleteKey (null);
         assertFalse ("Key was not deleted", key1.exists ());
         assertTrue ("Key did not exist", key2.exists ());
-        sessionTest (++q);
       }
 
     @Test
     public void test17 () throws Exception
       {
-        int q = sessionCount ();
         ProvSess sess = new ProvSess (device);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
@@ -1290,7 +1292,6 @@ public class SKSTest
         assertTrue (sess.exists ());
         key1.deleteKey (null);
         assertFalse ("Key was not deleted", key1.exists ());
-        sessionTest (q);
       }
 
     @Test
@@ -1566,7 +1567,6 @@ public class SKSTest
     @Test
     public void test29 () throws Exception
       {
-        int q = sessionCount ();
         ProvSess sess = new ProvSess (device, 0);
         GenKey key1 = sess.createECKey ("Key.1",
                                         null /* pin_value */,
@@ -1582,7 +1582,6 @@ public class SKSTest
         sess2.postDeleteKey (key2);
         sks.deleteKey (key1.key_handle, null);
         sess2.closeSession ();
-        sessionTest (q);
       }
 
     @Test
@@ -2500,7 +2499,6 @@ public class SKSTest
                                        pin_policy,
                                        AppUsage.ENCRYPTION).setCertificate (cn ());
         sess.closeSession ();
-        new ProvSess (device);
         try
           {
             key.setSymmetricKey (new byte[]{0,1,2,3,4,5,6,7,8,9});
