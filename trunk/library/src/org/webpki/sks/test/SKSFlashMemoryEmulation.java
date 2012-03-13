@@ -1626,8 +1626,8 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
     @Override
     public synchronized void setProperty (int key_handle,
                                           String type,
-                                          byte[] name,
-                                          byte[] value) throws SKSException
+                                          String name,
+                                          String value) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key (which must belong to an already fully provisioned session)
@@ -1646,6 +1646,17 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         ///////////////////////////////////////////////////////////////////////////////////
         // Found, now look for the property name and update the associated value
         ///////////////////////////////////////////////////////////////////////////////////
+        byte[] bin_name = null;
+        byte[] bin_value = null;
+        try
+          {
+            bin_name = name.getBytes ("UTF-8");
+            bin_value = value.getBytes ("UTF-8");
+          }
+        catch (IOException e)
+          {
+            abort ("Internal");
+          }
         int i = 0;
         while (i < ext_obj.extension_data.length)
           {
@@ -1654,14 +1665,14 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
             byte[] pname = Arrays.copyOfRange (ext_obj.extension_data, i, nam_len + i);
             i += nam_len;
             int val_len = getShort (ext_obj.extension_data, i + 1);
-            if (Arrays.equals (name, pname))
+            if (Arrays.equals (bin_name, pname))
               {
                 if (ext_obj.extension_data[i] != 0x01)
                   {
                     abort ("\"Property\" not writable: " + name, SKSException.ERROR_NOT_ALLOWED);
                   }
                 ext_obj.extension_data = addArrays (addArrays (Arrays.copyOfRange (ext_obj.extension_data, 0, ++i),
-                                                               addArrays (new byte[]{(byte)(value.length >> 8),(byte)value.length}, value)),
+                                                               addArrays (new byte[]{(byte)(bin_value.length >> 8),(byte)bin_value.length}, bin_value)),
                                                     Arrays.copyOfRange (ext_obj.extension_data, i + val_len + 2, ext_obj.extension_data.length));
                 return;
               }

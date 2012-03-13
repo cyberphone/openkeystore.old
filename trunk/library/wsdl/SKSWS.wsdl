@@ -580,8 +580,8 @@
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Type" type="xs:string"/>
-            <xs:element name="Name" type="xs:base64Binary"/>
-            <xs:element name="Value" type="xs:base64Binary"/>
+            <xs:element name="Name" type="xs:string"/>
+            <xs:element name="Value" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

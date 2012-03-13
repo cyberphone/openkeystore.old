@@ -215,8 +215,8 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
     @Override
     native public void setProperty (int key_handle, 
                                     String type,
-                                    byte[] name,
-                                    byte[] value) throws SKSException;
+                                    String name,
+                                    String value) throws SKSException;
 
     @Override
     native public void unlockKey (int key_handle,

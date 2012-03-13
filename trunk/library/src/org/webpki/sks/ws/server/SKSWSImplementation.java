@@ -229,13 +229,15 @@ public class SKSWSImplementation
                                int key_handle,
                                byte[] authorization) throws SKSException
       {
-        log (device_id, "Local:getKeyProtectionInfo (KeyHandle=" + key_handle);
+        log (device_id, "Local:getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
         KeyProtectionInfo kpi = getDevice (device_id).getKeyProtectionInfo (key_handle);
         if (kpi.hasLocalPINProtection ())
           {
             if (kpi.getPINInputMethod () == InputMethod.TRUSTED_GUI && !trusted_gui_authorization)
               {
-                throw new SKSException ("Missing required \"TrustedGUIAuthorization\" for key #" + key_handle);
+                String error = "Missing required \"TrustedGUIAuthorization\" for key #" + key_handle;
+                log (error);
+                throw new SKSException (error);
               }
             if (trusted_gui_authorization)
               {
@@ -350,32 +352,33 @@ public class SKSWSImplementation
                                           Holder<byte[]> attestation)
     throws SKSException
       {
-/*
-        System.out.println ("SERV=" + (server_ephemeral_key == null ? "NULL" : server_ephemeral_key.length) + " KMK=" + (key_management_key == null ? "NULL" : key_management_key.length));
+        String log_result = "";
         try
           {
-        org.webpki.asn1.BaseASN1Object o = org.webpki.asn1.DerDecoder.decode(server_ephemeral_key, 0);
-        System.out.println(o.toString (true, true));
+            ProvisioningSession sess = getDevice (device_id).createProvisioningSession (algorithm,
+                                                                                        privacy_enabled,
+                                                                                        server_session_id,
+                                                                                        getECPublicKey (server_ephemeral_key),
+                                                                                        issuer_uri,
+                                                                                        key_management_key == null ? null : createPublicKeyFromBlob (key_management_key),
+                                                                                        client_time,
+                                                                                        session_life_time,
+                                                                                        session_key_limit);
+            client_session_id.value = sess.getClientSessionID ();
+            client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
+            attestation.value = sess.getAttestation ();
+            log_result = " : ProvisioningHandle=" + sess.getProvisioningHandle ();
+            return sess.getProvisioningHandle ();
           }
-        catch (IOException e)
+        catch (SKSException e)
           {
-            System.out.println ("ASN1" + e.getMessage ());
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
           }
-*/
-        ProvisioningSession sess = getDevice (device_id).createProvisioningSession (algorithm,
-                                                                                    privacy_enabled,
-                                                                                    server_session_id,
-                                                                                    getECPublicKey (server_ephemeral_key),
-                                                                                    issuer_uri,
-                                                                                    key_management_key == null ? null : createPublicKeyFromBlob (key_management_key),
-                                                                                    client_time,
-                                                                                    session_life_time,
-                                                                                    session_key_limit);
-        client_session_id.value = sess.getClientSessionID ();
-        client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
-        attestation.value = sess.getAttestation ();
-        log (device_id, "createProvisioningSession () : ProvisioningHandle=" + sess.getProvisioningHandle ());
-        return sess.getProvisioningHandle ();
+        finally
+          {
+            log (device_id, "createProvisioningSession ()" + log_result);
+          }
       }
 
     @WebMethod(operationName="closeProvisioningSession")
@@ -404,7 +407,7 @@ public class SKSWSImplementation
           }
         finally
           {
-            log (device_id, "closeProvisioningSession (ProvisioningHandle=\"" + provisioning_handle + "\")" + log_result);
+            log (device_id, "closeProvisioningSession (ProvisioningHandle=" + provisioning_handle + ")" + log_result);
           }
       }
 
@@ -477,7 +480,7 @@ public class SKSWSImplementation
           }
         finally
           {
-            log (device_id, "abortProvisioningSession (ProvisioningHandle=\"" + provisioning_handle + "\")" + log_result);
+            log (device_id, "abortProvisioningSession (ProvisioningHandle=" + provisioning_handle + ")" + log_result);
           }
       }
 
@@ -517,7 +520,7 @@ public class SKSWSImplementation
                                 byte[] mac)
     throws SKSException
       {
-        log (device_id, "createPUKPolicy (ID=" + id + ")");
+        log (device_id, "createPUKPolicy (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")");
         return getDevice (device_id).createPUKPolicy (provisioning_handle,
                                                       id,
                                                       puk_value,
@@ -576,7 +579,7 @@ public class SKSWSImplementation
                                                                            max_length,
                                                                            input_method,
                                                                            mac);
-            log_result = " : PINPolicyHandle=\"" + pin_policy_handle + "\"";
+            log_result = " : PINPolicyHandle=" + pin_policy_handle;
             return pin_policy_handle;
           }
         catch (SKSException e)
@@ -586,7 +589,7 @@ public class SKSWSImplementation
           }
         finally
           {
-            log (device_id, "createPINPolicy (ID=\"" + id + "\")" + log_result);
+            log (device_id, "createPINPolicy (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")" + log_result);
           }
       }
 
@@ -665,7 +668,7 @@ public class SKSWSImplementation
           }
         finally
           {
-            log (device_id, "createKeyEntry (ID=" + id + ")" + log_result);
+            log (device_id, "createKeyEntry (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")" + log_result);
           }
       }
 
@@ -895,7 +898,7 @@ public class SKSWSImplementation
                                   Holder<List<String>> extension_types)
     throws SKSException
       {
-        log (device_id, "getKeyAttributes (KeyHandle=" + key_handle + ")");
+        String log_result = "";
         try
           {
             KeyAttributes ka = getDevice (device_id).getKeyAttributes (key_handle);
@@ -920,7 +923,17 @@ public class SKSWSImplementation
           }
         catch (GeneralSecurityException e)
           {
+            log_result = " Exception: " + e.getMessage ();
             throw new SKSException (e);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "getKeyAttributes (KeyHandle=" + key_handle + ")" + log_result);
           }
        }
 
@@ -971,33 +984,45 @@ public class SKSWSImplementation
                                       Holder<Byte> key_backup)
     throws SKSException
       {
-        log (device_id, "getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
-        KeyProtectionInfo kpi      = getDevice (device_id).getKeyProtectionInfo (key_handle);
-        protection_status.value    = kpi.getSKSProtectionStatus ();
-        if (kpi.hasLocalPUKProtection ())
+        String log_result = "";
+        try
           {
-            puk_format.value           = kpi.getPUKFormat ().getSKSValue ();
-            puk_retry_limit.value      = kpi.getPUKRetryLimit ();
-            puk_error_count.value      = kpi.getPUKErrorCount ();
+            KeyProtectionInfo kpi      = getDevice (device_id).getKeyProtectionInfo (key_handle);
+            protection_status.value    = kpi.getSKSProtectionStatus ();
+            if (kpi.hasLocalPUKProtection ())
+              {
+                puk_format.value           = kpi.getPUKFormat ().getSKSValue ();
+                puk_retry_limit.value      = kpi.getPUKRetryLimit ();
+                puk_error_count.value      = kpi.getPUKErrorCount ();
+              }
+            if (kpi.hasLocalPINProtection ())
+              {
+                user_defined.value         = kpi.getPINUserDefinedFlag ();
+                user_modifiable.value      = kpi.getPINUserModifiableFlag ();
+                format.value               = kpi.getPINFormat ().getSKSValue ();
+                retry_limit.value          = kpi.getPINRetryLimit ();
+                grouping.value             = kpi.getPINGrouping ().getSKSValue ();
+                pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPINPatternRestrictions ());
+                min_length.value           = kpi.getPINMinLength ();
+                max_length.value           = kpi.getPINMaxLength ();
+                input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
+                pin_error_count.value      = kpi.getPINErrorCount ();
+              }
+            enable_pin_caching.value   = kpi.getEnablePINCachingFlag ();
+            biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
+            export_protection.value    = kpi.getExportProtection ().getSKSValue ();
+            delete_protection.value    = kpi.getDeleteProtection ().getSKSValue ();
+            key_backup.value           = kpi.getKeyBackup ();
           }
-        if (kpi.hasLocalPINProtection ())
+        catch (SKSException e)
           {
-            user_defined.value         = kpi.getPINUserDefinedFlag ();
-            user_modifiable.value      = kpi.getPINUserModifiableFlag ();
-            format.value               = kpi.getPINFormat ().getSKSValue ();
-            retry_limit.value          = kpi.getPINRetryLimit ();
-            grouping.value             = kpi.getPINGrouping ().getSKSValue ();
-            pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPINPatternRestrictions ());
-            min_length.value           = kpi.getPINMinLength ();
-            max_length.value           = kpi.getPINMaxLength ();
-            input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
-            pin_error_count.value      = kpi.getPINErrorCount ();
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
           }
-        enable_pin_caching.value   = kpi.getEnablePINCachingFlag ();
-        biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
-        export_protection.value    = kpi.getExportProtection ().getSKSValue ();
-        delete_protection.value    = kpi.getDeleteProtection ().getSKSValue ();
-        key_backup.value           = kpi.getKeyBackup ();
+        finally
+          {
+            log (device_id, "getKeyProtectionInfo (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="getExtension")
@@ -1017,11 +1042,23 @@ public class SKSWSImplementation
                               Holder<byte[]> extension_data)
     throws SKSException
       {
-        log (device_id, "getExtension (KeyHandle=" + key_handle + ", Type=" + type + ")");
-        Extension ext = getDevice (device_id).getExtension (key_handle, type);
-        sub_type.value       = ext.getSubType ();
-        qualifier.value      = ext.getQualifier ();
-        extension_data.value = ext.getExtensionData ();
+        String log_result = "";
+        try
+          {
+            Extension ext = getDevice (device_id).getExtension (key_handle, type);
+            sub_type.value       = ext.getSubType ();
+            qualifier.value      = ext.getQualifier ();
+            extension_data.value = ext.getExtensionData ();
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "getExtension (KeyHandle=" + key_handle + ", Type=" + type + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="setProperty")
@@ -1034,13 +1071,25 @@ public class SKSWSImplementation
                              @WebParam(name="Type", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                              String type,
                              @WebParam(name="Name", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                             byte[] name,
+                             String name,
                              @WebParam(name="Value", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                             byte[] value)
+                             String value)
     throws SKSException
       {
-        log (device_id, "setProperty (KeyHandle=" + key_handle + ", Type=" + type + ")");
-        getDevice (device_id).setProperty (key_handle, type, name, value);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).setProperty (key_handle, type, name, value);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "setProperty (KeyHandle=" + key_handle + ", Type=" + type + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="deleteKey")
@@ -1054,8 +1103,20 @@ public class SKSWSImplementation
                            byte[] authorization)
     throws SKSException
       {
-        log (device_id, "deleteKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).deleteKey (key_handle, authorization);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).deleteKey (key_handle, authorization);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "deleteKey (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="exportKey")
@@ -1070,8 +1131,20 @@ public class SKSWSImplementation
                              byte[] authorization)
     throws SKSException
       {
-        log (device_id, "exportKey (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).exportKey (key_handle, authorization);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).exportKey (key_handle, authorization);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "exportKey (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="unlockKey")
@@ -1085,8 +1158,20 @@ public class SKSWSImplementation
                            byte[] authorization)
     throws SKSException
       {
-        log (device_id, "unlockKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).unlockKey (key_handle, authorization);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).unlockKey (key_handle, authorization);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "unlockKey (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="changePIN")
@@ -1102,8 +1187,20 @@ public class SKSWSImplementation
                            byte[] new_pin)
     throws SKSException
       {
-        log (device_id, "changePIN (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).changePIN (key_handle, authorization, new_pin);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).changePIN (key_handle, authorization, new_pin);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "changePIN (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="setPIN")
@@ -1119,8 +1216,20 @@ public class SKSWSImplementation
                         byte[] new_pin)
     throws SKSException
       {
-        log (device_id, "setPIN (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).setPIN (key_handle, authorization, new_pin);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).setPIN (key_handle, authorization, new_pin);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "setPIN (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="signHashedData")
@@ -1147,12 +1256,24 @@ public class SKSWSImplementation
                                             trusted_gui_authorization,
                                             key_handle,
                                             authorization);
-        log (device_id, "signHashedData (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).signHashedData (key_handle,
-                                                     algorithm,
-                                                     parameters,
-                                                     authorization,
-                                                     data);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).signHashedData (key_handle,
+                                                         algorithm,
+                                                         parameters,
+                                                         authorization,
+                                                         data);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "signHashedData (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="asymmetricKeyDecrypt")
@@ -1179,12 +1300,24 @@ public class SKSWSImplementation
                                             trusted_gui_authorization,
                                             key_handle,
                                             authorization);
-        log (device_id, "asymmetricKeyDecrypt (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).asymmetricKeyDecrypt (key_handle, 
-                                                           algorithm,
-                                                           parameters,
-                                                           authorization, 
-                                                           data);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).asymmetricKeyDecrypt (key_handle, 
+                                                               algorithm,
+                                                               parameters,
+                                                               authorization, 
+                                                               data);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "asymmetricKeyDecrypt (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="keyAgreement")
@@ -1211,12 +1344,24 @@ public class SKSWSImplementation
                                             trusted_gui_authorization,
                                             key_handle,
                                             authorization);
-        log (device_id, "keyAgreement (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).keyAgreement (key_handle, 
-                                                   algorithm, 
-                                                   parameters, 
-                                                   authorization, 
-                                                   getECPublicKey (public_key));
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).keyAgreement (key_handle, 
+                                                       algorithm, 
+                                                       parameters, 
+                                                       authorization, 
+                                                       getECPublicKey (public_key));
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "keyAgreement (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="performHMAC")
@@ -1241,11 +1386,23 @@ public class SKSWSImplementation
                                             trusted_gui_authorization,
                                             key_handle,
                                             authorization);
-        log (device_id, "performHMAC (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).performHMAC (key_handle, 
-                                                  algorithm,
-                                                  authorization,
-                                                  data);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).performHMAC (key_handle, 
+                                                      algorithm,
+                                                      authorization,
+                                                      data);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "performHMAC (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="symmetricKeyEncrypt")
@@ -1274,8 +1431,20 @@ public class SKSWSImplementation
                                             trusted_gui_authorization,
                                             key_handle,
                                             authorization);
-        log (device_id, "symmetricKeyEncrypt (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "symmetricKeyEncrypt (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="updateFirmware")
@@ -1288,8 +1457,20 @@ public class SKSWSImplementation
                                   byte[] chunk)
     throws SKSException
       {
-        log (device_id, "updateFirmware (Chunk.length=" + chunk.length + ")");
-        return getDevice (device_id).updateFirmware (chunk);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).updateFirmware (chunk);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "updateFirmware (Chunk.length=" + chunk.length + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="listDevices")
@@ -1322,7 +1503,7 @@ public class SKSWSImplementation
     public void logEvent (@WebParam(name="Description", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                           String description)
       {
-        log ("logEvent (Description=\"" + description + "\")");
+        log ("logEvent (Description=" + description + ")");
       }
 
     public static void main (String[] args)

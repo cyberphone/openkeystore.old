@@ -210,13 +210,15 @@
                                int key_handle,
                                byte[] authorization) throws SKSException
       {
-        log (device_id, "Local:getKeyProtectionInfo (KeyHandle=" + key_handle);
+        log (device_id, "Local:getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
         KeyProtectionInfo kpi = getDevice (device_id).getKeyProtectionInfo (key_handle);
         if (kpi.hasLocalPINProtection ())
           {
             if (kpi.getPINInputMethod () == InputMethod.TRUSTED_GUI && !trusted_gui_authorization)
               {
-                throw new SKSException ("Missing required \"TrustedGUIAuthorization\" for key #" + key_handle);
+                String error = "Missing required \"TrustedGUIAuthorization\" for key #" + key_handle;
+                log (error);
+                throw new SKSException (error);
               }
             if (trusted_gui_authorization)
               {
@@ -523,32 +525,33 @@
      <Parameter Name="client_ephemeral_key" Type="binary" XMLName="ClientEphemeralKey" Mode="out" RewriteRule="Out.ECPublicKey"/>
      <Parameter Name="attestation"          Type="binary" XMLName="Attestation"        Mode="out"/>
      <Code><![CDATA[
-/*
-        System.out.println ("SERV=" + (server_ephemeral_key == null ? "NULL" : server_ephemeral_key.length) + " KMK=" + (key_management_key == null ? "NULL" : key_management_key.length));
+        String log_result = "";
         try
           {
-        org.webpki.asn1.BaseASN1Object o = org.webpki.asn1.DerDecoder.decode(server_ephemeral_key, 0);
-        System.out.println(o.toString (true, true));
+            ProvisioningSession sess = getDevice (device_id).createProvisioningSession (algorithm,
+                                                                                        privacy_enabled,
+                                                                                        server_session_id,
+                                                                                        getECPublicKey (server_ephemeral_key),
+                                                                                        issuer_uri,
+                                                                                        key_management_key == null ? null : createPublicKeyFromBlob (key_management_key),
+                                                                                        client_time,
+                                                                                        session_life_time,
+                                                                                        session_key_limit);
+            client_session_id.value = sess.getClientSessionID ();
+            client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
+            attestation.value = sess.getAttestation ();
+            log_result = " : ProvisioningHandle=" + sess.getProvisioningHandle ();
+            return sess.getProvisioningHandle ();
           }
-        catch (IOException e)
+        catch (SKSException e)
           {
-            System.out.println ("ASN1" + e.getMessage ());
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
           }
-*/
-        ProvisioningSession sess = getDevice (device_id).createProvisioningSession (algorithm,
-                                                                                    privacy_enabled,
-                                                                                    server_session_id,
-                                                                                    getECPublicKey (server_ephemeral_key),
-                                                                                    issuer_uri,
-                                                                                    key_management_key == null ? null : createPublicKeyFromBlob (key_management_key),
-                                                                                    client_time,
-                                                                                    session_life_time,
-                                                                                    session_key_limit);
-        client_session_id.value = sess.getClientSessionID ();
-        client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
-        attestation.value = sess.getAttestation ();
-        log (device_id, "createProvisioningSession () : ProvisioningHandle=" + sess.getProvisioningHandle ());
-        return sess.getProvisioningHandle ();
+        finally
+          {
+            log (device_id, "createProvisioningSession ()" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="closeProvisioningSession" Throws="SKSException">
@@ -570,7 +573,7 @@
           }
         finally
           {
-            log (device_id, "closeProvisioningSession (ProvisioningHandle=\"" + provisioning_handle + "\")" + log_result);
+            log (device_id, "closeProvisioningSession (ProvisioningHandle=" + provisioning_handle + ")" + log_result);
           }
 ]]></Code></Method>
 
@@ -624,7 +627,7 @@
           }
         finally
           {
-            log (device_id, "abortProvisioningSession (ProvisioningHandle=\"" + provisioning_handle + "\")" + log_result);
+            log (device_id, "abortProvisioningSession (ProvisioningHandle=" + provisioning_handle + ")" + log_result);
           }
 ]]></Code></Method>
 
@@ -648,7 +651,7 @@
      <Parameter Name="retry_limit"         Type="short"  XMLName="RetryLimit"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "createPUKPolicy (ID=" + id + ")");
+        log (device_id, "createPUKPolicy (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")");
         return getDevice (device_id).createPUKPolicy (provisioning_handle,
                                                       id,
                                                       puk_value,
@@ -690,7 +693,7 @@
                                                                            max_length,
                                                                            input_method,
                                                                            mac);
-            log_result = " : PINPolicyHandle=\"" + pin_policy_handle + "\"";
+            log_result = " : PINPolicyHandle=" + pin_policy_handle;
             return pin_policy_handle;
           }
         catch (SKSException e)
@@ -700,7 +703,7 @@
           }
         finally
           {
-            log (device_id, "createPINPolicy (ID=\"" + id + "\")" + log_result);
+            log (device_id, "createPINPolicy (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")" + log_result);
           }
 ]]></Code></Method>
 
@@ -757,7 +760,7 @@
           }
         finally
           {
-            log (device_id, "createKeyEntry (ID=" + id + ")" + log_result);
+            log (device_id, "createKeyEntry (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")" + log_result);
           }
 ]]></Code></Method>
 
@@ -901,7 +904,7 @@
      <Parameter Name="endorsed_algorithms"  Type="string" XMLName="EndorsedAlgorithm"  Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
      <Parameter Name="extension_types"      Type="string" XMLName="ExtensionType"      Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
      <Code><![CDATA[
-        log (device_id, "getKeyAttributes (KeyHandle=" + key_handle + ")");
+        String log_result = "";
         try
           {
             KeyAttributes ka = getDevice (device_id).getKeyAttributes (key_handle);
@@ -926,7 +929,17 @@
           }
         catch (GeneralSecurityException e)
           {
+            log_result = " Exception: " + e.getMessage ();
             throw new SKSException (e);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "getKeyAttributes (KeyHandle=" + key_handle + ")" + log_result);
           }
  ]]></Code></Method>
 
@@ -953,33 +966,45 @@
      <Parameter Name="delete_protection"    Type="byte"   XMLName="DeleteProtection"    Mode="out"             RewriteRule="Out.DeleteProtection"/>
      <Parameter Name="key_backup"           Type="byte"   XMLName="KeyBackup"           Mode="out"/>
      <Code><![CDATA[
-        log (device_id, "getKeyProtectionInfo (KeyHandle=" + key_handle + ")");
-        KeyProtectionInfo kpi      = getDevice (device_id).getKeyProtectionInfo (key_handle);
-        protection_status.value    = kpi.getSKSProtectionStatus ();
-        if (kpi.hasLocalPUKProtection ())
+        String log_result = "";
+        try
           {
-            puk_format.value           = kpi.getPUKFormat ().getSKSValue ();
-            puk_retry_limit.value      = kpi.getPUKRetryLimit ();
-            puk_error_count.value      = kpi.getPUKErrorCount ();
+            KeyProtectionInfo kpi      = getDevice (device_id).getKeyProtectionInfo (key_handle);
+            protection_status.value    = kpi.getSKSProtectionStatus ();
+            if (kpi.hasLocalPUKProtection ())
+              {
+                puk_format.value           = kpi.getPUKFormat ().getSKSValue ();
+                puk_retry_limit.value      = kpi.getPUKRetryLimit ();
+                puk_error_count.value      = kpi.getPUKErrorCount ();
+              }
+            if (kpi.hasLocalPINProtection ())
+              {
+                user_defined.value         = kpi.getPINUserDefinedFlag ();
+                user_modifiable.value      = kpi.getPINUserModifiableFlag ();
+                format.value               = kpi.getPINFormat ().getSKSValue ();
+                retry_limit.value          = kpi.getPINRetryLimit ();
+                grouping.value             = kpi.getPINGrouping ().getSKSValue ();
+                pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPINPatternRestrictions ());
+                min_length.value           = kpi.getPINMinLength ();
+                max_length.value           = kpi.getPINMaxLength ();
+                input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
+                pin_error_count.value      = kpi.getPINErrorCount ();
+              }
+            enable_pin_caching.value   = kpi.getEnablePINCachingFlag ();
+            biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
+            export_protection.value    = kpi.getExportProtection ().getSKSValue ();
+            delete_protection.value    = kpi.getDeleteProtection ().getSKSValue ();
+            key_backup.value           = kpi.getKeyBackup ();
           }
-        if (kpi.hasLocalPINProtection ())
+        catch (SKSException e)
           {
-            user_defined.value         = kpi.getPINUserDefinedFlag ();
-            user_modifiable.value      = kpi.getPINUserModifiableFlag ();
-            format.value               = kpi.getPINFormat ().getSKSValue ();
-            retry_limit.value          = kpi.getPINRetryLimit ();
-            grouping.value             = kpi.getPINGrouping ().getSKSValue ();
-            pattern_restrictions.value = PatternRestriction.getSKSValue (kpi.getPINPatternRestrictions ());
-            min_length.value           = kpi.getPINMinLength ();
-            max_length.value           = kpi.getPINMaxLength ();
-            input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
-            pin_error_count.value      = kpi.getPINErrorCount ();
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
           }
-        enable_pin_caching.value   = kpi.getEnablePINCachingFlag ();
-        biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();
-        export_protection.value    = kpi.getExportProtection ().getSKSValue ();
-        delete_protection.value    = kpi.getDeleteProtection ().getSKSValue ();
-        key_backup.value           = kpi.getKeyBackup ();
+        finally
+          {
+            log (device_id, "getKeyProtectionInfo (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="getExtension" ReturnClass="Extension" Throws="SKSException">
@@ -990,22 +1015,46 @@
      <Parameter Name="qualifier"      Type="binary" XMLName="Qualifier"     Mode="out"/>
      <Parameter Name="extension_data" Type="binary" XMLName="ExtensionData" Mode="out"/>
      <Code><![CDATA[
-        log (device_id, "getExtension (KeyHandle=" + key_handle + ", Type=" + type + ")");
-        Extension ext = getDevice (device_id).getExtension (key_handle, type);
-        sub_type.value       = ext.getSubType ();
-        qualifier.value      = ext.getQualifier ();
-        extension_data.value = ext.getExtensionData ();
+        String log_result = "";
+        try
+          {
+            Extension ext = getDevice (device_id).getExtension (key_handle, type);
+            sub_type.value       = ext.getSubType ();
+            qualifier.value      = ext.getQualifier ();
+            extension_data.value = ext.getExtensionData ();
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "getExtension (KeyHandle=" + key_handle + ", Type=" + type + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="setProperty" Throws="SKSException">
      <Parameter Name="device_id"  Type="string" XMLName="DeviceID"          Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle" Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="type"       Type="string" XMLName="Type"/>
-     <Parameter Name="name"       Type="binary" XMLName="Name" />
-     <Parameter Name="value"      Type="binary" XMLName="Value"/>
+     <Parameter Name="name"       Type="string" XMLName="Name" />
+     <Parameter Name="value"      Type="string" XMLName="Value"/>
      <Code><![CDATA[
-        log (device_id, "setProperty (KeyHandle=" + key_handle + ", Type=" + type + ")");
-        getDevice (device_id).setProperty (key_handle, type, name, value);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).setProperty (key_handle, type, name, value);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "setProperty (KeyHandle=" + key_handle + ", Type=" + type + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="deleteKey" Throws="SKSException">
@@ -1013,8 +1062,20 @@
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
      <Code><![CDATA[
-        log (device_id, "deleteKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).deleteKey (key_handle, authorization);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).deleteKey (key_handle, authorization);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "deleteKey (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="exportKey" Throws="SKSException">
@@ -1023,8 +1084,20 @@
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="authorization" Type="binary" XMLName="Authorization" Null="true"/>
      <Code><![CDATA[
-        log (device_id, "exportKey (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).exportKey (key_handle, authorization);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).exportKey (key_handle, authorization);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "exportKey (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="unlockKey" Throws="SKSException">
@@ -1032,8 +1105,20 @@
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="authorization" Type="binary" XMLName="Authorization"/>
      <Code><![CDATA[
-        log (device_id, "unlockKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).unlockKey (key_handle, authorization);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).unlockKey (key_handle, authorization);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "unlockKey (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="changePIN" Throws="SKSException">
@@ -1042,8 +1127,20 @@
      <Parameter Name="authorization" Type="binary" XMLName="Authorization"/>
      <Parameter Name="new_pin"       Type="binary" XMLName="NewPIN"/>
      <Code><![CDATA[
-        log (device_id, "changePIN (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).changePIN (key_handle, authorization, new_pin);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).changePIN (key_handle, authorization, new_pin);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "changePIN (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="setPIN" Throws="SKSException">
@@ -1052,8 +1149,20 @@
      <Parameter Name="authorization" Type="binary" XMLName="Authorization"/>
      <Parameter Name="new_pin"       Type="binary" XMLName="NewPIN"/>
      <Code><![CDATA[
-        log (device_id, "setPIN (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).setPIN (key_handle, authorization, new_pin);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).setPIN (key_handle, authorization, new_pin);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "setPIN (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="signHashedData" Throws="SKSException" EmbedRule="TGA">
@@ -1070,12 +1179,24 @@
                                             trusted_gui_authorization,
                                             key_handle,
                                             authorization);
-        log (device_id, "signHashedData (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).signHashedData (key_handle,
-                                                     algorithm,
-                                                     parameters,
-                                                     authorization,
-                                                     data);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).signHashedData (key_handle,
+                                                         algorithm,
+                                                         parameters,
+                                                         authorization,
+                                                         data);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "signHashedData (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="asymmetricKeyDecrypt" Throws="SKSException" EmbedRule="TGA">
@@ -1092,12 +1213,24 @@
                                             trusted_gui_authorization,
                                             key_handle,
                                             authorization);
-        log (device_id, "asymmetricKeyDecrypt (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).asymmetricKeyDecrypt (key_handle, 
-                                                           algorithm,
-                                                           parameters,
-                                                           authorization, 
-                                                           data);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).asymmetricKeyDecrypt (key_handle, 
+                                                               algorithm,
+                                                               parameters,
+                                                               authorization, 
+                                                               data);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "asymmetricKeyDecrypt (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="keyAgreement" Throws="SKSException" EmbedRule="TGA">
@@ -1114,12 +1247,24 @@
                                             trusted_gui_authorization,
                                             key_handle,
                                             authorization);
-        log (device_id, "keyAgreement (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).keyAgreement (key_handle, 
-                                                   algorithm, 
-                                                   parameters, 
-                                                   authorization, 
-                                                   getECPublicKey (public_key));
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).keyAgreement (key_handle, 
+                                                       algorithm, 
+                                                       parameters, 
+                                                       authorization, 
+                                                       getECPublicKey (public_key));
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "keyAgreement (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="performHMAC" Throws="SKSException" EmbedRule="TGA">
@@ -1135,11 +1280,23 @@
                                             trusted_gui_authorization,
                                             key_handle,
                                             authorization);
-        log (device_id, "performHMAC (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).performHMAC (key_handle, 
-                                                  algorithm,
-                                                  authorization,
-                                                  data);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).performHMAC (key_handle, 
+                                                      algorithm,
+                                                      authorization,
+                                                      data);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "performHMAC (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="symmetricKeyEncrypt" Throws="SKSException" EmbedRule="TGA">
@@ -1157,8 +1314,20 @@
                                             trusted_gui_authorization,
                                             key_handle,
                                             authorization);
-        log (device_id, "symmetricKeyEncrypt (KeyHandle=" + key_handle + ")");
-        return getDevice (device_id).symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "symmetricKeyEncrypt (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="updateFirmware" Throws="SKSException">
@@ -1166,8 +1335,20 @@
      <Parameter Name="device_id"                 Type="string" XMLName="DeviceID"      Null="true" SuppressRule="DEV"/>
      <Parameter Name="chunk"                     Type="binary" XMLName="Chunk"/>
      <Code><![CDATA[
-        log (device_id, "updateFirmware (Chunk.length=" + chunk.length + ")");
-        return getDevice (device_id).updateFirmware (chunk);
+        String log_result = "";
+        try
+          {
+            return getDevice (device_id).updateFirmware (chunk);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "updateFirmware (Chunk.length=" + chunk.length + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="listDevices" Throws="SKSException">
@@ -1190,7 +1371,7 @@
    <Method Name="logEvent" Public="false">
      <Parameter Name="description" Type="string" XMLName="Description"/>
      <Code><![CDATA[
-        log ("logEvent (Description=\"" + description + "\")");
+        log ("logEvent (Description=" + description + ")");
 ]]></Code></Method>
 
 </WebService>

@@ -2073,17 +2073,17 @@ namespace org.webpki.sks.ws.client
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Name", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _name;
+        internal string _name;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Value", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _value;
+        internal string _value;
 
         public setProperty_Request(string DeviceID,
                                    int KeyHandle,
                                    string Type,
-                                   byte[] Name,
-                                   byte[] Value)
+                                   string Name,
+                                   string Value)
         {
             _device_id = DeviceID;
             _key_handle = KeyHandle;
@@ -3123,8 +3123,8 @@ namespace org.webpki.sks.ws.client
 
         public void setProperty(int KeyHandle,
                                 string Type,
-                                byte[] Name,
-                                byte[] Value)
+                                string Name,
+                                string Value)
         {
             try
             {

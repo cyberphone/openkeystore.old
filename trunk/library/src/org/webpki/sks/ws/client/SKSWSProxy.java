@@ -503,9 +503,9 @@ public interface SKSWSProxy
                              @WebParam(name="Type", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                              String type,
                              @WebParam(name="Name", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                             byte[] name,
+                             String name,
                              @WebParam(name="Value", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                             byte[] value)
+                             String value)
     throws SKSException_Exception;
 
     @WebMethod(operationName="deleteKey")

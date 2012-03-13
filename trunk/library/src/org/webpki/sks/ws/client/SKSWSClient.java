@@ -838,8 +838,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
     @Override
     public void setProperty (int key_handle,
                              String type,
-                             byte[] name,
-                             byte[] value) throws SKSException
+                             String name,
+                             String value) throws SKSException
       {
         try
           {

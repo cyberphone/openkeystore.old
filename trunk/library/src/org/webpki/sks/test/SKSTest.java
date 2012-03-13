@@ -296,7 +296,7 @@ public class SKSTest
                     try
                       {
                         String newval = "yes";
-                        device.sks.setProperty (key.key_handle, type, prop.getName ().getBytes ("UTF-8"), newval.getBytes ("UTF-8"));
+                        device.sks.setProperty (key.key_handle, type, prop.getName (), newval);
                         writes++;
                         assertTrue ("Writable", prop.isWritable ());
                         boolean found = false;
