@@ -715,17 +715,27 @@ public class SKSWSImplementation
                                     byte[] mac)
     throws SKSException
       {
-        log (device_id, "setCertificatePath (KeyHandle=" + key_handle + ")");
-        X509Certificate[] cp = null;
+        String log_result = null;
         try
           {
-            cp = CertificateUtil.getSortedPathFromBlobs (certificate_path);
+            X509Certificate[] cp = CertificateUtil.getSortedPathFromBlobs (certificate_path);
+            getDevice (device_id).setCertificatePath (key_handle, cp, mac);
+            log_result = " : " + cp[0].getSubjectX500Principal ().toString ();
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
           }
         catch (IOException e)
           {
+            log_result = " Exception: " + e.getMessage ();
             throw new SKSException (e);
           }
-        getDevice (device_id).setCertificatePath (key_handle, cp, mac);
+        finally
+          {
+            log (device_id, "setCertificatePath (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="importSymmetricKey")
