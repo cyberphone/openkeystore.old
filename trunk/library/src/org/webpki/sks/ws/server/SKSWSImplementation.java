@@ -439,24 +439,37 @@ public class SKSWSImplementation
                                               Holder<String> issuer_uri)
     throws SKSException
       {
-        EnumeratedProvisioningSession eps = getDevice (device_id).enumerateProvisioningSessions (provisioning_handle, provisioning_state);
-        if (eps == null)
+        String log_result = "  : Empty";
+        try
           {
-            eps = new EnumeratedProvisioningSession ();  // Back to square #1
+            EnumeratedProvisioningSession eps = getDevice (device_id).enumerateProvisioningSessions (provisioning_handle, provisioning_state);
+            if (eps == null)
+              {
+                eps = new EnumeratedProvisioningSession ();  // Back to square #1
+              }
+            else
+              {
+                algorithm.value = eps.getAlgorithm ();
+                privacy_enabled.value = eps.getPrivacyEnabled ();
+                key_management_key.value = eps.getKeyManagementKey () == null ? null : eps.getKeyManagementKey ().getEncoded ();
+                client_time.value = eps.getClientTime ();
+                session_life_time.value = eps.getSessionLifeTime ();
+                server_session_id.value = eps.getServerSessionID ();
+                client_session_id.value = eps.getClientSessionID ();
+                issuer_uri.value = eps.getIssuerURI ();
+                log_result = " : ProvisioningHandle=" + eps.getProvisioningHandle (); 
+              }
+            return eps.getProvisioningHandle ();
           }
-        else
+        catch (SKSException e)
           {
-            algorithm.value = eps.getAlgorithm ();
-            privacy_enabled.value = eps.getPrivacyEnabled ();
-            key_management_key.value = eps.getKeyManagementKey () == null ? null : eps.getKeyManagementKey ().getEncoded ();
-            client_time.value = eps.getClientTime ();
-            session_life_time.value = eps.getSessionLifeTime ();
-            server_session_id.value = eps.getServerSessionID ();
-            client_session_id.value = eps.getClientSessionID ();
-            issuer_uri.value = eps.getIssuerURI ();
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
           }
-        log (device_id, "enumerateProvisioningSessions (ProvisioningHandle=" + provisioning_handle + ") : ProvisioningHandle=" + eps.getProvisioningHandle ());
-        return eps.getProvisioningHandle ();
+        finally
+          {
+            log (device_id, "enumerateProvisioningSessions (ProvisioningHandle=" + provisioning_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="abortProvisioningSession")
@@ -888,17 +901,30 @@ public class SKSWSImplementation
                               Holder<Integer> provisioning_handle)
     throws SKSException
       {
-        EnumeratedKey ek = getDevice (device_id).enumerateKeys (key_handle);
-        if (ek == null)
+        String log_result = "  : Empty";
+        try
           {
-            ek = new EnumeratedKey ();  // Back to square #1
+            EnumeratedKey ek = getDevice (device_id).enumerateKeys (key_handle);
+            if (ek == null)
+              {
+                ek = new EnumeratedKey ();  // Back to square #1
+              }
+            else
+              {
+                provisioning_handle.value = ek.getProvisioningHandle ();
+                log_result = " : KeyHandle=" + ek.getKeyHandle ();
+              }
+            return ek.getKeyHandle ();
           }
-        else
+        catch (SKSException e)
           {
-            provisioning_handle.value = ek.getProvisioningHandle ();
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
           }
-        log (device_id, "enumerateKeys (KeyHandle=" + key_handle + ") : KeyHandle=" + ek.getKeyHandle ());
-        return ek.getKeyHandle ();
+        finally
+          {
+            log (device_id, "enumerateKeys (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="getKeyAttributes")
