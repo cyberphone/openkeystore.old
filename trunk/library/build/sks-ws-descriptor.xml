@@ -167,6 +167,11 @@
         return sks;
       }
 
+    String getEndEntityName (X509Certificate[] path)
+      {
+        return path[0].getIssuerX500Principal ().toString () + " / " + path[0].getSubjectX500Principal ().toString ();
+      }
+
     String getConnectionPort (String device_id) throws SKSException
       {
         return null;  // Not implemented
@@ -797,8 +802,22 @@
      <Parameter Name="provisioning_handle" Type="int"    XMLName="ProvisioningHandle"/>
      <Parameter Name="id"                  Type="string" XMLName="ID"/>
      <Code><![CDATA[
-        log (device_id, "getKeyHandle (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")");
-        return getDevice (device_id).getKeyHandle (provisioning_handle, id);
+        String log_result = null;
+        try
+          {
+            int key_handle = getDevice (device_id).getKeyHandle (provisioning_handle, id);
+            log_result = " : KeyHandle=" + key_handle;
+            return key_handle;
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "getKeyHandle (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="setCertificatePath" Throws="SKSException">
@@ -812,7 +831,7 @@
           {
             X509Certificate[] cp = CertificateUtil.getSortedPathFromBlobs (certificate_path);
             getDevice (device_id).setCertificatePath (key_handle, cp, mac);
-            log_result = " : " + cp[0].getSubjectX500Principal ().toString ();
+            log_result = " : " + getEndEntityName (cp);
           }
         catch (SKSException e)
           {
@@ -836,8 +855,20 @@
      <Parameter Name="symmetric_key" Type="binary" XMLName="SymmetricKey"/>
      <Parameter Name="mac"           Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "importSymmetricKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).importSymmetricKey (key_handle, symmetric_key, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).importSymmetricKey (key_handle, symmetric_key, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "importSymmetricKey (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="importPrivateKey" Throws="SKSException">
@@ -846,8 +877,20 @@
      <Parameter Name="private_key" Type="binary" XMLName="PrivateKey"/>
      <Parameter Name="mac"         Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "importPrivateKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).importPrivateKey (key_handle, private_key, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).importPrivateKey (key_handle, private_key, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "importPrivateKey (KeyHandle=" + key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="addExtension" Throws="SKSException">
@@ -859,13 +902,25 @@
      <Parameter Name="extension_data" Type="binary" XMLName="ExtensionData"/>
      <Parameter Name="mac"            Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "addExtension (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).addExtension (key_handle,
-                                            type,
-                                            sub_type,
-                                            qualifier,
-                                            extension_data,
-                                            mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).addExtension (key_handle,
+                                                type,
+                                                sub_type,
+                                                qualifier,
+                                                extension_data,
+                                                mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "addExtension (KeyHandle=" + key_handle + ", Type=" + type + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="postDeleteKey" Throws="SKSException">
@@ -875,8 +930,20 @@
      <Parameter Name="authorization"       Type="binary" XMLName="Authorization"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "postDeleteKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).postDeleteKey (provisioning_handle, target_key_handle, authorization, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).postDeleteKey (provisioning_handle, target_key_handle, authorization, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "postDeleteKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="postUnlockKey" Throws="SKSException">
@@ -886,8 +953,20 @@
      <Parameter Name="authorization"       Type="binary" XMLName="Authorization"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "postUnlockKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).postUnlockKey (provisioning_handle, target_key_handle, authorization, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).postUnlockKey (provisioning_handle, target_key_handle, authorization, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "postUnlockKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="postUpdateKey" Throws="SKSException">
@@ -897,8 +976,20 @@
      <Parameter Name="authorization"       Type="binary" XMLName="Authorization"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "postUpdateKey (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).postUpdateKey (key_handle, target_key_handle, authorization, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).postUpdateKey (key_handle, target_key_handle, authorization, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "postUpdateKey (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="postCloneKeyProtection" Throws="SKSException">
@@ -908,8 +999,20 @@
      <Parameter Name="authorization"       Type="binary" XMLName="Authorization"/>
      <Parameter Name="mac"                 Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
-        log (device_id, "postCloneKeyProtection (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).postCloneKeyProtection (key_handle, target_key_handle, authorization, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).postCloneKeyProtection (key_handle, target_key_handle, authorization, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "postCloneKeyProtection (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")" + log_result);
+          }
 ]]></Code></Method>
 
    <Method Name="enumerateKeys" ReturnClass="EnumeratedKey" Throws="SKSException">
@@ -954,7 +1057,7 @@
      <Parameter Name="endorsed_algorithms"  Type="string" XMLName="EndorsedAlgorithm"  Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
      <Parameter Name="extension_types"      Type="string" XMLName="ExtensionType"      Mode="out" List="true" Null="true" RewriteRule="Out.StringArray"/>
      <Code><![CDATA[
-        String log_result = "";
+        String log_result = null;
         try
           {
             KeyAttributes ka = getDevice (device_id).getKeyAttributes (key_handle);
@@ -976,6 +1079,7 @@
               {
                 extension_types.value.add (type);
               }
+            log_result = " : " + getEndEntityName (ka.getCertificatePath ());
           }
         catch (GeneralSecurityException e)
           {

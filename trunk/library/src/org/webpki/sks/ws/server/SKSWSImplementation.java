@@ -186,6 +186,11 @@ public class SKSWSImplementation
         return sks;
       }
 
+    String getEndEntityName (X509Certificate[] path)
+      {
+        return path[0].getIssuerX500Principal ().toString () + " / " + path[0].getSubjectX500Principal ().toString ();
+      }
+
     String getConnectionPort (String device_id) throws SKSException
       {
         return null;  // Not implemented
@@ -439,7 +444,7 @@ public class SKSWSImplementation
                                               Holder<String> issuer_uri)
     throws SKSException
       {
-        String log_result = "  : Empty";
+        String log_result = " : Empty";
         try
           {
             EnumeratedProvisioningSession eps = getDevice (device_id).enumerateProvisioningSessions (provisioning_handle, provisioning_state);
@@ -711,8 +716,22 @@ public class SKSWSImplementation
                              String id)
     throws SKSException
       {
-        log (device_id, "getKeyHandle (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")");
-        return getDevice (device_id).getKeyHandle (provisioning_handle, id);
+        String log_result = null;
+        try
+          {
+            int key_handle = getDevice (device_id).getKeyHandle (provisioning_handle, id);
+            log_result = " : KeyHandle=" + key_handle;
+            return key_handle;
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "getKeyHandle (ProvisioningHandle=" + provisioning_handle + ", ID=" + id + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="setCertificatePath")
@@ -733,7 +752,7 @@ public class SKSWSImplementation
           {
             X509Certificate[] cp = CertificateUtil.getSortedPathFromBlobs (certificate_path);
             getDevice (device_id).setCertificatePath (key_handle, cp, mac);
-            log_result = " : " + cp[0].getSubjectX500Principal ().toString ();
+            log_result = " : " + getEndEntityName (cp);
           }
         catch (SKSException e)
           {
@@ -764,8 +783,20 @@ public class SKSWSImplementation
                                     byte[] mac)
     throws SKSException
       {
-        log (device_id, "importSymmetricKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).importSymmetricKey (key_handle, symmetric_key, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).importSymmetricKey (key_handle, symmetric_key, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "importSymmetricKey (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="importPrivateKey")
@@ -781,8 +812,20 @@ public class SKSWSImplementation
                                   byte[] mac)
     throws SKSException
       {
-        log (device_id, "importPrivateKey (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).importPrivateKey (key_handle, private_key, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).importPrivateKey (key_handle, private_key, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "importPrivateKey (KeyHandle=" + key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="addExtension")
@@ -804,13 +847,25 @@ public class SKSWSImplementation
                               byte[] mac)
     throws SKSException
       {
-        log (device_id, "addExtension (KeyHandle=" + key_handle + ")");
-        getDevice (device_id).addExtension (key_handle,
-                                            type,
-                                            sub_type,
-                                            qualifier,
-                                            extension_data,
-                                            mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).addExtension (key_handle,
+                                                type,
+                                                sub_type,
+                                                qualifier,
+                                                extension_data,
+                                                mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "addExtension (KeyHandle=" + key_handle + ", Type=" + type + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="postDeleteKey")
@@ -828,8 +883,20 @@ public class SKSWSImplementation
                                byte[] mac)
     throws SKSException
       {
-        log (device_id, "postDeleteKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).postDeleteKey (provisioning_handle, target_key_handle, authorization, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).postDeleteKey (provisioning_handle, target_key_handle, authorization, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "postDeleteKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="postUnlockKey")
@@ -847,8 +914,20 @@ public class SKSWSImplementation
                                byte[] mac)
     throws SKSException
       {
-        log (device_id, "postUnlockKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).postUnlockKey (provisioning_handle, target_key_handle, authorization, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).postUnlockKey (provisioning_handle, target_key_handle, authorization, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "postUnlockKey (ProvisioningHandle=" + provisioning_handle + ", TargetKeyHandle=" + target_key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="postUpdateKey")
@@ -866,8 +945,20 @@ public class SKSWSImplementation
                                byte[] mac)
     throws SKSException
       {
-        log (device_id, "postUpdateKey (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).postUpdateKey (key_handle, target_key_handle, authorization, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).postUpdateKey (key_handle, target_key_handle, authorization, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "postUpdateKey (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="postCloneKeyProtection")
@@ -885,8 +976,20 @@ public class SKSWSImplementation
                                         byte[] mac)
     throws SKSException
       {
-        log (device_id, "postCloneKeyProtection (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")");
-        getDevice (device_id).postCloneKeyProtection (key_handle, target_key_handle, authorization, mac);
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).postCloneKeyProtection (key_handle, target_key_handle, authorization, mac);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "postCloneKeyProtection (KeyHandle=" + key_handle + ", TargetKeyHandle=" + target_key_handle + ")" + log_result);
+          }
       }
 
     @WebMethod(operationName="enumerateKeys")
@@ -901,7 +1004,7 @@ public class SKSWSImplementation
                               Holder<Integer> provisioning_handle)
     throws SKSException
       {
-        String log_result = "  : Empty";
+        String log_result = " : Empty";
         try
           {
             EnumeratedKey ek = getDevice (device_id).enumerateKeys (key_handle);
@@ -948,7 +1051,7 @@ public class SKSWSImplementation
                                   Holder<List<String>> extension_types)
     throws SKSException
       {
-        String log_result = "";
+        String log_result = null;
         try
           {
             KeyAttributes ka = getDevice (device_id).getKeyAttributes (key_handle);
@@ -970,6 +1073,7 @@ public class SKSWSImplementation
               {
                 extension_types.value.add (type);
               }
+            log_result = " : " + getEndEntityName (ka.getCertificatePath ());
           }
         catch (GeneralSecurityException e)
           {

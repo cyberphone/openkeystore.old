@@ -251,6 +251,15 @@ public class SKSTest
         checkException (e, "Authorization error for key #");
       }
     
+    void sessionNotOpenCheck (SKSException e)
+      {
+        assertTrue ("Not open", e.getError () == SKSException.ERROR_NO_SESSION);
+        if (reference_implementation)
+          {
+            assertTrue ("session", e.getMessage ().startsWith ("Session not open: "));
+          }
+      }
+
     void updateReplace (boolean order) throws Exception
       {
         String good_pin = "1563";
@@ -1070,6 +1079,8 @@ public class SKSTest
                                        null /* pin_value */,
                                        null /* pin_policy */,
                                        AppUsage.AUTHENTICATION).setCertificate (cn ());
+        int key_handle = device.sks.getKeyHandle (sess.provisioning_handle, "Key.1");
+        assertTrue ("Key Handle", key_handle == key.key_handle);
         sess.closeSession ();
         byte[] result = key.signData (SignatureAlgorithms.ECDSA_SHA256, null, TEST_STRING);
         Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
@@ -1084,6 +1095,15 @@ public class SKSTest
         catch (SKSException e)
           {
             checkException (e, "Redundant authorization information for key #");
+          }
+        try
+          {
+            device.sks.getKeyHandle (sess.provisioning_handle, "Key.1");
+            fail ("No such session");
+          }
+        catch (SKSException e)
+          {
+            sessionNotOpenCheck (e);
           }
       }
 
