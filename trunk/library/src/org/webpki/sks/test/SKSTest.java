@@ -153,7 +153,7 @@ public class SKSTest
       {
          if (sks instanceof WSSpecific)
            {
-             ((WSSpecific)sks).logEvent ("Test=" + name.getMethodName ());
+             ((WSSpecific)sks).logEvent ("Testing:" + _name.getMethodName ());
            }
       }
         
@@ -163,7 +163,7 @@ public class SKSTest
       }
 
     @Rule 
-    public TestName name = new TestName();
+    public TestName _name = new TestName();
 
     void edgeDeleteCase (boolean post) throws Exception
       {
@@ -921,7 +921,7 @@ public class SKSTest
 
     public String cn ()
       {
-        return "CN=" + name.getMethodName ();
+        return "CN=" + _name.getMethodName ();
       }
 
     @Test

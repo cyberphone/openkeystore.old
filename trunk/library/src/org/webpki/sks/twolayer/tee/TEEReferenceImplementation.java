@@ -999,6 +999,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                                           target_key_handle,
                                                           target_key_entry.owner.key_management_key,
                                                           ee_certificate,
+                                                          new_key.sealed_key,
                                                           provisioning.privacy_enabled,
                                                           update ? METHOD_POST_UPDATE_KEY : METHOD_POST_CLONE_KEY_PROTECTION,
                                                           authorization,

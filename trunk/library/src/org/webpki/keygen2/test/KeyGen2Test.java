@@ -53,7 +53,9 @@ import javax.crypto.Mac;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.BeforeClass;
@@ -261,6 +263,19 @@ public class KeyGen2Test
           }
       }
     
+    @Before
+    public void setup () throws Exception
+      {
+         if (sks instanceof WSSpecific)
+           {
+             ((WSSpecific)sks).logEvent ("Testing:" + _name.getMethodName ());
+           }
+      }
+        
+    @After
+    public void teardown () throws Exception
+      {
+      }
     @Rule 
     public TestName _name = new TestName();
 
@@ -1079,7 +1094,7 @@ public class KeyGen2Test
                             cert_spec.setKeyUsageBit (KeyUsageBits.keyEncipherment);
                           }
                       }
-                    cert_spec.setSubject ("CN=JUnit " + _name.getMethodName() + ", E=john.doe@example.com" +
+                    cert_spec.setSubject ("CN=KeyGen2 " + _name.getMethodName() + ", E=john.doe@example.com" +
                                           (otp ? ", OU=OTP Key" : ""));
                     otp = false;
     

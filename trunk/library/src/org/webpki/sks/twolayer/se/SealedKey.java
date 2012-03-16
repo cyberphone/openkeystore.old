@@ -8,5 +8,7 @@ public class SealedKey
     
     byte[] wrapped_key;
     
+    byte[] sha256_of_public_key_or_ee_certificate;  // just a little consistency checker
+    
     byte[] mac;
   }
