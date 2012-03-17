@@ -20,12 +20,14 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import java.security.PublicKey;
+import java.security.SecureRandom;
 
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -2085,12 +2087,18 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         checkIDSyntax (server_session_id, "ServerSessionID", this);
         
         ///////////////////////////////////////////////////////////////////////////////////
+        // Create TEEClientSessionIDPrefix which typically is a sequence number in TEE
+        ///////////////////////////////////////////////////////////////////////////////////
+        String tee_client_session_id_prefix = "C" + Long.toHexString (new Date().getTime());
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // The assumption here is that the SE can do crypto parameter validation...
         ///////////////////////////////////////////////////////////////////////////////////
         SEProvisioningData se_pd = SEReferenceImplementation.createProvisioningData (OS_INSTANCE_KEY,
                                                                                      algorithm,
                                                                                      privacy_enabled,
                                                                                      server_session_id,
+                                                                                     tee_client_session_id_prefix,
                                                                                      server_ephemeral_key,
                                                                                      issuer_uri,
                                                                                      key_management_key,

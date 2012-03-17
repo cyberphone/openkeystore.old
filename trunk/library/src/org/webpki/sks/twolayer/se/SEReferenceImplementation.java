@@ -49,7 +49,6 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedHashMap;
 
 import javax.crypto.Cipher;
@@ -87,6 +86,23 @@ public class SEReferenceImplementation
     static final boolean SKS_DEVICE_PIN_SUPPORT            = true;  // Change here to test or disable
     static final boolean SKS_BIOMETRIC_SUPPORT             = true;  // Change here to test or disable
     static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // Specific TEE/SE constants.  We want the SE to provide strong entropy without hampering
+    // the TEE from introducing monotonic sequence numbers to facilitate easy lookup
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    public static final int MAX_LENGTH_TEE_CS_PREFIX = 16;
+
+    static final char[] MODIFIED_BASE64 = {'A','B','C','D','E','F','G','H',
+                                           'I','J','K','L','M','N','O','P',
+                                           'Q','R','S','T','U','V','W','X',
+                                           'Y','Z','a','b','c','d','e','f',
+                                           'g','h','i','j','k','l','m','n',
+                                           'o','p','q','r','s','t','u','v',
+                                           'w','x','y','z','0','1','2','3',
+                                           '4','5','6','7','8','9','-','_'};
+
+    static final int SE_CS_RANDOM_LENGTH = 12;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Algorithm Support
@@ -1296,6 +1312,7 @@ public class SEReferenceImplementation
                                                              String algorithm,
                                                              boolean privacy_enabled,
                                                              String server_session_id,
+                                                             String tee_client_session_id_prefix,
                                                              ECPublicKey server_ephemeral_key,
                                                              String issuer_uri,
                                                              PublicKey key_management_key, // May be null
@@ -1317,6 +1334,14 @@ public class SEReferenceImplementation
         if (issuer_uri.length () == 0 || issuer_uri.length () >  SecureKeyStore.MAX_LENGTH_URI)
           {
             abort ("\"IssuerURI\" length error: " + issuer_uri.length ());
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check TEEClientSessionIDPrefix
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (tee_client_session_id_prefix.length () == 0 || tee_client_session_id_prefix.length () >  MAX_LENGTH_TEE_CS_PREFIX)
+          {
+            abort ("\"TEEClientSessionIDPrefix\" length error: " + tee_client_session_id_prefix.length ());
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1343,7 +1368,18 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Create ClientSessionID
         ///////////////////////////////////////////////////////////////////////////////////
-        String client_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
+        byte[] random = new byte[SE_CS_RANDOM_LENGTH];
+        new SecureRandom ().nextBytes (random);
+        StringBuffer buffer = new StringBuffer (tee_client_session_id_prefix);
+        int i = 0;
+        while (i < SE_CS_RANDOM_LENGTH)
+          {
+            buffer.append (MODIFIED_BASE64[(random[i] >>> 2) & 0x3F]);
+            buffer.append (MODIFIED_BASE64[((random[i++] << 4) & 0x30) | ((random[i] >>> 4) & 0x0F)]);
+            buffer.append (MODIFIED_BASE64[((random[i++] << 2) & 0x3C) | ((random[i] >>> 6) & 0x03)]);
+            buffer.append (MODIFIED_BASE64[random[i++] & 0x3F]);
+          }
+        String client_session_id = buffer.toString ();
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Prepare for the big crypto...
