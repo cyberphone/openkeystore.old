@@ -102,8 +102,6 @@ public class SEReferenceImplementation
                                            'w','x','y','z','0','1','2','3',
                                            '4','5','6','7','8','9','-','_'};
 
-    static final int SE_CS_RANDOM_LENGTH = 24;
-
     /////////////////////////////////////////////////////////////////////////////////////////////
     // Algorithm Support
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1368,15 +1366,12 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Create ClientSessionID.  The SE adds up to 31 random (but valid) characters
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] random = new byte[SE_CS_RANDOM_LENGTH];
+        byte[] random = new byte[SecureKeyStore.MAX_LENGTH_ID_TYPE - 1];
         new SecureRandom ().nextBytes (random);
         StringBuffer buffer = new StringBuffer (tee_client_session_id_prefix);
         int i = 0;
-        while (i < SE_CS_RANDOM_LENGTH)
+        while (i < SecureKeyStore.MAX_LENGTH_ID_TYPE - 1)
           {
-            buffer.append (MODIFIED_BASE64[(random[i] >>> 2) & 0x3F]);
-            buffer.append (MODIFIED_BASE64[((random[i++] << 4) & 0x30) | ((random[i] >>> 4) & 0x0F)]);
-            buffer.append (MODIFIED_BASE64[((random[i++] << 2) & 0x3C) | ((random[i] >>> 6) & 0x03)]);
             buffer.append (MODIFIED_BASE64[random[i++] & 0x3F]);
           }
         String client_session_id = buffer.toString ().substring (0, SecureKeyStore.MAX_LENGTH_ID_TYPE);
