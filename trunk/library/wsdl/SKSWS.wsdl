@@ -378,7 +378,7 @@
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Type" type="xs:string"/>
             <xs:element name="SubType" type="xs:byte"/>
-            <xs:element name="Qualifier" type="xs:base64Binary"/>
+            <xs:element name="Qualifier" type="xs:string"/>
             <xs:element name="ExtensionData" type="xs:base64Binary"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
           </xs:sequence>
@@ -563,7 +563,7 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="SubType" type="xs:byte"/>
-            <xs:element name="Qualifier" type="xs:base64Binary"/>
+            <xs:element name="Qualifier" type="xs:string"/>
             <xs:element name="ExtensionData" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>

@@ -898,7 +898,7 @@
      <Parameter Name="key_handle"     Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="type"           Type="string" XMLName="Type"/>
      <Parameter Name="sub_type"       Type="byte"   XMLName="SubType"/>
-     <Parameter Name="qualifier"      Type="binary" XMLName="Qualifier"/>
+     <Parameter Name="qualifier"      Type="string" XMLName="Qualifier"/>
      <Parameter Name="extension_data" Type="binary" XMLName="ExtensionData"/>
      <Parameter Name="mac"            Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
@@ -1166,7 +1166,7 @@
      <Parameter Name="key_handle"     Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="type"           Type="string" XMLName="Type"/>
      <Parameter Name="sub_type"       Type="byte"   XMLName="SubType"       Mode="out"/>
-     <Parameter Name="qualifier"      Type="binary" XMLName="Qualifier"     Mode="out"/>
+     <Parameter Name="qualifier"      Type="string" XMLName="Qualifier"     Mode="out"/>
      <Parameter Name="extension_data" Type="binary" XMLName="ExtensionData" Mode="out"/>
      <Code><![CDATA[
         String log_result = "";

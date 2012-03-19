@@ -1389,7 +1389,7 @@ namespace org.webpki.sks.ws.client
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Qualifier", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _qualifier;
+        internal string _qualifier;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ExtensionData", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -1403,7 +1403,7 @@ namespace org.webpki.sks.ws.client
                                     int KeyHandle,
                                     string Type,
                                     sbyte SubType,
-                                    byte[] Qualifier,
+                                    string Qualifier,
                                     byte[] ExtensionData,
                                     byte[] MAC)
         {
@@ -2028,7 +2028,7 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Qualifier", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
-        internal byte[] _qualifier;
+        internal string _qualifier;
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
@@ -2044,7 +2044,7 @@ namespace org.webpki.sks.ws.client
             get { return _sub_type; }
         }
 
-        public byte[] Qualifier
+        public string Qualifier
         {
             get { return _qualifier; }
         }
@@ -2970,7 +2970,7 @@ namespace org.webpki.sks.ws.client
         public void addExtension(int KeyHandle,
                                  string Type,
                                  sbyte SubType,
-                                 byte[] Qualifier,
+                                 string Qualifier,
                                  byte[] ExtensionData,
                                  byte[] MAC)
         {
