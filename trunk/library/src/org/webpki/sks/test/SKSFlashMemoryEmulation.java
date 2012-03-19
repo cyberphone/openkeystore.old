@@ -483,7 +483,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
       {
         private static final long serialVersionUID = 1L;
 
-        byte[] qualifier;
+        String qualifier;
         byte[] extension_data;
         byte sub_type;
       }
@@ -726,14 +726,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
 
         void addString (String string) throws SKSException
           {
-            try
-              {
-                addArray (string.getBytes ("UTF-8"));
-              }
-            catch (IOException e)
-              {
-                abort ("Interal UTF-8");
-              }
+            addArray (getBinary (string));
           }
 
         void addInt (int i)
@@ -978,6 +971,19 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
             abort ("Session not open: " +  provisioning_handle, SKSException.ERROR_NO_SESSION);
           }
         return provisioning;
+      }
+
+    byte[] getBinary (String string) throws SKSException
+      {
+        try
+          {
+            return string.getBytes ("UTF-8");
+          }
+        catch (IOException e)
+          {
+            abort ("Interal UTF-8");
+            return null;
+          }
       }
 
     int getShort (byte[] buffer, int index)
@@ -1646,17 +1652,8 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         ///////////////////////////////////////////////////////////////////////////////////
         // Found, now look for the property name and update the associated value
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] bin_name = null;
-        byte[] bin_value = null;
-        try
-          {
-            bin_name = name.getBytes ("UTF-8");
-            bin_value = value.getBytes ("UTF-8");
-          }
-        catch (IOException e)
-          {
-            abort ("Internal");
-          }
+        byte[] bin_name = getBinary (name);
+        byte[] bin_value = getBinary (value);
         int i = 0;
         while (i < ext_obj.extension_data.length)
           {
@@ -2760,7 +2757,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
     public synchronized void addExtension (int key_handle,
                                            String type,
                                            byte sub_type,
-                                           byte[] qualifier,
+                                           String qualifier,
                                            byte[] extension_data,
                                            byte[] mac) throws SKSException
       {
@@ -2786,11 +2783,11 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
           {
             key_entry.owner.abort ("Extension data exceeds " + MAX_LENGTH_EXTENSION_DATA + " bytes");
           }
-        if (((sub_type == SUB_TYPE_LOGOTYPE) ^ (qualifier.length != 0)) || qualifier.length > MAX_LENGTH_QUALIFIER)
+        byte[] bin_qualifier = getBinary (qualifier);
+        if (((sub_type == SUB_TYPE_LOGOTYPE) ^ (bin_qualifier.length != 0)) || bin_qualifier.length > MAX_LENGTH_QUALIFIER)
           {
             key_entry.owner.abort ("\"Qualifier\" length error");
           }
-
         ///////////////////////////////////////////////////////////////////////////////////
         // Property bags are checked for not being empty or incorrectly formatted
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2816,7 +2813,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_ADD_EXTENSION);
         verifier.addString (type);
         verifier.addByte (sub_type);
-        verifier.addArray (qualifier);
+        verifier.addArray (bin_qualifier);
         verifier.addBlob (extension_data);
         key_entry.owner.verifyMac (verifier, mac);
 

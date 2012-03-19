@@ -193,7 +193,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                     add_ext.addArray (ee_cert);
                     add_ext.addString (ei.type);
                     add_ext.addByte (ei.getSubType ());
-                    add_ext.addArray (ei.getQualifier ());
+                    add_ext.addString (ei.getQualifier ());
                     add_ext.addBlob (ei.getExtensionData ());
                     ei.writeExtension (wr, mac (add_ext.getResult (), SecureKeyStore.METHOD_ADD_EXTENSION));
                   }

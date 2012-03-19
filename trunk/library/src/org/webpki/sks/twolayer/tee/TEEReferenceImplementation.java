@@ -20,14 +20,14 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import java.security.PublicKey;
-import java.security.SecureRandom;
 
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
 
+import java.text.DecimalFormat;
+
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -425,7 +425,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
       {
         private static final long serialVersionUID = 1L;
 
-        byte[] qualifier;
+        String qualifier;
         byte[] extension_data;
         byte sub_type;
       }
@@ -641,6 +641,19 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
             abort ("Session not open: " +  provisioning_handle, SKSException.ERROR_NO_SESSION);
           }
         return provisioning;
+      }
+
+    byte[] getBinary (String string) throws SKSException
+      {
+        try
+          {
+            return string.getBytes ("UTF-8");
+          }
+        catch (IOException e)
+          {
+            abort ("Interal UTF-8");
+            return null;
+          }
       }
 
     int getShort (byte[] buffer, int index)
@@ -1240,17 +1253,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Found, now look for the property name and update the associated value
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] bin_name = null;
-        byte[] bin_value = null;
-        try
-          {
-            bin_name = name.getBytes ("UTF-8");
-            bin_value = value.getBytes ("UTF-8");
-          }
-        catch (IOException e)
-          {
-            abort ("Internal");
-          }
+        byte[] bin_name = getBinary (name);
+        byte[] bin_value = getBinary (value);
         int i = 0;
         while (i < ext_obj.extension_data.length)
           {
@@ -2089,7 +2093,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Create TEEClientSessionIDPrefix which typically is a sequence number in TEE
         ///////////////////////////////////////////////////////////////////////////////////
-        String tee_client_session_id_prefix = "C" + Long.toHexString (new Date().getTime());
+        String tee_client_session_id_prefix = "C" + new DecimalFormat ("#000000000").format (next_prov_handle);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // The assumption here is that the SE can do crypto parameter validation...
@@ -2134,7 +2138,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     public synchronized void addExtension (int key_handle,
                                            String type,
                                            byte sub_type,
-                                           byte[] qualifier,
+                                           String qualifier,
                                            byte[] extension_data,
                                            byte[] mac) throws SKSException
       {
@@ -2160,11 +2164,11 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
           {
             key_entry.owner.abort ("Extension data exceeds " + MAX_LENGTH_EXTENSION_DATA + " bytes");
           }
-        if (((sub_type == SUB_TYPE_LOGOTYPE) ^ (qualifier.length != 0)) || qualifier.length > MAX_LENGTH_QUALIFIER)
+        byte[] bin_qualifier = getBinary (qualifier);
+        if (((sub_type == SUB_TYPE_LOGOTYPE) ^ (bin_qualifier.length != 0)) || bin_qualifier.length > MAX_LENGTH_QUALIFIER)
           {
             key_entry.owner.abort ("\"Qualifier\" length error");
           }
-
         ///////////////////////////////////////////////////////////////////////////////////
         // Property bags are checked for not being empty or incorrectly formatted
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2197,7 +2201,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                                                               ee_certificate,
                                                                               type,
                                                                               sub_type,
-                                                                              qualifier,
+                                                                              bin_qualifier,
                                                                               extension_data,
                                                                               mac);
           }

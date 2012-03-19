@@ -22,18 +22,18 @@ import java.util.LinkedHashMap;
 
 public class Extension
   {
-    byte[] qualifier;
+    String qualifier;
     byte[] extension_data;
     byte sub_type;
 
-    public Extension (byte sub_type, byte[] qualifier, byte[] extension_data)
+    public Extension (byte sub_type, String qualifier, byte[] extension_data)
       {
         this.sub_type = sub_type;
         this.qualifier = qualifier;
         this.extension_data = extension_data;
       }
     
-    public byte[] getQualifier ()
+    public String getQualifier ()
       {
         return qualifier;
       }

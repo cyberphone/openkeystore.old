@@ -209,7 +209,7 @@ public interface SecureKeyStore
     void addExtension (int key_handle,
                        String type,
                        byte sub_type,
-                       byte[] qualifier,
+                       String qualifier,
                        byte[] extension_data,
                        byte[] mac) throws SKSException;
     

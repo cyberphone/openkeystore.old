@@ -570,7 +570,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
     public void addExtension (int key_handle, 
                               String type,
                               byte sub_type,
-                              byte[] qualifier,
+                              String qualifier,
                               byte[] extension_data,
                               byte[] mac) throws SKSException
       {
@@ -817,7 +817,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         try
           {
             Holder<Byte> sub_type = new Holder<Byte> ();
-            Holder<byte[]> qualifier = new Holder<byte[]> ();
+            Holder<String> qualifier = new Holder<String> ();
             Holder<byte[]> extension_data = new Holder<byte[]> ();
             getSKSWS ().getExtension (device_id,
                                       key_handle,

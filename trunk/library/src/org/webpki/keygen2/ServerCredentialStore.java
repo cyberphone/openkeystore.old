@@ -129,9 +129,9 @@ public class ServerCredentialStore implements Serializable
         
         public abstract byte getSubType ();
         
-        public byte[] getQualifier () throws IOException
+        public String getQualifier () throws IOException
           {
-            return SecureKeyStore.ZERO_LENGTH_ARRAY;
+            return "";
           }
         
         public abstract byte[] getExtensionData () throws IOException;
@@ -230,9 +230,9 @@ public class ServerCredentialStore implements Serializable
             return logotype.getData ();
           }
 
-        public byte[] getQualifier () throws IOException
+        public String getQualifier () throws IOException
           {
-            return logotype.getMimeType ().getBytes ("UTF-8");
+            return logotype.getMimeType ();
           }
 
         void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException

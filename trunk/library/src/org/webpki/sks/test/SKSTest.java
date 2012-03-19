@@ -326,7 +326,7 @@ public class SKSTest
           }
       }
 
-    Extension extensionTest (byte sub_type, byte[] qualifier, byte[] extension_data, boolean pass) throws Exception
+    Extension extensionTest (byte sub_type, String qualifier, byte[] extension_data, boolean pass) throws Exception
       {
         ProvSess sess = new ProvSess (device);
         GenKey key = sess.createECKey ("Key.1",
@@ -336,12 +336,13 @@ public class SKSTest
         String type = "http://example.com/define";
         try
           {
+            if (qualifier == null) qualifier = "";
             key.addExtension (type, sub_type, qualifier, extension_data);
             assertTrue ("Should pass", pass);
             sess.closeSession ();
             Extension ext = device.sks.getExtension (key.key_handle, type);
             assertTrue ("Ext data", ArrayUtil.compare (ext.getExtensionData (), extension_data));
-            assertTrue ("Qualifier", ArrayUtil.compare (ext.getQualifier (), qualifier));
+            assertTrue ("Qualifier", qualifier.equals (ext.getQualifier ()));
             assertTrue ("Sub type", ext.getSubType () == sub_type);
             if (sub_type == SecureKeyStore.SUB_TYPE_PROPERTY_BAG)
               {
@@ -3185,10 +3186,10 @@ public class SKSTest
         String type = "http://example.com/define";
         byte sub_type = SecureKeyStore.SUB_TYPE_EXTENSION;
         byte[] extension_data = {1,4,6,8};
-        key.addExtension (type, sub_type, SecureKeyStore.ZERO_LENGTH_ARRAY, extension_data);
+        key.addExtension (type, sub_type, "", extension_data);
         try
           {
-            key.addExtension (type, sub_type, SecureKeyStore.ZERO_LENGTH_ARRAY, extension_data);
+            key.addExtension (type, sub_type, "", extension_data);
             fail ("Duplicate");
           }
         catch (SKSException e)
@@ -3196,23 +3197,23 @@ public class SKSTest
             checkException (e, "Duplicate \"Type\" : " + type);
           }
         byte[] ext_data = {4,6,2,9,4};
-        extensionTest (SecureKeyStore.SUB_TYPE_EXTENSION, SecureKeyStore.ZERO_LENGTH_ARRAY, ext_data, true);
-        extensionTest (SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION, SecureKeyStore.ZERO_LENGTH_ARRAY, ext_data, true);
-        extensionTest (SecureKeyStore.SUB_TYPE_LOGOTYPE, SecureKeyStore.ZERO_LENGTH_ARRAY, ext_data, false);
-        extensionTest (SecureKeyStore.SUB_TYPE_LOGOTYPE, new byte[] {'i','m','a','g','e','/','g','i','f'}, ext_data, true);
-        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, SecureKeyStore.ZERO_LENGTH_ARRAY, ext_data, false);
-        Property[] props = extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, SecureKeyStore.ZERO_LENGTH_ARRAY, 
+        extensionTest (SecureKeyStore.SUB_TYPE_EXTENSION, null, ext_data, true);
+        extensionTest (SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION, null, ext_data, true);
+        extensionTest (SecureKeyStore.SUB_TYPE_LOGOTYPE, null, ext_data, false);
+        extensionTest (SecureKeyStore.SUB_TYPE_LOGOTYPE, "image/gif", ext_data, true);
+        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, ext_data, false);
+        Property[] props = extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
             new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e'}, true).getProperties ();
         assertTrue ("Number of props", props.length == 1);
         assertTrue ("Prop value", props[0].getName ().equals ("name") && props[0].getValue ().equals ("value"));
-        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, SecureKeyStore.ZERO_LENGTH_ARRAY, 
+        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
             new byte[]{0, 4, 'n', 'a', 'm', 'e', 1, 0, 5, 'v', 'a', 'l', 'u', 'e',
                        0, 4, 'l', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e'}, true);
-        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, SecureKeyStore.ZERO_LENGTH_ARRAY, 
+        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
             new byte[]{0, 4, 'n', 'a', 'm', 'e', 2, 0, 5, 'v', 'a', 'l', 'u', 'e'}, false);
-        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, SecureKeyStore.ZERO_LENGTH_ARRAY, 
+        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
             new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 5, 'v', 'a', 'l', 'u', 'e'}, false);
-        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, SecureKeyStore.ZERO_LENGTH_ARRAY, 
+        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
             new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e', 's'}, false);
       }
 

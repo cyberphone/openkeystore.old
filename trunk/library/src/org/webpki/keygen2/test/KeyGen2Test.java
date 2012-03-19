@@ -133,6 +133,7 @@ import org.webpki.tools.XML2HTMLPrinter;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.HTMLHeader;
+import org.webpki.util.ImageData;
 
 import org.webpki.xml.XMLSchemaCache;
 import org.webpki.xml.XMLObjectWrapper;
@@ -189,6 +190,8 @@ public class KeyGen2Test
     boolean encryption_key;
     
     boolean set_private_key;
+    
+    boolean set_logotype;
     
     boolean encrypted_extension;
     
@@ -1013,6 +1016,10 @@ public class KeyGen2Test
               {
                 kp.addEncryptedExtension ("http://host/ee", server_sess_key.encrypt (new byte[]{0,5}));
               }
+            if (set_logotype)
+              {
+                kp.addLogotype (KeyGen2URIs.LOGOTYPES.CARD, new ImageData (new byte[]{8,6,4,4}, "image/png"));
+              }
             if (export_protection != null)
               {
                 kp.setExportProtection (export_protection);
@@ -1293,13 +1300,14 @@ public class KeyGen2Test
             writeOption ("Delete Protection", delete_protection != null);
             writeOption ("Export Protection", export_protection != null);
             writeOption ("Private Key Import", set_private_key);
-            writeOption ("Updatable session", updatable);
+            writeOption ("Logotype Option", set_logotype);
+            writeOption ("Updatable Session", updatable);
             writeOption ("CloneKeyProtection", clone_key_protection != null);
             writeOption ("UpdateKey", update_key != null);
             writeOption ("DeleteKey", delete_key != null);
             writeOption ("UnlockKey", plain_unlock_key != null);
             writeOption ("ECC KMK", ecc_kmk);
-            writeOption ("Multiple keys", two_keys);
+            writeOption ("Multiple Keys", two_keys);
             writeOption ("HTTPS server certificate", https);
             server = new Server ();
             client = new Client ();
@@ -1472,6 +1480,14 @@ public class KeyGen2Test
       }
 
     @Test
+    public void Logotype () throws Exception
+      {
+        Doer doer = new Doer ();
+        set_logotype = true;
+        doer.perform ();
+      }
+
+   @Test
     public void ImportSymmetricKey () throws Exception
       {
         Doer doer = new Doer ();

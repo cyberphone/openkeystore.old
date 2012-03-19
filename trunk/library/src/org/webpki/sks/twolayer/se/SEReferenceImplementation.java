@@ -1586,7 +1586,7 @@ public class SEReferenceImplementation
                                                 X509Certificate ee_certificate,
                                                 String type,
                                                 byte sub_type,
-                                                byte[] qualifier,
+                                                byte[] bin_qualifier,
                                                 byte[] extension_data,
                                                 byte[] mac) throws SKSException
       {
@@ -1606,7 +1606,7 @@ public class SEReferenceImplementation
                                                        SecureKeyStore.METHOD_ADD_EXTENSION);
             verifier.addString (type);
             verifier.addByte (sub_type);
-            verifier.addArray (qualifier);
+            verifier.addArray (bin_qualifier);
             verifier.addBlob (extension_data);
             verifier.verify (mac);
           }

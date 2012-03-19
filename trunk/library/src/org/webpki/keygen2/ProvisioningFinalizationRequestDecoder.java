@@ -124,9 +124,9 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         public abstract byte getSubType ();
         
-        public byte[] getQualifier () throws IOException
+        public String getQualifier () throws IOException
           {
-            return SecureKeyStore.ZERO_LENGTH_ARRAY;
+            return "";
           }
         
         public abstract byte[] getExtensionData () throws IOException;
@@ -264,6 +264,12 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
             return SecureKeyStore.SUB_TYPE_LOGOTYPE;
           }
   
+        @Override
+        public String getQualifier ()
+          {
+            return mime_type;
+          }
+
         @Override
         public byte[] getExtensionData () throws IOException
           {

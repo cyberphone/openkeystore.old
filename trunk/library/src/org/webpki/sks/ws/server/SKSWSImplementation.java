@@ -840,7 +840,7 @@ public class SKSWSImplementation
                               @WebParam(name="SubType", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               byte sub_type,
                               @WebParam(name="Qualifier", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                              byte[] qualifier,
+                              String qualifier,
                               @WebParam(name="ExtensionData", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                               byte[] extension_data,
                               @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -1191,7 +1191,7 @@ public class SKSWSImplementation
                               @WebParam(name="SubType", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                               Holder<Byte> sub_type,
                               @WebParam(name="Qualifier", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                              Holder<byte[]> qualifier,
+                              Holder<String> qualifier,
                               @WebParam(name="ExtensionData", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                               Holder<byte[]> extension_data)
     throws SKSException
