@@ -1366,15 +1366,14 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Create ClientSessionID.  The SE adds up to 31 random (but valid) characters
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] random = new byte[SecureKeyStore.MAX_LENGTH_ID_TYPE - 1];
+        byte[] random = new byte[SecureKeyStore.MAX_LENGTH_ID_TYPE - tee_client_session_id_prefix.length ()];
         new SecureRandom ().nextBytes (random);
         StringBuffer buffer = new StringBuffer (tee_client_session_id_prefix);
-        int i = 0;
-        while (i < SecureKeyStore.MAX_LENGTH_ID_TYPE - 1)
+        for (int i = 0; i < random.length; i++)
           {
-            buffer.append (MODIFIED_BASE64[random[i++] & 0x3F]);
+            buffer.append (MODIFIED_BASE64[random[i] & 0x3F]);
           }
-        String client_session_id = buffer.toString ().substring (0, SecureKeyStore.MAX_LENGTH_ID_TYPE);
+        String client_session_id = buffer.toString ();
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Prepare for the big crypto...
@@ -1482,6 +1481,14 @@ public class SEReferenceImplementation
             UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
 
             ///////////////////////////////////////////////////////////////////////////////////
+            // Check for key length errors
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (private_key.length > (SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + AES_CBC_PKCS5_PADDING))
+              {
+                abort ("Private key: " + id + " exceeds " + SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + " bytes");
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
             // Verify incoming MAC
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder verifier = getEECertMacBuilder (unwrapped_session_key,
@@ -1542,6 +1549,14 @@ public class SEReferenceImplementation
             UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
 
             ///////////////////////////////////////////////////////////////////////////////////
+            // Check for key length errors
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (symmetric_key.length > (SecureKeyStore.MAX_LENGTH_SYMMETRIC_KEY + AES_CBC_PKCS5_PADDING))
+              {
+                abort ("Symmetric key: " + id + " exceeds " + SecureKeyStore.MAX_LENGTH_SYMMETRIC_KEY + " bytes");
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
             // Verify incoming MAC
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder verifier = getEECertMacBuilder (unwrapped_session_key,
@@ -1595,6 +1610,23 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
 
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check for length errors
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (type.length () == 0 || type.length () >  SecureKeyStore.MAX_LENGTH_URI)
+          {
+            abort ("URI length error: " + type.length ());
+          }
+        if (extension_data.length > (sub_type == SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION ? 
+                            SecureKeyStore.MAX_LENGTH_EXTENSION_DATA + AES_CBC_PKCS5_PADDING : SecureKeyStore.MAX_LENGTH_EXTENSION_DATA))
+          {
+            abort ("Extension data exceeds " + SecureKeyStore.MAX_LENGTH_EXTENSION_DATA + " bytes");
+          }
+        if (((sub_type == SecureKeyStore.SUB_TYPE_LOGOTYPE) ^ (bin_qualifier.length != 0)) ||
+            bin_qualifier.length > SecureKeyStore.MAX_LENGTH_QUALIFIER)
+          {
+            abort ("\"Qualifier\" length error");
+          }
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////

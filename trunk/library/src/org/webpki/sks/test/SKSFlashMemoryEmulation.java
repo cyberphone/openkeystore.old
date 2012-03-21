@@ -2849,7 +2849,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         ///////////////////////////////////////////////////////////////////////////////////
         if (private_key.length > (MAX_LENGTH_CRYPTO_DATA + AES_CBC_PKCS5_PADDING))
           {
-            key_entry.owner.abort ("Private key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
+            key_entry.owner.abort ("Private key: " + key_entry.id + " exceeds " + MAX_LENGTH_CRYPTO_DATA + " bytes");
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
