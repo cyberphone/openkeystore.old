@@ -478,6 +478,34 @@ public class SEReferenceImplementation
         throw new SKSException (e, SKSException.ERROR_CRYPTO);
       }
   
+    static void checkIDSyntax (String identifier, String symbolic_name) throws SKSException
+      {
+        boolean flag = false;
+        if (identifier.length () == 0 || identifier.length () > SecureKeyStore.MAX_LENGTH_ID_TYPE)
+          {
+            flag = true;
+          }
+        else for (int i = 0; i < identifier.length (); i++)
+          {
+            char c = identifier.charAt (i);
+            /////////////////////////////////////////////////
+            // The restricted XML NCName
+            /////////////////////////////////////////////////
+            if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && c != '_')
+              {
+                if (i == 0 || ((c < '0' || c > '9') && c != '-' && c != '.'))
+                  {
+                    flag = true;
+                    break;
+                  }
+              }
+          }
+        if (flag)
+          {
+            abort ("Malformed \"" + symbolic_name + "\" : " + identifier);
+          }
+      }
+
     static void checkECKeyCompatibility (ECKey ec_key, String key_id) throws SKSException
       {
         ECParameterSpec ec = ec_key.getParams ();
@@ -1282,6 +1310,12 @@ public class SEReferenceImplementation
         UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
         
         ///////////////////////////////////////////////////////////////////////////////////
+        // Check ID syntax
+        ///////////////////////////////////////////////////////////////////////////////////
+        checkIDSyntax (client_session_id, "ClientSessionID");
+        checkIDSyntax (server_session_id, "ServerSessionID");
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION);
@@ -1335,9 +1369,15 @@ public class SEReferenceImplementation
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
+        // Check ID syntax
+        ///////////////////////////////////////////////////////////////////////////////////
+        checkIDSyntax (tee_client_session_id_prefix, "TEEClientSessionIDPrefix");
+        checkIDSyntax (server_session_id, "ServerSessionID");
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Check TEEClientSessionIDPrefix
         ///////////////////////////////////////////////////////////////////////////////////
-        if (tee_client_session_id_prefix.length () == 0 || tee_client_session_id_prefix.length () >  MAX_LENGTH_TEE_CS_PREFIX)
+        if (tee_client_session_id_prefix.length () >  MAX_LENGTH_TEE_CS_PREFIX)
           {
             abort ("\"TEEClientSessionIDPrefix\" length error: " + tee_client_session_id_prefix.length ());
           }
@@ -1481,6 +1521,11 @@ public class SEReferenceImplementation
             UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
 
             ///////////////////////////////////////////////////////////////////////////////////
+            // Check ID syntax
+            ///////////////////////////////////////////////////////////////////////////////////
+            checkIDSyntax (id, "ID");
+
+            ///////////////////////////////////////////////////////////////////////////////////
             // Check for key length errors
             ///////////////////////////////////////////////////////////////////////////////////
             if (private_key.length > (SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + AES_CBC_PKCS5_PADDING))
@@ -1549,6 +1594,11 @@ public class SEReferenceImplementation
             UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
 
             ///////////////////////////////////////////////////////////////////////////////////
+            // Check ID syntax
+            ///////////////////////////////////////////////////////////////////////////////////
+            checkIDSyntax (id, "ID");
+
+            ///////////////////////////////////////////////////////////////////////////////////
             // Check for key length errors
             ///////////////////////////////////////////////////////////////////////////////////
             if (symmetric_key.length > (SecureKeyStore.MAX_LENGTH_SYMMETRIC_KEY + AES_CBC_PKCS5_PADDING))
@@ -1605,30 +1655,36 @@ public class SEReferenceImplementation
                                                 byte[] extension_data,
                                                 byte[] mac) throws SKSException
       {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Retrieve session key
-        ///////////////////////////////////////////////////////////////////////////////////
-        UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check for length errors
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (type.length () == 0 || type.length () >  SecureKeyStore.MAX_LENGTH_URI)
-          {
-            abort ("URI length error: " + type.length ());
-          }
-        if (extension_data.length > (sub_type == SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION ? 
-                            SecureKeyStore.MAX_LENGTH_EXTENSION_DATA + AES_CBC_PKCS5_PADDING : SecureKeyStore.MAX_LENGTH_EXTENSION_DATA))
-          {
-            abort ("Extension data exceeds " + SecureKeyStore.MAX_LENGTH_EXTENSION_DATA + " bytes");
-          }
-        if (((sub_type == SecureKeyStore.SUB_TYPE_LOGOTYPE) ^ (bin_qualifier.length != 0)) ||
-            bin_qualifier.length > SecureKeyStore.MAX_LENGTH_QUALIFIER)
-          {
-            abort ("\"Qualifier\" length error");
-          }
         try
           {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Retrieve session key
+            ///////////////////////////////////////////////////////////////////////////////////
+            UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check ID syntax
+            ///////////////////////////////////////////////////////////////////////////////////
+            checkIDSyntax (id, "ID");
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check for length errors
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (type.length () == 0 || type.length () >  SecureKeyStore.MAX_LENGTH_URI)
+              {
+                abort ("URI length error: " + type.length ());
+              }
+            if (extension_data.length > (sub_type == SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION ? 
+                                SecureKeyStore.MAX_LENGTH_EXTENSION_DATA + AES_CBC_PKCS5_PADDING : SecureKeyStore.MAX_LENGTH_EXTENSION_DATA))
+              {
+                abort ("Extension data exceeds " + SecureKeyStore.MAX_LENGTH_EXTENSION_DATA + " bytes");
+              }
+            if (((sub_type == SecureKeyStore.SUB_TYPE_LOGOTYPE) ^ (bin_qualifier.length != 0)) ||
+                bin_qualifier.length > SecureKeyStore.MAX_LENGTH_QUALIFIER)
+              {
+                abort ("\"Qualifier\" length error");
+              }
+
             ///////////////////////////////////////////////////////////////////////////////////
             // Verify incoming MAC
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1641,13 +1697,20 @@ public class SEReferenceImplementation
             verifier.addArray (bin_qualifier);
             verifier.addBlob (extension_data);
             verifier.verify (mac);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Return extension data
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (sub_type == SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION)
+              {
+                return decrypt (unwrapped_session_key, extension_data);
+              }
           }
         catch (GeneralSecurityException e)
           {
             abort (e);
           }
-        return sub_type == SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION ?
-                       decrypt (unwrapped_session_key, extension_data) : extension_data.clone ();
+        return extension_data.clone ();
       }
 
     
@@ -1664,18 +1727,23 @@ public class SEReferenceImplementation
                                                     X509Certificate[] certificate_path,
                                                     byte[] mac) throws SKSException
       {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Unwrap the key to use
-        ///////////////////////////////////////////////////////////////////////////////////
-        UnwrappedKey unwrapped_key = getUnwrappedKey (os_instance_key, sealed_key);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Retrieve session key
-        ///////////////////////////////////////////////////////////////////////////////////
-        UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
-
         try
           {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Unwrap the key to use
+            ///////////////////////////////////////////////////////////////////////////////////
+            UnwrappedKey unwrapped_key = getUnwrappedKey (os_instance_key, sealed_key);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Retrieve session key
+            ///////////////////////////////////////////////////////////////////////////////////
+            UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check ID syntax
+            ///////////////////////////////////////////////////////////////////////////////////
+            checkIDSyntax (id, "ID");
+
             ///////////////////////////////////////////////////////////////////////////////////
             // Verify key consistency 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1738,104 +1806,109 @@ public class SEReferenceImplementation
                                            String[] endorsed_algorithms,
                                            byte[] mac) throws SKSException
       {
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Retrieve session key
-        ///////////////////////////////////////////////////////////////////////////////////
-        UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Verify incoming MAC
-        ///////////////////////////////////////////////////////////////////////////////////
-        MacBuilder verifier = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.METHOD_CREATE_KEY_ENTRY);
-        verifier.addString (id);
-        verifier.addString (algorithm);
-        verifier.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
-        verifier.addString (pin_policy_id);
-        byte[] decrypted_pin_value = null;
-        if (encrypted_pin_value == null)
-          {
-            verifier.addString (SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE);
-          }
-        else
-          {
-            verifier.addArray (encrypted_pin_value);
-            decrypted_pin_value = decrypt (unwrapped_session_key, encrypted_pin_value);
-          }
-        verifier.addBool (enable_pin_caching);
-        verifier.addByte (biometric_protection);
-        verifier.addByte (export_protection);
-        verifier.addByte (delete_protection);
-        verifier.addByte (app_usage);
-        verifier.addString (friendly_name == null ? "" : friendly_name);
-        verifier.addArray (key_specifier);
-        String prev_alg = "\0";
-        for (String endorsed_algorithm : endorsed_algorithms)
-          {
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Check that the algorithms are sorted and known
-            ///////////////////////////////////////////////////////////////////////////////////
-            if (prev_alg.compareTo (endorsed_algorithm) >= 0)
-              {
-                abort ("Duplicate or incorrectly sorted algorithm: " + endorsed_algorithm);
-              }
-            Algorithm alg = supported_algorithms.get (endorsed_algorithm);
-            if (alg == null || alg.mask == 0)
-              {
-                abort ("Unsupported algorithm: " + endorsed_algorithm);
-              }
-            if ((alg.mask & ALG_NONE) != 0 && endorsed_algorithms.length > 1)
-              {
-                abort ("Algorithm must be alone: " + endorsed_algorithm);
-              }
-            verifier.addString (prev_alg = endorsed_algorithm);
-          }
-        verifier.verify (mac);
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Decode key algorithm specifier
-        ///////////////////////////////////////////////////////////////////////////////////
-        AlgorithmParameterSpec alg_par_spec = null;
-        if (key_specifier == null || key_specifier.length == 0)
-          {
-            abort ("Empty \"KeySpecifier\"");
-          }
-        if (key_specifier[0] == SecureKeyStore.KEY_ALGORITHM_TYPE_RSA)
-          {
-            if (key_specifier.length != 7)
-              {
-                abort ("Incorrectly formatted RSA \"KeySpecifier\"");
-              }
-            int rsa_key_size = getShort (key_specifier, 1);
-            BigInteger exponent = BigInteger.valueOf ((getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5));
-            if (!SKS_RSA_EXPONENT_SUPPORT && exponent.intValue () != 0)
-              {
-                abort ("Explicit RSA exponent setting not supported by this device");
-              }
-            checkRSAKeyCompatibility (rsa_key_size, exponent, "\"KeySpecifier\"");
-            alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size,
-                                                       exponent.intValue () == 0 ? RSAKeyGenParameterSpec.F4 : exponent);
-          }
-        else if (key_specifier[0] == SecureKeyStore.KEY_ALGORITHM_TYPE_EC)
-          {
-            StringBuffer ec_uri = new StringBuffer ();
-            for (int i = 1; i < key_specifier.length; i++)
-              {
-                ec_uri.append ((char) key_specifier[i]);
-              }
-            Algorithm alg = supported_algorithms.get (ec_uri.toString ());
-            if (alg == null || (alg.mask & ALG_EC_CRV) == 0)
-              {
-                abort ("Unsupported eliptic curve: " + ec_uri + " in \"KeySpecifier\"");
-              }
-            alg_par_spec = new ECGenParameterSpec (alg.jce_name);
-          }
-        else
-          {
-            abort ("Unknown key type in \"KeySpecifier\"");
-          }
-
         try
           {
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Retrieve session key
+            ///////////////////////////////////////////////////////////////////////////////////
+            UnwrappedSessionKey unwrapped_session_key = getUnwrappedSessionKey (os_instance_key, se_provisioning_state);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check ID syntax
+            ///////////////////////////////////////////////////////////////////////////////////
+            checkIDSyntax (id, "ID");
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Verify incoming MAC
+            ///////////////////////////////////////////////////////////////////////////////////
+            MacBuilder verifier = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.METHOD_CREATE_KEY_ENTRY);
+            verifier.addString (id);
+            verifier.addString (algorithm);
+            verifier.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
+            verifier.addString (pin_policy_id);
+            byte[] decrypted_pin_value = null;
+            if (encrypted_pin_value == null)
+              {
+                verifier.addString (SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE);
+              }
+            else
+              {
+                verifier.addArray (encrypted_pin_value);
+                decrypted_pin_value = decrypt (unwrapped_session_key, encrypted_pin_value);
+              }
+            verifier.addBool (enable_pin_caching);
+            verifier.addByte (biometric_protection);
+            verifier.addByte (export_protection);
+            verifier.addByte (delete_protection);
+            verifier.addByte (app_usage);
+            verifier.addString (friendly_name == null ? "" : friendly_name);
+            verifier.addArray (key_specifier);
+            String prev_alg = "\0";
+            for (String endorsed_algorithm : endorsed_algorithms)
+              {
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Check that the algorithms are sorted and known
+                ///////////////////////////////////////////////////////////////////////////////////
+                if (prev_alg.compareTo (endorsed_algorithm) >= 0)
+                  {
+                    abort ("Duplicate or incorrectly sorted algorithm: " + endorsed_algorithm);
+                  }
+                Algorithm alg = supported_algorithms.get (endorsed_algorithm);
+                if (alg == null || alg.mask == 0)
+                  {
+                    abort ("Unsupported algorithm: " + endorsed_algorithm);
+                  }
+                if ((alg.mask & ALG_NONE) != 0 && endorsed_algorithms.length > 1)
+                  {
+                    abort ("Algorithm must be alone: " + endorsed_algorithm);
+                  }
+                verifier.addString (prev_alg = endorsed_algorithm);
+              }
+            verifier.verify (mac);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Decode key algorithm specifier
+            ///////////////////////////////////////////////////////////////////////////////////
+            AlgorithmParameterSpec alg_par_spec = null;
+            if (key_specifier == null || key_specifier.length == 0)
+              {
+                abort ("Empty \"KeySpecifier\"");
+              }
+            if (key_specifier[0] == SecureKeyStore.KEY_ALGORITHM_TYPE_RSA)
+              {
+                if (key_specifier.length != 7)
+                  {
+                    abort ("Incorrectly formatted RSA \"KeySpecifier\"");
+                  }
+                int rsa_key_size = getShort (key_specifier, 1);
+                BigInteger exponent = BigInteger.valueOf ((getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5));
+                if (!SKS_RSA_EXPONENT_SUPPORT && exponent.intValue () != 0)
+                  {
+                    abort ("Explicit RSA exponent setting not supported by this device");
+                  }
+                checkRSAKeyCompatibility (rsa_key_size, exponent, "\"KeySpecifier\"");
+                alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size,
+                                                           exponent.intValue () == 0 ? RSAKeyGenParameterSpec.F4 : exponent);
+              }
+            else if (key_specifier[0] == SecureKeyStore.KEY_ALGORITHM_TYPE_EC)
+              {
+                StringBuffer ec_uri = new StringBuffer ();
+                for (int i = 1; i < key_specifier.length; i++)
+                  {
+                    ec_uri.append ((char) key_specifier[i]);
+                  }
+                Algorithm alg = supported_algorithms.get (ec_uri.toString ());
+                if (alg == null || (alg.mask & ALG_EC_CRV) == 0)
+                  {
+                    abort ("Unsupported eliptic curve: " + ec_uri + " in \"KeySpecifier\"");
+                  }
+                alg_par_spec = new ECGenParameterSpec (alg.jce_name);
+              }
+            else
+              {
+                abort ("Unknown key type in \"KeySpecifier\"");
+              }
+
             ///////////////////////////////////////////////////////////////////////////////////
             // At last, generate the desired key-pair
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1897,6 +1970,11 @@ public class SEReferenceImplementation
                                         byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
+        // Check ID syntax
+        ///////////////////////////////////////////////////////////////////////////////////
+        checkIDSyntax (id, "ID");
+
+        ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = getMacBuilderForMethodCall (getUnwrappedSessionKey (os_instance_key, se_provisioning_state), 
@@ -1938,6 +2016,11 @@ public class SEReferenceImplementation
         // Get value
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] decrypted_puk_value = decrypt (unwrapped_session_key, puk_value);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Check ID syntax
+        ///////////////////////////////////////////////////////////////////////////////////
+        checkIDSyntax (id, "ID");
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify incoming MAC
