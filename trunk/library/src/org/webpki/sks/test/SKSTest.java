@@ -326,7 +326,7 @@ public class SKSTest
           }
       }
 
-    Extension extensionTest (byte sub_type, String qualifier, byte[] extension_data, boolean pass) throws Exception
+    Extension extensionTest (byte sub_type, String qualifier, byte[] extension_data, String error) throws Exception
       {
         ProvSess sess = new ProvSess (device);
         GenKey key = sess.createECKey ("Key.1",
@@ -338,7 +338,7 @@ public class SKSTest
           {
             if (qualifier == null) qualifier = "";
             key.addExtension (type, sub_type, qualifier, extension_data);
-            assertTrue ("Should pass", pass);
+            assertTrue ("Should pass", error == null);
             sess.closeSession ();
             Extension ext = device.sks.getExtension (key.key_handle, type);
             assertTrue ("Ext data", ArrayUtil.compare (ext.getExtensionData (), extension_data));
@@ -381,6 +381,7 @@ public class SKSTest
                     catch (SKSException e)
                       {
                         assertFalse ("Read only", prop.isWritable ());
+                        checkException (e, "\"Property\" not writable: " + prop.getName ());
                       }
                   }
                 assertTrue ("Writables", writes == writables);
@@ -389,7 +390,8 @@ public class SKSTest
           }
         catch (SKSException e)
           {
-            assertFalse ("Shouldn't pass", pass);
+            assertFalse ("Shouldn't fail=" + e.getMessage (), error == null);
+            checkException (e, error);
           }
         return null;
       }
@@ -3197,24 +3199,26 @@ public class SKSTest
             checkException (e, "Duplicate \"Type\" : " + type);
           }
         byte[] ext_data = {4,6,2,9,4};
-        extensionTest (SecureKeyStore.SUB_TYPE_EXTENSION, null, ext_data, true);
-        extensionTest (SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION, null, ext_data, true);
-        extensionTest (SecureKeyStore.SUB_TYPE_LOGOTYPE, null, ext_data, false);
-        extensionTest (SecureKeyStore.SUB_TYPE_LOGOTYPE, "image/gif", ext_data, true);
-        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, ext_data, false);
+        extensionTest (SecureKeyStore.SUB_TYPE_EXTENSION, null, ext_data, null);
+        extensionTest (SecureKeyStore.SUB_TYPE_EXTENSION, null, new byte[device.device_info.getExtensionDataSize ()], null);
+        extensionTest (SecureKeyStore.SUB_TYPE_EXTENSION, null, new byte[device.device_info.getExtensionDataSize () + 1], "Extension data exceeds " + device.device_info.getExtensionDataSize () + " bytes");
+        extensionTest (SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION, null, ext_data, null);
+        extensionTest (SecureKeyStore.SUB_TYPE_LOGOTYPE, null, ext_data, "\"Qualifier\" length error");
+        extensionTest (SecureKeyStore.SUB_TYPE_LOGOTYPE, "image/gif", ext_data, null);
+        extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, ext_data, "\"PropertyBag\" format error: http://example.com/define");
         Property[] props = extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
-            new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e'}, true).getProperties ();
+            new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e'}, null).getProperties ();
         assertTrue ("Number of props", props.length == 1);
         assertTrue ("Prop value", props[0].getName ().equals ("name") && props[0].getValue ().equals ("value"));
         extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
             new byte[]{0, 4, 'n', 'a', 'm', 'e', 1, 0, 5, 'v', 'a', 'l', 'u', 'e',
-                       0, 4, 'l', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e'}, true);
+                       0, 4, 'l', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e'}, null);
         extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
-            new byte[]{0, 4, 'n', 'a', 'm', 'e', 2, 0, 5, 'v', 'a', 'l', 'u', 'e'}, false);
+            new byte[]{0, 4, 'n', 'a', 'm', 'e', 2, 0, 5, 'v', 'a', 'l', 'u', 'e'}, "\"PropertyBag\" format error: http://example.com/define");
         extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
-            new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 5, 'v', 'a', 'l', 'u', 'e'}, false);
+            new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 5, 'v', 'a', 'l', 'u', 'e'}, "\"PropertyBag\" format error: http://example.com/define");
         extensionTest (SecureKeyStore.SUB_TYPE_PROPERTY_BAG, null, 
-            new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e', 's'}, false);
+            new byte[]{0, 4, 'n', 'a', 'm', 'e', 0, 0, 5, 'v', 'a', 'l', 'u', 'e', 's'}, "\"PropertyBag\" format error: http://example.com/define");
       }
 
     @Test
@@ -3243,6 +3247,24 @@ public class SKSTest
         catch (SKSException e)
           {
             checkException (e, "MAC error");
+          }
+      }
+    
+    @Test
+    public void test76 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        try
+          {
+            sess.createECKey ("Key.1",
+                              null /* pin_value */,
+                              null,
+                              AppUsage.AUTHENTICATION).setCertificate (device.device_info.getCryptoDataSize ());
+            fail ("Shouldn't pass");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Certificate for: Key.1 exceeds " + device.device_info.getCryptoDataSize () + " bytes");
           }
       }
   }

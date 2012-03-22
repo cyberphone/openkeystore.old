@@ -59,6 +59,20 @@ public class GenKey
     X509Certificate[] cert_path;
     ProvSess prov_sess;
     
+    public GenKey setCertificate (int length) throws IOException, GeneralSecurityException
+      {
+        StringBuffer dn = new StringBuffer ("CN=");
+        for (int i = 1; i < length; i++)
+          {
+            if (i % 64 == 0)
+              {
+                dn.append (",CN=");
+              }
+            dn.append ('Y');
+          }
+        return setCertificate (dn.toString (), public_key);
+      }
+
     public GenKey setCertificate (String dn) throws IOException, GeneralSecurityException
       {
         return setCertificate (dn, public_key);
