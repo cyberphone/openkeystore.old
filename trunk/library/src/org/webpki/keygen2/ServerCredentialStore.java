@@ -738,6 +738,22 @@ public class ServerCredentialStore implements Serializable
           }
 
 
+        boolean trust_anchor;
+        boolean trust_anchor_set;
+        
+        public KeyProperties setTrustAnchor (boolean flag)
+          {
+            trust_anchor = flag;
+            trust_anchor_set = true;
+            return this;
+          }
+        
+        public boolean getTrustAnchorFlag ()
+          {
+            return trust_anchor;
+          }
+
+        
         BiometricProtection biometric_protection;
         
         public KeyProperties setBiometricProtection (BiometricProtection biometric_protection) throws IOException

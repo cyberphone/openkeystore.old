@@ -44,11 +44,14 @@ import org.webpki.sks.ProvisioningSession;
 import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
 
+import org.webpki.sks.twolayer.se.SECertificateData;
+import org.webpki.sks.twolayer.se.SEExtensionData;
 import org.webpki.sks.twolayer.se.SEKeyData;
-import org.webpki.sks.twolayer.se.SealedKey;
+import org.webpki.sks.twolayer.se.SEPUKData;
+import org.webpki.sks.twolayer.se.SEPrivateKeyData;
 import org.webpki.sks.twolayer.se.SEProvisioningData;
-import org.webpki.sks.twolayer.se.SEProvisioningState;
 import org.webpki.sks.twolayer.se.SEReferenceImplementation;
+import org.webpki.sks.twolayer.se.SESymmetricKeyData;
 
 /*
  *                          ################################################
@@ -71,7 +74,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     // SKS version and configuration data
     /////////////////////////////////////////////////////////////////////////////////////////////
     static final String SKS_VENDOR_NAME                    = "WebPKI.org";
-    static final String SKS_VENDOR_DESCRIPTION             = "SKS Reference - Java TEE Edition";
+    static final String SKS_VENDOR_DESCRIPTION             = "SKS TEE/SE RI - TEE Module";
     static final String SKS_UPDATE_URL                     = null;  // Change here to test or disable
     
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +168,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
 
         PublicKey public_key;     // In this implementation overwritten by "setCertificatePath"
 
-        SealedKey sealed_key;
+        byte[] sealed_key;
 
         X509Certificate[] certificate_path;
 
@@ -502,7 +505,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         int session_life_time;
         short session_key_limit;
 
-        SEProvisioningState se_provisioning_state;
+        byte[] provisioning_state;
 
         Provisioning ()
           {
@@ -1009,17 +1012,17 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         X509Certificate ee_certificate = new_key.getEECertificate ();
         try
           {
-            SEReferenceImplementation.validateTargetKey2 (OS_INSTANCE_KEY,
-                                                          target_key_entry.getEECertificate (),
-                                                          target_key_handle,
-                                                          target_key_entry.owner.key_management_key,
-                                                          ee_certificate,
-                                                          new_key.sealed_key,
-                                                          provisioning.privacy_enabled,
-                                                          update ? METHOD_POST_UPDATE_KEY : METHOD_POST_CLONE_KEY_PROTECTION,
-                                                          authorization,
-                                                          provisioning.se_provisioning_state,
-                                                          mac);
+            provisioning.provisioning_state = SEReferenceImplementation.validateTargetKey2 (OS_INSTANCE_KEY,
+                                                                                            target_key_entry.getEECertificate (),
+                                                                                            target_key_handle,
+                                                                                            target_key_entry.owner.key_management_key,
+                                                                                            ee_certificate,
+                                                                                            new_key.sealed_key,
+                                                                                            provisioning.privacy_enabled,
+                                                                                            update ? METHOD_POST_UPDATE_KEY : METHOD_POST_CLONE_KEY_PROTECTION,
+                                                                                            authorization,
+                                                                                            provisioning.provisioning_state,
+                                                                                            mac);
           }
         catch (SKSException e)
           {
@@ -1057,15 +1060,15 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            SEReferenceImplementation.validateTargetKey (OS_INSTANCE_KEY,
-                                                         target_key_entry.getEECertificate (),
-                                                         target_key_handle,
-                                                         target_key_entry.owner.key_management_key,
-                                                         provisioning.privacy_enabled,
-                                                         delete ? METHOD_POST_DELETE_KEY : METHOD_POST_UNLOCK_KEY,
-                                                         authorization,
-                                                         provisioning.se_provisioning_state,
-                                                         mac);
+            provisioning.provisioning_state = SEReferenceImplementation.validateTargetKey (OS_INSTANCE_KEY,
+                                                                                           target_key_entry.getEECertificate (),
+                                                                                           target_key_handle,
+                                                                                           target_key_entry.owner.key_management_key,
+                                                                                           provisioning.privacy_enabled,
+                                                                                           delete ? METHOD_POST_DELETE_KEY : METHOD_POST_UNLOCK_KEY,
+                                                                                           authorization,
+                                                                                           provisioning.provisioning_state,
+                                                                                           mac);
           }
         catch (SKSException e)
           {
@@ -1726,7 +1729,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Sign through the SE
         ///////////////////////////////////////////////////////////////////////////////////
-        return SEReferenceImplementation.executeSessionSign (OS_INSTANCE_KEY, provisioning.se_provisioning_state, data);
+        return SEReferenceImplementation.executeSessionSign (OS_INSTANCE_KEY, provisioning.provisioning_state, data);
       }
 
 
@@ -1863,7 +1866,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         try
           {
             attestation = SEReferenceImplementation.closeProvisioningAttest (OS_INSTANCE_KEY,
-                                                                             provisioning.se_provisioning_state,
+                                                                             provisioning.provisioning_state,
                                                                              provisioning.server_session_id,
                                                                              provisioning.client_session_id,
                                                                              provisioning.issuer_uri, 
@@ -2121,7 +2124,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         provisioning.key_management_key = key_management_key;
         provisioning.client_time = client_time;
         provisioning.session_life_time = session_life_time;
-        provisioning.se_provisioning_state = se_pd.se_provisioning_state;
+        provisioning.provisioning_state = se_pd.provisioning_state;
         return new ProvisioningSession (provisioning.provisioning_handle,
                                         se_pd.client_session_id,
                                         se_pd.attestation,
@@ -2194,16 +2197,18 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         X509Certificate ee_certificate = key_entry.getEECertificate ();
         try
           {
-            extension_data = SEReferenceImplementation.verifyAndGetExtension (OS_INSTANCE_KEY,
-                                                                              key_entry.owner.se_provisioning_state,
-                                                                              key_entry.sealed_key,
-                                                                              key_entry.id,
-                                                                              ee_certificate,
-                                                                              type,
-                                                                              sub_type,
-                                                                              bin_qualifier,
-                                                                              extension_data,
-                                                                              mac);
+            SEExtensionData se_extension_data = SEReferenceImplementation.verifyAndGetExtension (OS_INSTANCE_KEY,
+                                                                                                 key_entry.owner.provisioning_state,
+                                                                                                 key_entry.sealed_key,
+                                                                                                 key_entry.id,
+                                                                                                 ee_certificate,
+                                                                                                 type,
+                                                                                                 sub_type,
+                                                                                                 bin_qualifier,
+                                                                                                 extension_data,
+                                                                                                 mac);
+            key_entry.owner.provisioning_state = se_extension_data.provisioning_state;
+            extension_data = se_extension_data.extension_data;
           }
         catch (SKSException e)
           {
@@ -2255,13 +2260,15 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         X509Certificate ee_certificate = key_entry.getEECertificate ();
         try
           {
-            SEReferenceImplementation.verifyAndImportPrivateKey (OS_INSTANCE_KEY,
-                                                                 key_entry.owner.se_provisioning_state,
-                                                                 key_entry.sealed_key,
-                                                                 key_entry.id,
-                                                                 ee_certificate,
-                                                                 private_key,
-                                                                 mac);
+            SEPrivateKeyData se_private_key_data = SEReferenceImplementation.verifyAndImportPrivateKey (OS_INSTANCE_KEY,
+                                                                                                        key_entry.owner.provisioning_state,
+                                                                                                        key_entry.sealed_key,
+                                                                                                        key_entry.id,
+                                                                                                        ee_certificate,
+                                                                                                        private_key,
+                                                                                                        mac);
+            key_entry.owner.provisioning_state = se_private_key_data.provisioning_state;
+            key_entry.sealed_key = se_private_key_data.sealed_key;
           }
         catch (SKSException e)
           {
@@ -2304,13 +2311,16 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         X509Certificate ee_certificate = key_entry.getEECertificate ();
         try
           {
-            key_entry.symmetric_key_length = SEReferenceImplementation.verifyAndImportSymmetricKey (OS_INSTANCE_KEY,
-                                                                                                    key_entry.owner.se_provisioning_state,
-                                                                                                    key_entry.sealed_key,
-                                                                                                    key_entry.id,
-                                                                                                    ee_certificate,
-                                                                                                    symmetric_key,
-                                                                                                    mac);
+            SESymmetricKeyData se_symmetric_key_data = SEReferenceImplementation.verifyAndImportSymmetricKey (OS_INSTANCE_KEY,
+                                                                                                              key_entry.owner.provisioning_state,
+                                                                                                              key_entry.sealed_key,
+                                                                                                              key_entry.id,
+                                                                                                              ee_certificate,
+                                                                                                              symmetric_key,
+                                                                                                              mac);
+            key_entry.owner.provisioning_state = se_symmetric_key_data.provisioning_state;
+            key_entry.symmetric_key_length = se_symmetric_key_data.symmetric_key_length;
+            key_entry.sealed_key = se_symmetric_key_data.sealed_key;
           }
         catch (SKSException e)
           {
@@ -2339,13 +2349,15 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            SEReferenceImplementation.setAndVerifyCertificatePath (OS_INSTANCE_KEY,
-                                                                   key_entry.owner.se_provisioning_state,
-                                                                   key_entry.sealed_key,
-                                                                   key_entry.id,
-                                                                   key_entry.public_key,
-                                                                   certificate_path,
-                                                                   mac);
+            SECertificateData se_certificate_data = SEReferenceImplementation.setAndVerifyCertificatePath (OS_INSTANCE_KEY,
+                                                                                                           key_entry.owner.provisioning_state,
+                                                                                                           key_entry.sealed_key,
+                                                                                                           key_entry.id,
+                                                                                                           key_entry.public_key,
+                                                                                                           certificate_path,
+                                                                                                           mac);
+            key_entry.sealed_key = se_certificate_data.sealed_key;
+            key_entry.owner.provisioning_state = se_certificate_data.provisioning_state;
           }
         catch (SKSException e)
           {
@@ -2474,7 +2486,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         try
           {
             se_key_data = SEReferenceImplementation.createKeyPair (OS_INSTANCE_KEY,
-                                                                   provisioning.se_provisioning_state,
+                                                                   provisioning.provisioning_state,
                                                                    id,
                                                                    algorithm,
                                                                    server_seed,
@@ -2520,6 +2532,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         KeyEntry key_entry = new KeyEntry (provisioning, id);
         provisioning.names.put (id, true); // Referenced (for "closeProvisioningSession")
+        provisioning.provisioning_state = se_key_data.provisioning_state;
         key_entry.pin_policy = pin_policy;
         key_entry.friendly_name = friendly_name;
         key_entry.pin_value = pin_value;
@@ -2608,20 +2621,20 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            SEReferenceImplementation.verifyPINPolicy (OS_INSTANCE_KEY,
-                                                       provisioning.se_provisioning_state,
-                                                       id,
-                                                       puk_policy_id,
-                                                       user_defined,
-                                                       user_modifiable,
-                                                       format,
-                                                       retry_limit,
-                                                       grouping,
-                                                       pattern_restrictions,
-                                                       min_length,
-                                                       max_length,
-                                                       input_method,
-                                                       mac);
+            provisioning.provisioning_state = SEReferenceImplementation.verifyPINPolicy (OS_INSTANCE_KEY,
+                                                                                         provisioning.provisioning_state,
+                                                                                         id,
+                                                                                         puk_policy_id,
+                                                                                         user_defined,
+                                                                                         user_modifiable,
+                                                                                         format,
+                                                                                         retry_limit,
+                                                                                         grouping,
+                                                                                         pattern_restrictions,
+                                                                                         min_length,
+                                                                                         max_length,
+                                                                                         input_method,
+                                                                                         mac);
           }
         catch (SKSException e)
           {
@@ -2676,13 +2689,15 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         byte[] decrypted_puk_value = null;
         try
           {
-            decrypted_puk_value = SEReferenceImplementation.getPUKValue (OS_INSTANCE_KEY,
-                                                                         provisioning.se_provisioning_state,
-                                                                         id,
-                                                                         puk_value,
-                                                                         format,
-                                                                         retry_limit,
-                                                                         mac);
+            SEPUKData se_puk_data = SEReferenceImplementation.getPUKValue (OS_INSTANCE_KEY,
+                                                                           provisioning.provisioning_state,
+                                                                           id,
+                                                                           puk_value,
+                                                                           format,
+                                                                           retry_limit,
+                                                                           mac);
+            provisioning.provisioning_state = se_puk_data.provisioning_state;
+            decrypted_puk_value = se_puk_data.puk_value;
           }
         catch (SKSException e)
           {

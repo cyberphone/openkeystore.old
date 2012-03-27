@@ -144,6 +144,10 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
               {
                 wr.addChildElement (CERTIFICATE_PATH_ELEM);
                 wr.setStringAttribute (ID_ATTR, key.id);
+                if (key.trust_anchor_set)
+                  {
+                    wr.setBooleanAttribute (TRUST_ANCHOR_ATTR, key.trust_anchor);
+                  }
 
                 ////////////////////////////////////////////////////////////////////////
                 // Always: the X509 Certificate(s)

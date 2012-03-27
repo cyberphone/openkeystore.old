@@ -16,15 +16,9 @@
  */
 package org.webpki.sks.twolayer.se;
 
-import java.security.interfaces.ECPublicKey;
-
-public class SEProvisioningData
+public class SECertificateData
   {
+    public byte[] sealed_key;
+    
     public byte[] provisioning_state;
-
-    public String client_session_id;
-
-    public byte[] attestation;
-
-    public ECPublicKey client_ephemeral_key;
   }

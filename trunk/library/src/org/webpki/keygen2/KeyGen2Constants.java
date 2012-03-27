@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20120304#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20120327#";
 
     String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
 
@@ -138,6 +138,8 @@ public interface KeyGen2Constants
     String SUBMIT_URL_ATTR                           = "SubmitURL";
 
     String SUCCESS_URL_ATTR                          = "SuccessURL";
+
+    String TRUST_ANCHOR_ATTR                         = "TrustAnchor";
 
     String TYPE_ATTR                                 = "Type";
 

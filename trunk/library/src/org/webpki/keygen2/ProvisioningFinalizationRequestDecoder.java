@@ -293,6 +293,8 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         byte[] private_key_mac;
 
         byte[] mac;
+        
+        boolean trust_anchor;
 
         Vector<Extension> extensions = new Vector<Extension> ();
         
@@ -307,9 +309,18 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
             rd.getNext (CERTIFICATE_PATH_ELEM);
             id = ah.getString (ID_ATTR);
             mac = ah.getBinary (MAC_ATTR);
+            trust_anchor = ah.getBooleanConditional (TRUST_ANCHOR_ATTR);
             rd.getChild ();
 
-            certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);
+            certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);            
+
+            if (trust_anchor)
+              {
+                if (certificate_path[certificate_path.length - 1].getBasicConstraints () < 0)
+                  {
+                    throw new IOException ("The \"TrustAnchor\" option requires a CA certificate");
+                  }
+              }
 
             if (rd.hasNext (SYMMETRIC_KEY_ELEM))
               {
@@ -414,6 +425,11 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         public PostOperation getPostOperation ()
           {
             return post_operation;
+          }
+
+        public boolean getTrustAnchorFlag ()
+          {
+            return trust_anchor;
           }
 
       }

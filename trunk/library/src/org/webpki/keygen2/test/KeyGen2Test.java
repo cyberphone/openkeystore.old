@@ -31,6 +31,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
 
+import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -194,6 +195,8 @@ public class KeyGen2Test
     boolean set_logotype;
     
     boolean encrypted_extension;
+    
+    boolean set_trust_anchor;
     
     boolean https;  // Use server-cert
     
@@ -1127,14 +1130,14 @@ public class KeyGen2Test
                         gen_private_key = kp.getPrivate ();
                       }
     
-                    X509Certificate certificate = 
-                        new CA ().createCert (cert_spec,
-                                              DistinguishedName.subjectDN ((X509Certificate)DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey")),
-                                              new BigInteger (String.valueOf (new Date ().getTime ())),
-                                              start.getTime (),
-                                              end.getTime (), 
-                                              SignatureAlgorithms.RSA_SHA256,
-                                              new AsymKeySignerInterface ()
+                    Vector<X509Certificate> cert_path = new Vector<X509Certificate> ();
+                    cert_path.add (new CA ().createCert (cert_spec,
+                                                         DistinguishedName.subjectDN ((X509Certificate)DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey")),
+                                                         new BigInteger (String.valueOf (new Date ().getTime ())),
+                                                         start.getTime (),
+                                                         end.getTime (), 
+                                                         SignatureAlgorithms.RSA_SHA256,
+                                                         new AsymKeySignerInterface ()
                         {
     
                           @Override
@@ -1152,8 +1155,18 @@ public class KeyGen2Test
                               return signer.sign ();
                             }
                           
-                        }, pub_key);
-                    key_prop.setCertificatePath (new X509Certificate[]{certificate});
+                        }, pub_key));
+
+                    if (set_trust_anchor)
+                      {
+                        for (Certificate certificate : DemoKeyStore.getSubCAKeyStore ().getCertificateChain ("mykey"))
+                          {
+                            cert_path.add ((X509Certificate) certificate);
+                          }
+                        key_prop.setTrustAnchor (true);
+                      }
+
+                    key_prop.setCertificatePath (cert_path.toArray (new X509Certificate[0]));
     
                     if (temp_set_private_key)
                       {
@@ -1309,6 +1322,7 @@ public class KeyGen2Test
             writeOption ("ECC KMK", ecc_kmk);
             writeOption ("Multiple Keys", two_keys);
             writeOption ("HTTPS server certificate", https);
+            writeOption ("TrustAnchor option", set_trust_anchor);
             server = new Server ();
             client = new Client ();
             byte[] xml;
@@ -1769,5 +1783,14 @@ public class KeyGen2Test
         doer2.perform ();
         assertFalse ("UnLocked", sks.getKeyProtectionInfo (key_handle).isPINBlocked ());
         assertTrue ("PIN User Modifiable", sks.getKeyProtectionInfo (key_handle).getPINUserModifiableFlag ());
+      }
+
+    @Test
+    public void TrustAnchor () throws Exception
+      {
+        Doer doer = new Doer ();
+        set_trust_anchor = true;
+        doer.perform ();
+        assertTrue ("Path Length", sks.getKeyAttributes (doer.getFirstKey ()).getCertificatePath ().length == 3);
       }
   }
