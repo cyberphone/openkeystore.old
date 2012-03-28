@@ -1582,10 +1582,7 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Prepare for the big crypto...
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] attestation = null;
-        byte[] session_key = null;
-        ECPublicKey client_ephemeral_key = null;
-        byte[] provisioning_state;
+        SEProvisioningData se_provisioning_data = new SEProvisioningData ();
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1595,7 +1592,7 @@ public class SEReferenceImplementation
             ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
             generator.initialize (eccgen, new SecureRandom ());
             KeyPair kp = generator.generateKeyPair ();
-            client_ephemeral_key = (ECPublicKey) kp.getPublic ();
+            ECPublicKey client_ephemeral_key = (ECPublicKey) kp.getPublic ();
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Apply the SP800-56A ECC CDH primitive
@@ -1613,7 +1610,7 @@ public class SEReferenceImplementation
             kdf.addString (server_session_id);
             kdf.addString (issuer_uri);
             kdf.addArray (getDeviceID (privacy_enabled));
-            session_key = kdf.getResult ();
+            byte[] session_key = kdf.getResult ();
 
             ///////////////////////////////////////////////////////////////////////////////////
             // SessionKey attest
@@ -1627,10 +1624,10 @@ public class SEReferenceImplementation
             ska.addInt (client_time);
             ska.addInt (session_life_time);
             ska.addShort (session_key_limit);
-            attestation = ska.getResult ();
+            byte[] attestation = ska.getResult ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // Optionally sign attestation
+            // Unless privacy-enabled sign attestation
             ///////////////////////////////////////////////////////////////////////////////////
             if (!privacy_enabled)
               {
@@ -1644,20 +1641,18 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Create the wrapped session key and associated data
             ///////////////////////////////////////////////////////////////////////////////////
-            provisioning_state = wrapSessionKey (os_instance_key, new UnwrappedSessionKey (), session_key, session_key_limit);
+            se_provisioning_data.provisioning_state = wrapSessionKey (os_instance_key, new UnwrappedSessionKey (), session_key, session_key_limit);
+            se_provisioning_data.client_session_id = client_session_id;
+            se_provisioning_data.attestation = attestation;
+            se_provisioning_data.client_ephemeral_key = client_ephemeral_key;
           }
         catch (Exception e)
           {
-            throw new SKSException (e);
+            abort (e);
           }
         ///////////////////////////////////////////////////////////////////////////////////
-        // We did it!
+        // Success, return provisioning session data including sealed session object
         ///////////////////////////////////////////////////////////////////////////////////
-        SEProvisioningData se_provisioning_data = new SEProvisioningData ();
-        se_provisioning_data.client_session_id = client_session_id;
-        se_provisioning_data.attestation = attestation;
-        se_provisioning_data.client_ephemeral_key = client_ephemeral_key;
-        se_provisioning_data.provisioning_state = provisioning_state;
         return se_provisioning_data;
       }
 
