@@ -1030,7 +1030,14 @@ public class SEReferenceImplementation
                                      PublicKey public_key,
                                      String id) throws SKSException
       {
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Unwrap the key to use
+        ///////////////////////////////////////////////////////////////////////////////////
         UnwrappedKey unwrapped_key = getUnwrappedKey (os_instance_key, sealed_key);
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Perform "sanity" checks
+        ///////////////////////////////////////////////////////////////////////////////////
         if (public_key instanceof RSAPublicKey ^ unwrapped_key.isRSA ())
           {
             abort ("RSA/EC mixup between public and private keys for: " + id);
