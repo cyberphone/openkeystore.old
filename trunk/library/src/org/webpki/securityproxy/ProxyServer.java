@@ -72,6 +72,7 @@ public class ProxyServer
               {
                 instances.put (name_of_instance, instance = new ProxyServer ());
                 instance.instance_name = name_of_instance;
+                logger.info ("Instance \"" + name_of_instance + "\" initialized");
               }
             return instance;
           }
@@ -226,7 +227,7 @@ public class ProxyServer
           {
             //////////////////////////////////////////////////////////
             // We have a proxy but no one is currently requesting it.
-            // We simpy have to wait for a timeout or a real task.
+            // We simply have to wait for a timeout or a real task.
             //////////////////////////////////////////////////////////
             synchronized (proxy_worker)
               {

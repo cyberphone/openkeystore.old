@@ -9,6 +9,10 @@
 
     <display-name>External Service (For Testing Only)</display-name>
     
+    <listener>
+        <listener-class>org.webpki.securityproxy.test.extservice.Init</listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>ExtService</servlet-name>
         <servlet-class>org.webpki.securityproxy.test.extservice.ExtService</servlet-class>

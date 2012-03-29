@@ -123,7 +123,7 @@ public class ProxyClient
                                 send_object = upload_objects.remove (0);
                                 if (debug)
                                   {
-                                    logger.info ("Upload client");
+                                    logger.info ("Upload initiated on channel[" + channel_id + "]");
                                   }
                               }
                           }
@@ -133,6 +133,11 @@ public class ProxyClient
                     // The following only occurs if there is some kind of network problem
                     ////////////////////////////////////////////////////////////////////////
                     conn.setReadTimeout ((cycle_time * 3) / 2 + 30000);
+
+                    ////////////////////////////////////////////////////////////////////////
+                    // Direct mode only please!
+                    ////////////////////////////////////////////////////////////////////////
+                    conn.setInstanceFollowRedirects (false);
 
                     ////////////////////////////////////////////////////////////////////////
                     // Serialize the data object to send (Conf, Idle, Response)

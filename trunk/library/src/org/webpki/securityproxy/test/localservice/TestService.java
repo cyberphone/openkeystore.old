@@ -19,6 +19,7 @@ package org.webpki.securityproxy.test.localservice;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 import java.util.Date;
 import java.util.Properties;
@@ -28,6 +29,9 @@ import org.webpki.securityproxy.ProxyClient;
 import org.webpki.securityproxy.ProxyRequestHandler;
 import org.webpki.securityproxy.ProxyRequestInterface;
 import org.webpki.securityproxy.ProxyResponseWrapper;
+
+import org.webpki.securityproxy.test.common.SampleProxyObject;
+import org.webpki.securityproxy.test.common.SampleUploadObject;
 
 /**
  * Test service using the security proxy system. 
@@ -76,10 +80,11 @@ public class TestService implements ProxyRequestHandler
       }
 
     @Override
-    public ProxyResponseWrapper handleProxyRequest (ProxyRequestInterface proxy_req_wrapper)
+    public ProxyResponseWrapper handleProxyRequest (ProxyRequestInterface proxy_req_wrapper) throws IOException
       {
-        // TODO Auto-generated method stub
-        return null;
+        logger.info ("Received a \"" + proxy_req_wrapper.getClass ().getSimpleName () + "\" request");
+        SampleProxyObject sps = (SampleProxyObject) proxy_req_wrapper;
+        return new ProxyResponseWrapper (("Result=" + (sps.getX () * sps.getY ())).getBytes ("UTF-8"), "text/plain");
       }
 
     public static void main (String[] args)
@@ -134,7 +139,7 @@ public class TestService implements ProxyRequestHandler
               {
                 Thread.sleep (200000L);
                 logger.info ("Uploaded Data");
-                proxy_client.addUploadObject (new MyUpload (new Date ().getTime ()));
+                proxy_client.addUploadObject (new SampleUploadObject (new Date ().getTime ()));
               }
             catch (InterruptedException e)
               {

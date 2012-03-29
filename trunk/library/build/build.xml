@@ -345,6 +345,7 @@
       </manifest>
       <fileset dir="${temp_dir}">
         <include name="org/webpki/securityproxy/test/localservice/**"/>
+        <include name="org/webpki/securityproxy/test/common/**"/>
       </fileset>
     </jar>
 
@@ -356,6 +357,9 @@
 		<attribute name="Class-path" value="${webpki-libext}"/>
 		<attribute name="Main-Class" value="org.webpki.securityproxy.test.client.TestClient"/>
       </manifest>
+      <fileset dir="${temp_dir}">
+        <include name="org/webpki/securityproxy/test/client/**"/>
+      </fileset>
     </jar>
 
   	<war warfile="${dist_dir}/spts-intproxy.war" webxml="${spts_dir}/intproxy-web.xml">
@@ -367,7 +371,7 @@
   	<war warfile="${dist_dir}/spts-extservice.war" webxml="${spts_dir}/extservice-web.xml">
       <classes dir="${temp_dir}">
         <include name="org/webpki/securityproxy/test/extservice/**"/>
-        <include name="org/webpki/securityproxy/test/localservice/MyUpload.class"/>
+        <include name="org/webpki/securityproxy/test/common/**"/>
       </classes>
     </war>
 

@@ -19,7 +19,6 @@ package org.webpki.securityproxy.test.extservice;
 import java.io.IOException;
 
 import java.util.Date;
-import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
@@ -29,11 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServlet;
 
-import org.webpki.securityproxy.ProxyServer;
-import org.webpki.securityproxy.ProxyUploadHandler;
-import org.webpki.securityproxy.ProxyUploadInterface;
-
-import org.webpki.securityproxy.test.localservice.MyUpload;
+import org.webpki.securityproxy.test.common.SampleProxyObject;
 
 /**
  * External security proxy service.
@@ -41,41 +36,21 @@ import org.webpki.securityproxy.test.localservice.MyUpload;
  * This is the external service.
  * 
  */
-public class ExtService extends HttpServlet implements ProxyUploadHandler
+public class ExtService extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int HISTORY = 20;
-
     private static Logger logger = Logger.getLogger (ExtService.class.getName ());
-
-    private ProxyServer proxy_server;
-    
-    private Vector<MyUpload> uploads = new Vector<MyUpload> ();
 
     @Override
     public void init (ServletConfig config) throws ServletException
       {
         super.init (config);
-        proxy_server = ProxyServer.getInstance ("testing-testing...");
-        proxy_server.addUploadEventHandler (this);
       }
 
     @Override
     public void destroy ()
       {
-        proxy_server.deleteUploadEventHandler (this);
-      }
-
-    @Override
-    public void handleUploadedData (ProxyUploadInterface upload_payload)
-      {
-        uploads.add (0, (MyUpload) upload_payload);
-        if (uploads.size () > HISTORY)
-          {
-            uploads.setSize (HISTORY);
-          }
-        logger.info ("Uploaded data reached service");
       }
 
     @Override
@@ -85,11 +60,11 @@ public class ExtService extends HttpServlet implements ProxyUploadHandler
         response.setHeader ("Pragma", "No-Cache");
         response.setDateHeader ("EXPIRES", 0);
         StringBuffer s = new StringBuffer ("<html><head><meta http-equiv=\"refresh\" content=\"20\"></head><body>");
-        if (proxy_server.isReady ())
+        if (Init.proxy_server.isReady ())
           {
-            s.append ("Proxy Client ID = ").append (proxy_server.getProxyClientID ()).append ("<p>");
+            s.append ("Proxy Client ID = ").append (Init.proxy_server.getProxyClientID ()).append ("<p>");
             s.append ("Last Proxy Upload: ");
-            int l = uploads.size ();
+            int l = Init.uploads.size ();
             if (l == 0)
               {
                 s.append ("UNKNOWN");
@@ -113,16 +88,14 @@ public class ExtService extends HttpServlet implements ProxyUploadHandler
 
     private void printElem (StringBuffer s, int index)
       {
-        s.append (new Date (uploads.elementAt (index).getTimeStamp ()).toString ());
+        s.append (new Date (Init.uploads.elementAt (index).getTimeStamp ()).toString ());
       }
 
     @Override
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        response.setContentType ("text/html; charset=utf-8");
-        response.setHeader ("Pragma", "No-Cache");
-        response.setDateHeader ("EXPIRES", 0);
-        response.getWriter ().print ("<html><head><meta http-equiv=\"refresh\" content=\"20\"></head>" +
-                                     "<body>hi</body></html>");
+        Init.proxy_server.processCall (new SampleProxyObject (new Double (request.getParameter ("X")),
+                                                              new Double (request.getParameter ("Y"))),
+                                       response);
       }
   }

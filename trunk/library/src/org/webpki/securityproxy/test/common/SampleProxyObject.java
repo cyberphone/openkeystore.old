@@ -14,21 +14,31 @@
  *  limitations under the License.
  *
  */
-package org.webpki.securityproxy;
+package org.webpki.securityproxy.test.common;
 
-import java.io.IOException;
+import org.webpki.securityproxy.ProxyRequestInterface;
 
-/**
- * Security proxy client request handler interface.
- * 
- * Note that errors should be taken care of by the handler implementation
- * and for non-fatal situations return an error object to the actual caller.
- */
-public interface ProxyRequestHandler
+public class SampleProxyObject implements ProxyRequestInterface
   {
-    /**
-     * @param request_object the request
-     * @return suitable HTTP return data to the external caller
-     */
-    public ProxyResponseWrapper handleProxyRequest (ProxyRequestInterface request_object) throws IOException;
+    private static final long serialVersionUID = 1L;
+
+    private double x;
+ 
+    private double y;
+    
+    public double getX ()
+      {
+        return x;
+      }
+
+    public double getY ()
+      {
+        return y;
+      }
+    
+    public SampleProxyObject (double x, double y)
+      {
+        this.x = x;
+        this.y = y;
+      }
   }

@@ -16,11 +16,45 @@
  */
 package org.webpki.securityproxy.test.client;
 
+import org.webpki.net.HTTPSWrapper;
+
 /**
  * Security proxy test client. 
  *
  */
 public class TestClient
   {
-
+    public static void main (String[] argc)
+      {
+        if (argc.length != 1 && argc.length != 3)
+          {
+            System.out.println ("URL [count wait]\n" +
+                                "  URL using standard setup: http://localhost:8080/spts-extservice\n"+
+                                "  count is 1 if not given\n" +
+                                "  wait is given in millseconds");
+            System.exit (3);
+          }
+        try
+          {
+            HTTPSWrapper wrapper = new HTTPSWrapper ();
+            long wait = 0;
+            int count = 1;
+            if (argc.length > 1)
+              {
+                count = Integer.parseInt (argc[1]);
+                wait = Long.parseLong (argc[2]);
+              }
+            while (count-- > 0)
+              {
+                wrapper.setHeader ("Content-Type", "application/x-www-form-urlencoded");
+                wrapper.makePostRequestUTF8 (argc[0], "X=5.5&Y=0.45");
+                System.out.println (wrapper.getDataUTF8 ());
+                Thread.sleep (wait);
+              }
+          }
+        catch (Exception e)
+          {
+            e.printStackTrace ();
+          }
+      }
   }

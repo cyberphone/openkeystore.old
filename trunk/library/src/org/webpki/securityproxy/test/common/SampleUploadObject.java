@@ -14,11 +14,11 @@
  *  limitations under the License.
  *
  */
-package org.webpki.securityproxy.test.localservice;
+package org.webpki.securityproxy.test.common;
 
 import org.webpki.securityproxy.ProxyUploadInterface;
 
-public class MyUpload implements ProxyUploadInterface
+public class SampleUploadObject implements ProxyUploadInterface
   {
     private static final long serialVersionUID = 1L;
 
@@ -29,7 +29,7 @@ public class MyUpload implements ProxyUploadInterface
         return last_time_stamp;
       }
     
-    public MyUpload (long last_time_stamp)
+    public SampleUploadObject (long last_time_stamp)
       {
         this.last_time_stamp = last_time_stamp;
       }

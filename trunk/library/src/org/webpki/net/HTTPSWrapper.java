@@ -684,7 +684,7 @@ public class HTTPSWrapper
 
 
     /**
-     * Sets an HTTP header value for a succeding request. <br><br>
+     * Sets an HTTP header value for a succeeding request. <br><br>
      *
      * @param name Name of header to set.
      * @param value Value associated with the header.
