@@ -195,10 +195,10 @@ public class ProxyClient
                                   }
                                 return;
                               }
-                            if (debug)
-                              {
-                                logger.info ("Channel[" + channel_id + "] continues");
-                              }
+                          }
+                        if (debug)
+                          {
+                            logger.info ("Channel[" + channel_id + "] continues");
                           }
                       }
                     else
@@ -216,7 +216,10 @@ public class ProxyClient
                         //////////////////////////////////////////////////////
                         // Now do the request/response to the local server
                         //////////////////////////////////////////////////////
-                        send_object = new InternalResponseObject (request_handler.handleProxyRequest (request_object.proxy_request), request_object.caller_id, client_id);
+                        send_object = new InternalResponseObject (request_handler.handleProxyRequest (request_object.proxy_request), 
+                                                                  request_object.caller_id,
+                                                                  client_id,
+                                                                  !upload_objects.isEmpty ());
                       }
 
                     /////////////////////////////////////////////////

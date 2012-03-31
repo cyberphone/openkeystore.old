@@ -557,10 +557,18 @@ public class ProxyServer
                     return;
                   }
                 RequestDescriptor rd = findProxyRequest (ro.caller_id);
-                if (rd != null)
+                if (rd == null)
+                  {
+                    logger.severe ("Missing caller: " + ro.caller_id);
+                  }
+                else
                   {
                     rd.response_object = ro;
                     rd.response_waiter.haveData4You ();
+                  }
+                if (ro.return_immediately)
+                  {
+                    return;
                   }
               }
             else if (object instanceof InternalUploadObject)
@@ -599,5 +607,4 @@ public class ProxyServer
         Caller ci = addProxyWorker (response);
         ci.transactProxy ();
       }
-
   }

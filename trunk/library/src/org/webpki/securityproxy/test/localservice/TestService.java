@@ -19,7 +19,6 @@ package org.webpki.securityproxy.test.localservice;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 
 import java.util.Date;
 import java.util.Properties;
@@ -50,6 +49,8 @@ public class TestService implements ProxyRequestHandler
     ProxyClient proxy_client = new ProxyClient (this);
     
     Properties properties;
+    
+    int count;
 
     private String getPropertyStringUnconditional (String name) throws IOException
       {
@@ -82,9 +83,21 @@ public class TestService implements ProxyRequestHandler
     @Override
     public ProxyResponseWrapper handleProxyRequest (ProxyRequestInterface proxy_req_wrapper) throws IOException
       {
-        logger.info ("Received a \"" + proxy_req_wrapper.getClass ().getSimpleName () + "\" request");
+        logger.info ("Received a \"" + proxy_req_wrapper.getClass ().getSimpleName () + "\" request[" + ++count + "]" );
         SampleProxyObject sps = (SampleProxyObject) proxy_req_wrapper;
-        return new ProxyResponseWrapper (("Result=" + (sps.getX () * sps.getY ())).getBytes ("UTF-8"), "text/plain");
+        long server_wait = sps.getServerWait ();
+        if (server_wait != 0 && count % 10 == 0)
+          {
+            try
+              {
+                Thread.sleep (server_wait);
+              }
+            catch (InterruptedException e)
+              {
+                throw new IOException (e);
+              }
+          }
+        return new ProxyResponseWrapper (("Result[" + count + "]=" + (sps.getX () * sps.getY ())).getBytes ("UTF-8"), "text/plain");
       }
 
     public static void main (String[] args)
@@ -143,6 +156,7 @@ public class TestService implements ProxyRequestHandler
               }
             catch (InterruptedException e)
               {
+                System.out.println ("Interrupted!");
                 return;
               }
           }

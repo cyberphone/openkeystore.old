@@ -26,29 +26,33 @@ public class TestClient
   {
     public static void main (String[] argc)
       {
-        if (argc.length != 1 && argc.length != 3)
+        if (argc.length != 1 && argc.length != 4)
           {
-            System.out.println ("URL [count wait]\n" +
+            System.out.println ("URL [count wait serverwait]\n" +
                                 "  URL using standard setup: http://localhost:8080/spts-extservice\n"+
                                 "  count is 1 if not given\n" +
-                                "  wait is given in millseconds");
+                                "  wait is given in millseconds\n" +
+                                "  serverwait is introduced every 10:th call and given in millseconds");
             System.exit (3);
           }
         try
           {
             HTTPSWrapper wrapper = new HTTPSWrapper ();
             long wait = 0;
-            int count = 1;
+            int max = 1;
+            int server_wait = 0;
             if (argc.length > 1)
               {
-                count = Integer.parseInt (argc[1]);
+                max = Integer.parseInt (argc[1]);
                 wait = Long.parseLong (argc[2]);
+                server_wait =  Integer.parseInt (argc[3]);
               }
-            while (count-- > 0)
+            int count = 0;
+            while (count++ < max)
               {
                 wrapper.setHeader ("Content-Type", "application/x-www-form-urlencoded");
-                wrapper.makePostRequestUTF8 (argc[0], "X=5.5&Y=0.45");
-                System.out.println (wrapper.getDataUTF8 ());
+                wrapper.makePostRequestUTF8 (argc[0], "X=5.5&Y=0.45&WAIT=" + server_wait);
+                System.out.println ("Local[" + count + "]" + wrapper.getDataUTF8 ());
                 Thread.sleep (wait);
               }
           }

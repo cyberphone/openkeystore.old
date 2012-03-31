@@ -26,6 +26,8 @@ public class SampleProxyObject implements ProxyRequestInterface
  
     private double y;
     
+    private long server_wait;
+    
     public double getX ()
       {
         return x;
@@ -35,10 +37,16 @@ public class SampleProxyObject implements ProxyRequestInterface
       {
         return y;
       }
+
+    public long getServerWait ()
+      {
+        return server_wait;
+      }
     
-    public SampleProxyObject (double x, double y)
+    public SampleProxyObject (double x, double y, long server_wait)
       {
         this.x = x;
         this.y = y;
+        this.server_wait = server_wait;
       }
   }

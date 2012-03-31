@@ -27,17 +27,20 @@ class InternalResponseObject extends InternalClientObject implements Serializabl
     private static final long serialVersionUID = 1L;
     
     ProxyResponseWrapper response_data;
+    
+    boolean return_immediately;
 
     ////////////////////////////////////////////////////////
     // Due to the multi-channel proxy, calls need IDs
     ////////////////////////////////////////////////////////
     long caller_id;
 
-    InternalResponseObject (ProxyResponseWrapper response_data, long caller_id, String client_id)
+    InternalResponseObject (ProxyResponseWrapper response_data, long caller_id, String client_id, boolean return_immediately)
       {
         super (client_id);
         this.caller_id = caller_id;
         this.response_data = response_data;
+        this.return_immediately = return_immediately;
       }
 
   }

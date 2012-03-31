@@ -95,7 +95,8 @@ public class ExtService extends HttpServlet
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
         Init.proxy_server.processCall (new SampleProxyObject (new Double (request.getParameter ("X")),
-                                                              new Double (request.getParameter ("Y"))),
+                                                              new Double (request.getParameter ("Y")),
+                                                              new Long (request.getParameter ("WAIT"))),
                                        response);
       }
   }
