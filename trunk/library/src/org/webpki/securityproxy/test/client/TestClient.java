@@ -16,6 +16,8 @@
  */
 package org.webpki.securityproxy.test.client;
 
+import java.util.Random;
+
 import org.webpki.net.HTTPSWrapper;
 
 /**
@@ -38,6 +40,7 @@ public class TestClient
         try
           {
             HTTPSWrapper wrapper = new HTTPSWrapper ();
+            Random random = new Random ();
             long wait = 0;
             int max = 1;
             int server_wait = 0;
@@ -50,9 +53,11 @@ public class TestClient
             int count = 0;
             while (count++ < max)
               {
+                double x = random.nextDouble () * 10;
+                double y = random.nextDouble () * 10;
                 wrapper.setHeader ("Content-Type", "application/x-www-form-urlencoded");
-                wrapper.makePostRequestUTF8 (argc[0], "X=5.5&Y=0.45&WAIT=" + server_wait);
-                System.out.println ("Local[" + count + "]" + wrapper.getDataUTF8 ());
+                wrapper.makePostRequestUTF8 (argc[0], "X=" + x + "&Y=" + y + "&WAIT=" + server_wait);
+                System.out.println ("Local[" + count + "] X=" + x + " Y=" + y + " " + wrapper.getDataUTF8 ());
                 Thread.sleep (wait);
               }
           }
