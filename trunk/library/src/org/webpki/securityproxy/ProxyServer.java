@@ -368,7 +368,7 @@ public class ProxyServer
               }
             q++;
           }
-        returnInternalFailure (request_descriptor.response, "Internal server error");
+        returnInternalFailure (request_descriptor.response, "Internal server error: " + err);
       }
 
     private synchronized Caller processRequest (HttpServletResponse response, ProxyRequestInterface request_object) throws IOException, ServletException
