@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.webpki.securityproxy.ProxyClient;
+import org.webpki.securityproxy.ProxyInitializationHandler;
 import org.webpki.securityproxy.ProxyRequestHandler;
 import org.webpki.securityproxy.ProxyRequestInterface;
 import org.webpki.securityproxy.ProxyResponseWrapper;
@@ -35,7 +36,7 @@ import org.webpki.securityproxy.test.common.SampleUploadObject;
 /**
  * Test service using the security proxy system. 
  */
-public class TestService implements ProxyRequestHandler
+public class TestService implements ProxyRequestHandler, ProxyInitializationHandler
   {
     private static Logger logger = Logger.getLogger (TestService.class.getCanonicalName ());
     
@@ -160,6 +161,12 @@ public class TestService implements ProxyRequestHandler
                 return;
               }
           }
+      }
+
+    @Override
+    public void handleProxyInitialization () throws IOException
+      {
+        logger.info ("Got restart signal!");
       }
 
   }

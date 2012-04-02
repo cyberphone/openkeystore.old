@@ -63,6 +63,15 @@ public class ProxyServer
     
     private Class<? extends ProxyServerErrorFactory> error_container;
     
+    private ProxyServer () 
+      {
+      }
+    
+/**
+ * Create proxy server instance.
+ * @param name_of_instance Note that this name must be unique if there are more than one proxy server in a single JVM
+ * @return ProxyServer
+ */
     public static ProxyServer getInstance (String name_of_instance)
       {
         synchronized (instances)
@@ -83,14 +92,14 @@ public class ProxyServer
         this.error_container = error_container;
       }
     
-    public synchronized void addUploadEventHandler (ProxyUploadHandler ueh)
+    public synchronized void addUploadEventHandler (ProxyUploadHandler handler)
       {
-        upload_event_subscribers.add (ueh);
+        upload_event_subscribers.add (handler);
       }
     
-    public synchronized void deleteUploadEventHandler (ProxyUploadHandler ueh)
+    public synchronized void deleteUploadEventHandler (ProxyUploadHandler handler)
       {
-        upload_event_subscribers.remove (ueh);
+        upload_event_subscribers.remove (handler);
       }
     
     public synchronized boolean isReady ()

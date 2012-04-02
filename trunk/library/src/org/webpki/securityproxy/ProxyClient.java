@@ -56,14 +56,15 @@ public class ProxyClient
     private ProxyRequestHandler request_handler;
     
     /**
-     * Creates an empty security proxy.
+     * Creates a security proxy client.
+     * 
      * @see #initProxy
      * 
-     * @param request_handler the proxy user's interface
+     * @param handler the proxy user's interface.  Note that a user (service) may also implement {@link ProxyInitializationHandler}.
      */
-    public ProxyClient (ProxyRequestHandler request_handler)
+    public ProxyClient (ProxyRequestHandler handler)
       {
-        this.request_handler = request_handler;
+        this.request_handler = handler;
       }
 
     private class ProxyChannel implements Runnable
@@ -112,6 +113,11 @@ public class ProxyClient
                     if (socket_factory != null)
                       {
                         ((HttpsURLConnection) conn).setSSLSocketFactory (socket_factory);
+                      }
+                    
+                    if (send_object == server_configuration && request_handler instanceof ProxyInitializationHandler)
+                      {
+                        ((ProxyInitializationHandler)request_handler).handleProxyInitialization ();
                       }
 
                     if (send_object instanceof InternalIdleObject)

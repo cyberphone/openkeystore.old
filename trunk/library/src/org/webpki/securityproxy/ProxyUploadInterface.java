@@ -21,6 +21,8 @@ import java.io.Serializable;
 /**
  * Security proxy data object containing an upload operation.
  * Implemented by the actual user-defined object.
+ * 
+ * @see ProxyClient#addUploadObject(ProxyUploadInterface)
  */
 public interface ProxyUploadInterface extends Serializable
   {

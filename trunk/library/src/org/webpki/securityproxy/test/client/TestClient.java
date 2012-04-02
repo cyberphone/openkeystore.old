@@ -18,6 +18,8 @@ package org.webpki.securityproxy.test.client;
 
 import java.util.Random;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.webpki.net.HTTPSWrapper;
 
 /**
@@ -57,7 +59,14 @@ public class TestClient
                 double y = random.nextDouble () * 10;
                 wrapper.setHeader ("Content-Type", "application/x-www-form-urlencoded");
                 wrapper.makePostRequestUTF8 (argc[0], "X=" + x + "&Y=" + y + "&WAIT=" + server_wait);
-                System.out.println ("Local[" + count + "] X=" + x + " Y=" + y + " " + wrapper.getDataUTF8 ());
+                if (wrapper.getResponseCode () != HttpServletResponse.SC_OK)
+                  {
+                    System.out.println ("Failed: " + wrapper.getResponseMessage () + "\n" + wrapper.getDataUTF8 ());
+                  }
+                else
+                  {
+                    System.out.println ("Local[" + count + "] X=" + x + " Y=" + y + " " + wrapper.getDataUTF8 ());
+                  }
                 Thread.sleep (wait);
               }
           }

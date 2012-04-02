@@ -96,7 +96,7 @@ public class DOMUtil
      * will be created and appended to <i>parent</i>.
      * <p>This method is shorthand for 
      * <code>{@link #appendTextElement(Element, String, String) appendTextElement}(parent, element, value.toString())</code>
-     * and is hence useful when value is an object whos {@link Object#toString toString} function returns a suitably formatted
+     * and is hence useful when value is an object who's {@link Object#toString toString} function returns a suitably formatted
      * string representation, for example a {@link java.lang.StringBuffer StringBuffer},
      * {@link java.math.BigInteger BigInteger} or {@link java.math.BigDecimal BigDecimal}.
      * @param parent The parent of the new element.

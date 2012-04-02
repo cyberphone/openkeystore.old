@@ -19,15 +19,20 @@ package org.webpki.securityproxy;
 import java.io.IOException;
 
 /**
- * Security proxy client request handler interface.
- * Must be implemented by a client (service).
- * @see ProxyClient#ProxyClient(ProxyRequestHandler)
+ * Security proxy client initialization handler interface.
+ *  
+ * A user of the proxy client may optionally implement this
+ * interface in addition to the mandatory {@link ProxyRequestHandler}.
+ * This event can (for example) be used for performing initial uploads
+ * ({@link ProxyUploadInterface})
+ * each time the proxy is started or restarts due to errors.
+ * .
  */
-public interface ProxyRequestHandler
+public interface ProxyInitializationHandler
   {
     /**
-     * @param request_object the request
-     * @return suitable HTTP return data to the external caller
+     * Notify the proxy client user that proxy started or restarted
      */
-    public ProxyResponseWrapper handleProxyRequest (ProxyRequestInterface request_object) throws IOException;
+    public void handleProxyInitialization () throws IOException;
   }
+

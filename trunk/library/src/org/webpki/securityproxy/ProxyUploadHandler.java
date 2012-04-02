@@ -19,6 +19,8 @@ package org.webpki.securityproxy;
 /**
  * Security proxy upload event handler.
  * Implement in proxy-using servlet.
+ * @see ProxyServer#addUploadEventHandler(ProxyUploadHandler)
+ * @see ProxyServer#deleteUploadEventHandler(ProxyUploadHandler)
  */
 public interface ProxyUploadHandler
   {
