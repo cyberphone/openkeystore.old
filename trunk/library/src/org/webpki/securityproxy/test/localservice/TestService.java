@@ -25,7 +25,6 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.webpki.securityproxy.ProxyClient;
-import org.webpki.securityproxy.ProxyInitializationHandler;
 import org.webpki.securityproxy.ProxyRequestHandler;
 import org.webpki.securityproxy.ProxyRequestInterface;
 import org.webpki.securityproxy.ProxyResponseWrapper;
@@ -36,7 +35,7 @@ import org.webpki.securityproxy.test.common.SampleUploadObject;
 /**
  * Test service using the security proxy system. 
  */
-public class TestService implements ProxyRequestHandler, ProxyInitializationHandler
+public class TestService implements ProxyRequestHandler
   {
     private static Logger logger = Logger.getLogger (TestService.class.getCanonicalName ());
     
@@ -47,7 +46,7 @@ public class TestService implements ProxyRequestHandler, ProxyInitializationHand
     private static final String PROPERTY_RETRY_TIMEOUT = "securityproxy.retry-timeout";
     private static final String PROPERTY_DEBUG         = "securityproxy.debug";
 
-    ProxyClient proxy_client = new ProxyClient (this);
+    ProxyClient proxy_client = new ProxyClient ();
     
     Properties properties;
     
@@ -138,7 +137,8 @@ public class TestService implements ProxyRequestHandler, ProxyInitializationHand
         ////////////////////////////////////////////////////////////////////////////////////////////
         // Initialization
         ////////////////////////////////////////////////////////////////////////////////////////////
-        proxy_client.initProxy (getPropertyString (PROPERTY_PROXY_URL),
+        proxy_client.initProxy (this,
+                                getPropertyString (PROPERTY_PROXY_URL),
                                 getPropertyInt (PROPERTY_MAX_WORKERS),
                                 getPropertyInt (PROPERTY_CYCLE_TIME),
                                 getPropertyInt (PROPERTY_RETRY_TIMEOUT),

@@ -21,7 +21,7 @@ import java.io.IOException;
 /**
  * Security proxy client request handler interface.
  * Must be implemented by a client (service).
- * @see ProxyClient#ProxyClient(ProxyRequestHandler)
+ * @see ProxyClient#initProxy(ProxyRequestHandler, String, int, int, int, boolean)
  */
 public interface ProxyRequestHandler
   {
@@ -30,4 +30,12 @@ public interface ProxyRequestHandler
      * @return suitable HTTP return data to the external caller
      */
     public ProxyResponseWrapper handleProxyRequest (ProxyRequestInterface request_object) throws IOException;
+
+    /**
+     * Notify the proxy client user that proxy started or restarted.
+     * This event can (for example) be used for performing initial uploads
+     * ({@link ProxyUploadInterface})
+     * each time the proxy is started or restarts due to errors.
+     */
+    public void handleProxyInitialization () throws IOException;
   }
