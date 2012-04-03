@@ -248,6 +248,7 @@ public class ProxyServer
                 else
                   {
                     // We never got a hit and have to remove this proxy from the list...
+                    proxy_response.setStatus (HttpServletResponse.SC_OK);
                     int q = 0;
                     for (ProxyRequest proxy : proxies)
                       {
@@ -577,6 +578,7 @@ public class ProxyServer
                   }
                 if (ro.return_immediately)
                   {
+                    response.setStatus (HttpServletResponse.SC_OK);
                     return;
                   }
               }

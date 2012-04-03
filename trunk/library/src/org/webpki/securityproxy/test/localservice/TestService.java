@@ -112,6 +112,11 @@ public class TestService implements ProxyRequestHandler
           }
       }
 
+    private synchronized void uploadData () throws IOException
+      {
+        proxy_client.addUploadObject (new SampleUploadObject (new Date ().getTime ()));
+      }
+
     private void start (InputStream is) throws IOException
       {
         ////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +158,7 @@ public class TestService implements ProxyRequestHandler
               {
                 Thread.sleep (200000L);
                 logger.info ("Uploaded Data");
-                proxy_client.addUploadObject (new SampleUploadObject (new Date ().getTime ()));
+                uploadData ();
               }
             catch (InterruptedException e)
               {
@@ -167,6 +172,7 @@ public class TestService implements ProxyRequestHandler
     public void handleProxyInitialization () throws IOException
       {
         logger.info ("Got restart signal!");
+        uploadData ();
       }
 
   }
