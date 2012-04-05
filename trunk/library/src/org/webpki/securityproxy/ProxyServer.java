@@ -249,15 +249,13 @@ public class ProxyServer
                   {
                     // We never got a hit and have to remove this proxy from the list...
                     proxy_response.setStatus (HttpServletResponse.SC_OK);
-                    int q = 0;
-                    for (ProxyRequest proxy : proxies)
+                    for (ProxyRequest proxy : proxies.toArray (new ProxyRequest[0]))
                       {
                         if (proxy.proxy_id == proxy_id)
                           {
-                            proxies.remove (q);
+                            proxies.remove (proxy);
                             break;
                           }
-                        q++;
                       }
                   }
               }
@@ -356,27 +354,23 @@ public class ProxyServer
     private synchronized void cleanUpAfterFailedCall (RequestDescriptor request_descriptor, String err) throws IOException
       {
         long caller_id = request_descriptor.request_object.caller_id;
-        int q = 0;
-        for (RequestDescriptor rd : waiting_callers)
+        for (RequestDescriptor rd : waiting_callers.toArray (new RequestDescriptor[0]))
           {
             if (rd.request_object.caller_id == caller_id)
               {
-                waiting_callers.remove (q);
+                waiting_callers.remove (rd);
                 logger.info ("Request queue object removed after fail");
                 break;
               }
-            q++;
           }
-        q = 0;
-        for (RequestDescriptor rd : response_queue)
+        for (RequestDescriptor rd : response_queue.toArray (new RequestDescriptor[0]))
           {
             if (rd.request_object.caller_id == caller_id)
               {
-                response_queue.remove (q);
+                response_queue.remove (rd);
                 logger.info ("Response queue object removed after fail");
                 break;
               }
-            q++;
           }
         returnInternalFailure (request_descriptor.response, "Internal server error: " + err);
       }
@@ -445,15 +439,13 @@ public class ProxyServer
 
     private synchronized RequestDescriptor findProxyRequest (long caller_id)
       {
-        int q = 0;
-        for (RequestDescriptor rd : response_queue)
+        for (RequestDescriptor rd : response_queue.toArray (new RequestDescriptor[0]))
           {
             if (rd.request_object.caller_id == caller_id)
               {
-                response_queue.remove (q);
+                response_queue.remove (rd);
                 return rd;
               }
-            q++;
           }
         return null;
       }
@@ -485,11 +477,38 @@ public class ProxyServer
         response_timeout_errors = 0;
         request_timeout_errors = 0;
         last_request = null;
-        proxies.clear ();
-        response_queue.clear ();
-        waiting_callers.clear ();
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Remove any active queues and locks
+        ////////////////////////////////////////////////////////////////////////////////
+        synchronized (proxies)
+          {
+            while (!proxies.isEmpty ())
+              {
+                proxies.remove (0).proxy_worker.haveData4You ();
+              }
+          }
+        resetRequest (response_queue);
+        resetRequest (waiting_callers);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Set the new configuration
+        ////////////////////////////////////////////////////////////////////////////////
         server_configuration = server_conf;
         logger.info ("Proxy " + (server_conf == null ? "RESET" : "INIT" + (instance_name == null ? "" : " Name=" + instance_name) + " proxy-cycle=" + server_conf.proxy_timeout/1000 + "s") + " client-id=" + server_conf.client_id);
+      }
+
+    private void resetRequest (Vector<RequestDescriptor> request)
+      {
+        synchronized (request)
+          {
+            while (!request.isEmpty ())
+              {
+                RequestDescriptor rd = request.remove (0);
+                rd.response_waiter.haveData4You ();
+                rd.request_waiter.haveData4You ();
+              }
+          }
       }
 
     /**
@@ -529,8 +548,7 @@ public class ProxyServer
     public void processProxyCall (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
         ////////////////////////////////////////////////////////////////////////////////
-        // Perform as much as possible of the "heavy" stuff outside of
-        // synchronization
+        // Perform as much as possible of the "heavy" stuff outside of synchronization
         ////////////////////////////////////////////////////////////////////////////////
         ServletInputStream is = request.getInputStream ();
         byte[] buf = new byte[4096];
