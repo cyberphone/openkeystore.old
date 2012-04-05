@@ -115,10 +115,7 @@ public class ProxyClient
                     /////////////////////////////////////////////////////////////////////////////////////
                     // Are we starting or restarting?
                     /////////////////////////////////////////////////////////////////////////////////////
-                    if (send_object == server_configuration)
-                      {
-                        request_handler.handleProxyInitialization ();
-                      }
+                    boolean restarting = send_object == server_configuration;
 
                     /////////////////////////////////////////////////////////////////////////////////////
                     // If there is no request in progress, check for pending uploads
@@ -188,7 +185,19 @@ public class ProxyClient
                     istream.close ();
                     conn.disconnect ();
                     hanging = false;
+
+                    /////////////////////////////////////////////////////////////////////////////////////
+                    // If we have just restarted we give the local service a sign
+                    /////////////////////////////////////////////////////////////////////////////////////
+                    if (restarting)
+                      {
+                        request_handler.handleProxyInitialization ();
+                      }
                     throwed_an_iox = false;
+
+                    /////////////////////////////////////////////////////////////////////////////////////
+                    // Take care of the return data if there is such
+                    /////////////////////////////////////////////////////////////////////////////////////
                     if (data.length == 0)
                       {
                         /////////////////////////////////////////////////////////////////////////////////////
