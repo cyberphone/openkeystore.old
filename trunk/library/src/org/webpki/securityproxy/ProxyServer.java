@@ -573,6 +573,11 @@ public class ProxyServer
                 // First call. Reset all, get configuration
                 ////////////////////////////////////////////////
                 resetProxy ((InternalServerConfiguration) object);
+                if (!upload_event_subscribers.isEmpty ())
+                  {
+                    response.setStatus (HttpServletResponse.SC_OK);
+                    return;
+                  }
               }
             else if (object instanceof InternalResponseObject)
               {
