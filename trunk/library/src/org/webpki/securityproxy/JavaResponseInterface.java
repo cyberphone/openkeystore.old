@@ -18,29 +18,12 @@ package org.webpki.securityproxy;
 
 import java.io.Serializable;
 
-import java.util.LinkedHashMap;
 
 /**
- * Security proxy object containing the local service's HTTP response.
+ * Security proxy object containing a local service's Java response.
+ * A user-defined Java response object must implement this interface.
+ * @see ClientRequestHandler
  */
-public class ProxyResponseWrapper implements Serializable
+public interface JavaResponseInterface extends Serializable
   {
-    private static final long serialVersionUID = 1L;
-
-    byte[] data;
-    
-    String mime_type;
-    
-    LinkedHashMap<String,String> headers = new LinkedHashMap<String,String> ();
-    
-    public ProxyResponseWrapper (byte[] data, String mime_type)
-      {
-        this.data = data;
-        this.mime_type = mime_type;
-      }
-    
-    public void addHeader (String name, String value)
-      {
-        headers.put (name, value);
-      }
   }

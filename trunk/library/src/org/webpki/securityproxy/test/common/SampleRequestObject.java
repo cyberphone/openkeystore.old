@@ -14,25 +14,39 @@
  *  limitations under the License.
  *
  */
-package org.webpki.securityproxy;
+package org.webpki.securityproxy.test.common;
 
-import java.io.Serializable;
+import org.webpki.securityproxy.JavaRequestInterface;
 
-/**
- * Security proxy object containing the super class for all client-operations. Only
- * for proxy-internal use.
- */
-abstract class InternalClientObject implements Serializable
+public class SampleRequestObject implements JavaRequestInterface
   {
     private static final long serialVersionUID = 1L;
 
-    String client_id;
+    private double x;
+ 
+    private double y;
     
-    long time_stamp;
-
-    InternalClientObject (String client_id)
+    private long server_wait;
+    
+    public double getX ()
       {
-        this.client_id = client_id;
+        return x;
       }
 
+    public double getY ()
+      {
+        return y;
+      }
+
+    public long getServerWait ()
+      {
+        return server_wait;
+      }
+    
+    public SampleRequestObject (double x, double y, long server_wait)
+      {
+        this.x = x;
+        this.y = y;
+        this.server_wait = server_wait;
+      }
   }

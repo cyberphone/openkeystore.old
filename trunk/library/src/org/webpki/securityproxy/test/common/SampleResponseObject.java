@@ -14,16 +14,31 @@
  *  limitations under the License.
  *
  */
-package org.webpki.securityproxy;
+package org.webpki.securityproxy.test.common;
 
-import java.io.Serializable;
+import org.webpki.securityproxy.JavaResponseInterface;
 
-/**
- * Security proxy data object containing an upload operation.
- * Implemented by the actual user-defined object.
- * 
- * @see ProxyClient#addUploadObject(ProxyUploadInterface)
- */
-public interface ProxyUploadInterface extends Serializable
+public class SampleResponseObject implements JavaResponseInterface
   {
+    private static final long serialVersionUID = 1L;
+
+    private double result;
+    
+    private String header;
+ 
+    public double getResult ()
+      {
+        return result;
+      }
+
+    public String getHeader ()
+      {
+        return header;
+      }
+   
+    public SampleResponseObject (String header, double result)
+      {
+        this.header = header;
+        this.result = result;
+      }
   }

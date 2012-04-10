@@ -14,13 +14,33 @@
     </listener>
 
     <servlet>
-        <servlet-name>ExtService</servlet-name>
-        <servlet-class>org.webpki.securityproxy.test.extservice.ExtService</servlet-class>
+        <servlet-name>ExtHTTPService</servlet-name>
+        <servlet-class>org.webpki.securityproxy.test.extservice.ExtHTTPService</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ExtJavaService</servlet-name>
+        <servlet-class>org.webpki.securityproxy.test.extservice.ExtJavaService</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ServiceStatus</servlet-name>
+        <servlet-class>org.webpki.securityproxy.test.extservice.ServiceStatus</servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>ExtService</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <servlet-name>ExtHTTPService</servlet-name>
+        <url-pattern>/http</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ExtJavaService</servlet-name>
+        <url-pattern>/java</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ServiceStatus</servlet-name>
+        <url-pattern>/status</url-pattern>
     </servlet-mapping>
 
 </web-app>

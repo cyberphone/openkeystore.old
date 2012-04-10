@@ -16,9 +16,9 @@
  */
 package org.webpki.securityproxy.test.common;
 
-import org.webpki.securityproxy.ProxyUploadInterface;
+import org.webpki.securityproxy.JavaUploadInterface;
 
-public class SampleUploadObject implements ProxyUploadInterface
+public class SampleUploadObject implements JavaUploadInterface
   {
     private static final long serialVersionUID = 1L;
 

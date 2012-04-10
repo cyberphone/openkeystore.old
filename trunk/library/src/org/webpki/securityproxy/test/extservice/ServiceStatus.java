@@ -21,37 +21,20 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServlet;
 
-import org.webpki.securityproxy.test.common.SampleProxyObject;
-
 /**
- * External security proxy service.
- * 
- * This is the external service.
- * 
+ * This is the external service status servlet.
  */
-public class ExtService extends HttpServlet
+public class ServiceStatus extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
 
-    private static Logger logger = Logger.getLogger (ExtService.class.getName ());
-
-    @Override
-    public void init (ServletConfig config) throws ServletException
-      {
-        super.init (config);
-      }
-
-    @Override
-    public void destroy ()
-      {
-      }
+    private static Logger logger = Logger.getLogger (ServiceStatus.class.getName ());
 
     @Override
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
@@ -94,9 +77,6 @@ public class ExtService extends HttpServlet
     @Override
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        Init.proxy_server.processCall (new SampleProxyObject (new Double (request.getParameter ("X")),
-                                                              new Double (request.getParameter ("Y")),
-                                                              new Long (request.getParameter ("WAIT"))),
-                                       response);
+        throw new IOException ("POST not implemented");
       }
   }

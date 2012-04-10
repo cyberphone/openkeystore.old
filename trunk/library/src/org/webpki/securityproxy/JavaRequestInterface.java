@@ -19,20 +19,10 @@ package org.webpki.securityproxy;
 import java.io.Serializable;
 
 /**
- * Security proxy object containing the super class for all client-operations. Only
- * for proxy-internal use.
+ * Security proxy data object containing a request operation.
+ * The request is to be delivered to the local service (client).
+ * Implemented by the actual user-defined object.
  */
-abstract class InternalClientObject implements Serializable
+public interface JavaRequestInterface extends Serializable
   {
-    private static final long serialVersionUID = 1L;
-
-    String client_id;
-    
-    long time_stamp;
-
-    InternalClientObject (String client_id)
-      {
-        this.client_id = client_id;
-      }
-
   }

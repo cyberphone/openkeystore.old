@@ -19,13 +19,13 @@ package org.webpki.securityproxy;
 /**
  * Security proxy upload event handler.
  * Implement in proxy-using servlet.
- * @see ProxyServer#addUploadEventHandler(ProxyUploadHandler)
- * @see ProxyServer#deleteUploadEventHandler(ProxyUploadHandler)
+ * @see ProxyServer#addUploadEventHandler(ServerUploadHandler)
+ * @see ProxyServer#deleteUploadEventHandler(ServerUploadHandler)
  */
-public interface ProxyUploadHandler
+public interface ServerUploadHandler
   {
     /**
      * @param upload_object the uploaded data
      */
-    public void handleUploadedData (ProxyUploadInterface upload_object);
+    public void handleUploadedData (JavaUploadInterface upload_object);
   }

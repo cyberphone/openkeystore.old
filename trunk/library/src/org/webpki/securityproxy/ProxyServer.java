@@ -19,6 +19,7 @@ package org.webpki.securityproxy;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -35,6 +36,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class ProxyServer
   {
+    private static final long TIME_MARGIN = 600000;  // 10 minutes is a pretty good margin..,
+
     private static Logger logger = Logger.getLogger (ProxyServer.class.getName ());
 
     private static HashMap<String,ProxyServer> instances = new HashMap<String,ProxyServer> (); 
@@ -43,7 +46,7 @@ public class ProxyServer
 
     private Vector<RequestDescriptor> waiting_callers = new Vector<RequestDescriptor> ();
     
-    private Vector<ProxyUploadHandler> upload_event_subscribers = new Vector<ProxyUploadHandler> ();
+    private Vector<ServerUploadHandler> upload_event_subscribers = new Vector<ServerUploadHandler> ();
 
     private Vector<ProxyRequest> proxies = new Vector<ProxyRequest> ();
 
@@ -55,7 +58,7 @@ public class ProxyServer
 
     private InternalServerConfiguration server_configuration;
 
-    private ProxyRequestInterface last_request;
+    private JavaRequestInterface last_request;
 
     private int response_timeout_errors;
 
@@ -92,12 +95,12 @@ public class ProxyServer
         this.error_container = error_container;
       }
     
-    public synchronized void addUploadEventHandler (ProxyUploadHandler handler)
+    public synchronized void addUploadEventHandler (ServerUploadHandler handler)
       {
         upload_event_subscribers.add (handler);
       }
     
-    public synchronized void deleteUploadEventHandler (ProxyUploadHandler handler)
+    public synchronized void deleteUploadEventHandler (ServerUploadHandler handler)
       {
         upload_event_subscribers.remove (handler);
       }
@@ -149,6 +152,7 @@ public class ProxyServer
     private class RequestDescriptor extends Caller
       {
         HttpServletResponse response;
+        JavaResponseInterface java_response;  // If response == null java_response must be defined...
         InternalRequestObject request_object;
         InternalResponseObject response_object;
         ProxyRequest proxy;
@@ -192,16 +196,30 @@ public class ProxyServer
           {
             if (response_waiter.perform (server_configuration.response_timeout))
               {
-                //////////////////////////////////////////
-                // Normal response, output HTTP headers
-                //////////////////////////////////////////
-                response.setContentLength (response_object.response_data.data.length);
-                response.setContentType (response_object.response_data.mime_type);
-                for (String name : response_object.response_data.headers.keySet ())
+                if (response == null)
                   {
-                    response.setHeader (name, response_object.response_data.headers.get (name));
+                    try
+                      {
+                        java_response = (JavaResponseInterface)InternalObjectStream.readObject (response_object.response_data.data, request_object.proxy_request);
+                      }
+                    catch (ClassNotFoundException e)
+                      {
+                        throw new IOException (e);
+                      }
                   }
-                response.getOutputStream ().write (response_object.response_data.data);
+                else
+                  {
+                    //////////////////////////////////////////
+                    // Normal response, output HTTP headers
+                    //////////////////////////////////////////
+                    response.setContentLength (response_object.response_data.data.length);
+                    response.setContentType (response_object.response_data.mime_type);
+                    for (String name : response_object.response_data.headers.keySet ())
+                      {
+                        response.setHeader (name, response_object.response_data.headers.get (name));
+                      }
+                    response.getOutputStream ().write (response_object.response_data.data);
+                  }
               }
             else
               {
@@ -270,6 +288,10 @@ public class ProxyServer
     private void returnInternalFailure (HttpServletResponse response, String message) throws IOException
       {
         logger.severe (message);
+        if (response == null)
+          {
+            throw new IOException (message);
+          }
         if (error_container == null)
           {
             response.sendError (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
@@ -334,7 +356,7 @@ public class ProxyServer
      * @return The last (if any) request object. Will be <code>null</code> if
      *         there has been no external access yet.
      */
-    public synchronized ProxyRequestInterface getLastRequestObject ()
+    public synchronized JavaRequestInterface getLastRequestObject ()
       {
         return last_request;
       }
@@ -375,12 +397,12 @@ public class ProxyServer
         returnInternalFailure (request_descriptor.response, "Internal server error: " + err);
       }
 
-    private synchronized Caller processRequest (HttpServletResponse response, ProxyRequestInterface request_object) throws IOException, ServletException
+    private synchronized Caller processRequest (HttpServletResponse response, JavaRequestInterface request_object) throws IOException, ServletException
       {
         // Create a descriptor
         RequestDescriptor rd = new RequestDescriptor ();
         rd.response = response;
-        rd.request_object = new InternalRequestObject (last_request = request_object, next_caller_id++);
+        rd.request_object = new InternalRequestObject (last_request = request_object, next_caller_id++, response == null);
         response_queue.add (rd);
 
         // Now check if there is a proxy that can take this request
@@ -396,18 +418,7 @@ public class ProxyServer
         return preq;
       }
 
-    /**
-     * Proxy external call handler.
-     * <p>
-     * This method forwards an external call through the proxy tunnel, as well
-     * as returning the associated response data.
-     * 
-     * @param response
-     *          The response object of the external call Servlet.
-     * @param proxy_request_object
-     *          The request data object.
-     */
-    public void processCall (ProxyRequestInterface proxy_request_object, HttpServletResponse response) throws IOException, ServletException
+    private JavaResponseInterface internalProcessCall (JavaRequestInterface proxy_request_object, HttpServletResponse response) throws IOException, ServletException
       {
         ////////////////////////////////////////////////////////////////////////////////
         // Perform as much as possible of the "heavy" stuff outside of synchronization
@@ -416,7 +427,7 @@ public class ProxyServer
         if (server_configuration == null)
           {
             returnInternalFailure (response, "Proxy not started yet!");
-            return;
+            return null;
           }
 
         ////////////////////////////////////////////////////////////////////
@@ -435,6 +446,39 @@ public class ProxyServer
             ////////////////////////////////////////////////////////
             ci.transactResponse ();
           }
+        return ci instanceof ProxyRequest ? ((ProxyRequest)ci).request_descriptor.java_response : ((RequestDescriptor)ci).java_response;
+      }
+
+    /**
+     * Proxy external call handler.
+     * <p>
+     * This method forwards an external call through the proxy tunnel, as well
+     * as returning the associated response data.
+     * 
+     * @param proxy_request_object
+     *          The request data object.
+     * @param response
+     *          The response object of the external call Servlet.
+     */
+
+    public void processCall (JavaRequestInterface proxy_request_object, HttpServletResponse response) throws IOException, ServletException
+      {
+        internalProcessCall (proxy_request_object, response);
+      }
+
+    /**
+     * Proxy external call handler.
+     * <p>
+     * This method forwards an external call through the proxy tunnel, as well
+     * as returning the associated response data.
+     * 
+     * @param proxy_request_object
+     *          The request data object.
+     * @return  A Java object
+     */
+    public JavaResponseInterface processCall (JavaRequestInterface proxy_request_object) throws IOException, ServletException
+      {
+        return internalProcessCall (proxy_request_object, null);
       }
 
     private synchronized RequestDescriptor findProxyRequest (long caller_id)
@@ -565,26 +609,34 @@ public class ProxyServer
         /////////////////////////////////////////////////
         try
           {
-            Object object = InternalObjectStream.readObject (data, this);
-            if (object instanceof InternalServerConfiguration)
+            InternalClientObject client_object = (InternalClientObject) InternalObjectStream.readObject (data, this);
+            long server_time = new Date ().getTime ();
+            if (client_object.time_stamp > server_time + TIME_MARGIN ||
+                client_object.time_stamp < server_time - TIME_MARGIN)
+              {
+                logger.severe ("Proxy client/server time diff >" + TIME_MARGIN + " milliseconds");
+                returnInternalFailure (response, "Unrecognized object (check versions)");
+                return;
+              }
+            if (client_object instanceof InternalServerConfiguration)
               {
 
                 ////////////////////////////////////////////////
                 // First call. Reset all, get configuration
                 ////////////////////////////////////////////////
-                resetProxy ((InternalServerConfiguration) object);
+                resetProxy ((InternalServerConfiguration) client_object);
                 if (!upload_event_subscribers.isEmpty ())
                   {
                     response.setStatus (HttpServletResponse.SC_OK);
                     return;
                   }
               }
-            else if (object instanceof InternalResponseObject)
+            else if (client_object instanceof InternalResponseObject)
               {
                 ////////////////////////////////////////////////
                 // Data to process!
                 ////////////////////////////////////////////////
-                InternalResponseObject ro = (InternalResponseObject) object;
+                InternalResponseObject ro = (InternalResponseObject) client_object;
                 if (wrongClientID (ro, response))
                   {
                     return;
@@ -605,17 +657,17 @@ public class ProxyServer
                     return;
                   }
               }
-            else if (object instanceof InternalUploadObject)
+            else if (client_object instanceof InternalUploadObject)
               {
                 ////////////////////////////////////////////////
-                // Must be an "Upload" object
+                // Must be an "Upload" client_object
                 ////////////////////////////////////////////////
-                InternalUploadObject upload = (InternalUploadObject) object;
+                InternalUploadObject upload = (InternalUploadObject) client_object;
                 if (wrongClientID (upload, response))
                   {
                     return;
                   }
-                for (ProxyUploadHandler handler : upload_event_subscribers)
+                for (ServerUploadHandler handler : upload_event_subscribers)
                   {
                     handler.handleUploadedData (upload.getPayload (handler));
                   }
@@ -623,9 +675,9 @@ public class ProxyServer
             else
               {
                 ////////////////////////////////////////////////
-                // Must be an "Idle" object
+                // Must be an "Idle" client_object
                 ////////////////////////////////////////////////
-                InternalIdleObject idle = (InternalIdleObject) object;
+                InternalIdleObject idle = (InternalIdleObject) client_object;
                 if (wrongClientID (idle, response))
                   {
                     return;

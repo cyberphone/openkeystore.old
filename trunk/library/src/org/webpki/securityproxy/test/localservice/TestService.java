@@ -24,18 +24,20 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import org.webpki.securityproxy.JavaResponseInterface;
 import org.webpki.securityproxy.ProxyClient;
-import org.webpki.securityproxy.ProxyRequestHandler;
-import org.webpki.securityproxy.ProxyRequestInterface;
-import org.webpki.securityproxy.ProxyResponseWrapper;
+import org.webpki.securityproxy.ClientRequestHandler;
+import org.webpki.securityproxy.JavaRequestInterface;
+import org.webpki.securityproxy.HTTPResponseWrapper;
 
-import org.webpki.securityproxy.test.common.SampleProxyObject;
+import org.webpki.securityproxy.test.common.SampleRequestObject;
+import org.webpki.securityproxy.test.common.SampleResponseObject;
 import org.webpki.securityproxy.test.common.SampleUploadObject;
 
 /**
  * Test service using the security proxy system. 
  */
-public class TestService implements ProxyRequestHandler
+public class TestService implements ClientRequestHandler
   {
     private static Logger logger = Logger.getLogger (TestService.class.getCanonicalName ());
     
@@ -80,13 +82,12 @@ public class TestService implements ProxyRequestHandler
         throw new IOException ("Boolean syntax error: " + name);
       }
 
-    @Override
-    public ProxyResponseWrapper handleProxyRequest (ProxyRequestInterface proxy_req_wrapper) throws IOException
+    private double getRequest (JavaRequestInterface request_object) throws IOException
       {
-        logger.info ("Received a \"" + proxy_req_wrapper.getClass ().getSimpleName () + "\" request[" + ++count + "]" );
-        SampleProxyObject sps = (SampleProxyObject) proxy_req_wrapper;
+        logger.info ("Received a \"" + request_object.getClass ().getSimpleName () + "\" request[" + ++count + "]" );
+        SampleRequestObject sps = (SampleRequestObject) request_object;
         long server_wait = sps.getServerWait ();
-        if (server_wait != 0 && count % 10 == 0)
+        if (server_wait != 0 && count % 9 == 0)
           {
             try
               {
@@ -97,7 +98,19 @@ public class TestService implements ProxyRequestHandler
                 throw new IOException (e);
               }
           }
-        return new ProxyResponseWrapper (("Result[" + count + "]=" + (sps.getX () * sps.getY ())).getBytes ("UTF-8"), "text/plain");
+        return sps.getX () * sps.getY ();
+      }
+
+    @Override
+    public HTTPResponseWrapper handleHTTPResponseRequest (JavaRequestInterface request_object) throws IOException
+      {
+        return new HTTPResponseWrapper (("HTTP Result[" + count + "]=" + getRequest (request_object)).getBytes ("UTF-8"), "text/plain");
+      }
+
+    @Override
+    public JavaResponseInterface handleJavaResponseRequest (JavaRequestInterface request_object) throws IOException
+      {
+        return new SampleResponseObject ("JAVA Result[" + count + "]=", getRequest (request_object));
       }
 
     public static void main (String[] args)

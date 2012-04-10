@@ -14,39 +14,34 @@
  *  limitations under the License.
  *
  */
-package org.webpki.securityproxy.test.common;
+package org.webpki.securityproxy;
 
-import org.webpki.securityproxy.ProxyRequestInterface;
+import java.io.Serializable;
 
-public class SampleProxyObject implements ProxyRequestInterface
+import java.util.LinkedHashMap;
+
+/**
+ * Security proxy object containing a local service's HTTP response.
+ * @see ClientRequestHandler
+ */
+public class HTTPResponseWrapper implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    private double x;
- 
-    private double y;
+    byte[] data;
     
-    private long server_wait;
+    String mime_type;
     
-    public double getX ()
+    LinkedHashMap<String,String> headers = new LinkedHashMap<String,String> ();
+    
+    public HTTPResponseWrapper (byte[] data, String mime_type)
       {
-        return x;
-      }
-
-    public double getY ()
-      {
-        return y;
-      }
-
-    public long getServerWait ()
-      {
-        return server_wait;
+        this.data = data;
+        this.mime_type = mime_type;
       }
     
-    public SampleProxyObject (double x, double y, long server_wait)
+    public void addHeader (String name, String value)
       {
-        this.x = x;
-        this.y = y;
-        this.server_wait = server_wait;
+        headers.put (name, value);
       }
   }

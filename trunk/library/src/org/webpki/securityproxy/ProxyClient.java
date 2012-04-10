@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.BufferedInputStream;
 
+import java.util.Date;
 import java.util.Vector;
 
 import java.util.logging.Level;
@@ -53,7 +54,7 @@ public class ProxyClient
   {
     private static Logger logger = Logger.getLogger (ProxyClient.class.getCanonicalName ());
     
-    private ProxyRequestHandler request_handler;
+    private ClientRequestHandler request_handler;
     
     /**
      * Creates a security proxy client.
@@ -134,6 +135,11 @@ public class ProxyClient
                               }
                           }
                       }
+
+                    /////////////////////////////////////////////////////////////////////////////////////
+                    // Add a time-stamp
+                    /////////////////////////////////////////////////////////////////////////////////////
+                    send_object.time_stamp = new Date ().getTime ();
 
                     /////////////////////////////////////////////////////////////////////////////////////
                     // The following only occurs if there is some kind of network problem
@@ -234,7 +240,15 @@ public class ProxyClient
                         /////////////////////////////////////////////////////////////////////////////////////
                         // Now do the request/response to the local service.  Honor waiting uploads as well
                         /////////////////////////////////////////////////////////////////////////////////////
-                        send_object = new InternalResponseObject (request_handler.handleProxyRequest (request_object.proxy_request), 
+                        send_object = new InternalResponseObject (request_object.java_flag ?
+                                                                       new HTTPResponseWrapper (
+                                                                            InternalObjectStream.writeObject (
+                                                                                request_handler.handleJavaResponseRequest (request_object.proxy_request)
+                                                                                                                ),
+                                                                                "application/java"
+                                                                                               )
+                                                                                           :
+                                                                       request_handler.handleHTTPResponseRequest (request_object.proxy_request), 
                                                                   request_object.caller_id,
                                                                   client_id,
                                                                   !upload_objects.isEmpty ());
@@ -598,7 +612,7 @@ public class ProxyClient
      * @param debug
      *          Defines if debug output is to be created or not.
      */
-    public void initProxy (ProxyRequestHandler handler,
+    public void initProxy (ClientRequestHandler handler,
                            String proxy_url,
                            int max_workers,
                            int cycle_time,
@@ -619,12 +633,12 @@ public class ProxyClient
     
     /**
      * Put an object for upload in a queue.
-     * MUST NOT be called before {@link #initProxy(ProxyRequestHandler, String, int, int, int, boolean)}.
+     * MUST NOT be called before {@link #initProxy(ClientRequestHandler, String, int, int, int, boolean)}.
      * 
      * @param upload_object a derived object
      * @throws IOException 
      */
-    public void addUploadObject (ProxyUploadInterface upload_object) throws IOException
+    public void addUploadObject (JavaUploadInterface upload_object) throws IOException
       {
         if (request_handler == null)
           {

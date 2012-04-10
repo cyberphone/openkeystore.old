@@ -58,7 +58,7 @@ public class TestClient
                 double x = random.nextDouble () * 10;
                 double y = random.nextDouble () * 10;
                 wrapper.setHeader ("Content-Type", "application/x-www-form-urlencoded");
-                wrapper.makePostRequestUTF8 (argc[0], "X=" + x + "&Y=" + y + "&WAIT=" + server_wait);
+                wrapper.makePostRequestUTF8 (argc[0] + (count % 2 == 0 ? "/http" : "/java"), "X=" + x + "&Y=" + y + "&WAIT=" + server_wait);
                 if (wrapper.getResponseCode () != HttpServletResponse.SC_OK)
                   {
                     System.out.println ("Failed: " + wrapper.getResponseMessage () + "\n" + wrapper.getDataUTF8 ());

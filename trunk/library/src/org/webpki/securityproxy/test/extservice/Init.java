@@ -23,12 +23,12 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.webpki.securityproxy.ProxyServer;
-import org.webpki.securityproxy.ProxyUploadHandler;
-import org.webpki.securityproxy.ProxyUploadInterface;
+import org.webpki.securityproxy.ServerUploadHandler;
+import org.webpki.securityproxy.JavaUploadInterface;
 import org.webpki.securityproxy.test.common.SampleUploadObject;
 
 
-public class Init implements ServletContextListener, ProxyUploadHandler
+public class Init implements ServletContextListener, ServerUploadHandler
   {
     private static Logger logger = Logger.getLogger (Init.class.getName ());
     
@@ -51,7 +51,7 @@ public class Init implements ServletContextListener, ProxyUploadHandler
       }
 
     @Override
-    public void handleUploadedData (ProxyUploadInterface upload_payload)
+    public void handleUploadedData (JavaUploadInterface upload_payload)
       {
         uploads.add (0, (SampleUploadObject) upload_payload);
         if (uploads.size () > HISTORY)

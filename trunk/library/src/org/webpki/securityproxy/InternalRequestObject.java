@@ -26,16 +26,19 @@ class InternalRequestObject implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    ProxyRequestInterface proxy_request;
+    JavaRequestInterface proxy_request;
+    
+    boolean java_flag;  // Java = true means return java object else http
 
     ////////////////////////////////////////////////////////
     // Due to the multi-channel proxy, calls need IDs
     ////////////////////////////////////////////////////////
     long caller_id;
 
-    InternalRequestObject (ProxyRequestInterface proxy_request, long caller_id)
+    InternalRequestObject (JavaRequestInterface proxy_request, long caller_id, boolean java_flag)
       {
         this.proxy_request = proxy_request;
         this.caller_id = caller_id;
+        this.java_flag = java_flag;
       }
   }

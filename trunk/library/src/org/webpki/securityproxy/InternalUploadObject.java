@@ -29,12 +29,12 @@ class InternalUploadObject extends InternalClientObject implements Serializable
 
     private byte[] data;
     
-    ProxyUploadInterface getPayload (ProxyUploadHandler handler) throws IOException, ClassNotFoundException
+    JavaUploadInterface getPayload (ServerUploadHandler handler) throws IOException, ClassNotFoundException
       {
-        return (ProxyUploadInterface)InternalObjectStream.readObject (data, handler);
+        return (JavaUploadInterface)InternalObjectStream.readObject (data, handler);
       }
 
-    InternalUploadObject (String client_id, ProxyUploadInterface payload) throws IOException
+    InternalUploadObject (String client_id, JavaUploadInterface payload) throws IOException
       {
         super (client_id);
         data = InternalObjectStream.writeObject (payload);

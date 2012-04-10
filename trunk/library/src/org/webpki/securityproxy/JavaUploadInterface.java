@@ -19,10 +19,11 @@ package org.webpki.securityproxy;
 import java.io.Serializable;
 
 /**
- * Security proxy data object containing a request operation.
- * The request is to be delivered to the local service (client).
+ * Security proxy data object containing an upload operation.
  * Implemented by the actual user-defined object.
+ * 
+ * @see ProxyClient#addUploadObject(JavaUploadInterface)
  */
-public interface ProxyRequestInterface extends Serializable
+public interface JavaUploadInterface extends Serializable
   {
   }
