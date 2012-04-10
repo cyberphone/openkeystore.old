@@ -614,8 +614,7 @@ public class ProxyServer
             if (client_object.time_stamp > server_time + TIME_MARGIN ||
                 client_object.time_stamp < server_time - TIME_MARGIN)
               {
-                logger.severe ("Proxy client/server time diff >" + TIME_MARGIN + " milliseconds");
-                returnInternalFailure (response, "Unrecognized object (check versions)");
+                returnInternalFailure (response, "Proxy client/server time diff >" + TIME_MARGIN + " milliseconds");
                 return;
               }
             if (client_object instanceof InternalServerConfiguration)

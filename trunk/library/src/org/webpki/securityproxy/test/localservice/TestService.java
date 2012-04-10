@@ -41,12 +41,19 @@ public class TestService implements ClientRequestHandler
   {
     private static Logger logger = Logger.getLogger (TestService.class.getCanonicalName ());
     
-    private static final String DEFAULT_PROPERTIES     = "securityproxy.properties";
+    private static final String DEFAULT_PROPERTIES_RESOURCE = "securityproxy.properties";
+    
     private static final String PROPERTY_PROXY_URL     = "securityproxy.url";
     private static final String PROPERTY_MAX_WORKERS   = "securityproxy.max-workers";
     private static final String PROPERTY_CYCLE_TIME    = "securityproxy.cycle-time";
     private static final String PROPERTY_RETRY_TIMEOUT = "securityproxy.retry-timeout";
     private static final String PROPERTY_DEBUG         = "securityproxy.debug";
+
+    private static final String PROPERTY_TRUSTSTORE    = "securityproxy.truststore";
+    private static final String PROPERTY_STOREPASS     = "securityproxy.storepass";
+
+    private static final String PROPERTY_KEYSTORE      = "securityproxy.keystore";
+    private static final String PROPERTY_KEYPASS       = "securityproxy.keypass";
 
     ProxyClient proxy_client = new ProxyClient ();
     
@@ -137,7 +144,7 @@ public class TestService implements ClientRequestHandler
         ////////////////////////////////////////////////////////////////////////////////////////////
         if (is == null)
           {
-            is = this.getClass ().getResourceAsStream ("/META-INF/" + DEFAULT_PROPERTIES);
+            is = this.getClass ().getResourceAsStream ("/META-INF/" + DEFAULT_PROPERTIES_RESOURCE);
           }
         properties = new Properties ();
         properties.load (is);
@@ -155,6 +162,14 @@ public class TestService implements ClientRequestHandler
         ////////////////////////////////////////////////////////////////////////////////////////////
         // Initialization
         ////////////////////////////////////////////////////////////////////////////////////////////
+        if (properties.containsKey (PROPERTY_TRUSTSTORE))
+          {
+            proxy_client.setProxyServiceTruststore (getPropertyString (PROPERTY_TRUSTSTORE), getPropertyString (PROPERTY_STOREPASS));
+          }
+        if (properties.containsKey (PROPERTY_KEYSTORE))
+          {
+            proxy_client.setProxyServiceClientKey (getPropertyString (PROPERTY_KEYSTORE), getPropertyString (PROPERTY_KEYPASS));
+          }
         proxy_client.initProxy (this,
                                 getPropertyString (PROPERTY_PROXY_URL),
                                 getPropertyInt (PROPERTY_MAX_WORKERS),

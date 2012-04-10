@@ -324,9 +324,18 @@
     <delete dir="${dist_dir}"/>
   </target>
 
+  <target name="_tomcat-server-bck" unless="tomcat.server.bck">
+  	<echo message="IMPORTANT: ${env.CATALINA_HOME}/conf/server.xml copied to server.xml.bck !!!"/>
+    <copy tofile="${env.CATALINA_HOME}/conf/server.xml.bck" preservelastmodified="true" overwrite="true" file="${env.CATALINA_HOME}/conf/server.xml"/>
+  </target>
+
   <target name="_tomcat-deploy" if="tomcat-deploy">
   	<echo message="TOMCAT DEPLOY"/>
     <fail message="CATALINA_HOME must be set to environment!" unless="env.CATALINA_HOME"/>
+    <condition property="tomcat.server.bck">
+	      <available file="${env.CATALINA_HOME}/conf/server.xml.bck"/>
+    </condition>
+  	<antcall target="_tomcat-server-bck"/>
     <copy todir="${env.CATALINA_HOME}/conf" preservelastmodified="true" overwrite="true" file="${spts_dir}/server.xml"/>
     <copy todir="${env.CATALINA_HOME}/lib" preservelastmodified="true" overwrite="true" file="${dist_dir}/${webpki-securityproxy}"/>
     <copy todir="${env.CATALINA_HOME}/webapps" preservelastmodified="true" overwrite="true" file="${dist_dir}/spts-intproxy.war"/>
