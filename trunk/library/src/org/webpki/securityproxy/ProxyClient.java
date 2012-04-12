@@ -197,7 +197,7 @@ public class ProxyClient
                     /////////////////////////////////////////////////////////////////////////////////////
                     if (restarting)
                       {
-                        request_handler.handleProxyInitialization ();
+                        request_handler.handleInitialization ();
                       }
                     throwed_an_iox = false;
 

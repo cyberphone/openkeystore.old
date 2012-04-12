@@ -197,7 +197,7 @@ public class TestService implements ClientRequestHandler
       }
 
     @Override
-    public void handleProxyInitialization () throws IOException
+    public void handleInitialization () throws IOException
       {
         logger.info ("Got restart signal!");
         uploadData ();

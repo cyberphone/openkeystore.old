@@ -43,5 +43,5 @@ public interface ClientRequestHandler
      * ({@link JavaUploadInterface})
      * each time the proxy is started or restarts due to errors.
      */
-    public void handleProxyInitialization () throws IOException;
+    public void handleInitialization () throws IOException;
   }
