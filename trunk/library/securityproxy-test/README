@@ -1,0 +1,66 @@
+Testing the security proxy
+==========================
+
+Prerequisites
+- JDK 1.6
+- ANT 1.8.2
+- Tomcat 6.X
+
+1. Define an environment variable CATALINA_HOME=PATH_TO_TOMCAT_INSTALL_DIRECTORY
+
+2. Build and deploy by performing:
+
+ant -f PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/build/build.xml spts -Dtomcat-deploy=true
+
+NOTE: "server.xml" is taken from the same directory as this file resides in!
+
+
+3. If you start Tomcat it should not return any errors
+
+
+Starting the Local Service
+==========================
+java -jar PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/spts-service.jar {optional-property-file}
+
+NOTE: The service uses the properties defined in "securityproxy.properties" located in
+the same directory as this file which is compiled into the JAR.  You may also provide
+a file as input argument so you don't have to recompile for each property change.
+
+Starting the Local Service should generate a log event in Tomcat
+
+
+Calling the Proxy
+=================
+You will get a help screen by performing:
+
+java -jar PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/spts-testclient.jar
+
+A single call would look like this:
+
+java -jar PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/spts-testclient.jar http://localhost:8080/spts-extservice
+
+You can also call the proxy with a browser on http://localhost:8080/spts-extservice/status
+
+
+Using TLS
+=========
+The easiest way of securing the communication between the local service
+and the proxy is to use a single self-signed certificate and key.  This
+can be created by the following command: 
+
+java -cp PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/webpki.org-libext-1.00.jar:\
+PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/resources/third-party-jars/bcprov-jdk16-145.jar \
+org.webpki.ca.CommandLineCA -selfsigned -subject CN=proxyhostname \
+-validity/start 2010-01-01T00:00:00 -validity/end 2030-01-01T00:00:00 \
+-out/keystore proxy.jks -out/storepass testing -out/keypass testing
+
+The created file "proxy.jks" can be used in both ends serving as truststore as
+well as keystore and having the password "testing".
+
+If you use the Apache APR library you must convert the JKS into a PEM file:
+
+java -cp PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/webpki.org-libext-1.00.jar:\
+PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/resources/third-party-jars/bcprov-jdk16-145.jar \
+org.webpki.tools.KeyStore2PEMConverter proxy.jks testing proxy.pem
+
+See file "server-with-APR-and-TLS.xml" how to configure "server.xml". 

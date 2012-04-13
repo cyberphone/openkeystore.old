@@ -42,6 +42,8 @@ import java.security.spec.ECGenParameterSpec;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import org.webpki.asn1.cert.DistinguishedName;
 
 import org.webpki.crypto.SignatureAlgorithms;
@@ -999,7 +1001,7 @@ public class CommandLineCA
       {
         try
           {
-            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            Security.insertProviderAt (new BouncyCastleProvider(), 1);
             CommandLineCA clca = new CommandLineCA ();
             clca.decodeCommandLine (argv);
             clca.certify ();
