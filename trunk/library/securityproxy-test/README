@@ -1,10 +1,27 @@
-Testing the security proxy
-==========================
+Using the Security Proxy
+========================
 
 Prerequisites
 - JDK 1.6
 - ANT 1.8.2
 - Tomcat 6.X
+
+It is recommended following the steps below that installs a runnable test
+proxy that is useful as a starting point for a custom proxy application.
+
+
+Building the Documentation
+==========================
+
+ant -f PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/build/build.xml doc
+
+The Security Proxy documentation is generated in:
+
+PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/doc/org/webpki/securityproxy/package-summary.html
+
+
+Building and Deploying the Software
+===================================
 
 1. Define an environment variable CATALINA_HOME=PATH_TO_TOMCAT_INSTALL_DIRECTORY
 
@@ -13,7 +30,6 @@ Prerequisites
 ant -f PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/build/build.xml spts -Dtomcat-deploy=true
 
 NOTE: "server.xml" is taken from the same directory as this file resides in!
-
 
 3. If you start Tomcat it should not return any errors
 
