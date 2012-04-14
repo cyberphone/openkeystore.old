@@ -16,7 +16,7 @@
 
     <servlet-mapping>
         <servlet-name>IntProxy</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/proxychannel</url-pattern>
     </servlet-mapping>
 
 </web-app>

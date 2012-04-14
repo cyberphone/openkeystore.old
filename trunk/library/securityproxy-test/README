@@ -53,7 +53,7 @@ java -jar PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/spts-testclient.jar
 
 A single call would look like this:
 
-java -jar PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/spts-testclient.jar http://localhost:8080/spts-extservice
+java -jar PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/spts-testclient.jar http://localhost:8080
 
 You can also call the proxy with a browser on http://localhost:8080/spts-extservice/status
 

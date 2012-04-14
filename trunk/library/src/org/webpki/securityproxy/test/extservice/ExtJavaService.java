@@ -39,12 +39,6 @@ public class ExtJavaService extends HttpServlet
     private static Logger logger = Logger.getLogger (ExtJavaService.class.getName ());
 
     @Override
-    public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
-      {
-        throw new IOException ("GET not implemented");
-      }
-
-    @Override
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
         SampleResponseObject sro = (SampleResponseObject) Init.proxy_server.processCall (new SampleRequestObject (new Double (request.getParameter ("X")),

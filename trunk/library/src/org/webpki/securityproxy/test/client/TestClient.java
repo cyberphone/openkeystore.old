@@ -33,7 +33,7 @@ public class TestClient
         if (argc.length != 1 && argc.length != 4)
           {
             System.out.println ("URL [count wait serverwait]\n" +
-                                "  URL using standard setup: http://localhost:8080/spts-extservice\n"+
+                                "  URL using standard setup: http://localhost:8080\n"+
                                 "  count is 1 if not given\n" +
                                 "  wait is given in millseconds\n" +
                                 "  serverwait is introduced every 10:th call and given in millseconds");
