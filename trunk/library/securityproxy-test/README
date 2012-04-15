@@ -29,7 +29,7 @@ Building and Deploying the Software
 
 ant -f PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/build/build.xml spts -Dtomcat-deploy=true
 
-NOTE: "server.xml" is taken from the same directory as this file resides in!
+NOTE: "server.xml" is taken from "tomcat.conf" sub-directory.
 
 3. If you start Tomcat it should not return any errors
 
@@ -40,7 +40,7 @@ java -jar PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/spts-service.jar {op
 
 NOTE: The service uses the properties defined in "securityproxy.properties" located in
 the same directory as this file which is compiled into the JAR.  You may also provide
-a file as input argument so you don't have to recompile for each property change.
+a propery file as input argument so you don't have to recompile for each property change.
 
 Starting the Local Service should generate a log event in Tomcat
 
@@ -55,7 +55,7 @@ A single call would look like this:
 
 java -jar PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/spts-testclient.jar http://localhost:8080
 
-You can also call the proxy with a browser on http://localhost:8080/spts-extservice/status
+You can also call the proxy with a browser on http://localhost:8080/status
 
 
 Using TLS
@@ -79,4 +79,6 @@ java -cp PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/webpki.org-libext-1.0
 PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/resources/third-party-jars/bcprov-jdk16-145.jar \
 org.webpki.tools.KeyStore2PEMConverter proxy.jks testing proxy.pem
 
-See file "server-with-APR-and-TLS.xml" how to configure "server.xml". 
+See "tomcat.con/server-with-APR-and-TLS.xml" for configuring "server.xml" for TLS and APR.
+
+NOTE: In Windows the path separator is ";" instead of ":"! 

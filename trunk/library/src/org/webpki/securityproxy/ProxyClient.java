@@ -142,7 +142,7 @@ public class ProxyClient
                     send_object.time_stamp = new Date ().getTime ();
 
                     /////////////////////////////////////////////////////////////////////////////////////
-                    // The following only occurs if there is some kind of network problem
+                    // The following timeout only occurs if there is some kind of network problem
                     /////////////////////////////////////////////////////////////////////////////////////
                     conn.setReadTimeout ((cycle_time * 3) / 2 + 30000);
 
@@ -287,24 +287,17 @@ public class ProxyClient
                         // Kill and remove all proxy channels (threads)
                         /////////////////////////////////////////////////////////////////////////////////////
                         killProxy ();
-
-                        if (++error_count == MAX_ERRORS)
-                          {
-                            /////////////////////////////////////////////////////////////////////////////////////
-                            // We give up completely!
-                            /////////////////////////////////////////////////////////////////////////////////////
-                            logger.severe ("Hard error.  Shut down the proxy!");
-                            return;
-                          }
+                        ++error_count;
 
                         /////////////////////////////////////////////////////////////////////////////////////
-                        // It looks bad but we try restarting before shutting down the proxy
+                        // This looks pretty bad so we try restarting...
                         /////////////////////////////////////////////////////////////////////////////////////
                         running = true;
                         send_object = server_configuration;
                         channels.add (this);
                         try
                           {
+                            int retry_timeout = (request_timeout * 3) / 2;
                             if (debug)
                               {
                                 logger.info ("Channel[" + channel_id + "] resumes (after waiting " + retry_timeout/1000 + "s) for a new try...");
@@ -332,7 +325,7 @@ public class ProxyClient
 
     private int cycle_time;
 
-    private int retry_timeout;
+    private int request_timeout;
 
     private boolean debug;
 
@@ -356,13 +349,6 @@ public class ProxyClient
     private Vector<ProxyChannel> channels = new Vector<ProxyChannel> ();
 
     private Vector<InternalUploadObject> upload_objects = new Vector<InternalUploadObject> ();
-
-    ////////////////////////////////////
-    // Defaults
-    ////////////////////////////////////
-    private static final int REQUEST_TIMEOUT = 60 * 1000;
-
-    private static final int MAX_ERRORS = 1000;
 
     private void prepareForSSL ()
       {
@@ -433,7 +419,7 @@ public class ProxyClient
                 new SecureRandom ().nextBytes (cid);
                 client_id = toHexString (cid);
 
-                server_configuration = new InternalServerConfiguration (cycle_time, REQUEST_TIMEOUT, REQUEST_TIMEOUT, client_id, debug);
+                server_configuration = new InternalServerConfiguration (cycle_time, request_timeout, client_id);
                 idle_object = new InternalIdleObject (client_id);
                 channel.send_object = server_configuration;
                 if (debug)
@@ -606,9 +592,9 @@ public class ProxyClient
      * @param max_workers
      *          The maximum number of parallel proxy channels to use.
      * @param cycle_time
-     *          The timeout in seconds for the &quot;waiting&quot; state.
-     * @param retry_timeout
-     *          The timeout in seconds for resuming operation after a failure.
+     *          The timeout in seconds for the HTTP &quot;waiting&quot; state.
+     * @param request_timeout
+     *          The timeout in seconds for external proxy calls.
      * @param debug
      *          Defines if debug output is to be created or not.
      */
@@ -616,7 +602,7 @@ public class ProxyClient
                            String proxy_url,
                            int max_workers,
                            int cycle_time,
-                           int retry_timeout,
+                           int request_timeout,
                            boolean debug) throws IOException
       {
         killProxy ();
@@ -625,7 +611,7 @@ public class ProxyClient
         this.proxy_url = proxy_url;
         this.max_workers = max_workers;
         this.cycle_time = cycle_time * 1000;
-        this.retry_timeout = retry_timeout * 1000;
+        this.request_timeout = request_timeout * 1000;
         this.debug = debug;
         prepareForSSL ();
         spawnProxy ();

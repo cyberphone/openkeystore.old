@@ -16,12 +16,10 @@
  */
 package org.webpki.securityproxy;
 
-import java.io.Serializable;
-
 /**
  * Security proxy object containing an idle operation. Only for proxy-internal use.
  */
-class InternalIdleObject extends InternalClientObject implements Serializable
+class InternalIdleObject extends InternalClientObject
   {
     private static final long serialVersionUID = 1L;
 

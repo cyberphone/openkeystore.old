@@ -16,45 +16,23 @@
  */
 package org.webpki.securityproxy;
 
-import java.io.Serializable;
-
 /**
  * Security proxy object containing a serialized server configuration which is sent
  * from the client proxy to the server proxy during startup.
  */
-class InternalServerConfiguration extends InternalClientObject implements Serializable
+class InternalServerConfiguration extends InternalClientObject
   {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Returns the version of the proxy scheme.
-     * <p>
-     * Version matching is performed by the proxy server and client during the
-     * establishment of the first proxy channel.
-     * 
-     * @return A proxy version string.
-     */
-    static String getVersion ()
-      {
-        return "1.0";
-      }
-
     int proxy_timeout;
     int request_timeout;
-    int response_timeout;
-    boolean debug;
 
     InternalServerConfiguration (int proxy_timeout,
-                         int request_timeout,
-                         int response_timeout, 
-                         String client_id,
-                         boolean debug)
+                                 int request_timeout,
+                                 String client_id)
       {
         super (client_id);
         this.proxy_timeout = proxy_timeout;
         this.request_timeout = request_timeout;
-        this.response_timeout = response_timeout;
-        this.debug = debug;
       }
-
   }

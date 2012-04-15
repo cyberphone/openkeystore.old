@@ -34,5 +34,4 @@ abstract class InternalClientObject implements Serializable
       {
         this.client_id = client_id;
       }
-
   }

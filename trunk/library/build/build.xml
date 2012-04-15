@@ -336,12 +336,11 @@
 	      <available file="${env.CATALINA_HOME}/conf/server.xml.bck"/>
     </condition>
   	<antcall target="_tomcat-server-bck"/>
-    <copy todir="${env.CATALINA_HOME}/conf" preservelastmodified="true" overwrite="true" file="${spts_dir}/server.xml"/>
     <copy todir="${env.CATALINA_HOME}/lib" preservelastmodified="true" overwrite="true" file="${dist_dir}/${webpki-securityproxy}"/>
     <copy todir="${env.CATALINA_HOME}/securityproxy" preservelastmodified="true" overwrite="true" file="${dist_dir}/spts-intproxy.war"/>
     <copy todir="${env.CATALINA_HOME}/securityproxy" preservelastmodified="true" overwrite="true" file="${dist_dir}/spts-extservice.war"/>
     <copy todir="${env.CATALINA_HOME}/conf" preservelastmodified="true" overwrite="true">
- 	   <fileset dir="../securityproxy-test/tomcat"/>
+ 	   <fileset dir="../securityproxy-test/tomcat.conf"/>
     </copy>
   </target>
 

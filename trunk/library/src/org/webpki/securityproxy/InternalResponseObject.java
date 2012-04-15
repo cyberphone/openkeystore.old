@@ -16,13 +16,11 @@
  */
 package org.webpki.securityproxy;
 
-import java.io.Serializable;
-
 /**
  * Security proxy object containing a serialized HTTP response.
  * Internal use only.  Data is tunneled through the proxy out to the requester.
  */
-class InternalResponseObject extends InternalClientObject implements Serializable
+class InternalResponseObject extends InternalClientObject
   {
     private static final long serialVersionUID = 1L;
     
@@ -42,5 +40,4 @@ class InternalResponseObject extends InternalClientObject implements Serializabl
         this.response_data = response_data;
         this.return_immediately = return_immediately;
       }
-
   }

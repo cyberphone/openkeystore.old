@@ -194,8 +194,12 @@ public class ProxyServer
 
         void transactResponse () throws IOException, ServletException
           {
-            if (response_waiter.perform (server_configuration.response_timeout))
+            if (response_waiter.perform (server_configuration.request_timeout))
               {
+                if (response_object == null)
+                  {
+                    return;  // Special case: Restart
+                  }
                 if (response == null)
                   {
                     try
@@ -261,7 +265,15 @@ public class ProxyServer
                 if (proxy_worker.perform (server_configuration.proxy_timeout))
                   {
                     // We got some real data!
-                    proxy_response.getOutputStream ().write (InternalObjectStream.writeObject (request_descriptor.request_object));
+                    // However, we may also just be restarting...
+                    if (request_descriptor == null)
+                      {
+                        proxy_response.setStatus (HttpServletResponse.SC_OK);
+                      }
+                    else
+                      {
+                        proxy_response.getOutputStream ().write (InternalObjectStream.writeObject (request_descriptor.request_object));
+                      }
                   }
                 else
                   {

@@ -17,13 +17,12 @@
 package org.webpki.securityproxy;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 /**
  * Security proxy object containing an upload operation. 
  * Only for proxy-internal use.
  */
-class InternalUploadObject extends InternalClientObject implements Serializable
+class InternalUploadObject extends InternalClientObject
   {
     private static final long serialVersionUID = 1L;
 
