@@ -1,1 +1,1 @@
-<Context docBase="${catalina.home}/securityproxy/spts-intproxy.war"/>
+<Context docBase="${catalina.home}/securityproxy/spts-proxychannel.war"/>
