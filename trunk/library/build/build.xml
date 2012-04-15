@@ -337,7 +337,7 @@
     </condition>
   	<antcall target="_tomcat-server-bck"/>
     <copy todir="${env.CATALINA_HOME}/lib" preservelastmodified="true" overwrite="true" file="${dist_dir}/${webpki-securityproxy}"/>
-    <copy todir="${env.CATALINA_HOME}/securityproxy" preservelastmodified="true" overwrite="true" file="${dist_dir}/spts-intproxy.war"/>
+    <copy todir="${env.CATALINA_HOME}/securityproxy" preservelastmodified="true" overwrite="true" file="${dist_dir}/spts-proxychannel.war"/>
     <copy todir="${env.CATALINA_HOME}/securityproxy" preservelastmodified="true" overwrite="true" file="${dist_dir}/spts-extservice.war"/>
     <copy todir="${env.CATALINA_HOME}/conf" preservelastmodified="true" overwrite="true">
  	   <fileset dir="../securityproxy-test/tomcat.conf"/>
@@ -373,11 +373,7 @@
       </fileset>
     </jar>
 
-  	<war warfile="${dist_dir}/spts-intproxy.war" webxml="${spts_dir}/intproxy-web.xml">
-      <classes dir="${temp_dir}">
-        <include name="org/webpki/securityproxy/test/intproxy/**"/>
-      </classes>
-    </war>
+  	<war warfile="${dist_dir}/spts-proxychannel.war" webxml="${spts_dir}/proxychannel-web.xml"/>
 
   	<war warfile="${dist_dir}/spts-extservice.war" webxml="${spts_dir}/extservice-web.xml">
       <classes dir="${temp_dir}">
