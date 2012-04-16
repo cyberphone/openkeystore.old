@@ -37,18 +37,16 @@ public class ProxyChannelServlet extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
     
-    private static final String PROXY_INSTANCE_PROPERTY = "proxy-instance-name";
-    
     private ProxyServer proxy_server;
 
     @Override
     public void init (ServletConfig config) throws ServletException
       {
         super.init (config);
-        String name = config.getInitParameter (PROXY_INSTANCE_PROPERTY);
+        String name = config.getInitParameter (ProxyServer.PROXY_INSTANCE_PROPERTY);
         if (name == null)
           {
-            throw new ServletException ("Servlet property '" + PROXY_INSTANCE_PROPERTY + "' is undefined!");
+            throw new ServletException ("Servlet property '" + ProxyServer.PROXY_INSTANCE_PROPERTY + "' is undefined!");
           }
         proxy_server = ProxyServer.getInstance (name);
       }

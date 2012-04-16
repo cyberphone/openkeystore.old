@@ -41,7 +41,7 @@ public class Init implements ServletContextListener, ServerUploadHandler
     @Override
     public void contextInitialized (ServletContextEvent event)
       {
-        proxy_server = ProxyServer.getInstance ("testing-testing...");
+        proxy_server = ProxyServer.getInstance (event.getServletContext ().getInitParameter (ProxyServer.PROXY_INSTANCE_PROPERTY));
         proxy_server.addUploadEventHandler (this);
       }
 

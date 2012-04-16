@@ -36,6 +36,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class ProxyServer
   {
+    public static final String PROXY_INSTANCE_PROPERTY = "proxy-instance-name";
+    
     private static final long TIME_MARGIN = 600000;  // 10 minutes is a pretty good margin..,
 
     private static Logger logger = Logger.getLogger (ProxyServer.class.getName ());
@@ -70,13 +72,17 @@ public class ProxyServer
       {
       }
     
-/**
- * Create proxy server instance.
- * @param name_of_instance Note that this name must be unique if there are more than one proxy server in a single JVM
- * @return ProxyServer
- */
+    /**
+     * Create proxy server instance.
+     * @param name_of_instance Note that this name must be unique if there are more than one proxy server in a single JVM
+     * @return ProxyServer
+     */
     public static ProxyServer getInstance (String name_of_instance)
       {
+        if (name_of_instance == null || name_of_instance.length () == 0)
+          {
+            throw new RuntimeException ("Proxy instance name is missing or null");
+          }
         synchronized (instances)
           {
             ProxyServer instance = instances.get (name_of_instance);
