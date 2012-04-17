@@ -30,13 +30,14 @@ public class TestClient
   {
     public static void main (String[] argc)
       {
-        if (argc.length != 1 && argc.length != 4)
+        if (argc.length != 1 && argc.length != 5)
           {
-            System.out.println ("URL [count wait serverwait]\n" +
+            System.out.println ("URL [count wait serverwait debuf]\n" +
                                 "  URL using standard setup: http://localhost:8080\n"+
                                 "  count is 1 if not given\n" +
                                 "  wait is given in millseconds\n" +
-                                "  serverwait is introduced every 10:th call and given in millseconds");
+                                "  serverwait is introduced every 10:th call and given in millseconds\n" +
+                                "  debug true | false");
             System.exit (3);
           }
         try
@@ -46,11 +47,13 @@ public class TestClient
             long wait = 0;
             int max = 1;
             int server_wait = 0;
+            boolean debug = true;
             if (argc.length > 1)
               {
                 max = Integer.parseInt (argc[1]);
                 wait = Long.parseLong (argc[2]);
                 server_wait =  Integer.parseInt (argc[3]);
+                debug = new Boolean (argc[4]);
               }
             int count = 0;
             while (count++ < max)
@@ -63,7 +66,7 @@ public class TestClient
                   {
                     System.out.println ("Failed: " + wrapper.getResponseMessage () + "\n" + wrapper.getDataUTF8 ());
                   }
-                else
+                else if (debug)
                   {
                     System.out.println ("Local[" + count + "] X=" + x + " Y=" + y + " " + wrapper.getDataUTF8 ());
                   }

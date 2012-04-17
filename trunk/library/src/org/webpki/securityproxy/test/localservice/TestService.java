@@ -59,6 +59,8 @@ public class TestService implements ClientRequestHandler
     
     Properties properties;
     
+    boolean debug;
+    
     int count;
 
     private String getPropertyStringUnconditional (String name) throws IOException
@@ -91,7 +93,10 @@ public class TestService implements ClientRequestHandler
 
     private double getRequest (JavaRequestInterface request_object) throws IOException
       {
-        logger.info ("Received a \"" + request_object.getClass ().getSimpleName () + "\" request[" + ++count + "]" );
+        if (debug)
+          {
+            logger.info ("Received a \"" + request_object.getClass ().getSimpleName () + "\" request[" + ++count + "]" );
+          }
         SampleRequestObject sps = (SampleRequestObject) request_object;
         long server_wait = sps.getServerWait ();
         if (server_wait != 0 && count % 9 == 0)
@@ -175,7 +180,7 @@ public class TestService implements ClientRequestHandler
                                 getPropertyInt (PROPERTY_MAX_WORKERS),
                                 getPropertyInt (PROPERTY_CYCLE_TIME),
                                 getPropertyInt (PROPERTY_REQUEST_TIMEOUT),
-                                getPropertyBoolean (PROPERTY_DEBUG));
+                                debug = getPropertyBoolean (PROPERTY_DEBUG));
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         // Main loop
