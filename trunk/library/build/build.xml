@@ -187,7 +187,7 @@
        includes="**/*.java, **/*.xsd"/>
     <mkdir dir="${temp_dir}" />
 
-  	<!-- Copy all files except .java  -->
+  	<!-- Copy all files except .java and doc-related -->
     <copy todir="${temp_dir}" preservelastmodified="true" includeEmptyDirs="false">
       <fileset dir="${src_dir}">
         <include name="**/*"/>
@@ -314,6 +314,7 @@
       <fileset dir="${temp_dir}">
         <include name="org/webpki/securityproxy/**"/>
         <exclude name="org/webpki/securityproxy/test/**"/>
+        <exclude name="org/webpki/securityproxy/*.png"/>
       </fileset>
     </jar>
 
