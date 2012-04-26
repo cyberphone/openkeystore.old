@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -61,6 +62,10 @@ public class TestService implements ClientRequestHandler
     
     boolean debug;
     
+    boolean has_certificates; 
+    
+    X509Certificate[] server_certificates;
+    
     int count;
 
     private String getPropertyStringUnconditional (String name) throws IOException
@@ -93,6 +98,12 @@ public class TestService implements ClientRequestHandler
 
     private double getRequest (JavaRequestInterface request_object) throws IOException
       {
+        if (!has_certificates)
+          {
+            has_certificates = true;
+            server_certificates = proxy_client.getServerCertificates ();
+            logger.info ("Server Certificate: " + (server_certificates == null ? "NONE" : server_certificates[0].getSubjectX500Principal ().getName ()));
+          }
         if (debug)
           {
             logger.info ("Received a \"" + request_object.getClass ().getSimpleName () + "\" request[" + ++count + "]" );
@@ -169,11 +180,11 @@ public class TestService implements ClientRequestHandler
         ////////////////////////////////////////////////////////////////////////////////////////////
         if (properties.containsKey (PROPERTY_TRUSTSTORE))
           {
-            proxy_client.setProxyServiceTruststore (getPropertyString (PROPERTY_TRUSTSTORE), getPropertyString (PROPERTY_STOREPASS));
+            proxy_client.setTruststore (getPropertyString (PROPERTY_TRUSTSTORE), getPropertyString (PROPERTY_STOREPASS));
           }
         if (properties.containsKey (PROPERTY_KEYSTORE))
           {
-            proxy_client.setProxyServiceClientKey (getPropertyString (PROPERTY_KEYSTORE), getPropertyString (PROPERTY_KEYPASS));
+            proxy_client.setClientKey (getPropertyString (PROPERTY_KEYSTORE), getPropertyString (PROPERTY_KEYPASS));
           }
         proxy_client.initProxy (this,
                                 getPropertyString (PROPERTY_PROXY_URL),
@@ -205,6 +216,7 @@ public class TestService implements ClientRequestHandler
     public void handleInitialization () throws IOException
       {
         logger.info ("Got restart signal!");
+        has_certificates = false;
         uploadData ();
       }
 

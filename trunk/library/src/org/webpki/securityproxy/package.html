@@ -18,7 +18,7 @@ configuration:
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Network-friendly</I>.&nbsp;
 	 When there are no incoming requests, the load on the network is
 	negliable</P>
-<P ALIGN=LEFT STYLE="margin-left:20pt"><I>Authenticated</I>.&nbsp;
+<P ALIGN=LEFT STYLE="margin-left:20pt"><I>Secure</I>.&nbsp;
 	 The proxy supports two-way TLS authentication using X.509
 	certificates</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Self-healing</I>.&nbsp;
@@ -40,7 +40,7 @@ configuration:
 	running in the same JVM instance or JBoss application</P>
 
 <p><h3><B>Secure Operation</B></p></h3>
-<p>In order to achieve high security a number of steps should be considered.</P>
+<p>In order to improve security a number of steps should be considered.</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt">
 	<I>Filter incoming data</I>.&nbsp;
 	 It is recommended verifying incoming data with respect to syntax so
@@ -57,7 +57,457 @@ configuration:
 	preferably bound to different HTTP ports.  This requires specific
 	settings in &ldquo;server.xml&rdquo; in Tomcat or Jboss.</P>
 <P><h3><B>Configuration</B></h3></P>
-<P>The
-security proxy requires a minimum of configuration data.  The proxy
-client</P>
+<P>The security proxy requires a minimum of configuration data.  The following
+sample sections cover both the client- and server-part of the proxy.</P>
+<P><h3><B>Inner Service Code Sample</B></h3></P>
+<P>The following code snippet shows how the proxy could be utilized in
+an "Inner&nbsp;Service" web application where one class holds servlet initialization code.</P>
+<pre style="margin-left:20pt">
+package com.example.localservice;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
+import org.webpki.securityproxy.ProxyClient;
+import org.webpki.securityproxy.ClientRequestHandler;
+import org.webpki.securityproxy.JavaRequestInterface;
+import org.webpki.securityproxy.JavaResponseInterface;
+import org.webpki.securityproxy.HTTPResponseWrapper;
+
+import com.example.common.SampleRequestObject;
+import com.example.common.SampleResponseObject;
+
+/**
+ * Local service using the security proxy system. 
+ */
+public class LocalService {@link org.webpki.securityproxy.ClientRequestHandler}, ServletContextListener
+  {
+    private static Logger logger = Logger.getLogger (LocalService.class.getCanonicalName ());
+
+    private static final String DEFAULT_PROPERTIES     = "securityproxy.properties";
+
+    private static final String PROPERTY_PROXY_URL       = "securityproxy.url";
+    private static final String PROPERTY_MAX_WORKERS     = "securityproxy.max-workers";
+    private static final String PROPERTY_CYCLE_TIME      = "securityproxy.cycle-time";
+    private static final String PROPERTY_REQUEST_TIMEOUT = "securityproxy.request-timeout";
+    private static final String PROPERTY_DEBUG           = "securityproxy.debug";
+
+    private static final String PROPERTY_TRUSTSTORE      = "securityproxy.truststore";
+    private static final String PROPERTY_STOREPASS       = "securityproxy.storepass";
+
+    private static final String PROPERTY_KEYSTORE        = "securityproxy.keystore";
+    private static final String PROPERTY_KEYPASS         = "securityproxy.keypass";
+
+    static {@link org.webpki.securityproxy.ProxyClient} proxy_client = new {@link org.webpki.securityproxy.ProxyClient} ();
+
+    Properties properties;
+
+    private String getPropertyStringUnconditional (String name) throws IOException
+      {
+        String value = properties.getProperty (name);
+        if (value == null)
+          {
+            throw new IOException ("Property: " + name + " missing");
+          }
+        return value;
+      }
+
+    private String getPropertyString (String name) throws IOException
+      {
+        return getPropertyStringUnconditional (name);
+      }
+
+    private int getPropertyInt (String name) throws IOException
+      {
+        return Integer.parseInt (getPropertyStringUnconditional (name));
+      }
+
+    private boolean getPropertyBoolean (String name) throws IOException
+      {
+        String flag = getPropertyStringUnconditional (name);
+        if (flag.equals ("true")) return true;
+        if (flag.equals ("false")) return false;
+        throw new IOException ("Boolean syntax error: " + name);
+      }
+
+    &#64;Override
+    public {@link org.webpki.securityproxy.HTTPResponseWrapper} {@link org.webpki.securityproxy.ClientRequestHandler#handleHTTPResponseRequest(JavaRequestInterface) handleHTTPResponseRequest} ({@link org.webpki.securityproxy.JavaRequestInterface} request_object) throws IOException
+      {
+         ...
+      }
+
+    &#64;Override
+    public {@link org.webpki.securityproxy.JavaResponseInterface} {@link org.webpki.securityproxy.ClientRequestHandler#handleJavaResponseRequest handleJavaResponseRequest} ({@link org.webpki.securityproxy.JavaRequestInterface} request_object) throws IOException
+      {
+        SampleRequestObject sro = (SampleRequestObject) request_object;
+        return new SampleResponseObject (sro.getX () * sro.getY());
+      }
+
+    &#64;Override
+    public void {@link org.webpki.securityproxy.ClientRequestHandler#handleInitialization() handleInitialization} () throws IOException
+      {
+        logger.info ("Got restart signal!");
+
+        ...
+
+      }
+
+    &#64;Override
+    public void contextDestroyed (ServletContextEvent event)
+      {
+      }
+
+    &#64;Override
+    public void contextInitialized (ServletContextEvent event) 
+      {
+    	try 
+          {
+            ////////////////////////////////////////////////////////////////////////////////////////////
+            // Property fetching
+            ////////////////////////////////////////////////////////////////////////////////////////////
+            InputStream is = event.getServletContext ().getResourceAsStream ("/WEB-INF/" + DEFAULT_PROPERTIES);
+            properties = new Properties ();
+            properties.load (is);
+            StringBuffer s = new StringBuffer ();
+            for (String key : properties.stringPropertyNames ())
+              {
+                if (s.length () > 0)
+                  {
+                    s.append (", ");
+                  }
+                s.append (key).append ('=').append (properties.getProperty (key));
+              }
+            logger.info ("Properties: " + s.toString ());
+
+            ////////////////////////////////////////////////////////////////////////////////////////////
+            // Initialization
+            ////////////////////////////////////////////////////////////////////////////////////////////
+            if (properties.containsKey (PROPERTY_TRUSTSTORE))
+              {
+                proxy_client.{@link org.webpki.securityproxy.ProxyClient#setTruststore(String, String) setTruststore} (getPropertyString (PROPERTY_TRUSTSTORE), getPropertyString (PROPERTY_STOREPASS));
+              }
+            if (properties.containsKey (PROPERTY_KEYSTORE))
+              {
+                proxy_client.{@link org.webpki.securityproxy.ProxyClient#setClientKey(String, String) setClientKey} (getPropertyString (PROPERTY_KEYSTORE), getPropertyString (PROPERTY_KEYPASS));
+              }
+            proxy_client.{@link org.webpki.securityproxy.ProxyClient#initProxy(ClientRequestHandler, String, int, int, int, boolean) initProxy} (this,
+                                    getPropertyString (PROPERTY_PROXY_URL),
+                                    getPropertyInt (PROPERTY_MAX_WORKERS),
+                                    getPropertyInt (PROPERTY_CYCLE_TIME),
+                                    getPropertyInt (PROPERTY_REQUEST_TIMEOUT),
+                                    getPropertyBoolean (PROPERTY_DEBUG));
+            logger.info ("Local Service Started");
+          }
+    	catch (Exception e)
+          {
+            logger.log (Level.SEVERE, "Couldn't initialize", e);
+          }
+      }
+  }
+</pre>
+A matching property file could look like this:
+<pre style="margin-left:20pt">
+#####################################################################################
+# Mandatory Properties
+#####################################################################################
+securityproxy.url=https://extproxy.example.com:9090/proxychannel
+securityproxy.max-workers=10
+securityproxy.cycle-time=300
+securityproxy.request-timeout=60
+securityproxy.debug=true
+
+#####################################################################################
+# Optional Properties
+#####################################################################################
+
+#####################################################################################
+# If using HTTPS proxy server authentication you need a trust anchor
+# Supported: JKS and P12
+#####################################################################################
+securityproxy.truststore=truststore.jks
+securityproxy.storepass=changeit
+#####################################################################################
+
+#####################################################################################
+# If using HTTPS proxy client authentication you need a client certificate and key
+# Supported: JKS and P12
+#####################################################################################
+securityproxy.keystore=clientkey.jks
+securityproxy.keypass=secretpwd
+#####################################################################################
+</pre>
+In order to make the proxy client channel start automatically when the inner service begins,
+a "web.xml" file is needed:
+<pre style="margin-left:20pt">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;web-app version="2.5"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee" 
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"&gt;
+
+    &lt;display-name&gt;Local Service Web&lt;/display-name&gt;
+
+    &lt;listener&gt;
+       &lt;listener-class&gt;com.example.localservice.LocalService&lt;/listener-class&gt;
+    &lt;/listener&gt;
+
+          .
+          .
+          .
+
+&lt;/web-app&gt;
+</pre>
+<P><h3><B>Outer Service Code Sample</B></h3></P>
+<P>The following code snippets shows how the proxy could be utilized in
+an "Outer&nbsp;Service" web application.</P>
+<pre style="margin-left:20pt">
+package com.example.external;
+
+import java.util.Vector;
+import java.util.logging.Logger;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
+import org.webpki.securityproxy.ProxyServer;
+import org.webpki.securityproxy.ServerUploadHandler;
+import org.webpki.securityproxy.JavaUploadInterface;
+
+import com.example.common.SampleUploadObject;
+
+/**
+ * Proxy service initilization code
+ */
+public class Init implements ServletContextListener, {@link org.webpki.securityproxy.ServerUploadHandler}
+  {
+    private static Logger logger = Logger.getLogger (Init.class.getName ());
+
+    static {@link org.webpki.securityproxy.ProxyServer ProxyServer} proxy_server;
+
+    private static final int HISTORY = 20;
+
+    static Vector&lt;SampleUploadObject&gt; uploads = new Vector&lt;SampleUploadObject&gt; ();
+
+    &#64;Override
+    public void contextInitialized (ServletContextEvent event)
+      {
+        proxy_server = {@link org.webpki.securityproxy.ProxyServer#getInstance(String) ProxyServer.getInstance} (event.getServletContext ().getInitParameter ({@link org.webpki.securityproxy.ProxyServer#PROXY_INSTANCE_PROPERTY}));
+        proxy_server.{@link org.webpki.securityproxy.ProxyServer#addUploadEventHandler(ServerUploadHandler) addUploadEventHandler} (this);
+      }
+
+    &#64;Override
+    public void contextDestroyed (ServletContextEvent event)
+      {
+      }
+
+    &#64;Override
+    public void {@link org.webpki.securityproxy.ServerUploadHandler#handleUploadedData handleUploadedData} ({@link org.webpki.securityproxy.JavaUploadInterface} upload_payload)
+      {
+        uploads.add (0, (SampleUploadObject) upload_payload);
+        if (uploads.size () &gt; HISTORY)
+          {
+            uploads.setSize (HISTORY);
+          }
+        logger.info ("Uploaded data reached service");
+      }
+  }
+</pre>
+In addition to the initialization code there must of course be an outer service
+that processes incoming requests as well:
+<pre style="margin-left:20pt">
+package com.example.external;
+
+import java.io.IOException;
+
+import java.util.logging.Logger;
+
+import javax.servlet.ServletException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServlet;
+
+import com.example.common.SampleRequestObject;
+import com.example.common.SampleResponseObject;
+
+/**
+ * This is the external service java-2-java variant.
+ */
+public class ExtJavaService extends HttpServlet
+  {
+    private static final long serialVersionUID = 1L;
+
+    private static Logger logger = Logger.getLogger (ExtJavaService.class.getName ());
+
+    &#64;Override
+    public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+      {
+        throw new IOException ("GET not implemented");
+      }
+
+    &#64;Override
+    public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+      {
+        SampleResponseObject sro = (SampleResponseObject) Init.proxy_server.{@link org.webpki.securityproxy.ProxyServer#processCall(JavaRequestInterface) processCall} (new SampleRequestObject (new Double (request.getParameter ("X")),
+                                                                                         new Double (request.getParameter ("Y"))));
+        response.setContentType ("text/plain");
+        response.setHeader ("Pragma", "No-Cache");
+        response.setDateHeader ("EXPIRES", 0);
+        response.getWriter ().print ("Result=" + sro.getResult ());
+      }
+  }
+</pre>
+There must be a "web.xml" as well.
+Note the name <code>My.Proxy</code> which holds the name of proxy channel.
+The two java classes above should be packed together with "web.xml" into a "war" file.
+<pre style="margin-left:20pt">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;web-app version="2.5"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee" 
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"&gt;
+
+    &lt;display-name&gt;External Service&lt;/display-name&gt;
+
+    &lt;context-param&gt;
+        &lt;description&gt;Set the following value to a unique (proxy) name&lt;/description&gt;
+        &lt;param-name&gt;proxy-instance-name&lt;/param-name&gt;
+        &lt;param-value&gt;My.Proxy&lt;/param-value&gt;
+    &lt;/context-param&gt;
+
+    &lt;listener&gt;
+        &lt;listener-class&gt;com.example.external.Init&lt;/listener-class&gt;
+    &lt;/listener&gt;
+
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;ExtJavaService&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;com.example.external.ExtJavaService&lt;/servlet-class&gt;
+    &lt;/servlet&gt;
+
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;ExtJavaService&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/extjavacall&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+
+&lt;/web-app&gt;
+</pre>
+In addition, the "Outer Service" also needs to provision a proxy server
+listener by packaging the following "web.xml" in another "war" file running in
+the same servlet container.
+The securityproxy.jar must be placed in common servlet container "lib" storage.
+<pre style="margin-left:20pt">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;web-app version="2.5"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee" 
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"&gt;
+
+    &lt;display-name&gt;Proxy Channel&lt;/display-name&gt;
+
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;ProxyChannelServlet&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;org.webpki.securityproxy.ProxyChannelServlet&lt;/servlet-class&gt;
+        &lt;init-param&gt;
+           &lt;description&gt;Set the following value to a unique (proxy) name&lt;/description&gt;
+           &lt;param-name&gt;proxy-instance-name&lt;/param-name&gt;  
+           &lt;param-value&gt;My.Proxy&lt;/param-value&gt;  
+        &lt;/init-param&gt;
+    &lt;/servlet&gt;
+
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;ProxyChannelServlet&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/proxychannel&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+
+&lt;/web-app&gt;
+</pre>
+<P><h3><B>Common Objects</B></h3></P>
+The following shows the sample objects used in this tutorial:
+<pre style="margin-left:20pt">
+package com.example.common;
+
+import org.webpki.securityproxy.JavaRequestInterface;
+
+public class SampleRequestObject implements {@link org.webpki.securityproxy.JavaRequestInterface}
+  {
+    private static final long serialVersionUID = 1L;
+
+    private double x;
+
+    private double y;
+
+    public double getX ()
+      {
+        return x;
+      }
+
+    public double getY ()
+      {
+        return y;
+      }
+
+    public SampleRequestObject (double x, double y)
+      {
+        this.x = x;
+        this.y = y;
+      }
+  }
+
+
+package com.example.common;
+
+import org.webpki.securityproxy.JavaResponseInterface;
+
+public class SampleResponseObject implements {@link org.webpki.securityproxy.JavaResponseInterface}
+  {
+    private static final long serialVersionUID = 1L;
+
+    private double result;
+
+    public double getResult ()
+      {
+        return result;
+      }
+
+    public SampleResponseObject (double result)
+      {
+        this.result = result;
+      }
+  }
+
+
+package com.example.common;
+
+import org.webpki.securityproxy.JavaUploadInterface;
+
+public class SampleUploadObject implements {@link org.webpki.securityproxy.JavaUploadInterface}
+  {
+    private static final long serialVersionUID = 1L;
+
+    private long last_time_stamp;
+
+    public long getTimeStamp ()
+      {
+        return last_time_stamp;
+      }
+
+    public SampleUploadObject (long last_time_stamp)
+      {
+        this.last_time_stamp = last_time_stamp;
+      }
+  }
+</pre>
 </body>

@@ -40,7 +40,7 @@ java -jar PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/spts-service.jar {op
 
 NOTE: The service uses the properties defined in "securityproxy.properties" located in
 the same directory as this file which is compiled into the JAR.  You may also provide
-a propery file as input argument so you don't have to recompile for each property change.
+a property file as input argument so you don't have to recompile for each property change.
 
 Starting the Local Service should generate a log event in Tomcat
 

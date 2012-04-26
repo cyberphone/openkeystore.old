@@ -36,6 +36,7 @@ import java.net.InetAddress;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
@@ -166,13 +167,21 @@ public class ProxyClient
                     ostream.close ();
 
                     /////////////////////////////////////////////////////////////////////////////////////
+                    // For HTTPS we try to get the server certificate
+                    /////////////////////////////////////////////////////////////////////////////////////
+                    if (socket_factory != null && server_certificates == null)
+                      {
+                        setServerCertificates ((X509Certificate[])(((HttpsURLConnection)conn).getServerCertificates ()));
+                      }
+
+                    /////////////////////////////////////////////////////////////////////////////////////
                     // Set the default object for the next round
                     /////////////////////////////////////////////////////////////////////////////////////
                     send_object = idle_object;
 
-                    ////////////////////////////////////////////////////////////////////////////////////
+                    /////////////////////////////////////////////////////////////////////////////////////
                     // This is where the proxy client spends most its time - Waiting for some action
-                    ////////////////////////////////////////////////////////////////////////////////////
+                    /////////////////////////////////////////////////////////////////////////////////////
                     hanging = true;
                     BufferedInputStream istream = new BufferedInputStream (conn.getInputStream ());
                     ByteArrayOutputStream out = new ByteArrayOutputStream ();
@@ -334,7 +343,9 @@ public class ProxyClient
     private String proxy_service_key_password;
 
     private SSLSocketFactory socket_factory;
-    
+
+    private X509Certificate[] server_certificates;
+
     ////////////////////////////////////
     // App-wide "globals"
     ////////////////////////////////////
@@ -475,6 +486,11 @@ public class ProxyClient
           }
       }
 
+    private synchronized void setServerCertificates (X509Certificate[] certificates)
+      {
+        server_certificates = certificates;
+      }
+
     private boolean unneededProxy (long test_channel_id) throws IOException
       {
         synchronized (channels)
@@ -505,13 +521,23 @@ public class ProxyClient
       }
 
     /**
+     * For HTTPS we may need the server's certificate.
+     *  
+     * @return X509Certficate or null
+     */
+    public synchronized X509Certificate[] getServerCertificates ()
+      {
+        return server_certificates;
+      }
+
+    /**
      * For HTTPS use this method as an alternative to the global truststore.
      *  
      * @param truststore
      * @param password
      * @throws IOException
      */
-    public void setProxyServiceTruststore (String truststore, String password) throws IOException
+    public void setTruststore (String truststore, String password) throws IOException
       {
         checkOrder ();
         proxy_service_truststore = KeyStoreReader.loadKeyStore (truststore, password);
@@ -524,7 +550,7 @@ public class ProxyClient
      * @param key_password
      * @throws IOException
      */
-    public void setProxyServiceClientKey (String keystore, String key_password) throws IOException
+    public void setClientKey (String keystore, String key_password) throws IOException
       {
         checkOrder ();
         proxy_service_keystore = KeyStoreReader.loadKeyStore (keystore, key_password);
@@ -582,8 +608,8 @@ public class ProxyClient
      * Sets proxy core parameters and initializes the proxy channel.
      * <p>
      *
-     * @see #setProxyServiceTruststore
-     * @see #setProxyServiceClientKey
+     * @see #setTruststore
+     * @see #setClientKey
      * 
      * @param handler
      *          The proxy user's interface.
