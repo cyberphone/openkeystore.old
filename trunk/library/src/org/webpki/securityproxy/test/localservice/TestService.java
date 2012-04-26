@@ -180,11 +180,11 @@ public class TestService implements ClientRequestHandler
         ////////////////////////////////////////////////////////////////////////////////////////////
         if (properties.containsKey (PROPERTY_TRUSTSTORE))
           {
-            proxy_client.setTruststore (getPropertyString (PROPERTY_TRUSTSTORE), getPropertyString (PROPERTY_STOREPASS));
+            proxy_client.setTrustStore (getPropertyString (PROPERTY_TRUSTSTORE), getPropertyString (PROPERTY_STOREPASS));
           }
         if (properties.containsKey (PROPERTY_KEYSTORE))
           {
-            proxy_client.setClientKey (getPropertyString (PROPERTY_KEYSTORE), getPropertyString (PROPERTY_KEYPASS));
+            proxy_client.setKeyStore (getPropertyString (PROPERTY_KEYSTORE), getPropertyString (PROPERTY_KEYPASS));
           }
         proxy_client.initProxy (this,
                                 getPropertyString (PROPERTY_PROXY_URL),

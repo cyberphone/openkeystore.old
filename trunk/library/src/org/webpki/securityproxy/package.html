@@ -191,11 +191,11 @@ public class LocalService {@link org.webpki.securityproxy.ClientRequestHandler},
             ////////////////////////////////////////////////////////////////////////////////////////////
             if (properties.containsKey (PROPERTY_TRUSTSTORE))
               {
-                proxy_client.{@link org.webpki.securityproxy.ProxyClient#setTruststore(String, String) setTruststore} (getPropertyString (PROPERTY_TRUSTSTORE), getPropertyString (PROPERTY_STOREPASS));
+                proxy_client.{@link org.webpki.securityproxy.ProxyClient#setTrustStore(String, String) setTrustStore} (getPropertyString (PROPERTY_TRUSTSTORE), getPropertyString (PROPERTY_STOREPASS));
               }
             if (properties.containsKey (PROPERTY_KEYSTORE))
               {
-                proxy_client.{@link org.webpki.securityproxy.ProxyClient#setClientKey(String, String) setClientKey} (getPropertyString (PROPERTY_KEYSTORE), getPropertyString (PROPERTY_KEYPASS));
+                proxy_client.{@link org.webpki.securityproxy.ProxyClient#setKeyStore(String, String) setKeyStore} (getPropertyString (PROPERTY_KEYSTORE), getPropertyString (PROPERTY_KEYPASS));
               }
             proxy_client.{@link org.webpki.securityproxy.ProxyClient#initProxy(ClientRequestHandler, String, int, int, int, boolean) initProxy} (this,
                                     getPropertyString (PROPERTY_PROXY_URL),

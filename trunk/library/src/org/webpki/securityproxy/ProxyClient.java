@@ -537,7 +537,7 @@ public class ProxyClient
      * @param password
      * @throws IOException
      */
-    public void setTruststore (String truststore, String password) throws IOException
+    public void setTrustStore (String truststore, String password) throws IOException
       {
         checkOrder ();
         proxy_service_truststore = KeyStoreReader.loadKeyStore (truststore, password);
@@ -550,7 +550,7 @@ public class ProxyClient
      * @param key_password
      * @throws IOException
      */
-    public void setClientKey (String keystore, String key_password) throws IOException
+    public void setKeyStore (String keystore, String key_password) throws IOException
       {
         checkOrder ();
         proxy_service_keystore = KeyStoreReader.loadKeyStore (keystore, key_password);
@@ -608,8 +608,8 @@ public class ProxyClient
      * Sets proxy core parameters and initializes the proxy channel.
      * <p>
      *
-     * @see #setTruststore
-     * @see #setClientKey
+     * @see #setTrustStore
+     * @see #setKeyStore
      * 
      * @param handler
      *          The proxy user's interface.
