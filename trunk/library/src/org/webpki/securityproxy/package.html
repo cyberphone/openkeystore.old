@@ -87,7 +87,7 @@ import com.example.common.SampleResponseObject;
 /**
  * Local service using the security proxy system. 
  */
-public class LocalService {@link org.webpki.securityproxy.ClientRequestHandler}, ServletContextListener
+public class LocalService implements ServletContextListener, {@link org.webpki.securityproxy.ClientRequestHandler}
   {
     private static Logger logger = Logger.getLogger (LocalService.class.getCanonicalName ());
 
@@ -239,7 +239,7 @@ securityproxy.storepass=changeit
 # If using HTTPS proxy client authentication you need a client certificate and key
 # Supported: JKS and P12
 #####################################################################################
-securityproxy.keystore=clientkey.jks
+securityproxy.keystore=keystore.jks
 securityproxy.keypass=secretpwd
 #####################################################################################
 </pre>
@@ -510,4 +510,6 @@ public class SampleUploadObject implements {@link org.webpki.securityproxy.JavaU
       }
   }
 </pre>
+<P><h3><B>Tomcat/JBoss Port Configuration</B></h3></P>
+See supplied test code...
 </body>
