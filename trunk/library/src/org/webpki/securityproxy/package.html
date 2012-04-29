@@ -1,6 +1,6 @@
 <body>
 <h2>HTTP-based Security Proxy Framework</h2>
-Sometimes is required to restrict sensitive resources from direct incoming
+It is often desirable protecting sensitive resources from direct incoming
 calls while still being able to handle external requests.  This
 usually leads to the use of some kind of reverse proxy solution.  The
 following Java library provides a minute proxy solution that is
@@ -8,13 +8,12 @@ designed for integration in applications.  That is, this is not a
 tunnel scheme like SSH.  The illustration below shows a typical
 configuration:
 <br><IMG SRC="doc-files/securityproxy.png"><BR>
-<h3><B>Features at a Glance</B></h3>
+<h3><B>Core Features</B></h3>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>HTTP-based</I>.&nbsp;
-	 Use long-hanging outgoing HTTP requests that either terminate and
-	return after a predefined time, or return immediately when request
-	data is found</P>
+	 Builds on the "push-mail" concept where outgoing HTTP requests either terminate and
+	return after a predefined but long time, or immediately return when request data is found</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Speedy</I>.&nbsp;
-	 Request latency is essentially a network &ldquo;roundtrip&rdquo;</P>
+	 Request latency is essentially a network &quot;roundtrip&quot;</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Network-friendly</I>.&nbsp;
 	 When there are no incoming requests, the load on the network is
 	negliable</P>
@@ -27,7 +26,7 @@ configuration:
 	inner service is notified if the outer service is restarted</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Bidirectional</I>.&nbsp;
 	 Although the primary purpose of the proxy is catering for incoming
-	requests, the same channel can also be used for &ldquo;upload&rdquo;
+	requests, the same channel can also be used for &quot;upload&quot;
 	of data that the outer service may need</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Java-centric</I>.&nbsp;
 	 The proxy accepts requests that are based on serializable Java
@@ -38,7 +37,9 @@ configuration:
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Multi-serviceble</I>.&nbsp;
 	  There may be multiple and entirely different proxy services
 	running in the same JVM instance or JBoss application</P>
-
+<p><h3><B>Testing the Proxy</B></p></h3>
+<p>In the subdirectory "securityproxy-test" you will find a file README that
+contains instructions on how to compile and run supplied proxy test code.</p>
 <p><h3><B>Secure Operation</B></p></h3>
 <p>In order to improve security a number of steps should be considered.</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt">
@@ -55,15 +56,15 @@ configuration:
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Discriminate ports</I>.&nbsp;
     The outer service and its proxy server channel are
 	preferably bound to different HTTP ports.  This requires specific
-	settings in &ldquo;server.xml&rdquo; in Tomcat or Jboss.</P>
+	settings in &quot;server.xml&quot; in Tomcat or Jboss.</P>
 <P><h3><B>Configuration</B></h3></P>
 <P>The security proxy requires a minimum of configuration data.  The following
 sample sections cover both the client- and server-part of the proxy.</P>
 <P><h3><B>Inner Service Code Sample</B></h3></P>
-<P>The following code snippet shows how the proxy could be utilized in
+<P>The code snippet below shows how the proxy could be utilized in
 an "Inner&nbsp;Service" web application where one class holds servlet initialization code.</P>
 <pre style="margin-left:20pt">
-package com.example.localservice;
+package com.example.innerservice;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,11 +86,11 @@ import com.example.common.SampleRequestObject;
 import com.example.common.SampleResponseObject;
 
 /**
- * Local service using the security proxy system. 
+ * Inner service using the security proxy system. 
  */
-public class LocalService implements ServletContextListener, {@link org.webpki.securityproxy.ClientRequestHandler}
+public class InnerService implements ServletContextListener, {@link org.webpki.securityproxy.ClientRequestHandler}
   {
-    private static Logger logger = Logger.getLogger (LocalService.class.getCanonicalName ());
+    private static Logger logger = Logger.getLogger (InnerService.class.getCanonicalName ());
 
     private static final String DEFAULT_PROPERTIES     = "securityproxy.properties";
 
@@ -254,10 +255,10 @@ a "web.xml" file is needed:
          xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"&gt;
 
-    &lt;display-name&gt;Local Service Web&lt;/display-name&gt;
+    &lt;display-name&gt;Inner Service&lt;/display-name&gt;
 
     &lt;listener&gt;
-       &lt;listener-class&gt;com.example.localservice.LocalService&lt;/listener-class&gt;
+       &lt;listener-class&gt;com.example.innerservice.InnerService&lt;/listener-class&gt;
     &lt;/listener&gt;
 
           .
@@ -270,7 +271,7 @@ a "web.xml" file is needed:
 <P>The following code snippets shows how the proxy could be utilized in
 an "Outer&nbsp;Service" web application.</P>
 <pre style="margin-left:20pt">
-package com.example.external;
+package com.example.outerservice;
 
 import java.util.Vector;
 import java.util.logging.Logger;
@@ -324,7 +325,7 @@ public class Init implements ServletContextListener, {@link org.webpki.securityp
 In addition to the initialization code there must of course be an outer service
 that processes incoming requests as well:
 <pre style="margin-left:20pt">
-package com.example.external;
+package com.example.outerservice;
 
 import java.io.IOException;
 
@@ -340,13 +341,13 @@ import com.example.common.SampleRequestObject;
 import com.example.common.SampleResponseObject;
 
 /**
- * This is the external service java-2-java variant.
+ * This is an outer service that uses the java-2-java proxy request scheme.
  */
-public class ExtJavaService extends HttpServlet
+public class OuterService extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
 
-    private static Logger logger = Logger.getLogger (ExtJavaService.class.getName ());
+    private static Logger logger = Logger.getLogger (OuterService.class.getName ());
 
     &#64;Override
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
@@ -378,7 +379,7 @@ The two java classes above should be packed together with "web.xml" into a "war"
          xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"&gt;
 
-    &lt;display-name&gt;External Service&lt;/display-name&gt;
+    &lt;display-name&gt;Outer Service&lt;/display-name&gt;
 
     &lt;context-param&gt;
         &lt;description&gt;Set the following value to a unique (proxy) name&lt;/description&gt;
@@ -387,17 +388,17 @@ The two java classes above should be packed together with "web.xml" into a "war"
     &lt;/context-param&gt;
 
     &lt;listener&gt;
-        &lt;listener-class&gt;com.example.external.Init&lt;/listener-class&gt;
+        &lt;listener-class&gt;com.example.outerservice.Init&lt;/listener-class&gt;
     &lt;/listener&gt;
 
     &lt;servlet&gt;
-        &lt;servlet-name&gt;ExtJavaService&lt;/servlet-name&gt;
-        &lt;servlet-class&gt;com.example.external.ExtJavaService&lt;/servlet-class&gt;
+        &lt;servlet-name&gt;OuterService&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;com.example.outerservice.OuterService&lt;/servlet-class&gt;
     &lt;/servlet&gt;
 
     &lt;servlet-mapping&gt;
-        &lt;servlet-name&gt;ExtJavaService&lt;/servlet-name&gt;
-        &lt;url-pattern&gt;/extjavacall&lt;/url-pattern&gt;
+        &lt;servlet-name&gt;OuterService&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/outerservice&lt;/url-pattern&gt;
     &lt;/servlet-mapping&gt;
 
 &lt;/web-app&gt;
@@ -405,7 +406,8 @@ The two java classes above should be packed together with "web.xml" into a "war"
 In addition, the "Outer Service" also needs to provision a proxy server
 listener by packaging the following "web.xml" in another "war" file running in
 the same servlet container.
-The securityproxy.jar must be placed in common servlet container "lib" storage.
+The file "securityproxy.jar" must be placed in common servlet container "lib" storage.
+JBoss applications may also put "securityproxy.jar" in an "ear" file.
 <pre style="margin-left:20pt">
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 
