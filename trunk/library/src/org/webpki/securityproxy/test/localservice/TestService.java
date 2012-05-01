@@ -150,6 +150,7 @@ public class TestService implements ClientRequestHandler
 
     private synchronized void uploadData () throws IOException
       {
+        logger.info ("Uploaded Data");
         proxy_client.addUploadObject (new SampleUploadObject (new Date ().getTime ()));
       }
 
@@ -201,7 +202,6 @@ public class TestService implements ClientRequestHandler
             try
               {
                 Thread.sleep (200000L);
-                logger.info ("Uploaded Data");
                 uploadData ();
               }
             catch (InterruptedException e)

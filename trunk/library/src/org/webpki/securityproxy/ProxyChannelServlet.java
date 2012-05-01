@@ -17,6 +17,8 @@
 package org.webpki.securityproxy;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -29,20 +31,76 @@ import javax.servlet.http.HttpServlet;
 /**
  * Proxy channel servlet.
  * 
- * This is the actual proxy channel servlet that forwards client proxy requests
- * into proxy server logic.   It is configured by an external "web.xml" file.
- * 
+ * This is the actual proxy channel servlet that forwards "Outer Service" proxy requests
+ * into the {@link ProxyServer} instance.   It is configured by an external "web.xml" file.
+<pre style="margin-left:20pt">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;web-app version="2.5"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee" 
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"&gt;
+
+    &lt;display-name&gt;Sample Proxy Channel&lt;/display-name&gt;
+
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;ProxyChannelServlet&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;org.webpki.securityproxy.ProxyChannelServlet&lt;/servlet-class&gt;
+        &lt;init-param&gt;
+           &lt;description&gt;Mandatory unique proxy instance name&lt;/description&gt;
+           &lt;param-name&gt;proxy-instance-name&lt;/param-name&gt;  
+           &lt;param-value&gt;Proxy.Demo&lt;/param-value&gt;  
+        &lt;/init-param&gt;
+&lt;!-- If you use a firewall, the following should not be necessary --&gt;
+&lt;!-- 
+        &lt;init-param&gt;
+           &lt;description&gt;Optional proxy remote address check&lt;/description&gt;
+           &lt;param-name&gt;proxy-remote-address&lt;/param-name&gt;  
+           &lt;param-value&gt;192.168.0.204&lt;/param-value&gt;  
+        &lt;/init-param&gt;
+--&gt;
+&lt;!-- If you use a firewall, the following should not be necessary --&gt;
+&lt;!-- 
+        &lt;init-param&gt;
+           &lt;description&gt;Optional proxy port check&lt;/description&gt;
+           &lt;param-name&gt;proxy-server-port&lt;/param-name&gt;  
+           &lt;param-value&gt;9090&lt;/param-value&gt;  
+        &lt;/init-param&gt;
+--&gt;
+    &lt;/servlet&gt;
+
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;ProxyChannelServlet&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/proxychannel&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+
+&lt;/web-app&gt;
+
+</pre>
+ * Note that the servlet URI may be adapted to match the rest of the "Outer Service".
  */
 public class ProxyChannelServlet extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
     
+    private static Logger logger = Logger.getLogger (ProxyChannelServlet.class.getCanonicalName ());
+
+    private String remote_address;
+    
+    private Integer server_port;
+
     private ProxyServer proxy_server;
 
     @Override
     public void init (ServletConfig config) throws ServletException
       {
         super.init (config);
+        remote_address = config.getInitParameter (ProxyServer.PROXY_REMOTE_ADDRESS_PROPERTY);
+        String port = config.getInitParameter (ProxyServer.PROXY_SERVER_PORT_PROPERTY);
+        if (port != null)
+          {
+            server_port = new Integer (port);
+          }
         String name = config.getInitParameter (ProxyServer.PROXY_INSTANCE_PROPERTY);
         if (name == null)
           {
@@ -52,14 +110,17 @@ public class ProxyChannelServlet extends HttpServlet
       }
 
     @Override
-    public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
-      {
-        throw new IOException ("Not allowed");
-      }
-
-    @Override
     public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
-        proxy_server.processProxyCall (request, response);
+        if ((remote_address != null && !remote_address.equals (request.getRemoteAddr ())) ||
+            (server_port != null && server_port != request.getServerPort ()))
+          {
+            logger.log (Level.WARNING, "Illegal access from: " + request.getRemoteAddr ());
+            response.setStatus (HttpServletResponse.SC_FORBIDDEN);
+          }
+        else
+          {
+            proxy_server.processProxyCall (request, response);
+          }
       }
   }

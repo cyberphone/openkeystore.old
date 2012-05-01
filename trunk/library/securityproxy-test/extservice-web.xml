@@ -9,9 +9,9 @@
     <display-name>External Service (For Testing Only)</display-name>
 
     <context-param>
-        <description>Set the following value to a unique (proxy) name</description>
+        <description>Mandatory unique proxy instance name</description>
         <param-name>proxy-instance-name</param-name>
-        <param-value>testing-testing...</param-value>
+        <param-value>Proxy.Demo</param-value>
     </context-param>
 
     <listener>

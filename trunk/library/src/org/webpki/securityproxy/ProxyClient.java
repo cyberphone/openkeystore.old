@@ -58,9 +58,10 @@ public class ProxyClient
     private ClientRequestHandler request_handler;
     
     /**
-     * Creates a security proxy client.
+     * Creates a dormant security proxy client.
+     * Instantiated by an "Inner Service".
      * 
-     * @see #initProxy
+     * @see #initProxy(ClientRequestHandler,String,int,int,int,boolean) initProxy(ClientRequestHandler, String, int, int, int, boolean)
      */
     public ProxyClient ()
       {
@@ -521,9 +522,9 @@ public class ProxyClient
       }
 
     /**
-     * For HTTPS we may need the server's certificate.
+     * For HTTPS we may need the server's TLS certificate path.
      *  
-     * @return X509Certficate or null
+     * @return X509Certificate[] or null (for non-TLS connections)
      */
     public synchronized X509Certificate[] getServerCertificates ()
       {
@@ -533,8 +534,8 @@ public class ProxyClient
     /**
      * For HTTPS use this method as an alternative to the global truststore.
      *  
-     * @param truststore
-     * @param password
+     * @param truststore JKS or PKCS #12 file-name
+     * @param password Truststore password
      * @throws IOException
      */
     public void setTrustStore (String truststore, String password) throws IOException
@@ -546,15 +547,15 @@ public class ProxyClient
     /**
      * For HTTPS client certificate authentication.
      * 
-     * @param keystore
-     * @param key_password
+     * @param keystore JKS or PKCS #12 file-name
+     * @param password Key password
      * @throws IOException
      */
-    public void setKeyStore (String keystore, String key_password) throws IOException
+    public void setKeyStore (String keystore, String password) throws IOException
       {
         checkOrder ();
-        proxy_service_keystore = KeyStoreReader.loadKeyStore (keystore, key_password);
-        proxy_service_key_password = key_password;
+        proxy_service_keystore = KeyStoreReader.loadKeyStore (keystore, password);
+        proxy_service_key_password = password;
       }
 
     /**
@@ -608,8 +609,8 @@ public class ProxyClient
      * Sets proxy core parameters and initializes the proxy channel.
      * <p>
      *
-     * @see #setTrustStore
-     * @see #setKeyStore
+     * @see #setTrustStore(String,String) setTrustStore(String, String)
+     * @see #setKeyStore(String,String) setKeyStore(String, String)
      * 
      * @param handler
      *          The proxy user's interface.

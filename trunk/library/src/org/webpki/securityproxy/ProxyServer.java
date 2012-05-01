@@ -32,12 +32,34 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Security proxy server core logic. Called by a proxy servlet application.
+ * Security proxy server core logic. 
+ * Called by a proxy servlet application.
+ * @see ProxyChannelServlet
  */
 public class ProxyServer
   {
+    /**
+     * web.xml servlet init parameter.
+     * Mandatory name of proxy instance.
+     * An "Outer Service" must refer to the same name in {@link #getInstance(String)}.
+     * @see ProxyChannelServlet
+     */
     public static final String PROXY_INSTANCE_PROPERTY = "proxy-instance-name";
-    
+
+    /**
+     * web.xml servlet init parameter.
+     * Optional remote IP address check for systems using shared ports. 
+     * @see ProxyChannelServlet
+     */
+    public static final String PROXY_REMOTE_ADDRESS_PROPERTY = "proxy-remote-address";
+
+    /**
+     * web.xml servlet init parameter.
+     * Optional server port check for systems using shared ports. 
+     * @see ProxyChannelServlet
+     */
+    public static final String PROXY_SERVER_PORT_PROPERTY = "proxy-server-port";
+
     private static final long TIME_MARGIN = 600000;  // 10 minutes is a pretty good margin..,
 
     private static Logger logger = Logger.getLogger (ProxyServer.class.getName ());
@@ -607,7 +629,7 @@ public class ProxyServer
      * @param response
      *          The response object of the proxy server Servlet.
      */
-    public void processProxyCall (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+    void processProxyCall (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
         ////////////////////////////////////////////////////////////////////////////////
         // Perform as much as possible of the "heavy" stuff outside of synchronization

@@ -4,19 +4,18 @@ It is often desirable protecting sensitive resources from direct incoming
 calls while still being able to handle external requests.  This
 usually leads to the use of some kind of reverse proxy solution.  The
 following Java library provides a minute proxy solution that is
-designed for integration in applications.  That is, this is not a
+designed for integration in Java applications.  That is, this is not a
 tunnel scheme like SSH.  The illustration below shows a typical
 configuration:
 <br><IMG SRC="doc-files/securityproxy.png"><BR>
 <h3><B>Core Features</B></h3>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>HTTP-based</I>.&nbsp;
-	 Builds on the "push-mail" concept where outgoing HTTP requests either terminate and
+	 Builds on the "push-mail" concept where <i>outgoing</i> HTTP requests either terminate and
 	return after a predefined but long time, or immediately return when request data is found</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Speedy</I>.&nbsp;
 	 Request latency is essentially a network &quot;roundtrip&quot;</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Network-friendly</I>.&nbsp;
-	 When there are no incoming requests, the load on the network is
-	negliable</P>
+	 When there are no incoming requests, proxy network load is	negliable</P>
 <P ALIGN=LEFT STYLE="margin-left:20pt"><I>Secure</I>.&nbsp;
 	 The proxy supports two-way TLS authentication using X.509
 	certificates</P>
@@ -382,7 +381,7 @@ The two java classes above should be packed together with "web.xml" into a "war"
     &lt;display-name&gt;Outer Service&lt;/display-name&gt;
 
     &lt;context-param&gt;
-        &lt;description&gt;Set the following value to a unique (proxy) name&lt;/description&gt;
+        &lt;description&gt;Mandatory unique proxy instance name&lt;/description&gt;
         &lt;param-name&gt;proxy-instance-name&lt;/param-name&gt;
         &lt;param-value&gt;My.Proxy&lt;/param-value&gt;
     &lt;/context-param&gt;
@@ -423,7 +422,7 @@ JBoss applications may also put "securityproxy.jar" in an "ear" file.
         &lt;servlet-name&gt;ProxyChannelServlet&lt;/servlet-name&gt;
         &lt;servlet-class&gt;org.webpki.securityproxy.ProxyChannelServlet&lt;/servlet-class&gt;
         &lt;init-param&gt;
-           &lt;description&gt;Set the following value to a unique (proxy) name&lt;/description&gt;
+           &lt;description&gt;Mandatory unique proxy instance name&lt;/description&gt;
            &lt;param-name&gt;proxy-instance-name&lt;/param-name&gt;  
            &lt;param-value&gt;My.Proxy&lt;/param-value&gt;  
         &lt;/init-param&gt;
