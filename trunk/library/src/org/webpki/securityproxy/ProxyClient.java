@@ -276,7 +276,6 @@ public class ProxyClient
                 catch (IOException ioe)
                   {
                     badReturn (ioe.getMessage ());
-                    ioe.printStackTrace ();
                     try
                       {
                         if (throwed_an_iox && running)
@@ -284,7 +283,7 @@ public class ProxyClient
                             String err = conn.getResponseMessage ();
                             if (err != null)
                               {
-                                System.out.println (err);
+                                logger.severe (err);
                               }
                           }
                       }
