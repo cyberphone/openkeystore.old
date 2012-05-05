@@ -17,6 +17,10 @@
 package org.webpki.securityproxy;
 
 import java.io.IOException;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,7 +58,8 @@ import javax.servlet.http.HttpServlet;
 &lt;!-- If you use a firewall, the following should not be necessary --&gt;
 &lt;!-- 
         &lt;init-param&gt;
-           &lt;description&gt;Optional proxy remote address check&lt;/description&gt;
+           &lt;description&gt;Optional proxy remote address check.
+                        You may use an IP address or a resolvable DNS name.&lt;/description&gt;
            &lt;param-name&gt;proxy-remote-address&lt;/param-name&gt;  
            &lt;param-value&gt;192.168.0.204&lt;/param-value&gt;  
         &lt;/init-param&gt;
@@ -96,6 +101,20 @@ public class ProxyChannelServlet extends HttpServlet
       {
         super.init (config);
         remote_address = config.getInitParameter (ProxyServer.PROXY_REMOTE_ADDRESS_PROPERTY);
+        if (remote_address != null && remote_address.matches (".*[a-z,A-Z,_,\\-].*"))
+          {
+            try
+              {
+                remote_address = InetAddress.getByName (remote_address).getHostAddress ();
+              }
+            catch (UnknownHostException e)
+              {
+                logger.severe ("Host '" + remote_address + "' not resolvable");
+                remote_address = "N/A";
+              }
+            logger.info ("HOST=" + remote_address);
+          }
+        else logger.info ("IP=" + remote_address);
         String port = config.getInitParameter (ProxyServer.PROXY_SERVER_PORT_PROPERTY);
         if (port != null)
           {

@@ -19,7 +19,8 @@
 <!-- If you use a firewall, the following should not be necessary -->
 <!-- 
         <init-param>
-           <description>Optional proxy remote address check</description>
+           <description>Optional proxy remote address check.
+                        You may use an IP address or a resolvable DNS name.</description>
            <param-name>proxy-remote-address</param-name>  
            <param-value>192.168.0.204</param-value>  
         </init-param>
