@@ -114,7 +114,6 @@ public class ProxyChannelServlet extends HttpServlet
               }
             logger.info ("HOST=" + remote_address);
           }
-        else logger.info ("IP=" + remote_address);
         String port = config.getInitParameter (ProxyServer.PROXY_SERVER_PORT_PROPERTY);
         if (port != null)
           {
@@ -134,7 +133,9 @@ public class ProxyChannelServlet extends HttpServlet
         if ((remote_address != null && !remote_address.equals (request.getRemoteAddr ())) ||
             (server_port != null && server_port != request.getServerPort ()))
           {
-            logger.log (Level.WARNING, "Illegal access from: " + request.getRemoteAddr ());
+            logger.log (Level.WARNING, "Illegal access from: " + request.getRemoteAddr () + ":" +
+                request.getServerPort () + " expected: " + (remote_address == null ? "*" : remote_address) +
+                ":" + (server_port == null ? "*" : server_port.toString ()));
             response.setStatus (HttpServletResponse.SC_FORBIDDEN);
           }
         else
