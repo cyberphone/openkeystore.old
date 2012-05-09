@@ -96,6 +96,13 @@ public class ProxyChannelServlet extends HttpServlet
 
     private ProxyServer proxy_server;
 
+    private String getHostBinding ()
+      {
+        return (remote_address == null ? "*" : remote_address) +
+                                  ":" +
+               (server_port == null ? "*" : server_port.toString ());
+      }
+
     @Override
     public void init (ServletConfig config) throws ServletException
       {
@@ -112,13 +119,13 @@ public class ProxyChannelServlet extends HttpServlet
                 logger.severe ("Host '" + remote_address + "' not resolvable");
                 remote_address = "N/A";
               }
-            logger.info ("HOST=" + remote_address);
           }
         String port = config.getInitParameter (ProxyServer.PROXY_SERVER_PORT_PROPERTY);
         if (port != null)
           {
             server_port = new Integer (port);
           }
+        logger.info ("Host binding=" + getHostBinding ());
         String name = config.getInitParameter (ProxyServer.PROXY_INSTANCE_PROPERTY);
         if (name == null)
           {
@@ -134,8 +141,7 @@ public class ProxyChannelServlet extends HttpServlet
             (server_port != null && server_port != request.getServerPort ()))
           {
             logger.log (Level.WARNING, "Illegal access from: " + request.getRemoteAddr () + ":" +
-                request.getServerPort () + " expected: " + (remote_address == null ? "*" : remote_address) +
-                ":" + (server_port == null ? "*" : server_port.toString ()));
+                request.getServerPort () + " expected: " + getHostBinding ());
             response.setStatus (HttpServletResponse.SC_FORBIDDEN);
           }
         else

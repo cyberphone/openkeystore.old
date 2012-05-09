@@ -356,6 +356,16 @@ public class ProxyServer
           }
       }
 
+    private void returnProxyFailure (HttpServletResponse response, String message) throws IOException
+      {
+        logger.severe (message);
+        if (response == null)
+          {
+            throw new IOException (message);
+          }
+        response.sendError (HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
+      }
+
     /**
      * Proxy server status method.
      * <p>
@@ -608,14 +618,14 @@ public class ProxyServer
       {
         if (server_configuration == null)
           {
-            returnInternalFailure (response, "Proxy server not ready");
+            returnProxyFailure (response, "Proxy server not ready");
             return true;
           }
         if (server_configuration.client_id.equals (client_object.client_id))
           {
             return false;
           }
-        returnInternalFailure (response, "Proxy client ID error " + server_configuration.client_id + " versus " + client_object.client_id);
+        returnProxyFailure (response, "Proxy client ID error " + server_configuration.client_id + " versus " + client_object.client_id);
         return true;
       }
 
@@ -654,7 +664,7 @@ public class ProxyServer
             if (client_object.time_stamp > server_time + TIME_MARGIN ||
                 client_object.time_stamp < server_time - TIME_MARGIN)
               {
-                returnInternalFailure (response, "Proxy client/server time diff >" + TIME_MARGIN + " milliseconds");
+                returnProxyFailure (response, "Proxy client/server time diff >" + TIME_MARGIN + " milliseconds");
                 return;
               }
             if (client_object instanceof InternalServerConfiguration)
@@ -664,11 +674,8 @@ public class ProxyServer
                 // First call. Reset all, get configuration
                 ////////////////////////////////////////////////
                 resetProxy ((InternalServerConfiguration) client_object);
-                if (!upload_event_subscribers.isEmpty ())
-                  {
-                    response.setStatus (HttpServletResponse.SC_OK);
-                    return;
-                  }
+                response.setStatus (HttpServletResponse.SC_OK);
+                return;
               }
             else if (client_object instanceof InternalResponseObject)
               {
@@ -706,6 +713,11 @@ public class ProxyServer
                   {
                     return;
                   }
+                if (upload_event_subscribers.isEmpty ())
+                  {
+                    returnProxyFailure (response, "No upload handler, service not ready?");
+                    return;
+                  }
                 for (ServerUploadHandler handler : upload_event_subscribers)
                   {
                     handler.handleUploadedData (upload.getPayload (handler));
@@ -726,7 +738,7 @@ public class ProxyServer
         catch (ClassNotFoundException e)
           {
             logger.severe (e.getMessage ());
-            returnInternalFailure (response, "Unrecognized object (check versions)");
+            returnProxyFailure (response, "Unrecognized object (check versions)");
             return;
           }
         Caller ci = addProxyWorker (response);
