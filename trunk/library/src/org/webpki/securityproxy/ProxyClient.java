@@ -84,7 +84,7 @@ public class ProxyClient
           {
             if (running)
               {
-                logger.severe ("Channel[" + channel_id + "] returned: " + what);
+                logger.severe (proxy_url + " [" + channel_id + "] returned: " + what);
               }
           }
 
@@ -93,7 +93,7 @@ public class ProxyClient
             int error_count = 0;
             if (debug)
               {
-                logger.info ("Channel[" + channel_id + "] started");
+                logger.info (proxy_url + " [" + channel_id + "] started");
               }
             while (running)
               {
@@ -132,7 +132,7 @@ public class ProxyClient
                                 send_object = upload_objects.remove (0);
                                 if (debug)
                                   {
-                                    logger.info ("Upload initiated on channel[" + channel_id + "]");
+                                    logger.info ("Upload initiated on " + proxy_url + " [" + channel_id + "]");
                                   }
                               }
                           }
@@ -225,14 +225,14 @@ public class ProxyClient
                               {
                                 if (debug)
                                   {
-                                    logger.info ("Channel[" + channel_id + "] was deleted");
+                                    logger.info (proxy_url + " [" + channel_id + "] was deleted");
                                   }
                                 return;
                               }
                           }
                         if (debug)
                           {
-                            logger.info ("Channel[" + channel_id + "] continues");
+                            logger.info (proxy_url + " [" + channel_id + "] continues");
                           }
                       }
                     else
@@ -309,7 +309,7 @@ public class ProxyClient
                             int retry_timeout = (request_timeout * 3) / 2;
                             if (debug)
                               {
-                                logger.info ("Channel[" + channel_id + "] resumes (after waiting " + retry_timeout/1000 + "s) for a new try...");
+                                logger.info (proxy_url + " [" + channel_id + "] resumes (after waiting " + retry_timeout/1000 + "s) for a new try...");
                               }
                             Thread.sleep (retry_timeout);
                           }
@@ -435,7 +435,7 @@ public class ProxyClient
                 channel.send_object = server_configuration;
                 if (debug)
                   {
-                    logger.info ("Proxy " + client_id + " initiated");
+                    logger.info ("Proxy at " + proxy_url + " ID=" + client_id + " initiated");
                   }
               }
             else
@@ -597,7 +597,7 @@ public class ProxyClient
                 channel.running = false;
                 if (debug)
                   {
-                    logger.info ("Channel[" + channel.channel_id + "] was relased");
+                    logger.info (proxy_url + " [" + channel.channel_id + "] was relased");
                   }
               }
           }

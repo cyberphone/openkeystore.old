@@ -589,7 +589,7 @@ public class ProxyServer
         // Set the new configuration
         ////////////////////////////////////////////////////////////////////////////////
         server_configuration = server_conf;
-        logger.info ("Proxy " + (server_conf == null ? "RESET" : "INIT" + (instance_name == null ? "" : " Name=" + instance_name) + " proxy-cycle=" + server_conf.proxy_timeout/1000 + "s") + " client-id=" + server_conf.client_id);
+        logger.info ("Proxy " + (server_conf == null ? "RESET" : "INIT") + " Name=" + instance_name + (server_conf == null ? "" : " ID=" + server_conf.client_id));
       }
 
     private void resetRequest (Vector<RequestDescriptor> request)
