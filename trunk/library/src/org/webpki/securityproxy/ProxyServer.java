@@ -468,35 +468,42 @@ public class ProxyServer
         return preq;
       }
 
-    private JavaResponseInterface internalProcessCall (JavaRequestInterface proxy_request_object, HttpServletResponse response) throws IOException, ServletException
+    private JavaResponseInterface internalProcessCall (JavaRequestInterface proxy_request_object, HttpServletResponse response) throws IOException
       {
-        ////////////////////////////////////////////////////////////////////////////////
-        // Perform as much as possible of the "heavy" stuff outside of synchronization
-        ////////////////////////////////////////////////////////////////////////////////
-
-        if (server_configuration == null)
+        try
           {
-            returnInternalFailure (response, "Proxy not started yet!");
-            return null;
+            ////////////////////////////////////////////////////////////////////////////////
+            // Perform as much as possible of the "heavy" stuff outside of synchronization
+            ////////////////////////////////////////////////////////////////////////////////
+    
+            if (server_configuration == null)
+              {
+                returnInternalFailure (response, "Proxy not started yet!");
+                return null;
+              }
+    
+            ////////////////////////////////////////////////////////////////////
+            // Insert request into queues etc.
+            ////////////////////////////////////////////////////////////////////
+            Caller ci = processRequest (response, proxy_request_object);
+    
+            ///////////////////////////////////////////////////
+            // Now process the action of the request part
+            ///////////////////////////////////////////////////
+            if (ci.transactRequest ())
+              {
+    
+                ////////////////////////////////////////////////////////
+                // Success! Now process the action of the response part
+                ////////////////////////////////////////////////////////
+                ci.transactResponse ();
+              }
+            return ci instanceof ProxyRequest ? ((ProxyRequest)ci).request_descriptor.java_response : ((RequestDescriptor)ci).java_response;
           }
-
-        ////////////////////////////////////////////////////////////////////
-        // Insert request into queues etc.
-        ////////////////////////////////////////////////////////////////////
-        Caller ci = processRequest (response, proxy_request_object);
-
-        ///////////////////////////////////////////////////
-        // Now process the action of the request part
-        ///////////////////////////////////////////////////
-        if (ci.transactRequest ())
+        catch (ServletException e)
           {
-
-            ////////////////////////////////////////////////////////
-            // Success! Now process the action of the response part
-            ////////////////////////////////////////////////////////
-            ci.transactResponse ();
+            throw new IOException (e);
           }
-        return ci instanceof ProxyRequest ? ((ProxyRequest)ci).request_descriptor.java_response : ((RequestDescriptor)ci).java_response;
       }
 
     /**
@@ -511,7 +518,7 @@ public class ProxyServer
      *          The response object of the external call Servlet.
      */
 
-    public void processCall (JavaRequestInterface proxy_request_object, HttpServletResponse response) throws IOException, ServletException
+    public void processCall (JavaRequestInterface proxy_request_object, HttpServletResponse response) throws IOException
       {
         internalProcessCall (proxy_request_object, response);
       }
@@ -526,7 +533,7 @@ public class ProxyServer
      *          The request data object.
      * @return  A Java object
      */
-    public JavaResponseInterface processCall (JavaRequestInterface proxy_request_object) throws IOException, ServletException
+    public JavaResponseInterface processCall (JavaRequestInterface proxy_request_object) throws IOException
       {
         return internalProcessCall (proxy_request_object, null);
       }
