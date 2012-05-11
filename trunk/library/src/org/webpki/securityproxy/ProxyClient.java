@@ -433,10 +433,7 @@ public class ProxyClient
                 server_configuration = new InternalServerConfiguration (cycle_time, request_timeout, client_id);
                 idle_object = new InternalIdleObject (client_id);
                 channel.send_object = server_configuration;
-                if (debug)
-                  {
-                    logger.info ("Proxy at " + proxy_url + " ID=" + client_id + " initiated");
-                  }
+                logger.info ("Proxy at " + proxy_url + " ID=" + client_id + " initiated");
               }
             else
               {
