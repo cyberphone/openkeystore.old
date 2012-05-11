@@ -112,7 +112,7 @@ public class ProxyServer
               {
                 instances.put (name_of_instance, instance = new ProxyServer ());
                 instance.instance_name = name_of_instance;
-                logger.info ("Instance \"" + name_of_instance + "\" initialized");
+                logger.info ("Instance=" + name_of_instance + " created");
               }
             return instance;
           }
@@ -596,7 +596,7 @@ public class ProxyServer
         // Set the new configuration
         ////////////////////////////////////////////////////////////////////////////////
         server_configuration = server_conf;
-        logger.info ("Proxy " + (server_conf == null ? "RESET" : "INIT") + " Name=" + instance_name + (server_conf == null ? "" : " ID=" + server_conf.client_id));
+        logger.info ("Proxy " + (server_conf == null ? "RESET" : "INIT") + " Instance=" + instance_name + (server_conf == null ? "" : " ID=" + server_conf.client_id));
       }
 
     private void resetRequest (Vector<RequestDescriptor> request)
