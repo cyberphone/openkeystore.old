@@ -478,7 +478,7 @@ public class ProxyServer
     
             if (server_configuration == null)
               {
-                returnInternalFailure (response, "Proxy not started yet!");
+                returnInternalFailure (response, "Proxy " + instance_name + " not started yet!");
                 return null;
               }
     
@@ -722,7 +722,7 @@ public class ProxyServer
                   }
                 if (upload_event_subscribers.isEmpty ())
                   {
-                    returnProxyFailure (response, "No upload handler, service not ready?");
+                    returnProxyFailure (response, "No upload handler, " + instance_name + " service not ready?");
                     return;
                   }
                 for (ServerUploadHandler handler : upload_event_subscribers)
