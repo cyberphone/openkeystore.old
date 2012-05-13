@@ -275,7 +275,14 @@ public class ProxyClient
                   }
                 catch (IOException ioe)
                   {
-                    badReturn (ioe.getMessage ());
+                    if (debug)
+                      {
+                        logger.log (Level.SEVERE, proxy_url + " [" + channel_id + "] returned:", ioe);
+                      }
+                    else
+                      {
+                        badReturn (ioe.getMessage ());
+                      }
                     try
                       {
                         if (throwed_an_iox && running)
@@ -414,71 +421,65 @@ public class ProxyClient
         return res.toString ();
       }
 
-    private void spawnProxy ()
+    private synchronized void spawnProxy ()
       {
-        synchronized (channels)
+        ProxyChannel channel = new ProxyChannel ();
+        channel.channel_id = last_channel_id++;
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // If it is the first channel - issue a master reset + configuration to the proxy server
+        /////////////////////////////////////////////////////////////////////////////////////////
+        if (channel.channel_id == 0)
           {
-            ProxyChannel channel = new ProxyChannel ();
-            channel.channel_id = last_channel_id++;
+            byte[] cid = new byte[10];
+            new SecureRandom ().nextBytes (cid);
+            client_id = toHexString (cid);
 
-            /////////////////////////////////////////////////////////////////////////////////////////
-            // If it is the first channel - issue a master reset + configuration to the proxy server
-            /////////////////////////////////////////////////////////////////////////////////////////
-            if (channel.channel_id == 0)
-              {
-                byte[] cid = new byte[10];
-                new SecureRandom ().nextBytes (cid);
-                client_id = toHexString (cid);
-
-                server_configuration = new InternalServerConfiguration (cycle_time, request_timeout, client_id);
-                idle_object = new InternalIdleObject (client_id);
-                channel.send_object = server_configuration;
-                logger.info ("Proxy at " + proxy_url + " ID=" + client_id + " initiated");
-              }
-            else
-              {
-                channel.send_object = idle_object;
-              }
-            channels.add (channel);
-            new Thread (channel).start ();
+            server_configuration = new InternalServerConfiguration (cycle_time, request_timeout, client_id);
+            idle_object = new InternalIdleObject (client_id);
+            channel.send_object = server_configuration;
+            logger.info ("Proxy at " + proxy_url + " ID=" + client_id + " initiated");
           }
+        else
+          {
+            channel.send_object = idle_object;
+          }
+        channels.add (channel);
+        new Thread (channel).start ();
       }
 
-    private void checkForProxyDemand (boolean increase)
+    private synchronized void checkForProxyDemand (boolean increase)
       {
         /////////////////////////////////////////////////////////////////////////////////////
         // Check that there is ample of free channels in order to keep up with requests
         /////////////////////////////////////////////////////////////////////////////////////
-        synchronized (channels)
+        if (channels.size () < max_workers)
           {
-            if (channels.size () < max_workers)
+            /////////////////////////////////////////////////////////////////////////////////////
+            // We have not yet reached the ceiling
+            /////////////////////////////////////////////////////////////////////////////////////
+            int q = 0;
+            for (ProxyChannel channel : channels)
+              {
+                if (channel.hanging) // = Most likely to be idle
+                  {
+                    q++;
+                  }
+              }
+            if (increase)
+              {
+                q -= 2;
+              }
+
+            /////////////////////////////////////////////////////////////////////////////////////
+            // The margin checker
+            /////////////////////////////////////////////////////////////////////////////////////
+            if (q < 2 || q < (max_workers / 5))
               {
                 /////////////////////////////////////////////////////////////////////////////////////
-                // We have not yet reached the ceiling
+                // We could use a helping hand here...
                 /////////////////////////////////////////////////////////////////////////////////////
-                int q = 0;
-                for (ProxyChannel channel : channels)
-                  {
-                    if (channel.hanging) // = Most likely to be idle
-                      {
-                        q++;
-                      }
-                  }
-                if (increase)
-                  {
-                    q -= 2;
-                  }
-
-                /////////////////////////////////////////////////////////////////////////////////////
-                // The margin checker
-                /////////////////////////////////////////////////////////////////////////////////////
-                if (q < 2 || q < (max_workers / 5))
-                  {
-                    /////////////////////////////////////////////////////////////////////////////////////
-                    // We could use a helping hand here...
-                    /////////////////////////////////////////////////////////////////////////////////////
-                    spawnProxy ();
-                  }
+                spawnProxy ();
               }
           }
       }
@@ -488,33 +489,30 @@ public class ProxyClient
         server_certificates = certificates;
       }
 
-    private boolean unneededProxy (long test_channel_id) throws IOException
+    private synchronized boolean unneededProxy (long test_channel_id) throws IOException
       {
-        synchronized (channels)
+        if (channels.size () == 1)
           {
-            if (channels.size () == 1)
-              {
-                /////////////////////////////////////////////////////////////////////////////////////
-                // We must at least have one living thread...
-                /////////////////////////////////////////////////////////////////////////////////////
-                return false;
-              }
-
             /////////////////////////////////////////////////////////////////////////////////////
-            // Ooops. We are probably redundant...
+            // We must at least have one living thread...
             /////////////////////////////////////////////////////////////////////////////////////
-            int q = 0;
-            for (ProxyChannel channel : channels)
-              {
-                if (channel.channel_id == test_channel_id)
-                  {
-                    channels.remove (q);
-                    return true;
-                  }
-                q++;
-              }
-            throw new IOException ("Internal error.  Missing channel_id: " + test_channel_id);
+            return false;
           }
+
+        /////////////////////////////////////////////////////////////////////////////////////
+        // Ooops. We are probably redundant...
+        /////////////////////////////////////////////////////////////////////////////////////
+        int q = 0;
+        for (ProxyChannel channel : channels)
+          {
+            if (channel.channel_id == test_channel_id)
+              {
+                channels.remove (q);
+                return true;
+              }
+            q++;
+          }
+        throw new IOException ("Internal error.  Missing channel_id: " + test_channel_id);
       }
 
     /**
@@ -584,18 +582,15 @@ public class ProxyClient
      * Terminates and clears the proxy connection(s).
      * A well-behaved client service should call this before terminating.
      */
-    public void killProxy ()
+    public synchronized void killProxy ()
       {
-        synchronized (channels)
+        while (!channels.isEmpty ())
           {
-            while (!channels.isEmpty ())
+            ProxyChannel channel = channels.remove (0);
+            channel.running = false;
+            if (debug)
               {
-                ProxyChannel channel = channels.remove (0);
-                channel.running = false;
-                if (debug)
-                  {
-                    logger.info (proxy_url + " [" + channel.channel_id + "] was relased");
-                  }
+                logger.info (proxy_url + " [" + channel.channel_id + "] was relased");
               }
           }
         upload_objects.clear ();
