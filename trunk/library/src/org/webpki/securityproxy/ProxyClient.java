@@ -528,27 +528,41 @@ public class ProxyClient
     /**
      * For HTTPS use this method as an alternative to the global truststore.
      *  
-     * @param truststore JKS or PKCS #12 file-name
+     * @param truststore_file JKS or PKCS #12 file-name
      * @param password Truststore password
      * @throws IOException
      */
-    public void setTrustStore (String truststore, String password) throws IOException
+    public void setTrustStore (String truststore_file, String password) throws IOException
       {
         checkOrder ();
-        proxy_service_truststore = KeyStoreReader.loadKeyStore (truststore, password);
+        proxy_service_truststore = KeyStoreReader.loadKeyStore (truststore_file, password);
       }
 
     /**
      * For HTTPS client certificate authentication.
      * 
-     * @param keystore JKS or PKCS #12 file-name
+     * @param keystore Instantiated Java KeyStore
      * @param password Key password
      * @throws IOException
      */
-    public void setKeyStore (String keystore, String password) throws IOException
+    public void setKeyStore (KeyStore keystore, String password) throws IOException
       {
         checkOrder ();
-        proxy_service_keystore = KeyStoreReader.loadKeyStore (keystore, password);
+        proxy_service_keystore = keystore;
+        proxy_service_key_password = password;
+      }
+
+    /**
+     * For HTTPS client certificate authentication.
+     * 
+     * @param keystore_file JKS or PKCS #12 file-name
+     * @param password Key password
+     * @throws IOException
+     */
+    public void setKeyStore (String keystore_file, String password) throws IOException
+      {
+        checkOrder ();
+        proxy_service_keystore = KeyStoreReader.loadKeyStore (keystore_file, password);
         proxy_service_key_password = password;
       }
 

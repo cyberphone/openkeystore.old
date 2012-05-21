@@ -33,13 +33,44 @@ import org.webpki.util.Base64;
 
 public class KeyStore2PEMConverter
   {
+    private static void fail ()
+      {
+        System.out.println (KeyStore2PEMConverter.class.getName () + "  keystore-file password PEM-file qualifier\n" +
+                           "   qualifier = public | private | composite | all");
+        System.exit (3);
+      }
 
     public static void main (String argv[]) throws Exception
       {
-        if (argv.length != 3)
+        if (argv.length != 4)
           {
-            System.out.println (KeyStore2PEMConverter.class.getName () + "  keystore-file password PEM-file");
-            System.exit (3);
+            fail ();
+          }
+        boolean private_key = false;
+        boolean public_key = false;
+        boolean other_key = false;
+        if (argv[3].equals ("public"))
+          {
+            public_key = true;
+          }
+        else if (argv[3].equals ("private"))
+          {
+            private_key = true;
+          }
+        else if (argv[3].equals ("composite"))
+          {
+            public_key = true;
+            private_key = true;
+          }
+        else if (argv[3].equals ("all"))
+          {
+            public_key = true;
+            private_key = true;
+            other_key = true;
+          }
+        else
+          {
+            fail ();
           }
         Security.insertProviderAt (new BouncyCastleProvider(), 1);
         KeyStore ks = KeyStoreReader.loadKeyStore (argv[0], argv[1]);
@@ -50,15 +81,21 @@ public class KeyStore2PEMConverter
             String alias = aliases.nextElement ();
             if (ks.isKeyEntry (alias))
               {
-                writeObject (fis, "PRIVATE KEY", ks.getKey (alias, argv[1].toCharArray ()).getEncoded ());
-                for (Certificate cert : ks.getCertificateChain (alias))
+                if (private_key)
+                  {
+                    writeObject (fis, "PRIVATE KEY", ks.getKey (alias, argv[1].toCharArray ()).getEncoded ());
+                  }
+                if (public_key) for (Certificate cert : ks.getCertificateChain (alias))
                   {
                     writeCert (fis, cert);
                   }
               }
             else if (ks.isCertificateEntry (alias))
               {
-                writeCert (fis, ks.getCertificate (alias));
+                if (other_key)
+                  {
+                    writeCert (fis, ks.getCertificate (alias));
+                  }
               }
             else
               {
