@@ -32,14 +32,42 @@ public class HTTPResponseWrapper implements Serializable
     
     String mime_type;
     
+    String error_message;
+    
+    int error_status;
+    
     LinkedHashMap<String,String> headers = new LinkedHashMap<String,String> ();
     
+    /**
+     * For passing a HttpServletRequest "sendError"
+     * 
+     * @param error_status
+     * @param error_message
+     */
+    public HTTPResponseWrapper (int error_status, String error_message)
+      {
+        this.error_status = error_status;
+        this.error_message = error_message;
+      }
+
+    /**
+     * Normal HTTP return
+     * 
+     * @param data
+     * @param mime_type
+     */
     public HTTPResponseWrapper (byte[] data, String mime_type)
       {
         this.data = data;
         this.mime_type = mime_type;
       }
     
+    /**
+     * Adds a header to the HTTP response
+     * 
+     * @param name
+     * @param value
+     */
     public void addHeader (String name, String value)
       {
         headers.put (name, value);

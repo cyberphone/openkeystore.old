@@ -77,7 +77,7 @@ If you use the Apache APR library you must convert the JKS into a PEM file:
 
 java -cp PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/library/dist/webpki.org-libext-1.00.jar:\
 PATH_TO_WEBPKI.ORG_INSTALL_DIRECTORY/resources/third-party-jars/bcprov-jdk16-145.jar \
-org.webpki.tools.KeyStore2PEMConverter proxy.jks testing proxy.pem
+org.webpki.tools.KeyStore2PEMConverter proxy.jks testing proxy.pem composite
 
 See "tomcat.con/server-with-APR-and-TLS.xml" for configuring "server.xml" for TLS and APR.
 

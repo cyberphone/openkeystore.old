@@ -239,11 +239,11 @@ public class ProxyServer
                         throw new IOException (e);
                       }
                   }
-                else
+                else if (response_object.response_data.error_status == 0)
                   {
-                    //////////////////////////////////////////
-                    // Normal response, output HTTP headers
-                    //////////////////////////////////////////
+                    //////////////////////////////////////////////////
+                    // Normal HTTP response, output headers as well 
+                    //////////////////////////////////////////////////
                     response.setContentLength (response_object.response_data.data.length);
                     response.setContentType (response_object.response_data.mime_type);
                     for (String name : response_object.response_data.headers.keySet ())
@@ -251,6 +251,13 @@ public class ProxyServer
                         response.setHeader (name, response_object.response_data.headers.get (name));
                       }
                     response.getOutputStream ().write (response_object.response_data.data);
+                  }
+                else
+                  {
+                    //////////////////////////////////////////
+                    // HTTP error response
+                    //////////////////////////////////////////
+                    response.sendError (response_object.response_data.error_status, response_object.response_data.error_message);
                   }
               }
             else
