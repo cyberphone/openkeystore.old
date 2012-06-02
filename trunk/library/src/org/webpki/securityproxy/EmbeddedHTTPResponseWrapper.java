@@ -16,38 +16,24 @@
  */
 package org.webpki.securityproxy;
 
-import java.io.Serializable;
-
-import java.util.LinkedHashMap;
-
 /**
  * Security proxy object containing a local service's HTTP response.
+ * This version is supposed to be returned as a {@link JavaResponseInterface}
  * @see ClientRequestHandler
  */
-public class HTTPResponseWrapper implements Serializable
+public class EmbeddedHTTPResponseWrapper extends HTTPResponseWrapper implements JavaResponseInterface
   {
     private static final long serialVersionUID = 1L;
 
-    byte[] data;
-    
-    String mime_type;
-    
-    String error_message;
-    
-    int error_status;
-    
-    LinkedHashMap<String,String> headers = new LinkedHashMap<String,String> ();
-    
     /**
      * For passing a HttpServletRequest "sendError"
      * 
      * @param error_status
      * @param error_message
      */
-    public HTTPResponseWrapper (int error_status, String error_message)
+    public EmbeddedHTTPResponseWrapper (int error_status, String error_message)
       {
-        this.error_status = error_status;
-        this.error_message = error_message;
+        super (error_status, error_message);
       }
 
     /**
@@ -56,28 +42,8 @@ public class HTTPResponseWrapper implements Serializable
      * @param data
      * @param mime_type
      */
-    public HTTPResponseWrapper (byte[] data, String mime_type)
+    public EmbeddedHTTPResponseWrapper (byte[] data, String mime_type)
       {
-        this.data = data;
-        this.mime_type = mime_type;
-      }
-    
-    /**
-     * Adds a header to the HTTP response
-     * 
-     * @param name
-     * @param value
-     */
-    public void addHeader (String name, String value)
-      {
-        headers.put (name, value);
-      }
-
-    /**
-     * Checks if the returned object contains an HTTP error 
-     */
-    public boolean isError ()
-      {
-        return error_status != 0;
+        super (data, mime_type);
       }
   }

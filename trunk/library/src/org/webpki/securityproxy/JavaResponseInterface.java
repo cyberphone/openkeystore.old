@@ -23,6 +23,7 @@ import java.io.Serializable;
  * Security proxy object containing a local service's Java response.
  * A user-defined Java response object must implement this interface.
  * @see ClientRequestHandler
+ * @see ProxyServer#processCall(JavaRequestInterface)
  */
 public interface JavaResponseInterface extends Serializable
   {
