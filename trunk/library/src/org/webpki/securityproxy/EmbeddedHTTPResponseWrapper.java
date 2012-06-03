@@ -28,8 +28,8 @@ public class EmbeddedHTTPResponseWrapper extends HTTPResponseWrapper implements 
     /**
      * For passing a HttpServletRequest "sendError"
      * 
-     * @param error_status
-     * @param error_message
+     * @param error_status HTTP error code
+     * @param error_message HTTP status message
      */
     public EmbeddedHTTPResponseWrapper (int error_status, String error_message)
       {
@@ -39,8 +39,8 @@ public class EmbeddedHTTPResponseWrapper extends HTTPResponseWrapper implements 
     /**
      * Normal HTTP return
      * 
-     * @param data
-     * @param mime_type
+     * @param data The HTTP body
+     * @param mime_type The MIME type
      */
     public EmbeddedHTTPResponseWrapper (byte[] data, String mime_type)
       {

@@ -41,8 +41,8 @@ public class HTTPResponseWrapper implements Serializable
     /**
      * For passing a HttpServletRequest "sendError"
      * 
-     * @param error_status
-     * @param error_message
+     * @param error_status HTTP error code
+     * @param error_message HTTP status message
      */
     public HTTPResponseWrapper (int error_status, String error_message)
       {
@@ -53,8 +53,8 @@ public class HTTPResponseWrapper implements Serializable
     /**
      * Normal HTTP return
      * 
-     * @param data
-     * @param mime_type
+     * @param data The HTTP body
+     * @param mime_type The MIME type
      */
     public HTTPResponseWrapper (byte[] data, String mime_type)
       {
@@ -65,8 +65,8 @@ public class HTTPResponseWrapper implements Serializable
     /**
      * Adds a header to the HTTP response
      * 
-     * @param name
-     * @param value
+     * @param name Name of HTTP header
+     * @param value Value of HTTP Header
      */
     public void addHeader (String name, String value)
       {
@@ -74,7 +74,8 @@ public class HTTPResponseWrapper implements Serializable
       }
 
     /**
-     * Checks if the returned object contains an HTTP error 
+     * Checks if the returned object contains an HTTP error. 
+     * @return True if the object contains an HTTP error
      */
     public boolean isError ()
       {
