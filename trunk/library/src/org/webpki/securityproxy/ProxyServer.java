@@ -40,11 +40,11 @@ public class ProxyServer
   {
     /**
      * web.xml servlet init parameter.
-     * Mandatory name of proxy instance.
+     * Mandatory name of proxy service.
      * An "Outer Service" must refer to the same name in {@link #getInstance(String)}.
      * @see ProxyChannelServlet
      */
-    public static final String PROXY_INSTANCE_PROPERTY = "proxy-instance-name";
+    public static final String PROXY_SERVICE_PROPERTY = "proxy-service-name";
 
     /**
      * web.xml servlet init parameter.
@@ -64,7 +64,7 @@ public class ProxyServer
 
     private static Logger logger = Logger.getLogger (ProxyServer.class.getName ());
 
-    private static HashMap<String,ProxyServer> instances = new HashMap<String,ProxyServer> (); 
+    private static HashMap<String,ProxyServer> services = new HashMap<String,ProxyServer> (); 
 
     private Vector<RequestDescriptor> response_queue = new Vector<RequestDescriptor> ();
 
@@ -78,7 +78,7 @@ public class ProxyServer
 
     private long next_proxy_id;
     
-    private String instance_name;  // Optional
+    private String service_name;  // Optional
 
     private InternalServerConfiguration server_configuration;
 
@@ -95,26 +95,27 @@ public class ProxyServer
       }
     
     /**
-     * Create proxy server instance.
-     * @param name_of_instance Note that this name must be unique if there are more than one proxy server in a single JVM
+     * Create proxy service instance.
+     * Note that there can only be one instance of a specific named service running in a single JVM.
+     * @param name_of_service
      * @return ProxyServer
      */
-    public static ProxyServer getInstance (String name_of_instance)
+    public static ProxyServer getInstance (String name_of_service)
       {
-        if (name_of_instance == null || name_of_instance.length () == 0)
+        if (name_of_service == null || name_of_service.length () == 0)
           {
             throw new RuntimeException ("Proxy instance name is missing or null");
           }
-        synchronized (instances)
+        synchronized (services)
           {
-            ProxyServer instance = instances.get (name_of_instance);
-            if (instance == null)
+            ProxyServer service = services.get (name_of_service);
+            if (service == null)
               {
-                instances.put (name_of_instance, instance = new ProxyServer ());
-                instance.instance_name = name_of_instance;
-                logger.info ("Instance=" + name_of_instance + " created");
+                services.put (name_of_service, service = new ProxyServer ());
+                service.service_name = name_of_service;
+                logger.info ("Service=" + name_of_service + " created");
               }
-            return instance;
+            return service;
           }
       }
     
@@ -485,7 +486,7 @@ public class ProxyServer
     
             if (server_configuration == null)
               {
-                returnInternalFailure (response, "Proxy " + instance_name + " not started yet!");
+                returnInternalFailure (response, "Service " + service_name + " not started yet!");
                 return null;
               }
     
@@ -603,7 +604,7 @@ public class ProxyServer
         // Set the new configuration
         ////////////////////////////////////////////////////////////////////////////////
         server_configuration = server_conf;
-        logger.info ((server_conf == null ? "Resetting" : "Starting") + " Instance=" + instance_name + (server_conf == null ? "" : " ID=" + server_conf.client_id));
+        logger.info ((server_conf == null ? "Resetting" : "Starting") + " Service=" + service_name + (server_conf == null ? "" : " ID=" + server_conf.client_id));
       }
 
     private void resetRequest (Vector<RequestDescriptor> request)
@@ -729,7 +730,7 @@ public class ProxyServer
                   }
                 if (upload_event_subscribers.isEmpty ())
                   {
-                    returnProxyFailure (response, "No upload handler, " + instance_name + " service not ready?");
+                    returnProxyFailure (response, "No upload handler, " + service_name + " service not ready?");
                     return;
                   }
                 for (ServerUploadHandler handler : upload_event_subscribers)

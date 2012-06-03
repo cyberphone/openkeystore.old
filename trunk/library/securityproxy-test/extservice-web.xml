@@ -9,8 +9,8 @@
     <display-name>External Service (For Testing Only)</display-name>
 
     <context-param>
-        <description>Mandatory unique proxy instance name</description>
-        <param-name>proxy-instance-name</param-name>
+        <description>Mandatory unique proxy service name</description>
+        <param-name>proxy-service-name</param-name>
         <param-value>Proxy.Demo</param-value>
     </context-param>
 

@@ -51,8 +51,8 @@ import javax.servlet.http.HttpServlet;
         &lt;servlet-name&gt;ProxyChannelServlet&lt;/servlet-name&gt;
         &lt;servlet-class&gt;org.webpki.securityproxy.ProxyChannelServlet&lt;/servlet-class&gt;
         &lt;init-param&gt;
-           &lt;description&gt;Mandatory unique proxy instance name&lt;/description&gt;
-           &lt;param-name&gt;proxy-instance-name&lt;/param-name&gt;  
+           &lt;description&gt;Mandatory unique proxy service name&lt;/description&gt;
+           &lt;param-name&gt;proxy-service-name&lt;/param-name&gt;  
            &lt;param-value&gt;Proxy.Demo&lt;/param-value&gt;  
         &lt;/init-param&gt;
 &lt;!-- If you use a firewall, the following should not be necessary --&gt;
@@ -127,10 +127,10 @@ public class ProxyChannelServlet extends HttpServlet
           {
             server_port = new Integer (port);
           }
-        proxy_instance_name = config.getInitParameter (ProxyServer.PROXY_INSTANCE_PROPERTY);
+        proxy_instance_name = config.getInitParameter (ProxyServer.PROXY_SERVICE_PROPERTY);
         if (proxy_instance_name == null)
           {
-            throw new ServletException ("Servlet property '" + ProxyServer.PROXY_INSTANCE_PROPERTY + "' is undefined!");
+            throw new ServletException ("Servlet property '" + ProxyServer.PROXY_SERVICE_PROPERTY + "' is undefined!");
           }
         logger.info ("Host binding for " + proxy_instance_name + "=" + getHostBinding ());
         proxy_server = ProxyServer.getInstance (proxy_instance_name);

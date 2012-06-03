@@ -300,7 +300,7 @@ public class Init implements ServletContextListener, {@link org.webpki.securityp
     &#64;Override
     public void contextInitialized (ServletContextEvent event)
       {
-        proxy_server = {@link org.webpki.securityproxy.ProxyServer#getInstance(String) ProxyServer.getInstance} (event.getServletContext ().getInitParameter ({@link org.webpki.securityproxy.ProxyServer#PROXY_INSTANCE_PROPERTY}));
+        proxy_server = {@link org.webpki.securityproxy.ProxyServer#getInstance(String) ProxyServer.getInstance} (event.getServletContext ().getInitParameter ({@link org.webpki.securityproxy.ProxyServer#PROXY_SERVICE_PROPERTY}));
         proxy_server.{@link org.webpki.securityproxy.ProxyServer#addUploadEventHandler(ServerUploadHandler) addUploadEventHandler} (this);
       }
 
@@ -381,8 +381,8 @@ The two java classes above should be packed together with "web.xml" into a "war"
     &lt;display-name&gt;Outer Service&lt;/display-name&gt;
 
     &lt;context-param&gt;
-        &lt;description&gt;Mandatory unique proxy instance name&lt;/description&gt;
-        &lt;param-name&gt;proxy-instance-name&lt;/param-name&gt;
+        &lt;description&gt;Mandatory unique proxy service name&lt;/description&gt;
+        &lt;param-name&gt;proxy-service-name&lt;/param-name&gt;
         &lt;param-value&gt;My.Proxy&lt;/param-value&gt;
     &lt;/context-param&gt;
 
@@ -422,8 +422,8 @@ JBoss applications may also put "securityproxy.jar" in an "ear" file.
         &lt;servlet-name&gt;ProxyChannelServlet&lt;/servlet-name&gt;
         &lt;servlet-class&gt;org.webpki.securityproxy.ProxyChannelServlet&lt;/servlet-class&gt;
         &lt;init-param&gt;
-           &lt;description&gt;Mandatory unique proxy instance name&lt;/description&gt;
-           &lt;param-name&gt;proxy-instance-name&lt;/param-name&gt;  
+           &lt;description&gt;Mandatory unique proxy service name&lt;/description&gt;
+           &lt;param-name&gt;proxy-service-name&lt;/param-name&gt;  
            &lt;param-value&gt;My.Proxy&lt;/param-value&gt;  
         &lt;/init-param&gt;
     &lt;/servlet&gt;
