@@ -21,6 +21,10 @@ import java.util.Vector;
 import java.util.Set;
 import java.util.EnumSet;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import org.webpki.asn1.ASN1OctetString;
 import org.webpki.asn1.BaseASN1Object;
 import org.webpki.asn1.ASN1IA5String;
 
@@ -293,6 +297,12 @@ public class CertSpec
     public void addDNSName (String name)
       {
         addSubjectAltNameElement (SubjectAltNameTypes.DNS_NAME, new ASN1IA5String (name));
+      }
+
+    
+    public void addIPAddress (String ip_address) throws IOException
+      {
+        addSubjectAltNameElement (SubjectAltNameTypes.IP_ADDRESS, new ASN1OctetString (InetAddress.getByName (ip_address).getAddress ()));
       }
 
 

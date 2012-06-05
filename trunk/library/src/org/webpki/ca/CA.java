@@ -292,20 +292,28 @@ public class CA
                     int type = nameValue.name;
                         
                     // We currently only handle simple IA5String types.
-                    if(type == SubjectAltNameTypes.RFC822_NAME ||
-                       type == SubjectAltNameTypes.DNS_NAME ||
-                       type == SubjectAltNameTypes.UNIFORM_RESOURCE_IDENTIFIER)
+                    if (type == SubjectAltNameTypes.RFC822_NAME ||
+                        type == SubjectAltNameTypes.DNS_NAME ||
+                        type == SubjectAltNameTypes.UNIFORM_RESOURCE_IDENTIFIER)
                       {
                         if (!(nameValue.value instanceof ASN1IA5String))
                           {
-                            throw new IOException ("Wrong argument type to SubjectAltNames of type " + type + ": " + nameValue.toString ());
+                            throw new IOException ("Wrong argument type to SubjectAltNames of type " + type);
                           }
-                        san[i++] = new SimpleContextSpecific (type, nameValue.value);
+                      }
+                    // Or IP addresses.
+                    else if (type == SubjectAltNameTypes.IP_ADDRESS)
+                      {
+                        if (!(nameValue.value instanceof ASN1OctetString))
+                          {
+                            throw new IOException ("Wrong argument type to SubjectAltNames of type IP address");
+                          }
                       }
                     else
                       {
                         throw new IOException ("SubjectAltNames of type " + type + " are not handled.");
                       }
+                    san[i++] = new SimpleContextSpecific (type, nameValue.value);
                   }
                 extensions.add (CertificateExtensions.SUBJECT_ALT_NAME, new ASN1Sequence (san));
               }

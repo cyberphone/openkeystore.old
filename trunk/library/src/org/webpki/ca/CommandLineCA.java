@@ -659,6 +659,11 @@ public class CommandLineCA
                                                 "Add a DNS name SubjectAltName (SAN) extension",
                                                 CmdFrequency.OPTIONAL_MULTIPLE);
 
+    CmdLineArgument CMD_ext_ip        = create (CmdLineArgumentGroup.GENERAL,
+                                                "extension/ip", "ip-address",
+                                                "Add an IP address SubjectAltName (SAN) extension",
+                                                CmdFrequency.OPTIONAL_MULTIPLE);
+
     CmdLineArgument CMD_ext_iss_logo  = create (CmdLineArgumentGroup.GENERAL,
                                                 "extension/issuer-logo", "uri",
                                                 "Add an issuer logotype extension.  Must be an HTTP URL " +
@@ -961,6 +966,14 @@ public class CommandLineCA
             for (String arg : CMD_ext_dns.argvalue)
               {
                 certspec.addDNSName (arg);
+              }
+
+            ///////////////////////////////////////////////////////////////
+            // Get SAN IP addresses
+            ///////////////////////////////////////////////////////////////
+            for (String arg : CMD_ext_ip.argvalue)
+              {
+                certspec.addIPAddress (arg);
               }
 
             ///////////////////////////////////////////////////////////////
