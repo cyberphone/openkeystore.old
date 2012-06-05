@@ -90,7 +90,7 @@ public class ProxyChannelServlet extends HttpServlet
     
     private static Logger logger = Logger.getLogger (ProxyChannelServlet.class.getCanonicalName ());
     
-    private String proxy_instance_name;
+    private String name_of_service;
 
     private String remote_address;
     
@@ -127,13 +127,13 @@ public class ProxyChannelServlet extends HttpServlet
           {
             server_port = new Integer (port);
           }
-        proxy_instance_name = config.getInitParameter (ProxyServer.PROXY_SERVICE_PROPERTY);
-        if (proxy_instance_name == null)
+        name_of_service = config.getInitParameter (ProxyServer.PROXY_SERVICE_PROPERTY);
+        if (name_of_service == null)
           {
             throw new ServletException ("Servlet property '" + ProxyServer.PROXY_SERVICE_PROPERTY + "' is undefined!");
           }
-        logger.info ("Host binding for " + proxy_instance_name + "=" + getHostBinding ());
-        proxy_server = ProxyServer.getInstance (proxy_instance_name);
+        logger.info ("Host binding for " + name_of_service + "=" + getHostBinding ());
+        proxy_server = ProxyServer.getInstance (name_of_service);
       }
 
     @Override
@@ -142,7 +142,7 @@ public class ProxyChannelServlet extends HttpServlet
         if ((remote_address != null && !remote_address.equals (request.getRemoteAddr ())) ||
             (server_port != null && server_port != request.getServerPort ()))
           {
-            logger.log (Level.WARNING, "Illegal access to " + proxy_instance_name + " from: " +
+            logger.log (Level.WARNING, "Illegal access to " + name_of_service + " from: " +
                         request.getRemoteAddr () + ":" + request.getServerPort () +
                         " expected: " + getHostBinding ());
             response.setStatus (HttpServletResponse.SC_FORBIDDEN);
