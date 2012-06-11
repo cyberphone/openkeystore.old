@@ -119,6 +119,30 @@ public class ProxyServer
           }
       }
     
+    public static void outputHTTPResponse (HttpServletResponse response, HTTPResponseWrapper http_data) throws IOException
+      {
+        if (http_data.error_status == 0)
+          {
+            //////////////////////////////////////////////////
+            // Normal HTTP response, output headers as well 
+            //////////////////////////////////////////////////
+            response.setContentLength (http_data.data.length);
+            response.setContentType (http_data.mime_type);
+            for (String name : http_data.headers.keySet ())
+              {
+                response.setHeader (name, http_data.headers.get (name));
+              }
+            response.getOutputStream ().write (http_data.data);
+          }
+        else
+          {
+            //////////////////////////////////////////
+            // HTTP error response
+            //////////////////////////////////////////
+            response.sendError (http_data.error_status, http_data.error_message);
+          }
+      }
+    
     public void setProxyServerErrorFactory (Class<? extends ProxyServerErrorFactory> error_container)
       {
         this.error_container = error_container;
@@ -240,25 +264,9 @@ public class ProxyServer
                         throw new IOException (e);
                       }
                   }
-                else if (response_object.response_data.error_status == 0)
-                  {
-                    //////////////////////////////////////////////////
-                    // Normal HTTP response, output headers as well 
-                    //////////////////////////////////////////////////
-                    response.setContentLength (response_object.response_data.data.length);
-                    response.setContentType (response_object.response_data.mime_type);
-                    for (String name : response_object.response_data.headers.keySet ())
-                      {
-                        response.setHeader (name, response_object.response_data.headers.get (name));
-                      }
-                    response.getOutputStream ().write (response_object.response_data.data);
-                  }
                 else
                   {
-                    //////////////////////////////////////////
-                    // HTTP error response
-                    //////////////////////////////////////////
-                    response.sendError (response_object.response_data.error_status, response_object.response_data.error_message);
+                    outputHTTPResponse (response, response_object.response_data);
                   }
               }
             else
