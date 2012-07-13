@@ -41,7 +41,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 27-Mar-2012 
+    Revised: 13-JUL-2012 
     Author: Anders Rundgren
 
     Copyright 2006-2012 WebPKI.org (http://webpki.org).
@@ -59,11 +59,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20120327#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20120713#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20120327#"
+           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20120713#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -130,7 +130,7 @@
 
          <!-- "PrivacyEnabled" specifies if the SKS privacy enabled provisioning
               mode is to be used.  Default: false -->
-         <xs:attribute name="PrivacyEnabled" type="xs:anyURI" use="optional"/>
+         <xs:attribute name="PrivacyEnabled" type="xs:boolean" use="optional"/>
 
          <!-- GUI language in preference order.  Primarily for public computers -->
          <xs:attribute name="Languages" type="kgen:languageList" use="optional"/>
@@ -293,6 +293,21 @@
             </xs:simpleType>
          </xs:attribute>
 
+         <!-- "ClientAttributes" specifies additional client-attributes that may
+              be needed for granting a certificate or be used for inclusion in
+              issued certificates. Currently the only documented parameters have
+              the format: "http://xmlns.webpki.org/keygen2/1.0#clientattribute.*".
+              This request MUST NOT be emitted in the "PrivacyEnabled" mode.
+
+              If the server asks for an unknown attribute, the client SHOULD
+              continue anyway but (of course) not provide an element in the
+              response for the particular attribute.
+              See "ProvisioningInitializationResponse/ClientAttribute".
+
+              In case it is not obvious that the client supports an attribute,
+              the server SHOULD specify those in "BasicCapabilities@Features" -->
+         <xs:attribute name="ClientAttributes" type="kgen:uriList" use="optional"/>
+
          <!-- Where to HTTP POST the provisioning session response.
               Note that applicable session cookies MUST be submitted
               in the request as well.
@@ -341,6 +356,17 @@
                      <xs:element ref="ds:X509Data"/>
 
                   </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+
+            <!-- "ClientAttribute" holds an optional set of attributes requested by
+                 the server in "ProvisioningInitializationRequest@ClientAttributes".
+                 Some attribute types MAY be repeated since they can have multiple
+                 value. There MUST NOT be any such elements when "PrivacyEnabled" is true  -->
+            <xs:element name="ClientAttribute" minOccurs="0">
+               <xs:complexType>
+                  <xs:attribute name="Type" type="xs:anyURI" use="required"/>
+                  <xs:attribute name="Value" type="xs:string" use="required"/>
                </xs:complexType>
             </xs:element>
 

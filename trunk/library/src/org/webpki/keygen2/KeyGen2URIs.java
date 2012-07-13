@@ -40,4 +40,17 @@ public interface KeyGen2URIs
 
         String APPLICATION                 = "http://xmlns.webpki.org/keygen2/1.0#logotype.application";
       }
+
+    public interface CLIENT_ATTRIBUTES
+      {
+        String IMEI_NUMBER                 = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.imei-number";
+  
+        String MAC_ADDRESS                 = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.mac-address";
+  
+        String IP_ADDRESS                  = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.ip-address";
+
+        String OS_VENDOR                   = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.os-vendor";
+
+        String OS_VERSION                  = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.os-version";
+      }
   }
