@@ -92,6 +92,13 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
       {
         return key_management_key;
       }
+
+
+    public String[] getClientAttributes ()
+      {
+        return client_attributes.toArray (new String[0]);
+      }
+ 
     
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
@@ -124,6 +131,15 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
         session_key_limit = (short)ah.getInt (SESSION_KEY_LIMIT_ATTR);
         
         session_life_time = ah.getInt (SESSION_LIFE_TIME_ATTR);
+        
+        String[] attrs = ah.getListConditional (CLIENT_ATTRIBUTES_ATTR);
+        if (attrs != null)
+          {
+            for (String attr : attrs)
+              {
+                client_attributes.add (attr);
+              }
+          }
         
         rd.getChild ();
 

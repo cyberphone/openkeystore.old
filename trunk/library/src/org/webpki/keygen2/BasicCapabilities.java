@@ -30,7 +30,7 @@ public class BasicCapabilities
   {
     LinkedHashSet<String> algorithms = new LinkedHashSet<String> ();
 
-    LinkedHashSet<String> features = new LinkedHashSet<String> ();
+    LinkedHashSet<String> client_attributes = new LinkedHashSet<String> ();
 
     LinkedHashSet<String> extensions = new LinkedHashSet<String> ();
     
@@ -98,7 +98,7 @@ public class BasicCapabilities
         BasicCapabilities doc_data = new BasicCapabilities ();
         rd.getNext (BASIC_CAPABILITIES_ELEM);
         read (rd, doc_data.algorithms, ALGORITHMS_ATTR);
-        read (rd, doc_data.features, FEATURES_ATTR);
+        read (rd, doc_data.client_attributes, CLIENT_ATTRIBUTES_ATTR);
         read (rd, doc_data.extensions, EXTENSIONS_ATTR);
         rd.getChild ();
         if (rd.hasNext ())
@@ -134,7 +134,7 @@ public class BasicCapabilities
             wr.addComment (comment, true);
           }
         conditionalOutput (wr,  algorithms, ALGORITHMS_ATTR);
-        conditionalOutput (wr,  features, FEATURES_ATTR);
+        conditionalOutput (wr,  client_attributes, CLIENT_ATTRIBUTES_ATTR);
         conditionalOutput (wr,  extensions, EXTENSIONS_ATTR);
         if (rsa_exponent_set || rsa_key_size_set)
           {
@@ -171,9 +171,9 @@ public class BasicCapabilities
       }
 
     
-    public BasicCapabilities addFeature (String feature) throws IOException
+    public BasicCapabilities addClientAttribute (String client_attribute) throws IOException
       {
-        add (algorithms, feature);
+        add (client_attributes, client_attribute);
         return this;
       }
 
@@ -221,9 +221,9 @@ public class BasicCapabilities
       }
 
     
-    public String[] getFeatures () throws IOException
+    public String[] getClientAttributes () throws IOException
       {
-        return features.toArray (new String[0]);
+        return client_attributes.toArray (new String[0]);
       }
 
 

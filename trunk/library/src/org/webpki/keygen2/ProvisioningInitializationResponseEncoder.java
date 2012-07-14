@@ -19,6 +19,7 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.util.Date;
+import java.util.HashSet;
 
 import java.security.GeneralSecurityException;
 
@@ -83,7 +84,14 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
           }
       }
 
-    
+
+    public ProvisioningInitializationResponseEncoder setClientAttributeValue (String type, String value)
+      {
+        addClientAttribute (type, value);
+        return this;
+      }
+
+
     public void setPrefix (String prefix)
       {
         this.prefix = prefix;
@@ -140,6 +148,20 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
             wr.addChildElement (DEVICE_CERTIFICATE_PATH_ELEM);
             XMLSignatureWrapper.writeX509DataSubset (wr, device_certificate_path);
             wr.getParent();
+          }
+        
+        ////////////////////////////////////////////////////////////////////////
+        // Optional ClientAttributes
+        ////////////////////////////////////////////////////////////////////////
+        for (String type : client_attribute_values.keySet ())
+          {
+            for (String value : client_attribute_values.get (type))
+              {
+                wr.addChildElement (CLIENT_ATTRIBUTE_ELEM);
+                wr.setStringAttribute (TYPE_ATTR, type);
+                wr.setStringAttribute (VALUE_ATTR, value);
+                wr.getParent();
+              }
           }
 
         ////////////////////////////////////////////////////////////////////////

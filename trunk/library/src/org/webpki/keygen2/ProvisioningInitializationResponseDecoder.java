@@ -19,6 +19,8 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
@@ -97,8 +99,14 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
       {
         return server_certificate_fingerprint;
       }
-    
-    
+
+
+    public HashMap<String,HashSet<String>> getClientAttributeValues ()
+      {
+        return client_attribute_values;
+      }
+
+
     class XMLSignVer implements SymKeyVerifierInterface
       {
         ServerCryptoInterface server_crypto_interface;
@@ -195,6 +203,15 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
             rd.getChild ();
             device_certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);
             rd.getParent ();
+          }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Get the optional client attributes
+        /////////////////////////////////////////////////////////////////////////////////////////
+        while (rd.hasNext (CLIENT_ATTRIBUTE_ELEM))
+          {
+            rd.getNext ();
+            addClientAttribute (ah.getString (TYPE_ATTR), ah.getString (VALUE_ATTR));
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

@@ -198,6 +198,8 @@ public class KeyGen2Test
     
     boolean set_trust_anchor;
     
+    boolean get_client_attributes;
+    
     boolean https;  // Use server-cert
     
     boolean ask_for_4096;
@@ -396,6 +398,13 @@ public class KeyGen2Test
                     platform_response.getBasicCapabilities ().addRSAKeySize (key_size);
                   }
               }
+            for (String client_attribute : platform_req.getBasicCapabilities ().getClientAttributes ())
+              {
+                if (client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER) || client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS))
+                  {
+                    platform_response.getBasicCapabilities ().addClientAttribute (client_attribute);
+                  }
+              }
             if (image_prefs)
               {
                 platform_response.addImagePreference (KeyGen2URIs.LOGOTYPES.CARD, "image/png", 200, 120);
@@ -434,6 +443,20 @@ public class KeyGen2Test
               {
                 prov_sess_response.setServerCertificate (server_certificate);
               }
+
+            for (String client_attribute : prov_sess_req.getClientAttributes ())
+              {
+                if (client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER))
+                  {
+                    prov_sess_response.setClientAttributeValue (client_attribute, "490154203237518");
+                  }
+                else if (client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS))
+                  {
+                    prov_sess_response.setClientAttributeValue (client_attribute, "fe80::4465:62dc:5fa5:4766%10")
+                                      .setClientAttributeValue (client_attribute, "192.168.0.202");
+                  }
+              }
+
             prov_sess_response.signRequest (new SymKeySignerInterface ()
               {
                 public MacAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
@@ -889,6 +912,12 @@ public class KeyGen2Test
               {
                 platform_request.getBasicCapabilities ().addRSAKeySize ((short)4096).addRSAKeySize ((short)2048);
               }
+            if (get_client_attributes)
+              {
+                platform_request.getBasicCapabilities ().addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER)
+                                                        .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS)
+                                                        .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
+              }
             if (plain_unlock_key != null)
               {
                 platform_request.setAction (Action.UNLOCK);
@@ -914,6 +943,10 @@ public class KeyGen2Test
             if (updatable)
               {
                 prov_sess_request.setKeyManagementKey(server_km = server_sess_key.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
+              }
+            for (String client_attribute : platform_response.getBasicCapabilities ().getClientAttributes ())
+              {
+                prov_sess_request.addClientAttribute (client_attribute);
               }
             return prov_sess_request.writeXML ();
           }
@@ -1104,8 +1137,9 @@ public class KeyGen2Test
                             cert_spec.setKeyUsageBit (KeyUsageBits.keyEncipherment);
                           }
                       }
+                    String extra = get_client_attributes ? ", SerialNumber=" + prov_sess_response.getClientAttributeValues ().get (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER).iterator ().next () : "";
                     cert_spec.setSubject ("CN=KeyGen2 " + _name.getMethodName() + ", E=john.doe@example.com" +
-                                          (otp ? ", OU=OTP Key" : ""));
+                                          (otp ? ", OU=OTP Key" : extra));
                     otp = false;
     
                     GregorianCalendar start = new GregorianCalendar ();
@@ -1294,6 +1328,7 @@ public class KeyGen2Test
               }
             writeString ("Begin Test (" + _name.getMethodName() + ":" + (++round) + (html_mode ? ")</b><br>" : ")\n"));
             writeOption ("4096 over 2048 RSA key preference", ask_for_4096);
+            writeOption ("Get client attributes", get_client_attributes);
             writeOption ("Client shows one image preference", image_prefs);
             writeOption ("PUK Protection", puk_protection);
             writeOption ("PIN Protection ", pin_protection);
@@ -1377,6 +1412,13 @@ public class KeyGen2Test
     public void CryptoPreferences () throws Exception
       {
         ask_for_4096 = true;
+        new Doer ().perform ();
+      }
+
+    @Test
+    public void ClientAttributes () throws Exception
+      {
+        get_client_attributes = true;
         new Doer ().perform ();
       }
 

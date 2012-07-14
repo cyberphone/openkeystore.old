@@ -22,6 +22,8 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import org.webpki.xml.ServerCookie;
 import org.webpki.xml.XMLObjectWrapper;
@@ -46,6 +48,8 @@ abstract class ProvisioningInitializationResponse extends XMLObjectWrapper
     Date client_time;
     
     ECPublicKey client_ephemeral_key;
+    
+    HashMap<String,HashSet<String>> client_attribute_values = new HashMap<String,HashSet<String>> ();
 
     byte[] attestation;
     
@@ -54,6 +58,17 @@ abstract class ProvisioningInitializationResponse extends XMLObjectWrapper
     X509Certificate[] device_certificate_path;  // Is null for the privacy_enabled mode
     
     byte[] server_certificate_fingerprint;  // Optional
+
+
+    void addClientAttribute (String type, String value)
+      {
+        HashSet<String> set = client_attribute_values.get (type);
+        if (set == null)
+          {
+            client_attribute_values.put (type, set = new HashSet<String> ());
+          }
+        set.add (value);
+      }
 
 
     /**

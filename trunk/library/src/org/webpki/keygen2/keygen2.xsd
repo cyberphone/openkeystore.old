@@ -305,7 +305,7 @@
               See "ProvisioningInitializationResponse/ClientAttribute".
 
               In case it is not obvious that the client supports an attribute,
-              the server SHOULD specify those in "BasicCapabilities@Features" -->
+              the server SHOULD specify those in "BasicCapabilities@ClientAttributes" -->
          <xs:attribute name="ClientAttributes" type="kgen:uriList" use="optional"/>
 
          <!-- Where to HTTP POST the provisioning session response.
@@ -361,9 +361,9 @@
 
             <!-- "ClientAttribute" holds an optional set of attributes requested by
                  the server in "ProvisioningInitializationRequest@ClientAttributes".
-                 Some attribute types MAY be repeated since they can have multiple
-                 value. There MUST NOT be any such elements when "PrivacyEnabled" is true  -->
-            <xs:element name="ClientAttribute" minOccurs="0">
+                 Multi-valued attribute types MAY be repeated. There MUST NOT be
+                 any "ClientAttribute" elements when "PrivacyEnabled" is true  -->
+            <xs:element name="ClientAttribute" minOccurs="0" maxOccurs="unbounded">
                <xs:complexType>
                   <xs:attribute name="Type" type="xs:anyURI" use="required"/>
                   <xs:attribute name="Value" type="xs:string" use="required"/>
@@ -777,9 +777,9 @@
               algorithm it means that it is not supported -->
          <xs:attribute name="Algorithms" type="kgen:uriList" use="optional"/>
 
-         <!-- Features are things that are supported by the SKS or the platform
-              the SKS is running in -->
-         <xs:attribute name="Features" type="kgen:uriList" use="optional"/>
+         <!-- "ClientAttributes" are things that are supported by the SKS or the
+              platform the SKS is running in -->
+         <xs:attribute name="ClientAttributes" type="kgen:uriList" use="optional"/>
 
          <!-- Arbitrary extension objects MAY be requested.  Although most
               clients are likely to for example support HOTP

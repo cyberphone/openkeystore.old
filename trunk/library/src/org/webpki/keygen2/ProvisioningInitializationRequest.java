@@ -19,8 +19,11 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.security.PublicKey;
+
 import java.security.interfaces.ECPublicKey;
+
 import java.util.Date;
+import java.util.Vector;
 
 import org.webpki.xml.ServerCookie;
 import org.webpki.xml.XMLObjectWrapper;
@@ -45,6 +48,8 @@ abstract class ProvisioningInitializationRequest extends XMLObjectWrapper
     ECPublicKey server_ephemeral_key;
     
     PublicKey key_management_key;
+    
+    Vector<String> client_attributes = new Vector<String> ();
     
     int session_life_time;
 

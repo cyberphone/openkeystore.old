@@ -65,7 +65,7 @@ public interface KeyGen2Constants
 
     String EXTENSIONS_ATTR                           = "Extensions";
 
-    String FEATURES_ATTR                             = "Features";
+    String CLIENT_ATTRIBUTES_ATTR                    = "ClientAttributes";
 
     String FORMAT_ATTR                               = "Format";
 
@@ -157,6 +157,8 @@ public interface KeyGen2Constants
     String BASIC_CAPABILITIES_ELEM                   = "BasicCapabilities";
 
     String CERTIFICATE_PATH_ELEM                     = "CertificatePath";
+
+    String CLIENT_ATTRIBUTE_ELEM                     = "ClientAttribute";
 
     String CLIENT_EPHEMERAL_KEY_ELEM                 = "ClientEphemeralKey";
 
