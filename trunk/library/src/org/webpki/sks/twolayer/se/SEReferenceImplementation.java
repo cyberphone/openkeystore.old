@@ -394,20 +394,18 @@ public class SEReferenceImplementation
         
         byte[] symmetric_key;
 
-        byte[] mac;
-    
         boolean isRSA ()
           {
             return private_key instanceof RSAKey;
           }
 
-        public void createMAC (byte[] os_instance_key) throws GeneralSecurityException
+        private byte[] createMAC (byte[] os_instance_key) throws GeneralSecurityException
           {
             MacBuilder mac_builder = new MacBuilder (deriveKey (os_instance_key, user_key_mac_secret));
             mac_builder.addBool (is_exportable);
             mac_builder.addBool (is_symmetric);
             mac_builder.addArray (wrapped_key);
-            mac = mac_builder.getResult ();
+            return mac_builder.getResult ();
           }
 
         byte[] writeKey (byte[] os_instance_key) throws GeneralSecurityException
@@ -419,8 +417,7 @@ public class SEReferenceImplementation
                 byte_writer.writeBoolean (is_symmetric);
                 byte_writer.writeBoolean (is_exportable);
                 byte_writer.writeArray (sha256_of_public_key_or_ee_certificate);
-                createMAC (os_instance_key);
-                byte_writer.writeArray (mac);
+                byte_writer.writeArray (createMAC (os_instance_key));
                 return byte_writer.getData ();
               }
             catch (IOException e)
@@ -438,10 +435,9 @@ public class SEReferenceImplementation
                 is_symmetric = byte_reader.readBoolean ();
                 is_exportable = byte_reader.readBoolean ();
                 sha256_of_public_key_or_ee_certificate = byte_reader.readArray (32);
-                byte[] old_mac = mac = byte_reader.readArray (32);
+                byte[] old_mac = byte_reader.readArray (32);
                 byte_reader.checkEOF ();
-                createMAC (os_instance_key);
-                if (!Arrays.equals (old_mac, mac))
+                if (!Arrays.equals (old_mac, createMAC (os_instance_key)))
                   {
                     throw new GeneralSecurityException ("Sealed key MAC error");
                   }
