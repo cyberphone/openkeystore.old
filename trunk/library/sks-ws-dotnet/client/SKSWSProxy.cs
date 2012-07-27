@@ -2476,20 +2476,25 @@ namespace org.webpki.sks.ws.client
         internal string _algorithm;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Parameters", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _parameters;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="TrustedGUIAuthorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal bool _trusted_gui_authorization;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Authorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _authorization;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=6)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Data", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _data;
 
         public performHMAC_Request(string DeviceID,
                                    int KeyHandle,
                                    string Algorithm,
+                                   byte[] Parameters,
                                    bool TrustedGUIAuthorization,
                                    byte[] Authorization,
                                    byte[] Data)
@@ -2497,6 +2502,7 @@ namespace org.webpki.sks.ws.client
             _device_id = DeviceID;
             _key_handle = KeyHandle;
             _algorithm = Algorithm;
+            _parameters = Parameters;
             _trusted_gui_authorization = TrustedGUIAuthorization;
             _authorization = Authorization;
             _data = Data;
@@ -2535,8 +2541,8 @@ namespace org.webpki.sks.ws.client
         internal bool _mode;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="IV", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _iv;
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Parameters", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _parameters;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=5)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="TrustedGUIAuthorization", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -2554,7 +2560,7 @@ namespace org.webpki.sks.ws.client
                                            int KeyHandle,
                                            string Algorithm,
                                            bool Mode,
-                                           byte[] IV,
+                                           byte[] Parameters,
                                            bool TrustedGUIAuthorization,
                                            byte[] Authorization,
                                            byte[] Data)
@@ -2563,7 +2569,7 @@ namespace org.webpki.sks.ws.client
             _key_handle = KeyHandle;
             _algorithm = Algorithm;
             _mode = Mode;
-            _iv = IV;
+            _parameters = Parameters;
             _trusted_gui_authorization = TrustedGUIAuthorization;
             _authorization = Authorization;
             _data = Data;
@@ -3314,6 +3320,7 @@ namespace org.webpki.sks.ws.client
 
         public byte[] performHMAC(int KeyHandle,
                                   string Algorithm,
+                                  byte[] Parameters,
                                   byte[] Authorization,
                                   byte[] Data)
         {
@@ -3326,6 +3333,7 @@ namespace org.webpki.sks.ws.client
                     return base.Channel.performHMAC(new performHMAC_Request(device_id,
                                                                             KeyHandle,
                                                                             Algorithm,
+                                                                            Parameters,
                                                                             tga,
                                                                             Authorization,
                                                                             Data))._result;
@@ -3344,7 +3352,7 @@ namespace org.webpki.sks.ws.client
         public byte[] symmetricKeyEncrypt(int KeyHandle,
                                           string Algorithm,
                                           bool Mode,
-                                          byte[] IV,
+                                          byte[] Parameters,
                                           byte[] Authorization,
                                           byte[] Data)
         {
@@ -3358,7 +3366,7 @@ namespace org.webpki.sks.ws.client
                                                                                             KeyHandle,
                                                                                             Algorithm,
                                                                                             Mode,
-                                                                                            IV,
+                                                                                            Parameters,
                                                                                             tga,
                                                                                             Authorization,
                                                                                             Data))._result;

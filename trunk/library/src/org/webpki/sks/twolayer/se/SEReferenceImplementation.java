@@ -1187,6 +1187,7 @@ public class SEReferenceImplementation
                                       byte[] sealed_key,
                                       int key_handle,
                                       String algorithm,
+                                      byte[] parameters,
                                       byte[] data) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1198,6 +1199,10 @@ public class SEReferenceImplementation
         // Check input arguments
         ///////////////////////////////////////////////////////////////////////////////////
         Algorithm alg = checkKeyAndAlgorithm (unwrapped_key, key_handle, algorithm, ALG_HMAC);
+        if (parameters != null)
+          {
+            abort ("\"Parameters\" does not apply to: " + algorithm);
+          }
  
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally, perform operation
@@ -1225,7 +1230,7 @@ public class SEReferenceImplementation
                                                      int key_handle,
                                                      String algorithm,
                                                      boolean mode,
-                                                     byte[] iv,
+                                                     byte[] parameters,
                                                      byte[] data) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1239,14 +1244,14 @@ public class SEReferenceImplementation
         Algorithm alg = checkKeyAndAlgorithm (unwrapped_key, key_handle, algorithm, ALG_SYM_ENC);
         if ((alg.mask & ALG_IV_REQ) == 0 || (alg.mask & ALG_IV_INT) != 0)
           {
-            if (iv != null)
+            if (parameters != null)
               {
-                abort ("IV does not apply to: " + algorithm);
+                abort ("\"Parameters\" does not apply to: " + algorithm);
               }
           }
-        else if (iv == null || iv.length != 16)
+        else if (parameters == null || parameters.length != 16)
           {
-            abort ("IV must be 16 bytes for: " + algorithm);
+            abort ("\"Parameters\" must be 16 bytes for: " + algorithm);
           }
         if ((!mode || (alg.mask & ALG_AES_PAD) != 0) && data.length % 16 != 0)
           {
@@ -1263,29 +1268,29 @@ public class SEReferenceImplementation
             int jce_mode = mode ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
             if ((alg.mask & ALG_IV_INT) != 0)
               {
-                iv = new byte[16];
+                parameters = new byte[16];
                 if (mode)
                   {
-                    new SecureRandom ().nextBytes (iv);
+                    new SecureRandom ().nextBytes (parameters);
                   }
                 else
                   {
                     byte[] temp = new byte[data.length - 16];
-                    System.arraycopy (data, 0, iv, 0, 16);
+                    System.arraycopy (data, 0, parameters, 0, 16);
                     System.arraycopy (data, 16, temp, 0, temp.length);
                     data = temp;
                   }
               }
-            if (iv == null)
+            if (parameters == null)
               {
                 crypt.init (jce_mode, sk);
               }
             else
               {
-                crypt.init (jce_mode, sk, new IvParameterSpec (iv));
+                crypt.init (jce_mode, sk, new IvParameterSpec (parameters));
               }
             data = crypt.doFinal (data);
-            return (mode && (alg.mask & ALG_IV_INT) != 0) ? addArrays (iv, data) : data;
+            return (mode && (alg.mask & ALG_IV_INT) != 0) ? addArrays (parameters, data) : data;
           }
         catch (GeneralSecurityException e)
           {

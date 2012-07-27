@@ -1426,6 +1426,7 @@
      <Parameter Name="device_id"                 Type="string" XMLName="DeviceID"      Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
+     <Parameter Name="parameters"                Type="binary" XMLName="Parameters"    Null="true"/>
      <Parameter Name="trusted_gui_authorization" Type="bool"   XMLName="TrustedGUIAuthorization" SuppressRule="TGA"/>
      <Parameter Name="authorization"             Type="binary" XMLName="Authorization" Null="true"/>
      <Parameter Name="data"                      Type="binary" XMLName="Data"/>
@@ -1439,6 +1440,7 @@
           {
             return getDevice (device_id).performHMAC (key_handle, 
                                                       algorithm,
+                                                      parameters,
                                                       authorization,
                                                       data);
           }
@@ -1459,7 +1461,7 @@
      <Parameter Name="key_handle"                Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="algorithm"                 Type="string" XMLName="Algorithm"/>
      <Parameter Name="mode"                      Type="bool"   XMLName="Mode"/>
-     <Parameter Name="iv"                        Type="binary" XMLName="IV"            Null="true"/>
+     <Parameter Name="parameters"                Type="binary" XMLName="Parameters"    Null="true"/>
      <Parameter Name="trusted_gui_authorization" Type="bool"   XMLName="TrustedGUIAuthorization" SuppressRule="TGA"/>
      <Parameter Name="authorization"             Type="binary" XMLName="Authorization" Null="true"/>
      <Parameter Name="data"                      Type="binary" XMLName="Data"/>
@@ -1471,7 +1473,12 @@
         String log_result = "";
         try
           {
-            return getDevice (device_id).symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
+            return getDevice (device_id).symmetricKeyEncrypt (key_handle, 
+                                                              algorithm,
+                                                              mode,
+                                                              parameters,
+                                                              authorization,
+                                                              data);
           }
         catch (SKSException e)
           {

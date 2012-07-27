@@ -282,13 +282,14 @@ public interface SecureKeyStore
     
     byte[] performHMAC (int key_handle,
                         String algorithm,
+                        byte[] parameters,    // Must be null if not applicable
                         byte[] authorization, // Must be null if not applicable
                         byte[] data) throws SKSException;
     
     byte[] symmetricKeyEncrypt (int key_handle,
                                 String algorithm,
                                 boolean mode,
-                                byte[] iv,            // Must be null if not applicable
+                                byte[] parameters,    // Must be null if not applicable
                                 byte[] authorization, // Must be null if not applicable
                                 byte[] data) throws SKSException;
 

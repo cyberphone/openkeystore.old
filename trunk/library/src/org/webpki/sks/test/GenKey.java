@@ -239,12 +239,12 @@ public class GenKey
                                                    data);
       }
 
-    public byte[] symmetricKeyEncrypt (SymEncryptionAlgorithms alg_id, boolean mode, byte[] iv, String pin, byte[] data) throws SKSException
+    public byte[] symmetricKeyEncrypt (SymEncryptionAlgorithms alg_id, boolean mode, byte[] parameters, String pin, byte[] data) throws SKSException
       {
         return prov_sess.sks.symmetricKeyEncrypt (key_handle,
                                                   alg_id.getURI (),
                                                   mode,
-                                                  iv,
+                                                  parameters,
                                                   getConditionalAuthorization (pin),
                                                   data);
       }
@@ -253,6 +253,7 @@ public class GenKey
       {
         return prov_sess.sks.performHMAC (key_handle,
                                           alg_id.getURI (),
+                                          null,
                                           getConditionalAuthorization (pin),
                                           data);
       }

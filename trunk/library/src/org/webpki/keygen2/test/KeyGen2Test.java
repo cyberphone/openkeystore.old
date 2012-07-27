@@ -1531,7 +1531,10 @@ public class KeyGen2Test
             assertTrue ("Prop name error", props1[i].getName ().equals (props2[i].getName ()));
             assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
           }
-        assertTrue ("HMAC error", ArrayUtil.compare (sks.performHMAC (key_handle, MacAlgorithms.HMAC_SHA1.getURI (), USER_DEFINED_PIN, TEST_STRING),
+        assertTrue ("HMAC error", ArrayUtil.compare (sks.performHMAC (key_handle,
+                                                                      MacAlgorithms.HMAC_SHA1.getURI (),
+                                                                      null,
+                                                                      USER_DEFINED_PIN, TEST_STRING),
                                                      MacAlgorithms.HMAC_SHA1.digest (OTP_SEED, TEST_STRING)));
       }
 

@@ -1439,7 +1439,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     public synchronized byte[] symmetricKeyEncrypt (int key_handle,
                                                     String algorithm,
                                                     boolean mode,
-                                                    byte[] iv,
+                                                    byte[] parameters,
                                                     byte[] authorization,
                                                     byte[] data) throws SKSException
       {
@@ -1471,7 +1471,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                                                      key_handle,
                                                                      algorithm,
                                                                      mode,
-                                                                     iv,
+                                                                     parameters,
                                                                      data);
       }
 
@@ -1484,6 +1484,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     @Override
     public synchronized byte[] performHMAC (int key_handle,
                                             String algorithm,
+                                            byte[] parameters,
                                             byte[] authorization,
                                             byte[] data) throws SKSException
       {
@@ -1514,6 +1515,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                                       key_entry.sealed_key,
                                                       key_handle,
                                                       algorithm,
+                                                      parameters,
                                                       data);
       }
 

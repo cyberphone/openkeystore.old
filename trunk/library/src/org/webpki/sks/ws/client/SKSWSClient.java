@@ -1041,6 +1041,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
     @Override
     public byte[] performHMAC (int key_handle,
                                String algorithm,
+                               byte[] parameters,
                                byte[] authorization,
                                byte[] data) throws SKSException
       {
@@ -1054,6 +1055,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                 return getSKSWS ().performHMAC (device_id,
                                                 key_handle, 
                                                 algorithm,
+                                                parameters,
                                                 tga,
                                                 auth.value,
                                                 data);
@@ -1073,7 +1075,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
     public byte[] symmetricKeyEncrypt (int key_handle,
                                        String algorithm,
                                        boolean mode,
-                                       byte[] iv,
+                                       byte[] parameters,
                                        byte[] authorization,
                                        byte[] data) throws SKSException
       {
@@ -1088,7 +1090,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                                         key_handle,
                                                         algorithm,
                                                         mode,
-                                                        iv,
+                                                        parameters,
                                                         tga,
                                                         auth.value,
                                                         data);

@@ -764,6 +764,7 @@
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Algorithm" type="xs:string"/>
+            <xs:element name="Parameters" type="xs:base64Binary" nillable="true" minOccurs="0"/>
             <xs:element name="TrustedGUIAuthorization" type="xs:boolean"/>
             <xs:element name="Authorization" type="xs:base64Binary" nillable="true" minOccurs="0"/>
             <xs:element name="Data" type="xs:base64Binary"/>
@@ -790,7 +791,7 @@
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="Algorithm" type="xs:string"/>
             <xs:element name="Mode" type="xs:boolean"/>
-            <xs:element name="IV" type="xs:base64Binary" nillable="true" minOccurs="0"/>
+            <xs:element name="Parameters" type="xs:base64Binary" nillable="true" minOccurs="0"/>
             <xs:element name="TrustedGUIAuthorization" type="xs:boolean"/>
             <xs:element name="Authorization" type="xs:base64Binary" nillable="true" minOccurs="0"/>
             <xs:element name="Data" type="xs:base64Binary"/>

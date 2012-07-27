@@ -173,6 +173,7 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
     @Override
     native public byte[] performHMAC (int key_handle,
                                       String algorithm,
+                                      byte[] parameters,
                                       byte[] authorization,
                                       byte[] data) throws SKSException;
 
@@ -180,7 +181,7 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
     native public byte[] symmetricKeyEncrypt (int key_handle, 
                                               String algorithm,
                                               boolean mode, 
-                                              byte[] iv,
+                                              byte[] parameters,
                                               byte[] authorization,
                                               byte[] data) throws SKSException;
 

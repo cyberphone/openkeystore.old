@@ -1528,6 +1528,8 @@ public class SKSWSImplementation
                                int key_handle,
                                @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                String algorithm,
+                               @WebParam(name="Parameters", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               byte[] parameters,
                                @WebParam(name="TrustedGUIAuthorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                boolean trusted_gui_authorization,
                                @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -1545,6 +1547,7 @@ public class SKSWSImplementation
           {
             return getDevice (device_id).performHMAC (key_handle, 
                                                       algorithm,
+                                                      parameters,
                                                       authorization,
                                                       data);
           }
@@ -1571,8 +1574,8 @@ public class SKSWSImplementation
                                        String algorithm,
                                        @WebParam(name="Mode", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                        boolean mode,
-                                       @WebParam(name="IV", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                       byte[] iv,
+                                       @WebParam(name="Parameters", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                       byte[] parameters,
                                        @WebParam(name="TrustedGUIAuthorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                        boolean trusted_gui_authorization,
                                        @WebParam(name="Authorization", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -1588,7 +1591,12 @@ public class SKSWSImplementation
         String log_result = "";
         try
           {
-            return getDevice (device_id).symmetricKeyEncrypt (key_handle, algorithm, mode, iv, authorization, data);
+            return getDevice (device_id).symmetricKeyEncrypt (key_handle, 
+                                                              algorithm,
+                                                              mode,
+                                                              parameters,
+                                                              authorization,
+                                                              data);
           }
         catch (SKSException e)
           {
