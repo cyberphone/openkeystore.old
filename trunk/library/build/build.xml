@@ -390,18 +390,7 @@
   <target name="_test">
   	<property name="sks.standalone" value="true"/>
     <mkdir dir="${test_dir}"/>
-  	<condition property="test.dir" value="">
-      <not>
-        <isset property="test.out.file"/>
-      </not>
-  	</condition>
 	<property name="test.dir" location="${test_dir}"/>
-  	<condition property="test.out.html" value="">
-      <not>
-        <isset property="html.mode"/>
-      </not>
-  	</condition>
-	<property name="test.out.html" value="true"/>
     <junit fork="yes" forkmode="once" haltonfailure="yes" tempdir="${test_dir}">
       <test name="${test.class}" unless="method"/>
       <test name="${test.class}" methods="${method}" if="method"/><!-- ANT 1.8.2 and up -->
@@ -409,7 +398,6 @@
     	<sysproperty key="sks.device" value="${sks.device}"/>
     	<sysproperty key="sks.auth.gui" value="${sks.auth.gui}"/>
     	<sysproperty key="test.dir" value="${test.dir}"/>
-    	<sysproperty key="html.mode" value="${test.out.html}"/>
     	<sysproperty key="sks.standalone" value="${sks.standalone}"/>
       	<sysproperty key="sks.referenceimplementation" value="${sks.referenceimplementation}"/>
     	<sysproperty key="org.webpki.sks.ws.client.url" value="${sksws.url}"/>

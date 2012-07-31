@@ -216,8 +216,6 @@ public class KeyGen2Test
     
     static SecureKeyStore sks;
     
-    static boolean html_mode;
-
     static final byte[] OTP_SEED = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
     
     static final byte[] AES32BITKEY = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
@@ -235,15 +233,11 @@ public class KeyGen2Test
     @BeforeClass
     public static void openFile () throws Exception
       {
-        html_mode = new Boolean (System.getProperty ("html.mode", "false"));
         String dir = System.getProperty ("test.dir");
         if (dir.length () > 0)
           {
-            fos = new FileOutputStream (dir + "/" + KeyGen2Test.class.getCanonicalName () + (html_mode ? ".html" : ".txt"));
-            if (html_mode)
-              {
-                fos.write (HTMLHeader.createHTMLHeader (false, true,"KeyGen2 JUinit test output", null).append ("<body><h3>KeyGen2 JUnit Test</h3><p>").toString ().getBytes ("UTF-8"));
-              }
+            fos = new FileOutputStream (dir + "/keygen2.junit.run.html");
+            fos.write (HTMLHeader.createHTMLHeader (false, true,"KeyGen2 JUinit test output", null).append ("<body><h3>KeyGen2 JUnit Test</h3><p>").toString ().getBytes ("UTF-8"));
           }
         Security.insertProviderAt (new BouncyCastleProvider(), 1);
         server_certificate = (X509Certificate) CertificateFactory.getInstance ("X.509").generateCertificate (KeyGen2Test.class.getResourceAsStream ("server-certificate.der"));
@@ -263,10 +257,7 @@ public class KeyGen2Test
       {
         if (fos != null)
           {
-            if (html_mode)
-              {
-                fos.write ("</body></html>".getBytes ("UTF-8"));
-              }
+            fos.write ("</body></html>".getBytes ("UTF-8"));
             fos.close ();
           }
       }
@@ -1249,7 +1240,7 @@ public class KeyGen2Test
                 for (int i = 0; i < data.length; i++)
                   {
                     byte b = data[i];
-                    if (b == '\n' && html_mode)
+                    if (b == '\n')
                       {
                         fos.write ("<br>".getBytes ("UTF-8"));
                       }
@@ -1283,25 +1274,8 @@ public class KeyGen2Test
         byte[] fileLogger (byte[] xmldata) throws Exception
           {
             XMLObjectWrapper xo = xmlschemas.parse (xmldata);
-            if (html_mode)
-              {
-                writeString ("&nbsp;<br><table><tr><td bgcolor=\"#F0F0F0\" style=\"border:solid;border-width:1px;padding:4px\">&nbsp;Pass #" + (++pass) + ":&nbsp;" + xo.element () + "&nbsp;</td></tr></table>&nbsp;<br>");
-                writeString (XML2HTMLPrinter.convert (new String (xmldata, "UTF-8")));
-              }
-            else
-              {
-                String element = "#" + (++pass) + ": " + xo.element ();
-                write ('\n');
-                for (int i = 0; i < element.length (); i++) write ('-');
-                write ('\n');
-                writeString (element);
-                write ('\n');
-                for (int i = 0; i < element.length (); i++) write ('-');
-                write ('\n');
-                write ('\n');
-                write (xmldata);
-                write ('\n');
-              }
+            writeString ("&nbsp;<br><table><tr><td bgcolor=\"#F0F0F0\" style=\"border:solid;border-width:1px;padding:4px\">&nbsp;Pass #" + (++pass) + ":&nbsp;" + xo.element () + "&nbsp;</td></tr></table>&nbsp;<br>");
+            writeString (XML2HTMLPrinter.convert (new String (xmldata, "UTF-8")));
             return xmldata;
           }
 
@@ -1322,11 +1296,8 @@ public class KeyGen2Test
         
         void perform () throws Exception
           {
-            if (html_mode)
-              {
-                writeString ("<b>");
-              }
-            writeString ("Begin Test (" + _name.getMethodName() + ":" + (++round) + (html_mode ? ")</b><br>" : ")\n"));
+            writeString ("<b>");
+            writeString ("Begin Test (" + _name.getMethodName() + ":" + (++round) + ")</b><br>");
             writeOption ("4096 over 2048 RSA key preference", ask_for_4096);
             writeOption ("Get client attributes", get_client_attributes);
             writeOption ("Client shows one image preference", image_prefs);
