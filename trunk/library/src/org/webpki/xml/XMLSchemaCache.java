@@ -32,16 +32,16 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 
 import javax.xml.transform.dom.DOMSource;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import org.webpki.util.ArrayUtil;
 
@@ -103,12 +103,10 @@ public class XMLSchemaCache
     
     private Vector<DOMSource> schema_stack;
     
-    private Schema current_schema;
+    private DocumentBuilder xsd_parser;
     
-    private SchemaFactory schema_factory;
-    
-    private DocumentBuilder parser;
-    
+    private DocumentBuilder xml_parser;
+
     private static class ElementID
       {
         String namespace, element;
@@ -142,8 +140,7 @@ public class XMLSchemaCache
         dbf.setNamespaceAware (true);
         try
           {
-            parser = dbf.newDocumentBuilder ();
-            schema_factory = SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            xsd_parser = dbf.newDocumentBuilder ();
           }
         catch (ParserConfigurationException e)
           {
@@ -176,7 +173,7 @@ public class XMLSchemaCache
           }
         try
           {
-            Document document = parser.parse (new ByteArrayInputStream (schema));
+            Document document = xsd_parser.parse (new ByteArrayInputStream (schema));
             Element element = document.getDocumentElement ();
             // Add more checks?
             String target_namespace = element.getLocalName ().equals ("schema") ? element.getAttribute ("targetNamespace") : null;
@@ -366,16 +363,41 @@ public class XMLSchemaCache
       {
         try
           {
-            if (current_schema == null)
+            if (xml_parser == null)
               {
-                current_schema = schema_factory.newSchema (schema_stack.toArray(new DOMSource[0]));
+                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance ();
+                dbf.setNamespaceAware (true);
+                dbf.setSchema (SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema (schema_stack.toArray(new DOMSource[0])));
+                xml_parser = dbf.newDocumentBuilder ();
+                xml_parser.setErrorHandler (new ErrorHandler ()
+                  {
+
+                    @Override
+                    public void warning (SAXParseException exception) throws SAXException
+                      {
+                        throw exception;
+                      }
+
+                    @Override
+                    public void error (SAXParseException exception) throws SAXException
+                      {
+                        throw exception;
+                      }
+
+                    @Override
+                    public void fatalError (SAXParseException exception) throws SAXException
+                      {
+                        throw exception;
+                      }
+                  });
               }
-            Document document = parser.parse (is);
-            Validator validator = current_schema.newValidator ();
-            validator.validate (new DOMSource (document));
-            return document;
+            return xml_parser.parse (is);
           }
         catch (SAXException e)
+          {
+            throw new IOException (e);
+          }
+        catch (ParserConfigurationException e)
           {
             throw new IOException (e);
           }
@@ -425,58 +447,4 @@ public class XMLSchemaCache
         Element e = xmlp.validateXMLFromFile (argv[last]).getDocumentElement ();
         System.out.println ("E=" + e.getLocalName () + " NS=" + DOMUtil.getDefiningNamespace (e));
       }
-    /*
-    if  (argv.length < 2)
-      {
-          System.out.println ("Usage: test.Validate schema... instance-document");
-          System.exit (3);
-      }
-
-      try
-      {
-  
-  // parse an XML document into a DOM tree
-  Document document = xmlp.parser.parse(new File(argv[argv.length - 1]));
-  Element e = document.getDocumentElement();
-  System.out.println ("Name space=" + e.lookupNamespaceURI(e.getPrefix()));
-  System.out.println ("Element=" + e.getLocalName());
-
-   // create a SchemaFactory capable of understanding WXS schemas
-//  SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-
-  // load a WXS schema, represented by a Schema instance
-  Schema schema = null;
-  Validator validator = null;
-  Vector<DOMSource> schemas = new Vector<DOMSource> ();
-  for (int i = 0; i < argv.length - 1; i++)
-  {
-     FileInputStream is = new FileInputStream (argv[i]);
-      java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream (10000);
-      byte[] buffer = new byte[10000];
-      int bytes;
-      while ((bytes = is.read (buffer)) != -1)
-        {
-          baos.write (buffer, 0, bytes);
-        }
-      is.close ();
-    Document sd = xmlp.parser.parse (new ByteArrayInputStream (baos.toByteArray ()));
-     Element se = sd.getDocumentElement ();
-     System.out.println ("XMLNS=" +  (se.getLocalName ().equals ("schema") ? se.getAttribute ("targetNamespace") : null));
-      schemas.add(new DOMSource(sd));
-      schema = SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(schemas.toArray(new DOMSource[0]));
-      validator = schema.newValidator ();
-//    schemas.add(new StreamSource(new File(args[i])));
-  }
-
-  // create a Validator instance, which can be used to validate an instance document
-
-  // validate the DOM tree
-      validator.validate(new DOMSource(document));
-  } catch (SAXException e) {
-      e.printStackTrace();
-  } catch (IOException e) {
-      e.printStackTrace();
-  }
-  }
-*/
   }

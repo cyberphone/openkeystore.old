@@ -15,6 +15,9 @@ import javax.xml.validation.Validator;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 public class SchemaFactoryBug
   {
@@ -103,8 +106,32 @@ public class SchemaFactoryBug
             xsds2.add (getDOM (parser, xsd1));
             xsds2.add (getDOM (parser, xsd2));
             Schema schema2 = SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema (xsds2.toArray(new DOMSource[0]));
-            validator = schema2.newValidator ();
-            validator.validate (new DOMSource (document));
+            DocumentBuilderFactory dbf2 = DocumentBuilderFactory.newInstance ();
+            dbf2.setNamespaceAware (true);
+            dbf2.setSchema (schema2);
+            DocumentBuilder parser2 = dbf2.newDocumentBuilder ();
+            parser2.setErrorHandler (new ErrorHandler ()
+                  {
+
+                    @Override
+                    public void warning (SAXParseException exception) throws SAXException
+                      {
+                        throw new RuntimeException (exception);
+                      }
+
+                    @Override
+                    public void error (SAXParseException exception) throws SAXException
+                      {
+                        throw new RuntimeException (exception);
+                      }
+
+                    @Override
+                    public void fatalError (SAXParseException exception) throws SAXException
+                      {
+                        throw new RuntimeException (exception);
+                      }
+                  });
+            parser2.parse (new ByteArrayInputStream (xml.getBytes ("UTF-8")));
           }
         catch (Exception e)
           {
