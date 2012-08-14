@@ -33,7 +33,7 @@ import org.webpki.wasp.prof.xds.XDSProfileRequestEncoder;
 import org.webpki.xml.XMLSchemaCache;
 import org.webpki.xml.XMLCookie;
 import org.webpki.xml.ServerCookie;
-import org.webpki.xml.XMLConfiguration;
+import org.webpki.xml.DOMUtil;
 
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.CertificateSelection;
@@ -59,7 +59,7 @@ public class SreqEnc
 
     static ServerCookie createServerCookie () throws Exception
       {
-        Document d = XMLConfiguration.createDocument ();
+        Document d = DOMUtil.createDocument ();
         Element e = d.createElementNS ("http://example.com/def", "SomeTextingXML");
         e.setAttributeNS ("http://www.w3.org/2000/xmlns/", "xmlns", "http://example.com/def");
         e.setAttribute ("kurtz","700");

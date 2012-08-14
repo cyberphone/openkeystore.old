@@ -151,12 +151,7 @@ public class DOMWriterHelper
           {
             subprefix = prefix;  // May be null anyway
           }
-//            DocumentBuilderFactory dbf = DocumentBuilderFactoryImpl.newInstance ();
-//        DocumentBuilderFactory dbf = new DocumentBuilderFactoryImpl ();
-//        dbf.setNamespaceAware (true);
-//        DocumentBuilder db = dbf.newDocumentBuilder ();
-//        doc = db.newDocument ();
-        doc = XMLConfiguration.createDocument ();
+        doc = DOMUtil.createDocument ();
         String ns = instance.namespace ();
         Element e = doc.createElementNS (ns, (prefix == null) ? instance.element () : prefix + ":" + instance.element ());
         if (instance.output_ns_attribute)

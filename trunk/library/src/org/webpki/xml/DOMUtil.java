@@ -20,12 +20,16 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.XMLSerializer;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
 
 /**
  * Utility methods for traversing and building DOM trees.
@@ -300,46 +304,12 @@ public class DOMUtil
       }
 
     /**
-     * 
-     */
-    private static String emptyAsNull (String s)
-      {
-        return s != null && s.length () != 0 ? s : null;
-      }
-    
-    /**
      * Get the defining target namespace of this element 
      */
     public static String getDefiningNamespace (Element e)
       {
-//        return e.lookupNamespaceURI (e.getPrefix ());
-        String prefix = getPrefix (e);
-
-        String nsURI = null, noNSPrefix = null, noNSURI = null;
-        Node n = e;
-
-        do
-          {
-            e = (Element)n;
-
-            nsURI = emptyAsNull (e.getAttribute (prefix != null ? "xmlns:" + prefix : "xmlns"));
-            
-            if (noNSPrefix == null)
-              {
-                noNSPrefix = getPrefix (e);
-              }
-            
-            if (noNSPrefix != null && noNSURI == null)
-              {
-                noNSURI = emptyAsNull (e.getAttribute ("xmlns:" + noNSPrefix));
-              }
-          }
-        while ((n = e.getParentNode()) != null && n instanceof Element && nsURI == null);
-        // TODO: Should noNSURI == null also be in the loop condition <=>
-        //       can default namespace reach inside nodes of other namespaces?
-        
-        return (prefix != null || nsURI != null) ? nsURI : noNSURI;
-     }
+        return e.lookupNamespaceURI (e.getPrefix ());
+      }
     
     /**
      * Write the XML-encoding of a {@link Document Document} to an 
@@ -347,26 +317,32 @@ public class DOMUtil
      */
     public static void writeXML (Document d, OutputStream out) throws IOException
       {
-        OutputFormat format = new OutputFormat (d);
-        format.setPreserveSpace (true);
-        XMLSerializer serial = new XMLSerializer (out, format);
-        serial.asDOMSerializer ();
-        serial.serialize (d.getDocumentElement ());
+        DOMImplementationLS DOMiLS = (DOMImplementationLS)d.getImplementation ();;
+        LSOutput LSO=DOMiLS.createLSOutput ();
+        LSO.setByteStream (out);          
+        LSSerializer LSS=DOMiLS.createLSSerializer ();
+        if (!LSS.write (d, LSO))
+          {
+            throw new IOException ("[Serialization failed!]");
+          }
       }
 
     public static void writeXML (Element e, OutputStream out) throws IOException
       {
-        OutputFormat format = new OutputFormat (e.getOwnerDocument ());
-        format.setPreserveSpace (true);
-        XMLSerializer serial = new XMLSerializer (out, format);
-        serial.asDOMSerializer ();
-        serial.serialize (e);
+        DOMImplementationLS DOMiLS = (DOMImplementationLS)e.getOwnerDocument ().getImplementation ();;
+        LSOutput LSO=DOMiLS.createLSOutput ();
+        LSO.setByteStream (out);          
+        LSSerializer LSS=DOMiLS.createLSSerializer ();
+        if (!LSS.write (e, LSO))
+          {
+            throw new IOException ("[Serialization failed!]");
+          }
       }
 
     /**
      * Write the XML-encoding of a {@link Document Document} to a byte array.
      */
-    public static byte[] writeXML(Document d) throws IOException
+    public static byte[] writeXML (Document d) throws IOException
       {
         ByteArrayOutputStream baos = new ByteArrayOutputStream ();
         writeXML (d, baos);
@@ -374,43 +350,13 @@ public class DOMUtil
         return baos.toByteArray ();
       }
     
-    public static byte[] writeXML(Element e) throws IOException
+    public static byte[] writeXML (Element e) throws IOException
       {
         ByteArrayOutputStream baos = new ByteArrayOutputStream ();
         writeXML (e, baos);
         baos.close ();
         return baos.toByteArray ();
       }
-    
-    
-    /**
-     * Write the &quot;pretty printed&quot; XML-encoding of a {@link Document Document}
-     * to an {@link java.io.OutputStream OutputStream}.
-     */
-    public static void writePrettyXML (Document d, OutputStream out, int indent, int lineWidth)
-    throws IOException
-      {
-        OutputFormat format = new OutputFormat (d);
-        format.setIndenting (true);
-        format.setIndent (indent);
-        format.setLineWidth (lineWidth);
-        XMLSerializer serial = new XMLSerializer (out, format);
-        serial.asDOMSerializer ();
-        serial.serialize (d.getDocumentElement ());
-      }
-
-    /**
-     * Write the &quot;pretty printed&quot;XML-encoding of a {@link Document Document}
-     * to a byte array.
-     */
-    public static byte[] writePrettyXML (Document d, int indent, int lineWidth) throws IOException
-      {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-        writePrettyXML (d, baos, indent, lineWidth);
-        baos.close ();
-        return baos.toByteArray ();
-      }
-    
     
     public static String getPrefix (Node n)
       {
@@ -439,6 +385,20 @@ public class DOMUtil
         else
           {
             throw new IllegalArgumentException ("Not an XML boolean: " + s);
+          }
+      }
+    
+    public static Document createDocument ()
+      {
+        try
+          {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance ();
+            dbf.setNamespaceAware (true);
+            return dbf.newDocumentBuilder ().newDocument ();
+          }
+        catch (ParserConfigurationException e)
+          {
+            throw new RuntimeException (e);
           }
       }
     

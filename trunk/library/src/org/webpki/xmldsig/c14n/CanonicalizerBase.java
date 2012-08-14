@@ -33,7 +33,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
 
-import org.webpki.xml.XMLConfiguration;
+import org.webpki.xml.DOMUtil;
 
 /**
  * Abstract base class for canonicalization algorithms.
@@ -68,7 +68,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
    protected static final Attr nullNode;
    static
      {
-       nullNode = XMLConfiguration.createDocument ().createAttributeNS (Constants.NamespaceSpecNS,XMLNS);
+       nullNode = DOMUtil.createDocument ().createAttributeNS (Constants.NamespaceSpecNS,XMLNS);
        nullNode.setValue ("");
      }
    

@@ -24,23 +24,24 @@ import java.io.FileInputStream;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
+
+import javax.xml.XMLConstants;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+
+import javax.xml.transform.dom.DOMSource;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import org.apache.xerces.parsers.XMLGrammarPreparser;
-import org.apache.xerces.parsers.DOMParser;
-import org.apache.xerces.parsers.IntegratedParserConfiguration;
-import org.apache.xerces.util.XMLGrammarPoolImpl;
-import org.apache.xerces.impl.Constants;
-import org.apache.xerces.util.SymbolTable;
-
-import org.apache.xerces.xni.parser.XMLParserConfiguration;
-import org.apache.xerces.xni.grammars.XMLGrammarDescription;
-import org.apache.xerces.xni.parser.XMLInputSource;
-import org.apache.xerces.xni.parser.XMLErrorHandler;
-import org.apache.xerces.xni.parser.XMLParseException;
-import org.apache.xerces.xni.XNIException;
+import org.xml.sax.SAXException;
 
 import org.webpki.util.ArrayUtil;
 
@@ -96,145 +97,74 @@ import org.webpki.util.ArrayUtil;
  */
 public class XMLSchemaCache
   {
-    // Property identifier: symbol table
-    public static final String SYMBOL_TABLE =
-        Constants.XERCES_PROPERTY_PREFIX + Constants.SYMBOL_TABLE_PROPERTY;
-
-    // Property identifier: grammar pool
-    public static final String GRAMMAR_POOL =
-        Constants.XERCES_PROPERTY_PREFIX + Constants.XMLGRAMMAR_POOL_PROPERTY;
-
-    // Namespaces feature id (http://xml.org/sax/features/namespaces)
-    private static final String NAMESPACES_FEATURE_ID = "http://xml.org/sax/features/namespaces";
-
-    // Validation feature id (http://xml.org/sax/features/validation)
-    private static final String VALIDATION_FEATURE_ID = "http://xml.org/sax/features/validation";
-
-    // Schema validation feature id (http://apache.org/xml/features/validation/schema)
-    private static final String SCHEMA_VALIDATION_FEATURE_ID = "http://apache.org/xml/features/validation/schema";
-
-    // Schema full checking feature id (http://apache.org/xml/features/validation/schema-full-checking)
-    private static final String SCHEMA_FULL_CHECKING_FEATURE_ID = "http://apache.org/xml/features/validation/schema-full-checking";
-
-    // a larg(ish) prime to use for a symbol table to be shared
-    // among potentially many parsers.  Start one as close to 2K (20
-    // times larger than normal) and see what happens...
-    private static final int BIG_PRIME = 2039;
-
-    private XMLGrammarPoolImpl grammarPool;
-
-    private XMLGrammarPreparser preparser;
-
-    private SymbolTable symtab;
-
-    private XMLParserConfiguration parserConfiguration;
-
-    private DOMParser parser;
-
-    private Hashtable<String,byte[]> knownURIs;
-
     private Hashtable<ElementID,Class<?>> classMap;
     
-    private Hashtable<String,String> schemaFiles;
+    private Hashtable<String,byte[]> knownURIs;
+    
+    private Vector<DOMSource> schema_stack;
+    
+    private Schema current_schema;
+    
+    private SchemaFactory schema_factory;
+    
+    private DocumentBuilder parser;
     
     private static class ElementID
       {
         String namespace, element;
         
-        ElementID(String namespace, String element)
+        ElementID (String namespace, String element)
           {
             this.namespace = namespace;
             this.element = element;
           }
         
-        public int hashCode()
+        public int hashCode ()
           {
-            return namespace.hashCode() ^ element.hashCode();
+            return namespace.hashCode () ^ element.hashCode ();
           }
         
-        public boolean equals(Object o)
+        public boolean equals (Object o)
           {
             return o instanceof ElementID &&
-                   namespace.equals(((ElementID)o).namespace) &&
-                   element.equals(((ElementID)o).element);
+                   namespace.equals (((ElementID)o).namespace) &&
+                   element.equals (((ElementID)o).element);
           }
       }
     
 
-    //
-    // Parser error handler
-    //
-    private static void parseError (String domain, String key, XMLParseException exception) throws XNIException
+    public XMLSchemaCache () throws IOException
       {
-        throw exception;
-      }
-
-    private static XMLErrorHandler simpleErrorHandler = new XMLErrorHandler ()
-      {
-        public void error (String domain, String key, XMLParseException exception) throws XNIException
-          {
-            parseError (domain, key, exception);
-          }
-        public void fatalError (String domain, String key, XMLParseException exception) throws XNIException
-          {
-            parseError (domain, key, exception);
-          }
-        public void warning (String domain, String key, XMLParseException exception) throws XNIException
-          {
-            parseError (domain, key, exception);
-          }
-      };
-
-
-   public XMLSchemaCache () throws IOException
-      {
-        symtab = new SymbolTable (BIG_PRIME);
-        preparser = new XMLGrammarPreparser (symtab);
-        grammarPool = new XMLGrammarPoolImpl ();
-        preparser.registerPreparser (XMLGrammarDescription.XML_SCHEMA, null);
-        preparser.setGrammarPool (grammarPool);
-        preparser.setFeature (NAMESPACES_FEATURE_ID, true);
-        preparser.setFeature( VALIDATION_FEATURE_ID, true);
-        // We set schema features just in case...
-        preparser.setFeature (SCHEMA_VALIDATION_FEATURE_ID, true);
-        preparser.setFeature (SCHEMA_FULL_CHECKING_FEATURE_ID, true);
-        preparser.setErrorHandler (simpleErrorHandler);
-
-        parserConfiguration = new IntegratedParserConfiguration (symtab, grammarPool);
-        parserConfiguration.setFeature (NAMESPACES_FEATURE_ID, true);
-        parserConfiguration.setFeature (VALIDATION_FEATURE_ID, true);
-            // now we can still do schema features just in case,
-            // so long as it's our configuraiton......
-        parserConfiguration.setFeature (SCHEMA_VALIDATION_FEATURE_ID, true);
-        parserConfiguration.setFeature (SCHEMA_FULL_CHECKING_FEATURE_ID, true);
-        parserConfiguration.setErrorHandler (simpleErrorHandler);
-        parser = new DOMParser (parserConfiguration);
-
         classMap = new Hashtable<ElementID,Class<?>> ();
         knownURIs = new Hashtable<String,byte[]> ();
-        schemaFiles = new Hashtable <String, String> ();
+        schema_stack = new Vector<DOMSource> ();
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance ();
+        dbf.setNamespaceAware (true);
+        try
+          {
+            parser = dbf.newDocumentBuilder ();
+            schema_factory = SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI);
+          }
+        catch (ParserConfigurationException e)
+          {
+            throw new IOException (e);
+          }
       }
 
 
-    public void addSchema (InputStream is, String fname) throws IOException
+    public void addSchema (InputStream is) throws IOException
       {
-        addSchema (ArrayUtil.getByteArrayFromInputStream (is), fname);
+        addSchema (ArrayUtil.getByteArrayFromInputStream (is));
       }
 
 
     public void addSchemaFromFile (String fname) throws IOException
       {
-        addSchema (new FileInputStream (new File (fname)), fname);
+        addSchema (new FileInputStream (new File (fname)));
       }
 
 
-    public boolean hasSchema(String targetNamespace)
-      {
-        return knownURIs.containsKey(targetNamespace);
-      }
-    
-
-    public void addSchema (byte[] schema, String fname) throws IOException
+    public void addSchema (byte[] schema) throws IOException
       {
         Enumeration<byte[]> schemas = knownURIs.elements ();
         while (schemas.hasMoreElements ())
@@ -244,37 +174,30 @@ public class XMLSchemaCache
                 return;
               }
           }
-        DOMParser scparser = new DOMParser ();
         try
           {
-            scparser.setFeature (SCHEMA_VALIDATION_FEATURE_ID, false);
-            scparser.setFeature ("http://apache.org/xml/features/dom/defer-node-expansion", true);
-            scparser.setFeature (NAMESPACES_FEATURE_ID, true);
-            scparser.setFeature (VALIDATION_FEATURE_ID, false);
+            Document document = parser.parse (new ByteArrayInputStream (schema));
+            Element element = document.getDocumentElement ();
+            // Add more checks?
+            String target_namespace = element.getLocalName ().equals ("schema") ? element.getAttribute ("targetNamespace") : null;
+            if (target_namespace == null)
+              {
+                throw new IOException ("Schema did not decode");
+              }
+            byte[] old = knownURIs.get (target_namespace);
+            if (old == null)
+              {
+                knownURIs.put (target_namespace, schema);
+                schema_stack.add (new DOMSource (document));
+              }
+            else
+              {
+                throw new IOException ("Attempt to redefine target namespace '" + target_namespace + "'.");
+              }
           }
-        catch (Exception ex)
+        catch (SAXException e)
           {
-            throw new IOException (ex.getMessage ());
-          }
-        scparser.parse (new XMLInputSource (null, null, null, new ByteArrayInputStream (schema), null));
-        Element e = scparser.getDocument ().getDocumentElement ();
-        // Add more checks?
-        String targetNamespace = e.getLocalName ().equals ("schema") ? e.getAttribute ("targetNamespace") : null;
-        if (targetNamespace == null)
-          {
-            throw new IOException ("Schema did not decode");
-          }
-        byte[] old = knownURIs.get (targetNamespace);
-        if (old == null)
-          {
-            knownURIs.put (targetNamespace, schema);
-            schemaFiles.put (targetNamespace, fname == null ? "file.xsd" : fname);
-            preparser.preparseGrammar (XMLGrammarDescription.XML_SCHEMA, 
-                                       new XMLInputSource (targetNamespace, null, null, new ByteArrayInputStream (schema), null));
-          }
-        else
-          {
-            throw new IOException ("Attempt to redefine target namespace '" + targetNamespace + "'.");
+            throw new IOException (e);
           }
       }
     
@@ -417,18 +340,9 @@ public class XMLSchemaCache
      * Get the XML schema associated with a target namespace.
      * @return The XML schema as a blob.
      */
-    public byte[] getSchema (String targetNamespace)
+    public byte[] getSchema (String target_namespace)
       {
-        return knownURIs.get (targetNamespace);
-      }
-
-    /**
-     * Get the XML schema file with a target namespace.
-     * @return The XML schema file as a name.
-     */
-    public String getFile (String targetNamespace)
-      {
-        return schemaFiles.get (targetNamespace);
+        return knownURIs.get (target_namespace);
       }
 
     /**
@@ -448,10 +362,23 @@ public class XMLSchemaCache
       }
 
 
-    public Document validate (InputStream is) throws IOException
+    public synchronized Document validate (InputStream is) throws IOException
       {
-        parser.parse (new XMLInputSource (null, null, null, is, null));
-        return parser.getDocument ();
+        try
+          {
+            if (current_schema == null)
+              {
+                current_schema = schema_factory.newSchema (schema_stack.toArray(new DOMSource[0]));
+              }
+            Document document = parser.parse (is);
+            Validator validator = current_schema.newValidator ();
+            validator.validate (new DOMSource (document));
+            return document;
+          }
+        catch (SAXException e)
+          {
+            throw new IOException (e);
+          }
       }
 
     public Document validate (byte[] xmldata) throws IOException
@@ -482,7 +409,6 @@ public class XMLSchemaCache
         return wrap (validate (is));
       }
 
-
     public static void main (String argv[]) throws IOException
       {
         XMLSchemaCache xmlp = new XMLSchemaCache ();
@@ -497,7 +423,60 @@ public class XMLSchemaCache
             xmlp.addSchemaFromFile (argv[i]);
           }
         Element e = xmlp.validateXMLFromFile (argv[last]).getDocumentElement ();
-        System.out.println ("E=" + e.getLocalName() + " NS=" + DOMUtil.getDefiningNamespace (e));
+        System.out.println ("E=" + e.getLocalName () + " NS=" + DOMUtil.getDefiningNamespace (e));
+      }
+    /*
+    if  (argv.length < 2)
+      {
+          System.out.println ("Usage: test.Validate schema... instance-document");
+          System.exit (3);
       }
 
+      try
+      {
+  
+  // parse an XML document into a DOM tree
+  Document document = xmlp.parser.parse(new File(argv[argv.length - 1]));
+  Element e = document.getDocumentElement();
+  System.out.println ("Name space=" + e.lookupNamespaceURI(e.getPrefix()));
+  System.out.println ("Element=" + e.getLocalName());
+
+   // create a SchemaFactory capable of understanding WXS schemas
+//  SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+  // load a WXS schema, represented by a Schema instance
+  Schema schema = null;
+  Validator validator = null;
+  Vector<DOMSource> schemas = new Vector<DOMSource> ();
+  for (int i = 0; i < argv.length - 1; i++)
+  {
+     FileInputStream is = new FileInputStream (argv[i]);
+      java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream (10000);
+      byte[] buffer = new byte[10000];
+      int bytes;
+      while ((bytes = is.read (buffer)) != -1)
+        {
+          baos.write (buffer, 0, bytes);
+        }
+      is.close ();
+    Document sd = xmlp.parser.parse (new ByteArrayInputStream (baos.toByteArray ()));
+     Element se = sd.getDocumentElement ();
+     System.out.println ("XMLNS=" +  (se.getLocalName ().equals ("schema") ? se.getAttribute ("targetNamespace") : null));
+      schemas.add(new DOMSource(sd));
+      schema = SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(schemas.toArray(new DOMSource[0]));
+      validator = schema.newValidator ();
+//    schemas.add(new StreamSource(new File(args[i])));
+  }
+
+  // create a Validator instance, which can be used to validate an instance document
+
+  // validate the DOM tree
+      validator.validate(new DOMSource(document));
+  } catch (SAXException e) {
+      e.printStackTrace();
+  } catch (IOException e) {
+      e.printStackTrace();
+  }
+  }
+*/
   }

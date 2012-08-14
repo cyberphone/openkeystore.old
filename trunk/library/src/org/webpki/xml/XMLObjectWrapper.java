@@ -20,13 +20,11 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.InputStream;
+
 import java.util.Vector;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
-
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.XMLSerializer;
 
 /**
  * Base class for java classes whos data can be translated to/from XML documents.
@@ -75,7 +73,7 @@ public abstract class XMLObjectWrapper
     
     protected void addSchema (String localname) throws IOException
       {
-        schemaCache.addSchema (getResource (localname), localname);
+        schemaCache.addSchema (getResource (localname));
       }
     
     protected void addWrapper (Class<? extends XMLObjectWrapper> wrapperClass) throws IOException
@@ -232,11 +230,7 @@ public abstract class XMLObjectWrapper
     public void writeXML (OutputStream out) throws IOException
       {
         toXMLDocument ();
-        OutputFormat format = new OutputFormat (parsed_root.document);
-        format.setPreserveSpace (true);
-        XMLSerializer serial = new XMLSerializer(out, format);
-        serial.asDOMSerializer();
-        serial.serialize (parsed_root.element);
+        DOMUtil.writeXML (parsed_root.document, out);
       }
 
     /**
@@ -245,7 +239,7 @@ public abstract class XMLObjectWrapper
      */
     public byte[] writeXML () throws IOException
       {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream ();
         writeXML (baos);
         baos.close ();
         return baos.toByteArray ();
