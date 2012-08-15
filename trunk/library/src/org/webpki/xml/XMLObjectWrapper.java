@@ -26,6 +26,8 @@ import java.util.Vector;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
+import org.webpki.util.ArrayUtil;
+
 /**
  * Base class for java classes whos data can be translated to/from XML documents.
  * <p>A <code>XMLObjectWrapper</code> subclass represents (and handles) a certain 
@@ -262,7 +264,7 @@ public abstract class XMLObjectWrapper
 
     public boolean equals (XMLObjectWrapper other) throws IOException
       {
-        return org.webpki.util.ArrayUtil.compare (writeXML (), other.writeXML ());
+        return ArrayUtil.compare (writeXML (), other.writeXML ());
       }
     
     /**
