@@ -3054,12 +3054,12 @@ public class SKSTest
         badKeySpec (new byte[0], "Empty \"KeySpecifier\"");
         badKeySpec (new byte[]{2}, "Unknown key type in \"KeySpecifier\"");
         badKeySpec (new byte[]{1,'M','y','E','C'}, "Unsupported eliptic curve: MyEC in \"KeySpecifier\"");
-        badKeySpec (new byte[]{0,0x40,0,0,0,0,0}, "Unsupported RSA key size 16384 for: \"KeySpecifier\"");
-        badKeySpec (new byte[]{0,0x08,0,0,0,0}, "Incorrectly formatted RSA \"KeySpecifier\"");
-        badKeySpec (new byte[]{0,0x08,0,0,0,0,0,0}, "Incorrectly formatted RSA \"KeySpecifier\"");
+        badKeySpec (new byte[]{0,0x40,0,0,1,0,1}, "Unsupported RSA key size 16384 for: \"KeySpecifier\"");
+        badKeySpec (new byte[]{0,0x08,0,0,1,0}, "Incorrectly formatted RSA \"KeySpecifier\"");
+        badKeySpec (new byte[]{0,0x08,0,0,1,0,1,0}, "Incorrectly formatted RSA \"KeySpecifier\"");
         if (!device.device_info.getRSAExponentSupport ())
           {
-            badKeySpec (new byte[]{0,0x08,0,0,0,0,3}, "Explicit RSA exponent setting not supported by this device");
+            badKeySpec (new byte[]{0,0x08,0,0,0,0,3}, "Unsupported RSA exponent value for: \"KeySpecifier\"");
           }
       }
 

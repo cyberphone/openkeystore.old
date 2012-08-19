@@ -21,6 +21,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 import java.io.IOException;
 import java.io.Serializable;
 
+import java.security.spec.RSAKeyGenParameterSpec;
+
 import org.webpki.crypto.ECDomains;
 
 import org.webpki.sks.SecureKeyStore;
@@ -49,7 +51,9 @@ public abstract class KeySpecifier implements Serializable
 
         int key_size;
     
-        int fixed_exponent;  // May be 0
+        int fixed_exponent = RSAKeyGenParameterSpec.F4.intValue ();
+        
+        boolean output_exponent;
     
         public RSA (int key_size)
           {
@@ -58,6 +62,7 @@ public abstract class KeySpecifier implements Serializable
 
         public RSA (int key_size, int fixed_exponent)
           {
+            output_exponent = true;
             this.key_size = key_size;
             this.fixed_exponent = fixed_exponent;
           }
@@ -80,7 +85,7 @@ public abstract class KeySpecifier implements Serializable
           {
             wr.addChildElement (RSA_ELEM);
             wr.setIntAttribute (KEY_SIZE_ATTR, key_size);
-            if (fixed_exponent != 0)
+            if (output_exponent)
               {
                 wr.setIntAttribute (EXPONENT_ATTR, fixed_exponent);
               }
@@ -127,7 +132,7 @@ public abstract class KeySpecifier implements Serializable
         @Override
         public byte[] getSKSValue () throws IOException
           {
-            return ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_EC}, named_curve.getURI ().getBytes ("UTF-8"));
+            return ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_NAMED_EC}, named_curve.getURI ().getBytes ("UTF-8"));
           }
       }
   }

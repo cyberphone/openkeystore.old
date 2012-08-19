@@ -598,7 +598,7 @@ public class ProvSess
                           false /* enable_pin_caching */,
                           app_usage,
                           "" /* friendly_name */,
-                          new KeySpecifier.RSA (2048, 0),
+                          new KeySpecifier.RSA (2048),
                           endorsed_algorithm);
       }
     

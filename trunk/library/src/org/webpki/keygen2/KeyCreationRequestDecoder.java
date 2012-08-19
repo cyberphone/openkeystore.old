@@ -18,6 +18,7 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Vector;
 import java.util.Set;
 import java.util.EnumSet;
@@ -364,7 +365,8 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             if (rd.hasNext (RSA_ELEM))
               {
                 rd.getNext (RSA_ELEM);
-                key_specifier = new KeySpecifier.RSA (ah.getInt (KEY_SIZE_ATTR), ah.getIntConditional (EXPONENT_ATTR));
+                key_specifier = new KeySpecifier.RSA (ah.getInt (KEY_SIZE_ATTR), 
+                                                      ah.getIntConditional (EXPONENT_ATTR, RSAKeyGenParameterSpec.F4.intValue ()));
               }
             else
               {

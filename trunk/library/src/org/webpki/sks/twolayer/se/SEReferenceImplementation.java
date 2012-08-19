@@ -669,6 +669,10 @@ public class SEReferenceImplementation
 
     static void checkRSAKeyCompatibility (int rsa_key_size, BigInteger  exponent, String key_id) throws SKSException
       {
+        if (!SKS_RSA_EXPONENT_SUPPORT && !exponent.equals (RSAKeyGenParameterSpec.F4))
+          {
+            abort ("Unsupported RSA exponent value for: " + key_id);
+          }
         boolean found = false;
         for (short key_size : SecureKeyStore.SKS_DEFAULT_RSA_SUPPORT)
           {
@@ -2077,15 +2081,10 @@ public class SEReferenceImplementation
                   }
                 int rsa_key_size = getShort (key_specifier, 1);
                 BigInteger exponent = BigInteger.valueOf ((getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5));
-                if (!SKS_RSA_EXPONENT_SUPPORT && exponent.intValue () != 0)
-                  {
-                    abort ("Explicit RSA exponent setting not supported by this device");
-                  }
                 checkRSAKeyCompatibility (rsa_key_size, exponent, "\"KeySpecifier\"");
-                alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size,
-                                                           exponent.intValue () == 0 ? RSAKeyGenParameterSpec.F4 : exponent);
+                alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size, exponent);
               }
-            else if (key_specifier[0] == SecureKeyStore.KEY_ALGORITHM_TYPE_EC)
+            else if (key_specifier[0] == SecureKeyStore.KEY_ALGORITHM_TYPE_NAMED_EC)
               {
                 StringBuffer ec_uri = new StringBuffer ();
                 for (int i = 1; i < key_specifier.length; i++)
