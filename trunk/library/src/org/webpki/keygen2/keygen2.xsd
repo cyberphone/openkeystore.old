@@ -748,7 +748,7 @@
             <!-- If this element is not specified during the request phase,
                  the client SHOULD anyway return its capability if it differs
                  (presumably due to export issues) from the mandatory
-                 RSA 1024 and 2048 key-sizes or is unable to set exponents -->
+                 RSA 1024 and 2048 key-sizes -->
             <xs:element name="RSASupport" minOccurs="0">
                <xs:complexType>
 
