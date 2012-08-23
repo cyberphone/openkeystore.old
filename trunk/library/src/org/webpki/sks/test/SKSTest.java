@@ -17,6 +17,7 @@
 package org.webpki.sks.test;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -28,6 +29,7 @@ import java.security.Signature;
 import java.security.interfaces.ECPublicKey;
 
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.RSAKeyGenParameterSpec;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -3149,15 +3151,40 @@ public class SKSTest
         badKeySpec (KeyAlgorithms.RSA1024.getURI (), new byte[]{0,0,0,3}, "Unexpected \"KeyParameters\"");
         badKeySpec (KeyAlgorithms.P_256.getURI (), new byte[]{0,0,0,3}, "Unexpected \"KeyParameters\"");
         badKeySpec ("http://badcrypto/snakeoil-1", null, "Unsupported \"KeyAlgorithm\": http://badcrypto/snakeoil-1");
+        boolean supports_var_exp = false;
         for (String algorithm : device.device_info.getSupportedAlgorithms ())
           {
             if (algorithm.equals (KeyAlgorithms.RSA1024_EXP.getURI ()))
               {
-                badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), null, "Missing \"KeyParameters\"");
-                badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[]{0,0,0,0,3}, "\"KeyParameters\" length error: 5");
-                badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[]{0,0,3}, "\"KeyParameters\" length error: 3");
+                supports_var_exp = true;
                 break;
               }
+          }
+        if (supports_var_exp)
+          {
+            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), null, "Missing \"KeyParameters\"");
+            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[]{0,0,0,0,3}, "\"KeyParameters\" length error: 5");
+            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[]{0,0,3}, "\"KeyParameters\" length error: 3");
+          }
+        ProvSess sess = new ProvSess (device);
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
+        kpg.initialize (new RSAKeyGenParameterSpec (1024, BigInteger.valueOf (3)));
+        KeyPair key_pair = kpg.generateKeyPair ();
+        try
+          {
+            GenKey key = sess.createKey ("Key.1",
+                                         KeyAlgorithms.RSA1024,
+                                         null /* pin_value */,
+                                         null,
+                                         AppUsage.AUTHENTICATION).setCertificate (cn (), key_pair.getPublic ());
+            key.setPrivateKey (key_pair.getPrivate ());
+            sess.closeSession ();
+            assertTrue ("RSA exp match", supports_var_exp);
+          }
+        catch (SKSException e)
+          {
+            assertFalse ("RSA exp mismatch", supports_var_exp);
+            checkException (e, "Unsupported RSA exponent value for: Key.1");
           }
       }
 
