@@ -71,8 +71,6 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
     
     Vector<ImageDescriptor> image_descriptors = new Vector<ImageDescriptor> ();
 
-    BasicCapabilities basic_capabilities;
-
     private XMLSignatureWrapper signature;  // Optional
 
 
@@ -112,12 +110,6 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
       }
 
 
-    public BasicCapabilities getBasicCapabilities ()
-      {
-        return basic_capabilities;
-      }
-
-    
     public boolean getPrivacyEnabledFlag ()
       {
         return privacy_enabled;
@@ -138,6 +130,11 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
         
         privacy_enabled = ah.getBooleanConditional (PRIVACY_ENABLED_ATTR);
 
+        readBasicCapabilities (ah);
+
+        //////////////////////////////////////////////////////////////////////////
+        // Get the child elements
+        //////////////////////////////////////////////////////////////////////////
         rd.getChild ();
 
         do
@@ -153,8 +150,6 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
           }
         while (rd.hasNext (ISSUER_LOGOTYPE_ELEM));
 
-        basic_capabilities = BasicCapabilities.read (rd);
-
         if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
           {
             server_cookie = ServerCookie.read (rd);
@@ -165,5 +160,4 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
             signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
           }
       }
-
   }

@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20120713#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20120822#";
 
     String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
 
@@ -58,8 +58,6 @@ public interface KeyGen2Constants
     String EXCLUDED_POLICIES_ATTR                    = "ExcludedPolicies";
 
     String EXPIRES_ATTR                              = "Expires";
-
-    String EXPONENT_ATTR                             = "Exponent";
 
     String EXPORT_PROTECTION_ATTR                    = "ExportProtection";
 
@@ -105,9 +103,9 @@ public interface KeyGen2Constants
 
     String NAME_ATTR                                 = "Name";
 
-    String NAMED_CURVE_ATTR                          = "NamedCurve";
-
     String NONCE_ATTR                                = "Nonce";
+
+    String PARAMETERS_ATTR                           = "Parameters";
 
     String PATTERN_RESTRICTIONS_ATTR                 = "PatternRestrictions";
 
@@ -154,8 +152,6 @@ public interface KeyGen2Constants
 
     // XML elements
     
-    String BASIC_CAPABILITIES_ELEM                   = "BasicCapabilities";
-
     String CERTIFICATE_PATH_ELEM                     = "CertificatePath";
 
     String CLIENT_ATTRIBUTE_ELEM                     = "ClientAttribute";
@@ -174,8 +170,6 @@ public interface KeyGen2Constants
 
     String DEVICE_PIN_PROTECTION_ELEM                = "DevicePINProtection";
 
-    String EC_ELEM                                   = "EC";
-    
     String EXTENSION_ELEM                            = "Extension";
 
     String ENCRYPTED_EXTENSION_ELEM                  = "EncryptedExtension";
@@ -225,10 +219,6 @@ public interface KeyGen2Constants
     String PUBLIC_KEY_ELEM                           = "PublicKey";
 
     String PUK_POLICY_ELEM                           = "PUKPolicy";       
-
-    String RSA_ELEM                                  = "RSA";
-
-    String RSA_SUPPORT_ELEM                          = "RSASupport";
 
     String SERVER_EPHEMERAL_KEY_ELEM                 = "ServerEphemeralKey";
 

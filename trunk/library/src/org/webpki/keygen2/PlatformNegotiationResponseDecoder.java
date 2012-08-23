@@ -28,8 +28,6 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class PlatformNegotiationResponseDecoder extends PlatformNegotiationResponse
   {
-    BasicCapabilities basic_capabilities;
-    
     public class ImagePreference
       {
         private ImagePreference () {}
@@ -54,12 +52,6 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
       }
 
 
-    public BasicCapabilities getBasicCapabilities ()
-      {
-        return basic_capabilities;
-      }
-    
-    
     public ImagePreference[] getImagesPreferences ()
       {
         return image_preferences.toArray (new ImagePreference[0]);
@@ -74,14 +66,13 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
         //////////////////////////////////////////////////////////////////////////
         server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
 
-        rd.getChild ();
-
+        readBasicCapabilities (ah);
+        
         //////////////////////////////////////////////////////////////////////////
         // Get the child elements
         //////////////////////////////////////////////////////////////////////////
+        rd.getChild ();
 
-        basic_capabilities = BasicCapabilities.read (rd);
-        
         while (rd.hasNext (IMAGE_PREFERENCE_ELEM))
           {
             ImagePreference im_pref = new ImagePreference ();
@@ -98,5 +89,4 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
             server_cookie = ServerCookie.read (rd);
           }
       }
-
-   }
+  }

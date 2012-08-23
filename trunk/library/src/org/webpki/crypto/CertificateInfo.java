@@ -372,12 +372,7 @@ public class CertificateInfo
 
     public int getPublicKeySize () throws IOException
       {
-        if (certificate.getPublicKey () instanceof RSAPublicKey)
-          {
-            byte[] arr = ((RSAPublicKey) certificate.getPublicKey ()).getModulus ().toByteArray ();
-            return (arr[0] == 0 ? arr.length - 1 : arr.length) * 8;
-          }
-        return ECDomains.getECDomain ((ECPublicKey)certificate.getPublicKey ()).getPublicKeySizeInBits ();
+        return KeyAlgorithms.getKeyAlgorithm (certificate.getPublicKey ()).getPublicKeySizeInBits ();
       }
 
 

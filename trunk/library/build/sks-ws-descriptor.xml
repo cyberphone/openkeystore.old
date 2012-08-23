@@ -469,8 +469,6 @@
      <Parameter Name="vendor_description"   Type="string" XMLName="VendorDescription"  Mode="out"/>
      <Parameter Name="certificate_path"     Type="binary" XMLName="X509Certificate"    Mode="out" List="true" RewriteRule="Out.X509"/>
      <Parameter Name="supported_algorithms" Type="string" XMLName="SupportedAlgorithm" Mode="out" List="true" RewriteRule="Out.StringArray"/>
-     <Parameter Name="rsa_exponent_support" Type="bool"   XMLName="RSAExponentSupport" Mode="out"/>
-     <Parameter Name="rsa_key_sizes"        Type="short"  XMLName="RSAKeySize"         Mode="out" List="true" RewriteRule="Out.ShortArray"/>
      <Parameter Name="crypto_data_size"     Type="int"    XMLName="CryptoDataSize"     Mode="out"/>
      <Parameter Name="extension_data_size"  Type="int"    XMLName="ExtensionDataSize"  Mode="out"/>
      <Parameter Name="device_pin_support"   Type="bool"   XMLName="DevicePINSupport"   Mode="out"/>
@@ -495,12 +493,6 @@
             for (String alg : device_info.getSupportedAlgorithms ())
               {
                 supported_algorithms.value.add (alg);
-              }
-            rsa_exponent_support.value = device_info.getRSAExponentSupport ();
-            rsa_key_sizes.value = new ArrayList<Short> ();
-            for (short size : device_info.getRSAKeySizes ())
-              {
-                rsa_key_sizes.value.add (size);
               }
             crypto_data_size.value = device_info.getCryptoDataSize ();
             extension_data_size.value = device_info.getExtensionDataSize ();
@@ -755,7 +747,8 @@
      <Parameter Name="delete_protection"     Type="byte"   XMLName="DeleteProtection"                           RewriteRule="In.DeleteProtection"/>
      <Parameter Name="app_usage"             Type="byte"   XMLName="AppUsage"                                   RewriteRule="In.AppUsage"/>
      <Parameter Name="friendly_name"         Type="string" XMLName="FriendlyName"       Null="true"/>
-     <Parameter Name="key_specifier"         Type="binary" XMLName="KeySpecifier"/>
+     <Parameter Name="key_algorithm"         Type="string" XMLName="KeyAlgorithm"/>
+     <Parameter Name="key_parameters"        Type="binary" XMLName="KeyParameters"      Null="true"/>
      <Parameter Name="endorsed_algorithms"   Type="string" XMLName="EndorsedAlgorithm"  Null="true" List="true" RewriteRule="In.StringArray"/>
      <Parameter Name="mac"                   Type="binary" XMLName="MAC"/>
      <Parameter Name="public_key"            Type="binary" XMLName="PublicKey"          Mode="out" RewriteRule="Out.PublicKey"/>
@@ -777,7 +770,8 @@
                                                                delete_protection,
                                                                app_usage,
                                                                friendly_name,
-                                                               key_specifier,
+                                                               key_algorithm,
+                                                               key_parameters,
                                                                endorsed_algorithms.toArray (new String[0]),
                                                                mac);
             public_key.value = kd.getPublicKey ().getEncoded ();

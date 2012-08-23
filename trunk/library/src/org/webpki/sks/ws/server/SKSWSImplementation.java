@@ -272,10 +272,6 @@ public class SKSWSImplementation
                                Holder<List<byte[]>> certificate_path,
                                @WebParam(name="SupportedAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<List<String>> supported_algorithms,
-                               @WebParam(name="RSAExponentSupport", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                               Holder<Boolean> rsa_exponent_support,
-                               @WebParam(name="RSAKeySize", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                               Holder<List<Short>> rsa_key_sizes,
                                @WebParam(name="CryptoDataSize", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<Integer> crypto_data_size,
                                @WebParam(name="ExtensionDataSize", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
@@ -306,12 +302,6 @@ public class SKSWSImplementation
             for (String alg : device_info.getSupportedAlgorithms ())
               {
                 supported_algorithms.value.add (alg);
-              }
-            rsa_exponent_support.value = device_info.getRSAExponentSupport ();
-            rsa_key_sizes.value = new ArrayList<Short> ();
-            for (short size : device_info.getRSAKeySizes ())
-              {
-                rsa_key_sizes.value.add (size);
               }
             crypto_data_size.value = device_info.getCryptoDataSize ();
             extension_data_size.value = device_info.getExtensionDataSize ();
@@ -657,8 +647,10 @@ public class SKSWSImplementation
                                byte app_usage,
                                @WebParam(name="FriendlyName", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                String friendly_name,
-                               @WebParam(name="KeySpecifier", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                               byte[] key_specifier,
+                               @WebParam(name="KeyAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               String key_algorithm,
+                               @WebParam(name="KeyParameters", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               byte[] key_parameters,
                                @WebParam(name="EndorsedAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                List<String> endorsed_algorithms,
                                @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -685,7 +677,8 @@ public class SKSWSImplementation
                                                                delete_protection,
                                                                app_usage,
                                                                friendly_name,
-                                                               key_specifier,
+                                                               key_algorithm,
+                                                               key_parameters,
                                                                endorsed_algorithms.toArray (new String[0]),
                                                                mac);
             public_key.value = kd.getPublicKey ().getEncoded ();

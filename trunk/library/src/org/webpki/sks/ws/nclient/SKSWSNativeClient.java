@@ -75,8 +75,9 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
                                           byte export_protection, 
                                           byte delete_protection, 
                                           byte app_usage, 
-                                          String friendly_name, 
-                                          byte[] key_specifier, 
+                                          String friendly_name,
+                                          String key_algorithm,
+                                          byte[] key_parameters, 
                                           String[] endorsed_algorithms, 
                                           byte[] mac) throws SKSException;
 

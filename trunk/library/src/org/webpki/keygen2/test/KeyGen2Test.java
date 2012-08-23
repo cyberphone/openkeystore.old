@@ -74,7 +74,7 @@ import org.webpki.ca.CertSpec;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.CertificateUtil;
-import org.webpki.crypto.ECDomains;
+import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.MacAlgorithms;
@@ -203,6 +203,8 @@ public class KeyGen2Test
     boolean https;  // Use server-cert
     
     boolean ask_for_4096;
+    
+    boolean ask_for_exponent;
     
     ExportProtection export_protection;
     
@@ -370,30 +372,27 @@ public class KeyGen2Test
             platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (xmldata);
             device_info = sks.getDeviceInfo ();
             PlatformNegotiationResponseEncoder platform_response = new PlatformNegotiationResponseEncoder (platform_req);
-            Vector<Short> matches = new Vector<Short> ();
-            for (short key_size : platform_req.getBasicCapabilities ().getRSAKeySizes ())
+            Vector<String> matches = new Vector<String> ();
+            for (String want : platform_req.getAlgorithms ())
               {
-                for (short d_key_size : device_info.getRSAKeySizes ())
+                for (String have : device_info.getSupportedAlgorithms ())
                   {
-                    if (key_size == d_key_size)
+                    if (have.equals (want))
                       {
-                        matches.add (key_size);
+                        matches.add (have);
                         break;
                       }
                   }
               }
-            if (!matches.isEmpty () && matches.size () != device_info.getRSAKeySizes ().length)
+            for (String algorithm : matches)
               {
-                for (short key_size : matches)
-                  {
-                    platform_response.getBasicCapabilities ().addRSAKeySize (key_size);
-                  }
+                platform_response.addAlgorithm (algorithm);
               }
-            for (String client_attribute : platform_req.getBasicCapabilities ().getClientAttributes ())
+            for (String client_attribute : platform_req.getClientAttributes ())
               {
                 if (client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER) || client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS))
                   {
-                    platform_response.getBasicCapabilities ().addClientAttribute (client_attribute);
+                    platform_response.addClientAttribute (client_attribute);
                   }
               }
             if (image_prefs)
@@ -570,7 +569,8 @@ public class KeyGen2Test
                                                        key.getDeleteProtection ().getSKSValue (),
                                                        key.getAppUsage ().getSKSValue (),
                                                        key.getFriendlyName (),
-                                                       key.getKeySpecifier ().getSKSValue (),
+                                                       key.getKeySpecifier ().getKeyAlgorithm ().getURI (),
+                                                       key.getKeySpecifier ().getParameters (),
                                                        key.getEndorsedAlgorithms (),
                                                        key.getMAC ());
                 key_init_response.addPublicKey (key_data.getPublicKey (),
@@ -757,7 +757,7 @@ public class KeyGen2Test
             public ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException
               {
                 KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
-                ECGenParameterSpec eccgen = new ECGenParameterSpec (ECDomains.P_256.getJCEName ());
+                ECGenParameterSpec eccgen = new ECGenParameterSpec (KeyAlgorithms.P_256.getJCEName ());
                 generator.initialize (eccgen, new SecureRandom ());
                 KeyPair kp = generator.generateKeyPair();
                 server_ec_private_key = (ECPrivateKey) kp.getPrivate ();
@@ -901,13 +901,18 @@ public class KeyGen2Test
             platform_request.addLogotype (LOGO_URL, LOGO_MIME, LOGO_SHA256, LOGO_WIDTH, LOGO_HEIGHT);
             if (ask_for_4096)
               {
-                platform_request.getBasicCapabilities ().addRSAKeySize ((short)4096).addRSAKeySize ((short)2048);
+                platform_request.addAlgorithm (KeyAlgorithms.RSA4096.getURI ());
+                platform_request.addAlgorithm (KeyAlgorithms.RSA2048.getURI ());
+              }
+            if (ask_for_exponent)
+              {
+                platform_request.addAlgorithm (KeyAlgorithms.RSA2048_EXP.getURI ());
               }
             if (get_client_attributes)
               {
-                platform_request.getBasicCapabilities ().addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER)
-                                                        .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS)
-                                                        .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
+                platform_request.addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER)
+                                .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS)
+                                .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
               }
             if (plain_unlock_key != null)
               {
@@ -926,6 +931,29 @@ public class KeyGen2Test
         byte[] provSessRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             PlatformNegotiationResponseDecoder platform_response = (PlatformNegotiationResponseDecoder) server_xml_cache.parse (xmldata);
+            if (ask_for_exponent)
+              {
+                ask_for_exponent = false;
+                for (String algorithm : platform_response.getAlgorithms ())
+                  {
+                    if (algorithm.equals (KeyAlgorithms.RSA2048_EXP.getURI ()))
+                      {
+                        ask_for_exponent = true;
+                      }
+                  }
+              }
+            if (ask_for_4096)
+              {
+                ask_for_4096 = false;
+                for (String algorithm : platform_response.getAlgorithms ())
+                  {
+                    if (algorithm.equals (KeyAlgorithms.RSA4096.getURI ()))
+                      {
+                        ask_for_4096 = true;
+                      }
+                  }
+              }
+
             prov_sess_request =  new ProvisioningInitializationRequestEncoder (server_sess_key.generateEphemeralKey (),
                                                                                server_session_id,
                                                                                ISSUER_URI,
@@ -935,7 +963,7 @@ public class KeyGen2Test
               {
                 prov_sess_request.setKeyManagementKey(server_km = server_sess_key.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
               }
-            for (String client_attribute : platform_response.getBasicCapabilities ().getClientAttributes ())
+            for (String client_attribute : platform_response.getClientAttributes ())
               {
                 prov_sess_request.addClientAttribute (client_attribute);
               }
@@ -1012,8 +1040,19 @@ public class KeyGen2Test
                     pin_policy.setUserModifiable (false);
                   }
               }
-            KeySpecifier key_alg =  ecc_key ?
-                 new KeySpecifier.EC (ECDomains.P_256) : new KeySpecifier.RSA (2048);
+            KeySpecifier key_alg = null;
+            if (ecc_key)
+              {
+                key_alg = new KeySpecifier (KeyAlgorithms.P_256);
+              }
+            else if (ask_for_exponent)
+              {
+                key_alg = new KeySpecifier (KeyAlgorithms.RSA2048_EXP, 3);
+              }
+            else
+              {
+                key_alg = new KeySpecifier (ask_for_4096 ? KeyAlgorithms.RSA4096 : KeyAlgorithms.RSA2048);
+              }
 
             ServerCredentialStore.KeyProperties kp = device_pin_protection ?
                 server_credential_store.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
@@ -1031,7 +1070,7 @@ public class KeyGen2Test
               }
             if (key_agreement)
               {
-                kp.setEndorsedAlgorithms (new String[]{KeyGen2URIs.ALGORITHMS.ECDH_RAW});
+                kp.setEndorsedAlgorithms (new String[]{KeyGen2URIs.SPECIAL_ALGORITHMS.ECDH_RAW});
               }
             if (property_bag)
               {
@@ -1089,9 +1128,7 @@ public class KeyGen2Test
             key_create_request = new KeyCreationRequestEncoder (KEY_INIT_URL, server_credential_store, server_sess_key);
             if (two_keys)
               {
-                server_credential_store.createKey (AppUsage.SIGNATURE,
-                                                   new KeySpecifier.EC (ECDomains.P_256),
-                                                   pin_policy);
+                server_credential_store.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.P_256), pin_policy);
 
               }
             return key_create_request.writeXML ();
@@ -1299,6 +1336,7 @@ public class KeyGen2Test
             writeString ("<b>");
             writeString ("Begin Test (" + _name.getMethodName() + ":" + (++round) + ")</b><br>");
             writeOption ("4096 over 2048 RSA key preference", ask_for_4096);
+            writeOption ("RSA key with custom exponent", ask_for_exponent);
             writeOption ("Get client attributes", get_client_attributes);
             writeOption ("Client shows one image preference", image_prefs);
             writeOption ("PUK Protection", puk_protection);
@@ -1380,9 +1418,16 @@ public class KeyGen2Test
       }
 
     @Test
-    public void CryptoPreferences () throws Exception
+    public void StrongRSAPreferences () throws Exception
       {
         ask_for_4096 = true;
+        new Doer ().perform ();
+      }
+
+    @Test
+    public void RSAExponentPreferences () throws Exception
+      {
+        ask_for_exponent = true;
         new Doer ().perform ();
       }
 
@@ -1718,7 +1763,7 @@ public class KeyGen2Test
         KeyPair kp = generator.generateKeyPair ();
         KeyAttributes ka = sks.getKeyAttributes (key_handle);
         byte[] z = sks.keyAgreement (key_handle,
-                                     KeyGen2URIs.ALGORITHMS.ECDH_RAW,
+                                     KeyGen2URIs.SPECIAL_ALGORITHMS.ECDH_RAW,
                                      null,
                                      USER_DEFINED_PIN, 
                                      (ECPublicKey)kp.getPublic ());

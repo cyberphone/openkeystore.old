@@ -47,8 +47,6 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
     
     Vector<ImageDescriptor> image_descriptors = new Vector<ImageDescriptor> ();
 
-    BasicCapabilities basic_capabilities = new BasicCapabilities ();
-    
     Action action = Action.MANAGE;
 
     boolean needs_dsig_ns;
@@ -100,12 +98,6 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
       }
 
 
-    public BasicCapabilities getBasicCapabilities ()
-      {
-        return basic_capabilities;
-      }
-    
-    
     public PlatformNegotiationRequestEncoder addLogotype (String logotype_url,
                                                           String mime_type,
                                                           byte[] image_fingerprint,
@@ -136,6 +128,11 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
         
+        ////////////////////////////////////////////////////////////////////////
+        // Basic capabilities
+        ////////////////////////////////////////////////////////////////////////
+        writeBasicCapabilities (wr);
+
         if (privacy_enabled_set)
           {
             wr.setBooleanAttribute (PRIVACY_ENABLED_ATTR, privacy_enabled);
@@ -162,18 +159,11 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
           }
 
         ////////////////////////////////////////////////////////////////////////
-        // Basic capabilities
-        ////////////////////////////////////////////////////////////////////////
-        basic_capabilities.write (wr);
-
-        ////////////////////////////////////////////////////////////////////////
         // Optional ServerCookie
         ////////////////////////////////////////////////////////////////////////
         if (server_cookie != null)
           {
             server_cookie.write (wr);
           }
-
       }
-
   }

@@ -57,7 +57,7 @@ abstract class ProvisioningInitializationRequest extends XMLObjectWrapper
 
     ServerCookie server_cookie;
 
-    String algorithm = KeyGen2URIs.ALGORITHMS.SESSION_KEY_1;
+    String algorithm = KeyGen2URIs.SPECIAL_ALGORITHMS.SESSION_KEY_1;
     
     /**
      * Internal Use Only

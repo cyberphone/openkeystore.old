@@ -34,6 +34,7 @@ import org.webpki.xmldsig.XMLAsymKeyVerifier;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLVerifier;
 
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.VerifierInterface;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -216,6 +217,10 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
               }
             XMLAsymKeyVerifier verifier = new XMLAsymKeyVerifier ();
             verifier.validateEnvelopedSignature (this, o.element, o.signature, o.id);
+            if (verifier.getSignatureAlgorithm ().getDigestAlgorithm () != HashAlgorithms.SHA256)
+              {
+                throw new IOException ("Lookup signature must use SHA256");
+              }
             o.key_management_key = verifier.getPublicKey ();
           }
         while (rd.hasNext (LOOKUP_SPECIFIER_ELEM));

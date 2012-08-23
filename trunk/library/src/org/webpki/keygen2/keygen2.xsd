@@ -41,7 +41,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 13-JUL-2012 
+    Revised: 22-AUG-2012 
     Author: Anders Rundgren
 
     Copyright 2006-2012 WebPKI.org (http://webpki.org).
@@ -59,11 +59,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20120713#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20120822#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20120713#"
+           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20120822#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -101,12 +101,6 @@
                </xs:complexType>
             </xs:element>
 
-            <!-- The requesting issuer SHOULD enquire about capabilities that are
-                 not default or even may be unavailable due to export restrictions.
-                 An omission performing a proper capability negotiation could in
-                 fact lead to run-time errors in the client implementation! -->
-            <xs:element ref="kgen:BasicCapabilities"/>
-
             <!-- See "ServerCookie" definition -->
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
@@ -124,6 +118,12 @@
             <xs:element ref="ds:Signature" minOccurs="0"/>
 
          </xs:sequence> 
+
+         <!-- The requesting issuer SHOULD enquire about capabilities that are
+              not default or even may be unavailable due to export restrictions.
+              An omission performing a proper capability negotiation could in
+              fact lead to run-time errors in the client implementation! -->
+         <xs:attributeGroup ref="kgen:basicCapabilities"/>
 
          <!-- GUI notification -->
          <xs:attribute name="Action" type="kgen:action" use="required"/>
@@ -164,19 +164,6 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- A conforming client MUST respond to special requirements
-                 by indicating its matching capabilities.  A client MAY also
-                 in the case the default (mandatory) is unavailable due to
-                 export restrictions or marginal implementations, output
-                 its reduced capability in order for the issuer to either
-                 deny credentials (with an appropriate message to user...),
-                 or issue credentials with a possibly more limited scope.
-
-                 In the case a capability is secret, a client MAY not
-                 return a capability except for signed requests from a
-                 known (pre-configured) party -->
-            <xs:element ref="kgen:BasicCapabilities"/>
-            
             <!-- Optional hints for the "CertificatePath/Logotype" extension -->
             <xs:element name="ImagePreference" minOccurs="0" maxOccurs="unbounded">
                <xs:complexType>
@@ -197,6 +184,19 @@
             <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
 
          </xs:sequence>
+
+         <!-- A conforming client MUST respond to special requirements
+              by indicating its matching capabilities.  A client MAY also
+              in the case the default (mandatory) is unavailable due to
+              export restrictions or marginal implementations, output
+              its reduced capability in order for the issuer to either
+              deny credentials (with an appropriate message to user...),
+              or issue credentials with a possibly more limited scope.
+
+              In the case a capability is secret, a client MAY not
+              return a capability except for signed requests from a
+              known (pre-configured) party -->
+         <xs:attributeGroup ref="kgen:basicCapabilities"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
@@ -741,57 +741,27 @@
             Object representing basic algorithm/capability requirements/support
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:element name="BasicCapabilities">
-      <xs:complexType>
-         <xs:sequence>
+   <xs:attributeGroup name="basicCapabilities">
 
-            <!-- If this element is not specified during the request phase,
-                 the client SHOULD anyway return its capability if it differs
-                 (presumably due to export issues) from the mandatory
-                 RSA 1024 and 2048 key-sizes -->
-            <xs:element name="RSASupport" minOccurs="0">
-               <xs:complexType>
+      <!-- If non-mandatory algorithms are preferred, the following attribute
+           can host a list of such.  If the response does not contain a requested
+           algorithm it means that it is not supported -->
+      <xs:attribute name="Algorithms" type="kgen:uriList" use="optional"/>
 
-                  <!-- List of RSA key-sizes -->
-                  <xs:attribute name="KeySizes" use="required">
-                     <xs:simpleType>
-                        <xs:restriction>
-                           <xs:simpleType>
-                              <xs:list itemType="xs:positiveInteger"/>
-                           </xs:simpleType>
-                           <xs:minLength value="1"/>
-                        </xs:restriction>
-                     </xs:simpleType>
-                  </xs:attribute>
+      <!-- "ClientAttributes" are things that are supported by the SKS or the
+            platform the SKS is running in -->
+      <xs:attribute name="ClientAttributes" type="kgen:uriList" use="optional"/>
 
-                  <!-- Optional attribute: Can the exponent be set?  Default: false -->
-                  <xs:attribute name="SettableExponent" type="xs:boolean" use="optional"/>
+      <!-- Arbitrary extension objects MAY be requested.  Although most
+           clients are likely to for example support HOTP
+           ("http://xmlns.webpki.org/keygen2/1.0#provider.ietf-hotp"),
+           application support is outside of the core SKS specification
+           and SHOULD be requested rather than taken for granted.
+           A provisioning client MAY dynamically check for application
+           availability -->
+      <xs:attribute name="Extensions" type="kgen:uriList" use="optional"/>
 
-               </xs:complexType>
-            </xs:element>
-
-         </xs:sequence>
-
-         <!-- If non-mandatory algorithms are preferred, the following attribute
-              can host a list of such.  If the response does not contain a requested
-              algorithm it means that it is not supported -->
-         <xs:attribute name="Algorithms" type="kgen:uriList" use="optional"/>
-
-         <!-- "ClientAttributes" are things that are supported by the SKS or the
-              platform the SKS is running in -->
-         <xs:attribute name="ClientAttributes" type="kgen:uriList" use="optional"/>
-
-         <!-- Arbitrary extension objects MAY be requested.  Although most
-              clients are likely to for example support HOTP
-              ("http://xmlns.webpki.org/keygen2/1.0#provider.ietf-hotp"),
-              application support is outside of the core SKS specification
-              and SHOULD be requested rather than taken for granted.
-              A provisioning client MAY dynamically check for application
-              availability -->
-         <xs:attribute name="Extensions" type="kgen:uriList" use="optional"/>
-
-      </xs:complexType>
-   </xs:element>
+   </xs:attributeGroup>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Base-object for representing a certified public key, path, and optional attributes
@@ -1052,35 +1022,6 @@
 
    <xs:element name="KeyEntry">
       <xs:complexType>
-         <xs:sequence>
-
-            <!-- SKS Specification: createKeyEntry.KeySpecifier -->
-            <xs:choice>
-
-               <xs:element name="RSA">
-                  <xs:complexType>
-
-                     <!-- RSA key size in bits -->
-                     <xs:attribute name="KeySize" type="xs:positiveInteger" use="required"/>
-
-                     <!-- RSA exponent.  Default: 0 => Use SKS default -->
-                    <xs:attribute name="Exponent" type="xs:positiveInteger" use="optional"/>
-
-                  </xs:complexType>
-               </xs:element>
-
-               <xs:element name="EC">
-                  <xs:complexType>
-
-                     <!-- Name of curve -->
-                     <xs:attribute name="NamedCurve" type="xs:anyURI" use="required"/>
-
-                  </xs:complexType>
-               </xs:element>
-
-            </xs:choice>
-
-         </xs:sequence>
 
          <!-- SKS Reference: createKeyEntry.ID -->
          <xs:attribute name="ID" type="kgen:sksID" use="required"/>
@@ -1114,6 +1055,12 @@
 
          <!-- SKS Reference: createKeyEntry.AppUsage -->
          <xs:attribute name="AppUsage" type="kgen:appUsageTYpes" use="required"/>
+
+         <!-- SKS Reference: createKeyEntry.KeyAlgorithm -->
+         <xs:attribute name="Algorithm" type="xs:anyURI" use="required"/>
+
+         <!-- SKS Reference: createKeyEntry.KeyParameters --> 
+         <xs:attribute name="Parameters" type="xs:base64Binary" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.FriendlyName 
               Default: "" -->

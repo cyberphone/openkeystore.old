@@ -16,124 +16,74 @@
  */
 package org.webpki.keygen2;
 
-import static org.webpki.keygen2.KeyGen2Constants.*;
-
 import java.io.IOException;
 import java.io.Serializable;
 
-import java.security.spec.RSAKeyGenParameterSpec;
-
-import org.webpki.crypto.ECDomains;
-
-import org.webpki.sks.SecureKeyStore;
+import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.util.ArrayUtil;
 
-import org.webpki.xml.DOMWriterHelper;
-
-public abstract class KeySpecifier implements Serializable
+public class KeySpecifier implements Serializable
   {
     private static final long serialVersionUID = 1L;
 
-    public abstract byte[] getSKSValue () throws IOException;
+    byte[] parameters;
     
-    abstract void writeKeySpecifier (DOMWriterHelper wr) throws IOException;
+    KeyAlgorithms key_algorithm;
     
-    byte[] short2bytes (int s)
+    public KeySpecifier (KeyAlgorithms key_algorithm)
+      {
+        this.key_algorithm = key_algorithm;
+      }
+
+
+    KeySpecifier (KeyAlgorithms key_algorithm, byte[] optional_parameter) throws IOException
+      {
+        this (key_algorithm);
+        if (optional_parameter != null)
+          {
+            if (!key_algorithm.hasParameter ())
+              {
+                throw new IOException ("Algorithm '" + key_algorithm.toString () + "' does not use a \"Parameters\"");
+              }
+            if (key_algorithm.isRSAKey ())
+              {
+                parameters = optional_parameter; 
+              }
+            else
+              {
+                throw new IOException ("Algorithm '" + key_algorithm.toString () + "' not fu implemented");
+              }
+          }
+      }
+
+
+    public KeySpecifier (KeyAlgorithms key_algorithm, int int_parameter) throws IOException
+      {
+        this (key_algorithm, ArrayUtil.add (short2bytes (int_parameter >>> 16), short2bytes (int_parameter)));
+      }
+
+
+    public KeySpecifier (String uri, byte[] optional_parameters) throws IOException
+      {
+        this (KeyAlgorithms.getKeyAlgorithmFromURI (uri), optional_parameters);
+      }
+
+
+    public byte[] getParameters () throws IOException
+      {
+        return parameters;
+      }
+
+
+    public KeyAlgorithms getKeyAlgorithm ()
+      {
+        return key_algorithm;
+      }
+
+
+    static byte[] short2bytes (int s)
       {
         return new byte[]{(byte)(s >>> 8), (byte)s};
       }
-
-
-    public static class RSA extends KeySpecifier implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        int key_size;
-    
-        int fixed_exponent = RSAKeyGenParameterSpec.F4.intValue ();
-        
-        boolean output_exponent;
-    
-        public RSA (int key_size)
-          {
-            this.key_size = key_size;
-          }
-
-        public RSA (int key_size, int fixed_exponent)
-          {
-            output_exponent = true;
-            this.key_size = key_size;
-            this.fixed_exponent = fixed_exponent;
-          }
-    
-    
-        public int getKeySize ()
-          {
-            return key_size;
-          }
-    
-    
-        public int getFixedExponent ()
-          {
-            return fixed_exponent;
-          }
-
-
-        @Override
-        void writeKeySpecifier (DOMWriterHelper wr) throws IOException
-          {
-            wr.addChildElement (RSA_ELEM);
-            wr.setIntAttribute (KEY_SIZE_ATTR, key_size);
-            if (output_exponent)
-              {
-                wr.setIntAttribute (EXPONENT_ATTR, fixed_exponent);
-              }
-            wr.getParent ();
-          }
-
-
-        @Override
-        public byte[] getSKSValue () throws IOException
-          {
-            return ArrayUtil.add (ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_RSA}, short2bytes (key_size)),
-                                                 ArrayUtil.add (short2bytes (fixed_exponent >>> 16), short2bytes (fixed_exponent)));
-          }
-      }
-
-
-    public static class EC extends KeySpecifier implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-
-        ECDomains named_curve;
-    
-        public EC (ECDomains named_curve)
-          {
-            this.named_curve = named_curve;
-          }
-    
-    
-        public ECDomains getNamedCurve ()
-          {
-            return named_curve;
-          }
-
-
-        @Override
-        void writeKeySpecifier (DOMWriterHelper wr) throws IOException
-          {
-            wr.addChildElement (EC_ELEM);
-            wr.setStringAttribute (NAMED_CURVE_ATTR, named_curve.getURI ());
-            wr.getParent ();
-          }      
-        
-
-        @Override
-        public byte[] getSKSValue () throws IOException
-          {
-            return ArrayUtil.add (new byte[]{SecureKeyStore.KEY_ALGORITHM_TYPE_NAMED_EC}, named_curve.getURI ().getBytes ("UTF-8"));
-          }
-      }
   }
-

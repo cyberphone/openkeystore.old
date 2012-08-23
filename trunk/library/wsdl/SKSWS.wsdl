@@ -63,8 +63,6 @@
             <xs:element name="VendorDescription" type="xs:string"/>
             <xs:element name="X509Certificate" type="xs:base64Binary" maxOccurs="unbounded"/>
             <xs:element name="SupportedAlgorithm" type="xs:string" maxOccurs="unbounded"/>
-            <xs:element name="RSAExponentSupport" type="xs:boolean"/>
-            <xs:element name="RSAKeySize" type="xs:short" maxOccurs="unbounded"/>
             <xs:element name="CryptoDataSize" type="xs:int"/>
             <xs:element name="ExtensionDataSize" type="xs:int"/>
             <xs:element name="DevicePINSupport" type="xs:boolean"/>
@@ -277,7 +275,8 @@
             <xs:element name="DeleteProtection" type="xs:byte"/>
             <xs:element name="AppUsage" type="xs:byte"/>
             <xs:element name="FriendlyName" type="xs:string" nillable="true" minOccurs="0"/>
-            <xs:element name="KeySpecifier" type="xs:base64Binary"/>
+            <xs:element name="KeyAlgorithm" type="xs:string"/>
+            <xs:element name="KeyParameters" type="xs:base64Binary" nillable="true" minOccurs="0"/>
             <xs:element name="EndorsedAlgorithm" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
           </xs:sequence>

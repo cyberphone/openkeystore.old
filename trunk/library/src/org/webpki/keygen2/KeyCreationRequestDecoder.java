@@ -18,7 +18,6 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Vector;
 import java.util.Set;
 import java.util.EnumSet;
@@ -40,7 +39,6 @@ import org.webpki.xmldsig.XMLVerifier;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import org.webpki.crypto.VerifierInterface;
-import org.webpki.crypto.ECDomains;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -360,28 +358,8 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             export_protection = ExportProtection.getExportPolicyFromString (ah.getStringConditional (EXPORT_PROTECTION_ATTR, 
                                                                             ExportProtection.NON_EXPORTABLE.getXMLName ()));
 
-            rd.getChild ();
-
-            if (rd.hasNext (RSA_ELEM))
-              {
-                rd.getNext (RSA_ELEM);
-                key_specifier = new KeySpecifier.RSA (ah.getInt (KEY_SIZE_ATTR), 
-                                                      ah.getIntConditional (EXPONENT_ATTR, RSAKeyGenParameterSpec.F4.intValue ()));
-              }
-            else
-              {
-                rd.getNext (EC_ELEM);
-                String ec_uri = ah.getString (NAMED_CURVE_ATTR);
-                if (ec_uri.startsWith ("urn:oid:"))
-                  {
-                    key_specifier = new KeySpecifier.EC (ECDomains.getECDomainFromOID (ec_uri.substring (8)));
-                  }
-                else
-                  {
-                    bad ("urn:oid: expected");
-                  }
-              }
-            rd.getParent ();
+            key_specifier = new KeySpecifier (ah.getString (XMLSignatureWrapper.ALGORITHM_ATTR),
+                                              ah.getBinaryConditional (PARAMETERS_ATTR));
           }
 
 

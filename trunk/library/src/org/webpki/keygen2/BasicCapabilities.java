@@ -20,37 +20,19 @@ import java.io.IOException;
 
 import java.util.LinkedHashSet;
 
-import org.webpki.sks.SecureKeyStore;
-import org.webpki.xml.DOMReaderHelper;
+import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
+import org.webpki.xml.XMLObjectWrapper;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class BasicCapabilities
+public abstract class BasicCapabilities extends XMLObjectWrapper
   {
     LinkedHashSet<String> algorithms = new LinkedHashSet<String> ();
 
     LinkedHashSet<String> client_attributes = new LinkedHashSet<String> ();
 
     LinkedHashSet<String> extensions = new LinkedHashSet<String> ();
-    
-    LinkedHashSet<Short> rsa_key_sizes = new LinkedHashSet<Short> ();
-    
-    boolean rsa_exponent_set;
-    
-    boolean rsa_exponent_settable;
-    
-    boolean rsa_key_size_set;
-
-    String comment;
-    
-    BasicCapabilities ()
-      {
-        for (short key_size : SecureKeyStore.SKS_DEFAULT_RSA_SUPPORT)
-          {
-            rsa_key_sizes.add (key_size);
-          }
-      }
     
     
     static String[] getSortedAlgorithms (String[] algorithms) throws IOException
@@ -81,9 +63,9 @@ public class BasicCapabilities
       }
 
 
-    static void read (DOMReaderHelper rd, LinkedHashSet<String> args, String tag) throws IOException
+    static void conditionalInput (DOMAttributeReaderHelper ah, LinkedHashSet<String> args, String tag) throws IOException
       {
-        String[] opt_uri_list = rd.getAttributeHelper ().getListConditional (tag);
+        String[] opt_uri_list = ah.getListConditional (tag);
         if (opt_uri_list != null)
           {
             for (String uri : opt_uri_list)
@@ -93,26 +75,11 @@ public class BasicCapabilities
           }
       }
 
-    static BasicCapabilities read (DOMReaderHelper rd) throws IOException
+    void readBasicCapabilities (DOMAttributeReaderHelper ah) throws IOException
       {
-        BasicCapabilities doc_data = new BasicCapabilities ();
-        rd.getNext (BASIC_CAPABILITIES_ELEM);
-        read (rd, doc_data.algorithms, ALGORITHMS_ATTR);
-        read (rd, doc_data.client_attributes, CLIENT_ATTRIBUTES_ATTR);
-        read (rd, doc_data.extensions, EXTENSIONS_ATTR);
-        rd.getChild ();
-        if (rd.hasNext ())
-          {
-            rd.getNext (RSA_SUPPORT_ELEM);
-            for (String rsa : rd.getAttributeHelper ().getList (KEY_SIZES_ATTR))
-              {
-                doc_data.addRSAKeySize (new Short (rsa));
-              }
-            doc_data.rsa_exponent_settable = rd.getAttributeHelper ().getBooleanConditional (SETTABLE_EXPONENT_ATTR);
-
-          }
-        rd.getParent ();
-        return doc_data;
+        conditionalInput (ah, algorithms, ALGORITHMS_ATTR);
+        conditionalInput (ah, client_attributes, CLIENT_ATTRIBUTES_ATTR);
+        conditionalInput (ah, extensions, EXTENSIONS_ATTR);
       }
 
 
@@ -125,37 +92,15 @@ public class BasicCapabilities
       }
 
 
-    void write (DOMWriterHelper wr) throws IOException
+    void writeBasicCapabilities (DOMWriterHelper wr) throws IOException
       {
-        wr.addChildElement (BASIC_CAPABILITIES_ELEM);
-
-        if (comment != null)
-          {
-            wr.addComment (comment, true);
-          }
         conditionalOutput (wr,  algorithms, ALGORITHMS_ATTR);
         conditionalOutput (wr,  client_attributes, CLIENT_ATTRIBUTES_ATTR);
         conditionalOutput (wr,  extensions, EXTENSIONS_ATTR);
-        if (rsa_exponent_set || rsa_key_size_set)
-          {
-            wr.addChildElement (RSA_SUPPORT_ELEM);
-            if (rsa_exponent_set)
-              {
-                wr.setBooleanAttribute (SETTABLE_EXPONENT_ATTR, rsa_exponent_settable);
-              }
-            String[] sizes = new String[rsa_key_sizes.size ()];
-            int i = 0;
-            for (int size : rsa_key_sizes)
-              {
-                sizes[i++] = String.valueOf (size);
-              }
-            wr.setListAttribute (KEY_SIZES_ATTR, sizes);
-          }
-        wr.getParent ();
       }
 
     
-    void add (LinkedHashSet<String> arg_set, String arg) throws IOException
+    void addCapability (LinkedHashSet<String> arg_set, String arg) throws IOException
       {
         if (!arg_set.add (arg))
           {
@@ -166,56 +111,26 @@ public class BasicCapabilities
 
     public BasicCapabilities addAlgorithm (String algorithm) throws IOException
       {
-        add (algorithms, algorithm);
+        addCapability (algorithms, algorithm);
         return this;
       }
 
     
     public BasicCapabilities addClientAttribute (String client_attribute) throws IOException
       {
-        add (client_attributes, client_attribute);
+        addCapability (client_attributes, client_attribute);
         return this;
       }
 
     
     public BasicCapabilities addExtension (String extension) throws IOException
       {
-        add (extensions, extension);
+        addCapability (extensions, extension);
         return this;
       }
 
 
-    public BasicCapabilities addRSAKeySize (short key_size) throws IOException
-      {
-        if (!rsa_key_size_set)
-          {
-            rsa_key_sizes.clear ();
-            rsa_key_size_set = true;
-          }
-        if (!rsa_key_sizes.add (key_size))
-          {
-            throw new IOException ("Multiply defined key size:" + key_size);
-          }
-        return this;
-      }
-
-
-    public BasicCapabilities setRSAExponentSettable (boolean flag) throws IOException
-      {
-        rsa_exponent_set = true;
-        rsa_exponent_settable = flag;
-        return this;
-      }
-
-
-    public BasicCapabilities setComment (String comment)
-      {
-        this.comment = comment;
-        return this;
-      }
-
-
-    public String[] getAlgorithms () throws IOException
+   public String[] getAlgorithms () throws IOException
       {
         return algorithms.toArray (new String[0]);
       }
@@ -231,22 +146,4 @@ public class BasicCapabilities
       {
         return extensions.toArray (new String[0]);
       }
-
-
-    public short[] getRSAKeySizes () throws IOException
-      {
-        short[] sizes = new short[rsa_key_sizes.size ()];
-        int i = 0;
-        for (short key_size : rsa_key_sizes)
-          {
-            sizes[i++] = key_size;
-          }
-        return sizes;
-      }
-
-
-    public boolean getRSAExponentSettableFlag ()
-      {
-        return rsa_exponent_settable;
-      }
- }
+  }

@@ -413,42 +413,30 @@ namespace org.webpki.sks.ws.client
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=7)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="RSAExponentSupport", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        #pragma warning disable 0649
-        internal bool _rsa_exponent_support;
-        #pragma warning restore 0649
-
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=8)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="RSAKeySize", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        #pragma warning disable 0649
-        internal List<short> _rsa_key_sizes;
-        #pragma warning restore 0649
-
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=9)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="CryptoDataSize", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal int _crypto_data_size;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=10)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=8)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ExtensionDataSize", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal int _extension_data_size;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=11)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=9)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="DevicePINSupport", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal bool _device_pin_support;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=12)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=10)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="BiometricSupport", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal bool _biometric_support;
         #pragma warning restore 0649
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=13)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=11)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ConnectionPort", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
         internal string _connection_port;
@@ -509,16 +497,6 @@ namespace org.webpki.sks.ws.client
         public string[] SupportedAlgorithms
         {
             get { return _supported_algorithms.ToArray(); }
-        }
-
-        public bool RSAExponentSupport
-        {
-            get { return _rsa_exponent_support; }
-        }
-
-        public short[] RSAKeySizes
-        {
-            get { return _rsa_key_sizes.ToArray(); }
         }
 
         public int CryptoDataSize
@@ -1127,14 +1105,18 @@ namespace org.webpki.sks.ws.client
         internal string _friendly_name;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=14)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeySpecifier", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _key_specifier;
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyAlgorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal string _key_algorithm;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=15)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyParameters", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _key_parameters;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=16)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="EndorsedAlgorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal List<string> _endorsed_algorithms;
 
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=16)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=17)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         internal byte[] _mac;
 
@@ -1152,7 +1134,8 @@ namespace org.webpki.sks.ws.client
                                       sbyte DeleteProtection,
                                       sbyte AppUsage,
                                       string FriendlyName,
-                                      byte[] KeySpecifier,
+                                      string KeyAlgorithm,
+                                      byte[] KeyParameters,
                                       List<string> EndorsedAlgorithms,
                                       byte[] MAC)
         {
@@ -1170,7 +1153,8 @@ namespace org.webpki.sks.ws.client
             _delete_protection = DeleteProtection;
             _app_usage = AppUsage;
             _friendly_name = FriendlyName;
-            _key_specifier = KeySpecifier;
+            _key_algorithm = KeyAlgorithm;
+            _key_parameters = KeyParameters;
             _endorsed_algorithms = EndorsedAlgorithms;
             _mac = MAC;
         }
@@ -2877,7 +2861,8 @@ namespace org.webpki.sks.ws.client
                                       DeleteProtection DeleteProtection,
                                       AppUsage AppUsage,
                                       string FriendlyName,
-                                      byte[] KeySpecifier,
+                                      string KeyAlgorithm,
+                                      byte[] KeyParameters,
                                       string[] EndorsedAlgorithms,
                                       byte[] MAC)
         {
@@ -2897,7 +2882,8 @@ namespace org.webpki.sks.ws.client
                                                                               (sbyte)DeleteProtection,
                                                                               (sbyte)AppUsage,
                                                                               FriendlyName,
-                                                                              KeySpecifier,
+                                                                              KeyAlgorithm,
+                                                                              KeyParameters,
                                                                               new List<string>(EndorsedAlgorithms),
                                                                               MAC));
             }

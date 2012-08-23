@@ -47,7 +47,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.webpki.asn1.cert.DistinguishedName;
 
 import org.webpki.crypto.SignatureAlgorithms;
-import org.webpki.crypto.ECDomains;
+import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.KeyUsageBits;
 
@@ -132,9 +132,9 @@ public class CommandLineCA
             return SignatureAlgorithms.valueOf (getString ());
           }
 
-        ECDomains getECCDomain () throws IOException
+        KeyAlgorithms getECCDomain () throws IOException
           {
-            return ECDomains.valueOf (getString ());
+            return KeyAlgorithms.valueOf (getString ());
           }
 
         BigInteger getBigInteger () throws IOException
@@ -443,14 +443,17 @@ public class CommandLineCA
       {
         StringBuffer s = new StringBuffer ();
         boolean comma = false;
-        for (ECDomains curve : ECDomains.values ())
+        for (KeyAlgorithms curve : KeyAlgorithms.values ())
           {
-            if (comma)
+            if (curve.isECKey ())
               {
-                s.append (", ");
+                if (comma)
+                  {
+                    s.append (", ");
+                  }
+                comma = true;
+                s.append (curve.toString ());
               }
-            comma = true;
-            s.append (curve.toString ());
           }
         return s.toString ();
       }

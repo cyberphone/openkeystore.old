@@ -56,7 +56,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
     Vector<String> written_puk = new Vector<String> ();
 
-    private String algorithm = KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1;
+    private String algorithm = KeyGen2URIs.SPECIAL_ALGORITHMS.KEY_ATTESTATION_1;
 
 
     // Constructors

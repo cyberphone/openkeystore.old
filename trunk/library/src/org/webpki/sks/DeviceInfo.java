@@ -84,20 +84,6 @@ public class DeviceInfo
         return supported_algorithms;
       }
 
-    boolean rsa_exponent_support;
-    
-    public boolean getRSAExponentSupport ()
-      {
-        return rsa_exponent_support;
-      }
-    
-    short[] rsa_key_sizes;
-
-    public short[] getRSAKeySizes ()
-      {
-        return rsa_key_sizes;
-      }
-    
     int crypto_data_size;
     
     public int getCryptoDataSize ()
@@ -156,8 +142,6 @@ public class DeviceInfo
                        String vendor_description,
                        X509Certificate[] certificate_path,
                        String[] supported_algorithms,
-                       boolean rsa_exponent_support,
-                       short[] rsa_key_sizes,
                        int crypto_data_size,
                        int extension_data_size,
                        boolean device_pin_support,
@@ -170,8 +154,6 @@ public class DeviceInfo
         this.vendor_description = vendor_description;
         this.certificate_path = certificate_path;
         this.supported_algorithms = supported_algorithms;
-        this.rsa_exponent_support = rsa_exponent_support;
-        this.rsa_key_sizes = rsa_key_sizes;
         this.crypto_data_size = crypto_data_size;
         this.extension_data_size = extension_data_size;
         this.device_pin_support = device_pin_support;

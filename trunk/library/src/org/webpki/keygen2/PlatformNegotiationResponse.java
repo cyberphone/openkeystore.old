@@ -19,7 +19,6 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import org.webpki.xml.ServerCookie;
-import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 
@@ -27,7 +26,7 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-abstract class PlatformNegotiationResponse extends XMLObjectWrapper
+abstract class PlatformNegotiationResponse extends BasicCapabilities
   {
     String server_session_id;
 

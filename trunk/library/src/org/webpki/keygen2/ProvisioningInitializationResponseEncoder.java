@@ -19,7 +19,6 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.util.Date;
-import java.util.HashSet;
 
 import java.security.GeneralSecurityException;
 

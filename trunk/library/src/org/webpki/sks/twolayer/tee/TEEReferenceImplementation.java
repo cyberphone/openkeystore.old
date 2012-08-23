@@ -1536,8 +1536,6 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                SKS_VENDOR_DESCRIPTION + " / " + device_info.getVendorDescription (),
                                device_info.getCertificatePath (),
                                device_info.getSupportedAlgorithms (),
-                               device_info.getRSAExponentSupport (),
-                               device_info.getRSAKeySizes (),
                                device_info.getCryptoDataSize (),
                                device_info.getExtensionDataSize (),
                                device_info.getDevicePINSupport (),
@@ -2401,7 +2399,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                                 byte delete_protection,
                                                 byte app_usage,
                                                 String friendly_name,
-                                                byte[] key_specifier,
+                                                String key_algorithm,
+                                                byte[] key_parameters,
                                                 String[] endorsed_algorithms,
                                                 byte[] mac) throws SKSException
       {
@@ -2501,7 +2500,8 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                                                    delete_protection,
                                                                    app_usage,
                                                                    friendly_name,
-                                                                   key_specifier,
+                                                                   key_algorithm,
+                                                                   key_parameters,
                                                                    endorsed_algorithms,
                                                                    mac);
           }

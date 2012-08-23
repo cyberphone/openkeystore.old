@@ -134,12 +134,6 @@ public interface SecureKeyStore
     byte BIOMETRIC_PROTECTION_EXCLUSIVE       = 0x03;
 
     ///////////////////////////////////////////////////////////////////////////////////
-    // SKS key algorithm IDs used in "createKeyPair"
-    ///////////////////////////////////////////////////////////////////////////////////
-    byte KEY_ALGORITHM_TYPE_RSA               = 0x00;
-    byte KEY_ALGORITHM_TYPE_NAMED_EC          = 0x01;
-
-    ///////////////////////////////////////////////////////////////////////////////////
     // Default algorithms
     ///////////////////////////////////////////////////////////////////////////////////
     short[] SKS_DEFAULT_RSA_SUPPORT           = {1024, 2048};
@@ -193,7 +187,8 @@ public interface SecureKeyStore
                             byte delete_protection,
                             byte app_usage,
                             String friendly_name,  // May be null
-                            byte[] key_specifier,
+                            String key_algorithm,
+                            byte[] key_parameters,  // Must be null if not applicable
                             String[] endorsed_algorithms,
                             byte[] mac) throws SKSException;
     

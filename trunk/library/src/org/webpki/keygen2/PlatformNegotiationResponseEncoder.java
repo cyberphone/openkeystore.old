@@ -42,8 +42,6 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class PlatformNegotiationResponseEncoder extends PlatformNegotiationResponse
   {
-    BasicCapabilities basic_capabilities = new BasicCapabilities ();
-
     private String prefix;  // Default: no prefix
     
     class ImagePreference
@@ -72,12 +70,6 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
     public String getPrefix ()
       {
         return prefix;
-      }
-
-
-    public BasicCapabilities getBasicCapabilities ()
-      {
-        return basic_capabilities;
       }
 
 
@@ -111,7 +103,7 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
         ////////////////////////////////////////////////////////////////////////
         // Basic capabilities
         ////////////////////////////////////////////////////////////////////////
-        basic_capabilities.write (wr);
+        writeBasicCapabilities (wr);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional image preferences
@@ -134,5 +126,4 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
             server_cookie.write (wr);
           }
       }
-
   }

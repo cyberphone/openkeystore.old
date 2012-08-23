@@ -46,6 +46,8 @@ import org.webpki.util.MimeTypedObject;
 
 import org.webpki.xml.DOMWriterHelper;
 
+import org.webpki.xmldsig.XMLSignatureWrapper;
+
 public class ServerCredentialStore implements Serializable
   {
     private static final long serialVersionUID = 1L;
@@ -923,7 +925,8 @@ public class ServerCredentialStore implements Serializable
                        DeleteProtection.NONE.getSKSValue () : delete_protection.getSKSValue ());
             key_pair_mac.addByte (app_usage.getSKSValue ());
             key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
-            key_pair_mac.addArray (key_specifier.getSKSValue ());
+            key_pair_mac.addString (key_specifier.getKeyAlgorithm ().getURI ());
+            key_pair_mac.addArray (key_specifier.getParameters () == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : key_specifier.getParameters ());
             if (endorsed_algorithms != null) for (String algorithm : endorsed_algorithms)
               {
                 key_pair_mac.addString (algorithm);
@@ -980,7 +983,11 @@ public class ServerCredentialStore implements Serializable
             
             expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
             
-            key_specifier.writeKeySpecifier (wr);
+            wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, key_specifier.getKeyAlgorithm ().getURI ());
+            if (key_specifier.getParameters () != null)
+              {
+                wr.setBinaryAttribute (PARAMETERS_ATTR, key_specifier.getParameters ());
+              }
 
             wr.getParent ();
 
@@ -1084,7 +1091,7 @@ public class ServerCredentialStore implements Serializable
       {
         MacGenerator check = new MacGenerator ();
         check.addArray (saved_close_nonce);
-        check.addString (KeyGen2URIs.ALGORITHMS.SESSION_KEY_1);
+        check.addString (KeyGen2URIs.SPECIAL_ALGORITHMS.SESSION_KEY_1);
         if (!ArrayUtil.compare (attest (check.getResult (),
                                         getMACSequenceCounterAndUpdate (),
                                         server_crypto_interface),

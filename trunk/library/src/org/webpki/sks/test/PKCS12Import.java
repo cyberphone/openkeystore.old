@@ -35,7 +35,7 @@ import java.util.Vector;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
-import org.webpki.crypto.ECDomains;
+import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 
 import org.webpki.keygen2.KeyGen2URIs;
@@ -110,7 +110,7 @@ public class PKCS12Import
             endorsed_algs = new String[]{rsa_flag ? 
                     AsymEncryptionAlgorithms.RSA_PKCS_1.getURI ()
                                                   :
-                    KeyGen2URIs.ALGORITHMS.ECDH_RAW};
+                    KeyGen2URIs.SPECIAL_ALGORITHMS.ECDH_RAW};
           }
         else if (app_usage == AppUsage.SIGNATURE)
           {
@@ -173,7 +173,7 @@ public class PKCS12Import
                                                null /* puk_policy */);
           }
         GenKey key = sess.createKey ("Key",
-                                     KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1,
+                                     KeyGen2URIs.SPECIAL_ALGORITHMS.KEY_ATTESTATION_1,
                                      null /* server_seed */,
                                      pin_policy,
                                      pin_value,
@@ -183,7 +183,7 @@ public class PKCS12Import
                                      pin_caching /* enable_pin_caching */,
                                      app_usage,
                                      "" /* friendly_name */,
-                                     new KeySpecifier.EC (ECDomains.P_256),
+                                     new KeySpecifier(KeyAlgorithms.P_256),
                                      endorsed_algs);
         key.setCertificatePath (cert_path.toArray (new X509Certificate[0]));
         key.setPrivateKey (private_key);

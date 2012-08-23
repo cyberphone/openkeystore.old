@@ -192,8 +192,6 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             Holder<String> vendor_description = new Holder<String> ();
             Holder<List<byte[]>> certificate_path = new Holder<List<byte[]>> ();
             Holder<List<String>> supported_algorithms = new Holder<List<String>> ();
-            Holder<Boolean> rsa_exponent_support = new Holder<Boolean> ();
-            Holder<List<Short>> rsa_key_sizes = new Holder<List<Short>> ();
             Holder<Integer> crypto_data_size = new Holder<Integer> ();
             Holder<Integer> extension_data_size = new Holder<Integer> ();
             Holder<Boolean> device_pin_support = new Holder<Boolean> ();
@@ -207,18 +205,11 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                        vendor_description,
                                        certificate_path,
                                        supported_algorithms,
-                                       rsa_exponent_support,
-                                       rsa_key_sizes,
                                        crypto_data_size,
                                        extension_data_size,
                                        device_pin_support,
                                        biometric_support,
                                        connection_port);
-            short[] lsizes = new short[rsa_key_sizes.value.size ()];
-            for (int i = 0; i < rsa_key_sizes.value.size () ; i++)
-              {
-                lsizes[i] = rsa_key_sizes.value.get (i);
-              }
             DeviceInfo device_info = new DeviceInfo (api_level.value,
                                                      device_type.value,
                                                      update_url.value,
@@ -226,8 +217,6 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                                      vendor_description.value,
                                                      getCertArrayFromBlobs (certificate_path.value),
                                                      supported_algorithms.value.toArray (new String[0]),
-                                                     rsa_exponent_support.value,
-                                                     lsizes,
                                                      crypto_data_size.value,
                                                      extension_data_size.value,
                                                      device_pin_support.value,
@@ -459,7 +448,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                    byte delete_protection,
                                    byte app_usage,
                                    String friendly_name,
-                                   byte[] key_specifier,
+                                   String key_algorithm,
+                                   byte[] key_parameters,
                                    String[] endorsed_algorithms,
                                    byte[] mac) throws SKSException
       {
@@ -486,7 +476,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                                          delete_protection,
                                                          app_usage,
                                                          friendly_name,
-                                                         key_specifier,
+                                                         key_algorithm,
+                                                         key_parameters,
                                                          lalg,
                                                          mac,
                                                          public_key,

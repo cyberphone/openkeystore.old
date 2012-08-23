@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2URIs
   {
-    public interface ALGORITHMS
+    public interface SPECIAL_ALGORITHMS
       {
         String KEY_ATTESTATION_1           = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
 

@@ -22,6 +22,7 @@ import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+
 import java.security.interfaces.ECPublicKey;
 
 import java.util.Date;
@@ -332,6 +333,7 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         for (LookupDescriptor im_des : lookup_descriptors)
           {
             XMLAsymKeySigner ds = new XMLAsymKeySigner (im_des);
+            ds.setSignatureAlgorithm (im_des.key_management_key instanceof ECPublicKey ? SignatureAlgorithms.ECDSA_SHA256 : SignatureAlgorithms.RSA_SHA256);
             ds.removeXMLSignatureNS ();
             ds.createEnvelopedSignature (im_des);
             im_des.root.getDocumentElement ().removeAttributeNS ("http://www.w3.org/2000/xmlns/", prefix == null ? "xmlns" : prefix);

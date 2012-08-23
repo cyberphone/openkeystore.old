@@ -45,9 +45,10 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.webpki.crypto.CertificateUtil;
-import org.webpki.crypto.ECDomains;
+import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
+
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.KeySpecifier;
@@ -112,7 +113,7 @@ public class ProvSess
         public ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException
           {
             KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
-            ECGenParameterSpec eccgen = new ECGenParameterSpec (ECDomains.P_256.getJCEName ());
+            ECGenParameterSpec eccgen = new ECGenParameterSpec (KeyAlgorithms.P_256.getJCEName ());
             generator.initialize (eccgen, new SecureRandom ());
             KeyPair kp = generator.generateKeyPair();
             server_ec_private_key = (ECPrivateKey) kp.getPrivate ();
@@ -213,7 +214,7 @@ public class ProvSess
     
     SoftHSM server_sess_key = new SoftHSM ();
 
-    String session_key_algorithm = KeyGen2URIs.ALGORITHMS.SESSION_KEY_1;
+    String session_key_algorithm = KeyGen2URIs.SPECIAL_ALGORITHMS.SESSION_KEY_1;
     
     static final String ISSUER_URI = "http://issuer.example.com/provsess";
     
@@ -253,7 +254,9 @@ public class ProvSess
     
     InputMethod input_method = InputMethod.ANY;
 
-    byte[] custom_key_specifier = null;
+    byte[] custom_key_parameters = null;
+    
+    String custom_key_algorithm = null;
     
     static class MacGenerator
       {
@@ -447,7 +450,7 @@ public class ProvSess
                                                       SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION));
         MacGenerator check = new MacGenerator ();
         check.addArray (nonce);
-        check.addString (KeyGen2URIs.ALGORITHMS.SESSION_KEY_1);
+        check.addString (KeyGen2URIs.SPECIAL_ALGORITHMS.SESSION_KEY_1);
         if (!ArrayUtil.compare (attest (check.getResult ()), result))
           {
             bad ("Final attestation failed!");
@@ -487,9 +490,14 @@ public class ProvSess
         this.input_method = input_method;
       }
     
-    public void setKeySpecifier (byte[] key_specifier)
+    public void setKeyAlgorithm (String key_algorithm)
       {
-        custom_key_specifier = key_specifier;
+        custom_key_algorithm = key_algorithm;
+      }
+
+    public void setKeyParameters (byte[] key_parameters)
+      {
+        custom_key_parameters = key_parameters;
       }
 
     public byte[] getPassphraseBytes (PassphraseFormat format, String passphrase) throws IOException
@@ -569,26 +577,26 @@ public class ProvSess
         return pin_policy;
       }
    
-    public GenKey createRSAKey (String id,
-                                int rsa_size,
-                                String pin_value,
-                                PINPol pin_policy,
-                                AppUsage key_usage) throws SKSException, IOException, GeneralSecurityException
+    public GenKey createKey (String id,
+                             KeyAlgorithms key_algorithm,
+                             String pin_value,
+                             PINPol pin_policy,
+                             AppUsage key_usage) throws SKSException, IOException, GeneralSecurityException
       {
-        return createRSAKey (id, rsa_size, pin_value, pin_policy, key_usage, null);
+        return createKey (id, key_algorithm, pin_value, pin_policy, key_usage, null);
       }
 
-    public GenKey createRSAKey (String id,
-                                int rsa_size,
-                                String pin_value,
-                                PINPol pin_policy,
-                                AppUsage app_usage,
-                                String[] endorsed_algorithm) throws SKSException, IOException, GeneralSecurityException
+    public GenKey createKey (String id,
+                             KeyAlgorithms key_algorithm,
+                             String pin_value,
+                             PINPol pin_policy,
+                             AppUsage app_usage,
+                             String[] endorsed_algorithm) throws SKSException, IOException, GeneralSecurityException
       {
         byte[] server_seed = new byte[32];
         new SecureRandom ().nextBytes (server_seed);
         return createKey (id,
-                          KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1,
+                          KeyGen2URIs.SPECIAL_ALGORITHMS.KEY_ATTESTATION_1,
                           server_seed,
                           pin_policy,
                           pin_value,
@@ -598,38 +606,10 @@ public class ProvSess
                           false /* enable_pin_caching */,
                           app_usage,
                           "" /* friendly_name */,
-                          new KeySpecifier.RSA (2048),
+                          new KeySpecifier (key_algorithm),
                           endorsed_algorithm);
       }
     
-    public GenKey createECKey (String id,
-                               String pin_value,
-                               PINPol pin_policy,
-                               AppUsage app_usage) throws SKSException, IOException, GeneralSecurityException
-      {
-        return createECKey (id, pin_value, pin_policy, app_usage, null);
-      }
-
-    public GenKey createECKey (String id,
-                               String pin_value,
-                               PINPol pin_policy,
-                               AppUsage app_usage,
-                               String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
-      {
-        return createKey (id,
-                          KeyGen2URIs.ALGORITHMS.KEY_ATTESTATION_1,
-                          null /* server_seed */,
-                          pin_policy,
-                          pin_value,
-                          BiometricProtection.NONE /* biometric_protection */,
-                          ExportProtection.NON_EXPORTABLE /* export_policy */,
-                          DeleteProtection.NONE /* delete_policy */,
-                          false /* enable_pin_caching */,
-                          app_usage,
-                          "" /* friendly_name */,
-                          new KeySpecifier.EC (ECDomains.P_256),
-                          endorsed_algorithms);
-      }
 
     public GenKey createKey (String id,
                              String attestation_algorithm,
@@ -642,10 +622,11 @@ public class ProvSess
                              boolean enable_pin_caching,
                              AppUsage app_usage,
                              String friendly_name,
-                             KeySpecifier key_algorithm,
+                             KeySpecifier key_specifier,
                              String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
       {
-        byte[] key_specifier = custom_key_specifier == null ? key_algorithm.getSKSValue () : custom_key_specifier;
+        String key_algorithm = custom_key_algorithm == null ? key_specifier.getKeyAlgorithm ().getURI () : custom_key_algorithm;
+        byte[] key_parameters = custom_key_parameters == null ? key_specifier.getParameters () : custom_key_parameters;
         String[] sorted_algorithms = endorsed_algorithms == null ? new String[0] : endorsed_algorithms;
         byte actual_export_policy = override_export_protection ? overriden_export_protection : export_protection.getSKSValue ();
         MacGenerator key_pair_mac = new MacGenerator ();
@@ -686,7 +667,8 @@ public class ProvSess
         key_pair_mac.addByte (delete_protection.getSKSValue ());
         key_pair_mac.addByte (app_usage.getSKSValue ());
         key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
-        key_pair_mac.addArray (key_specifier);
+        key_pair_mac.addString (key_algorithm);
+        key_pair_mac.addArray (key_parameters == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : key_parameters);
         for (String algorithm : sorted_algorithms)
           {
             key_pair_mac.addString (algorithm);
@@ -704,7 +686,8 @@ public class ProvSess
                                                delete_protection.getSKSValue (), 
                                                app_usage.getSKSValue (), 
                                                friendly_name, 
-                                               key_specifier,
+                                               key_algorithm,
+                                               key_parameters,
                                                sorted_algorithms,
                                                mac4call (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
         MacGenerator key_attestation = new MacGenerator ();

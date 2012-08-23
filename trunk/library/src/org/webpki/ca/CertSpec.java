@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.EnumSet;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import org.webpki.asn1.ASN1OctetString;
 import org.webpki.asn1.BaseASN1Object;

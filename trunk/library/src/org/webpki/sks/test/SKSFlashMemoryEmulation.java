@@ -93,7 +93,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
     static final String SKS_UPDATE_URL                     = null;  // Change here to test or disable
     static final boolean SKS_DEVICE_PIN_SUPPORT            = true;  // Change here to test or disable
     static final boolean SKS_BIOMETRIC_SUPPORT             = true;  // Change here to test or disable
-    static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
+    static final boolean SKS_RSA_EXPONENT_SUPPORT          = false;  // Change here to test or disable
 
     int next_key_handle = 1;
     LinkedHashMap<Integer,KeyEntry> keys = new LinkedHashMap<Integer,KeyEntry> ();
@@ -799,25 +799,28 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         supported_algorithms.put (uri, alg);
       }
 
-    static final int ALG_SYM_ENC  = 0x000001;
-    static final int ALG_IV_REQ   = 0x000002;
-    static final int ALG_IV_INT   = 0x000004;
-    static final int ALG_SYML_128 = 0x000008;
-    static final int ALG_SYML_192 = 0x000010;
-    static final int ALG_SYML_256 = 0x000020;
-    static final int ALG_HMAC     = 0x000040;
-    static final int ALG_ASYM_ENC = 0x000080;
-    static final int ALG_ASYM_SGN = 0x000100;
-    static final int ALG_RSA_KEY  = 0x000200;
-    static final int ALG_EC_KEY   = 0x000400;
-    static final int ALG_EC_CRV   = 0x000800;
-    static final int ALG_HASH_160 = 0x014000;
-    static final int ALG_HASH_256 = 0x020000;
-    static final int ALG_HASH_DIV = 0x001000;
-    static final int ALG_HASH_MSK = 0x00007F;
-    static final int ALG_NONE     = 0x080000;
-    static final int ALG_ASYM_KA  = 0x100000;
-    static final int ALG_AES_PAD  = 0x200000;
+    static final int ALG_SYM_ENC  = 0x00000001;
+    static final int ALG_IV_REQ   = 0x00000002;
+    static final int ALG_IV_INT   = 0x00000004;
+    static final int ALG_SYML_128 = 0x00000008;
+    static final int ALG_SYML_192 = 0x00000010;
+    static final int ALG_SYML_256 = 0x00000020;
+    static final int ALG_HMAC     = 0x00000040;
+    static final int ALG_ASYM_ENC = 0x00000080;
+    static final int ALG_ASYM_SGN = 0x00000100;
+    static final int ALG_RSA_KEY  = 0x00004000;
+    static final int ALG_RSA_GMSK = 0x00003FFF;
+    static final int ALG_RSA_EXP  = 0x00008000;
+    static final int ALG_HASH_160 = 0x00140000;
+    static final int ALG_HASH_256 = 0x00200000;
+    static final int ALG_HASH_DIV = 0x00010000;
+    static final int ALG_HASH_MSK = 0x0000007F;
+    static final int ALG_NONE     = 0x00800000;
+    static final int ALG_ASYM_KA  = 0x01000000;
+    static final int ALG_AES_PAD  = 0x02000000;
+    static final int ALG_EC_KEY   = 0x04000000;
+    static final int ALG_KEY_GEN  = 0x08000000;
+    static final int ALG_KEY_PARM = 0x10000000;
 
     static final int AES_CBC_PKCS5_PADDING = 32;
     
@@ -895,9 +898,22 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                       ALG_ASYM_SGN | ALG_EC_KEY);
 
         //////////////////////////////////////////////////////////////////////////////////////
-        //  Elliptic Curves
+        //  Asymmetric Key Generation
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("urn:oid:1.2.840.10045.3.1.7", "secp256r1", ALG_EC_CRV);
+        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.p256",
+                      "secp256r1",
+                      ALG_EC_KEY | ALG_KEY_GEN);
+        
+        for (short rsa_size : SKS_DEFAULT_RSA_SUPPORT)
+          {
+            addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa" + rsa_size,
+                          null, ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
+            if (SKS_RSA_EXPONENT_SUPPORT)
+              {
+                addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa" + rsa_size + ".exp",
+                              null, ALG_KEY_PARM | ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
+              }
+          }
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Special Algorithms
@@ -2028,8 +2044,6 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                                    SKS_VENDOR_DESCRIPTION,
                                    getDeviceCertificatePath (),
                                    supported_algorithms.keySet ().toArray (new String[0]),
-                                   SKS_RSA_EXPONENT_SUPPORT,
-                                   SKS_DEFAULT_RSA_SUPPORT,
                                    MAX_LENGTH_CRYPTO_DATA,
                                    MAX_LENGTH_EXTENSION_DATA,
                                    SKS_DEVICE_PIN_SUPPORT,
@@ -3047,7 +3061,8 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                                                 byte delete_protection,
                                                 byte app_usage,
                                                 String friendly_name,
-                                                byte[] key_specifier,
+                                                String key_algorithm,
+                                                byte[] key_parameters,
                                                 String[] endorsed_algorithms,
                                                 byte[] mac) throws SKSException
       {
@@ -3062,6 +3077,15 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         if (!algorithm.equals (ALGORITHM_KEY_ATTEST_1))
           {
             provisioning.abort ("Unsupported \"Algorithm\" : " + algorithm, SKSException.ERROR_ALGORITHM);
+          }
+        Algorithm kalg = supported_algorithms.get (key_algorithm);
+        if (kalg == null || (kalg.mask & ALG_KEY_GEN) == 0)
+          {
+            provisioning.abort ("Unsupported \"KeyAlgorithm\": " + key_algorithm);
+          }
+        if ((kalg.mask & ALG_KEY_PARM) == 0 ^ key_parameters == null)
+          {
+            provisioning.abort ((key_parameters == null ? "Missing" : "Unexpected") + " \"KeyParameters\"");
           }
         if (server_seed != null && (server_seed.length == 0 || server_seed.length > 32))
           {
@@ -3154,7 +3178,8 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         verifier.addByte (delete_protection);
         verifier.addByte (app_usage);
         verifier.addString (friendly_name == null ? "" : friendly_name);
-        verifier.addArray (key_specifier);
+        verifier.addString (key_algorithm);
+        verifier.addArray (key_parameters == null ? ZERO_LENGTH_ARRAY : key_parameters);
         LinkedHashSet<String> temp_endorsed = new LinkedHashSet<String> ();
         String prev_alg = "\0";
         for (String endorsed_algorithm : endorsed_algorithms)
@@ -3195,40 +3220,24 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         // Decode key algorithm specifier
         ///////////////////////////////////////////////////////////////////////////////////
         AlgorithmParameterSpec alg_par_spec = null;
-        if (key_specifier == null || key_specifier.length == 0)
+        if ((kalg.mask & ALG_RSA_KEY) == ALG_RSA_KEY)
           {
-            provisioning.abort ("Empty \"KeySpecifier\"");
-          }
-        if (key_specifier[0] == KEY_ALGORITHM_TYPE_RSA)
-          {
-            if (key_specifier.length != 7)
+            int rsa_key_size = kalg.mask & ALG_RSA_GMSK;
+            BigInteger exponent = RSAKeyGenParameterSpec.F4;
+            if (key_parameters != null)
               {
-                provisioning.abort ("Incorrectly formatted RSA \"KeySpecifier\"");
+                if (key_parameters.length != 4)
+                  {
+                    provisioning.abort ("\"KeyParameters\" length error: " + key_parameters.length);
+                  }
+                exponent = BigInteger.valueOf ((getShort (key_parameters, 0) << 16) + getShort (key_parameters, 2));
               }
-            int rsa_key_size = getShort (key_specifier, 1);
-            BigInteger exponent = BigInteger.valueOf ((getShort (key_specifier, 3) << 16) + getShort (key_specifier, 5));
-            checkRSAKeyCompatibility (rsa_key_size, exponent, provisioning, "\"KeySpecifier\"");
             alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size, exponent);
-          }
-        else if (key_specifier[0] == KEY_ALGORITHM_TYPE_NAMED_EC)
-          {
-            StringBuffer ec_uri = new StringBuffer ();
-            for (int i = 1; i < key_specifier.length; i++)
-              {
-                ec_uri.append ((char) key_specifier[i]);
-              }
-            Algorithm alg = supported_algorithms.get (ec_uri.toString ());
-            if (alg == null || (alg.mask & ALG_EC_CRV) == 0)
-              {
-                provisioning.abort ("Unsupported eliptic curve: " + ec_uri + " in \"KeySpecifier\"");
-              }
-            alg_par_spec = new ECGenParameterSpec (alg.jce_name);
           }
         else
           {
-            provisioning.abort ("Unknown key type in \"KeySpecifier\"");
+            alg_par_spec = new ECGenParameterSpec (kalg.jce_name);
           }
-
         try
           {
             ///////////////////////////////////////////////////////////////////////////////////

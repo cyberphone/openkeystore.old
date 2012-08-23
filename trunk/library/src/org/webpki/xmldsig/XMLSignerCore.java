@@ -21,9 +21,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
-import java.security.interfaces.RSAPublicKey;
-import java.security.interfaces.ECPublicKey;
-
 import org.w3c.dom.Text;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
@@ -35,7 +32,7 @@ import org.webpki.xml.XMLObjectWrapper;
 
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.ECDomains;
+import org.webpki.crypto.KeyAlgorithms;
 
 
 abstract class XMLSignerCore
@@ -132,11 +129,7 @@ abstract class XMLSignerCore
             PublicKey public_key = populateKeys (dsig_wrapper);
             if (signature_algorithm == null)
               {
-                signature_algorithm = public_key instanceof RSAPublicKey 
-                                             ?
-                                  SignatureAlgorithms.RSA_SHA256
-                                             :
-                                  ECDomains.getRecommendedSignatureAlgorithm ((ECPublicKey)public_key);
+                signature_algorithm = KeyAlgorithms.getKeyAlgorithm (public_key).getRecommendedSignatureAlgorithm ();
               }
             dsig_wrapper.signature_algorithm = signature_algorithm.getURI ();
           }
