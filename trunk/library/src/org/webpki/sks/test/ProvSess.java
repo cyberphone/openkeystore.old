@@ -19,6 +19,8 @@ package org.webpki.sks.test;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -27,11 +29,15 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.RSAKeyGenParameterSpec;
 
 import java.util.Date;
 import java.util.EnumSet;
@@ -41,6 +47,7 @@ import java.util.Set;
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
+
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -629,10 +636,10 @@ public class ProvSess
         byte[] key_parameters = custom_key_parameters == null ? key_specifier.getParameters () : custom_key_parameters;
         String[] sorted_algorithms = endorsed_algorithms == null ? new String[0] : endorsed_algorithms;
         byte actual_export_policy = override_export_protection ? overriden_export_protection : export_protection.getSKSValue ();
-        MacGenerator key_pair_mac = new MacGenerator ();
-        key_pair_mac.addString (id);
-        key_pair_mac.addString (attestation_algorithm);
-        key_pair_mac.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
+        MacGenerator key_entry_mac = new MacGenerator ();
+        key_entry_mac.addString (id);
+        key_entry_mac.addString (attestation_algorithm);
+        key_entry_mac.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
         byte[] encrypted_pin_value = null;
         if (pin_policy == null)
           {
@@ -649,58 +656,72 @@ public class ProvSess
                 encrypted_pin_value = server_sess_key.encrypt (encrypted_pin_value);
               }
           }
-        key_pair_mac.addString (pin_policy == null ? 
+        key_entry_mac.addString (pin_policy == null ? 
                                       SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE 
                                                    :
                                       pin_policy.id);
         if (pin_policy == null || pin_policy.user_defined)
           {
-            key_pair_mac.addString (SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE);
+            key_entry_mac.addString (SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE);
           }
         else
           {
-            key_pair_mac.addArray (encrypted_pin_value);
+            key_entry_mac.addArray (encrypted_pin_value);
           }
-        key_pair_mac.addBool (enable_pin_caching);
-        key_pair_mac.addByte (biometric_protection.getSKSValue ());
-        key_pair_mac.addByte (actual_export_policy);
-        key_pair_mac.addByte (delete_protection.getSKSValue ());
-        key_pair_mac.addByte (app_usage.getSKSValue ());
-        key_pair_mac.addString (friendly_name == null ? "" : friendly_name);
-        key_pair_mac.addString (key_algorithm);
-        key_pair_mac.addArray (key_parameters == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : key_parameters);
+        key_entry_mac.addBool (enable_pin_caching);
+        key_entry_mac.addByte (biometric_protection.getSKSValue ());
+        key_entry_mac.addByte (actual_export_policy);
+        key_entry_mac.addByte (delete_protection.getSKSValue ());
+        key_entry_mac.addByte (app_usage.getSKSValue ());
+        key_entry_mac.addString (friendly_name == null ? "" : friendly_name);
+        key_entry_mac.addString (key_algorithm);
+        key_entry_mac.addArray (key_parameters == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : key_parameters);
         for (String algorithm : sorted_algorithms)
           {
-            key_pair_mac.addString (algorithm);
+            key_entry_mac.addString (algorithm);
           }
-        KeyData key_pair = sks.createKeyEntry (provisioning_handle, 
-                                               id,
-                                               attestation_algorithm, 
-                                               server_seed,
-                                               device_pin_protected,
-                                               pin_policy == null ? 0 : pin_policy.pin_policy_handle, 
-                                               encrypted_pin_value, 
-                                               enable_pin_caching, 
-                                               biometric_protection.getSKSValue (), 
-                                               actual_export_policy, 
-                                               delete_protection.getSKSValue (), 
-                                               app_usage.getSKSValue (), 
-                                               friendly_name, 
-                                               key_algorithm,
-                                               key_parameters,
-                                               sorted_algorithms,
-                                               mac4call (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
+        KeyData key_entry = sks.createKeyEntry (provisioning_handle, 
+                                                id,
+                                                attestation_algorithm, 
+                                                server_seed,
+                                                device_pin_protected,
+                                                pin_policy == null ? 0 : pin_policy.pin_policy_handle, 
+                                                encrypted_pin_value, 
+                                                enable_pin_caching, 
+                                                biometric_protection.getSKSValue (), 
+                                                actual_export_policy, 
+                                                delete_protection.getSKSValue (), 
+                                                app_usage.getSKSValue (), 
+                                                friendly_name, 
+                                                key_algorithm,
+                                                key_parameters,
+                                                sorted_algorithms,
+                                                mac4call (key_entry_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
         MacGenerator key_attestation = new MacGenerator ();
         key_attestation.addString (id);
-        key_attestation.addArray (key_pair.getPublicKey ().getEncoded ());
-        if (!ArrayUtil.compare (attest (key_attestation.getResult ()), key_pair.getAttestation ()))
+        key_attestation.addArray (key_entry.getPublicKey ().getEncoded ());
+        if (!ArrayUtil.compare (attest (key_attestation.getResult ()), key_entry.getAttestation ()))
           {
             bad ("Failed key attest");
           }
         GenKey key = new GenKey ();
         key.id = id;
-        key.key_handle = key_pair.getKeyHandle ();
-        key.public_key = key_pair.getPublicKey ();
+        key.key_handle = key_entry.getKeyHandle ();
+        String return_alg = KeyAlgorithms.getKeyAlgorithm (key.public_key = key_entry.getPublicKey ()).getURI ();
+        BigInteger exponent = RSAKeyGenParameterSpec.F4;
+        if (key_parameters != null)
+          {
+            return_alg += ".exp";
+            exponent = new BigInteger (key_parameters);
+          }
+        if (!return_alg.equals (key_algorithm))
+          {
+            bad ("Bad return algorithm: " + return_alg);
+          }
+        if (key.public_key instanceof RSAPublicKey && !((RSAPublicKey)key.public_key).getPublicExponent ().equals (exponent))
+          {
+            bad ("Wrong exponent RSA returned");
+          }
         key.prov_sess = this;
         return key;
       }
