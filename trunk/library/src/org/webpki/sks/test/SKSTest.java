@@ -3163,8 +3163,8 @@ public class SKSTest
         if (supports_var_exp)
           {
             badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), null, "Missing \"KeyParameters\"");
-            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[]{0,0,0,0,3}, "\"KeyParameters\" length error: 5");
-            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[]{0,0,3}, "\"KeyParameters\" length error: 3");
+            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[]{0,0,0,0,0,0,0,0,3}, "\"KeyParameters\" length error: 9");
+            badKeySpec (KeyAlgorithms.RSA1024_EXP.getURI (), new byte[0], "\"KeyParameters\" length error: 0");
           }
         ProvSess sess = new ProvSess (device);
         KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");

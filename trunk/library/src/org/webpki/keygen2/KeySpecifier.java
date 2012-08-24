@@ -19,9 +19,9 @@ package org.webpki.keygen2;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.webpki.crypto.KeyAlgorithms;
+import java.math.BigInteger;
 
-import org.webpki.util.ArrayUtil;
+import org.webpki.crypto.KeyAlgorithms;
 
 public class KeySpecifier implements Serializable
   {
@@ -58,9 +58,9 @@ public class KeySpecifier implements Serializable
       }
 
 
-    public KeySpecifier (KeyAlgorithms key_algorithm, int int_parameter) throws IOException
+    public KeySpecifier (KeyAlgorithms key_algorithm, long parameter) throws IOException
       {
-        this (key_algorithm, ArrayUtil.add (short2bytes (int_parameter >>> 16), short2bytes (int_parameter)));
+        this (key_algorithm, BigInteger.valueOf (parameter).toByteArray ());
       }
 
 

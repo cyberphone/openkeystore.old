@@ -2112,11 +2112,11 @@ public class SEReferenceImplementation
                 BigInteger exponent = RSAKeyGenParameterSpec.F4;
                 if (key_parameters != null)
                   {
-                    if (key_parameters.length != 4)
+                    if (key_parameters.length == 0 || key_parameters.length > 8)
                       {
                         abort ("\"KeyParameters\" length error: " + key_parameters.length);
                       }
-                    exponent = BigInteger.valueOf ((getShort (key_parameters, 0) << 16) + getShort (key_parameters, 2));
+                    exponent = new BigInteger (key_parameters);
                   }
                 alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size, exponent);
               }
