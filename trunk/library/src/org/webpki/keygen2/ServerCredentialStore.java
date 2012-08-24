@@ -46,8 +46,6 @@ import org.webpki.util.MimeTypedObject;
 
 import org.webpki.xml.DOMWriterHelper;
 
-import org.webpki.xmldsig.XMLSignatureWrapper;
-
 public class ServerCredentialStore implements Serializable
   {
     private static final long serialVersionUID = 1L;
@@ -983,10 +981,10 @@ public class ServerCredentialStore implements Serializable
             
             expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
             
-            wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, key_specifier.getKeyAlgorithm ().getURI ());
+            wr.setStringAttribute (KEY_ALGORITHM_ATTR, key_specifier.getKeyAlgorithm ().getURI ());
             if (key_specifier.getParameters () != null)
               {
-                wr.setBinaryAttribute (PARAMETERS_ATTR, key_specifier.getParameters ());
+                wr.setBinaryAttribute (KEY_PARAMETERS_ATTR, key_specifier.getParameters ());
               }
 
             wr.getParent ();

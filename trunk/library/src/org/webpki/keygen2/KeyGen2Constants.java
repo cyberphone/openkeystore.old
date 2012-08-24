@@ -83,6 +83,10 @@ public interface KeyGen2Constants
 
     String ISSUED_AFTER_ATTR                         = "IssuedAfter";
 
+    String KEY_ALGORITHM_ATTR                        = "KeyAlgorithm";
+
+    String KEY_PARAMETERS_ATTR                       = "KeyParameters";
+
     String KEY_SIZE_ATTR                             = "KeySize";
 
     String KEY_SIZES_ATTR                            = "KeySizes";
@@ -104,8 +108,6 @@ public interface KeyGen2Constants
     String NAME_ATTR                                 = "Name";
 
     String NONCE_ATTR                                = "Nonce";
-
-    String PARAMETERS_ATTR                           = "Parameters";
 
     String PATTERN_RESTRICTIONS_ATTR                 = "PatternRestrictions";
 

@@ -1057,10 +1057,10 @@
          <xs:attribute name="AppUsage" type="kgen:appUsageTYpes" use="required"/>
 
          <!-- SKS Reference: createKeyEntry.KeyAlgorithm -->
-         <xs:attribute name="Algorithm" type="xs:anyURI" use="required"/>
+         <xs:attribute name="KeyAlgorithm" type="xs:anyURI" use="required"/>
 
          <!-- SKS Reference: createKeyEntry.KeyParameters --> 
-         <xs:attribute name="Parameters" type="xs:base64Binary" use="optional"/>
+         <xs:attribute name="KeyParameters" type="xs:base64Binary" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.FriendlyName 
               Default: "" -->

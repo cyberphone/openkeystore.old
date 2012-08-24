@@ -358,8 +358,8 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             export_protection = ExportProtection.getExportPolicyFromString (ah.getStringConditional (EXPORT_PROTECTION_ATTR, 
                                                                             ExportProtection.NON_EXPORTABLE.getXMLName ()));
 
-            key_specifier = new KeySpecifier (ah.getString (XMLSignatureWrapper.ALGORITHM_ATTR),
-                                              ah.getBinaryConditional (PARAMETERS_ATTR));
+            key_specifier = new KeySpecifier (ah.getString (KEY_ALGORITHM_ATTR),
+                                              ah.getBinaryConditional (KEY_PARAMETERS_ATTR));
           }
 
 
