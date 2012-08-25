@@ -244,6 +244,15 @@ public class KeyGen2Test
         Security.insertProviderAt (new BouncyCastleProvider(), 1);
         server_certificate = (X509Certificate) CertificateFactory.getInstance ("X.509").generateCertificate (KeyGen2Test.class.getResourceAsStream ("server-certificate.der"));
         sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
+        if (fos != null)
+          {
+            DeviceInfo dev = sks.getDeviceInfo ();
+            fos.write (("<b>SKS Description: " + dev.getVendorDescription () +
+                        "<br>SKS Vendor: " + dev.getVendorName () +
+                        "<br>SKS API Level: " + dev.getAPILevel () +
+                        "<br>SKS Interface: " + (sks instanceof WSSpecific ? "WebService" : "Direct") +
+                        "<br>&nbsp<br></b>").getBytes ("UTF-8"));
+          }
         if (sks instanceof WSSpecific)
           {
             String device_id = System.getProperty ("sks.device");
