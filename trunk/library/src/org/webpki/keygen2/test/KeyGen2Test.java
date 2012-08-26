@@ -494,6 +494,7 @@ public class KeyGen2Test
                                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                                 X509Certificate[] cert_path = ka.getCertificatePath ();
                                 CertificateFilter cf = new CertificateFilter ();
+                                cf.setIssuerRegEx (ls.getIssuerRegEx ());
                                 cf.setSubjectRegEx (ls.getSubjectRegEx ());
                                 cf.setSerial (ls.getSerial ());
                                 cf.setEmailAddress (ls.getEmailAddress ());
@@ -996,7 +997,8 @@ public class KeyGen2Test
                           .setSerial (new BigInteger ("123"))
                           .setIssuedBefore (new Date (new Date ().getTime () - 100000))
                           .setIssuedAfter (new Date ())
-                          .setSubjectRegEx ("CN=John");
+                          .setSubjectRegEx ("CN=John")
+                          .setIssuerRegEx ("CN=Root CA");
             return cdre.writeXML ();
           }
 

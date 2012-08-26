@@ -46,6 +46,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
       {
         String id;
         
+        String issuer_reg_ex;
         String subject_reg_ex;
         BigInteger serial;
         String email_address;
@@ -75,6 +76,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
             if (rd.hasNext (SEARCH_FILTER_ELEM))
               {
                 rd.getNext ();
+                issuer_reg_ex = ah.getStringConditional (ISSUER_ATTR);
                 subject_reg_ex = ah.getStringConditional (SUBJECT_ATTR);
                 serial = ah.getBigIntegerConditional (SERIAL_ATTR);
                 email_address = ah.getStringConditional (EMAIL_ATTR);
@@ -101,6 +103,11 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         public String getSubjectRegEx ()
           {
             return subject_reg_ex;
+          }
+
+        public String getIssuerRegEx ()
+          {
+            return issuer_reg_ex;
           }
         
         public BigInteger getSerial ()

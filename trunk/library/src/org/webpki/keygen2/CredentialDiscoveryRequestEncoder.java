@@ -60,6 +60,7 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         
         boolean search_filter;
 
+        String issuer_reg_ex;
         String subject_reg_ex;
         BigInteger serial;
         String email_address;
@@ -82,6 +83,13 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
           {
             search_filter = true;
             this.subject_reg_ex = subject_reg_ex;
+            return this;
+          }
+
+        public LookupDescriptor setIssuerRegEx (String issuer_reg_ex)
+          {
+            search_filter = true;
+            this.issuer_reg_ex = issuer_reg_ex;
             return this;
           }
 
@@ -170,6 +178,10 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
                 if (subject_reg_ex != null)
                   {
                     wr.setStringAttribute (SUBJECT_ATTR, subject_reg_ex);
+                  }
+                if (issuer_reg_ex != null)
+                  {
+                    wr.setStringAttribute (ISSUER_ATTR, issuer_reg_ex);
                   }
                 if (serial != null)
                   {
