@@ -1140,7 +1140,6 @@ public class KeyGen2Test
             if (two_keys)
               {
                 server_credential_store.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.P_256), pin_policy);
-
               }
             return key_create_request.writeXML ();
           }

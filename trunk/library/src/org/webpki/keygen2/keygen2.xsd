@@ -1272,6 +1272,7 @@
               and "IssuedAfter" can be used to create a region that should either
               be included or excluded depending on which one is biggest.  The "Subject"
               and "Issuer" attributes are regular expressions matching RFC 2253 names.
+              Note that the "Issuer" attribute is searched for through the entire path.
               "Email" attributes MUST be searched for in both the subject DN and in
               subject alt name extensions -->
          <xs:attribute name="Issuer" type="kgen:distinguishedNameExpr" use="optional"/>
