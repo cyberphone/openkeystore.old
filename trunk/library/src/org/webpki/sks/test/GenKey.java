@@ -28,7 +28,6 @@ import java.security.Signature;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.webpki.asn1.cert.DistinguishedName;
@@ -58,6 +57,8 @@ public class GenKey
     PublicKey public_key;
     X509Certificate[] cert_path;
     ProvSess prov_sess;
+    
+    static long serial_number = 10000;
     
     public GenKey setCertificate (int length) throws IOException, GeneralSecurityException
       {
@@ -91,7 +92,7 @@ public class GenKey
         X509Certificate certificate = 
             new CA ().createCert (cert_spec,
                                   DistinguishedName.subjectDN ((X509Certificate)DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey")),
-                                  new BigInteger (String.valueOf (new Date ().getTime ())),
+                                  BigInteger.valueOf (serial_number++),
                                   start.getTime (),
                                   end.getTime (), 
                                   SignatureAlgorithms.RSA_SHA256,
