@@ -42,7 +42,7 @@ public class KeySpecifier implements Serializable
         this (key_algorithm);
         if (optional_parameter != null)
           {
-            if (!key_algorithm.hasParameter ())
+            if (!key_algorithm.hasParameters ())
               {
                 throw new IOException ("Algorithm '" + key_algorithm.toString () + "' does not use a \"Parameters\"");
               }
@@ -79,11 +79,5 @@ public class KeySpecifier implements Serializable
     public KeyAlgorithms getKeyAlgorithm ()
       {
         return key_algorithm;
-      }
-
-
-    static byte[] short2bytes (int s)
-      {
-        return new byte[]{(byte)(s >>> 8), (byte)s};
       }
   }

@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
+import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMReaderHelper;
@@ -71,7 +72,10 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
                   {
                     ServerCredentialStore.bad ("Missing key id:" + gpk.id);
                   }
-                kp.public_key = gpk.public_key;
+                if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
+                  {
+                    ServerCredentialStore.bad ("Wrong key type returned for key id:" + gpk.id);
+                  }
                 MacGenerator attestation = new MacGenerator ();
                 // Write key attestation data
                 attestation.addString (gpk.id);

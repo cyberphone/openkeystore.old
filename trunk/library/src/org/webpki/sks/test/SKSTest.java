@@ -1082,7 +1082,7 @@ public class SKSTest
               }
             if (doit)
               {
-                sess.setKeyParameters ((key_algorithm.isRSAKey () && key_algorithm.hasParameter ()) ?
+                sess.setKeyParameters ((key_algorithm.isRSAKey () && key_algorithm.hasParameters ()) ?
                                                                                 new byte[]{0,0,0,3} : null);
                 sess.createKey ("Key." + i++,
                                 key_algorithm,

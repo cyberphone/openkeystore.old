@@ -145,7 +145,7 @@ public enum KeyAlgorithms
     private final String jcename;             // As expressed for JCE
     private final int length_in_bits;
     private final SignatureAlgorithms pref_alg;
-    private final boolean has_parameter;      // Parameter value required?
+    private final boolean has_parameters;      // Parameter value required?
     private final boolean sks_mandatory;      // If required in SKS
 
 
@@ -154,7 +154,7 @@ public enum KeyAlgorithms
                            String jcename,
                            int length_in_bits,
                            SignatureAlgorithms pref_alg,
-                           boolean has_parameter,
+                           boolean has_parameters,
                            boolean sks_mandatory)
       {
         this.ec_domain_oid = ec_domain_oid;
@@ -162,7 +162,7 @@ public enum KeyAlgorithms
         this.jcename = jcename;
         this.length_in_bits = length_in_bits;
         this.pref_alg = pref_alg;
-        this.has_parameter = has_parameter;
+        this.has_parameters = has_parameters;
         this.sks_mandatory = sks_mandatory;
       }
 
@@ -209,9 +209,9 @@ public enum KeyAlgorithms
       }
 
 
-    public boolean hasParameter ()
+    public boolean hasParameters ()
       {
-        return has_parameter;
+        return has_parameters;
       }
  
 
@@ -228,7 +228,7 @@ public enum KeyAlgorithms
       }
 
 
-    public static KeyAlgorithms getKeyAlgorithm (PublicKey public_key) throws IOException
+    public static KeyAlgorithms getKeyAlgorithm (PublicKey public_key, boolean key_parameters) throws IOException
       {
         if (public_key instanceof ECPublicKey)
           {
@@ -241,12 +241,18 @@ public enum KeyAlgorithms
         int length_in_bits = (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;
         for (KeyAlgorithms alg : values ())
           {
-            if (length_in_bits == alg.length_in_bits)
+            if (length_in_bits == alg.length_in_bits && alg.has_parameters == key_parameters)
               {
                 return alg;
               }
           }
         throw new IOException ("Unsupported RSA key size: " + length_in_bits);
+      }
+
+
+    public static KeyAlgorithms getKeyAlgorithm (PublicKey public_key) throws IOException
+      {
+        return getKeyAlgorithm (public_key);
       }
 
 

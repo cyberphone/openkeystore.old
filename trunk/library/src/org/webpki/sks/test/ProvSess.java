@@ -707,11 +707,10 @@ public class ProvSess
         GenKey key = new GenKey ();
         key.id = id;
         key.key_handle = key_entry.getKeyHandle ();
-        String return_alg = KeyAlgorithms.getKeyAlgorithm (key.public_key = key_entry.getPublicKey ()).getURI ();
+        String return_alg = KeyAlgorithms.getKeyAlgorithm (key.public_key = key_entry.getPublicKey (), key_parameters != null).getURI ();
         BigInteger exponent = RSAKeyGenParameterSpec.F4;
         if (key_parameters != null)
           {
-            return_alg += ".exp";
             exponent = new BigInteger (key_parameters);
           }
         if (!return_alg.equals (key_algorithm))
