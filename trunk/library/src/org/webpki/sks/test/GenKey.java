@@ -28,6 +28,7 @@ import java.security.Signature;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.webpki.asn1.cert.DistinguishedName;
@@ -88,11 +89,11 @@ public class GenKey
         GregorianCalendar start = new GregorianCalendar ();
         GregorianCalendar end = (GregorianCalendar) start.clone ();
         end.set (GregorianCalendar.YEAR, end.get (GregorianCalendar.YEAR) + 25);
-    
+        
         X509Certificate certificate = 
             new CA ().createCert (cert_spec,
                                   DistinguishedName.subjectDN ((X509Certificate)DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey")),
-                                  BigInteger.valueOf (serial_number++),
+                                  BigInteger.valueOf (serial_number++).shiftLeft (64).add (BigInteger.valueOf (new Date ().getTime ())),
                                   start.getTime (),
                                   end.getTime (), 
                                   SignatureAlgorithms.RSA_SHA256,
