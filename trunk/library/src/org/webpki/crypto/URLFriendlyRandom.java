@@ -34,9 +34,14 @@ public class URLFriendlyRandom
         byte[] random = new byte[length_in_characters];
         new SecureRandom ().nextBytes (random);
         StringBuffer buffer = new StringBuffer ();
-        for (int i = 0; i < length_in_characters; i++)
+        while (--length_in_characters >= 0)
           {
-            buffer.append (MODIFIED_BASE64[random[i] & 0x3F]);
+            char c = MODIFIED_BASE64[random[length_in_characters] & 0x3F];
+            if (c == '-' && length_in_characters == 0)
+              {
+                c = '_'; // URLs ending with "-" are mistreated by UAs :-(
+              }
+            buffer.append (c);
           }
         return buffer.toString ();
       }
