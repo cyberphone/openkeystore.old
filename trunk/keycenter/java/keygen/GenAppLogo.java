@@ -13,7 +13,6 @@ import org.webpki.util.MimeTypedObject;
 
 import org.webpki.keygen2.KeyGen2URIs;
 
-
 public class GenAppLogo implements MimeTypedObject
   {
     static BufferedImage applogo;
