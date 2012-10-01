@@ -156,6 +156,10 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                 set_certificate.addArray (key.public_key.getEncoded ());
                 set_certificate.addString (key.id);
                 X509Certificate[] certificate_path = CertificateUtil.getSortedPath (key.certificate_path);
+                if (key.trust_anchor_set && !CertificateUtil.isTrustAnchor (certificate_path[certificate_path.length - 1]))
+                  {
+                    throw new IOException ("Invalid \"" + TRUST_ANCHOR_ATTR + "\"");
+                  }
                 for (X509Certificate certificate : certificate_path)
                   {
                     set_certificate.addArray (certificate.getEncoded ());

@@ -1862,6 +1862,7 @@ public class KeyGen2Test
         Doer doer = new Doer ();
         set_trust_anchor = true;
         doer.perform ();
-        assertTrue ("Path Length", sks.getKeyAttributes (doer.getFirstKey ()).getCertificatePath ().length == 3);
+        X509Certificate[] cert_path = sks.getKeyAttributes (doer.getFirstKey ()).getCertificatePath ();
+        assertTrue ("Path Length", CertificateUtil.isTrustAnchor (cert_path[cert_path.length - 1]));
       }
   }

@@ -26,10 +26,15 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateFactory;
 
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -505,4 +510,22 @@ public class CertificateUtil
           }
       }
 
+
+    public static boolean isTrustAnchor (X509Certificate certificate) throws IOException
+      {
+        boolean trust_anchor = certificate.getSubjectX500Principal ().equals (certificate.getIssuerX500Principal ()) && certificate.getBasicConstraints () >= 0;
+        if (trust_anchor)
+          {
+            try
+              {
+                certificate.verify (certificate.getPublicKey ());
+              }
+            catch (Exception e)
+              {
+                throw new IOException (e);
+              }
+            return true;
+          }
+        return false;
+      }
   }
