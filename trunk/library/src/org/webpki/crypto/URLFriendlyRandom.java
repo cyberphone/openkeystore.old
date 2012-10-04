@@ -20,6 +20,8 @@ import java.security.SecureRandom;
 
 public class URLFriendlyRandom
   {
+    private URLFriendlyRandom () {} // No instantiation
+
     private static final char[] MODIFIED_BASE64 = {'A','B','C','D','E','F','G','H',
                                                    'I','J','K','L','M','N','O','P',
                                                    'Q','R','S','T','U','V','W','X',

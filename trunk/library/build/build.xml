@@ -281,6 +281,17 @@
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
       <bottom><![CDATA[<i>2005-2012 WebPKI.org.</i>]]></bottom>
     </javadoc>
+    <java fork="yes"
+          classname="org.webpki.tools.XSD2HTMLPrinter"
+          failonerror="true">
+        <classpath>
+            <fileset dir="${dist_dir}">
+               <include name="${webpki-libext}"/>
+             </fileset>
+        </classpath>
+    	<redirector output="${doc_dir}/keygen2schema.html"/>
+        <arg value="${src_dir}/org/webpki/keygen2/keygen2.xsd"/>
+    </java>
   </target>
 
   <target name="dist" depends="clean,compile">    
