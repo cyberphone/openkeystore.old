@@ -127,7 +127,7 @@ public abstract class WhichClass  // Prevent instantiation; only provide static 
 
         try
         {
-            m = Thread.class.getMethod("getContextClassLoader", null);
+            m = Thread.class.getMethod("getContextClassLoader", (Class<?>[])null);
         }
         catch (NoSuchMethodException nsme)
         {
@@ -141,7 +141,7 @@ public abstract class WhichClass  // Prevent instantiation; only provide static 
 
         try
         {
-            return (ClassLoader) m.invoke(Thread.currentThread(), null);
+            return (ClassLoader) m.invoke(Thread.currentThread(), (Object[])null);
         }
         catch (Exception e)
         {

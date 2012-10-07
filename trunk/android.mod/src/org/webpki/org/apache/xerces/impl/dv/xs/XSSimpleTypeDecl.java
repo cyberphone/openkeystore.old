@@ -721,7 +721,7 @@ public class XSSimpleTypeDecl implements XSSimpleType, TypeInfo {
             applyFacets(facets, presentFacet, fixedFacet, SPECIAL_PATTERN_NONE, fDummyContext);
         } catch (InvalidDatatypeFacetException e) {
             // should never gets here, internel error
-            throw new RuntimeException("internal error");
+            throw new RuntimeException(e);
         }
         // we've now applied facets; so lock this object:
         fIsImmutable = true;
@@ -736,7 +736,7 @@ public class XSSimpleTypeDecl implements XSSimpleType, TypeInfo {
             applyFacets(facets, presentFacet, fixedFacet, patternType, fDummyContext);
         } catch (InvalidDatatypeFacetException e) {
             // should never gets here, internel error
-            throw new RuntimeException("internal error");
+            throw new RuntimeException(e);
         }
         // we've now applied facets; so lock this object:
         fIsImmutable = true;

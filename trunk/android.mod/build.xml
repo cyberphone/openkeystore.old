@@ -1,0 +1,91 @@
+<project name="Android Fixes" default="dist" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="debug"  value="on"/>
+  <property name="src_dir" value="src" />
+  <property name="class_dir" value=".tmp" />
+  <property name="dist_dir" value="dist" />
+  <property name="test_dir" value="test" />
+  
+  <target name="help">
+    <echo message="Targets: help dist doc testkg2 testsks pkcs12import sks-service."/>
+  </target>
+    
+    
+  <target name="compile">
+    <mkdir dir="${class_dir}" />
+
+    <javac debug="${debug}"
+           srcdir="${src_dir}"
+           destdir="${class_dir}" 
+           includeAntRuntime="false"/>
+  </target>
+
+
+  <target name="dist" depends="clean,compile">    
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist_dir}" />
+
+    <!-- Put everything from ${class_dir} into jar files -->
+    <jar jarfile="${dist_dir}/webpki.org-android.mod.jar">
+      <fileset dir="${class_dir}"/>
+      <fileset dir="${src_dir}">
+          <exclude name="**/*.java"/>
+      </fileset>
+      <service type="javax.xml.parsers.DocumentBuilderFactory"
+               provider="org.webpki.org.apache.xerces.jaxp.DocumentBuilderFactoryImpl"/>
+       <service type="javax.xml.validation.SchemaFactory"
+               provider="org.webpki.org.apache.xerces.jaxp.validation.XMLSchemaFactory"/>
+    </jar>
+  </target>
+
+  <target name="clean">
+    <delete dir="${class_dir}"/>
+    <delete dir="${dist_dir}"/>
+  </target>
+
+ <!-- JUnit test of the KeyGen2 protocol and the SKS API -->
+  <target name="testkg2">
+   <property name="sks.standalone" value="true"/>
+   <property name="sks.implementation" value="org.webpki.sks.test.SKSReferenceImplementation"/>
+   <property name="sks.auth.gui" value="org.webpki.sks.test.DummyTrustedGUIAuthorization"/>
+   <property name="sks.ws.client" value="org.webpki.sks.ws.client.SKSWSClient"/>
+   <property name="sks.debug" value="true"/>
+   <property name="sks.device" value=""/>
+    <property name="sksws.url" value="http://localhost:9982/securekeystore"/>
+   <property name="test.class" value="org.webpki.keygen2.test.KeyGen2Test"/>
+    <mkdir dir="${test_dir}"/>
+    <property name="test.dir" location="${test_dir}"/>
+    <junit fork="yes" forkmode="once" haltonfailure="yes" tempdir="${test_dir}">
+      <test name="${test.class}" unless="method"/>
+      <test name="${test.class}" methods="${method}" if="method"/><!-- ANT 1.8.2 and up -->
+        <sysproperty key="sks.implementation" value="${sks.implementation}"/>
+        <sysproperty key="sks.device" value="${sks.device}"/>
+        <sysproperty key="sks.auth.gui" value="${sks.auth.gui}"/>
+        <sysproperty key="test.dir" value="${test.dir}"/>
+        <sysproperty key="sks.standalone" value="${sks.standalone}"/>
+        <sysproperty key="sks.referenceimplementation" value="${sks.referenceimplementation}"/>
+        <sysproperty key="org.webpki.sks.ws.client.url" value="${sksws.url}"/>
+        <!-- 
+        <sysproperty key="javax.xml.validation.SchemaFactory:http://www.w3.org/2001/XMLSchema" value="org.webpki.org.apache.xerces.jaxp.validation.XMLSchemaFactory"/>
+        <sysproperty key="javax.xml.parsers.DocumentBuilderFactory" value="org.webpki.org.apache.xerces.jaxp.DocumentBuilderFactoryImpl"/>
+         -->
+      <formatter type="plain" usefile="false"/>
+      <jvmarg value="-Djava.endorsed.dirs=../resources/jax-ws"/>
+      <classpath>
+        <fileset dir="${dist_dir}">
+          <include name="*.jar"/>
+        </fileset>
+        <fileset dir="../library/dist">
+          <include name="webpki.org-libext*.jar"/>
+          <include name="webpki.org-sksws*.jar"/>
+        </fileset>
+        <fileset dir="../resources/third-party-jars">
+          <include name="*.jar"/>
+        </fileset>
+     </classpath>
+    </junit>
+  </target>
+
+</project>
+

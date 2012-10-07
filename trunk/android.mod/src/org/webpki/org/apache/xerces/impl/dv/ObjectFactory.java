@@ -332,6 +332,8 @@ final class ObjectFactory {
         // assert(className != null);
         try{
             Class providerClass = findProviderClass(className, cl, doFallback);
+            if (DEBUG) debugPrintln("got providerclass=" + providerClass +
+                    " using ClassLoader: " + cl);
             Object instance = providerClass.newInstance();
             if (DEBUG) debugPrintln("created new instance of " + providerClass +
                    " using ClassLoader: " + cl);
