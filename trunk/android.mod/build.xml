@@ -2,7 +2,7 @@
 
   <!-- set global properties for this build -->
   <property name="debug"  value="on"/>
-  <property name="src_dir" value="src" />
+  <property name="xerces_src_dir" value="xerces.src" />
   <property name="class_dir" value=".tmp" />
   <property name="dist_dir" value="dist" />
   <property name="test_dir" value="test" />
@@ -16,7 +16,7 @@
     <mkdir dir="${class_dir}" />
 
     <javac debug="${debug}"
-           srcdir="${src_dir}"
+           srcdir="${xerces_src_dir}"
            destdir="${class_dir}" 
            includeAntRuntime="false"/>
   </target>
@@ -29,7 +29,7 @@
     <!-- Put everything from ${class_dir} into jar files -->
     <jar jarfile="${dist_dir}/webpki.org-android.mod.jar">
       <fileset dir="${class_dir}"/>
-      <fileset dir="${src_dir}">
+      <fileset dir="${xerces_src_dir}">
           <exclude name="**/*.java"/>
       </fileset>
       <service type="javax.xml.parsers.DocumentBuilderFactory"
