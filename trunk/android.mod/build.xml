@@ -3,6 +3,7 @@
   <!-- set global properties for this build -->
   <property name="debug"  value="on"/>
   <property name="xerces_src_dir" value="xerces.src" />
+  <property name="w3c_dom_src_dir" value="missing.w3c.dom" />
   <property name="class_dir" value=".tmp" />
   <property name="dist_dir" value="dist" />
   <property name="test_dir" value="test" />
@@ -16,7 +17,7 @@
     <mkdir dir="${class_dir}" />
 
     <javac debug="${debug}"
-           srcdir="${xerces_src_dir}"
+           srcdir="${xerces_src_dir}:${w3c_dom_src_dir}"
            destdir="${class_dir}" 
            includeAntRuntime="false"/>
   </target>
