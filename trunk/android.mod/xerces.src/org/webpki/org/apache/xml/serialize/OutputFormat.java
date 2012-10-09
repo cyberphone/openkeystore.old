@@ -32,7 +32,6 @@ import java.io.UnsupportedEncodingException;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.Node;
-import org.w3c.dom.html.HTMLDocument;
 
 
 /**
@@ -856,11 +855,6 @@ public class OutputFormat
         String  value;
         int     i;
 
-        // If document is derived from HTMLDocument then the default
-        // method is html.
-        if ( doc instanceof HTMLDocument )
-            return Method.HTML;
-
         // Lookup the root element and the text nodes preceding it.
         // If root element is html and all text nodes contain whitespace
         // only, the method is html.
@@ -913,8 +907,6 @@ public class OutputFormat
            } catch ( Error except ) {  }
            }
         
-        if ( doc instanceof HTMLDocument )
-            return DTD.XHTMLPublicId;
         return null;
     }
 
@@ -937,8 +929,6 @@ public class OutputFormat
            } catch ( Error except ) { }
            }
         
-        if ( doc instanceof HTMLDocument )
-            return DTD.XHTMLSystemId;
         return null;
     }
 
