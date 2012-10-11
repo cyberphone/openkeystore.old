@@ -1468,7 +1468,8 @@ public class HTTPSWrapper
                 Security.addProvider (provider);
                 KeyStore ks = KeyStore.getInstance (prov);
                 System.out.println (CMD_keystore.getString ());
-                ks.load (CMD_keystore.found ? new FileInputStream (CMD_keystore.getString ()) : null, null);
+                ks.load (CMD_keystore.found ? new FileInputStream (CMD_keystore.getString ()) : null,
+                                                                   CMD_keypass.found ? CMD_keypass.getString ().toCharArray () : null);
                 wrap.setKeyStore (ks, CMD_keypass.getString ());
                 CMD_keystore.found = false;
               }
