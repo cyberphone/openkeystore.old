@@ -26,18 +26,14 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateFactory;
 
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
 
 import org.webpki.asn1.DerDecoder;
@@ -78,9 +74,7 @@ public class CertificateUtil
           }
         catch (GeneralSecurityException gse)
           {
-            IOException iox = new IOException ();
-            iox.initCause (gse.getCause ());
-            throw iox;
+            throw new IOException (gse);
           }
       }
 
@@ -278,9 +272,7 @@ public class CertificateUtil
           }
         catch (GeneralSecurityException gse)
           {
-            IOException iox = new IOException ();
-            iox.initCause (gse.getCause ());
-            throw iox;
+            throw new IOException (gse);
           }
       }
 
@@ -395,9 +387,7 @@ public class CertificateUtil
           }
         catch (GeneralSecurityException gse)
           {
-            IOException iox = new IOException ();
-            iox.initCause (gse.getCause ());
-            throw iox;
+            throw new IOException (gse);
           }
       }
 
@@ -489,9 +479,7 @@ public class CertificateUtil
           }
         catch (GeneralSecurityException gse)
           {
-            IOException iox = new IOException ();
-            iox.initCause (gse.getCause ());
-            throw iox;
+            throw new IOException (gse);
           }
       }
 
@@ -504,9 +492,7 @@ public class CertificateUtil
           }
         catch (GeneralSecurityException gse)
           {
-            IOException iox = new IOException ();
-            iox.initCause (gse.getCause ());
-            throw iox;
+            throw new IOException (gse);
           }
       }
 
@@ -527,5 +513,32 @@ public class CertificateUtil
             return true;
           }
         return false;
+      }
+
+    public static void main (String[] args)
+      {
+        if (args.length == 0)
+          {
+            System.out.println ("\nCheck path for:\n   {certificate-in-der-format}...");
+          }
+        else
+          {
+            try
+              {
+                Vector<byte[]> cert_path = new Vector<byte[]> ();
+                for (String file : args)
+                  {
+                    cert_path.add (ArrayUtil.readFile (file));
+                  }
+                for (X509Certificate cert : getSortedPathFromBlobs (cert_path))
+                  {
+                    System.out.println ("\nCertificate:\n" + new CertificateInfo (cert));
+                  }
+              }
+            catch (Exception e)
+              {
+                e.printStackTrace ();
+              }
+          }
       }
   }
