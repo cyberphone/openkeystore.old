@@ -63,7 +63,7 @@
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kgen="http://xmlns.webpki.org/keygen2/beta/20120826#"
+           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20120826#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -87,10 +87,10 @@
                <xs:complexType>
                   <xs:complexContent>
 
-                     <xs:extension base="kgen:imageData">
+                     <xs:extension base="kg2:imageData">
 
                         <!-- Where to get the logotype. -->
-                        <xs:attribute name="LogotypeURL" type="kgen:httpURI" use="required"/>
+                        <xs:attribute name="LogotypeURL" type="kg2:httpURI" use="required"/>
 
                         <!-- ImageFingerprint using SHA256. -->
                         <xs:attribute name="ImageFingerprint" type="xs:base64Binary" use="required"/>
@@ -102,7 +102,7 @@
             </xs:element>
 
             <!-- See "ServerCookie" definition -->
-            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
             <!-- A request MAY also include an enveloped XML signature
                  covering the entire request object (which MUST be done
@@ -123,30 +123,30 @@
               not default or even may be unavailable due to export restrictions.
               An omission performing a proper capability negotiation could in
               fact lead to run-time errors in the client implementation! -->
-         <xs:attributeGroup ref="kgen:basicCapabilities"/>
+         <xs:attributeGroup ref="kg2:basicCapabilities"/>
 
          <!-- GUI notification -->
-         <xs:attribute name="Action" type="kgen:action" use="required"/>
+         <xs:attribute name="Action" type="kg2:action" use="required"/>
 
          <!-- "PrivacyEnabled" specifies if the SKS privacy enabled provisioning
               mode is to be used.  Default: false -->
          <xs:attribute name="PrivacyEnabled" type="xs:boolean" use="optional"/>
 
          <!-- GUI language in preference order.  Primarily for public computers -->
-         <xs:attribute name="Languages" type="kgen:languageList" use="optional"/>
+         <xs:attribute name="Languages" type="kg2:languageList" use="optional"/>
 
          <!-- Key container constraints in preference order -->
-         <xs:attribute name="KeyContainers" type="kgen:containerList" use="optional"/>
+         <xs:attribute name="KeyContainers" type="kg2:containerList" use="optional"/>
 
          <!-- This mandatory server-generated item MUST be unique between
               key provisioning sessions but MUST remain constant among
               requests within a specific session -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- Where to HTTP POST the platform negotiation response.
               Note that applicable session cookies MUST be submitted
               in the request as well -->
-         <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
+         <xs:attribute name="SubmitURL" type="kg2:httpURI" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -169,7 +169,7 @@
                <xs:complexType>
                   <xs:complexContent>
 
-                     <xs:extension base="kgen:imageData">
+                     <xs:extension base="kg2:imageData">
 
                         <!-- Logotype usage type -->
                         <xs:attribute name="Type" type="xs:anyURI" use="required"/>
@@ -181,7 +181,7 @@
             </xs:element>
 
             <!-- See "ServerCookie" definition -->
-            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
          </xs:sequence>
 
@@ -196,11 +196,11 @@
               In the case a capability is secret, a client MAY not
               return a capability except for signed requests from a
               known (pre-configured) party -->
-         <xs:attributeGroup ref="kgen:basicCapabilities"/>
+         <xs:attributeGroup ref="kg2:basicCapabilities"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
-         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -251,7 +251,7 @@
             </xs:element>
 
             <!-- See "ServerCookie" definition -->
-            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
             <!-- See "PlatformNegotiationRequest/Signature" -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
@@ -265,7 +265,7 @@
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- Mandatory time-stamp indicating when the request was issued.
               The provisioning middleware MAY check it for "sanity" -->
@@ -306,14 +306,14 @@
 
               In case it is not obvious that the client supports an attribute,
               the server SHOULD specify those in "BasicCapabilities@ClientAttributes" -->
-         <xs:attribute name="ClientAttributes" type="kgen:uriList" use="optional"/>
+         <xs:attribute name="ClientAttributes" type="kg2:uriList" use="optional"/>
 
          <!-- Where to HTTP POST the provisioning session response.
               Note that applicable session cookies MUST be submitted
               in the request as well.
 
               This instance of "SubmitURL" is equivalent to SKS' "IssuerURI".  -->
-         <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
+         <xs:attribute name="SubmitURL" type="kg2:httpURI" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -371,7 +371,7 @@
             </xs:element>
 
             <!-- See "ServerCookie" definition -->
-            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
             <!-- MUST hold an enveloped XML symmetric-key signature created
                  by the SKS "signProvisioningSessionData" method and use "ID"
@@ -381,10 +381,10 @@
          </xs:sequence> 
 
          <!-- "ID" holds the SKS-generated ClientSessionID -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- MUST be equal to "ProvisioningInitializationRequest/@ID" -->
-         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
 
          <!-- Copy of "ProvisioningInitializationRequest/@ServerTime" -->
          <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
@@ -423,7 +423,7 @@
                   <xs:sequence>
 
                      <!-- Optional search filter -->
-                     <xs:element ref="kgen:SearchFilter" minOccurs="0"/>
+                     <xs:element ref="kg2:SearchFilter" minOccurs="0"/>
 
                      <!-- MUST contain the issuer KM signature -->
                      <xs:element ref="ds:Signature"/>
@@ -431,7 +431,7 @@
                   </xs:sequence>
 
                   <!-- MUST be be linked to by the enveloped signature element -->
-                  <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+                  <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
                   <!-- Freshness nonce to bind discovery to the session -->
                   <xs:attribute name="Nonce" type="xs:base64Binary" use="required"/>
@@ -440,7 +440,7 @@
             </xs:element>
 
             <!-- See "ServerCookie" definition -->
-            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
             <!-- See "PlatformNegotiationRequest/Signature" -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
@@ -449,16 +449,16 @@
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- MUST be equal to"ProvisioningInitializationResponse/@ID"
               within a specific session -->
-         <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
+         <xs:attribute name="ClientSessionID" type="kg2:sksNCName" use="required"/>
 
          <!-- Where to HTTP POST the credential discovery response.  Note that
               applicable session cookies MUST be submitted in the request
               as well -->
-         <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
+         <xs:attribute name="SubmitURL" type="kg2:httpURI" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -483,26 +483,26 @@
                   <xs:sequence>
 
                      <!-- Matching credentials... -->
-                     <xs:element ref="kgen:MatchingCredential"  minOccurs="0" maxOccurs="unbounded"/>
+                     <xs:element ref="kg2:MatchingCredential"  minOccurs="0" maxOccurs="unbounded"/>
 
                   </xs:sequence>
 
                   <!-- MUST match "LookupSpecifier@ID" -->
-                  <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+                  <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
                </xs:complexType>
             </xs:element>
 
             <!-- See "ServerCookie" definition -->
-            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
          </xs:sequence> 
 
          <!-- "ID" holds the SKS-generated ClientSessionID -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- MUST be equal to "ProvisioningInitializationRequest/@ID" -->
-         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -523,27 +523,27 @@
             <xs:choice maxOccurs="unbounded">
 
                <!-- A key that requires no PIN code -->
-               <xs:element ref="kgen:KeyEntry"/>
+               <xs:element ref="kg2:KeyEntry"/>
 
                <!-- One or more keys that are protected by a specific PIN policy.
                     In addition to the PIN there is a master PUK code that can
                     unlock keys that have been locked due to the use of erroneous
                     PIN codes -->
-               <xs:element ref="kgen:PUKPolicy"/>
+               <xs:element ref="kg2:PUKPolicy"/>
 
                <!-- One or more keys that are protected by a specific PIN policy -->
-               <xs:element ref="kgen:PINPolicy"/>
+               <xs:element ref="kg2:PINPolicy"/>
 
                <!-- A key that is protected by the same PIN as the device.
                     This option (which MAY be supported by the device), is
                     mainly intended for keys belonging to an organization
                     that manages the device -->
-               <xs:element ref="kgen:DevicePINProtection"/>
+               <xs:element ref="kg2:DevicePINProtection"/>
 
             </xs:choice>
 
             <!-- See "ServerCookie" definition -->
-            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
             <!-- See "PlatformNegotiationRequest/Signature" -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
@@ -561,16 +561,16 @@
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- MUST be equal to"ProvisioningInitializationResponse/@ID"
               within a specific session -->
-         <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
+         <xs:attribute name="ClientSessionID" type="kg2:sksNCName" use="required"/>
 
          <!-- Where to HTTP POST the key operation response.  Note that
               applicable session cookies MUST be submitted in the request
               as well -->
-         <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
+         <xs:attribute name="SubmitURL" type="kg2:httpURI" use="required"/>
 
          <!-- "Algorithm" is mandatory.  Currently the only
                documented key generation and attestation algorithm is:
@@ -594,20 +594,20 @@
          <xs:sequence>
 
             <!-- The keys to be certified -->
-            <xs:element ref="kgen:PublicKey" maxOccurs="unbounded"/>
+            <xs:element ref="kg2:PublicKey" maxOccurs="unbounded"/>
 
             <!-- See "ServerCookie" definition -->
-            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
          </xs:sequence>
 
          <!-- MUST be equal to "PlatformNegotiationResponse/@ID"
               within a specific session -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
-         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -626,16 +626,16 @@
          <xs:sequence>
 
             <!-- The now certified keys.  Note: optional -->
-            <xs:element ref="kgen:CertificatePath" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="kg2:CertificatePath" minOccurs="0" maxOccurs="unbounded"/>
 
             <!-- SKS Reference: postUnlockKey -->
-            <xs:element name="UnlockKey" type="kgen:targetKey" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="UnlockKey" type="kg2:targetKey" minOccurs="0" maxOccurs="unbounded"/>
 
             <!-- SKS Reference: postDeleteKey -->
-            <xs:element name="DeleteKey" type="kgen:targetKey" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="DeleteKey" type="kg2:targetKey" minOccurs="0" maxOccurs="unbounded"/>
 
             <!-- See "ServerCookie" definition -->
-            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
             <!-- See "PlatformNegotiationRequest/Signature" -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
@@ -644,14 +644,14 @@
 
          <!-- MUST be equal to "ProvisioningInitializationResponse/@ID"
               within a specific session -->
-         <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
+         <xs:attribute name="ClientSessionID" type="kg2:sksNCName" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- Where to POST the response -->
-         <xs:attribute name="SubmitURL" type="kgen:httpURI" use="required"/>
+         <xs:attribute name="SubmitURL" type="kg2:httpURI" use="required"/>
 
          <!-- SKS Reference: closeProvisioningSession -->
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
@@ -676,17 +676,17 @@
          <xs:sequence>
 
             <!-- See "ServerCookie" definition -->
-            <xs:element ref="kgen:ServerCookie" minOccurs="0"/>
+            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
          </xs:sequence>
 
          <!-- MUST be equal to "PlatformNegotiationResponse/@ID"
               within a specific session -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
-         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
 
          <!-- SKS Reference: closeProvisioningSession -->
          <xs:attribute name="Attestation" type="xs:base64Binary" use="required"/>
@@ -727,7 +727,7 @@
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
-         <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -746,11 +746,11 @@
       <!-- If non-mandatory algorithms are preferred, the following attribute
            can host a list of such.  If the response does not contain a requested
            algorithm it means that it is not supported -->
-      <xs:attribute name="Algorithms" type="kgen:uriList" use="optional"/>
+      <xs:attribute name="Algorithms" type="kg2:uriList" use="optional"/>
 
       <!-- "ClientAttributes" are things that are supported by the SKS or the
             platform the SKS is running in -->
-      <xs:attribute name="ClientAttributes" type="kgen:uriList" use="optional"/>
+      <xs:attribute name="ClientAttributes" type="kg2:uriList" use="optional"/>
 
       <!-- Arbitrary extension objects MAY be requested.  Although most
            clients are likely to for example support HOTP
@@ -759,7 +759,7 @@
            and SHOULD be requested rather than taken for granted.
            A provisioning client MAY dynamically check for application
            availability -->
-      <xs:attribute name="Extensions" type="kgen:uriList" use="optional"/>
+      <xs:attribute name="Extensions" type="kg2:uriList" use="optional"/>
 
    </xs:attributeGroup>
 
@@ -824,7 +824,7 @@
                     Some credentials like OTP seeds need additional attributes
                     to work.  These are supplied as typed "PropertyBags" holding
                     "Property" name-value elements -->
-               <xs:element ref="kgen:PropertyBag"/>
+               <xs:element ref="kg2:PropertyBag"/>
 
                <!-- SKS Reference: addExtension 
                     Optional logotypes that can be used in various GUIs.
@@ -859,10 +859,10 @@
                <xs:element name="Logotype">
                   <xs:complexType>
                      <xs:simpleContent>
-                        <xs:extension base="kgen:imageType">
+                        <xs:extension base="kg2:imageType">
 
                            <!-- Mandatory extension type attribute -->
-                           <xs:attributeGroup ref="kgen:extensionAttrs"/>
+                           <xs:attributeGroup ref="kg2:extensionAttrs"/>
 
                         </xs:extension>
                      </xs:simpleContent>
@@ -876,7 +876,7 @@
                         <xs:extension base="xs:base64Binary">
 
                            <!-- Mandatory extension type attribute -->
-                           <xs:attributeGroup ref="kgen:extensionAttrs"/>
+                           <xs:attributeGroup ref="kg2:extensionAttrs"/>
 
                         </xs:extension>
                      </xs:simpleContent>
@@ -890,7 +890,7 @@
                         <xs:extension base="xs:base64Binary">
 
                            <!-- Mandatory extension type attribute -->
-                           <xs:attributeGroup ref="kgen:extensionAttrs"/>
+                           <xs:attributeGroup ref="kg2:extensionAttrs"/>
 
                         </xs:extension>
                      </xs:simpleContent>
@@ -902,10 +902,10 @@
             <xs:choice minOccurs="0">
 
                <!-- SKS Reference: postUpdateKey -->
-               <xs:element name="UpdateKey" type="kgen:targetKey"/>
+               <xs:element name="UpdateKey" type="kg2:targetKey"/>
 
                <!-- SKS Reference: postCloneKeyProtection -->
-               <xs:element name="CloneKeyProtection" type="kgen:targetKey"/>
+               <xs:element name="CloneKeyProtection" type="kg2:targetKey"/>
 
             </xs:choice>
 
@@ -914,7 +914,7 @@
          <!-- SKS Reference: setCertificatePath.ID 
               A unique key-ID which MUST match the corresponding
               "KeyCreationResponse/PublicKey/@ID" -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- SKS Reference: setCertificatePath.MAC -->
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
@@ -975,13 +975,13 @@
          </xs:sequence>
 
          <!-- Mandatory extension attributes -->
-         <xs:attributeGroup ref="kgen:extensionAttrs"/>
+         <xs:attributeGroup ref="kg2:extensionAttrs"/>
 
       </xs:complexType>
 
       <!-- Property names within a PropertyBag MUST be unique -->
       <xs:unique name="Unique.Property">
-         <xs:selector xpath="kgen:Property"/>
+         <xs:selector xpath="kg2:Property"/>
          <xs:field xpath="@Name"/>
       </xs:unique>
 
@@ -1011,7 +1011,7 @@
 
          <!-- A unique key-ID which MUST match a "KeyEntry/@ID"
               in the corresponding "KeyCreationRequest" -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -1024,7 +1024,7 @@
       <xs:complexType>
 
          <!-- SKS Reference: createKeyEntry.ID -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- SKS Reference: createKeyEntry.ServerSeed 
               Default: 0 bytes -->
@@ -1039,22 +1039,22 @@
 
          <!-- SKS Reference: createKeyEntry.BiometricProtection 
               Default: "none" -->
-         <xs:attribute name="BiometricProtection" type="kgen:biomProtTypes" use="optional"/>
+         <xs:attribute name="BiometricProtection" type="kg2:biomProtTypes" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.ExportProtection 
               Default: "non-exportable" -->
-         <xs:attribute name="ExportProtection" type="kgen:expProtectionTypes" use="optional"/>
+         <xs:attribute name="ExportProtection" type="kg2:expProtectionTypes" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.DeleteProtection 
               Default: "none" -->
-         <xs:attribute name="DeleteProtection" type="kgen:delProtectionTypes" use="optional"/>
+         <xs:attribute name="DeleteProtection" type="kg2:delProtectionTypes" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.EnablePINCaching 
               Default: false -->
          <xs:attribute name="EnablePINCaching" type="xs:boolean" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.AppUsage -->
-         <xs:attribute name="AppUsage" type="kgen:appUsageTYpes" use="required"/>
+         <xs:attribute name="AppUsage" type="kg2:appUsageTYpes" use="required"/>
 
          <!-- SKS Reference: createKeyEntry.KeyAlgorithm -->
          <xs:attribute name="KeyAlgorithm" type="xs:anyURI" use="required"/>
@@ -1070,7 +1070,7 @@
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
          <!-- SKS Reference: createKeyEntry.EndorsedAlgorithm -->
-         <xs:attribute name="EndorsedAlgorithms" type="kgen:uriList" use="optional"/>
+         <xs:attribute name="EndorsedAlgorithms" type="kg2:uriList" use="optional"/>
         
       </xs:complexType>
    </xs:element>
@@ -1096,18 +1096,18 @@
          <xs:sequence>
 
             <!-- The PIN-protected key groups -->
-            <xs:element ref="kgen:PINPolicy" maxOccurs="unbounded"/>
+            <xs:element ref="kg2:PINPolicy" maxOccurs="unbounded"/>
 
          </xs:sequence>
 
          <!-- SKS Reference: createPUKPolicy.ID -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- SKS Reference: createPUKPolicy.PUKValue -->
          <xs:attribute name="Value" type="xs:base64Binary" use="required"/>
 
          <!-- SKS Reference: createPUKPolicy.Format -->
-         <xs:attribute name="Format" type="kgen:pinFormats" use="required"/>
+         <xs:attribute name="Format" type="kg2:pinFormats" use="required"/>
     
          <!-- SKS Reference: createPUKPolicy.RetryLimit -->
          <xs:attribute name="RetryLimit" type="xs:unsignedShort" use="required"/>
@@ -1130,14 +1130,14 @@
 
                <!-- One or more keys protected by user-defined PINs governed by
                     a common PIN policy -->
-               <xs:element ref="kgen:KeyEntry" maxOccurs="unbounded"/>
+               <xs:element ref="kg2:KeyEntry" maxOccurs="unbounded"/>
 
                <!-- One or more keys protected by issuer-defined PINs -->
                <xs:element name="PresetPIN" maxOccurs="unbounded">
                   <xs:complexType>
 
                      <xs:sequence>
-                        <xs:element ref="kgen:KeyEntry"/>
+                        <xs:element ref="kg2:KeyEntry"/>
                      </xs:sequence>
                            
                      <!-- SKS Reference: createKeyEntry.PINValue -->
@@ -1151,7 +1151,7 @@
          </xs:sequence>
 
          <!-- SKS Reference: createPINPolicy.ID -->
-         <xs:attribute name="ID" type="kgen:sksID" use="required"/>
+         <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- SKS Reference: createPINPolicy.PUKPolicyHandle 
               "PUKPolicyHandle" is an implicit and implementation-dependent
@@ -1167,28 +1167,28 @@
          <xs:attribute name="UserModifiable" type="xs:boolean" use="optional"/>
 
          <!-- SKS Reference: createPINPolicy.Format -->
-         <xs:attribute name="Format" type="kgen:pinFormats" use="required"/>
+         <xs:attribute name="Format" type="kg2:pinFormats" use="required"/>
     
          <!-- SKS Reference: createPINPolicy.RetryLimit -->
          <xs:attribute name="RetryLimit" type="xs:unsignedShort" use="required"/>
 
          <!-- SKS Reference: createPINPolicy.Grouping 
               Default: "none" -->
-         <xs:attribute name="Grouping" type="kgen:pinGrouping" use="optional"/>
+         <xs:attribute name="Grouping" type="kg2:pinGrouping" use="optional"/>
 
          <!-- SKS Reference: createPINPolicy.PatternRestrictions 
               Default: none -->
-         <xs:attribute name="PatternRestrictions" type="kgen:pinPatternList" use="optional"/>
+         <xs:attribute name="PatternRestrictions" type="kg2:pinPatternList" use="optional"/>
 
          <!-- SKS Reference: createPINPolicy.MinLength -->
-         <xs:attribute name="MinLength" type="kgen:pinLength" use="required"/>
+         <xs:attribute name="MinLength" type="kg2:pinLength" use="required"/>
 
          <!-- SKS Reference: createPINPolicy.MaxLength -->
-         <xs:attribute name="MaxLength" type="kgen:pinLength" use="required"/>
+         <xs:attribute name="MaxLength" type="kg2:pinLength" use="required"/>
 
          <!-- SKS Reference: createPINPolicy.InputMethod 
               Default: "any" -->
-         <xs:attribute name="InputMethod" type="kgen:pinInput" use="optional"/>
+         <xs:attribute name="InputMethod" type="kg2:pinInput" use="optional"/>
 
          <!-- SKS Reference: createPINPolicy.MAC -->
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
@@ -1203,7 +1203,7 @@
    <xs:element name="DevicePINProtection">
       <xs:complexType>
          <xs:sequence>
-            <xs:element ref="kgen:KeyEntry"/>
+            <xs:element ref="kg2:KeyEntry"/>
          </xs:sequence>
       </xs:complexType>
    </xs:element>
@@ -1211,7 +1211,7 @@
    <xs:complexType name="imageData">
 
       <!-- MIME type. -->
-      <xs:attribute name="MIMEType" type="kgen:mimeType" use="required"/>
+      <xs:attribute name="MIMEType" type="kg2:mimeType" use="required"/>
 
       <!-- Width in pixels.  For SVG it holds the "ideal" width -->
       <xs:attribute name="Width" type="xs:positiveInteger" use="required"/>
@@ -1224,10 +1224,10 @@
    <xs:complexType name="keyID">
 
       <!-- One of the two IDs identifying a provisioning session -->
-      <xs:attribute name="ClientSessionID" type="kgen:sksNCName" use="required"/>
+      <xs:attribute name="ClientSessionID" type="kg2:sksNCName" use="required"/>
 
       <!-- The other ID identifying a provisioning session -->
-      <xs:attribute name="ServerSessionID" type="kgen:sksNCName" use="required"/>
+      <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
 
       <!-- Handle to the certificate (key ID) -->
       <xs:attribute name="CertificateFingerprint" type="xs:base64Binary" use="required"/>
@@ -1237,7 +1237,7 @@
    <xs:complexType name="targetKey">
       <xs:complexContent>
 
-         <xs:extension base="kgen:keyID">
+         <xs:extension base="kg2:keyID">
 
             <!-- Mandatory MAC (Message Authentication Code) -->
             <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
@@ -1254,7 +1254,7 @@
       <xs:complexType>
          <xs:complexContent>
 
-            <xs:extension base="kgen:keyID">
+            <xs:extension base="kg2:keyID">
 
               <!-- Locked?  Default: false -->
               <xs:attribute name="Locked" type="xs:boolean" use="optional"/>
@@ -1275,12 +1275,12 @@
               Note that the "Issuer" attribute is searched for through the entire path.
               "Email" attributes MUST be searched for in both the subject DN and in
               subject alt name extensions -->
-         <xs:attribute name="Issuer" type="kgen:distinguishedNameExpr" use="optional"/>
-         <xs:attribute name="Subject" type="kgen:distinguishedNameExpr" use="optional"/>
+         <xs:attribute name="Issuer" type="kg2:distinguishedNameExpr" use="optional"/>
+         <xs:attribute name="Subject" type="kg2:distinguishedNameExpr" use="optional"/>
          <xs:attribute name="Serial" type="xs:integer" use="optional"/>
          <xs:attribute name="Email" type="xs:string" use="optional"/>
-         <xs:attribute name="Policy" type="kgen:oidValue" use="optional"/>
-         <xs:attribute name="ExcludedPolicies" type="kgen:oidValueList" use="optional"/>
+         <xs:attribute name="Policy" type="kg2:oidValue" use="optional"/>
+         <xs:attribute name="ExcludedPolicies" type="kg2:oidValueList" use="optional"/>
          <xs:attribute name="IssuedBefore" type="xs:dateTime" use="optional"/>
          <xs:attribute name="IssuedAfter" type="xs:dateTime" use="optional"/>
 
@@ -1332,7 +1332,7 @@
    <xs:complexType name="imageType">
       <xs:simpleContent>
          <xs:extension base="xs:base64Binary">
-            <xs:attribute name="MIMEType" type="kgen:mimeType" use="required"/>
+            <xs:attribute name="MIMEType" type="kg2:mimeType" use="required"/>
          </xs:extension>
       </xs:simpleContent>
    </xs:complexType>
@@ -1470,7 +1470,7 @@
    <xs:simpleType name="oidValueList">
       <xs:restriction>
          <xs:simpleType>
-            <xs:list itemType="kgen:oidValue"/>
+            <xs:list itemType="kg2:oidValue"/>
          </xs:simpleType>
          <xs:minLength value="1"/>
       </xs:restriction>
