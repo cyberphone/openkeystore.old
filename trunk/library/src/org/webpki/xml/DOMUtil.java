@@ -387,12 +387,17 @@ public class DOMUtil
             throw new IllegalArgumentException ("Not an XML boolean: " + s);
           }
       }
+
+    public static DocumentBuilderFactory createDocumentBuilderFactory ()
+      {
+        return DocumentBuilderFactory.newInstance ();
+      }
     
     public static Document createDocument ()
       {
         try
           {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance ();
+            DocumentBuilderFactory dbf = createDocumentBuilderFactory ();
             dbf.setNamespaceAware (true);
             return dbf.newDocumentBuilder ().newDocument ();
           }

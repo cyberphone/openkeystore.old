@@ -136,7 +136,7 @@ public class XMLSchemaCache
         classMap = new Hashtable<ElementID,Class<?>> ();
         knownURIs = new Hashtable<String,byte[]> ();
         schema_stack = new Vector<DOMSource> ();
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance ();
+        DocumentBuilderFactory dbf = DOMUtil.createDocumentBuilderFactory ();
         dbf.setNamespaceAware (true);
         try
           {
@@ -365,7 +365,7 @@ public class XMLSchemaCache
           {
             if (xml_parser == null)
               {
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance ();
+                DocumentBuilderFactory dbf = DOMUtil.createDocumentBuilderFactory ();
                 dbf.setNamespaceAware (true);
                 dbf.setSchema (SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema (schema_stack.toArray(new DOMSource[0])));
                 xml_parser = dbf.newDocumentBuilder ();

@@ -80,9 +80,7 @@ public enum HashAlgorithms
           }
         catch (GeneralSecurityException gse)
           {
-            IOException iox = new IOException ();
-            iox.initCause (gse.getCause ());
-            throw iox;
+            throw new IOException (gse);
           }
       }
 
