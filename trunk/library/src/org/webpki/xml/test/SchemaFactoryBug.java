@@ -15,7 +15,6 @@ import javax.xml.validation.Validator;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.webpki.xml.DOMUtil;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -89,7 +88,7 @@ public class SchemaFactoryBug
       {
         try
           {
-            DocumentBuilderFactory dbf = DOMUtil.createDocumentBuilderFactory ();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance ();
             dbf.setNamespaceAware (true);
             DocumentBuilder parser = dbf.newDocumentBuilder ();
             Vector<DOMSource> xsds = new Vector<DOMSource> ();
@@ -107,7 +106,7 @@ public class SchemaFactoryBug
             xsds2.add (getDOM (parser, xsd1));
             xsds2.add (getDOM (parser, xsd2));
             Schema schema2 = SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema (xsds2.toArray(new DOMSource[0]));
-            DocumentBuilderFactory dbf2 = DOMUtil.createDocumentBuilderFactory ();
+            DocumentBuilderFactory dbf2 = DocumentBuilderFactory.newInstance ();
             dbf2.setNamespaceAware (true);
             dbf2.setSchema (schema2);
             DocumentBuilder parser2 = dbf2.newDocumentBuilder ();
