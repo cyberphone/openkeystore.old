@@ -100,7 +100,6 @@ public class DocumentBuilderFactoryImpl extends DocumentBuilderFactory {
         }
         
         try {
-        	System.out.println ("ANDROID DBF");
             return new DocumentBuilderImpl(this, attributes, features, fSecureProcess);
         } catch (SAXException se) {
             // Handles both SAXNotSupportedException, SAXNotRecognizedException

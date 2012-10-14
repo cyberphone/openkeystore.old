@@ -119,7 +119,6 @@ public final class XMLSchemaFactory extends SchemaFactory {
         fXMLSchemaLoader.setEntityResolver(fDOMEntityResolverWrapper);
         fXMLSchemaLoader.setErrorHandler(fErrorHandlerWrapper);
         fUseGrammarPoolOnly = true;
-        System.out.println ("ANDRIOD XSF");
     }
     
     /**
