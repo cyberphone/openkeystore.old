@@ -55,7 +55,7 @@
   <target name="compile">
     <mkdir dir="${temp_dir}"/>
     
-    <condition property="webpki.found">
+    <condition property="webpki.found" value="true" else="false">
       <available file="${webpki_src_dir}/org/webpki/keygen2/keygen2.xsd"/>
     </condition>
 
@@ -79,7 +79,7 @@
     <mkdir dir="${dist_dir}" />
     
     <condition property="target-name" value="webpki.org" else="xerces">
-      <isset property="webpki.found"/>
+      <istrue value="${webpki.found}"/>
     </condition>
 
     <!-- Create Android class library -->
