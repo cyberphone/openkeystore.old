@@ -78,7 +78,7 @@ public class MainActivity extends Activity {
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
         "<key:KeyInfo xmlns:key=\"http://example.com/xmldsig\"" +
         " xmlns:ds11=\"http://example.com/xmldsig11\">\n" +
-        "  <ds11:ECKeyValue>AmA0R1CUdde3nakEJAFEqa29xtYQRaRXc7zB+iTOsV4=</ds11:ECKeyValue>\n" +
+        "  <ds11:ECKeyValue>\nAmA0R1CUdde3nakEJAFEqa29xtYQRaRXc7zB+iTOsV4=\n  </ds11:ECKeyValue>\n" +
         "</key:KeyInfo>";
     
     static DocumentBuilderFactory dbf;
