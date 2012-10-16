@@ -1,13 +1,16 @@
 package com.example.xercesporttester;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import android.os.Bundle;
 import android.app.Activity;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.content.Intent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+
+import org.webpki.android.org.apache.env.WhichXerces;
 
 public class MainActivity extends Activity {
 
@@ -69,6 +72,8 @@ public class MainActivity extends Activity {
         "  <ds11:ECKeyValue>\nAmA0R1CUdde3nakEJAFEqa29xtYQRaRXc7zB+iTOsV4=\n  </ds11:ECKeyValue>\n" +
         "</key:KeyInfo>";
     
+    static DocumentBuilderFactory dbf;
+    
     EditText xml_control;
     
     void restoreXML ()
@@ -90,13 +95,26 @@ public class MainActivity extends Activity {
             }
         });
 
-        restoreXML ();
-    }
+        Button validateXML = (Button)findViewById (R.id.buttonValidateXML);
+        validateXML.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this, ValidationActivity.class);
+                startActivity(i);
+            }
+        });
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_main, menu);
-        return true;
+        restoreXML ();
+        new WhichXerces ();
+    	if (dbf != null) try
+    	{
+    		dbf = DocumentBuilderFactory.newInstance ("org.webpki.android.org.apache.xerces.jaxp.DocumentBuilderFactoryImpl",
+    				                                  MainActivity.class.getClassLoader ());
+    	}
+    	catch (Exception e)
+    	{
+    		throw new RuntimeException (e);
+    	}
     }
 
 }
