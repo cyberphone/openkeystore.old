@@ -1,18 +1,27 @@
 package com.example.xercesporttester;
 
+import java.io.ByteArrayInputStream;
+import java.util.Vector;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-import org.webpki.android.org.apache.env.WhichXerces;
-
 public class MainActivity extends Activity {
+	
+	static final String XML_MESSAGE = "com.example.xercesporttester.XML";
 
     static String xsd1 =
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
@@ -74,6 +83,39 @@ public class MainActivity extends Activity {
     
     static DocumentBuilderFactory dbf;
     
+    static Schema schema;
+    
+    private static DOMSource getDOM (DocumentBuilder parser, String xml) throws Exception
+    {
+      return new DOMSource (parser.parse (new ByteArrayInputStream (xml.getBytes ("UTF-8"))));
+    }
+
+    static
+	{
+		try 
+		{
+			dbf = DocumentBuilderFactory.newInstance ("org.webpki.android.org.apache.xerces.jaxp.DocumentBuilderFactoryImpl",
+					                                  MainActivity.class.getClassLoader ());
+            dbf.setNamespaceAware (true);
+            DocumentBuilder parser = dbf.newDocumentBuilder ();
+            Vector<DOMSource> xsds = new Vector<DOMSource> ();
+            xsds.add (getDOM (parser, xsd1));
+            xsds.add (getDOM (parser, xsd2));
+            xsds.add (getDOM (parser, xsd3));
+			Log.v("XML", "Parsed");
+            schema = SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI, 
+                                                "org.webpki.android.org.apache.xerces.jaxp.validation.XMLSchemaFactory",
+                                                MainActivity.class.getClassLoader ()).newSchema (xsds.toArray(new DOMSource[0]));
+			Log.v("XML", "Schema");
+
+		}
+		catch (Exception e)
+		{
+			Log.e("XML", "Failed");
+			throw new RuntimeException (e);
+		}
+	}
+
     EditText xml_control;
     
     void restoreXML ()
@@ -99,22 +141,14 @@ public class MainActivity extends Activity {
         validateXML.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this, ValidationActivity.class);
-                startActivity(i);
+                Intent intent = new Intent(MainActivity.this, ValidationActivity.class);
+                String xml_message = xml_control.getText().toString();
+                intent.putExtra(XML_MESSAGE, xml_message);
+                startActivity(intent);
             }
         });
 
         restoreXML ();
-        new WhichXerces ();
-    	if (dbf != null) try
-    	{
-    		dbf = DocumentBuilderFactory.newInstance ("org.webpki.android.org.apache.xerces.jaxp.DocumentBuilderFactoryImpl",
-    				                                  MainActivity.class.getClassLoader ());
-    	}
-    	catch (Exception e)
-    	{
-    		throw new RuntimeException (e);
-    	}
     }
 
 }
