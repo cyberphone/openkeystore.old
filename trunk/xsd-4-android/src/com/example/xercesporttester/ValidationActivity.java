@@ -61,7 +61,6 @@ public class ValidationActivity extends Activity {
         return2main.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                validation_result.setText("Yeah!");
                 finish ();
             }
         });
