@@ -17,19 +17,19 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebView;
 import android.widget.Button;
-import android.widget.TextView;
 
 public class ValidationActivity extends Activity {
 	
-	TextView validation_result;
+	WebView validation_result;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_validation);
         
-        validation_result = (TextView)findViewById (R.id.validationResult);
+        validation_result = (WebView)findViewById (R.id.validationResult);
         
         Intent intent = getIntent();
         String xml_message = intent.getStringExtra(MainActivity.XML_MESSAGE);
@@ -39,8 +39,7 @@ public class ValidationActivity extends Activity {
 	        Document document = parser.parse (new ByteArrayInputStream (xml_message.getBytes ("UTF-8")));
             Validator validator = MainActivity.schema.newValidator ();
             validator.validate (new DOMSource (document));
-        	validation_result.setTextColor(Color.GREEN);
-	    	validation_result.setText("XML validated OK");
+            validation_result.loadData("<html><body><center><b>The XML is Valid</b></center></body></html>", "text/html", null);
         }
         catch (Exception e)
         {
@@ -48,9 +47,21 @@ public class ValidationActivity extends Activity {
         	PrintWriter printer_writer = new PrintWriter (baos);
         	e.printStackTrace(printer_writer);
         	printer_writer.flush();
-        	validation_result.setTextColor(Color.RED);
         	try {
-				validation_result.setText(baos.toString("UTF-8"));
+        		String res = baos.toString("UTF-8");
+        		StringBuffer sb = new StringBuffer ("<html><body><center><b>Failed!</b></center><pre><font color=%22red%22>");
+        		for (char c : res.toCharArray())
+        		{
+        			if (c == '\n')
+        			{
+        				sb.append("%0A");
+        			}
+        			else
+        			{
+            			sb.append(c);
+        			}
+        		}
+	            validation_result.loadData(sb.append("</font></pre></body></html>").toString(), "text/html", null);
 			} catch (UnsupportedEncodingException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
