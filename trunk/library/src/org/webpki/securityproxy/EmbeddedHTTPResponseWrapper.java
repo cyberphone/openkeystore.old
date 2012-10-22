@@ -26,7 +26,7 @@ public class EmbeddedHTTPResponseWrapper extends HTTPResponseWrapper implements 
     private static final long serialVersionUID = 1L;
 
     /**
-     * For passing a HttpServletRequest "sendError"
+     * For passing a HttpServletResponse "sendError"
      * 
      * @param error_status HTTP error code
      * @param error_message HTTP status message
@@ -34,6 +34,16 @@ public class EmbeddedHTTPResponseWrapper extends HTTPResponseWrapper implements 
     public EmbeddedHTTPResponseWrapper (int error_status, String error_message)
       {
         super (error_status, error_message);
+      }
+
+    /**
+     * For passing a HttpServletResponse "sendRedirect"
+     * 
+     * @param redirect_url Arbitrary URL
+     */
+    public EmbeddedHTTPResponseWrapper (String redirect_url)
+      {
+        super (redirect_url);
       }
 
     /**

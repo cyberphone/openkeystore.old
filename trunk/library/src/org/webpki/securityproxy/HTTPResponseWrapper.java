@@ -20,6 +20,8 @@ import java.io.Serializable;
 
 import java.util.LinkedHashMap;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Security proxy object containing a local service's HTTP response.
  * @see ClientRequestHandler
@@ -32,14 +34,25 @@ public class HTTPResponseWrapper implements Serializable
     
     String mime_type;
     
-    String error_message;
+    String string_data;
     
     int error_status;
     
     LinkedHashMap<String,String> headers = new LinkedHashMap<String,String> ();
     
     /**
-     * For passing a HttpServletRequest "sendError"
+     * For passing a HttpServletResponse "sendRedirect"
+     * 
+     * @param redirect_url Arbitrary URL
+     */
+    public HTTPResponseWrapper (String redirect_url)
+      {
+        this.error_status = HttpServletResponse.SC_MOVED_TEMPORARILY;
+        this.string_data = redirect_url;
+      }
+
+    /**
+     * For passing a HttpServletResponse "sendError"
      * 
      * @param error_status HTTP error code
      * @param error_message HTTP status message
@@ -47,7 +60,7 @@ public class HTTPResponseWrapper implements Serializable
     public HTTPResponseWrapper (int error_status, String error_message)
       {
         this.error_status = error_status;
-        this.error_message = error_message;
+        this.string_data = error_message;
       }
 
     /**

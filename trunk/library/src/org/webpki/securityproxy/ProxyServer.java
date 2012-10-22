@@ -134,12 +134,16 @@ public class ProxyServer
               }
             response.getOutputStream ().write (http_data.data);
           }
+        else if (http_data.error_status == HttpServletResponse.SC_MOVED_TEMPORARILY)
+          {
+            response.sendRedirect (http_data.string_data);
+          }
         else
           {
             //////////////////////////////////////////
             // HTTP error response
             //////////////////////////////////////////
-            response.sendError (http_data.error_status, http_data.error_message);
+            response.sendError (http_data.error_status, http_data.string_data);
           }
       }
     
