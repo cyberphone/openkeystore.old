@@ -97,6 +97,8 @@ import org.webpki.util.ArrayUtil;
  */
 public class XMLSchemaCache
   {
+    private static String class_schema_factory;
+
     private Hashtable<ElementID,Class<?>> classMap;
     
     private Hashtable<String,byte[]> knownURIs;
@@ -148,6 +150,16 @@ public class XMLSchemaCache
           }
       }
 
+
+    /**
+     * Forces the use of a specific implementation
+     * @param schema_factory Class name
+     */
+    public static void forceSchemaFactory (String schema_factory)
+      {
+        class_schema_factory = schema_factory;
+      }
+  
 
     public void addSchema (InputStream is) throws IOException
       {
@@ -367,7 +379,10 @@ public class XMLSchemaCache
               {
                 DocumentBuilderFactory dbf = DOMUtil.createDocumentBuilderFactory ();
                 dbf.setNamespaceAware (true);
-                dbf.setSchema (SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema (schema_stack.toArray(new DOMSource[0])));
+                dbf.setSchema ((class_schema_factory == null ? 
+                    SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI) :
+                    SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI, class_schema_factory, this.getClass ().getClassLoader ())
+                              ).newSchema (schema_stack.toArray(new DOMSource[0])));
                 xml_parser = dbf.newDocumentBuilder ();
                 xml_parser.setErrorHandler (new ErrorHandler ()
                   {

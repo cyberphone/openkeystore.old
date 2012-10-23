@@ -36,14 +36,24 @@ import org.w3c.dom.ls.LSSerializer;
  */
 public class DOMUtil
   {
-
+    private static String class_document_builder_factory;
+    
     /**
      * Private constructor, no reason to allow instatiation at this time.
      */
     private DOMUtil()
       {
       }
-  
+
+    /**
+     * Forces the use of a specific implementation
+     * @param document_builder_factory Class name
+     */
+    public static void forceDocumentBuilderFactory (String document_builder_factory)
+      {
+        class_document_builder_factory = document_builder_factory;
+      }
+
     /**
      * Creates a subelement with a single child, a text node, as a child of an existing node.
      * <p>The structure <code>&lt;<i>element</i>&gt;<i>value</i>&lt;/<i>element</i>&gt;</code>
@@ -388,11 +398,23 @@ public class DOMUtil
           }
       }
 
+    /**
+     * Centralized DocumentBuilderFactory creator/implemenation
+     * @return DocumentBuilderFactory
+     */
     public static DocumentBuilderFactory createDocumentBuilderFactory ()
       {
-        return DocumentBuilderFactory.newInstance ();
+        if (class_document_builder_factory == null)
+          {
+            return DocumentBuilderFactory.newInstance ();
+          }
+        return DocumentBuilderFactory.newInstance (class_document_builder_factory, DOMUtil.class.getClassLoader ());
       }
-    
+
+    /**
+     * Centralized Document creator/implemenation
+     * @return Document
+     */
     public static Document createDocument ()
       {
         try
