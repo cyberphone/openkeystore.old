@@ -11,8 +11,6 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import android.view.View;
-import android.view.View.OnClickListener;
-
 
 import org.webpki.android.keygen2.PlatformNegotiationRequestDecoder;
 import org.webpki.android.keygen2.PlatformNegotiationResponseEncoder;
@@ -93,7 +91,7 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, String>
 			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 			cancel.setLayoutParams(layoutParams);
 
-			ok.setOnClickListener(new OnClickListener()
+			ok.setOnClickListener(new View.OnClickListener()
 	        {
 	            @Override
 	            public void onClick(View v)

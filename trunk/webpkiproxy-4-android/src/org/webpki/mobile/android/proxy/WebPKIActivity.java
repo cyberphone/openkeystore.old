@@ -1,6 +1,8 @@
 package org.webpki.mobile.android.proxy;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import java.net.URLDecoder;
 
@@ -24,14 +26,36 @@ public abstract class WebPKIActivity extends Activity
 	
 	ProgressDialog progress_display;
 	
+	StringBuffer logger = new StringBuffer ();
+
 	void showHeavyWork ()
 	{
 		progress_display = ProgressDialog.show(this, null, "Initializing...");
 	}
-	
+
 	void noMoreWorkToDo ()
 	{
 		progress_display.dismiss();
+	}
+
+	void logOK (String message)
+	{
+		logger.append(message).append('\n');
+	}
+
+	void logException (Exception e)
+	{
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+    	PrintWriter printer_writer = new PrintWriter (baos);
+    	e.printStackTrace(printer_writer);
+    	printer_writer.flush();
+    	try 
+    	{
+    		logger.append("<font color=\"red\">").append(baos.toString("UTF-8")).append("</font>");
+		} 
+    	catch (IOException e1)
+		{
+		}
 	}
 	
 	WebPKIInvocationData getWebPKIInvocationData () throws IOException

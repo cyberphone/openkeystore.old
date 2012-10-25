@@ -18,25 +18,29 @@
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:theme="@android:style/Theme.Light"
             android:name=".KeyGen2Activity"
-            android:label="@string/title_activity_keygen2" 
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_keygen2"
+            android:theme="@android:style/Theme.Light" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="keygen2"
-                    android:scheme="webpkiproxy" >
-                </data>
-            </intent-filter>
+                <data android:scheme="webpkiproxy" android:host="keygen2"/>
+
+                </intent-filter>
+        </activity>
+        <activity
+            android:name=".FailLoggerActivity"
+            android:label="@string/title_activity_fail_logger"
+            android:theme="@android:style/Theme.Light" >
         </activity>
     </application>
 
