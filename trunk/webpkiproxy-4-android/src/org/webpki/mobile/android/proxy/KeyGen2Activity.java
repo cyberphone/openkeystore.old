@@ -1,5 +1,6 @@
 package org.webpki.mobile.android.proxy;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -9,11 +10,16 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.webpki.android.keygen2.PlatformNegotiationRequestDecoder;
+
+import org.webpki.android.xml.XMLSchemaCache;
+
+
 public class KeyGen2Activity extends WebPKIActivity
 {
 	TextView text_view;
 
-	KeyGen2ProtocolRunner kg2_prot_run;
+	PlatformNegotiationRequestDecoder platform_request;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -21,18 +27,7 @@ public class KeyGen2Activity extends WebPKIActivity
         setContentView(R.layout.activity_keygen2);
         text_view = (TextView)findViewById(R.id.win);
 
-        // Start of keygen2
-        kg2_prot_run = new KeyGen2ProtocolRunner (this);
-        ((Button) findViewById(R.id.OKbutton)).setOnClickListener(new OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-            	kg2_prot_run.execute();
-            }
-        });
-
-        // Cancel
+        // Setup the "Cancel" button
         ((Button) findViewById(R.id.cancelButton)).setOnClickListener(new OnClickListener()
         {
             @Override
@@ -41,6 +36,11 @@ public class KeyGen2Activity extends WebPKIActivity
             	finish();
             }
         });
+        
+        showHeavyWork ();
+
+        // Start of keygen2
+        new KeyGen2ProtocolInit (this).execute();
     }
 
     @Override

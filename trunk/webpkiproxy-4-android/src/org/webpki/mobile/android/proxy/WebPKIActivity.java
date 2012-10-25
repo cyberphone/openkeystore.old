@@ -7,16 +7,32 @@ import java.net.URLDecoder;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 
 import android.content.Intent;
 
 import android.net.Uri;
+
+import org.webpki.android.xml.XMLSchemaCache;
 
 /**
  * Class for taking care of "webpkiproxy://" XML protocol handlers
  */
 public abstract class WebPKIActivity extends Activity 
 {
+	XMLSchemaCache schema_cache;
+	
+	ProgressDialog progress_display;
+	
+	void showHeavyWork ()
+	{
+		progress_display = ProgressDialog.show(this, null, "Initializing...");
+	}
+	
+	void noMoreWorkToDo ()
+	{
+		progress_display.dismiss();
+	}
 	
 	WebPKIInvocationData getWebPKIInvocationData () throws IOException
 	{

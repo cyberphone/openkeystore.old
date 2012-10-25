@@ -24,7 +24,8 @@
         <activity
             android:theme="@android:style/Theme.Light"
             android:name=".KeyGen2Activity"
-            android:label="@string/title_activity_keygen2" >
+            android:label="@string/title_activity_keygen2" 
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
