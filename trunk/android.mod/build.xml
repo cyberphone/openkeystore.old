@@ -42,13 +42,34 @@
 
     <replaceregexp file="${temp_dir}/org/webpki/android/xml/DOMUtil.java"
         match="(DocumentBuilderFactory\.newInstance\ \()(\))"
-        replace="\1&quot;org.webpki.android.org.apache.xerces.jaxp.DocumentBuilderFactoryImpl&quot;, DOMUtil.class.getClassLoader ()\2"
-        byline="false"/>
+        replace="\1&quot;org.webpki.android.org.apache.xerces.jaxp.DocumentBuilderFactoryImpl&quot;, DOMUtil.class.getClassLoader ()\2"/>
     
     <replaceregexp file="${temp_dir}/org/webpki/android/xml/XMLSchemaCache.java"
         match="(SchemaFactory\.newInstance\ \(XMLConstants\.W3C_XML_SCHEMA_NS_URI)(\))"
-        replace="\1, &quot;org.webpki.android.org.apache.xerces.jaxp.validation.XMLSchemaFactory&quot;, this.getClass ().getClassLoader ()\2"
-        byline="false"/>
+        replace="\1, &quot;org.webpki.android.org.apache.xerces.jaxp.validation.XMLSchemaFactory&quot;, this.getClass ().getClassLoader ()\2"/>
+
+    <replaceregexp file="${temp_dir}/org/webpki/android/crypto/KeyStoreReader.java"
+        match="(\/\/\ JKS\ magic\ number\ \+\ version\ \(2\).*)(byte\[\]\ jks\ \=\ \{)(\(byte\)0xfe,\ \(byte\)0xed,\ \(byte\)0xfe,\ \(byte\)0xed,\ 0,\ 0,\ 0,\ 2)(\}\;)"
+        replace="\20, 0, 0, 1, 0, 0, 0, 20\4 // BKS: (int)VERSION + (int)SALT_LENGTH"
+        flags="s"/>
+
+    <replaceregexp
+        match="&quot;SunX509&quot;"
+        replace="&quot;X509&quot;"
+        flags="g">
+        <fileset dir="${temp_dir}/org/webpki/android/">
+          <include name="**/*.java"/>
+        </fileset>
+    </replaceregexp>
+    
+    <replaceregexp
+        match="(&quot;JKS&quot;)"
+        replace="&quot;BKS&quot;"
+        flags="g">
+        <fileset dir="${temp_dir}/org/webpki/android/">
+          <include name="**/*.java"/>
+        </fileset>
+    </replaceregexp>
 
   </target>
     
