@@ -1,6 +1,7 @@
 package org.webpki.mobile.android.proxy;
 
 import java.io.IOException;
+import java.security.Security;
 
 import android.os.AsyncTask;
 
@@ -10,6 +11,8 @@ import android.widget.RelativeLayout;
 import android.view.View;
 
 import org.webpki.android.keygen2.PlatformNegotiationRequestDecoder;
+
+import org.spongycastle.jce.provider.BouncyCastleProvider;
 
 public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean> 
 {
@@ -26,6 +29,7 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
 		try
 		{
 			keygen2_activity.getWebPKIInvocationData();	
+			Security.insertProviderAt(new BouncyCastleProvider(), 1);
             keygen2_activity.schema_cache.addWrapper(PlatformNegotiationRequestDecoder.class);
             keygen2_activity.logOK ("Added XML Schemas");
             keygen2_activity.platform_request = (PlatformNegotiationRequestDecoder) keygen2_activity.schema_cache.parse(keygen2_activity.initial_request_data);

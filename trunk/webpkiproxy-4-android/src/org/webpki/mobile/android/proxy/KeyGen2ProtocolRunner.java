@@ -1,6 +1,11 @@
 package org.webpki.mobile.android.proxy;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
+import java.security.spec.ECGenParameterSpec;
 
 import org.webpki.android.keygen2.PlatformNegotiationResponseEncoder;
 
@@ -29,6 +34,11 @@ public class KeyGen2ProtocolRunner extends AsyncTask<Void, String, String>
         	keygen2_activity.addOptionalCookies();
         	keygen2_activity.https_wrapper.makePostRequest(keygen2_activity.platform_request.getSubmitURL(), platform_response.writeXML());
             keygen2_activity.logOK ("Sent \"PlatformNegotiationResponse\"");
+            KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
+            ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
+            generator.initialize (eccgen, new SecureRandom ());
+            KeyPair kp = generator.generateKeyPair ();
+
             if (keygen2_activity.https_wrapper.getResponseCode() == 302)
             {
             	keygen2_activity.logOK ("Found redirect=" + keygen2_activity.https_wrapper.getHeaderValue("Location"));
@@ -38,6 +48,10 @@ public class KeyGen2ProtocolRunner extends AsyncTask<Void, String, String>
             {
             	throw new IOException ("Missing redirect");
             }
+		}
+		catch (GeneralSecurityException e)
+		{
+            keygen2_activity.logException (e);
 		}
 		catch (IOException e)
 		{
