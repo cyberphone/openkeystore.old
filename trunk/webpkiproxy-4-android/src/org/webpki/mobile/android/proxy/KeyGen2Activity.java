@@ -15,7 +15,8 @@ public class KeyGen2Activity extends WebPKIActivity
 	PlatformNegotiationRequestDecoder platform_request;
 	
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_keygen2);
         text_view = (TextView)findViewById(R.id.win);
@@ -35,5 +36,5 @@ public class KeyGen2Activity extends WebPKIActivity
         // Start of keygen2
         new KeyGen2ProtocolInit (this).execute();
     }
-   
+
 }

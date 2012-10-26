@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.URLDecoder;
 
 import java.util.List;
+import java.util.Vector;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -15,6 +16,7 @@ import android.content.Intent;
 
 import android.net.Uri;
 
+import org.webpki.android.net.HTTPSWrapper;
 import org.webpki.android.xml.XMLSchemaCache;
 
 /**
@@ -27,23 +29,37 @@ public abstract class WebPKIActivity extends Activity
 	ProgressDialog progress_display;
 	
 	StringBuffer logger = new StringBuffer ();
+	
+    HTTPSWrapper https_wrapper = new HTTPSWrapper ();
+	
+	Vector<String> cookies = new Vector<String> ();
+	
+	byte[] initial_request_data;
 
-	void showHeavyWork ()
+	public void showHeavyWork ()
 	{
 		progress_display = ProgressDialog.show(this, null, "Initializing...");
 	}
 
-	void noMoreWorkToDo ()
+	public void noMoreWorkToDo ()
 	{
 		progress_display.dismiss();
 	}
 
-	void logOK (String message)
+	public void logOK (String message)
 	{
 		logger.append(message).append('\n');
 	}
 
-	void logException (Exception e)
+	public void addOptionalCookies () throws IOException
+	{
+		for (String cookie : cookies)
+		{
+			https_wrapper.setHeader("Cookie", cookie);
+		}
+	}
+
+	public void logException (Exception e)
 	{
     	ByteArrayOutputStream baos = new ByteArrayOutputStream ();
     	PrintWriter printer_writer = new PrintWriter (baos);
@@ -57,10 +73,23 @@ public abstract class WebPKIActivity extends Activity
 		{
 		}
 	}
-	
-	WebPKIInvocationData getWebPKIInvocationData () throws IOException
+
+	public void setOptionalCookie ()
 	{
-		WebPKIInvocationData invocation_data = new WebPKIInvocationData ();
+		
+	}
+	
+	public void showFailLog() 
+	{
+        Intent intent = new Intent(this, FailLoggerActivity.class);
+        intent.putExtra(FailLoggerActivity.LOG_MESSAGE, logger.toString());
+        startActivity(intent);
+        finish ();
+	}
+   
+	public void getWebPKIInvocationData () throws IOException
+	{
+		schema_cache = new XMLSchemaCache ();
         Intent intent = getIntent ();
         Uri uri = intent.getData();
         if (uri == null)
@@ -72,12 +101,12 @@ public abstract class WebPKIActivity extends Activity
     	{
     		throw new IOException ("Missing \"msg\"");
     	}
-    	invocation_data.xmldata = URLDecoder.decode(arg.get(0), "UTF-8").getBytes("UTF-8");
+    	initial_request_data = URLDecoder.decode(arg.get(0), "UTF-8").getBytes("UTF-8");
     	arg = uri.getQueryParameters("cookie");
     	if (!arg.isEmpty())
     	{
-    		invocation_data.cookie = arg.get(0);
+    		cookies.add(arg.get(0));
     	}
-        return invocation_data;
+        logOK ("Read Invocation, Cookie=" + (arg.isEmpty() ? "N/A" : cookies.elementAt(0)));
 	}
 }
