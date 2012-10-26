@@ -374,6 +374,11 @@ public class HTTPSWrapper
     private void setupRequest (String url, boolean output) throws IOException
       {
         ///////////////////////////////////////////////
+        // Clean the response header.
+        ///////////////////////////////////////////////
+        response_headers.clear ();
+
+        ///////////////////////////////////////////////
         // If HTTPS, setup the security pieces
         ///////////////////////////////////////////////
         this.url = url;
@@ -450,6 +455,15 @@ public class HTTPSWrapper
                 conn.setRequestProperty (key, value);
               }
           }
+
+        ///////////////////////////////////////////////
+        // We are done with the request header
+        ///////////////////////////////////////////////
+        request_headers.clear ();
+
+        ///////////////////////////////////////////////
+        // Calling you...
+        ///////////////////////////////////////////////
         conn.setConnectTimeout(60000);
         conn.connect ();
 
@@ -457,9 +471,6 @@ public class HTTPSWrapper
           {
             server_certificate = (X509Certificate)(((HttpsURLConnection)conn).getServerCertificates ()[0]);
           }
-
-        request_headers.clear ();
-        response_headers.clear ();
       }
     
     
