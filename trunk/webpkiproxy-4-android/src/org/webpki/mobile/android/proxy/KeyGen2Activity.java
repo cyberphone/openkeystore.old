@@ -31,7 +31,7 @@ public class KeyGen2Activity extends WebPKIActivity
             }
         });
         
-        showHeavyWork ();
+        showHeavyWork (PROGRESS_INITIALIZING);
 
         // Start of keygen2
         new KeyGen2ProtocolInit (this).execute();

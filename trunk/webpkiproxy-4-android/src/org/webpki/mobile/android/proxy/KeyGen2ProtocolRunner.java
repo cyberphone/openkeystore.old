@@ -1,11 +1,14 @@
 package org.webpki.mobile.android.proxy;
 
 import java.io.IOException;
+import java.math.BigInteger;
+
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.RSAKeyGenParameterSpec;
 
 import org.webpki.android.keygen2.PlatformNegotiationResponseEncoder;
 
@@ -38,6 +41,16 @@ public class KeyGen2ProtocolRunner extends AsyncTask<Void, String, String>
             ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
             generator.initialize (eccgen, new SecureRandom ());
             KeyPair kp = generator.generateKeyPair ();
+            
+            publishProgress (WebPKIActivity.PROGRESS_KEYGEN);
+
+            int rsa_key_size = 2048;
+            BigInteger exponent = RSAKeyGenParameterSpec.F4;
+            RSAKeyGenParameterSpec alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size, exponent);
+            SecureRandom secure_random = new SecureRandom ();
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
+            kpg.initialize (alg_par_spec, secure_random);
+            KeyPair key_pair = kpg.generateKeyPair ();
 
             if (keygen2_activity.https_wrapper.getResponseCode() == 302)
             {
@@ -61,11 +74,17 @@ public class KeyGen2ProtocolRunner extends AsyncTask<Void, String, String>
 	}
 
 	@Override
+	public void onProgressUpdate(String... message)
+	{
+		keygen2_activity.updateWorkIndicator (message[0]);
+	}
+
+	@Override
     protected void onPostExecute(String result)
 	{
+		keygen2_activity.noMoreWorkToDo ();
 		if (result != null)
 		{
-			keygen2_activity.noMoreWorkToDo ();
           	Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(result));
 	        keygen2_activity.startActivity(intent);
 	        keygen2_activity.finish ();

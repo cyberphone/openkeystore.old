@@ -24,6 +24,12 @@ import org.webpki.android.xml.XMLSchemaCache;
  */
 public abstract class WebPKIActivity extends Activity 
 {
+	static final String PROGRESS_INITIALIZING = "Initializing...";
+	static final String PROGRESS_KEYGEN       = "Generating keys...";
+	static final String PROGRESS_LOOKUP       = "Credential lookup...";
+	static final String PROGRESS_DEPLOY_CERTS = "Receiving credentials...";
+	static final String PROGRESS_FINAL        = "Finish message...";
+	
 	XMLSchemaCache schema_cache;
 	
 	ProgressDialog progress_display;
@@ -36,14 +42,19 @@ public abstract class WebPKIActivity extends Activity
 	
 	byte[] initial_request_data;
 
-	public void showHeavyWork ()
+	public void showHeavyWork (String message)
 	{
-		progress_display = ProgressDialog.show(this, null, "Initializing...");
+		progress_display = ProgressDialog.show(this, null, message);
 	}
 
 	public void noMoreWorkToDo ()
 	{
 		progress_display.dismiss();
+	}
+
+	public void updateWorkIndicator(String message)
+	{
+		progress_display.setMessage(message);
 	}
 
 	public void logOK (String message)

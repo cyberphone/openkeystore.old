@@ -46,10 +46,9 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
 	@Override
     protected void onPostExecute(Boolean success)
 	{
+		keygen2_activity.noMoreWorkToDo ();
 		if (success)
 		{
-			keygen2_activity.noMoreWorkToDo ();
-
 			Button ok = (Button) keygen2_activity.findViewById(R.id.OKbutton);
 			ok.setVisibility(View.VISIBLE);
 
@@ -63,6 +62,7 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
 	            @Override
 	            public void onClick(View v)
 	            {
+	                keygen2_activity.showHeavyWork (WebPKIActivity.PROGRESS_LOOKUP);
 	            	keygen2_activity.logOK("The user hit OK");
 	            	new KeyGen2ProtocolRunner (keygen2_activity).execute();
 	            }
