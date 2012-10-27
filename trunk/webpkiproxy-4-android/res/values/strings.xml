@@ -2,8 +2,7 @@
 
     <string name="app_name">WebPKI Proxy</string>
     <string name="hello_world">Hello world!</string>
-    <string name="menu_settings">Settings</string>
-    <string name="title_activity_main">WebPKI Proxy</string>
+    <string name="title_activity_settings">Settings</string>
     <string name="title_activity_keygen2">Credential Enrollment</string>
     <string name="title_activity_fail_logger">Failed Execution - Log Data</string>
 

@@ -1,7 +1,6 @@
-package org.webpki.mobile.android.proxy;
+package org.webpki.mobile.android.proxy.keygen2;
 
 import java.io.IOException;
-import java.security.Security;
 
 import android.os.AsyncTask;
 
@@ -11,8 +10,8 @@ import android.widget.RelativeLayout;
 import android.view.View;
 
 import org.webpki.android.keygen2.PlatformNegotiationRequestDecoder;
-
-import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.webpki.mobile.android.proxy.R;
+import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
 public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean> 
 {
@@ -29,10 +28,9 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
 		try
 		{
 			keygen2_activity.getWebPKIInvocationData();	
-			Security.insertProviderAt(new BouncyCastleProvider(), 1);
-            keygen2_activity.schema_cache.addWrapper(PlatformNegotiationRequestDecoder.class);
+            keygen2_activity.addSchema(PlatformNegotiationRequestDecoder.class);
             keygen2_activity.logOK ("Added XML Schemas");
-            keygen2_activity.platform_request = (PlatformNegotiationRequestDecoder) keygen2_activity.schema_cache.parse(keygen2_activity.initial_request_data);
+            keygen2_activity.platform_request = (PlatformNegotiationRequestDecoder) keygen2_activity.parseXML(keygen2_activity.initial_request_data);
             keygen2_activity.logOK ("Decoded \"PlatformNegotiationRequest\"");
             return true;
 		}
@@ -62,7 +60,7 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
 	            @Override
 	            public void onClick(View v)
 	            {
-	                keygen2_activity.showHeavyWork (WebPKIActivity.PROGRESS_LOOKUP);
+	                keygen2_activity.showHeavyWork (BaseProxyActivity.PROGRESS_LOOKUP);
 	            	keygen2_activity.logOK("The user hit OK");
 	            	new KeyGen2ProtocolRunner (keygen2_activity).execute();
 	            }

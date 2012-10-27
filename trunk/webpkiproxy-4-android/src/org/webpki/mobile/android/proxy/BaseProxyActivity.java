@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 
 import java.net.URLDecoder;
 
+import java.security.Security;
 import java.util.List;
 import java.util.Vector;
 
@@ -18,29 +19,32 @@ import android.net.Uri;
 
 import org.webpki.android.net.HTTPSWrapper;
 import org.webpki.android.xml.XMLSchemaCache;
+import org.webpki.android.xml.XMLObjectWrapper;
+
+import org.spongycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * Class for taking care of "webpkiproxy://" XML protocol handlers
  */
-public abstract class WebPKIActivity extends Activity 
+public abstract class BaseProxyActivity extends Activity 
 {
-	static final String PROGRESS_INITIALIZING = "Initializing...";
-	static final String PROGRESS_KEYGEN       = "Generating keys...";
-	static final String PROGRESS_LOOKUP       = "Credential lookup...";
-	static final String PROGRESS_DEPLOY_CERTS = "Receiving credentials...";
-	static final String PROGRESS_FINAL        = "Finish message...";
+	public static final String PROGRESS_INITIALIZING = "Initializing...";
+	public static final String PROGRESS_KEYGEN       = "Generating keys...";
+	public static final String PROGRESS_LOOKUP       = "Credential lookup...";
+	public static final String PROGRESS_DEPLOY_CERTS = "Receiving credentials...";
+	public static final String PROGRESS_FINAL        = "Finish message...";
 	
-	XMLSchemaCache schema_cache;
+	private XMLSchemaCache schema_cache;
 	
 	ProgressDialog progress_display;
 	
-	StringBuffer logger = new StringBuffer ();
+	private StringBuffer logger = new StringBuffer ();
 	
-    HTTPSWrapper https_wrapper = new HTTPSWrapper ();
+	public HTTPSWrapper https_wrapper = new HTTPSWrapper ();
 	
 	Vector<String> cookies = new Vector<String> ();
 	
-	byte[] initial_request_data;
+	public byte[] initial_request_data;
 
 	public void showHeavyWork (String message)
 	{
@@ -85,7 +89,7 @@ public abstract class WebPKIActivity extends Activity
 		}
 	}
 
-	public void setOptionalCookie ()
+	protected void setOptionalCookie ()
 	{
 		
 	}
@@ -97,8 +101,18 @@ public abstract class WebPKIActivity extends Activity
         startActivity(intent);
         finish ();
 	}
+
+	public void addSchema (Class<? extends XMLObjectWrapper> wrapper_class) throws IOException
+	{
+		schema_cache.addWrapper(wrapper_class);
+	}
    
-	public void getWebPKIInvocationData () throws IOException
+    public XMLObjectWrapper parseXML (byte[] xmldata) throws IOException
+    {
+    	return schema_cache.parse(xmldata);
+    }
+
+    public void getWebPKIInvocationData () throws IOException
 	{
 		schema_cache = new XMLSchemaCache ();
         Intent intent = getIntent ();
@@ -119,5 +133,6 @@ public abstract class WebPKIActivity extends Activity
     		cookies.add(arg.get(0));
     	}
         logOK ("Read Invocation, Cookie=" + (arg.isEmpty() ? "N/A" : cookies.elementAt(0)));
+		Security.insertProviderAt(new BouncyCastleProvider(), 1);
 	}
 }

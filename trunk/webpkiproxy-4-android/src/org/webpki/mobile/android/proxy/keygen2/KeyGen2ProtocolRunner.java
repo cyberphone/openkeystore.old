@@ -1,4 +1,4 @@
-package org.webpki.mobile.android.proxy;
+package org.webpki.mobile.android.proxy.keygen2;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -11,6 +11,7 @@ import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
 import org.webpki.android.keygen2.PlatformNegotiationResponseEncoder;
+import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -42,7 +43,7 @@ public class KeyGen2ProtocolRunner extends AsyncTask<Void, String, String>
             generator.initialize (eccgen, new SecureRandom ());
             KeyPair kp = generator.generateKeyPair ();
             
-            publishProgress (WebPKIActivity.PROGRESS_KEYGEN);
+            publishProgress (BaseProxyActivity.PROGRESS_KEYGEN);
 
             int rsa_key_size = 2048;
             BigInteger exponent = RSAKeyGenParameterSpec.F4;
