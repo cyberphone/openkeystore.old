@@ -9,9 +9,14 @@ import android.widget.RelativeLayout;
 
 import android.view.View;
 
-import org.webpki.android.keygen2.PlatformNegotiationRequestDecoder;
 import org.webpki.mobile.android.proxy.R;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
+
+import org.webpki.android.keygen2.CredentialDiscoveryRequestDecoder;
+import org.webpki.android.keygen2.KeyCreationRequestDecoder;
+import org.webpki.android.keygen2.PlatformNegotiationRequestDecoder;
+import org.webpki.android.keygen2.ProvisioningFinalizationRequestDecoder;
+import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
 
 public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean> 
 {
@@ -29,6 +34,10 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
 		{
 			keygen2_activity.getWebPKIInvocationData();	
             keygen2_activity.addSchema(PlatformNegotiationRequestDecoder.class);
+            keygen2_activity.addSchema(ProvisioningInitializationRequestDecoder.class);
+            keygen2_activity.addSchema(KeyCreationRequestDecoder.class);
+            keygen2_activity.addSchema(CredentialDiscoveryRequestDecoder.class);
+            keygen2_activity.addSchema(ProvisioningFinalizationRequestDecoder.class);
             keygen2_activity.logOK ("Added XML Schemas");
             keygen2_activity.platform_request = (PlatformNegotiationRequestDecoder) keygen2_activity.parseXML(keygen2_activity.initial_request_data);
             keygen2_activity.logOK ("Decoded \"PlatformNegotiationRequest\"");

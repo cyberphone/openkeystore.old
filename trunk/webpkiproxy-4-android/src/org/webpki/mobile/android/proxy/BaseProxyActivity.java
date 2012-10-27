@@ -17,9 +17,12 @@ import android.content.Intent;
 
 import android.net.Uri;
 
+import org.apache.http.HttpStatus;
+
 import org.webpki.android.net.HTTPSWrapper;
 import org.webpki.android.xml.XMLSchemaCache;
 import org.webpki.android.xml.XMLObjectWrapper;
+import org.webpki.mobile.android.sks.SKSImplementation;
 
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 
@@ -40,7 +43,11 @@ public abstract class BaseProxyActivity extends Activity
 	
 	private StringBuffer logger = new StringBuffer ();
 	
-	public HTTPSWrapper https_wrapper = new HTTPSWrapper ();
+	private HTTPSWrapper https_wrapper = new HTTPSWrapper ();
+	
+	public SKSImplementation sks = new SKSImplementation ();
+	
+	private String redirect_url;
 	
 	Vector<String> cookies = new Vector<String> ();
 	
@@ -49,6 +56,47 @@ public abstract class BaseProxyActivity extends Activity
 	public void showHeavyWork (String message)
 	{
 		progress_display = ProgressDialog.show(this, null, message);
+	}
+
+	private void addOptionalCookies (String url) throws IOException
+	{
+		for (String cookie : cookies)
+		{
+			https_wrapper.setHeader("Cookie", cookie);
+		}
+	}
+
+	public void postXMLData (String url, XMLObjectWrapper xml_object, boolean interrupt_expected) throws IOException, InterruptedProtocolException
+	{
+		addOptionalCookies (url);
+		https_wrapper.makePostRequest(url, xml_object.writeXML());
+		if (https_wrapper.getResponseCode() == HttpStatus.SC_MOVED_TEMPORARILY)
+		{
+			if ((redirect_url = https_wrapper.getHeaderValue("Location")) == null)
+			{
+				throw new IOException ("Malformed redirect");
+			}
+			if (!interrupt_expected)
+			{
+				throw new InterruptedProtocolException ();
+			}
+		}
+		else
+		{
+			 if (https_wrapper.getResponseCode() != HttpStatus.SC_OK)
+			 {
+				 throw new IOException (https_wrapper.getResponseMessage());
+			 }
+			 if (interrupt_expected)
+			 {
+				 throw new IOException ("Redirect expected");
+			 }
+		}
+	}
+
+	public String getRedirectURL ()
+	{
+		return redirect_url;
 	}
 
 	public void noMoreWorkToDo ()
@@ -64,14 +112,6 @@ public abstract class BaseProxyActivity extends Activity
 	public void logOK (String message)
 	{
 		logger.append(message).append('\n');
-	}
-
-	public void addOptionalCookies () throws IOException
-	{
-		for (String cookie : cookies)
-		{
-			https_wrapper.setHeader("Cookie", cookie);
-		}
 	}
 
 	public void logException (Exception e)

@@ -11,7 +11,9 @@ import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
 import org.webpki.android.keygen2.PlatformNegotiationResponseEncoder;
+import org.webpki.android.sks.DeviceInfo;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
+import org.webpki.mobile.android.proxy.InterruptedProtocolException;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -34,9 +36,10 @@ public class KeyGen2ProtocolRunner extends AsyncTask<Void, String, String>
 	{
 		try
 		{
+			DeviceInfo dev_info = keygen2_activity.sks.getDeviceInfo();
+			keygen2_activity.logOK ("Device Cert:\n" + dev_info.getCertificatePath()[0].toString());
         	PlatformNegotiationResponseEncoder platform_response = new PlatformNegotiationResponseEncoder (keygen2_activity.platform_request);
-        	keygen2_activity.addOptionalCookies();
-        	keygen2_activity.https_wrapper.makePostRequest(keygen2_activity.platform_request.getSubmitURL(), platform_response.writeXML());
+        	keygen2_activity.postXMLData(keygen2_activity.platform_request.getSubmitURL(), platform_response, true);
             keygen2_activity.logOK ("Sent \"PlatformNegotiationResponse\"");
             KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
             ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
@@ -52,16 +55,7 @@ public class KeyGen2ProtocolRunner extends AsyncTask<Void, String, String>
             KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
             kpg.initialize (alg_par_spec, secure_random);
             KeyPair key_pair = kpg.generateKeyPair ();
-
-            if (keygen2_activity.https_wrapper.getResponseCode() == 302)
-            {
-            	keygen2_activity.logOK ("Found redirect=" + keygen2_activity.https_wrapper.getHeaderValue("Location"));
-            	return keygen2_activity.https_wrapper.getHeaderValue("Location");
-            }
-            else
-            {
-            	throw new IOException ("Missing redirect");
-            }
+			return keygen2_activity.getRedirectURL();
 		}
 		catch (GeneralSecurityException e)
 		{
@@ -70,6 +64,10 @@ public class KeyGen2ProtocolRunner extends AsyncTask<Void, String, String>
 		catch (IOException e)
 		{
             keygen2_activity.logException (e);
+		}
+		catch (InterruptedProtocolException e)
+		{
+			return keygen2_activity.getRedirectURL();
 		}
 		return null;
 	}
