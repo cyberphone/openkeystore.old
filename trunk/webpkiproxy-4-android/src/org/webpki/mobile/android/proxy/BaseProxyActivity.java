@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.net.URLDecoder;
 
 import java.security.Security;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
@@ -16,6 +18,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 
 import android.net.Uri;
+import android.util.Log;
 
 import org.apache.http.HttpStatus;
 
@@ -65,9 +68,17 @@ public abstract class BaseProxyActivity extends Activity
 			https_wrapper.setHeader("Cookie", cookie);
 		}
 	}
+	
+	public void launchBrowser (String url)
+	{
+      	Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(url));
+        startActivity(intent);
+        finish ();
+	}
 
 	public void postXMLData (String url, XMLObjectWrapper xml_object, boolean interrupt_expected) throws IOException, InterruptedProtocolException
 	{
+		logOK ("Writing \"" + xml_object.element() + "\" object to: " + url);
 		addOptionalCookies (url);
 		https_wrapper.makePostRequest(url, xml_object.writeXML());
 		if (https_wrapper.getResponseCode() == HttpStatus.SC_MOVED_TEMPORARILY)
@@ -78,6 +89,7 @@ public abstract class BaseProxyActivity extends Activity
 			}
 			if (!interrupt_expected)
 			{
+				Log.e(getProtocolName (), "Unexpected redirect");
 				throw new InterruptedProtocolException ();
 			}
 		}
@@ -129,11 +141,8 @@ public abstract class BaseProxyActivity extends Activity
 		}
 	}
 
-	protected void setOptionalCookie ()
-	{
-		
-	}
-	
+	public abstract String getProtocolName ();
+
 	public void showFailLog() 
 	{
         Intent intent = new Intent(this, FailLoggerActivity.class);
@@ -145,15 +154,19 @@ public abstract class BaseProxyActivity extends Activity
 	public void addSchema (Class<? extends XMLObjectWrapper> wrapper_class) throws IOException
 	{
 		schema_cache.addWrapper(wrapper_class);
+		logOK ("Added XML schema for: " + wrapper_class.getName());
 	}
    
     public XMLObjectWrapper parseXML (byte[] xmldata) throws IOException
     {
-    	return schema_cache.parse(xmldata);
+    	XMLObjectWrapper xml_object = schema_cache.parse(xmldata);
+    	logOK("Successfully read \"" + xml_object.element() + "\" object");
+    	return xml_object;
     }
 
-    public void getWebPKIInvocationData () throws IOException
+    public void getProtocolInvocationData () throws IOException
 	{
+    	logOK (getProtocolName () + " protocol run: " + new SimpleDateFormat ("yyyy-MM-dd' 'HH:mm:ss' UTC'").format (new Date ()));
 		schema_cache = new XMLSchemaCache ();
         Intent intent = getIntent ();
         Uri uri = intent.getData();
@@ -172,7 +185,7 @@ public abstract class BaseProxyActivity extends Activity
     	{
     		cookies.add(arg.get(0));
     	}
-        logOK ("Read Invocation, Cookie=" + (arg.isEmpty() ? "N/A" : cookies.elementAt(0)));
+        logOK ("Invocation read, Cookie: " + (arg.isEmpty() ? "N/A" : cookies.elementAt(0)));
 		Security.insertProviderAt(new BouncyCastleProvider(), 1);
 	}
 }

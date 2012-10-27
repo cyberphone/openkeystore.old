@@ -4,6 +4,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_keygen2">Credential Enrollment</string>
-    <string name="title_activity_fail_logger">Failed Execution - Log Data</string>
+    <string name="title_activity_fail_logger">Protocol Execution Log</string>
 
 </resources>

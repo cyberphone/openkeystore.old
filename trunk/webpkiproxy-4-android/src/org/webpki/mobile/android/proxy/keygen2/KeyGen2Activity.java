@@ -11,6 +11,8 @@ import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
 public class KeyGen2Activity extends BaseProxyActivity
 {
+	static final String KEYGEN2 = "KeyGen2";
+
 	TextView text_view;
 
 	PlatformNegotiationRequestDecoder platform_request;
@@ -37,5 +39,11 @@ public class KeyGen2Activity extends BaseProxyActivity
         // Start of keygen2
         new KeyGen2ProtocolInit (this).execute();
     }
+
+	@Override
+	public String getProtocolName() 
+	{
+		return KEYGEN2;
+	}
 
 }

@@ -1,7 +1,5 @@
 package org.webpki.mobile.android.proxy.keygen2;
 
-import java.io.IOException;
-
 import android.os.AsyncTask;
 
 import android.widget.Button;
@@ -32,18 +30,16 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
 	{
 		try
 		{
-			keygen2_activity.getWebPKIInvocationData();	
+			keygen2_activity.getProtocolInvocationData();	
             keygen2_activity.addSchema(PlatformNegotiationRequestDecoder.class);
             keygen2_activity.addSchema(ProvisioningInitializationRequestDecoder.class);
             keygen2_activity.addSchema(KeyCreationRequestDecoder.class);
             keygen2_activity.addSchema(CredentialDiscoveryRequestDecoder.class);
             keygen2_activity.addSchema(ProvisioningFinalizationRequestDecoder.class);
-            keygen2_activity.logOK ("Added XML Schemas");
             keygen2_activity.platform_request = (PlatformNegotiationRequestDecoder) keygen2_activity.parseXML(keygen2_activity.initial_request_data);
-            keygen2_activity.logOK ("Decoded \"PlatformNegotiationRequest\"");
             return true;
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
             keygen2_activity.logException (e);
 		}
