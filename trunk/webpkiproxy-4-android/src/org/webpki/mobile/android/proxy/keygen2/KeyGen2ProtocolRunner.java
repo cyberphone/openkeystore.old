@@ -1,23 +1,25 @@
 package org.webpki.mobile.android.proxy.keygen2;
 
 import java.io.IOException;
-import java.math.BigInteger;
+
+import java.security.GeneralSecurityException;
 
 import java.util.Date;
 
 import android.os.AsyncTask;
 
-import org.webpki.android.keygen2.PlatformNegotiationResponseEncoder;
-import org.webpki.android.sks.DeviceInfo;
-import org.webpki.android.crypto.MacAlgorithms;
-import org.webpki.android.crypto.SymKeySignerInterface;
-import org.webpki.android.keygen2.KeyGen2URIs;
-import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
-import org.webpki.android.keygen2.ProvisioningInitializationResponseEncoder;
-import org.webpki.android.sks.ProvisioningSession;
-
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 import org.webpki.mobile.android.proxy.InterruptedProtocolException;
+
+import org.webpki.android.crypto.MacAlgorithms;
+import org.webpki.android.crypto.SymKeySignerInterface;
+
+import org.webpki.android.keygen2.PlatformNegotiationResponseEncoder;
+import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
+import org.webpki.android.keygen2.ProvisioningInitializationResponseEncoder;
+
+import org.webpki.android.sks.ProvisioningSession;
+import org.webpki.android.sks.DeviceInfo;
 
 /**
  * This part does the real work
@@ -36,40 +38,42 @@ public class KeyGen2ProtocolRunner extends AsyncTask<Void, String, String>
 	{
 		try
 		{
-			DeviceInfo dev_info = keygen2_activity.sks.getDeviceInfo();
-			keygen2_activity.logOK ("Device Cert:\n" + dev_info.getCertificatePath()[0].toString());
+			DeviceInfo device_info = keygen2_activity.sks.getDeviceInfo();
         	PlatformNegotiationResponseEncoder platform_response = new PlatformNegotiationResponseEncoder (keygen2_activity.platform_request);
         	keygen2_activity.postXMLData(keygen2_activity.platform_request.getSubmitURL(), platform_response, false);
             
-            publishProgress (BaseProxyActivity.PROGRESS_KEYGEN);
-/*
-            prov_sess_req = (ProvisioningInitializationRequestDecoder) client_xml_cache.parse (xmldata);
+            publishProgress (BaseProxyActivity.PROGRESS_SESSION);
+
+            keygen2_activity.prov_sess_req = (ProvisioningInitializationRequestDecoder) keygen2_activity.parseResponse ();
             Date client_time = new Date ();
-            ProvisioningSession sess = 
-                  sks.createProvisioningSession (prov_sess_req.getSessionKeyAlgorithm (),
-                                                 platform_req.getPrivacyEnabledFlag(),
-                                                 prov_sess_req.getServerSessionID (),
-                                                 prov_sess_req.getServerEphemeralKey (),
-                                                 prov_sess_req.getSubmitURL (), // IssuerURI
-                                                 prov_sess_req.getKeyManagementKey (),
-                                                 (int)(client_time.getTime () / 1000),
-                                                 prov_sess_req.getSessionLifeTime (),
-                                                 prov_sess_req.getSessionKeyLimit ());
-            provisioning_handle = sess.getProvisioningHandle ();
+            ProvisioningSession session = 
+            	keygen2_activity.sks.createProvisioningSession (keygen2_activity.prov_sess_req.getSessionKeyAlgorithm (),
+                		  			                            keygen2_activity.platform_request.getPrivacyEnabledFlag(),
+                		  			                            keygen2_activity.prov_sess_req.getServerSessionID (),
+                		  			                            keygen2_activity.prov_sess_req.getServerEphemeralKey (),
+                		  			                            keygen2_activity.prov_sess_req.getSubmitURL (), // IssuerURI
+                		  			                            keygen2_activity.prov_sess_req.getKeyManagementKey (),
+                		  			                            (int)(client_time.getTime () / 1000),
+                		  			                            keygen2_activity.prov_sess_req.getSessionLifeTime (),
+                		  			                            keygen2_activity.prov_sess_req.getSessionKeyLimit ());
+
+            keygen2_activity.provisioning_handle = session.getProvisioningHandle ();
             
             ProvisioningInitializationResponseEncoder prov_sess_response = 
-                  new ProvisioningInitializationResponseEncoder (sess.getClientEphemeralKey (),
-                                                                 prov_sess_req.getServerSessionID (),
-                                                                 sess.getClientSessionID (),
-                                                                 prov_sess_req.getServerTime (),
+                  new ProvisioningInitializationResponseEncoder (session.getClientEphemeralKey (),
+                		                                         keygen2_activity.prov_sess_req.getServerSessionID (),
+                		                                         session.getClientSessionID (),
+                		                                         keygen2_activity.prov_sess_req.getServerTime (),
                                                                  client_time,
-                                                                 sess.getAttestation (),
-                                                                 platform_req.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
-            if (https)
-              {
-                prov_sess_response.setServerCertificate (server_certificate);
-              }
+                                                                 session.getAttestation (),
+                                                                 keygen2_activity.platform_request.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
 
+            if (keygen2_activity.getServerCertificate () != null)
+              {
+                prov_sess_response.setServerCertificate (keygen2_activity.getServerCertificate ());
+              }
+            
+/* No specific attributes are supported yet (if ever...)
             for (String client_attribute : prov_sess_req.getClientAttributes ())
               {
                 if (client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER))
@@ -82,6 +86,7 @@ public class KeyGen2ProtocolRunner extends AsyncTask<Void, String, String>
                                       .setClientAttributeValue (client_attribute, "192.168.0.202");
                   }
               }
+*/
 
             prov_sess_response.signRequest (new SymKeySignerInterface ()
               {
@@ -92,10 +97,12 @@ public class KeyGen2ProtocolRunner extends AsyncTask<Void, String, String>
 
                 public byte[] signData (byte[] data) throws IOException, GeneralSecurityException
                   {
-                    return sks.signProvisioningSessionData (provisioning_handle, data);
+                    return keygen2_activity.sks.signProvisioningSessionData (keygen2_activity.provisioning_handle, data);
                   }
               });
-*/
+            
+            keygen2_activity.postXMLData(keygen2_activity.prov_sess_req.getSubmitURL(), prov_sess_response, true);
+
             return keygen2_activity.getRedirectURL();
 		}
 		catch (InterruptedProtocolException e)

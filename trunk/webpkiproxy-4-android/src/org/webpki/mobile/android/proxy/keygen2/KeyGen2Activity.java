@@ -5,9 +5,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.webpki.android.keygen2.PlatformNegotiationRequestDecoder;
 import org.webpki.mobile.android.proxy.R;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
+
+import org.webpki.android.keygen2.PlatformNegotiationRequestDecoder;
+import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
 
 public class KeyGen2Activity extends BaseProxyActivity
 {
@@ -16,6 +18,10 @@ public class KeyGen2Activity extends BaseProxyActivity
 	TextView text_view;
 
 	PlatformNegotiationRequestDecoder platform_request;
+	
+	ProvisioningInitializationRequestDecoder prov_sess_req;
+	
+	int provisioning_handle;
 	
     @Override
     public void onCreate(Bundle savedInstanceState)

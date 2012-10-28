@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.URLDecoder;
 
 import java.security.Security;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.spongycastle.jce.provider.BouncyCastleProvider;
 public abstract class BaseProxyActivity extends Activity 
 {
 	public static final String PROGRESS_INITIALIZING = "Initializing...";
+	public static final String PROGRESS_SESSION      = "Creating session...";
 	public static final String PROGRESS_KEYGEN       = "Generating keys...";
 	public static final String PROGRESS_LOOKUP       = "Credential lookup...";
 	public static final String PROGRESS_DEPLOY_CERTS = "Receiving credentials...";
@@ -162,6 +164,16 @@ public abstract class BaseProxyActivity extends Activity
     	XMLObjectWrapper xml_object = schema_cache.parse(xmldata);
     	logOK("Successfully read \"" + xml_object.element() + "\" object");
     	return xml_object;
+    }
+
+    public XMLObjectWrapper parseResponse () throws IOException
+    {
+    	return parseXML (https_wrapper.getData());
+    }
+
+    public X509Certificate getServerCertificate ()
+    {
+    	return https_wrapper.getServerCertificate();
     }
 
     public void getProtocolInvocationData () throws IOException
