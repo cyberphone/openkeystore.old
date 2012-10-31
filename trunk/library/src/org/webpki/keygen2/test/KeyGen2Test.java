@@ -85,6 +85,7 @@ import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.Action;
+import org.webpki.keygen2.BasicCapabilities;
 import org.webpki.keygen2.KeySpecifier;
 import org.webpki.keygen2.ProvisioningFinalizationRequestDecoder;
 import org.webpki.keygen2.ProvisioningFinalizationRequestEncoder;
@@ -381,8 +382,10 @@ public class KeyGen2Test
             platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (xmldata);
             device_info = sks.getDeviceInfo ();
             PlatformNegotiationResponseEncoder platform_response = new PlatformNegotiationResponseEncoder (platform_req);
+            BasicCapabilities basic_capabilties_response = platform_response.getBasicCapabilities ();
+            BasicCapabilities basic_capabilties_request = platform_req.getBasicCapabilities ();
             Vector<String> matches = new Vector<String> ();
-            for (String want : platform_req.getAlgorithms ())
+            for (String want : basic_capabilties_request.getAlgorithms ())
               {
                 for (String have : device_info.getSupportedAlgorithms ())
                   {
@@ -395,13 +398,13 @@ public class KeyGen2Test
               }
             for (String algorithm : matches)
               {
-                platform_response.addAlgorithm (algorithm);
+                basic_capabilties_response.addAlgorithm (algorithm);
               }
-            for (String client_attribute : platform_req.getClientAttributes ())
+            for (String client_attribute : basic_capabilties_request.getClientAttributes ())
               {
                 if (client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER) || client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS))
                   {
-                    platform_response.addClientAttribute (client_attribute);
+                    basic_capabilties_response.addClientAttribute (client_attribute);
                   }
               }
             if (image_prefs)
@@ -909,20 +912,21 @@ public class KeyGen2Test
             server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
             platform_request =  new PlatformNegotiationRequestEncoder (server_session_id, PLATFORM_URI);
             platform_request.addLogotype (LOGO_URL, LOGO_MIME, LOGO_SHA256, LOGO_WIDTH, LOGO_HEIGHT);
+            BasicCapabilities basic_capabilities = platform_request.getBasicCapabilities ();
             if (ask_for_4096)
               {
-                platform_request.addAlgorithm (KeyAlgorithms.RSA4096.getURI ());
-                platform_request.addAlgorithm (KeyAlgorithms.RSA2048.getURI ());
+                basic_capabilities.addAlgorithm (KeyAlgorithms.RSA4096.getURI ())
+                                  .addAlgorithm (KeyAlgorithms.RSA2048.getURI ());
               }
             if (ask_for_exponent)
               {
-                platform_request.addAlgorithm (KeyAlgorithms.RSA2048_EXP.getURI ());
+                basic_capabilities.addAlgorithm (KeyAlgorithms.RSA2048_EXP.getURI ());
               }
             if (get_client_attributes)
               {
-                platform_request.addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER)
-                                .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS)
-                                .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
+                basic_capabilities.addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER)
+                                  .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS)
+                                  .addClientAttribute (KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
               }
             if (plain_unlock_key != null)
               {
@@ -941,10 +945,11 @@ public class KeyGen2Test
         byte[] provSessRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             PlatformNegotiationResponseDecoder platform_response = (PlatformNegotiationResponseDecoder) server_xml_cache.parse (xmldata);
+            BasicCapabilities basic_capabilties = platform_response.getBasicCapabilities ();
             if (ask_for_exponent)
               {
                 ask_for_exponent = false;
-                for (String algorithm : platform_response.getAlgorithms ())
+                for (String algorithm : basic_capabilties.getAlgorithms ())
                   {
                     if (algorithm.equals (KeyAlgorithms.RSA2048_EXP.getURI ()))
                       {
@@ -955,7 +960,7 @@ public class KeyGen2Test
             if (ask_for_4096)
               {
                 ask_for_4096 = false;
-                for (String algorithm : platform_response.getAlgorithms ())
+                for (String algorithm : basic_capabilties.getAlgorithms ())
                   {
                     if (algorithm.equals (KeyAlgorithms.RSA4096.getURI ()))
                       {
@@ -971,9 +976,9 @@ public class KeyGen2Test
                                                                                (short)50);
             if (updatable)
               {
-                prov_sess_request.setKeyManagementKey(server_km = server_sess_key.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
+                prov_sess_request.setKeyManagementKey (server_km = server_sess_key.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
               }
-            for (String client_attribute : platform_response.getClientAttributes ())
+            for (String client_attribute : platform_response.getBasicCapabilities ().getClientAttributes ())
               {
                 prov_sess_request.addClientAttribute (client_attribute);
               }

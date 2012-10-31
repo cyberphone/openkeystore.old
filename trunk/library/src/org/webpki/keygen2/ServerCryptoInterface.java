@@ -17,6 +17,7 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
@@ -25,7 +26,7 @@ import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
 
-public interface ServerCryptoInterface
+public interface ServerCryptoInterface extends Serializable
   {
     ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException;
     

@@ -44,14 +44,6 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
   {
     private String prefix;  // Default: no prefix
     
-    class ImagePreference
-      {
-        String type;
-        String mime_type;
-        int width;
-        int height;
-      }
-    
     Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
 
 
@@ -103,7 +95,7 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
         ////////////////////////////////////////////////////////////////////////
         // Basic capabilities
         ////////////////////////////////////////////////////////////////////////
-        writeBasicCapabilities (wr);
+        BasicCapabilities.write (wr, basic_capabilities);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional image preferences

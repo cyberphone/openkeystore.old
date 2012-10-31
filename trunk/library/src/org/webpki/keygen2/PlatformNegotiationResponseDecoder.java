@@ -28,16 +28,6 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class PlatformNegotiationResponseDecoder extends PlatformNegotiationResponse
   {
-    public class ImagePreference
-      {
-        private ImagePreference () {}
-
-        String type;
-        String mime_type;
-        int width;
-        int height;
-      }
-    
     Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
 
     public String getServerSessionID ()
@@ -66,7 +56,7 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
         //////////////////////////////////////////////////////////////////////////
         server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
 
-        readBasicCapabilities (ah);
+        BasicCapabilities.read (ah, basic_capabilities);
         
         //////////////////////////////////////////////////////////////////////////
         // Get the child elements

@@ -22,11 +22,10 @@ import java.util.LinkedHashSet;
 
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.XMLObjectWrapper;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public abstract class BasicCapabilities extends XMLObjectWrapper
+public class BasicCapabilities
   {
     LinkedHashSet<String> algorithms = new LinkedHashSet<String> ();
 
@@ -63,7 +62,7 @@ public abstract class BasicCapabilities extends XMLObjectWrapper
       }
 
 
-    static void conditionalInput (DOMAttributeReaderHelper ah, LinkedHashSet<String> args, String tag) throws IOException
+    private static void conditionalInput (DOMAttributeReaderHelper ah, LinkedHashSet<String> args, String tag) throws IOException
       {
         String[] opt_uri_list = ah.getListConditional (tag);
         if (opt_uri_list != null)
@@ -75,15 +74,15 @@ public abstract class BasicCapabilities extends XMLObjectWrapper
           }
       }
 
-    void readBasicCapabilities (DOMAttributeReaderHelper ah) throws IOException
+    static void read (DOMAttributeReaderHelper ah, BasicCapabilities basic_capabilities) throws IOException
       {
-        conditionalInput (ah, algorithms, ALGORITHMS_ATTR);
-        conditionalInput (ah, client_attributes, CLIENT_ATTRIBUTES_ATTR);
-        conditionalInput (ah, extensions, EXTENSIONS_ATTR);
+        conditionalInput (ah, basic_capabilities.algorithms, ALGORITHMS_ATTR);
+        conditionalInput (ah, basic_capabilities.client_attributes, CLIENT_ATTRIBUTES_ATTR);
+        conditionalInput (ah, basic_capabilities.extensions, EXTENSIONS_ATTR);
       }
 
 
-    void conditionalOutput (DOMWriterHelper wr, LinkedHashSet<String> arg_set, String tag)
+    private static void conditionalOutput (DOMWriterHelper wr, LinkedHashSet<String> arg_set, String tag)
       {
         if (!arg_set.isEmpty ())
           {
@@ -92,11 +91,11 @@ public abstract class BasicCapabilities extends XMLObjectWrapper
       }
 
 
-    void writeBasicCapabilities (DOMWriterHelper wr) throws IOException
+    static void write (DOMWriterHelper wr, BasicCapabilities basic_capabilities) throws IOException
       {
-        conditionalOutput (wr,  algorithms, ALGORITHMS_ATTR);
-        conditionalOutput (wr,  client_attributes, CLIENT_ATTRIBUTES_ATTR);
-        conditionalOutput (wr,  extensions, EXTENSIONS_ATTR);
+        conditionalOutput (wr,  basic_capabilities.algorithms, ALGORITHMS_ATTR);
+        conditionalOutput (wr,  basic_capabilities.client_attributes, CLIENT_ATTRIBUTES_ATTR);
+        conditionalOutput (wr,  basic_capabilities.extensions, EXTENSIONS_ATTR);
       }
 
     

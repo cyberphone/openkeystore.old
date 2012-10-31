@@ -21,12 +21,13 @@ import java.io.IOException;
 import org.webpki.xml.ServerCookie;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
+import org.webpki.xml.XMLObjectWrapper;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-abstract class PlatformNegotiationRequest extends BasicCapabilities 
+abstract class PlatformNegotiationRequest extends XMLObjectWrapper 
   {
     String server_session_id;
 
@@ -36,7 +37,15 @@ abstract class PlatformNegotiationRequest extends BasicCapabilities
     
     boolean privacy_enabled;
     
+    BasicCapabilities basic_capabilities = new BasicCapabilities ();
+    
     PlatformNegotiationRequest () {}
+
+
+    public BasicCapabilities getBasicCapabilities ()
+      {
+        return basic_capabilities;
+      }
 
 
     /**

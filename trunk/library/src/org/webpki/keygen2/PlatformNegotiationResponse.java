@@ -21,18 +21,27 @@ import java.io.IOException;
 import org.webpki.xml.ServerCookie;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
+import org.webpki.xml.XMLObjectWrapper;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-abstract class PlatformNegotiationResponse extends BasicCapabilities
+abstract class PlatformNegotiationResponse extends XMLObjectWrapper
   {
     String server_session_id;
 
     ServerCookie server_cookie;  // Optional
+    
+    BasicCapabilities basic_capabilities = new BasicCapabilities ();
 
     PlatformNegotiationResponse () {}
+
+
+    public BasicCapabilities getBasicCapabilities ()
+      {
+        return basic_capabilities;
+      }
 
 
     /**
