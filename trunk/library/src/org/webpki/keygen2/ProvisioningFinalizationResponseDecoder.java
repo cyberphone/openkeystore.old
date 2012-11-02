@@ -50,13 +50,12 @@ public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinaliz
       }
     
     
-    public void verifyProvisioningResult (ServerKeyGen2State server_credential_store,
-                                          ServerCryptoInterface server_crypto_interface) throws IOException
+    public void verifyProvisioningResult (ServerKeyGen2State server_keygen2_state) throws IOException
       {
-        server_credential_store.checkSession (client_session_id, server_session_id);
+        server_keygen2_state.checkSession (client_session_id, server_session_id);
         try
           {
-            server_credential_store.checkFinalResult (attestation, server_crypto_interface);
+            server_keygen2_state.checkFinalResult (attestation);
           }
         catch (GeneralSecurityException e)
           {

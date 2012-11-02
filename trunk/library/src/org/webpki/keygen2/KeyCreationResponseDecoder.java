@@ -58,8 +58,8 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
     
     public void validateAndPopulate (KeyCreationRequestEncoder key_init_request, ServerCryptoInterface server_crypto_interface) throws IOException
       {
-        key_init_request.server_credential_store.checkSession (client_session_id, server_session_id);
-        if (generated_keys.size () != key_init_request.server_credential_store.requested_keys.size ())
+        key_init_request.server_keygen2_state.checkSession (client_session_id, server_session_id);
+        if (generated_keys.size () != key_init_request.server_keygen2_state.requested_keys.size ())
           {
             ServerKeyGen2State.bad ("Different number of requested and received keys");
           }
@@ -67,7 +67,7 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
           {
             for (GeneratedPublicKey gpk : generated_keys.values ())
               {
-                ServerKeyGen2State.KeyProperties kp = key_init_request.server_credential_store.requested_keys.get (gpk.id);
+                ServerKeyGen2State.KeyProperties kp = key_init_request.server_keygen2_state.requested_keys.get (gpk.id);
                 if (kp == null)
                   {
                     ServerKeyGen2State.bad ("Missing key id:" + gpk.id);
@@ -80,9 +80,8 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
                 // Write key attestation data
                 attestation.addString (gpk.id);
                 attestation.addArray (gpk.public_key.getEncoded ());
-                 if (!ArrayUtil.compare (key_init_request.server_credential_store.attest (attestation.getResult (),
-                                                                                          kp.expected_attest_mac_count,
-                                                                                          server_crypto_interface),
+                 if (!ArrayUtil.compare (key_init_request.server_keygen2_state.attest (attestation.getResult (),
+                                                                                          kp.expected_attest_mac_count),
                                          kp.attestation = gpk.attestation))
                   {
                     ServerKeyGen2State.bad ("Attestation failed for key id:" + gpk.id);

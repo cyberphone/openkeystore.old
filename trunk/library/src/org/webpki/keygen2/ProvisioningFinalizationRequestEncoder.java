@@ -49,20 +49,16 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
 
     ServerCookie server_cookie;
 
-    ServerKeyGen2State server_credential_store;
+    ServerKeyGen2State server_keygen2_state;
     
-    ServerCryptoInterface server_crypto_interface;
-    
-    
+   
     // Constructors
 
     public ProvisioningFinalizationRequestEncoder (String submit_url, 
-                                                   ServerKeyGen2State server_credential_store,
-                                                   ServerCryptoInterface server_crypto_interface) throws IOException
+                                                   ServerKeyGen2State server_keygen2_state) throws IOException
       {
         this.submit_url = submit_url;
-        this.server_credential_store = server_credential_store;
-        this.server_crypto_interface = server_crypto_interface;
+        this.server_keygen2_state = server_keygen2_state;
       }
 
 
@@ -83,13 +79,13 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
         XMLSigner ds = new XMLSigner (signer);
         ds.removeXMLSignatureNS ();
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_credential_store.server_session_id);
+        ds.createEnvelopedSignature (doc, server_keygen2_state.server_session_id);
       }
     
     
     private byte[] mac (byte[] data, byte[] method) throws IOException, GeneralSecurityException
       {
-        return server_credential_store.mac (data, method, server_crypto_interface);
+        return server_keygen2_state.mac (data, method);
       }
     
     
@@ -107,9 +103,9 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
         wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, target_key.client_session_id);
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, target_key.server_session_id);
         wr.setBinaryAttribute (CERTIFICATE_FINGERPRINT_ATTR, HashAlgorithms.SHA256.digest (target_key.certificate_data));
-        byte[] device_id = server_credential_store.device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : server_credential_store.device_certificate.getEncoded ();
-        byte[] key_id = server_crypto_interface.mac (target_key.certificate_data, device_id);
-        byte[] authorization = server_crypto_interface.generateKeyManagementAuthorization (target_key.key_management_key, key_id);
+        byte[] device_id = server_keygen2_state.device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : server_keygen2_state.device_certificate.getEncoded ();
+        byte[] key_id = server_keygen2_state.server_crypto_interface.mac (target_key.certificate_data, device_id);
+        byte[] authorization = server_keygen2_state.server_crypto_interface.generateKeyManagementAuthorization (target_key.key_management_key, key_id);
         wr.setBinaryAttribute (AUTHORIZATION_ATTR, authorization);
         post_op_mac.addArray (authorization);
         mac (wr, post_op_mac.getResult (), target_key.post_operation.getMethod ());
@@ -126,21 +122,21 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             //////////////////////////////////////////////////////////////////////////
             // Set top-level attributes
             //////////////////////////////////////////////////////////////////////////
-            wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_credential_store.client_session_id);
+            wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_keygen2_state.client_session_id);
     
-            wr.setStringAttribute (ID_ATTR, server_credential_store.server_session_id);
+            wr.setStringAttribute (ID_ATTR, server_keygen2_state.server_session_id);
     
             wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
     
             byte[] nonce;
-            wr.setBinaryAttribute (NONCE_ATTR, nonce = server_crypto_interface.generateNonce ());
+            wr.setBinaryAttribute (NONCE_ATTR, nonce = server_keygen2_state.server_crypto_interface.generateNonce ());
     
             XMLSignatureWrapper.addXMLSignatureNS (wr);
     
             ////////////////////////////////////////////////////////////////////////
             // Write [0..n] Credentials
             ////////////////////////////////////////////////////////////////////////
-            for (ServerKeyGen2State.KeyProperties key : server_credential_store.getKeyProperties ())
+            for (ServerKeyGen2State.KeyProperties key : server_keygen2_state.getKeyProperties ())
               {
                 wr.addChildElement (CERTIFICATE_PATH_ELEM);
                 wr.setStringAttribute (ID_ATTR, key.id);
@@ -222,7 +218,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             ////////////////////////////////////////////////////////////////////////
             // Optional: post provisioning unlock operations
             ////////////////////////////////////////////////////////////////////////
-            for (ServerKeyGen2State.PostProvisioningTargetKey pptk : server_credential_store.post_operations)
+            for (ServerKeyGen2State.PostProvisioningTargetKey pptk : server_keygen2_state.post_operations)
               {
                 if (pptk.post_operation == ServerKeyGen2State.PostOperation.UNLOCK_KEY)
                   {
@@ -233,7 +229,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             ////////////////////////////////////////////////////////////////////////
             // Optional: post provisioning delete operations
             ////////////////////////////////////////////////////////////////////////
-            for (ServerKeyGen2State.PostProvisioningTargetKey pptk : server_credential_store.post_operations)
+            for (ServerKeyGen2State.PostProvisioningTargetKey pptk : server_keygen2_state.post_operations)
               {
                 if (pptk.post_operation == ServerKeyGen2State.PostOperation.DELETE_KEY)
                   {
@@ -245,10 +241,10 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             // Done with the crypto, now set the "closeProvisioningSession" MAC
             ////////////////////////////////////////////////////////////////////////
             MacGenerator close = new MacGenerator ();
-            close.addString (server_credential_store.client_session_id);
-            close.addString (server_credential_store.server_session_id);
-            close.addString (server_credential_store.issuer_uri);
-            close.addArray (server_credential_store.saved_close_nonce = nonce);
+            close.addString (server_keygen2_state.client_session_id);
+            close.addString (server_keygen2_state.server_session_id);
+            close.addString (server_keygen2_state.issuer_uri);
+            close.addArray (server_keygen2_state.saved_close_nonce = nonce);
             top.setAttribute (MAC_ATTR,
                               new Base64 ().getBase64StringFromBinary (mac (close.getResult (),
                                                                             SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION)));

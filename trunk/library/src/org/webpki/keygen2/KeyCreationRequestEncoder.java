@@ -45,7 +45,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
     ServerCookie server_cookie;
     
-    ServerKeyGen2State server_credential_store;
+    ServerKeyGen2State server_keygen2_state;
     
     ServerCryptoInterface server_crypto_interface;
 
@@ -62,11 +62,11 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
     // Constructors
 
     public KeyCreationRequestEncoder (String submit_url,
-                                      ServerKeyGen2State server_credential_store,
+                                      ServerKeyGen2State server_keygen2_state,
                                       ServerCryptoInterface server_crypto_interface) throws IOException
       {
         this.submit_url = submit_url;
-        this.server_credential_store = server_credential_store;
+        this.server_keygen2_state = server_keygen2_state;
         this.server_crypto_interface = server_crypto_interface;
       }
 
@@ -107,7 +107,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
         ds.removeXMLSignatureNS ();
         need_signature_ns = true;
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_credential_store.server_session_id);
+        ds.createEnvelopedSignature (doc, server_keygen2_state.server_session_id);
       }
     
     
@@ -129,9 +129,9 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, server_credential_store.server_session_id);
+        wr.setStringAttribute (ID_ATTR, server_keygen2_state.server_session_id);
 
-        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_credential_store.client_session_id);
+        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_keygen2_state.client_session_id);
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
 
@@ -145,15 +145,15 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
         ////////////////////////////////////////////////////////////////////////
         // There MUST not be zero keys to initialize...
         ////////////////////////////////////////////////////////////////////////
-        if (server_credential_store.requested_keys.isEmpty ())
+        if (server_keygen2_state.requested_keys.isEmpty ())
           {
             bad ("Empty request not allowd!");
           }
-        server_credential_store.key_attestation_algorithm = algorithm;
+        server_keygen2_state.key_attestation_algorithm = algorithm;
         ServerKeyGen2State.KeyProperties last_req_key = null;
         try
           {
-            for (ServerKeyGen2State.KeyProperties req_key : server_credential_store.requested_keys.values ())
+            for (ServerKeyGen2State.KeyProperties req_key : server_keygen2_state.requested_keys.values ())
               {
                 if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
                     getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
@@ -176,7 +176,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
                       }
                     else
                       {
-                        getPUKPolicy (req_key).writePolicy (wr, server_crypto_interface);
+                        getPUKPolicy (req_key).writePolicy (wr);
                         written_puk.add (getPUKPolicy (req_key).id);
                       }
                   }
@@ -191,11 +191,11 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
                       }
                     else
                       {
-                        req_key.pin_policy.writePolicy (wr, server_crypto_interface);
+                        req_key.pin_policy.writePolicy (wr);
                         written_pin.add (req_key.pin_policy.id);
                       }
                   }
-                req_key.writeRequest (wr, server_crypto_interface);
+                req_key.writeRequest (wr);
                 last_req_key = req_key;
               }
           }

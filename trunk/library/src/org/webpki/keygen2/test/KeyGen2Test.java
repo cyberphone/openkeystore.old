@@ -28,7 +28,6 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -39,24 +38,16 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
 
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.LinkedHashMap;
 import java.util.Vector;
 
-import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
-import javax.crypto.Mac;
-
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -738,7 +729,7 @@ public class KeyGen2Test
 
         ProvisioningInitializationResponseDecoder prov_sess_response;
         
-        ServerKeyGen2State server_credential_store;
+        ServerKeyGen2State server_keygen2_state;
         
         PrivateKey gen_private_key;
         
@@ -746,134 +737,6 @@ public class KeyGen2Test
         
         String server_session_id;
 
-        class SoftHSM implements ServerCryptoInterface
-          {
-            ////////////////////////////////////////////////////////////////////////////////////////
-            // Private and secret keys would in a HSM implementation be represented as handles
-            ////////////////////////////////////////////////////////////////////////////////////////
-            LinkedHashMap<PublicKey,PrivateKey> key_management_keys = new LinkedHashMap<PublicKey,PrivateKey> ();
-            
-            private void addKMK (KeyStore km_keystore) throws IOException, GeneralSecurityException
-              {
-                key_management_keys.put (km_keystore.getCertificate ("mykey").getPublicKey (),
-                                         (PrivateKey) km_keystore.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
-              }
-            
-            SoftHSM () throws IOException, GeneralSecurityException
-              {
-                addKMK (DemoKeyStore.getMybankDotComKeyStore ());
-                addKMK (DemoKeyStore.getSubCAKeyStore ());
-                addKMK (DemoKeyStore.getECDSAStore ());
-              }
-            
-            ECPrivateKey server_ec_private_key;
-            
-            byte[] session_key;
-  
-            @Override
-            public ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException
-              {
-                KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
-                ECGenParameterSpec eccgen = new ECGenParameterSpec (KeyAlgorithms.P_256.getJCEName ());
-                generator.initialize (eccgen, new SecureRandom ());
-                KeyPair kp = generator.generateKeyPair();
-                server_ec_private_key = (ECPrivateKey) kp.getPrivate ();
-                return (ECPublicKey) kp.getPublic ();
-              }
-
-            @Override
-            public void generateAndVerifySessionKey (ECPublicKey client_ephemeral_key,
-                                                     byte[] kdf_data,
-                                                     byte[] session_key_mac_data,
-                                                     X509Certificate device_certificate,
-                                                     byte[] session_attestation) throws IOException, GeneralSecurityException
-              {
-
-                // SP800-56A C(2, 0, ECC CDH)
-                KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
-                key_agreement.init (server_ec_private_key);
-                key_agreement.doPhase (client_ephemeral_key, true);
-                byte[] Z = key_agreement.generateSecret ();
-
-                // The custom KDF
-                Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
-                mac.init (new SecretKeySpec (Z, "RAW"));
-                session_key = mac.doFinal (kdf_data);
-                
-                // The session key signature
-                mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
-                mac.init (new SecretKeySpec (session_key, "RAW"));
-                byte[] session_key_attest = mac.doFinal (session_key_mac_data);
-                
-                if (device_certificate == null)
-                  {
-                    // Privacy enabled mode
-                    if (!ArrayUtil.compare (session_key_attest, session_attestation))
-                      {
-                        throw new IOException ("Verify attestation failed");
-                      }
-                  }
-                else
-                  {
-                    // E2ES mode
-                    PublicKey device_public_key = device_certificate.getPublicKey ();
-                    SignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
-                        SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256;
-    
-                    // Verify that the session key signature was signed by the device key
-                    Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
-                    verifier.initVerify (device_public_key);
-                    verifier.update (session_key_attest);
-                    if (!verifier.verify (session_attestation))
-                      {
-                        throw new IOException ("Verify provisioning signature failed");
-                      }
-                  }
-              }
-
-            @Override
-            public byte[] mac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException
-              {
-                Mac mac = Mac.getInstance (MacAlgorithms.HMAC_SHA256.getJCEName ());
-                mac.init (new SecretKeySpec (ArrayUtil.add (session_key, key_modifier), "RAW"));
-                return mac.doFinal (data);
-              }
-
-            @Override
-            public byte[] encrypt (byte[] data) throws IOException, GeneralSecurityException
-              {
-                byte[] key = mac (SecureKeyStore.KDF_ENCRYPTION_KEY, new byte[0]);
-                Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
-                byte[] iv = new byte[16];
-                new SecureRandom ().nextBytes (iv);
-                crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (iv));
-                return ArrayUtil.add (iv, crypt.doFinal (data));
-              }
-
-            @Override
-            public byte[] generateNonce () throws IOException, GeneralSecurityException
-              {
-                byte[] rnd = new byte[32];
-                new SecureRandom ().nextBytes (rnd);
-                return rnd;
-              }
-
-            @Override
-            public byte[] generateKeyManagementAuthorization (PublicKey key_management__key, byte[] data) throws IOException, GeneralSecurityException
-              {
-                Signature km_sign = Signature.getInstance (key_management__key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
-                km_sign.initSign (key_management_keys.get (key_management__key));
-                km_sign.update (data);
-                return km_sign.sign ();
-              }
-
-            @Override
-            public PublicKey[] enumerateKeyManagementKeys () throws IOException, GeneralSecurityException
-              {
-                return key_management_keys.keySet ().toArray (new PublicKey[0]);
-              }
-          }
-        
         SoftHSM server_sess_key = new SoftHSM ();
 
         Server () throws Exception
@@ -902,9 +765,10 @@ public class KeyGen2Test
             X509Certificate[] certificate_path = prov_sess_response.getDeviceCertificatePath ();
 
             ////////////////////////////////////////////////////////////////////////////////////
-            // Now we can create the container
+            // Update the container
             ////////////////////////////////////////////////////////////////////////////////////
-            server_credential_store = new ServerKeyGen2State (prov_sess_response, prov_sess_request);
+            server_keygen2_state.update (prov_sess_request);
+            server_keygen2_state.update (prov_sess_response);
           }
         
         //////////////////////////////////////////////////////////////////////////////////
@@ -912,6 +776,11 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] platformRequest () throws IOException, GeneralSecurityException
           {
+            ////////////////////////////////////////////////////////////////////////////////////
+            // Now we can create the container
+            ////////////////////////////////////////////////////////////////////////////////////
+            server_keygen2_state = new ServerKeyGen2State (server_sess_key);
+
             server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
             platform_request =  new PlatformNegotiationRequestEncoder (server_session_id, PLATFORM_URI);
             platform_request.addLogotype (LOGO_URL, LOGO_MIME, LOGO_SHA256, LOGO_WIDTH, LOGO_HEIGHT);
@@ -1030,13 +899,13 @@ public class KeyGen2Test
             if (puk_protection)
               {
                 puk_policy =
-                  server_credential_store.createPUKPolicy (server_sess_key.encrypt (new byte[]{'0','1','2','3','4','5','6', '7','8','9'}),
+                  server_keygen2_state.createPUKPolicy (server_sess_key.encrypt (new byte[]{'0','1','2','3','4','5','6', '7','8','9'}),
                                                                                     PassphraseFormat.NUMERIC,
                                                                                     3);
               }
             if (pin_protection)
               {
-                pin_policy = server_credential_store.createPINPolicy (PassphraseFormat.NUMERIC,
+                pin_policy = server_keygen2_state.createPINPolicy (PassphraseFormat.NUMERIC,
                                                                       4,
                                                                       8,
                                                                       pin_retry_limit,
@@ -1074,12 +943,12 @@ public class KeyGen2Test
               }
 
             ServerKeyGen2State.KeyProperties kp = device_pin_protection ?
-                server_credential_store.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
-                  preset_pin ? server_credential_store.createKeyWithPresetPIN (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
+                server_keygen2_state.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
+                  preset_pin ? server_keygen2_state.createKeyWithPresetPIN (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                                                key_alg, pin_policy,
                                                                                server_sess_key.encrypt (PREDEF_SERVER_PIN))
                              :
-            server_credential_store.createKey (encryption_key || key_agreement? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
+            server_keygen2_state.createKey (encryption_key || key_agreement? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                key_alg,
                                                pin_policy);
             if (symmetric_key || encryption_key)
@@ -1125,29 +994,29 @@ public class KeyGen2Test
               }
             if (clone_key_protection != null)
               {
-                kp.setClonedKeyProtection (clone_key_protection.server_credential_store.getClientSessionID (), 
-                                           clone_key_protection.server_credential_store.getServerSessionID (),
-                                           clone_key_protection.server_credential_store.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
+                kp.setClonedKeyProtection (clone_key_protection.server_keygen2_state.getClientSessionID (), 
+                                           clone_key_protection.server_keygen2_state.getServerSessionID (),
+                                           clone_key_protection.server_keygen2_state.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
                                            clone_key_protection.server_km);
               }
             if (update_key != null)
               {
-                kp.setUpdatedKey (update_key.server_credential_store.getClientSessionID (), 
-                                  update_key.server_credential_store.getServerSessionID (),
-                                  update_key.server_credential_store.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
+                kp.setUpdatedKey (update_key.server_keygen2_state.getClientSessionID (), 
+                                  update_key.server_keygen2_state.getServerSessionID (),
+                                  update_key.server_keygen2_state.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
                                   update_key.server_km);
               }
             if (delete_key != null)
               {
-                server_credential_store.addPostDeleteKey (delete_key.server_credential_store.getClientSessionID (), 
-                                                          delete_key.server_credential_store.getServerSessionID (),
-                                                          delete_key.server_credential_store.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
+                server_keygen2_state.addPostDeleteKey (delete_key.server_keygen2_state.getClientSessionID (), 
+                                                          delete_key.server_keygen2_state.getServerSessionID (),
+                                                          delete_key.server_keygen2_state.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
                                                           delete_key.server_km);
               }
-            key_create_request = new KeyCreationRequestEncoder (KEY_INIT_URL, server_credential_store, server_sess_key);
+            key_create_request = new KeyCreationRequestEncoder (KEY_INIT_URL, server_keygen2_state, server_sess_key);
             if (two_keys)
               {
-                server_credential_store.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.P_256), pin_policy);
+                server_keygen2_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.P_256), pin_policy);
               }
             return key_create_request.writeXML ();
           }
@@ -1164,7 +1033,7 @@ public class KeyGen2Test
                 boolean otp = symmetric_key && !encryption_key;
                 KeyCreationResponseDecoder key_init_response = (KeyCreationResponseDecoder) server_xml_cache.parse (xmldata);
                 key_init_response.validateAndPopulate (key_create_request, server_sess_key);
-                for (ServerKeyGen2State.KeyProperties key_prop : server_credential_store.getKeyProperties ())
+                for (ServerKeyGen2State.KeyProperties key_prop : server_keygen2_state.getKeyProperties ())
                   {
                     boolean auth = key_prop.getAppUsage () == AppUsage.AUTHENTICATION;
                     CertSpec cert_spec = new CertSpec ();
@@ -1258,15 +1127,14 @@ public class KeyGen2Test
               }
             else
               {
-                server_credential_store.addPostUnlockKey (plain_unlock_key.server_credential_store.getClientSessionID (), 
-                                                          plain_unlock_key.server_credential_store.getServerSessionID (),
-                                                          plain_unlock_key.server_credential_store.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
-                                                          plain_unlock_key.server_km);
+                server_keygen2_state.addPostUnlockKey (plain_unlock_key.server_keygen2_state.getClientSessionID (), 
+                                                       plain_unlock_key.server_keygen2_state.getServerSessionID (),
+                                                       plain_unlock_key.server_keygen2_state.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
+                                                       plain_unlock_key.server_km);
               }
             ProvisioningFinalizationRequestEncoder fin_prov_request 
                        = new ProvisioningFinalizationRequestEncoder (FIN_PROV_URL, 
-                                                                     server_credential_store,
-                                                                     server_sess_key);
+                                                                     server_keygen2_state);
 
             return fin_prov_request.writeXML ();
           }
@@ -1277,13 +1145,13 @@ public class KeyGen2Test
         void creFinalizeResponse (byte[] xmldata) throws IOException
           {
             ProvisioningFinalizationResponseDecoder fin_prov_response = (ProvisioningFinalizationResponseDecoder) server_xml_cache.parse (xmldata);
-            fin_prov_response.verifyProvisioningResult (server_credential_store, server_sess_key);
+            fin_prov_response.verifyProvisioningResult (server_keygen2_state);
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Just a small consistency check
             ///////////////////////////////////////////////////////////////////////////////////
             ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-            new ObjectOutputStream (baos).writeObject (server_credential_store);
+            new ObjectOutputStream (baos).writeObject (server_keygen2_state);
             byte[] serialized = baos.toByteArray ();
             try
               {
@@ -1552,7 +1420,7 @@ public class KeyGen2Test
         property_bag = true;
         doer.perform ();
         int key_handle = doer.getFirstKey ();
-        ServerKeyGen2State.PropertyBag prop_bag = doer.server.server_credential_store.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getPropertyBags ()[0];
+        ServerKeyGen2State.PropertyBag prop_bag = doer.server.server_keygen2_state.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getPropertyBags ()[0];
         Property[] props1 = sks.getExtension (key_handle, prop_bag.getType ()).getProperties ();
         ServerKeyGen2State.Property[] props2 = prop_bag.getProperties ();
         assertTrue ("Prop len error", props1.length == props2.length);

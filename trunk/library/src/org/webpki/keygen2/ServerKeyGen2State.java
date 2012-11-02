@@ -382,7 +382,7 @@ public class ServerKeyGen2State implements Serializable
             this.retry_limit = retry_limit;
           }
 
-        void writePolicy (DOMWriterHelper wr, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
+        void writePolicy (DOMWriterHelper wr) throws IOException, GeneralSecurityException
           {
             wr.addChildElement (PUK_POLICY_ELEM);
             super.write (wr);
@@ -396,7 +396,7 @@ public class ServerKeyGen2State implements Serializable
             puk_policy_mac.addArray (encrypted_value);
             puk_policy_mac.addByte (format.getSKSValue ());
             puk_policy_mac.addShort (retry_limit);
-            wr.setBinaryAttribute (MAC_ATTR, mac (puk_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PUK_POLICY, server_crypto_interface));
+            wr.setBinaryAttribute (MAC_ATTR, mac (puk_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PUK_POLICY));
           }
       }
 
@@ -474,7 +474,7 @@ public class ServerKeyGen2State implements Serializable
             this.id = pin_prefix + ++next_pin_id_suffix;
           }
 
-        void writePolicy (DOMWriterHelper wr, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
+        void writePolicy (DOMWriterHelper wr) throws IOException, GeneralSecurityException
           {
             wr.addChildElement (PIN_POLICY_ELEM);
             wr.setStringAttribute (ID_ATTR, id);
@@ -516,7 +516,7 @@ public class ServerKeyGen2State implements Serializable
             pin_policy_mac.addShort (min_length);
             pin_policy_mac.addShort (max_length);
             pin_policy_mac.addByte (input_method == null ? InputMethod.ANY.getSKSValue () : input_method.getSKSValue ());
-            wr.setBinaryAttribute (MAC_ATTR, mac (pin_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PIN_POLICY, server_crypto_interface));
+            wr.setBinaryAttribute (MAC_ATTR, mac (pin_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PIN_POLICY));
           }
 
         public PINPolicy setInputMethod (InputMethod input_method)
@@ -892,7 +892,7 @@ public class ServerKeyGen2State implements Serializable
               }
           }
 
-        void writeRequest (DOMWriterHelper wr, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
+        void writeRequest (DOMWriterHelper wr) throws IOException, GeneralSecurityException
           {
             key_init_done = true;
             MacGenerator key_pair_mac = new MacGenerator ();
@@ -977,7 +977,7 @@ public class ServerKeyGen2State implements Serializable
                 wr.setBinaryAttribute (SERVER_SEED_ATTR, server_seed);
               }
 
-            wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY, server_crypto_interface));
+            wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
             
             expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
             
@@ -995,6 +995,8 @@ public class ServerKeyGen2State implements Serializable
               }
           }
       }
+
+    ServerCryptoInterface server_crypto_interface;
 
     BasicCapabilities basic_capabilities = new BasicCapabilities ();
     
@@ -1076,24 +1078,23 @@ public class ServerKeyGen2State implements Serializable
         return  new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
       }
 
-    byte[] mac (byte[] data, byte[] method, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
+    byte[] mac (byte[] data, byte[] method) throws IOException, GeneralSecurityException
       {
         return server_crypto_interface.mac (data, ArrayUtil.add (method, getMACSequenceCounterAndUpdate ()));
       }
     
-    byte[] attest (byte[] data, byte[] mac_counter, ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
+    byte[] attest (byte[] data, byte[] mac_counter) throws IOException, GeneralSecurityException
       {
         return server_crypto_interface.mac (data, ArrayUtil.add (SecureKeyStore.KDF_DEVICE_ATTESTATION, mac_counter)); 
       }
     
-    void checkFinalResult (byte[] close_session_attestation,  ServerCryptoInterface server_crypto_interface) throws IOException, GeneralSecurityException
+    void checkFinalResult (byte[] close_session_attestation) throws IOException, GeneralSecurityException
       {
         MacGenerator check = new MacGenerator ();
         check.addArray (saved_close_nonce);
         check.addString (KeyGen2URIs.SPECIAL_ALGORITHMS.SESSION_KEY_1);
         if (!ArrayUtil.compare (attest (check.getResult (),
-                                        getMACSequenceCounterAndUpdate (),
-                                        server_crypto_interface),
+                                        getMACSequenceCounterAndUpdate ()),
                                 close_session_attestation))
           {
             bad ("Final attestation failed!");
@@ -1107,15 +1108,24 @@ public class ServerKeyGen2State implements Serializable
     
  
     // Constructor
+    public ServerKeyGen2State (ServerCryptoInterface server_crypto_interface)
+      {
+        this.server_crypto_interface = server_crypto_interface;
+      }
 
-    public ServerKeyGen2State (ProvisioningInitializationResponseDecoder prov_sess_response,
-                                  ProvisioningInitializationRequestEncoder prov_sess_request) throws IOException
+    
+    public void update (ProvisioningInitializationResponseDecoder prov_sess_response)
       {
         this.client_session_id = prov_sess_response.client_session_id;
+        this.device_certificate = prov_sess_response.device_certificate_path == null ? null : prov_sess_response.device_certificate_path[0];
+      }
+
+
+    public void update (ProvisioningInitializationRequestEncoder prov_sess_request)
+      {
         this.server_session_id = prov_sess_request.server_session_id;
         this.issuer_uri = prov_sess_request.submit_url;
-        this.device_certificate = prov_sess_response.device_certificate_path == null ? null : prov_sess_response.device_certificate_path[0];
-       }
+      }
     
     
     public void addPostDeleteKey (String old_client_session_id,
