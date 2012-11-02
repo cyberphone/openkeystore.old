@@ -45,7 +45,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
     ServerCookie server_cookie;
     
-    ServerCredentialStore server_credential_store;
+    ServerKeyGen2State server_credential_store;
     
     ServerCryptoInterface server_crypto_interface;
 
@@ -62,7 +62,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
     // Constructors
 
     public KeyCreationRequestEncoder (String submit_url,
-                                      ServerCredentialStore server_credential_store,
+                                      ServerKeyGen2State server_credential_store,
                                       ServerCryptoInterface server_crypto_interface) throws IOException
       {
         this.submit_url = submit_url;
@@ -111,7 +111,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
       }
     
     
-    private ServerCredentialStore.PUKPolicy getPUKPolicy (ServerCredentialStore.KeyProperties kp)
+    private ServerKeyGen2State.PUKPolicy getPUKPolicy (ServerKeyGen2State.KeyProperties kp)
       {
         return kp.pin_policy == null ? null : kp.pin_policy.puk_policy;
       }
@@ -150,10 +150,10 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
             bad ("Empty request not allowd!");
           }
         server_credential_store.key_attestation_algorithm = algorithm;
-        ServerCredentialStore.KeyProperties last_req_key = null;
+        ServerKeyGen2State.KeyProperties last_req_key = null;
         try
           {
-            for (ServerCredentialStore.KeyProperties req_key : server_credential_store.requested_keys.values ())
+            for (ServerKeyGen2State.KeyProperties req_key : server_credential_store.requested_keys.values ())
               {
                 if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
                     getPUKPolicy (last_req_key) != getPUKPolicy (req_key))

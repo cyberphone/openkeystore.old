@@ -61,20 +61,20 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
         key_init_request.server_credential_store.checkSession (client_session_id, server_session_id);
         if (generated_keys.size () != key_init_request.server_credential_store.requested_keys.size ())
           {
-            ServerCredentialStore.bad ("Different number of requested and received keys");
+            ServerKeyGen2State.bad ("Different number of requested and received keys");
           }
         try
           {
             for (GeneratedPublicKey gpk : generated_keys.values ())
               {
-                ServerCredentialStore.KeyProperties kp = key_init_request.server_credential_store.requested_keys.get (gpk.id);
+                ServerKeyGen2State.KeyProperties kp = key_init_request.server_credential_store.requested_keys.get (gpk.id);
                 if (kp == null)
                   {
-                    ServerCredentialStore.bad ("Missing key id:" + gpk.id);
+                    ServerKeyGen2State.bad ("Missing key id:" + gpk.id);
                   }
                 if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
                   {
-                    ServerCredentialStore.bad ("Wrong key type returned for key id:" + gpk.id);
+                    ServerKeyGen2State.bad ("Wrong key type returned for key id:" + gpk.id);
                   }
                 MacGenerator attestation = new MacGenerator ();
                 // Write key attestation data
@@ -85,7 +85,7 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
                                                                                           server_crypto_interface),
                                          kp.attestation = gpk.attestation))
                   {
-                    ServerCredentialStore.bad ("Attestation failed for key id:" + gpk.id);
+                    ServerKeyGen2State.bad ("Attestation failed for key id:" + gpk.id);
                   }
               }
           }
@@ -126,7 +126,7 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
             rd.getParent ();
             if (generated_keys.put (gk.id, gk) != null)
               {
-                ServerCredentialStore.bad ("Duplicate key id:" + gk.id);
+                ServerKeyGen2State.bad ("Duplicate key id:" + gk.id);
               }
           }
         while (rd.hasNext (PUBLIC_KEY_ELEM));

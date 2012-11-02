@@ -37,7 +37,7 @@ import org.webpki.xmldsig.XMLSigner;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SignerInterface;
 import org.webpki.crypto.CertificateUtil;
-import org.webpki.keygen2.ServerCredentialStore.PostProvisioningTargetKey;
+import org.webpki.keygen2.ServerKeyGen2State.PostProvisioningTargetKey;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -49,7 +49,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
 
     ServerCookie server_cookie;
 
-    ServerCredentialStore server_credential_store;
+    ServerKeyGen2State server_credential_store;
     
     ServerCryptoInterface server_crypto_interface;
     
@@ -57,7 +57,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
     // Constructors
 
     public ProvisioningFinalizationRequestEncoder (String submit_url, 
-                                                   ServerCredentialStore server_credential_store,
+                                                   ServerKeyGen2State server_credential_store,
                                                    ServerCryptoInterface server_crypto_interface) throws IOException
       {
         this.submit_url = submit_url;
@@ -140,7 +140,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             ////////////////////////////////////////////////////////////////////////
             // Write [0..n] Credentials
             ////////////////////////////////////////////////////////////////////////
-            for (ServerCredentialStore.KeyProperties key : server_credential_store.getKeyProperties ())
+            for (ServerKeyGen2State.KeyProperties key : server_credential_store.getKeyProperties ())
               {
                 wr.addChildElement (CERTIFICATE_PATH_ELEM);
                 wr.setStringAttribute (ID_ATTR, key.id);
@@ -195,7 +195,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                 ////////////////////////////////////////////////////////////////////////
                 // Optional: property bags, extensions, and logotypes
                 ////////////////////////////////////////////////////////////////////////
-                for (ServerCredentialStore.ExtensionInterface ei : key.extensions.values ())
+                for (ServerKeyGen2State.ExtensionInterface ei : key.extensions.values ())
                   {
                     MacGenerator add_ext = new MacGenerator ();
                     add_ext.addArray (ee_cert);
@@ -222,9 +222,9 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             ////////////////////////////////////////////////////////////////////////
             // Optional: post provisioning unlock operations
             ////////////////////////////////////////////////////////////////////////
-            for (ServerCredentialStore.PostProvisioningTargetKey pptk : server_credential_store.post_operations)
+            for (ServerKeyGen2State.PostProvisioningTargetKey pptk : server_credential_store.post_operations)
               {
-                if (pptk.post_operation == ServerCredentialStore.PostOperation.UNLOCK_KEY)
+                if (pptk.post_operation == ServerKeyGen2State.PostOperation.UNLOCK_KEY)
                   {
                     writePostOp (wr, pptk, new MacGenerator ());
                   }
@@ -233,9 +233,9 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             ////////////////////////////////////////////////////////////////////////
             // Optional: post provisioning delete operations
             ////////////////////////////////////////////////////////////////////////
-            for (ServerCredentialStore.PostProvisioningTargetKey pptk : server_credential_store.post_operations)
+            for (ServerKeyGen2State.PostProvisioningTargetKey pptk : server_credential_store.post_operations)
               {
-                if (pptk.post_operation == ServerCredentialStore.PostOperation.DELETE_KEY)
+                if (pptk.post_operation == ServerKeyGen2State.PostOperation.DELETE_KEY)
                   {
                     writePostOp (wr, pptk, new MacGenerator ());
                   }

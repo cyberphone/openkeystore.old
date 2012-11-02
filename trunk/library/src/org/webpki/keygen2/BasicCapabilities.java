@@ -17,6 +17,7 @@
 package org.webpki.keygen2;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import java.util.LinkedHashSet;
 
@@ -25,8 +26,10 @@ import org.webpki.xml.DOMWriterHelper;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class BasicCapabilities
+public class BasicCapabilities implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     LinkedHashSet<String> algorithms = new LinkedHashSet<String> ();
 
     LinkedHashSet<String> client_attributes = new LinkedHashSet<String> ();

@@ -16,8 +16,12 @@
  */
 package org.webpki.keygen2.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 
 import java.math.BigInteger;
 
@@ -108,7 +112,7 @@ import org.webpki.keygen2.ProvisioningInitializationRequestDecoder;
 import org.webpki.keygen2.ProvisioningInitializationRequestEncoder;
 import org.webpki.keygen2.ProvisioningInitializationResponseDecoder;
 import org.webpki.keygen2.ProvisioningInitializationResponseEncoder;
-import org.webpki.keygen2.ServerCredentialStore;
+import org.webpki.keygen2.ServerKeyGen2State;
 import org.webpki.keygen2.ServerCryptoInterface;
 
 import org.webpki.sks.AppUsage;
@@ -230,7 +234,7 @@ public class KeyGen2Test
     static final byte[] BAD_PIN = {0x03, 0x33, 0x03, 0x04};
     
     static X509Certificate server_certificate;
-
+    
     int round;
    
     @BeforeClass
@@ -720,9 +724,9 @@ public class KeyGen2Test
         
         XMLSchemaCache server_xml_cache;
         
-        ServerCredentialStore.PINPolicy pin_policy;
+        ServerKeyGen2State.PINPolicy pin_policy;
 
-        ServerCredentialStore.PUKPolicy puk_policy;
+        ServerKeyGen2State.PUKPolicy puk_policy;
         
         int pin_retry_limit = 3;
 
@@ -734,7 +738,7 @@ public class KeyGen2Test
 
         ProvisioningInitializationResponseDecoder prov_sess_response;
         
-        ServerCredentialStore server_credential_store;
+        ServerKeyGen2State server_credential_store;
         
         PrivateKey gen_private_key;
         
@@ -900,8 +904,7 @@ public class KeyGen2Test
             ////////////////////////////////////////////////////////////////////////////////////
             // Now we can create the container
             ////////////////////////////////////////////////////////////////////////////////////
-            server_credential_store = new ServerCredentialStore (prov_sess_response, prov_sess_request);
-
+            server_credential_store = new ServerKeyGen2State (prov_sess_response, prov_sess_request);
           }
         
         //////////////////////////////////////////////////////////////////////////////////
@@ -1070,7 +1073,7 @@ public class KeyGen2Test
                 key_alg = new KeySpecifier (ask_for_4096 ? KeyAlgorithms.RSA4096 : KeyAlgorithms.RSA2048);
               }
 
-            ServerCredentialStore.KeyProperties kp = device_pin_protection ?
+            ServerKeyGen2State.KeyProperties kp = device_pin_protection ?
                 server_credential_store.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
                   preset_pin ? server_credential_store.createKeyWithPresetPIN (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                                                key_alg, pin_policy,
@@ -1124,21 +1127,21 @@ public class KeyGen2Test
               {
                 kp.setClonedKeyProtection (clone_key_protection.server_credential_store.getClientSessionID (), 
                                            clone_key_protection.server_credential_store.getServerSessionID (),
-                                           clone_key_protection.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
+                                           clone_key_protection.server_credential_store.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
                                            clone_key_protection.server_km);
               }
             if (update_key != null)
               {
                 kp.setUpdatedKey (update_key.server_credential_store.getClientSessionID (), 
                                   update_key.server_credential_store.getServerSessionID (),
-                                  update_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
+                                  update_key.server_credential_store.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
                                   update_key.server_km);
               }
             if (delete_key != null)
               {
                 server_credential_store.addPostDeleteKey (delete_key.server_credential_store.getClientSessionID (), 
                                                           delete_key.server_credential_store.getServerSessionID (),
-                                                          delete_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
+                                                          delete_key.server_credential_store.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
                                                           delete_key.server_km);
               }
             key_create_request = new KeyCreationRequestEncoder (KEY_INIT_URL, server_credential_store, server_sess_key);
@@ -1161,7 +1164,7 @@ public class KeyGen2Test
                 boolean otp = symmetric_key && !encryption_key;
                 KeyCreationResponseDecoder key_init_response = (KeyCreationResponseDecoder) server_xml_cache.parse (xmldata);
                 key_init_response.validateAndPopulate (key_create_request, server_sess_key);
-                for (ServerCredentialStore.KeyProperties key_prop : server_credential_store.getKeyProperties ())
+                for (ServerKeyGen2State.KeyProperties key_prop : server_credential_store.getKeyProperties ())
                   {
                     boolean auth = key_prop.getAppUsage () == AppUsage.AUTHENTICATION;
                     CertSpec cert_spec = new CertSpec ();
@@ -1257,7 +1260,7 @@ public class KeyGen2Test
               {
                 server_credential_store.addPostUnlockKey (plain_unlock_key.server_credential_store.getClientSessionID (), 
                                                           plain_unlock_key.server_credential_store.getServerSessionID (),
-                                                          plain_unlock_key.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getCertificatePath ()[0],
+                                                          plain_unlock_key.server_credential_store.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
                                                           plain_unlock_key.server_km);
               }
             ProvisioningFinalizationRequestEncoder fin_prov_request 
@@ -1275,6 +1278,21 @@ public class KeyGen2Test
           {
             ProvisioningFinalizationResponseDecoder fin_prov_response = (ProvisioningFinalizationResponseDecoder) server_xml_cache.parse (xmldata);
             fin_prov_response.verifyProvisioningResult (server_credential_store, server_sess_key);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Just a small consistency check
+            ///////////////////////////////////////////////////////////////////////////////////
+            ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+            new ObjectOutputStream (baos).writeObject (server_credential_store);
+            byte[] serialized = baos.toByteArray ();
+            try
+              {
+                ServerKeyGen2State scs = (ServerKeyGen2State) new ObjectInputStream (new ByteArrayInputStream (serialized)).readObject ();
+              }
+            catch (ClassNotFoundException e)
+              {
+                throw new IOException (e);
+              }
           }
       }
     
@@ -1534,9 +1552,9 @@ public class KeyGen2Test
         property_bag = true;
         doer.perform ();
         int key_handle = doer.getFirstKey ();
-        ServerCredentialStore.PropertyBag prop_bag = doer.server.server_credential_store.getKeyProperties ().toArray (new ServerCredentialStore.KeyProperties[0])[0].getPropertyBags ()[0];
+        ServerKeyGen2State.PropertyBag prop_bag = doer.server.server_credential_store.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getPropertyBags ()[0];
         Property[] props1 = sks.getExtension (key_handle, prop_bag.getType ()).getProperties ();
-        ServerCredentialStore.Property[] props2 = prop_bag.getProperties ();
+        ServerKeyGen2State.Property[] props2 = prop_bag.getProperties ();
         assertTrue ("Prop len error", props1.length == props2.length);
         int w = 0;
         for (int i = 0; i < props1.length; i++)

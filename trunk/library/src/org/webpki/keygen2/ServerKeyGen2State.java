@@ -46,7 +46,7 @@ import org.webpki.util.MimeTypedObject;
 
 import org.webpki.xml.DOMWriterHelper;
 
-public class ServerCredentialStore implements Serializable
+public class ServerKeyGen2State implements Serializable
   {
     private static final long serialVersionUID = 1L;
     
@@ -996,7 +996,8 @@ public class ServerCredentialStore implements Serializable
           }
       }
 
-
+    BasicCapabilities basic_capabilities = new BasicCapabilities ();
+    
     int next_personal_code = 1;
 
     String key_prefix = "Key.";
@@ -1107,7 +1108,7 @@ public class ServerCredentialStore implements Serializable
  
     // Constructor
 
-    public ServerCredentialStore (ProvisioningInitializationResponseDecoder prov_sess_response,
+    public ServerKeyGen2State (ProvisioningInitializationResponseDecoder prov_sess_response,
                                   ProvisioningInitializationRequestEncoder prov_sess_request) throws IOException
       {
         this.client_session_id = prov_sess_response.client_session_id;

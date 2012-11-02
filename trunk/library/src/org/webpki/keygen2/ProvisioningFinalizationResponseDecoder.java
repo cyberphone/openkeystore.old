@@ -50,7 +50,7 @@ public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinaliz
       }
     
     
-    public void verifyProvisioningResult (ServerCredentialStore server_credential_store,
+    public void verifyProvisioningResult (ServerKeyGen2State server_credential_store,
                                           ServerCryptoInterface server_crypto_interface) throws IOException
       {
         server_credential_store.checkSession (client_session_id, server_session_id);
