@@ -46,10 +46,17 @@ import org.webpki.util.MimeTypedObject;
 
 import org.webpki.xml.DOMWriterHelper;
 
-public class ServerKeyGen2State implements Serializable
+public class ServerState implements Serializable
   {
     private static final long serialVersionUID = 1L;
     
+    public enum ProtocolPhase {PLATFORM_NEGOTIATION,
+                               PROVISIONING_INITIALIZING,
+                               CREDENTIAL_DISCOVERY,
+                               KEY_CREATION,
+                               PROVISIONING_FINALIZATION,
+                               DONE};
+
     enum PostOperation
       {
         DELETE_KEY            (SecureKeyStore.METHOD_POST_DELETE_KEY,           DELETE_KEY_ELEM), 
@@ -998,7 +1005,11 @@ public class ServerKeyGen2State implements Serializable
 
     ServerCryptoInterface server_crypto_interface;
 
-    BasicCapabilities basic_capabilities = new BasicCapabilities ();
+    BasicCapabilities basic_capabilities;
+
+    ProtocolPhase current_phase = ProtocolPhase.PLATFORM_NEGOTIATION;
+    
+    boolean request_phase = true;
     
     int next_personal_code = 1;
 
@@ -1108,26 +1119,55 @@ public class ServerKeyGen2State implements Serializable
     
  
     // Constructor
-    public ServerKeyGen2State (ServerCryptoInterface server_crypto_interface)
+    public ServerState (ServerCryptoInterface server_crypto_interface)
       {
         this.server_crypto_interface = server_crypto_interface;
       }
 
     
-    public void update (ProvisioningInitializationResponseDecoder prov_sess_response)
+    void checkState (boolean request, ProtocolPhase expected) throws IOException
       {
-        this.client_session_id = prov_sess_response.client_session_id;
-        this.device_certificate = prov_sess_response.device_certificate_path == null ? null : prov_sess_response.device_certificate_path[0];
+        if (request ^ request_phase)
+          {
+            throw new IOException ("Wrong order of request versus response");
+          }
+        request_phase = !request_phase;
+        if (current_phase != expected)
+          {
+            throw new IOException ("Incorrect object, expected: " + expected + " got: " + current_phase);
+          }
       }
 
 
-    public void update (ProvisioningInitializationRequestEncoder prov_sess_request)
+    public void update (PlatformNegotiationRequestEncoder platform_request) throws IOException
       {
+        checkState (true, ProtocolPhase.PLATFORM_NEGOTIATION);
+      }
+
+    
+    public void update (PlatformNegotiationResponseDecoder platform_response) throws IOException
+      {
+        checkState (false, ProtocolPhase.PLATFORM_NEGOTIATION);
+        current_phase = ProtocolPhase.PROVISIONING_INITIALIZING;
+      }
+
+
+    public void update (ProvisioningInitializationRequestEncoder prov_sess_request) throws IOException
+      {
+        checkState (true, ProtocolPhase.PROVISIONING_INITIALIZING);
         this.server_session_id = prov_sess_request.server_session_id;
         this.issuer_uri = prov_sess_request.submit_url;
       }
     
     
+    public void update (ProvisioningInitializationResponseDecoder prov_sess_response) throws IOException
+      {
+        checkState (false, ProtocolPhase.PROVISIONING_INITIALIZING);
+        this.client_session_id = prov_sess_response.client_session_id;
+        this.device_certificate = prov_sess_response.device_certificate_path == null ? null : prov_sess_response.device_certificate_path[0];
+      }
+
+
     public void addPostDeleteKey (String old_client_session_id,
                                               String old_server_session_id,
                                               X509Certificate old_key,
@@ -1228,5 +1268,4 @@ public class ServerKeyGen2State implements Serializable
       {
         return addKeyProperties (app_usage, key_specifier, null, null, true);
       }
-
   }

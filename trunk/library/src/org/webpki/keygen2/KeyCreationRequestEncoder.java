@@ -45,7 +45,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
     ServerCookie server_cookie;
     
-    ServerKeyGen2State server_keygen2_state;
+    ServerState server_state;
     
     ServerCryptoInterface server_crypto_interface;
 
@@ -62,11 +62,11 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
     // Constructors
 
     public KeyCreationRequestEncoder (String submit_url,
-                                      ServerKeyGen2State server_keygen2_state,
+                                      ServerState server_state,
                                       ServerCryptoInterface server_crypto_interface) throws IOException
       {
         this.submit_url = submit_url;
-        this.server_keygen2_state = server_keygen2_state;
+        this.server_state = server_state;
         this.server_crypto_interface = server_crypto_interface;
       }
 
@@ -107,11 +107,11 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
         ds.removeXMLSignatureNS ();
         need_signature_ns = true;
         Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_keygen2_state.server_session_id);
+        ds.createEnvelopedSignature (doc, server_state.server_session_id);
       }
     
     
-    private ServerKeyGen2State.PUKPolicy getPUKPolicy (ServerKeyGen2State.KeyProperties kp)
+    private ServerState.PUKPolicy getPUKPolicy (ServerState.KeyProperties kp)
       {
         return kp.pin_policy == null ? null : kp.pin_policy.puk_policy;
       }
@@ -129,9 +129,9 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, server_keygen2_state.server_session_id);
+        wr.setStringAttribute (ID_ATTR, server_state.server_session_id);
 
-        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_keygen2_state.client_session_id);
+        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_state.client_session_id);
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
 
@@ -145,15 +145,15 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
         ////////////////////////////////////////////////////////////////////////
         // There MUST not be zero keys to initialize...
         ////////////////////////////////////////////////////////////////////////
-        if (server_keygen2_state.requested_keys.isEmpty ())
+        if (server_state.requested_keys.isEmpty ())
           {
             bad ("Empty request not allowd!");
           }
-        server_keygen2_state.key_attestation_algorithm = algorithm;
-        ServerKeyGen2State.KeyProperties last_req_key = null;
+        server_state.key_attestation_algorithm = algorithm;
+        ServerState.KeyProperties last_req_key = null;
         try
           {
-            for (ServerKeyGen2State.KeyProperties req_key : server_keygen2_state.requested_keys.values ())
+            for (ServerState.KeyProperties req_key : server_state.requested_keys.values ())
               {
                 if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
                     getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
@@ -221,5 +221,4 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
           }
 
       }
-
   }

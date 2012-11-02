@@ -103,8 +103,7 @@ import org.webpki.keygen2.ProvisioningInitializationRequestDecoder;
 import org.webpki.keygen2.ProvisioningInitializationRequestEncoder;
 import org.webpki.keygen2.ProvisioningInitializationResponseDecoder;
 import org.webpki.keygen2.ProvisioningInitializationResponseEncoder;
-import org.webpki.keygen2.ServerKeyGen2State;
-import org.webpki.keygen2.ServerCryptoInterface;
+import org.webpki.keygen2.ServerState;
 
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.DeleteProtection;
@@ -640,8 +639,8 @@ public class KeyGen2Test
                 if (key.getEncryptedPrivateKey () != null)
                   {
                     sks.importPrivateKey (key_handle, 
-                                           key.getEncryptedPrivateKey (),
-                                           key.getPrivateKeyMac ());
+                                          key.getEncryptedPrivateKey (),
+                                          key.getPrivateKeyMac ());
                   }
 
                 //////////////////////////////////////////////////////////////////////////
@@ -715,9 +714,9 @@ public class KeyGen2Test
         
         XMLSchemaCache server_xml_cache;
         
-        ServerKeyGen2State.PINPolicy pin_policy;
+        ServerState.PINPolicy pin_policy;
 
-        ServerKeyGen2State.PUKPolicy puk_policy;
+        ServerState.PUKPolicy puk_policy;
         
         int pin_retry_limit = 3;
 
@@ -729,7 +728,7 @@ public class KeyGen2Test
 
         ProvisioningInitializationResponseDecoder prov_sess_response;
         
-        ServerKeyGen2State server_keygen2_state;
+        ServerState server_state;
         
         PrivateKey gen_private_key;
         
@@ -767,8 +766,7 @@ public class KeyGen2Test
             ////////////////////////////////////////////////////////////////////////////////////
             // Update the container
             ////////////////////////////////////////////////////////////////////////////////////
-            server_keygen2_state.update (prov_sess_request);
-            server_keygen2_state.update (prov_sess_response);
+            server_state.update (prov_sess_response);
           }
         
         //////////////////////////////////////////////////////////////////////////////////
@@ -777,10 +775,13 @@ public class KeyGen2Test
         byte[] platformRequest () throws IOException, GeneralSecurityException
           {
             ////////////////////////////////////////////////////////////////////////////////////
-            // Now we can create the container
+            // Create the state container
             ////////////////////////////////////////////////////////////////////////////////////
-            server_keygen2_state = new ServerKeyGen2State (server_sess_key);
+            server_state = new ServerState (server_sess_key);
 
+            ////////////////////////////////////////////////////////////////////////////////////
+            // First keygen2 request
+            ////////////////////////////////////////////////////////////////////////////////////
             server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
             platform_request =  new PlatformNegotiationRequestEncoder (server_session_id, PLATFORM_URI);
             platform_request.addLogotype (LOGO_URL, LOGO_MIME, LOGO_SHA256, LOGO_WIDTH, LOGO_HEIGHT);
@@ -808,6 +809,7 @@ public class KeyGen2Test
               {
                 platform_request.setPrivacyEnabled (true);
               }
+            server_state.update (platform_request);
             return platform_request.writeXML ();
           }
 
@@ -817,6 +819,7 @@ public class KeyGen2Test
         byte[] provSessRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             PlatformNegotiationResponseDecoder platform_response = (PlatformNegotiationResponseDecoder) server_xml_cache.parse (xmldata);
+            server_state.update (platform_response);
             BasicCapabilities basic_capabilties = platform_response.getBasicCapabilities ();
             if (ask_for_exponent)
               {
@@ -854,6 +857,7 @@ public class KeyGen2Test
               {
                 prov_sess_request.addClientAttribute (client_attribute);
               }
+            server_state.update (prov_sess_request);
             return prov_sess_request.writeXML ();
           }
 
@@ -899,13 +903,13 @@ public class KeyGen2Test
             if (puk_protection)
               {
                 puk_policy =
-                  server_keygen2_state.createPUKPolicy (server_sess_key.encrypt (new byte[]{'0','1','2','3','4','5','6', '7','8','9'}),
+                  server_state.createPUKPolicy (server_sess_key.encrypt (new byte[]{'0','1','2','3','4','5','6', '7','8','9'}),
                                                                                     PassphraseFormat.NUMERIC,
                                                                                     3);
               }
             if (pin_protection)
               {
-                pin_policy = server_keygen2_state.createPINPolicy (PassphraseFormat.NUMERIC,
+                pin_policy = server_state.createPINPolicy (PassphraseFormat.NUMERIC,
                                                                       4,
                                                                       8,
                                                                       pin_retry_limit,
@@ -942,13 +946,13 @@ public class KeyGen2Test
                 key_alg = new KeySpecifier (ask_for_4096 ? KeyAlgorithms.RSA4096 : KeyAlgorithms.RSA2048);
               }
 
-            ServerKeyGen2State.KeyProperties kp = device_pin_protection ?
-                server_keygen2_state.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
-                  preset_pin ? server_keygen2_state.createKeyWithPresetPIN (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
+            ServerState.KeyProperties kp = device_pin_protection ?
+                server_state.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
+                  preset_pin ? server_state.createKeyWithPresetPIN (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                                                key_alg, pin_policy,
                                                                                server_sess_key.encrypt (PREDEF_SERVER_PIN))
                              :
-            server_keygen2_state.createKey (encryption_key || key_agreement? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
+            server_state.createKey (encryption_key || key_agreement? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                key_alg,
                                                pin_policy);
             if (symmetric_key || encryption_key)
@@ -994,29 +998,29 @@ public class KeyGen2Test
               }
             if (clone_key_protection != null)
               {
-                kp.setClonedKeyProtection (clone_key_protection.server_keygen2_state.getClientSessionID (), 
-                                           clone_key_protection.server_keygen2_state.getServerSessionID (),
-                                           clone_key_protection.server_keygen2_state.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
+                kp.setClonedKeyProtection (clone_key_protection.server_state.getClientSessionID (), 
+                                           clone_key_protection.server_state.getServerSessionID (),
+                                           clone_key_protection.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getCertificatePath ()[0],
                                            clone_key_protection.server_km);
               }
             if (update_key != null)
               {
-                kp.setUpdatedKey (update_key.server_keygen2_state.getClientSessionID (), 
-                                  update_key.server_keygen2_state.getServerSessionID (),
-                                  update_key.server_keygen2_state.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
+                kp.setUpdatedKey (update_key.server_state.getClientSessionID (), 
+                                  update_key.server_state.getServerSessionID (),
+                                  update_key.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getCertificatePath ()[0],
                                   update_key.server_km);
               }
             if (delete_key != null)
               {
-                server_keygen2_state.addPostDeleteKey (delete_key.server_keygen2_state.getClientSessionID (), 
-                                                          delete_key.server_keygen2_state.getServerSessionID (),
-                                                          delete_key.server_keygen2_state.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
-                                                          delete_key.server_km);
+                server_state.addPostDeleteKey (delete_key.server_state.getClientSessionID (), 
+                                               delete_key.server_state.getServerSessionID (),
+                                               delete_key.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getCertificatePath ()[0],
+                                               delete_key.server_km);
               }
-            key_create_request = new KeyCreationRequestEncoder (KEY_INIT_URL, server_keygen2_state, server_sess_key);
+            key_create_request = new KeyCreationRequestEncoder (KEY_INIT_URL, server_state, server_sess_key);
             if (two_keys)
               {
-                server_keygen2_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.P_256), pin_policy);
+                server_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.P_256), pin_policy);
               }
             return key_create_request.writeXML ();
           }
@@ -1033,7 +1037,7 @@ public class KeyGen2Test
                 boolean otp = symmetric_key && !encryption_key;
                 KeyCreationResponseDecoder key_init_response = (KeyCreationResponseDecoder) server_xml_cache.parse (xmldata);
                 key_init_response.validateAndPopulate (key_create_request, server_sess_key);
-                for (ServerKeyGen2State.KeyProperties key_prop : server_keygen2_state.getKeyProperties ())
+                for (ServerState.KeyProperties key_prop : server_state.getKeyProperties ())
                   {
                     boolean auth = key_prop.getAppUsage () == AppUsage.AUTHENTICATION;
                     CertSpec cert_spec = new CertSpec ();
@@ -1127,14 +1131,14 @@ public class KeyGen2Test
               }
             else
               {
-                server_keygen2_state.addPostUnlockKey (plain_unlock_key.server_keygen2_state.getClientSessionID (), 
-                                                       plain_unlock_key.server_keygen2_state.getServerSessionID (),
-                                                       plain_unlock_key.server_keygen2_state.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getCertificatePath ()[0],
-                                                       plain_unlock_key.server_km);
+                server_state.addPostUnlockKey (plain_unlock_key.server_state.getClientSessionID (), 
+                                               plain_unlock_key.server_state.getServerSessionID (),
+                                               plain_unlock_key.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getCertificatePath ()[0],
+                                               plain_unlock_key.server_km);
               }
             ProvisioningFinalizationRequestEncoder fin_prov_request 
                        = new ProvisioningFinalizationRequestEncoder (FIN_PROV_URL, 
-                                                                     server_keygen2_state);
+                                                                     server_state);
 
             return fin_prov_request.writeXML ();
           }
@@ -1145,17 +1149,17 @@ public class KeyGen2Test
         void creFinalizeResponse (byte[] xmldata) throws IOException
           {
             ProvisioningFinalizationResponseDecoder fin_prov_response = (ProvisioningFinalizationResponseDecoder) server_xml_cache.parse (xmldata);
-            fin_prov_response.verifyProvisioningResult (server_keygen2_state);
+            fin_prov_response.verifyProvisioningResult (server_state);
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Just a small consistency check
             ///////////////////////////////////////////////////////////////////////////////////
             ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-            new ObjectOutputStream (baos).writeObject (server_keygen2_state);
+            new ObjectOutputStream (baos).writeObject (server_state);
             byte[] serialized = baos.toByteArray ();
             try
               {
-                ServerKeyGen2State scs = (ServerKeyGen2State) new ObjectInputStream (new ByteArrayInputStream (serialized)).readObject ();
+                ServerState scs = (ServerState) new ObjectInputStream (new ByteArrayInputStream (serialized)).readObject ();
               }
             catch (ClassNotFoundException e)
               {
@@ -1420,9 +1424,9 @@ public class KeyGen2Test
         property_bag = true;
         doer.perform ();
         int key_handle = doer.getFirstKey ();
-        ServerKeyGen2State.PropertyBag prop_bag = doer.server.server_keygen2_state.getKeyProperties ().toArray (new ServerKeyGen2State.KeyProperties[0])[0].getPropertyBags ()[0];
+        ServerState.PropertyBag prop_bag = doer.server.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getPropertyBags ()[0];
         Property[] props1 = sks.getExtension (key_handle, prop_bag.getType ()).getProperties ();
-        ServerKeyGen2State.Property[] props2 = prop_bag.getProperties ();
+        ServerState.Property[] props2 = prop_bag.getProperties ();
         assertTrue ("Prop len error", props1.length == props2.length);
         int w = 0;
         for (int i = 0; i < props1.length; i++)

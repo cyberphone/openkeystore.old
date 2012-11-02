@@ -50,12 +50,12 @@ public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinaliz
       }
     
     
-    public void verifyProvisioningResult (ServerKeyGen2State server_keygen2_state) throws IOException
+    public void verifyProvisioningResult (ServerState server_state) throws IOException
       {
-        server_keygen2_state.checkSession (client_session_id, server_session_id);
+        server_state.checkSession (client_session_id, server_session_id);
         try
           {
-            server_keygen2_state.checkFinalResult (attestation);
+            server_state.checkFinalResult (attestation);
           }
         catch (GeneralSecurityException e)
           {
@@ -88,5 +88,4 @@ public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinaliz
             server_cookie = ServerCookie.read (rd);
           }
       }
-
   }

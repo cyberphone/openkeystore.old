@@ -58,33 +58,33 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
     
     public void validateAndPopulate (KeyCreationRequestEncoder key_init_request, ServerCryptoInterface server_crypto_interface) throws IOException
       {
-        key_init_request.server_keygen2_state.checkSession (client_session_id, server_session_id);
-        if (generated_keys.size () != key_init_request.server_keygen2_state.requested_keys.size ())
+        key_init_request.server_state.checkSession (client_session_id, server_session_id);
+        if (generated_keys.size () != key_init_request.server_state.requested_keys.size ())
           {
-            ServerKeyGen2State.bad ("Different number of requested and received keys");
+            ServerState.bad ("Different number of requested and received keys");
           }
         try
           {
             for (GeneratedPublicKey gpk : generated_keys.values ())
               {
-                ServerKeyGen2State.KeyProperties kp = key_init_request.server_keygen2_state.requested_keys.get (gpk.id);
+                ServerState.KeyProperties kp = key_init_request.server_state.requested_keys.get (gpk.id);
                 if (kp == null)
                   {
-                    ServerKeyGen2State.bad ("Missing key id:" + gpk.id);
+                    ServerState.bad ("Missing key id:" + gpk.id);
                   }
                 if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
                   {
-                    ServerKeyGen2State.bad ("Wrong key type returned for key id:" + gpk.id);
+                    ServerState.bad ("Wrong key type returned for key id:" + gpk.id);
                   }
                 MacGenerator attestation = new MacGenerator ();
                 // Write key attestation data
                 attestation.addString (gpk.id);
                 attestation.addArray (gpk.public_key.getEncoded ());
-                 if (!ArrayUtil.compare (key_init_request.server_keygen2_state.attest (attestation.getResult (),
+                 if (!ArrayUtil.compare (key_init_request.server_state.attest (attestation.getResult (),
                                                                                           kp.expected_attest_mac_count),
                                          kp.attestation = gpk.attestation))
                   {
-                    ServerKeyGen2State.bad ("Attestation failed for key id:" + gpk.id);
+                    ServerState.bad ("Attestation failed for key id:" + gpk.id);
                   }
               }
           }
@@ -125,7 +125,7 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
             rd.getParent ();
             if (generated_keys.put (gk.id, gk) != null)
               {
-                ServerKeyGen2State.bad ("Duplicate key id:" + gk.id);
+                ServerState.bad ("Duplicate key id:" + gk.id);
               }
           }
         while (rd.hasNext (PUBLIC_KEY_ELEM));
@@ -134,6 +134,5 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
           {
             server_cookie = ServerCookie.read (rd);
           }
-     }
-
+      }
   }
