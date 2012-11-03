@@ -18,8 +18,8 @@
     10-pass "combo" three years later.
 
     Properly implemented the current incarnation provides E2ES (End to End Security),
-    VSDs (Virtual Security Domains), and Transaction Oriented Provisioning, which is
-    primarily intended for mobile phones with embedded security hardware hosting
+    VSDs (Virtual Security Domains), and TBP (Transaction Based Provisioning), which
+    is primarily intended for mobile phones with embedded security hardware hosting
     credentials from multiple and independent issuers.
 
     KeyGen2 may be used in the following modes and associated protocol steps:
@@ -28,7 +28,7 @@
 
      - Action="create": ProvisioningInitialization KeyCreation   
      - Action="unlock": ProvisioningInitialization [CredentialDiscovery] 
-     - Action="manage": ProvisioningInitialization [CredentialDiscovery] [KeyCreation] 
+     - Action="update": ProvisioningInitialization [CredentialDiscovery] [KeyCreation] 
      - Action="resume": *
 
      - Mandatory: ProvisioningFinalization *
@@ -59,11 +59,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20120826#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20121103#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20120826#"
+           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20121103#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -1345,7 +1345,7 @@
       <xs:restriction base="xs:string">
          <xs:enumeration value="create"/>
          <xs:enumeration value="unlock"/>
-         <xs:enumeration value="manage"/>
+         <xs:enumeration value="update"/>
          <xs:enumeration value="resume"/>
       </xs:restriction>
    </xs:simpleType>

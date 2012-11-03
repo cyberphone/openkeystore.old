@@ -47,7 +47,7 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
     
     Vector<ImageDescriptor> image_descriptors = new Vector<ImageDescriptor> ();
 
-    Action action = Action.MANAGE;
+    Action action = Action.UPDATE;
 
     boolean needs_dsig_ns;
 

@@ -427,7 +427,7 @@ public class KeyGen2Test
                                                  prov_sess_req.getSessionKeyLimit ());
             provisioning_handle = sess.getProvisioningHandle ();
             
-            ProvisioningInitializationResponseEncoder prov_sess_response = 
+            ProvisioningInitializationResponseEncoder prov_init_response = 
                   new ProvisioningInitializationResponseEncoder (sess.getClientEphemeralKey (),
                                                                  prov_sess_req.getServerSessionID (),
                                                                  sess.getClientSessionID (),
@@ -437,23 +437,23 @@ public class KeyGen2Test
                                                                  platform_req.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
             if (https)
               {
-                prov_sess_response.setServerCertificate (server_certificate);
+                prov_init_response.setServerCertificate (server_certificate);
               }
 
             for (String client_attribute : prov_sess_req.getClientAttributes ())
               {
                 if (client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER))
                   {
-                    prov_sess_response.setClientAttributeValue (client_attribute, "490154203237518");
+                    prov_init_response.setClientAttributeValue (client_attribute, "490154203237518");
                   }
                 else if (client_attribute.equals (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS))
                   {
-                    prov_sess_response.setClientAttributeValue (client_attribute, "fe80::4465:62dc:5fa5:4766%10")
+                    prov_init_response.setClientAttributeValue (client_attribute, "fe80::4465:62dc:5fa5:4766%10")
                                       .setClientAttributeValue (client_attribute, "192.168.0.202");
                   }
               }
 
-            prov_sess_response.signRequest (new SymKeySignerInterface ()
+            prov_init_response.signRequest (new SymKeySignerInterface ()
               {
                 public MacAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
                   {
@@ -465,7 +465,7 @@ public class KeyGen2Test
                     return sks.signProvisioningSessionData (provisioning_handle, data);
                   }
               });
-            return prov_sess_response.writeXML ();
+            return prov_init_response.writeXML ();
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -714,10 +714,6 @@ public class KeyGen2Test
         
         XMLSchemaCache server_xml_cache;
         
-        ServerState.PINPolicy pin_policy;
-
-        ServerState.PUKPolicy puk_policy;
-        
         int pin_retry_limit = 3;
 
         ServerState server_state;
@@ -726,7 +722,7 @@ public class KeyGen2Test
         
         PublicKey server_km;
         
-        SoftHSM server_sess_key = new SoftHSM ();
+        SoftHSM server_crypto_interface = new SoftHSM ();
 
         Server () throws Exception
           {
@@ -743,17 +739,17 @@ public class KeyGen2Test
             ////////////////////////////////////////////////////////////////////////////////////
             // Begin by creating the "SessionKey" that holds the key to just about everything
             ////////////////////////////////////////////////////////////////////////////////////
-            ProvisioningInitializationResponseDecoder prov_sess_response = (ProvisioningInitializationResponseDecoder) xml_object;
+            ProvisioningInitializationResponseDecoder prov_init_response = (ProvisioningInitializationResponseDecoder) xml_object;
 
             ////////////////////////////////////////////////////////////////////////////////////
             // Update the container state.  This is where the action is
             ////////////////////////////////////////////////////////////////////////////////////
-            server_state.update (prov_sess_response, https ? server_certificate : null);
+            server_state.update (prov_init_response, https ? server_certificate : null);
 
             ////////////////////////////////////////////////////////////////////////////////////
             // Here we could/should introduce an SKS identity/brand check
             ////////////////////////////////////////////////////////////////////////////////////
-            X509Certificate[] certificate_path = prov_sess_response.getDeviceCertificatePath ();
+            X509Certificate[] certificate_path = prov_init_response.getDeviceCertificatePath ();
           }
         
         //////////////////////////////////////////////////////////////////////////////////
@@ -764,7 +760,7 @@ public class KeyGen2Test
             ////////////////////////////////////////////////////////////////////////////////////
             // Create the state container
             ////////////////////////////////////////////////////////////////////////////////////
-            server_state = new ServerState (server_sess_key);
+            server_state = new ServerState (server_crypto_interface);
 
             ////////////////////////////////////////////////////////////////////////////////////
             // First keygen2 request
@@ -831,18 +827,14 @@ public class KeyGen2Test
                   }
               }
 
-            ProvisioningInitializationRequestEncoder prov_sess_request = 
+            ProvisioningInitializationRequestEncoder prov_init_request = 
                  new ProvisioningInitializationRequestEncoder (ISSUER_URI, 10000, (short)50);
             if (updatable)
               {
-                prov_sess_request.setKeyManagementKey (server_km = server_sess_key.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
+                prov_init_request.setKeyManagementKey (server_km = server_crypto_interface.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
               }
-            for (String client_attribute : platform_response.getBasicCapabilities ().getClientAttributes ())
-              {
-                prov_sess_request.addClientAttribute (client_attribute);
-              }
-            server_state.update (prov_sess_request);
-            return prov_sess_request.writeXML ();
+            server_state.update (prov_init_request);
+            return prov_init_request.writeXML ();
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -852,15 +844,15 @@ public class KeyGen2Test
           {
             getProvSess (server_xml_cache.parse (xmldata));
             CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder (CRE_DISC_URL);
-            cdre.addLookupDescriptor (server_sess_key.enumerateKeyManagementKeys ()[0]);
+            cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[0]);
 
-            cdre.addLookupDescriptor (server_sess_key.enumerateKeyManagementKeys ()[2])
+            cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[2])
                           .setEmailAddress ("john.doe@example.com");
 
-            cdre.addLookupDescriptor (server_sess_key.enumerateKeyManagementKeys ()[2])
+            cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[2])
                           .setEmailAddress ("jane.doe@example.com");
 
-            cdre.addLookupDescriptor (server_sess_key.enumerateKeyManagementKeys ()[1])
+            cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[1])
                           .setEmailAddress ("john.doe@example.com")
                           .setExcludedPolicies (new String[]{"1.3.4","34.90"})
                           .setPolicy ("5.4.8")
@@ -886,14 +878,19 @@ public class KeyGen2Test
             else
               {
                 CredentialDiscoveryResponseDecoder cdrd = (CredentialDiscoveryResponseDecoder) xml_object;
+                server_state.update (cdrd);
                 CredentialDiscoveryResponseDecoder.LookupResult[] lres = cdrd.getLookupResults ();
 // TODO verify
               }
 
+            ServerState.PINPolicy pin_policy = null;
+
+            ServerState.PUKPolicy puk_policy = null;
+            
             if (puk_protection)
               {
                 puk_policy =
-                  server_state.createPUKPolicy (server_sess_key.encrypt (new byte[]{'0','1','2','3','4','5','6', '7','8','9'}),
+                  server_state.createPUKPolicy (server_crypto_interface.encrypt (new byte[]{'0','1','2','3','4','5','6', '7','8','9'}),
                                                                                     PassphraseFormat.NUMERIC,
                                                                                     3);
               }
@@ -940,7 +937,7 @@ public class KeyGen2Test
                 server_state.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
                   preset_pin ? server_state.createKeyWithPresetPIN (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                                                key_alg, pin_policy,
-                                                                               server_sess_key.encrypt (PREDEF_SERVER_PIN))
+                                                                               server_crypto_interface.encrypt (PREDEF_SERVER_PIN))
                              :
             server_state.createKey (encryption_key || key_agreement? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                key_alg,
@@ -948,7 +945,7 @@ public class KeyGen2Test
             if (symmetric_key || encryption_key)
               {
                 kp.setEndorsedAlgorithms (new String[]{encryption_key ? SymEncryptionAlgorithms.AES256_CBC.getURI () : MacAlgorithms.HMAC_SHA1.getURI ()});
-                kp.setEncryptedSymmetricKey (server_sess_key.encrypt (encryption_key ? AES32BITKEY : OTP_SEED));
+                kp.setEncryptedSymmetricKey (server_crypto_interface.encrypt (encryption_key ? AES32BITKEY : OTP_SEED));
               }
             if (key_agreement)
               {
@@ -962,7 +959,7 @@ public class KeyGen2Test
               }
             if (encrypted_extension)
               {
-                kp.addEncryptedExtension ("http://host/ee", server_sess_key.encrypt (new byte[]{0,5}));
+                kp.addEncryptedExtension ("http://host/ee", server_crypto_interface.encrypt (new byte[]{0,5}));
               }
             if (set_logotype)
               {
@@ -1114,7 +1111,7 @@ public class KeyGen2Test
     
                     if (temp_set_private_key)
                       {
-                        key_prop.setEncryptedPrivateKey (server_sess_key.encrypt (gen_private_key.getEncoded ()));
+                        key_prop.setEncryptedPrivateKey (server_crypto_interface.encrypt (gen_private_key.getEncoded ()));
                         temp_set_private_key = false;
                       }
     
@@ -1127,11 +1124,10 @@ public class KeyGen2Test
                                                plain_unlock_key.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getCertificatePath ()[0],
                                                plain_unlock_key.server_km);
               }
-            ProvisioningFinalizationRequestEncoder fin_prov_request 
-                       = new ProvisioningFinalizationRequestEncoder (FIN_PROV_URL, 
-                                                                     server_state);
 
-            return fin_prov_request.writeXML ();
+            ProvisioningFinalizationRequestEncoder prov_final_request = new ProvisioningFinalizationRequestEncoder (FIN_PROV_URL);
+            server_state.update (prov_final_request);
+            return prov_final_request.writeXML ();
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1139,8 +1135,8 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         void creFinalizeResponse (byte[] xmldata) throws IOException
           {
-            ProvisioningFinalizationResponseDecoder fin_prov_response = (ProvisioningFinalizationResponseDecoder) server_xml_cache.parse (xmldata);
-            fin_prov_response.verifyProvisioningResult (server_state);
+            ProvisioningFinalizationResponseDecoder prov_final_response = (ProvisioningFinalizationResponseDecoder) server_xml_cache.parse (xmldata);
+            server_state.update (prov_final_response);
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Just a small consistency check

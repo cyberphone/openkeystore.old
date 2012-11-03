@@ -102,9 +102,9 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
 
     private Vector<LookupResult> lookup_results = new Vector<LookupResult> ();
     
-    private String client_session_id;
+    String client_session_id;
 
-    private String server_session_id;
+    String server_session_id;
 
     private ServerCookie server_cookie;                     // Optional
 

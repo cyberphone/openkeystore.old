@@ -77,13 +77,6 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
       }
     
     
-    public ProvisioningInitializationRequestEncoder addClientAttribute (String client_attribute)
-      {
-        client_attributes.add (client_attribute);
-        return this;
-      }
-
-
     public void setPrefix (String prefix)
       {
         this.prefix = prefix;

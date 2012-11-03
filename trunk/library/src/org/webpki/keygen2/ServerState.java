@@ -40,7 +40,6 @@ import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SymKeyVerifierInterface;
-import org.webpki.keygen2.KeyCreationResponseDecoder.GeneratedPublicKey;
 
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
@@ -1195,18 +1194,22 @@ public class ServerState implements Serializable
       }
 
 
-    public void update (ProvisioningInitializationRequestEncoder prov_sess_request) throws IOException
+    public void update (ProvisioningInitializationRequestEncoder prov_init_request) throws IOException
       {
         try
           {
             checkState (true, ProtocolPhase.PROVISIONING_INITIALIZATION);
-            issuer_uri = prov_sess_request.submit_url;
-            prov_sess_request.server_session_id = server_session_id;
-            provisioning_session_algorithm = prov_sess_request.algorithm;
-            server_ephemeral_key = prov_sess_request.server_ephemeral_key = server_crypto_interface.generateEphemeralKey ();
-            key_management_key = prov_sess_request.key_management_key;
-            session_life_time = prov_sess_request.session_life_time;
-            session_key_limit = prov_sess_request.session_key_limit;
+            issuer_uri = prov_init_request.submit_url;
+            prov_init_request.server_session_id = server_session_id;
+            provisioning_session_algorithm = prov_init_request.algorithm;
+            server_ephemeral_key = prov_init_request.server_ephemeral_key = server_crypto_interface.generateEphemeralKey ();
+            key_management_key = prov_init_request.key_management_key;
+            session_life_time = prov_init_request.session_life_time;
+            session_key_limit = prov_init_request.session_key_limit;
+            for (String client_attribute : basic_capabilities.client_attributes)
+              {
+                prov_init_request.client_attributes.add (client_attribute);
+              }
           }
         catch (GeneralSecurityException e)
           {
@@ -1215,15 +1218,15 @@ public class ServerState implements Serializable
       }
     
     
-    public void update (ProvisioningInitializationResponseDecoder prov_sess_response, X509Certificate server_certificate) throws IOException
+    public void update (ProvisioningInitializationResponseDecoder prov_init_response, X509Certificate server_certificate) throws IOException
       {
         try
           {
             checkState (false, ProtocolPhase.PROVISIONING_INITIALIZATION);
-            client_session_id = prov_sess_response.client_session_id;
-            device_certificate = prov_sess_response.device_certificate_path == null ? null : prov_sess_response.device_certificate_path[0];
-            client_ephemeral_key = prov_sess_response.client_ephemeral_key;
-            client_attribute_values = prov_sess_response.client_attribute_values;
+            client_session_id = prov_init_response.client_session_id;
+            device_certificate = prov_init_response.device_certificate_path == null ? null : prov_init_response.device_certificate_path[0];
+            client_ephemeral_key = prov_init_response.client_ephemeral_key;
+            client_attribute_values = prov_init_response.client_attribute_values;
 
             MacGenerator kdf = new MacGenerator ();
             kdf.addString (client_session_id);
@@ -1237,7 +1240,7 @@ public class ServerState implements Serializable
             session_key_mac_data.addArray (server_ephemeral_key.getEncoded ());
             session_key_mac_data.addArray (client_ephemeral_key.getEncoded ());
             session_key_mac_data.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
-            session_key_mac_data.addInt ((int) (prov_sess_response.client_time.getTime () / 1000));
+            session_key_mac_data.addInt ((int) (prov_init_response.client_time.getTime () / 1000));
             session_key_mac_data.addInt (session_life_time);
             session_key_mac_data.addShort (session_key_limit);
 
@@ -1245,9 +1248,9 @@ public class ServerState implements Serializable
                                                                  kdf.getResult (),
                                                                  session_key_mac_data.getResult (),
                                                                  device_certificate == null ? null : device_certificate,
-                                                                 prov_sess_response.attestation);
-            if (((server_certificate == null ^ prov_sess_response.server_certificate_fingerprint == null)) ||
-                (server_certificate != null && !ArrayUtil.compare (prov_sess_response.server_certificate_fingerprint, 
+                                                                 prov_init_response.attestation);
+            if (((server_certificate == null ^ prov_init_response.server_certificate_fingerprint == null)) ||
+                (server_certificate != null && !ArrayUtil.compare (prov_init_response.server_certificate_fingerprint, 
                                                                    HashAlgorithms.SHA256.digest (server_certificate.getEncoded ()))))
               {
                 throw new IOException ("Attribute '" + SERVER_CERT_FP_ATTR + "' is missing or is invalid");
@@ -1259,13 +1262,15 @@ public class ServerState implements Serializable
                   {
                     return ArrayUtil.compare (server_crypto_interface.mac (data, SecureKeyStore.KDF_EXTERNAL_SIGNATURE), digest);
                   }
-              }).validateEnvelopedSignature (prov_sess_response, null, prov_sess_response.signature, client_session_id);
+              }).validateEnvelopedSignature (prov_init_response, null, prov_init_response.signature, client_session_id);
           }
         catch (GeneralSecurityException e)
           {
             throw new IOException (e);
           }
+        current_phase = ProtocolPhase.CREDENTIAL_DISCOVERY;
       }
+
 
     public void update (CredentialDiscoveryRequestEncoder credential_discovery_request)
       {
@@ -1275,12 +1280,76 @@ public class ServerState implements Serializable
       }
 
 
+    public void update (CredentialDiscoveryResponseDecoder credential_discovery_response) throws IOException
+      {
+        checkSession (credential_discovery_response.client_session_id, credential_discovery_response.server_session_id);
+      }
+
+
     public void update (KeyCreationRequestEncoder key_create_request)
       {
         key_create_request.server_state = this;
       }
 
+
+    public void update (KeyCreationResponseDecoder key_create_response) throws IOException
+      {
+        checkSession (key_create_response.client_session_id, key_create_response.server_session_id);
+        if (key_create_response.generated_keys.size () != requested_keys.size ())
+          {
+            ServerState.bad ("Different number of requested and received keys");
+          }
+        try
+          {
+            for (KeyCreationResponseDecoder.GeneratedPublicKey gpk : key_create_response.generated_keys.values ())
+              {
+                ServerState.KeyProperties kp = requested_keys.get (gpk.id);
+                if (kp == null)
+                  {
+                    ServerState.bad ("Missing key id:" + gpk.id);
+                  }
+                if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
+                  {
+                    ServerState.bad ("Wrong key type returned for key id:" + gpk.id);
+                  }
+                MacGenerator attestation = new MacGenerator ();
+                // Write key attestation data
+                attestation.addString (gpk.id);
+                attestation.addArray (gpk.public_key.getEncoded ());
+                 if (!ArrayUtil.compare (attest (attestation.getResult (), kp.expected_attest_mac_count),
+                                         kp.attestation = gpk.attestation))
+                  {
+                    ServerState.bad ("Attestation failed for key id:" + gpk.id);
+                  }
+              }
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
+      }
+
     
+    public void update (ProvisioningFinalizationRequestEncoder fin_prov_request)
+      {
+        fin_prov_request.server_state = this;
+      }
+
+    
+    public void update (ProvisioningFinalizationResponseDecoder prov_final_response) throws IOException
+      {
+        checkSession (prov_final_response.client_session_id, prov_final_response.server_session_id);
+        try
+          {
+            checkFinalResult (prov_final_response.attestation);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
+      }
+
+
     public BasicCapabilities getBasicCapabilities ()
       {
         return basic_capabilities;
@@ -1392,42 +1461,5 @@ public class ServerState implements Serializable
     public KeyProperties createDevicePINProtectedKey (AppUsage app_usage, KeySpecifier key_specifier) throws IOException
       {
         return addKeyProperties (app_usage, key_specifier, null, null, true);
-      }
-
-    public void update (KeyCreationResponseDecoder key_init_response) throws IOException
-      {
-        checkSession (key_init_response.client_session_id, key_init_response.server_session_id);
-        if (key_init_response.generated_keys.size () != requested_keys.size ())
-          {
-            ServerState.bad ("Different number of requested and received keys");
-          }
-        try
-          {
-            for (GeneratedPublicKey gpk : key_init_response.generated_keys.values ())
-              {
-                ServerState.KeyProperties kp = requested_keys.get (gpk.id);
-                if (kp == null)
-                  {
-                    ServerState.bad ("Missing key id:" + gpk.id);
-                  }
-                if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
-                  {
-                    ServerState.bad ("Wrong key type returned for key id:" + gpk.id);
-                  }
-                MacGenerator attestation = new MacGenerator ();
-                // Write key attestation data
-                attestation.addString (gpk.id);
-                attestation.addArray (gpk.public_key.getEncoded ());
-                 if (!ArrayUtil.compare (attest (attestation.getResult (), kp.expected_attest_mac_count),
-                                         kp.attestation = gpk.attestation))
-                  {
-                    ServerState.bad ("Attestation failed for key id:" + gpk.id);
-                  }
-              }
-          }
-        catch (GeneralSecurityException e)
-          {
-            throw new IOException (e);
-          }
       }
   }

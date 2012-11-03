@@ -56,11 +56,9 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
    
     // Constructors
 
-    public ProvisioningFinalizationRequestEncoder (String submit_url, 
-                                                   ServerState server_state) throws IOException
+    public ProvisioningFinalizationRequestEncoder (String submit_url) throws IOException
       {
         this.submit_url = submit_url;
-        this.server_state = server_state;
       }
 
 

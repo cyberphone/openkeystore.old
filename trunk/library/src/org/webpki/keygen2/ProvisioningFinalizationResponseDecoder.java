@@ -29,11 +29,11 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinalizationResponse
   {
       
-    private String client_session_id;
+    String client_session_id;
 
-    private String server_session_id;
+    String server_session_id;
     
-    private byte[] attestation;
+    byte[] attestation;
 
     private ServerCookie server_cookie;     // Optional
 
@@ -50,20 +50,6 @@ public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinaliz
       }
     
     
-    public void verifyProvisioningResult (ServerState server_state) throws IOException
-      {
-        server_state.checkSession (client_session_id, server_session_id);
-        try
-          {
-            server_state.checkFinalResult (attestation);
-          }
-        catch (GeneralSecurityException e)
-          {
-            throw new IOException (e);
-          }
-      }
-
-
     protected void fromXML (DOMReaderHelper rd) throws IOException
       {
         DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
