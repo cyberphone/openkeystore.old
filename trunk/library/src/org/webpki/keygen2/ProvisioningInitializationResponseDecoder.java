@@ -22,29 +22,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
+
 import java.security.interfaces.ECPublicKey;
 
-import org.webpki.sks.SecureKeyStore;
-import org.webpki.util.ArrayUtil;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
-import org.webpki.xmldsig.XMLSymKeyVerifier;
-
-import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.MacAlgorithms;
-import org.webpki.crypto.SymKeyVerifierInterface;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
 public class ProvisioningInitializationResponseDecoder extends ProvisioningInitializationResponse
   {
-    private XMLSignatureWrapper signature;
+    XMLSignatureWrapper signature;
 
 
     public String getServerSessionID ()
@@ -104,64 +97,6 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
     public HashMap<String,HashSet<String>> getClientAttributeValues ()
       {
         return client_attribute_values;
-      }
-
-
-    class XMLSignVer implements SymKeyVerifierInterface
-      {
-        ServerCryptoInterface server_crypto_interface;
-        
-        XMLSignVer (ServerCryptoInterface server_crypto_interface)
-          {
-            this.server_crypto_interface = server_crypto_interface;
-          }
-
-        @Override
-        public boolean verifyData (byte[] data, byte[] digest, MacAlgorithms algorithm) throws IOException, GeneralSecurityException
-          {
-            return ArrayUtil.compare (server_crypto_interface.mac (data, SecureKeyStore.KDF_EXTERNAL_SIGNATURE), digest);
-          }
-      }
-
-
-    public void verifyAndGenerateSessionKey (ServerCryptoInterface server_crypto_interface,
-                                             ProvisioningInitializationRequestEncoder prov_sess_request,
-                                             X509Certificate server_certificate) throws IOException
-      {
-        try
-          {
-            MacGenerator kdf = new MacGenerator ();
-            kdf.addString (client_session_id);
-            kdf.addString (server_session_id);
-            kdf.addString (prov_sess_request.submit_url);
-            kdf.addArray (device_certificate_path == null ? SecureKeyStore.KDF_ANONYMOUS : device_certificate_path[0].getEncoded ());
-
-            MacGenerator session_key_mac_data = new MacGenerator ();
-            session_key_mac_data.addString (prov_sess_request.algorithm);
-            session_key_mac_data.addBool (device_certificate_path == null);
-            session_key_mac_data.addArray (prov_sess_request.server_ephemeral_key.getEncoded ());
-            session_key_mac_data.addArray (client_ephemeral_key.getEncoded ());
-            session_key_mac_data.addArray (prov_sess_request.key_management_key == null ? new byte[0] : prov_sess_request.key_management_key.getEncoded ());
-            session_key_mac_data.addInt ((int) (client_time.getTime () / 1000));
-            session_key_mac_data.addInt (prov_sess_request.session_life_time);
-            session_key_mac_data.addShort (prov_sess_request.session_key_limit);
-
-            server_crypto_interface.generateAndVerifySessionKey (client_ephemeral_key,
-                                                                 kdf.getResult (),
-                                                                 session_key_mac_data.getResult (),
-                                                                 device_certificate_path == null ? null : device_certificate_path[0],
-                                                                 attestation);
-            if (((server_certificate == null ^ server_certificate_fingerprint == null)) ||
-                (server_certificate != null && !ArrayUtil.compare (server_certificate_fingerprint, HashAlgorithms.SHA256.digest (server_certificate.getEncoded ()))))
-              {
-                throw new IOException ("Attribute '" + SERVER_CERT_FP_ATTR + "' is missing or is invalid");
-              }
-          }
-        catch (GeneralSecurityException e)
-          {
-            throw new IOException (e);
-          }
-        new XMLSymKeyVerifier (new XMLSignVer (server_crypto_interface)).validateEnvelopedSignature (this, null, signature, client_session_id);
       }
 
 

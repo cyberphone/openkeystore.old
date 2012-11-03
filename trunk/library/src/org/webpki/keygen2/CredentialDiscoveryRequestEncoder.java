@@ -50,10 +50,10 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryRequest
   {
+    ServerCryptoInterface server_crypto_interface;
+
     public class LookupDescriptor extends XMLObjectWrapper implements XMLEnvelopedInput, AsymKeySignerInterface
       {
-        ServerCryptoInterface server_crypto_interface;
-
         PublicKey key_management_key;
 
         String id;
@@ -72,9 +72,8 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         Document root;
         
 
-        LookupDescriptor (ServerCryptoInterface server_crypto_interface, PublicKey key_management_key)
+        LookupDescriptor (PublicKey key_management_key)
           {
-            this.server_crypto_interface = server_crypto_interface;
             this.key_management_key = key_management_key;
             this.id = lookup_prefix + ++next_lookup_id_suffix;
           }
@@ -269,11 +268,8 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
 
     // Constructors
 
-    public CredentialDiscoveryRequestEncoder (ProvisioningInitializationResponseDecoder prov_sess_dec,
-                                              String submit_url)
+    public CredentialDiscoveryRequestEncoder (String submit_url)
       {
-        super.server_session_id = prov_sess_dec.server_session_id;
-        super.client_session_id = prov_sess_dec.client_session_id;
         super.submit_url = submit_url;
       }
 
@@ -299,9 +295,9 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
       }
 
     
-    public LookupDescriptor addLookupDescriptor (ServerCryptoInterface server_crypto_interface, PublicKey key_management_key)
+    public LookupDescriptor addLookupDescriptor (PublicKey key_management_key)
       {
-        LookupDescriptor lo_des = new LookupDescriptor (server_crypto_interface, key_management_key);
+        LookupDescriptor lo_des = new LookupDescriptor (key_management_key);
         lookup_descriptors.add (lo_des);
         if (key_management_key instanceof ECPublicKey)
           {

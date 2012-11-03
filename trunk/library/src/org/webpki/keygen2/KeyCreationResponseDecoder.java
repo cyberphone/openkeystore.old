@@ -36,7 +36,7 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class KeyCreationResponseDecoder extends KeyCreationResponse
   {
-    private LinkedHashMap<String,GeneratedPublicKey> generated_keys = new LinkedHashMap<String,GeneratedPublicKey> ();
+    LinkedHashMap<String,GeneratedPublicKey> generated_keys = new LinkedHashMap<String,GeneratedPublicKey> ();
 
     class GeneratedPublicKey
       {
@@ -56,45 +56,6 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
       }
     
     
-    public void validateAndPopulate (KeyCreationRequestEncoder key_init_request, ServerCryptoInterface server_crypto_interface) throws IOException
-      {
-        key_init_request.server_state.checkSession (client_session_id, server_session_id);
-        if (generated_keys.size () != key_init_request.server_state.requested_keys.size ())
-          {
-            ServerState.bad ("Different number of requested and received keys");
-          }
-        try
-          {
-            for (GeneratedPublicKey gpk : generated_keys.values ())
-              {
-                ServerState.KeyProperties kp = key_init_request.server_state.requested_keys.get (gpk.id);
-                if (kp == null)
-                  {
-                    ServerState.bad ("Missing key id:" + gpk.id);
-                  }
-                if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
-                  {
-                    ServerState.bad ("Wrong key type returned for key id:" + gpk.id);
-                  }
-                MacGenerator attestation = new MacGenerator ();
-                // Write key attestation data
-                attestation.addString (gpk.id);
-                attestation.addArray (gpk.public_key.getEncoded ());
-                 if (!ArrayUtil.compare (key_init_request.server_state.attest (attestation.getResult (),
-                                                                                          kp.expected_attest_mac_count),
-                                         kp.attestation = gpk.attestation))
-                  {
-                    ServerState.bad ("Attestation failed for key id:" + gpk.id);
-                  }
-              }
-          }
-        catch (GeneralSecurityException e)
-          {
-            throw new IOException (e);
-          }
-      }
-
-
     /////////////////////////////////////////////////////////////////////////////////////////////
     // XML Reader
     /////////////////////////////////////////////////////////////////////////////////////////////

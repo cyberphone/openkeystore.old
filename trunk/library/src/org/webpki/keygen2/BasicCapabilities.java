@@ -148,4 +148,24 @@ public class BasicCapabilities implements Serializable
       {
         return extensions.toArray (new String[0]);
       }
+
+
+    public void checkCapabilities (BasicCapabilities actual_capabilities) throws IOException
+      {
+         checkCompliance (algorithms, actual_capabilities.algorithms);
+         checkCompliance (client_attributes, actual_capabilities.client_attributes);
+         checkCompliance (extensions, actual_capabilities.extensions);
+      }
+
+
+    private void checkCompliance (LinkedHashSet<String> requested_features, LinkedHashSet<String> supported_features) throws IOException
+      {
+        for (String feature : supported_features)
+          {
+            if (!requested_features.contains (feature))
+              {
+                throw new IOException ("Unexpected feature: " + feature);
+              }
+          }
+      }
   }

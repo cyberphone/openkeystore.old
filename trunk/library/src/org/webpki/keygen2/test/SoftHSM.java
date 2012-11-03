@@ -71,7 +71,7 @@ public class SoftHSM implements ServerCryptoInterface
                                  (PrivateKey) km_keystore.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
       }
     
-    SoftHSM () throws IOException, GeneralSecurityException
+    public SoftHSM () throws IOException, GeneralSecurityException
       {
         addKMK (DemoKeyStore.getMybankDotComKeyStore ());
         addKMK (DemoKeyStore.getSubCAKeyStore ());

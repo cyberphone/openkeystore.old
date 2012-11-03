@@ -23,13 +23,24 @@ import java.io.Serializable;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+
 import java.security.cert.X509Certificate;
+
+import java.security.interfaces.ECPublicKey;
 
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Vector;
+
+import org.webpki.crypto.HashAlgorithms;
+import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.MacAlgorithms;
+import org.webpki.crypto.SymKeyVerifierInterface;
+import org.webpki.keygen2.KeyCreationResponseDecoder.GeneratedPublicKey;
 
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
@@ -46,12 +57,14 @@ import org.webpki.util.MimeTypedObject;
 
 import org.webpki.xml.DOMWriterHelper;
 
+import org.webpki.xmldsig.XMLSymKeyVerifier;
+
 public class ServerState implements Serializable
   {
     private static final long serialVersionUID = 1L;
     
     public enum ProtocolPhase {PLATFORM_NEGOTIATION,
-                               PROVISIONING_INITIALIZING,
+                               PROVISIONING_INITIALIZATION,
                                CREDENTIAL_DISCOVERY,
                                KEY_CREATION,
                                PROVISIONING_FINALIZATION,
@@ -849,7 +862,7 @@ public class ServerState implements Serializable
         public KeyProperties setClonedKeyProtection (String old_client_session_id, 
                                                      String old_server_session_id,
                                                      X509Certificate old_key,
-                                                     PublicKey key_management_key) throws IOException, GeneralSecurityException
+                                                     PublicKey key_management_key) throws IOException
           {
             PostProvisioningTargetKey op = addPostOperation (old_client_session_id,
                                                              old_server_session_id,
@@ -863,7 +876,7 @@ public class ServerState implements Serializable
         public KeyProperties setUpdatedKey (String old_client_session_id, 
                                             String old_server_session_id,
                                             X509Certificate old_key,
-                                            PublicKey key_management_key) throws IOException, GeneralSecurityException
+                                            PublicKey key_management_key) throws IOException
           { 
             PostProvisioningTargetKey op = addPostOperation (old_client_session_id,
                                                              old_server_session_id,
@@ -1003,9 +1016,21 @@ public class ServerState implements Serializable
           }
       }
 
+    public Collection<KeyProperties> getKeyProperties ()
+      {
+        return requested_keys.values ();
+      }
+
+    public ProtocolPhase getProtocolPhase ()
+      {
+        return current_phase;
+      }
+
     ServerCryptoInterface server_crypto_interface;
 
     BasicCapabilities basic_capabilities;
+    
+    HashMap<String,HashSet<String>> client_attribute_values;
 
     ProtocolPhase current_phase = ProtocolPhase.PLATFORM_NEGOTIATION;
     
@@ -1029,18 +1054,25 @@ public class ServerState implements Serializable
 
     LinkedHashMap<String,KeyProperties> requested_keys = new LinkedHashMap<String,KeyProperties> ();
     
-    public Collection<KeyProperties> getKeyProperties ()
-      {
-        return requested_keys.values ();
-      }
-
     String server_session_id;
 
     String client_session_id;
     
     String issuer_uri;
+
+    int session_life_time;
+
+    short session_key_limit;
+    
+    String provisioning_session_algorithm;
     
     String key_attestation_algorithm;
+    
+    ECPublicKey server_ephemeral_key;
+    
+    ECPublicKey client_ephemeral_key;
+    
+    PublicKey key_management_key;
     
     byte[] saved_close_nonce;
     
@@ -1050,29 +1082,36 @@ public class ServerState implements Serializable
                                                 String old_server_session_id,
                                                 X509Certificate old_key,
                                                 PostOperation operation,
-                                                PublicKey key_management_key) throws IOException, GeneralSecurityException
+                                                PublicKey key_management_key) throws IOException
       {
-        PostProvisioningTargetKey new_post_op = new PostProvisioningTargetKey (old_client_session_id,
-                                                                               old_server_session_id,
-                                                                               old_key.getEncoded (),
-                                                                               key_management_key,
-                                                                               operation);
-        for (PostProvisioningTargetKey post_op : post_operations)
+        try
           {
-            if (post_op.equals (new_post_op))
+            PostProvisioningTargetKey new_post_op = new PostProvisioningTargetKey (old_client_session_id,
+                                                                                   old_server_session_id,
+                                                                                   old_key.getEncoded (),
+                                                                                   key_management_key,
+                                                                                   operation);
+            for (PostProvisioningTargetKey post_op : post_operations)
               {
-                if (post_op.post_operation == PostOperation.DELETE_KEY || new_post_op.post_operation == PostOperation.DELETE_KEY)
+                if (post_op.equals (new_post_op))
                   {
-                    bad ("DeleteKey cannot be combined with other management operations");
-                  }
-                if (post_op.post_operation == PostOperation.UPDATE_KEY || new_post_op.post_operation == PostOperation.UPDATE_KEY)
-                  {
-                    bad ("UpdateKey can only be performed once per key");
+                    if (post_op.post_operation == PostOperation.DELETE_KEY || new_post_op.post_operation == PostOperation.DELETE_KEY)
+                      {
+                        bad ("DeleteKey cannot be combined with other management operations");
+                      }
+                    if (post_op.post_operation == PostOperation.UPDATE_KEY || new_post_op.post_operation == PostOperation.UPDATE_KEY)
+                      {
+                        bad ("UpdateKey can only be performed once per key");
+                      }
                   }
               }
+            post_operations.add (new_post_op);
+            return new_post_op;
           }
-        post_operations.add (new_post_op);
-        return new_post_op;
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
       }
     
     void checkSession (String client_session_id, String server_session_id) throws IOException
@@ -1142,36 +1181,122 @@ public class ServerState implements Serializable
     public void update (PlatformNegotiationRequestEncoder platform_request) throws IOException
       {
         checkState (true, ProtocolPhase.PLATFORM_NEGOTIATION);
+        server_session_id = platform_request.server_session_id;
+        basic_capabilities = platform_request.basic_capabilities;
       }
 
     
     public void update (PlatformNegotiationResponseDecoder platform_response) throws IOException
       {
         checkState (false, ProtocolPhase.PLATFORM_NEGOTIATION);
-        current_phase = ProtocolPhase.PROVISIONING_INITIALIZING;
+        current_phase = ProtocolPhase.PROVISIONING_INITIALIZATION;
+        basic_capabilities.checkCapabilities (platform_response.basic_capabilities);
+        basic_capabilities = platform_response.basic_capabilities;
       }
 
 
     public void update (ProvisioningInitializationRequestEncoder prov_sess_request) throws IOException
       {
-        checkState (true, ProtocolPhase.PROVISIONING_INITIALIZING);
-        this.server_session_id = prov_sess_request.server_session_id;
-        this.issuer_uri = prov_sess_request.submit_url;
+        try
+          {
+            checkState (true, ProtocolPhase.PROVISIONING_INITIALIZATION);
+            issuer_uri = prov_sess_request.submit_url;
+            prov_sess_request.server_session_id = server_session_id;
+            provisioning_session_algorithm = prov_sess_request.algorithm;
+            server_ephemeral_key = prov_sess_request.server_ephemeral_key = server_crypto_interface.generateEphemeralKey ();
+            key_management_key = prov_sess_request.key_management_key;
+            session_life_time = prov_sess_request.session_life_time;
+            session_key_limit = prov_sess_request.session_key_limit;
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
       }
     
     
-    public void update (ProvisioningInitializationResponseDecoder prov_sess_response) throws IOException
+    public void update (ProvisioningInitializationResponseDecoder prov_sess_response, X509Certificate server_certificate) throws IOException
       {
-        checkState (false, ProtocolPhase.PROVISIONING_INITIALIZING);
-        this.client_session_id = prov_sess_response.client_session_id;
-        this.device_certificate = prov_sess_response.device_certificate_path == null ? null : prov_sess_response.device_certificate_path[0];
+        try
+          {
+            checkState (false, ProtocolPhase.PROVISIONING_INITIALIZATION);
+            client_session_id = prov_sess_response.client_session_id;
+            device_certificate = prov_sess_response.device_certificate_path == null ? null : prov_sess_response.device_certificate_path[0];
+            client_ephemeral_key = prov_sess_response.client_ephemeral_key;
+            client_attribute_values = prov_sess_response.client_attribute_values;
+
+            MacGenerator kdf = new MacGenerator ();
+            kdf.addString (client_session_id);
+            kdf.addString (server_session_id);
+            kdf.addString (issuer_uri);
+            kdf.addArray (device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : device_certificate.getEncoded ());
+
+            MacGenerator session_key_mac_data = new MacGenerator ();
+            session_key_mac_data.addString (provisioning_session_algorithm);
+            session_key_mac_data.addBool (device_certificate == null);
+            session_key_mac_data.addArray (server_ephemeral_key.getEncoded ());
+            session_key_mac_data.addArray (client_ephemeral_key.getEncoded ());
+            session_key_mac_data.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
+            session_key_mac_data.addInt ((int) (prov_sess_response.client_time.getTime () / 1000));
+            session_key_mac_data.addInt (session_life_time);
+            session_key_mac_data.addShort (session_key_limit);
+
+            server_crypto_interface.generateAndVerifySessionKey (client_ephemeral_key,
+                                                                 kdf.getResult (),
+                                                                 session_key_mac_data.getResult (),
+                                                                 device_certificate == null ? null : device_certificate,
+                                                                 prov_sess_response.attestation);
+            if (((server_certificate == null ^ prov_sess_response.server_certificate_fingerprint == null)) ||
+                (server_certificate != null && !ArrayUtil.compare (prov_sess_response.server_certificate_fingerprint, 
+                                                                   HashAlgorithms.SHA256.digest (server_certificate.getEncoded ()))))
+              {
+                throw new IOException ("Attribute '" + SERVER_CERT_FP_ATTR + "' is missing or is invalid");
+              }
+            new XMLSymKeyVerifier (new SymKeyVerifierInterface()
+              {
+                @Override
+                public boolean verifyData (byte[] data, byte[] digest, MacAlgorithms algorithm) throws IOException, GeneralSecurityException
+                  {
+                    return ArrayUtil.compare (server_crypto_interface.mac (data, SecureKeyStore.KDF_EXTERNAL_SIGNATURE), digest);
+                  }
+              }).validateEnvelopedSignature (prov_sess_response, null, prov_sess_response.signature, client_session_id);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
+      }
+
+    public void update (CredentialDiscoveryRequestEncoder credential_discovery_request)
+      {
+        credential_discovery_request.client_session_id = client_session_id;
+        credential_discovery_request.server_session_id = server_session_id;
+        credential_discovery_request.server_crypto_interface = server_crypto_interface;
       }
 
 
+    public void update (KeyCreationRequestEncoder key_create_request)
+      {
+        key_create_request.server_state = this;
+      }
+
+    
+    public BasicCapabilities getBasicCapabilities ()
+      {
+        return basic_capabilities;
+      }
+
+
+    public HashMap<String,HashSet<String>> getClientAttributeValues ()
+      {
+        return client_attribute_values;
+      }
+
+    
     public void addPostDeleteKey (String old_client_session_id,
-                                              String old_server_session_id,
-                                              X509Certificate old_key,
-                                              PublicKey key_management_key) throws IOException, GeneralSecurityException
+                                  String old_server_session_id,
+                                  X509Certificate old_key,
+                                  PublicKey key_management_key) throws IOException
       {
         addPostOperation (old_client_session_id, 
                           old_server_session_id,
@@ -1182,9 +1307,9 @@ public class ServerState implements Serializable
 
   
     public void addPostUnlockKey (String old_client_session_id,
-                                              String old_server_session_id,
-                                              X509Certificate old_key,
-                                              PublicKey key_management_key) throws IOException, GeneralSecurityException
+                                  String old_server_session_id,
+                                  X509Certificate old_key,
+                                  PublicKey key_management_key) throws IOException
       {
         addPostOperation (old_client_session_id, 
         old_server_session_id,
@@ -1267,5 +1392,42 @@ public class ServerState implements Serializable
     public KeyProperties createDevicePINProtectedKey (AppUsage app_usage, KeySpecifier key_specifier) throws IOException
       {
         return addKeyProperties (app_usage, key_specifier, null, null, true);
+      }
+
+    public void update (KeyCreationResponseDecoder key_init_response) throws IOException
+      {
+        checkSession (key_init_response.client_session_id, key_init_response.server_session_id);
+        if (key_init_response.generated_keys.size () != requested_keys.size ())
+          {
+            ServerState.bad ("Different number of requested and received keys");
+          }
+        try
+          {
+            for (GeneratedPublicKey gpk : key_init_response.generated_keys.values ())
+              {
+                ServerState.KeyProperties kp = requested_keys.get (gpk.id);
+                if (kp == null)
+                  {
+                    ServerState.bad ("Missing key id:" + gpk.id);
+                  }
+                if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
+                  {
+                    ServerState.bad ("Wrong key type returned for key id:" + gpk.id);
+                  }
+                MacGenerator attestation = new MacGenerator ();
+                // Write key attestation data
+                attestation.addString (gpk.id);
+                attestation.addArray (gpk.public_key.getEncoded ());
+                 if (!ArrayUtil.compare (attest (attestation.getResult (), kp.expected_attest_mac_count),
+                                         kp.attestation = gpk.attestation))
+                  {
+                    ServerState.bad ("Attestation failed for key id:" + gpk.id);
+                  }
+              }
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
       }
   }

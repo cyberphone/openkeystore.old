@@ -19,7 +19,6 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.security.PublicKey;
-import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
 import java.util.Date;
@@ -44,14 +43,10 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
 
     // Constructors
 
-    public ProvisioningInitializationRequestEncoder (ECPublicKey server_ephemeral_key,
-                                                     String server_session_id,
-                                                     String submit_url,
+    public ProvisioningInitializationRequestEncoder (String submit_url,
                                                      int session_life_time,
                                                      short session_key_limit)  throws IOException
       {
-        super.server_ephemeral_key = server_ephemeral_key;
-        super.server_session_id = server_session_id;
         super.submit_url = submit_url;
         super.session_life_time = session_life_time;
         super.session_key_limit = session_key_limit;

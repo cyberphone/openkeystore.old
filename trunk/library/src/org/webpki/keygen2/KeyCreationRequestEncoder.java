@@ -47,9 +47,6 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
     
     ServerState server_state;
     
-    ServerCryptoInterface server_crypto_interface;
-
-    
     private boolean need_signature_ns;
     
     Vector<String> written_pin = new Vector<String> ();
@@ -61,13 +58,9 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
     // Constructors
 
-    public KeyCreationRequestEncoder (String submit_url,
-                                      ServerState server_state,
-                                      ServerCryptoInterface server_crypto_interface) throws IOException
+    public KeyCreationRequestEncoder (String submit_url) throws IOException
       {
         this.submit_url = submit_url;
-        this.server_state = server_state;
-        this.server_crypto_interface = server_crypto_interface;
       }
 
 

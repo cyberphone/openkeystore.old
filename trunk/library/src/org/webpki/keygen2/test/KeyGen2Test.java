@@ -720,22 +720,12 @@ public class KeyGen2Test
         
         int pin_retry_limit = 3;
 
-        PlatformNegotiationRequestEncoder platform_request;
-
-        KeyCreationRequestEncoder key_create_request;
-        
-        ProvisioningInitializationRequestEncoder prov_sess_request;
-
-        ProvisioningInitializationResponseDecoder prov_sess_response;
-        
         ServerState server_state;
         
         PrivateKey gen_private_key;
         
         PublicKey server_km;
         
-        String server_session_id;
-
         SoftHSM server_sess_key = new SoftHSM ();
 
         Server () throws Exception
@@ -751,22 +741,19 @@ public class KeyGen2Test
         void getProvSess (XMLObjectWrapper xml_object) throws IOException
           {
             ////////////////////////////////////////////////////////////////////////////////////
-            // Begin with creating the "SessionKey" that holds just about everything
+            // Begin by creating the "SessionKey" that holds the key to just about everything
             ////////////////////////////////////////////////////////////////////////////////////
-            prov_sess_response = (ProvisioningInitializationResponseDecoder) xml_object;
-            prov_sess_response.verifyAndGenerateSessionKey (server_sess_key,
-                                                            prov_sess_request,
-                                                            https ? server_certificate : null);
+            ProvisioningInitializationResponseDecoder prov_sess_response = (ProvisioningInitializationResponseDecoder) xml_object;
+
+            ////////////////////////////////////////////////////////////////////////////////////
+            // Update the container state.  This is where the action is
+            ////////////////////////////////////////////////////////////////////////////////////
+            server_state.update (prov_sess_response, https ? server_certificate : null);
 
             ////////////////////////////////////////////////////////////////////////////////////
             // Here we could/should introduce an SKS identity/brand check
             ////////////////////////////////////////////////////////////////////////////////////
             X509Certificate[] certificate_path = prov_sess_response.getDeviceCertificatePath ();
-
-            ////////////////////////////////////////////////////////////////////////////////////
-            // Update the container
-            ////////////////////////////////////////////////////////////////////////////////////
-            server_state.update (prov_sess_response);
           }
         
         //////////////////////////////////////////////////////////////////////////////////
@@ -782,8 +769,8 @@ public class KeyGen2Test
             ////////////////////////////////////////////////////////////////////////////////////
             // First keygen2 request
             ////////////////////////////////////////////////////////////////////////////////////
-            server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
-            platform_request =  new PlatformNegotiationRequestEncoder (server_session_id, PLATFORM_URI);
+            String server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
+            PlatformNegotiationRequestEncoder platform_request =  new PlatformNegotiationRequestEncoder (server_session_id, PLATFORM_URI);
             platform_request.addLogotype (LOGO_URL, LOGO_MIME, LOGO_SHA256, LOGO_WIDTH, LOGO_HEIGHT);
             BasicCapabilities basic_capabilities = platform_request.getBasicCapabilities ();
             if (ask_for_4096)
@@ -844,11 +831,8 @@ public class KeyGen2Test
                   }
               }
 
-            prov_sess_request =  new ProvisioningInitializationRequestEncoder (server_sess_key.generateEphemeralKey (),
-                                                                               server_session_id,
-                                                                               ISSUER_URI,
-                                                                               10000,
-                                                                               (short)50);
+            ProvisioningInitializationRequestEncoder prov_sess_request = 
+                 new ProvisioningInitializationRequestEncoder (ISSUER_URI, 10000, (short)50);
             if (updatable)
               {
                 prov_sess_request.setKeyManagementKey (server_km = server_sess_key.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
@@ -867,11 +851,16 @@ public class KeyGen2Test
         byte[] creDiscRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             getProvSess (server_xml_cache.parse (xmldata));
-            CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder (prov_sess_response, CRE_DISC_URL);
-            cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[0]);
-            cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[2]).setEmailAddress ("john.doe@example.com");
-            cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[2]).setEmailAddress ("jane.doe@example.com");
-            cdre.addLookupDescriptor (server_sess_key, server_sess_key.enumerateKeyManagementKeys ()[1])
+            CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder (CRE_DISC_URL);
+            cdre.addLookupDescriptor (server_sess_key.enumerateKeyManagementKeys ()[0]);
+
+            cdre.addLookupDescriptor (server_sess_key.enumerateKeyManagementKeys ()[2])
+                          .setEmailAddress ("john.doe@example.com");
+
+            cdre.addLookupDescriptor (server_sess_key.enumerateKeyManagementKeys ()[2])
+                          .setEmailAddress ("jane.doe@example.com");
+
+            cdre.addLookupDescriptor (server_sess_key.enumerateKeyManagementKeys ()[1])
                           .setEmailAddress ("john.doe@example.com")
                           .setExcludedPolicies (new String[]{"1.3.4","34.90"})
                           .setPolicy ("5.4.8")
@@ -880,6 +869,7 @@ public class KeyGen2Test
                           .setIssuedAfter (new Date ())
                           .setSubjectRegEx ("CN=John")
                           .setIssuerRegEx ("CN=Root CA");
+            server_state.update (cdre);
             return cdre.writeXML ();
           }
 
@@ -1017,11 +1007,12 @@ public class KeyGen2Test
                                                delete_key.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getCertificatePath ()[0],
                                                delete_key.server_km);
               }
-            key_create_request = new KeyCreationRequestEncoder (KEY_INIT_URL, server_state, server_sess_key);
             if (two_keys)
               {
                 server_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.P_256), pin_policy);
               }
+            KeyCreationRequestEncoder key_create_request = new KeyCreationRequestEncoder (KEY_INIT_URL);
+            server_state.update (key_create_request);
             return key_create_request.writeXML ();
           }
 
@@ -1036,7 +1027,7 @@ public class KeyGen2Test
                 boolean temp_set_private_key = set_private_key;
                 boolean otp = symmetric_key && !encryption_key;
                 KeyCreationResponseDecoder key_init_response = (KeyCreationResponseDecoder) server_xml_cache.parse (xmldata);
-                key_init_response.validateAndPopulate (key_create_request, server_sess_key);
+                server_state.update (key_init_response);
                 for (ServerState.KeyProperties key_prop : server_state.getKeyProperties ())
                   {
                     boolean auth = key_prop.getAppUsage () == AppUsage.AUTHENTICATION;
@@ -1056,7 +1047,7 @@ public class KeyGen2Test
                             cert_spec.setKeyUsageBit (KeyUsageBits.keyEncipherment);
                           }
                       }
-                    String extra = get_client_attributes ? ", SerialNumber=" + prov_sess_response.getClientAttributeValues ().get (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER).iterator ().next () : "";
+                    String extra = get_client_attributes ? ", SerialNumber=" + server_state.getClientAttributeValues ().get (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER).iterator ().next () : "";
                     cert_spec.setSubject ("CN=KeyGen2 " + _name.getMethodName() + ", E=john.doe@example.com" +
                                           (otp ? ", OU=OTP Key" : extra));
                     otp = false;
