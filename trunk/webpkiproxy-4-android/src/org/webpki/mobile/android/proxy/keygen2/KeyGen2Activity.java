@@ -8,6 +8,7 @@ import android.widget.TextView;
 import org.webpki.mobile.android.proxy.R;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
+import org.webpki.android.keygen2.KeyCreationRequestDecoder;
 import org.webpki.android.keygen2.PlatformNegotiationRequestDecoder;
 import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
 
@@ -19,7 +20,10 @@ public class KeyGen2Activity extends BaseProxyActivity
 
 	PlatformNegotiationRequestDecoder platform_request;
 	
-	ProvisioningInitializationRequestDecoder prov_sess_req;
+	ProvisioningInitializationRequestDecoder prov_init_request;
+	
+	KeyCreationRequestDecoder key_creation_request;
+	
 	
 	int provisioning_handle;
 	
