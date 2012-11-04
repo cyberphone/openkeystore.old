@@ -290,7 +290,7 @@ public class KeyGen2Test
         
         int provisioning_handle;
         
-        KeyCreationRequestDecoder key_create_request;
+        KeyCreationRequestDecoder key_creation_request;
         
         ProvisioningInitializationRequestDecoder prov_sess_req;
         
@@ -517,11 +517,11 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] keyCreResponse (byte[] xmldata) throws IOException
           {
-            key_create_request = (KeyCreationRequestDecoder) client_xml_cache.parse (xmldata);
-            KeyCreationResponseEncoder key_init_response = new KeyCreationResponseEncoder (key_create_request);
+            key_creation_request = (KeyCreationRequestDecoder) client_xml_cache.parse (xmldata);
+            KeyCreationResponseEncoder key_creation_response = new KeyCreationResponseEncoder (key_creation_request);
             int pin_policy_handle = 0;
             int puk_policy_handle = 0;
-            for (KeyCreationRequestDecoder.KeyObject key : key_create_request.getKeyObjects ())
+            for (KeyCreationRequestDecoder.KeyObject key : key_creation_request.getKeyObjects ())
               {
                 byte[] pin_value = key.getPresetPIN ();
                 if (key.getPINPolicy () == null)
@@ -565,7 +565,7 @@ public class KeyGen2Test
                   }
                 KeyData key_data = sks.createKeyEntry (provisioning_handle,
                                                        key.getID (),
-                                                       key_create_request.getAlgorithm (),
+                                                       key_creation_request.getAlgorithm (),
                                                        key.getServerSeed (),
                                                        key.isDevicePINProtected (),
                                                        pin_policy_handle,
@@ -580,11 +580,11 @@ public class KeyGen2Test
                                                        key.getKeySpecifier ().getParameters (),
                                                        key.getEndorsedAlgorithms (),
                                                        key.getMAC ());
-                key_init_response.addPublicKey (key_data.getPublicKey (),
-                                                key_data.getAttestation (),
-                                                key.getID ());
+                key_creation_response.addPublicKey (key_data.getPublicKey (),
+                                                    key_data.getAttestation (),
+                                                    key.getID ());
               }
-            return key_init_response.writeXML ();
+            return key_creation_response.writeXML ();
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -592,7 +592,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] creFinalizeResponse (byte[] xmldata) throws IOException, GeneralSecurityException
           {
-            ProvisioningFinalizationRequestDecoder fin_prov_request =
+            ProvisioningFinalizationRequestDecoder prov_final_request =
                            (ProvisioningFinalizationRequestDecoder) client_xml_cache.parse (xmldata);
             /* 
                Note: we could have used the saved provisioning_handle but that would not
@@ -605,11 +605,11 @@ public class KeyGen2Test
                 if ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), true)) == null)
                   {
                     abort ("Provisioning session not found:" + 
-                           fin_prov_request.getClientSessionID () + "/" +
-                           fin_prov_request.getServerSessionID ());
+                           prov_final_request.getClientSessionID () + "/" +
+                           prov_final_request.getServerSessionID ());
                   }
-                if (eps.getClientSessionID ().equals(fin_prov_request.getClientSessionID ()) &&
-                    eps.getServerSessionID ().equals (fin_prov_request.getServerSessionID ()))
+                if (eps.getClientSessionID ().equals(prov_final_request.getClientSessionID ()) &&
+                    eps.getServerSessionID ().equals (prov_final_request.getServerSessionID ()))
                   {
                     break;
                   }
@@ -618,7 +618,7 @@ public class KeyGen2Test
             //////////////////////////////////////////////////////////////////////////
             // Final check, do these keys match the request?
             //////////////////////////////////////////////////////////////////////////
-            for (ProvisioningFinalizationRequestDecoder.DeployedKeyEntry key : fin_prov_request.getDeployedKeyEntrys ())
+            for (ProvisioningFinalizationRequestDecoder.DeployedKeyEntry key : prov_final_request.getDeployedKeyEntrys ())
               {
                 int key_handle = sks.getKeyHandle (eps.getProvisioningHandle (), key.getID ());
                 sks.setCertificatePath (key_handle, key.getCertificatePath (), key.getMAC ());
@@ -669,7 +669,7 @@ public class KeyGen2Test
             //////////////////////////////////////////////////////////////////////////
             // There may be any number of postUnlockKey
             //////////////////////////////////////////////////////////////////////////
-            for (ProvisioningFinalizationRequestDecoder.PostOperation post_unl : fin_prov_request.getPostUnlockKeys ())
+            for (ProvisioningFinalizationRequestDecoder.PostOperation post_unl : prov_final_request.getPostUnlockKeys ())
               {
                 postProvisioning (post_unl, eps.getProvisioningHandle ());
               }
@@ -677,7 +677,7 @@ public class KeyGen2Test
             //////////////////////////////////////////////////////////////////////////
             // There may be any number of postDeleteKey
             //////////////////////////////////////////////////////////////////////////
-            for (ProvisioningFinalizationRequestDecoder.PostOperation post_del : fin_prov_request.getPostDeleteKeys ())
+            for (ProvisioningFinalizationRequestDecoder.PostOperation post_del : prov_final_request.getPostDeleteKeys ())
               {
                 postProvisioning (post_del, eps.getProvisioningHandle ());
               }
@@ -686,10 +686,10 @@ public class KeyGen2Test
             // Create final and attested message
             //////////////////////////////////////////////////////////////////////////
             ProvisioningFinalizationResponseEncoder fin_prov_response = 
-                new ProvisioningFinalizationResponseEncoder (fin_prov_request,
+                new ProvisioningFinalizationResponseEncoder (prov_final_request,
                                                              sks.closeProvisioningSession (eps.getProvisioningHandle (),
-                                                                                           fin_prov_request.getCloseSessionNonce (),
-                                                                                           fin_prov_request.getCloseSessionMAC ()));
+                                                                                           prov_final_request.getCloseSessionNonce (),
+                                                                                           prov_final_request.getCloseSessionMAC ()));
             return fin_prov_response.writeXML ();
           }
       }
@@ -987,21 +987,21 @@ public class KeyGen2Test
               {
                 kp.setClonedKeyProtection (clone_key_protection.server_state.getClientSessionID (), 
                                            clone_key_protection.server_state.getServerSessionID (),
-                                           clone_key_protection.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getCertificatePath ()[0],
+                                           clone_key_protection.server_state.getKeyProperties ()[0].getCertificatePath ()[0],
                                            clone_key_protection.server_km);
               }
             if (update_key != null)
               {
                 kp.setUpdatedKey (update_key.server_state.getClientSessionID (), 
                                   update_key.server_state.getServerSessionID (),
-                                  update_key.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getCertificatePath ()[0],
+                                  update_key.server_state.getKeyProperties ()[0].getCertificatePath ()[0],
                                   update_key.server_km);
               }
             if (delete_key != null)
               {
                 server_state.addPostDeleteKey (delete_key.server_state.getClientSessionID (), 
                                                delete_key.server_state.getServerSessionID (),
-                                               delete_key.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getCertificatePath ()[0],
+                                               delete_key.server_state.getKeyProperties ()[0].getCertificatePath ()[0],
                                                delete_key.server_km);
               }
             if (two_keys)
@@ -1119,9 +1119,13 @@ public class KeyGen2Test
               }
             else
               {
+                CredentialDiscoveryResponseDecoder cdrd = (CredentialDiscoveryResponseDecoder) server_xml_cache.parse (xmldata);
+                server_state.update (cdrd);
+                CredentialDiscoveryResponseDecoder.LookupResult[] lres = cdrd.getLookupResults ();
+// TODO verify
                 server_state.addPostUnlockKey (plain_unlock_key.server_state.getClientSessionID (), 
                                                plain_unlock_key.server_state.getServerSessionID (),
-                                               plain_unlock_key.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getCertificatePath ()[0],
+                                               plain_unlock_key.server_state.getKeyProperties ()[0].getCertificatePath ()[0],
                                                plain_unlock_key.server_km);
               }
 
@@ -1411,7 +1415,7 @@ public class KeyGen2Test
         property_bag = true;
         doer.perform ();
         int key_handle = doer.getFirstKey ();
-        ServerState.PropertyBag prop_bag = doer.server.server_state.getKeyProperties ().toArray (new ServerState.KeyProperties[0])[0].getPropertyBags ()[0];
+        ServerState.PropertyBag prop_bag = doer.server.server_state.getKeyProperties ()[0].getPropertyBags ()[0];
         Property[] props1 = sks.getExtension (key_handle, prop_bag.getType ()).getProperties ();
         ServerState.Property[] props2 = prop_bag.getProperties ();
         assertTrue ("Prop len error", props1.length == props2.length);

@@ -28,7 +28,6 @@ import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
 
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1015,9 +1014,9 @@ public class ServerState implements Serializable
           }
       }
 
-    public Collection<KeyProperties> getKeyProperties ()
+    public KeyProperties[] getKeyProperties ()
       {
-        return requested_keys.values ();
+        return requested_keys.values ().toArray (new KeyProperties[0]);
       }
 
     public ProtocolPhase getProtocolPhase ()
@@ -1272,8 +1271,9 @@ public class ServerState implements Serializable
       }
 
 
-    public void update (CredentialDiscoveryRequestEncoder credential_discovery_request)
+    public void update (CredentialDiscoveryRequestEncoder credential_discovery_request) throws IOException
       {
+        checkState (true, ProtocolPhase.CREDENTIAL_DISCOVERY);
         credential_discovery_request.client_session_id = client_session_id;
         credential_discovery_request.server_session_id = server_session_id;
         credential_discovery_request.server_crypto_interface = server_crypto_interface;
@@ -1282,18 +1282,23 @@ public class ServerState implements Serializable
 
     public void update (CredentialDiscoveryResponseDecoder credential_discovery_response) throws IOException
       {
+        checkState (false, ProtocolPhase.CREDENTIAL_DISCOVERY);
         checkSession (credential_discovery_response.client_session_id, credential_discovery_response.server_session_id);
+        current_phase = ProtocolPhase.KEY_CREATION;
       }
 
 
-    public void update (KeyCreationRequestEncoder key_create_request)
+    public void update (KeyCreationRequestEncoder key_create_request) throws IOException
       {
+        checkState (true, current_phase == ProtocolPhase.CREDENTIAL_DISCOVERY ? ProtocolPhase.CREDENTIAL_DISCOVERY : ProtocolPhase.KEY_CREATION);
         key_create_request.server_state = this;
+        current_phase = ProtocolPhase.KEY_CREATION;
       }
 
 
     public void update (KeyCreationResponseDecoder key_create_response) throws IOException
       {
+        checkState (false, ProtocolPhase.KEY_CREATION);
         checkSession (key_create_response.client_session_id, key_create_response.server_session_id);
         if (key_create_response.generated_keys.size () != requested_keys.size ())
           {
@@ -1327,17 +1332,21 @@ public class ServerState implements Serializable
           {
             throw new IOException (e);
           }
+        current_phase = ProtocolPhase.PROVISIONING_FINALIZATION;
       }
 
     
-    public void update (ProvisioningFinalizationRequestEncoder fin_prov_request)
+    public void update (ProvisioningFinalizationRequestEncoder fin_prov_request) throws IOException
       {
+        checkState (true, current_phase == ProtocolPhase.KEY_CREATION? ProtocolPhase.KEY_CREATION : ProtocolPhase.PROVISIONING_FINALIZATION);
         fin_prov_request.server_state = this;
+        current_phase = ProtocolPhase.PROVISIONING_FINALIZATION;
       }
 
     
     public void update (ProvisioningFinalizationResponseDecoder prov_final_response) throws IOException
       {
+        checkState (false, ProtocolPhase.PROVISIONING_FINALIZATION);
         checkSession (prov_final_response.client_session_id, prov_final_response.server_session_id);
         try
           {
@@ -1347,6 +1356,7 @@ public class ServerState implements Serializable
           {
             throw new IOException (e);
           }
+        current_phase = ProtocolPhase.DONE;
       }
 
 
