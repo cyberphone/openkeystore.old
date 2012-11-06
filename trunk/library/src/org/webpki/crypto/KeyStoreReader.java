@@ -23,8 +23,10 @@ import java.security.KeyStore;
 
 import org.webpki.util.ArrayUtil;
 
-public abstract class KeyStoreReader
+public class KeyStoreReader
   {
+    private KeyStoreReader () {} // No instantiation
+
     public static KeyStore loadKeyStore (String keystore_file_name, String password) throws IOException
       {
         try

@@ -43,6 +43,7 @@ import org.webpki.crypto.SymKeyVerifierInterface;
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
 import org.webpki.sks.DeleteProtection;
+import org.webpki.sks.DeviceID;
 import org.webpki.sks.ExportProtection;
 import org.webpki.sks.InputMethod;
 import org.webpki.sks.Grouping;
@@ -1357,6 +1358,12 @@ public class ServerState implements Serializable
             throw new IOException (e);
           }
         current_phase = ProtocolPhase.DONE;
+      }
+
+    
+    public String getDeviceID ()
+      {
+        return DeviceID.getDeviceID (device_certificate);
       }
 
 
