@@ -136,7 +136,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             ////////////////////////////////////////////////////////////////////////
             // Write [0..n] Credentials
             ////////////////////////////////////////////////////////////////////////
-            for (ServerState.KeyProperties key : server_state.getKeyProperties ())
+            for (ServerState.Key key : server_state.getKeys ())
               {
                 wr.addChildElement (CERTIFICATE_PATH_ELEM);
                 wr.setStringAttribute (ID_ATTR, key.id);

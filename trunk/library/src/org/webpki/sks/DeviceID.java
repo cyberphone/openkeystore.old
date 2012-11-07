@@ -27,9 +27,9 @@ public class DeviceID
     private DeviceID () {}  // No instantiation
     
     private static final char[] MODIFIED_BASE32 = {'A','B','C','D','E','F','G','H',
-                                                   'I','J','K','L','M','N','7','P',
-                                                   'Q','R','S','T','U','V','W','X',
-                                                   'Y','Z','1','2','3','4','5','6'};
+                                                   'I','J','K','L','M','N','P','Q',
+                                                   'R','S','T','U','V','W','X','Y',
+                                                   'Z','1','2','3','4','5','6','7'};
 
     private static byte[] half (byte[] data)
       {
@@ -60,7 +60,7 @@ public class DeviceID
         return result;
       }
 
-    public static String getDeviceID (X509Certificate device_certificate_or_null)
+    public static String getDeviceID (X509Certificate device_certificate_or_null, char optional_divider)
       {
         if (device_certificate_or_null != null)
           {
@@ -74,9 +74,9 @@ public class DeviceID
                 StringBuffer buffer = new StringBuffer ();
                 for (int bit_position = 0; bit_position < 180; bit_position += 5)
                   {
-                    if (bit_position > 0 && bit_position % 20 == 0)
+                    if (bit_position > 0 && bit_position % 20 == 0 && optional_divider != 0)
                       {
-                        buffer.append ('-');
+                        buffer.append (optional_divider);
                       }
                     int bit_position_in_byte = bit_position % 8;
                     int index = bit_position / 8;

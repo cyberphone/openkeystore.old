@@ -104,7 +104,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
       }
     
     
-    private ServerState.PUKPolicy getPUKPolicy (ServerState.KeyProperties kp)
+    private ServerState.PUKPolicy getPUKPolicy (ServerState.Key kp)
       {
         return kp.pin_policy == null ? null : kp.pin_policy.puk_policy;
       }
@@ -143,10 +143,10 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
             bad ("Empty request not allowd!");
           }
         server_state.key_attestation_algorithm = algorithm;
-        ServerState.KeyProperties last_req_key = null;
+        ServerState.Key last_req_key = null;
         try
           {
-            for (ServerState.KeyProperties req_key : server_state.requested_keys.values ())
+            for (ServerState.Key req_key : server_state.requested_keys.values ())
               {
                 if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
                     getPUKPolicy (last_req_key) != getPUKPolicy (req_key))

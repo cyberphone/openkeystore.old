@@ -558,7 +558,7 @@ public class ServerState implements Serializable
       }
 
 
-    public class KeyProperties implements Serializable
+    public class Key implements Serializable
       {
         private static final long serialVersionUID = 1L;
 
@@ -601,7 +601,7 @@ public class ServerState implements Serializable
 
         Object object;
         
-        public KeyProperties setUserObject (Object object)
+        public Key setUserObject (Object object)
           {
             this.object = object;
             return this;
@@ -613,19 +613,19 @@ public class ServerState implements Serializable
           }
 
 
-        public KeyProperties addExtension (String type, byte[] data) throws IOException
+        public Key addExtension (String type, byte[] data) throws IOException
           {
             addExtension (new Extension (type, data));
             return this;
           }
 
-        public KeyProperties addEncryptedExtension (String type, byte[] encrypted_data) throws IOException
+        public Key addEncryptedExtension (String type, byte[] encrypted_data) throws IOException
           {
             addExtension (new EncryptedExtension (type, encrypted_data));
             return this;
           }
 
-        public KeyProperties addLogotype (String type, MimeTypedObject logotype) throws IOException
+        public Key addLogotype (String type, MimeTypedObject logotype) throws IOException
           {
             addExtension (new Logotype (type, logotype));
             return this;
@@ -634,7 +634,7 @@ public class ServerState implements Serializable
 
         X509Certificate[] certificate_path;
         
-        public KeyProperties setCertificatePath (X509Certificate[] certificate_path)
+        public Key setCertificatePath (X509Certificate[] certificate_path)
           {
             this.certificate_path = certificate_path;
             return this;
@@ -648,7 +648,7 @@ public class ServerState implements Serializable
 
         byte[] encrypted_symmetric_key;
         
-        public KeyProperties setEncryptedSymmetricKey (byte[] encrypted_symmetric_key) throws IOException
+        public Key setEncryptedSymmetricKey (byte[] encrypted_symmetric_key) throws IOException
           {
             this.encrypted_symmetric_key = encrypted_symmetric_key;
             return this;
@@ -657,7 +657,7 @@ public class ServerState implements Serializable
 
         String[] endorsed_algorithms;
 
-        public KeyProperties setEndorsedAlgorithms (String[] endorsed_algorithms) throws IOException
+        public Key setEndorsedAlgorithms (String[] endorsed_algorithms) throws IOException
           {
             this.endorsed_algorithms = BasicCapabilities.getSortedAlgorithms (endorsed_algorithms);
             return this;
@@ -672,7 +672,7 @@ public class ServerState implements Serializable
 
         byte[] encrypted_private_key;
         
-        public KeyProperties setEncryptedPrivateKey (byte[] encrypted_private_key)
+        public Key setEncryptedPrivateKey (byte[] encrypted_private_key)
           {
             this.encrypted_private_key = encrypted_private_key;
             return this;
@@ -686,7 +686,7 @@ public class ServerState implements Serializable
         
         String friendly_name;
 
-        public KeyProperties setFriendlyName (String friendly_name)
+        public Key setFriendlyName (String friendly_name)
           {
             this.friendly_name = friendly_name;
             return this;
@@ -716,7 +716,7 @@ public class ServerState implements Serializable
 
         ExportProtection export_protection;
         
-        public KeyProperties setExportProtection (ExportProtection export_protection)
+        public Key setExportProtection (ExportProtection export_protection)
           {
             this.export_protection = export_protection;
             return this;
@@ -730,7 +730,7 @@ public class ServerState implements Serializable
         
         byte[] server_seed;
         
-        public KeyProperties setServerSeed (byte[] server_seed) throws IOException
+        public Key setServerSeed (byte[] server_seed) throws IOException
           {
             if (server_seed.length > 32 || server_seed.length == 0)
               {
@@ -744,7 +744,7 @@ public class ServerState implements Serializable
         boolean enable_pin_caching;
         boolean enable_pin_caching_set;
         
-        public KeyProperties setEnablePINCaching (boolean flag)
+        public Key setEnablePINCaching (boolean flag)
           {
             enable_pin_caching = flag;
             enable_pin_caching_set = true;
@@ -760,7 +760,7 @@ public class ServerState implements Serializable
         boolean trust_anchor;
         boolean trust_anchor_set;
         
-        public KeyProperties setTrustAnchor (boolean flag)
+        public Key setTrustAnchor (boolean flag)
           {
             trust_anchor = flag;
             trust_anchor_set = true;
@@ -775,7 +775,7 @@ public class ServerState implements Serializable
         
         BiometricProtection biometric_protection;
         
-        public KeyProperties setBiometricProtection (BiometricProtection biometric_protection) throws IOException
+        public Key setBiometricProtection (BiometricProtection biometric_protection) throws IOException
           {
             // TODO there must be some PIN-related tests here...
             this.biometric_protection = biometric_protection;
@@ -790,7 +790,7 @@ public class ServerState implements Serializable
 
         DeleteProtection delete_protection;
         
-        public KeyProperties setDeleteProtection (DeleteProtection delete_protection) throws IOException
+        public Key setDeleteProtection (DeleteProtection delete_protection) throws IOException
           {
             // TODO there must be some PIN-related tests here...
             this.delete_protection = delete_protection;
@@ -858,7 +858,7 @@ public class ServerState implements Serializable
           }
         
      
-        public KeyProperties setClonedKeyProtection (String old_client_session_id, 
+        public Key setClonedKeyProtection (String old_client_session_id, 
                                                      String old_server_session_id,
                                                      X509Certificate old_key,
                                                      PublicKey key_management_key) throws IOException
@@ -872,7 +872,7 @@ public class ServerState implements Serializable
             return this;
           }
 
-        public KeyProperties setUpdatedKey (String old_client_session_id, 
+        public Key setUpdatedKey (String old_client_session_id, 
                                             String old_server_session_id,
                                             X509Certificate old_key,
                                             PublicKey key_management_key) throws IOException
@@ -886,7 +886,7 @@ public class ServerState implements Serializable
             return this;
           }
 
-        KeyProperties (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
+        Key (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
           {
             this.id = key_prefix + ++next_key_id_suffix;
             this.app_usage = app_usage;
@@ -1015,9 +1015,9 @@ public class ServerState implements Serializable
           }
       }
 
-    public KeyProperties[] getKeyProperties ()
+    public Key[] getKeys ()
       {
-        return requested_keys.values ().toArray (new KeyProperties[0]);
+        return requested_keys.values ().toArray (new Key[0]);
       }
 
     public ProtocolPhase getProtocolPhase ()
@@ -1051,7 +1051,7 @@ public class ServerState implements Serializable
 
     short mac_sequence_counter;
 
-    LinkedHashMap<String,KeyProperties> requested_keys = new LinkedHashMap<String,KeyProperties> ();
+    LinkedHashMap<String,Key> requested_keys = new LinkedHashMap<String,Key> ();
     
     String server_session_id;
 
@@ -1309,7 +1309,7 @@ public class ServerState implements Serializable
           {
             for (KeyCreationResponseDecoder.GeneratedPublicKey gpk : key_create_response.generated_keys.values ())
               {
-                ServerState.KeyProperties kp = requested_keys.get (gpk.id);
+                ServerState.Key kp = requested_keys.get (gpk.id);
                 if (kp == null)
                   {
                     ServerState.bad ("Missing key id:" + gpk.id);
@@ -1361,9 +1361,9 @@ public class ServerState implements Serializable
       }
 
     
-    public String getDeviceID ()
+    public String getDeviceID (char optional_divider)
       {
-        return DeviceID.getDeviceID (device_certificate);
+        return DeviceID.getDeviceID (device_certificate, optional_divider);
       }
 
 
@@ -1442,15 +1442,15 @@ public class ServerState implements Serializable
       }
 
 
-    private KeyProperties addKeyProperties (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
+    private Key addKeyProperties (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
       {
-        KeyProperties key = new KeyProperties (app_usage, key_specifier, pin_policy, preset_pin, device_pin_protection);
+        Key key = new Key (app_usage, key_specifier, pin_policy, preset_pin, device_pin_protection);
         requested_keys.put (key.getID (), key);
         return key;
       }
 
 
-    public KeyProperties createKeyWithPresetPIN (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] encrypted_pin) throws IOException
+    public Key createKeyWithPresetPIN (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] encrypted_pin) throws IOException
       {
         if (pin_policy == null)
           {
@@ -1460,9 +1460,9 @@ public class ServerState implements Serializable
       }
 
 
-    public KeyProperties createKey (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy) throws IOException
+    public Key createKey (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy) throws IOException
       {
-        KeyProperties key = addKeyProperties (app_usage, key_specifier, pin_policy, null, false);
+        Key key = addKeyProperties (app_usage, key_specifier, pin_policy, null, false);
         if (pin_policy != null)
           {
             pin_policy.user_defined = true;
@@ -1475,7 +1475,7 @@ public class ServerState implements Serializable
       }
 
 
-    public KeyProperties createDevicePINProtectedKey (AppUsage app_usage, KeySpecifier key_specifier) throws IOException
+    public Key createDevicePINProtectedKey (AppUsage app_usage, KeySpecifier key_specifier) throws IOException
       {
         return addKeyProperties (app_usage, key_specifier, null, null, true);
       }

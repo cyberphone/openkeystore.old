@@ -890,17 +890,17 @@ public class KeyGen2Test
             if (puk_protection)
               {
                 puk_policy =
-                  server_state.createPUKPolicy (server_crypto_interface.encrypt (new byte[]{'0','1','2','3','4','5','6', '7','8','9'}),
-                                                                                    PassphraseFormat.NUMERIC,
-                                                                                    3);
+                    server_state.createPUKPolicy (server_crypto_interface.encrypt (new byte[]{'0','1','2','3','4','5','6', '7','8','9'}),
+                                                                                   PassphraseFormat.NUMERIC,
+                                                                                   3);
               }
             if (pin_protection)
               {
                 pin_policy = server_state.createPINPolicy (PassphraseFormat.NUMERIC,
-                                                                      4,
-                                                                      8,
-                                                                      pin_retry_limit,
-                                                                      puk_policy);
+                                                           4,
+                                                           8,
+                                                           pin_retry_limit,
+                                                           puk_policy);
                 if (add_pin_pattern)
                   {
                     pin_policy.addPatternRestriction (PatternRestriction.THREE_IN_A_ROW);
@@ -933,7 +933,7 @@ public class KeyGen2Test
                 key_alg = new KeySpecifier (ask_for_4096 ? KeyAlgorithms.RSA4096 : KeyAlgorithms.RSA2048);
               }
 
-            ServerState.KeyProperties kp = device_pin_protection ?
+            ServerState.Key kp = device_pin_protection ?
                 server_state.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
                   preset_pin ? server_state.createKeyWithPresetPIN (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                                                key_alg, pin_policy,
@@ -987,21 +987,21 @@ public class KeyGen2Test
               {
                 kp.setClonedKeyProtection (clone_key_protection.server_state.getClientSessionID (), 
                                            clone_key_protection.server_state.getServerSessionID (),
-                                           clone_key_protection.server_state.getKeyProperties ()[0].getCertificatePath ()[0],
+                                           clone_key_protection.server_state.getKeys ()[0].getCertificatePath ()[0],
                                            clone_key_protection.server_km);
               }
             if (update_key != null)
               {
                 kp.setUpdatedKey (update_key.server_state.getClientSessionID (), 
                                   update_key.server_state.getServerSessionID (),
-                                  update_key.server_state.getKeyProperties ()[0].getCertificatePath ()[0],
+                                  update_key.server_state.getKeys ()[0].getCertificatePath ()[0],
                                   update_key.server_km);
               }
             if (delete_key != null)
               {
                 server_state.addPostDeleteKey (delete_key.server_state.getClientSessionID (), 
                                                delete_key.server_state.getServerSessionID (),
-                                               delete_key.server_state.getKeyProperties ()[0].getCertificatePath ()[0],
+                                               delete_key.server_state.getKeys ()[0].getCertificatePath ()[0],
                                                delete_key.server_km);
               }
             if (two_keys)
@@ -1025,7 +1025,7 @@ public class KeyGen2Test
                 boolean otp = symmetric_key && !encryption_key;
                 KeyCreationResponseDecoder key_init_response = (KeyCreationResponseDecoder) server_xml_cache.parse (xmldata);
                 server_state.update (key_init_response);
-                for (ServerState.KeyProperties key_prop : server_state.getKeyProperties ())
+                for (ServerState.Key key_prop : server_state.getKeys ())
                   {
                     boolean auth = key_prop.getAppUsage () == AppUsage.AUTHENTICATION;
                     CertSpec cert_spec = new CertSpec ();
@@ -1125,7 +1125,7 @@ public class KeyGen2Test
 // TODO verify
                 server_state.addPostUnlockKey (plain_unlock_key.server_state.getClientSessionID (), 
                                                plain_unlock_key.server_state.getServerSessionID (),
-                                               plain_unlock_key.server_state.getKeyProperties ()[0].getCertificatePath ()[0],
+                                               plain_unlock_key.server_state.getKeys ()[0].getCertificatePath ()[0],
                                                plain_unlock_key.server_km);
               }
 
@@ -1415,7 +1415,7 @@ public class KeyGen2Test
         property_bag = true;
         doer.perform ();
         int key_handle = doer.getFirstKey ();
-        ServerState.PropertyBag prop_bag = doer.server.server_state.getKeyProperties ()[0].getPropertyBags ()[0];
+        ServerState.PropertyBag prop_bag = doer.server.server_state.getKeys ()[0].getPropertyBags ()[0];
         Property[] props1 = sks.getExtension (key_handle, prop_bag.getType ()).getProperties ();
         ServerState.Property[] props2 = prop_bag.getProperties ();
         assertTrue ("Prop len error", props1.length == props2.length);
