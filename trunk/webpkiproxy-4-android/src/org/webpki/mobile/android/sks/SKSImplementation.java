@@ -72,6 +72,8 @@ import org.webpki.android.sks.ProvisioningSession;
 import org.webpki.android.sks.SKSException;
 import org.webpki.android.sks.SecureKeyStore;
 
+import android.util.Log;
+
 /*
  *                          ###########################
  *                          #  SKS - Secure Key Store #
@@ -104,6 +106,8 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     static final boolean SKS_DEVICE_PIN_SUPPORT            = true;  // Change here to test or disable
     static final boolean SKS_BIOMETRIC_SUPPORT             = false;  // Change here to test or disable
     static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
+    
+    private static final String TAG_SKS = "SKS";  // Android debug constant
 
     int next_key_handle = 1;
     LinkedHashMap<Integer,KeyEntry> keys = new LinkedHashMap<Integer,KeyEntry> ();
@@ -1507,6 +1511,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     static final byte[] DIGEST_INFO_SHA256 = {0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, (byte)0x86, 0x48,
                                               0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20};
 
+	
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
@@ -2774,6 +2779,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         p.client_time = client_time;
         p.session_life_time = session_life_time;
         p.session_key_limit = session_key_limit;
+        Log.i (TAG_SKS, "Session key created");
         return new ProvisioningSession (p.provisioning_handle,
                                         client_session_id,
                                         attestation,

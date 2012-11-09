@@ -1,3 +1,19 @@
+/*
+ *  Copyright 2006-2012 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package org.webpki.mobile.android.proxy;
 
 import java.io.ByteArrayOutputStream;
@@ -41,7 +57,9 @@ public abstract class BaseProxyActivity extends Activity
 	public static final String PROGRESS_LOOKUP       = "Credential lookup...";
 	public static final String PROGRESS_DEPLOY_CERTS = "Receiving credentials...";
 	public static final String PROGRESS_FINAL        = "Finish message...";
-	
+
+	public static final String CONTINUE_EXECUTION = "CONTINUE_EXECUTION";
+
 	private XMLSchemaCache schema_cache;
 	
 	ProgressDialog progress_display;
@@ -60,7 +78,23 @@ public abstract class BaseProxyActivity extends Activity
 
 	public void showHeavyWork (String message)
 	{
-		progress_display = ProgressDialog.show(this, null, message);
+		if (progress_display == null)
+		{
+			progress_display = ProgressDialog.show(this, null, message);
+		}
+		else
+		{
+			progress_display.setMessage(message);
+		}
+	}
+
+	public void noMoreWorkToDo ()
+	{
+		if (progress_display != null)
+		{
+			progress_display.dismiss();
+			progress_display = null;
+		}
 	}
 
 	private void addOptionalCookies (String url) throws IOException
@@ -111,16 +145,6 @@ public abstract class BaseProxyActivity extends Activity
 	public String getRedirectURL ()
 	{
 		return redirect_url;
-	}
-
-	public void noMoreWorkToDo ()
-	{
-		progress_display.dismiss();
-	}
-
-	public void updateWorkIndicator(String message)
-	{
-		progress_display.setMessage(message);
 	}
 
 	public void logOK (String message)
