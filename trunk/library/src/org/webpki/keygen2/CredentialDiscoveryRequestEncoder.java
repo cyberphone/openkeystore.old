@@ -45,6 +45,7 @@ import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SignerInterface;
+import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -268,8 +269,12 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
 
     // Constructors
 
-    public CredentialDiscoveryRequestEncoder (String submit_url)
+    public CredentialDiscoveryRequestEncoder (ServerState server_state, String submit_url) throws IOException
       {
+        server_state.checkState (true, ProtocolPhase.CREDENTIAL_DISCOVERY);
+        client_session_id = server_state.client_session_id;
+        server_session_id = server_state.server_session_id;
+        server_crypto_interface = server_state.server_crypto_interface;
         super.submit_url = submit_url;
       }
 

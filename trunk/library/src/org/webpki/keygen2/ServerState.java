@@ -1027,7 +1027,7 @@ public class ServerState implements Serializable
 
     ServerCryptoInterface server_crypto_interface;
 
-    BasicCapabilities basic_capabilities;
+    BasicCapabilities basic_capabilities = new BasicCapabilities (false);
     
     HashMap<String,HashSet<String>> client_attribute_values;
 
@@ -1063,7 +1063,7 @@ public class ServerState implements Serializable
 
     short session_key_limit;
     
-    String provisioning_session_algorithm;
+    String provisioning_session_algorithm = KeyGen2URIs.SPECIAL_ALGORITHMS.SESSION_KEY_1;
     
     String key_attestation_algorithm;
     
@@ -1177,14 +1177,6 @@ public class ServerState implements Serializable
       }
 
 
-    public void update (PlatformNegotiationRequestEncoder platform_request) throws IOException
-      {
-        checkState (true, ProtocolPhase.PLATFORM_NEGOTIATION);
-        server_session_id = platform_request.server_session_id;
-        basic_capabilities = platform_request.basic_capabilities;
-      }
-
-    
     public void update (PlatformNegotiationResponseDecoder platform_response) throws IOException
       {
         checkState (false, ProtocolPhase.PLATFORM_NEGOTIATION);
@@ -1194,30 +1186,6 @@ public class ServerState implements Serializable
       }
 
 
-    public void update (ProvisioningInitializationRequestEncoder prov_init_request) throws IOException
-      {
-        try
-          {
-            checkState (true, ProtocolPhase.PROVISIONING_INITIALIZATION);
-            issuer_uri = prov_init_request.submit_url;
-            prov_init_request.server_session_id = server_session_id;
-            provisioning_session_algorithm = prov_init_request.algorithm;
-            server_ephemeral_key = prov_init_request.server_ephemeral_key = server_crypto_interface.generateEphemeralKey ();
-            key_management_key = prov_init_request.key_management_key;
-            session_life_time = prov_init_request.session_life_time;
-            session_key_limit = prov_init_request.session_key_limit;
-            for (String client_attribute : basic_capabilities.client_attributes)
-              {
-                prov_init_request.client_attributes.add (client_attribute);
-              }
-          }
-        catch (GeneralSecurityException e)
-          {
-            throw new IOException (e);
-          }
-      }
-    
-    
     public void update (ProvisioningInitializationResponseDecoder prov_init_response, X509Certificate server_certificate) throws IOException
       {
         try
@@ -1272,27 +1240,10 @@ public class ServerState implements Serializable
       }
 
 
-    public void update (CredentialDiscoveryRequestEncoder credential_discovery_request) throws IOException
-      {
-        checkState (true, ProtocolPhase.CREDENTIAL_DISCOVERY);
-        credential_discovery_request.client_session_id = client_session_id;
-        credential_discovery_request.server_session_id = server_session_id;
-        credential_discovery_request.server_crypto_interface = server_crypto_interface;
-      }
-
-
     public void update (CredentialDiscoveryResponseDecoder credential_discovery_response) throws IOException
       {
         checkState (false, ProtocolPhase.CREDENTIAL_DISCOVERY);
         checkSession (credential_discovery_response.client_session_id, credential_discovery_response.server_session_id);
-        current_phase = ProtocolPhase.KEY_CREATION;
-      }
-
-
-    public void update (KeyCreationRequestEncoder key_create_request) throws IOException
-      {
-        checkState (true, current_phase == ProtocolPhase.CREDENTIAL_DISCOVERY ? ProtocolPhase.CREDENTIAL_DISCOVERY : ProtocolPhase.KEY_CREATION);
-        key_create_request.server_state = this;
         current_phase = ProtocolPhase.KEY_CREATION;
       }
 
@@ -1333,14 +1284,6 @@ public class ServerState implements Serializable
           {
             throw new IOException (e);
           }
-        current_phase = ProtocolPhase.PROVISIONING_FINALIZATION;
-      }
-
-    
-    public void update (ProvisioningFinalizationRequestEncoder fin_prov_request) throws IOException
-      {
-        checkState (true, current_phase == ProtocolPhase.KEY_CREATION? ProtocolPhase.KEY_CREATION : ProtocolPhase.PROVISIONING_FINALIZATION);
-        fin_prov_request.server_state = this;
         current_phase = ProtocolPhase.PROVISIONING_FINALIZATION;
       }
 

@@ -33,16 +33,7 @@ abstract class PlatformNegotiationResponse extends XMLObjectWrapper
 
     ServerCookie server_cookie;  // Optional
     
-    BasicCapabilities basic_capabilities = new BasicCapabilities ();
-
     PlatformNegotiationResponse () {}
-
-
-    public BasicCapabilities getBasicCapabilities ()
-      {
-        return basic_capabilities;
-      }
-
 
     /**
      * Internal Use Only

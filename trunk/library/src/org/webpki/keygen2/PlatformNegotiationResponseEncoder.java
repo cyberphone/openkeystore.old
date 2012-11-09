@@ -79,6 +79,12 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
         return this;
       }
 
+    BasicCapabilities basic_capabilities = new BasicCapabilities (false);
+
+    public BasicCapabilities getBasicCapabilities ()
+      {
+        return basic_capabilities;
+      }
 
     public PlatformNegotiationResponseEncoder (PlatformNegotiationRequestDecoder decoder)
       {

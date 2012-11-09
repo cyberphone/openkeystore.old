@@ -37,16 +37,7 @@ abstract class PlatformNegotiationRequest extends XMLObjectWrapper
     
     boolean privacy_enabled;
     
-    BasicCapabilities basic_capabilities = new BasicCapabilities ();
-    
     PlatformNegotiationRequest () {}
-
-
-    public BasicCapabilities getBasicCapabilities ()
-      {
-        return basic_capabilities;
-      }
-
 
     /**
      * Internal Use Only

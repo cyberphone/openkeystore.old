@@ -39,7 +39,8 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
   {
     private XMLSignatureWrapper signature;  // Optional
 
-
+    String algorithm;
+    
     public String getServerSessionID ()
       {
         return server_session_id;

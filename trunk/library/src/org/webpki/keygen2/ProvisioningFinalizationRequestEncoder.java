@@ -40,6 +40,7 @@ import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SignerInterface;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.keygen2.ServerState.PostProvisioningTargetKey;
+import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -56,9 +57,12 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
    
     // Constructors
 
-    public ProvisioningFinalizationRequestEncoder (String submit_url) throws IOException
+    public ProvisioningFinalizationRequestEncoder (ServerState server_state, String submit_url) throws IOException
       {
+        this.server_state = server_state;
         this.submit_url = submit_url;
+        server_state.checkState (true, server_state.current_phase == ProtocolPhase.KEY_CREATION? ProtocolPhase.KEY_CREATION : ProtocolPhase.PROVISIONING_FINALIZATION);
+        server_state.current_phase = ProtocolPhase.PROVISIONING_FINALIZATION;
       }
 
 

@@ -18,6 +18,7 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 
@@ -32,6 +33,7 @@ import org.webpki.xmldsig.XMLSigner;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import org.webpki.crypto.SignerInterface;
+import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -40,16 +42,34 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
   {
     String prefix;  // Default: no prefix
     
+    ServerState server_state;
+    
 
     // Constructors
 
-    public ProvisioningInitializationRequestEncoder (String submit_url,
+    public ProvisioningInitializationRequestEncoder (ServerState server_state,
+                                                     String submit_url,
                                                      int session_life_time,
                                                      short session_key_limit)  throws IOException
       {
-        super.submit_url = submit_url;
-        super.session_life_time = session_life_time;
-        super.session_key_limit = session_key_limit;
+        try
+          {
+            server_state.checkState (true, ProtocolPhase.PROVISIONING_INITIALIZATION);
+            this.server_state = server_state;
+            super.submit_url = server_state.issuer_uri = submit_url;
+            super.session_life_time = server_state.session_life_time = session_life_time;
+            super.session_key_limit = server_state.session_key_limit = session_key_limit;
+            server_session_id = server_state.server_session_id;
+            server_ephemeral_key = server_state.server_ephemeral_key = server_state.server_crypto_interface.generateEphemeralKey ();
+            for (String client_attribute : server_state.basic_capabilities.client_attributes)
+              {
+                client_attributes.add (client_attribute);
+              }
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
       }
 
 
@@ -62,12 +82,13 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
     public void setKeyManagementKey (PublicKey key_management_key)
       {
         super.key_management_key = key_management_key;
+        server_state.key_management_key = key_management_key;
       }
 
 
     public void setSessionKeyAlgorithm (String session_key_algorithm)
       {
-        super.algorithm = session_key_algorithm;
+        server_state.provisioning_session_algorithm = session_key_algorithm;
       }
 
     
@@ -119,7 +140,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
 
         wr.setIntAttribute (SESSION_KEY_LIMIT_ATTR, session_key_limit);
 
-        wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, algorithm);
+        wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, server_state.provisioning_session_algorithm);
         
         if (!client_attributes.isEmpty ())
           {

@@ -30,6 +30,13 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
   {
     Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
 
+    BasicCapabilities basic_capabilities = new BasicCapabilities (true);
+
+    public BasicCapabilities getBasicCapabilities ()
+      {
+        return basic_capabilities;
+      }
+
     public String getServerSessionID ()
       {
         return server_session_id;

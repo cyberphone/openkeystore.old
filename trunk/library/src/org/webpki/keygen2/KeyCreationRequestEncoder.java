@@ -31,6 +31,7 @@ import org.webpki.xmldsig.XMLSigner;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import org.webpki.crypto.SignerInterface;
+import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -58,9 +59,12 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
     // Constructors
 
-    public KeyCreationRequestEncoder (String submit_url) throws IOException
+    public KeyCreationRequestEncoder (ServerState server_state, String submit_url) throws IOException
       {
+        this.server_state = server_state;
         this.submit_url = submit_url;
+        server_state.checkState (true, server_state.current_phase == ProtocolPhase.CREDENTIAL_DISCOVERY ? ProtocolPhase.CREDENTIAL_DISCOVERY : ProtocolPhase.KEY_CREATION);
+        server_state.current_phase = ProtocolPhase.KEY_CREATION;
       }
 
 

@@ -74,6 +74,13 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
     private XMLSignatureWrapper signature;  // Optional
 
 
+    BasicCapabilities basic_capabilities = new BasicCapabilities (true);
+    
+    public BasicCapabilities getBasicCapabilities ()
+      {
+        return basic_capabilities;
+      }
+
     public String getServerSessionID ()
       {
         return server_session_id;

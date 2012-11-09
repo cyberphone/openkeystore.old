@@ -766,7 +766,7 @@ public class KeyGen2Test
             // First keygen2 request
             ////////////////////////////////////////////////////////////////////////////////////
             String server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
-            PlatformNegotiationRequestEncoder platform_request =  new PlatformNegotiationRequestEncoder (server_session_id, PLATFORM_URI);
+            PlatformNegotiationRequestEncoder platform_request =  new PlatformNegotiationRequestEncoder (server_state, PLATFORM_URI, server_session_id);
             platform_request.addLogotype (LOGO_URL, LOGO_MIME, LOGO_SHA256, LOGO_WIDTH, LOGO_HEIGHT);
             BasicCapabilities basic_capabilities = platform_request.getBasicCapabilities ();
             if (ask_for_4096)
@@ -792,7 +792,6 @@ public class KeyGen2Test
               {
                 platform_request.setPrivacyEnabled (true);
               }
-            server_state.update (platform_request);
             return platform_request.writeXML ();
           }
 
@@ -828,12 +827,11 @@ public class KeyGen2Test
               }
 
             ProvisioningInitializationRequestEncoder prov_init_request = 
-                 new ProvisioningInitializationRequestEncoder (ISSUER_URI, 10000, (short)50);
+                 new ProvisioningInitializationRequestEncoder (server_state, ISSUER_URI, 10000, (short)50);
             if (updatable)
               {
                 prov_init_request.setKeyManagementKey (server_km = server_crypto_interface.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
               }
-            server_state.update (prov_init_request);
             return prov_init_request.writeXML ();
           }
 
@@ -843,7 +841,7 @@ public class KeyGen2Test
         byte[] creDiscRequest (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             getProvSess (server_xml_cache.parse (xmldata));
-            CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder (CRE_DISC_URL);
+            CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder (server_state, CRE_DISC_URL);
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[0]);
 
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[2])
@@ -861,7 +859,6 @@ public class KeyGen2Test
                           .setIssuedAfter (new Date ())
                           .setSubjectRegEx ("CN=John")
                           .setIssuerRegEx ("CN=Root CA");
-            server_state.update (cdre);
             return cdre.writeXML ();
           }
 
@@ -1008,9 +1005,8 @@ public class KeyGen2Test
               {
                 server_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.P_256), pin_policy);
               }
-            KeyCreationRequestEncoder key_create_request = new KeyCreationRequestEncoder (KEY_INIT_URL);
-            server_state.update (key_create_request);
-            return key_create_request.writeXML ();
+
+            return new KeyCreationRequestEncoder (server_state, KEY_INIT_URL).writeXML ();
           }
 
 
@@ -1129,9 +1125,7 @@ public class KeyGen2Test
                                                plain_unlock_key.server_km);
               }
 
-            ProvisioningFinalizationRequestEncoder prov_final_request = new ProvisioningFinalizationRequestEncoder (FIN_PROV_URL);
-            server_state.update (prov_final_request);
-            return prov_final_request.writeXML ();
+            return new ProvisioningFinalizationRequestEncoder (server_state, FIN_PROV_URL).writeXML ();
           }
 
         ///////////////////////////////////////////////////////////////////////////////////

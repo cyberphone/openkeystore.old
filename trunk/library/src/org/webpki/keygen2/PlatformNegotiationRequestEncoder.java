@@ -29,6 +29,7 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSigner;
 
 import org.webpki.crypto.SignerInterface;
+import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -51,16 +52,25 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
 
     boolean needs_dsig_ns;
 
+    private ServerState server_state;
+
     // Constructors
 
-    public PlatformNegotiationRequestEncoder (String server_session_id,
-                                              String submit_url)
+    public PlatformNegotiationRequestEncoder (ServerState server_state,
+                                              String submit_url,
+                                              String server_session_id) throws IOException
       {
-        this.server_session_id = server_session_id;
+        server_state.checkState (true, ProtocolPhase.PLATFORM_NEGOTIATION);
+        this.server_state = server_state;
         this.submit_url = submit_url;
+        this.server_session_id = server_state.server_session_id = server_session_id;
       }
     
-    
+    public BasicCapabilities getBasicCapabilities ()
+      {
+        return server_state.basic_capabilities;
+      }
+   
     public void setAction (Action action)
       {
         this.action = action;
@@ -131,7 +141,7 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         ////////////////////////////////////////////////////////////////////////
         // Basic capabilities
         ////////////////////////////////////////////////////////////////////////
-        BasicCapabilities.write (wr, basic_capabilities);
+        BasicCapabilities.write (wr, server_state.basic_capabilities);
 
         if (privacy_enabled_set)
           {
