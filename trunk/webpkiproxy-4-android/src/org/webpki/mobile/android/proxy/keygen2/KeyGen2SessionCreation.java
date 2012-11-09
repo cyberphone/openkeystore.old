@@ -23,9 +23,13 @@ import java.security.GeneralSecurityException;
 import java.util.Date;
 
 import android.os.AsyncTask;
+import android.view.View;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 import org.webpki.mobile.android.proxy.InterruptedProtocolException;
+import org.webpki.mobile.android.proxy.R;
 
 import org.webpki.android.crypto.MacAlgorithms;
 import org.webpki.android.crypto.SymKeySignerInterface;
@@ -146,7 +150,16 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
 		{
 			if (result.equals (BaseProxyActivity.CONTINUE_EXECUTION))
 			{
-            	new KeyGen2KeyCreation (keygen2_activity).execute();
+				keygen2_activity.setContentView(R.layout.activity_keygen2_pin);
+				Button ok = (Button) keygen2_activity.findViewById(R.id.OKbutton);
+				ok.setOnClickListener(new View.OnClickListener()
+		        {
+		            @Override
+		            public void onClick(View v)
+		            {
+		            	new KeyGen2KeyCreation (keygen2_activity).execute();
+		            }
+		        });
 			}
 			else
 			{

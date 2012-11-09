@@ -68,14 +68,13 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
 		keygen2_activity.noMoreWorkToDo ();
 		if (success)
 		{
-			Button ok = (Button) keygen2_activity.findViewById(R.id.OKbutton);
-			ok.setVisibility(View.VISIBLE);
-
 			View cancel = keygen2_activity.findViewById(R.id.cancelButton);
 			RelativeLayout.LayoutParams cancel_layout =(RelativeLayout.LayoutParams)cancel.getLayoutParams();
 			cancel_layout.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 			cancel.setLayoutParams(cancel_layout);
 
+			Button ok = (Button) keygen2_activity.findViewById(R.id.OKbutton);
+			ok.setVisibility(View.VISIBLE);
 			ok.setOnClickListener(new View.OnClickListener()
 	        {
 	            @Override

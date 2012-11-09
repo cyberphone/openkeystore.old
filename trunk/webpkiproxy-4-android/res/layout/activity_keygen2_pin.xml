@@ -1,0 +1,68 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/cancelButton"
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/win2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/padding_large"
+        android:text="Set PIN"
+        android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/leadpin1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Please specify a PIN:" />
+    
+    <EditText
+        android:id="@+id/editpin1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPassword" >
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/leadpin2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Retype the PIN:" />
+
+    <EditText
+        android:id="@+id/editpin2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPassword"/>
+    
+    </LinearLayout>
+    
+    <Button
+        android:id="@+id/cancelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="Cancel" />
+
+    <Button
+        android:id="@+id/OKbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="   OK   " />
+
+
+</RelativeLayout>
