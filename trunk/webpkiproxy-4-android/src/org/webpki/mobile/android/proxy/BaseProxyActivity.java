@@ -30,8 +30,10 @@ import java.util.List;
 import java.util.Vector;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.net.Uri;
@@ -224,4 +226,31 @@ public abstract class BaseProxyActivity extends Activity
         logOK ("Invocation read, Cookie: " + (arg.isEmpty() ? "N/A" : cookies.elementAt(0)));
 		Security.insertProviderAt(new BouncyCastleProvider(), 1);
 	}
+    
+    public void showAlert (String message)
+    {
+    	AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+		// set title
+//		alertDialogBuilder.setTitle("Your Title");
+
+		// set dialog message
+		alertDialogBuilder
+			.setMessage(message)
+			.setCancelable(false)
+			.setPositiveButton("OK",new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog,int id) {
+					// the dialog box and do nothing
+					dialog.cancel();
+				}
+			  });
+
+		// create alert dialog
+		AlertDialog alertDialog = alertDialogBuilder.create();
+	
+		// show it
+		alertDialog.show();
+    }
+	
+
 }

@@ -24,10 +24,13 @@ import java.util.Date;
 
 import android.os.AsyncTask;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 import org.webpki.mobile.android.proxy.InterruptedProtocolException;
@@ -53,6 +56,12 @@ import org.webpki.android.xml.XMLObjectWrapper;
 public class KeyGen2SessionCreation extends AsyncTask<Void, String, String> 
 {
 	private KeyGen2Activity keygen2_activity;
+	
+	private EditText pin1;
+	private EditText pin2;
+	private TextView pin_err;
+	private byte[] last_pin;
+
 	
 	public KeyGen2SessionCreation (KeyGen2Activity keygen2_activity)
 	{
@@ -170,21 +179,60 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
 							keygen2_activity.setContentView(key.getPINPolicy().getFormat() == PassphraseFormat.NUMERIC ?
 									R.layout.activity_keygen2_numeric_pin : R.layout.activity_keygen2_pin);
 							Button ok = (Button) keygen2_activity.findViewById(R.id.OKbutton);
-							final EditText pin1 = (EditText) keygen2_activity.findViewById(R.id.editpin1);
-							final EditText pin2 = (EditText) keygen2_activity.findViewById(R.id.editpin2);
+							pin1 = (EditText) keygen2_activity.findViewById(R.id.editpin1);
+							pin2 = (EditText) keygen2_activity.findViewById(R.id.editpin2);
+							pin_err = (TextView) keygen2_activity.findViewById(R.id.errorPIN);
+							checkPIN ();
+							pin1.addTextChangedListener(new TextWatcher ()
+							{
+								@Override
+								public void afterTextChanged(Editable s)
+								{
+									checkPIN ();
+								}
+
+								@Override
+								public void beforeTextChanged(CharSequence s, int start, int count, int after)
+								{
+								}
+
+								@Override
+								public void onTextChanged(CharSequence s, int start, int before, int count)
+								{
+								}
+							});
+							pin2.addTextChangedListener(new TextWatcher ()
+							{
+								@Override
+								public void afterTextChanged(Editable s)
+								{
+									checkPIN ();
+								}
+
+								@Override
+								public void beforeTextChanged(CharSequence s, int start, int count, int after)
+								{
+								}
+
+								@Override
+								public void onTextChanged(CharSequence s, int start, int before, int count)
+								{
+								}
+							});
 							ok.setOnClickListener(new View.OnClickListener()
 					        {
 					            @Override
 					            public void onClick(View v)
 					            {
-								    try 
-								    {
-										key.setUserPIN(pin1.getText().toString().getBytes("UTF-8"));
-									} 
-								    catch (IOException e)
-								    {
-									}
-					            	new KeyGen2KeyCreation (keygen2_activity).execute();
+					            	if (checkPIN ())
+					            	{
+										key.setUserPIN(last_pin);
+						            	new KeyGen2KeyCreation (keygen2_activity).execute();
+					            	}
+					            	else
+					            	{
+					            		keygen2_activity.showAlert("Please correct PIN");
+					            	}
 					            }
 					        });
 					    }
@@ -208,5 +256,28 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
 		{
 			keygen2_activity.showFailLog ();
 		}
+	}
+
+	private boolean checkPIN() {
+		try {
+			last_pin = pin1.getText().toString().getBytes ("UTF-8");
+			if (last_pin.length < 4 || last_pin.length > 8)
+			{
+				pin_err.setText("PIN must be 4-8 characters");
+			}
+			else
+			{
+				if (pin1.getText().toString().equals(pin2.getText().toString ()))
+				{
+					pin_err.setText("");
+					return true;
+				}
+				pin_err.setText("Retyped PIN doesn't match the first PIN");
+			}
+		}
+		catch (IOException e) 
+		{
+		}
+		return false;
 	}
 }

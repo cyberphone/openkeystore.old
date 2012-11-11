@@ -11,6 +11,13 @@
         android:orientation="vertical" >
 
     <TextView
+        android:id="@+id/errorPIN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/padding_large"
+        android:textColor="#ff0000"/>
+    
+    <TextView
         android:id="@+id/win2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -22,7 +29,7 @@
         android:id="@+id/leadpin1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Please specify a PIN:" />
+        android:text="Specify a PIN of your choice:" />
     
     <EditText
         android:id="@+id/editpin1"
@@ -47,24 +54,9 @@
         android:ems="10"
         android:password="true"
         android:inputType="numberPassword" />
-    
+
     </LinearLayout>
     
-    <Button
-        android:id="@+id/cancelButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:text="Cancel" />
-
-    <Button
-        android:id="@+id/OKbutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:text="   OK   " />
-
+    <include layout="@layout/lower_buttons"/>
 
 </RelativeLayout>
