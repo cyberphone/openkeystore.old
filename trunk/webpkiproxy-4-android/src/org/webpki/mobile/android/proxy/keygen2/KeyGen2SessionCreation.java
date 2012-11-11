@@ -23,9 +23,11 @@ import java.security.GeneralSecurityException;
 import java.util.Date;
 
 import android.os.AsyncTask;
+
 import android.view.View;
+
 import android.widget.Button;
-import android.widget.RelativeLayout;
+import android.widget.EditText;
 
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 import org.webpki.mobile.android.proxy.InterruptedProtocolException;
@@ -34,12 +36,16 @@ import org.webpki.mobile.android.proxy.R;
 import org.webpki.android.crypto.MacAlgorithms;
 import org.webpki.android.crypto.SymKeySignerInterface;
 
+import org.webpki.android.keygen2.KeyCreationRequestDecoder;
 import org.webpki.android.keygen2.PlatformNegotiationResponseEncoder;
 import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
 import org.webpki.android.keygen2.ProvisioningInitializationResponseEncoder;
 
+import org.webpki.android.sks.PassphraseFormat;
 import org.webpki.android.sks.ProvisioningSession;
 import org.webpki.android.sks.DeviceInfo;
+
+import org.webpki.android.xml.XMLObjectWrapper;
 
 /**
  * This part does the real work
@@ -122,8 +128,13 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
               });
             
             keygen2_activity.postXMLData(keygen2_activity.prov_init_request.getSubmitURL(), prov_sess_response, false);
-
-            return KeyGen2Activity.CONTINUE_EXECUTION;
+            XMLObjectWrapper xml_object = keygen2_activity.parseResponse ();
+            if (xml_object instanceof KeyCreationRequestDecoder)
+            {
+                keygen2_activity.key_creation_request = (KeyCreationRequestDecoder) xml_object;
+                return KeyGen2Activity.CONTINUE_EXECUTION;
+            }
+            throw new IOException ("Unexpected object: " + xml_object.element());
 		}
 		catch (InterruptedProtocolException e)
 		{
@@ -150,16 +161,43 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
 		{
 			if (result.equals (BaseProxyActivity.CONTINUE_EXECUTION))
 			{
-				keygen2_activity.setContentView(R.layout.activity_keygen2_pin);
-				Button ok = (Button) keygen2_activity.findViewById(R.id.OKbutton);
-				ok.setOnClickListener(new View.OnClickListener()
-		        {
-		            @Override
-		            public void onClick(View v)
-		            {
-		            	new KeyGen2KeyCreation (keygen2_activity).execute();
-		            }
-		        });
+	            try
+	            {
+					for (final KeyCreationRequestDecoder.KeyObject key : keygen2_activity.key_creation_request.getKeyObjects ())
+					{
+					  if (key.getPINPolicy () != null && key.getPINPolicy ().getUserDefinedFlag ())
+					    {
+							keygen2_activity.setContentView(key.getPINPolicy().getFormat() == PassphraseFormat.NUMERIC ?
+									R.layout.activity_keygen2_numeric_pin : R.layout.activity_keygen2_pin);
+							Button ok = (Button) keygen2_activity.findViewById(R.id.OKbutton);
+							final EditText pin1 = (EditText) keygen2_activity.findViewById(R.id.editpin1);
+							final EditText pin2 = (EditText) keygen2_activity.findViewById(R.id.editpin2);
+							ok.setOnClickListener(new View.OnClickListener()
+					        {
+					            @Override
+					            public void onClick(View v)
+					            {
+								    try 
+								    {
+										key.setUserPIN(pin1.getText().toString().getBytes("UTF-8"));
+									} 
+								    catch (IOException e)
+								    {
+									}
+					            	new KeyGen2KeyCreation (keygen2_activity).execute();
+					            }
+					        });
+					    }
+					    else
+					     {
+						  new KeyGen2KeyCreation (keygen2_activity).execute();
+					     }
+					}
+				} 
+	            catch (IOException e) 
+				{
+				}
+
 			}
 			else
 			{

@@ -202,7 +202,7 @@ public abstract class BaseProxyActivity extends Activity
 
     public void getProtocolInvocationData () throws IOException
 	{
-    	logOK (getProtocolName () + " protocol run: " + new SimpleDateFormat ("yyyy-MM-dd' 'HH:mm:ss' UTC'").format (new Date ()));
+    	logOK (getProtocolName () + " protocol run: " + new SimpleDateFormat ("yyyy-MM-dd' 'HH:mm:ss").format (new Date ()));
 		schema_cache = new XMLSchemaCache ();
         Intent intent = getIntent ();
         Uri uri = intent.getData();

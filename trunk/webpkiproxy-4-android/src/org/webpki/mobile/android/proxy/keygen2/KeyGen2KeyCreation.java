@@ -110,14 +110,12 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
 		{
             publishProgress (BaseProxyActivity.PROGRESS_KEYGEN);
 
-            keygen2_activity.key_creation_request = (KeyCreationRequestDecoder) keygen2_activity.parseResponse ();
             KeyCreationResponseEncoder key_creation_response = new KeyCreationResponseEncoder (keygen2_activity.key_creation_request);
 
             int pin_policy_handle = 0;
             int puk_policy_handle = 0;
             for (KeyCreationRequestDecoder.KeyObject key : keygen2_activity.key_creation_request.getKeyObjects ())
 	            {
-	              byte[] pin_value = key.getPresetPIN ();
 	              if (key.getPINPolicy () == null)
 	                {
 	                  pin_policy_handle = 0;
@@ -125,10 +123,6 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
 	                }
 	              else
 	                {
-	                  if (key.getPINPolicy ().getUserDefinedFlag ())
-	                    {
-	                      pin_value = new byte[]{'1','2','3','4'};
-	                    }
 	                  if (key.isStartOfPINPolicy ())
 	                    {
 	                      if (key.isStartOfPUKPolicy ())
@@ -163,7 +157,7 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
 	                                                     key.getServerSeed (),
 	                                                     key.isDevicePINProtected (),
 	                                                     pin_policy_handle,
-	                                                     pin_value,
+	                                                     key.getSKSPINValue(),
 	                                                     key.getEnablePINCachingFlag (),
 	                                                     key.getBiometricProtection ().getSKSValue (),
 	                                                     key.getExportProtection ().getSKSValue (),
