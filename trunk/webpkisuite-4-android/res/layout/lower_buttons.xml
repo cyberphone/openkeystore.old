@@ -6,6 +6,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
+        android:visibility="invisible"
         android:text="Cancel" />
 
     <Button
@@ -14,6 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:visibility="invisible"
         android:text="   OK   " />
 
 </merge>
