@@ -305,7 +305,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
         boolean start_of_pin_group;
 
         PINPolicy pin_policy;
-
+        
         PresetPIN preset_pin;
 
         boolean device_pin_protected;
@@ -471,6 +471,17 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             return endorsed_algorithms;
           }
 
+        byte[] user_set_pin;
+        
+        public void setUserPIN (byte[] user_set_pin)
+          {
+            this.user_set_pin = user_set_pin;
+          }
+        
+        public byte[] getSKSPINValue ()
+          {
+            return user_set_pin == null ? getPresetPIN () : user_set_pin;
+          }
       }
 
 

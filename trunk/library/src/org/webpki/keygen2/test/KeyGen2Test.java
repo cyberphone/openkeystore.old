@@ -523,7 +523,6 @@ public class KeyGen2Test
             int puk_policy_handle = 0;
             for (KeyCreationRequestDecoder.KeyObject key : key_creation_request.getKeyObjects ())
               {
-                byte[] pin_value = key.getPresetPIN ();
                 if (key.getPINPolicy () == null)
                   {
                     pin_policy_handle = 0;
@@ -533,7 +532,7 @@ public class KeyGen2Test
                   {
                     if (key.getPINPolicy ().getUserDefinedFlag ())
                       {
-                        pin_value = USER_DEFINED_PIN;
+                        key.setUserPIN (USER_DEFINED_PIN);
                       }
                     if (key.isStartOfPINPolicy ())
                       {
@@ -569,7 +568,7 @@ public class KeyGen2Test
                                                        key.getServerSeed (),
                                                        key.isDevicePINProtected (),
                                                        pin_policy_handle,
-                                                       pin_value,
+                                                       key.getSKSPINValue (),
                                                        key.getEnablePINCachingFlag (),
                                                        key.getBiometricProtection ().getSKSValue (),
                                                        key.getExportProtection ().getSKSValue (),
