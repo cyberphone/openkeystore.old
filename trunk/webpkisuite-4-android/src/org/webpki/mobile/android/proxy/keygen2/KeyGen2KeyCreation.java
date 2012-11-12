@@ -41,7 +41,8 @@ import org.webpki.android.sks.KeyData;
 import org.webpki.android.sks.PatternRestriction;
 
 /**
- * This part does the real work
+ * This worker class creates keys.
+ * If keys are only managed, this class will not be instanciated.
  */
 public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
   {
@@ -141,12 +142,13 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
             publishProgress (BaseProxyActivity.PROGRESS_DEPLOY_CERTS);
 
             ProvisioningFinalizationRequestDecoder prov_final_request = (ProvisioningFinalizationRequestDecoder) keygen2_activity.parseResponse ();
-            /*
-             * Note: we could have used the saved provisioning_handle but that
-             * would not work for certifications that are delayed. The following
-             * code is working for fully interactive and delayed scenarios by
-             * using SKS as state-holder
-             */
+
+            //////////////////////////////////////////////////////////////////////////
+            // Note: we could have used the saved provisioning_handle but that
+            // would not work for certifications that are delayed. The following
+            // code is working for fully interactive and delayed scenarios by
+            // using SKS as state-holder
+             //////////////////////////////////////////////////////////////////////////
             EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
             while (true)
               {
@@ -160,41 +162,41 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
                   }
               }
 
-            // ////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
             // Final check, do these keys match the request?
-            // ////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
             for (ProvisioningFinalizationRequestDecoder.DeployedKeyEntry key : prov_final_request.getDeployedKeyEntrys ())
               {
                 int key_handle = keygen2_activity.sks.getKeyHandle (eps.getProvisioningHandle (), key.getID ());
                 keygen2_activity.sks.setCertificatePath (key_handle, key.getCertificatePath (), key.getMAC ());
 
-                // ////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////
                 // There may be a symmetric key
-                // ////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////
                 if (key.getEncryptedSymmetricKey () != null)
                   {
                     keygen2_activity.sks.importSymmetricKey (key_handle, key.getEncryptedSymmetricKey (), key.getSymmetricKeyMac ());
                   }
 
-                // ////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////
                 // There may be a private key
-                // ////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////
                 if (key.getEncryptedPrivateKey () != null)
                   {
                     keygen2_activity.sks.importPrivateKey (key_handle, key.getEncryptedPrivateKey (), key.getPrivateKeyMac ());
                   }
 
-                // ////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////
                 // There may be extensions
-                // ////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////
                 for (ProvisioningFinalizationRequestDecoder.Extension extension : key.getExtensions ())
                   {
                     keygen2_activity.sks.addExtension (key_handle, extension.getExtensionType (), extension.getSubType (), extension.getQualifier (), extension.getExtensionData (), extension.getMAC ());
                   }
 
-                // ////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////
                 // There may be an postUpdateKey or postCloneKeyProtection
-                // ////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////
                 ProvisioningFinalizationRequestDecoder.PostOperation post_operation = key.getPostOperation ();
                 if (post_operation != null)
                   {
@@ -202,17 +204,17 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
                   }
               }
 
-            // ////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
             // There may be any number of postUnlockKey
-            // ////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
             for (ProvisioningFinalizationRequestDecoder.PostOperation post_unl : prov_final_request.getPostUnlockKeys ())
               {
                 postProvisioning (post_unl, eps.getProvisioningHandle ());
               }
 
-            // ////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
             // There may be any number of postDeleteKey
-            // ////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
             for (ProvisioningFinalizationRequestDecoder.PostOperation post_del : prov_final_request.getPostDeleteKeys ())
               {
                 postProvisioning (post_del, eps.getProvisioningHandle ());
@@ -220,9 +222,9 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
 
             publishProgress (BaseProxyActivity.PROGRESS_FINAL);
 
-            // ////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
             // Create final and attested message
-            // ////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
             keygen2_activity.postXMLData (prov_final_request.getSubmitURL (), new ProvisioningFinalizationResponseEncoder (prov_final_request, keygen2_activity.sks.closeProvisioningSession (eps.getProvisioningHandle (), prov_final_request.getCloseSessionNonce (), prov_final_request.getCloseSessionMAC ())), true);
             return keygen2_activity.getRedirectURL ();
           }

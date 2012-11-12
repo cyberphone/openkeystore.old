@@ -53,13 +53,14 @@ import org.webpki.android.sks.DeviceInfo;
 import org.webpki.android.xml.XMLObjectWrapper;
 
 /**
- * This part does the real work
+ * This worker class creates the SKS/KeyGen2 SessionKey.
+ * Optionally credentials are looked-up and PINs are set.
  */
 public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
   {
     private KeyGen2Activity keygen2_activity;
 
-    class PINDialog
+    private class PINDialog
       {
         private EditText pin1;
         private EditText pin2;
@@ -107,90 +108,90 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
 
         PINDialog (final Iterator<KeyCreationRequestDecoder.KeyObject> iter)
           {
-            key = iter.next ();
-            keygen2_activity.setContentView (key.getPINPolicy ().getFormat () == PassphraseFormat.NUMERIC ? R.layout.activity_keygen2_numeric_pin : R.layout.activity_keygen2_pin);
-
-            Button ok = (Button) keygen2_activity.findViewById (R.id.OKbutton);
-            ok.setVisibility (View.VISIBLE);
-            Button cancel = (Button) keygen2_activity.findViewById (R.id.cancelButton);
-            cancel.setVisibility (View.VISIBLE);
-
-            pin1 = (EditText) keygen2_activity.findViewById (R.id.editpin1);
-            pin2 = (EditText) keygen2_activity.findViewById (R.id.editpin2);
-            if (key.getPINPolicy ().getFormat () == PassphraseFormat.ALPHANUMERIC)
+            if (iter.hasNext ())
               {
-                upperCasePIN (pin1);
-                upperCasePIN (pin2);
-              }
-            pin_err = (TextView) keygen2_activity.findViewById (R.id.errorPIN);
-            checkPIN ();
-            pin1.addTextChangedListener (new TextWatcher ()
-              {
-                @Override
-                public void afterTextChanged (Editable s)
+                key = iter.next ();
+                keygen2_activity.setContentView (key.getPINPolicy ().getFormat () == PassphraseFormat.NUMERIC ? R.layout.activity_keygen2_numeric_pin : R.layout.activity_keygen2_pin);
+    
+                Button ok = (Button) keygen2_activity.findViewById (R.id.OKbutton);
+                ok.setVisibility (View.VISIBLE);
+                Button cancel = (Button) keygen2_activity.findViewById (R.id.cancelButton);
+                cancel.setVisibility (View.VISIBLE);
+    
+                pin1 = (EditText) keygen2_activity.findViewById (R.id.editpin1);
+                pin2 = (EditText) keygen2_activity.findViewById (R.id.editpin2);
+                if (key.getPINPolicy ().getFormat () == PassphraseFormat.ALPHANUMERIC)
                   {
-                    checkPIN ();
+                    upperCasePIN (pin1);
+                    upperCasePIN (pin2);
                   }
-
-                @Override
-                public void beforeTextChanged (CharSequence s, int start, int count, int after)
+                pin_err = (TextView) keygen2_activity.findViewById (R.id.errorPIN);
+                checkPIN ();
+                pin1.addTextChangedListener (new TextWatcher ()
                   {
-                  }
-
-                @Override
-                public void onTextChanged (CharSequence s, int start, int before, int count)
-                  {
-                  }
-              });
-            pin2.addTextChangedListener (new TextWatcher ()
-              {
-                @Override
-                public void afterTextChanged (Editable s)
-                  {
-                    checkPIN ();
-                  }
-
-                @Override
-                public void beforeTextChanged (CharSequence s, int start, int count, int after)
-                  {
-                  }
-
-                @Override
-                public void onTextChanged (CharSequence s, int start, int before, int count)
-                  {
-                  }
-              });
-            ok.setOnClickListener (new View.OnClickListener ()
-              {
-                @Override
-                public void onClick (View v)
-                  {
-                    if (checkPIN ())
+                    @Override
+                    public void afterTextChanged (Editable s)
                       {
-                        key.setUserPIN (last_pin);
-                        if (iter.hasNext ())
+                        checkPIN ();
+                      }
+    
+                    @Override
+                    public void beforeTextChanged (CharSequence s, int start, int count, int after)
+                      {
+                      }
+    
+                    @Override
+                    public void onTextChanged (CharSequence s, int start, int before, int count)
+                      {
+                      }
+                  });
+                pin2.addTextChangedListener (new TextWatcher ()
+                  {
+                    @Override
+                    public void afterTextChanged (Editable s)
+                      {
+                        checkPIN ();
+                      }
+    
+                    @Override
+                    public void beforeTextChanged (CharSequence s, int start, int count, int after)
+                      {
+                      }
+    
+                    @Override
+                    public void onTextChanged (CharSequence s, int start, int before, int count)
+                      {
+                      }
+                  });
+                ok.setOnClickListener (new View.OnClickListener ()
+                  {
+                    @Override
+                    public void onClick (View v)
+                      {
+                        if (checkPIN ())
                           {
+                            key.setUserPIN (last_pin);
                             new PINDialog (iter);
                           }
                         else
                           {
-                            new KeyGen2KeyCreation (keygen2_activity).execute ();
+                            keygen2_activity.showAlert ("Please correct PIN");
                           }
                       }
-                    else
-                      {
-                        keygen2_activity.showAlert ("Please correct PIN");
-                      }
-                  }
-              });
-            cancel.setOnClickListener (new View.OnClickListener ()
-              {
-                @Override
-                public void onClick (View v)
+                  });
+                cancel.setOnClickListener (new View.OnClickListener ()
                   {
-                    keygen2_activity.finish ();
-                  }
-              });
+                    @Override
+                    public void onClick (View v)
+                      {
+                        keygen2_activity.finish ();
+                      }
+                  });
+              }
+            else
+              {
+                new KeyGen2KeyCreation (keygen2_activity).execute ();
+              }
           }
       }
 
@@ -286,15 +287,10 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
               {
                 try
                   {
-                    Iterator<KeyCreationRequestDecoder.KeyObject> iter = keygen2_activity.key_creation_request.getKeyObjects ().iterator ();
-                    if (iter.hasNext ())
-                      {
-                        new PINDialog (iter);
-                      }
-                    else
-                      {
-                        new KeyGen2KeyCreation (keygen2_activity).execute ();
-                      }
+                    ///////////////////////////////////////////////////////////////////////////
+                    // Note: There may be zero PINs but the test in the constructor fixes that
+                    ///////////////////////////////////////////////////////////////////////////
+                    new PINDialog (keygen2_activity.key_creation_request.getKeyObjects ().iterator ());
                   }
                 catch (Exception e)
                   {
