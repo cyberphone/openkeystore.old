@@ -90,7 +90,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
           {
             String pin = pin1.getText ().toString ();
             equal_pins = pin1.getText ().toString ().equals (pin2.getText ().toString ());
-            KeyCreationRequestDecoder.UserPINSyntaxError res = upd.setPIN (pin, set_value && equal_pins);
+            KeyCreationRequestDecoder.UserPINError res = upd.setPIN (pin, set_value && equal_pins);
             if (res == null)
               {
                 pin_err.setText ("");
