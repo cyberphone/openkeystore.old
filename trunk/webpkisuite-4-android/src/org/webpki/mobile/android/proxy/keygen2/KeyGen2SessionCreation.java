@@ -46,6 +46,8 @@ import org.webpki.android.keygen2.PlatformNegotiationResponseEncoder;
 import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
 import org.webpki.android.keygen2.ProvisioningInitializationResponseEncoder;
 
+import org.webpki.android.sks.AppUsage;
+import org.webpki.android.sks.Grouping;
 import org.webpki.android.sks.PassphraseFormat;
 import org.webpki.android.sks.ProvisioningSession;
 import org.webpki.android.sks.DeviceInfo;
@@ -59,15 +61,18 @@ import org.webpki.android.xml.XMLObjectWrapper;
 public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
   {
     private KeyGen2Activity keygen2_activity;
+    
+    private int pin_count;
+    private boolean multiple_pins;
 
     private class PINDialog
       {
         private EditText pin1;
         private EditText pin2;
         private TextView pin_err;
-        private byte[] last_pin;
+        private boolean equal_pins;
 
-        KeyCreationRequestDecoder.KeyObject key;
+        KeyCreationRequestDecoder.UserPINDescriptor upd;
 
         private void upperCasePIN (EditText pin)
           {
@@ -81,37 +86,83 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
             pin.getEditableText ().setFilters (new_filter);
           }
 
-        private boolean checkPIN ()
+        private boolean checkPIN (boolean set_value)
           {
-            try
+            String pin = pin1.getText ().toString ();
+            equal_pins = pin1.getText ().toString ().equals (pin2.getText ().toString ());
+            KeyCreationRequestDecoder.UserPINSyntaxError res = upd.setPIN (pin, set_value && equal_pins);
+            if (res == null)
               {
-                last_pin = pin1.getText ().toString ().getBytes ("UTF-8");
-                if (last_pin.length < 4 || last_pin.length > 8)
-                  {
-                    pin_err.setText ("PIN must be 4-8 characters");
-                  }
-                else
-                  {
-                    if (pin1.getText ().toString ().equals (pin2.getText ().toString ()))
-                      {
-                        pin_err.setText ("");
-                        return true;
-                      }
-                    pin_err.setText ("Retyped PIN doesn't match the first PIN");
-                  }
+                pin_err.setText ("");
+                return true;
               }
-            catch (IOException e)
+            else
               {
+                KeyCreationRequestDecoder.PINPolicy pin_policy = upd.getPINPolicy ();
+                String error = "PIN syntax error";
+                if (res.length_error)
+                  {
+                    error = "PINs must be between " + pin_policy.getMinLength () + " and " + 
+                            pin_policy.getMaxLength () + (pin_policy.getFormat () == PassphraseFormat.NUMERIC ? " digits" : " characters");
+                  }
+                else if (res.syntax_error)
+                  {
+                    switch (pin_policy.getFormat ())
+                      {
+                        case NUMERIC:
+                          error = "PINs must only contain 0-9";
+                          break;
+
+                        case ALPHANUMERIC:
+                          error = "PINs must only contain 0-9 A-Z";
+                          break;
+
+                        case BINARY:
+                          error = "PINs must be a hexadecimal string";
+                          break;
+                      }
+                  }
+                else if (res.pattern_error != null)
+                  {
+                    switch (res.pattern_error)
+                      {
+                        case SEQUENCE:
+                          error = "PINs must not be a sequence";
+                          break;
+
+                        case TWO_IN_A_ROW:
+                          error = "PINs must not contain two equal charcaters in a row";
+                          break;
+
+                        case THREE_IN_A_ROW:
+                          error = "PINs must not contain three equal charcaters in a row";
+                          break;
+
+                        case REPEATED:
+                          error = "PINs must not contain the same charcater twice";
+                          break;
+
+                        case MISSING_GROUP:
+                          error = "PINs must be a mix of " + (pin_policy.getFormat () == PassphraseFormat.ALPHANUMERIC ? 
+                                           "A-Z 0-9" : "A-Z a-z 0-9 and control characters");
+                          break;
+                      }
+                  }
+                else if (res.unique_error)
+                  {
+                    error = "PINs for " + upd.getAppUsage ().getXMLName () + " and " + res.unique_error_app_usage.getXMLName () + " must not be equal";
+                  }
+                pin_err.setText (error);
               }
             return false;
           }
 
-        PINDialog (final Iterator<KeyCreationRequestDecoder.KeyObject> iter)
+        PINDialog (final Iterator<KeyCreationRequestDecoder.UserPINDescriptor> iter)
           {
             if (iter.hasNext ())
               {
-                key = iter.next ();
-                keygen2_activity.setContentView (key.getPINPolicy ().getFormat () == PassphraseFormat.NUMERIC ? R.layout.activity_keygen2_numeric_pin : R.layout.activity_keygen2_pin);
+                upd = iter.next ();
+                keygen2_activity.setContentView (upd.getPINPolicy ().getFormat () == PassphraseFormat.NUMERIC ? R.layout.activity_keygen2_numeric_pin : R.layout.activity_keygen2_pin);
     
                 Button ok = (Button) keygen2_activity.findViewById (R.id.OKbutton);
                 ok.setVisibility (View.VISIBLE);
@@ -120,37 +171,39 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
     
                 pin1 = (EditText) keygen2_activity.findViewById (R.id.editpin1);
                 pin2 = (EditText) keygen2_activity.findViewById (R.id.editpin2);
-                if (key.getPINPolicy ().getFormat () == PassphraseFormat.ALPHANUMERIC)
+                if (upd.getPINPolicy ().getFormat () == PassphraseFormat.ALPHANUMERIC)
                   {
                     upperCasePIN (pin1);
                     upperCasePIN (pin2);
                   }
                 pin_err = (TextView) keygen2_activity.findViewById (R.id.errorPIN);
-                checkPIN ();
+                TextView set_pin_text = (TextView) keygen2_activity.findViewById (R.id.setPINtext);
+                StringBuffer lead_text = new StringBuffer ("Set ");
+                if (upd.getPINPolicy ().getGrouping () == Grouping.SIGNATURE_PLUS_STANDARD)
+                  {
+                    lead_text.append (upd.getAppUsage () == AppUsage.SIGNATURE ? "signature " : "standard ");
+                  }
+                else if (upd.getPINPolicy ().getGrouping () == Grouping.UNIQUE)
+                  {
+                    if (upd.getAppUsage () != AppUsage.UNIVERSAL)
+                      {
+                        lead_text.append (upd.getAppUsage ().getXMLName ());
+                        lead_text.append (' ');
+                      }
+                  }
+                lead_text.append ("PIN");
+                if (multiple_pins)
+                  {
+                    lead_text.append (" #").append (++pin_count);
+                  }
+                set_pin_text.setText (lead_text);
+                checkPIN (false);
                 pin1.addTextChangedListener (new TextWatcher ()
                   {
                     @Override
                     public void afterTextChanged (Editable s)
                       {
-                        checkPIN ();
-                      }
-    
-                    @Override
-                    public void beforeTextChanged (CharSequence s, int start, int count, int after)
-                      {
-                      }
-    
-                    @Override
-                    public void onTextChanged (CharSequence s, int start, int before, int count)
-                      {
-                      }
-                  });
-                pin2.addTextChangedListener (new TextWatcher ()
-                  {
-                    @Override
-                    public void afterTextChanged (Editable s)
-                      {
-                        checkPIN ();
+                        checkPIN (false);
                       }
     
                     @Override
@@ -168,10 +221,16 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                     @Override
                     public void onClick (View v)
                       {
-                        if (checkPIN ())
+                        if (checkPIN (true))
                           {
-                            key.setUserPIN (last_pin);
-                            new PINDialog (iter);
+                            if (equal_pins)
+                              {
+                                new PINDialog (iter);
+                              }
+                            else
+                              {
+                                keygen2_activity.showAlert ("The retyped PIN doesn't match the original");
+                              }
                           }
                         else
                           {
@@ -290,7 +349,8 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                     ///////////////////////////////////////////////////////////////////////////
                     // Note: There may be zero PINs but the test in the constructor fixes that
                     ///////////////////////////////////////////////////////////////////////////
-                    new PINDialog (keygen2_activity.key_creation_request.getKeyObjects ().iterator ());
+                    multiple_pins = keygen2_activity.key_creation_request.getUserPINDescriptors ().size () > 1;
+                    new PINDialog (keygen2_activity.key_creation_request.getUserPINDescriptors ().iterator ());
                   }
                 catch (Exception e)
                   {
