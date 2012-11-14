@@ -123,7 +123,9 @@ public abstract class BaseProxyActivity extends Activity
         finish ();
       }
 
-    public void postXMLData (String url, XMLObjectWrapper xml_object, boolean interrupt_expected) throws IOException, InterruptedProtocolException
+    public void postXMLData (String url,
+                             XMLObjectWrapper xml_object,
+                             boolean interrupt_expected) throws IOException, InterruptedProtocolException
       {
         logOK ("Writing \"" + xml_object.element () + "\" object to: " + url);
         addOptionalCookies (url);
@@ -239,9 +241,6 @@ public abstract class BaseProxyActivity extends Activity
     public void showAlert (String message)
       {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder (this);
-
-        // set title
-        // alertDialogBuilder.setTitle("Your Title");
 
         // set dialog message
         alertDialogBuilder.setMessage (message).setCancelable (false).setPositiveButton ("OK", new DialogInterface.OnClickListener ()

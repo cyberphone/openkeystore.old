@@ -102,8 +102,8 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                 String error = "PIN syntax error";
                 if (res.length_error)
                   {
-                    error = "PINs must be between " + pin_policy.getMinLength () + " and " + 
-                            pin_policy.getMaxLength () + (pin_policy.getFormat () == PassphraseFormat.NUMERIC ? " digits" : " characters");
+                    error = "PINs must be between " + pin_policy.getMinLength () + " and " + pin_policy.getMaxLength () +
+                            (pin_policy.getFormat () == PassphraseFormat.NUMERIC ? " digits" : " characters");
                   }
                 else if (res.syntax_error)
                   {
@@ -162,7 +162,8 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
             if (iter.hasNext ())
               {
                 upd = iter.next ();
-                keygen2_activity.setContentView (upd.getPINPolicy ().getFormat () == PassphraseFormat.NUMERIC ? R.layout.activity_keygen2_numeric_pin : R.layout.activity_keygen2_pin);
+                keygen2_activity.setContentView (upd.getPINPolicy ().getFormat () == PassphraseFormat.NUMERIC ?
+                             R.layout.activity_keygen2_numeric_pin : R.layout.activity_keygen2_pin);
     
                 Button ok = (Button) keygen2_activity.findViewById (R.id.OKbutton);
                 ok.setVisibility (View.VISIBLE);
@@ -267,17 +268,33 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
             publishProgress (BaseProxyActivity.PROGRESS_SESSION);
 
             DeviceInfo device_info = keygen2_activity.sks.getDeviceInfo ();
-            PlatformNegotiationResponseEncoder platform_response = new PlatformNegotiationResponseEncoder (keygen2_activity.platform_request);
+            PlatformNegotiationResponseEncoder platform_response = 
+                new PlatformNegotiationResponseEncoder (keygen2_activity.platform_request);
             keygen2_activity.postXMLData (keygen2_activity.platform_request.getSubmitURL (), platform_response, false);
 
             keygen2_activity.prov_init_request = (ProvisioningInitializationRequestDecoder) keygen2_activity.parseResponse ();
             Date client_time = new Date ();
-            ProvisioningSession session = keygen2_activity.sks.createProvisioningSession (keygen2_activity.prov_init_request.getSessionKeyAlgorithm (), keygen2_activity.platform_request.getPrivacyEnabledFlag (), keygen2_activity.prov_init_request.getServerSessionID (), keygen2_activity.prov_init_request.getServerEphemeralKey (), keygen2_activity.prov_init_request.getSubmitURL (), // IssuerURI
-            keygen2_activity.prov_init_request.getKeyManagementKey (), (int) (client_time.getTime () / 1000), keygen2_activity.prov_init_request.getSessionLifeTime (), keygen2_activity.prov_init_request.getSessionKeyLimit ());
+            ProvisioningSession session = 
+                keygen2_activity.sks.createProvisioningSession (keygen2_activity.prov_init_request.getSessionKeyAlgorithm (),
+                                                                keygen2_activity.platform_request.getPrivacyEnabledFlag (),
+                                                                keygen2_activity.prov_init_request.getServerSessionID (),
+                                                                keygen2_activity.prov_init_request.getServerEphemeralKey (),
+                                                                keygen2_activity.prov_init_request.getSubmitURL (), // IssuerURI
+                                                                keygen2_activity.prov_init_request.getKeyManagementKey (),
+                                                                (int) (client_time.getTime () / 1000),
+                                                                keygen2_activity.prov_init_request.getSessionLifeTime (),
+                                                                keygen2_activity.prov_init_request.getSessionKeyLimit ());
 
             keygen2_activity.provisioning_handle = session.getProvisioningHandle ();
 
-            ProvisioningInitializationResponseEncoder prov_sess_response = new ProvisioningInitializationResponseEncoder (session.getClientEphemeralKey (), keygen2_activity.prov_init_request.getServerSessionID (), session.getClientSessionID (), keygen2_activity.prov_init_request.getServerTime (), client_time, session.getAttestation (), keygen2_activity.platform_request.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
+            ProvisioningInitializationResponseEncoder prov_sess_response =
+                new ProvisioningInitializationResponseEncoder (session.getClientEphemeralKey (),
+                                                               keygen2_activity.prov_init_request.getServerSessionID (),
+                                                               session.getClientSessionID (),
+                                                               keygen2_activity.prov_init_request.getServerTime (),
+                                                               client_time,
+                                                               session.getAttestation (),
+                                                               keygen2_activity.platform_request.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
 
             if (keygen2_activity.getServerCertificate () != null)
               {

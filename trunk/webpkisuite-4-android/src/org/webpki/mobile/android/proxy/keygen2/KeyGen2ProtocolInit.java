@@ -23,7 +23,6 @@ import android.widget.Button;
 import android.view.View;
 
 import org.webpki.mobile.android.proxy.R;
-import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
 import org.webpki.android.keygen2.CredentialDiscoveryRequestDecoder;
 import org.webpki.android.keygen2.KeyCreationRequestDecoder;
