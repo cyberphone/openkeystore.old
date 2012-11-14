@@ -32,6 +32,8 @@ abstract class PlatformNegotiationRequest extends XMLObjectWrapper
     String server_session_id;
 
     String submit_url;
+    
+    String abort_url; // Optional
 
     ServerCookie server_cookie;
     

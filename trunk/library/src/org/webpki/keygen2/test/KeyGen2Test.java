@@ -81,6 +81,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.Action;
 import org.webpki.keygen2.BasicCapabilities;
+import org.webpki.keygen2.KeyGen2Constants;
 import org.webpki.keygen2.KeySpecifier;
 import org.webpki.keygen2.ProvisioningFinalizationRequestDecoder;
 import org.webpki.keygen2.ProvisioningFinalizationRequestEncoder;
@@ -128,6 +129,7 @@ import org.webpki.sks.ws.WSSpecific;
 import org.webpki.tools.XML2HTMLPrinter;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.DebugFormatter;
 import org.webpki.util.HTMLHeader;
 import org.webpki.util.ImageData;
 
@@ -201,6 +203,8 @@ public class KeyGen2Test
     
     boolean ask_for_exponent;
     
+    boolean set_abort_url;
+    
     ExportProtection export_protection;
     
     DeleteProtection delete_protection;
@@ -222,6 +226,18 @@ public class KeyGen2Test
     static final byte[] PREDEF_SERVER_PIN = {'3','1','2','5','8','9'};
     
     static final byte[] BAD_PIN = {0x03, 0x33, 0x03, 0x04};
+
+    static final String ABORT_URL = "http://issuer.example.com/abort";
+
+    static final String PLATFORM_URL = "http://issuer.example.com/platform";
+
+    static final String ISSUER_URL = "http://issuer.example.com/provsess";
+    
+    static final String KEY_INIT_URL = "http://issuer.example.com/keyinit";
+
+    static final String FIN_PROV_URL = "http://issuer.example.com/finalize";
+
+    static final String CRE_DISC_URL = "http://issuer.example.com/credisc";
     
     static X509Certificate server_certificate;
     
@@ -283,6 +299,157 @@ public class KeyGen2Test
       }
     @Rule 
     public TestName _name = new TestName();
+    
+    static class KeyCreator
+      {
+        private static final String kg2keycre = 
+          "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+          "<KeyCreationRequest Algorithm=\"http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1\" " +
+          "ClientSessionID=\"C-139622a0ac98f2f44a35c9753ca\" " +
+          "ID=\"S-139622a0a9993085d38d1586b76\" " +
+          "SubmitURL=\"http://issuer.example.com/keyinit\" " +
+          "xmlns=\"" + KeyGen2Constants.KEYGEN2_NS + "\">";
+      
+        private static XMLSchemaCache xml_cache;
+        
+        static
+        {
+          try
+            {
+              xml_cache = new XMLSchemaCache ();
+              xml_cache.addWrapper (KeyCreationRequestDecoder.class);
+            }
+          catch (IOException e)
+            {
+            }
+        }
+        
+        private StringBuffer xml = new StringBuffer (kg2keycre);
+        
+        private int key_id;
+        
+        private int pin_id;
+        
+        private boolean pin_active;
+        
+        KeyCreator () throws IOException
+          {
+          }
+        
+        KeyCreator addPIN (PassphraseFormat format, Grouping grouping, PatternRestriction[] patterns)
+          {
+            finishPIN ();
+            pin_active = true;
+            if (grouping == null)
+              {
+                grouping = Grouping.NONE;
+              }
+            xml.append ("<PINPolicy Format=\"")
+               .append (format.getXMLName ())
+               .append ("\" ID=\"PIN.")
+               .append (++pin_id)
+               .append ("\" Grouping=\"")
+               .append (grouping.getXMLName ())
+               .append ("\"");
+            if (patterns != null)
+              {
+                xml.append (" PatternRestrictions=\"");
+                String blank="";
+                for (PatternRestriction pattern : patterns)
+                  {
+                    xml.append (blank);
+                    blank = " ";
+                    xml.append (pattern.getXMLName ());
+                  }
+                xml.append ("\"");
+              }
+            xml.append (" MAC=\"3dGegeDJ1enpEzCgwdbXJirNZ95wooM6ordOGW/AJ+0=\" MaxLength=\"8\" MinLength=\"4\" RetryLimit=\"3\">");
+            return this;
+          }
+        
+        private void finishPIN ()
+          {
+            if (pin_active)
+              {
+                pin_active = false;
+                xml.append ("</PINPolicy>");
+              }
+          }
+
+        KeyCreator addKey (AppUsage app_usage)
+          {
+            xml.append ("<KeyEntry AppUsage=\"")
+               .append (app_usage.getXMLName ())
+               .append ("\" ID=\"Key.")
+               .append (++key_id)
+               .append ("\" KeyAlgorithm=\"http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa2048\" MAC=\"Jrqigi79Yw6SoLobsBA5S8b74gTKrIJPh3tQRKci33Y=\"/>");
+            return this;
+          }
+
+        KeyCreationRequestDecoder parse () throws Exception
+          {
+            finishPIN ();
+            return (KeyCreationRequestDecoder)xml_cache.parse (xml.append ("</KeyCreationRequest>").toString ().getBytes ("UTF-8"));
+          }
+      }
+
+    boolean PINCheck (PassphraseFormat format, PatternRestriction[] patterns, String pin) throws Exception
+      {
+        byte[] pin_value = format == PassphraseFormat.BINARY ? DebugFormatter.getByteArrayFromHex (pin) : pin.getBytes ("UTF-8");
+        KeyCreator kc = new KeyCreator ();
+        kc.addPIN (format, null, patterns);
+        kc.addKey (AppUsage.AUTHENTICATION);
+        KeyCreationRequestDecoder.UserPINDescriptor upd = kc.parse ().getUserPINDescriptors ().elementAt (0);
+        return upd.setPIN (pin_value) == null;
+      }
+    
+    void PINGroupCheck (Grouping grouping, AppUsage[] keys, String[] pins, int[] index, boolean fail) throws Exception
+      {
+        KeyCreator kc = new KeyCreator ();
+        kc.addPIN (PassphraseFormat.NUMERIC, grouping, null);
+        for (AppUsage app_usage : keys)
+          {
+            kc.addKey (app_usage);
+          }
+        KeyCreationRequestDecoder decoder = kc.parse ();
+        String error = null;
+        if (decoder.getUserPINDescriptors ().size () != pins.length)
+          {
+            error = "Wrong number of PINs";
+          }
+        else
+          {
+            int i = 0;
+            for (KeyCreationRequestDecoder.UserPINDescriptor upd : decoder.getUserPINDescriptors ())
+              {
+                if (upd.setPIN (pins[i++].getBytes ("UTF-8")) != null)
+                  {
+                    error = "PIN return error";
+                    break;
+                  }
+              }
+            if (error == null)
+              {
+                i = 0;
+                for (KeyCreationRequestDecoder.KeyObject ko : decoder.getKeyObjects ())
+                  {
+                    if (!ArrayUtil.compare (ko.getSKSPINValue (), pins[index[i++]].getBytes ("UTF-8")))
+                      {
+                        error = "Grouping problem";
+                        break;
+                      }
+                  }
+              }
+          }
+        if (error == null)
+          {
+            if (fail) throw new IOException ("Error expected");
+          }
+        else if (!fail)
+          {
+            throw new IOException ("Unexpected error: " + error);
+          }
+      }
 
     class Client
       {
@@ -374,6 +541,14 @@ public class KeyGen2Test
         byte[] platformResponse (byte[] xmldata) throws IOException
           {
             platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (xmldata);
+            if (set_abort_url)
+              {
+                assertTrue ("Abort URL", platform_req.getAbortURL ().equals (ABORT_URL));
+              }
+            else
+              {
+                assertTrue ("Abort URL", platform_req.getAbortURL () == null);
+              }
             device_info = sks.getDeviceInfo ();
             PlatformNegotiationResponseEncoder platform_response = new PlatformNegotiationResponseEncoder (platform_req);
             BasicCapabilities basic_capabilties_response = platform_response.getBasicCapabilities ();
@@ -414,6 +589,7 @@ public class KeyGen2Test
         byte[] provSessResponse (byte[] xmldata) throws IOException
           {
             prov_sess_req = (ProvisioningInitializationRequestDecoder) client_xml_cache.parse (xmldata);
+            assertTrue ("Submit URL", prov_sess_req.getSubmitURL ().equals (ISSUER_URL));
             Date client_time = new Date ();
             ProvisioningSession sess = 
                   sks.createProvisioningSession (prov_sess_req.getSessionKeyAlgorithm (),
@@ -474,6 +650,7 @@ public class KeyGen2Test
         byte[] creDiscResponse (byte[] xmldata) throws IOException, GeneralSecurityException
           {
             cre_disc_req = (CredentialDiscoveryRequestDecoder) client_xml_cache.parse (xmldata);
+            assertTrue ("Submit URL", cre_disc_req.getSubmitURL ().equals (CRE_DISC_URL));
             CredentialDiscoveryResponseEncoder cdre = new CredentialDiscoveryResponseEncoder (cre_disc_req);
             for (CredentialDiscoveryRequestDecoder.LookupSpecifier ls : cre_disc_req.getLookupSpecifiers ())
               {
@@ -518,7 +695,12 @@ public class KeyGen2Test
         byte[] keyCreResponse (byte[] xmldata) throws IOException
           {
             key_creation_request = (KeyCreationRequestDecoder) client_xml_cache.parse (xmldata);
+            assertTrue ("Submit URL", key_creation_request.getSubmitURL ().equals (KEY_INIT_URL));
             KeyCreationResponseEncoder key_creation_response = new KeyCreationResponseEncoder (key_creation_request);
+            for (KeyCreationRequestDecoder.UserPINDescriptor upd : key_creation_request.getUserPINDescriptors ())
+              {
+                upd.setPIN (USER_DEFINED_PIN);
+              }
             int pin_policy_handle = 0;
             int puk_policy_handle = 0;
             for (KeyCreationRequestDecoder.KeyObject key : key_creation_request.getKeyObjects ())
@@ -530,10 +712,6 @@ public class KeyGen2Test
                   }
                 else
                   {
-                    if (key.getPINPolicy ().getUserDefinedFlag ())
-                      {
-                        key.setUserPIN (USER_DEFINED_PIN);
-                      }
                     if (key.isStartOfPINPolicy ())
                       {
                         if (key.isStartOfPUKPolicy ())
@@ -593,6 +771,7 @@ public class KeyGen2Test
           {
             ProvisioningFinalizationRequestDecoder prov_final_request =
                            (ProvisioningFinalizationRequestDecoder) client_xml_cache.parse (xmldata);
+            assertTrue ("Submit URL", prov_final_request.getSubmitURL ().equals (FIN_PROV_URL));
             /* 
                Note: we could have used the saved provisioning_handle but that would not
                work for certifications that are delayed.  The following code is working
@@ -695,16 +874,6 @@ public class KeyGen2Test
     
     class Server
       {
-        static final String PLATFORM_URI = "http://issuer.example.com/platform";
-
-        static final String ISSUER_URI = "http://issuer.example.com/provsess";
-        
-        static final String KEY_INIT_URL = "http://issuer.example.com/keyinit";
-
-        static final String FIN_PROV_URL = "http://issuer.example.com/finalize";
-
-        static final String CRE_DISC_URL = "http://issuer.example.com/credisc";
-
         static final String LOGO_URL = "http://issuer.example.com/images/logo.png";
         static final String LOGO_MIME = "image/png";
         byte[] LOGO_SHA256 = {0,5,6,6,0,5,6,6,0,5,6,6,0,5,6,6,0,5,6,6,0,5,6,6,0,5,6,6,0,5,6,6}; 
@@ -765,7 +934,11 @@ public class KeyGen2Test
             // First keygen2 request
             ////////////////////////////////////////////////////////////////////////////////////
             String server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
-            PlatformNegotiationRequestEncoder platform_request =  new PlatformNegotiationRequestEncoder (server_state, PLATFORM_URI, server_session_id);
+            PlatformNegotiationRequestEncoder platform_request =  new PlatformNegotiationRequestEncoder (server_state, PLATFORM_URL, server_session_id);
+            if (set_abort_url)
+              {
+                platform_request.setAbortURL (ABORT_URL);
+              }
             platform_request.addLogotype (LOGO_URL, LOGO_MIME, LOGO_SHA256, LOGO_WIDTH, LOGO_HEIGHT);
             BasicCapabilities basic_capabilities = platform_request.getBasicCapabilities ();
             if (ask_for_4096)
@@ -826,7 +999,7 @@ public class KeyGen2Test
               }
 
             ProvisioningInitializationRequestEncoder prov_init_request = 
-                 new ProvisioningInitializationRequestEncoder (server_state, ISSUER_URI, 10000, (short)50);
+                 new ProvisioningInitializationRequestEncoder (server_state, ISSUER_URL, 10000, (short)50);
             if (updatable)
               {
                 prov_init_request.setKeyManagementKey (server_km = server_crypto_interface.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
@@ -1256,6 +1429,7 @@ public class KeyGen2Test
             writeOption ("Multiple Keys", two_keys);
             writeOption ("HTTPS server certificate", https);
             writeOption ("TrustAnchor option", set_trust_anchor);
+            writeOption ("Abort URL option", set_abort_url);
             server = new Server ();
             client = new Client ();
             byte[] xml;
@@ -1482,6 +1656,7 @@ public class KeyGen2Test
       {
         Doer doer = new Doer ();
         device_pin_protection = true;
+        set_abort_url = true;
         doer.perform ();
       }
 
@@ -1743,5 +1918,64 @@ public class KeyGen2Test
         doer.perform ();
         X509Certificate[] cert_path = sks.getKeyAttributes (doer.getFirstKey ()).getCertificatePath ();
         assertTrue ("Path Length", CertificateUtil.isTrustAnchor (cert_path[cert_path.length - 1]));
+      }
+
+    @Test
+    public void MassiveUserPINCollection () throws Exception
+      {
+        assertTrue (PINCheck (PassphraseFormat.ALPHANUMERIC, null, "AB123"));
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, null, "1234"));
+        assertTrue (PINCheck (PassphraseFormat.STRING, null, "azAB13.\n"));
+        assertTrue (PINCheck (PassphraseFormat.BINARY, null, "12300234FF"));
+
+        assertFalse (PINCheck (PassphraseFormat.ALPHANUMERIC, null, "ab123"));  // Lowercase 
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, null, "AB1234"));      // Alpha
+
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE}, "1234"));      // Up seq
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE}, "8765"));      // Down seq
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE}, "1235"));      // No seq
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE}, "1345"));      // No seq
+
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.TWO_IN_A_ROW}, "1232"));      // No two in row
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.TWO_IN_A_ROW}, "11345"));      // Two in a row
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.TWO_IN_A_ROW}, "13455"));      // Two in a row
+
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.THREE_IN_A_ROW}, "11232"));      // No two in row
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.THREE_IN_A_ROW}, "111345"));      // Three in a row
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.THREE_IN_A_ROW}, "134555"));      // Three in a row
+        
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE, PatternRestriction.THREE_IN_A_ROW}, "1235"));      // No seq or three in a row
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE, PatternRestriction.THREE_IN_A_ROW}, "6789"));      // Seq
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.SEQUENCE, PatternRestriction.THREE_IN_A_ROW}, "1115"));      // Three in a row
+
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "1476"));      // Bad combo
+        assertFalse (PINCheck (PassphraseFormat.BINARY, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "12300234FF"));      // Bad combo
+
+        assertTrue (PINCheck (PassphraseFormat.STRING, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "2aZ."));
+        assertTrue (PINCheck (PassphraseFormat.ALPHANUMERIC, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "AB34"));
+
+        assertFalse (PINCheck (PassphraseFormat.STRING, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "2aZA"));  // Non alphanum missing
+        assertFalse (PINCheck (PassphraseFormat.STRING, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "a.jZ"));  // Number missing
+        assertFalse (PINCheck (PassphraseFormat.STRING, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "2 ZA"));  // Lowercase missing
+        assertFalse (PINCheck (PassphraseFormat.STRING, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "2a 6"));  // Uppercase missing
+
+        assertFalse (PINCheck (PassphraseFormat.ALPHANUMERIC, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "ABCK")); // Missing number
+        assertFalse (PINCheck (PassphraseFormat.ALPHANUMERIC, new PatternRestriction[]{PatternRestriction.MISSING_GROUP}, "1235")); // Missing alpha
+        
+        assertTrue (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.REPEATED}, "1345"));
+        assertFalse (PINCheck (PassphraseFormat.NUMERIC, new PatternRestriction[]{PatternRestriction.REPEATED}, "1315"));  // Two of same
+
+        PINGroupCheck (Grouping.NONE, new AppUsage[] {AppUsage.AUTHENTICATION}, new String[] {"1234"}, new int[] {0}, false);
+        PINGroupCheck (Grouping.NONE, new AppUsage[] {AppUsage.AUTHENTICATION, AppUsage.SIGNATURE}, new String[] {"1234", "1234"}, new int[] {0, 1}, false);
+        PINGroupCheck (Grouping.NONE, new AppUsage[] {AppUsage.AUTHENTICATION, AppUsage.SIGNATURE}, new String[] {"1234", "1235"}, new int[] {0, 1}, false);
+        PINGroupCheck (Grouping.SHARED, new AppUsage[] {AppUsage.AUTHENTICATION, AppUsage.SIGNATURE}, new String[] {"1234", "1234"}, new int[] {0, 1}, true);
+        PINGroupCheck (Grouping.SHARED, new AppUsage[] {AppUsage.AUTHENTICATION, AppUsage.SIGNATURE, AppUsage.SIGNATURE}, new String[] {"1234"}, new int[] {0, 0, 0}, false);
+        PINGroupCheck (Grouping.UNIQUE, new AppUsage[] {AppUsage.AUTHENTICATION, AppUsage.SIGNATURE}, new String[] {"1234"}, new int[] {0, 0}, true);
+        PINGroupCheck (Grouping.UNIQUE, new AppUsage[] {AppUsage.AUTHENTICATION, AppUsage.SIGNATURE}, new String[] {"1234","2345"}, new int[] {0, 1}, false);
+        PINGroupCheck (Grouping.UNIQUE, new AppUsage[] {AppUsage.AUTHENTICATION, AppUsage.SIGNATURE}, new String[] {"1234","1234"}, new int[] {0, 1}, true);
+        PINGroupCheck (Grouping.UNIQUE, new AppUsage[] {AppUsage.SIGNATURE, AppUsage.AUTHENTICATION, AppUsage.SIGNATURE}, new String[] {"1234","2345"}, new int[] {0, 1, 0}, false);
+        PINGroupCheck (Grouping.UNIQUE, new AppUsage[] {AppUsage.SIGNATURE, AppUsage.AUTHENTICATION, AppUsage.SIGNATURE, AppUsage.ENCRYPTION}, new String[] {"1234","2345","7777"}, new int[] {0, 1, 0, 2}, false);
+        PINGroupCheck (Grouping.SIGNATURE_PLUS_STANDARD, new AppUsage[] {AppUsage.SIGNATURE, AppUsage.AUTHENTICATION, AppUsage.SIGNATURE, AppUsage.ENCRYPTION}, new String[] {"2345","1234"}, new int[] {0, 1, 0, 1}, false);
+        PINGroupCheck (Grouping.SIGNATURE_PLUS_STANDARD, new AppUsage[] {AppUsage.SIGNATURE, AppUsage.AUTHENTICATION, AppUsage.SIGNATURE, AppUsage.ENCRYPTION}, new String[] {"2345","2345"}, new int[] {0, 1, 0, 1}, true);
       }
   }

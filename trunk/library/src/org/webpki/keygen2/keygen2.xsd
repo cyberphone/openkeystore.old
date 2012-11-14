@@ -148,6 +148,13 @@
               in the request as well -->
          <xs:attribute name="SubmitURL" type="kg2:httpURI" use="required"/>
 
+         <!-- If the user aborts the enrollment process the following optional
+              URL can be set to inform the issuer that this is the case.
+              The server is supposed to return a suitable web-page as the
+              response from the HTTP GET operation.  Note that applicable
+              session cookies MUST be submitted in the request as well -->
+         <xs:attribute name="AbortURL" type="kg2:httpURI" use="optional"/>
+
       </xs:complexType>
    </xs:element>
 

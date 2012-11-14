@@ -93,6 +93,12 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
       }
 
 
+    public String getAbortURL ()
+      {
+        return abort_url;
+      }
+
+
     public ServerCookie getServerCookie ()
       {
         return server_cookie;
@@ -134,7 +140,9 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
         server_session_id = ah.getString (ID_ATTR);
 
         submit_url = ah.getString (SUBMIT_URL_ATTR);
-        
+
+        abort_url = ah.getStringConditional (ABORT_URL_ATTR);
+
         privacy_enabled = ah.getBooleanConditional (PRIVACY_ENABLED_ATTR);
 
         BasicCapabilities.read (ah, basic_capabilities);

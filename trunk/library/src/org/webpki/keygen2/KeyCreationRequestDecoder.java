@@ -31,6 +31,8 @@ import org.webpki.sks.Grouping;
 import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.PatternRestriction;
 
+import org.webpki.util.ArrayUtil;
+
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
@@ -157,7 +159,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         byte max_length;
 
-        Grouping group;
+        Grouping grouping;
 
         InputMethod input_method;
 
@@ -184,7 +186,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
             format = PassphraseFormat.getPassphraseFormatFromString (ah.getString (FORMAT_ATTR));
 
-            group = Grouping.getGroupingFromString (ah.getStringConditional (GROUPING_ATTR, Grouping.NONE.getXMLName ()));
+            grouping = Grouping.getGroupingFromString (ah.getStringConditional (GROUPING_ATTR, Grouping.NONE.getXMLName ()));
 
             input_method = InputMethod.getInputMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR, InputMethod.ANY.getXMLName ()));
             
@@ -234,7 +236,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         public Grouping getGrouping ()
           {
-            return group;
+            return grouping;
           }
 
 
@@ -290,7 +292,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           {
             return puk_policy;
           }
-
       }
 
 
@@ -307,6 +308,8 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
         PINPolicy pin_policy;
         
         PresetPIN preset_pin;
+
+        byte[] user_set_pin;
 
         boolean device_pin_protected;
         
@@ -471,12 +474,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             return endorsed_algorithms;
           }
 
-        byte[] user_set_pin;
-        
-        public void setUserPIN (byte[] user_set_pin)
-          {
-            this.user_set_pin = user_set_pin;
-          }
         
         public byte[] getSKSPINValue ()
           {
@@ -484,7 +481,283 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
       }
 
+    public class UserPINSyntaxError
+      {
+        public boolean length_error;
+        public boolean syntax_error;
+        public boolean unique_error;
+        public AppUsage unique_error_app_usage;
+        public PatternRestriction pattern_error;
+      }
+    
 
+    public class UserPINDescriptor
+      {
+        PINPolicy pin_policy;
+        AppUsage app_usage;
+        
+        private UserPINDescriptor (PINPolicy pin_policy, AppUsage app_usage)
+          {
+            this.pin_policy = pin_policy;
+            this.app_usage = app_usage;
+          }
+
+        public PINPolicy getPINPolicy ()
+          {
+            return pin_policy;
+          }
+
+        public AppUsage getAppUsage ()
+          {
+            return app_usage;
+          }
+        
+        public UserPINSyntaxError setPIN (byte[] pin)
+          {
+            UserPINSyntaxError error = new UserPINSyntaxError ();
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check PIN length
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (pin_policy.min_length > pin.length || pin_policy.max_length < pin.length)
+              {
+                error.length_error = true;
+                return error;
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check PIN syntax
+            ///////////////////////////////////////////////////////////////////////////////////
+            boolean upperalpha = false;
+            boolean loweralpha = false;
+            boolean number = false;
+            boolean nonalphanum = false;
+            for (int i = 0; i < pin.length; i++)
+              {
+                int c = pin[i];
+                if (c >= 'A' && c <= 'Z')
+                  {
+                    upperalpha = true;
+                  }
+                else if (c >= 'a' && c <= 'z')
+                  {
+                    loweralpha = true;
+                  }
+                else if (c >= '0' && c <= '9')
+                  {
+                    number = true;
+                  }
+                else
+                  {
+                    nonalphanum = true;
+                  }
+              }
+            if ((pin_policy.format == PassphraseFormat.NUMERIC && (loweralpha || nonalphanum || upperalpha)) ||
+                (pin_policy.format == PassphraseFormat.ALPHANUMERIC && (loweralpha || nonalphanum)))
+              {
+                error.syntax_error = true;
+                return error;
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check PIN patterns
+            ///////////////////////////////////////////////////////////////////////////////////
+            if (pin_policy.pattern_restrictions.contains (PatternRestriction.MISSING_GROUP))
+              {
+                if (!upperalpha || !number ||
+                    (pin_policy.format == PassphraseFormat.STRING && (!loweralpha || !nonalphanum)))
+                  {
+                    error.pattern_error = PatternRestriction.MISSING_GROUP;
+                    return error;
+                  }
+              }
+            if (pin_policy.pattern_restrictions.contains (PatternRestriction.SEQUENCE))
+              {
+                byte c = pin[0];
+                byte f = (byte)(pin[1] - c);
+                boolean seq = (f == 1) || (f == -1);
+                for (int i = 1; i < pin.length; i++)
+                  {
+                    if ((byte)(c + f) != pin[i])
+                      {
+                        seq = false;
+                        break;
+                      }
+                    c = pin[i];
+                  }
+                if (seq)
+                  {
+                    error.pattern_error = PatternRestriction.SEQUENCE;
+                    return error;
+                  }
+              }
+            if (pin_policy.pattern_restrictions.contains (PatternRestriction.REPEATED))
+              {
+                for (int i = 0; i < pin.length; i++)
+                  {
+                    byte b = pin[i];
+                    for (int j = 0; j < pin.length; j++)
+                      {
+                        if (j != i && b == pin[j])
+                          {
+                            error.pattern_error = PatternRestriction.REPEATED;
+                            return error;
+                          }
+                      }
+                  }
+              }
+            if (pin_policy.pattern_restrictions.contains (PatternRestriction.TWO_IN_A_ROW) ||
+                pin_policy.pattern_restrictions.contains (PatternRestriction.THREE_IN_A_ROW))
+              {
+                int max = pin_policy.pattern_restrictions.contains (PatternRestriction.THREE_IN_A_ROW) ? 3 : 2;
+                byte c = pin [0];
+                int same_count = 1;
+                for (int i = 1; i < pin.length; i++)
+                  {
+                    if (c == pin[i])
+                      {
+                        if (++same_count == max)
+                          {
+                            error.pattern_error = max == 2 ? PatternRestriction.TWO_IN_A_ROW : PatternRestriction.THREE_IN_A_ROW;
+                            return error;
+                          }
+                      }
+                    else
+                      {
+                        same_count = 1;
+                        c = pin[i];
+                      }
+                  }
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Check that PIN grouping rules are followed
+            ///////////////////////////////////////////////////////////////////////////////////
+            Vector<KeyObject> keys_needing_pin = new Vector<KeyObject> ();
+            for (KeyObject key : request_objects)
+              {
+                if (key.pin_policy == pin_policy)
+                  {
+                    switch (pin_policy.grouping)
+                      {
+                        case NONE:
+                          if (key.user_set_pin == null)
+                            {
+                              keys_needing_pin.add (key);
+                              break;
+                            }
+                          continue;
+ 
+                        case SHARED:
+                          keys_needing_pin.add (key);
+                          continue;
+                  
+                        case UNIQUE:
+                          if (app_usage == key.app_usage)
+                            {
+                              keys_needing_pin.add (key);
+                            }
+                          else
+                            {
+                              if (key.user_set_pin != null && ArrayUtil.compare (pin, key.user_set_pin))
+                                {
+                                  error.unique_error = true;
+                                  error.unique_error_app_usage = key.app_usage;
+                                  return error;
+                                }
+                            }
+                          continue;
+
+                        case SIGNATURE_PLUS_STANDARD:
+                          if ((app_usage == AppUsage.SIGNATURE) ^ (key.app_usage == AppUsage.SIGNATURE))
+                            {
+                              if (key.user_set_pin != null && ArrayUtil.compare (pin, key.user_set_pin))
+                                {
+                                  error.unique_error = true;
+                                  error.unique_error_app_usage = key.app_usage;
+                                  return error;
+                                }
+                            }
+                          else
+                            {
+                              keys_needing_pin.add (key);
+                            }
+                          continue;
+                      }
+                    break;
+                  }
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // We did it!  Assign the PIN to the associated keys
+            ///////////////////////////////////////////////////////////////////////////////////
+            for (KeyObject key : keys_needing_pin)
+              {
+                key.user_set_pin = pin;
+              }
+            return null;
+          }
+      }
+
+
+    public Vector<KeyObject> getKeyObjects () throws IOException
+      {
+        return request_objects;
+      }
+
+
+    public Vector<UserPINDescriptor> getUserPINDescriptors ()
+      {
+        Vector<UserPINDescriptor> user_pin_policies = new Vector<UserPINDescriptor>();
+        for (KeyObject key: request_objects)
+          {
+            if (key.getPINPolicy () != null && key.getPINPolicy ().getUserDefinedFlag ())
+              {
+                UserPINDescriptor pin_desc = new UserPINDescriptor (key.pin_policy, key.app_usage);
+                if (key.pin_policy.grouping == Grouping.NONE)
+                  {
+                    user_pin_policies.add (pin_desc);
+                  }
+                else 
+                  {
+                    for (UserPINDescriptor upd2 : user_pin_policies)
+                      {
+                        if (upd2.pin_policy == key.pin_policy)
+                          {
+                            if (key.pin_policy.grouping == Grouping.SHARED)
+                              {
+                                pin_desc = null;
+                                break;
+                              }
+                            if (key.pin_policy.grouping == Grouping.UNIQUE)
+                              {
+                                if (upd2.app_usage == key.app_usage)
+                                  {
+                                    pin_desc = null;
+                                    break;
+                                  }
+                              }
+                            else
+                              {
+                                if ((upd2.app_usage == AppUsage.SIGNATURE) ^ (key.app_usage != AppUsage.SIGNATURE))
+                                  {
+                                    pin_desc = null;
+                                    break;
+                                  }
+                              }
+                          }
+                      }
+                    if (pin_desc != null)
+                      {
+                        user_pin_policies.add (pin_desc);
+                      }
+                  }
+              }
+          }
+        return user_pin_policies;
+      }
+
+    
     private void bad (String error_msg) throws IOException
       {
         throw new IOException (error_msg);
@@ -605,12 +878,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
     public boolean getDeferredCertificationFlag ()
       {
         return deferred_certification;
-      }
-
-
-    public KeyObject[] getKeyObjects () throws IOException
-      {
-        return request_objects.toArray (new KeyObject[0]);
       }
 
 

@@ -25,6 +25,8 @@ public interface KeyGen2Constants
 
     // XML attributes
 
+    String ABORT_URL_ATTR                            = "AbortURL";
+
     String ACTION_ATTR                               = "Action";
 
     String ALGORITHMS_ATTR                           = "Algorithms";

@@ -76,6 +76,11 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         this.action = action;
       }
 
+    public void setAbortURL (String abort_url)
+      {
+        this.abort_url = abort_url;
+      }
+
 
     public ServerCookie setServerCookie (ServerCookie server_cookie)
       {
@@ -137,6 +142,11 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         wr.setStringAttribute (ID_ATTR, server_session_id);
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
+        
+        if (abort_url != null)
+          {
+            wr.setStringAttribute (ABORT_URL_ATTR, abort_url);
+          }
         
         ////////////////////////////////////////////////////////////////////////
         // Basic capabilities
