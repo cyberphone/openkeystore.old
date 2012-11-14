@@ -32,6 +32,7 @@ import org.webpki.sks.PassphraseFormat;
 import org.webpki.sks.PatternRestriction;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.DebugFormatter;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
@@ -512,9 +513,27 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             return app_usage;
           }
         
-        public UserPINSyntaxError setPIN (byte[] pin)
+        public UserPINSyntaxError setPIN (String pin_string_value)
           {
             UserPINSyntaxError error = new UserPINSyntaxError ();
+
+            byte[] pin = null;
+            try
+              {
+                if (pin_policy.format == PassphraseFormat.BINARY)
+                  {
+                    pin = DebugFormatter.getByteArrayFromHex (pin_string_value);
+                  }
+                else
+                  {
+                    pin = pin_string_value.getBytes ("UTF-8");
+                  }
+              }
+            catch (IOException e)
+              {
+                error.syntax_error = true;
+                return error;
+              }
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Check PIN length

@@ -129,7 +129,6 @@ import org.webpki.sks.ws.WSSpecific;
 import org.webpki.tools.XML2HTMLPrinter;
 
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.DebugFormatter;
 import org.webpki.util.HTMLHeader;
 import org.webpki.util.ImageData;
 
@@ -395,12 +394,11 @@ public class KeyGen2Test
 
     boolean PINCheck (PassphraseFormat format, PatternRestriction[] patterns, String pin) throws Exception
       {
-        byte[] pin_value = format == PassphraseFormat.BINARY ? DebugFormatter.getByteArrayFromHex (pin) : pin.getBytes ("UTF-8");
         KeyCreator kc = new KeyCreator ();
         kc.addPIN (format, null, patterns);
         kc.addKey (AppUsage.AUTHENTICATION);
         KeyCreationRequestDecoder.UserPINDescriptor upd = kc.parse ().getUserPINDescriptors ().elementAt (0);
-        return upd.setPIN (pin_value) == null;
+        return upd.setPIN (pin) == null;
       }
     
     void PINGroupCheck (Grouping grouping, AppUsage[] keys, String[] pins, int[] index, boolean fail) throws Exception
@@ -422,7 +420,7 @@ public class KeyGen2Test
             int i = 0;
             for (KeyCreationRequestDecoder.UserPINDescriptor upd : decoder.getUserPINDescriptors ())
               {
-                if (upd.setPIN (pins[i++].getBytes ("UTF-8")) != null)
+                if (upd.setPIN (pins[i++]) != null)
                   {
                     error = "PIN return error";
                     break;
@@ -699,7 +697,7 @@ public class KeyGen2Test
             KeyCreationResponseEncoder key_creation_response = new KeyCreationResponseEncoder (key_creation_request);
             for (KeyCreationRequestDecoder.UserPINDescriptor upd : key_creation_request.getUserPINDescriptors ())
               {
-                upd.setPIN (USER_DEFINED_PIN);
+                upd.setPIN (new String (USER_DEFINED_PIN, "UTF-8"));
               }
             int pin_policy_handle = 0;
             int puk_policy_handle = 0;
@@ -1927,6 +1925,9 @@ public class KeyGen2Test
         assertTrue (PINCheck (PassphraseFormat.NUMERIC, null, "1234"));
         assertTrue (PINCheck (PassphraseFormat.STRING, null, "azAB13.\n"));
         assertTrue (PINCheck (PassphraseFormat.BINARY, null, "12300234FF"));
+        assertTrue (PINCheck (PassphraseFormat.BINARY, null, "12300234ff"));
+        assertFalse (PINCheck (PassphraseFormat.BINARY, null, "3034ff"));
+        assertFalse (PINCheck (PassphraseFormat.BINARY, null, "12300234fp"));
 
         assertFalse (PINCheck (PassphraseFormat.ALPHANUMERIC, null, "ab123"));  // Lowercase 
         assertFalse (PINCheck (PassphraseFormat.NUMERIC, null, "AB1234"));      // Alpha
