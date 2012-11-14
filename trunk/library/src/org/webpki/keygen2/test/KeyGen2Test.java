@@ -398,8 +398,8 @@ public class KeyGen2Test
         kc.addPIN (format, null, patterns);
         kc.addKey (AppUsage.AUTHENTICATION);
         KeyCreationRequestDecoder.UserPINDescriptor upd = kc.parse ().getUserPINDescriptors ().elementAt (0);
-        KeyCreationRequestDecoder.UserPINSyntaxError pin_test = upd.setPIN (pin, false);
-        KeyCreationRequestDecoder.UserPINSyntaxError pin_set = upd.setPIN (pin, true);
+        KeyCreationRequestDecoder.UserPINError pin_test = upd.setPIN (pin, false);
+        KeyCreationRequestDecoder.UserPINError pin_set = upd.setPIN (pin, true);
         if ((pin_test == null) ^ (pin_set == null))
           {
             throw new IOException ("PIN test/set confusion");

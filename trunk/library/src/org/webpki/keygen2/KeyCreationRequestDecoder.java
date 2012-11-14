@@ -482,7 +482,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
       }
 
-    public class UserPINSyntaxError
+    public class UserPINError
       {
         public boolean length_error;
         public boolean syntax_error;
@@ -513,9 +513,9 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             return app_usage;
           }
         
-        public UserPINSyntaxError setPIN (String pin_string_value, boolean set_value_on_success)
+        public UserPINError setPIN (String pin_string_value, boolean set_value_on_success)
           {
-            UserPINSyntaxError error = new UserPINSyntaxError ();
+            UserPINError error = new UserPINError ();
 
             byte[] pin = null;
             try
