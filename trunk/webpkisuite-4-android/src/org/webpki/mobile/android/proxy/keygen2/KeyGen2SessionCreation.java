@@ -131,15 +131,15 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                           break;
 
                         case TWO_IN_A_ROW:
-                          error = "PINs must not contain two equal charcaters in a row";
+                          error = "PINs must not contain two equal characters in a row";
                           break;
 
                         case THREE_IN_A_ROW:
-                          error = "PINs must not contain three equal charcaters in a row";
+                          error = "PINs must not contain three equal characters in a row";
                           break;
 
                         case REPEATED:
-                          error = "PINs must not contain the same charcater twice";
+                          error = "PINs must not contain the same characters twice";
                           break;
 
                         case MISSING_GROUP:
