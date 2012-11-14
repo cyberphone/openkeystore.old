@@ -398,7 +398,13 @@ public class KeyGen2Test
         kc.addPIN (format, null, patterns);
         kc.addKey (AppUsage.AUTHENTICATION);
         KeyCreationRequestDecoder.UserPINDescriptor upd = kc.parse ().getUserPINDescriptors ().elementAt (0);
-        return upd.setPIN (pin) == null;
+        KeyCreationRequestDecoder.UserPINSyntaxError pin_test = upd.setPIN (pin, false);
+        KeyCreationRequestDecoder.UserPINSyntaxError pin_set = upd.setPIN (pin, true);
+        if ((pin_test == null) ^ (pin_set == null))
+          {
+            throw new IOException ("PIN test/set confusion");
+          }
+        return pin_set == null;
       }
     
     void PINGroupCheck (Grouping grouping, AppUsage[] keys, String[] pins, int[] index, boolean fail) throws Exception
@@ -420,7 +426,7 @@ public class KeyGen2Test
             int i = 0;
             for (KeyCreationRequestDecoder.UserPINDescriptor upd : decoder.getUserPINDescriptors ())
               {
-                if (upd.setPIN (pins[i++]) != null)
+                if (upd.setPIN (pins[i++], true) != null)
                   {
                     error = "PIN return error";
                     break;
@@ -697,7 +703,7 @@ public class KeyGen2Test
             KeyCreationResponseEncoder key_creation_response = new KeyCreationResponseEncoder (key_creation_request);
             for (KeyCreationRequestDecoder.UserPINDescriptor upd : key_creation_request.getUserPINDescriptors ())
               {
-                upd.setPIN (new String (USER_DEFINED_PIN, "UTF-8"));
+                upd.setPIN (new String (USER_DEFINED_PIN, "UTF-8"), true);
               }
             int pin_policy_handle = 0;
             int puk_policy_handle = 0;

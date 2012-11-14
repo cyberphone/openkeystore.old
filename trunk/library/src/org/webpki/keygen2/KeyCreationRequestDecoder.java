@@ -513,7 +513,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             return app_usage;
           }
         
-        public UserPINSyntaxError setPIN (String pin_string_value)
+        public UserPINSyntaxError setPIN (String pin_string_value, boolean set_value_on_success)
           {
             UserPINSyntaxError error = new UserPINSyntaxError ();
 
@@ -708,11 +708,14 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
               }
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // We did it!  Assign the PIN to the associated keys
+            // We did it!  Assign the PIN to the associated keys or just return null=success
             ///////////////////////////////////////////////////////////////////////////////////
-            for (KeyObject key : keys_needing_pin)
+            if (set_value_on_success)
               {
-                key.user_set_pin = pin;
+                for (KeyObject key : keys_needing_pin)
+                  {
+                    key.user_set_pin = pin;
+                  }
               }
             return null;
           }
