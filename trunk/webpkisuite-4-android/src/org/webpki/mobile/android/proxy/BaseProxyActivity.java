@@ -23,8 +23,11 @@ import java.io.PrintWriter;
 import java.net.URLDecoder;
 
 import java.security.Security;
+
 import java.security.cert.X509Certificate;
+
 import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
@@ -44,6 +47,7 @@ import org.apache.http.HttpStatus;
 import org.webpki.android.net.HTTPSWrapper;
 import org.webpki.android.xml.XMLSchemaCache;
 import org.webpki.android.xml.XMLObjectWrapper;
+
 import org.webpki.mobile.android.sks.SKSImplementation;
 
 import org.spongycastle.jce.provider.BouncyCastleProvider;

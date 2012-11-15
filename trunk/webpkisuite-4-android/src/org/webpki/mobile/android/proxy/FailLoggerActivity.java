@@ -17,8 +17,11 @@
 package org.webpki.mobile.android.proxy;
 
 import android.os.Bundle;
+
 import android.webkit.WebView;
+
 import android.app.Activity;
+
 import android.content.Intent;
 
 public class FailLoggerActivity extends Activity

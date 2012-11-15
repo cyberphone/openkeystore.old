@@ -2633,6 +2633,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         // We are done, close the show for this time
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.open = false;
+        Log.i (TAG_SKS, "Successful session termination");
         return attestation;
       }
 
@@ -3249,10 +3250,12 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
                 exponent = new BigInteger (key_parameters);
               }
             alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size, exponent);
+            Log.i (TAG_SKS, "RSA " + rsa_key_size + " key created");
           }
         else
           {
             alg_par_spec = new ECGenParameterSpec (kalg.jce_name);
+            Log.i (TAG_SKS, "EC " + kalg.jce_name + " key created");
           }
         try
           {
@@ -3394,6 +3397,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         pin_policy.min_length = min_length;
         pin_policy.max_length = max_length;
         pin_policy.input_method = input_method;
+        Log.i (TAG_SKS, "PIN policy object created");
         return pin_policy.pin_policy_handle;
       }
 
@@ -3453,6 +3457,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         puk_policy.puk_value = decrypted_puk_value;
         puk_policy.format = format;
         puk_policy.retry_limit = retry_limit;
+        Log.i (TAG_SKS, "PUK policy object created");
         return puk_policy.puk_policy_handle;
       }
   }
