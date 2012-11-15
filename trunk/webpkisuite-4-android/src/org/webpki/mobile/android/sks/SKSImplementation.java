@@ -3055,6 +3055,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
           {
             key_entry.owner.abort ("Multiple calls to \"setCertificatePath\" for: " + key_entry.id);
           }
+        Log.i (TAG_SKS, "Certificate for \"" + certificate_path[0].getSubjectX500Principal ().getName () + "\" Serial=" + certificate_path[0].getSerialNumber () + " received");
         key_entry.certificate_path = certificate_path.clone ();
       }
 
