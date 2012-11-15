@@ -250,6 +250,10 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
               }
             else
               {
+                Button ok = (Button) keygen2_activity.findViewById (R.id.OKbutton);
+                ok.setVisibility (View.INVISIBLE);
+                Button cancel = (Button) keygen2_activity.findViewById (R.id.cancelButton);
+                cancel.setVisibility (View.INVISIBLE);
                 new KeyGen2KeyCreation (keygen2_activity).execute ();
               }
           }
