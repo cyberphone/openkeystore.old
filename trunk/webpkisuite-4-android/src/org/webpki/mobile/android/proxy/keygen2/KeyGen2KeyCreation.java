@@ -319,7 +319,6 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
     @Override
     protected void onPostExecute (String result)
       {
-        keygen2_activity.noMoreWorkToDo ();
         if (result != null)
           {
             keygen2_activity.launchBrowser (result);

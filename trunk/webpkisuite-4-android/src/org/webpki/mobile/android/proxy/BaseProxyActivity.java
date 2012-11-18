@@ -122,6 +122,7 @@ public abstract class BaseProxyActivity extends Activity
 
     public void launchBrowser (String url)
       {
+        noMoreWorkToDo ();
         Intent intent = new Intent (Intent.ACTION_VIEW).setData (Uri.parse (url));
         startActivity (intent);
         finish ();
@@ -188,6 +189,7 @@ public abstract class BaseProxyActivity extends Activity
 
     public void showFailLog ()
       {
+        noMoreWorkToDo ();
         Intent intent = new Intent (this, FailLoggerActivity.class);
         intent.putExtra (FailLoggerActivity.LOG_MESSAGE, logger.toString ());
         startActivity (intent);
