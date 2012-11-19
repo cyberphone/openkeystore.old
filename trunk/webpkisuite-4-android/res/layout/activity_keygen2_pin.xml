@@ -38,6 +38,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:password="true"
+        android:imeOptions="flagNoFullscreen"
         android:inputType="textPassword" >
         <requestFocus />
     </EditText>
@@ -54,6 +55,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:password="true"
+        android:imeOptions="flagNoFullscreen"
         android:inputType="textPassword" />
     
     </LinearLayout>
