@@ -1,17 +1,10 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="@dimen/screen_width"
-    android:layout_height="@dimen/screen_height"
-    android:layout_gravity="center_vertical|center_horizontal"
-    android:background="@drawable/appborder" >
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/cancelButton"
-        android:gravity="center_vertical|center_horizontal"
-        android:orientation="vertical" >
-
+                <org.webpki.mobile.android.proxy.keygen2.KeyGen2InitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:background="@drawable/appborder"
+            android:orientation="vertical" >
+        
     <ImageView
         android:id="@+id/imageView1"
         android:layout_width="wrap_content"
@@ -22,13 +15,31 @@
         android:id="@+id/win"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="@dimen/padding_medium"
-        android:text="Do you accept that the party above creates
-or updates credentials for you?" />
-
-    </LinearLayout>
+        android:text="Do you accept that the party above&#10;creates or updates credentials for you?" />
     
-    <include layout="@layout/lower_buttons"/>
+    <Button
+        android:id="@+id/cancelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:text="Cancel" />
 
+    <Button
+        android:id="@+id/OKbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:text="OK" />
 
-</RelativeLayout>
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/dialogborder"
+        android:gravity="center_vertical|center_horizontal"
+        android:padding="4dp"
+        android:text="Credential Enrollment"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#000000" />
+    
+    </org.webpki.mobile.android.proxy.keygen2.KeyGen2InitLayout>
