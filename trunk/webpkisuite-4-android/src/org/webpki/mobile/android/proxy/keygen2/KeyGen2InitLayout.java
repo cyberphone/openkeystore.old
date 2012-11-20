@@ -54,7 +54,7 @@ public class KeyGen2InitLayout extends LinearLayout
         int button_w = getChildAt (2).getMeasuredWidth();
         if (button_w > 0)
           {
-            int height = 60 + getChildAt (0).getMeasuredHeight () + getChildAt (1).getMeasuredHeight () + getChildAt (4).getMeasuredHeight ();
+            int height = 60 + getChildAt (0).getMeasuredHeight () + getChildAt (1).getMeasuredHeight () ;
             int width = 40 + w_max;
             if (w > h)
               {
@@ -90,8 +90,7 @@ public class KeyGen2InitLayout extends LinearLayout
         Log.i ("L", "C=" + changed + " L=" + l + " T=" + t + " R=" + r + " b=" + b);
 //        super.onLayout (changed, l, t, r, b);
         // if( !changed ) return;
-        int height = getChildAt (4).getMeasuredHeight ();
-        getChildAt (4).layout (0, 0, r - l, height);
+        int height = 0;
         int width = getChildAt (0).getMeasuredWidth ();
         getChildAt (0).layout ((r - l - width)/2, height + 20, (r - l - width)/2 + width, height + getChildAt (0).getMeasuredHeight () + 20);
         width = getChildAt (1).getMeasuredWidth ();
