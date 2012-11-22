@@ -6,7 +6,6 @@
             android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/textView1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_margin="1px"
@@ -18,9 +17,10 @@
         android:textColor="#000000" />
 
 <org.webpki.mobile.android.proxy.keygen2.KeyGen2InitLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
+    android:id="@+id/primaryWindow"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:visibility="invisible" >
                     
     <ImageView
         android:id="@+id/imageView1"
@@ -32,22 +32,12 @@
         android:id="@+id/win"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Do you accept that the party above&#10;creates or updates credentials for you?" />
+        android:minLines="2"
+        android:text="Do you accept that the party above&#10;creates or updates credentials for you?"
+        android:textColor="#000000" />
     
-    <Button
-        android:id="@+id/cancelButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-        android:text="Cancel" />
-
-    <Button
-        android:id="@+id/OKbutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-        android:text="OK" />
-
+    <include layout="@layout/lower_buttons"/>
     
     </org.webpki.mobile.android.proxy.keygen2.KeyGen2InitLayout>
+
 </LinearLayout>

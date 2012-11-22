@@ -27,6 +27,7 @@ import android.os.AsyncTask;
 
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.View;
 
@@ -102,7 +103,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                 String error = "PIN syntax error";
                 if (res.length_error)
                   {
-                    error = "PINs must be between " + pin_policy.getMinLength () + " and " + pin_policy.getMaxLength () +
+                    error = "PINs must be " + pin_policy.getMinLength () + "-" + pin_policy.getMaxLength () +
                             (pin_policy.getFormat () == PassphraseFormat.NUMERIC ? " digits" : " characters");
                   }
                 else if (res.syntax_error)
@@ -131,20 +132,20 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                           break;
 
                         case TWO_IN_A_ROW:
-                          error = "PINs must not contain two equal characters in a row";
+                          error = "PINs must not contain two equal\ncharacters in a row";
                           break;
 
                         case THREE_IN_A_ROW:
-                          error = "PINs must not contain three equal characters in a row";
+                          error = "PINs must not contain three equal\ncharacters in a row";
                           break;
 
                         case REPEATED:
-                          error = "PINs must not contain the same characters twice";
+                          error = "PINs must not contain the same\ncharacters twice";
                           break;
 
                         case MISSING_GROUP:
-                          error = "PINs must be a mix of " + (pin_policy.getFormat () == PassphraseFormat.ALPHANUMERIC ? 
-                                           "A-Z 0-9" : "A-Z a-z 0-9 and control characters");
+                          error = "PINs must be a mix of A-Z " + (pin_policy.getFormat () == PassphraseFormat.ALPHANUMERIC ? 
+                                           "0-9" : "a-z 0-9\nand control characters");
                           break;
                       }
                   }
@@ -162,16 +163,18 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
             if (iter.hasNext ())
               {
                 upd = iter.next ();
-                keygen2_activity.setContentView (upd.getPINPolicy ().getFormat () == PassphraseFormat.NUMERIC ?
-                             R.layout.activity_keygen2_numeric_pin : R.layout.activity_keygen2_pin);
+                keygen2_activity.setContentView (R.layout.activity_keygen2_pin);
     
                 Button ok = (Button) keygen2_activity.findViewById (R.id.OKbutton);
-                ok.setVisibility (View.VISIBLE);
                 Button cancel = (Button) keygen2_activity.findViewById (R.id.cancelButton);
-                cancel.setVisibility (View.VISIBLE);
     
                 pin1 = (EditText) keygen2_activity.findViewById (R.id.editpin1);
                 pin2 = (EditText) keygen2_activity.findViewById (R.id.editpin2);
+                if (upd.getPINPolicy ().getFormat () != PassphraseFormat.NUMERIC)
+                  {
+                    pin1.setInputType (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    pin2.setInputType (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                  }
                 if (upd.getPINPolicy ().getFormat () == PassphraseFormat.ALPHANUMERIC)
                   {
                     upperCasePIN (pin1);
@@ -250,7 +253,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
               }
             else
               {
-                keygen2_activity.setContentView (R.layout.activity_keygen2);
+                keygen2_activity.findViewById (R.id.primaryWindow).setVisibility (View.INVISIBLE);
                 new KeyGen2KeyCreation (keygen2_activity).execute ();
               }
           }

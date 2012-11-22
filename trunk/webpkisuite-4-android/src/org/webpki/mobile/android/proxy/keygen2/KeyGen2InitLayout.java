@@ -21,10 +21,17 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
-public class KeyGen2InitLayout extends LinearLayout
+public class KeyGen2InitLayout extends FrameLayout
   {
+    static final int PADDING = 20;
+
+    static final int HOST_IMAGE = 0;
+    static final int ACCEPT_TEXT = 1;
+    static final int CANCEL_BUTTON = 2;
+    static final int OK_BUTTON = 3;
+    
     public KeyGen2InitLayout (Context context)
       {
         super (context);
@@ -43,37 +50,35 @@ public class KeyGen2InitLayout extends LinearLayout
         int hs = MeasureSpec.getMode (hSpec);
         int h = MeasureSpec.getSize (hSpec);
         Log.i ("M", "WS=" + ws + " W=" + w + " HS=" + hs + " H=" + h);
-        getChildAt (3).setMinimumWidth (getChildAt (2).getMeasuredWidth());
         super.onMeasure (wSpec, hSpec);
+        getChildAt (OK_BUTTON).setMinimumWidth (getChildAt (CANCEL_BUTTON).getMeasuredWidth());
         Log.i ("M2", "W=" + getMeasuredWidth());
-        int w_max = getChildAt (0).getMeasuredWidth();
-        if (w_max < getChildAt (1).getMeasuredWidth())
+        int w_max = getChildAt (HOST_IMAGE).getMeasuredWidth();
+        if (w_max < getChildAt (ACCEPT_TEXT).getMeasuredWidth())
           {
-            w_max = getChildAt (1).getMeasuredWidth();
+            w_max = getChildAt (ACCEPT_TEXT).getMeasuredWidth();
           }
-        int button_w = getChildAt (2).getMeasuredWidth();
+        int button_w = getChildAt (CANCEL_BUTTON).getMeasuredWidth();
         if (button_w > 0)
           {
-            int height = 60 + getChildAt (0).getMeasuredHeight () + getChildAt (1).getMeasuredHeight () ;
-            int width = 40 + w_max;
+            int height = PADDING * 3 + getChildAt (HOST_IMAGE).getMeasuredHeight () + getChildAt (ACCEPT_TEXT).getMeasuredHeight () ;
+            int width = PADDING * 2 + w_max;
             if (w > h)
               {
-                width += 40 + 2 * button_w;
-                int up = getChildAt (2).getMeasuredHeight () -  getChildAt (1).getMeasuredHeight ();
+                width += 2 * (button_w + PADDING);
+                int up = getChildAt (CANCEL_BUTTON).getMeasuredHeight () -  getChildAt (ACCEPT_TEXT).getMeasuredHeight ();
                   {
                     if (up > 0)
                       {
-                        height += up / 2 + getChildAt (2).getMeasuredHeight () / 12;
+                        height += up / 2 + getChildAt (CANCEL_BUTTON).getMeasuredHeight () / 12;
                       }
                   }
               }
             else
               {
-                height += 20 + getChildAt (3).getMeasuredHeight ();
+                height += PADDING + getChildAt (OK_BUTTON).getMeasuredHeight ();
               }
             setMeasuredDimension (width, height);
-//            getChildAt (4).setMinimumWidth (0);
-//            getChildAt (4).setMinimumWidth (width);
             Log.i ("CHN", "W=" + getMeasuredWidth ());
           }
         int len = getChildCount ();
@@ -87,29 +92,13 @@ public class KeyGen2InitLayout extends LinearLayout
     @Override
     protected void onLayout (boolean changed, int l, int t, int r, int b)
       {
-        Log.i ("L", "C=" + changed + " L=" + l + " T=" + t + " R=" + r + " b=" + b);
-//        super.onLayout (changed, l, t, r, b);
-        // if( !changed ) return;
         int height = 0;
-        int width = getChildAt (0).getMeasuredWidth ();
-        getChildAt (0).layout ((r - l - width)/2, height + 20, (r - l - width)/2 + width, height + getChildAt (0).getMeasuredHeight () + 20);
-        width = getChildAt (1).getMeasuredWidth ();
-        getChildAt (1).layout ((r - l - width)/2, height + getChildAt (0).getMeasuredHeight () + 40, (r - l - width)/2 + width, height + getChildAt (0).getMeasuredHeight () + getChildAt (1).getMeasuredHeight () + 40);
-        width = getChildAt (2).getMeasuredWidth ();
-        getChildAt (2).layout (20, b - t - getChildAt (2).getMeasuredHeight () - 20, 20 + width , b - t - 20);
-        getChildAt (3).layout (r - l - width - 20, b - t - getChildAt (3).getMeasuredHeight () - 20, r - l - 20 , b - t - 20);
-        /*
-        int len = getChildCount ();
-        int top = 20;
-        for (int i = 0; i < len; i++)
-          {
-            View c = getChildAt (i);
-            int w = c.getMeasuredWidth ();
-            int h = c.getMeasuredHeight ();
-            c.layout (20, top , w + 20, top + h);
-            top += 20 + h;
-            Log.i ("CH2", "W=" + c.getWidth ());
-          }
-          */
+        int width = getChildAt (HOST_IMAGE).getMeasuredWidth ();
+        getChildAt (HOST_IMAGE).layout ((r - l - width)/2, height + PADDING, (r - l - width)/2 + width, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + PADDING);
+        width = getChildAt (ACCEPT_TEXT).getMeasuredWidth ();
+        getChildAt (ACCEPT_TEXT).layout ((r - l - width)/2, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + PADDING * 2, (r - l - width)/2 + width, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + getChildAt (ACCEPT_TEXT).getMeasuredHeight () + PADDING * 2);
+        width = getChildAt (CANCEL_BUTTON).getMeasuredWidth ();
+        getChildAt (CANCEL_BUTTON).layout (PADDING, b - t - getChildAt (CANCEL_BUTTON).getMeasuredHeight () - PADDING, PADDING + width , b - t - PADDING);
+        getChildAt (OK_BUTTON).layout (r - l - width - PADDING, b - t - getChildAt (OK_BUTTON).getMeasuredHeight () - PADDING, r - l - PADDING , b - t - PADDING);
       }
   }

@@ -66,18 +66,17 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
         keygen2_activity.noMoreWorkToDo ();
         if (success)
           {
+            keygen2_activity.findViewById (R.id.primaryWindow).setVisibility (View.VISIBLE);
             final Button ok = (Button) keygen2_activity.findViewById (R.id.OKbutton);
-            ok.setVisibility (View.VISIBLE);
+//            ok.setVisibility (View.VISIBLE);
             final Button cancel = (Button) keygen2_activity.findViewById (R.id.cancelButton);
-            cancel.setVisibility (View.VISIBLE);
+//            cancel.setVisibility (View.VISIBLE);
             ok.setOnClickListener (new View.OnClickListener ()
               {
                 @Override
                 public void onClick (View v)
                   {
-                    ok.setVisibility (View.INVISIBLE);
-                    cancel.setVisibility (View.INVISIBLE);
-
+                    keygen2_activity.findViewById (R.id.primaryWindow).setVisibility (View.INVISIBLE);
                     keygen2_activity.logOK ("The user hit OK");
                     new KeyGen2SessionCreation (keygen2_activity).execute ();
                   }

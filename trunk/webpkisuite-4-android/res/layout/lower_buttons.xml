@@ -4,18 +4,12 @@
         android:id="@+id/cancelButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:visibility="invisible"
         android:text="Cancel" />
 
     <Button
         android:id="@+id/OKbutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:visibility="invisible"
-        android:text="   OK   " />
+        android:text="OK" />
 
 </merge>
