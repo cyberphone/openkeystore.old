@@ -81,8 +81,45 @@ public abstract class BaseProxyActivity extends Activity
     Vector<String> cookies = new Vector<String> ();
 
     public byte[] initial_request_data;
+    
+    public void conditionalAbort (final String message)
+      {
+        final BaseProxyActivity instance = this;
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder (this);
 
-    public void showHeavyWork (String message)
+        // set dialog message
+        alertDialogBuilder.setMessage ("Do you want to abort the current enrollment process?").setCancelable (false);
+        alertDialogBuilder.setPositiveButton ("Yes", new DialogInterface.OnClickListener ()
+          {
+            public void onClick (DialogInterface dialog, int id)
+              {
+                // the dialog box and do nothing
+                dialog.cancel ();
+                instance.finish ();
+              }
+          });
+        alertDialogBuilder.setNegativeButton ("No", new DialogInterface.OnClickListener ()
+          {
+            public void onClick (DialogInterface dialog, int id)
+              {
+                // the dialog box and do nothing
+                dialog.cancel ();
+                if (message != null && progress_display != null)
+                  {
+                    progress_display = null;
+                    showHeavyWork (message);
+                  }
+              }
+          });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create ();
+
+        // show it
+        alertDialog.show ();
+      }
+
+    public void showHeavyWork (final String message)
       {
         if (progress_display == null)
           {
@@ -92,7 +129,7 @@ public abstract class BaseProxyActivity extends Activity
               {
                 public void onClick (DialogInterface dialog, int which)
                   {
-                    finish ();
+                    conditionalAbort (message);
                   }
               });
             progress_display.show ();

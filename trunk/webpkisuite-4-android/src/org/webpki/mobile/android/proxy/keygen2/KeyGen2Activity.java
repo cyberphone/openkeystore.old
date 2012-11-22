@@ -31,8 +31,6 @@ public class KeyGen2Activity extends BaseProxyActivity
   {
     static final String KEYGEN2 = "KeyGen2";
 
-    TextView text_view;
-
     PlatformNegotiationRequestDecoder platform_request;
 
     ProvisioningInitializationRequestDecoder prov_init_request;
@@ -46,7 +44,6 @@ public class KeyGen2Activity extends BaseProxyActivity
       {
         super.onCreate (savedInstanceState);
         setContentView (R.layout.activity_keygen2);
-        text_view = (TextView) findViewById (R.id.win);
 
         showHeavyWork (PROGRESS_INITIALIZING);
 

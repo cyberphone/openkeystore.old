@@ -247,7 +247,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                     @Override
                     public void onClick (View v)
                       {
-                        keygen2_activity.finish ();
+                        keygen2_activity.conditionalAbort (null);
                       }
                   });
               }

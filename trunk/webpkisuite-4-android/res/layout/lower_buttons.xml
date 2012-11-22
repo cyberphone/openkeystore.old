@@ -1,15 +1,15 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
     
-    <Button
+    <org.webpki.mobile.android.proxy.MatchedButton
         android:id="@+id/cancelButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cancel" />
+        android:text="Cancel"/>
 
-    <Button
+    <org.webpki.mobile.android.proxy.MatchedButton
         android:id="@+id/OKbutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="OK" />
+        android:text="OK"/>
 
 </merge>
