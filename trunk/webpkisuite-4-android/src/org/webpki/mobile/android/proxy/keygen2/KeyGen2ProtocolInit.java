@@ -69,6 +69,7 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
             keygen2_activity.findViewById (R.id.primaryWindow).setVisibility (View.VISIBLE);
             final Button ok = (Button) keygen2_activity.findViewById (R.id.OKbutton);
             final Button cancel = (Button) keygen2_activity.findViewById (R.id.cancelButton);
+            ok.requestFocus ();
             ok.setOnClickListener (new View.OnClickListener ()
               {
                 @Override

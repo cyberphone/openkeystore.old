@@ -55,6 +55,7 @@ public class KeyGen2InitLayout extends FrameLayout
           {
             super.onMeasure (wSpec, hSpec);
           }
+        int button_h = getChildAt (CANCEL_BUTTON).getMeasuredHeight ();
         int w_max = getChildAt (HOST_IMAGE).getMeasuredWidth ();
         if (w_max < getChildAt (ACCEPT_TEXT).getMeasuredWidth ())
           {
@@ -62,20 +63,20 @@ public class KeyGen2InitLayout extends FrameLayout
           }
         int height = PADDING * 3 + getChildAt (HOST_IMAGE).getMeasuredHeight () + getChildAt (ACCEPT_TEXT).getMeasuredHeight ();
         int width = PADDING * 2 + w_max;
-        if (w > h)
+        if (w > h && h < (height + PADDING * 2 + 2 * button_h))
           {
             width += 2 * (button_w + PADDING);
-            int up = getChildAt (CANCEL_BUTTON).getMeasuredHeight () - getChildAt (ACCEPT_TEXT).getMeasuredHeight ();
+            int up = button_h - getChildAt (ACCEPT_TEXT).getMeasuredHeight ();
               {
                 if (up > 0)
                   {
-                    height += up / 2 + getChildAt (CANCEL_BUTTON).getMeasuredHeight () / 12;
+                    height += up / 2 + button_h / 12;
                   }
               }
           }
         else
           {
-            height += PADDING + getChildAt (OK_BUTTON).getMeasuredHeight ();
+            height += PADDING + button_h;
           }
         setMeasuredDimension (width, height);
       }

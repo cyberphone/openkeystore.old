@@ -58,7 +58,7 @@ public class KeyGen2PINLayout extends FrameLayout
         int w_max = getChildAt (PIN_CHUNK).getMeasuredWidth ();
         int height = PADDING * 2 + getChildAt (PIN_CHUNK).getMeasuredHeight ();
         int width = PADDING * 2 + w_max;
-        if (w > h)
+        if (w > h && h < (height + PADDING * 2 + 2 * button_h))
           {
             width += 2 * (button_w + PADDING);
           }
