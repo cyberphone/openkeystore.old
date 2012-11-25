@@ -18,8 +18,6 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.security.GeneralSecurityException;
-
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;

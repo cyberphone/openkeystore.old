@@ -43,8 +43,6 @@ public class BasicCapabilities implements Serializable
         this.read_only = read_only;
       }
 
-    private BasicCapabilities () {}
-    
     static String[] getSortedAlgorithms (String[] algorithms) throws IOException
       {
         int i = 0;

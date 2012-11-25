@@ -20,11 +20,7 @@ import java.io.IOException;
 
 import java.util.LinkedHashMap;
 
-import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-
-import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
