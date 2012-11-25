@@ -125,6 +125,8 @@ public abstract class BaseProxyActivity extends Activity
           {
             progress_display = new ProgressDialog (this);
             progress_display.setMessage (message);
+            progress_display.setCanceledOnTouchOutside (false);
+            progress_display.setCancelable (false);
             progress_display.setButton (DialogInterface.BUTTON_POSITIVE, "Cancel", new DialogInterface.OnClickListener ()
               {
                 public void onClick (DialogInterface dialog, int which)
