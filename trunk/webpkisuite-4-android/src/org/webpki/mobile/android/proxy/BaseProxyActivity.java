@@ -77,6 +77,8 @@ public abstract class BaseProxyActivity extends Activity
     public SKSImplementation sks = new SKSImplementation ();
 
     private String redirect_url;
+    
+    private String abort_url;
 
     Vector<String> cookies = new Vector<String> ();
 
@@ -85,24 +87,30 @@ public abstract class BaseProxyActivity extends Activity
     public void conditionalAbort (final String message)
       {
         final BaseProxyActivity instance = this;
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder (this);
-
-        // set dialog message
-        alertDialogBuilder.setMessage ("Do you want to abort the current enrollment process?").setCancelable (false);
-        alertDialogBuilder.setPositiveButton ("Yes", new DialogInterface.OnClickListener ()
+        AlertDialog.Builder alert_dialog = new AlertDialog.Builder (this)
+            .setMessage ("Do you want to abort the current enrollment process?")
+            .setCancelable (false)
+            .setPositiveButton ("Yes", new DialogInterface.OnClickListener ()
           {
             public void onClick (DialogInterface dialog, int id)
               {
-                // the dialog box and do nothing
+                // The user decided that this is not what he/she wants...
                 dialog.cancel ();
-                instance.finish ();
+                if (abort_url == null)
+                  {
+                    instance.finish ();
+                  }
+                else
+                  {
+                    launchBrowser (abort_url);
+                  }
               }
           });
-        alertDialogBuilder.setNegativeButton ("No", new DialogInterface.OnClickListener ()
+        alert_dialog.setNegativeButton ("No", new DialogInterface.OnClickListener ()
           {
             public void onClick (DialogInterface dialog, int id)
               {
-                // the dialog box and do nothing
+                // The user apparently changed his/her mind and wants to continue...
                 dialog.cancel ();
                 if (message != null && progress_display != null)
                   {
@@ -112,11 +120,8 @@ public abstract class BaseProxyActivity extends Activity
               }
           });
 
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create ();
-
-        // show it
-        alertDialog.show ();
+        // Create and show alert dialog
+        alert_dialog.create ().show ();
       }
 
     public void showHeavyWork (final String message)
@@ -285,22 +290,18 @@ public abstract class BaseProxyActivity extends Activity
 
     public void showAlert (String message)
       {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder (this);
-
-        // set dialog message
-        alertDialogBuilder.setMessage (message).setCancelable (false).setPositiveButton ("OK", new DialogInterface.OnClickListener ()
+        AlertDialog.Builder alert_dialog = new AlertDialog.Builder (this)
+            .setMessage (message).setCancelable (false)
+            .setPositiveButton ("OK", new DialogInterface.OnClickListener ()
           {
             public void onClick (DialogInterface dialog, int id)
               {
-                // the dialog box and do nothing
+                // Close the dialog box and do nothing
                 dialog.cancel ();
               }
           });
 
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create ();
-
-        // show it
-        alertDialog.show ();
+        // Create and show alert dialog
+        alert_dialog.create ().show ();
       }
   }
