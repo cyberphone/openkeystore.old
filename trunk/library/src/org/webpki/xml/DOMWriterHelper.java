@@ -546,7 +546,36 @@ public class DOMWriterHelper
      */
     public void setStringAttribute (String name, String value)
       {
-        current.setAttribute (name, value);
+        StringBuffer s = new StringBuffer ();
+        for (char c : value.toCharArray ())
+          {
+            switch (c)
+              {
+                case '"':
+                  s.append ("&quot;");
+                  continue;
+
+                case '\'':
+                  s.append ("&apos;");
+                  continue;
+
+                case '<':
+                  s.append ("&lt;");
+                  continue;
+
+                case '>':
+                  s.append ("&gt;");
+                  continue;
+
+                case '&':
+                  s.append ("&amp;");
+                  continue;
+
+                default:
+                  s.append (c);
+              }
+          }
+        current.setAttribute (name, s.toString ());
       }
  
     public void setBinaryAttribute (String name, byte[] value)
