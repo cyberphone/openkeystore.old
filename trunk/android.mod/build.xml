@@ -53,6 +53,38 @@
         replace="\20, 0, 0, 1, 0, 0, 0, 20\4 // BKS: (int)VERSION + (int)SALT_LENGTH"
         flags="s"/>
 
+    <!--  Unfortunately the limited Android stack cannot deal with certain regex types so we just short-circuit them :-( -->
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="\&lt;xs\:simpleType\ name\=&quot;distinguishedNameExpr&quot;\&gt;.*?\&lt;\/xs\:simpleType\&gt;"
+        replace="&lt;!-- REMOVED --&gt;"
+        flags="s"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="kg2\:distinguishedNameExpr"
+        replace="xs:string"
+        flags="g"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="\&lt;xs\:simpleType\ name\=&quot;httpURI&quot;\&gt;.*?\&lt;\/xs\:simpleType\&gt;"
+        replace="&lt;!-- REMOVED --&gt;"
+        flags="s"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="kg2\:httpURI"
+        replace="xs:anyURI"
+        flags="g"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="\&lt;xs\:simpleType\ name\=&quot;oidValue&quot;\&gt;.*?\&lt;\/xs\:simpleType\&gt;"
+        replace="&lt;!-- REMOVED --&gt;"
+        flags="s"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="&quot;kg2\:oidValue&quot;"
+        replace="&quot;xs:string&quot;"
+        flags="g"/>
+
     <replaceregexp
         match="&quot;SunX509&quot;"
         replace="&quot;X509&quot;"
@@ -63,7 +95,7 @@
     </replaceregexp>
     
     <replaceregexp
-        match="(&quot;JKS&quot;)"
+        match="&quot;JKS&quot;"
         replace="&quot;BKS&quot;"
         flags="g">
         <fileset dir="${temp_dir}/org/webpki/android/">
