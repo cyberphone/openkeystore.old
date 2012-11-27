@@ -30,6 +30,7 @@ import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 
 import android.widget.Button;
 import android.widget.EditText;
@@ -180,6 +181,8 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                     upperCasePIN (pin1);
                     upperCasePIN (pin2);
                   }
+                pin1.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+                pin2.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
                 pin_err = (TextView) keygen2_activity.findViewById (R.id.errorPIN);
                 TextView set_pin_text = (TextView) keygen2_activity.findViewById (R.id.setPINtext);
                 StringBuffer lead_text = new StringBuffer ("Set ");
