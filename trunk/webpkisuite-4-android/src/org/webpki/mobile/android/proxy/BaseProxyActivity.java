@@ -124,6 +124,11 @@ public abstract class BaseProxyActivity extends Activity
         alert_dialog.create ().show ();
       }
 
+    public void setAbortURL (String abort_url)
+      {
+        this.abort_url = abort_url;
+      }
+
     public void showHeavyWork (final String message)
       {
         if (progress_display == null)
