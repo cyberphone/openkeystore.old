@@ -1061,7 +1061,7 @@
          <xs:attribute name="EnablePINCaching" type="xs:boolean" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.AppUsage -->
-         <xs:attribute name="AppUsage" type="kg2:appUsageTYpes" use="required"/>
+         <xs:attribute name="AppUsage" type="kg2:appUsageTypes" use="required"/>
 
          <!-- SKS Reference: createKeyEntry.KeyAlgorithm -->
          <xs:attribute name="KeyAlgorithm" type="xs:anyURI" use="required"/>
@@ -1361,7 +1361,7 @@
                             Application usage definitions
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:simpleType name="appUsageTYpes">
+   <xs:simpleType name="appUsageTypes">
       <xs:restriction base="xs:string">
          <xs:enumeration value="signature"/>
          <xs:enumeration value="authentication"/>
