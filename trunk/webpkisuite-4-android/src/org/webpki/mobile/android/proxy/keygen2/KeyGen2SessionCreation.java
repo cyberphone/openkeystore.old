@@ -163,6 +163,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
           {
             if (iter.hasNext ())
               {
+                keygen2_activity.noMoreWorkToDo ();
                 upd = iter.next ();
                 keygen2_activity.setContentView (R.layout.activity_keygen2_pin);
     
@@ -363,7 +364,6 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
     @Override
     protected void onPostExecute (String result)
       {
-        keygen2_activity.noMoreWorkToDo ();
         if (result != null)
           {
             if (result.equals (BaseProxyActivity.CONTINUE_EXECUTION))
