@@ -65,7 +65,6 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
     private KeyGen2Activity keygen2_activity;
     
     private int pin_count;
-    private boolean multiple_pins;
 
     private class PINDialog
       {
@@ -200,7 +199,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                       }
                   }
                 lead_text.append ("PIN");
-                if (multiple_pins)
+                if (keygen2_activity.key_creation_request.getUserPINDescriptors ().size () > 1)
                   {
                     lead_text.append (" #").append (++pin_count);
                   }
@@ -309,19 +308,6 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                 prov_sess_response.setServerCertificate (keygen2_activity.getServerCertificate ());
               }
 
-            /*
-             * No specific attributes are supported yet (if ever...) for (String
-             * client_attribute : prov_sess_req.getClientAttributes ()) { if
-             * (client_attribute.equals
-             * (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER)) {
-             * prov_sess_response.setClientAttributeValue (client_attribute,
-             * "490154203237518"); } else if (client_attribute.equals
-             * (KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS)) {
-             * prov_sess_response.setClientAttributeValue (client_attribute,
-             * "fe80::4465:62dc:5fa5:4766%10") .setClientAttributeValue
-             * (client_attribute, "192.168.0.202"); } }
-             */
-
             prov_sess_response.signRequest (new SymKeySignerInterface ()
               {
                 public MacAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
@@ -373,7 +359,6 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                     ///////////////////////////////////////////////////////////////////////////
                     // Note: There may be zero PINs but the test in the constructor fixes that
                     ///////////////////////////////////////////////////////////////////////////
-                    multiple_pins = keygen2_activity.key_creation_request.getUserPINDescriptors ().size () > 1;
                     new PINDialog (keygen2_activity.key_creation_request.getUserPINDescriptors ().iterator ());
                   }
                 catch (Exception e)
