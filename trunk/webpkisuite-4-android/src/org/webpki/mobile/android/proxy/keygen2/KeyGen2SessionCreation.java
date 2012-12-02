@@ -103,7 +103,8 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                 String error = "PIN syntax error";
                 if (res.length_error)
                   {
-                    error = "PINs must be " + pin_policy.getMinLength () + "-" + pin_policy.getMaxLength () +
+                    int multiplier = pin_policy.getFormat () == PassphraseFormat.BINARY ? 2 : 1;
+                    error = "PINs must be " + (pin_policy.getMinLength () * multiplier) + "-" + (pin_policy.getMaxLength () * multiplier) +
                             (pin_policy.getFormat () == PassphraseFormat.NUMERIC ? " digits" : " characters");
                   }
                 else if (res.syntax_error)
