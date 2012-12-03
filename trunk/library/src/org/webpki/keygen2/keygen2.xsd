@@ -41,7 +41,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 26-AUG-2012 
+    Revised: 03-DEC-2012 
     Author: Anders Rundgren
 
     Copyright 2006-2012 WebPKI.org (http://webpki.org).
@@ -59,11 +59,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20121103#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20121203#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20121103#"
+           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20121203#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -77,29 +77,6 @@
    <xs:element name="PlatformNegotiationRequest">
       <xs:complexType>
          <xs:sequence>
-
-            <!-- Issuer logotypes that SHOULD be shown in the provisioning GUI
-                 as "branding" and hint.  See the "Logotype" element for
-                 general recommendations regarding images. An issuer SHOULD
-                 provide a selection of images so that the client software
-                 can use one which fits the screen of the provisioning device -->
-            <xs:element name="IssuerLogotype" maxOccurs="unbounded">
-               <xs:complexType>
-                  <xs:complexContent>
-
-                     <xs:extension base="kg2:imageData">
-
-                        <!-- Where to get the logotype. -->
-                        <xs:attribute name="LogotypeURL" type="kg2:httpURI" use="required"/>
-
-                        <!-- ImageFingerprint using SHA256. -->
-                        <xs:attribute name="ImageFingerprint" type="xs:base64Binary" use="required"/>
-
-                     </xs:extension>
-
-                  </xs:complexContent>
-               </xs:complexType>
-            </xs:element>
 
             <!-- See "ServerCookie" definition -->
             <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
@@ -172,20 +149,7 @@
          <xs:sequence>
 
             <!-- Optional hints for the "CertificatePath/Logotype" extension -->
-            <xs:element name="ImagePreference" minOccurs="0" maxOccurs="unbounded">
-               <xs:complexType>
-                  <xs:complexContent>
-
-                     <xs:extension base="kg2:imageData">
-
-                        <!-- Logotype usage type -->
-                        <xs:attribute name="Type" type="xs:anyURI" use="required"/>
-
-                     </xs:extension>
-
-                  </xs:complexContent>
-               </xs:complexType>
-            </xs:element>
+            <xs:element name="ImagePreference" type="kg2:imageData" minOccurs="0" maxOccurs="unbounded"/>
 
             <!-- See "ServerCookie" definition -->
             <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
@@ -1219,6 +1183,9 @@
 
       <!-- MIME type. -->
       <xs:attribute name="MIMEType" type="kg2:mimeType" use="required"/>
+
+      <!-- Logotype usage type -->
+      <xs:attribute name="Type" type="xs:anyURI" use="required"/>
 
       <!-- Width in pixels.  For SVG it holds the "ideal" width -->
       <xs:attribute name="Width" type="xs:positiveInteger" use="required"/>

@@ -520,7 +520,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             byte[] pin = null;
             try
               {
-                if (pin_policy.format == PassphraseFormat.BINARY)
+                if (pin_string_value.length () > 0 && pin_policy.format == PassphraseFormat.BINARY)
                   {
                     pin = DebugFormatter.getByteArrayFromHex (pin_string_value);
                   }

@@ -943,7 +943,6 @@ public class KeyGen2Test
               {
                 platform_request.setAbortURL (ABORT_URL);
               }
-            platform_request.addLogotype (LOGO_URL, LOGO_MIME, LOGO_SHA256, LOGO_WIDTH, LOGO_HEIGHT);
             BasicCapabilities basic_capabilities = platform_request.getBasicCapabilities ();
             if (ask_for_4096)
               {

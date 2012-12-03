@@ -35,19 +35,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class PlatformNegotiationRequestEncoder extends PlatformNegotiationRequest
   {
-    class ImageDescriptor
-      {
-        String mime_type;
-        byte[] image_fingerprint;
-        int width;
-        int height;
-        String logotype_url;
-      }
-
     private String prefix;  // Default: no prefix
     
-    Vector<ImageDescriptor> image_descriptors = new Vector<ImageDescriptor> ();
-
     Action action = Action.UPDATE;
 
     boolean needs_dsig_ns;
@@ -113,23 +102,6 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
       }
 
 
-    public PlatformNegotiationRequestEncoder addLogotype (String logotype_url,
-                                                          String mime_type,
-                                                          byte[] image_fingerprint,
-                                                          int width,
-                                                          int height)
-      {
-        ImageDescriptor im_des = new ImageDescriptor ();
-        im_des.logotype_url = logotype_url;
-        im_des.mime_type = mime_type;
-        im_des.image_fingerprint = image_fingerprint;
-        im_des.width = width;
-        im_des.height = height;
-        image_descriptors.add (im_des);
-        return this;
-      }
-
-
     protected void toXML (DOMWriterHelper wr) throws IOException
       {
         wr.initializeRootObject (prefix);
@@ -159,24 +131,6 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
           }
         
         if (needs_dsig_ns) XMLSignatureWrapper.addXMLSignatureNS (wr);
-
-        ////////////////////////////////////////////////////////////////////////
-        // Issuer logotype(s)
-        ////////////////////////////////////////////////////////////////////////
-        if (image_descriptors.isEmpty ())
-          {
-            throw new IOException ("There must be at least one logotype image defined");
-          }
-        for (ImageDescriptor im_des : image_descriptors)
-          {
-            wr.addChildElement (ISSUER_LOGOTYPE_ELEM);
-            wr.setStringAttribute (MIME_TYPE_ATTR, im_des.mime_type);
-            wr.setStringAttribute (LOGOTYPE_URL_ATTR, im_des.logotype_url);
-            wr.setIntAttribute (WIDTH_ATTR, im_des.width);
-            wr.setIntAttribute (HEIGHT_ATTR, im_des.height);
-            wr.setBinaryAttribute (IMAGE_FINGERPRINT_ATTR, im_des.image_fingerprint);
-            wr.getParent ();
-          }
 
         ////////////////////////////////////////////////////////////////////////
         // Optional ServerCookie

@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20121103#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20121203#";
 
     String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
 
@@ -79,8 +79,6 @@ public interface KeyGen2Constants
 
     String ISSUER_ATTR                               = "Issuer";
 
-    String IMAGE_FINGERPRINT_ATTR                    = "ImageFingerprint";
-
     String INPUT_METHOD_ATTR                         = "InputMethod";
 
     String ISSUED_BEFORE_ATTR                        = "IssuedBefore";
@@ -98,8 +96,6 @@ public interface KeyGen2Constants
     String LANGUAGES_ATTR                            = "Languages";
 
     String LOCKED_ATTR                               = "Locked";
-
-    String LOGOTYPE_URL_ATTR                         = "LogotypeURL";
 
     String MAC_ATTR                                  = "MAC";
 
@@ -181,8 +177,6 @@ public interface KeyGen2Constants
     String ENCRYPTED_EXTENSION_ELEM                  = "EncryptedExtension";
 
     String IMAGE_PREFERENCE_ELEM                     = "ImagePreference";
-
-    String ISSUER_LOGOTYPE_ELEM                      = "IssuerLogotype";       
 
     String KEY_CREATION_REQUEST_ELEM                 = "KeyCreationRequest";
     
