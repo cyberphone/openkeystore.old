@@ -19,6 +19,7 @@ package org.webpki.mobile.android.proxy.keygen2;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+import java.security.cert.X509Certificate;
 
 import java.util.Date;
 import java.util.Iterator;
@@ -42,12 +43,19 @@ import org.webpki.mobile.android.proxy.R;
 
 import org.webpki.android.crypto.MacAlgorithms;
 import org.webpki.android.crypto.SymKeySignerInterface;
+import org.webpki.android.crypto.CertificateFilter;
+import org.webpki.android.crypto.HashAlgorithms;
 
+import org.webpki.android.keygen2.CredentialDiscoveryRequestDecoder;
+import org.webpki.android.keygen2.CredentialDiscoveryResponseEncoder;
 import org.webpki.android.keygen2.KeyCreationRequestDecoder;
 import org.webpki.android.keygen2.PlatformNegotiationResponseEncoder;
 import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
 import org.webpki.android.keygen2.ProvisioningInitializationResponseEncoder;
 
+import org.webpki.android.sks.EnumeratedKey;
+import org.webpki.android.sks.EnumeratedProvisioningSession;
+import org.webpki.android.sks.KeyAttributes;
 import org.webpki.android.sks.AppUsage;
 import org.webpki.android.sks.Grouping;
 import org.webpki.android.sks.PassphraseFormat;
@@ -324,12 +332,51 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
 
             keygen2_activity.postXMLData (keygen2_activity.prov_init_request.getSubmitURL (), prov_sess_response, false);
             XMLObjectWrapper xml_object = keygen2_activity.parseResponse ();
-            if (xml_object instanceof KeyCreationRequestDecoder)
+            if (xml_object instanceof CredentialDiscoveryRequestDecoder)
               {
-                keygen2_activity.key_creation_request = (KeyCreationRequestDecoder) xml_object;
-                return KeyGen2Activity.CONTINUE_EXECUTION;
+                publishProgress (BaseProxyActivity.PROGRESS_LOOKUP);
+
+                CredentialDiscoveryRequestDecoder cred_disc_request = (CredentialDiscoveryRequestDecoder) xml_object;
+                CredentialDiscoveryResponseEncoder cred_disc_response = new CredentialDiscoveryResponseEncoder (cred_disc_request);
+                for (CredentialDiscoveryRequestDecoder.LookupSpecifier ls : cred_disc_request.getLookupSpecifiers ())
+                  {
+                    CredentialDiscoveryResponseEncoder.LookupResult lr = cred_disc_response.addLookupResult (ls.getID ());
+                    EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
+                    while ((eps = keygen2_activity.sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), false)) != null)
+                      {
+                        if (ls.getKeyManagementKey ().equals (eps.getKeyManagementKey ()))
+                          {
+                            EnumeratedKey ek = new EnumeratedKey ();
+                            while ((ek = keygen2_activity.sks.enumerateKeys (ek.getKeyHandle ())) != null)
+                              {
+                                if (ek.getProvisioningHandle () == eps.getProvisioningHandle ())
+                                  {
+                                    KeyAttributes ka = keygen2_activity.sks.getKeyAttributes (ek.getKeyHandle ());
+                                    X509Certificate[] cert_path = ka.getCertificatePath ();
+                                    CertificateFilter cf = new CertificateFilter ();
+                                    cf.setIssuerRegEx (ls.getIssuerRegEx ());
+                                    cf.setSubjectRegEx (ls.getSubjectRegEx ());
+                                    cf.setSerial (ls.getSerial ());
+                                    cf.setEmailAddress (ls.getEmailAddress ());
+                                    cf.setPolicy (ls.getPolicy ());
+                                    if (!cf.matches (cert_path, null, null))
+                                      {
+                                        continue;
+                                      }
+                                    lr.addMatchingCredential (HashAlgorithms.SHA256.digest (cert_path[0].getEncoded ()),
+                                                              eps.getClientSessionID (),
+                                                              eps.getServerSessionID (),
+                                                              keygen2_activity.sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());
+                                  }
+                              }
+                          }
+                      }
+                  }
+                keygen2_activity.postXMLData (cred_disc_request.getSubmitURL (), cred_disc_response, false);
+                xml_object = keygen2_activity.parseResponse ();
               }
-            throw new IOException ("Unexpected object: " + xml_object.element ());
+             keygen2_activity.key_creation_request = (KeyCreationRequestDecoder) xml_object;
+             return KeyGen2Activity.CONTINUE_EXECUTION;
           }
         catch (InterruptedProtocolException e)
           {
