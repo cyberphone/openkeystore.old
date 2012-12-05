@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.ServerCookie;
 
@@ -32,7 +35,7 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
 
     class MatchingCredential
       {
-        byte[] certficate_fingerprint;
+        byte[] end_entity_certificate;
 
         String client_session_id;
 
@@ -52,10 +55,17 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
             this.id = id;
           }
         
-        public void addMatchingCredential (byte[] certificate_fingerprint, String client_session_id, String server_session_id, boolean locked)
+        public void addMatchingCredential (X509Certificate end_entity_certificate, String client_session_id, String server_session_id, boolean locked) throws IOException
           {
             MatchingCredential mc = new MatchingCredential ();
-            mc.certficate_fingerprint = certificate_fingerprint;
+            try
+              {
+                mc.end_entity_certificate = end_entity_certificate.getEncoded ();
+              }
+            catch (CertificateEncodingException e)
+              {
+                throw new IOException (e);
+              }
             mc.client_session_id = client_session_id;
             mc.server_session_id = server_session_id;
             mc.locked = locked;
@@ -136,7 +146,7 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
                 wr.addChildElement (MATCHING_CREDENTIAL_ELEM);
                 wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, mc.client_session_id);
                 wr.setStringAttribute (SERVER_SESSION_ID_ATTR, mc.server_session_id);
-                wr.setBinaryAttribute (CERTIFICATE_FINGERPRINT_ATTR, mc.certficate_fingerprint);
+                wr.setBinaryAttribute (END_ENTITY_CERTIFICATE_ATTR, mc.end_entity_certificate);
                 if (mc.locked)
                   {
                     wr.setBooleanAttribute (LOCKED_ATTR, mc.locked);

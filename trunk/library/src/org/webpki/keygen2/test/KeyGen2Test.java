@@ -681,7 +681,7 @@ public class KeyGen2Test
                                   {
                                     continue;
                                   }
-                                lr.addMatchingCredential (HashAlgorithms.SHA256.digest (cert_path[0].getEncoded ()),
+                                lr.addMatchingCredential (cert_path[0],
                                                           eps.getClientSessionID (),
                                                           eps.getServerSessionID (),
                                                           sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());

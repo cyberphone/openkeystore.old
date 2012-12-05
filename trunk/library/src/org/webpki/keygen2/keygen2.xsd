@@ -1195,7 +1195,7 @@
 
    </xs:complexType>
 
-   <xs:complexType name="keyID">
+   <xs:complexType name="targetKey">
 
       <!-- One of the two IDs identifying a provisioning session -->
       <xs:attribute name="ClientSessionID" type="kg2:sksNCName" use="required"/>
@@ -1203,39 +1203,32 @@
       <!-- The other ID identifying a provisioning session -->
       <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
 
-      <!-- Handle to the certificate (key ID) -->
+      <!-- Handle to the end entity certificate (key ID) -->
       <xs:attribute name="CertificateFingerprint" type="xs:base64Binary" use="required"/>
 
-   </xs:complexType>
+      <!-- Mandatory MAC (Message Authentication Code) -->
+      <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
-   <xs:complexType name="targetKey">
-      <xs:complexContent>
+      <!-- Authorization -->
+      <xs:attribute name="Authorization" type="xs:base64Binary" use="required"/>
 
-         <xs:extension base="kg2:keyID">
-
-            <!-- Mandatory MAC (Message Authentication Code) -->
-            <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
-
-            <!-- Authorization -->
-            <xs:attribute name="Authorization" type="xs:base64Binary" use="required"/>
-
-         </xs:extension>
-
-      </xs:complexContent>
    </xs:complexType>
 
    <xs:element name="MatchingCredential">
       <xs:complexType>
-         <xs:complexContent>
 
-            <xs:extension base="kg2:keyID">
+         <!-- The End Entity Certificate -->
+         <xs:attribute name="EndEntityCertificate" type="xs:base64Binary" use="optional"/>
 
-              <!-- Locked?  Default: false -->
-              <xs:attribute name="Locked" type="xs:boolean" use="optional"/>
+         <!-- One of the two IDs identifying a provisioning session -->
+         <xs:attribute name="ClientSessionID" type="kg2:sksNCName" use="required"/>
 
-         </xs:extension>
+         <!-- The other ID identifying a provisioning session -->
+         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
 
-         </xs:complexContent>
+         <!-- Locked?  Default: false -->
+         <xs:attribute name="Locked" type="xs:boolean" use="optional"/>
+
       </xs:complexType>
    </xs:element>
 

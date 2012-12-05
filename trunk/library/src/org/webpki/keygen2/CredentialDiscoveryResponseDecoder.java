@@ -18,8 +18,11 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.security.cert.X509Certificate;
+
 import java.util.Vector;
 
+import org.webpki.crypto.CertificateUtil;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.ServerCookie;
@@ -32,7 +35,7 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
       {
         MatchingCredential () {}
         
-        byte[] certificate_fingerprint;
+        X509Certificate end_entity_certificate;
         
         String client_session_id;
         
@@ -50,9 +53,9 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
             return server_session_id;
           }
         
-        public byte[] getCertificateFingerprint ()
+        public X509Certificate getEndEntityCertificate ()
           {
-            return certificate_fingerprint;
+            return end_entity_certificate;
           }
         
         public boolean isLocked ()
@@ -81,7 +84,7 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
                 MatchingCredential mc = new MatchingCredential ();
                 mc.client_session_id = ah.getString (CLIENT_SESSION_ID_ATTR);
                 mc.server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
-                mc.certificate_fingerprint = ah.getBinary (CERTIFICATE_FINGERPRINT_ATTR);
+                mc.end_entity_certificate = CertificateUtil.getCertificateFromBlob (ah.getBinary (END_ENTITY_CERTIFICATE_ATTR));
                 mc.locked = ah.getBooleanConditional (LOCKED_ATTR);
                 matching_credentials.add (mc);
               }

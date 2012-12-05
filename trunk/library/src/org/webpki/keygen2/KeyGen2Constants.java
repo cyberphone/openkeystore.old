@@ -55,6 +55,8 @@ public interface KeyGen2Constants
 
     String ENABLE_PIN_CACHING_ATTR                   = "EnablePINCaching";
 
+    String END_ENTITY_CERTIFICATE_ATTR               = "EndEntityCertificate";
+
     String ERROR_URL_ATTR                            = "ErrorURL";
 
     String EXCLUDED_POLICIES_ATTR                    = "ExcludedPolicies";
