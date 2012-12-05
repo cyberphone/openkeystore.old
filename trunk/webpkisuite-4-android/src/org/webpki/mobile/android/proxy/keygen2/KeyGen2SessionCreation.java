@@ -44,7 +44,6 @@ import org.webpki.mobile.android.proxy.R;
 import org.webpki.android.crypto.MacAlgorithms;
 import org.webpki.android.crypto.SymKeySignerInterface;
 import org.webpki.android.crypto.CertificateFilter;
-import org.webpki.android.crypto.HashAlgorithms;
 
 import org.webpki.android.keygen2.CredentialDiscoveryRequestDecoder;
 import org.webpki.android.keygen2.CredentialDiscoveryResponseEncoder;
@@ -363,7 +362,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                                       {
                                         continue;
                                       }
-                                    lr.addMatchingCredential (HashAlgorithms.SHA256.digest (cert_path[0].getEncoded ()),
+                                    lr.addMatchingCredential (cert_path[0],
                                                               eps.getClientSessionID (),
                                                               eps.getServerSessionID (),
                                                               keygen2_activity.sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());

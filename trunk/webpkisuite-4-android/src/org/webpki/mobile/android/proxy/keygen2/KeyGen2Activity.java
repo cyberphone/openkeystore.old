@@ -18,8 +18,6 @@ package org.webpki.mobile.android.proxy.keygen2;
 
 import android.os.Bundle;
 
-import android.widget.TextView;
-
 import org.webpki.mobile.android.proxy.R;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 

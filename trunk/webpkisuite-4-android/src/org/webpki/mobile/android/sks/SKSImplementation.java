@@ -989,6 +989,16 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         return (PrivateKey) getAttestationKeyStore ().getKey (ATTESTATION_KEY_ALIAS, ATTESTATION_KEY_PASSWORD);        
       }
 
+    void logCertificateOperation (KeyEntry key_entry, String operation)
+      {
+        Log.i (TAG_SKS, certificateLogData (key_entry) + " " + operation);
+      }
+
+    String certificateLogData (KeyEntry key_entry)
+      {
+        return "Certificate for \"" + key_entry.certificate_path[0].getSubjectX500Principal ().getName () + "\" Serial=" + key_entry.certificate_path[0].getSerialNumber ();
+      }
+
     Provisioning getOpenProvisioningSession (int provisioning_handle) throws SKSException
       {
         Provisioning provisioning = provisionings.get (provisioning_handle);
@@ -1467,6 +1477,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the post-op buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////
+        logCertificateOperation (target_key_entry, update ? "postUpdateKey" : "postCloneKeyProtection");
         provisioning.addPostProvisioningObject (target_key_entry, new_key, update);
       }
 
@@ -1499,6 +1510,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the post-op buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////
+        logCertificateOperation (target_key_entry, delete ? "postDeleteKey" : "postUnlockKey");
         provisioning.addPostProvisioningObject (target_key_entry, null, delete);
       }
 
@@ -3055,8 +3067,8 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
           {
             key_entry.owner.abort ("Multiple calls to \"setCertificatePath\" for: " + key_entry.id);
           }
-        Log.i (TAG_SKS, "Certificate for \"" + certificate_path[0].getSubjectX500Principal ().getName () + "\" Serial=" + certificate_path[0].getSerialNumber () + " received");
         key_entry.certificate_path = certificate_path.clone ();
+        logCertificateOperation (key_entry, "received");
       }
 
 

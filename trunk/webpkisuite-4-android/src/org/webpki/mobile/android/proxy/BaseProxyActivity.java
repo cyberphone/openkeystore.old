@@ -17,7 +17,11 @@
 package org.webpki.mobile.android.proxy;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 
 import java.net.URLDecoder;
@@ -36,6 +40,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
@@ -72,9 +77,9 @@ public abstract class BaseProxyActivity extends Activity
 
     private StringBuffer logger = new StringBuffer ();
 
-    private HTTPSWrapper https_wrapper = new HTTPSWrapper ();
+    private HTTPSWrapper https_wrapper;
 
-    public SKSImplementation sks = new SKSImplementation ();
+    public SKSImplementation sks;
 
     private String redirect_url;
     
@@ -169,12 +174,22 @@ public abstract class BaseProxyActivity extends Activity
           }
       }
 
+    public void initSKS ()
+      {
+        sks = new SKSImplementation ();
+      }
+
+    public void closeProxy ()
+      {
+        finish ();
+      }
+
     public void launchBrowser (String url)
       {
         noMoreWorkToDo ();
         Intent intent = new Intent (Intent.ACTION_VIEW).setData (Uri.parse (url));
         startActivity (intent);
-        finish ();
+        closeProxy ();
       }
 
     public void postXMLData (String url,
@@ -242,7 +257,7 @@ public abstract class BaseProxyActivity extends Activity
         Intent intent = new Intent (this, FailLoggerActivity.class);
         intent.putExtra (FailLoggerActivity.LOG_MESSAGE, logger.toString ());
         startActivity (intent);
-        finish ();
+        closeProxy ();
       }
 
     public void addSchema (Class<? extends XMLObjectWrapper> wrapper_class) throws IOException
@@ -267,10 +282,12 @@ public abstract class BaseProxyActivity extends Activity
       {
         return https_wrapper.getServerCertificate ();
       }
-
-    public void getProtocolInvocationData () throws IOException
+    
+    public void getProtocolInvocationData () throws Exception
       {
         logOK (getProtocolName () + " protocol run: " + new SimpleDateFormat ("yyyy-MM-dd' 'HH:mm:ss").format (new Date ()));
+        https_wrapper = new HTTPSWrapper ();
+        initSKS ();
         schema_cache = new XMLSchemaCache ();
         Intent intent = getIntent ();
         Uri uri = intent.getData ();
