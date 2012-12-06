@@ -397,6 +397,10 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
     @Override
     protected void onPostExecute (String result)
       {
+        if (keygen2_activity.userHasAborted ())
+          {
+            return;
+          }
         if (result != null)
           {
             if (result.equals (BaseProxyActivity.CONTINUE_EXECUTION))

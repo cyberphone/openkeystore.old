@@ -64,6 +64,10 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
     @Override
     protected void onPostExecute (Boolean success)
       {
+        if (keygen2_activity.userHasAborted ())
+          {
+            return;
+          }
         keygen2_activity.noMoreWorkToDo ();
         if (success)
           {

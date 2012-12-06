@@ -18,6 +18,8 @@ package org.webpki.mobile.android.proxy.keygen2;
 
 import android.os.Bundle;
 
+import android.util.Log;
+
 import org.webpki.mobile.android.proxy.R;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
@@ -53,5 +55,21 @@ public class KeyGen2Activity extends BaseProxyActivity
     public String getProtocolName ()
       {
         return KEYGEN2;
+      }
+
+    @Override
+    public void abortTearDown ()
+      {
+        if (provisioning_handle != 0)
+          {
+            try
+              {
+                sks.abortProvisioningSession (provisioning_handle);
+              }
+            catch (Exception e)
+              {
+                Log.e (KEYGEN2, "Failed to abort SKS session");
+              }
+          }
       }
   }

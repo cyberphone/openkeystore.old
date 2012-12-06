@@ -107,8 +107,8 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     static final boolean SKS_BIOMETRIC_SUPPORT             = false;  // Change here to test or disable
     static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
     
-    private static final String TAG_SKS = "SKS";  // Android debug constant
-
+    private static final String SKS_DEBUG                  = "SKS";  // Android SKS debug constant
+ 
     int next_key_handle = 1;
     LinkedHashMap<Integer,KeyEntry> keys = new LinkedHashMap<Integer,KeyEntry> ();
 
@@ -991,12 +991,12 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
     void logCertificateOperation (KeyEntry key_entry, String operation)
       {
-        Log.i (TAG_SKS, certificateLogData (key_entry) + " " + operation);
+        Log.i (SKS_DEBUG, certificateLogData (key_entry) + " " + operation);
       }
 
     String certificateLogData (KeyEntry key_entry)
       {
-        return "Certificate for \"" + key_entry.certificate_path[0].getSubjectX500Principal ().getName () + "\" Serial=" + key_entry.certificate_path[0].getSerialNumber ();
+        return "Certificate for '" + key_entry.certificate_path[0].getSubjectX500Principal ().getName () + "' Serial=" + key_entry.certificate_path[0].getSerialNumber ();
       }
 
     Provisioning getOpenProvisioningSession (int provisioning_handle) throws SKSException
@@ -1477,7 +1477,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the post-op buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////
-        logCertificateOperation (target_key_entry, update ? "postUpdateKey" : "postCloneKeyProtection");
+        logCertificateOperation (target_key_entry, update ? "post-updated" : "post-cloned");
         provisioning.addPostProvisioningObject (target_key_entry, new_key, update);
       }
 
@@ -1510,7 +1510,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Put the operation in the post-op buffer used by "closeProvisioningSession"
         ///////////////////////////////////////////////////////////////////////////////////
-        logCertificateOperation (target_key_entry, delete ? "postDeleteKey" : "postUnlockKey");
+        logCertificateOperation (target_key_entry, delete ? "post-deleted" : "post-unlocked");
         provisioning.addPostProvisioningObject (target_key_entry, null, delete);
       }
 
@@ -2381,6 +2381,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         deleteObject (pin_policies, provisioning);
         deleteObject (puk_policies, provisioning);
         provisionings.remove (provisioning_handle);
+        Log.e (SKS_DEBUG, "Session ABORTED");
       }
 
 
@@ -2427,6 +2428,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
                 provisioning.abort ("Unreferenced object \"ID\" : " + id);
               }
           }
+        provisioning.names.clear ();
         for (KeyEntry key_entry : keys.values ())
           {
             if (key_entry.owner == provisioning)
@@ -2635,6 +2637,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
               }
             provisionings.remove (old_owner.provisioning_handle);  // OK to perform also if already done
           }
+        provisioning.post_provisioning_objects.clear ();  // No need to save
 
         ///////////////////////////////////////////////////////////////////////////////////
         // If there are no keys associated with the session we just delete it
@@ -2645,7 +2648,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         // We are done, close the show for this time
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.open = false;
-        Log.i (TAG_SKS, "Successful session termination");
+        Log.i (SKS_DEBUG, "Session successfully CLOSED");
         return attestation;
       }
 
@@ -2792,7 +2795,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         p.client_time = client_time;
         p.session_life_time = session_life_time;
         p.session_key_limit = session_key_limit;
-        Log.i (TAG_SKS, "Session key created");
+        Log.i (SKS_DEBUG, "Session CREATED");
         return new ProvisioningSession (p.provisioning_handle,
                                         client_session_id,
                                         attestation,
@@ -3263,12 +3266,12 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
                 exponent = new BigInteger (key_parameters);
               }
             alg_par_spec = new RSAKeyGenParameterSpec (rsa_key_size, exponent);
-            Log.i (TAG_SKS, "RSA " + rsa_key_size + " key created");
+            Log.i (SKS_DEBUG, "RSA " + rsa_key_size + " key created");
           }
         else
           {
             alg_par_spec = new ECGenParameterSpec (kalg.jce_name);
-            Log.i (TAG_SKS, "EC " + kalg.jce_name + " key created");
+            Log.i (SKS_DEBUG, "EC " + kalg.jce_name + " key created");
           }
         try
           {
@@ -3410,7 +3413,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         pin_policy.min_length = min_length;
         pin_policy.max_length = max_length;
         pin_policy.input_method = input_method;
-        Log.i (TAG_SKS, "PIN policy object created");
+        Log.i (SKS_DEBUG, "PIN policy object created");
         return pin_policy.pin_policy_handle;
       }
 
@@ -3470,7 +3473,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         puk_policy.puk_value = decrypted_puk_value;
         puk_policy.format = format;
         puk_policy.retry_limit = retry_limit;
-        Log.i (TAG_SKS, "PUK policy object created");
+        Log.i (SKS_DEBUG, "PUK policy object created");
         return puk_policy.puk_policy_handle;
       }
   }

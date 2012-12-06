@@ -17,8 +17,6 @@
 package org.webpki.mobile.android.proxy;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -63,13 +61,15 @@ import org.spongycastle.jce.provider.BouncyCastleProvider;
 public abstract class BaseProxyActivity extends Activity
   {
     public static final String PROGRESS_INITIALIZING = "Initializing...";
-    public static final String PROGRESS_SESSION = "Creating session...";
-    public static final String PROGRESS_KEYGEN = "Generating keys...";
-    public static final String PROGRESS_LOOKUP = "Credential lookup...";
+    public static final String PROGRESS_SESSION      = "Creating session...";
+    public static final String PROGRESS_KEYGEN       = "Generating keys...";
+    public static final String PROGRESS_LOOKUP       = "Credential lookup...";
     public static final String PROGRESS_DEPLOY_CERTS = "Receiving credentials...";
-    public static final String PROGRESS_FINAL = "Finish message...";
+    public static final String PROGRESS_FINAL        = "Finish message...";
 
-    public static final String CONTINUE_EXECUTION = "CONTINUE_EXECUTION";
+    public static final String CONTINUE_EXECUTION    = "CONTINUE_EXECUTION";
+    
+    private static final String PERSISTENCE_SKS       = "SKS";  // SKS persistence file
 
     private XMLSchemaCache schema_cache;
 
@@ -84,11 +84,17 @@ public abstract class BaseProxyActivity extends Activity
     private String redirect_url;
     
     private String abort_url;
+    
+    private boolean user_aborted;
 
     Vector<String> cookies = new Vector<String> ();
 
     public byte[] initial_request_data;
     
+    public abstract String getProtocolName ();
+    
+    public abstract void abortTearDown ();
+
     public void conditionalAbort (final String message)
       {
         final BaseProxyActivity instance = this;
@@ -101,6 +107,8 @@ public abstract class BaseProxyActivity extends Activity
               {
                 // The user decided that this is not what he/she wants...
                 dialog.cancel ();
+                user_aborted = true;
+                abortTearDown ();
                 if (abort_url == null)
                   {
                     instance.finish ();
@@ -136,24 +144,27 @@ public abstract class BaseProxyActivity extends Activity
 
     public void showHeavyWork (final String message)
       {
-        if (progress_display == null)
+        if (!user_aborted)
           {
-            progress_display = new ProgressDialog (this);
-            progress_display.setMessage (message);
-            progress_display.setCanceledOnTouchOutside (false);
-            progress_display.setCancelable (false);
-            progress_display.setButton (DialogInterface.BUTTON_POSITIVE, "Cancel", new DialogInterface.OnClickListener ()
+            if (progress_display == null)
               {
-                public void onClick (DialogInterface dialog, int which)
+                progress_display = new ProgressDialog (this);
+                progress_display.setMessage (message);
+                progress_display.setCanceledOnTouchOutside (false);
+                progress_display.setCancelable (false);
+                progress_display.setButton (DialogInterface.BUTTON_POSITIVE, "Cancel", new DialogInterface.OnClickListener ()
                   {
-                    conditionalAbort (message);
-                  }
-              });
-            progress_display.show ();
-          }
-        else
-          {
-            progress_display.setMessage (message);
+                    public void onClick (DialogInterface dialog, int which)
+                      {
+                        conditionalAbort (message);
+                      }
+                  });
+                progress_display.show ();
+              }
+            else
+              {
+                progress_display.setMessage (message);
+              }
           }
       }
 
@@ -174,13 +185,39 @@ public abstract class BaseProxyActivity extends Activity
           }
       }
 
+    public boolean userHasAborted ()
+      {
+        return user_aborted;
+      }
+
     public void initSKS ()
       {
-        sks = new SKSImplementation ();
+        try
+          {
+            sks = (SKSImplementation) new ObjectInputStream (openFileInput(PERSISTENCE_SKS)).readObject ();
+          }
+        catch (Exception e)
+          {
+            Log.e (getProtocolName (), "Couldn't read SKS");
+            sks = new SKSImplementation ();
+          }
       }
 
     public void closeProxy ()
       {
+        if (sks != null)
+          {
+            try
+              {
+                ObjectOutputStream oos = new ObjectOutputStream (openFileOutput(PERSISTENCE_SKS, Context.MODE_PRIVATE));
+                oos.writeObject (sks);
+                oos.close ();
+              }
+            catch (Exception e)
+              {
+                Log.e (getProtocolName (), "Couldn't write SKS");
+              }
+          }
         finish ();
       }
 
@@ -248,8 +285,6 @@ public abstract class BaseProxyActivity extends Activity
           {
           }
       }
-
-    public abstract String getProtocolName ();
 
     public void showFailLog ()
       {
