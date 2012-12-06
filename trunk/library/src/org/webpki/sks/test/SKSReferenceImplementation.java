@@ -2418,6 +2418,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 provisioning.abort ("Unreferenced object \"ID\" : " + id);
               }
           }
+        provisioning.names.clear ();
         for (KeyEntry key_entry : keys.values ())
           {
             if (key_entry.owner == provisioning)
@@ -2626,6 +2627,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             provisionings.remove (old_owner.provisioning_handle);  // OK to perform also if already done
           }
+        provisioning.post_provisioning_objects.clear ();  // No need to save
 
         ///////////////////////////////////////////////////////////////////////////////////
         // If there are no keys associated with the session we just delete it
