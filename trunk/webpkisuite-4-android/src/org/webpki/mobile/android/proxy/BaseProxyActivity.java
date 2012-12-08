@@ -330,18 +330,25 @@ public abstract class BaseProxyActivity extends Activity
           {
             throw new IOException ("No URI");
           }
-        List<String> arg = uri.getQueryParameters ("msg");
+        List<String> arg = uri.getQueryParameters ("url");
         if (arg.isEmpty ())
           {
-            throw new IOException ("Missing \"msg\"");
+            throw new IOException ("Missing \"url\"");
           }
-        initial_request_data = URLDecoder.decode (arg.get (0), "UTF-8").getBytes ("UTF-8");
+        String init_url = URLDecoder.decode (arg.get (0), "UTF-8");
         arg = uri.getQueryParameters ("cookie");
         if (!arg.isEmpty ())
           {
             cookies.add (arg.get (0));
           }
-        logOK ("Invocation read, Cookie: " + (arg.isEmpty () ? "N/A" : cookies.elementAt (0)));
+        logOK ("Invocation URL=" + init_url + ", Cookie: " + (arg.isEmpty () ? "N/A" : cookies.elementAt (0)));
+        addOptionalCookies (init_url);
+        https_wrapper.makeGetRequest (init_url);
+        if (https_wrapper.getResponseCode () != HttpStatus.SC_OK)
+          {
+            throw new IOException (https_wrapper.getResponseMessage ());
+          }
+        initial_request_data = https_wrapper.getData ();
         Security.insertProviderAt (new BouncyCastleProvider (), 1);
       }
 
