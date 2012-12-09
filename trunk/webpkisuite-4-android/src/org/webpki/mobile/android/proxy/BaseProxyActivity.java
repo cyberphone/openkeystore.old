@@ -333,9 +333,9 @@ public abstract class BaseProxyActivity extends Activity
         List<String> arg = uri.getQueryParameters ("url");
         if (arg.isEmpty ())
           {
-            throw new IOException ("Missing \"url\"");
+            throw new IOException ("Missing initialization \"url\"");
           }
-        String init_url = URLDecoder.decode (arg.get (0), "UTF-8");
+        String init_url = arg.get (0);
         arg = uri.getQueryParameters ("cookie");
         if (!arg.isEmpty ())
           {
