@@ -72,4 +72,10 @@ public class KeyGen2Activity extends BaseProxyActivity
               }
           }
       }
+
+    @Override
+    public void onBackPressed ()
+      {
+        conditionalAbort (null);
+      }
   }
