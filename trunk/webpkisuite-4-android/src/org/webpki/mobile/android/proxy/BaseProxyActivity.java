@@ -58,6 +58,9 @@ import org.spongycastle.jce.provider.BouncyCastleProvider;
  */
 public abstract class BaseProxyActivity extends Activity
   {
+    //////////////////////
+    // Progress messages
+    //////////////////////
     public static final String PROGRESS_INITIALIZING = "Initializing...";
     public static final String PROGRESS_SESSION      = "Creating session...";
     public static final String PROGRESS_KEYGEN       = "Generating keys...";
@@ -65,9 +68,9 @@ public abstract class BaseProxyActivity extends Activity
     public static final String PROGRESS_DEPLOY_CERTS = "Receiving credentials...";
     public static final String PROGRESS_FINAL        = "Finish message...";
 
-    public static final String CONTINUE_EXECUTION    = "CONTINUE_EXECUTION";
+    public static final String CONTINUE_EXECUTION    = "CONTINUE_EXECUTION";  // Return constant to AsyncTasks
     
-    private static final String PERSISTENCE_SKS       = "SKS";  // SKS persistence file
+    private static final String PERSISTENCE_SKS      = "SKS";  // SKS persistence file
 
     private XMLSchemaCache schema_cache;
 

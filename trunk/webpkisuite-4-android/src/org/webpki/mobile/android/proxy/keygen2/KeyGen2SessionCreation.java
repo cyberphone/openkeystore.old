@@ -343,7 +343,8 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                     EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
                     while ((eps = keygen2_activity.sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), false)) != null)
                       {
-                        if (ls.getKeyManagementKey ().equals (eps.getKeyManagementKey ()))
+                        if (ls.getKeyManagementKey ().equals (eps.getKeyManagementKey ()) &&
+                            keygen2_activity.platform_request.getPrivacyEnabledFlag () == eps.getPrivacyEnabled ())
                           {
                             EnumeratedKey ek = new EnumeratedKey ();
                             while ((ek = keygen2_activity.sks.enumerateKeys (ek.getKeyHandle ())) != null)
@@ -358,14 +359,13 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                                     cf.setSerial (ls.getSerial ());
                                     cf.setEmailAddress (ls.getEmailAddress ());
                                     cf.setPolicy (ls.getPolicy ());
-                                    if (!cf.matches (cert_path, null, null))
+                                    if (cf.matches (cert_path, null, null))
                                       {
-                                        continue;
+                                        lr.addMatchingCredential (cert_path[0],
+                                                                  eps.getClientSessionID (),
+                                                                  eps.getServerSessionID (),
+                                                                  keygen2_activity.sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());
                                       }
-                                    lr.addMatchingCredential (cert_path[0],
-                                                              eps.getClientSessionID (),
-                                                              eps.getServerSessionID (),
-                                                              keygen2_activity.sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());
                                   }
                               }
                           }
