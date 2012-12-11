@@ -92,15 +92,17 @@ public abstract class BaseProxyActivity extends Activity
 
     public byte[] initial_request_data;
     
-    public abstract String getProtocolName ();
+    protected abstract String getProtocolName ();
     
-    public abstract void abortTearDown ();
+    protected abstract void abortTearDown ();
+    
+    protected abstract String getAbortString ();
 
     public void conditionalAbort (final String message)
       {
         final BaseProxyActivity instance = this;
         AlertDialog.Builder alert_dialog = new AlertDialog.Builder (this)
-            .setMessage ("Do you want to abort the current enrollment process?")
+            .setMessage (getAbortString ())
             .setCancelable (false)
             .setPositiveButton ("Yes", new DialogInterface.OnClickListener ()
           {

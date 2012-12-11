@@ -52,13 +52,13 @@ public class KeyGen2Activity extends BaseProxyActivity
       }
 
     @Override
-    public String getProtocolName ()
+    protected String getProtocolName ()
       {
         return KEYGEN2;
       }
 
     @Override
-    public void abortTearDown ()
+    protected void abortTearDown ()
       {
         if (provisioning_handle != 0)
           {
@@ -77,5 +77,11 @@ public class KeyGen2Activity extends BaseProxyActivity
     public void onBackPressed ()
       {
         conditionalAbort (null);
+      }
+
+    @Override
+    protected String getAbortString ()
+      {
+        return "Do you want to abort the current enrollment process?";
       }
   }
