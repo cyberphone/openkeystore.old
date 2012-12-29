@@ -20,12 +20,14 @@ import java.io.IOException;
 
 import java.util.Date;
 
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+import java.security.Signature;
 import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLVerifier;
 import org.webpki.xmldsig.XMLSignatureWrapper;
@@ -71,12 +73,6 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
       }
 
 
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
-      }
-
-
     public int getSessionLifeTime ()
       {
         return session_life_time;
@@ -92,6 +88,12 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
     public PublicKey getKeyManagementKey ()
       {
         return key_management_key;
+      }
+
+    
+    public String getVirtualMachineFriendlyName ()
+      {
+        return virtual_machine_friendly_name;
       }
 
 
@@ -161,15 +163,27 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
             rd.getNext (KEY_MANAGEMENT_KEY_ELEM);
             rd.getChild ();
             key_management_key = XMLSignatureWrapper.readPublicKey (rd);
+            if (rd.hasNext (VIRTUAL_MACHINE_ELEM))
+              {
+                rd.getNext ();
+                try
+                  {
+                    Signature km_verify = Signature.getInstance (key_management_key instanceof RSAPublicKey ? 
+                                                                                            "SHA256WithRSA" : "SHA256WithECDSA");
+                    km_verify.initVerify (key_management_key);
+                    km_verify.update (server_ephemeral_key.getEncoded ());
+                    if (!km_verify.verify (ah.getBinary (AUTHORIZATION_ATTR)))
+                      {
+                        throw new IOException ("Virtual Machine \"" + AUTHORIZATION_ATTR + "\" signature error");
+                      }
+                  }
+                catch (GeneralSecurityException e)
+                  {
+                    throw new IOException (e);
+                  }
+                virtual_machine_friendly_name = ah.getString (FRIENDLY_NAME_ATTR);
+              }
             rd.getParent ();
-          }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the optional server cookie
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
-          {
-            server_cookie = ServerCookie.read (rd);
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

@@ -23,9 +23,9 @@ import java.security.cert.X509Certificate;
 import java.util.Vector;
 
 import org.webpki.crypto.CertificateUtil;
+
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -109,9 +109,6 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
 
     String server_session_id;
 
-    private ServerCookie server_cookie;                     // Optional
-
-    
     public String getServerSessionID ()
       {
         return server_session_id;
@@ -121,12 +118,6 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
     public String getClientSessionID ()
       {
         return client_session_id;
-      }
-
-
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
       }
 
 
@@ -159,13 +150,5 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
             lookup_results.add (o);
           }
         while (rd.hasNext (LOOKUP_RESULT_ELEM));
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get optional server cookie
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext ())
-          {
-            server_cookie = ServerCookie.read (rd);
-          }
       }
   }

@@ -26,7 +26,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.ServerCookie;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -91,12 +90,6 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
       }
 
 
-    public ServerCookie setServerCookie (ServerCookie server_cookie)
-      {
-        return super.server_cookie = server_cookie;
-      }
-
-
     public void setPrefix (String prefix)
       {
         this.prefix = prefix;
@@ -154,14 +147,6 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
                 wr.getParent ();
               }
             wr.getParent ();
-          }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional ServerCookie
-        ////////////////////////////////////////////////////////////////////////
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr);
           }
       }
   }

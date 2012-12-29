@@ -28,7 +28,6 @@ import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLVerifier;
@@ -458,8 +457,6 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
 
     private String submit_url;
 
-    private ServerCookie server_cookie;                     // Optional
-
     private XMLSignatureWrapper signature;                  // Optional
 
     private byte[] close_session_mac;
@@ -482,12 +479,6 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
     public String getSubmitURL ()
       {
         return submit_url;
-      }
-
-
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
       }
 
 
@@ -575,14 +566,6 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         while (rd.hasNext (DELETE_KEY_ELEM))
           {
             post_delete_keys.add (readPostOperation (rd, PostOperation.DELETE_KEY, DELETE_KEY_ELEM));
-          }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get optional server cookie
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
-          {
-            server_cookie = ServerCookie.read (rd);
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

@@ -33,7 +33,6 @@ import org.w3c.dom.Element;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.ServerCookie;
 import org.webpki.xml.XMLObjectWrapper;
 
 import org.webpki.xmldsig.XMLAsymKeySigner;
@@ -279,12 +278,6 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
       }
 
 
-    public ServerCookie setServerCookie (ServerCookie server_cookie)
-      {
-        return super.server_cookie = server_cookie;
-      }
-
-
     public void setPrefix (String prefix)
       {
         this.prefix = prefix;
@@ -351,14 +344,6 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
             ds.createEnvelopedSignature (im_des);
             im_des.root.getDocumentElement ().removeAttributeNS ("http://www.w3.org/2000/xmlns/", prefix == null ? "xmlns" : prefix);
             wr.addWrapped (im_des);
-          }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional ServerCookie
-        ////////////////////////////////////////////////////////////////////////
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr);
           }
       }
   }

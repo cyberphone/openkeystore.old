@@ -31,7 +31,6 @@ import org.webpki.sks.SecureKeyStore;
 import org.webpki.util.Base64;
 
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSigner;
@@ -50,8 +49,6 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
 
     private String prefix;  // Default: no prefix
 
-    ServerCookie server_cookie;
-
     ServerState server_state;
     
    
@@ -63,12 +60,6 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
         this.submit_url = submit_url;
         server_state.checkState (true, server_state.current_phase == ProtocolPhase.KEY_CREATION? ProtocolPhase.KEY_CREATION : ProtocolPhase.PROVISIONING_FINALIZATION);
         server_state.current_phase = ProtocolPhase.PROVISIONING_FINALIZATION;
-      }
-
-
-    public ServerCookie setServerCookie (ServerCookie server_cookie)
-      {
-        return this.server_cookie = server_cookie;
       }
 
 
@@ -256,14 +247,6 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
         catch (GeneralSecurityException e)
           {
             throw new IOException (e);
-          }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional ServerCookie
-        ////////////////////////////////////////////////////////////////////////
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr);
           }
       }
   }

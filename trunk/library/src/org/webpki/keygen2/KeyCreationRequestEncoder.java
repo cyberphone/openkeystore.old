@@ -25,7 +25,6 @@ import java.util.Vector;
 import org.w3c.dom.Document;
 
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSigner;
 import org.webpki.xmldsig.XMLSignatureWrapper;
@@ -44,8 +43,6 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
     String prefix;  // Default: no prefix
 
-    ServerCookie server_cookie;
-    
     ServerState server_state;
     
     private boolean need_signature_ns;
@@ -83,12 +80,6 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
     public void setKeyAttestationAlgorithm (String key_attestation_algorithm_uri)
       {
         this.algorithm = key_attestation_algorithm_uri;
-      }
-
-
-    public ServerCookie setServerCookie (ServerCookie server_cookie)
-      {
-        return this.server_cookie = server_cookie;
       }
 
 
@@ -208,14 +199,5 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
           {
             wr.getParent ();
           }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional ServerCookie
-        ////////////////////////////////////////////////////////////////////////
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr);
-          }
-
       }
   }

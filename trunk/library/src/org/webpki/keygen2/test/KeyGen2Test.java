@@ -194,6 +194,8 @@ public class KeyGen2Test
     
     boolean set_trust_anchor;
     
+    boolean virtual_machine;
+    
     boolean get_client_attributes;
     
     boolean https;  // Use server-cert
@@ -237,6 +239,8 @@ public class KeyGen2Test
     static final String FIN_PROV_URL = "http://issuer.example.com/finalize";
 
     static final String CRE_DISC_URL = "http://issuer.example.com/credisc";
+    
+    static final String ACME_INDUSTRIES = "Acme Industries";
     
     static X509Certificate server_certificate;
     
@@ -594,6 +598,7 @@ public class KeyGen2Test
           {
             prov_sess_req = (ProvisioningInitializationRequestDecoder) client_xml_cache.parse (xmldata);
             assertTrue ("Submit URL", prov_sess_req.getSubmitURL ().equals (ISSUER_URL));
+            assertFalse ("VM", virtual_machine ^ ACME_INDUSTRIES.equals (prov_sess_req.getVirtualMachineFriendlyName ()));
             Date client_time = new Date ();
             ProvisioningSession sess = 
                   sks.createProvisioningSession (prov_sess_req.getSessionKeyAlgorithm (),
@@ -1003,9 +1008,13 @@ public class KeyGen2Test
 
             ProvisioningInitializationRequestEncoder prov_init_request = 
                  new ProvisioningInitializationRequestEncoder (server_state, ISSUER_URL, 10000, (short)50);
-            if (updatable)
+            if (updatable || virtual_machine)
               {
                 prov_init_request.setKeyManagementKey (server_km = server_crypto_interface.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
+                if (virtual_machine)
+                  {
+                    prov_init_request.setVirtualMachineFriendlyName (ACME_INDUSTRIES);
+                  }
               }
             return prov_init_request.writeXML ();
           }
@@ -1433,6 +1442,7 @@ public class KeyGen2Test
             writeOption ("HTTPS server certificate", https);
             writeOption ("TrustAnchor option", set_trust_anchor);
             writeOption ("Abort URL option", set_abort_url);
+            writeOption ("Virtual Machine option", virtual_machine);
             server = new Server ();
             client = new Client ();
             byte[] xml;
@@ -1921,6 +1931,14 @@ public class KeyGen2Test
         doer.perform ();
         X509Certificate[] cert_path = sks.getKeyAttributes (doer.getFirstKey ()).getCertificatePath ();
         assertTrue ("Path Length", CertificateUtil.isTrustAnchor (cert_path[cert_path.length - 1]));
+      }
+
+    @Test
+    public void VirtualMachine () throws Exception
+      {
+        Doer doer = new Doer ();
+        virtual_machine = true;
+        doer.perform ();
       }
 
     @Test

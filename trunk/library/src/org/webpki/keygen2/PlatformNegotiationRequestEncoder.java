@@ -18,12 +18,9 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.util.Vector;
-
 import org.w3c.dom.Document;
 
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSigner;
@@ -70,12 +67,6 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         this.abort_url = abort_url;
       }
 
-
-    public ServerCookie setServerCookie (ServerCookie server_cookie)
-      {
-        return this.server_cookie = server_cookie;
-      }
-    
 
     boolean privacy_enabled_set;
     
@@ -131,13 +122,5 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
           }
         
         if (needs_dsig_ns) XMLSignatureWrapper.addXMLSignatureNS (wr);
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional ServerCookie
-        ////////////////////////////////////////////////////////////////////////
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr);
-          }
       }
   }

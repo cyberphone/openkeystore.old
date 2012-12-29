@@ -18,7 +18,6 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import org.webpki.xml.ServerCookie;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.XMLObjectWrapper;
@@ -31,8 +30,6 @@ abstract class PlatformNegotiationResponse extends XMLObjectWrapper
   {
     String server_session_id;
 
-    ServerCookie server_cookie;  // Optional
-    
     PlatformNegotiationResponse () {}
 
     /**

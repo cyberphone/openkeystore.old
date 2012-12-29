@@ -41,7 +41,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 03-DEC-2012 
+    Revised: 28-DEC-2012 
     Author: Anders Rundgren
 
     Copyright 2006-2012 WebPKI.org (http://webpki.org).
@@ -59,11 +59,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20121203#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20121228#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20121203#"
+           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20121228#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -77,9 +77,6 @@
    <xs:element name="PlatformNegotiationRequest">
       <xs:complexType>
          <xs:sequence>
-
-            <!-- See "ServerCookie" definition -->
-            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
             <!-- A request MAY also include an enveloped XML signature
                  covering the entire request object (which MUST be done
@@ -151,9 +148,6 @@
             <!-- Optional hints for the "CertificatePath/Logotype" extension -->
             <xs:element name="ImagePreference" type="kg2:imageData" minOccurs="0" maxOccurs="unbounded"/>
 
-            <!-- See "ServerCookie" definition -->
-            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
-
          </xs:sequence>
 
          <!-- A conforming client MUST respond to special requirements
@@ -189,7 +183,8 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- "ServerEphemeralKey" holds a server-generated ephemeral key
+            <!-- SKS Reference: createProvisioningSession 
+                 "ServerEphemeralKey" holds a server-generated ephemeral key
                  for creating an SKS "SessionKey" (shared session key) -->
             <xs:element name="ServerEphemeralKey">
                <xs:complexType>
@@ -202,8 +197,8 @@
                </xs:complexType>
             </xs:element>
 
-               <!-- SKS Reference: createProvisioningSession 
-                    Optional key management key -->
+            <!-- SKS Reference: createProvisioningSession 
+                 Optional key management key -->
             <xs:element name="KeyManagementKey" minOccurs="0">
                <xs:complexType>
                   <xs:sequence>
@@ -217,12 +212,28 @@
 
                      </xs:choice>
 
+                     <!-- SKS Reference: createProvisioningSession 
+                          Virtual Machine support is optional and MUST be verified
+                          before requested by enquiring the capability attribute
+                          "http://xmlns.webpki.org/keygen2/1.0#feature.vm".  The VMs
+                          identity is supposed to be derived from the "KeyManagementKey"
+                          which requires an "Authorization" object created by signing
+                          "ServerEphemeralKey" with "KeyManagementKey" using SHA256 as the
+                          hash algorithm.  Note that VM support is meant to be dealt with by
+                          the client platform rather than the SKS. If the VM doesn't exist it
+                          should (after the user's consent) be created, otherwise it is
+                          opened.  A newly created VM should not be made available until
+                          the provisioning session has successfully terminated. -->
+                     <xs:element name="VirtualMachine" minOccurs="0">
+                        <xs:complexType>
+                           <xs:attribute name="FriendlyName" type="kg2:friendlyNameType" use="required"/>
+                           <xs:attribute name="Authorization" type="xs:base64Binary" use="required"/>
+                        </xs:complexType>
+                     </xs:element>
+
                   </xs:sequence>
                </xs:complexType>
             </xs:element>
-
-            <!-- See "ServerCookie" definition -->
-            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
             <!-- See "PlatformNegotiationRequest/Signature" -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
@@ -341,9 +352,6 @@
                </xs:complexType>
             </xs:element>
 
-            <!-- See "ServerCookie" definition -->
-            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
-
             <!-- MUST hold an enveloped XML symmetric-key signature created
                  by the SKS "signProvisioningSessionData" method and use "ID"
                  as the "Reference" URI attribute -->
@@ -410,9 +418,6 @@
                </xs:complexType>
             </xs:element>
 
-            <!-- See "ServerCookie" definition -->
-            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
-
             <!-- See "PlatformNegotiationRequest/Signature" -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
 
@@ -464,9 +469,6 @@
                </xs:complexType>
             </xs:element>
 
-            <!-- See "ServerCookie" definition -->
-            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
-
          </xs:sequence> 
 
          <!-- "ID" holds the SKS-generated ClientSessionID -->
@@ -512,9 +514,6 @@
                <xs:element ref="kg2:DevicePINProtection"/>
 
             </xs:choice>
-
-            <!-- See "ServerCookie" definition -->
-            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
             <!-- See "PlatformNegotiationRequest/Signature" -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
@@ -567,9 +566,6 @@
             <!-- The keys to be certified -->
             <xs:element ref="kg2:PublicKey" maxOccurs="unbounded"/>
 
-            <!-- See "ServerCookie" definition -->
-            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
-
          </xs:sequence>
 
          <!-- MUST be equal to "PlatformNegotiationResponse/@ID"
@@ -604,9 +600,6 @@
 
             <!-- SKS Reference: postDeleteKey -->
             <xs:element name="DeleteKey" type="kg2:targetKey" minOccurs="0" maxOccurs="unbounded"/>
-
-            <!-- See "ServerCookie" definition -->
-            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
 
             <!-- See "PlatformNegotiationRequest/Signature" -->
             <xs:element ref="ds:Signature" minOccurs="0"/>
@@ -644,12 +637,6 @@
 
    <xs:element name="ProvisioningFinalizationResponse">
       <xs:complexType>
-         <xs:sequence>
-
-            <!-- See "ServerCookie" definition -->
-            <xs:element ref="kg2:ServerCookie" minOccurs="0"/>
-
-         </xs:sequence>
 
          <!-- MUST be equal to "PlatformNegotiationResponse/@ID"
               within a specific session -->
@@ -1035,7 +1022,7 @@
 
          <!-- SKS Reference: createKeyEntry.FriendlyName 
               Default: "" -->
-         <xs:attribute name="FriendlyName" type="xs:string" use="optional"/>
+         <xs:attribute name="FriendlyName" type="kg2:friendlyNameType" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.MAC --> 
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
@@ -1274,24 +1261,6 @@
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      The "ServerCookie" object is intended for passing arbitrary data between a
-      request and a response.  It can be used to enable "statelessness" between
-      requests and responses, by for example holding a HMAC authentication of the
-      request and a time stamp.  The format of ServerCookie data is out of scope
-      for the KeyGen2 specification.  If a ServerCookie is specified in a request
-      it MUST be copied verbatim to the associated response object by the client
-      software
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:element name="ServerCookie">
-      <xs:complexType mixed="true">
-         <xs:sequence>
-            <xs:any namespace="##any" processContents="lax" maxOccurs="unbounded"/>
-         </xs:sequence>
-      </xs:complexType>
-   </xs:element>
-
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       Image definition.  An image SHOULD consist of a size-wise device-adapted
       GIF or PNG picture
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -1512,6 +1481,17 @@
    <xs:simpleType name="distinguishedNameExpr">
       <xs:restriction base="xs:string">
          <xs:pattern value="\S.*"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                                  Miscellenous
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+   <xs:simpleType name="friendlyNameType">
+      <xs:restriction base="xs:string">
+         <xs:minLength value="1"/>
+         <xs:maxLength value="100"/>
       </xs:restriction>
    </xs:simpleType>
 

@@ -36,7 +36,6 @@ import org.webpki.util.DebugFormatter;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLVerifier;
 import org.webpki.xmldsig.XMLSignatureWrapper;
@@ -844,8 +843,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
       
     private String submit_url;
 
-    private ServerCookie server_cookie;     // Optional
-
     private boolean deferred_certification;
 
     private XMLSignatureWrapper signature;  // Optional
@@ -872,10 +869,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
       }
 
 
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
-      }
     
     String algorithm;
     
@@ -960,14 +953,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             else break;
           }
  
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the optional server cookie
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
-          {
-            server_cookie = ServerCookie.read (rd);
-          }
-
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional signature
         /////////////////////////////////////////////////////////////////////////////////////////

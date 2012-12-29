@@ -25,7 +25,6 @@ import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
@@ -67,12 +66,6 @@ public class KeyCreationResponseEncoder extends KeyCreationResponse
             need_ds11_namespace = true;
           }
         gk.key_attestation = key_attestation;
-      }
-
-
-    public ServerCookie setServerCookie (ServerCookie server_cookie)
-      {
-        return this.server_cookie = server_cookie;
       }
 
 
@@ -118,11 +111,5 @@ public class KeyCreationResponseEncoder extends KeyCreationResponse
             XMLSignatureWrapper.writePublicKey (wr, gk.public_key);
             wr.getParent ();
           }
-
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr);
-          }
       }
-
   }

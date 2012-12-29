@@ -28,7 +28,6 @@ import java.security.interfaces.ECPublicKey;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
@@ -67,12 +66,6 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
     public ECPublicKey getClientEphemeralKey ()
       {
         return client_ephemeral_key;
-      }
-
-
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
       }
 
 
@@ -147,14 +140,6 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
           {
             rd.getNext ();
             addClientAttribute (ah.getString (TYPE_ATTR), ah.getString (VALUE_ATTR));
-          }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the optional ServerCookie
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
-          {
-            server_cookie = ServerCookie.read (rd);
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.util.Vector;
 
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.ServerCookie;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -45,12 +44,6 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
     private String prefix;  // Default: no prefix
     
     Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
-
-
-    public ServerCookie setServerCookie (ServerCookie server_cookie)
-      {
-        return this.server_cookie = server_cookie;
-      }
 
 
     public void setPrefix (String prefix) throws IOException
@@ -89,7 +82,6 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
     public PlatformNegotiationResponseEncoder (PlatformNegotiationRequestDecoder decoder)
       {
         this.server_session_id = decoder.server_session_id;
-        this.server_cookie = decoder.server_cookie;
       }
 
     protected void toXML (DOMWriterHelper wr) throws IOException
@@ -114,14 +106,6 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
             wr.setIntAttribute (WIDTH_ATTR, im_pref.width);
             wr.setIntAttribute (HEIGHT_ATTR, im_pref.height);
             wr.getParent ();
-          }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional ServerCookie
-        ////////////////////////////////////////////////////////////////////////
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr);
           }
       }
   }

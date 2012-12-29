@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20121203#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20121228#";
 
     String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
 
@@ -231,4 +231,6 @@ public interface KeyGen2Constants
     String UNLOCK_KEY_ELEM                           = "UnlockKey";
 
     String UPDATE_KEY_ELEM                           = "UpdateKey";
+
+    String VIRTUAL_MACHINE_ELEM                      = "VirtualMachine";
   }

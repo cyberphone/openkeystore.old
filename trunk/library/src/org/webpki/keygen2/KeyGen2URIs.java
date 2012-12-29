@@ -27,7 +27,6 @@ public interface KeyGen2URIs
         String ECDH_RAW                    = "http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh.raw";
 
         String NONE                        = "http://xmlns.webpki.org/keygen2/1.0#algorithm.none";
-
       }
 
     public interface LOGOTYPES
@@ -52,5 +51,10 @@ public interface KeyGen2URIs
         String OS_VENDOR                   = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.os-vendor";
 
         String OS_VERSION                  = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.os-version";
+      }
+
+    public interface FEATURE
+      {
+        String VIRTUAL_MACHINE             = "http://xmlns.webpki.org/keygen2/1.0#feature.vm";
       }
   }

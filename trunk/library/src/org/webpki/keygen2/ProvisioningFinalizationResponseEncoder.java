@@ -19,8 +19,6 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.ServerCookie;
-
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -32,8 +30,6 @@ public class ProvisioningFinalizationResponseEncoder extends ProvisioningFinaliz
 
     String server_session_id;
 
-    ServerCookie server_cookie;
-    
     byte[] attestation;
 
     String prefix;
@@ -46,12 +42,6 @@ public class ProvisioningFinalizationResponseEncoder extends ProvisioningFinaliz
         client_session_id = fin_prov_request.getClientSessionID ();
         server_session_id = fin_prov_request.getServerSessionID ();
         this.attestation = attestation;
-      }
-
-
-    public ServerCookie setServerCookie (ServerCookie server_cookie)
-      {
-        return this.server_cookie = server_cookie;
       }
 
 
@@ -73,15 +63,5 @@ public class ProvisioningFinalizationResponseEncoder extends ProvisioningFinaliz
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
 
         wr.setBinaryAttribute (ATTESTATION_ATTR, attestation);
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional ServerCookie
-        ////////////////////////////////////////////////////////////////////////
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr);
-          }
-
       }
-
   }

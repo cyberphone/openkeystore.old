@@ -27,7 +27,6 @@ import java.util.Date;
 import org.w3c.dom.Document;
 
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSigner;
 import org.webpki.xmldsig.XMLSignatureWrapper;
@@ -73,16 +72,20 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
       }
 
 
-    public ServerCookie setServerCookie (ServerCookie server_cookie)
-      {
-        return super.server_cookie = server_cookie;
-      }
-
-
     public void setKeyManagementKey (PublicKey key_management_key)
       {
         super.key_management_key = key_management_key;
         server_state.key_management_key = key_management_key;
+      }
+
+
+    public void setVirtualMachineFriendlyName (String name) throws IOException
+      {
+        if (key_management_key == null)
+          {
+            throw new IOException ("\"" + KEY_MANAGEMENT_KEY_ELEM + "\" must be set first");
+          }
+        virtual_machine_friendly_name = name;
       }
 
 
@@ -161,16 +164,26 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
           {
             wr.addChildElement (KEY_MANAGEMENT_KEY_ELEM);
             XMLSignatureWrapper.writePublicKey (wr, key_management_key);
+            if (virtual_machine_friendly_name != null)
+              {
+                ////////////////////////////////////////////////////////////////////////
+                // We request a VM as well
+                ////////////////////////////////////////////////////////////////////////
+                wr.addChildElement (VIRTUAL_MACHINE_ELEM);
+                wr.setStringAttribute (FRIENDLY_NAME_ATTR, virtual_machine_friendly_name);
+                try
+                  {
+                    wr.setBinaryAttribute (AUTHORIZATION_ATTR,
+                                           server_state.server_crypto_interface.generateKeyManagementAuthorization (key_management_key,
+                                                                                                                    server_ephemeral_key.getEncoded ()));
+                  }
+                catch (GeneralSecurityException e)
+                  {
+                    throw new IOException (e);
+                  }
+                wr.getParent();
+              }
             wr.getParent();
           }
-        
-        ////////////////////////////////////////////////////////////////////////
-        // Optional ServerCookie
-        ////////////////////////////////////////////////////////////////////////
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr);
-          }
       }
-
   }

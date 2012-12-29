@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -33,20 +32,12 @@ public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinaliz
     
     byte[] attestation;
 
-    private ServerCookie server_cookie;     // Optional
-
 
     public byte[] getAttestation ()
       {
         return attestation;
       }
 
-    
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
-      }
-    
     
     protected void fromXML (DOMReaderHelper rd) throws IOException
       {
@@ -63,13 +54,5 @@ public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinaliz
         attestation = ah.getBinary (ATTESTATION_ATTR);
 
         rd.getChild ();
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the ServerCookie if there is one
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext ())
-          {
-            server_cookie = ServerCookie.read (rd);
-          }
       }
   }

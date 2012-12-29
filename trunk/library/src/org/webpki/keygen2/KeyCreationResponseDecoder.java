@@ -24,7 +24,6 @@ import java.security.PublicKey;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
@@ -46,12 +45,6 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
       }
 
 
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
-      }
-    
-    
     /////////////////////////////////////////////////////////////////////////////////////////////
     // XML Reader
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,10 +79,5 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
               }
           }
         while (rd.hasNext (PUBLIC_KEY_ELEM));
-
-        if (rd.hasNext ())  // If not ServerCookie XML validation has gone wrong
-          {
-            server_cookie = ServerCookie.read (rd);
-          }
       }
   }

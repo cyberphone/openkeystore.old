@@ -18,7 +18,6 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import org.webpki.xml.ServerCookie;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.XMLObjectWrapper;
@@ -35,8 +34,6 @@ abstract class PlatformNegotiationRequest extends XMLObjectWrapper
     
     String abort_url; // Optional
 
-    ServerCookie server_cookie;
-    
     boolean privacy_enabled;
     
     PlatformNegotiationRequest () {}

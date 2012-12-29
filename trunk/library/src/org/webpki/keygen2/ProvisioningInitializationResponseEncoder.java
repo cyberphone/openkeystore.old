@@ -29,7 +29,6 @@ import java.security.interfaces.ECPublicKey;
 import org.w3c.dom.Document;
 
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSymKeySigner;
@@ -65,12 +64,6 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
       }
 
 
-    public ServerCookie setServerCookie (ServerCookie server_cookie)
-      {
-        return super.server_cookie = server_cookie;
-      }
-
-    
     public void setServerCertificate (X509Certificate server_certificate) throws IOException
       {
         try
@@ -162,14 +155,5 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
                 wr.getParent();
               }
           }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Optional ServerCookie
-        ////////////////////////////////////////////////////////////////////////
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr);
-          }
       }
-
   }

@@ -25,7 +25,6 @@ import java.security.interfaces.ECPublicKey;
 import java.util.Date;
 import java.util.Vector;
 
-import org.webpki.xml.ServerCookie;
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
@@ -47,15 +46,15 @@ abstract class ProvisioningInitializationRequest extends XMLObjectWrapper
     
     ECPublicKey server_ephemeral_key;
     
-    PublicKey key_management_key;
+    PublicKey key_management_key;  // Optional
+    
+    String virtual_machine_friendly_name;  // Optional, defined => Virtual machine defined
     
     Vector<String> client_attributes = new Vector<String> ();
     
     int session_life_time;
 
     short session_key_limit;
-
-    ServerCookie server_cookie;
 
     /**
      * Internal Use Only
@@ -110,5 +109,4 @@ abstract class ProvisioningInitializationRequest extends XMLObjectWrapper
       {
         throw new IOException ("Should have been implemented in derived class");
       }
-
   }

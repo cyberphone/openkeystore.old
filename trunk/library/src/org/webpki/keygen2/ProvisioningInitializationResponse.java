@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.webpki.xml.ServerCookie;
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
@@ -52,8 +51,6 @@ abstract class ProvisioningInitializationResponse extends XMLObjectWrapper
     HashMap<String,HashSet<String>> client_attribute_values = new HashMap<String,HashSet<String>> ();
 
     byte[] attestation;
-    
-    ServerCookie server_cookie;
     
     X509Certificate[] device_certificate_path;  // Is null for the privacy_enabled mode
     

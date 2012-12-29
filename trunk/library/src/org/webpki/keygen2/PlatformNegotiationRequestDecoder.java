@@ -18,11 +18,8 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.util.Vector;
-
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLVerifier;
@@ -57,12 +54,6 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
     public String getAbortURL ()
       {
         return abort_url;
-      }
-
-
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
       }
 
 
@@ -106,11 +97,6 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
         // Get the child elements
         //////////////////////////////////////////////////////////////////////////
         rd.getChild ();
-
-        if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
-          {
-            server_cookie = ServerCookie.read (rd);
-          }
 
         if (rd.hasNext ())// Must be a Signature otherwise schema validation has gone wrong...
           {

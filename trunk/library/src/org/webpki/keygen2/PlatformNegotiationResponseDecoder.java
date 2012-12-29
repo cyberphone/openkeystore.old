@@ -22,7 +22,6 @@ import java.util.Vector;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -40,12 +39,6 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
     public String getServerSessionID ()
       {
         return server_session_id;
-      }
-
-
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
       }
 
 
@@ -79,11 +72,6 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
             im_pref.width = ah.getInt (WIDTH_ATTR);
             im_pref.height = ah.getInt (HEIGHT_ATTR);
             image_preferences.add (im_pref);
-          }
-
-        if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
-          {
-            server_cookie = ServerCookie.read (rd);
           }
       }
   }
