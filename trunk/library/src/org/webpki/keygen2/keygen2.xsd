@@ -657,44 +657,6 @@
    ===========================================================================================-->
 
 
-   <!--==========================================================================================
-                          The primary (top-level) client error response object
-   ===========================================================================================-->
-
-   <xs:element name="ClientErrorResponse">
-      <xs:complexType>
-
-         <xs:attribute name="Error" use="required">
-            <xs:simpleType>
-               <xs:restriction base="xs:string">
-                  <xs:enumeration value="not-implemented"/>
-                  <xs:enumeration value="unexpected-client-exception"/>
-                  <xs:enumeration value="negotiation-failure"/>
-                  <xs:enumeration value="keystore-overflow"/>
-                  <xs:enumeration value="unsupported-feature-requested"/>
-                  <xs:enumeration value="non-matching-requests"/>
-                  <xs:enumeration value="no-such-key"/>
-                  <xs:enumeration value="missing-provisioning-data"/>
-                  <xs:enumeration value="general-error"/>
-               </xs:restriction>
-            </xs:simpleType>
-         </xs:attribute>
-
-         <!-- String associated with the "Error" code -->
-         <xs:attribute name="Argument" type="xs:string" use="required"/>
-
-         <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
-              within a specific session -->
-         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
-
-      </xs:complexType>
-   </xs:element>
-
-   <!--==========================================================================================
-                          End of client error response object definition
-   ===========================================================================================-->
-
-
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             Object representing basic algorithm/capability requirements/support
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
