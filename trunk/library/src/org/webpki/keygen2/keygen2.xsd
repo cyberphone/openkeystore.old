@@ -212,8 +212,7 @@
 
                      </xs:choice>
 
-                     <!-- SKS Reference: createProvisioningSession 
-                          Virtual Machine support is optional and MUST be verified
+                     <!-- Virtual Machine support is optional and MUST be verified
                           before requested by enquiring the capability attribute
                           "http://xmlns.webpki.org/keygen2/1.0#feature.vm".  The VMs
                           identity is supposed to be derived from the "KeyManagementKey"
