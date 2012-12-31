@@ -228,7 +228,7 @@ public enum KeyAlgorithms
       }
 
 
-    public static KeyAlgorithms getKeyAlgorithm (PublicKey public_key, boolean key_parameters) throws IOException
+    public static KeyAlgorithms getKeyAlgorithm (PublicKey public_key, Boolean key_parameters) throws IOException
       {
         if (public_key instanceof ECPublicKey)
           {
@@ -241,7 +241,7 @@ public enum KeyAlgorithms
         int length_in_bits = (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;
         for (KeyAlgorithms alg : values ())
           {
-            if (length_in_bits == alg.length_in_bits && alg.has_parameters == key_parameters)
+            if (length_in_bits == alg.length_in_bits && (key_parameters == null || alg.has_parameters == key_parameters))
               {
                 return alg;
               }
@@ -252,7 +252,7 @@ public enum KeyAlgorithms
 
     public static KeyAlgorithms getKeyAlgorithm (PublicKey public_key) throws IOException
       {
-        return getKeyAlgorithm (public_key);
+        return getKeyAlgorithm (public_key, null);
       }
 
 
