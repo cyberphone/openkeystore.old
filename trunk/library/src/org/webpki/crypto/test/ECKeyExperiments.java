@@ -19,6 +19,7 @@ package org.webpki.crypto.test;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
@@ -26,6 +27,8 @@ import java.security.Signature;
 import java.security.spec.ECGenParameterSpec;
 
 import javax.crypto.KeyAgreement;
+
+import org.webpki.crypto.KeyAlgorithms;
 
 public class ECKeyExperiments
   {
@@ -36,10 +39,10 @@ public class ECKeyExperiments
       {
       }
     
-    private static KeyPair gen (String alg) throws Exception
+    private static KeyPair gen (KeyAlgorithms key_alg) throws Exception
       {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance (alg);
-        ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
+        KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
+        ECGenParameterSpec eccgen = new ECGenParameterSpec (key_alg.getJCEName ());
         generator.initialize(eccgen, new SecureRandom());
         return generator.generateKeyPair();
       }
@@ -67,20 +70,15 @@ public class ECKeyExperiments
      
       }
     
-    private static void test (String alg) throws Exception
+    private static void execute (KeyAlgorithms key_alg) throws Exception
       {
-        KeyPair kp1 = gen ("ECDH");
-        KeyPair kp2 = gen (alg);
-        String ka_alg = alg;
-        if (alg.equals ("EC"))
-          {
-             ka_alg = "ECDH";
-          }
-        KeyAgreement ka1 = KeyAgreement.getInstance(ka_alg, "BC");
+        KeyPair kp1 = gen (key_alg);
+        KeyPair kp2 = gen (key_alg);
+        KeyAgreement ka1 = KeyAgreement.getInstance("ECDH");
 
         ka1.init(kp1.getPrivate());
 
-        KeyAgreement ka2 = KeyAgreement.getInstance(ka_alg);
+        KeyAgreement ka2 = KeyAgreement.getInstance("ECDH");
 
         ka2.init(kp2.getPrivate());
 
@@ -92,7 +90,7 @@ public class ECKeyExperiments
 
         if (!k1.equals(k2))
         {
-            throw new RuntimeException (alg + " 2-way test failed");
+            throw new RuntimeException (key_alg + " 2-way test failed");
         }
         System.out.println ("ECDH Worked");
         signverify (kp1);
@@ -102,9 +100,22 @@ public class ECKeyExperiments
 
     public static void main (String[] argv) throws Exception
       {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        test ("EC");
-        test ("ECDH");
+        try
+          {
+            Class<?> clazz = Class.forName ("org.bouncycastle.jce.provider.BouncyCastleProvider");
+            Security.insertProviderAt ((Provider) clazz.newInstance (), 1);
+          }
+        catch (Exception e)
+          {
+            System.out.println ("BC not found");
+          }
+        for (KeyAlgorithms key_alg : KeyAlgorithms.values ())
+          {
+            if (key_alg.isECKey ())
+              {
+                execute (key_alg);
+              }
+          }
        }
 
   }

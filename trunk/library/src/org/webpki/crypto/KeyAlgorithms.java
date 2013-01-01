@@ -94,25 +94,25 @@ public enum KeyAlgorithms
 
     B_163       ("1.3.132.0.15",
                  "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.b163",
-                 "B-163",
+                 "sect163r2",
                  163,
-                 SignatureAlgorithms.ECDSA_SHA1,
+                 SignatureAlgorithms.ECDSA_SHA256,
                  false,
                  false),
 
     B_233       ("1.3.132.0.27",
                  "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.b233",
-                 "B-233",
+                 "sect233r1",
                  233,
-                 SignatureAlgorithms.ECDSA_SHA256,
+                 SignatureAlgorithms.ECDSA_SHA512,
                  false,
                  false),
 
     B_283       ("1.3.132.0.17",
                  "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.b283",
-                 "B-283",
+                 "sect283r1",
                  283,
-                 SignatureAlgorithms.ECDSA_SHA384,
+                 SignatureAlgorithms.ECDSA_SHA512,
                  false,
                  false),
 
@@ -136,17 +136,25 @@ public enum KeyAlgorithms
                  "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.p384",
                  "secp384r1",
                  384,
-                 SignatureAlgorithms.ECDSA_SHA384,
+                 SignatureAlgorithms.ECDSA_SHA512,
+                 false,
+                 false),
+
+    P_521       ("1.3.132.0.35",
+                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.p521",
+                 "secp521r1",
+                 521,
+                 SignatureAlgorithms.ECDSA_SHA512,
                  false,
                  false);
 
-    private final String ec_domain_oid;       // EC domain as expressed in ASN.1 messages, null for RSA
-    private final String uri;                 // As expressed in XML messages
-    private final String jcename;             // As expressed for JCE
+    private final String ec_domain_oid;          // EC domain as expressed in ASN.1 messages, null for RSA
+    private final String uri;                    // As expressed in XML messages
+    private final String jcename;                // As expressed for JCE
     private final int length_in_bits;
-    private final SignatureAlgorithms pref_alg;
-    private final boolean has_parameters;      // Parameter value required?
-    private final boolean sks_mandatory;      // If required in SKS
+    private final SignatureAlgorithms pref_alg;  // A sort of a "guide"
+    private final boolean has_parameters;        // Parameter value required?
+    private final boolean sks_mandatory;         // If required in SKS
 
 
     private KeyAlgorithms (String ec_domain_oid, 
