@@ -74,17 +74,24 @@ public final class ASN1ObjectID extends Simple
           {
             BigInteger subID = v.elementAt(i);
             byte[] t = new byte[(subID.bitLength() + 6) / 7];
-            for(int j = 0; j < t.length; j++)
+            if (t.length == 0)
               {
-                if(j < t.length - 1)
+                t = new byte[]{0};
+              }
+            else
+              {
+                for(int j = 0; j < t.length; j++)
                   {
-                    t[j] = (byte)0x80;
-                  }
-                for(int k = 0; k < 7; k++)
-                  {
-                    if(subID.testBit(7 * (t.length - j - 1) + k))
+                    if(j < t.length - 1)
                       {
-                        t[j] = (byte)(t[j] | bitMasks[k]);
+                        t[j] = (byte)0x80;
+                      }
+                    for(int k = 0; k < 7; k++)
+                      {
+                        if(subID.testBit(7 * (t.length - j - 1) + k))
+                          {
+                            t[j] = (byte)(t[j] | bitMasks[k]);
+                          }
                       }
                   }
               }
