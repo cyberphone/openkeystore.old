@@ -61,12 +61,14 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
   {
     private static final long serialVersionUID = 1L;
 
-    public static final String XML_DSIG_NS_PREFIX = "ds";
+    public static final String XML_DSIG_NS_PREFIX   = "ds";
     public static final String XML_DSIG11_NS_PREFIX = "ds11";
 
-    public static final String XML_DSIG_NS       = "http://www.w3.org/2000/09/xmldsig#";
-    public static final String XML_DSIG11_NS     = "http://www.w3.org/2009/xmldsig11#";
-    public static final String ENVELOPED_URI     = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
+    public static final String EC_NAMED_CURVES_OID  = "1.2.840.10045.2.1";
+
+    public static final String XML_DSIG_NS          = "http://www.w3.org/2000/09/xmldsig#";
+    public static final String XML_DSIG11_NS        = "http://www.w3.org/2009/xmldsig11#";
+    public static final String ENVELOPED_URI        = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
 
     public static final String SIGNATURE_ELEM               = "Signature";
     public static final String X509_CERTIFICATE_ELEM        = "X509Certificate";
@@ -81,7 +83,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
     public static final String SIGNATURE_METHOD_ELEM        = "SignatureMethod";
     public static final String SIGNATURE_VALUE_ELEM         = "SignatureValue";
     public static final String KEY_INFO_ELEM                = "KeyInfo";
-    public static final String KEY_NAME_ELEM                = "KeyName"; // XML encryption only
+    public static final String KEY_NAME_ELEM                = "KeyName";
     public static final String KEY_VALUE_ELEM               = "KeyValue";
     public static final String RSA_KEY_VALUE_ELEM           = "RSAKeyValue";
     public static final String EC_KEY_VALUE_ELEM            = "ECKeyValue";
@@ -252,16 +254,16 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
                         {
                           new ASN1Sequence (new BaseASN1Object[]
                             {
-                              new ASN1ObjectID ("1.2.840.10045.2.1"),
+                              new ASN1ObjectID (EC_NAMED_CURVES_OID),
                               new ASN1ObjectID (rd.getAttributeHelper ().getString (URI_ATTR).substring (8))
                             }),
                           new ASN1BitString (rd.getBinary (PUBLIC_KEY_ELEM))
                         }).encode ()));
               }
           }
-        catch (GeneralSecurityException gse)
+        catch (GeneralSecurityException e)
           {
-            throw new IOException (gse.getMessage ());
+            throw new IOException (e);
           }
         rd.getParent ();
         KeyAlgorithms.getKeyAlgorithm (public_key); // Verify that it is one of the supported
@@ -582,9 +584,9 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
               {
                 wr.addBinary (X509_CERTIFICATE_ELEM, certificate.getEncoded());
               }
-            catch (GeneralSecurityException gse)
+            catch (GeneralSecurityException e)
               {
-                throw new IOException (gse.getMessage ());
+                throw new IOException (e);
               }
           }
 
@@ -650,5 +652,4 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
             wr.addWrapped (wrappedData);
           }
       }
-
   }
