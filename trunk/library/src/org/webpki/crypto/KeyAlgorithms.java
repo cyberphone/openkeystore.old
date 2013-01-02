@@ -19,6 +19,7 @@ package org.webpki.crypto;
 import java.io.IOException;
 
 import java.security.PublicKey;
+
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
@@ -186,6 +187,12 @@ public enum KeyAlgorithms
         return jcename;
       }
 
+
+    public String getECDomainOID ()
+      {
+        return ec_domain_oid;
+      }
+
     
     public boolean isMandatorySKSAlgorithm ()
       {
@@ -223,27 +230,23 @@ public enum KeyAlgorithms
       }
  
 
-    public static KeyAlgorithms getECDomainFromOID (String ec_domain_oid) throws IOException
-      {
-        for (KeyAlgorithms alg : values ())
-          {
-            if (ec_domain_oid.equals (alg.ec_domain_oid))
-              {
-                return alg;
-              }
-          }
-        throw new IOException ("Unknown domain: " + ec_domain_oid);
-      }
-
-
     public static KeyAlgorithms getKeyAlgorithm (PublicKey public_key, Boolean key_parameters) throws IOException
       {
         if (public_key instanceof ECPublicKey)
           {
-            return getECDomainFromOID (ParseUtil.oid (
-                ParseUtil.sequence (
-                   ParseUtil.sequence (
-                      DerDecoder.decode (public_key.getEncoded ()), 2).get(0), 2).get (1)).oid ());
+            String ec_domain_oid = ParseUtil.oid (
+                                    ParseUtil.sequence (
+                                      ParseUtil.sequence (
+                                        DerDecoder.decode (public_key.getEncoded ()), 2).get(0), 2).get (1)
+                                                 ).oid ();
+            for (KeyAlgorithms alg : values ())
+              {
+                if (ec_domain_oid.equals (alg.ec_domain_oid))
+                  {
+                    return alg;
+                  }
+              }
+            throw new IOException ("Unknown EC domain: " + ec_domain_oid);
           }
         byte[] modblob = ((RSAPublicKey)public_key).getModulus ().toByteArray ();
         int length_in_bits = (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;

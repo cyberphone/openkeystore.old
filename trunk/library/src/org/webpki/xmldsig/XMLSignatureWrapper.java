@@ -32,7 +32,6 @@ import java.security.KeyFactory;
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.RSAPublicKey;
-import java.security.interfaces.ECPublicKey;
 
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -52,6 +51,7 @@ import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.XMLObjectWrapper;
 
+import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
@@ -264,6 +264,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
             throw new IOException (gse.getMessage ());
           }
         rd.getParent ();
+        KeyAlgorithms.getKeyAlgorithm (public_key); // Verify that it is one of the supported
         return public_key;
       }
 
@@ -518,7 +519,8 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
     public static void writePublicKey (DOMWriterHelper wr, PublicKey public_key) throws IOException
       {
-        if (public_key instanceof RSAPublicKey)
+        KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
+        if (key_alg.isRSAKey ())
           {
             String old = wr.pushPrefix (XML_DSIG_NS_PREFIX);
             if (old == null || !old.equals (XML_DSIG_NS_PREFIX))
@@ -536,10 +538,9 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
           {
             wr.pushPrefix (XML_DSIG11_NS_PREFIX);
             wr.addChildElementNS (XML_DSIG11_NS, EC_KEY_VALUE_ELEM);
-            ASN1Sequence sequence = ParseUtil.sequence (DerDecoder.decode (((ECPublicKey)public_key).getEncoded ()), 2);
             wr.addEmptyElement (NAMED_CURVE_ELEM);
-            wr.setStringAttribute (URI_ATTR, "urn:oid:" + ParseUtil.oid (ParseUtil.sequence (sequence.get(0), 2).get (1)).oid ());
-            wr.addBinary (PUBLIC_KEY_ELEM, ParseUtil.bitstring (sequence.get (1)));
+            wr.setStringAttribute (URI_ATTR, "urn:oid:" + key_alg.getECDomainOID ());
+            wr.addBinary (PUBLIC_KEY_ELEM, ParseUtil.bitstring (ParseUtil.sequence (DerDecoder.decode (public_key.getEncoded ()), 2).get (1)));
           }
         wr.getParent ();
         wr.popPrefix ();
