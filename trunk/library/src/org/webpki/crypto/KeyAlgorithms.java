@@ -241,7 +241,8 @@ public enum KeyAlgorithms
                                                  ).oid ();
             for (KeyAlgorithms alg : values ())
               {
-                if (ec_domain_oid.equals (alg.ec_domain_oid))
+                if (ec_domain_oid.equals (alg.ec_domain_oid) &&
+                    (key_parameters == null || !alg.has_parameters))
                   {
                     return alg;
                   }
