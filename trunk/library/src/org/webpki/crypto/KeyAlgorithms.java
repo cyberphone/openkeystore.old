@@ -252,7 +252,8 @@ public enum KeyAlgorithms
         int length_in_bits = (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;
         for (KeyAlgorithms alg : values ())
           {
-            if (length_in_bits == alg.length_in_bits && (key_parameters == null || alg.has_parameters == key_parameters))
+            if (alg.ec_domain_oid == null && length_in_bits == alg.length_in_bits && 
+                (key_parameters == null || alg.has_parameters == key_parameters))
               {
                 return alg;
               }
