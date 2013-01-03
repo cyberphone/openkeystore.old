@@ -60,7 +60,12 @@ public class KeyExperiments
           }
         KeyPairGenerator generator = KeyPairGenerator.getInstance (alg_par_spec instanceof RSAKeyGenParameterSpec ? "RSA" : "EC");
         generator.initialize (alg_par_spec, new SecureRandom ());
-        return generator.generateKeyPair ();
+        KeyPair kp =  generator.generateKeyPair ();
+        if (key_alg != KeyAlgorithms.getKeyAlgorithm (kp.getPublic (), key_alg.hasParameters ()))
+          {
+            throw new RuntimeException ("Key mismatch on: " + key_alg);
+          }
+        return kp;
       }
 
     static byte[] data = {4, 5, 6, 7, 8, 0};
