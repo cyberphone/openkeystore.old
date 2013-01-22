@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2012 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2013 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Vector;
 
+import org.webpki.crypto.DeviceID;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MacAlgorithms;
@@ -43,7 +44,6 @@ import org.webpki.crypto.SymKeyVerifierInterface;
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
 import org.webpki.sks.DeleteProtection;
-import org.webpki.sks.DeviceID;
 import org.webpki.sks.ExportProtection;
 import org.webpki.sks.InputMethod;
 import org.webpki.sks.Grouping;

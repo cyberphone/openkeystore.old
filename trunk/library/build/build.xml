@@ -279,7 +279,7 @@
       <link offline="true" href="http://download.oracle.com/javase/${javadoc-version}/docs/api/" packagelistLoc="${env.JAVA_HOME}\jsedocs\api"/>
       <link offline="true" href="http://download.oracle.com/javaee/6/api/" packagelistLoc="${env.JAVA_HOME}\jeedocs\api"/>
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
-      <bottom><![CDATA[<i>2005-2012 WebPKI.org.</i>]]></bottom>
+      <bottom><![CDATA[<i>2005-2013 WebPKI.org.</i>]]></bottom>
     </javadoc>
     <java fork="yes"
           classname="org.webpki.tools.XSD2HTMLPrinter"

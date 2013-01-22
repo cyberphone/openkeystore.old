@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2012 WebPKI.org (http://webpki.org).
+ *  Copyright 2006-2013 WebPKI.org (http://webpki.org).
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,22 +14,41 @@
  *  limitations under the License.
  *
  */
-package org.webpki.sks;
+package org.webpki.crypto;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import java.security.GeneralSecurityException;
 
 import java.security.cert.X509Certificate;
 
-import org.webpki.crypto.HashAlgorithms;
-
+/**
+ * Device ID generator.
+ * <p>A Device ID is a cryptographically secured 36-character identifier where the last
+ * 4 characters represent a (SHA1-based) checksum of the 160-bit SHA1 hash of the
+ * argument which is the actual identity.  The latter may be an IMEI-code, Device
+ * Certificate, Apple-ID etc.</p>
+ * 
+ * <p>The checksum makes it easy verifying that the user has typed in the correct Device ID.</p>
+ * 
+ * <p>To further reduce mistakes the character-set has been limited to 32 visually
+ * distinguishable characters:<pre>
+ *     ABCDEFGHJKLMNPQRSTUVWXYZ23456789</pre></p>
+ * 
+ * <p>A user-display would typically show a Device ID like the following: <pre>
+ *     CCCC-CCCC-CCCC-CCCC
+ *     CCCC-CCCC-CCCC-CCCC
+ *     CCCC</pre></p>
+ */
 public class DeviceID
   {
     private DeviceID () {}  // No instantiation
     
     private static final char[] MODIFIED_BASE32 = {'A','B','C','D','E','F','G','H',
-                                                   'I','J','K','L','M','N','P','Q',
-                                                   'R','S','T','U','V','W','X','Y',
-                                                   'Z','1','2','3','4','5','6','7'};
+                                                   'J','K','L','M','N','P','Q','R',
+                                                   'S','T','U','V','W','X','Y','Z',
+                                                   '2','3','4','5','6','7','8','9'};
 
     private static byte[] half (byte[] data)
       {
@@ -59,14 +78,14 @@ public class DeviceID
           }
         return result;
       }
-
-    public static String getDeviceID (X509Certificate device_certificate_or_null, char optional_divider)
+    
+    public static String getDeviceID (byte[] identity_blob_or_null, char optional_divider)
       {
-        if (device_certificate_or_null != null)
+        if (identity_blob_or_null != null)
           {
             try
               {
-                byte[] sha1 = HashAlgorithms.SHA1.digest (device_certificate_or_null.getEncoded ());
+                byte[] sha1 = HashAlgorithms.SHA1.digest (identity_blob_or_null);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream ();
                 baos.write (sha1);
                 baos.write (half (half (half (sha1))));
@@ -89,11 +108,23 @@ public class DeviceID
                   }
                 return buffer.toString ();
               }
-            catch (Exception e)
+            catch (IOException e)
               {
                 throw new RuntimeException (e);
               }
           }
         return "N/A";
+      }
+
+    public static String getDeviceID (X509Certificate device_certificate_or_null, char optional_divider)
+      {
+        try
+          {
+            return getDeviceID (device_certificate_or_null == null ? null : device_certificate_or_null.getEncoded (), optional_divider);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new RuntimeException (e);
+          }
       }
   }
