@@ -27,8 +27,10 @@ import java.security.cert.X509Certificate;
  * Device ID generator.
  * <p>A Device ID is a cryptographically secured 36-character identifier where the last
  * 4 characters represent a (SHA1-based) checksum of the 160-bit SHA1 hash of the
- * argument which is the actual identity.  The latter may be an IMEI-code, Device
- * Certificate, Apple-ID etc.</p>
+ * argument which is the actual identity.  The identity used as input may be an IMEI-code,
+ * Device Certificate, Apple-ID, etc.</p>
+ * <p>The scheme also supports a truncated 20-character Device ID-variant which
+ * presumably is sufficient for most real-world usages.</p>
  * 
  * <p>The checksum makes it easy verifying that the user has typed in the correct Device ID.</p>
  * 
@@ -36,7 +38,7 @@ import java.security.cert.X509Certificate;
  * distinguishable characters:<pre>
  *     ABCDEFGHJKLMNPQRSTUVWXYZ23456789</pre></p>
  * 
- * <p>A user-display would typically show a Device ID like the following: <pre>
+ * <p>A user-display would typically show a 36-character Device ID like the following: <pre>
  *     CCCC-CCCC-CCCC-CCCC
  *     CCCC-CCCC-CCCC-CCCC
  *     CCCC</pre></p>
@@ -93,16 +95,22 @@ public class DeviceID
         return result;
       }
     
-    public static String getDeviceIDFromSHA1Hash (byte[] sha1)
+    public static String getDeviceIDFromHash (byte[] hash)
       {
         try
           {
+            if (hash.length != 20 && hash.length != 10)
+              {
+                throw new IllegalArgumentException ("Hash length: " + hash.length);
+              }
+            int total_bits = hash.length == 20 ? 180 : 100;
             ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-            baos.write (sha1);
-            baos.write (half (half (half (sha1))));
+            baos.write (hash);
+            hash = half (half (hash));
+            baos.write (hash.length == 5 ? half (hash) : hash);
             byte[] data = baos.toByteArray ();
             StringBuffer buffer = new StringBuffer ();
-            for (int bit_position = 0; bit_position < 180; bit_position += 5)
+            for (int bit_position = 0; bit_position < total_bits; bit_position += 5)
               {
                 int bit_position_in_byte = bit_position % 8;
                 int index = bit_position / 8;
@@ -111,7 +119,7 @@ public class DeviceID
        ((data[index] << (bit_position_in_byte - 3)) & 0x1F) | ((data[index + 1] & 0xFF) >> (11 - bit_position_in_byte))
                              :
         data[index] >>> (3 - bit_position_in_byte));
-               buffer.append (MODIFIED_BASE32[value & 0x1F]);
+                buffer.append (MODIFIED_BASE32[value & 0x1F]);
               }
             return buffer.toString ();
           }
@@ -121,13 +129,14 @@ public class DeviceID
           }
       }
 
-    public static String getDeviceID (byte[] identity_blob_or_null)
+    public static String getDeviceID (byte[] identity_blob_or_null, boolean long_version)
       {
         if (identity_blob_or_null != null)
           {
             try
               {
-                return getDeviceIDFromSHA1Hash (HashAlgorithms.SHA1.digest (identity_blob_or_null));
+                byte[] hash = HashAlgorithms.SHA1.digest (identity_blob_or_null);
+                return getDeviceIDFromHash (long_version ? hash : half (hash));
               }
             catch (IOException e)
               {
@@ -137,11 +146,11 @@ public class DeviceID
         return "N/A";
       }
 
-    public static String getDeviceID (X509Certificate device_certificate_or_null)
+    public static String getDeviceID (X509Certificate device_certificate_or_null, boolean long_version)
       {
         try
           {
-            return getDeviceID (device_certificate_or_null == null ? null : device_certificate_or_null.getEncoded ());
+            return getDeviceID (device_certificate_or_null == null ? null : device_certificate_or_null.getEncoded (), long_version);
           }
         catch (GeneralSecurityException e)
           {
@@ -149,16 +158,23 @@ public class DeviceID
           }
       }
     
-    public static byte[] getSHA1FromDeviceID (String device_id) throws IOException
+    public static byte[] getHashFromDeviceID (String device_id) throws IOException
       {
-        if (device_id.length () != 32 && device_id.length () != 36)
+        int bytes = 20;
+        int characters = 32;
+        if (device_id.length () == 20)
           {
-            throw new IOException ("DeviceID must be 32 or 36 characters");
+            bytes = 10;
+            characters = 16;
           }
-        byte[] sha1 = new byte[20];
+        else if (device_id.length () != 36)
+          {
+            throw new IOException ("DeviceID must be 20 or 36 characters");
+          }
+        byte[] hash = new byte[bytes];
         int q = 0;
         int bit_position = 0;
-        for (int i = 0; i < 32; i++)
+        for (int i = 0; i < characters; i++)
           {
             char c = device_id.charAt (i);
             if (c > 255 || (c = REVERSE_BASE32[c]) < 0)
@@ -169,9 +185,9 @@ public class DeviceID
               {
                 if (bit_position == 0)
                   {
-                    sha1[q] = 0;
+                    hash[q] = 0;
                   }
-                sha1[q] |= (byte)(c << (3 - bit_position));
+                hash[q] |= (byte)(c << (3 - bit_position));
                 if (bit_position == 3)
                   {
                     q++;
@@ -179,28 +195,25 @@ public class DeviceID
               }
             else
               {
-                sha1[q] |= (byte)(c >> ((bit_position + 5) % 8));
-                sha1[++q] = (byte)(c << (11 - bit_position));
+                hash[q] |= (byte)(c >> ((bit_position + 5) % 8));
+                hash[++q] = (byte)(c << (11 - bit_position));
               }
             bit_position = (bit_position + 5) % 8;
           }
-        if (device_id.length () == 36)
+        if (!device_id.equals (getDeviceIDFromHash (hash)))
           {
-            if (!device_id.equals (getDeviceIDFromSHA1Hash (sha1)))
-              {
-                throw new IOException ("DeviceID checksum error");
-              }
+            throw new IOException ("DeviceID checksum error");
           }
-        return sha1;
+        return hash;
       }
 
     public static void main (String[] args) throws IOException
       {
-        if (args.length != 1)
+        if (args.length != 2)
           {
-            System.out.println ("\n" + DeviceID.class.getName () + " string-to-be-converted-into-a-device-id\n");
+            System.out.println ("\n" + DeviceID.class.getName () + " string-to-be-converted-into-a-device-id long_version_expressed_as_true_or_false\n");
             System.exit (3);
           }
-        System.out.println ("Device ID=" + getDeviceID (args[0].getBytes ("UTF-8")));
+        System.out.println ("Device ID=" + getDeviceID (args[0].getBytes ("UTF-8"), new Boolean (args[1])));
       }
   }
