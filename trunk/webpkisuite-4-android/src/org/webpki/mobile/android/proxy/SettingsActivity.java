@@ -17,15 +17,35 @@
 package org.webpki.mobile.android.proxy;
 
 import android.os.Bundle;
-import android.app.Activity;
 
-public class SettingsActivity extends Activity
+import android.view.View;
+
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import android.app.ListActivity;
+
+public class SettingsActivity extends ListActivity
   {
+    String[] items = { "this", "is", "a", "really", 
+        "silly", "list" };
 
     @Override
     public void onCreate (Bundle savedInstanceState)
       {
-        super.onCreate (savedInstanceState);
-        setContentView (R.layout.activity_settings);
-      }
-  }
+              super.onCreate(savedInstanceState);
+              setContentView(R.layout.activity_settings);
+       setListAdapter(new ArrayAdapter<String>(
+             this,
+             android.R.layout.simple_expandable_list_item_1,
+             items));
+          }
+
+       @Override
+       protected void onListItemClick(ListView l, View v, int position, long id) {
+       super.onListItemClick(l, v, position, id);
+       String text = " position:" + position + "  " + items[position];
+       android.util.Log.i ("YEA", text);
+       }
+             
+   }
