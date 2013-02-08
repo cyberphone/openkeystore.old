@@ -16,36 +16,122 @@
  */
 package org.webpki.mobile.android.proxy;
 
+import org.webpki.android.crypto.DeviceID;
+import org.webpki.android.sks.SKSException;
+import org.webpki.mobile.android.sks.SKSImplementation;
+import org.webpki.mobile.android.sks.SKSStore;
+
 import android.os.Bundle;
 
 import android.view.View;
 
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
+
+import android.content.DialogInterface;
 
 public class SettingsActivity extends ListActivity
   {
-    String[] items = { "this", "is", "a", "really", 
-        "silly", "list" };
+    static final int DLG_ABOUT = 0;
+    static final int DLG_DEVICE_ID = 1;
+    static final int DLG_DEVICE_CERT = 2;
+    static final int DLG_EXT_DEVICE_ID = 3;
+    String[] items = { "About", "Device ID", "Device Certificate", "Extended Device ID"};
+    SKSImplementation sks;
 
     @Override
     public void onCreate (Bundle savedInstanceState)
       {
-              super.onCreate(savedInstanceState);
-              setContentView(R.layout.activity_settings);
-       setListAdapter(new ArrayAdapter<String>(
-             this,
-             android.R.layout.simple_expandable_list_item_1,
-             items));
-          }
+        super.onCreate (savedInstanceState);
+        setContentView (R.layout.activity_settings);
+        setListAdapter (new ArrayAdapter<String> (this, android.R.layout.simple_expandable_list_item_1, items));
+      }
 
-       @Override
-       protected void onListItemClick(ListView l, View v, int position, long id) {
-       super.onListItemClick(l, v, position, id);
-       String text = " position:" + position + "  " + items[position];
-       android.util.Log.i ("YEA", text);
-       }
-             
-   }
+    @SuppressWarnings("deprecation")
+    @Override
+    protected void onListItemClick (ListView l, View v, int position, long id)
+      {
+        super.onListItemClick (l, v, position, id);
+        String text = " position:" + position + "  " + items[position];
+        android.util.Log.i ("YEA", text);
+        sks = SKSStore.createSKS ("Dialog", getBaseContext (), true);
+        showDialog (position);
+      }
+    
+    @Override
+    protected Dialog onCreateDialog (int id)
+      {
+        switch (id)
+          {
+            case DLG_ABOUT:
+              AlertDialog.Builder about_builder = new AlertDialog.Builder (this);
+              about_builder.setTitle ("About");
+              about_builder.setMessage ("This application was developed by PrimeKey solutions AB");
+              about_builder.setIcon (android.R.drawable.btn_star_big_on);
+              about_builder.setPositiveButton (android.R.string.ok, new DialogInterface.OnClickListener ()
+                {
+                  public void onClick (DialogInterface dialog, int which)
+                    {
+                      return;
+                    }
+                });
+              return about_builder.create ();
+
+            case DLG_DEVICE_ID:
+              AlertDialog.Builder device_id_builder = new AlertDialog.Builder (this);
+              device_id_builder.setTitle ("Device ID");
+              device_id_builder.setIcon (android.R.drawable.ic_menu_info_details);
+              try
+                {
+                  StringBuffer devid = new StringBuffer (DeviceID.getDeviceID (sks.getDeviceInfo ().getCertificatePath ()[0], false));
+                  for (int i = 0, j = 4; i < 4; i++, j += 5)
+                    {
+                      devid.insert (j, '-');
+                    }
+                  device_id_builder.setMessage (devid);
+                }
+              catch (SKSException e)
+                {
+                  device_id_builder.setMessage ("Something went wrong");
+                }
+              device_id_builder.setPositiveButton (android.R.string.ok, new DialogInterface.OnClickListener ()
+                {
+                  public void onClick (DialogInterface dialog, int which)
+                    {
+                      return;
+                    }
+                });
+              return device_id_builder.create ();
+              
+            case DLG_DEVICE_CERT:
+              AlertDialog.Builder device_cert_builder = new AlertDialog.Builder (this);
+              device_cert_builder.setTitle ("Device Certificate");
+              device_cert_builder.setIcon (android.R.drawable.ic_menu_info_details);
+              try
+                {
+                  device_cert_builder.setMessage (sks.getDeviceInfo ().getCertificatePath ()[0].toString ());
+                }
+              catch (SKSException e)
+                {
+                  device_cert_builder.setMessage ("Something went wrong");
+                }
+              device_cert_builder.setPositiveButton (android.R.string.ok, new DialogInterface.OnClickListener ()
+                {
+                  public void onClick (DialogInterface dialog, int which)
+                    {
+                      return;
+                    }
+                });
+              return device_cert_builder.create ();
+              
+            default:
+              Toast.makeText (getApplicationContext(), "Not implemented!", Toast.LENGTH_SHORT).show ();
+          }
+        return null;
+      }
+  }

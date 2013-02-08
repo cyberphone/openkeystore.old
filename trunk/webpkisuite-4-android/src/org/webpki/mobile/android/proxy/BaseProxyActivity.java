@@ -18,11 +18,7 @@ package org.webpki.mobile.android.proxy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-
-import java.security.Security;
 
 import java.security.cert.X509Certificate;
 
@@ -36,7 +32,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
@@ -50,8 +45,7 @@ import org.webpki.android.xml.XMLSchemaCache;
 import org.webpki.android.xml.XMLObjectWrapper;
 
 import org.webpki.mobile.android.sks.SKSImplementation;
-
-import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.webpki.mobile.android.sks.SKSStore;
 
 /**
  * Class for taking care of "webpkiproxy://" XML protocol handlers
@@ -70,8 +64,6 @@ public abstract class BaseProxyActivity extends Activity
 
     public static final String CONTINUE_EXECUTION    = "CONTINUE_EXECUTION";  // Return constant to AsyncTasks
     
-    private static final String PERSISTENCE_SKS      = "SKS";  // SKS persistence file
-
     private XMLSchemaCache schema_cache;
 
     ProgressDialog progress_display;
@@ -195,32 +187,12 @@ public abstract class BaseProxyActivity extends Activity
 
     public void initSKS ()
       {
-        try
-          {
-            sks = (SKSImplementation) new ObjectInputStream (openFileInput(PERSISTENCE_SKS)).readObject ();
-          }
-        catch (Exception e)
-          {
-            Log.e (getProtocolName (), "Couldn't read SKS");
-            sks = new SKSImplementation ();
-          }
+        sks = SKSStore.createSKS (getProtocolName (), this, false);
       }
 
     public void closeProxy ()
       {
-        if (sks != null)
-          {
-            try
-              {
-                ObjectOutputStream oos = new ObjectOutputStream (openFileOutput(PERSISTENCE_SKS, Context.MODE_PRIVATE));
-                oos.writeObject (sks);
-                oos.close ();
-              }
-            catch (Exception e)
-              {
-                Log.e (getProtocolName (), "Couldn't write SKS");
-              }
-          }
+        SKSStore.serializeSKS (getProtocolName (), this);
         finish ();
       }
 
@@ -352,7 +324,6 @@ public abstract class BaseProxyActivity extends Activity
             throw new IOException (https_wrapper.getResponseMessage ());
           }
         initial_request_data = https_wrapper.getData ();
-        Security.insertProviderAt (new BouncyCastleProvider (), 1);
       }
 
     public void showAlert (String message)

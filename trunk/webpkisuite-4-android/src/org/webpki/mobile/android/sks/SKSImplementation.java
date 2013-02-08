@@ -120,6 +120,15 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
     int next_puk_handle = 1;
     LinkedHashMap<Integer,PUKPolicy> puk_policies = new LinkedHashMap<Integer,PUKPolicy> ();
+    
+    X509Certificate device_certificate;
+    PrivateKey attestation_key;
+    
+    SKSImplementation (X509Certificate device_certificate, PrivateKey attestation_key)
+      {
+        this.device_certificate = device_certificate;
+        this.attestation_key = attestation_key;
+      }
 
 
     abstract class NameSpace implements Serializable
@@ -956,27 +965,9 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     // Utility Functions
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    static final char[] ATTESTATION_KEY_PASSWORD =  {'t','e','s','t','i','n','g'};
-
-    static final String ATTESTATION_KEY_ALIAS = "mykey";
-    
-    KeyStore getAttestationKeyStore () throws GeneralSecurityException
-      {
-        try
-          {
-            KeyStore ks = KeyStore.getInstance ("BKS");
-            ks.load (getClass ().getResourceAsStream ("ecattestkey.bks"), ATTESTATION_KEY_PASSWORD);
-            return ks;
-          }
-        catch (IOException e)
-          {
-            throw new GeneralSecurityException (e);
-          }
-      }
-    
     X509Certificate[] getDeviceCertificatePath () throws GeneralSecurityException
       {
-        return new X509Certificate[]{(X509Certificate)getAttestationKeyStore ().getCertificate (ATTESTATION_KEY_ALIAS)};
+        return new X509Certificate[]{device_certificate};
       }
     
     byte[] getDeviceID (boolean privacy_enabled) throws GeneralSecurityException
@@ -986,7 +977,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
     PrivateKey getAttestationKey () throws GeneralSecurityException
       {
-        return (PrivateKey) getAttestationKeyStore ().getKey (ATTESTATION_KEY_ALIAS, ATTESTATION_KEY_PASSWORD);        
+        return attestation_key;        
       }
 
     void logCertificateOperation (KeyEntry key_entry, String operation)
