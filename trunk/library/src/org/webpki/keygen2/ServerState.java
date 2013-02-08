@@ -1310,6 +1310,12 @@ public class ServerState implements Serializable
       }
 
 
+    public X509Certificate getDeviceCertificate ()
+      {
+        return device_certificate;
+      }
+
+
     public BasicCapabilities getBasicCapabilities ()
       {
         return basic_capabilities;
