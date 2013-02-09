@@ -55,10 +55,11 @@ public abstract class SKSStore
               {
                 Security.insertProviderAt (new BouncyCastleProvider (), 1);
                 sks = (SKSImplementation) new ObjectInputStream (caller.openFileInput(PERSISTENCE_SKS)).readObject ();
+                Log.i (caller_for_log, "SKS found, restoring it");
               }
             catch (Exception e)
               {
-                Log.i (caller_for_log, "No SKS found, recreating it");
+                Log.i (caller_for_log, "SKS not found, recreating it");
                 try
                   {
                     KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");

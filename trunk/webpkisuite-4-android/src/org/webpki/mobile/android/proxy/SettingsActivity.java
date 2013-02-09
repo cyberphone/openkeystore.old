@@ -57,8 +57,6 @@ public class SettingsActivity extends ListActivity
     protected void onListItemClick (ListView l, View v, int position, long id)
       {
         super.onListItemClick (l, v, position, id);
-        String text = " position:" + position + "  " + items[position];
-        android.util.Log.i ("YEA", text);
         sks = SKSStore.createSKS ("Dialog", getBaseContext (), true);
         showDialog (position);
       }
