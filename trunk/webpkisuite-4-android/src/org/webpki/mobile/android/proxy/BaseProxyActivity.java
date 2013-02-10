@@ -73,6 +73,10 @@ public abstract class BaseProxyActivity extends Activity
     private HTTPSWrapper https_wrapper;
 
     public SKSImplementation sks;
+    
+    private String initialization_url;
+    
+    private X509Certificate server_certificate;
 
     private String redirect_url;
     
@@ -135,6 +139,11 @@ public abstract class BaseProxyActivity extends Activity
     public void setAbortURL (String abort_url)
       {
         this.abort_url = abort_url;
+      }
+
+    public String getInitializationURL ()
+      {
+        return initialization_url;
       }
 
     public void showHeavyWork (final String message)
@@ -290,7 +299,7 @@ public abstract class BaseProxyActivity extends Activity
 
     public X509Certificate getServerCertificate ()
       {
-        return https_wrapper.getServerCertificate ();
+        return server_certificate;
       }
     
     public void getProtocolInvocationData () throws Exception
@@ -310,20 +319,21 @@ public abstract class BaseProxyActivity extends Activity
           {
             throw new IOException ("Missing initialization \"url\"");
           }
-        String init_url = arg.get (0);
+        initialization_url = arg.get (0);
         arg = uri.getQueryParameters ("cookie");
         if (!arg.isEmpty ())
           {
             cookies.add (arg.get (0));
           }
-        logOK ("Invocation URL=" + init_url + ", Cookie: " + (arg.isEmpty () ? "N/A" : cookies.elementAt (0)));
-        addOptionalCookies (init_url);
-        https_wrapper.makeGetRequest (init_url);
+        logOK ("Invocation URL=" + initialization_url + ", Cookie: " + (arg.isEmpty () ? "N/A" : cookies.elementAt (0)));
+        addOptionalCookies (initialization_url);
+        https_wrapper.makeGetRequest (initialization_url);
         if (https_wrapper.getResponseCode () != HttpStatus.SC_OK)
           {
             throw new IOException (https_wrapper.getResponseMessage ());
           }
         initial_request_data = https_wrapper.getData ();
+        server_certificate = https_wrapper.getServerCertificate ();
       }
 
     public void showAlert (String message)

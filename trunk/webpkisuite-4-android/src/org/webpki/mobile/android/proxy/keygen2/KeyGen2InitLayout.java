@@ -86,7 +86,7 @@ public class KeyGen2InitLayout extends FrameLayout
       {
         int height = 0;
         int width = getChildAt (HOST_IMAGE).getMeasuredWidth ();
-        getChildAt (HOST_IMAGE).layout ((r - l - width) / 2, height + PADDING, (r - l - width) / 2 + width, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + PADDING);
+        getChildAt (HOST_IMAGE).layout ((r - l - width) / 2, height + PADDING + 5, (r - l - width) / 2 + width, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + PADDING + 5);
         width = getChildAt (ACCEPT_TEXT).getMeasuredWidth ();
         getChildAt (ACCEPT_TEXT).layout ((r - l - width) / 2, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + PADDING * 2, (r - l - width) / 2 + width, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + getChildAt (ACCEPT_TEXT).getMeasuredHeight () + PADDING * 2);
         width = getChildAt (CANCEL_BUTTON).getMeasuredWidth ();
