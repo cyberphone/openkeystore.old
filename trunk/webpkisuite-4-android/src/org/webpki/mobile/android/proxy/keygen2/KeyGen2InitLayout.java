@@ -63,6 +63,10 @@ public class KeyGen2InitLayout extends FrameLayout
           }
         int height = PADDING * 3 + getChildAt (HOST_IMAGE).getMeasuredHeight () + getChildAt (ACCEPT_TEXT).getMeasuredHeight ();
         int width = PADDING * 2 + w_max;
+        if (width > w)
+          {
+            width = w;
+          }
         if (w > h && h < (height + PADDING * 2 + 2 * button_h))
           {
             width += 2 * (button_w + PADDING);
