@@ -26,12 +26,13 @@
         android:id="@+id/partyInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="20dp"
         android:background="@drawable/partyborder"
         android:paddingBottom="6dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="6dp"
-        android:text="example.com"
+        android:text="Failed!!!"
         android:textColor="#000000"
         android:typeface="monospace" />
     
