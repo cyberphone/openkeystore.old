@@ -23,6 +23,8 @@ import java.security.GeneralSecurityException;
 
 import java.security.cert.X509Certificate;
 
+import org.webpki.util.ArrayUtil;
+
 /**
  * Device ID generator.
  * <p>A Device ID is a cryptographically secured 36-character identifier where the last
@@ -211,9 +213,9 @@ public class DeviceID
       {
         if (args.length != 2)
           {
-            System.out.println ("\n" + DeviceID.class.getName () + " string-to-be-converted-into-a-device-id long_version_expressed_as_true_or_false\n");
+            System.out.println ("\n" + DeviceID.class.getName () + " certificate-in-der-format long_version_expressed_as_true_or_false\n");
             System.exit (3);
           }
-        System.out.println ("Device ID=" + getDeviceID (args[0].getBytes ("UTF-8"), new Boolean (args[1])));
+        System.out.println ("Device ID=" + getDeviceID (ArrayUtil.readFile (args[0]), new Boolean (args[1])));
       }
   }
