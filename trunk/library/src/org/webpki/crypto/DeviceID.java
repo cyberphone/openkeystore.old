@@ -97,7 +97,7 @@ public class DeviceID
         return result;
       }
     
-    public static String getDeviceIDFromHash (byte[] hash)
+    private static String getDeviceIDFromHash (byte[] hash)
       {
         try
           {
@@ -160,7 +160,7 @@ public class DeviceID
           }
       }
     
-    public static byte[] getHashFromDeviceID (String device_id) throws IOException
+    public static void validateDeviceID (String device_id) throws IOException
       {
         int bytes = 20;
         int characters = 32;
@@ -206,7 +206,6 @@ public class DeviceID
           {
             throw new IOException ("DeviceID checksum error");
           }
-        return hash;
       }
 
     public static void main (String[] args) throws IOException
