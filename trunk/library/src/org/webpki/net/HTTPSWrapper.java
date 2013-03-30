@@ -101,14 +101,14 @@ import org.webpki.util.ArrayUtil;
  *     HTTPSWrapper wrap = new HTTPSWrapper ();
  *
  *     // Allow untrusted server certificates. 
- *     wrap.allowUntrustedCert (true); 
+ *     wrap.allowInvalidCert (true); 
  *
  *     // Set HTTP request header. Must be set before making the request. 
  *     wrap.setHeader ("MyStuff", "IsGreat");    
  *     
  *     // If not called, the wrapper will use the Trust Store 
  *     // supplied with the JRE. Must be called before making the request.
- *     wrap.setTrustStore ("Path to my store", "JKS", "passphrase");
+ *     wrap.setTrustStore ("Path to my store", "passphrase");
  *
  *     // Make the request.                               
  *     wrap.makeGetRequest ("https://www.example.com");   
