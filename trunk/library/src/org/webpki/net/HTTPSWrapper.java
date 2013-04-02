@@ -1511,7 +1511,7 @@ public class HTTPSWrapper
 
             if (CMD_dump_headers.found)
               {
-                System.out.println ("\nHeaders:\n" + wrap.getResponseMessage ());
+                System.out.println ("\nHeaders:\n" + wrap.getResponseCode () + " " + wrap.getResponseMessage ());
                 LinkedHashMap<String,Vector<String>> headers = wrap.getHeaders ();
                 for (String key : headers.keySet ())
                   {
