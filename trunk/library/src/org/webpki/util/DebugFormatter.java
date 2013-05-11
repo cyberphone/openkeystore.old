@@ -193,9 +193,15 @@ public class DebugFormatter
 
     public static void main (String args[]) throws IOException
       {
+        if (args.length == 3 && args[0].equals("tobin"))
+          {
+            ArrayUtil.writeFile (args[2], DebugFormatter.getByteArrayFromHex (new String (ArrayUtil.readFile (args[1]), "UTF-8")));
+            System.exit (0);
+          }
         if (args.length != 2 || !(args[0].equals("hex") || args[0].equals ("dump")))
           {
-            System.out.println ("Usage: DebugFormatter hex|dump file \n");
+            System.out.println ("Usage: DebugFormatter hex|dump bininputfile \n" +
+                                "                      tobin inputfileinhex outputfilebin\n");
             System.exit (0);
           }
         byte[] data = ArrayUtil.readFile (args[1]);
