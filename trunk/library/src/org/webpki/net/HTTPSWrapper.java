@@ -16,15 +16,21 @@
  */
 package org.webpki.net;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 
 import java.net.Proxy;
 import java.net.InetSocketAddress;
 import java.net.InetAddress;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
+import java.net.Socket;
 import java.net.URL;
 import java.net.HttpURLConnection;
 
@@ -40,6 +46,8 @@ import java.util.LinkedHashMap;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.Principal;
+import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
 
@@ -55,6 +63,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.HostnameVerifier;
@@ -141,6 +150,7 @@ public class HTTPSWrapper
     private static Proxy default_proxy;
     private static KeyStore default_trust_store;
     private KeyStore key_store;
+    private String key_alias;
     private String key_store_password;
 
     private LinkedHashMap<String,Vector<String>> request_headers = new LinkedHashMap<String,Vector<String>> ();
@@ -200,6 +210,50 @@ public class HTTPSWrapper
                     KeyManagerFactory kmf = KeyManagerFactory.getInstance ("SunX509");
                     kmf.init (key_store, key_store_password.toCharArray ());
                     key_managers = kmf.getKeyManagers ();
+                    if (key_alias != null)
+                      {
+                        final X509KeyManager orig_key_manager = (X509KeyManager)key_managers[0];
+                        key_managers = new KeyManager[] {new X509KeyManager ()
+                          {
+
+                            @Override
+                            public String chooseClientAlias (String[] key_type, Principal[] issuers, Socket socket)
+                              {
+                                return key_alias;
+                              }
+
+                            @Override
+                            public String chooseServerAlias (String key_type, Principal[] issuers, Socket socket)
+                              {
+                                return orig_key_manager.chooseServerAlias (key_type, issuers, socket);
+                              }
+
+                            @Override
+                            public X509Certificate[] getCertificateChain (String alias)
+                              {
+                                return orig_key_manager.getCertificateChain (alias);
+                              }
+
+                            @Override
+                            public String[] getClientAliases (String key_type, Principal[] issuers)
+                              {
+                                return orig_key_manager.getClientAliases (key_type, issuers);
+                              }
+
+                            @Override
+                            public PrivateKey getPrivateKey (String alias)
+                              {
+                                return orig_key_manager.getPrivateKey (alias);
+                              }
+
+                            @Override
+                            public String[] getServerAliases (String key_type, Principal[] issuers)
+                              {
+                                 return orig_key_manager.getServerAliases (key_type, issuers);
+                              }
+                            
+                          }};
+                      }
                   }
                 SSLContext ctx = SSLContext.getInstance ("TLS");
                 ctx.init (key_managers, trust_managers, null);
@@ -323,6 +377,24 @@ public class HTTPSWrapper
     public void setKeyStore (String key_store_file, String key_store_password) throws IOException
       {
         setKeyStore (KeyStoreReader.loadKeyStore (key_store_file, key_store_password), key_store_password);
+      }
+
+    
+    /**
+     * Sets the Key Alias to use. The Key Alias is used to authenticate 
+     * with using SSL.<br><br>
+     *
+     * If this method is not called the HTTPSWrapper will look for the
+     * first suitable key. <br><br>
+     *
+     * his method must be called before making either a GET or POST request.
+     *
+     * @param key_alias
+     * @throws IOException 
+     */
+    public void setKeyAlias (String key_alias)
+      {
+        this.key_alias = key_alias;
       }
 
     
@@ -953,10 +1025,12 @@ public class HTTPSWrapper
       {
 
         Vector<CmdLineArgument> list = new Vector<CmdLineArgument> ();
-
+        
         int max_display;
 
         String helptext;
+
+        HTTPSWrapper wrap = new HTTPSWrapper ();
 
         private void bad (String what)
           {
@@ -976,8 +1050,6 @@ public class HTTPSWrapper
             Vector<String> argvalue = new Vector<String> ();
             CmdFrequency frequency;
             boolean found;
-
-            String temparg;
 
             CmdLineArgument (CmdLineArgumentGroup group, 
                              String command, 
@@ -1239,7 +1311,7 @@ public class HTTPSWrapper
                                                     CmdFrequency.SINGLE);
 
         CmdLineArgument CMD_data_file     = create (CmdLineArgumentGroup.POST_OPERATION,
-                                                    "input", "filename",
+                                                    "input", "file",
                                                     "POSTed data file",
                                                     CmdFrequency.SINGLE);
 
@@ -1279,7 +1351,7 @@ public class HTTPSWrapper
                                                     CmdFrequency.OPTIONAL);
 
         CmdLineArgument CMD_store_data    = create (CmdLineArgumentGroup.GENERAL,
-                                                    "output", "filename",
+                                                    "output", "file",
                                                     "Write data to file",
                                                     CmdFrequency.OPTIONAL);
 
@@ -1304,7 +1376,7 @@ public class HTTPSWrapper
                                                     CmdFrequency.OPTIONAL_MULTIPLE);
 
         CmdLineArgument CMD_truststore    = create (CmdLineArgumentGroup.GENERAL,
-                                                    "truststore", "filename",
+                                                    "truststore", "file",
                                                     "Set external trust store",
                                                     CmdFrequency.OPTIONAL);
 
@@ -1314,18 +1386,39 @@ public class HTTPSWrapper
                                                     "testing");
 
         CmdLineArgument CMD_keystore      = create (CmdLineArgumentGroup.GENERAL,
-                                                    "keystore", "filename",
+                                                    "keystore", "file",
                                                     "Set external key store",
                                                     CmdFrequency.OPTIONAL);
 
-       CmdLineArgument CMD_keypass        = create (CmdLineArgumentGroup.GENERAL,
+        CmdLineArgument CMD_p11lib        = create (CmdLineArgumentGroup.GENERAL,
+                                                    "p11lib", "file",
+                                                    "Set PKCS11 library path.  If \"p11slot\" is not given the " +
+                                                    "file is assumed to hold a PKCS11 configuration",
+                                                    CmdFrequency.OPTIONAL);
+
+        CmdLineArgument CMD_p11slot       = create (CmdLineArgumentGroup.GENERAL,
+                                                    "p11slot", "slot",
+                                                    "Set PKCS11 slot number.  If started with \"i\" slotListIndex is used",
+                                                    CmdFrequency.OPTIONAL);
+
+        CmdLineArgument CMD_keypass       = create (CmdLineArgumentGroup.GENERAL,
                                                     "keypass", "password",
                                                     "Set password of key",
                                                     "testing");
 
-       CmdLineArgument CMD_addprovider    = create (CmdLineArgumentGroup.GENERAL,
+        CmdLineArgument CMD_keyalias      = create (CmdLineArgumentGroup.GENERAL,
+                                                    "keyalias", "alias",
+                                                    "Set alias of key",
+                                                    CmdFrequency.OPTIONAL);
+
+        CmdLineArgument CMD_addprovider   = create (CmdLineArgumentGroup.GENERAL,
                                                     "provider", "class",
-                                                    "Add provider",
+                                                    "Add provider (also see \"provider-argument\")",
+                                                    CmdFrequency.OPTIONAL);
+
+        CmdLineArgument CMD_provider_arg  = create (CmdLineArgumentGroup.GENERAL,
+                                                    "provider-argument", "argument",
+                                                    "If \"provider\" needs an argument",
                                                     CmdFrequency.OPTIONAL);
 
         CmdLineArgument CMD_proxyhost     = create (CmdLineArgumentGroup.GENERAL,
@@ -1395,6 +1488,25 @@ public class HTTPSWrapper
           }
 
 
+        void initiateProviderKeyStore (Provider provider) throws Exception
+          {
+            String prov = null;
+            for (Provider.Service ps : provider.getServices ())
+              {
+                 if (ps.getType ().equals ("KeyStore"))
+                  {
+                    prov = ps.getAlgorithm ();
+                  }
+              }
+            Security.addProvider (provider);
+            KeyStore ks = KeyStore.getInstance (prov, provider);
+            ks.load (CMD_keystore.found ? new FileInputStream (CMD_keystore.getString ()) : null,
+                                                               CMD_keypass.found ? CMD_keypass.getString ().toCharArray () : null);
+            wrap.setKeyStore (ks, CMD_keypass.getString ());
+            CMD_keystore.found = false;
+          }
+        
+
         void execute (String argv[]) throws Exception
           {
             decodeCommandLine (argv);
@@ -1404,8 +1516,6 @@ public class HTTPSWrapper
                 bad ("Missing command: -" + (CMD_proxyhost.found ?
                              CMD_proxyport.command : CMD_proxyhost.command));
               }
-
-            HTTPSWrapper wrap = new HTTPSWrapper ();
 
             wrap.setInteractiveMode (true);
 
@@ -1463,24 +1573,46 @@ public class HTTPSWrapper
                 wrap.setHeader ("Content-Type", CMD_mime_type.getString ());
               }
 
+            if (CMD_p11lib.found)
+              {
+                String p11wrapper = "sun.security.pkcs11.SunPKCS11";
+                if (CMD_addprovider.found)
+                  {
+                    p11wrapper = CMD_addprovider.getString ();
+                    CMD_addprovider.found = false;
+                  }
+                if (CMD_p11slot.found)
+                  {
+                    String slot = CMD_p11slot.getString (); 
+                    String slot_label = "slot";
+                    if (slot.charAt (0) == 'i')
+                      {
+                        slot_label = "slotListIndex";
+                        slot = slot.substring (1);
+                      }
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream ();
+                    PrintWriter pw = new PrintWriter (baos);
+                    pw.println ("name = " + new File (CMD_p11lib.getString ()).getName () + "-" + slot_label + slot);
+                    pw.println ("library = " + CMD_p11lib.getString ());
+                    pw.println (slot_label + " = " + slot);
+                    pw.flush ();
+                    pw.close ();
+                    initiateProviderKeyStore ((Provider) Class.forName (p11wrapper).
+                                              getConstructor (InputStream.class).newInstance (new ByteArrayInputStream (baos.toByteArray ())));
+                  }
+                else
+                  {
+                    initiateProviderKeyStore ((Provider) Class.forName (p11wrapper).
+                                              getConstructor (String.class).newInstance (CMD_p11lib.getString ()));
+                  }
+              }
+
             if (CMD_addprovider.found)
               {
-                Provider provider = (Provider) Class.forName (CMD_addprovider.getString ()).newInstance ();
-                String prov = null;
-                for (Provider.Service ps : provider.getServices ())
-                  {
-                    if (ps.getType ().equals ("KeyStore"))
-                      {
-                        prov = ps.getAlgorithm ();
-                      }
-                  }
-                Security.addProvider (provider);
-                KeyStore ks = KeyStore.getInstance (prov);
-                System.out.println (CMD_keystore.getString ());
-                ks.load (CMD_keystore.found ? new FileInputStream (CMD_keystore.getString ()) : null,
-                                                                   CMD_keypass.found ? CMD_keypass.getString ().toCharArray () : null);
-                wrap.setKeyStore (ks, CMD_keypass.getString ());
-                CMD_keystore.found = false;
+                initiateProviderKeyStore (CMD_provider_arg.found ? 
+                    (Provider) Class.forName (CMD_addprovider.getString ()).getConstructor (String.class).newInstance (CMD_provider_arg.getString ())
+                                           :
+                    (Provider) Class.forName (CMD_addprovider.getString ()).newInstance ());
               }
 
             if (CMD_truststore.found)
@@ -1493,6 +1625,11 @@ public class HTTPSWrapper
               {
                 wrap.setKeyStore (CMD_keystore.getString (),
                                   CMD_keypass.getString ());
+              }
+
+            if (CMD_keyalias.found)
+              {
+                wrap.setKeyAlias (CMD_keyalias.getString ());
               }
 
             if (CMD_get_oper.found)

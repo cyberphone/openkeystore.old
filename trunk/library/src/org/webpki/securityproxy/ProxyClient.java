@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.net.HttpURLConnection;
+import java.net.Socket;
 import java.net.URL;
 import java.net.Proxy;
 import java.net.InetSocketAddress;
@@ -35,7 +36,10 @@ import java.net.InetAddress;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.Principal;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
+
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -45,6 +49,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509KeyManager;
 
 import org.webpki.crypto.KeyStoreReader;
 
@@ -348,6 +353,7 @@ public class ProxyClient
     private KeyStore proxy_service_truststore;
     private KeyStore proxy_service_keystore;
     private String proxy_service_key_password;
+    private String proxy_service_key_alias;
 
     private SSLSocketFactory socket_factory;
 
@@ -381,6 +387,50 @@ public class ProxyClient
                     KeyManagerFactory kmf = KeyManagerFactory.getInstance ("SunX509");
                     kmf.init (proxy_service_keystore, proxy_service_key_password.toCharArray ());
                     key_managers = kmf.getKeyManagers ();
+                    if (proxy_service_key_alias != null)
+                      {
+                        final X509KeyManager orig_key_manager = (X509KeyManager)key_managers[0];
+                        key_managers = new KeyManager[] {new X509KeyManager ()
+                          {
+
+                            @Override
+                            public String chooseClientAlias (String[] key_type, Principal[] issuers, Socket socket)
+                              {
+                                return proxy_service_key_alias;
+                              }
+
+                            @Override
+                            public String chooseServerAlias (String key_type, Principal[] issuers, Socket socket)
+                              {
+                                return orig_key_manager.chooseServerAlias (key_type, issuers, socket);
+                              }
+
+                            @Override
+                            public X509Certificate[] getCertificateChain (String alias)
+                              {
+                                return orig_key_manager.getCertificateChain (alias);
+                              }
+
+                            @Override
+                            public String[] getClientAliases (String key_type, Principal[] issuers)
+                              {
+                                return orig_key_manager.getClientAliases (key_type, issuers);
+                              }
+
+                            @Override
+                            public PrivateKey getPrivateKey (String alias)
+                              {
+                                return orig_key_manager.getPrivateKey (alias);
+                              }
+
+                            @Override
+                            public String[] getServerAliases (String key_type, Principal[] issuers)
+                              {
+                                 return orig_key_manager.getServerAliases (key_type, issuers);
+                              }
+                            
+                          }};
+                      }
                   }
                 if (proxy_service_truststore != null)
                   {
@@ -564,6 +614,18 @@ public class ProxyClient
         checkOrder ();
         proxy_service_keystore = KeyStoreReader.loadKeyStore (keystore_file, password);
         proxy_service_key_password = password;
+      }
+
+    /**
+     * For HTTPS client certificate authentication.
+     * 
+     * @param key_alias Key alias
+     * @throws IOException
+     */
+    public void setKeyAlias (String key_alias) throws IOException
+      {
+        checkOrder ();
+        proxy_service_key_alias = key_alias;
       }
 
     /**
