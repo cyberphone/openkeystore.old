@@ -1873,9 +1873,9 @@ namespace org.webpki.sks.ws.client
 
         public const sbyte PROTSTAT_DEVICE_PIN = 0x10;
 
-        public const sbyte KEYBACKUP_SERVER = 0x01;
+        public const sbyte KEYBACKUP_IMPORTED = 0x01;
 
-        public const sbyte KEYBACKUP_LOCAL = 0x02;
+        public const sbyte KEYBACKUP_EXPORTED = 0x02;
 
         public sbyte ProtectionStatus
         {

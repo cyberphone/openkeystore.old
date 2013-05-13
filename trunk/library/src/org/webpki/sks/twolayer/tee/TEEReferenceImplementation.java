@@ -401,11 +401,11 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
 
         void setAndVerifyServerBackupFlag () throws SKSException
           {
-            if ((key_backup & KeyProtectionInfo.KEYBACKUP_SERVER) != 0)
+            if ((key_backup & KeyProtectionInfo.KEYBACKUP_IMPORTED) != 0)
               {
                 owner.abort ("Mutiple key imports for: " + id);
               }
-            key_backup |= KeyProtectionInfo.KEYBACKUP_SERVER;
+            key_backup |= KeyProtectionInfo.KEYBACKUP_IMPORTED;
           }
 
         X509Certificate getEECertificate () throws SKSException
@@ -1219,7 +1219,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Mark as "copied" locally
         ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.key_backup |= KeyProtectionInfo.KEYBACKUP_LOCAL;
+        key_entry.key_backup |= KeyProtectionInfo.KEYBACKUP_EXPORTED;
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Export key in raw unencrypted format through the SE

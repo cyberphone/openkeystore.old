@@ -456,8 +456,8 @@
      <Constant Name="PROTSTAT_PIN_BLOCKED"   Type="byte" Value="0x04"/>
      <Constant Name="PROTSTAT_PUK_BLOCKED"   Type="byte" Value="0x08"/>
      <Constant Name="PROTSTAT_DEVICE_PIN"    Type="byte" Value="0x10"/>
-     <Constant Name="KEYBACKUP_SERVER"       Type="byte" Value="0x01"/>
-     <Constant Name="KEYBACKUP_LOCAL"        Type="byte" Value="0x02"/>
+     <Constant Name="KEYBACKUP_IMPORTED"     Type="byte" Value="0x01"/>
+     <Constant Name="KEYBACKUP_EXPORTED"     Type="byte" Value="0x02"/>
    </ReturnClass>
  
    <Method Name="getDeviceInfo" ReturnClass="DeviceInfo" Throws="SKSException">

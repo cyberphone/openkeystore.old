@@ -1954,7 +1954,7 @@ public class SKSTest
             assertTrue ("No flags should be set", kpi.getKeyBackup () == 0);
             device.sks.exportKey (key.key_handle, null);
             kpi = key.getKeyProtectionInfo ();
-            assertTrue ("Flag must be set", kpi.getKeyBackup () == KeyProtectionInfo.KEYBACKUP_LOCAL);
+            assertTrue ("EXPORTED must be set", kpi.getKeyBackup () == KeyProtectionInfo.KEYBACKUP_EXPORTED);
           }
         catch (SKSException e)
           {
@@ -2131,7 +2131,7 @@ public class SKSTest
                                          new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate (cn ());
             key.setSymmetricKey (symmetric_key);
             sess.closeSession ();
-            assertTrue ("Server must be set", key.getKeyProtectionInfo ().getKeyBackup () == KeyProtectionInfo.KEYBACKUP_SERVER);
+            assertTrue ("IMPORTED must be set", key.getKeyProtectionInfo ().getKeyBackup () == KeyProtectionInfo.KEYBACKUP_IMPORTED);
           }
       }
 
@@ -2486,7 +2486,7 @@ public class SKSTest
                                          key_usage).setCertificate (cn (), key_pair.getPublic ());
             key.setPrivateKey (key_pair.getPrivate ());
             sess.closeSession ();
-            assertTrue ("Server must be set", key.getKeyProtectionInfo ().getKeyBackup () == KeyProtectionInfo.KEYBACKUP_SERVER);
+            assertTrue ("IMPORTED must be set", key.getKeyProtectionInfo ().getKeyBackup () == KeyProtectionInfo.KEYBACKUP_IMPORTED);
             Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
             cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
             byte[] enc = cipher.doFinal (TEST_STRING);

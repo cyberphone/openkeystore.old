@@ -35,8 +35,8 @@ public class KeyProtectionInfo
     ///////////////////////////////////////////////////////////////////////////////////
     // "KeyBackup" bit-field constants
     ///////////////////////////////////////////////////////////////////////////////////
-    public static final byte KEYBACKUP_SERVER            = 0x01;
-    public static final byte KEYBACKUP_LOCAL             = 0x02;
+    public static final byte KEYBACKUP_IMPORTED          = 0x01;
+    public static final byte KEYBACKUP_EXPORTED          = 0x02;
  
     private PassphraseFormat puk_format;
     
