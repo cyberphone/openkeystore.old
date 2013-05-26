@@ -43,6 +43,16 @@
             android:name=".FailLoggerActivity"
             android:label="@string/title_activity_fail_logger">
         </activity>
+        <activity
+            android:name=".CertViewActivity"
+            android:label="@string/title_activity_cert_view">
+        </activity>
+        <activity
+            android:name=".CredentialsActivity"
+            android:label="@string/title_activity_credentials"
+            android:theme="@android:style/Theme.Black">
+        </activity>
+        
     </application>
 
 </manifest>

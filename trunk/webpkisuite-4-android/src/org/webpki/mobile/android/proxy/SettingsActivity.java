@@ -17,7 +17,9 @@
 package org.webpki.mobile.android.proxy;
 
 import org.webpki.android.crypto.DeviceID;
+
 import org.webpki.android.sks.SKSException;
+
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
 
@@ -34,14 +36,16 @@ import android.app.Dialog;
 import android.app.ListActivity;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 
 public class SettingsActivity extends ListActivity
   {
-    static final int DLG_ABOUT = 0;
-    static final int DLG_DEVICE_ID = 1;
-    static final int DLG_DEVICE_CERT = 2;
-    static final int DLG_EXT_DEVICE_ID = 3;
-    String[] items = { "About", "Device ID", "Device Certificate", "Extended Device ID"};
+    static final int SETTINGS_ABOUT = 0;
+    static final int SETTINGS_DEVICE_ID = 1;
+    static final int SETTINGS_USER_CREDENTIALS = 2;
+    static final int SETTINGS_DEVICE_CERT = 3;
+    static final int SETTINGS_EXT_DEVICE_ID = 4;
+    String[] items = { "About", "Device ID", "User Credentials", "Device Certificate", "Extended Device ID"};
     SKSImplementation sks;
 
     @Override
@@ -58,7 +62,39 @@ public class SettingsActivity extends ListActivity
       {
         super.onListItemClick (l, v, position, id);
         sks = SKSStore.createSKS ("Dialog", getBaseContext (), true);
-        showDialog (position);
+        if (id == SETTINGS_DEVICE_CERT)
+          {
+            Intent intent = new Intent (this, CertViewActivity.class);
+            try
+              {
+                intent.putExtra (CertViewActivity.CERTIFICATE_BLOB, sks.getDeviceInfo ().getCertificatePath ()[0].getEncoded ());
+              }
+            catch (Exception e)
+              {
+                intent.putExtra (CertViewActivity.CERTIFICATE_BLOB, new byte[]{});
+              }
+            startActivity (intent);
+          }
+        else if (id == SETTINGS_USER_CREDENTIALS)
+          {
+            try
+              {
+                if (sks.enumerateKeys (0) != null)
+                  {
+                    Intent intent = new Intent (this, CredentialsActivity.class);
+                    startActivity (intent);
+                    return;
+                  }
+              }
+            catch (SKSException e)
+              {
+              }
+            showDialog (position);
+          }
+        else
+          {
+            showDialog (position);
+          }
       }
     
     @Override
@@ -66,7 +102,7 @@ public class SettingsActivity extends ListActivity
       {
         switch (id)
           {
-            case DLG_ABOUT:
+            case SETTINGS_ABOUT:
               AlertDialog.Builder about_builder = new AlertDialog.Builder (this);
               about_builder.setTitle ("About");
               about_builder.setMessage ("This application was developed by PrimeKey solutions AB");
@@ -80,7 +116,7 @@ public class SettingsActivity extends ListActivity
                 });
               return about_builder.create ();
 
-            case DLG_DEVICE_ID:
+            case SETTINGS_DEVICE_ID:
               AlertDialog.Builder device_id_builder = new AlertDialog.Builder (this);
               device_id_builder.setTitle ("Device ID");
               device_id_builder.setIcon (android.R.drawable.ic_menu_info_details);
@@ -106,26 +142,19 @@ public class SettingsActivity extends ListActivity
                 });
               return device_id_builder.create ();
               
-            case DLG_DEVICE_CERT:
-              AlertDialog.Builder device_cert_builder = new AlertDialog.Builder (this);
-              device_cert_builder.setTitle ("Device Certificate");
-              device_cert_builder.setIcon (android.R.drawable.ic_menu_info_details);
-              try
-                {
-                  device_cert_builder.setMessage (sks.getDeviceInfo ().getCertificatePath ()[0].toString ());
-                }
-              catch (SKSException e)
-                {
-                  device_cert_builder.setMessage ("Something went wrong");
-                }
-              device_cert_builder.setPositiveButton (android.R.string.ok, new DialogInterface.OnClickListener ()
+            case SETTINGS_USER_CREDENTIALS:
+              AlertDialog.Builder no_credentials_alert = new AlertDialog.Builder (this);
+              no_credentials_alert.setTitle ("User Credentials");
+              no_credentials_alert.setIcon (android.R.drawable.ic_menu_info_details);
+              no_credentials_alert.setMessage ("You have no credentials yet");
+              no_credentials_alert.setPositiveButton (android.R.string.ok, new DialogInterface.OnClickListener ()
                 {
                   public void onClick (DialogInterface dialog, int which)
                     {
                       return;
                     }
                 });
-              return device_cert_builder.create ();
+              return no_credentials_alert.create ();
               
             default:
               Toast.makeText (getApplicationContext(), "Not implemented!", Toast.LENGTH_SHORT).show ();

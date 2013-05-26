@@ -30,6 +30,9 @@ import java.security.spec.ECGenParameterSpec;
 
 import java.util.Date;
 
+import org.spongycastle.asn1.x509.BasicConstraints;
+import org.spongycastle.asn1.x509.KeyUsage;
+import org.spongycastle.asn1.x509.X509Extensions;
 import org.spongycastle.jce.X509Principal;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 
@@ -74,9 +77,11 @@ public abstract class SKSStore
                     X509Principal x509_name = new X509Principal ("serialNumber=" + (android_id == null ? "N/A" : android_id) +
                                                                  ",CN=Android SKS"); 
                     cert_gen.setIssuerDN (x509_name);  
-                    cert_gen.setNotBefore (new Date(System.currentTimeMillis() - 1000L * 60 * 10));  // EJBCA also uses 10 minutes predating...
-                    cert_gen.setNotAfter (new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 25)));  
+                    cert_gen.setNotBefore (new Date (System.currentTimeMillis() - 1000L * 60 * 10));  // EJBCA also uses 10 minutes predating...
+                    cert_gen.setNotAfter (new Date (System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 25)));  
                     cert_gen.setSubjectDN (x509_name);  
+                    cert_gen.addExtension (X509Extensions.BasicConstraints, true, new BasicConstraints (false));
+                    cert_gen.addExtension (X509Extensions.KeyUsage, true, new KeyUsage (KeyUsage.digitalSignature));
                     cert_gen.setPublicKey (kp.getPublic ());  
                     cert_gen.setSignatureAlgorithm ("SHA256withECDSA");   
                     sks = new SKSImplementation (cert_gen.generateX509Certificate (kp.getPrivate ()), kp.getPrivate ());
