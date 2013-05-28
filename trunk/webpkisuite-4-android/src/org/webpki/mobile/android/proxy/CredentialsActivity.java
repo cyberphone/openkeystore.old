@@ -16,61 +16,158 @@
  */
 package org.webpki.mobile.android.proxy;
 
-import java.util.Vector;
-
-import org.webpki.android.crypto.DeviceID;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.webpki.android.sks.EnumeratedKey;
+import org.webpki.android.sks.EnumeratedProvisioningSession;
+import org.webpki.android.sks.SKSException;
 
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
 
 import android.os.Bundle;
 
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
+
+import android.content.DialogInterface;
 import android.content.Intent;
+
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 
 public class CredentialsActivity extends ListActivity
   {
     SKSImplementation sks = SKSStore.createSKS ("Dialog", getBaseContext (), true);
 
+    List<CredentialArrayAdapter.CredentialData> list = new ArrayList<CredentialArrayAdapter.CredentialData> ();
+    
     @Override
     public void onCreate (Bundle savedInstanceState)
       {
         super.onCreate (savedInstanceState);
-        setContentView (R.layout.activity_credentials);
-        Vector<String> items = new Vector<String> ();
         try
           {
-            EnumeratedKey ek = sks.enumerateKeys (0);
-            items.add (sks.getKeyAttributes (ek.getKeyHandle ()).getCertificatePath ()[0].getSubjectDN ().getName ().substring (0, 10));
+            EnumeratedKey ek = new EnumeratedKey ();
+            while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
+              {
+                String domain = "***ERROR***";
+                EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
+                while ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), false)) != null)
+                  {
+                    if (ek.getProvisioningHandle () == eps.getProvisioningHandle ())
+                      {
+                        domain = new URL (eps.getIssuerURI ()).getHost ();
+                        break;
+                      }
+                  }
+                list.add (new CredentialArrayAdapter.CredentialData (domain, 
+                                                                     ek.getKeyHandle (),
+                                                                     sks.getKeyAttributes (ek.getKeyHandle ()).getCertificatePath ()[0].getSubjectDN ().getName (),
+                                                                     BitmapFactory.decodeResource (getResources (), R.drawable.ok)));
+              }
+            setListAdapter (new CredentialArrayAdapter (this, list));
+            registerForContextMenu (getListView ());
           }
         catch (Exception e)
           {
-            items.add ("Total fuck up");
+            throw new RuntimeException (e);
           }
-        setListAdapter (new ArrayAdapter<String> (this, android.R.layout.simple_expandable_list_item_1, items.toArray (new String[0])));
+      }
+
+    
+    @Override
+    protected void onListItemClick (ListView l, View view, int position, long id)
+      {
+        view.showContextMenu();
       }
 
     @Override
-    protected void onListItemClick (ListView l, View v, int position, long id)
+    public void onCreateContextMenu (ContextMenu menu, View v, ContextMenuInfo menuInfo)
       {
-        super.onListItemClick (l, v, position, id);
-        Intent intent = new Intent (this, CertViewActivity.class);
-        try
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        menu.setHeaderTitle (list.get (info.position).getDomain ());
+        menu.setHeaderIcon (new BitmapDrawable (getResources (), list.get (info.position).getIcon ()));
+        // String[] menuItems = getResources().getStringArray(R.array.menu);
+        String[] menuItems = { "Certificate Properties", "Additional Properties", "Delete Credential" };
+        for (int i = 0; i < menuItems.length; i++)
           {
-            EnumeratedKey ek = sks.enumerateKeys (0);
-            intent.putExtra (CertViewActivity.CERTIFICATE_BLOB, sks.getKeyAttributes (ek.getKeyHandle ()).getCertificatePath ()[0].getEncoded ());
+            menu.add (Menu.NONE, i, i, menuItems[i]);
           }
-        catch (Exception e)
-          {
-            intent.putExtra (CertViewActivity.CERTIFICATE_BLOB, new byte[]{});
-          }
-        startActivity (intent);
       }
-  }
+    
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean onContextItemSelected (MenuItem item)
+      {
+        final AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo ();
+        int menuItemIndex = item.getItemId ();
+         if (menuItemIndex == 0)
+          {
+            try
+              {
+                Intent intent = new Intent (this, CertViewActivity.class);
+                intent.putExtra (CertViewActivity.CERTIFICATE_BLOB, 
+                                 sks.getKeyAttributes (list.get (info.position).getKeyHandle ()).getCertificatePath ()[0].getEncoded ());
+                startActivity (intent);
+              }
+            catch (Exception e)
+              {
+                throw new RuntimeException (e);
+              }
+          }
+        else if (menuItemIndex == 1)
+          {
+            Toast.makeText (getApplicationContext (), "Not Implemented!", Toast.LENGTH_LONG).show ();
+          }
+        else
+          {
+            AlertDialog.Builder alert_dialog = 
+                new AlertDialog.Builder (this).setIcon (new BitmapDrawable (getResources (), list.get (info.position).getIcon ()))
+                    .setTitle (list.get (info.position).getDomain ())
+                    .setMessage ("Do you want to delete this credential?")
+                    .setPositiveButton ("Yes", new DialogInterface.OnClickListener ()
+              {
+                public void onClick (DialogInterface dialog, int id)
+                  {
+                    // The user decided that this credential should be deleted...
+                    try
+                      {
+                        sks.deleteKey (list.get (info.position).getKeyHandle (), null);
+                        list.remove (info.position);
+                        ((ArrayAdapter<CredentialArrayAdapter.CredentialData>) getListAdapter ()).notifyDataSetChanged ();
+                        dialog.cancel ();
+                      }
+                    catch (SKSException e)
+                      {
+                        Toast.makeText (getApplicationContext (), "Not permitted: " + e.getMessage (), Toast.LENGTH_LONG).show ();
+                      }
+                  }
+              });
+            alert_dialog.setNegativeButton ("No", new DialogInterface.OnClickListener ()
+              {
+                public void onClick (DialogInterface dialog, int id)
+                  {
+                    // The user apparently changed his/her mind and wants to continue...
+                    dialog.cancel ();
+                  }
+              });
+            alert_dialog.create ().show ();
+          }
+        return true;
+      }
+   }

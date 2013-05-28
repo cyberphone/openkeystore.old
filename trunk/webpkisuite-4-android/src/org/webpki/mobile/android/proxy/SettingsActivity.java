@@ -53,7 +53,7 @@ public class SettingsActivity extends ListActivity
       {
         super.onCreate (savedInstanceState);
         setContentView (R.layout.activity_settings);
-        setListAdapter (new ArrayAdapter<String> (this, android.R.layout.simple_expandable_list_item_1, items));
+        setListAdapter (new ArrayAdapter<String> (this, android.R.layout.simple_list_item_1, items));
       }
 
     @SuppressWarnings("deprecation")
