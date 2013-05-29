@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.webpki.mobile.android.proxy"
+    package="org.webpki.mobile.android"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Light" >
         <activity
-            android:name=".SettingsActivity"
+            android:name=".application.SettingsActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_settings"
             android:theme="@android:style/Theme.Black">
@@ -40,15 +40,15 @@
                 </intent-filter>
         </activity>
         <activity
-            android:name=".FailLoggerActivity"
+            android:name=".proxy.FailLoggerActivity"
             android:label="@string/title_activity_fail_logger">
         </activity>
         <activity
-            android:name=".CertViewActivity"
+            android:name=".application.CertViewActivity"
             android:label="@string/title_activity_cert_view">
         </activity>
         <activity
-            android:name=".CredentialsActivity"
+            android:name=".application.CredentialsActivity"
             android:label="@string/title_activity_credentials"
             android:theme="@android:style/Theme.Black">
         </activity>
