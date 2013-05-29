@@ -16,6 +16,8 @@
  */
 package org.webpki.mobile.android.proxy;
 
+import org.webpki.mobile.android.R;
+
 import android.os.Bundle;
 
 import android.webkit.WebView;
