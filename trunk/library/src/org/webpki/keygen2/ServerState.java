@@ -1052,7 +1052,9 @@ public class ServerState implements Serializable
     short mac_sequence_counter;
 
     LinkedHashMap<String,Key> requested_keys = new LinkedHashMap<String,Key> ();
-    
+
+    Vector<ImagePreference> image_preferences; 
+
     String server_session_id;
 
     String client_session_id;
@@ -1183,6 +1185,7 @@ public class ServerState implements Serializable
         current_phase = ProtocolPhase.PROVISIONING_INITIALIZATION;
         basic_capabilities.checkCapabilities (platform_response.basic_capabilities);
         basic_capabilities = platform_response.basic_capabilities;
+        image_preferences = platform_response.image_preferences;
       }
 
 
@@ -1325,6 +1328,26 @@ public class ServerState implements Serializable
     public HashMap<String,HashSet<String>> getClientAttributeValues ()
       {
         return client_attribute_values;
+      }
+
+
+    public ImagePreference[] getImagePreferences ()
+      {
+        return image_preferences.toArray (new ImagePreference[0]);
+      }
+
+    
+    public ImagePreference[] getImagePreferences (String type)
+      {
+        Vector<ImagePreference> matching = new Vector<ImagePreference> ();
+        for (ImagePreference impref : image_preferences)
+          {
+            if (impref.type.equals (type))
+              {
+                matching.add (impref);
+              }
+          }
+        return matching.toArray (new ImagePreference[0]);
       }
 
     

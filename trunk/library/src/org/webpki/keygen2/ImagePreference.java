@@ -22,4 +22,24 @@ public class ImagePreference
     String mime_type;
     int width;
     int height;
+    
+    public String getType ()
+      {
+        return type;
+      }
+
+    public String getMimeType ()
+      {
+        return mime_type;
+      }
+
+    public int getWidth ()
+      {
+        return width;
+      }
+
+    public int getHeight ()
+      {
+        return height;
+      }
   }
