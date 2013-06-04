@@ -60,7 +60,7 @@ public class PDFProfileResponseDecoder extends XMLObjectWrapper implements Signa
 
     private String id;
 
-    private byte[] server_certificate_sha1;                     // Optional
+    private byte[] server_certificate_fingerprint;              // Optional
 
     private String[] unreferenced_attachments;                  // Optional
 
@@ -112,9 +112,9 @@ public class PDFProfileResponseDecoder extends XMLObjectWrapper implements Signa
     }
 
   
-  public byte[] getServerCertificateSHA1 ()
+  public byte[] getServerCertificateFingerprint ()
     {
-      return server_certificate_sha1;
+      return server_certificate_fingerprint;
     }
 
   
@@ -163,7 +163,7 @@ public class PDFProfileResponseDecoder extends XMLObjectWrapper implements Signa
         client_time = ah.getDateTimeConditional (CLIENT_TIME_ATTR);
         server_time = ah.getDateTimeConditional (SERVER_TIME_ATTR);
         id = ah.getString (ID_ATTR);
-        server_certificate_sha1 = ah.getBinaryConditional (SERVER_CERT_SHA1_ATTR);
+        server_certificate_fingerprint = ah.getBinaryConditional (SERVER_CERT_FP_ATTR);
 
         rd.getChild();
 
@@ -197,10 +197,9 @@ public class PDFProfileResponseDecoder extends XMLObjectWrapper implements Signa
     public boolean match (SignatureProfileEncoder spreenc,
                           DocumentData doc_data,
                           DocumentReferences doc_refs,
-                          ServerCookie server_cookie,
                           Vector<CertificateFilter> cert_filters,
                           String id,
-                          byte[] expected_sha1)
+                          byte[] expected_fingerprint)
     throws IOException
       {
         // Is this the same profile?
@@ -227,10 +226,10 @@ public class PDFProfileResponseDecoder extends XMLObjectWrapper implements Signa
             return false;
           }
 
-        if (expected_sha1 != null &&
-            (server_certificate_sha1 == null || !ArrayUtil.compare (server_certificate_sha1, expected_sha1)))
+        if (expected_fingerprint != null &&
+            (server_certificate_fingerprint == null || !ArrayUtil.compare (server_certificate_fingerprint, expected_fingerprint)))
           {
-            bad ("Server certificate SHA1");
+            bad ("Server certificate fingerprint");
           }
 
         if (cert_filters.size () > 0 && signer_certpath != null)

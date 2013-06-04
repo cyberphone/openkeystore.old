@@ -20,11 +20,8 @@ import java.io.IOException;
 
 import java.util.Vector;
 
-import org.webpki.util.MimeTypedObject;
-
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLVerifier;
 import org.webpki.xmldsig.XMLSignatureWrapper;
@@ -40,28 +37,11 @@ import static org.webpki.wasp.WASPConstants.*;
 
 public class AuthenticationRequestDecoder extends AuthenticationRequest
   {
-
-    private String id;
-
     private String server_time;
-
-    private String submit_url;
-
-    private String cancel_url;                                                          // Optional
-
-    private String[] languages;                                                         // Optional
-
-    private int expires;                                                                // Optional
 
     private Vector<AuthenticationProfile> auth_profiles = new Vector<AuthenticationProfile> ();
 
     private Vector<CertificateFilter> cert_filters = new Vector<CertificateFilter> ();  // Optional
-
-    private AuthDocument main_document;
-
-    private Vector<AuthDocument> embedded_objects = new Vector<AuthDocument> ();        // Optional
-
-    private ServerCookie server_cookie;                                                 // Optional
 
     private ClientPlatformRequest client_platform_request;                              // Optional
 
@@ -141,68 +121,6 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
       }
 
 
-    public class AuthDocument implements MimeTypedObject
-      {
-        Object user_object;
-
-        boolean referenced;
-        byte[] data;
-        String content_id;
-        String mime_type;
-
-        public String getContentID ()
-          {
-            return content_id;
-          }
-
-        public byte[] getData ()
-          {
-            referenced = true;
-            return data;
-          }
-
-        public String getMimeType ()
-          {
-            return mime_type;
-          }
-
-        public boolean isReferenced ()
-          {
-            return referenced;
-          }
-
-        public Object getUserObject ()
-          {
-            return user_object;
-          }
-
-        public Object setUserObject (Object user_object)
-          {
-            return this.user_object = user_object;
-          }
-
-      }
-
-
-    private AuthDocument readDocument (String elem, DOMReaderHelper rd, boolean has_content_id) throws IOException
-      {
-        AuthDocument doc = new AuthDocument ();
-        rd.getNext (elem);
-        doc.content_id = has_content_id ? rd.getAttributeHelper ().getString (CONTENT_ID_ATTR) : "cid:maindoc@example.com";
-        rd.getChild ();
-        if (rd.hasNext (BINARY_SUB_ELEM))
-          {
-            doc.data = rd.getBinary (BINARY_SUB_ELEM);
-          }
-        else
-          {
-            doc.data = rd.getString (TEXT_SUB_ELEM).getBytes ("UTF-8");
-          }
-        doc.mime_type = rd.getAttributeHelper ().getString (MIME_TYPE_ATTR);
-        rd.getParent ();
-        return doc;
-      }
-
 
     public AuthenticationProfile[] getAuthenticationProfiles ()
       {
@@ -213,24 +131,6 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
     public CertificateFilter[] getCertificateFilters ()
       {
         return cert_filters.toArray (new CertificateFilter[0]);
-      }
-
-
-    public AuthDocument getMainDocument ()
-      {
-        return main_document;
-      }
-
-
-    public AuthDocument[] getEmbeddedObjects ()
-      {
-        return embedded_objects.toArray (new AuthDocument[0]);
-      }
-
-
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
       }
 
 
@@ -332,36 +232,6 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
         while (rd.hasNext (CERTIFICATE_FILTER_ELEM))
           {
             cert_filters.add (SignatureRequestDecoder.readCertificateFilter (rd));
-          }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the background view [0..1]
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (BACKGROUND_VIEW_ELEM))
-          {
-            rd.getNext(BACKGROUND_VIEW_ELEM);
-            rd.getChild ();
-
-            /////////////////////////////////////////////////////////////////////////////////////////
-            // Get the main document data [1]
-            /////////////////////////////////////////////////////////////////////////////////////////
-            main_document = readDocument (MAIN_DOCUMENT_SUB_ELEM, rd, false);
-
-            /////////////////////////////////////////////////////////////////////////////////////////
-            // Get the embedded object data [0..n]
-            /////////////////////////////////////////////////////////////////////////////////////////
-            while (rd.hasNext (EMBEDDED_OBJECT_SUB_ELEM))
-              {
-                embedded_objects.add (readDocument (EMBEDDED_OBJECT_SUB_ELEM, rd, true));
-              }
-            rd.getParent ();
-          }
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the optional cookie-like data [0..1]
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
-          {
-            server_cookie = ServerCookie.read (rd);
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

@@ -50,7 +50,7 @@ public class PDFProfileResponseEncoder extends XMLObjectWrapper implements Signa
 
     private String id;
 
-    private byte[] server_certificate_sha1;
+    private byte[] server_certificate_fingerprint;
 
     private Text pdf_object;
 
@@ -121,9 +121,9 @@ public class PDFProfileResponseEncoder extends XMLObjectWrapper implements Signa
 
         wr.setStringAttribute (SERVER_TIME_ATTR, server_time);
 
-        if (server_certificate_sha1 != null)
+        if (server_certificate_fingerprint != null)
           {
-            wr.setBinaryAttribute (SERVER_CERT_SHA1_ATTR, server_certificate_sha1);
+            wr.setBinaryAttribute (SERVER_CERT_FP_ATTR, server_certificate_fingerprint);
           }
         wr.pushPrefix (s_resp_enc.getPrefix ());
         s_req_dec.getDocumentReferences ().write (wr, true);
@@ -144,7 +144,7 @@ public class PDFProfileResponseEncoder extends XMLObjectWrapper implements Signa
                                   SignatureRequestDecoder s_req_dec,
                                   String request_url,
                                   Date client_time,
-                                  byte[] server_certificate_sha1) throws IOException
+                                  byte[] server_certificate_fingerprint) throws IOException
       {
         this.s_resp_enc = s_resp_enc;
         this.s_req_dec = s_req_dec;
@@ -152,7 +152,7 @@ public class PDFProfileResponseEncoder extends XMLObjectWrapper implements Signa
         this.client_time = client_time;
         server_time = s_req_dec.getServerTime ();
         id = s_req_dec.getID ();
-        this.server_certificate_sha1 = server_certificate_sha1;
+        this.server_certificate_fingerprint = server_certificate_fingerprint;
         doc_sign = new DocumentSignatures (HashAlgorithms.getAlgorithmFromURI (to_decoder.digest_algorithm),
                                            to_decoder.document_canonicalization_algorithm,
                                            s_req_dec.getDocumentData ());

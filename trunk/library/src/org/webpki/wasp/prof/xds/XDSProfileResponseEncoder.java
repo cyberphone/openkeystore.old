@@ -23,10 +23,8 @@ import java.util.Date;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.XMLObjectWrapper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.wasp.DocumentSignatures;
-import org.webpki.wasp.IdentityProviderAssertions;
 import org.webpki.wasp.SignatureResponseEncoder;
 import org.webpki.wasp.SignatureRequestDecoder;
 import org.webpki.wasp.SignatureProfileResponseEncoder;
@@ -48,7 +46,7 @@ public class XDSProfileResponseEncoder extends XMLObjectWrapper implements Signa
 
     private String id;
 
-    private byte[] server_certificate_sha1;
+    private byte[] server_certificate_fingerprint;
 
 
     private SignatureResponseEncoder s_resp_enc;
@@ -56,8 +54,6 @@ public class XDSProfileResponseEncoder extends XMLObjectWrapper implements Signa
     private SignatureRequestDecoder s_req_dec;
 
     private DocumentSignatures doc_sign;
-
-    private IdentityProviderAssertions idp_assertions;
 
     XDSProfileRequestDecoder to_decoder;
 
@@ -105,12 +101,6 @@ public class XDSProfileResponseEncoder extends XMLObjectWrapper implements Signa
       }
 
 
-    public void setIdentityProviderAssertions (IdentityProviderAssertions idp_assertions)
-      {
-        this.idp_assertions = idp_assertions;
-      }
-
-
     protected void toXML (DOMWriterHelper wr) throws IOException
       {
         wr.initializeRootObject (prefix);
@@ -127,9 +117,9 @@ public class XDSProfileResponseEncoder extends XMLObjectWrapper implements Signa
  
         wr.setDateTimeAttribute (CLIENT_TIME_ATTR, client_time);
 
-        if (server_certificate_sha1 != null)
+        if (server_certificate_fingerprint != null)
           {
-            wr.setBinaryAttribute (SERVER_CERT_SHA1_ATTR, server_certificate_sha1);
+            wr.setBinaryAttribute (SERVER_CERT_FP_ATTR, server_certificate_fingerprint);
           }
 
         //////////////////////////////////////////////////////////////////////////
@@ -139,17 +129,6 @@ public class XDSProfileResponseEncoder extends XMLObjectWrapper implements Signa
         s_req_dec.getDocumentReferences ().write (wr, true);
 
         doc_sign.write (wr, true);
-
-        ServerCookie server_cookie = s_req_dec.getServerCookie ();
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr, WASP_NS);
-          }
-
-        if (idp_assertions != null)
-          {
-            idp_assertions.write (wr, true);
-          }
 
         wr.popPrefix ();
       }
@@ -166,14 +145,14 @@ public class XDSProfileResponseEncoder extends XMLObjectWrapper implements Signa
                                   SignatureRequestDecoder s_req_dec,
                                   String request_url,
                                   Date client_time,
-                                  byte[] server_certificate_sha1) throws IOException
+                                  byte[] server_certificate_fingerprint) throws IOException
       {
         this.s_resp_enc = s_resp_enc;
         this.s_req_dec = s_req_dec;
         this.request_url = request_url;
         this.client_time = client_time;
         this.id = s_req_dec.getID ();
-        this.server_certificate_sha1 = server_certificate_sha1;
+        this.server_certificate_fingerprint = server_certificate_fingerprint;
         this.doc_sign = new DocumentSignatures (to_decoder.getDigestAlgorithm (),
                                                 to_decoder.getDocumentCanonicalizationAlgorithm (),
                                                 s_req_dec.getDocumentData ());

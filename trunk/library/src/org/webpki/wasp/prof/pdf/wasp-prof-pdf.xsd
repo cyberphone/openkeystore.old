@@ -12,10 +12,10 @@
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:prof="http://xmlns.webpki.org/wasp/pdfsigprofile0/20060826"
-           xmlns:wasp="http://xmlns.webpki.org/wasp/1.0/core#"
+           xmlns:wasp="http://xmlns.webpki.org/wasp/beta/core/20130604#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
         
-   <xs:import namespace="http://xmlns.webpki.org/wasp/1.0/core#"/>
+   <xs:import namespace="http://xmlns.webpki.org/wasp/beta/core/20130604#"/>
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
 
@@ -65,7 +65,7 @@
               binary value of "External" objects, the Base64-decoded value of "Binary"
               objects, and the UTF-8 decoded value of "Text" objects.  The actual algorithm
               used MUST be published in "DocumentSignatures/@CanonicalizationAlgorithm".
-              Default value: "http://xmlns.webpki.org/wasp/1.0/core#cn". -->
+              Default value: "http://xmlns.webpki.org/wasp/beta/core/20130604#cn". -->
          <xs:attribute name="DocumentCanonicalizationAlgorithm" type="xs:anyURI" use="optional"/>
 
       </xs:complexType>
@@ -109,8 +109,10 @@
          <!-- Copy of "SignatureRequest/@ID". -->
          <xs:attribute name="ID" type="xs:ID" use="required"/>
 
-         <!-- See "SignatureRequest/@ServerCertificateSHA1Request". -->
-         <xs:attribute name="ServerCertificateSHA1" type="wasp:sha1Hash" use="optional"/>
+         <!-- The "ServerCertificateFingerprint" attribute MUST be populated
+              with the SHA256 hash of the associated server certificate if the
+              SignatureRequest was invoked over HTTPS. --> 
+         <xs:attribute name="ServerCertificateFingerprint" type="wasp:sha256Hash" use="optional"/>
 
          <!-- The client software SHOULD keep track the URIs ("ContentID" or
               "Location") of attachments that have not been viewed or

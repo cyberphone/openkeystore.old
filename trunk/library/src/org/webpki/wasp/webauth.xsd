@@ -4,34 +4,33 @@
     providing an authentication counterpart to the WASP (Web Activated Signature
     Protocol) signature scheme.  Web Authentication is an application-level
     alternative to using SSL/TLS client-certificate authentication.
-
-    Web Authentication can be used in two basic modes (configurations): 
-    1. Native (enhanced) browser mode. 
-    2. Authentication proxy mode.  In this mode the authentication request and
-    authentication response messages are transferred using the same principle
-    as in the POST profile of the OASIS SAML 1.1 browser bindings specification.
-
-    In the proxy mode, a standard (non-enhanced) web browser is used while the
-    actual authentication operation is carried out by an external authentication
-    server (proxy).   An authentication proxy server may in turn be arranged in
-    two different ways: 
-    1. Installed locally on the user's computer where redirects are performed to
-    (and from) "localhost". 
-    2. Constituting the core of an Identity Provider (IdP) service to which users
-    authenticate through other means than PKI.
-
+    
     "Perfection is achieved, not when there is nothing more to add, but when there
     is nothing left to take away" [Antoine de Saint-Exupery]
 
-    Version: 1.0 
-    Revised: 18-Oct-2007 
-    Author: Anders Rundgren, WebPKI.org 
+    Version: BETA 
+    Revised: 04-06-2013 
+    Author: Anders Rundgren
+
+    Copyright 2006-2013 WebPKI.org (http://webpki.org).
+
+    Licensed under the Apache License, Version 2.0 (the "License"); 
+    you may not use this file except in compliance with the License. 
+    You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/webauth/1.0#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/webauth/beta/20130604#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-           xmlns:auth="http://xmlns.webpki.org/webauth/1.0#"
+           xmlns:auth="http://xmlns.webpki.org/webauth/beta/20130604#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -49,12 +48,6 @@
 
             <!-- See "CertificateFilter" definition. -->
             <xs:element ref="auth:CertificateFilter" minOccurs="0" maxOccurs="unbounded"/>
-
-            <!-- See "BackgroundView" definition. -->
-            <xs:element ref="auth:BackgroundView" minOccurs="0"/>
-
-            <!-- See "ServerCookie" definition. -->
-            <xs:element ref="auth:ServerCookie" minOccurs="0"/>
 
             <!-- If defined, the client software MUST include the client's key platform
                  parameters in the "AuthenticationResponse/ClientPlatform" object.
@@ -130,14 +123,8 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- See "ServerCookie" definition. -->
-            <xs:element ref="auth:ServerCookie" minOccurs="0"/>
-
             <!-- See "AuthenticationRequest/ClientPlatformRequest". -->
             <xs:element ref="auth:ClientPlatform" minOccurs="0"/>
-
-            <!-- See "IdentityProviderAssertions" definition. -->
-            <xs:element ref="auth:IdentityProviderAssertions" minOccurs="0"/>
 
             <!-- The user authentication signature is an enveloped XML signature
                  covering the entire AuthenticationResponse object (which MUST be done
@@ -259,113 +246,6 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                   The "documentType" holds the actual document data.
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:complexType name="documentType">
-      <xs:choice>
-
-         <!-- Base64 encoded data.  Note that textual data that does not have a predefined
-              encoding (e.g. HTML), when put in a Binary element MUST be UTF-8 encoded. -->
-         <xs:element name="Binary">
-            <xs:complexType>
-               <xs:simpleContent>
-                  <xs:extension base="xs:base64Binary">
-                     <xs:attribute name="MIMEType" type="auth:mimeType" use="required"/>
-                  </xs:extension>
-               </xs:simpleContent>
-            </xs:complexType>
-         </xs:element>
-
-         <!-- UTF-8 encoded textual data.  XML, HTML and other markup data is preferably
-              stored in CDATA sections for space considerations. -->
-         <xs:element name="Text">
-            <xs:complexType>
-               <xs:simpleContent>
-                  <xs:extension base="xs:string">
-                     <xs:attribute name="MIMEType" type="auth:mimeType" use="required"/>
-                  </xs:extension>
-               </xs:simpleContent>
-            </xs:complexType>
-         </xs:element>
-
-      </xs:choice>
-   </xs:complexType>
-
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      The optional "BackgroundView" object is intended for showing a view to the user
-      associated with the requester.  This can be used to eliminate the HTML page that
-      is typically used as a "bootstrap" for an authentication mechanism.  It is
-      RECOMMENDED to deploy this object for the proxy modes since they do not offer any
-      bootstrap possibility.  A client software MAY ignore the "BackgroundView" object.
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - --> 
-
-   <xs:element name="BackgroundView">
-      <xs:complexType>
-         <xs:sequence>
-         
-            <!-- Main document, optionally shown during authentication. -->
-            <xs:element name="MainDocument" type="auth:documentType"/>
-
-            <!-- Optional embedded objects (like style sheets and images),
-                 referred to by "MainDocument".
-
-                 It is RECOMMENDED to use EmbeddedObject elements rather than HTTP
-                 URIs since only the former are guaranteed to be fully downloaded
-                 (and thus displayable) during authentication.  Below is an example
-                 of a well-formed HTML image reference:
-
-                     <img src="cid:d0@example.com">
-
-                 In contrast to RFC 2111 (which was the inspiration for this scheme),
-                 "ContentID" arguments SHOULD always be expressed as absolute e-mail
-                 addresses prepended with "cid:" but they do not need to be globally
-                 unique between different authentication requests. -->
-            <xs:element name="EmbeddedObject" minOccurs="0" maxOccurs="unbounded">
-               <xs:complexType>
-                  <xs:complexContent>
-                     <xs:extension base="auth:documentType">
-                        <xs:attribute name="ContentID" type="auth:cidURI" use="required"/>
-                     </xs:extension>
-                  </xs:complexContent>
-               </xs:complexType>
-            </xs:element>
-
-         </xs:sequence>
-      </xs:complexType>
-
-      <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                Constraints (that can be enforced by schema-directed validation).
-       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-      <!-- Embedded objects MUST have a unique "ContentID". -->
-      <xs:unique name="UniqueContentID">
-         <xs:selector xpath="auth:EmbeddedObject"/>
-         <xs:field xpath="@ContentID"/>
-      </xs:unique>
-
-   </xs:element>
-
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      The "ServerCookie" object is intended for passing arbitrary data between an
-      authentication request and an authentication response.  It can be used to
-      enable "statelessness" between a authentication request and a authentication
-      receive application, by for example holding a HMAC authentication of the
-      request ID and a time stamp.  The format of ServerCookie data is out of scope
-      for the Web Authentication specification.  If a ServerCookie is specified in
-      an AuthenticationRequest, it MUST be copied verbatim to the associated
-      AuthenticationResponse object by the client software.
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - --> 
-
-   <xs:element name="ServerCookie">
-      <xs:complexType mixed="true">
-         <xs:sequence>
-            <xs:any namespace="##any" processContents="lax" maxOccurs="unbounded"/>
-         </xs:sequence>
-      </xs:complexType>
-   </xs:element>
-  
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       Requested authentication profile(s) for the client software to select from in
       descending preference order.  The client software MAY NOT recognize all
       supplied profiles, but MUST abort the operation if none is recognized and
@@ -399,13 +279,14 @@
          <!-- XML DSig parameter.  Implementations MAY support other algorithms
               than the default.  This parameter indicates a required value for
               the "SignedInfo/Reference/DigestMethod/@Algorihtm" attribute.
-              Default value: "http://www.w3.org/2000/09/xmldsig#sha1". -->
+              Default value: See "getRecommendSignatureAlgorithm" in
+              org.webpki.crypto.KeyAlgorithms.java. -->
          <xs:attribute name="DigestAlgorithm" type="xs:anyURI" use="optional"/>
 
          <!-- XML DSig parameter.  Implementations MAY support other algorithms
               than the default.  This parameter indicates a required value for
               the "SignedInfo/SignatureMethod/@Algorihtm" attribute.
-              Default value: "http://www.w3.org/2000/09/xmldsig#rsa-sha1". -->
+              Default value: "http://www.w3.org/2000/09/xmldsig#rsa-sha256". -->
          <xs:attribute name="SignatureAlgorithm" type="xs:anyURI" use="optional"/>
 
       </xs:complexType>
@@ -428,51 +309,6 @@
                     maxOccurs="unbounded"/>
          </xs:sequence>
 
-         <!-- The standard browser identifier. -->
-         <xs:attribute name="UserAgent" type="xs:string" use="required"/>
-
-         <!-- Authentication product vendor.  RECOMMENDED in the form of an URL. -->
-         <xs:attribute name="Vendor" type="xs:string" use="required"/>
-
-         <!-- Authentication product ID in vendor notation. -->
-         <xs:attribute name="ProductID" type="xs:string" use="required"/>
-
-         <!-- Authentication product version (build) etc. in vendor notation. -->
-         <xs:attribute name="Version" type="xs:string" use="required"/>
-
-         <!-- The language that the authentication client "speaks".
-              Note: this MAY differ from the default OS locale and MAY also be
-              dynamically set by the "AuthenticationRequest/@Languages" list. -->
-         <xs:attribute name="Language" type="xs:language" use="required"/>
-
-         <!-- Screen width in pixels. -->
-         <xs:attribute name="ScreenWidth" type="xs:integer" use="optional"/>
-
-         <!-- Screen height in pixels. -->
-         <xs:attribute name="ScreenHeight" type="xs:integer" use="optional"/>
-
-         <!-- Screen colors. A negative value indicates gray shades. -->
-         <xs:attribute name="ScreenColors" type="xs:integer" use="optional"/>
-
-      </xs:complexType>
-   </xs:element>
-
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      The "IdentityProviderAssertions" object is intended for hosting user-related
-      authentication data such as "authentication strength", "authentication type",
-      "IP address" etc.  The information supplied can be used for accepting or
-      rejecting a user authentication depending on security requirements, and may
-      also be used for logging purposes.
-
-      Note: The IdentityProviderAssertions object MUST NOT be used by native
-      configurations or by local web-proxy configurations.
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - --> 
-
-   <xs:element name="IdentityProviderAssertions">
-      <xs:complexType mixed="true">
-         <xs:sequence>
-            <xs:any namespace="##any" processContents="lax" maxOccurs="unbounded"/>
-         </xs:sequence>
       </xs:complexType>
    </xs:element>
 

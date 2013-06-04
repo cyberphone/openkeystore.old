@@ -46,6 +46,7 @@ public class AresEnc
 
 // The following is equivalent to the receival of of a AuthenticationRequest
         AuthenticationRequestDecoder authdec = AreqDec.test (in_file, false);
+System.out.println ("SIGALG=" + authdec.getAuthenticationProfiles ()[0].getSignatureAlgorithm ());
 
 // Now the user is supposed to look on the auth request displayed on his/her screen
 
@@ -66,8 +67,7 @@ public class AresEnc
                                          new GregorianCalendar (2006, 0, 1, 10, 0, 0).getTime() 
                                                  :
                                          new Date (),
-                                      authdec.getSubmitURL ().startsWith ("https://") ?
-                                         new byte[]{1,4,5,3,6,7,8,3,0,3,5,6,1,4,5,3,6,7,8,3}: null);
+                                      null);
 // Which is to be HTTP POSTed but here just put on a file
 
         byte[] data = authenc.writeXML ();

@@ -42,36 +42,16 @@ import static org.webpki.wasp.WASPConstants.*;
 
 public class AuthenticationResponseDecoder extends AuthenticationResponse
   {
-
     // Attributes
-    private String id;
-
     private GregorianCalendar server_time;
 
-    private String submit_url;
-
-    private String request_url;
-
     private GregorianCalendar client_time;
-
-    private byte[] server_certificate_sha1;                     // Optional
-
-    private ServerCookie server_cookie;                         // Optional
-
-    private IdentityProviderAssertions idp_assertions;          // Optional
 
     private XMLSignatureWrapper signature;
 
     private X509Certificate[] signer_certpath;
 
 
-
-    public IdentityProviderAssertions getIdentityProviderAssertions ()
-      {
-        return idp_assertions;
-      }
- 
-    
     public String getSubmitURL ()
       {
         return submit_url;
@@ -84,16 +64,10 @@ public class AuthenticationResponseDecoder extends AuthenticationResponse
       }
  
     
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
-      }
-    
-    
     public GregorianCalendar getClientTime ()
-    {
+      {
         return client_time;
-    }
+      }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,23 +90,13 @@ public class AuthenticationResponseDecoder extends AuthenticationResponse
 
         client_time = ah.getDateTime (CLIENT_TIME_ATTR);
 
-        server_certificate_sha1 = ah.getBinaryConditional (SERVER_CERT_SHA1_ATTR);
+        server_certificate_fingerprint = ah.getBinaryConditional (SERVER_CERT_FP_ATTR);
 
         rd.getChild();
 
         //////////////////////////////////////////////////////////////////////////
-        // Get the child elements
+        // Get the sole child element
         //////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
-          {
-            server_cookie = ServerCookie.read (rd);
-          }
-
-        if (rd.hasNext (IDP_ASSERTIONS_ELEM))
-          {
-            idp_assertions = IdentityProviderAssertions.read (rd);
-          }
-
         signature = (XMLSignatureWrapper) wrap (rd.getNext ());
       }
 
@@ -156,12 +120,12 @@ public class AuthenticationResponseDecoder extends AuthenticationResponse
       }
 
 
-    public void checkRequestResponseIntegrity (AuthenticationRequestEncoder areqenc, byte[] expected_sha1) throws IOException
+    public void checkRequestResponseIntegrity (AuthenticationRequestEncoder areqenc, byte[] expected_fingerprint) throws IOException
       {
-        if (expected_sha1 != null &&
-            (server_certificate_sha1 == null || !ArrayUtil.compare (server_certificate_sha1, expected_sha1)))
+        if (expected_fingerprint != null &&
+            (server_certificate_fingerprint == null || !ArrayUtil.compare (server_certificate_fingerprint, expected_fingerprint)))
           {
-            bad ("Server certificate SHA1");
+            bad ("Server certificate fingerprint");
           }
         if (!id.equals (areqenc.id))
           {

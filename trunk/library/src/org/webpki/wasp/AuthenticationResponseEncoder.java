@@ -18,15 +18,19 @@ package org.webpki.wasp;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+
+import java.security.cert.X509Certificate;
+
 import java.util.Date;
 
 import org.w3c.dom.Element;
 
 import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSigner;
 
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SignerInterface;
 
 import static org.webpki.wasp.WASPConstants.*;
@@ -34,22 +38,9 @@ import static org.webpki.wasp.WASPConstants.*;
 
 public class AuthenticationResponseEncoder extends AuthenticationResponse
   {
-
-    private String request_url;
-
-    private String submit_url;
-
-    private String id;
-
-    private Date client_time;
-
     private String server_time;
 
-    private byte[] server_certificate_sha1;
-
-    private ServerCookie server_cookie;
-
-    private IdentityProviderAssertions idp_assertions;
+    private Date client_time;
 
     private boolean add_new_line = true;
 
@@ -68,25 +59,28 @@ public class AuthenticationResponseEncoder extends AuthenticationResponse
       }
 
 
-    public IdentityProviderAssertions setIdentityProviderAssertions (IdentityProviderAssertions idp_assertions)
-      {
-        return this.idp_assertions = idp_assertions;
-      }
-
-
     public void createSignedResponse (SignerInterface signer,
                                       AuthenticationRequestDecoder auth_req_decoder,
                                       String request_url,
                                       Date client_time,
-                                      byte[] server_certificate_sha1) throws IOException
+                                      X509Certificate server_certificate) throws IOException
       {
         this.id = auth_req_decoder.getID ();
         this.server_time = auth_req_decoder.getServerTime ();
         this.request_url = request_url;
         this.submit_url = auth_req_decoder.getSubmitURL ();
         this.client_time = client_time;
-        this.server_certificate_sha1 = server_certificate_sha1;
-        this.server_cookie = auth_req_decoder.getServerCookie ();
+        if (server_certificate != null)
+          {
+            try
+              {
+                this.server_certificate_fingerprint = HashAlgorithms.SHA256.digest (server_certificate.getEncoded ());
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+          }
         Element elem = forcedDOMRewrite ();
         if (add_new_line)
           {
@@ -120,21 +114,9 @@ public class AuthenticationResponseEncoder extends AuthenticationResponse
 
         wr.setDateTimeAttribute (CLIENT_TIME_ATTR, client_time);
 
-        if (server_certificate_sha1 != null)
+        if (server_certificate_fingerprint != null)
           {
-            wr.setBinaryAttribute (SERVER_CERT_SHA1_ATTR, server_certificate_sha1);
-          }
-
-        if (server_cookie != null)
-          {
-            add_new_line = false;
-            server_cookie.write (wr);
-          }
-
-        if (idp_assertions != null)
-          {
-            add_new_line = false;
-            idp_assertions.write (wr);
+            wr.setBinaryAttribute (SERVER_CERT_FP_ATTR, server_certificate_fingerprint);
           }
       }
 

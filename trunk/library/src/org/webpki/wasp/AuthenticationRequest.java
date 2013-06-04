@@ -33,9 +33,18 @@ import static org.webpki.wasp.WASPConstants.*;
  */
 abstract class AuthenticationRequest extends XMLObjectWrapper 
   {
-    AuthenticationRequest () {}
+    String id;
 
-    static final String BACKGROUND_VIEW_ELEM        = "BackgroundView";
+    String submit_url;
+
+    String cancel_url;                                                          // Optional
+
+    String[] languages;                                                         // Optional
+
+    int expires;
+
+
+    AuthenticationRequest () {}
 
     static final String AUTHENTICATION_PROFILE_ELEM = "AuthenticationProfile";
 

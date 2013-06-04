@@ -21,12 +21,11 @@ import org.webpki.crypto.KeyContainerTypes;
 
 public interface WASPConstants
   {
-
-    String WASP_NS             = "http://xmlns.webpki.org/wasp/1.0/core#";
+    String WASP_NS             = "http://xmlns.webpki.org/wasp/beta/core/20130604#";
 
     String WASP_SCHEMA_FILE    = "wasp-core.xsd";
 
-    String DOC_SIGN_CN_ALG     = "http://xmlns.webpki.org/wasp/1.0/core#cn";
+    String DOC_SIGN_CN_ALG     = "http://xmlns.webpki.org/wasp/beta/core/20130604#cn";
 
     String[] TEXT_TYPES        = new String[]{"text/plain",
                                               "text/html", 
@@ -45,7 +44,7 @@ public interface WASPConstants
 
     String WEBAUTH_SCHEMA_FILE = "webauth.xsd";
 
-    String WEBAUTH_NS          = "http://xmlns.webpki.org/webauth/1.0#";
+    String WEBAUTH_NS          = "http://xmlns.webpki.org/webauth/beta/20130604#";
 
 
     // Package only definitions
@@ -86,7 +85,7 @@ public interface WASPConstants
 
     String COPY_DATA_ATTR                  = "CopyData";
 
-    String SERVER_CERT_SHA1_ATTR           = "ServerCertificateSHA1";
+    String SERVER_CERT_FP_ATTR             = "ServerCertificateFingerprint";
 
     String MIME_TYPE_ATTR                  = "MIMEType";
 

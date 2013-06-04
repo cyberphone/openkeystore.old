@@ -27,7 +27,6 @@ import org.webpki.util.MimeTypedObject;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.XMLObjectWrapper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLVerifier;
 import org.webpki.xmldsig.XMLSignatureWrapper;
@@ -69,8 +68,6 @@ public class SignatureRequestDecoder extends SignatureRequest
     private boolean copy_data;                                                          // Default: false
 
     private int expires;                                                                // Optional
-
-    private ServerCookie server_cookie;                                                 // Optional
 
     private XMLSignatureWrapper signature;                                              // Optional
 
@@ -332,12 +329,6 @@ public class SignatureRequestDecoder extends SignatureRequest
       }
 
 
-    public ServerCookie getServerCookie ()
-      {
-        return server_cookie;
-      }
-
-
     public DocumentData getDocumentData ()
       {
         return doc_data;
@@ -500,13 +491,6 @@ public class SignatureRequestDecoder extends SignatureRequest
         // Get the document data [1]
         /////////////////////////////////////////////////////////////////////////////////////////
         doc_data = DocumentData.read (rd);
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the optional cookie-like data [0..1]
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (ServerCookie.SERVER_COOKIE_ELEM))
-          {
-            server_cookie = ServerCookie.read (rd);
-          }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional client platform request data [0..1]

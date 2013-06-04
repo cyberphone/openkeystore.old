@@ -17,10 +17,10 @@
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:prof="http://xmlns.webpki.org/wasp/1.0/prof/xds#"
-           xmlns:wasp="http://xmlns.webpki.org/wasp/1.0/core#"
+           xmlns:wasp="http://xmlns.webpki.org/wasp/beta/core/20130604#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
         
-   <xs:import namespace="http://xmlns.webpki.org/wasp/1.0/core#"/>
+   <xs:import namespace="http://xmlns.webpki.org/wasp/beta/core/20130604#"/>
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
 
@@ -63,17 +63,16 @@
 
          <!-- XML DSig parameter.  Implementations MAY support other algorithms than the default.
               This parameter controls the "SignedInfo/SignatureMethod/@Algorihtm" attribute.
-              Default value: For RSA signatures "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
-              is the default while ECDSA signatures use a default which is associated with
-              the actual curve used according to NIST's recommendations. -->
-         <xs:attribute name="SignatureAlgorithm" type="xs:anyURI" use="optional"/>
+              Default value: See "getRecommendSignatureAlgorithm" in
+              org.webpki.crypto.KeyAlgorithms.java. -->
+        <xs:attribute name="SignatureAlgorithm" type="xs:anyURI" use="optional"/>
 
          <!-- For the document payload.  Implementations MAY support other algorithms than
               the default.  The default canonicalization algorithm uses the Base64-decoded
               value of "Binary" objects, and the UTF-8 decoded value of "Text" objects.
               The actual algorithm used MUST be published in
               "DocumentSignatures/@CanonicalizationAlgorithm".
-              Default value: "http://xmlns.webpki.org/wasp/1.0/core#cn". -->
+              Default value: "http://xmlns.webpki.org/wasp/beta/core/20130604#cn". -->
          <xs:attribute name="DocumentCanonicalizationAlgorithm" type="xs:anyURI" use="optional"/>
 
       </xs:complexType>
@@ -94,14 +93,8 @@
             <!-- The set of locally calculated document hashes. -->
             <xs:element ref="wasp:DocumentSignatures"/>
 
-            <!-- Copy of "SignatureRequest/ServerCookie". -->
-            <xs:element ref="wasp:ServerCookie" minOccurs="0"/>
-
             <!-- See "SignatureRequest/ClientPlatformRequest". -->
             <xs:element ref="wasp:ClientPlatform" minOccurs="0"/>
-
-            <!-- See "IdentityProviderAssertions" in the core schema. -->
-            <xs:element ref="wasp:IdentityProviderAssertions" minOccurs="0"/>
 
             <!-- The enveloped XML signature object.
                  MUST refer to the "SignedData/@ID" attribute. -->
@@ -125,14 +118,10 @@
          <!-- The client's local clock is a mandatory item. -->
          <xs:attribute name="ClientTime" type="xs:dateTime" use="required"/>
 
-         <!-- For native (enhanced browser) mode implementations, the
-              "ServerCertificateSHA1" attribute MUST be populated with
-              the SHA1 hash of the associated server certificate if the
-              SignatureRequest was invoked over HTTPS.  For the proxy
-              modes, the certificate used for optionally signing signature
-              requests MUST (if present) be hashed and the result be
-              assigned to "ServerCertificateSHA1". --> 
-         <xs:attribute name="ServerCertificateSHA1" type="wasp:sha1Hash" use="optional"/>
+         <!-- The "ServerCertificateFingerprint" attribute MUST be populated
+              with the SHA256 hash of the associated server certificate if the
+              SignatureRequest was invoked over HTTPS. --> 
+         <xs:attribute name="ServerCertificateFingerprint" type="wasp:sha256Hash" use="optional"/>
 
          <!-- The client software SHOULD keep track the "ContentID" URIs
               of attachments that have not been viewed or accessed by a

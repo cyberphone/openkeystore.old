@@ -39,11 +39,9 @@ public class AreqEnc
       {
         System.out.println ("AreqEnc outfile [options]\n" +
                             "  -W       simple 'Hello authentication world!'\n" +
-                            "  -N       no background view\n" +
                             "  -F authfile  full round (all 4 steps)\n" +
-                            "  -H       use sha256 as message digest\n" +
-                            "  -B       use rsasha256 as signature method\n" +
-                            "  -U       add server cookie data\n" +
+                            "  -H       use sha1 as message digest\n" +
+                            "  -B       use rsasha1 as signature method\n" +
                             "  -Q       request prefix REQ\n" +
                             "  -P       -F: RESP prefix\n" +
                             "  -A       full cert path\n" +
@@ -69,22 +67,17 @@ public class AreqEnc
         boolean fixed_client_time = false;
         boolean fixed_server_time = false;
         boolean certpath = false;
-        boolean simpledoc = false;
-        boolean sha256DS = false;
-        boolean rsasha256DS = false;
+        boolean sha1DS = false;
+        boolean rsasha1DS = false;
         boolean signrequest = false;
-        boolean servercookie = false;
         boolean certflt = false;
         boolean signKI = false;
         boolean iddata = false;
-        boolean background = true;
         for (int i = 1; i < args.length; i++)
           {
             if (args[i].equals ("-I")) signrequest = true;
-            else if (args[i].equals ("-W")) simpledoc = true;
-            else if (args[i].equals ("-N")) background = false;
-            else if (args[i].equals ("-H")) sha256DS = true;
-            else if (args[i].equals ("-B")) rsasha256DS = true;
+            else if (args[i].equals ("-H")) sha1DS = true;
+            else if (args[i].equals ("-B")) rsasha1DS = true;
             else if (args[i].equals ("-A")) certpath = true;
             else if (args[i].equals ("-D")) signKI = true;
             else if (args[i].equals ("-F"))
@@ -95,7 +88,6 @@ public class AreqEnc
                   }
                 authfile = args[i];
               }
-            else if (args[i].equals ("-U")) servercookie = true;
             else if (args[i].equals ("-Q")) reqprefix = true;
             else if (args[i].equals ("-P")) respprefix = true;
             else if (args[i].equals ("-T")) fixed_server_time = true;
@@ -107,25 +99,7 @@ public class AreqEnc
           }
  
          
-        AuthenticationRequestEncoder areqenc = null;
-        if (simpledoc)
-          {
-            areqenc = new AuthenticationRequestEncoder ("example.com", "https://example.com/home");
-            if (background)
-              {
-                areqenc.setMainDocument ("Hello authentication world!", "text/plain");
-              }
-          }
-        else
-          {
-            areqenc = new AuthenticationRequestEncoder ("mybank.com", "https://secure.mybank.com/account");
-            if (background)
-              {
-                String content_id_uri = areqenc.addEmbeddedObject (BankLogo.getGIFImage (), "image/gif");
-                areqenc.setMainDocumentAsHTML ("<html><body><center><img src=\"" + content_id_uri + 
-                                               "\"><p>Welcome to MyBank</center></body></html>");
-              }
-          }
+        AuthenticationRequestEncoder areqenc = new AuthenticationRequestEncoder ("https://example.com/home");
 
         AuthenticationRequestEncoder.AuthenticationProfile ap = areqenc.addAuthenticationProfile ();
 
@@ -133,14 +107,14 @@ public class AreqEnc
 
         ap.setSignedKeyInfo (signKI);
 
-        if (sha256DS)
+        if (sha1DS)
           {
-            ap.setDigestAlgorithm (HashAlgorithms.SHA256);
+            ap.setDigestAlgorithm (HashAlgorithms.SHA1);
           }
 
-        if (rsasha256DS)
+        if (rsasha1DS)
           {
-            ap.setSignatureAlgorithm (SignatureAlgorithms.RSA_SHA256);
+            ap.setSignatureAlgorithm (SignatureAlgorithms.RSA_SHA1);
           }
 
         if (certflt)
@@ -166,21 +140,13 @@ public class AreqEnc
             areqenc.setServerTime (new GregorianCalendar (2005, 3, 10, 9, 30, 0).getTime());
           }
 
-        if (servercookie)
-          {
-            areqenc.setServerCookie (SreqEnc.createServerCookie ());
-          }
-
         if (reqprefix)
           {
             areqenc.setPrefix ("REQ");
           }
         if (signrequest)
           {
-            KeyStoreSigner req_signer = new KeyStoreSigner (simpledoc ?
-                                                         DemoKeyStore.getExampleDotComKeyStore ()
-                                                                  :
-                                                         DemoKeyStore.getMybankDotComKeyStore (), null);
+            KeyStoreSigner req_signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
             req_signer.setKey (null, DemoKeyStore.getSignerPassword ());
             areqenc.signRequest (req_signer);
           }

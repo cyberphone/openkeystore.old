@@ -59,17 +59,15 @@ public class SignatureRequestEncoder extends SignatureRequest
 
     DocumentData doc_data = new DocumentData ();
 
-    ServerCookie server_cookie;
-
     String id;
-
-    Date server_time;
 
     String submit_url;
 
     String cancel_url;
 
     ClientPlatformRequest client_platform_request;
+
+    Date server_time;
 
     private String signature_gui_policy;
 
@@ -353,12 +351,6 @@ public class SignatureRequestEncoder extends SignatureRequest
       }
 
 
-    public ServerCookie setServerCookie (ServerCookie server_cookie)
-      {
-        return this.server_cookie = server_cookie;
-      }
-
-
     // Debug method
     public DocumentSignatures getDocumentSignatures () throws IOException
       {
@@ -443,14 +435,6 @@ public class SignatureRequestEncoder extends SignatureRequest
         // Document data
         //////////////////////////////////////////////////////////////////////////
         doc_data.write (wr, sorter);
-
-        //////////////////////////////////////////////////////////////////////////
-        // Optional "server cookie"
-        //////////////////////////////////////////////////////////////////////////
-        if (server_cookie != null)
-          {
-            server_cookie.write (wr);
-          }
 
         //////////////////////////////////////////////////////////////////////////
         // Optional "client platform request"

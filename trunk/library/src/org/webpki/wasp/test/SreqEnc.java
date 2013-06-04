@@ -20,20 +20,15 @@ import java.io.IOException;
 import java.util.GregorianCalendar;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.wasp.prof.xds.XDSProfileRequestEncoder;
 
 import org.webpki.xml.XMLSchemaCache;
-import org.webpki.xml.XMLCookie;
-import org.webpki.xml.ServerCookie;
-import org.webpki.xml.DOMUtil;
 
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.CertificateSelection;
@@ -56,18 +51,6 @@ import org.webpki.wasp.DeletedDocument;
 
 public class SreqEnc
   {
-
-    static ServerCookie createServerCookie () throws Exception
-      {
-        Document d = DOMUtil.createDocument ();
-        Element e = d.createElementNS ("http://example.com/def", "SomeTextingXML");
-        e.setAttributeNS ("http://www.w3.org/2000/xmlns/", "xmlns", "http://example.com/def");
-        e.setAttribute ("kurtz","700");
-        d.appendChild (e);
-        return new ServerCookie ().addXMLCookie (new XMLCookie (d));
-      }
-
-
     private static void show ()
       {
         System.out.println ("SreqEnc outfile [options]\n" +
@@ -77,8 +60,8 @@ public class SreqEnc
                             "  -d       add a detail view\n" +
                             "  -a       add an attachment\n" +
                             "  -F sigfile  full round (all 4 steps)\n" +
-                            "  -H       use sha256 as message digest\n" +
-                            "  -B       use rsasha256 as signature method\n" +
+                            "  -H       use sha1 as message digest\n" +
+                            "  -B       use rsasha1 as signature method\n" +
                             "  -n       prof: do not set a profile (use default XML)\n" +
                             "  -c       prof: only CMS\n" +
                             "  -2       prof: set two signature profiles (CMS, XMLDSig)\n" +
@@ -86,7 +69,6 @@ public class SreqEnc
                             "  -s       add a client platform request element\n" +
                             "  -T       fixed server time\n" +
                             "  -t       -F: fixed client time to response\n" +
-                            "  -U       add server cookie data\n" +
                             "  -C       copy data (by client)\n" +
                             "  -Q       request prefix REQ\n" +
                             "  -K       -F: copy data (by server)\n" +
@@ -144,8 +126,8 @@ public class SreqEnc
         boolean processing = false;
         boolean simplesign = false;
         boolean copydata = false;
-        boolean sha256DS = false;
-        boolean rsasha256DS = false;
+        boolean sha1DS = false;
+        boolean rsasha1DS = false;
         boolean servertime = false;
         boolean twoprofs = false;
         boolean signrequest = false;
@@ -154,7 +136,6 @@ public class SreqEnc
         boolean aiapreload = false;
         boolean internal = false;
         boolean deleted = false;
-        boolean servercookie = false;
         boolean servercopy = false;
         boolean clientplatfreq = false;
         boolean certflt = false;
@@ -172,8 +153,8 @@ public class SreqEnc
             else if (args[i].equals ("-T")) servertime = true;
             else if (args[i].equals ("-I")) signrequest = true;
             else if (args[i].equals ("-W")) simplesign = true;
-            else if (args[i].equals ("-H")) sha256DS = true;
-            else if (args[i].equals ("-B")) rsasha256DS = true;
+            else if (args[i].equals ("-H")) sha1DS = true;
+            else if (args[i].equals ("-B")) rsasha1DS = true;
             else if (args[i].equals ("-a")) attachment = true;
             else if (args[i].equals ("-A")) certpath = true;
             else if (args[i].equals ("-k")) aiaextension = true;
@@ -188,7 +169,6 @@ public class SreqEnc
                   }
                 sigfile = args[i];
               }
-            else if (args[i].equals ("-U")) servercookie = true;
             else if (args[i].equals ("-n")) noset = true;
             else if (args[i].equals ("-t")) fixedtime = true;
             else if (args[i].equals ("-c")) cms_only = true;
@@ -261,14 +241,14 @@ public class SreqEnc
 
         xml.setSignedKeyInfo (signKI);
 
-        if (sha256DS)
+        if (sha1DS)
           {
-            xml.setDigestAlgorithm (HashAlgorithms.SHA256);
+            xml.setDigestAlgorithm (HashAlgorithms.SHA1);
           }
 
-        if (rsasha256DS)
+        if (rsasha1DS)
           {
-            xml.setSignatureAlgorithm (SignatureAlgorithms.RSA_SHA256);
+            xml.setSignatureAlgorithm (SignatureAlgorithms.RSA_SHA1);
           }
 
 //        CMSProfile0Request cms = new CMSProfile0Request ();
@@ -305,11 +285,6 @@ public class SreqEnc
         if (lang)
           {
             sreqenc.setLanguages (new String[]{"eng"});
-          }
-
-        if (servercookie)
-          {
-            sreqenc.setServerCookie (createServerCookie ());
           }
 
         if (copydata)

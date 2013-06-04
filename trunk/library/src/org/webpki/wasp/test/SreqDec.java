@@ -22,7 +22,6 @@ import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
 
 import org.webpki.xml.XMLSchemaCache;
-import org.webpki.xml.XMLCookie;
 
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.CertificateFilter;
@@ -139,17 +138,6 @@ public class SreqDec
         for (SignatureRequestDecoder.BaseDocument d : sreq.getAttachments ())
           {
             print ("ATTACHMENT", d, s);
-          }
-
-        if (sreq.getServerCookie () != null)
-          {
-            s.append ("\nSERVERCOOKIE:");
-            XMLCookie[] cookies = sreq.getServerCookie ().getXMLCookies ();
-            for (int i = 0; i < cookies.length; i++)
-              {
-                s.append ("\n[" + i + "]=\n").append (new String (cookies[i].getData (), "UTF-8"));
-              }
-            s.append ("\nSERVERCOOKIE\n");
           }
 
         s.append ("\nID=" + sreq.getID () + "\n");

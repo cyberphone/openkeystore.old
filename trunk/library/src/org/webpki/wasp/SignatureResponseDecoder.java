@@ -18,10 +18,15 @@ package org.webpki.wasp;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+
+import java.security.cert.X509Certificate;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMUtil;
 
@@ -55,7 +60,7 @@ public class SignatureResponseDecoder extends SignatureResponse
       }
 
 
-    public void checkRequestResponseIntegrity (SignatureRequestEncoder sreqenc, byte[] expected_sha1) throws IOException
+    public void checkRequestResponseIntegrity (SignatureRequestEncoder sreqenc, X509Certificate server_certificate) throws IOException
       {
         // The DocumentData object
         if (sreqenc.copy_data)
@@ -64,6 +69,18 @@ public class SignatureResponseDecoder extends SignatureResponse
             if (!sreqenc.doc_data.equals (doc_data)) bad ("DocumentData mismatch");
           }
         else if (doc_data != null) bad ("Unexpected DocumentData");
+        byte[] expected_fingerprint = null;
+        if (server_certificate != null)
+          {
+            try
+              {
+                expected_fingerprint = HashAlgorithms.SHA256.digest (server_certificate.getEncoded ());
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+          }
 
         // For each candidate profile do a match try
         for (SignatureProfileEncoder spe : sreqenc.signature_profiles)
@@ -71,10 +88,9 @@ public class SignatureResponseDecoder extends SignatureResponse
             if (sign_prof_data.match (spe,
                                       sreqenc.doc_data,
                                       sreqenc.doc_refs,
-                                      sreqenc.server_cookie,
                                       sreqenc.cert_filters,
                                       sreqenc.id,
-                                      expected_sha1))
+                                      expected_fingerprint))
               {
                 return;
               }

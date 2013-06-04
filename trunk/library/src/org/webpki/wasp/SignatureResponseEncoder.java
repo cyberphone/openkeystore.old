@@ -18,11 +18,15 @@ package org.webpki.wasp;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+import java.security.cert.X509Certificate;
+
 import java.util.Date;
 
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMWriterHelper;
 
+import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SignerInterface;
 
 
@@ -64,18 +68,30 @@ public class SignatureResponseEncoder extends SignatureResponse
                                       SignatureProfileResponseEncoder sign_prof_resp_encoder,
                                       String request_url,
                                       Date client_time,
-                                      byte[] server_certificate_sha1) throws IOException
+                                      X509Certificate server_certificate) throws IOException
       {
         check (called_xml, "createSignedResponse MUST be called before XML generation!");
         called_sign = true;
         this.sign_req_decoder = sign_req_decoder;
         this.sign_prof_resp_encoder = sign_prof_resp_encoder;
+        byte[] fingerprint = null;
+        if (server_certificate != null)
+          {
+            try
+              {
+                fingerprint = HashAlgorithms.SHA256.digest (server_certificate.getEncoded ());
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+          }
         sign_prof_resp_encoder.createSignedData (signer,
                                                  this,
                                                  sign_req_decoder,
                                                  request_url,
                                                  client_time,
-                                                 server_certificate_sha1);
+                                                 fingerprint);
       }
 
 

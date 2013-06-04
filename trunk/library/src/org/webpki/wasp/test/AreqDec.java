@@ -20,7 +20,6 @@ import org.webpki.util.StringUtil;
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.XMLSchemaCache;
-import org.webpki.xml.XMLCookie;
 
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.CertificateFilter;
@@ -38,13 +37,6 @@ public class AreqDec
                             "   -n   No object data output\n" +
                             "   -d   Debug\n");
         System.exit (3);
-      }
-
-    private static void print (String name, AuthenticationRequestDecoder.AuthDocument d, StringBuffer s) throws Exception
-      {
-        s.append ("\n" +name + ":\nURI=" + d.getContentID () +
-                  "\nMimeType=" + d.getMimeType () + "\nValue=\n" +
-                  new String (d.getData(), "UTF-8") + "\n");
       }
 
     static AuthenticationRequestDecoder test (String file, boolean outdata) throws Exception
@@ -83,27 +75,6 @@ public class AreqDec
         for (CertificateFilter cf : areq.getCertificateFilters ())
           {
             SreqDec.printcf (cf, s);
-          }
-
-        if (areq.getMainDocument () != null)
-          {
-            print ("MAIN_VIEW", areq.getMainDocument (), s);
-
-            for (AuthenticationRequestDecoder.AuthDocument d : areq.getEmbeddedObjects ())
-              {
-                print ("EMBEDDED", d, s);
-              }
-          }
-
-        if (areq.getServerCookie () != null)
-          {
-            s.append ("\nSERVERCOOKIE:");
-            XMLCookie[] cookies = areq.getServerCookie ().getXMLCookies ();
-            for (int i = 0; i < cookies.length; i++)
-              {
-                s.append ("\n[" + i + "]=\n").append (new String (cookies[i].getData (), "UTF-8"));
-              }
-            s.append ("\nSERVERCOOKIE\n");
           }
 
         s.append ("\nID=" + areq.getID () + "\n");

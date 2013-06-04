@@ -4,21 +4,6 @@
     WASP is providing a way for users to digitally sign transactions (or
     documents), in interactive sessions using a web browser.
 
-    WASP can be used in two basic modes (configurations): 
-    1. Native (enhanced) browser mode. 
-    2. Signature proxy mode.  In this mode the signature request and signature
-    response messages are transferred using the same principle as in the POST
-    profile of the OASIS SAML 1.1 browser bindings specification.
-
-    In the proxy mode, a standard (non-enhanced) web browser is used while the
-    actual signature operation is carried out by an external signature server
-    (proxy).   A signature proxy server may in turn be arranged in two different
-    ways: 
-    1. Installed locally on the user's computer where redirects are performed to
-    (and from) "localhost". 
-    2. Constituting the core of an Identity Provider (IdP) service to which users
-    authenticate through other means than PKI.
-
     Note that the WASP core schema must be augmented with one or more signature
     profile schemas in order to create a complete signature request and response
     definition.
@@ -26,15 +11,29 @@
     "Perfection is achieved, not when there is nothing more to add, but when there
     is nothing left to take away" [Antoine de Saint-Exupery]
 
-    Version: 1.0 
-    Revised: 18-Oct-2007 
-    Author: Anders Rundgren, WebPKI.org 
+    Version: BETA 
+    Revised: 04-06-2013 
+    Author: Anders Rundgren
+
+    Copyright 2006-2013 WebPKI.org (http://webpki.org).
+
+    Licensed under the Apache License, Version 2.0 (the "License"); 
+    you may not use this file except in compliance with the License. 
+    You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/wasp/1.0/core#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/wasp/beta/core/20130604#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-           xmlns:wasp="http://xmlns.webpki.org/wasp/1.0/core#"
+           xmlns:wasp="http://xmlns.webpki.org/wasp/beta/core/20130604#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -71,9 +70,6 @@
             <!-- See "DocumentData" definition. -->
             <xs:element ref="wasp:DocumentData"/>
 
-            <!-- See "ServerCookie" definition. -->
-            <xs:element ref="wasp:ServerCookie" minOccurs="0"/>
-            
             <!-- If defined, the client software MUST for signature profiles that support
                  this, include the client's key platform parameters in the signed result.
                  It is an ERROR including a client platform request in conjunction with
@@ -334,7 +330,7 @@
       canonicalization of document data: Only the binary decoded content of the
       actual (raw) document data is to be used in digest operations.  That is,
       element tags and "ContentID" URIs MUST be excluded from such calculations
-      when using the core algorithm "http://xmlns.webpki.org/wasp/1.0/core#cn".
+      when using the core algorithm "http://xmlns.webpki.org/wasp/beta/core/20130604#cn".
 
       Note that HTTP URIs SHOULD NOT be used for embedded images and similar in
       HTML or XHTML documents, since WASP only supports the signing of explicitly
@@ -444,40 +440,6 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      The "ServerCookie" object is intended for passing arbitrary data between a
-      signature request and a signature response.
-
-      The format of ServerCookie data is out of scope for the WASP specification.  If
-      a ServerCookie is specified in a SignatureRequest, it MUST be copied verbatim to
-      the associated signature profile response object by the client software.
-      It is an ERROR including a ServerCookie in conjunction with signature profiles
-      that do not support such objects.
-
-    A ServerCookie can be used for several things including: 
-
-      1. Enabling "statelessness" between a signature request and a signature receive
-      application, by for example holding a HMAC signature of the anticipated response
-      data.
-
-      2. Holding optional non-viewable data.  These objects can for example be used to
-      augment a WYSIWYS user view with a computer's "view" of the same transaction.
-      A "light" version of this function is rather using a ServerCookie for holding
-      digests to server-based data that through these digests will be cryptographically
-      bound to the user's signature.
-
-      A user MUST NOT be held legally bound to signed ServerCookie data, since this
-      (deliberately) hidden object is only intended for a provider's internal use.  
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:element name="ServerCookie">
-      <xs:complexType mixed="true">
-         <xs:sequence>
-            <xs:any namespace="##any" processContents="lax" maxOccurs="unbounded"/>
-         </xs:sequence>
-      </xs:complexType>
-   </xs:element>
-  
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       The "ClientPlatform" object is holding various signature client related data
       that can be used as evidence in case there is a dispute with the signer.
       The ClientPlatform object is optionally supported by signature profiles.
@@ -495,60 +457,6 @@
                     maxOccurs="unbounded"/>
          </xs:sequence>
 
-         <!-- The standard browser identifier. -->
-         <xs:attribute name="UserAgent" type="xs:string" use="required"/>
-
-         <!-- Signature product vendor.  RECOMMENDED in the form of an URL. -->
-         <xs:attribute name="Vendor" type="xs:string" use="required"/>
-
-         <!-- Signature product ID in vendor notation. -->
-         <xs:attribute name="ProductID" type="xs:string" use="required"/>
-
-         <!-- Signature product version (build) etc. in vendor notation. -->
-         <xs:attribute name="Version" type="xs:string" use="required"/>
-
-         <!-- The language that the signature client "speaks".  Note:
-              this MAY differ from the default OS locale and MAY also be
-              dynamically set by the "SignatureRequest/@Languages" list.  -->
-         <xs:attribute name="Language" type="xs:language" use="required"/>
-
-         <!-- Screen width in pixels. -->
-         <xs:attribute name="ScreenWidth" type="xs:integer" use="optional"/>
-
-         <!-- Screen height in pixels. -->
-         <xs:attribute name="ScreenHeight" type="xs:integer" use="optional"/>
-
-         <!-- Screen colors. A negative value indicates gray shades. -->
-         <xs:attribute name="ScreenColors" type="xs:integer" use="optional"/>
-
-         <!-- Width of the signature request "view" object in pixels. -->
-         <xs:attribute name="SignViewWidth" type="xs:integer" use="optional"/>
-
-         <!-- Height of the signature request "view" object in pixels. --> 
-         <xs:attribute name="SignViewHeight" type="xs:integer" use="optional"/>
-
-         <!-- See "DocumentReferences/@SignatureGUIPolicy". -->
-         <xs:attribute name="SignatureGUIPolicy" type="xs:anyURI" use="optional"/>
-
-      </xs:complexType>
-   </xs:element>
-
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      The "IdentityProviderAssertions" object is intended for hosting user-related
-      authentication data such as "authentication strength", "authentication type",
-      "IP address" etc.  This object is optionally supported by signature profiles.
-      The information supplied can be used for accepting or rejecting a signature
-      depending on security requirements, and may also be used for logging purposes.
-
-      Note: The IdentityProviderAssertions object MUST NOT be used by native
-      configurations or by local web-proxy configurations.
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:element name="IdentityProviderAssertions">
-      <xs:complexType mixed="true">
-         <xs:sequence>
-            <xs:any namespace="##any" processContents="lax" maxOccurs="unbounded"/>
-         </xs:sequence>
       </xs:complexType>
    </xs:element>
 
@@ -641,13 +549,20 @@
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                  SHA-1 hash data definition.
+                                    Hash data definitions.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="sha1Hash">
       <xs:restriction base="xs:base64Binary">
          <xs:maxLength value="20"/>
          <xs:minLength value="20"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="sha256Hash">
+      <xs:restriction base="xs:base64Binary">
+         <xs:maxLength value="32"/>
+         <xs:minLength value="32"/>
       </xs:restriction>
    </xs:simpleType>
 

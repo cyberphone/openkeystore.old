@@ -72,8 +72,7 @@ public class SresEnc
                                          new GregorianCalendar (2006, 0, 1, 10, 0, 0).getTime() 
                                                  :
                                          new Date (),
-                                       sreqdec.getSubmitURL ().startsWith ("https://") ?
-                                          new byte[]{1,4,5,3,6,7,8,3,0,3,5,6,1,4,5,3,6,7,8,3} : null);
+                                      null);
 // Which is to be HTTP POSTed but here just put on a file
 
         byte[] data = sresenc.writeXML ();
