@@ -18,7 +18,6 @@ package com.google.zxing;
 
 import com.google.zxing.aztec.AztecWriter;
 import com.google.zxing.common.BitMatrix;
-import com.google.zxing.datamatrix.DataMatrixWriter;
 import com.google.zxing.oned.CodaBarWriter;
 import com.google.zxing.oned.Code128Writer;
 import com.google.zxing.oned.Code39Writer;
@@ -26,7 +25,6 @@ import com.google.zxing.oned.EAN13Writer;
 import com.google.zxing.oned.EAN8Writer;
 import com.google.zxing.oned.ITFWriter;
 import com.google.zxing.oned.UPCAWriter;
-import com.google.zxing.pdf417.PDF417Writer;
 import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.util.Map;
@@ -76,14 +74,8 @@ public final class MultiFormatWriter implements Writer {
       case ITF:
         writer = new ITFWriter();
         break;
-      case PDF_417:
-        writer = new PDF417Writer();
-        break;
       case CODABAR:
         writer = new CodaBarWriter();
-        break;
-      case DATA_MATRIX:
-        writer = new DataMatrixWriter();
         break;
       case AZTEC:
         writer = new AztecWriter();
