@@ -16,7 +16,6 @@
 
 package com.google.zxing;
 
-import com.google.zxing.aztec.AztecReader;
 import com.google.zxing.qrcode.QRCodeReader;
 
 import java.util.ArrayList;
@@ -113,15 +112,11 @@ public final class MultiFormatReader implements Reader {
       if (formats.contains(BarcodeFormat.QR_CODE)) {
         readers.add(new QRCodeReader());
       }
-      if (formats.contains(BarcodeFormat.AZTEC)) {
-        readers.add(new AztecReader());
-      }
       // At end in "try harder" mode
     }
     if (readers.isEmpty()) {
 
       readers.add(new QRCodeReader());
-      readers.add(new AztecReader());
 
     }
     this.readers = readers.toArray(new Reader[readers.size()]);
