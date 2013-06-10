@@ -26,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -52,6 +53,8 @@ public final class ViewfinderView extends View {
   private final int resultColor;
   private final int laserColor;
   private final int resultPointColor;
+  private int view_height;
+  private int view_width;
   private int scannerAlpha;
   private List<ResultPoint> possibleResultPoints;
   private List<ResultPoint> lastPossibleResultPoints;
@@ -75,11 +78,28 @@ public final class ViewfinderView extends View {
   public void setCameraManager(CameraManager cameraManager) {
     this.cameraManager = cameraManager;
   }
+  
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec){
+	  super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+	  view_height = getHeight ();
+	  view_width = getWidth ();
+  }
+
+  @Override
+  protected void onSizeChanged (int w, int h, int oldw, int oldh) {
+	  if (w != 0) {
+		  Log.i ("VIEW", "W=" + w + " H=" +h);
+	  }
+  }
 
   @Override
   public void onDraw(Canvas canvas) {
     if (cameraManager == null) {
       return; // not ready yet, early draw before done configuring
+    }
+    if (view_height == 0 || view_width == 0) {
+      return;
     }
     Rect frame = cameraManager.getFramingRect();
     if (frame == null) {
