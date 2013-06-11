@@ -26,6 +26,8 @@ import android.preference.PreferenceScreen;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.webpki.android.qrcode.R;
+
 /**
  * The main settings activity.
  *

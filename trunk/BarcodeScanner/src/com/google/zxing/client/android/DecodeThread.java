@@ -32,6 +32,8 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import org.webpki.android.qrcode.CaptureActivity;
+
 /**
  * This thread does all the heavy lifting of decoding the images.
  *

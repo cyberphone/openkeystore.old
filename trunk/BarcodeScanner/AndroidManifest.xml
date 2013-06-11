@@ -15,7 +15,7 @@
  limitations under the License.
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.google.zxing.client.android"
+          package="org.webpki.android.qrcode"
           android:versionName="4.3.2"
           android:versionCode="88"
           android:installLocation="auto">

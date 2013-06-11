@@ -38,6 +38,9 @@ import android.util.Log;
 import java.util.Collection;
 import java.util.Map;
 
+import org.webpki.android.qrcode.CaptureActivity;
+import org.webpki.android.qrcode.R;
+
 /**
  * This class handles all the messaging which comprises the state machine for capture.
  *
@@ -58,7 +61,7 @@ public final class CaptureActivityHandler extends Handler {
     DONE
   }
 
-  CaptureActivityHandler(CaptureActivity activity,
+  public CaptureActivityHandler(CaptureActivity activity,
                          Collection<BarcodeFormat> decodeFormats,
                          Map<DecodeHintType,?> baseHints,
                          String characterSet,

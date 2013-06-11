@@ -28,10 +28,13 @@ import android.util.Log;
 
 import java.io.IOException;
 
+import org.webpki.android.qrcode.CaptureActivity;
+import org.webpki.android.qrcode.R;
+
 /**
  * Manages beeps and vibrations for {@link CaptureActivity}.
  */
-final class BeepManager {
+public final class BeepManager {
 
   private static final String TAG = BeepManager.class.getSimpleName();
 
@@ -43,13 +46,13 @@ final class BeepManager {
   private boolean playBeep;
   private boolean vibrate;
 
-  BeepManager(Activity activity) {
+  public BeepManager(Activity activity) {
     this.activity = activity;
     this.mediaPlayer = null;
     updatePrefs();
   }
 
-  void updatePrefs() {
+  public void updatePrefs() {
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
     playBeep = shouldBeep(prefs, activity);
     vibrate = prefs.getBoolean(PreferencesActivity.KEY_VIBRATE, false);
@@ -61,7 +64,7 @@ final class BeepManager {
     }
   }
 
-  void playBeepSoundAndVibrate() {
+  public void playBeepSoundAndVibrate() {
     if (playBeep && mediaPlayer != null) {
       mediaPlayer.start();
     }

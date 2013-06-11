@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package com.google.zxing.client.android;
+package org.webpki.android.qrcode;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.Result;
 import com.google.zxing.ResultMetadataType;
 import com.google.zxing.ResultPoint;
+import com.google.zxing.client.android.AmbientLightManager;
+import com.google.zxing.client.android.BeepManager;
+import com.google.zxing.client.android.CaptureActivityHandler;
+import com.google.zxing.client.android.FinishListener;
+import com.google.zxing.client.android.InactivityTimer;
+import com.google.zxing.client.android.ViewfinderView;
 import com.google.zxing.client.android.camera.CameraManager;
 
 import android.app.Activity;
@@ -88,7 +94,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   private BeepManager beepManager;
   private AmbientLightManager ambientLightManager;
 
-  ViewfinderView getViewfinderView() {
+  public ViewfinderView getViewfinderView() {
     return viewfinderView;
   }
 
@@ -96,7 +102,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     return handler;
   }
 
-  CameraManager getCameraManager() {
+  public CameraManager getCameraManager() {
     return cameraManager;
   }
 
