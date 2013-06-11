@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import com.google.zxing.PlanarYUVLuminanceSource;
+import com.google.zxing.client.android.ViewfinderView;
 import com.google.zxing.client.android.camera.open.OpenCameraManager;
 
 import java.io.IOException;
@@ -70,9 +71,10 @@ public final class CameraManager {
    * Opens the camera driver and initializes the hardware parameters.
    *
    * @param holder The surface object which the camera will draw preview frames into.
+ * @param viewfinderView 
    * @throws IOException Indicates the camera driver failed to open.
    */
-  public synchronized void openDriver(SurfaceHolder holder) throws IOException {
+  public synchronized void openDriver(SurfaceHolder holder, ViewfinderView viewfinderView) throws IOException {
     Camera theCamera = camera;
     if (theCamera == null) {
       theCamera = new OpenCameraManager().build().open();
@@ -85,7 +87,7 @@ public final class CameraManager {
 
     if (!initialized) {
       initialized = true;
-      configManager.initFromCameraParameters(theCamera);
+      configManager.initFromCameraParameters(theCamera, viewfinderView);
       if (requestedFramingRectWidth > 0 && requestedFramingRectHeight > 0) {
         setManualFramingRect(requestedFramingRectWidth, requestedFramingRectHeight);
         requestedFramingRectWidth = 0;

@@ -24,8 +24,10 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.google.zxing.client.android.PreferencesActivity;
+import com.google.zxing.client.android.ViewfinderView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,14 +59,14 @@ final class CameraConfigurationManager {
 
   /**
    * Reads, one time, values from the camera that are needed by the app.
+ * @param viewfinderView 
    */
-  void initFromCameraParameters(Camera camera) {
+  void initFromCameraParameters(Camera camera, ViewfinderView viewfinderView) {
     Camera.Parameters parameters = camera.getParameters();
-    WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-    Display display = manager.getDefaultDisplay();
-    int width = display.getWidth();
-    int height = display.getHeight();
+    int width = viewfinderView.getWidth();
+    int height = viewfinderView.getHeight();
     Log.i ("INIT", "W=" + width + " H=" + height);
+    	
     // We're landscape-only, and have apparently seen issues with display thinking it's portrait 
     // when waking from sleep. If it's not landscape, assume it's mistaken and reverse them:
     if (width < height) {
@@ -75,6 +77,8 @@ final class CameraConfigurationManager {
       height = temp;
 */
     }
+    camera.setDisplayOrientation(width < height ? 90 : 0);
+ 
     screenResolution = new Point(width, height);
     Log.i(TAG, "Screen resolution: " + screenResolution);
     cameraResolution = findBestPreviewSizeValue(parameters, screenResolution);
