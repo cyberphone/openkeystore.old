@@ -47,6 +47,7 @@ public final class ViewfinderView extends View {
   private static final int CURRENT_POINT_OPACITY = 0xA0;
   private static final int MAX_RESULT_POINTS = 20;
   private static final int POINT_SIZE = 6;
+  private static final int LASER_SQUARE_STROKE = 4;
 
   private CameraManager cameraManager;
   private final Paint paint;
@@ -106,10 +107,15 @@ public final class ViewfinderView extends View {
       // Draw a red "laser scanner" line through the middle to show decoding is active
       paint.setColor(laserColor);
       paint.setAlpha(SCANNER_ALPHA[scannerAlpha]);
+      paint.setStyle (Paint.Style.STROKE);
+      paint.setStrokeWidth(LASER_SQUARE_STROKE);
       scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
-      int middle = frame.height() / 2 + frame.top;
-      canvas.drawRect(frame.left + 2, middle - 1, frame.right - 1, middle + 2, paint);
-      
+      canvas.drawRect(frame.left,
+              frame.top,
+              frame.right,
+              frame.bottom, paint);
+      paint.setStyle(Paint.Style.FILL);
+    
       Rect previewFrame = cameraManager.getFramingRectInPreview();
       float scaleX = frame.width() / (float) previewFrame.width();
       float scaleY = frame.height() / (float) previewFrame.height();

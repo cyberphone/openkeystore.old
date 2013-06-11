@@ -25,7 +25,7 @@
   <com.google.zxing.client.android.ViewfinderView
       android:id="@+id/viewfinder_view"
       android:layout_width="fill_parent"
-      android:layout_height="fill_parent"/>
+      android:layout_height="fill_parent" />
 
   <TextView android:id="@+id/status_view"
             android:layout_width="wrap_content"
@@ -37,8 +37,9 @@
 
   <LinearLayout
       android:layout_width="fill_parent"
-      android:background="@color/contents_text"
-      android:layout_height="wrap_content" >
+      android:layout_height="wrap_content"
+      android:background="#ffE0E0E0"
+      android:padding="@dimen/half_padding" >
 
       <ImageView
           android:id="@+id/imageView1"
@@ -51,8 +52,9 @@
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_gravity="center_vertical"
+          android:paddingLeft="@dimen/half_padding"
           android:text="QR ID"
-          android:textColor="@color/status_text" />
+          android:textColor="@color/result_view" />
 
   </LinearLayout>
 

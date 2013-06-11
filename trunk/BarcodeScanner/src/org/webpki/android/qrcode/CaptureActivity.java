@@ -224,6 +224,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     }
     cameraManager.closeDriver();
     ((TextView) findViewById(R.id.top_view)).setText(rawResult.getText());
+    ((SurfaceView) findViewById(R.id.preview_view)).setVisibility(View.GONE);
 /*
     Intent intent = new Intent (Intent.ACTION_VIEW).setData (Uri.parse (rawResult.getText()));
     startActivity (intent);
