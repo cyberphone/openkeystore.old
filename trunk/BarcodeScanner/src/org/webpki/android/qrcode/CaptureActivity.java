@@ -19,7 +19,6 @@ package org.webpki.android.qrcode;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.Result;
-import com.google.zxing.ResultMetadataType;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.client.android.AmbientLightManager;
 import com.google.zxing.client.android.BeepManager;
@@ -31,41 +30,22 @@ import com.google.zxing.client.android.camera.CameraManager;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.Collection;
-import java.util.Date;
-import java.util.EnumSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This activity opens the camera and does the actual scanning on a background thread. It draws a
@@ -243,7 +223,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
       drawResultPoints(barcode, scaleFactor, rawResult);
     }
     cameraManager.closeDriver();
-    setTitle (rawResult.getText());
+    ((TextView) findViewById(R.id.top_view)).setText(rawResult.getText());
 /*
     Intent intent = new Intent (Intent.ACTION_VIEW).setData (Uri.parse (rawResult.getText()));
     startActivity (intent);
@@ -304,7 +284,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
       return;
     }
     try {
-      cameraManager.openDriver(surfaceHolder, viewfinderView);
+      cameraManager.openDriver(surfaceHolder);
       // Creating the handler starts the preview, which can also throw a RuntimeException.
       if (handler == null) {
         handler = new CaptureActivityHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);

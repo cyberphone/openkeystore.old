@@ -24,10 +24,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.google.zxing.client.android.PreferencesActivity;
-import com.google.zxing.client.android.ViewfinderView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,10 +59,12 @@ final class CameraConfigurationManager {
    * Reads, one time, values from the camera that are needed by the app.
  * @param viewfinderView 
    */
-  void initFromCameraParameters(Camera camera, ViewfinderView viewfinderView) {
+  void initFromCameraParameters(Camera camera) {
     Camera.Parameters parameters = camera.getParameters();
-    int width = viewfinderView.getWidth();
-    int height = viewfinderView.getHeight();
+    WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+    Display display = manager.getDefaultDisplay();
+    int width = display.getWidth();
+    int height = display.getHeight();
     Log.i ("INIT", "W=" + width + " H=" + height);
 
     camera.setDisplayOrientation(width < height ? 90 : 0);

@@ -35,4 +35,25 @@
             android:text="@string/msg_default_status"
             android:textColor="@color/status_text"/>
 
+  <LinearLayout
+      android:layout_width="fill_parent"
+      android:background="@color/contents_text"
+      android:layout_height="wrap_content" >
+
+      <ImageView
+          android:id="@+id/imageView1"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:src="@drawable/launcher_icon" />
+
+      <TextView
+          android:id="@+id/top_view"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_vertical"
+          android:text="QR ID"
+          android:textColor="@color/status_text" />
+
+  </LinearLayout>
+
 </FrameLayout>
