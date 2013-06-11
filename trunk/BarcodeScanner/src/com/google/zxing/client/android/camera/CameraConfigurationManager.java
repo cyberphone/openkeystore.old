@@ -66,17 +66,7 @@ final class CameraConfigurationManager {
     int width = viewfinderView.getWidth();
     int height = viewfinderView.getHeight();
     Log.i ("INIT", "W=" + width + " H=" + height);
-    	
-    // We're landscape-only, and have apparently seen issues with display thinking it's portrait 
-    // when waking from sleep. If it's not landscape, assume it's mistaken and reverse them:
-    if (width < height) {
-      Log.i(TAG, "Display reports portrait orientation; assuming this is incorrect");
-/*
-      int temp = width;
-      width = height;
-      height = temp;
-*/
-    }
+
     camera.setDisplayOrientation(width < height ? 90 : 0);
  
     screenResolution = new Point(width, height);
@@ -183,15 +173,6 @@ final class CameraConfigurationManager {
       parameters.setFlashMode(flashMode);
     }
 
-    /*
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-    if (!prefs.getBoolean(PreferencesActivity.KEY_DISABLE_EXPOSURE, false)) {
-      if (!safeMode) {
-        ExposureInterface exposure = new ExposureManager().build();
-        exposure.setExposure(parameters, newSetting);
-      }
-    }
-     */
   }
 
   private Point findBestPreviewSizeValue(Camera.Parameters parameters, Point screenResolution) {
