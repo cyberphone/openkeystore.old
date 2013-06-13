@@ -31,9 +31,11 @@ import com.google.zxing.client.android.camera.CameraManager;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -45,6 +47,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Map;
 
@@ -227,15 +230,30 @@ public final class QRIDActivity extends Activity implements SurfaceHolder.Callba
       drawResultPoints(barcode, scaleFactor, rawResult);
     }
     cameraManager.closeDriver();
-    ((TextView) findViewById(R.id.qrid_result_text)).setText(rawResult.getText());
     ((SurfaceView) findViewById(R.id.preview_view)).setVisibility(View.GONE);
     helpTextView.setVisibility(View.GONE);
-/*
-    Intent intent = new Intent (Intent.ACTION_VIEW).setData (Uri.parse (rawResult.getText()));
-    startActivity (intent);
-    finish ();
-*/
-
+    String raw = rawResult.getText();
+    if (raw.startsWith ("webpki.org="))
+      {
+        try
+          {
+            raw = URLDecoder.decode (raw.substring (11), "UTF-8");
+            Intent intent = new Intent (Intent.ACTION_VIEW).setData (Uri.parse (raw));
+            startActivity (intent);
+            finish ();
+            return;
+          }
+        catch (IOException e)
+          {
+          }
+      }
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    builder.setIcon (R.drawable.qr_launcher);
+    builder.setTitle(getString(R.string.qrid_app_name));
+    builder.setMessage("This is not a valid QR ID!");
+    builder.setPositiveButton(R.string.button_ok, new FinishListener(this));
+    builder.setOnCancelListener(new FinishListener(this));
+    builder.show();
   }
 
   /**

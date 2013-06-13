@@ -3,7 +3,7 @@
     <string name="app_name">WebPKI Suite</string>
     <string name="qrid_app_name">QR ID</string>
     <string name="hello_world">This part is still under development...</string>
-    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_properties">Properties</string>
     <string name="title_activity_qrid">QR ID</string>
     <string name="title_activity_keygen2">Credential Enrollment</string>
     <string name="title_activity_fail_logger">Protocol Execution Log</string>

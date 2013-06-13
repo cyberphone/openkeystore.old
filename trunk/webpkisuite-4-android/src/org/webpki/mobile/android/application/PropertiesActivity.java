@@ -40,7 +40,7 @@ import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 
-public class SettingsActivity extends ListActivity
+public class PropertiesActivity extends ListActivity
   {
     static final int SETTINGS_ABOUT = 0;
     static final int SETTINGS_DEVICE_ID = 1;
@@ -54,7 +54,7 @@ public class SettingsActivity extends ListActivity
     public void onCreate (Bundle savedInstanceState)
       {
         super.onCreate (savedInstanceState);
-        setContentView (R.layout.activity_settings);
+        setContentView (R.layout.activity_properties);
         setListAdapter (new ArrayAdapter<String> (this, android.R.layout.simple_list_item_1, items));
       }
 
