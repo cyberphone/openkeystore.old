@@ -25,7 +25,6 @@ import java.security.cert.X509Certificate;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.util.ArrayUtil;
 
@@ -43,13 +42,13 @@ import static org.webpki.wasp.WASPConstants.*;
 public class AuthenticationResponseDecoder extends AuthenticationResponse
   {
     // Attributes
-    private GregorianCalendar server_time;
+    GregorianCalendar server_time;
 
     private GregorianCalendar client_time;
 
     private XMLSignatureWrapper signature;
 
-    private X509Certificate[] signer_certpath;
+    X509Certificate[] signer_certpath;
 
 
     public String getSubmitURL ()
@@ -69,6 +68,17 @@ public class AuthenticationResponseDecoder extends AuthenticationResponse
         return client_time;
       }
 
+
+    public String getID ()
+      {
+        return id;
+      }
+
+
+    public ClientPlatformFeature[] getClientPlatformFeatures ()
+      {
+        return client_platform_features.toArray (new ClientPlatformFeature[0]);
+      }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // XML Reader
@@ -93,6 +103,14 @@ public class AuthenticationResponseDecoder extends AuthenticationResponse
         server_certificate_fingerprint = ah.getBinaryConditional (SERVER_CERT_FP_ATTR);
 
         rd.getChild();
+        
+        //////////////////////////////////////////////////////////////////////////
+        // Get the optional clien platform features
+        //////////////////////////////////////////////////////////////////////////
+        while (rd.hasNext (ClientPlatformFeature.CLIENT_PLATFORM_FEATURE_ELEM))
+          {
+            client_platform_features.add (ClientPlatformFeature.read (rd));
+          }
 
         //////////////////////////////////////////////////////////////////////////
         // Get the sole child element
@@ -112,40 +130,4 @@ public class AuthenticationResponseDecoder extends AuthenticationResponse
         ds.validateEnvelopedSignature (this, null, signature, id);
         signer_certpath = verifier.getSignerCertificatePath ();
       }
-
-
-    private void bad (String mismatch) throws IOException
-      {
-        throw new IOException ("Mismatch between request and response: " + mismatch);
-      }
-
-
-    public void checkRequestResponseIntegrity (AuthenticationRequestEncoder areqenc, byte[] expected_fingerprint) throws IOException
-      {
-        if (expected_fingerprint != null &&
-            (server_certificate_fingerprint == null || !ArrayUtil.compare (server_certificate_fingerprint, expected_fingerprint)))
-          {
-            bad ("Server certificate fingerprint");
-          }
-        if (!id.equals (areqenc.id))
-          {
-            bad ("ID attributes");
-          }
-        if (!DOMWriterHelper.formatDateTime (server_time.getTime ()).equals (DOMWriterHelper.formatDateTime (areqenc.server_time)))
-          {
-            bad ("ServerTime attribute");
-          }
-        if (areqenc.cert_filters.size () > 0 && signer_certpath != null)
-          {
-            for (CertificateFilter cf : areqenc.cert_filters)
-              {
-                if (cf.matches (signer_certpath, null, null))
-                  {
-                    return;
-                  }
-              }
-            bad ("Certificates does not match filter(s)");
-          }
-      }
-
   }

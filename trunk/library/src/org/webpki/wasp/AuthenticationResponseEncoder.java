@@ -87,7 +87,7 @@ public class AuthenticationResponseEncoder extends AuthenticationResponse
             elem.appendChild (getRootDocument ().createTextNode ("\n"));
           }
         
-        AuthenticationRequestDecoder.AuthenticationProfile selected_auth_profile = auth_req_decoder.getAuthenticationProfiles ()[0];
+        AuthenticationProfile selected_auth_profile = auth_req_decoder.getAuthenticationProfiles ()[0];
         XMLSigner ds = new XMLSigner (signer);
         ds.setSignatureAlgorithm (selected_auth_profile.getSignatureAlgorithm ());
         ds.setDigestAlgorithm (selected_auth_profile.getDigestAlgorithm ());
@@ -97,6 +97,13 @@ public class AuthenticationResponseEncoder extends AuthenticationResponse
         ds.setSignedKeyInfo (selected_auth_profile.getSignedKeyInfo ());
 
         ds.createEnvelopedSignature (getRootDocument (), id);
+      }
+
+
+    public AuthenticationResponseEncoder addClientPlatformFeature (ClientPlatformFeature client_platform_feature)
+      {
+        client_platform_features.add (client_platform_feature);
+        return this;
       }
 
 
@@ -118,6 +125,11 @@ public class AuthenticationResponseEncoder extends AuthenticationResponse
           {
             wr.setBinaryAttribute (SERVER_CERT_FP_ATTR, server_certificate_fingerprint);
           }
+        
+        for (ClientPlatformFeature client_platform_feature : client_platform_features)
+          {
+            add_new_line = false;
+            client_platform_feature.write (wr);
+          }
       }
-
   }

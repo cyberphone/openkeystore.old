@@ -1451,4 +1451,18 @@ public class ServerState implements Serializable
       {
         return addKeyProperties (app_usage, key_specifier, null, null, true);
       }
+
+
+    private LinkedHashMap<String,Object> service_specific_objects = new LinkedHashMap<String,Object> ();
+    
+    public void setServiceSpecificObject (String name, Object value)
+      {
+        service_specific_objects.put (name, value);
+      }
+
+
+    public Object getServiceSpecificObject (String name)
+      {
+        return service_specific_objects.get (name);
+      }
   }

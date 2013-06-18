@@ -96,12 +96,12 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
        
       }
 
-    String id;
+    public String id;
 
     Element sig;
     Element ins;
 
-    String value;
+    public String value;
 
     XMLSignatureWrapper signature;
     

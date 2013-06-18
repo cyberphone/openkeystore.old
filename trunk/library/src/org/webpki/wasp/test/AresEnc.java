@@ -26,7 +26,9 @@ import java.security.KeyStore;
 
 import org.webpki.util.ArrayUtil;
 
+import org.webpki.xml.XMLCookie;
 import org.webpki.xml.XMLSchemaCache;
+import org.webpki.xmldsig.test.xmlobject;
 
 import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.crypto.KeyStoreSigner;
@@ -34,6 +36,7 @@ import org.webpki.crypto.SignerInterface;
 
 import org.webpki.wasp.AuthenticationRequestDecoder;
 import org.webpki.wasp.AuthenticationResponseEncoder;
+import org.webpki.wasp.ClientPlatformFeature;
 
 
 public class AresEnc
@@ -54,6 +57,16 @@ System.out.println ("SIGALG=" + authdec.getAuthenticationProfiles ()[0].getSigna
 // The following creates a matching AuthenticationResponse
 
         AuthenticationResponseEncoder authenc = new AuthenticationResponseEncoder ();
+        
+        if (authdec.getRequestedClientPlatformFeatures ().length > 0)
+          {
+            xmlobject o = new xmlobject ();
+            o.id = "id.1234";
+            o.value = "Some text";
+            o.forcedDOMRewrite ();
+            authenc.addClientPlatformFeature (new ClientPlatformFeature (authdec.getRequestedClientPlatformFeatures ()[0],
+                                              new XMLCookie (o)));
+          }
 
         if (respprefix)
           {

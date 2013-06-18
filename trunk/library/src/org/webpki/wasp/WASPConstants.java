@@ -51,8 +51,6 @@ public interface WASPConstants
 
     String CERTIFICATE_FILTER_ELEM = "CertificateFilter";
 
-    String IDP_ASSERTIONS_ELEM     = "IdentityProviderAssertions";
-
     KeyContainerTypes[] KEYCONTAINER2NAME  = new KeyContainerTypes[] {KeyContainerTypes.FILE,
                                                                       KeyContainerTypes.TPM,
                                                                       KeyContainerTypes.SIM,
@@ -71,7 +69,7 @@ public interface WASPConstants
 
     String REQUEST_URL_ATTR                = "RequestURL";
 
-    String CANCEL_URL_ATTR                 = "CancelURL";
+    String ABORT_URL_ATTR                  = "AbortURL";
 
     String SERVER_TIME_ATTR                = "ServerTime";
 
@@ -86,6 +84,8 @@ public interface WASPConstants
     String COPY_DATA_ATTR                  = "CopyData";
 
     String SERVER_CERT_FP_ATTR             = "ServerCertificateFingerprint";
+
+    String CLIENT_PLATFORM_FEATURES_ATTR   = "ClientPlatformFeatures";
 
     String MIME_TYPE_ATTR                  = "MIMEType";
 

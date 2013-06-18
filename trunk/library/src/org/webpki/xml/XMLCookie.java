@@ -67,6 +67,5 @@ public class XMLCookie implements Serializable
       {
         return ArrayUtil.compare (getC14NData (), ref.getC14NData ());
       }
-
   }
 

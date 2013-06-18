@@ -59,7 +59,7 @@ public class SignatureRequestDecoder extends SignatureRequest
 
     private String cancel_url;                                                          // Optional
 
-    private ClientPlatformRequest client_platform_request;                              // Optional
+    private ClientPlatformFeature client_platform_request;                              // Optional
 
     private String signature_gui_policy;                                                // Optional
 
@@ -128,7 +128,7 @@ public class SignatureRequestDecoder extends SignatureRequest
               }
           }
         cf.setKeyUsage (key_usage);
-        cf.setExtKeyUsage (ah.getStringConditional (CF_EXT_KEY_USAGE_ATTR));
+        cf.setExtendedKeyUsage (ah.getStringConditional (CF_EXT_KEY_USAGE_ATTR));
         return cf;
       }
 
@@ -365,7 +365,7 @@ public class SignatureRequestDecoder extends SignatureRequest
       }
 
 
-    public ClientPlatformRequest getClientPlatformRequest ()
+    public ClientPlatformFeature getClientPlatformRequest ()
       {
         return client_platform_request;
       }
@@ -431,7 +431,7 @@ public class SignatureRequestDecoder extends SignatureRequest
 
         submit_url = ah.getString (SUBMIT_URL_ATTR);
 
-        cancel_url = ah.getStringConditional (CANCEL_URL_ATTR);
+        cancel_url = ah.getStringConditional (ABORT_URL_ATTR);
 
         signature_gui_policy = ah.getStringConditional (SIGNATURE_GUI_POLICY_ATTR);
 
@@ -495,9 +495,9 @@ public class SignatureRequestDecoder extends SignatureRequest
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional client platform request data [0..1]
         /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (ClientPlatformRequest.CLIENT_PLATFORM_REQUEST_ELEM))
+        if (rd.hasNext (ClientPlatformFeature.CLIENT_PLATFORM_FEATURE_ELEM))
           {
-            client_platform_request = ClientPlatformRequest.read (rd);
+            client_platform_request = ClientPlatformFeature.read (rd);
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

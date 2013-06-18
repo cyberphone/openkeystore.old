@@ -18,6 +18,8 @@ package org.webpki.wasp;
 
 import java.io.IOException;
 
+import java.util.Vector;
+
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
@@ -37,6 +39,8 @@ abstract class AuthenticationResponse extends XMLObjectWrapper
     String request_url;
 
     byte[] server_certificate_fingerprint;                     // Optional
+    
+    Vector<ClientPlatformFeature> client_platform_features = new Vector<ClientPlatformFeature> ();
 
     public void init () throws IOException
       {

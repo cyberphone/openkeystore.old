@@ -18,8 +18,6 @@ package org.webpki.wasp;
 
 import java.io.IOException;
 
-import java.util.Vector;
-
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 
@@ -39,98 +37,69 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
   {
     private String server_time;
 
-    private Vector<AuthenticationProfile> auth_profiles = new Vector<AuthenticationProfile> ();
-
-    private Vector<CertificateFilter> cert_filters = new Vector<CertificateFilter> ();  // Optional
-
-    private ClientPlatformRequest client_platform_request;                              // Optional
-
     private XMLSignatureWrapper signature;                                              // Optional
-
-
-    public class AuthenticationProfile
-      {
-        boolean signed_key_info;
-
-        boolean extended_cert_path;
-
-        String canonicalization_algorithm;
-
-        String digest_algorithm;
-
-        String signature_algorithm;
-
-        AuthenticationProfile ()
-          {
-          }
-
-
-        public boolean getSignedKeyInfo ()
-          {
-            return signed_key_info;
-          }
-
-
-        public boolean getExtendedCertPath ()
-          {
-            return extended_cert_path;
-          }
-
-
-        public CanonicalizationAlgorithms getCanonicalizationAlgorithm () throws IOException
-          {
-            return canonicalization_algorithm == null ? null : CanonicalizationAlgorithms.getAlgorithmFromURI (canonicalization_algorithm);
-          }
-
-
-        public HashAlgorithms getDigestAlgorithm () throws IOException
-          {
-            return digest_algorithm == null ? null : HashAlgorithms.getAlgorithmFromURI (digest_algorithm);
-          }
-
-
-        public SignatureAlgorithms getSignatureAlgorithm () throws IOException
-          {
-            return signature_algorithm == null ? null : SignatureAlgorithms.getAlgorithmFromURI (signature_algorithm);
-          }
-
-      }
-
 
     private void readAuthenticationProfile (DOMReaderHelper rd) throws IOException
       {
         rd.getNext (AUTHENTICATION_PROFILE_ELEM);
         DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
         AuthenticationProfile ap = new AuthenticationProfile ();
+
         ap.signed_key_info = ah.getBooleanConditional (SIGNED_KEY_INFO_ATTR);
 
         ap.extended_cert_path = ah.getBooleanConditional (EXTENDED_CERT_PATH_ATTR);
 
-        ap.canonicalization_algorithm = ah.getStringConditional (CN_ALG_ATTR);
-
-        ap.digest_algorithm = ah.getStringConditional (DIGEST_ALG_ATTR);
-
-        ap.signature_algorithm = ah.getStringConditional (SIGNATURE_ALG_ATTR);
-
-        if ((ap.canonicalization_algorithm == null || CanonicalizationAlgorithms.testAlgorithmURI (ap.canonicalization_algorithm)) &&
-            (ap.digest_algorithm == null || HashAlgorithms.testAlgorithmURI (ap.digest_algorithm)) &&
-            (ap.signature_algorithm == null || SignatureAlgorithms.testAlgorithmURI (ap.signature_algorithm)))
+        String value;
+        
+        if ((value = ah.getStringConditional (CN_ALG_ATTR)) != null)
           {
-            auth_profiles.add (ap);
+            if (CanonicalizationAlgorithms.testAlgorithmURI (value))
+              {
+                ap.canonicalization_algorithm = CanonicalizationAlgorithms.getAlgorithmFromURI (value);
+              }
+            else
+              {
+                return;
+              }
           }
-      }
 
+        if ((value = ah.getStringConditional (DIGEST_ALG_ATTR)) != null)
+          {
+            if (HashAlgorithms.testAlgorithmURI (value))
+              {
+                ap.digest_algorithm = HashAlgorithms.getAlgorithmFromURI (value);
+              }
+            else
+              {
+                return;
+              }
+          }
+  
+        if ((value = ah.getStringConditional (SIGNATURE_ALG_ATTR)) != null)
+          {
+            if (SignatureAlgorithms.testAlgorithmURI (value))
+              {
+                ap.signature_algorithm = SignatureAlgorithms.getAlgorithmFromURI (value);
+              }
+            else
+              {
+                return;
+              }
+          }
+
+        authentication_profiles.add (ap);
+      }
 
 
     public AuthenticationProfile[] getAuthenticationProfiles ()
       {
-        return auth_profiles.toArray (new AuthenticationProfile[0]);
+        return authentication_profiles.toArray (new AuthenticationProfile[0]);
       }
 
 
     public CertificateFilter[] getCertificateFilters ()
       {
-        return cert_filters.toArray (new CertificateFilter[0]);
+        return certificate_filters.toArray (new CertificateFilter[0]);
       }
 
 
@@ -152,15 +121,15 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
       }
 
 
-    public String getCancelURL ()
+    public String getAbortURL ()
       {
-        return cancel_url;
+        return abort_url;
       }
 
 
-    public ClientPlatformRequest getClientPlatformRequest ()
+    public String[] getRequestedClientPlatformFeatures ()
       {
-        return client_platform_request;
+        return requested_client_platform_features.toArray (new String[0]);
       }
 
 
@@ -205,11 +174,20 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
 
         submit_url = ah.getString (SUBMIT_URL_ATTR);
 
-        cancel_url = ah.getStringConditional (CANCEL_URL_ATTR);
+        abort_url = ah.getStringConditional (ABORT_URL_ATTR);
 
         languages = ah.getListConditional (LANGUAGES_ATTR);
 
         expires = ah.getIntConditional (EXPIRES_ATTR, -1);  // Default: no timeout and associated GUI
+
+        //////////////////////////////////////////////////////////////////////////
+        // Optional "client platform features"
+        //////////////////////////////////////////////////////////////////////////
+        String[] features = ah.getListConditional (CLIENT_PLATFORM_FEATURES_ATTR);
+        if (features != null) for (String feature : features)
+          {
+            requested_client_platform_features.add (feature);
+          }
 
         rd.getChild ();
         
@@ -221,7 +199,7 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
             readAuthenticationProfile (rd);
           }
         while (rd.hasNext (AUTHENTICATION_PROFILE_ELEM));
-        if (auth_profiles.isEmpty ())
+        if (authentication_profiles.isEmpty ())
           {
             throw new IOException ("No matching AuthenticationProfile found");
           }
@@ -231,15 +209,7 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
         /////////////////////////////////////////////////////////////////////////////////////////
         while (rd.hasNext (CERTIFICATE_FILTER_ELEM))
           {
-            cert_filters.add (SignatureRequestDecoder.readCertificateFilter (rd));
-          }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the optional client platform request data [0..1]
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (ClientPlatformRequest.CLIENT_PLATFORM_REQUEST_ELEM))
-          {
-            client_platform_request = ClientPlatformRequest.read (rd);
+            certificate_filters.add (SignatureRequestDecoder.readCertificateFilter (rd));
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -250,5 +220,4 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
             signature = (XMLSignatureWrapper)wrap (rd.getNext ());
           }
       }
-
   }

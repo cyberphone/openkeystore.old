@@ -26,8 +26,11 @@ import java.util.EnumSet;
 import java.util.regex.Pattern;
 
 import java.security.cert.X509Certificate;
+
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
+
+import javax.security.auth.x500.X500Principal;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
@@ -99,11 +102,6 @@ public class CertificateFilter
           {
             return required;
           }
-      }
-
-
-    public CertificateFilter ()
-      {
       }
 
 
@@ -286,7 +284,7 @@ public class CertificateFilter
       }
 
 
-    public CertificateFilter setExtKeyUsage (String ext_key_usage_oid)
+    public CertificateFilter setExtendedKeyUsage (String ext_key_usage_oid)
       {
         this.ext_key_usage_oid = ext_key_usage_oid;
         return this;
@@ -435,9 +433,9 @@ public class CertificateFilter
         int path_len = issuer ? cert_path.length : 1;
         for (int q = 0; q < path_len; q++)
           {
-            String dn = issuer ? cert_path[q].getIssuerX500Principal ().getName ()
+            String dn = issuer ? cert_path[q].getIssuerX500Principal ().getName (X500Principal.RFC2253)
                                          :
-                                 cert_path[q].getSubjectX500Principal ().getName ();
+                                 cert_path[q].getSubjectX500Principal ().getName (X500Principal.RFC2253);
             if (pattern.matcher (dn).matches ())
               {
                 return true;

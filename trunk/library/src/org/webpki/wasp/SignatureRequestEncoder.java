@@ -33,7 +33,6 @@ import org.webpki.wasp.prof.xds.XDSProfileRequestEncoder;
 
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.XMLObjectWrapper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.xmldsig.XMLSigner;
 
@@ -53,11 +52,11 @@ public class SignatureRequestEncoder extends SignatureRequest
 
     Vector<SignatureProfileEncoder> signature_profiles = new Vector<SignatureProfileEncoder> ();
 
-    Vector<CertificateFilter> cert_filters = new Vector<CertificateFilter> ();
+    Vector<CertificateFilter> certificate_filters = new Vector<CertificateFilter> ();
 
-    DocumentReferences doc_refs = new DocumentReferences ();
+    DocumentReferences document_references = new DocumentReferences ();
 
-    DocumentData doc_data = new DocumentData ();
+    DocumentData document_data = new DocumentData ();
 
     String id;
 
@@ -65,7 +64,7 @@ public class SignatureRequestEncoder extends SignatureRequest
 
     String cancel_url;
 
-    ClientPlatformRequest client_platform_request;
+    ClientPlatformFeature client_platform_request;
 
     Date server_time;
 
@@ -79,16 +78,29 @@ public class SignatureRequestEncoder extends SignatureRequest
 
     private String prefix;  // Default: no prefix
 
+    static void writeOptionalStringAttribute (DOMWriterHelper wr, String attribute_name, String value) throws IOException
+      {
+        if (value != null)
+          {
+            wr.setStringAttribute (attribute_name, value);
+          }
+      }
 
     static void writeCertificateFilter (DOMWriterHelper wr, CertificateFilter cf) throws IOException
       {
         wr.addEmptyElement (CERTIFICATE_FILTER_ELEM);
-        wr.setBinaryAttribute (CF_SHA1_ATTR, cf.getSha1 ());
-        wr.setStringAttribute (CF_ISSUER_ATTR, cf.getIssuerRegEx ());
-        wr.setStringAttribute (CF_SUBJECT_ATTR, cf.getSubjectRegEx ());
-        wr.setStringAttribute (CF_EMAIL_ATTR, cf.getEmailAddress ());
-        wr.setBigIntegerAttribute (CF_SERIAL_ATTR, cf.getSerial ());
-        wr.setStringAttribute (CF_POLICY_ATTR, cf.getPolicy ());
+        if (cf.getSha1 () != null)
+          {
+            wr.setBinaryAttribute (CF_SHA1_ATTR, cf.getSha1 ());
+          }
+        writeOptionalStringAttribute (wr, CF_ISSUER_ATTR, cf.getIssuerRegEx ());
+        writeOptionalStringAttribute (wr, CF_SUBJECT_ATTR, cf.getSubjectRegEx ());
+        writeOptionalStringAttribute (wr, CF_EMAIL_ATTR, cf.getEmailAddress ());
+        if (cf.getSerial () != null)
+          {
+            wr.setBigIntegerAttribute (CF_SERIAL_ATTR, cf.getSerial ());
+          }
+        writeOptionalStringAttribute (wr, CF_POLICY_ATTR, cf.getPolicy ());
         if (cf.getContainers () != null)
           {
             KeyContainerTypes[] containers = cf.getContainers ();
@@ -129,13 +141,9 @@ public class SignatureRequestEncoder extends SignatureRequest
               }
             wr.setStringAttribute (CF_KEY_USAGE_ATTR, coded_key_usage.toString ().substring (0, i + 1));
           }
-        if (cf.getExtKeyUsage () != null) wr.setStringAttribute (CF_EXT_KEY_USAGE_ATTR, cf.getExtKeyUsage ());
+        writeOptionalStringAttribute (wr, CF_EXT_KEY_USAGE_ATTR, cf.getExtKeyUsage ());
       }
     // Constructors
-
-    @SuppressWarnings("unused")
-    private SignatureRequestEncoder () {}
-
 
     public SignatureRequestEncoder (String domain_id, String submit_url, String cancel_url)
       {
@@ -160,7 +168,7 @@ public class SignatureRequestEncoder extends SignatureRequest
 
     public CertificateFilter addCertificateFilter (CertificateFilter cf)
       {
-        cert_filters.add (cf);
+        certificate_filters.add (cf);
         return cf;
       }
 
@@ -177,9 +185,10 @@ public class SignatureRequestEncoder extends SignatureRequest
       }
 
 
-    public ClientPlatformRequest createClientPlatformRequest ()
+    public ClientPlatformFeature createClientPlatformRequest (ClientPlatformFeature cli)
       {
-        return client_platform_request = new ClientPlatformRequest ();
+// TODO
+        return client_platform_request = cli;
       }
 
 
@@ -283,36 +292,36 @@ public class SignatureRequestEncoder extends SignatureRequest
 
     public String addDocument (RootDocument the_doc, TargetContainer target, String mime_type, String meta_data) throws IOException
       {
-        doc_data.addDocument (the_doc);
+        document_data.addDocument (the_doc);
         String content_id = the_doc.getContentID ();
         switch (target)
           {
             case MAIN_DOCUMENT:
-              if (doc_refs.main_document != null)
+              if (document_references.main_document != null)
                 {
                   throw new IOException ("MainDocument already defined!");
                 }
-              doc_refs.main_document = doc_refs.addReference (content_id, mime_type, meta_data);
+              document_references.main_document = document_references.addReference (content_id, mime_type, meta_data);
               break;
 
             case DETAIL_DOCUMENT:
-              if (doc_refs.detail_document != null)
+              if (document_references.detail_document != null)
                 {
                   throw new IOException ("DetailDocument already defined!");
                 }
-              doc_refs.detail_document = doc_refs.addReference (content_id, mime_type, meta_data);
+              document_references.detail_document = document_references.addReference (content_id, mime_type, meta_data);
               break;
 
             case PROCESSING_DOCUMENT:
-              if (doc_refs.processing_document != null)
+              if (document_references.processing_document != null)
                 {
                   throw new IOException ("ProcessingDocument already defined!");
                 }
-              doc_refs.processing_document = doc_refs.addReference (content_id, mime_type, meta_data);
+              document_references.processing_document = document_references.addReference (content_id, mime_type, meta_data);
               break;
 
             case EMBEDDED_OBJECT:
-              doc_refs.addEmbeddedObjectReference (content_id, mime_type, meta_data);
+              document_references.addEmbeddedObjectReference (content_id, mime_type, meta_data);
               break;
 
             default:
@@ -326,9 +335,9 @@ public class SignatureRequestEncoder extends SignatureRequest
                                  boolean provider_originated, String description, String file, boolean must_access)
     throws IOException
       {
-        doc_data.addDocument (the_doc);
+        document_data.addDocument (the_doc);
         String content_id = the_doc.getContentID ();
-        doc_refs.addAttachmentReference (content_id, mime_type, meta_data, provider_originated, description, file, must_access);
+        document_references.addAttachmentReference (content_id, mime_type, meta_data, provider_originated, description, file, must_access);
         return content_id;
       }
 
@@ -354,7 +363,7 @@ public class SignatureRequestEncoder extends SignatureRequest
     // Debug method
     public DocumentSignatures getDocumentSignatures () throws IOException
       {
-        return new DocumentSignatures (doc_data);
+        return new DocumentSignatures (document_data);
       }
 
 
@@ -381,7 +390,7 @@ public class SignatureRequestEncoder extends SignatureRequest
 
         if (cancel_url != null)
           {
-            wr.setStringAttribute (CANCEL_URL_ATTR, cancel_url);
+            wr.setStringAttribute (ABORT_URL_ATTR, cancel_url);
           }
 
         if (signature_gui_policy != null)
@@ -421,7 +430,7 @@ public class SignatureRequestEncoder extends SignatureRequest
         //////////////////////////////////////////////////////////////////////////
         // Certificate filters (optional)
         //////////////////////////////////////////////////////////////////////////
-        for (CertificateFilter cf : cert_filters)
+        for (CertificateFilter cf : certificate_filters)
           {
             writeCertificateFilter (wr, cf);
           }
@@ -429,12 +438,12 @@ public class SignatureRequestEncoder extends SignatureRequest
         //////////////////////////////////////////////////////////////////////////
         // Document references
         //////////////////////////////////////////////////////////////////////////
-        Element sorter = doc_refs.write (wr);
+        Element sorter = document_references.write (wr);
 
         //////////////////////////////////////////////////////////////////////////
         // Document data
         //////////////////////////////////////////////////////////////////////////
-        doc_data.write (wr, sorter);
+        document_data.write (wr, sorter);
 
         //////////////////////////////////////////////////////////////////////////
         // Optional "client platform request"
@@ -452,5 +461,4 @@ public class SignatureRequestEncoder extends SignatureRequest
         Document doc = getRootDocument ();
         ds.createEnvelopedSignature (doc, id);
       }
-
   }

@@ -95,15 +95,15 @@ public class SreqEnc
         
         CertificateFilter cf1 = new CertificateFilter ()
               .setPolicy ("1.25.453.22.22.88")
-              .setKeyUsage (new CertificateFilter.KeyUsage ().require (KeyUsageBits.nonRepudiation))
+              .setKeyUsage (new CertificateFilter.KeyUsage ().require (KeyUsageBits.digitalSignature))
               .setSha1 (ci.getCertificateHash ())  // CA
-              .setIssuerDN (ci.getSubject ());
+              .setIssuerDN (ci.getIssuer ());
 
         CertificateFilter cf2 = new CertificateFilter ()
               .setSha1 (new byte[]{1,4,5,3,6,7,8,3,0,3,5,6,1,4,5,3,6,7,8,3})
               .setIssuerDN ("CN=SuckerTrust GlobalCA, emailaddress=boss@fire.hell, c=TV")
               .setContainers (new KeyContainerTypes[]{KeyContainerTypes.TPM, KeyContainerTypes.SIM})
-              .setExtKeyUsage ("1.56.245.123")
+              .setExtendedKeyUsage ("1.56.245.123")
               .setKeyUsage (new CertificateFilter.KeyUsage ().require (KeyUsageBits.nonRepudiation)
                                                              .disAllow (KeyUsageBits.keyEncipherment))
               .setEmailAddress ("try@this.com");

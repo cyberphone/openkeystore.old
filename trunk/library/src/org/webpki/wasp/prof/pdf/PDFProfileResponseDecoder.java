@@ -31,7 +31,6 @@ import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.ServerCookie;
 
 import org.webpki.wasp.DocumentSignatures;
 import org.webpki.wasp.DocumentReferences;

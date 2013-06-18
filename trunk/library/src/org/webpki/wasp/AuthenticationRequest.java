@@ -18,6 +18,10 @@ package org.webpki.wasp;
 
 import java.io.IOException;
 
+import java.util.Vector;
+
+import org.webpki.crypto.CertificateFilter;
+
 import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
@@ -37,17 +41,21 @@ abstract class AuthenticationRequest extends XMLObjectWrapper
 
     String submit_url;
 
-    String cancel_url;                                                          // Optional
+    String abort_url;                                                          // Optional
 
     String[] languages;                                                         // Optional
 
     int expires;
+    
+    Vector<AuthenticationProfile> authentication_profiles = new Vector<AuthenticationProfile> ();
 
+    Vector<CertificateFilter> certificate_filters = new Vector<CertificateFilter> ();
+
+    Vector<String> requested_client_platform_features = new Vector<String> ();
 
     AuthenticationRequest () {}
 
     static final String AUTHENTICATION_PROFILE_ELEM = "AuthenticationProfile";
-
 
     public void init () throws IOException
       {
@@ -84,5 +92,4 @@ abstract class AuthenticationRequest extends XMLObjectWrapper
       {
         throw new IOException ("Should have been implemented in derived class");
       }
-
   }

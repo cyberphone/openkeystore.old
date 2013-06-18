@@ -29,6 +29,7 @@ import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 
 import static org.webpki.wasp.WASPConstants.*;
+
 import static org.webpki.wasp.prof.pdf.PDFProfileConstants.*;
 
 

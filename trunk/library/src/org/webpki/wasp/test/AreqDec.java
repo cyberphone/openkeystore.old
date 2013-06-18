@@ -25,6 +25,7 @@ import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.test.DemoKeyStore;
 
+import org.webpki.wasp.AuthenticationProfile;
 import org.webpki.wasp.AuthenticationRequestDecoder;
 
 
@@ -61,7 +62,7 @@ public class AreqDec
 
         StringBuffer s = new StringBuffer ();
 
-        for (AuthenticationRequestDecoder.AuthenticationProfile ap : areq.getAuthenticationProfiles ())
+        for (AuthenticationProfile ap : areq.getAuthenticationProfiles ())
           {
             s.append ("\nAUTHPROF:");
             s.append ("\nSignedKeyInfo=" + ap.getSignedKeyInfo ());

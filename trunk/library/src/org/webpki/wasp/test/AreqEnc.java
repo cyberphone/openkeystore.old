@@ -29,6 +29,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 
+import org.webpki.wasp.AuthenticationProfile;
 import org.webpki.wasp.AuthenticationRequestEncoder;
 import org.webpki.wasp.AuthenticationResponseDecoder;
 
@@ -38,7 +39,6 @@ public class AreqEnc
     private static void show ()
       {
         System.out.println ("AreqEnc outfile [options]\n" +
-                            "  -W       simple 'Hello authentication world!'\n" +
                             "  -F authfile  full round (all 4 steps)\n" +
                             "  -H       use sha1 as message digest\n" +
                             "  -B       use rsasha1 as signature method\n" +
@@ -47,8 +47,8 @@ public class AreqEnc
                             "  -A       full cert path\n" +
                             "  -D       signed keyinfo\n" +
                             "  -I       sign request\n" +
+                            "  -R       request client-feature\n" +
                             "  -T       set a fixed server time-stamp\n" +
-                            "  -t       set a fixed client time-stamp\n" +
                             "  -t       set a fixed client time-stamp\n" +
                             "  -i       set a fixed reference ID\n" +
                             "  -f       set certificate filters\n" +
@@ -69,6 +69,7 @@ public class AreqEnc
         boolean certpath = false;
         boolean sha1DS = false;
         boolean rsasha1DS = false;
+        boolean request_client_feature = false;
         boolean signrequest = false;
         boolean certflt = false;
         boolean signKI = false;
@@ -90,6 +91,7 @@ public class AreqEnc
               }
             else if (args[i].equals ("-Q")) reqprefix = true;
             else if (args[i].equals ("-P")) respprefix = true;
+            else if (args[i].equals ("-R")) request_client_feature = true;
             else if (args[i].equals ("-T")) fixed_server_time = true;
             else if (args[i].equals ("-t")) fixed_client_time = true;
             else if (args[i].equals ("-i")) iddata = true;
@@ -101,7 +103,7 @@ public class AreqEnc
          
         AuthenticationRequestEncoder areqenc = new AuthenticationRequestEncoder ("https://example.com/home");
 
-        AuthenticationRequestEncoder.AuthenticationProfile ap = areqenc.addAuthenticationProfile ();
+        AuthenticationProfile ap = areqenc.addAuthenticationProfile ();
 
         ap.setExtendedCertPath (certpath);
 
@@ -144,6 +146,12 @@ public class AreqEnc
           {
             areqenc.setPrefix ("REQ");
           }
+        
+        if (request_client_feature)
+          {
+            areqenc.requestClientPlatformFeature ("http://xmlns.example.com/feature1");
+          }
+
         if (signrequest)
           {
             KeyStoreSigner req_signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
@@ -168,7 +176,7 @@ public class AreqEnc
         // Receive by requesting service
 
         AuthenticationResponseDecoder aresdec = AresDec.test (authfile);
-        aresdec.checkRequestResponseIntegrity (areqenc, null);
+        areqenc.checkRequestResponseIntegrity (aresdec, null);
 
         ArrayUtil.writeFile (authfile, aresdec.writeXML ());
 

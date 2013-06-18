@@ -49,25 +49,6 @@
             <!-- See "CertificateFilter" definition. -->
             <xs:element ref="auth:CertificateFilter" minOccurs="0" maxOccurs="unbounded"/>
 
-            <!-- If defined, the client software MUST include the client's key platform
-                 parameters in the "AuthenticationResponse/ClientPlatform" object.
-
-                 Optionally the requester MAY include XML data objects specifying that
-                 it wants additional information concerning the client platform.  Such
-                 XML objects may not necessarily be recognized by the authentication
-                 client and MAY also be ignored.  In case the requested information
-                 would include data that could affect personal integrity (like a
-                 machine ID), the client software SHOULD warn the user, and offer an
-                 option to decline the release of such data. -->
-            <xs:element name="ClientPlatformRequest" minOccurs="0">
-               <xs:complexType>
-                  <xs:sequence>
-                     <xs:any namespace="##any" processContents="lax" minOccurs="0"
-                             maxOccurs="unbounded"/>
-                  </xs:sequence>
-               </xs:complexType>
-            </xs:element>
-
             <!-- An authentication request MAY also include an enveloped XML signature
                  covering the entire AuthenticationRequest object (which MUST be done
                  through an explicit reference to the "AuthenticationRequest/@ID" attribute).
@@ -94,10 +75,10 @@
               as well. -->
          <xs:attribute name="SubmitURL" type="auth:httpURI" use="required"/>
 
-         <!-- Where to HTTP GET if the user cancels the authentication process.
+         <!-- Where to HTTP GET if the user aborts the authentication process.
               Note that applicable session cookies MUST be submitted in the
               request as well. -->
-         <xs:attribute name="CancelURL" type="auth:httpURI" use="optional"/>
+         <xs:attribute name="AbortURL" type="auth:httpURI" use="optional"/>
 
          <!-- GUI language in preference order.  Primarily for public computers. -->
          <xs:attribute name="Languages" type="auth:languageList" use="optional"/>
@@ -106,6 +87,15 @@
               an authentication request is about to expire.  The value is given
               in seconds. -->
          <xs:attribute name="Expires" type="xs:unsignedInt" use="optional"/>
+
+         <!-- Optionally the requester MAY include URI objects specifying that
+              it wants additional information concerning the client platform.
+              Such URIs may not necessarily be recognized by the authentication
+              client and MAY also be ignored.  In case the requested information
+              would include data that could affect personal integrity (like a
+              machine ID), the client software SHOULD warn the user, and offer an
+              option to decline the release of such data. -->
+         <xs:attribute name="ClientPlatformFeatures" type="auth:featureList" use="optional"/>
 
       </xs:complexType>
    </xs:element>
@@ -123,8 +113,8 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- See "AuthenticationRequest/ClientPlatformRequest". -->
-            <xs:element ref="auth:ClientPlatform" minOccurs="0"/>
+            <!-- See "AuthenticationRequest/@ClientPlatformFeatures". -->
+            <xs:element ref="auth:ClientPlatformFeature" minOccurs="0" maxOccurs="unbounded"/>
 
             <!-- The user authentication signature is an enveloped XML signature
                  covering the entire AuthenticationResponse object (which MUST be done
@@ -150,14 +140,10 @@
          <!-- The client's local clock is a mandatory item. -->
          <xs:attribute name="ClientTime" type="xs:dateTime" use="required"/>
 
-         <!-- For native (enhanced browser) mode implementations, the
-              "ServerCertificateSHA1" attribute MUST be populated with
-              the SHA1 hash of the associated server certificate if the
-              AuthenticationRequest was invoked over HTTPS.  For the
-              proxy modes, the certificate used for optionally signing
-              authentication requests MUST (if present) be hashed and the
-              result be assigned to "ServerCertificateSHA1" -->
-         <xs:attribute name="ServerCertificateSHA1" type="auth:sha1Hash" use="optional"/>
+         <!-- The "ServerCertificateFingerprint" attribute MUST be populated
+              with the SHA256 hash of the associated server certificate if the
+              AuthenticationRequest was invoked over HTTPS. --> 
+         <xs:attribute name="ServerCertificateFingerprint" type="auth:sha256Hash" use="optional"/>
 
       </xs:complexType>
    </xs:element>
@@ -293,21 +279,22 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      The "ClientPlatform" object is holding various authentication client related
+      The "ClientPlatformFeature" object is holding various authentication client related
       data which can be used for monitoring purposes.  With platform health statements
       this object may also be used for qualifying machines before granting access.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - --> 
 
-   <xs:element name="ClientPlatform">
+   <xs:element name="ClientPlatformFeature">
       <xs:complexType>
 
          <!-- Room for extensions like platform health statements.  Note:
               a relying party application MAY ignore a supplied extension
               as indicated by the "lax" processing directive. -->
          <xs:sequence>
-            <xs:any namespace="##any" processContents="lax" minOccurs="0"
-                    maxOccurs="unbounded"/>
+            <xs:any namespace="##any" processContents="lax"/>
          </xs:sequence>
+         
+         <xs:attribute name="URI" type="xs:anyURI" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -315,12 +302,6 @@
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                                    URI and OID definitions.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:simpleType name="cidURI">
-      <xs:restriction base="xs:string">
-         <xs:pattern value="cid:.*@.*"/>
-      </xs:restriction>
-   </xs:simpleType>
 
    <xs:simpleType name="oidValue">
       <xs:restriction base="xs:string">
@@ -334,6 +315,19 @@
       </xs:restriction>
    </xs:simpleType>
    
+   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                                  Feature list definitions.
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+   <xs:simpleType name="featureList">
+      <xs:restriction>
+         <xs:simpleType>
+            <xs:list itemType="xs:anyURI"/>
+         </xs:simpleType>
+         <xs:minLength value="1"/>
+      </xs:restriction>
+   </xs:simpleType>
+
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                                   Language list definitions.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -358,13 +352,20 @@
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                  SHA-1 hash data definition.
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - --> 
+                                    Hash data definitions.
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="sha1Hash">
       <xs:restriction base="xs:base64Binary">
          <xs:maxLength value="20"/>
          <xs:minLength value="20"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="sha256Hash">
+      <xs:restriction base="xs:base64Binary">
+         <xs:maxLength value="32"/>
+         <xs:minLength value="32"/>
       </xs:restriction>
    </xs:simpleType>
 

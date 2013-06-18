@@ -66,7 +66,7 @@ public class SignatureResponseDecoder extends SignatureResponse
         if (sreqenc.copy_data)
           {
             if (doc_data == null) bad ("Missing DocumentData");
-            if (!sreqenc.doc_data.equals (doc_data)) bad ("DocumentData mismatch");
+            if (!sreqenc.document_data.equals (doc_data)) bad ("DocumentData mismatch");
           }
         else if (doc_data != null) bad ("Unexpected DocumentData");
         byte[] expected_fingerprint = null;
@@ -86,9 +86,9 @@ public class SignatureResponseDecoder extends SignatureResponse
         for (SignatureProfileEncoder spe : sreqenc.signature_profiles)
           {
             if (sign_prof_data.match (spe,
-                                      sreqenc.doc_data,
-                                      sreqenc.doc_refs,
-                                      sreqenc.cert_filters,
+                                      sreqenc.document_data,
+                                      sreqenc.document_references,
+                                      sreqenc.certificate_filters,
                                       sreqenc.id,
                                       expected_fingerprint))
               {
@@ -107,12 +107,12 @@ public class SignatureResponseDecoder extends SignatureResponse
           }
         Document owner = getRootDocument ();
         Element root = getRootElement ();
-        sre.doc_data.setPrefix (DOMUtil.getPrefix (root));
-        sre.doc_data.setNameSpaceMode (false);
-        sre.doc_data.forcedDOMRewrite ();
+        sre.document_data.setPrefix (DOMUtil.getPrefix (root));
+        sre.document_data.setNameSpaceMode (false);
+        sre.document_data.forcedDOMRewrite ();
         Node text =  root.appendChild (owner.createTextNode ("\n"));
-        root.insertBefore (sre.doc_data.root = owner.importNode (sre.doc_data.getRootElement (), true), text);
-        doc_data = sre.doc_data;
+        root.insertBefore (sre.document_data.root = owner.importNode (sre.document_data.getRootElement (), true), text);
+        doc_data = sre.document_data;
       }
 
 

@@ -18,22 +18,19 @@ package org.webpki.wasp;
 
 import java.io.IOException;
 
-import java.util.Vector;
 import java.util.Date;
-
-import java.security.SecureRandom;
 
 import org.w3c.dom.Document;
 
 import org.webpki.xml.DOMWriterHelper;
 
 import org.webpki.xmldsig.XMLSigner;
-import org.webpki.xmldsig.CanonicalizationAlgorithms;
 
 import org.webpki.crypto.SignerInterface;
 import org.webpki.crypto.CertificateFilter;
-import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.URLFriendlyRandom;
+
+import org.webpki.util.ArrayUtil;
 import org.webpki.wasp.SignatureRequestEncoder;
 
 import static org.webpki.wasp.WASPConstants.*;
@@ -43,100 +40,13 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
   {
     Date server_time;
 
-    Vector<AuthenticationProfile> auth_profiles = new Vector<AuthenticationProfile> ();
-
-    Vector<CertificateFilter> cert_filters = new Vector<CertificateFilter> ();
-
-    ClientPlatformRequest client_platform_request;
-
-     private String prefix;  // Default: no prefix
+    private String prefix;  // Default: no prefix
 
 
-    public class AuthenticationProfile
-      {
-        boolean signed_key_info;
-
-        boolean extended_cert_path;
-
-        CanonicalizationAlgorithms canonicalization_algorithm = CanonicalizationAlgorithms.C14N_EXCL;
-
-        HashAlgorithms digest_algorithm = HashAlgorithms.SHA256;
-
-        SignatureAlgorithms signature_algorithm = SignatureAlgorithms.RSA_SHA256;
-
-
-        AuthenticationProfile ()
-          {
-          }
-
-
-        public void setSignedKeyInfo (boolean flag)
-          {
-            this.signed_key_info = flag;
-          }
-
-
-        public void setExtendedCertPath (boolean flag)
-          {
-            this.extended_cert_path = flag;
-          }
-
-
-        public void setCanonicalizationAlgorithm (CanonicalizationAlgorithms canonicalization_algorithm)
-          {
-            this.canonicalization_algorithm = canonicalization_algorithm;
-          }
-
-
-        public void setDigestAlgorithm (HashAlgorithms digest_algorithm)
-          {
-            this.digest_algorithm = digest_algorithm;
-          }
-
-
-        public void setSignatureAlgorithm (SignatureAlgorithms signature_algorithm)
-          {
-            this.signature_algorithm = signature_algorithm;
-          }
-
-
-        void write (DOMWriterHelper wr) throws IOException
-          {
-            wr.addEmptyElement (AUTHENTICATION_PROFILE_ELEM);
-            if (signed_key_info)
-              {
-                wr.setBooleanAttribute (SIGNED_KEY_INFO_ATTR, true);
-              }
-            if (extended_cert_path)
-              {
-                wr.setBooleanAttribute (EXTENDED_CERT_PATH_ATTR, true);
-              }
-            if (canonicalization_algorithm != CanonicalizationAlgorithms.C14N_EXCL)
-              {
-                wr.setStringAttribute (CN_ALG_ATTR, canonicalization_algorithm.getURI ());
-              }
-            if (digest_algorithm != HashAlgorithms.SHA256)
-              {
-                wr.setStringAttribute (DIGEST_ALG_ATTR, digest_algorithm.getURI ());
-              }
-            if (signature_algorithm != SignatureAlgorithms.RSA_SHA256)
-              {
-                wr.setStringAttribute (SIGNATURE_ALG_ATTR, signature_algorithm.getURI ());
-              }
-          }
-      }
-
-
-    // Constructors
-
-    @SuppressWarnings("unused")
-    private AuthenticationRequestEncoder () {}
-
-
-    public AuthenticationRequestEncoder (String submit_url, String cancel_url)
+    public AuthenticationRequestEncoder (String submit_url, String abort_url)
       {
         this.submit_url = submit_url;
-        this.cancel_url = cancel_url;
+        this.abort_url = abort_url;
       }
 
 
@@ -149,15 +59,15 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
     public AuthenticationProfile addAuthenticationProfile ()
       {
         AuthenticationProfile ap = new AuthenticationProfile ();
-        auth_profiles.add (ap);
+        authentication_profiles.add (ap);
         return ap;
       }
 
 
-    public CertificateFilter addCertificateFilter (CertificateFilter cf)
+    public AuthenticationRequestEncoder addCertificateFilter (CertificateFilter cf)
       {
-        cert_filters.add (cf);
-        return cf;
+        certificate_filters.add (cf);
+        return this;
       }
 
 
@@ -185,9 +95,10 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
       }
 
 
-    public ClientPlatformRequest createClientPlatformRequest ()
+    public AuthenticationRequestEncoder requestClientPlatformFeature (String feature_uri)
       {
-        return client_platform_request = new ClientPlatformRequest ();
+        requested_client_platform_features.add (feature_uri);
+        return this;
       }
 
 
@@ -200,7 +111,7 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
         //////////////////////////////////////////////////////////////////////////
         if (id == null)
           {
-            id = "_auth." + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom ().nextLong());
+            id = "_auth." + Long.toHexString (new Date ().getTime ()) + URLFriendlyRandom.generate (20);
           }
         wr.setStringAttribute (ID_ATTR, id);
 
@@ -212,9 +123,9 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
 
-        if (cancel_url != null)
+        if (abort_url != null)
           {
-            wr.setStringAttribute (CANCEL_URL_ATTR, cancel_url);
+            wr.setStringAttribute (ABORT_URL_ATTR, abort_url);
           }
 
         if (languages != null)
@@ -228,31 +139,51 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
           }
 
         //////////////////////////////////////////////////////////////////////////
+        // Optional "client platform features"
+        //////////////////////////////////////////////////////////////////////////
+        if (!requested_client_platform_features.isEmpty ())
+          {
+            wr.setListAttribute (CLIENT_PLATFORM_FEATURES_ATTR, requested_client_platform_features.toArray (new String[0]));
+          }
+
+        //////////////////////////////////////////////////////////////////////////
         // Authentication profiles
         //////////////////////////////////////////////////////////////////////////
-        if (auth_profiles.isEmpty ())
+        if (authentication_profiles.isEmpty ())
           {
             addAuthenticationProfile ();
           }
-        for (AuthenticationProfile ap : auth_profiles)
+        for (AuthenticationProfile ap : authentication_profiles)
           {
-            ap.write (wr);
+            wr.addEmptyElement (AUTHENTICATION_PROFILE_ELEM);
+            if (ap.signed_key_info)
+              {
+                wr.setBooleanAttribute (SIGNED_KEY_INFO_ATTR, true);
+              }
+            if (ap.extended_cert_path)
+              {
+                wr.setBooleanAttribute (EXTENDED_CERT_PATH_ATTR, true);
+              }
+            if (ap.canonicalization_algorithm != null)
+              {
+                wr.setStringAttribute (CN_ALG_ATTR, ap.canonicalization_algorithm.getURI ());
+              }
+            if (ap.digest_algorithm != null)
+              {
+                wr.setStringAttribute (DIGEST_ALG_ATTR, ap.digest_algorithm.getURI ());
+              }
+            if (ap.signature_algorithm != null)
+              {
+                wr.setStringAttribute (SIGNATURE_ALG_ATTR, ap.signature_algorithm.getURI ());
+              }
           }
 
         //////////////////////////////////////////////////////////////////////////
         // Certificate filters (optional)
         //////////////////////////////////////////////////////////////////////////
-        for (CertificateFilter cf : cert_filters)
+        for (CertificateFilter cf : certificate_filters)
           {
             SignatureRequestEncoder.writeCertificateFilter (wr, cf);
-          }
-
-        //////////////////////////////////////////////////////////////////////////
-        // Optional "client platform request"
-        //////////////////////////////////////////////////////////////////////////
-        if (client_platform_request != null)
-          {
-            client_platform_request.write (wr);
           }
       }
 
@@ -264,4 +195,38 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
         ds.createEnvelopedSignature (doc, id);
       }
 
+
+    private void bad (String mismatch) throws IOException
+      {
+        throw new IOException ("Mismatch between request and response: " + mismatch);
+      }
+
+
+    public void checkRequestResponseIntegrity (AuthenticationResponseDecoder areresp, byte[] expected_fingerprint) throws IOException
+      {
+        if (expected_fingerprint != null &&
+            (areresp.server_certificate_fingerprint == null || !ArrayUtil.compare (areresp.server_certificate_fingerprint, expected_fingerprint)))
+          {
+            bad ("Server certificate fingerprint");
+          }
+        if (!id.equals (areresp.id))
+          {
+            bad ("ID attributes");
+          }
+        if (!DOMWriterHelper.formatDateTime (server_time).equals (DOMWriterHelper.formatDateTime (areresp.server_time.getTime ())))
+          {
+            bad ("ServerTime attribute");
+          }
+        if (certificate_filters.size () > 0 && areresp.signer_certpath != null)
+          {
+            for (CertificateFilter cf : certificate_filters)
+              {
+                if (cf.matches (areresp.signer_certpath, null, null))
+                  {
+                    return;
+                  }
+              }
+            bad ("Certificates does not match filter(s)");
+          }
+      }
   }
