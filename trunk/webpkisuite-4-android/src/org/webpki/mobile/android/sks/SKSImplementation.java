@@ -24,7 +24,6 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
-import java.security.KeyStore;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -93,9 +92,9 @@ import android.util.Log;
  *  
  *  Author: Anders Rundgren
  */
-public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
+public class SKSImplementation implements SKSError, SecureKeyStore, Serializable, GrantInterface
   {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     // SKS version and configuration data
@@ -200,6 +199,8 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         byte[] symmetric_key;     // Defined by "importSymmetricKey"
 
         LinkedHashSet<String> endorsed_algorithms;
+        
+        LinkedHashSet<String> granted_domains = new LinkedHashSet<String> ();
 
         String friendly_name;
 
@@ -488,11 +489,11 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
 
         void setAndVerifyServerBackupFlag () throws SKSException
           {
-            if ((key_backup & KeyProtectionInfo.KEYBACKUP_SERVER) != 0)
+            if ((key_backup & KeyProtectionInfo.KEYBACKUP_IMPORTED) != 0)
               {
                 owner.abort ("Mutiple key imports for: " + id);
               }
-            key_backup |= KeyProtectionInfo.KEYBACKUP_SERVER;
+            key_backup |= KeyProtectionInfo.KEYBACKUP_IMPORTED;
           }
 
         BigInteger getPublicRSAExponentFromPrivateKey ()
@@ -1653,7 +1654,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Mark as "copied" locally
         ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.key_backup |= KeyProtectionInfo.KEYBACKUP_LOCAL;
+        key_entry.key_backup |= KeyProtectionInfo.KEYBACKUP_EXPORTED;
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Export key in raw unencrypted format
@@ -3466,5 +3467,40 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         puk_policy.retry_limit = retry_limit;
         Log.i (SKS_DEBUG, "PUK policy object created");
         return puk_policy.puk_policy_handle;
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                      A set of public non-SKS methods                       //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public boolean isGranted (int key_handle, String domain) throws SKSException
+      {
+        KeyEntry key_entry = getStdKey (key_handle);
+        return key_entry.granted_domains.contains (domain);
+      }
+    
+    @Override
+    public void setGrant (int key_handle, String domain, boolean granted) throws SKSException
+      {
+        KeyEntry key_entry = getStdKey (key_handle);
+        if (granted)
+          {
+            key_entry.granted_domains.add (domain);
+          }
+        else
+          {
+            key_entry.granted_domains.remove (granted);
+          }
+      }
+    
+    @Override
+    public String[] listGrants (int key_handle) throws SKSException
+      {
+        KeyEntry key_entry = getStdKey (key_handle);
+        return key_entry.granted_domains.toArray (new String[0]);
       }
   }

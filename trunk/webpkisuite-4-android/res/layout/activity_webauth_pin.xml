@@ -11,8 +11,9 @@
         android:layout_margin="1px"
         android:background="@drawable/dialogborder"
         android:gravity="center_vertical|center_horizontal"
+        android:maxLines="1"
         android:padding="4dp"
-        android:text="@string/title_activity_keygen2"
+        android:text="@string/title_activity_webauth"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#000000" />
 
@@ -31,19 +32,8 @@
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_gravity="center_horizontal"
-          android:text="err"
-             android:textColor="#ff0000" />
-  
-          <TextView
-              android:id="@+id/setPINtext"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="center_horizontal"
-              android:layout_marginBottom="10dp"
-              android:layout_marginTop="5dp"
-              android:text="Set PIN"
-              android:textColor="#000000"
-              android:textSize="20dp" />
+              android:text=" "
+              android:textColor="#ff0000" />
   
           <TextView
               android:id="@+id/leadpin1"
@@ -63,22 +53,6 @@
   
               <requestFocus />
           </EditText>
-  
-          <TextView
-              android:id="@+id/leadpin2"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="Retype the PIN:"
-              android:textColor="#000000" />
-  
-          <EditText
-              android:id="@+id/editpin2"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:ems="10"
-              android:imeOptions="flagNoFullscreen"
-              android:inputType="numberPassword"
-              android:password="true" />
   
        </LinearLayout>
 

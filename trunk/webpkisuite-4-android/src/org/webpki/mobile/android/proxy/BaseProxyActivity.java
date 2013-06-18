@@ -55,12 +55,13 @@ public abstract class BaseProxyActivity extends Activity
     //////////////////////
     // Progress messages
     //////////////////////
-    public static final String PROGRESS_INITIALIZING = "Initializing...";
-    public static final String PROGRESS_SESSION      = "Creating session...";
-    public static final String PROGRESS_KEYGEN       = "Generating keys...";
-    public static final String PROGRESS_LOOKUP       = "Credential lookup...";
-    public static final String PROGRESS_DEPLOY_CERTS = "Receiving credentials...";
-    public static final String PROGRESS_FINAL        = "Finish message...";
+    public static final String PROGRESS_INITIALIZING    = "Initializing...";
+    public static final String PROGRESS_SESSION         = "Creating session...";
+    public static final String PROGRESS_KEYGEN          = "Generating keys...";
+    public static final String PROGRESS_LOOKUP          = "Credential lookup...";
+    public static final String PROGRESS_DEPLOY_CERTS    = "Receiving credentials...";
+    public static final String PROGRESS_FINAL           = "Finish message...";
+    public static final String PROGRESS_AUTHENTICATING  = "Authenticating...";
 
     public static final String CONTINUE_EXECUTION    = "CONTINUE_EXECUTION";  // Return constant to AsyncTasks
     
@@ -93,6 +94,34 @@ public abstract class BaseProxyActivity extends Activity
     protected abstract void abortTearDown ();
     
     protected abstract String getAbortString ();
+    
+    public void unconditionalAbort (final String message)
+      {
+        final BaseProxyActivity instance = this;
+        AlertDialog.Builder alert_dialog = new AlertDialog.Builder (this)
+            .setMessage (message)
+            .setCancelable (false)
+            .setPositiveButton ("OK", new DialogInterface.OnClickListener ()
+      {
+        public void onClick (DialogInterface dialog, int id)
+          {
+            // The user decided that this is not what he/she wants...
+            dialog.cancel ();
+            user_aborted = true;
+            abortTearDown ();
+            if (abort_url == null)
+              {
+                instance.finish ();
+              }
+            else
+              {
+                launchBrowser (abort_url);
+              }
+          }
+      });
+    // Create and show alert dialog
+    alert_dialog.create ().show ();
+  }
 
     public void conditionalAbort (final String message)
       {

@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.mobile.android.keygen2;
+package org.webpki.mobile.android.wasp;
 
 import org.webpki.mobile.android.proxy.MatchedButton;
 
@@ -24,21 +24,20 @@ import android.util.AttributeSet;
 
 import android.widget.FrameLayout;
 
-public class KeyGen2InitLayout extends FrameLayout
+import static org.webpki.mobile.android.keygen2.KeyGen2InitLayout.PADDING;
+
+public class WebAuthPINLayout extends FrameLayout
   {
-    public static final int PADDING = 20;
+    static final int PIN_CHUNK     = 0;
+    static final int CANCEL_BUTTON = 1;
+    static final int OK_BUTTON     = 2;
 
-    static final int HOST_IMAGE    = 0;
-    static final int ACCEPT_TEXT   = 1;
-    static final int CANCEL_BUTTON = 2;
-    static final int OK_BUTTON     = 3;
-
-    public KeyGen2InitLayout (Context context)
+    public WebAuthPINLayout (Context context)
       {
         super (context);
       }
 
-    public KeyGen2InitLayout (Context context, AttributeSet attrs)
+    public WebAuthPINLayout (Context context, AttributeSet attrs)
       {
         super (context, attrs);
       }
@@ -56,27 +55,12 @@ public class KeyGen2InitLayout extends FrameLayout
             super.onMeasure (wSpec, hSpec);
           }
         int button_h = getChildAt (CANCEL_BUTTON).getMeasuredHeight ();
-        int w_max = getChildAt (HOST_IMAGE).getMeasuredWidth ();
-        if (w_max < getChildAt (ACCEPT_TEXT).getMeasuredWidth ())
-          {
-            w_max = getChildAt (ACCEPT_TEXT).getMeasuredWidth ();
-          }
-        int height = PADDING * 3 + getChildAt (HOST_IMAGE).getMeasuredHeight () + getChildAt (ACCEPT_TEXT).getMeasuredHeight ();
+        int w_max = getChildAt (PIN_CHUNK).getMeasuredWidth ();
+        int height = PADDING * 2 + getChildAt (PIN_CHUNK).getMeasuredHeight ();
         int width = PADDING * 2 + w_max;
-        if (width > w)
-          {
-            width = w;
-          }
         if (w > h && h < (height + PADDING * 2 + 2 * button_h))
           {
             width += 2 * (button_w + PADDING);
-            int up = button_h - getChildAt (ACCEPT_TEXT).getMeasuredHeight ();
-              {
-                if (up > 0)
-                  {
-                    height += up / 2 + button_h / 12;
-                  }
-              }
           }
         else
           {
@@ -88,11 +72,8 @@ public class KeyGen2InitLayout extends FrameLayout
     @Override
     protected void onLayout (boolean changed, int l, int t, int r, int b)
       {
-        int height = 0;
-        int width = getChildAt (HOST_IMAGE).getMeasuredWidth ();
-        getChildAt (HOST_IMAGE).layout ((r - l - width) / 2, height + PADDING + 5, (r - l - width) / 2 + width, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + PADDING + 5);
-        width = getChildAt (ACCEPT_TEXT).getMeasuredWidth ();
-        getChildAt (ACCEPT_TEXT).layout ((r - l - width) / 2, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + PADDING * 2, (r - l - width) / 2 + width, height + getChildAt (HOST_IMAGE).getMeasuredHeight () + getChildAt (ACCEPT_TEXT).getMeasuredHeight () + PADDING * 2);
+        int width = getChildAt (PIN_CHUNK).getMeasuredWidth ();
+        getChildAt (PIN_CHUNK).layout ((r - l - width) / 2, PADDING, (r - l - width) / 2 + width, getChildAt (PIN_CHUNK).getMeasuredHeight () + PADDING);
         width = getChildAt (CANCEL_BUTTON).getMeasuredWidth ();
         getChildAt (CANCEL_BUTTON).layout (PADDING, b - t - getChildAt (CANCEL_BUTTON).getMeasuredHeight () - PADDING, PADDING + width, b - t - PADDING);
         getChildAt (OK_BUTTON).layout (r - l - width - PADDING, b - t - getChildAt (OK_BUTTON).getMeasuredHeight () - PADDING, r - l - PADDING, b - t - PADDING);

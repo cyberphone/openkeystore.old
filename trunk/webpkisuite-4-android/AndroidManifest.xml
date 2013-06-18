@@ -58,6 +58,21 @@
             </intent-filter>
         </activity>
         <activity
+            android:taskAffinity=".wasp.WebAuthActivity"
+            android:name=".wasp.WebAuthActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/title_activity_webauth"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="webpkiproxy" android:host="webauth"/>
+            </intent-filter>
+        </activity>
+        <activity
             android:taskAffinity=".proxy.FailLoggerActivity"
             android:name=".proxy.FailLoggerActivity"
             android:label="@string/title_activity_fail_logger">

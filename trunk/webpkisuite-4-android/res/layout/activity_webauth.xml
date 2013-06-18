@@ -12,7 +12,7 @@
         android:background="@drawable/dialogborder"
         android:gravity="center_vertical|center_horizontal"
         android:padding="4dp"
-        android:text="@string/title_activity_keygen2"
+        android:text="@string/title_activity_webauth"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#000000" />
 
@@ -40,8 +40,7 @@
           android:id="@+id/win"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:minLines="2"
-          android:text="Do you accept that the party above&#10;creates or updates credentials for you?"
+          android:text="Do you want to authenticate to the&#10;party above?"
           android:textColor="#000000" />
     
       <include layout="@layout/lower_buttons"/>
