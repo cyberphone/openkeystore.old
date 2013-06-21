@@ -19,7 +19,10 @@ package org.webpki.mobile.android.wasp;
 import android.os.AsyncTask;
 
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import android.util.Log;
 import android.view.View;
@@ -29,15 +32,18 @@ import java.net.URL;
 
 import java.security.cert.X509Certificate;
 
-import org.webpki.android.crypto.CertificateFilter;
+import org.webpki.mobile.android.R;
 
 import org.webpki.android.sks.EnumeratedKey;
 
+import org.webpki.android.crypto.CertificateFilter;
+
 import org.webpki.android.wasp.AuthenticationRequestDecoder;
 
-import org.webpki.mobile.android.R;
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
+
+import org.webpki.mobile.android.util.CredentialListDataFactory;
 
 public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
   {
@@ -125,10 +131,48 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                   {
                     webauth_activity.findViewById (R.id.primaryWindow).setVisibility (View.INVISIBLE);
                     webauth_activity.logOK ("The user hit OK");
-//                    webauth_activity.setContentView (R.layout.activity_webauth_pin);
-                    new WebAuthResponseCreation (webauth_activity,
-                                                 new byte[]{'1','2','3','5'},
-                                                 webauth_activity.matching_keys.firstElement ()).execute ();
+                    webauth_activity.setContentView (R.layout.activity_webauth_pin);
+                    try
+                      {
+                        ((LinearLayout)webauth_activity.findViewById (R.id.credential_element)).setOnClickListener (new View.OnClickListener ()
+                          {
+                            @Override
+                            public void onClick (View v)
+                              {
+                                Toast.makeText (webauth_activity, "Credential Properties - Not yet implemented!", Toast.LENGTH_LONG).show ();
+                              }
+                          });
+                        CredentialListDataFactory credential_data_factory = new CredentialListDataFactory (webauth_activity, sks);
+                        ((ImageView) webauth_activity.findViewById (R.id.auth_cred_logo)).setImageBitmap (credential_data_factory.getListIcon (webauth_activity.matching_keys.firstElement ()));
+                        ((TextView) webauth_activity.findViewById (R.id.auth_cred_domain)).setText (credential_data_factory.getDomain (webauth_activity.matching_keys.firstElement ()));
+                        Button ok = (Button) webauth_activity.findViewById (R.id.OKbutton);
+                        ok.requestFocus ();
+                        Button cancel = (Button) webauth_activity.findViewById (R.id.cancelButton);
+                        ((TextView) webauth_activity.findViewById (R.id.editpin1)).setSelected (true);
+                        ((TextView) webauth_activity.findViewById (R.id.editpin1)).requestFocus ();
+                        ok.setOnClickListener (new View.OnClickListener ()
+                          {
+                            @Override
+                            public void onClick (View v)
+                              {
+                                new WebAuthResponseCreation (webauth_activity,
+                                                             ((TextView) webauth_activity.findViewById (R.id.editpin1)).getText ().toString (),
+                                                             webauth_activity.matching_keys.firstElement ()).execute ();
+                              }
+                          });
+                        cancel.setOnClickListener (new View.OnClickListener ()
+                          {
+                            @Override
+                            public void onClick (View v)
+                              {
+                                webauth_activity.conditionalAbort (null);
+                              }
+                          });
+                      }
+                    catch (Exception e)
+                      {
+                        throw new RuntimeException (e);
+                      }
                   }
               });
             cancel.setOnClickListener (new View.OnClickListener ()

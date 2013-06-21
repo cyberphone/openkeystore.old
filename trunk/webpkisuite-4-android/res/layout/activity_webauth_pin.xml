@@ -16,30 +16,69 @@
         android:text="@string/title_activity_webauth"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#000000" />
+    
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_marginTop="4dp"
+            android:orientation="vertical" >
+    
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Credential:"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="#000000" />
 
-    <org.webpki.mobile.android.keygen2.KeyGen2PINLayout
+    <LinearLayout
+        android:id="@+id/credential_element"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/partyborder"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="4dp" >
+
+        <ImageView
+            android:id="@+id/auth_cred_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/credview_background_bm" />
+
+        <TextView
+            android:id="@+id/auth_cred_domain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginLeft="6dp"
+            android:textColor="#000000" 
+            android:text="domain" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+    
+    <org.webpki.mobile.android.wasp.WebAuthPINLayout
         android:id="@+id/primaryWindow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
       <LinearLayout
+          android:id="@+id/pinWindow"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:orientation="vertical" >
   
           <TextView
-              android:id="@+id/errorPIN"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="center_horizontal"
-              android:text=" "
-              android:textColor="#ff0000" />
-  
-          <TextView
               android:id="@+id/leadpin1"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="Specify a PIN of your choice:"
+              android:text="Enter Credential PIN:"
               android:textColor="#000000" />
   
           <EditText
@@ -58,6 +97,6 @@
 
     <include layout="@layout/lower_buttons"/>
 
-    </org.webpki.mobile.android.keygen2.KeyGen2PINLayout>
+    </org.webpki.mobile.android.wasp.WebAuthPINLayout>
 
 </LinearLayout>

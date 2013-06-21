@@ -16,21 +16,17 @@
  */
 package org.webpki.mobile.android.application;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.webpki.android.keygen2.KeyGen2URIs;
-import org.webpki.android.sks.EnumeratedKey;
-import org.webpki.android.sks.EnumeratedProvisioningSession;
-import org.webpki.android.sks.Extension;
-import org.webpki.android.sks.KeyAttributes;
-import org.webpki.android.sks.SKSException;
 
-import org.webpki.mobile.android.R;
+import org.webpki.android.sks.EnumeratedKey;
+import org.webpki.android.sks.SKSException;
 
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
+
+import org.webpki.mobile.android.util.CredentialListDataFactory;
 
 import android.os.Bundle;
 
@@ -51,9 +47,6 @@ import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 
 public class CredentialsActivity extends ListActivity
@@ -68,45 +61,14 @@ public class CredentialsActivity extends ListActivity
         super.onCreate (savedInstanceState);
         try
           {
-            BitmapFactory.Options bmo = new BitmapFactory.Options ();
-            bmo.inScaled = false;
-            Bitmap default_icon = BitmapFactory.decodeResource (getResources (), R.drawable.certview_logo_na, bmo);
-            default_icon.setDensity (Bitmap.DENSITY_NONE);
-
+            CredentialListDataFactory credential_data_factory = new CredentialListDataFactory (this, sks);
             EnumeratedKey ek = new EnumeratedKey ();
             while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
               {
-                String domain = "***ERROR***";
-                EnumeratedProvisioningSession eps = new EnumeratedProvisioningSession ();
-                while ((eps = sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), false)) != null)
-                  {
-                    if (ek.getProvisioningHandle () == eps.getProvisioningHandle ())
-                      {
-                        domain = new URL (eps.getIssuerURI ()).getHost ();
-                        break;
-                      }
-                  }
-                KeyAttributes key_attributes = sks.getKeyAttributes (ek.getKeyHandle ());
-                Bitmap issuer_bm = default_icon;
-                for (String type : key_attributes.getExtensionTypes ())
-                  {
-                    if (type.equals (KeyGen2URIs.LOGOTYPES.LIST))
-                      {
-                        Extension extension = sks.getExtension (ek.getKeyHandle (), type);
-                        issuer_bm = BitmapFactory.decodeByteArray (extension.getExtensionData (), 0, extension.getExtensionData ().length, bmo);
-                        issuer_bm.setDensity (Bitmap.DENSITY_NONE);
-                        issuer_bm = Bitmap.createScaledBitmap (issuer_bm, default_icon.getWidth (), default_icon.getHeight (), true);
-                        break;
-                      }
-                  }
-                Bitmap derived_bm = BitmapFactory.decodeResource (getResources (), R.drawable.credview_background_bm, bmo).copy (Bitmap.Config.ARGB_8888, true);
-                derived_bm.setDensity (Bitmap.DENSITY_NONE);
-                Canvas canvas = new Canvas (derived_bm);
-                canvas.drawBitmap (issuer_bm, (derived_bm.getWidth() - issuer_bm.getWidth())/ 2, (derived_bm.getHeight() - issuer_bm.getHeight()) / 2, null);
-                list.add (new CredentialArrayAdapter.CredentialData (domain, 
+                list.add (new CredentialArrayAdapter.CredentialData (credential_data_factory.getDomain (ek.getKeyHandle ()), 
                                                                      ek.getKeyHandle (),
-                                                                     key_attributes.getCertificatePath ()[0].getSubjectDN ().getName (),
-                                                                     derived_bm));
+                                                                     sks.getKeyAttributes (ek.getKeyHandle ()).getCertificatePath ()[0].getSubjectDN ().getName (),
+                                                                     credential_data_factory.getListIcon (ek.getKeyHandle ())));
               }
             setListAdapter (new CredentialArrayAdapter (this, list));
             registerForContextMenu (getListView ());

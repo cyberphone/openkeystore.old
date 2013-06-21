@@ -33,8 +33,8 @@
           android:paddingRight="10dp"
           android:paddingTop="6dp"
           android:text="Failed!!!"
-          android:textColor="#000000"
-          android:typeface="monospace" />
+          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textColor="#000000"/>
       
       <TextView
           android:id="@+id/win"

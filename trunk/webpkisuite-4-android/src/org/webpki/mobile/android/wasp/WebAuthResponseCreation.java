@@ -24,8 +24,8 @@ import java.util.Date;
 import android.os.AsyncTask;
 
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
-import org.webpki.mobile.android.proxy.InterruptedProtocolException;
 
+import org.webpki.android.sks.SKSException;
 import org.webpki.android.wasp.AuthenticationResponseEncoder;
 
 import org.webpki.android.crypto.CertificateInfo;
@@ -39,11 +39,13 @@ public class WebAuthResponseCreation extends AsyncTask<Void, String, String>
   {
     private WebAuthActivity webauth_activity;
     
-    private byte[] authorization;
+    private String authorization;
     
     private int key_handle;
+    
+    private String authorization_error;
 
-    public WebAuthResponseCreation (WebAuthActivity webauth_activity, byte[] authorization, int key_handle)
+    public WebAuthResponseCreation (WebAuthActivity webauth_activity, String authorization, int key_handle)
       {
         this.webauth_activity = webauth_activity;
         this.authorization = authorization;
@@ -86,7 +88,7 @@ public class WebAuthResponseCreation extends AsyncTask<Void, String, String>
                     return webauth_activity.sks.signHashedData (key_handle,
                                                                 sign_alg.getURI (),
                                                                 null,
-                                                                authorization,
+                                                                authorization.getBytes ("UTF-8"),
                                                                 sign_alg.getDigestAlgorithm ().digest (data));
                   }},
                   webauth_activity.authentication_request,
@@ -96,11 +98,31 @@ public class WebAuthResponseCreation extends AsyncTask<Void, String, String>
             webauth_activity.postXMLData (webauth_activity.authentication_request.getSubmitURL (), authentication_response, true);
             return webauth_activity.getRedirectURL ();
           }
+        catch (SKSException e)
+          {
+            webauth_activity.logException (e);
+            if (e.getError () == SKSException.ERROR_AUTHORIZATION)
+              {
+                try
+                  {
+                    authorization_error = webauth_activity.sks.getKeyProtectionInfo (key_handle).isPINBlocked () ? "Too many PIN errors - Blocked" : "Incorrect PIN";
+                  }
+                catch (SKSException e1)
+                  {
+                  }
+              }
+          }
         catch (Exception e)
           {
             webauth_activity.logException (e);
           }
         return null;
+      }
+
+    @Override
+    public void onProgressUpdate (String... message)
+      {
+        webauth_activity.showHeavyWork (message[0]);
       }
 
     @Override
@@ -110,13 +132,21 @@ public class WebAuthResponseCreation extends AsyncTask<Void, String, String>
           {
             return;
           }
-        if (result != null)
+        webauth_activity.noMoreWorkToDo ();
+        if (result == null)
           {
-            webauth_activity.launchBrowser (result);
+            if (authorization_error == null)
+              {
+                webauth_activity.showFailLog ();
+              }
+            else
+              {
+                webauth_activity.showAlert (authorization_error);
+              }
           }
         else
           {
-            webauth_activity.showFailLog ();
+            webauth_activity.launchBrowser (result);
           }
       }
   }
