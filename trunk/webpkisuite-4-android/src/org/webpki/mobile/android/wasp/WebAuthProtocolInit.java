@@ -19,13 +19,17 @@ package org.webpki.mobile.android.wasp;
 import android.os.AsyncTask;
 
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -145,18 +149,19 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                         CredentialListDataFactory credential_data_factory = new CredentialListDataFactory (webauth_activity, sks);
                         ((ImageView) webauth_activity.findViewById (R.id.auth_cred_logo)).setImageBitmap (credential_data_factory.getListIcon (webauth_activity.matching_keys.firstElement ()));
                         ((TextView) webauth_activity.findViewById (R.id.auth_cred_domain)).setText (credential_data_factory.getDomain (webauth_activity.matching_keys.firstElement ()));
-                        Button ok = (Button) webauth_activity.findViewById (R.id.OKbutton);
+                        final Button ok = (Button) webauth_activity.findViewById (R.id.OKbutton);
                         ok.requestFocus ();
                         Button cancel = (Button) webauth_activity.findViewById (R.id.cancelButton);
-                        ((TextView) webauth_activity.findViewById (R.id.editpin1)).setSelected (true);
-                        ((TextView) webauth_activity.findViewById (R.id.editpin1)).requestFocus ();
+                        final EditText pin = (EditText) webauth_activity.findViewById (R.id.editpin1); 
+                        pin.setSelected (true);
+                        pin.requestFocus ();
                         ok.setOnClickListener (new View.OnClickListener ()
                           {
                             @Override
                             public void onClick (View v)
                               {
                                 new WebAuthResponseCreation (webauth_activity,
-                                                             ((TextView) webauth_activity.findViewById (R.id.editpin1)).getText ().toString (),
+                                                             pin.getText ().toString (),
                                                              webauth_activity.matching_keys.firstElement ()).execute ();
                               }
                           });
@@ -166,6 +171,18 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                             public void onClick (View v)
                               {
                                 webauth_activity.conditionalAbort (null);
+                              }
+                          });
+                        pin.setOnEditorActionListener (new OnEditorActionListener ()
+                          {
+                            @Override
+                            public boolean onEditorAction (TextView v, int actionId, KeyEvent event)
+                              {
+                                if ((actionId & EditorInfo.IME_MASK_ACTION) != 0)
+                                  {
+                                    ok.performClick ();
+                                  }
+                                return false;
                               }
                           });
                       }
