@@ -1,0 +1,223 @@
+/*
+ *  Copyright 2006-2013 WebPKI.org (http://webpki.org).
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+package org.webpki.android.wasp;
+
+import java.io.IOException;
+
+import org.webpki.android.xml.DOMReaderHelper;
+import org.webpki.android.xml.DOMAttributeReaderHelper;
+
+import org.webpki.android.xmldsig.XMLVerifier;
+import org.webpki.android.xmldsig.XMLSignatureWrapper;
+import org.webpki.android.xmldsig.CanonicalizationAlgorithms;
+
+import org.webpki.android.crypto.VerifierInterface;
+import org.webpki.android.crypto.CertificateFilter;
+import org.webpki.android.crypto.HashAlgorithms;
+import org.webpki.android.crypto.SignatureAlgorithms;
+
+import static org.webpki.android.wasp.WASPConstants.*;
+
+
+public class AuthenticationRequestDecoder extends AuthenticationRequest
+  {
+    private String server_time;
+
+    private XMLSignatureWrapper signature;                                              // Optional
+
+    private void readAuthenticationProfile (DOMReaderHelper rd) throws IOException
+      {
+        rd.getNext (AUTHENTICATION_PROFILE_ELEM);
+        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+        AuthenticationProfile ap = new AuthenticationProfile ();
+
+        ap.signed_key_info = ah.getBooleanConditional (SIGNED_KEY_INFO_ATTR);
+
+        ap.extended_cert_path = ah.getBooleanConditional (EXTENDED_CERT_PATH_ATTR);
+
+        String value;
+        
+        if ((value = ah.getStringConditional (CN_ALG_ATTR)) != null)
+          {
+            if (CanonicalizationAlgorithms.testAlgorithmURI (value))
+              {
+                ap.canonicalization_algorithm = CanonicalizationAlgorithms.getAlgorithmFromURI (value);
+              }
+            else
+              {
+                return;
+              }
+          }
+
+        if ((value = ah.getStringConditional (DIGEST_ALG_ATTR)) != null)
+          {
+            if (HashAlgorithms.testAlgorithmURI (value))
+              {
+                ap.digest_algorithm = HashAlgorithms.getAlgorithmFromURI (value);
+              }
+            else
+              {
+                return;
+              }
+          }
+  
+        if ((value = ah.getStringConditional (SIGNATURE_ALG_ATTR)) != null)
+          {
+            if (SignatureAlgorithms.testAlgorithmURI (value))
+              {
+                ap.signature_algorithm = SignatureAlgorithms.getAlgorithmFromURI (value);
+              }
+            else
+              {
+                return;
+              }
+          }
+
+        authentication_profiles.add (ap);
+      }
+
+
+    public AuthenticationProfile[] getAuthenticationProfiles ()
+      {
+        return authentication_profiles.toArray (new AuthenticationProfile[0]);
+      }
+
+
+    public CertificateFilter[] getCertificateFilters ()
+      {
+        return certificate_filters.toArray (new CertificateFilter[0]);
+      }
+
+
+    public String getID ()
+      {
+        return id;
+      }
+
+
+    public String getServerTime ()
+      {
+        return server_time;
+      }
+
+
+    public String getSubmitURL ()
+      {
+        return submit_url;
+      }
+
+
+    public String getAbortURL ()
+      {
+        return abort_url;
+      }
+
+
+    public String[] getRequestedClientPlatformFeatures ()
+      {
+        return requested_client_platform_features.toArray (new String[0]);
+      }
+
+
+    public String[] getLanguages ()
+      {
+        return languages;
+      }
+
+
+    public int getExpires ()
+      {
+        return expires;
+      }
+
+
+    public void verifySignature (VerifierInterface verifier) throws IOException
+      {
+        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, id);
+      }
+
+
+    public boolean isSigned ()
+      {
+        return signature != null;
+      }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // XML Reader
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected void fromXML (DOMReaderHelper rd) throws IOException
+      {
+        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Read the top level attributes
+        /////////////////////////////////////////////////////////////////////////////////////////
+
+        id = ah.getString (ID_ATTR);
+
+        server_time = ah.getString (SERVER_TIME_ATTR);
+
+        submit_url = ah.getString (SUBMIT_URL_ATTR);
+
+        abort_url = ah.getStringConditional (ABORT_URL_ATTR);
+
+        languages = ah.getListConditional (LANGUAGES_ATTR);
+
+        expires = ah.getIntConditional (EXPIRES_ATTR, -1);  // Default: no timeout and associated GUI
+
+        //////////////////////////////////////////////////////////////////////////
+        // Optional "client platform features"
+        //////////////////////////////////////////////////////////////////////////
+        String[] features = ah.getListConditional (CLIENT_PLATFORM_FEATURES_ATTR);
+        if (features != null) for (String feature : features)
+          {
+            requested_client_platform_features.add (feature);
+          }
+
+        rd.getChild ();
+        
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Get the authentication profiles [1..n]
+        /////////////////////////////////////////////////////////////////////////////////////////
+        do
+          {
+            readAuthenticationProfile (rd);
+          }
+        while (rd.hasNext (AUTHENTICATION_PROFILE_ELEM));
+        if (authentication_profiles.isEmpty ())
+          {
+            throw new IOException ("No matching AuthenticationProfile found");
+          }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Get the certificate filters [0..n]
+        /////////////////////////////////////////////////////////////////////////////////////////
+        while (rd.hasNext (CERTIFICATE_FILTER_ELEM))
+          {
+            certificate_filters.add (SignatureRequestDecoder.readCertificateFilter (rd));
+          }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Get the signature [0..1]
+        /////////////////////////////////////////////////////////////////////////////////////////
+        if (rd.hasNext (XMLSignatureWrapper.SIGNATURE_ELEM))
+          {
+            signature = (XMLSignatureWrapper)wrap (rd.getNext ());
+          }
+      }
+  }

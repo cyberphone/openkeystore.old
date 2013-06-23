@@ -1,0 +1,155 @@
+<project name="Android webpki classes" default="dist" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="debug"  value="on"/>
+  <property name="xerces_src_dir" value="xerces.src" />
+  <property name="w3c_dom_src_dir" value="missing.w3c.dom" />
+  <property name="webpki_src_dir" value="../library/src" />
+  <property name="temp_dir" value=".tmp" />
+  <property name="class_dir" value=".classes" />
+  <property name="dist_dir" value="dist" />
+  <property name="test_dir" value="test" />
+  
+  <target name="help">
+    <echo message="Targets: help dist xerces."/>
+  </target>
+  
+  <target name="xerces">
+    <property name="webpki.found" value="false" />
+    <antcall target="dist"/>
+  </target>
+  
+  <target name="webpki-total" if="${webpki.found}">
+    <copy todir="${temp_dir}/org/webpki/android" preservelastmodified="true">
+      <fileset dir="${webpki_src_dir}/org/webpki">
+        <exclude name="**/test/**"/>
+        <exclude name="**/infocard/**"/>
+        <exclude name="**/tools/**"/>
+        <exclude name="**/pdf/**"/>
+        <exclude name="**/sks/ws/**"/>
+        <exclude name="**/securityproxy/**"/>
+        <exclude name="**/ca/**"/>
+        <exclude name="**/pkcs7/**"/>
+        <exclude name="**/webutil/**"/>
+       </fileset>
+    </copy>
+    
+    <replace summary="true" dir="${temp_dir}" value="org.webpki.android.">
+       <include name="**/*"/>
+       <replacetoken><![CDATA[org.webpki.]]></replacetoken>
+     </replace>
+
+    <replaceregexp file="${temp_dir}/org/webpki/android/xml/DOMUtil.java"
+        match="(DocumentBuilderFactory\.newInstance\ \()(\))"
+        replace="\1&quot;org.webpki.android.org.apache.xerces.jaxp.DocumentBuilderFactoryImpl&quot;, DOMUtil.class.getClassLoader ()\2"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/xml/XMLSchemaCache.java"
+        match="(SchemaFactory\.newInstance\ \(XMLConstants\.W3C_XML_SCHEMA_NS_URI)(\))"
+        replace="\1, &quot;org.webpki.android.org.apache.xerces.jaxp.validation.XMLSchemaFactory&quot;, this.getClass ().getClassLoader ()\2"/>
+
+    <replaceregexp file="${temp_dir}/org/webpki/android/crypto/KeyStoreReader.java"
+        match="(\/\/\ JKS\ magic\ number\ \+\ version\ \(2\).*)(byte\[\]\ jks\ \=\ \{)(\(byte\)0xfe,\ \(byte\)0xed,\ \(byte\)0xfe,\ \(byte\)0xed,\ 0,\ 0,\ 0,\ 2)(\}\;)"
+        replace="\20, 0, 0, 1, 0, 0, 0, 20\4 // BKS: (int)VERSION + (int)SALT_LENGTH"
+        flags="s"/>
+
+    <!--  Unfortunately the limited Android stack cannot deal with certain regex types so we just short-circuit them :-( -->
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="\&lt;xs\:simpleType\ name\=&quot;distinguishedNameExpr&quot;\&gt;.*?\&lt;\/xs\:simpleType\&gt;"
+        replace="&lt;!-- REMOVED --&gt;"
+        flags="s"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="kg2\:distinguishedNameExpr"
+        replace="xs:string"
+        flags="g"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="\&lt;xs\:simpleType\ name\=&quot;httpURI&quot;\&gt;.*?\&lt;\/xs\:simpleType\&gt;"
+        replace="&lt;!-- REMOVED --&gt;"
+        flags="s"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="kg2\:httpURI"
+        replace="xs:anyURI"
+        flags="g"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="\&lt;xs\:simpleType\ name\=&quot;oidValue&quot;\&gt;.*?\&lt;\/xs\:simpleType\&gt;"
+        replace="&lt;!-- REMOVED --&gt;"
+        flags="s"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/keygen2/keygen2.xsd"
+        match="&quot;kg2\:oidValue&quot;"
+        replace="&quot;xs:string&quot;"
+        flags="g"/>
+
+    <replaceregexp
+        match="&quot;SunX509&quot;"
+        replace="&quot;X509&quot;"
+        flags="g">
+        <fileset dir="${temp_dir}/org/webpki/android/">
+          <include name="**/*.java"/>
+        </fileset>
+    </replaceregexp>
+    
+    <replaceregexp
+        match="&quot;JKS&quot;"
+        replace="&quot;BKS&quot;"
+        flags="g">
+        <fileset dir="${temp_dir}/org/webpki/android/">
+          <include name="**/*.java"/>
+        </fileset>
+    </replaceregexp>
+
+  </target>
+    
+  <target name="compile">
+    <mkdir dir="${temp_dir}"/>
+    
+    <condition property="webpki.found" value="true" else="false">
+      <available file="${webpki_src_dir}/org/webpki/keygen2/keygen2.xsd"/>
+    </condition>
+
+    <antcall target="webpki-total"/>
+    
+    <copy todir="${temp_dir}">
+      <fileset dir="${xerces_src_dir}"/>
+    </copy>
+        
+    <copy todir="${temp_dir}">
+      <fileset dir="${w3c_dom_src_dir}"/>
+    </copy>
+    
+    <mkdir dir="${class_dir}" />
+    <javac debug="${debug}" srcdir="${temp_dir}" destdir="${class_dir}" includeAntRuntime="false"/>
+
+  </target>
+
+  <target name="dist" depends="clean,compile">    
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist_dir}" />
+    
+    <condition property="target-name" value="webpki.org" else="xerces">
+      <istrue value="${webpki.found}"/>
+    </condition>
+
+    <!-- Create Android class library -->
+    <jar jarfile="${dist_dir}/${target-name}-android.mod.jar">
+      <fileset dir="${class_dir}"/>
+      <fileset dir="${temp_dir}">
+          <exclude name="**/*.java"/>
+          <exclude name="**/*.html"/>
+          <exclude name="**/doc-files/*"/>
+       </fileset>
+    </jar>
+  </target>
+
+  <target name="clean">
+    <delete dir="${class_dir}"/>
+    <delete dir="${temp_dir}"/>
+    <delete dir="${dist_dir}"/>
+  </target>
+
+</project>
+

@@ -1,0 +1,23 @@
+Android: Xerces and Webpki port
+===============================
+
+If you need to validate XML documents using Schemas you just
+download this project and do "ant xerces".  The resulting JAR
+for dropping into the "libs" section of an Android project
+will be called "dist/xerces-android.mod.jar".
+
+Due to the fact that Android (at least with JB 4.1) does not support
+standard methods for adding XML parsers you need to do the following:
+
+DocumentBuilderFactory dbf =
+   DocumentBuilderFactory.newInstance ("org.webpki.android.org.apache.xerces.jaxp.DocumentBuilderFactoryImpl",
+   TheClassThatIsUsingTheLibrary.class.getClassLoader ());
+   
+SchemaFactory sf = SchemaFactory.newInstance (XMLConstants.W3C_XML_SCHEMA_NS_URI, 
+       "org.webpki.android.org.apache.xerces.jaxp.validation.XMLSchemaFactory",
+       TheClassThatIsUsingTheLibrary.class.getClassLoader ());
+   
+Now you should be able to follow the Java standard for XML validation!
+
+A sibling Android app project "xsd-4-android" shows a complete example using XML schema validation
+
