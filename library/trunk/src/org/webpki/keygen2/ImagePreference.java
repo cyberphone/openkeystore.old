@@ -16,13 +16,17 @@
  */
 package org.webpki.keygen2;
 
-public class ImagePreference
+import java.io.Serializable;
+
+public class ImagePreference implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     String type;
     String mime_type;
     int width;
     int height;
-    
+
     public String getType ()
       {
         return type;
