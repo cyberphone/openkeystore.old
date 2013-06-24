@@ -105,18 +105,18 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
     @Override
     protected void onPostExecute (Boolean success)
       {
-        if (webauth_activity.userHasAborted ())
+        if (webauth_activity.userHasAborted () || webauth_activity.initWasRejected ())
           {
             return;
           }
         webauth_activity.noMoreWorkToDo ();
-        if (webauth_activity.matching_keys.isEmpty ())
-          {
-            webauth_activity.unconditionalAbort ("You have no matching credentials");
-            return;
-          }
         if (success)
           {
+            if (webauth_activity.matching_keys.isEmpty ())
+              {
+                webauth_activity.unconditionalAbort ("You have no matching credentials");
+                return;
+              }
             try
               {
                 ((TextView) webauth_activity.findViewById (R.id.partyInfo)).setText (new URL (webauth_activity.getInitializationURL ()).getHost ());

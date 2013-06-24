@@ -63,7 +63,9 @@ public abstract class BaseProxyActivity extends Activity
     public static final String PROGRESS_FINAL           = "Finish message...";
     public static final String PROGRESS_AUTHENTICATING  = "Authenticating...";
 
-    public static final String CONTINUE_EXECUTION    = "CONTINUE_EXECUTION";  // Return constant to AsyncTasks
+    public static final String CONTINUE_EXECUTION  = "CONTINUE_EXECUTION";  // Return constant to AsyncTasks
+    
+    private static final String VERSION_MACRO           = "$VER$";
     
     private XMLSchemaCache schema_cache;
 
@@ -84,6 +86,8 @@ public abstract class BaseProxyActivity extends Activity
     private String abort_url;
     
     private boolean user_aborted;
+    
+    private boolean init_rejected;
 
     Vector<String> cookies = new Vector<String> ();
 
@@ -223,6 +227,15 @@ public abstract class BaseProxyActivity extends Activity
         return user_aborted;
       }
 
+    public boolean initWasRejected ()
+      {
+        if (init_rejected)
+          {
+            launchBrowser (redirect_url);
+          }
+        return init_rejected;
+      }
+
     public void initSKS ()
       {
         sks = SKSStore.createSKS (getProtocolName (), this, false);
@@ -356,13 +369,31 @@ public abstract class BaseProxyActivity extends Activity
           }
         logOK ("Invocation URL=" + initialization_url + ", Cookie: " + (arg.isEmpty () ? "N/A" : cookies.elementAt (0)));
         addOptionalCookies (initialization_url);
+        int ver_index;
+        if ((ver_index = initialization_url.indexOf (VERSION_MACRO)) > 0)
+          {
+            initialization_url = initialization_url.substring (0, ver_index) +
+                                 getPackageManager().getPackageInfo(getPackageName(), 0).versionName +
+                                 initialization_url.substring (ver_index + VERSION_MACRO.length ());
+          }
         https_wrapper.makeGetRequest (initialization_url);
-        if (https_wrapper.getResponseCode () != HttpStatus.SC_OK)
+        if (https_wrapper.getResponseCode () == HttpStatus.SC_OK)
+          {
+            initial_request_data = https_wrapper.getData ();
+            server_certificate = https_wrapper.getServerCertificate ();
+          }
+        else if (https_wrapper.getResponseCode () == HttpStatus.SC_MOVED_TEMPORARILY)
+          {
+            if ((redirect_url = https_wrapper.getHeaderValue ("Location")) == null)
+              {
+                throw new IOException ("Malformed redirect");
+              }
+            init_rejected = true;
+          }
+        else
           {
             throw new IOException (https_wrapper.getResponseMessage ());
           }
-        initial_request_data = https_wrapper.getData ();
-        server_certificate = https_wrapper.getServerCertificate ();
       }
 
     public void showAlert (String message)
