@@ -84,6 +84,56 @@
         replace="&quot;xs:string&quot;"
         flags="g"/>
 
+    <replaceregexp file="${temp_dir}/org/webpki/android/wasp/webauth.xsd"
+        match="\&lt;xs\:simpleType\ name\=&quot;distinguishedNameExpr&quot;\&gt;.*?\&lt;\/xs\:simpleType\&gt;"
+        replace="&lt;!-- REMOVED --&gt;"
+        flags="s"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/wasp/webauth.xsd"
+        match="auth\:distinguishedNameExpr"
+        replace="xs:string"
+        flags="g"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/wasp/webauth.xsd"
+        match="\&lt;xs\:simpleType\ name\=&quot;emailAddress&quot;\&gt;.*?\&lt;\/xs\:simpleType\&gt;"
+        replace="&lt;!-- REMOVED --&gt;"
+        flags="s"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/wasp/webauth.xsd"
+        match="auth\:emailAddress"
+        replace="xs:string"
+        flags="g"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/wasp/webauth.xsd"
+        match="\&lt;xs\:simpleType\ name\=&quot;keyUsageBits&quot;\&gt;.*?\&lt;\/xs\:simpleType\&gt;"
+        replace="&lt;!-- REMOVED --&gt;"
+        flags="s"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/wasp/webauth.xsd"
+        match="auth\:oidValue"
+        replace="xs:string"
+        flags="g"/>
+ 
+    <replaceregexp file="${temp_dir}/org/webpki/android/wasp/webauth.xsd"
+        match="\&lt;xs\:simpleType\ name\=&quot;oidValue&quot;\&gt;.*?\&lt;\/xs\:simpleType\&gt;"
+        replace="&lt;!-- REMOVED --&gt;"
+        flags="s"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/wasp/webauth.xsd"
+        match="auth\:keyUsageBits"
+        replace="xs:string"
+        flags="g"/>
+ 
+    <replaceregexp file="${temp_dir}/org/webpki/android/wasp/webauth.xsd"
+        match="\&lt;xs\:simpleType\ name\=&quot;httpURI&quot;\&gt;.*?\&lt;\/xs\:simpleType\&gt;"
+        replace="&lt;!-- REMOVED --&gt;"
+        flags="s"/>
+    
+    <replaceregexp file="${temp_dir}/org/webpki/android/wasp/webauth.xsd"
+        match="auth\:httpURI"
+        replace="xs:anyURI"
+        flags="g"/>
+    
     <replaceregexp
         match="&quot;SunX509&quot;"
         replace="&quot;X509&quot;"
