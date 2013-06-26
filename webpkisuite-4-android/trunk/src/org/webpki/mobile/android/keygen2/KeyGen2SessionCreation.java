@@ -32,12 +32,14 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 import org.webpki.mobile.android.proxy.InterruptedProtocolException;
@@ -178,7 +180,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                 upd = iter.next ();
                 keygen2_activity.setContentView (R.layout.activity_keygen2_pin);
     
-                Button ok = (Button) keygen2_activity.findViewById (R.id.OKbutton);
+                final Button ok = (Button) keygen2_activity.findViewById (R.id.OKbutton);
                 Button cancel = (Button) keygen2_activity.findViewById (R.id.cancelButton);
     
                 pin1 = (EditText) keygen2_activity.findViewById (R.id.editpin1);
@@ -263,6 +265,18 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                     public void onClick (View v)
                       {
                         keygen2_activity.conditionalAbort (null);
+                      }
+                  });
+                pin2.setOnEditorActionListener (new OnEditorActionListener ()
+                  {
+                    @Override
+                    public boolean onEditorAction (TextView v, int actionId, KeyEvent event)
+                      {
+                        if ((actionId & EditorInfo.IME_MASK_ACTION) != 0)
+                          {
+                            ok.performClick ();
+                          }
+                        return false;
                       }
                   });
               }

@@ -33,7 +33,7 @@
           android:paddingLeft="10dp"
           android:paddingRight="10dp"
           android:paddingTop="6dp"
-          android:text="Failed!!!"
+          android:text="Waiting..."
           android:textAppearance="?android:attr/textAppearanceMedium"
           android:textColor="#000000"/>
       

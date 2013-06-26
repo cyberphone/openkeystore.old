@@ -33,7 +33,7 @@
         android:paddingTop="6dp"
         android:clickable="true"
         android:focusable="true"
-        android:text="@string/msg_undefined"
+        android:text="@string/msg_waiting_dot_dot_dot"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#000000"/>
 

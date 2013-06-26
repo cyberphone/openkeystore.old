@@ -181,6 +181,11 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                         CredentialListDataFactory credential_data_factory = new CredentialListDataFactory (webauth_activity, sks);
                         ((ImageView) webauth_activity.findViewById (R.id.auth_cred_logo)).setImageBitmap (credential_data_factory.getListIcon (webauth_activity.matching_keys.firstElement ()));
                         ((TextView) webauth_activity.findViewById (R.id.auth_cred_domain)).setText (credential_data_factory.getDomain (webauth_activity.matching_keys.firstElement ()));
+                        if (android.os.Build.VERSION.SDK_INT < 16)
+                          {
+                            webauth_activity.findViewById (R.id.pinWindow).setVisibility (View.GONE);
+                            webauth_activity.findViewById (R.id.pinWindow).setVisibility (View.VISIBLE);
+                          }
                         final Button ok = (Button) webauth_activity.findViewById (R.id.OKbutton);
                         Button cancel = (Button) webauth_activity.findViewById (R.id.cancelButton);
                         final EditText pin = (EditText) webauth_activity.findViewById (R.id.editpin1); 
