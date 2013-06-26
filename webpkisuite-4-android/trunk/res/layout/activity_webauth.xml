@@ -1,50 +1,103 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:background="@drawable/appborder"
-            android:orientation="vertical" >
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical|center_horizontal"
+            android:background="@drawable/appshaddow"
+    android:orientation="vertical" >
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="1px"
         android:background="@drawable/dialogborder"
         android:gravity="center_vertical|center_horizontal"
-        android:padding="4dp"
+        android:lines="1"
+        android:paddingBottom="6dp"
+        android:paddingTop="6dp"
         android:text="@string/title_activity_webauth"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#000000" />
 
-    <org.webpki.mobile.android.keygen2.KeyGen2InitLayout
-        android:id="@+id/primaryWindow"
+    <TextView
+        android:id="@+id/partyInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="invisible" >
-                    
-      <TextView
-          android:id="@+id/partyInfo"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_margin="20dp"
-          android:background="@drawable/partyborder"
-          android:paddingBottom="6dp"
-          android:paddingLeft="10dp"
-          android:paddingRight="10dp"
-          android:paddingTop="6dp"
-          android:text="Failed!!!"
-          android:textAppearance="?android:attr/textAppearanceMedium"
-          android:textColor="#000000"/>
-      
-      <TextView
-          android:id="@+id/win"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="Do you want to authenticate to the&#10;party above?"
-          android:textColor="#000000" />
-    
-      <include layout="@layout/lower_buttons"/>
-    
-    </org.webpki.mobile.android.keygen2.KeyGen2InitLayout>
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="6dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/partyborder"
+        android:paddingBottom="6dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="6dp"
+        android:text="@string/msg_undefined"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#000000" />
 
-</LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:lines="1"
+        android:paddingBottom="6dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="6dp"
+        android:text="@string/title_activity_webauth"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:visibility="invisible" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:text="@string/msg_auth_user_question"
+        android:textColor="#000000" />
+
+    <CheckBox
+        android:id="@+id/grantCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:text="Don&apos;t ask me again"
+        android:textColor="#000000" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp" >
+
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:lines="1"
+            android:text="Cancel" />
+
+        <!-- Dummy to cope with a strange layout bug -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="                "
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/OKbutton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".3"
+            android:lines="1"
+            android:text="OK" />
+        
+    </LinearLayout>
+        
+         </LinearLayout>

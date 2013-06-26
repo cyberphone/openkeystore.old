@@ -2,27 +2,27 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical|center_horizontal"
-    android:background="@drawable/appborder"
+            android:background="@drawable/appshaddow"
     android:orientation="vertical" >
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="1px"
         android:background="@drawable/dialogborder"
         android:gravity="center_vertical|center_horizontal"
-        android:maxLines="1"
-        android:padding="4dp"
+        android:lines="1"
+        android:paddingBottom="6dp"
+        android:paddingTop="6dp"
         android:text="@string/title_activity_webauth"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#000000" />
-    
+
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="6dp"
-            android:layout_marginRight="6dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="6dp"
             android:orientation="vertical" >
     
     <TextView
@@ -57,21 +57,32 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginLeft="6dp"
             android:textColor="#000000" 
-            android:text="domain" />
+            android:text="@string/msg_undefined"/>
 
         </LinearLayout>
 
     </LinearLayout>
-    
-    <org.webpki.mobile.android.wasp.WebAuthPINLayout
-        android:id="@+id/primaryWindow"
+    <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="0dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:lines="1"
+        android:paddingBottom="6dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="6dp"
+        android:text="@string/title_activity_webauth"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:visibility="invisible" />
 
       <LinearLayout
           android:id="@+id/pinWindow"
-          android:layout_width="wrap_content"
+          android:layout_width="fill_parent"
           android:layout_height="wrap_content"
+          android:layout_marginBottom="10dp"
+          android:layout_marginLeft="10dp"
+          android:layout_marginRight="10dp"
+          android:layout_marginTop="6dp"
           android:orientation="vertical" >
   
           <TextView
@@ -83,7 +94,7 @@
   
           <EditText
               android:id="@+id/editpin1"
-              android:layout_width="wrap_content"
+              android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:ems="10"
               android:imeOptions="flagNoFullscreen"
@@ -95,8 +106,36 @@
   
        </LinearLayout>
 
-    <include layout="@layout/lower_buttons"/>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp" >
 
-    </org.webpki.mobile.android.wasp.WebAuthPINLayout>
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:lines="1"
+            android:text="Cancel" />
 
-</LinearLayout>
+        <!-- Dummy to cope with a strange layout bug -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="                "
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/OKbutton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".3"
+            android:lines="1"
+            android:text="OK" />
+        
+    </LinearLayout>
+        
+         </LinearLayout>

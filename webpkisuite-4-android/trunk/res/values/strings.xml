@@ -6,12 +6,14 @@
     <string name="title_activity_properties">Properties</string>
     <string name="title_activity_qrid">QR ID</string>
     <string name="title_activity_keygen2">Credential Enrollment</string>
-    <string name="title_activity_webauth">Authenticate</string>
+    <string name="title_activity_webauth">Authentication Request</string>
     <string name="title_activity_fail_logger">Protocol Execution Log</string>
     <string name="title_activity_cert_view">Certificate Properties</string>
     <string name="title_activity_credentials">User Credentials</string>
     
   <string name="button_ok">OK</string>
+  <string name="msg_auth_user_question">Do you want to authenticate to the\nparty above?</string>
+  <string name="msg_undefined">Undefined</string>
   <string name="msg_camera_framework_bug">Sorry, the Android camera encountered a problem. You may need to restart the device.</string>
   <string name="msg_default_status">Place the QR ID inside of the viewfinder</string>
   <string name="preferences_actions_title">When a barcode is found\u2026</string>
