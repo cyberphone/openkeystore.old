@@ -124,7 +124,18 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
             catch (MalformedURLException e)
               {
               }
- //           webauth_activity.findViewById (R.id.primaryWindow).setVisibility (View.VISIBLE);
+            ((TextView)webauth_activity.findViewById (R.id.partyInfo)).setOnClickListener (new View.OnClickListener ()
+              {
+                @Override
+                public void onClick (View v)
+                  {
+                    Toast.makeText (webauth_activity, "Requesting Party Properties - Not yet implemented!", Toast.LENGTH_LONG).show ();
+                  }
+              });
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // We have just fetched the request
+            ///////////////////////////////////////////////////////////////////////////////////
             final Button ok = (Button) webauth_activity.findViewById (R.id.OKbutton);
             final Button cancel = (Button) webauth_activity.findViewById (R.id.cancelButton);
             ok.requestFocus ();
@@ -133,7 +144,6 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                 @Override
                 public void onClick (View v)
                   {
-//                    webauth_activity.findViewById (R.id.primaryWindow).setVisibility (View.INVISIBLE);
                     webauth_activity.logOK ("The user hit OK");
                     webauth_activity.setContentView (R.layout.activity_webauth_pin);
                     try
