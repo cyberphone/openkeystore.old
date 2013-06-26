@@ -82,7 +82,7 @@
   
        </LinearLayout>
 
-    <include layout="@layout/lower_buttons"/>
+    <include layout="@layout/old_buttons"/>
 
     </org.webpki.mobile.android.keygen2.KeyGen2PINLayout>
 

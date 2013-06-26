@@ -38,7 +38,9 @@ import java.security.cert.X509Certificate;
 
 import org.webpki.mobile.android.R;
 
+import org.webpki.android.sks.AppUsage;
 import org.webpki.android.sks.EnumeratedKey;
+import org.webpki.android.sks.KeyAttributes;
 
 import org.webpki.android.crypto.CertificateFilter;
 
@@ -74,10 +76,23 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
              while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
               {
                 Log.i (WebAuthActivity.WEBAUTH, "KeyHandle=" + ek.getKeyHandle ());
-                X509Certificate[] cert_path = sks.getKeyAttributes (ek.getKeyHandle ()).getCertificatePath ();
+                KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
+
+                ////////////////////////////////////////////////////////////////////////////////////
+                // All keys are NOT usable (or intended) for PKI-based authentication...
+                ////////////////////////////////////////////////////////////////////////////////////
+                if (ka.isSymmetricKey () || 
+                    (ka.getAppUsage () != AppUsage.AUTHENTICATION && ka.getAppUsage () != AppUsage.UNIVERSAL))
+                  {
+                    continue;
+                  }
+                X509Certificate[] cert_path = ka.getCertificatePath ();
                 if (webauth_activity.authentication_request.getCertificateFilters ().length > 0)
                   {
                     boolean did_it = false;
+                    ////////////////////////////////////////////////////////////////////////////////////
+                    // The requester wants to discriminate keys further...
+                    ////////////////////////////////////////////////////////////////////////////////////
                     for (CertificateFilter cf : webauth_activity.authentication_request.getCertificateFilters ())
                       {
                         if (cf.matches (cert_path, null, null))
@@ -112,11 +127,9 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
         webauth_activity.noMoreWorkToDo ();
         if (success)
           {
-            if (webauth_activity.matching_keys.isEmpty ())
-              {
-                webauth_activity.unconditionalAbort ("You have no matching credentials");
-                return;
-              }
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Successfully recieved the request, now show the domain name of the requester
+            ///////////////////////////////////////////////////////////////////////////////////
             try
               {
                 ((TextView) webauth_activity.findViewById (R.id.partyInfo)).setText (new URL (webauth_activity.getInitializationURL ()).getHost ());
@@ -145,6 +158,15 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                 public void onClick (View v)
                   {
                     webauth_activity.logOK ("The user hit OK");
+
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    // We have no keys at all or no keys that matches the filter criterions, abort
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    if (webauth_activity.matching_keys.isEmpty ())
+                      {
+                        webauth_activity.showAlert ("You have no matching credentials");
+                        return;
+                      }
                     webauth_activity.setContentView (R.layout.activity_webauth_pin);
                     try
                       {
@@ -160,7 +182,6 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                         ((ImageView) webauth_activity.findViewById (R.id.auth_cred_logo)).setImageBitmap (credential_data_factory.getListIcon (webauth_activity.matching_keys.firstElement ()));
                         ((TextView) webauth_activity.findViewById (R.id.auth_cred_domain)).setText (credential_data_factory.getDomain (webauth_activity.matching_keys.firstElement ()));
                         final Button ok = (Button) webauth_activity.findViewById (R.id.OKbutton);
-                        ok.requestFocus ();
                         Button cancel = (Button) webauth_activity.findViewById (R.id.cancelButton);
                         final EditText pin = (EditText) webauth_activity.findViewById (R.id.editpin1); 
                         pin.setSelected (true);
