@@ -2,8 +2,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical|center_horizontal"
-            android:background="@drawable/appshaddow"
-    android:orientation="vertical" >
+    android:background="@drawable/appshaddow"
+    android:orientation="vertical">
 
     <TextView
         android:layout_width="fill_parent"
@@ -15,7 +15,7 @@
         android:paddingTop="6dp"
         android:text="@string/title_activity_webauth"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#000000" />
+        android:textColor="#000000"/>
 
     <TextView
         android:id="@+id/partyInfo"
@@ -35,8 +35,9 @@
         android:focusable="true"
         android:text="@string/msg_undefined"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#000000" />
+        android:textColor="#000000"/>
 
+    <!-- Dummy to cope with a strange layout bug -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="0dp"
@@ -48,7 +49,7 @@
         android:paddingTop="6dp"
         android:text="@string/title_activity_webauth"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:visibility="invisible" />
+        android:visibility="invisible"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -57,7 +58,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:text="@string/msg_auth_user_question"
-        android:textColor="#000000" />
+        android:textColor="#000000"/>
 
     <CheckBox
         android:id="@+id/grantCheckBox"
@@ -68,14 +69,14 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:text="Don&apos;t ask me again"
-        android:textColor="#000000" />
+        android:textColor="#000000"/>
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="6dp"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp" >
+        android:layout_marginRight="10dp">
 
         <Button
             android:id="@+id/cancelButton"
@@ -83,14 +84,14 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
             android:lines="1"
-            android:text="Cancel" />
+            android:text="@string/button_cancel"/>
 
         <!-- Dummy to cope with a strange layout bug -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="                "
-            android:visibility="invisible" />
+            android:visibility="invisible"/>
 
         <Button
             android:id="@+id/OKbutton"
@@ -98,8 +99,8 @@
             android:layout_height="wrap_content"
             android:layout_weight=".3"
             android:lines="1"
-            android:text="OK" />
+            android:text="@string/button_ok"/>
         
     </LinearLayout>
         
-         </LinearLayout>
+</LinearLayout>

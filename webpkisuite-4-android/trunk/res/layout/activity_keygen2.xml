@@ -1,20 +1,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:background="@drawable/appborder"
-            android:orientation="vertical" >
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical|center_horizontal"
+    android:background="@drawable/appshaddow"
+    android:orientation="vertical">
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="1px"
         android:background="@drawable/dialogborder"
         android:gravity="center_vertical|center_horizontal"
-        android:padding="4dp"
+        android:lines="1"
+        android:paddingBottom="6dp"
+        android:paddingTop="6dp"
         android:text="@string/title_activity_keygen2"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#000000" />
+        android:textColor="#000000"/>
 
     <org.webpki.mobile.android.keygen2.KeyGen2InitLayout
         android:id="@+id/primaryWindow"

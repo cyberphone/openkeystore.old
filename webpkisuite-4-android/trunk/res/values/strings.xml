@@ -12,6 +12,7 @@
     <string name="title_activity_credentials">User Credentials</string>
     
   <string name="button_ok">OK</string>
+  <string name="button_cancel">Cancel</string>
   <string name="msg_auth_user_question">Do you want to authenticate to the\nparty above?</string>
   <string name="msg_undefined">Undefined</string>
   <string name="msg_camera_framework_bug">Sorry, the Android camera encountered a problem. You may need to restart the device.</string>

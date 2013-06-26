@@ -2,8 +2,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical|center_horizontal"
-            android:background="@drawable/appshaddow"
-    android:orientation="vertical" >
+    android:background="@drawable/appshaddow"
+    android:orientation="vertical">
 
     <TextView
         android:layout_width="fill_parent"
@@ -15,53 +15,55 @@
         android:paddingTop="6dp"
         android:text="@string/title_activity_webauth"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#000000" />
-
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="6dp"
-            android:orientation="vertical" >
-    
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Credential:"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#000000" />
+        android:textColor="#000000"/>
 
     <LinearLayout
-        android:id="@+id/credential_element"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/partyborder"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="4dp" >
-
-        <ImageView
-            android:id="@+id/auth_cred_logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/credview_background_bm" />
-
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="6dp"
+        android:orientation="vertical">
+    
         <TextView
-            android:id="@+id/auth_cred_domain"
+            android:id="@+id/textView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_marginLeft="6dp"
-            android:textColor="#000000" 
-            android:text="@string/msg_undefined"/>
-
+            android:text="Credential:"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#000000"/>
+    
+        <LinearLayout
+            android:id="@+id/credential_element"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/partyborder"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp">
+    
+            <ImageView
+                android:id="@+id/auth_cred_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/credview_background_bm"/>
+    
+            <TextView
+                android:id="@+id/auth_cred_domain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_marginLeft="6dp"
+                android:textColor="#000000" 
+                android:text="@string/msg_undefined"/>
+    
         </LinearLayout>
 
     </LinearLayout>
+
+    <!-- Dummy to cope with a strange layout bug -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="0dp"
@@ -73,45 +75,45 @@
         android:paddingTop="6dp"
         android:text="@string/title_activity_webauth"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:visibility="invisible" />
+        android:visibility="invisible"/>
+  
+    <LinearLayout
+        android:id="@+id/pinWindow"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="6dp"
+        android:orientation="vertical">
 
-      <LinearLayout
-          android:id="@+id/pinWindow"
-          android:layout_width="fill_parent"
-          android:layout_height="wrap_content"
-          android:layout_marginBottom="10dp"
-          android:layout_marginLeft="10dp"
-          android:layout_marginRight="10dp"
-          android:layout_marginTop="6dp"
-          android:orientation="vertical" >
-  
-          <TextView
-              android:id="@+id/leadpin1"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="Enter Credential PIN:"
-              android:textColor="#000000" />
-  
-          <EditText
-              android:id="@+id/editpin1"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:ems="10"
-              android:imeOptions="flagNoFullscreen"
-              android:inputType="numberPassword"
-              android:password="true" >
-  
-              <requestFocus />
-          </EditText>
-  
-       </LinearLayout>
+        <TextView
+            android:id="@+id/leadpin1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter Credential PIN:"
+            android:textColor="#000000"/>
+
+        <EditText
+            android:id="@+id/editpin1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:imeOptions="flagNoFullscreen"
+            android:inputType="numberPassword"
+            android:password="true">
+
+            <requestFocus/>
+        </EditText>
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="6dp"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp" >
+        android:layout_marginRight="10dp">
 
         <Button
             android:id="@+id/cancelButton"
@@ -119,14 +121,14 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
             android:lines="1"
-            android:text="Cancel" />
+            android:text="@string/button_cancel"/>
 
         <!-- Dummy to cope with a strange layout bug -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="                "
-            android:visibility="invisible" />
+            android:visibility="invisible"/>
 
         <Button
             android:id="@+id/OKbutton"
@@ -134,8 +136,8 @@
             android:layout_height="wrap_content"
             android:layout_weight=".3"
             android:lines="1"
-            android:text="OK" />
+            android:text="@string/button_ok"/>
         
     </LinearLayout>
         
-         </LinearLayout>
+</LinearLayout>
