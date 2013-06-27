@@ -16,9 +16,6 @@
  */
 package org.webpki.mobile.android.keygen2;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import android.os.AsyncTask;
 
 import android.widget.Button;
@@ -75,13 +72,7 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
         keygen2_activity.noMoreWorkToDo ();
         if (success)
           {
-            try
-              {
-                ((TextView) keygen2_activity.findViewById (R.id.partyInfo)).setText (new URL (keygen2_activity.getInitializationURL ()).getHost ());
-              }
-            catch (MalformedURLException e)
-              {
-              }
+            ((TextView) keygen2_activity.findViewById (R.id.partyInfo)).setText (keygen2_activity.getRequestingHost ());
             keygen2_activity.findViewById (R.id.primaryWindow).setVisibility (View.VISIBLE);
             final Button ok = (Button) keygen2_activity.findViewById (R.id.OKbutton);
             final Button cancel = (Button) keygen2_activity.findViewById (R.id.cancelButton);

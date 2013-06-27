@@ -19,6 +19,7 @@ package org.webpki.mobile.android.wasp;
 import android.os.AsyncTask;
 
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,12 +28,11 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import android.util.Log;
+
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import android.view.inputmethod.EditorInfo;
 
 import java.security.cert.X509Certificate;
 
@@ -130,13 +130,7 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
             ///////////////////////////////////////////////////////////////////////////////////
             // Successfully recieved the request, now show the domain name of the requester
             ///////////////////////////////////////////////////////////////////////////////////
-            try
-              {
-                ((TextView) webauth_activity.findViewById (R.id.partyInfo)).setText (new URL (webauth_activity.getInitializationURL ()).getHost ());
-              }
-            catch (MalformedURLException e)
-              {
-              }
+            ((TextView) webauth_activity.findViewById (R.id.partyInfo)).setText (webauth_activity.getRequestingHost ());
             ((TextView)webauth_activity.findViewById (R.id.partyInfo)).setOnClickListener (new View.OnClickListener ()
               {
                 @Override
@@ -146,9 +140,6 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                   }
               });
 
-            ///////////////////////////////////////////////////////////////////////////////////
-            // We have just fetched the request
-            ///////////////////////////////////////////////////////////////////////////////////
             final Button ok = (Button) webauth_activity.findViewById (R.id.OKbutton);
             final Button cancel = (Button) webauth_activity.findViewById (R.id.cancelButton);
             ok.requestFocus ();
@@ -167,9 +158,16 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                         webauth_activity.showAlert ("You have no matching credentials");
                         return;
                       }
-                    webauth_activity.setContentView (R.layout.activity_webauth_pin);
                     try
                       {
+                        ///////////////////////////////////////////////////////////////////////////////////
+                        // Seem we got something here to authenticate with!
+                        ///////////////////////////////////////////////////////////////////////////////////
+                        if (((CheckBox) webauth_activity.findViewById (R.id.grantCheckBox)).isChecked ())
+                          {
+                            sks.setGrant (webauth_activity.matching_keys.firstElement (), webauth_activity.getRequestingHost (), true);
+                          }
+                        webauth_activity.setContentView (R.layout.activity_webauth_pin);
                         ((LinearLayout)webauth_activity.findViewById (R.id.credential_element)).setOnClickListener (new View.OnClickListener ()
                           {
                             @Override
@@ -236,6 +234,19 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                     webauth_activity.conditionalAbort (null);
                   }
               });
+            try
+              {
+                if (!webauth_activity.matching_keys.isEmpty () &&
+                    sks.isGranted (webauth_activity.matching_keys.firstElement (), webauth_activity.getRequestingHost ()))
+                  {
+                    ((CheckBox) webauth_activity.findViewById (R.id.grantCheckBox)).setChecked (true);
+                    ok.performClick ();
+                  }
+              }
+            catch (Exception e)
+              {
+                throw new RuntimeException (e);
+              }
           }
         else
           {

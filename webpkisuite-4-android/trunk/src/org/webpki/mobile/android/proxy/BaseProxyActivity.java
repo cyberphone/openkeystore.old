@@ -19,6 +19,7 @@ package org.webpki.mobile.android.proxy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
 
 import java.security.cert.X509Certificate;
 
@@ -78,6 +79,8 @@ public abstract class BaseProxyActivity extends Activity
     public SKSImplementation sks;
     
     private String initialization_url;
+    
+    private String requesting_host;
     
     private X509Certificate server_certificate;
 
@@ -177,6 +180,11 @@ public abstract class BaseProxyActivity extends Activity
     public String getInitializationURL ()
       {
         return initialization_url;
+      }
+
+    public String getRequestingHost ()
+      {
+        return requesting_host;
       }
 
     public void showHeavyWork (final String message)
@@ -361,7 +369,7 @@ public abstract class BaseProxyActivity extends Activity
           {
             throw new IOException ("Missing initialization \"url\"");
           }
-        initialization_url = arg.get (0);
+        requesting_host = new URL (initialization_url = arg.get (0)).getHost ();
         arg = uri.getQueryParameters ("cookie");
         if (!arg.isEmpty ())
           {
