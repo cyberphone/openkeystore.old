@@ -12,64 +12,59 @@
         android:gravity="center_vertical|center_horizontal"
         android:lines="1"
         android:paddingBottom="6dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:paddingTop="6dp"
         android:text="@string/title_activity_webauth"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#000000"/>
-
-    <TextView
-        android:id="@+id/partyInfo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="6dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/partyborder"
-        android:paddingBottom="6dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="6dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:text="@string/msg_waiting_dot_dot_dot"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#000000"/>
-
-    <!-- Dummy to cope with a strange layout bug -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:gravity="center_vertical|center_horizontal"
-        android:lines="1"
-        android:paddingBottom="6dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="6dp"
-        android:text="@string/title_activity_webauth"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:visibility="invisible"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:text="@string/msg_auth_user_question"
-        android:textColor="#000000"/>
-
-    <CheckBox
-        android:id="@+id/grantCheckBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:text="@string/msg_auth_user_dont_ask_me_again"
         android:textColor="#000000" />
 
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/partyInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="6dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/partyborder"
+            android:paddingBottom="6dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="6dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="@string/msg_waiting_dot_dot_dot"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#000000"/>
+    
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="@string/msg_auth_user_question"
+            android:textColor="#000000"/>
+    
+        <CheckBox
+            android:id="@+id/grantCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="@string/msg_auth_user_dont_ask_me_again"
+            android:textColor="#000000" />
+
+    </LinearLayout>
+    
     <include layout="@layout/lower_buttons"/>
-        
+       
 </LinearLayout>

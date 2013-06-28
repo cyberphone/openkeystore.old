@@ -50,7 +50,7 @@ public abstract class SKSStore
     
     private static SKSImplementation sks;
 
-    public static SKSImplementation createSKS (String caller_for_log, Context caller, boolean save_if_new)
+    public static synchronized SKSImplementation createSKS (String caller_for_log, Context caller, boolean save_if_new)
       {
         if (sks == null)
           {
@@ -99,7 +99,7 @@ public abstract class SKSStore
         return sks;
       }
     
-    public static void serializeSKS (String caller_for_log, Context caller)
+    public static synchronized void serializeSKS (String caller_for_log, Context caller)
       {
         if (sks != null)
           {

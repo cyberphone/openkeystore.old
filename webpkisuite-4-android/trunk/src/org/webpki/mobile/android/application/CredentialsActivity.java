@@ -51,10 +51,17 @@ import android.graphics.drawable.BitmapDrawable;
 
 public class CredentialsActivity extends ListActivity
   {
-    SKSImplementation sks = SKSStore.createSKS ("Dialog", getBaseContext (), true);
+    private static final String DIALOG = "Dialog";
+    
+    SKSImplementation sks = SKSStore.createSKS (DIALOG, getBaseContext (), true);
 
     List<CredentialArrayAdapter.CredentialData> list = new ArrayList<CredentialArrayAdapter.CredentialData> ();
     
+    private void serializeSKS ()
+      {
+        SKSStore.serializeSKS (DIALOG, getBaseContext ());
+      }
+
     @Override
     public void onCreate (Bundle savedInstanceState)
       {
@@ -93,7 +100,7 @@ public class CredentialsActivity extends ListActivity
         menu.setHeaderTitle (list.get (info.position).getDomain ());
         menu.setHeaderIcon (new BitmapDrawable (getResources (), list.get (info.position).getIcon ()));
         // String[] menuItems = getResources().getStringArray(R.array.menu);
-        String[] menuItems = { "Certificate Properties", "Additional Properties", "Delete Credential" };
+        String[] menuItems = { "Certificate Properties", "Additional Properties", "Clear Grants", "Delete Credential" };
         for (int i = 0; i < menuItems.length; i++)
           {
             menu.add (Menu.NONE, i, i, menuItems[i]);
@@ -125,6 +132,25 @@ public class CredentialsActivity extends ListActivity
           {
             Toast.makeText (getApplicationContext (), "Not Implemented!", Toast.LENGTH_LONG).show ();
           }
+        else if (menuItemIndex == 2)
+          {
+            try
+              {
+                int key_handle = list.get (info.position).getKeyHandle ();
+                int i = 0;
+                for (String domain : sks.listGrants (key_handle))
+                  {
+                    i++;
+                    sks.setGrant (key_handle, domain, false);
+                  }
+                Toast.makeText (getApplicationContext (), String.valueOf (i) + " granted domains cleared", Toast.LENGTH_LONG).show ();
+                serializeSKS ();
+              }
+            catch (Exception e)
+              {
+                throw new RuntimeException (e);
+              }
+          }
         else
           {
             AlertDialog.Builder alert_dialog = 
@@ -142,6 +168,7 @@ public class CredentialsActivity extends ListActivity
                         list.remove (info.position);
                         ((ArrayAdapter<CredentialArrayAdapter.CredentialData>) getListAdapter ()).notifyDataSetChanged ();
                         dialog.cancel ();
+                        serializeSKS ();
                       }
                     catch (SKSException e)
                       {

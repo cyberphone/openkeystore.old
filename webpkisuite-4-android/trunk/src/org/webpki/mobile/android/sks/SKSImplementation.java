@@ -3493,7 +3493,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
           }
         else
           {
-            key_entry.granted_domains.remove (granted);
+            key_entry.granted_domains.remove (domain);
           }
       }
     
