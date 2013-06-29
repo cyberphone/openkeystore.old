@@ -19,7 +19,7 @@
             android:name=".application.PropertiesActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_properties">
-            <intent-filter>
+            <intent-filter android:label="@string/title_activity_webpki">
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
