@@ -1436,7 +1436,7 @@
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      "Subject" attributes MUST be represented as regular expressions compatible with
      the XML Schema "pattern" facet.  Note that the regular expressions MUST be
-     targeted for RFC 2253 encoded data
+     targeted for RFC 4514 encoded data
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="distinguishedNameExpr">

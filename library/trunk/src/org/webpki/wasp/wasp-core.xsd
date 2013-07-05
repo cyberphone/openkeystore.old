@@ -231,7 +231,7 @@
       Note that DNs (Distinguished Names) in certificates to be checked MUST be
       expressed as described in RFC 2253, while CertificateFilter DN attributes MUST be
       coded as described in the "distinguishedNameExpr" type definition in this XML
-      Schema.  A policy attribute MUST contain an RFC 3280 certificate policy OID.
+      Schema.  A policy attribute MUST contain an RFC 5280 certificate policy OID.
       If a certificate contains multiple policy OIDs, but only one of them matches a
       specified policy attribute, this MUST anyway be regarded as a match.  Subject
       e-mail addresses SHOULD be searched for both in the subject DN and in possible
@@ -262,7 +262,7 @@
       specification.
 
       2] A conforming client MUST include all locally provisioned CA certificates
-      associated with the EE certificates, as well as expanding all RFC 3280 AIA
+      associated with the EE certificates, as well as expanding all RFC 5280 AIA
       CaIssuers entries with HTTP or HTTPS accessLocation URIs.  This requirement
       is independent of if CertificateFilter is supported or not since it also affects
       other parts of signature profiles such as length of emitted certificate paths.
@@ -590,7 +590,7 @@
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      "KeyUsage" attribute definition: This attribute is represented by 9 bits as
-     described in RFC 3280.  The leftmost bit is digitalSignature (DS).  The KeyUsage
+     described in RFC 5280.  The leftmost bit is digitalSignature (DS).  The KeyUsage
      attribute bits MUST have the value "1", "0" or "X", where "X" denotes don't care.
      Unspecified KeyUsage attribute bits MUST be treated like Xs.  Examples: 
      "1" => Select certificates with digitalSignature=1 
@@ -606,7 +606,7 @@
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      "Issuer" and "Subject" attributes MUST be represented as regular expressions
      compatible with the XML Schema "pattern" facet.  Note that the regular expressions
-     MUST be targeted for RFC 2253 encoded data.
+     MUST be targeted for RFC 4514 encoded data.
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="distinguishedNameExpr">
