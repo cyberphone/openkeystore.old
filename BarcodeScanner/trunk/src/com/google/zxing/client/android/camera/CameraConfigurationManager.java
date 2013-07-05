@@ -175,6 +175,7 @@ final class CameraConfigurationManager {
 
   }
 
+ /*
   private Point findBestPreviewSizeValue(Camera.Parameters parameters, Point screenResolution) {
 Log.i(TAG,"screeres" + screenResolution);
     List<Camera.Size> rawSupportedSizes = parameters.getSupportedPreviewSizes();
@@ -258,6 +259,7 @@ Log.i(TAG,"screeres" + screenResolution);
     Log.i(TAG, "Found best approximate preview size: " + bestSize);
     return bestSize;
   }
+*/
 
   private static String findSettableValue(Collection<String> supportedValues,
                                           String... desiredValues) {
