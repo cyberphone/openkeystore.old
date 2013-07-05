@@ -261,6 +261,16 @@ public final class CameraManager {
       rect.right = rect.right * cameraResolution.x / screenResolution.x;
       rect.top = rect.top * cameraResolution.y / screenResolution.y;
       rect.bottom = rect.bottom * cameraResolution.y / screenResolution.y;
+//    Ugly fix for portrait mode.  I don't understand how ZXing really works...
+      if (rect.right - rect.left > (rect.bottom - rect.top) * 2)  // Weird perspective that takes 4ever to decode...
+      {
+          int i = ((rect.right - rect.left) - (rect.bottom - rect.top)) / 2;
+          if (rect.top - i > 5)  // To not kill cameras that don't fit our kludge...
+          {
+	          rect.top -= i;
+	          rect.bottom += i;
+          }
+      }
       framingRectInPreview = rect;
     }
     return framingRectInPreview;
