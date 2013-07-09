@@ -1385,7 +1385,17 @@ public class KeyGen2Test
         byte[] fileLogger (byte[] xmldata) throws Exception
           {
             XMLObjectWrapper xo = xmlschemas.parse (xmldata);
-            writeString ("&nbsp;<br><table><tr><td bgcolor=\"#F0F0F0\" style=\"border:solid;border-width:1px;padding:4px\">&nbsp;Pass #" + (++pass) + ":&nbsp;" + xo.element () + "&nbsp;</td></tr></table>&nbsp;<br>");
+            writeString ("&nbsp;<br><table><tr><td bgcolor=\"#F0F0F0\" style=\"border:solid;border-width:1px;padding:4px\">&nbsp;Pass #" + 
+                         (++pass) +
+                         ":&nbsp;" + 
+                         xo.element () +
+                         "<a id=\"" +
+                         xo.element () +
+                         "." +
+                         _name.getMethodName() +
+                         "." +
+                         round +
+                         "\"/>&nbsp;</td></tr></table>&nbsp;<br>");
             writeString (XML2HTMLPrinter.convert (new String (xmldata, "UTF-8")));
             return xmldata;
           }
