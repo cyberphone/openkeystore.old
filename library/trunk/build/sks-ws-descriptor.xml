@@ -1095,23 +1095,23 @@
      <Parameter Name="device_id"            Type="string" XMLName="DeviceID"            Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"           Type="int"    XMLName="KeyHandle"/>
      <Parameter Name="protection_status"    Type="byte"   XMLName="ProtectionStatus"    Mode="out"/>
-     <Parameter Name="puk_format"           Type="byte"   XMLName="PUKFormat"           Mode="out" Null="true" RewriteRule="Out.PassphraseFormat"/>
-     <Parameter Name="puk_retry_limit"      Type="short"  XMLName="PUKRetryLimit"       Mode="out" Null="true"/>
-     <Parameter Name="puk_error_count"      Type="short"  XMLName="PUKErrorCount"       Mode="out" Null="true"/>
-     <Parameter Name="user_defined"         Type="bool"   XMLName="UserDefined"         Mode="out" Null="true"/>
-     <Parameter Name="user_modifiable"      Type="bool"   XMLName="UserModifiable"      Mode="out" Null="true"/>
-     <Parameter Name="format"               Type="byte"   XMLName="Format"              Mode="out" Null="true" RewriteRule="Out.PassphraseFormat"/>
-     <Parameter Name="retry_limit"          Type="short"  XMLName="RetryLimit"          Mode="out" Null="true"/>
-     <Parameter Name="grouping"             Type="byte"   XMLName="Grouping"            Mode="out" Null="true" RewriteRule="Out.Grouping"/>
-     <Parameter Name="pattern_restrictions" Type="byte"   XMLName="PatternRestrictions" Mode="out" Null="true" RewriteRule="Out.PatternRestrictions"/>
-     <Parameter Name="min_length"           Type="short"  XMLName="MinLength"           Mode="out" Null="true"/>
-     <Parameter Name="max_length"           Type="short"  XMLName="MaxLength"           Mode="out" Null="true"/>
-     <Parameter Name="input_method"         Type="byte"   XMLName="InputMethod"         Mode="out" Null="true" RewriteRule="Out.InputMethod"/>
-     <Parameter Name="pin_error_count"      Type="short"  XMLName="PINErrorCount"       Mode="out" Null="true"/>
-     <Parameter Name="enable_pin_caching"   Type="bool"   XMLName="EnablePINCaching"    Mode="out" Null="true"/>
-     <Parameter Name="biometric_protection" Type="byte"   XMLName="BiometricProtection" Mode="out"             RewriteRule="Out.BiometricProtection"/>
-     <Parameter Name="export_protection"    Type="byte"   XMLName="ExportProtection"    Mode="out"             RewriteRule="Out.ExportProtection"/>
-     <Parameter Name="delete_protection"    Type="byte"   XMLName="DeleteProtection"    Mode="out"             RewriteRule="Out.DeleteProtection"/>
+     <Parameter Name="puk_format"           Type="byte"   XMLName="PUKFormat"           Mode="out" RewriteRule="Out.PassphraseFormat"/>
+     <Parameter Name="puk_retry_limit"      Type="short"  XMLName="PUKRetryLimit"       Mode="out"/>
+     <Parameter Name="puk_error_count"      Type="short"  XMLName="PUKErrorCount"       Mode="out"/>
+     <Parameter Name="user_defined"         Type="bool"   XMLName="UserDefined"         Mode="out"/>
+     <Parameter Name="user_modifiable"      Type="bool"   XMLName="UserModifiable"      Mode="out"/>
+     <Parameter Name="format"               Type="byte"   XMLName="Format"              Mode="out" RewriteRule="Out.PassphraseFormat"/>
+     <Parameter Name="retry_limit"          Type="short"  XMLName="RetryLimit"          Mode="out"/>
+     <Parameter Name="grouping"             Type="byte"   XMLName="Grouping"            Mode="out" RewriteRule="Out.Grouping"/>
+     <Parameter Name="pattern_restrictions" Type="byte"   XMLName="PatternRestrictions" Mode="out" RewriteRule="Out.PatternRestrictions"/>
+     <Parameter Name="min_length"           Type="short"  XMLName="MinLength"           Mode="out"/>
+     <Parameter Name="max_length"           Type="short"  XMLName="MaxLength"           Mode="out"/>
+     <Parameter Name="input_method"         Type="byte"   XMLName="InputMethod"         Mode="out" RewriteRule="Out.InputMethod"/>
+     <Parameter Name="pin_error_count"      Type="short"  XMLName="PINErrorCount"       Mode="out"/>
+     <Parameter Name="enable_pin_caching"   Type="bool"   XMLName="EnablePINCaching"    Mode="out"/>
+     <Parameter Name="biometric_protection" Type="byte"   XMLName="BiometricProtection" Mode="out" RewriteRule="Out.BiometricProtection"/>
+     <Parameter Name="export_protection"    Type="byte"   XMLName="ExportProtection"    Mode="out" RewriteRule="Out.ExportProtection"/>
+     <Parameter Name="delete_protection"    Type="byte"   XMLName="DeleteProtection"    Mode="out" RewriteRule="Out.DeleteProtection"/>
      <Parameter Name="key_backup"           Type="byte"   XMLName="KeyBackup"           Mode="out"/>
      <Code><![CDATA[
         String log_result = "";
@@ -1125,6 +1125,12 @@
                 puk_retry_limit.value      = kpi.getPUKRetryLimit ();
                 puk_error_count.value      = kpi.getPUKErrorCount ();
               }
+            else
+              {
+                puk_format.value           = (byte)0;
+                puk_retry_limit.value      = (short)0;
+                puk_error_count.value      = (short)0;
+              }
             if (kpi.hasLocalPINProtection ())
               {
                 user_defined.value         = kpi.getPINUserDefinedFlag ();
@@ -1137,6 +1143,19 @@
                 max_length.value           = kpi.getPINMaxLength ();
                 input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
                 pin_error_count.value      = kpi.getPINErrorCount ();
+              }
+            else
+              {
+                user_defined.value         = false;
+                user_modifiable.value      = false;
+                format.value               = (byte)0;
+                retry_limit.value          = (short)0;
+                grouping.value             = (byte)0;
+                pattern_restrictions.value = (byte)0;
+                min_length.value           = (short)0;
+                max_length.value           = (short)0;
+                input_method.value         = (byte)0;
+                pin_error_count.value      = (short)0;
               }
             enable_pin_caching.value   = kpi.getEnablePINCachingFlag ();
             biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();

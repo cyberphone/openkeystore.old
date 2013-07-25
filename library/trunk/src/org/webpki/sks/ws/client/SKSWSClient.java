@@ -101,9 +101,9 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
               }
             KeyAttributes ka = getKeyAttributes (key_handle);
             authorization_holder.value = tga_provider.getTrustedAuthorization (kpi.getPINFormat (),
-                                                                      kpi.getPINGrouping (),
-                                                                      ka.getAppUsage (),
-                                                                      ka.getFriendlyName ());
+                                                                               kpi.getPINGrouping (),
+                                                                               ka.getAppUsage (),
+                                                                               ka.getFriendlyName ());
             return authorization_holder.value != null;
           }
         return false;

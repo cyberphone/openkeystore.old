@@ -1142,6 +1142,12 @@ public class SKSWSImplementation
                 puk_retry_limit.value      = kpi.getPUKRetryLimit ();
                 puk_error_count.value      = kpi.getPUKErrorCount ();
               }
+            else
+              {
+                puk_format.value           = (byte)0;
+                puk_retry_limit.value      = (short)0;
+                puk_error_count.value      = (short)0;
+              }
             if (kpi.hasLocalPINProtection ())
               {
                 user_defined.value         = kpi.getPINUserDefinedFlag ();
@@ -1154,6 +1160,19 @@ public class SKSWSImplementation
                 max_length.value           = kpi.getPINMaxLength ();
                 input_method.value         = kpi.getPINInputMethod ().getSKSValue ();
                 pin_error_count.value      = kpi.getPINErrorCount ();
+              }
+            else
+              {
+                user_defined.value         = false;
+                user_modifiable.value      = false;
+                format.value               = (byte)0;
+                retry_limit.value          = (short)0;
+                grouping.value             = (byte)0;
+                pattern_restrictions.value = (byte)0;
+                min_length.value           = (short)0;
+                max_length.value           = (short)0;
+                input_method.value         = (byte)0;
+                pin_error_count.value      = (short)0;
               }
             enable_pin_caching.value   = kpi.getEnablePINCachingFlag ();
             biometric_protection.value = kpi.getBiometricProtection ().getSKSValue ();

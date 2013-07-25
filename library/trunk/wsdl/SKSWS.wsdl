@@ -522,20 +522,20 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="ProtectionStatus" type="xs:byte"/>
-            <xs:element name="PUKFormat" type="xs:byte" nillable="true" minOccurs="0"/>
-            <xs:element name="PUKRetryLimit" type="xs:short" nillable="true" minOccurs="0"/>
-            <xs:element name="PUKErrorCount" type="xs:short" nillable="true" minOccurs="0"/>
-            <xs:element name="UserDefined" type="xs:boolean" nillable="true" minOccurs="0"/>
-            <xs:element name="UserModifiable" type="xs:boolean" nillable="true" minOccurs="0"/>
-            <xs:element name="Format" type="xs:byte" nillable="true" minOccurs="0"/>
-            <xs:element name="RetryLimit" type="xs:short" nillable="true" minOccurs="0"/>
-            <xs:element name="Grouping" type="xs:byte" nillable="true" minOccurs="0"/>
-            <xs:element name="PatternRestrictions" type="xs:byte" nillable="true" minOccurs="0"/>
-            <xs:element name="MinLength" type="xs:short" nillable="true" minOccurs="0"/>
-            <xs:element name="MaxLength" type="xs:short" nillable="true" minOccurs="0"/>
-            <xs:element name="InputMethod" type="xs:byte" nillable="true" minOccurs="0"/>
-            <xs:element name="PINErrorCount" type="xs:short" nillable="true" minOccurs="0"/>
-            <xs:element name="EnablePINCaching" type="xs:boolean" nillable="true" minOccurs="0"/>
+            <xs:element name="PUKFormat" type="xs:byte"/>
+            <xs:element name="PUKRetryLimit" type="xs:short"/>
+            <xs:element name="PUKErrorCount" type="xs:short"/>
+            <xs:element name="UserDefined" type="xs:boolean"/>
+            <xs:element name="UserModifiable" type="xs:boolean"/>
+            <xs:element name="Format" type="xs:byte"/>
+            <xs:element name="RetryLimit" type="xs:short"/>
+            <xs:element name="Grouping" type="xs:byte"/>
+            <xs:element name="PatternRestrictions" type="xs:byte"/>
+            <xs:element name="MinLength" type="xs:short"/>
+            <xs:element name="MaxLength" type="xs:short"/>
+            <xs:element name="InputMethod" type="xs:byte"/>
+            <xs:element name="PINErrorCount" type="xs:short"/>
+            <xs:element name="EnablePINCaching" type="xs:boolean"/>
             <xs:element name="BiometricProtection" type="xs:byte"/>
             <xs:element name="ExportProtection" type="xs:byte"/>
             <xs:element name="DeleteProtection" type="xs:byte"/>

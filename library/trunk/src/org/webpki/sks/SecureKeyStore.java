@@ -38,9 +38,9 @@ public interface SecureKeyStore
     int MAX_LENGTH_CRYPTO_DATA                = 16384;
     int MAX_LENGTH_EXTENSION_DATA             = 65536;
     int MAX_RETRY_LIMIT                       = 10000;
-
+    
     ///////////////////////////////////////////////////////////////////////////////////
-    // Method IDs are used "as is" in the MAC KDF
+    // Method names are used "as is" in MAC operations
     ///////////////////////////////////////////////////////////////////////////////////
     byte[] METHOD_SET_CERTIFICATE_PATH        = {'s','e','t','C','e','r','t','i','f','i','c','a','t','e','P','a','t','h'};
     byte[] METHOD_IMPORT_SYMMETRIC_KEY        = {'i','m','p','o','r','t','S','y','m','m','e','t','r','i','c','K','e','y'};
@@ -56,7 +56,7 @@ public interface SecureKeyStore
     byte[] METHOD_POST_CLONE_KEY_PROTECTION   = {'p','o','s','t','C','l','o','n','e','K','e','y','P','r','o','t','e','c','t','i','o','n'};
 
     ///////////////////////////////////////////////////////////////////////////////////
-    // Other KDF constants that are used "as is"
+    // KDF constants that are used "as is" in MAC operations
     ///////////////////////////////////////////////////////////////////////////////////
     byte[] KDF_DEVICE_ATTESTATION             = {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
     byte[] KDF_ENCRYPTION_KEY                 = {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
