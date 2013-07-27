@@ -17,7 +17,7 @@
 package org.webpki.crypto;
 
 
-public interface EncryptionAlgorithms extends SKSAlgorithms
+public interface SKSAlgorithms
   {
-    public String getURI ();
+    public boolean isMandatorySKSAlgorithm ();
   }

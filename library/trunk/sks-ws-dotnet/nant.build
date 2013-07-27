@@ -12,7 +12,7 @@
     <property name="nant.settings.currentframework" value="net-4.0"/>
     
     <target name="help">
-      <echo message="Commands: build, sign, ecdh, test"/>
+      <echo message="Commands: build, sign, encrypt, ecdh, test"/>
     </target>
 
 <!--
@@ -147,7 +147,7 @@ public static void ScriptMain(Project project)
             {
                 System.Console.WriteLine("Signature: " + (looping ? "Round[" + ++round + "] " : "") + (rsa ? "RSA" : "EC") + " Key ID=#" + ek.KeyHandle + ", Subject: " + ka.CertificatePath[0].Subject);
                 string sign_alg = rsa ? "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" : "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256";
-                byte[] test_string = Encoding.UTF8.GetBytes("hi there!");
+                byte[] test_string = Encoding.UTF8.GetBytes("Signed hi there!");
                 byte[] res = ws.signHashedData(ek.KeyHandle,
                                                sign_alg,
                                                null,
@@ -169,6 +169,112 @@ public static void ScriptMain(Project project)
     catch (SKSException e)
     {
         throw new NAnt.Core.BuildException("Signing: " + e.Message + " code=" + e.Error);
+    }
+}
+            ]]>
+          </code>
+      </script>
+    </target>
+
+<!--
+#########################################################################
+#   A small test program that encrypts data using the first available   #
+#   key or a key specified by the command line option "-D:key=nnn".     #
+#                                                                       #
+#   Depends on the BouncyCastle library for encryption verification.    #
+#########################################################################
+-->
+    <target name="encrypt" depends="build">
+      <script language="C#">
+          <references>
+              <include name="System.Data.dll"/>
+              <include name="System.dll"/>
+              <include name="System.Core.dll"/>
+              <include name="System.Runtime.Serialization.dll"/>
+              <include name="System.ServiceModel.dll"/>
+              <include name="System.Xml.dll"/>
+              <include name="../dist/${client.library.name}.dll" />
+              <include name="third-party-dlls/BouncyCastle.Crypto.dll" />
+          </references>
+          <imports>
+              <import namespace="${client.library.name}" />
+              <import namespace="System.Linq" />
+              <import namespace="System.Security.Cryptography" />
+           </imports>
+          <code>
+            <![CDATA[
+public static void EncryptRound (EnumeratedKey ek,
+                                 SKSWSProxy ws,
+                                 Org.BouncyCastle.Crypto.IAsymmetricBlockCipher engine,
+                                 String algorithm,
+                                 byte[] pin)
+{
+    KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
+    byte[] test_string = Encoding.UTF8.GetBytes("Encrypted hi there!");
+    engine.Init(true, Org.BouncyCastle.Security.PublicKeyFactory.CreateKey(ka.CertificatePath[0].PublicKey.X509Encoding()));
+    byte[] encrypted = engine.ProcessBlock(test_string, 0, test_string.Length);
+    byte[] sks_res = ws.asymmetricKeyDecrypt(ek.KeyHandle,
+                                             algorithm,
+                                             null,
+                                             pin,
+                                             encrypted);
+    // Do we match?
+    if (!sks_res.SequenceEqual(test_string))
+    {
+       throw new NAnt.Core.BuildException ("FAILED ENCRYPTION!!!");
+    }
+}
+public static void ScriptMain(Project project)
+{
+   try
+    {
+        SKSWSProxy ws = SKSWSProxy.getDefaultSKSWSProxy();
+        string device = project.Properties["device"];
+        byte[] pin = project.Properties["pin"] == null ? null : System.Text.Encoding.UTF8.GetBytes (project.Properties["pin"]);
+        bool looping = project.Properties["loop"] != null;
+        int round = 0;
+        if (device != null)
+        {
+            foreach (string device_id in ws.listDevices ())
+            {
+               System.Console.WriteLine ("Device: " + device_id);
+            }
+            ws.DeviceID = device;
+        }
+        EnumeratedKey ek = new EnumeratedKey();
+        while ((ek = ws.enumerateKeys(ek.KeyHandle)) != null)
+        {
+            KeyAttributes ka = ws.getKeyAttributes(ek.KeyHandle);
+            if (project.Properties["key"] == null)
+            {
+                if (ka.SymmetricKeyLength > 0 || !ka.CertificatePath[0].PublicKey.IsRSA()) continue;
+            }
+            else
+            {
+                if (Int32.Parse(project.Properties["key"]) != ek.KeyHandle) continue;
+            }
+            do
+            {
+                EncryptRound(ek,
+                             ws,
+                             new Org.BouncyCastle.Crypto.Encodings.Pkcs1Encoding(new Org.BouncyCastle.Crypto.Engines.RsaEngine()),
+                             "http://www.w3.org/2001/04/xmlenc#rsa-1_5",
+                             pin);
+                EncryptRound(ek,
+                             ws,
+                             new Org.BouncyCastle.Crypto.Encodings.OaepEncoding(new Org.BouncyCastle.Crypto.Engines.RsaEngine()),
+                             "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p",
+                             pin);
+                System.Console.WriteLine("Encryption: Round[" + ++round + "] Key ID=#" + ek.KeyHandle + ", Subject: " + ka.CertificatePath[0].Subject);
+            }
+            while (looping);
+            return;
+        }
+        throw new NAnt.Core.BuildException ("NO SUITABLE KEY FOUND!!!");
+    }
+    catch (SKSException e)
+    {
+        throw new NAnt.Core.BuildException("Encryption: " + e.Message + " code=" + e.Error);
     }
 }
             ]]>

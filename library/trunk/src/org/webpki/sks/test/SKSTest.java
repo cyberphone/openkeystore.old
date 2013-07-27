@@ -1674,6 +1674,12 @@ public class SKSTest
     @Test
     public void test30 () throws Exception
       {
+        rsaEncryptionTest (AsymEncryptionAlgorithms.RSA_PKCS_1);
+        rsaEncryptionTest (AsymEncryptionAlgorithms.RSA_OAEP_MGF1P);
+      }
+
+    private void rsaEncryptionTest (AsymEncryptionAlgorithms encryption_algorithm) throws Exception
+      {
         String good_pin = "1563";
         ProvSess sess = new ProvSess (device);
         PINPol pin_policy = sess.createPINPolicy ("PIN",
@@ -1695,11 +1701,11 @@ public class SKSTest
                                       AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         
-        Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
+        Cipher cipher = Cipher.getInstance (encryption_algorithm.getJCEName ());
         cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
         byte[] enc = cipher.doFinal (TEST_STRING);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                                                            encryption_algorithm.getURI (), 
                                                                                             null,
                                                                                             good_pin.getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
@@ -1719,7 +1725,7 @@ public class SKSTest
         try
           {
             device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                             encryption_algorithm.getURI (), 
                                              new byte[]{6},
                                              good_pin.getBytes ("UTF-8"), 
                                              enc);
@@ -1731,7 +1737,7 @@ public class SKSTest
           }
         try
           {
-            key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, good_pin + "4", enc);
+            key.asymmetricKeyDecrypt (encryption_algorithm, good_pin + "4", enc);
             fail ("PIN error");
           }
         catch (SKSException e)
@@ -1740,7 +1746,7 @@ public class SKSTest
           }
         try
           {
-            key2.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, good_pin, enc);
+            key2.asymmetricKeyDecrypt (encryption_algorithm, good_pin, enc);
             fail ("PKCS #1 error");
           }
         catch (SKSException e)

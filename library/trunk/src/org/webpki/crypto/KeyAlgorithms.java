@@ -27,7 +27,7 @@ import org.webpki.asn1.DerDecoder;
 import org.webpki.asn1.ParseUtil;
 
 
-public enum KeyAlgorithms
+public enum KeyAlgorithms implements SKSAlgorithms
   {
     RSA1024     (null,
                  "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa1024",
@@ -194,6 +194,7 @@ public enum KeyAlgorithms
       }
 
     
+    @Override
     public boolean isMandatorySKSAlgorithm ()
       {
         return sks_mandatory;

@@ -98,11 +98,6 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
       }
 
     
-    public boolean isMandatorySKSAlgorithm ()
-      {
-        return sks_mandatory;
-      }
-
 
     public boolean needsPadding ()
       {
@@ -120,5 +115,12 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
               }
           }
         throw new IOException ("Unknown algorithm: " + uri);
+      }
+
+
+    @Override
+    public boolean isMandatorySKSAlgorithm ()
+      {
+        return sks_mandatory;
       }
   }

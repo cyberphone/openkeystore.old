@@ -107,17 +107,17 @@ public class PKCS12Import
           }
         if (app_usage == AppUsage.ENCRYPTION)
           {
-            endorsed_algs = new String[]{rsa_flag ? 
-                    AsymEncryptionAlgorithms.RSA_PKCS_1.getURI ()
-                                                  :
-                    KeyGen2URIs.SPECIAL_ALGORITHMS.ECDH_RAW};
+            endorsed_algs = rsa_flag ? 
+                new String[]{AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), AsymEncryptionAlgorithms.RSA_OAEP_MGF1P.getURI ()} 
+                                 :
+                new String[]{KeyGen2URIs.SPECIAL_ALGORITHMS.ECDH_RAW};
           }
         else if (app_usage == AppUsage.SIGNATURE)
           {
             endorsed_algs = rsa_flag ? 
-                    new String[]{SignatureAlgorithms.RSA_SHA1.getURI (), SignatureAlgorithms.RSA_SHA256.getURI ()}
-                                     :
-                    new String[]{SignatureAlgorithms.ECDSA_SHA256.getURI ()};
+                new String[]{SignatureAlgorithms.RSA_SHA1.getURI (), SignatureAlgorithms.RSA_SHA256.getURI ()}
+                                 :
+                new String[]{SignatureAlgorithms.ECDSA_SHA256.getURI ()};
           }
         SecureKeyStore sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.client")).newInstance ();
         EnumeratedKey ek = new EnumeratedKey ();

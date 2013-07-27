@@ -192,6 +192,10 @@ public class SEReferenceImplementation
                       "RSA/ECB/PKCS1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
+        addAlgorithm ("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p",
+                      "RSA/ECB/OAEPWithSHA-1AndMGF1Padding",
+                      ALG_ASYM_ENC | ALG_RSA_KEY);
+
         addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.raw",
                       "RSA/ECB/NoPadding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);

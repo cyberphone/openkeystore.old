@@ -18,7 +18,7 @@ package org.webpki.crypto;
 
 import java.io.IOException;
 
-public enum SignatureAlgorithms
+public enum SignatureAlgorithms implements SKSAlgorithms
   {
     RSA_NONE     ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.none", 
                   null,                    "NONEwithRSA",     null,                  true),
@@ -90,10 +90,6 @@ public enum SignatureAlgorithms
       }
 
 
-    public boolean isMandatorySKSAlgorithm ()
-      {
-        return sks_mandatory;
-      }
 
 
     public static boolean testAlgorithmURI (String uri)
@@ -121,4 +117,10 @@ public enum SignatureAlgorithms
         throw new IOException ("Unknown algorithm: " + uri);
       }
 
+
+    @Override
+    public boolean isMandatorySKSAlgorithm ()
+      {
+        return sks_mandatory;
+      }
   }
