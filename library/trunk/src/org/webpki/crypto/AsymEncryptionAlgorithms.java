@@ -21,9 +21,9 @@ import java.io.IOException;
 
 public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
   {
-    RSA_PKCS_1      ("1.2.840.113549.1.1.1",  "http://www.w3.org/2001/04/xmlenc#rsa-1_5",        "RSA/ECB/PKCS1Padding"),
-    RSA_OAEP_MGF1P  ("1.2.840.113549.1.1.7",  "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p", "RSA/ECB/OAEPWithSHA-1AndMGF1Padding"),
-    RSA_RAW         (null,                    "internal:RSA/ECB/NoPadding",                      "RSA/ECB/NoPadding");
+    RSA_PKCS_1      ("1.2.840.113549.1.1.1",  "http://www.w3.org/2001/04/xmlenc#rsa-1_5",              "RSA/ECB/PKCS1Padding"),
+    RSA_OAEP_MGF1P  ("1.2.840.113549.1.1.7",  "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p",       "RSA/ECB/OAEPWithSHA-1AndMGF1Padding"),
+    RSA_RAW         (null,                    "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.raw", "RSA/ECB/NoPadding");
 
     private final String         oid;             // As expressed in OIDs
     private final String         uri;             // As expressed in XML

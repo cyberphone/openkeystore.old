@@ -1674,8 +1674,13 @@ public class SKSTest
     @Test
     public void test30 () throws Exception
       {
-        rsaEncryptionTest (AsymEncryptionAlgorithms.RSA_PKCS_1);
-        rsaEncryptionTest (AsymEncryptionAlgorithms.RSA_OAEP_MGF1P);
+        for (AsymEncryptionAlgorithms algorithm : AsymEncryptionAlgorithms.values ())
+          {
+            if (algorithm.isMandatorySKSAlgorithm ())
+              {
+                rsaEncryptionTest (algorithm);
+              }
+          }
       }
 
     private void rsaEncryptionTest (AsymEncryptionAlgorithms encryption_algorithm) throws Exception
@@ -1694,11 +1699,6 @@ public class SKSTest
                                      good_pin /* pin_value */,
                                      pin_policy /* pin_policy */,
                                      AppUsage.ENCRYPTION).setCertificate (cn ());
-        GenKey key2 = sess.createKey ("Key.2",
-                                      KeyAlgorithms.RSA1024,
-                                      good_pin /* pin_value */,
-                                      pin_policy /* pin_policy */,
-                                      AppUsage.AUTHENTICATION).setCertificate (cn ());
         sess.closeSession ();
         
         Cipher cipher = Cipher.getInstance (encryption_algorithm.getJCEName ());
@@ -1743,14 +1743,6 @@ public class SKSTest
         catch (SKSException e)
           {
             authorizationErrorCheck (e);
-          }
-        try
-          {
-            key2.asymmetricKeyDecrypt (encryption_algorithm, good_pin, enc);
-            fail ("PKCS #1 error");
-          }
-        catch (SKSException e)
-          {
           }
       }
 
