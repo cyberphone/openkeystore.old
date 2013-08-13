@@ -20,4 +20,8 @@ package org.webpki.crypto;
 public interface SKSAlgorithms
   {
     public boolean isMandatorySKSAlgorithm ();
+
+    public String getURI ();
+    
+    public String getOID ();
   }

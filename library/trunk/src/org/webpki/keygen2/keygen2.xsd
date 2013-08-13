@@ -41,7 +41,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 28-DEC-2012 
+    Revised: 13-Aug-2013 
     Author: Anders Rundgren
 
     Copyright 2006-2013 WebPKI.org (http://webpki.org).
@@ -59,11 +59,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20121228#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20130813#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20121228#"
+           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20130813#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -241,7 +241,7 @@
 
          <!-- "Algorithm" specifies the algorithm to use for creating an
               SKS "SessionKey".  Currently the only documented algorithm URI is:
-              "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1" -->
+              "http://xmlns.webpki.org/sks/algorithm#session.1" -->
          <xs:attribute name="Algorithm" type="xs:anyURI" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
@@ -543,7 +543,7 @@
 
          <!-- "Algorithm" is mandatory.  Currently the only
                documented key generation and attestation algorithm is:
-              "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1" -->
+              "http://xmlns.webpki.org/sks/algorithm#key.1" -->
          <xs:attribute name="Algorithm" type="xs:anyURI" use="required"/>
 
       </xs:complexType>
@@ -951,7 +951,7 @@
             <xs:simpleType>
                <xs:restriction base="xs:base64Binary">
                   <xs:minLength value="1"/>
-                  <xs:maxLength value="32"/>
+                  <xs:maxLength value="64"/>
                </xs:restriction>
             </xs:simpleType>
          </xs:attribute>

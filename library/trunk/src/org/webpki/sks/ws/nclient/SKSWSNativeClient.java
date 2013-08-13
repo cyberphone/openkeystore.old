@@ -271,4 +271,11 @@ public class SKSWSNativeClient implements SecureKeyStore, WSSpecific
         return null;
       }
 
+    @Override
+    public void updateKeyManagementKey (int provisioning_handle, PublicKey key_managegent_key, byte[] authorization) throws SKSException
+      {
+        // TODO Auto-generated method stub
+        
+      }
+
   }

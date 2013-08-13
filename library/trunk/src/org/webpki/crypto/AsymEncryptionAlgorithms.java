@@ -21,9 +21,18 @@ import java.io.IOException;
 
 public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
   {
-    RSA_PKCS_1      ("1.2.840.113549.1.1.1",  "http://www.w3.org/2001/04/xmlenc#rsa-1_5",              "RSA/ECB/PKCS1Padding"),
-    RSA_OAEP_MGF1P  ("1.2.840.113549.1.1.7",  "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p",       "RSA/ECB/OAEPWithSHA-1AndMGF1Padding"),
-    RSA_RAW         (null,                    "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.raw", "RSA/ECB/NoPadding");
+    RSA_PKCS_1_5           ("1.2.840.113549.1.1.1",
+                            "http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
+                            "RSA/ECB/PKCS1Padding"),
+    RSA_OAEP_SHA1_MGF1P    (null,
+                            "http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha1.mgf1p",
+                            "RSA/ECB/OAEPWithSHA1AndMGF1Padding"),
+    RSA_OAEP_SHA256_MGF1P  (null,
+                            "http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha256.mgf1p",
+                            "RSA/ECB/OAEPWithSHA256AndMGF1Padding"),
+    RSA_RAW                (null,
+                            "http://xmlns.webpki.org/sks/algorithm#rsa.raw",
+                            "RSA/ECB/NoPadding");
 
     private final String         oid;             // As expressed in OIDs
     private final String         uri;             // As expressed in XML
@@ -37,6 +46,7 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
       }
 
 
+    @Override
     public String getOID ()
       {
         return oid;
@@ -49,6 +59,7 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
       }
 
 
+    @Override
     public String getURI ()
       {
         return uri;

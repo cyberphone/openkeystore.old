@@ -802,6 +802,24 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
+    public void updateKeyManagementKey (int provisioning_handle,
+                                        PublicKey key_managegent_key,
+                                        byte[] authorization) throws SKSException
+      {
+        try
+          {
+            getSKSWS ().updateKeyManagementKey (device_id,
+                                                provisioning_handle,
+                                                key_managegent_key.getEncoded (),
+                                                authorization);
+          }
+        catch (SKSException_Exception e)
+          {
+            throw new SKSException (e.getFaultInfo ().getMessage (), e.getFaultInfo ().getError ());
+          }
+      }
+
+    @Override
     public Extension getExtension (int key_handle,
                                    String type) throws SKSException
       {
@@ -1166,5 +1184,4 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         SKSWSClient client = args[0].equals ("default") ? new SKSWSClient () : new SKSWSClient (args[0]);
         System.out.println ("Version=" + client.getVersion () + "\nDevice=" + client.getDeviceInfo ().getVendorDescription ());
       }
-
   }

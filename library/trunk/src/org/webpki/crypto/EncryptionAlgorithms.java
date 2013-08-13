@@ -19,5 +19,4 @@ package org.webpki.crypto;
 
 public interface EncryptionAlgorithms extends SKSAlgorithms
   {
-    public String getURI ();
   }

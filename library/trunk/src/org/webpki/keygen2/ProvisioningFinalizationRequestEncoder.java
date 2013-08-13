@@ -28,6 +28,7 @@ import java.security.cert.X509Certificate;
 
 import org.webpki.sks.SecureKeyStore;
 
+import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
 
 import org.webpki.xml.DOMWriterHelper;
@@ -100,7 +101,9 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
         wr.setBinaryAttribute (CERTIFICATE_FINGERPRINT_ATTR, HashAlgorithms.SHA256.digest (target_key.certificate_data));
         byte[] device_id = server_state.device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : server_state.device_certificate.getEncoded ();
         byte[] key_id = server_state.server_crypto_interface.mac (target_key.certificate_data, device_id);
-        byte[] authorization = server_state.server_crypto_interface.generateKeyManagementAuthorization (target_key.key_management_key, key_id);
+        byte[] authorization = server_state.server_crypto_interface.generateKeyManagementAuthorization (target_key.key_management_key,
+                                                                                                        ArrayUtil.add (SecureKeyStore.KMK_TARGET_KEY_REFERENCE,
+                                                                                                                       key_id));
         wr.setBinaryAttribute (AUTHORIZATION_ATTR, authorization);
         post_op_mac.addArray (authorization);
         mac (wr, post_op_mac.getResult (), target_key.post_operation.getMethod ());

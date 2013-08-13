@@ -83,7 +83,7 @@ public class PKCS7Signer
             BaseASN1Object cert_ref = signer_cert.get (new int[]{0, i});
 
             String digest_oid = signature_algorithm.getDigestAlgorithm ().getOID ();
-            String encryption_oid = AsymEncryptionAlgorithms.RSA_PKCS_1.getOID ();
+            String encryption_oid = AsymEncryptionAlgorithms.RSA_PKCS_1_5.getOID ();
 
             byte[] signed_data = signer_implem.signData (message, signature_algorithm);
             

@@ -50,6 +50,7 @@ import org.webpki.sks.SKSException;
 import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.sks.test.ProvSess.MacGenerator;
+import org.webpki.util.ArrayUtil;
 
 public class GenKey
   {
@@ -174,8 +175,10 @@ public class GenKey
             kmk_id = 0;  // Just for JUnit...
           }
         PublicKey kmk = current.server_sess_key.enumerateKeyManagementKeys ()[kmk_id];
-        byte[] authorization = current.server_sess_key.generateKeyManagementAuthorization (kmk, current.mac (cert_path[0].getEncoded (),
-                                                                                                  current.getDeviceID ()));
+        byte[] authorization = current.server_sess_key.generateKeyManagementAuthorization (kmk,
+                                                                                           ArrayUtil.add (SecureKeyStore.KMK_TARGET_KEY_REFERENCE,
+                                                                                                          current.mac (cert_path[0].getEncoded (),
+                                                                                                                       current.getDeviceID ())));
         upd_mac.addArray (authorization);
         return authorization;
       }

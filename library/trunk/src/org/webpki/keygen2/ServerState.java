@@ -732,9 +732,9 @@ public class ServerState implements Serializable
         
         public Key setServerSeed (byte[] server_seed) throws IOException
           {
-            if (server_seed.length > 32 || server_seed.length == 0)
+            if (server_seed.length > SecureKeyStore.MAX_LENGTH_SERVER_SEED || server_seed.length == 0)
               {
-                bad ("Server seed must be 1-32 bytes");
+                bad ("Server seed must be 1-" + SecureKeyStore.MAX_LENGTH_SERVER_SEED + " bytes");
               }
             this.server_seed = server_seed;
             return this;
@@ -1065,7 +1065,7 @@ public class ServerState implements Serializable
 
     short session_key_limit;
     
-    String provisioning_session_algorithm = KeyGen2URIs.SPECIAL_ALGORITHMS.SESSION_KEY_1;
+    String provisioning_session_algorithm = SecureKeyStore.ALGORITHM_SESSION_ATTEST_1;
     
     String key_attestation_algorithm;
     
@@ -1143,7 +1143,7 @@ public class ServerState implements Serializable
       {
         MacGenerator check = new MacGenerator ();
         check.addArray (saved_close_nonce);
-        check.addString (KeyGen2URIs.SPECIAL_ALGORITHMS.SESSION_KEY_1);
+        check.addString (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1);
         if (!ArrayUtil.compare (attest (check.getResult (),
                                         getMACSequenceCounterAndUpdate ()),
                                 close_session_attestation))

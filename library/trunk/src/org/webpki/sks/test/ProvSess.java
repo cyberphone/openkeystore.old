@@ -221,7 +221,7 @@ public class ProvSess
     
     SoftHSM server_sess_key = new SoftHSM ();
 
-    String session_key_algorithm = KeyGen2URIs.SPECIAL_ALGORITHMS.SESSION_KEY_1;
+    String session_key_algorithm = SecureKeyStore.ALGORITHM_SESSION_ATTEST_1;
     
     static final String ISSUER_URI = "http://issuer.example.com/provsess";
     
@@ -408,6 +408,11 @@ public class ProvSess
                                                         sess.getAttestation ());
      }
 
+    public void byPassKMK (int kmk_id)
+      {
+        this.kmk_id = kmk_id;
+      }
+
     public ProvSess (Device device, short session_key_limit, Integer kmk_id, boolean privacy_enabled) throws GeneralSecurityException, IOException
       {
         this (device, session_key_limit, kmk_id, privacy_enabled, null, null);
@@ -457,7 +462,7 @@ public class ProvSess
                                                       SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION));
         MacGenerator check = new MacGenerator ();
         check.addArray (nonce);
-        check.addString (KeyGen2URIs.SPECIAL_ALGORITHMS.SESSION_KEY_1);
+        check.addString (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1);
         if (!ArrayUtil.compare (attest (check.getResult ()), result))
           {
             bad ("Final attestation failed!");
@@ -603,7 +608,7 @@ public class ProvSess
         byte[] server_seed = new byte[32];
         new SecureRandom ().nextBytes (server_seed);
         return createKey (id,
-                          KeyGen2URIs.SPECIAL_ALGORITHMS.KEY_ATTESTATION_1,
+                          SecureKeyStore.ALGORITHM_KEY_ATTEST_1,
                           server_seed,
                           pin_policy,
                           pin_value,

@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -444,15 +445,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             provisioning.verifyMac (verifier, mac);
             
             ///////////////////////////////////////////////////////////////////////////////////
-            // Verify KM signature
+            // Verify KMM signature
             ///////////////////////////////////////////////////////////////////////////////////
             try
               {
-                Signature km_verify = Signature.getInstance (owner.key_management_key instanceof RSAPublicKey ? 
-                                                                                              "SHA256WithRSA" : "SHA256WithECDSA");
-                km_verify.initVerify (owner.key_management_key);
-                km_verify.update (provisioning.getMacBuilder (getDeviceID (provisioning.privacy_enabled)).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
-                if (!km_verify.verify (authorization))
+                Signature kmk_verify = owner.initKeyManagementKeyVerifier ();
+                kmk_verify.update (KMK_TARGET_KEY_REFERENCE);
+                kmk_verify.update (provisioning.getMacBuilder (getDeviceID (provisioning.privacy_enabled)).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
+                if (!kmk_verify.verify (authorization))
                   {
                     provisioning.abort ("\"Authorization\" signature did not verify for key #" + key_handle);
                   }
@@ -709,6 +709,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 abort ("Invalid \"RetryLimit\" value=" + retry_limit);
               }
           }
+
+        Signature initKeyManagementKeyVerifier () throws GeneralSecurityException
+          {
+            Signature kmk_verify = Signature.getInstance (key_management_key instanceof RSAPublicKey ? 
+                                                                                     "SHA256WithRSA" : "SHA256WithECDSA");
+            kmk_verify.initVerify (key_management_key);
+            return kmk_verify;
+          }
       }
 
 
@@ -859,11 +867,11 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                       "AES/CBC/PKCS5Padding",
                       ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_256);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.nopad",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.ecb.nopad",
                       "AES/ECB/NoPadding",
                       ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256 | ALG_AES_PAD);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.cbc.pkcs5",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.cbc.pkcs5",
                       "AES/CBC/PKCS5Padding",
                       ALG_SYM_ENC | ALG_IV_REQ | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
 
@@ -877,22 +885,26 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Decryption
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://www.w3.org/2001/04/xmlenc#rsa-1_5",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
                       "RSA/ECB/PKCS1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
-        addAlgorithm ("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p",
-                      "RSA/ECB/OAEPWithSHA-1AndMGF1Padding",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha1.mgf1p",
+                      "RSA/ECB/OAEPWithSHA1AndMGF1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.raw",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha256.mgf1p",
+                      "RSA/ECB/OAEPWithSHA256AndMGF1Padding",
+                      ALG_ASYM_ENC | ALG_RSA_KEY);
+
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.raw",
                       "RSA/ECB/NoPadding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Diffie-Hellman Key Agreement
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh.raw",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ecdh.raw",
                       "ECDH",
                       ALG_ASYM_KA | ALG_EC_KEY);
         
@@ -911,28 +923,28 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                       "NONEwithECDSA",
                       ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_256);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.none",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1.none",
                       "NONEwithRSA",
                       ALG_ASYM_SGN | ALG_RSA_KEY);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdsa.none",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ecdsa.none",
                       "NONEwithECDSA",
                       ALG_ASYM_SGN | ALG_EC_KEY);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Generation
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.p256",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.p256",
                       "secp256r1",
                       ALG_EC_KEY | ALG_KEY_GEN);
         
         for (short rsa_size : SKS_DEFAULT_RSA_SUPPORT)
           {
-            addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa" + rsa_size,
+            addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa" + rsa_size,
                           null, ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
             if (SKS_RSA_EXPONENT_SUPPORT)
               {
-                addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa" + rsa_size + ".exp",
+                addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa" + rsa_size + ".exp",
                               null, ALG_KEY_PARM | ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
               }
           }
@@ -944,7 +956,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
         addAlgorithm (ALGORITHM_KEY_ATTEST_1, null, 0);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.none", null, ALG_NONE);
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#none", null, ALG_NONE);
 
       }
 
@@ -997,16 +1009,32 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         return (PrivateKey) getAttestationKeyStore ().getKey (ATTESTATION_KEY_ALIAS, ATTESTATION_KEY_PASSWORD);        
       }
 
-    Provisioning getOpenProvisioningSession (int provisioning_handle) throws SKSException
+    Provisioning getProvisioningSession (int provisioning_handle) throws SKSException
       {
         Provisioning provisioning = provisionings.get (provisioning_handle);
         if (provisioning == null)
           {
             abort ("No such provisioning session: " + provisioning_handle, SKSException.ERROR_NO_SESSION);
           }
+        return provisioning;
+      }
+
+    Provisioning getOpenProvisioningSession (int provisioning_handle) throws SKSException
+      {
+        Provisioning provisioning = getProvisioningSession (provisioning_handle);
         if (!provisioning.open)
           {
             abort ("Session not open: " +  provisioning_handle, SKSException.ERROR_NO_SESSION);
+          }
+        return provisioning;
+      }
+
+    Provisioning getClosedProvisioningSession (int provisioning_handle) throws SKSException
+      {
+        Provisioning provisioning = getProvisioningSession (provisioning_handle);
+        if (provisioning.open)
+          {
+            abort ("Session is open: " +  provisioning_handle, SKSException.ERROR_NOT_ALLOWED);
           }
         return provisioning;
       }
@@ -2225,6 +2253,47 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
+    //                           updateKeyManagementKey                           //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void updateKeyManagementKey (int provisioning_handle,
+                                        PublicKey key_management_key,
+                                        byte[] authorization) throws SKSException
+      {
+        Provisioning provisioning = getClosedProvisioningSession (provisioning_handle);
+        if (provisioning.key_management_key == null)
+          {
+            abort ("Session is not updatable: " +  provisioning_handle, SKSException.ERROR_NOT_ALLOWED);
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify KMK signature
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            Signature kmk_verify = provisioning.initKeyManagementKeyVerifier ();
+            kmk_verify.update (KMK_ROLL_OVER_ATTESTATION);
+            kmk_verify.update (key_management_key.getEncoded ());
+            if (!kmk_verify.verify (authorization))
+              {
+                abort ("\"Authorization\" signature did not verify for session: " + provisioning_handle);
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Success, update KeyManagementKey
+            ///////////////////////////////////////////////////////////////////////////////////
+            provisioning.key_management_key = key_management_key;
+          }
+        catch (GeneralSecurityException e)
+          {
+            abort (e.getMessage (), SKSException.ERROR_CRYPTO);
+          }
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
     //                       enumerateProvisioningSessions                        //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
@@ -3111,7 +3180,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             provisioning.abort ((key_parameters == null ? "Missing" : "Unexpected") + " \"KeyParameters\"");
           }
-        if (server_seed != null && (server_seed.length == 0 || server_seed.length > 32))
+        if (server_seed != null && (server_seed.length == 0 || server_seed.length > MAX_LENGTH_SERVER_SEED))
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
           }
@@ -3338,7 +3407,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         // Perform PIN "sanity" checks
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.rangeTest (grouping, PIN_GROUPING_NONE, PIN_GROUPING_UNIQUE, "Grouping");
-        provisioning.rangeTest (input_method, INPUT_METHOD_PROGRAMMATIC, INPUT_METHOD_ANY, "InputMethod");
+        provisioning.rangeTest (input_method, INPUT_METHOD_ANY, INPUT_METHOD_TRUSTED_GUI, "InputMethod");
         provisioning.passphraseFormatTest (format);
         provisioning.retryLimitTest (retry_limit, (short)1);
         if ((pattern_restrictions & ~(PIN_PATTERN_TWO_IN_A_ROW | 

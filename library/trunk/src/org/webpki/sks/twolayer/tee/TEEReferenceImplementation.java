@@ -2418,7 +2418,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
           {
             provisioning.abort ("Unsupported \"Algorithm\" : " + algorithm, SKSException.ERROR_ALGORITHM);
           }
-        if (server_seed != null && (server_seed.length == 0 || server_seed.length > 32))
+        if (server_seed != null && (server_seed.length == 0 || server_seed.length > MAX_LENGTH_SERVER_SEED))
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
           }
@@ -2587,7 +2587,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         // Perform PIN "sanity" checks
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.rangeTest (grouping, PIN_GROUPING_NONE, PIN_GROUPING_UNIQUE, "Grouping");
-        provisioning.rangeTest (input_method, INPUT_METHOD_PROGRAMMATIC, INPUT_METHOD_ANY, "InputMethod");
+        provisioning.rangeTest (input_method, INPUT_METHOD_ANY, INPUT_METHOD_TRUSTED_GUI, "InputMethod");
         provisioning.passphraseFormatTest (format);
         provisioning.retryLimitTest (retry_limit, (short)1);
         if ((pattern_restrictions & ~(PIN_PATTERN_TWO_IN_A_ROW | 
@@ -2729,5 +2729,12 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         puk_policy.format = format;
         puk_policy.retry_limit = retry_limit;
         return puk_policy.puk_policy_handle;
+      }
+
+    @Override
+    public void updateKeyManagementKey (int provisioning_handle, PublicKey key_managegent_key, byte[] authorization) throws SKSException
+      {
+        // TODO Auto-generated method stub
+        
       }
   }

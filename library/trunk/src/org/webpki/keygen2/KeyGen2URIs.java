@@ -18,17 +18,6 @@ package org.webpki.keygen2;
 
 public interface KeyGen2URIs
   {
-    public interface SPECIAL_ALGORITHMS
-      {
-        String KEY_ATTESTATION_1           = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
-
-        String SESSION_KEY_1               = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
-
-        String ECDH_RAW                    = "http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh.raw";
-
-        String NONE                        = "http://xmlns.webpki.org/keygen2/1.0#algorithm.none";
-      }
-
     public interface LOGOTYPES
       {
         String ICON                        = "http://xmlns.webpki.org/keygen2/1.0#logotype.icon";

@@ -384,16 +384,16 @@
    </Enumeration>
 
   <Enumeration ClassName="InputMethod" Type="byte">
+     <Entry Name="ANY"          Value="0x00"/>
      <Entry Name="PROGRAMMATIC" Value="0x01"/>
      <Entry Name="TRUSTED_GUI"  Value="0x02"/>
-     <Entry Name="ANY"          Value="0x03"/>
    </Enumeration>
 
    <Enumeration ClassName="PassphraseFormat" Type="byte">
-     <Entry Name="NUMERIC" Value="0x00"/>
+     <Entry Name="NUMERIC"      Value="0x00"/>
      <Entry Name="ALPHANUMERIC" Value="0x01"/>
-     <Entry Name="STRING" Value="0x02"/>
-     <Entry Name="BINARY" Value="0x03"/>
+     <Entry Name="STRING"       Value="0x02"/>
+     <Entry Name="BINARY"       Value="0x03"/>
    </Enumeration>
 
    <Enumeration ClassName="PatternRestriction" Type="byte">
@@ -1038,6 +1038,30 @@
         finally
           {
             log (device_id, "enumerateKeys (KeyHandle=" + key_handle + ")" + log_result);
+          }
+]]></Code></Method>
+
+   <Method Name="updateKeyManagementKey" Throws="SKSException">
+     <Parameter Name="device_id"            Type="string" XMLName="DeviceID"           Null="true" SuppressRule="DEV"/>
+     <Parameter Name="provisioning_handle"  Type="int"    XMLName="ProvisioningHandle"/>
+     <Parameter Name="key_management_key"   Type="binary" XMLName="KeyManagementKey"   RewriteRule="In.PublicKey"/>
+     <Parameter Name="attestation"          Type="binary" XMLName="Attestation"/>
+     <Code><![CDATA[
+        String log_result = "";
+        try
+          {
+            getDevice (device_id).updateKeyManagementKey (provisioning_handle,
+                                                          createPublicKeyFromBlob (key_management_key),
+                                                          attestation);
+          }
+        catch (SKSException e)
+          {
+            log_result = " Exception: " + e.getMessage ();
+            throw e;
+          }
+        finally
+          {
+            log (device_id, "updateKeyManagementKey (ProvisioningHandle=" + provisioning_handle + ")" + log_result);
           }
 ]]></Code></Method>
 

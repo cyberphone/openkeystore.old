@@ -30,7 +30,7 @@ import org.webpki.asn1.ParseUtil;
 public enum KeyAlgorithms implements SKSAlgorithms
   {
     RSA1024     (null,
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa1024",
+                 "http://xmlns.webpki.org/sks/algorithm#rsa1024",
                  "RSA",
                  1024,
                  SignatureAlgorithms.RSA_SHA1,
@@ -38,7 +38,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  true),
 
     RSA2048     (null,
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa2048",
+                 "http://xmlns.webpki.org/sks/algorithm#rsa2048",
                  "RSA",
                  2048,
                  SignatureAlgorithms.RSA_SHA256,
@@ -46,7 +46,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  true),
 
     RSA3072     (null,
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa3072",
+                 "http://xmlns.webpki.org/sks/algorithm#rsa3072",
                  "RSA",
                  3072,
                  SignatureAlgorithms.RSA_SHA512,
@@ -54,7 +54,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false),
 
     RSA4096     (null,
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa4096",
+                 "http://xmlns.webpki.org/sks/algorithm#rsa4096",
                  "RSA",
                  4096,
                  SignatureAlgorithms.RSA_SHA512,
@@ -62,7 +62,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false),
 
     RSA1024_EXP (null,
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa1024.exp",
+                 "http://xmlns.webpki.org/sks/algorithm#rsa1024.exp",
                  "RSA",
                  1024,
                  SignatureAlgorithms.RSA_SHA1,
@@ -70,7 +70,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false),
 
     RSA2048_EXP (null,
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa2048.exp",
+                 "http://xmlns.webpki.org/sks/algorithm#rsa2048.exp",
                  "RSA",
                  2048,
                  SignatureAlgorithms.RSA_SHA256,
@@ -78,7 +78,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false),
 
     RSA3072_EXP (null,
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa3072.exp",
+                 "http://xmlns.webpki.org/sks/algorithm#rsa3072.exp",
                  "RSA",
                  3072,
                  SignatureAlgorithms.RSA_SHA512,
@@ -86,7 +86,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false),
 
     RSA4096_EXP (null,
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa4096.exp",
+                 "http://xmlns.webpki.org/sks/algorithm#rsa4096.exp",
                  "RSA",
                  4096,
                  SignatureAlgorithms.RSA_SHA512,
@@ -94,7 +94,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false),
 
     B_163       ("1.3.132.0.15",
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.b163",
+                 "http://xmlns.webpki.org/sks/algorithm#ec.b163",
                  "sect163r2",
                  163,
                  SignatureAlgorithms.ECDSA_SHA256,
@@ -102,7 +102,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false),
 
     B_233       ("1.3.132.0.27",
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.b233",
+                 "http://xmlns.webpki.org/sks/algorithm#ec.b233",
                  "sect233r1",
                  233,
                  SignatureAlgorithms.ECDSA_SHA512,
@@ -110,7 +110,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false),
 
     B_283       ("1.3.132.0.17",
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.b283",
+                 "http://xmlns.webpki.org/sks/algorithm#ec.b283",
                  "sect283r1",
                  283,
                  SignatureAlgorithms.ECDSA_SHA512,
@@ -118,7 +118,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false),
 
     P_192       ("1.2.840.10045.3.1.1",
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.p192",
+                 "http://xmlns.webpki.org/sks/algorithm#ec.p192",
                  "secp192r1",
                  192,
                  SignatureAlgorithms.ECDSA_SHA256,
@@ -126,7 +126,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false),
 
     P_256       ("1.2.840.10045.3.1.7",
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.p256",
+                 "http://xmlns.webpki.org/sks/algorithm#ec.p256",
                  "secp256r1",
                  256,
                  SignatureAlgorithms.ECDSA_SHA256,
@@ -134,7 +134,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  true),
 
     P_384       ("1.3.132.0.34",
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.p384",
+                 "http://xmlns.webpki.org/sks/algorithm#ec.p384",
                  "secp384r1",
                  384,
                  SignatureAlgorithms.ECDSA_SHA512,
@@ -142,7 +142,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false),
 
     P_521       ("1.3.132.0.35",
-                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.p521",
+                 "http://xmlns.webpki.org/sks/algorithm#ec.p521",
                  "secp521r1",
                  521,
                  SignatureAlgorithms.ECDSA_SHA512,
@@ -176,6 +176,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
       }
 
 
+    @Override
     public String getURI ()
       {
         return uri;
@@ -280,5 +281,12 @@ public enum KeyAlgorithms implements SKSAlgorithms
               }
           }
         throw new IOException ("Unknown algorithm: " + uri);
+      }
+
+
+    @Override
+    public String getOID ()
+      {
+        return null;
       }
   }

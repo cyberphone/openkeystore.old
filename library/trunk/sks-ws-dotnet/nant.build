@@ -257,13 +257,24 @@ public static void ScriptMain(Project project)
             {
                 EncryptRound(ek,
                              ws,
+                             new Org.BouncyCastle.Crypto.Engines.RsaEngine(),
+                             "http://xmlns.webpki.org/sks/algorithm#rsa.raw",
+                             pin);
+                EncryptRound(ek,
+                             ws,
                              new Org.BouncyCastle.Crypto.Encodings.Pkcs1Encoding(new Org.BouncyCastle.Crypto.Engines.RsaEngine()),
-                             "http://www.w3.org/2001/04/xmlenc#rsa-1_5",
+                             "http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
                              pin);
                 EncryptRound(ek,
                              ws,
                              new Org.BouncyCastle.Crypto.Encodings.OaepEncoding(new Org.BouncyCastle.Crypto.Engines.RsaEngine()),
-                             "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p",
+                             "http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha1.mgf1p",
+                             pin);
+                EncryptRound(ek,
+                             ws,
+                             new Org.BouncyCastle.Crypto.Encodings.OaepEncoding(new Org.BouncyCastle.Crypto.Engines.RsaEngine(),
+                             new Org.BouncyCastle.Crypto.Digests.Sha256Digest()),
+                             "http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha256.mgf1p",
                              pin);
                 System.Console.WriteLine("Encryption: Round[" + ++round + "] Key ID=#" + ek.KeyHandle + ", Subject: " + ka.CertificatePath[0].Subject);
             }
@@ -350,7 +361,7 @@ public static void ScriptMain(Project project)
                 PublicKey genpubkey = Conversions.DecodeX509PublicKey(gensubinfo.ToAsn1Object().GetEncoded());
                 // Do SKS side
                 byte[] sks_res = ws.keyAgreement(ek.KeyHandle,
-                                                 "http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh.raw",
+                                                 "http://xmlns.webpki.org/sks/algorithm#ecdh.raw",
                                                  null,
                                                  pin,
                                                  genpubkey);

@@ -34,6 +34,7 @@ public interface SecureKeyStore
     int MAX_LENGTH_QUALIFIER                  = 128;
     int MAX_LENGTH_SYMMETRIC_KEY              = 128;
     int MAX_LENGTH_ID_TYPE                    = 32;
+    int MAX_LENGTH_SERVER_SEED                = 64;
     int MAX_LENGTH_URI                        = 1000;
     int MAX_LENGTH_CRYPTO_DATA                = 16384;
     int MAX_LENGTH_EXTENSION_DATA             = 65536;
@@ -58,16 +59,22 @@ public interface SecureKeyStore
     ///////////////////////////////////////////////////////////////////////////////////
     // KDF constants that are used "as is" in MAC operations
     ///////////////////////////////////////////////////////////////////////////////////
-    byte[] KDF_DEVICE_ATTESTATION             = {'D','e','v','i','c','e',' ','A','t','t','e','s','t','a','t','i','o','n'};
-    byte[] KDF_ENCRYPTION_KEY                 = {'E','n','c','r','y','p','t','i','o','n',' ','K','e','y'};
-    byte[] KDF_EXTERNAL_SIGNATURE             = {'E','x','t','e','r','n','a','l',' ','S','i','g','n','a','t','u','r','e'};
+    byte[] KDF_DEVICE_ATTESTATION             = {'D','e','v','i','c','e','A','t','t','e','s','t','a','t','i','o','n'};
+    byte[] KDF_ENCRYPTION_KEY                 = {'E','n','c','r','y','p','t','i','o','n','K','e','y'};
+    byte[] KDF_EXTERNAL_SIGNATURE             = {'E','x','t','e','r','n','a','l','S','i','g','n','a','t','u','r','e'};
     byte[] KDF_ANONYMOUS                      = {'A','n','o','n','y','m','o','u','s'};
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Constants that are used "as is" in KeyManagementKey operations
+    ///////////////////////////////////////////////////////////////////////////////////
+    byte[] KMK_TARGET_KEY_REFERENCE           = {'T','a','r','g','e','t','K','e','y','R','e','f','e','r','e','n','c','e'};
+    byte[] KMK_ROLL_OVER_ATTESTATION          = {'R','o','l','l','O','v','e','r','A','t','t','e','s','t','a','t','i','o','n'};
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Predefined PIN and PUK policy IDs for MAC operations
     ///////////////////////////////////////////////////////////////////////////////////
     String CRYPTO_STRING_NOT_AVAILABLE        = "#N/A";
-    String CRYPTO_STRING_DEVICE_PIN           = "#Device PIN";
+    String CRYPTO_STRING_DEVICE_PIN           = "#DevicePIN";
 
     ///////////////////////////////////////////////////////////////////////////////////
     // See "AppUsage" in the SKS specification
@@ -121,9 +128,9 @@ public interface SecureKeyStore
     ///////////////////////////////////////////////////////////////////////////////////
     // "InputMethod" constants
     ///////////////////////////////////////////////////////////////////////////////////
+    byte INPUT_METHOD_ANY                     = 0x00;
     byte INPUT_METHOD_PROGRAMMATIC            = 0x01;
     byte INPUT_METHOD_TRUSTED_GUI             = 0x02;
-    byte INPUT_METHOD_ANY                     = 0x03;
 
     ///////////////////////////////////////////////////////////////////////////////////
     // "BiometricProtection" constants
@@ -134,21 +141,23 @@ public interface SecureKeyStore
     byte BIOMETRIC_PROTECTION_EXCLUSIVE       = 0x03;
 
     ///////////////////////////////////////////////////////////////////////////////////
-    // Default algorithms
+    // Default RSA support
     ///////////////////////////////////////////////////////////////////////////////////
     short[] SKS_DEFAULT_RSA_SUPPORT           = {1024, 2048};
 
-    String ALGORITHM_KEY_ATTEST_1             = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1";
-
-    String ALGORITHM_SESSION_ATTEST_1         = "http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.s1";
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Special algorithms
+    ///////////////////////////////////////////////////////////////////////////////////
+    String ALGORITHM_KEY_ATTEST_1             = "http://xmlns.webpki.org/sks/algorithm#key.1";
+    String ALGORITHM_SESSION_ATTEST_1         = "http://xmlns.webpki.org/sks/algorithm#session.1";
+    String ALGORITHM_ECDH_RAW                 = "http://xmlns.webpki.org/sks/algorithm#ecdh.raw";
+    String ALGORITHM_NONE                     = "http://xmlns.webpki.org/sks/algorithm#none";
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Miscellaneous
     ///////////////////////////////////////////////////////////////////////////////////
     byte[] ZERO_LENGTH_ARRAY                  = new byte[0];
-    
     short SKS_API_LEVEL                       = 100;
-
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Core Provisioning API
@@ -236,6 +245,10 @@ public interface SecureKeyStore
                          byte format,
                          short retry_limit,
                          byte[] mac) throws SKSException;
+
+    void updateKeyManagementKey (int provisioning_handle,
+                                 PublicKey key_management_key,
+                                 byte[] authorization) throws SKSException;
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Post Provisioning (Management)

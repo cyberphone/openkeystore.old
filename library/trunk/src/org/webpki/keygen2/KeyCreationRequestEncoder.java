@@ -24,12 +24,15 @@ import java.util.Vector;
 
 import org.w3c.dom.Document;
 
+import org.webpki.sks.SecureKeyStore;
+
 import org.webpki.xml.DOMWriterHelper;
 
 import org.webpki.xmldsig.XMLSigner;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import org.webpki.crypto.SignerInterface;
+
 import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -51,7 +54,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
     Vector<String> written_puk = new Vector<String> ();
 
-    private String algorithm = KeyGen2URIs.SPECIAL_ALGORITHMS.KEY_ATTESTATION_1;
+    private String algorithm = SecureKeyStore.ALGORITHM_KEY_ATTEST_1;
 
 
     // Constructors

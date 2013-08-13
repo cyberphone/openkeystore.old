@@ -129,6 +129,11 @@ namespace org.webpki.sks.ws.client
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
         [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
         [System.ServiceModel.XmlSerializerFormatAttribute()]
+        updateKeyManagementKey_Response updateKeyManagementKey(updateKeyManagementKey_Request request);
+
+        [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
+        [System.ServiceModel.FaultContractAttribute(typeof(_SKSException), Action="", Name="SKSException")]
+        [System.ServiceModel.XmlSerializerFormatAttribute()]
         KeyAttributes getKeyAttributes(getKeyAttributes_Request request);
 
         [System.ServiceModel.OperationContractAttribute(Action="", ReplyAction="*")]
@@ -306,9 +311,9 @@ namespace org.webpki.sks.ws.client
 
     public enum InputMethod : sbyte
     {
+        ANY = 0x00,
         PROGRAMMATIC = 0x01,
-        TRUSTED_GUI = 0x02,
-        ANY = 0x03
+        TRUSTED_GUI = 0x02
     }
 
     public enum PassphraseFormat : sbyte
@@ -1628,6 +1633,44 @@ namespace org.webpki.sks.ws.client
         {
             get { return _provisioning_handle; }
         }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="updateKeyManagementKey", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class updateKeyManagementKey_Request
+    {
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="DeviceID", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal string _device_id;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="ProvisioningHandle", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal int _provisioning_handle;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyManagementKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _key_management_key;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Attestation", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _attestation;
+
+        public updateKeyManagementKey_Request(string DeviceID,
+                                              int ProvisioningHandle,
+                                              byte[] KeyManagementKey,
+                                              byte[] Attestation)
+        {
+            _device_id = DeviceID;
+            _provisioning_handle = ProvisioningHandle;
+            _key_management_key = KeyManagementKey;
+            _attestation = Attestation;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="updateKeyManagementKey.Response", WrapperNamespace="http://xmlns.webpki.org/sks/v1.00", IsWrapped=true)]
+    public class updateKeyManagementKey_Response
+    {
     }
 
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -3065,6 +3108,23 @@ namespace org.webpki.sks.ws.client
                 EnumeratedKey _res = base.Channel.enumerateKeys(new enumerateKeys_Request(device_id,
                                                                                           KeyHandle));
                 return _res._key_handle == 0 ? null : _res;
+            }
+            catch (System.ServiceModel.FaultException<_SKSException> e)
+            {
+                throw new SKSException(e);
+            }
+        }
+
+        public void updateKeyManagementKey(int ProvisioningHandle,
+                                           PublicKey KeyManagementKey,
+                                           byte[] Attestation)
+        {
+            try
+            {
+                base.Channel.updateKeyManagementKey(new updateKeyManagementKey_Request(device_id,
+                                                                                       ProvisioningHandle,
+                                                                                       Conversions.EncodeX509PublicKey(KeyManagementKey),
+                                                                                       Attestation));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {

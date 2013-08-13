@@ -35,16 +35,16 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
     KW_AES256       ("http://www.w3.org/2001/04/xmlenc#kw-aes256",
                         "AESWrap",              32, false, false, false, true),
                         
-    AES_ECB_NP      ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.nopad",
+    AES_ECB_NP      ("http://xmlns.webpki.org/sks/algorithm#aes.ecb.nopad",
                         "AES/ECB/NoPadding",    0,  false, false, true,  true),  // SecurID
                         
-    AES_ECB_P5      ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.pkcs5",
+    AES_ECB_P5      ("http://xmlns.webpki.org/sks/algorithm#aes.ecb.pkcs5",
                         "AES/ECB/PKCS5Padding", 0,  false, false, false, false),
                         
     AES_CBC_NP      ("internal:AES/CBC/NoPadding",
                         "AES/CBC/NoPadding",    0,  true,  false, false,  true),
                         
-    AES_CBC_P5      ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.cbc.pkcs5",
+    AES_CBC_P5      ("http://xmlns.webpki.org/sks/algorithm#aes.cbc.pkcs5",
                         "AES/CBC/PKCS5Padding", 0,  true,  false, true,   false);
     
 
@@ -74,6 +74,7 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
       }
 
 
+    @Override
     public String getURI ()
       {
         return uri;
@@ -122,5 +123,12 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
     public boolean isMandatorySKSAlgorithm ()
       {
         return sks_mandatory;
+      }
+
+
+    @Override
+    public String getOID ()
+      {
+        return null;
       }
   }

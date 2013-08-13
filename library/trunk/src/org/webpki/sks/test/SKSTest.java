@@ -17,11 +17,13 @@
 package org.webpki.sks.test;
 
 import java.io.IOException;
+
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
@@ -59,9 +61,11 @@ import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 
-import org.webpki.keygen2.KeyGen2URIs;
+import org.webpki.keygen2.KeySpecifier;
 
 import org.webpki.sks.AppUsage;
+import org.webpki.sks.BiometricProtection;
+import org.webpki.sks.DeleteProtection;
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedProvisioningSession;
 import org.webpki.sks.ExportProtection;
@@ -855,6 +859,90 @@ public class SKSTest
           {
             assertFalse ("Grouping must not be shared", grouping == Grouping.SHARED);
             checkException (e, "A cloned key protection must have PIN grouping=\"shared\"");
+          }
+      }
+
+    void serverSeed (int length) throws Exception
+      {
+        byte[] server_seed = new byte[length];
+        new SecureRandom ().nextBytes (server_seed);
+        ProvSess sess = new ProvSess (device); 
+        sess.createKey ("Key.1",
+                        SecureKeyStore.ALGORITHM_KEY_ATTEST_1,
+                        server_seed,
+                        null,
+                        null,
+                        BiometricProtection.NONE /* biometric_protection */,
+                        ExportProtection.NON_EXPORTABLE /* export_policy */,
+                        DeleteProtection.NONE /* delete_policy */,
+                        false /* enable_pin_caching */,
+                        AppUsage.AUTHENTICATION,
+                        "" /* friendly_name */,
+                        new KeySpecifier (KeyAlgorithms.RSA1024),
+                        null).setCertificate (cn ());
+        sess.closeSession ();
+      }
+
+    void rsaEncryptionTest (AsymEncryptionAlgorithms encryption_algorithm) throws Exception
+      {
+        String good_pin = "1563";
+        ProvSess sess = new ProvSess (device);
+        PINPol pin_policy = sess.createPINPolicy ("PIN",
+                                                  PassphraseFormat.NUMERIC,
+                                                  4 /* min_length */, 
+                                                  8 /* max_length */,
+                                                  (short) 3 /* retry_limit*/, 
+                                                  null /* puk_policy */);
+  
+        GenKey key = sess.createKey ("Key.1",
+                                     KeyAlgorithms.RSA1024,
+                                     good_pin /* pin_value */,
+                                     pin_policy /* pin_policy */,
+                                     AppUsage.ENCRYPTION).setCertificate (cn ());
+        sess.closeSession ();
+        
+        Cipher cipher = Cipher.getInstance (encryption_algorithm.getJCEName ());
+        cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
+        byte[] enc = cipher.doFinal (TEST_STRING);
+        assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
+                                                                                            encryption_algorithm.getURI (), 
+                                                                                            null,
+                                                                                            good_pin.getBytes ("UTF-8"), 
+                                                                                            enc), TEST_STRING));
+        try
+          {
+            device.sks.asymmetricKeyDecrypt (key.key_handle, 
+                                             SignatureAlgorithms.RSA_SHA256.getURI (), 
+                                             null,
+                                             good_pin.getBytes ("UTF-8"), 
+                                             enc);
+            fail ("Alg error");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Algorithm does not match operation: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+          }
+        try
+          {
+            device.sks.asymmetricKeyDecrypt (key.key_handle, 
+                                             encryption_algorithm.getURI (), 
+                                             new byte[]{6},
+                                             good_pin.getBytes ("UTF-8"), 
+                                             enc);
+            fail ("Parm error");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "\"Parameters\" for key # do not match algorithm");
+          }
+        try
+          {
+            key.asymmetricKeyDecrypt (encryption_algorithm, good_pin + "4", enc);
+            fail ("PIN error");
+          }
+        catch (SKSException e)
+          {
+            authorizationErrorCheck (e);
           }
       }
 
@@ -1683,69 +1771,6 @@ public class SKSTest
           }
       }
 
-    private void rsaEncryptionTest (AsymEncryptionAlgorithms encryption_algorithm) throws Exception
-      {
-        String good_pin = "1563";
-        ProvSess sess = new ProvSess (device);
-        PINPol pin_policy = sess.createPINPolicy ("PIN",
-                                                  PassphraseFormat.NUMERIC,
-                                                  4 /* min_length */, 
-                                                  8 /* max_length */,
-                                                  (short) 3 /* retry_limit*/, 
-                                                  null /* puk_policy */);
-
-        GenKey key = sess.createKey ("Key.1",
-                                     KeyAlgorithms.RSA1024,
-                                     good_pin /* pin_value */,
-                                     pin_policy /* pin_policy */,
-                                     AppUsage.ENCRYPTION).setCertificate (cn ());
-        sess.closeSession ();
-        
-        Cipher cipher = Cipher.getInstance (encryption_algorithm.getJCEName ());
-        cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
-        byte[] enc = cipher.doFinal (TEST_STRING);
-        assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            encryption_algorithm.getURI (), 
-                                                                                            null,
-                                                                                            good_pin.getBytes ("UTF-8"), 
-                                                                                            enc), TEST_STRING));
-        try
-          {
-            device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             SignatureAlgorithms.RSA_SHA256.getURI (), 
-                                             null,
-                                             good_pin.getBytes ("UTF-8"), 
-                                             enc);
-            fail ("Alg error");
-          }
-        catch (SKSException e)
-          {
-            checkException (e, "Algorithm does not match operation: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
-          }
-        try
-          {
-            device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             encryption_algorithm.getURI (), 
-                                             new byte[]{6},
-                                             good_pin.getBytes ("UTF-8"), 
-                                             enc);
-            fail ("Parm error");
-          }
-        catch (SKSException e)
-          {
-            checkException (e, "\"Parameters\" for key # do not match algorithm");
-          }
-        try
-          {
-            key.asymmetricKeyDecrypt (encryption_algorithm, good_pin + "4", enc);
-            fail ("PIN error");
-          }
-        catch (SKSException e)
-          {
-            authorizationErrorCheck (e);
-          }
-      }
-
     @Test
     public void test31 () throws Exception
       {
@@ -1782,11 +1807,11 @@ public class SKSTest
           }
         key.changePIN (good_pin, good_pin = "8463");
         
-        Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
+        Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1_5.getJCEName ());
         cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
         byte[] enc = cipher.doFinal (TEST_STRING);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                                                            AsymEncryptionAlgorithms.RSA_PKCS_1_5.getURI (), 
                                                                                             null,
                                                                                             good_pin.getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
@@ -1794,7 +1819,7 @@ public class SKSTest
           {
             try
               {
-                key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, good_pin + "4", enc);
+                key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1_5, good_pin + "4", enc);
                 fail ("PIN error");
               }
             catch (SKSException e)
@@ -1805,7 +1830,7 @@ public class SKSTest
           }
         try
           {
-            key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, good_pin, enc);
+            key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1_5, good_pin, enc);
             fail ("PIN lock error");
           }
         catch (SKSException e)
@@ -1823,7 +1848,7 @@ public class SKSTest
           }
         key.unlockKey (good_puk);
         assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), 
+                                                                                            AsymEncryptionAlgorithms.RSA_PKCS_1_5.getURI (), 
                                                                                             null,
                                                                                             good_pin.getBytes ("UTF-8"), 
                                                                                             enc), TEST_STRING));
@@ -1850,7 +1875,7 @@ public class SKSTest
             authorizationErrorCheck (e);
           }
         key.setPIN (good_puk, good_pin + "2");
-        assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, 
+        assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1_5, 
                                                                                      good_pin + "2", 
                                                                                      enc),
                                                            TEST_STRING));
@@ -2366,7 +2391,7 @@ public class SKSTest
                                      good_pin /* pin_value */,
                                      pin_policy /* pin_policy */,
                                      AppUsage.AUTHENTICATION,
-                                     new String[]{KeyGen2URIs.SPECIAL_ALGORITHMS.NONE}).setCertificate (cn ());
+                                     new String[]{SecureKeyStore.ALGORITHM_NONE}).setCertificate (cn ());
         key.setSymmetricKey (symmetric_key);
         sess.closeSession ();
         try
@@ -2485,10 +2510,10 @@ public class SKSTest
             key.setPrivateKey (key_pair.getPrivate ());
             sess.closeSession ();
             assertTrue ("IMPORTED must be set", key.getKeyProtectionInfo ().getKeyBackup () == KeyProtectionInfo.KEYBACKUP_IMPORTED);
-            Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1.getJCEName ());
+            Cipher cipher = Cipher.getInstance (AsymEncryptionAlgorithms.RSA_PKCS_1_5.getJCEName ());
             cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
             byte[] enc = cipher.doFinal (TEST_STRING);
-            assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1, 
+            assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1_5, 
                                                                                          good_pin, 
                                                                                          enc), TEST_STRING));
             byte[] result = key.signData (SignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
@@ -2573,7 +2598,7 @@ public class SKSTest
         generator.initialize (eccgen, new SecureRandom ());
         KeyPair key_pair = generator.generateKeyPair ();
         byte[] z = device.sks.keyAgreement (key.key_handle,
-                                            KeyGen2URIs.SPECIAL_ALGORITHMS.ECDH_RAW,
+                                            SecureKeyStore.ALGORITHM_ECDH_RAW,
                                             null,
                                             good_pin.getBytes ("UTF-8"), 
                                             (ECPublicKey)key_pair.getPublic ());
@@ -3400,6 +3425,72 @@ public class SKSTest
         catch (SKSException e)
           {
             checkException (e, "Certificate for: Key.1 exceeds " + device.device_info.getCryptoDataSize () + " bytes");
+          }
+      }
+
+    @Test
+    public void test77 () throws Exception
+      {
+        serverSeed (SecureKeyStore.MAX_LENGTH_SERVER_SEED);
+        try
+          {
+            serverSeed (SecureKeyStore.MAX_LENGTH_SERVER_SEED + 1);
+            fail ("ServerSeed");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "\"ServerSeed\" length error: " + (SecureKeyStore.MAX_LENGTH_SERVER_SEED + 1));
+          }
+      }
+
+    @Test
+    public void test78 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device, 0);
+        GenKey key = sess.createKey ("Key.1",
+                                     KeyAlgorithms.P_256,
+                                     null /* pin_value */,
+                                     null,
+                                     AppUsage.AUTHENTICATION).setCertificate (cn ());
+        sess.createKey ("Key.2",
+                        KeyAlgorithms.P_256,
+                        null /* pin_value */,
+                        null,
+                        AppUsage.AUTHENTICATION).setCertificate (cn ());
+        sess.closeSession ();
+        PublicKey key_management_key = sess.server_sess_key.enumerateKeyManagementKeys ()[1];  // The new KMK
+        byte[] authorization = sess.server_sess_key.generateKeyManagementAuthorization (sess.server_sess_key.enumerateKeyManagementKeys ()[0],
+                                                                                        ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_ATTESTATION,
+                                                                                                       key_management_key.getEncoded ()));
+        device.sks.updateKeyManagementKey (sess.provisioning_handle, key_management_key, authorization);
+        ProvSess sess2 = new ProvSess (device);
+        sess2.byPassKMK (1);
+        sess2.postDeleteKey (key);
+        sess2.closeSession ();
+      }
+
+    @Test
+    public void test79 () throws Exception
+      {
+        ProvSess sess = new ProvSess (device);
+        sess.createKey ("Key.1",
+                        KeyAlgorithms.P_256,
+                        null /* pin_value */,
+                        null,
+                        AppUsage.AUTHENTICATION).setCertificate (cn ());
+        sess.closeSession ();
+        PublicKey key_management_key = sess.server_sess_key.enumerateKeyManagementKeys ()[1];  // The new KMK
+        byte[] authorization = sess.server_sess_key.generateKeyManagementAuthorization (sess.server_sess_key.enumerateKeyManagementKeys ()[0],
+                                                                                        ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_ATTESTATION,
+                                                                                                       key_management_key.getEncoded ()));
+        try
+          {
+            device.sks.updateKeyManagementKey (sess.provisioning_handle, key_management_key, authorization);
+            fail ("Not updatable");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Session is not updatable: " + sess.provisioning_handle);
           }
       }
   }

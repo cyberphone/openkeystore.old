@@ -108,9 +108,11 @@ public class PKCS12Import
         if (app_usage == AppUsage.ENCRYPTION)
           {
             endorsed_algs = rsa_flag ? 
-                new String[]{AsymEncryptionAlgorithms.RSA_PKCS_1.getURI (), AsymEncryptionAlgorithms.RSA_OAEP_MGF1P.getURI ()} 
+                new String[]{AsymEncryptionAlgorithms.RSA_PKCS_1_5.getURI (),
+                             AsymEncryptionAlgorithms.RSA_OAEP_SHA1_MGF1P.getURI (),
+                             AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P.getURI ()} 
                                  :
-                new String[]{KeyGen2URIs.SPECIAL_ALGORITHMS.ECDH_RAW};
+                new String[]{SecureKeyStore.ALGORITHM_ECDH_RAW};
           }
         else if (app_usage == AppUsage.SIGNATURE)
           {
@@ -173,7 +175,7 @@ public class PKCS12Import
                                                null /* puk_policy */);
           }
         GenKey key = sess.createKey ("Key",
-                                     KeyGen2URIs.SPECIAL_ALGORITHMS.KEY_ATTESTATION_1,
+                                     SecureKeyStore.ALGORITHM_KEY_ATTEST_1,
                                      null /* server_seed */,
                                      pin_policy,
                                      pin_value,

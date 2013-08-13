@@ -20,7 +20,7 @@ import java.io.IOException;
 
 public enum SignatureAlgorithms implements SKSAlgorithms
   {
-    RSA_NONE     ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.none", 
+    RSA_NONE     ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1.none", 
                   null,                    "NONEwithRSA",     null,                  true),
         
     RSA_SHA1     ("http://www.w3.org/2000/09/xmldsig#rsa-sha1",              
@@ -35,7 +35,7 @@ public enum SignatureAlgorithms implements SKSAlgorithms
     RSA_SHA512   ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",       
                   "1.2.840.113549.1.1.13", "SHA512withRSA",   HashAlgorithms.SHA512, false),
         
-    ECDSA_NONE   ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdsa.none",
+    ECDSA_NONE   ("http://xmlns.webpki.org/sks/algorithm#ecdsa.none",
                   null,                    "NONEwithECDSA",   null,                  true),
         
     ECDSA_SHA1   ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha1",       
@@ -66,12 +66,14 @@ public enum SignatureAlgorithms implements SKSAlgorithms
       }
 
 
+    @Override
     public String getOID ()
       {
         return oid;
       }
 
 
+    @Override
     public String getURI ()
       {
         return uri;

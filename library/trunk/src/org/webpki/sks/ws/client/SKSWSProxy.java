@@ -406,6 +406,19 @@ public interface SKSWSProxy
                               Holder<Integer> provisioning_handle)
     throws SKSException_Exception;
 
+    @WebMethod(operationName="updateKeyManagementKey")
+    @RequestWrapper(localName="updateKeyManagementKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @ResponseWrapper(localName="updateKeyManagementKey.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    public void updateKeyManagementKey (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        String device_id,
+                                        @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        int provisioning_handle,
+                                        @WebParam(name="KeyManagementKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        byte[] key_management_key,
+                                        @WebParam(name="Attestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                        byte[] attestation)
+    throws SKSException_Exception;
+
     @WebMethod(operationName="getKeyAttributes")
     @RequestWrapper(localName="getKeyAttributes", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="getKeyAttributes.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")

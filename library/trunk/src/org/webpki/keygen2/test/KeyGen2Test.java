@@ -307,7 +307,7 @@ public class KeyGen2Test
       {
         private static final String kg2keycre = 
           "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-          "<KeyCreationRequest Algorithm=\"http://xmlns.webpki.org/keygen2/1.0#algorithm.sks.k1\" " +
+          "<KeyCreationRequest Algorithm=\"http://xmlns.webpki.org/sks/algorithm#key.1\" " +
           "ClientSessionID=\"C-139622a0ac98f2f44a35c9753ca\" " +
           "ID=\"S-139622a0a9993085d38d1586b76\" " +
           "SubmitURL=\"http://issuer.example.com/keyinit\" " +
@@ -385,7 +385,7 @@ public class KeyGen2Test
                .append (app_usage.getXMLName ())
                .append ("\" ID=\"Key.")
                .append (++key_id)
-               .append ("\" KeyAlgorithm=\"http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa2048\" MAC=\"Jrqigi79Yw6SoLobsBA5S8b74gTKrIJPh3tQRKci33Y=\"/>");
+               .append ("\" KeyAlgorithm=\"http://xmlns.webpki.org/sks/algorithm#rsa2048\" MAC=\"Jrqigi79Yw6SoLobsBA5S8b74gTKrIJPh3tQRKci33Y=\"/>");
             return this;
           }
 
@@ -1130,7 +1130,7 @@ public class KeyGen2Test
               }
             if (key_agreement)
               {
-                kp.setEndorsedAlgorithms (new String[]{KeyGen2URIs.SPECIAL_ALGORITHMS.ECDH_RAW});
+                kp.setEndorsedAlgorithms (new String[]{SecureKeyStore.ALGORITHM_ECDH_RAW});
               }
             if (property_bag)
               {
@@ -1850,7 +1850,7 @@ public class KeyGen2Test
         KeyPair kp = generator.generateKeyPair ();
         KeyAttributes ka = sks.getKeyAttributes (key_handle);
         byte[] z = sks.keyAgreement (key_handle,
-                                     KeyGen2URIs.SPECIAL_ALGORITHMS.ECDH_RAW,
+                                     SecureKeyStore.ALGORITHM_ECDH_RAW,
                                      null,
                                      USER_DEFINED_PIN, 
                                      (ECPublicKey)kp.getPublic ());

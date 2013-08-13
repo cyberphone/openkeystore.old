@@ -433,6 +433,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                 Signature km_verify = Signature.getInstance (owner.key_management_key instanceof RSAPublicKey ? 
                                                                                               "SHA256WithRSA" : "SHA256WithECDSA");
                 km_verify.initVerify (owner.key_management_key);
+                km_verify.update (KMK_TARGET_KEY_REFERENCE);
                 km_verify.update (provisioning.getMacBuilder (getDeviceID (provisioning.privacy_enabled)).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
                 if (!km_verify.verify (authorization))
                   {
@@ -841,11 +842,11 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                       "AES/CBC/PKCS5Padding",
                       ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_256);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.nopad",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.ecb.nopad",
                       "AES/ECB/NoPadding",
                       ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256 | ALG_AES_PAD);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.cbc.pkcs5",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.cbc.pkcs5",
                       "AES/CBC/PKCS5Padding",
                       ALG_SYM_ENC | ALG_IV_REQ | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
 
@@ -859,22 +860,26 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Decryption
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://www.w3.org/2001/04/xmlenc#rsa-1_5",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
                       "RSA/ECB/PKCS1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
-        addAlgorithm ("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha1.mgf1p",
                       "RSA/ECB/OAEPWithSHA-1AndMGF1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.raw",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha256.mgf1p",
+                      "RSA/ECB/OAEPWithSHA256AndMGF1Padding",
+                      ALG_ASYM_ENC | ALG_RSA_KEY);
+
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.raw",
                       "RSA/ECB/NoPadding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Diffie-Hellman Key Agreement
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh.raw",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ecdh.raw",
                       "ECDH",
                       ALG_ASYM_KA | ALG_EC_KEY);
         
@@ -893,28 +898,28 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                       "NONEwithECDSA",
                       ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_256);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.none",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1.none",
                       "NONEwithRSA",
                       ALG_ASYM_SGN | ALG_RSA_KEY);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdsa.none",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ecdsa.none",
                       "NONEwithECDSA",
                       ALG_ASYM_SGN | ALG_EC_KEY);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Generation
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.p256",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.p256",
                       "secp256r1",
                       ALG_EC_KEY | ALG_KEY_GEN);
         
         for (short rsa_size : SKS_DEFAULT_RSA_SUPPORT)
           {
-            addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa" + rsa_size,
+            addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa" + rsa_size,
                           null, ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
             if (SKS_RSA_EXPONENT_SUPPORT)
               {
-                addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa" + rsa_size + ".exp",
+                addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa" + rsa_size + ".exp",
                               null, ALG_KEY_PARM | ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
               }
           }
@@ -926,7 +931,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
 
         addAlgorithm (ALGORITHM_KEY_ATTEST_1, null, 0);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.none", null, ALG_NONE);
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#none", null, ALG_NONE);
 
       }
 
@@ -3093,7 +3098,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
           {
             provisioning.abort ((key_parameters == null ? "Missing" : "Unexpected") + " \"KeyParameters\"");
           }
-        if (server_seed != null && (server_seed.length == 0 || server_seed.length > 32))
+        if (server_seed != null && (server_seed.length == 0 || server_seed.length > MAX_LENGTH_SERVER_SEED))
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
           }
@@ -3320,7 +3325,7 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         // Perform PIN "sanity" checks
         ///////////////////////////////////////////////////////////////////////////////////
         provisioning.rangeTest (grouping, PIN_GROUPING_NONE, PIN_GROUPING_UNIQUE, "Grouping");
-        provisioning.rangeTest (input_method, INPUT_METHOD_PROGRAMMATIC, INPUT_METHOD_ANY, "InputMethod");
+        provisioning.rangeTest (input_method, INPUT_METHOD_ANY, INPUT_METHOD_TRUSTED_GUI, "InputMethod");
         provisioning.passphraseFormatTest (format);
         provisioning.retryLimitTest (retry_limit, (short)1);
         if ((pattern_restrictions & ~(PIN_PATTERN_TWO_IN_A_ROW | 
@@ -3444,5 +3449,12 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         puk_policy.format = format;
         puk_policy.retry_limit = retry_limit;
         return puk_policy.puk_policy_handle;
+      }
+
+    @Override
+    public void updateKeyManagementKey (int provisioning_handle, PublicKey key_management_key, byte[] authorization) throws SKSException
+      {
+        // TODO Auto-generated method stub
+        
       }
   }

@@ -170,11 +170,11 @@ public class SEReferenceImplementation
                       "AES/CBC/PKCS5Padding",
                       ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_256);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.ecb.nopad",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.ecb.nopad",
                       "AES/ECB/NoPadding",
                       ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256 | ALG_AES_PAD);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.aes.cbc.pkcs5",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.cbc.pkcs5",
                       "AES/CBC/PKCS5Padding",
                       ALG_SYM_ENC | ALG_IV_REQ | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
 
@@ -188,22 +188,26 @@ public class SEReferenceImplementation
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Decryption
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://www.w3.org/2001/04/xmlenc#rsa-1_5",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
                       "RSA/ECB/PKCS1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
-        addAlgorithm ("http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha1.mgf1p",
                       "RSA/ECB/OAEPWithSHA-1AndMGF1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.raw",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha256.mgf1p",
+                      "RSA/ECB/OAEPWithSHA256AndMGF1Padding",
+                      ALG_ASYM_ENC | ALG_RSA_KEY);
+
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.raw",
                       "RSA/ECB/NoPadding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Diffie-Hellman Key Agreement
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdh.raw",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ecdh.raw",
                       "ECDH",
                       ALG_ASYM_KA | ALG_EC_KEY);
         
@@ -222,28 +226,28 @@ public class SEReferenceImplementation
                       "NONEwithECDSA",
                       ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_256);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa.none",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1.none",
                       "NONEwithRSA",
                       ALG_ASYM_SGN | ALG_RSA_KEY);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ecdsa.none",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ecdsa.none",
                       "NONEwithECDSA",
                       ALG_ASYM_SGN | ALG_EC_KEY);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Generation
         //////////////////////////////////////////////////////////////////////////////////////
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.ec.p256",
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ec.p256",
                       "secp256r1",
                       ALG_EC_KEY | ALG_KEY_GEN);
         
         for (short rsa_size : SecureKeyStore.SKS_DEFAULT_RSA_SUPPORT)
           {
-            addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa" + rsa_size,
+            addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa" + rsa_size,
                           null, ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
             if (SKS_RSA_EXPONENT_SUPPORT)
               {
-                addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.rsa" + rsa_size + ".exp",
+                addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa" + rsa_size + ".exp",
                               null, ALG_KEY_PARM | ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
               }
           }
@@ -255,7 +259,7 @@ public class SEReferenceImplementation
 
         addAlgorithm (SecureKeyStore.ALGORITHM_KEY_ATTEST_1, null, 0);
 
-        addAlgorithm ("http://xmlns.webpki.org/keygen2/1.0#algorithm.none", null, ALG_NONE);
+        addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#none", null, ALG_NONE);
       }
 
     static final byte[] RSA_ENCRYPTION_OID = {0x06, 0x09, 0x2A, (byte)0x86, 0x48, (byte)0x86, (byte)0xF7, 0x0D, 0x01, 0x01, 0x01};
@@ -875,6 +879,7 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         Signature km_verify = Signature.getInstance (key_management_key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
         km_verify.initVerify (key_management_key);
+        km_verify.update (SecureKeyStore.KMK_TARGET_KEY_REFERENCE);
         km_verify.update (getMacBuilder (unwrapped_session_key, getDeviceID (privacy_enabled)).addVerbatim (target_key_ee_certificate.getEncoded ()).getResult ());
         if (!km_verify.verify (authorization))
           {
@@ -2033,7 +2038,7 @@ public class SEReferenceImplementation
               {
                 abort ("Unsupported \"Algorithm\" : " + algorithm, SKSException.ERROR_ALGORITHM);
               }
-            if (server_seed != null && (server_seed.length == 0 || server_seed.length > 32))
+            if (server_seed != null && (server_seed.length == 0 || server_seed.length > SecureKeyStore.MAX_LENGTH_SERVER_SEED))
               {
                 abort ("\"ServerSeed\" length error: " + server_seed.length);
               }

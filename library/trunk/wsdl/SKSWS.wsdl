@@ -481,6 +481,23 @@
 
 <!--
       #########################################################
+      #                updateKeyManagementKey                 #
+      #########################################################
+-->
+      <xs:element name="updateKeyManagementKey">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
+            <xs:element name="ProvisioningHandle" type="xs:int"/>
+            <xs:element name="KeyManagementKey" type="xs:base64Binary"/>
+            <xs:element name="Attestation" type="xs:base64Binary"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="updateKeyManagementKey.Response"/>
+
+<!--
+      #########################################################
       #                   getKeyAttributes                    #
       #########################################################
 -->
@@ -1028,6 +1045,14 @@
     <wsdl:part name="parameters" element="tns:enumerateKeys.Response"/>
   </wsdl:message>
 
+  <wsdl:message name="updateKeyManagementKey">
+    <wsdl:part name="parameters" element="tns:updateKeyManagementKey"/>
+  </wsdl:message>
+
+  <wsdl:message name="updateKeyManagementKey.Response">
+    <wsdl:part name="parameters" element="tns:updateKeyManagementKey.Response"/>
+  </wsdl:message>
+
   <wsdl:message name="getKeyAttributes">
     <wsdl:part name="parameters" element="tns:getKeyAttributes"/>
   </wsdl:message>
@@ -1285,6 +1310,12 @@
     <wsdl:operation name="enumerateKeys">
       <wsdl:input message="tns:enumerateKeys"/>
       <wsdl:output message="tns:enumerateKeys.Response"/>
+      <wsdl:fault message="tns:SKSException" name="SKSException"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="updateKeyManagementKey">
+      <wsdl:input message="tns:updateKeyManagementKey"/>
+      <wsdl:output message="tns:updateKeyManagementKey.Response"/>
       <wsdl:fault message="tns:SKSException" name="SKSException"/>
     </wsdl:operation>
 
@@ -1616,6 +1647,18 @@
       </wsdl:operation>
 
       <wsdl:operation name="enumerateKeys">
+        <wsdl:input>
+          <soap:body use="literal"/>
+        </wsdl:input>
+        <wsdl:output>
+          <soap:body use="literal"/>
+        </wsdl:output>
+        <wsdl:fault name="SKSException">
+          <soap:fault name="SKSException" use="literal"/>
+        </wsdl:fault>
+      </wsdl:operation>
+
+      <wsdl:operation name="updateKeyManagementKey">
         <wsdl:input>
           <soap:body use="literal"/>
         </wsdl:input>

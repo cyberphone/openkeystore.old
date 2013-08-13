@@ -20,9 +20,9 @@ import java.io.IOException;
 
 public enum InputMethod
   {
+    ANY           ("any",          SecureKeyStore.INPUT_METHOD_ANY),
     PROGRAMMATIC  ("programmatic", SecureKeyStore.INPUT_METHOD_PROGRAMMATIC),
-    TRUSTED_GUI   ("trusted-gui",  SecureKeyStore.INPUT_METHOD_TRUSTED_GUI),
-    ANY           ("any",          SecureKeyStore.INPUT_METHOD_ANY);
+    TRUSTED_GUI   ("trusted-gui",  SecureKeyStore.INPUT_METHOD_TRUSTED_GUI);
 
     private final String xml_name;       // As expressed in XML
 
@@ -58,5 +58,4 @@ public enum InputMethod
           }
         throw new IOException ("Unknown method: " + xml_name);
       }
-
   }
