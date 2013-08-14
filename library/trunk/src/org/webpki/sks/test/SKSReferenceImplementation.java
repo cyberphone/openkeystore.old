@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -445,7 +444,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             provisioning.verifyMac (verifier, mac);
             
             ///////////////////////////////////////////////////////////////////////////////////
-            // Verify KMM signature
+            // Verify KMK signature
             ///////////////////////////////////////////////////////////////////////////////////
             try
               {
@@ -2273,7 +2272,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         try
           {
             Signature kmk_verify = provisioning.initKeyManagementKeyVerifier ();
-            kmk_verify.update (KMK_ROLL_OVER_ATTESTATION);
+            kmk_verify.update (KMK_ROLL_OVER_AUTHORIZATION);
             kmk_verify.update (key_management_key.getEncoded ());
             if (!kmk_verify.verify (authorization))
               {

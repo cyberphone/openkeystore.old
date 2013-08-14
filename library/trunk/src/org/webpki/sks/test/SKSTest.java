@@ -3460,7 +3460,7 @@ public class SKSTest
         sess.closeSession ();
         PublicKey key_management_key = sess.server_sess_key.enumerateKeyManagementKeys ()[1];  // The new KMK
         byte[] authorization = sess.server_sess_key.generateKeyManagementAuthorization (sess.server_sess_key.enumerateKeyManagementKeys ()[0],
-                                                                                        ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_ATTESTATION,
+                                                                                        ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION,
                                                                                                        key_management_key.getEncoded ()));
         device.sks.updateKeyManagementKey (sess.provisioning_handle, key_management_key, authorization);
         ProvSess sess2 = new ProvSess (device);
@@ -3481,7 +3481,7 @@ public class SKSTest
         sess.closeSession ();
         PublicKey key_management_key = sess.server_sess_key.enumerateKeyManagementKeys ()[1];  // The new KMK
         byte[] authorization = sess.server_sess_key.generateKeyManagementAuthorization (sess.server_sess_key.enumerateKeyManagementKeys ()[0],
-                                                                                        ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_ATTESTATION,
+                                                                                        ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION,
                                                                                                        key_management_key.getEncoded ()));
         try
           {

@@ -426,16 +426,14 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
             provisioning.verifyMac (verifier, mac);
             
             ///////////////////////////////////////////////////////////////////////////////////
-            // Verify KM signature
+            // Verify KMK signature
             ///////////////////////////////////////////////////////////////////////////////////
             try
               {
-                Signature km_verify = Signature.getInstance (owner.key_management_key instanceof RSAPublicKey ? 
-                                                                                              "SHA256WithRSA" : "SHA256WithECDSA");
-                km_verify.initVerify (owner.key_management_key);
-                km_verify.update (KMK_TARGET_KEY_REFERENCE);
-                km_verify.update (provisioning.getMacBuilder (getDeviceID (provisioning.privacy_enabled)).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
-                if (!km_verify.verify (authorization))
+                Signature kmk_verify = owner.initKeyManagementKeyVerifier ();
+                kmk_verify.update (KMK_TARGET_KEY_REFERENCE);
+                kmk_verify.update (provisioning.getMacBuilder (getDeviceID (provisioning.privacy_enabled)).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
+                if (!kmk_verify.verify (authorization))
                   {
                     provisioning.abort ("\"Authorization\" signature did not verify for key #" + key_handle);
                   }
@@ -692,6 +690,14 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                 abort ("Invalid \"RetryLimit\" value=" + retry_limit);
               }
           }
+
+        Signature initKeyManagementKeyVerifier () throws GeneralSecurityException
+          {
+            Signature kmk_verify = Signature.getInstance (key_management_key instanceof RSAPublicKey ? 
+                                                                                     "SHA256WithRSA" : "SHA256WithECDSA");
+            kmk_verify.initVerify (key_management_key);
+            return kmk_verify;
+          }
       }
 
 
@@ -833,49 +839,49 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes128-cbc",
                       "AES/CBC/PKCS5Padding",
                       ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_128);
-
+  
         addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes192-cbc",
                       "AES/CBC/PKCS5Padding",
                       ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_192);
-
+  
         addAlgorithm ("http://www.w3.org/2001/04/xmlenc#aes256-cbc",
                       "AES/CBC/PKCS5Padding",
                       ALG_SYM_ENC | ALG_IV_INT | ALG_IV_REQ | ALG_SYML_256);
-
+  
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.ecb.nopad",
                       "AES/ECB/NoPadding",
                       ALG_SYM_ENC | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256 | ALG_AES_PAD);
-
+  
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#aes.cbc.pkcs5",
                       "AES/CBC/PKCS5Padding",
                       ALG_SYM_ENC | ALG_IV_REQ | ALG_SYML_128 | ALG_SYML_192 | ALG_SYML_256);
-
+  
         //////////////////////////////////////////////////////////////////////////////////////
         //  HMAC Operations
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://www.w3.org/2000/09/xmldsig#hmac-sha1", "HmacSHA1", ALG_HMAC);
-
+  
         addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HmacSHA256", ALG_HMAC);
-
+  
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Decryption
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1_5",
                       "RSA/ECB/PKCS1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
-
+  
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha1.mgf1p",
-                      "RSA/ECB/OAEPWithSHA-1AndMGF1Padding",
+                      "RSA/ECB/OAEPWithSHA1AndMGF1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
-
+  
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.oaep.sha256.mgf1p",
                       "RSA/ECB/OAEPWithSHA256AndMGF1Padding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
-
+  
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.raw",
                       "RSA/ECB/NoPadding",
                       ALG_ASYM_ENC | ALG_RSA_KEY);
-
+  
         //////////////////////////////////////////////////////////////////////////////////////
         //  Diffie-Hellman Key Agreement
         //////////////////////////////////////////////////////////////////////////////////////
@@ -889,23 +895,23 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         addAlgorithm ("http://www.w3.org/2000/09/xmldsig#rsa-sha1",
                       "NONEwithRSA",
                       ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_160);
-
+  
         addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
                       "NONEwithRSA",
                       ALG_ASYM_SGN | ALG_RSA_KEY | ALG_HASH_256);
-
+  
         addAlgorithm ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
                       "NONEwithECDSA",
                       ALG_ASYM_SGN | ALG_EC_KEY | ALG_HASH_256);
-
+  
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1.none",
                       "NONEwithRSA",
                       ALG_ASYM_SGN | ALG_RSA_KEY);
-
+  
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#ecdsa.none",
                       "NONEwithECDSA",
                       ALG_ASYM_SGN | ALG_EC_KEY);
-
+  
         //////////////////////////////////////////////////////////////////////////////////////
         //  Asymmetric Key Generation
         //////////////////////////////////////////////////////////////////////////////////////
@@ -923,16 +929,16 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                               null, ALG_KEY_PARM | ALG_RSA_KEY | ALG_KEY_GEN | rsa_size);
               }
           }
-
+  
         //////////////////////////////////////////////////////////////////////////////////////
         //  Special Algorithms
         //////////////////////////////////////////////////////////////////////////////////////
         addAlgorithm (ALGORITHM_SESSION_ATTEST_1, null, 0);
-
+  
         addAlgorithm (ALGORITHM_KEY_ATTEST_1, null, 0);
-
+  
         addAlgorithm ("http://xmlns.webpki.org/sks/algorithm#none", null, ALG_NONE);
-
+  
       }
 
     static final byte[] RSA_ENCRYPTION_OID = {0x06, 0x09, 0x2A, (byte)0x86, 0x48, (byte)0x86, (byte)0xF7, 0x0D, 0x01, 0x01, 0x01};
@@ -984,16 +990,32 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         return (PrivateKey) getAttestationKeyStore ().getKey (ATTESTATION_KEY_ALIAS, ATTESTATION_KEY_PASSWORD);        
       }
 
-    Provisioning getOpenProvisioningSession (int provisioning_handle) throws SKSException
+    Provisioning getProvisioningSession (int provisioning_handle) throws SKSException
       {
         Provisioning provisioning = provisionings.get (provisioning_handle);
         if (provisioning == null)
           {
             abort ("No such provisioning session: " + provisioning_handle, SKSException.ERROR_NO_SESSION);
           }
+        return provisioning;
+      }
+
+    Provisioning getOpenProvisioningSession (int provisioning_handle) throws SKSException
+      {
+        Provisioning provisioning = getProvisioningSession (provisioning_handle);
         if (!provisioning.open)
           {
             abort ("Session not open: " +  provisioning_handle, SKSException.ERROR_NO_SESSION);
+          }
+        return provisioning;
+      }
+  
+    Provisioning getClosedProvisioningSession (int provisioning_handle) throws SKSException
+      {
+        Provisioning provisioning = getProvisioningSession (provisioning_handle);
+        if (provisioning.open)
+          {
+            abort ("Session is open: " +  provisioning_handle, SKSException.ERROR_NOT_ALLOWED);
           }
         return provisioning;
       }
@@ -2207,6 +2229,47 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
                                   key_entry.friendly_name,
                                   key_entry.endorsed_algorithms.toArray (new String[0]),
                                   key_entry.extensions.keySet ().toArray (new String[0]));
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
+    //                           updateKeyManagementKey                           //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void updateKeyManagementKey (int provisioning_handle,
+                                        PublicKey key_management_key,
+                                        byte[] authorization) throws SKSException
+      {
+        Provisioning provisioning = getClosedProvisioningSession (provisioning_handle);
+        if (provisioning.key_management_key == null)
+          {
+            abort ("Session is not updatable: " +  provisioning_handle, SKSException.ERROR_NOT_ALLOWED);
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify KMK signature
+        ///////////////////////////////////////////////////////////////////////////////////
+        try
+          {
+            Signature kmk_verify = provisioning.initKeyManagementKeyVerifier ();
+            kmk_verify.update (KMK_ROLL_OVER_AUTHORIZATION);
+            kmk_verify.update (key_management_key.getEncoded ());
+            if (!kmk_verify.verify (authorization))
+              {
+                abort ("\"Authorization\" signature did not verify for session: " + provisioning_handle);
+              }
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Success, update KeyManagementKey
+            ///////////////////////////////////////////////////////////////////////////////////
+            provisioning.key_management_key = key_management_key;
+          }
+        catch (GeneralSecurityException e)
+          {
+            abort (e.getMessage (), SKSException.ERROR_CRYPTO);
+          }
       }
 
 
@@ -3449,12 +3512,5 @@ public class SKSFlashMemoryEmulation implements SKSError, SecureKeyStore, Serial
         puk_policy.format = format;
         puk_policy.retry_limit = retry_limit;
         return puk_policy.puk_policy_handle;
-      }
-
-    @Override
-    public void updateKeyManagementKey (int provisioning_handle, PublicKey key_management_key, byte[] authorization) throws SKSException
-      {
-        // TODO Auto-generated method stub
-        
       }
   }

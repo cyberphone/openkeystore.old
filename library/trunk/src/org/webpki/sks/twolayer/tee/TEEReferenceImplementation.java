@@ -632,16 +632,32 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
 
     static final int AES_CBC_PKCS5_PADDING = 32;
 
-    Provisioning getOpenProvisioningSession (int provisioning_handle) throws SKSException
+    Provisioning getProvisioningSession (int provisioning_handle) throws SKSException
       {
         Provisioning provisioning = provisionings.get (provisioning_handle);
         if (provisioning == null)
           {
             abort ("No such provisioning session: " + provisioning_handle, SKSException.ERROR_NO_SESSION);
           }
+        return provisioning;
+      }
+  
+    Provisioning getOpenProvisioningSession (int provisioning_handle) throws SKSException
+      {
+        Provisioning provisioning = getProvisioningSession (provisioning_handle);
         if (!provisioning.open)
           {
             abort ("Session not open: " +  provisioning_handle, SKSException.ERROR_NO_SESSION);
+          }
+        return provisioning;
+      }
+  
+    Provisioning getClosedProvisioningSession (int provisioning_handle) throws SKSException
+      {
+        Provisioning provisioning = getProvisioningSession (provisioning_handle);
+        if (provisioning.open)
+          {
+            abort ("Session is open: " +  provisioning_handle, SKSException.ERROR_NOT_ALLOWED);
           }
         return provisioning;
       }
@@ -1690,6 +1706,39 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
 
     ////////////////////////////////////////////////////////////////////////////////
     //                                                                            //
+    //                           updateKeyManagementKey                           //
+    //                                                                            //
+    ////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void updateKeyManagementKey (int provisioning_handle,
+                                        PublicKey key_management_key,
+                                        byte[] authorization) throws SKSException
+      {
+        Provisioning provisioning = getClosedProvisioningSession (provisioning_handle);
+        if (provisioning.key_management_key == null)
+          {
+            abort ("Session is not updatable: " +  provisioning_handle, SKSException.ERROR_NOT_ALLOWED);
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Verify KMK signature
+        ///////////////////////////////////////////////////////////////////////////////////
+        if (!SEReferenceImplementation.validateRollOverAuthorization (key_management_key,
+                                                                      provisioning.key_management_key,
+                                                                      authorization))
+          {
+            abort ("\"Authorization\" signature did not verify for session: " + provisioning_handle);
+          }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        // Success, update KeyManagementKey
+        ///////////////////////////////////////////////////////////////////////////////////
+        provisioning.key_management_key = key_management_key;
+      }
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //                                                                            //
     //                       enumerateProvisioningSessions                        //
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
@@ -2729,12 +2778,5 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         puk_policy.format = format;
         puk_policy.retry_limit = retry_limit;
         return puk_policy.puk_policy_handle;
-      }
-
-    @Override
-    public void updateKeyManagementKey (int provisioning_handle, PublicKey key_managegent_key, byte[] authorization) throws SKSException
-      {
-        // TODO Auto-generated method stub
-        
       }
   }

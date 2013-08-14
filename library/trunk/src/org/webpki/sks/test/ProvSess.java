@@ -59,7 +59,6 @@ import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.keygen2.KeySpecifier;
-import org.webpki.keygen2.KeyGen2URIs;
 import org.webpki.keygen2.ServerCryptoInterface;
 
 import org.webpki.sks.AppUsage;

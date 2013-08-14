@@ -68,7 +68,7 @@ public interface SecureKeyStore
     // Constants that are used "as is" in KeyManagementKey operations
     ///////////////////////////////////////////////////////////////////////////////////
     byte[] KMK_TARGET_KEY_REFERENCE           = {'T','a','r','g','e','t','K','e','y','R','e','f','e','r','e','n','c','e'};
-    byte[] KMK_ROLL_OVER_ATTESTATION          = {'R','o','l','l','O','v','e','r','A','t','t','e','s','t','a','t','i','o','n'};
+    byte[] KMK_ROLL_OVER_AUTHORIZATION        = {'R','o','l','l','O','v','e','r','A','u','t','h','o','r','i','z','a','t','i','o','n'};
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Predefined PIN and PUK policy IDs for MAC operations
