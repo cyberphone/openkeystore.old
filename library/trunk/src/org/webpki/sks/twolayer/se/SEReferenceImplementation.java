@@ -860,11 +860,16 @@ public class SEReferenceImplementation
           }
       }
 
-    static Signature initKeyManagementKeyVerifier (PublicKey key_management_key) throws GeneralSecurityException
+    static boolean verifyKeyManagementKeyAuthorization (PublicKey key_management_key,
+                                                        byte[] kmk_kdf,
+                                                        byte[] argument,
+                                                        byte[] authorization) throws GeneralSecurityException
       {
         Signature kmk_verify = Signature.getInstance (key_management_key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
         kmk_verify.initVerify (key_management_key);
-        return kmk_verify;
+        kmk_verify.update (kmk_kdf);
+        kmk_verify.update (argument);
+        return kmk_verify.verify (authorization);
       }
 
     static void validateTargetKeyLocal (MacBuilder verifier,
@@ -885,10 +890,11 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Verify KMK signature
         ///////////////////////////////////////////////////////////////////////////////////
-        Signature kmk_verify = initKeyManagementKeyVerifier (key_management_key);
-        kmk_verify.update (SecureKeyStore.KMK_TARGET_KEY_REFERENCE);
-        kmk_verify.update (getMacBuilder (unwrapped_session_key, getDeviceID (privacy_enabled)).addVerbatim (target_key_ee_certificate.getEncoded ()).getResult ());
-        if (!kmk_verify.verify (authorization))
+        if (!verifyKeyManagementKeyAuthorization (key_management_key,
+                                                  SecureKeyStore.KMK_TARGET_KEY_REFERENCE,
+                                                  getMacBuilder (unwrapped_session_key,
+                                                                 getDeviceID (privacy_enabled)).addVerbatim (target_key_ee_certificate.getEncoded ()).getResult (),
+                                                  authorization))
           {
             abort ("\"Authorization\" signature did not verify for key #" + target_key_handle);
           }
@@ -1511,10 +1517,10 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            Signature kmk_verify = initKeyManagementKeyVerifier (old_key_management_key);
-            kmk_verify.update (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION);
-            kmk_verify.update (new_key_management_key.getEncoded ());
-            return kmk_verify.verify (authorization);
+            return verifyKeyManagementKeyAuthorization (old_key_management_key,
+                                                        SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION,
+                                                        new_key_management_key.getEncoded (),
+                                                        authorization);
           }
         catch (GeneralSecurityException e)
           {

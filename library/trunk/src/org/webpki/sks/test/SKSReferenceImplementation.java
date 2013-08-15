@@ -448,10 +448,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             ///////////////////////////////////////////////////////////////////////////////////
             try
               {
-                Signature kmk_verify = owner.initKeyManagementKeyVerifier ();
-                kmk_verify.update (KMK_TARGET_KEY_REFERENCE);
-                kmk_verify.update (provisioning.getMacBuilder (getDeviceID (provisioning.privacy_enabled)).addVerbatim (certificate_path[0].getEncoded ()).getResult ());
-                if (!kmk_verify.verify (authorization))
+                if (!owner.verifyKeyManagementKeyAuthorization (KMK_TARGET_KEY_REFERENCE,
+                                                                provisioning.getMacBuilder (getDeviceID (provisioning.privacy_enabled)).addVerbatim (certificate_path[0].getEncoded ()).getResult (),
+                                                                authorization))
                   {
                     provisioning.abort ("\"Authorization\" signature did not verify for key #" + key_handle);
                   }
@@ -709,12 +708,16 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
           }
 
-        Signature initKeyManagementKeyVerifier () throws GeneralSecurityException
+        boolean verifyKeyManagementKeyAuthorization (byte[] kmk_kdf,
+                                                     byte[] argument,
+                                                     byte[] authorization) throws GeneralSecurityException
           {
             Signature kmk_verify = Signature.getInstance (key_management_key instanceof RSAPublicKey ? 
                                                                                      "SHA256WithRSA" : "SHA256WithECDSA");
             kmk_verify.initVerify (key_management_key);
-            return kmk_verify;
+            kmk_verify.update (kmk_kdf);
+            kmk_verify.update (argument);
+            return kmk_verify.verify (authorization);
           }
       }
 
@@ -2271,10 +2274,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            Signature kmk_verify = provisioning.initKeyManagementKeyVerifier ();
-            kmk_verify.update (KMK_ROLL_OVER_AUTHORIZATION);
-            kmk_verify.update (key_management_key.getEncoded ());
-            if (!kmk_verify.verify (authorization))
+            if (!provisioning.verifyKeyManagementKeyAuthorization (KMK_ROLL_OVER_AUTHORIZATION,
+                                                                   key_management_key.getEncoded (),
+                                                                   authorization))
               {
                 abort ("\"Authorization\" signature did not verify for session: " + provisioning_handle);
               }
