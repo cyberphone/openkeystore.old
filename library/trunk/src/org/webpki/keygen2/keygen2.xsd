@@ -167,6 +167,9 @@
               within a specific session -->
          <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
 
+         <!-- A Nonce MUST be generated if the VirtualMachine option is used -->
+         <xs:attribute name="Nonce" type="xs:base64Binary" use="optional"/>
+
       </xs:complexType>
    </xs:element>
 
@@ -214,25 +217,33 @@
 
                      <xs:element ref="kg2:UpdateKeyManagementKey" minOccurs="0"/>
 
-                     <!-- Virtual Machine support is optional and MUST be verified
-                          before requested by enquiring the capability attribute
-                          "http://xmlns.webpki.org/keygen2/1.0#feature.vm".  The VMs
-                          identity is supposed to be derived from the "KeyManagementKey"
-                          which requires an "Authorization" object created by signing
-                          "ServerEphemeralKey" with "KeyManagementKey" using SHA256 as the
-                          hash algorithm.  Note that VM support is meant to be dealt with by
-                          the client platform rather than the SKS. If the VM doesn't exist it
-                          should (after the user's consent) be created, otherwise it is
-                          opened.  A newly created VM should not be made available until
-                          the provisioning session has successfully terminated. -->
-                     <xs:element name="VirtualMachine" minOccurs="0">
-                        <xs:complexType>
-                           <xs:attribute name="FriendlyName" type="kg2:friendlyNameType" use="required"/>
-                           <xs:attribute name="Authorization" type="xs:base64Binary" use="required"/>
-                        </xs:complexType>
-                     </xs:element>
-
                   </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+
+            <!-- Virtual Machine support is optional and MUST be verified
+                 before requested by enquiring the capability attribute
+                 "http://xmlns.webpki.org/keygen2/1.0#feature.vm".
+                 Virtual Machine support MUST use a signed request.
+                 The name of the Virtual Machine is equivalent to
+                 the domain name of the signer certificate.
+                 Note "ProvisioningInitializationRequest/@Nonce". -->
+            <xs:element name="VirtualMachine" minOccurs="0">
+               <xs:complexType>
+                  <xs:simpleContent>
+
+                     <!-- The VM data in proprietary format -->
+                     <xs:extension base="xs:base64Binary">
+
+                        <!-- Type of VM -->
+                        <xs:attribute name="Type" type="xs:string" use="required"/>
+
+                        <!-- For the user... -->
+                        <xs:attribute name="FriendlyName" type="xs:string" use="required"/>
+
+                    </xs:extension>
+
+                  </xs:simpleContent>
                </xs:complexType>
             </xs:element>
 
@@ -297,6 +308,10 @@
 
               This instance of "SubmitURL" is equivalent to SKS' "IssuerURI".  -->
          <xs:attribute name="SubmitURL" type="kg2:httpURI" use="required"/>
+
+         <!-- MUST be equal to "PlatformNegotiationResponse/@Nonce"
+              within a specific session -->
+         <xs:attribute name="Nonce" type="xs:base64Binary" use="optional"/>
 
       </xs:complexType>
    </xs:element>

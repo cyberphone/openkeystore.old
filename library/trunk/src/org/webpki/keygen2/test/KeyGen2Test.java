@@ -71,6 +71,7 @@ import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
+import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
@@ -1029,7 +1030,7 @@ public class KeyGen2Test
 
             ProvisioningInitializationRequestEncoder prov_init_request = 
                  new ProvisioningInitializationRequestEncoder (server_state, ISSUER_URL, 10000, (short)50);
-            if (updatable || virtual_machine)
+            if (updatable)
               {
                 ProvisioningInitializationRequestEncoder.KeyManagementKeyUpdateHolder kmk = 
                      prov_init_request.setKeyManagementKey (server_km = server_crypto_interface.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
@@ -1038,10 +1039,13 @@ public class KeyGen2Test
                     kmk.update (server_crypto_interface.enumerateKeyManagementKeys ()[1])
                        .update (update_key.server_km);
                   }
-                if (virtual_machine)
-                  {
-                    prov_init_request.setVirtualMachineFriendlyName (ACME_INDUSTRIES);
-                  }
+              }
+            if (virtual_machine)
+              {
+                prov_init_request.setVirtualMachine (new byte[]{0,1,2,3}, "http://vm/mac", ACME_INDUSTRIES);
+                KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
+                signer.setKey (null, DemoKeyStore.getSignerPassword ());
+                prov_init_request.signRequest (signer);
               }
             return prov_init_request.writeXML ();
           }

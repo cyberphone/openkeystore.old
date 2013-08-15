@@ -44,6 +44,10 @@ abstract class ProvisioningInitializationRequest extends XMLObjectWrapper
     
     ECPublicKey server_ephemeral_key;
     
+    byte[] virtual_machine_data;
+
+    String virtual_machine_type;
+
     String virtual_machine_friendly_name;  // Optional, defined => Virtual machine defined
     
     Vector<String> client_attributes = new Vector<String> ();

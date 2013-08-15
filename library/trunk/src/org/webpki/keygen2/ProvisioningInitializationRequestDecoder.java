@@ -21,11 +21,9 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Vector;
 
-import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-import java.security.Signature;
+
 import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
 
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
@@ -218,27 +216,21 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
             rd.getNext (KEY_MANAGEMENT_KEY_ELEM);
             rd.getChild ();
             scanForUpdateKeys (rd, kmk_root = new KeyManagementKeyUpdateHolder (key_management_key = XMLSignatureWrapper.readPublicKey (rd)));
-            if (rd.hasNext (VIRTUAL_MACHINE_ELEM))
-              {
-                rd.getNext ();
-                try
-                  {
-                    Signature km_verify = Signature.getInstance (key_management_key instanceof RSAPublicKey ? 
-                                                                                            "SHA256WithRSA" : "SHA256WithECDSA");
-                    km_verify.initVerify (key_management_key);
-                    km_verify.update (server_ephemeral_key.getEncoded ());
-                    if (!km_verify.verify (ah.getBinary (AUTHORIZATION_ATTR)))
-                      {
-                        throw new IOException ("Virtual Machine \"" + AUTHORIZATION_ATTR + "\" signature error");
-                      }
-                  }
-                catch (GeneralSecurityException e)
-                  {
-                    throw new IOException (e);
-                  }
-                virtual_machine_friendly_name = ah.getString (FRIENDLY_NAME_ATTR);
-              }
             rd.getParent ();
+          }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Get the optional virtual machine
+        /////////////////////////////////////////////////////////////////////////////////////////
+        if (rd.hasNext (VIRTUAL_MACHINE_ELEM))
+          {
+            virtual_machine_data = rd.getBinary (VIRTUAL_MACHINE_ELEM);
+            virtual_machine_type = ah.getString (TYPE_ATTR);
+            virtual_machine_friendly_name = ah.getString (FRIENDLY_NAME_ATTR);
+            if (!rd.hasNext ())
+              {
+                throw new IOException ("Virtual Machine requests must be signed");
+              }
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

@@ -50,8 +50,8 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
     
     KeyManagementKeyUpdateHolder kmk_root;
     
-    boolean rsa_kmk_found;
-    
+    boolean output_dsig_ns;
+
     public class KeyManagementKeyUpdateHolder
       {
         PublicKey key_management_key;
@@ -64,7 +64,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
           {
             if (key_management_key instanceof RSAPublicKey)
               {
-                rsa_kmk_found = true;
+                output_dsig_ns = true;
               }
             this.key_management_key = key_management_key;
           }
@@ -145,13 +145,11 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
       }
 
 
-    public void setVirtualMachineFriendlyName (String name) throws IOException
+    public void setVirtualMachine (byte[] vm_data, String type, String friendly_name)
       {
-        if (kmk_root == null)
-          {
-            throw new IOException ("\"" + KEY_MANAGEMENT_KEY_ELEM + "\" must be set first");
-          }
-        virtual_machine_friendly_name = name;
+        virtual_machine_data = vm_data;
+        virtual_machine_type = type;
+        virtual_machine_friendly_name = friendly_name;
       }
 
 
@@ -175,7 +173,9 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
 
     public void signRequest (SignerInterface signer) throws IOException
       {
+        output_dsig_ns = true;
         XMLSigner ds = new XMLSigner (signer);
+        ds.removeXMLSignatureNS ();
         Document doc = getRootDocument ();
         ds.createEnvelopedSignature (doc, server_session_id);
       }
@@ -200,7 +200,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
 
         XMLSignatureWrapper.addXMLSignature11NS (wr);
         
-        if (rsa_kmk_found)
+        if (output_dsig_ns)
           {
             XMLSignatureWrapper.addXMLSignatureNS (wr);
           }
@@ -244,26 +244,17 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
             wr.addChildElement (KEY_MANAGEMENT_KEY_ELEM);
             XMLSignatureWrapper.writePublicKey (wr, kmk_root.key_management_key);
             scanForUpdatedKeys (wr, kmk_root);
-            if (virtual_machine_friendly_name != null)
-              {
-                ////////////////////////////////////////////////////////////////////////
-                // We request a VM as well
-                ////////////////////////////////////////////////////////////////////////
-                wr.addChildElement (VIRTUAL_MACHINE_ELEM);
-                wr.setStringAttribute (FRIENDLY_NAME_ATTR, virtual_machine_friendly_name);
-                try
-                  {
-                    wr.setBinaryAttribute (AUTHORIZATION_ATTR,
-                                           server_state.server_crypto_interface.generateKeyManagementAuthorization (kmk_root.key_management_key,
-                                                                                                                server_ephemeral_key.getEncoded ()));
-                  }
-                catch (GeneralSecurityException e)
-                  {
-                    throw new IOException (e);
-                  }
-                wr.getParent();
-              }
             wr.getParent();
+          }
+
+        ////////////////////////////////////////////////////////////////////////
+        // We request a VM as well
+        ////////////////////////////////////////////////////////////////////////
+        if (virtual_machine_data != null)
+          {
+            wr.addBinary (VIRTUAL_MACHINE_ELEM, virtual_machine_data);
+            wr.setStringAttribute (TYPE_ATTR, virtual_machine_type);
+            wr.setStringAttribute (FRIENDLY_NAME_ATTR, virtual_machine_friendly_name);
           }
       }
   }
