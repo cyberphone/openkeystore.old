@@ -18,8 +18,6 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.security.PublicKey;
-
 import java.security.interfaces.ECPublicKey;
 
 import java.util.Date;
@@ -45,8 +43,6 @@ abstract class ProvisioningInitializationRequest extends XMLObjectWrapper
     String submit_url;
     
     ECPublicKey server_ephemeral_key;
-    
-    PublicKey key_management_key;  // Optional
     
     String virtual_machine_friendly_name;  // Optional, defined => Virtual machine defined
     

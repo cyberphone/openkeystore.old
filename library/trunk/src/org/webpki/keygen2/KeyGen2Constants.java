@@ -230,6 +230,8 @@ public interface KeyGen2Constants
 
     String UNLOCK_KEY_ELEM                           = "UnlockKey";
 
+    String UPDATE_KEY_MANAGEMENT_KEY_ELEM            = "UpdateKeyManagementKey";
+
     String UPDATE_KEY_ELEM                           = "UpdateKey";
 
     String VIRTUAL_MACHINE_ELEM                      = "VirtualMachine";

@@ -20,12 +20,16 @@ import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+
 import java.security.interfaces.RSAPublicKey;
 
 import java.util.Date;
+import java.util.Vector;
 
 import org.w3c.dom.Document;
 
+import org.webpki.sks.SecureKeyStore;
+import org.webpki.util.ArrayUtil;
 import org.webpki.xml.DOMWriterHelper;
 
 import org.webpki.xmldsig.XMLSigner;
@@ -43,6 +47,32 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
     
     ServerState server_state;
     
+    KeyManagementKeyUpdateHolder kmk_root;
+    
+    boolean rsa_kmk_found;
+    
+    public class KeyManagementKeyUpdateHolder
+      {
+        PublicKey key_management_key;
+        
+        Vector<KeyManagementKeyUpdateHolder> children = new Vector<KeyManagementKeyUpdateHolder> ();
+        
+        KeyManagementKeyUpdateHolder (PublicKey key_management_key)
+          {
+            if (key_management_key instanceof RSAPublicKey)
+              {
+                rsa_kmk_found = true;
+              }
+            this.key_management_key = key_management_key;
+          }
+
+        public KeyManagementKeyUpdateHolder upgrade (PublicKey key_management_key)
+          {
+            KeyManagementKeyUpdateHolder kmk = new KeyManagementKeyUpdateHolder (key_management_key);
+            children.add (kmk);
+            return kmk;
+          }
+      }    
 
     // Constructors
 
@@ -72,16 +102,15 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
       }
 
 
-    public void setKeyManagementKey (PublicKey key_management_key)
+    public KeyManagementKeyUpdateHolder setKeyManagementKey (PublicKey key_management_key)
       {
-        super.key_management_key = key_management_key;
-        server_state.key_management_key = key_management_key;
+        return kmk_root = new KeyManagementKeyUpdateHolder (server_state.key_management_key = key_management_key);
       }
 
 
     public void setVirtualMachineFriendlyName (String name) throws IOException
       {
-        if (key_management_key == null)
+        if (kmk_root == null)
           {
             throw new IOException ("\"" + KEY_MANAGEMENT_KEY_ELEM + "\" must be set first");
           }
@@ -115,13 +144,29 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
       }
 
 
+    private void scanForUpdatedKeys (DOMWriterHelper wr, KeyManagementKeyUpdateHolder kmk) throws IOException, GeneralSecurityException
+      {
+        for (KeyManagementKeyUpdateHolder child : kmk.children.toArray (new KeyManagementKeyUpdateHolder[0]))
+          {
+            wr.addChildElement (UPDATE_KEY_MANAGEMENT_KEY_ELEM);
+            wr.setBinaryAttribute (AUTHORIZATION_ATTR,
+                                   server_state.server_crypto_interface.generateKeyManagementAuthorization (child.key_management_key,
+                                                                                                            ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION,
+                                                                                                                           kmk.key_management_key.getEncoded ())));
+            XMLSignatureWrapper.writePublicKey (wr, child.key_management_key);
+            scanForUpdatedKeys (wr, child);
+            wr.getParent ();
+          }
+      }
+
+
     protected void toXML (DOMWriterHelper wr) throws IOException
       {
         wr.initializeRootObject (prefix);
 
         XMLSignatureWrapper.addXMLSignature11NS (wr);
         
-        if (key_management_key != null && key_management_key instanceof RSAPublicKey)
+        if (rsa_kmk_found)
           {
             XMLSignatureWrapper.addXMLSignatureNS (wr);
           }
@@ -160,28 +205,29 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
         ////////////////////////////////////////////////////////////////////////
         // Key management key
         ////////////////////////////////////////////////////////////////////////
-        if (key_management_key != null)
+        if (kmk_root != null)
           {
             wr.addChildElement (KEY_MANAGEMENT_KEY_ELEM);
-            XMLSignatureWrapper.writePublicKey (wr, key_management_key);
-            if (virtual_machine_friendly_name != null)
+            XMLSignatureWrapper.writePublicKey (wr, kmk_root.key_management_key);
+            try
               {
-                ////////////////////////////////////////////////////////////////////////
-                // We request a VM as well
-                ////////////////////////////////////////////////////////////////////////
-                wr.addChildElement (VIRTUAL_MACHINE_ELEM);
-                wr.setStringAttribute (FRIENDLY_NAME_ATTR, virtual_machine_friendly_name);
-                try
+                scanForUpdatedKeys (wr, kmk_root);
+                if (virtual_machine_friendly_name != null)
                   {
+                    ////////////////////////////////////////////////////////////////////////
+                    // We request a VM as well
+                    ////////////////////////////////////////////////////////////////////////
+                    wr.addChildElement (VIRTUAL_MACHINE_ELEM);
+                    wr.setStringAttribute (FRIENDLY_NAME_ATTR, virtual_machine_friendly_name);
                     wr.setBinaryAttribute (AUTHORIZATION_ATTR,
-                                           server_state.server_crypto_interface.generateKeyManagementAuthorization (key_management_key,
+                                           server_state.server_crypto_interface.generateKeyManagementAuthorization (kmk_root.key_management_key,
                                                                                                                     server_ephemeral_key.getEncoded ()));
+                    wr.getParent();
                   }
-                catch (GeneralSecurityException e)
-                  {
-                    throw new IOException (e);
-                  }
-                wr.getParent();
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
               }
             wr.getParent();
           }

@@ -19,6 +19,7 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.util.Date;
+import java.util.Vector;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
@@ -39,6 +40,42 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class ProvisioningInitializationRequestDecoder extends ProvisioningInitializationRequest
   {
+    public class KeyManagementKeyUpdateHolder
+      {
+        Vector<KeyManagementKeyUpdateHolder> children = new Vector<KeyManagementKeyUpdateHolder> ();
+        
+        PublicKey kmk;
+
+        byte[] authorization;
+        
+        public KeyManagementKeyUpdateHolder[] KeyManagementKeyUpdateHolders ()
+          {
+            return children.toArray (new KeyManagementKeyUpdateHolder[0]);
+          }
+        
+        public PublicKey getKeyManagementKey ()
+          {
+            return kmk;
+          }
+        
+        KeyManagementKeyUpdateHolder (PublicKey kmk)
+          {
+            this.kmk = kmk;
+          }
+
+        public byte[] getAuthorization ()
+          {
+            return authorization;
+          }
+      }
+    
+    private KeyManagementKeyUpdateHolder kmk_root = new KeyManagementKeyUpdateHolder (null);
+    
+    public KeyManagementKeyUpdateHolder getKeyManagementKeyUpdateHolderRoot ()
+      {
+        return kmk_root;
+      }
+
     private XMLSignatureWrapper signature;  // Optional
 
     String algorithm;
@@ -85,6 +122,8 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
       }
 
 
+    PublicKey key_management_key;
+
     public PublicKey getKeyManagementKey ()
       {
         return key_management_key;
@@ -115,6 +154,22 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
       }
 
 
+    private void scanForUpdateKeys (DOMReaderHelper rd, KeyManagementKeyUpdateHolder kmk) throws IOException
+      {
+        while (rd.hasNext (UPDATE_KEY_MANAGEMENT_KEY_ELEM))
+          {
+            rd.getNext ();
+            byte[] authorization = rd.getAttributeHelper ().getBinary (AUTHORIZATION_ATTR);
+            rd.getChild ();
+            KeyManagementKeyUpdateHolder child = new KeyManagementKeyUpdateHolder (XMLSignatureWrapper.readPublicKey (rd));
+            child.authorization = authorization;
+            kmk.children.add (child);
+            scanForUpdateKeys (rd, child);
+            rd.getParent ();
+          }
+      }
+
+    
     protected void fromXML (DOMReaderHelper rd) throws IOException
       {
         DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
@@ -162,7 +217,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
           {
             rd.getNext (KEY_MANAGEMENT_KEY_ELEM);
             rd.getChild ();
-            key_management_key = XMLSignatureWrapper.readPublicKey (rd);
+            scanForUpdateKeys (rd, kmk_root = new KeyManagementKeyUpdateHolder (key_management_key = XMLSignatureWrapper.readPublicKey (rd)));
             if (rd.hasNext (VIRTUAL_MACHINE_ELEM))
               {
                 rd.getNext ();
@@ -194,6 +249,5 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
             signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
           }
       }
-
   }
 

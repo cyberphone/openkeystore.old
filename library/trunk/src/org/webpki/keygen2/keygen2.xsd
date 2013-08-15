@@ -212,6 +212,8 @@
 
                      </xs:choice>
 
+                     <xs:element ref="kg2:UpdateKeyManagementKey" minOccurs="0"/>
+
                      <!-- Virtual Machine support is optional and MUST be verified
                           before requested by enquiring the capability attribute
                           "http://xmlns.webpki.org/keygen2/1.0#feature.vm".  The VMs
@@ -904,6 +906,33 @@
          <xs:field xpath="@Name"/>
       </xs:unique>
 
+   </xs:element>
+
+   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                    Object holding a KeyManagementKey upgrade object
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+   <xs:element name="UpdateKeyManagementKey">
+      <xs:complexType>
+         <xs:sequence>
+
+            <!-- SKS Reference: updateKeyManagementKey.KeyManagementKey -->
+            <xs:choice>
+
+               <xs:element ref="ds11:ECKeyValue"/>
+
+               <xs:element ref="ds:RSAKeyValue"/>
+
+            </xs:choice>
+
+         <xs:element ref="kg2:UpdateKeyManagementKey" minOccurs="0"/>
+
+         </xs:sequence>
+
+         <!-- SKS Reference: updateKeyManagementKey.Authorization -->
+         <xs:attribute name="Authorization" type="xs:base64Binary" use="optional"/>
+
+      </xs:complexType>
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

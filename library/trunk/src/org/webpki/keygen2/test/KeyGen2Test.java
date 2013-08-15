@@ -194,6 +194,8 @@ public class KeyGen2Test
     
     boolean set_trust_anchor;
     
+    boolean update_kmk;
+    
     boolean virtual_machine;
     
     boolean get_client_attributes;
@@ -491,6 +493,24 @@ public class KeyGen2Test
             throw new IOException (message);
           }
         
+        private void scanForKeyManagementKeyUpdates (ProvisioningInitializationRequestDecoder.KeyManagementKeyUpdateHolder kmk) throws SKSException
+          {
+            for (ProvisioningInitializationRequestDecoder.KeyManagementKeyUpdateHolder child : kmk.KeyManagementKeyUpdateHolders ())
+              {
+                scanForKeyManagementKeyUpdates (child);
+                EnumeratedProvisioningSession old_provisioning_session = new EnumeratedProvisioningSession ();
+                while ((old_provisioning_session = sks.enumerateProvisioningSessions (old_provisioning_session.getProvisioningHandle (), false)) != null)
+                  {
+                    if (child.getKeyManagementKey ().equals (old_provisioning_session.getKeyManagementKey ()))
+                      {
+                        sks.updateKeyManagementKey (old_provisioning_session.getProvisioningHandle (),
+                                                    kmk.getKeyManagementKey (),
+                                                    child.getAuthorization ());
+                      }
+                  }
+              }
+          }
+
         private void postProvisioning (ProvisioningFinalizationRequestDecoder.PostOperation post_operation, int handle) throws IOException, GeneralSecurityException
           {
             EnumeratedProvisioningSession old_provisioning_session = new EnumeratedProvisioningSession ();
@@ -597,6 +617,7 @@ public class KeyGen2Test
         byte[] provSessResponse (byte[] xmldata) throws IOException
           {
             prov_sess_req = (ProvisioningInitializationRequestDecoder) client_xml_cache.parse (xmldata);
+            scanForKeyManagementKeyUpdates (prov_sess_req.getKeyManagementKeyUpdateHolderRoot ());
             assertTrue ("Submit URL", prov_sess_req.getSubmitURL ().equals (ISSUER_URL));
             assertFalse ("VM", virtual_machine ^ ACME_INDUSTRIES.equals (prov_sess_req.getVirtualMachineFriendlyName ()));
             Date client_time = new Date ();
@@ -1010,7 +1031,13 @@ public class KeyGen2Test
                  new ProvisioningInitializationRequestEncoder (server_state, ISSUER_URL, 10000, (short)50);
             if (updatable || virtual_machine)
               {
-                prov_init_request.setKeyManagementKey (server_km = server_crypto_interface.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
+                ProvisioningInitializationRequestEncoder.KeyManagementKeyUpdateHolder kmk = 
+                     prov_init_request.setKeyManagementKey (server_km = server_crypto_interface.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
+                if (update_kmk)
+                  {
+                    kmk.upgrade (server_crypto_interface.enumerateKeyManagementKeys ()[1])
+                       .upgrade (update_key.server_km);
+                  }
                 if (virtual_machine)
                   {
                     prov_init_request.setVirtualMachineFriendlyName (ACME_INDUSTRIES);
@@ -1176,7 +1203,7 @@ public class KeyGen2Test
                 kp.setUpdatedKey (update_key.server_state.getClientSessionID (), 
                                   update_key.server_state.getServerSessionID (),
                                   update_key.server_state.getKeys ()[0].getCertificatePath ()[0],
-                                  update_key.server_km);
+                                  update_kmk ? server_km : update_key.server_km);
               }
             if (delete_key != null)
               {
@@ -1448,6 +1475,7 @@ public class KeyGen2Test
             writeOption ("DeleteKey", delete_key != null);
             writeOption ("UnlockKey", plain_unlock_key != null);
             writeOption ("ECC KMK", ecc_kmk);
+            writeOption ("Update KMK", update_kmk);
             writeOption ("Multiple Keys", two_keys);
             writeOption ("HTTPS server certificate", https);
             writeOption ("TrustAnchor option", set_trust_anchor);
@@ -1747,6 +1775,36 @@ public class KeyGen2Test
         pin_protection = false;
         preset_pin = false;
         update_key= doer1.server;
+        Doer doer2 = new Doer ();
+        doer2.perform ();
+        int key_handle = doer2.getFirstKey ();
+        KeyAttributes ka = sks.getKeyAttributes (key_handle);
+        byte[] result = sks.signHashedData (key_handle,
+                                            SignatureAlgorithms.RSA_SHA256.getURI (),
+                                            null,
+                                            PREDEF_SERVER_PIN,
+                                            HashAlgorithms.SHA256.digest (TEST_STRING));
+        Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+        verify.initVerify (ka.getCertificatePath ()[0]);
+        verify.update (TEST_STRING);
+        assertTrue ("Bad signature", verify.verify (result));
+      }
+
+    @Test
+    public void UpdateKeyManagementKey () throws Exception
+      {
+        Doer doer1 = new Doer ();
+        updatable = true;
+        pin_protection = true;
+        pin_group_shared = true;
+        preset_pin = true;
+        doer1.perform ();
+        updatable = true;
+        pin_protection = false;
+        preset_pin = false;
+        update_kmk = true;
+        update_key= doer1.server;
+        ecc_kmk = true;
         Doer doer2 = new Doer ();
         doer2.perform ();
         int key_handle = doer2.getFirstKey ();
