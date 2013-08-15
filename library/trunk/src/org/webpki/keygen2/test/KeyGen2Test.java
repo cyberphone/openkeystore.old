@@ -1035,8 +1035,8 @@ public class KeyGen2Test
                      prov_init_request.setKeyManagementKey (server_km = server_crypto_interface.enumerateKeyManagementKeys ()[ecc_kmk ? 2 : 0]);
                 if (update_kmk)
                   {
-                    kmk.upgrade (server_crypto_interface.enumerateKeyManagementKeys ()[1])
-                       .upgrade (update_key.server_km);
+                    kmk.update (server_crypto_interface.enumerateKeyManagementKeys ()[1])
+                       .update (update_key.server_km);
                   }
                 if (virtual_machine)
                   {

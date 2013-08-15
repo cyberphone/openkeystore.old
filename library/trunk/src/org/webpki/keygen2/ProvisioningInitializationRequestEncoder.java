@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+import java.security.Signature;
 
 import java.security.interfaces.RSAPublicKey;
 
@@ -55,6 +56,8 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
       {
         PublicKey key_management_key;
         
+        byte[] authorization;
+        
         Vector<KeyManagementKeyUpdateHolder> children = new Vector<KeyManagementKeyUpdateHolder> ();
         
         KeyManagementKeyUpdateHolder (PublicKey key_management_key)
@@ -66,9 +69,43 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
             this.key_management_key = key_management_key;
           }
 
-        public KeyManagementKeyUpdateHolder upgrade (PublicKey key_management_key)
+        public KeyManagementKeyUpdateHolder update (PublicKey key_management_key) throws IOException
           {
             KeyManagementKeyUpdateHolder kmk = new KeyManagementKeyUpdateHolder (key_management_key);
+            try
+              {
+                kmk.authorization = server_state.server_crypto_interface.generateKeyManagementAuthorization (key_management_key,
+                                                                                                             ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION,
+                                                                                                             this.key_management_key.getEncoded ()));
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+            children.add (kmk);
+            return kmk;
+          }
+
+        public KeyManagementKeyUpdateHolder update (PublicKey key_management_key, byte[] external_authorization) throws IOException
+          {
+            KeyManagementKeyUpdateHolder kmk = new KeyManagementKeyUpdateHolder (key_management_key);
+            kmk.authorization = external_authorization;
+            try
+              {
+                Signature kmk_verify = Signature.getInstance (key_management_key instanceof RSAPublicKey ? 
+                                                                                         "SHA256WithRSA" : "SHA256WithECDSA");
+                kmk_verify.initVerify (key_management_key);
+                kmk_verify.update (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION);
+                kmk_verify.update (this.key_management_key.getEncoded ());
+                if (!kmk_verify.verify (external_authorization))
+                  {
+                    throw new IOException ("Authorization signature did not validate");
+                  }
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
             children.add (kmk);
             return kmk;
           }
@@ -144,15 +181,12 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
       }
 
 
-    private void scanForUpdatedKeys (DOMWriterHelper wr, KeyManagementKeyUpdateHolder kmk) throws IOException, GeneralSecurityException
+    private void scanForUpdatedKeys (DOMWriterHelper wr, KeyManagementKeyUpdateHolder kmk) throws IOException
       {
-        for (KeyManagementKeyUpdateHolder child : kmk.children.toArray (new KeyManagementKeyUpdateHolder[0]))
+        for (KeyManagementKeyUpdateHolder child : kmk.children)
           {
             wr.addChildElement (UPDATE_KEY_MANAGEMENT_KEY_ELEM);
-            wr.setBinaryAttribute (AUTHORIZATION_ATTR,
-                                   server_state.server_crypto_interface.generateKeyManagementAuthorization (child.key_management_key,
-                                                                                                            ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION,
-                                                                                                                           kmk.key_management_key.getEncoded ())));
+            wr.setBinaryAttribute (AUTHORIZATION_ATTR, child.authorization);
             XMLSignatureWrapper.writePublicKey (wr, child.key_management_key);
             scanForUpdatedKeys (wr, child);
             wr.getParent ();
@@ -209,25 +243,25 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
           {
             wr.addChildElement (KEY_MANAGEMENT_KEY_ELEM);
             XMLSignatureWrapper.writePublicKey (wr, kmk_root.key_management_key);
-            try
+            scanForUpdatedKeys (wr, kmk_root);
+            if (virtual_machine_friendly_name != null)
               {
-                scanForUpdatedKeys (wr, kmk_root);
-                if (virtual_machine_friendly_name != null)
+                ////////////////////////////////////////////////////////////////////////
+                // We request a VM as well
+                ////////////////////////////////////////////////////////////////////////
+                wr.addChildElement (VIRTUAL_MACHINE_ELEM);
+                wr.setStringAttribute (FRIENDLY_NAME_ATTR, virtual_machine_friendly_name);
+                try
                   {
-                    ////////////////////////////////////////////////////////////////////////
-                    // We request a VM as well
-                    ////////////////////////////////////////////////////////////////////////
-                    wr.addChildElement (VIRTUAL_MACHINE_ELEM);
-                    wr.setStringAttribute (FRIENDLY_NAME_ATTR, virtual_machine_friendly_name);
                     wr.setBinaryAttribute (AUTHORIZATION_ATTR,
                                            server_state.server_crypto_interface.generateKeyManagementAuthorization (kmk_root.key_management_key,
-                                                                                                                    server_ephemeral_key.getEncoded ()));
-                    wr.getParent();
+                                                                                                                server_ephemeral_key.getEncoded ()));
                   }
-              }
-            catch (GeneralSecurityException e)
-              {
-                throw new IOException (e);
+                catch (GeneralSecurityException e)
+                  {
+                    throw new IOException (e);
+                  }
+                wr.getParent();
               }
             wr.getParent();
           }
