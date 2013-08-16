@@ -55,6 +55,8 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
         // Get the top-level attributes
         //////////////////////////////////////////////////////////////////////////
         server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
+        
+        nonce = ah.getBinaryConditional (NONCE_ATTR);
 
         BasicCapabilities.read (ah, basic_capabilities);
         

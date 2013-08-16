@@ -37,6 +37,8 @@ abstract class ProvisioningInitializationRequest extends XMLObjectWrapper
     ProvisioningInitializationRequest () {}
 
     String server_session_id;
+    
+    byte[] nonce;
 
     Date server_time;
 

@@ -83,12 +83,25 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
       {
         this.server_session_id = decoder.server_session_id;
       }
+    
+    public void setNonce (byte[] nonce)
+      {
+        this.nonce = nonce;
+      }
 
     protected void toXML (DOMWriterHelper wr) throws IOException
       {
         wr.initializeRootObject (prefix);
 
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
+        
+        ////////////////////////////////////////////////////////////////////////
+        // VM mandatory option
+        ////////////////////////////////////////////////////////////////////////
+        if (nonce != null)
+          {
+            wr.setBinaryAttribute (NONCE_ATTR, nonce);
+          }
 
         ////////////////////////////////////////////////////////////////////////
         // Basic capabilities

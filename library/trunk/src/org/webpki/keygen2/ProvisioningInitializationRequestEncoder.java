@@ -125,6 +125,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
             super.submit_url = server_state.issuer_uri = submit_url;
             super.session_life_time = server_state.session_life_time = session_life_time;
             super.session_key_limit = server_state.session_key_limit = session_key_limit;
+            super.nonce = server_state.vm_nonce;
             server_session_id = server_state.server_session_id;
             server_ephemeral_key = server_state.server_ephemeral_key = server_state.server_crypto_interface.generateEphemeralKey ();
             for (String client_attribute : server_state.basic_capabilities.client_attributes)
@@ -209,11 +210,17 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
         wr.setStringAttribute (ID_ATTR, server_session_id);
+        
+        if (nonce != null)
+          {
+            wr.setBinaryAttribute (NONCE_ATTR, nonce);
+          }
 
         if (server_time == null)
           {
             server_time = new Date ();
           }
+
         wr.setDateTimeAttribute (SERVER_TIME_ATTR, server_time);
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);

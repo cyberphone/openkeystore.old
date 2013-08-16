@@ -222,17 +222,20 @@
             </xs:element>
 
             <!-- Virtual Machine support is optional and MUST be verified
-                 before requested by enquiring the capability attribute
-                 "http://xmlns.webpki.org/keygen2/1.0#feature.vm".
-                 Virtual Machine support MUST use a signed request.
-                 The name of the Virtual Machine is equivalent to
-                 the domain name of the signer certificate.
-                 Note "ProvisioningInitializationRequest/@Nonce". -->
+                 before requested by enquiring the basic capability extension
+                 "http://xmlns.webpki.org/keygen2/1.0#feature.vm" +
+                 one or more specific Virtual Machines types.
+                 Virtual Machine support MUST feature signed
+                 "ProvisioningInitializationRequest" and
+                 "PlatformNegotiationRequest" using the same certificate.
+                 The name of the Virtual Machine is
+                 equivalent to the domain name of the signer certificate.
+                 Note: "ProvisioningInitializationRequest/@Nonce". -->
             <xs:element name="VirtualMachine" minOccurs="0">
                <xs:complexType>
                   <xs:simpleContent>
 
-                     <!-- The VM data in proprietary format -->
+                     <!-- The VM configuration data in proprietary format -->
                      <xs:extension base="xs:base64Binary">
 
                         <!-- Type of VM -->

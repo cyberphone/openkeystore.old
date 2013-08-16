@@ -245,6 +245,10 @@ public class KeyGen2Test
     
     static final String ACME_INDUSTRIES = "Acme Industries";
     
+    static final String SPECIFIC_VM = "http://platforms.extreme-vm.com/type.3";
+    static final String FOR_THE_CLIENT_UNKNOWN_VM = "http://cool-but-obscure-vm.com/x";
+    static final byte[] VM_CONFIG_DATA = {0,1,2,3};  // In real file probably a bit bigger...
+    
     static X509Certificate server_certificate;
     
     int round;
@@ -608,6 +612,17 @@ public class KeyGen2Test
             if (image_prefs)
               {
                 platform_response.addImagePreference (KeyGen2URIs.LOGOTYPES.CARD, "image/png", 200, 120);
+              }
+            for (String extension : basic_capabilties_request.getExtensions ())
+              {
+                if (extension.equals (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE))
+                  {
+                    basic_capabilties_response.addExtension (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE);
+                    basic_capabilties_response.addExtension (SPECIFIC_VM);
+                    byte[] nonce = new byte[16];
+                    new SecureRandom ().nextBytes (nonce);
+                    platform_response.setNonce (nonce);
+                  }
               }
             return platform_response.writeXML ();
           }
@@ -994,6 +1009,15 @@ public class KeyGen2Test
               {
                 platform_request.setPrivacyEnabled (true);
               }
+            if (virtual_machine)
+              {
+                basic_capabilities.addExtension (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE);
+                basic_capabilities.addExtension (SPECIFIC_VM);
+                basic_capabilities.addExtension (FOR_THE_CLIENT_UNKNOWN_VM);
+                KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
+                signer.setKey (null, DemoKeyStore.getSignerPassword ());
+                platform_request.signRequest (signer);
+              }
             return platform_request.writeXML ();
           }
 
@@ -1042,7 +1066,7 @@ public class KeyGen2Test
               }
             if (virtual_machine)
               {
-                prov_init_request.setVirtualMachine (new byte[]{0,1,2,3}, "http://vm/mac", ACME_INDUSTRIES);
+                prov_init_request.setVirtualMachine (VM_CONFIG_DATA, SPECIFIC_VM, ACME_INDUSTRIES);
                 KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
                 signer.setKey (null, DemoKeyStore.getSignerPassword ());
                 prov_init_request.signRequest (signer);

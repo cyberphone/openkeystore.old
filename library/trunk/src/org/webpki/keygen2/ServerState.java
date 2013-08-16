@@ -1077,6 +1077,8 @@ public class ServerState implements Serializable
     
     byte[] saved_close_nonce;
     
+    byte[] vm_nonce;
+    
     X509Certificate device_certificate;
     
     PostProvisioningTargetKey addPostOperation (String old_client_session_id,
@@ -1186,6 +1188,7 @@ public class ServerState implements Serializable
         basic_capabilities.checkCapabilities (platform_response.basic_capabilities);
         basic_capabilities = platform_response.basic_capabilities;
         image_preferences = platform_response.image_preferences;
+        vm_nonce = platform_response.nonce;
       }
 
 
