@@ -151,8 +151,6 @@ public class SEReferenceImplementation
     static final int ALG_KEY_GEN  = 0x08000000;
     static final int ALG_KEY_PARM = 0x10000000;
 
-    static final int AES_CBC_PKCS5_PADDING = 32;
-    
     static
       {
         //////////////////////////////////////////////////////////////////////////////////////
@@ -489,7 +487,7 @@ public class SEReferenceImplementation
             try
               {
                 ByteReader byte_reader = new ByteReader (provisioning_state);
-                wrapped_session_key = byte_reader.readArray (AES_CBC_PKCS5_PADDING + 32);
+                wrapped_session_key = byte_reader.readArray (SecureKeyStore.AES_CBC_PKCS5_PADDING + 32);
                 mac_sequence_counter = byte_reader.readShort ();
                 session_key_limit = byte_reader.readShort ();
                 byte_reader.checkEOF ();
@@ -1766,7 +1764,7 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Check for key length errors
             ///////////////////////////////////////////////////////////////////////////////////
-            if (private_key.length > (SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + AES_CBC_PKCS5_PADDING))
+            if (private_key.length > (SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING))
               {
                 abort ("Private key: " + id + " exceeds " + SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + " bytes");
               }
@@ -1844,7 +1842,7 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Check for key length errors
             ///////////////////////////////////////////////////////////////////////////////////
-            if (symmetric_key.length > (SecureKeyStore.MAX_LENGTH_SYMMETRIC_KEY + AES_CBC_PKCS5_PADDING))
+            if (symmetric_key.length > (SecureKeyStore.MAX_LENGTH_SYMMETRIC_KEY + SecureKeyStore.AES_CBC_PKCS5_PADDING))
               {
                 abort ("Symmetric key: " + id + " exceeds " + SecureKeyStore.MAX_LENGTH_SYMMETRIC_KEY + " bytes");
               }
@@ -1928,7 +1926,9 @@ public class SEReferenceImplementation
                 abort ("URI length error: " + type.length ());
               }
             if (extension_data.length > (sub_type == SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION ? 
-                                SecureKeyStore.MAX_LENGTH_EXTENSION_DATA + AES_CBC_PKCS5_PADDING : SecureKeyStore.MAX_LENGTH_EXTENSION_DATA))
+                SecureKeyStore.MAX_LENGTH_EXTENSION_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING
+                     :
+                SecureKeyStore.MAX_LENGTH_EXTENSION_DATA))
               {
                 abort ("Extension data exceeds " + SecureKeyStore.MAX_LENGTH_EXTENSION_DATA + " bytes");
               }

@@ -630,8 +630,6 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     // Utility Functions
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    static final int AES_CBC_PKCS5_PADDING = 32;
-
     Provisioning getProvisioningSession (int provisioning_handle) throws SKSException
       {
         Provisioning provisioning = provisionings.get (provisioning_handle);
@@ -2214,7 +2212,9 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
             key_entry.owner.abort ("Duplicate \"Type\" : " + type);
           }
         if (extension_data.length > (sub_type == SUB_TYPE_ENCRYPTED_EXTENSION ? 
-                            MAX_LENGTH_EXTENSION_DATA + AES_CBC_PKCS5_PADDING : MAX_LENGTH_EXTENSION_DATA))
+            MAX_LENGTH_EXTENSION_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING
+               :
+            MAX_LENGTH_EXTENSION_DATA))
           {
             key_entry.owner.abort ("Extension data exceeds " + MAX_LENGTH_EXTENSION_DATA + " bytes");
           }
@@ -2295,7 +2295,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for key length errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if (private_key.length > (MAX_LENGTH_CRYPTO_DATA + AES_CBC_PKCS5_PADDING))
+        if (private_key.length > (MAX_LENGTH_CRYPTO_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING))
           {
             key_entry.owner.abort ("Private key: " + key_entry.id + " exceeds " + MAX_LENGTH_CRYPTO_DATA + " bytes");
           }
@@ -2346,7 +2346,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for various input errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if (symmetric_key.length > (MAX_LENGTH_SYMMETRIC_KEY + AES_CBC_PKCS5_PADDING))
+        if (symmetric_key.length > (MAX_LENGTH_SYMMETRIC_KEY + SecureKeyStore.AES_CBC_PKCS5_PADDING))
           {
             key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
           }

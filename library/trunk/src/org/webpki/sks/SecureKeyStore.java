@@ -158,6 +158,8 @@ public interface SecureKeyStore
     ///////////////////////////////////////////////////////////////////////////////////
     byte[] ZERO_LENGTH_ARRAY                  = new byte[0];
     short SKS_API_LEVEL                       = 100;
+    int AES_CBC_PKCS5_PADDING                 = 32;
+
 
     ///////////////////////////////////////////////////////////////////////////////////
     // Core Provisioning API

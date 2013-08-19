@@ -850,8 +850,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final int ALG_KEY_GEN  = 0x08000000;
     static final int ALG_KEY_PARM = 0x10000000;
 
-    static final int AES_CBC_PKCS5_PADDING = 32;
-    
     static
       {
         //////////////////////////////////////////////////////////////////////////////////////
