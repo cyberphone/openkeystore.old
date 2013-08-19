@@ -155,9 +155,9 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         short retry_limit;
 
-        byte min_length;
+        short min_length;
 
-        byte max_length;
+        short max_length;
 
         Grouping grouping;
 
@@ -173,9 +173,9 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             
             id = ah.getString (ID_ATTR);
 
-            min_length = (byte)ah.getInt (MIN_LENGTH_ATTR);
+            min_length = (short)ah.getInt (MIN_LENGTH_ATTR);
 
-            max_length = (byte)ah.getInt (MAX_LENGTH_ATTR);
+            max_length = (short)ah.getInt (MAX_LENGTH_ATTR);
 
             if (min_length > max_length)
               {
@@ -210,13 +210,13 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
 
 
-        public byte getMinLength ()
+        public short getMinLength ()
           {
             return min_length;
           }
 
 
-        public byte getMaxLength ()
+        public short getMaxLength ()
           {
             return max_length;
           }
