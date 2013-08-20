@@ -1160,24 +1160,8 @@
    </xs:element>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      Request sub-object for creating a key protected by the key "host" device PIN-code
+                    Structures used for post-update operations
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:complexType name="imageData">
-
-      <!-- MIME type. -->
-      <xs:attribute name="MIMEType" type="kg2:mimeType" use="required"/>
-
-      <!-- Logotype usage type -->
-      <xs:attribute name="Type" type="xs:anyURI" use="required"/>
-
-      <!-- Width in pixels.  For SVG it holds the "ideal" width -->
-      <xs:attribute name="Width" type="xs:positiveInteger" use="required"/>
-
-      <!-- Height in pixels.  For SVG it holds the "ideal" height -->
-      <xs:attribute name="Height" type="xs:positiveInteger" use="required"/>
-
-   </xs:complexType>
 
    <xs:complexType name="targetKey">
 
@@ -1258,7 +1242,7 @@
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      Image definition.  An image SHOULD consist of a size-wise device-adapted
+      Image definitions.  An image SHOULD consist of a size-wise device-adapted
       GIF or PNG picture
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
@@ -1268,6 +1252,22 @@
             <xs:attribute name="MIMEType" type="kg2:mimeType" use="required"/>
          </xs:extension>
       </xs:simpleContent>
+   </xs:complexType>
+
+   <xs:complexType name="imageData">
+
+      <!-- MIME type. -->
+      <xs:attribute name="MIMEType" type="kg2:mimeType" use="required"/>
+
+      <!-- Logotype usage type -->
+      <xs:attribute name="Type" type="xs:anyURI" use="required"/>
+
+      <!-- Width in pixels.  For SVG it holds the "ideal" width -->
+      <xs:attribute name="Width" type="xs:positiveInteger" use="required"/>
+
+      <!-- Height in pixels.  For SVG it holds the "ideal" height -->
+      <xs:attribute name="Height" type="xs:positiveInteger" use="required"/>
+
    </xs:complexType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
