@@ -130,7 +130,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         public abstract byte[] getExtensionData () throws IOException;
         
-        Extension (DOMReaderHelper rd, DeployedKeyEntry cpk) throws IOException
+        Extension (DOMReaderHelper rd, IssuedKey cpk) throws IOException
           {
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
             type = ah.getString (TYPE_ATTR);
@@ -144,7 +144,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
       {
         byte[] data;
 
-        StandardExtension (byte[] data, DOMReaderHelper rd, DeployedKeyEntry cpk) throws IOException
+        StandardExtension (byte[] data, DOMReaderHelper rd, IssuedKey cpk) throws IOException
           {
             super (rd, cpk);
             this.data = data;
@@ -171,7 +171,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
       {
         byte[] data;
          
-        EncryptedExtension (byte[] data, DOMReaderHelper rd, DeployedKeyEntry cpk) throws IOException
+        EncryptedExtension (byte[] data, DOMReaderHelper rd, IssuedKey cpk) throws IOException
           {
             super (rd, cpk);
             this.data = data;
@@ -208,7 +208,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
 
     class PropertyBag extends Extension
       {
-        private PropertyBag (DOMReaderHelper rd, DeployedKeyEntry cpk) throws IOException
+        private PropertyBag (DOMReaderHelper rd, IssuedKey cpk) throws IOException
           {
             super (rd, cpk);
           }
@@ -250,7 +250,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         String mime_type;
   
-        Logotype (byte[] data, String mime_type, DOMReaderHelper rd, DeployedKeyEntry cpk) throws IOException
+        Logotype (byte[] data, String mime_type, DOMReaderHelper rd, IssuedKey cpk) throws IOException
           {
             super (rd, cpk);
             this.mime_type = mime_type;
@@ -277,7 +277,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
       }
 
 
-    public class DeployedKeyEntry
+    public class IssuedKey
       {
         X509Certificate[] certificate_path;
 
@@ -299,13 +299,13 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         PostOperation post_operation;
 
-        DeployedKeyEntry () { }
+        IssuedKey () { }
 
 
-        DeployedKeyEntry (DOMReaderHelper rd) throws IOException
+        IssuedKey (DOMReaderHelper rd) throws IOException
           {
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-            rd.getNext (CERTIFICATE_PATH_ELEM);
+            rd.getNext (ISSUED_KEY_ELEM);
             id = ah.getString (ID_ATTR);
             mac = ah.getBinary (MAC_ATTR);
             trust_anchor = ah.getBooleanConditional (TRUST_ANCHOR_ATTR);
@@ -445,7 +445,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
                                   post_op);
       }
 
-    private Vector<DeployedKeyEntry> deployed_key_entries = new Vector<DeployedKeyEntry> ();
+    private Vector<IssuedKey> issued_keys = new Vector<IssuedKey> ();
     
     private Vector<PostOperation> post_unlock_keys = new Vector<PostOperation> ();
       
@@ -482,9 +482,9 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
       }
 
 
-    public DeployedKeyEntry[] getDeployedKeyEntrys ()
+    public IssuedKey[] getIssuedKeys ()
       {
-        return deployed_key_entries.toArray (new DeployedKeyEntry[0]);
+        return issued_keys.toArray (new IssuedKey[0]);
       }
     
     
@@ -545,11 +545,11 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         rd.getChild ();
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the deployed_key_entries [0..n]
+        // Get the issued_keys [0..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        while (rd.hasNext (CERTIFICATE_PATH_ELEM))
+        while (rd.hasNext (ISSUED_KEY_ELEM))
           {
-            deployed_key_entries.add (new DeployedKeyEntry (rd));
+            issued_keys.add (new IssuedKey (rd));
           }
  
         /////////////////////////////////////////////////////////////////////////////////////////

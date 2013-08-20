@@ -46,43 +46,7 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class KeyCreationRequestDecoder extends KeyCreationRequest
   {
-    abstract class PresetValueReference
-      {
-        byte[] encrypted_value;
-
-        PresetValueReference (DOMReaderHelper rd) throws IOException
-          {
-            encrypted_value = rd.getAttributeHelper ().getBinary (VALUE_ATTR);
-          }
-        
-        public byte[] getEncryptedValue ()
-          {
-            return encrypted_value;
-          }
-
-      }
-
-
-    public class PresetPIN extends PresetValueReference
-      {
-        boolean user_modifiable;
-
-        PresetPIN (DOMReaderHelper rd) throws IOException
-          {
-            super (rd);
-            user_modifiable = rd.getAttributeHelper ().getBooleanConditional (USER_MODIFIABLE_ATTR);
-          }
-
-
-        public boolean isUserModifiable ()
-          {
-            return user_modifiable;
-          }
-
-      }
-
-
-    public class PUKPolicy extends PresetValueReference
+    public class PUKPolicy
       {
         byte[] mac;
         
@@ -93,10 +57,12 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
         short retry_limit;
         
         String id;
+        
+        byte[] encrypted_value;
  
         PUKPolicy (DOMReaderHelper rd) throws IOException
           {
-            super (rd);
+            encrypted_value = rd.getAttributeHelper ().getBinary (VALUE_ATTR);
             retry_limit = (short)rd.getAttributeHelper ().getInt (RETRY_LIMIT_ATTR);
             id = rd.getAttributeHelper ().getString (ID_ATTR);
             format = PassphraseFormat.getPassphraseFormatFromString (rd.getAttributeHelper ().getString (FORMAT_ATTR));
@@ -113,6 +79,11 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
         public PassphraseFormat getFormat ()
           {
             return format;
+          }
+
+        public byte[] getEncryptedValue ()
+          {
+            return encrypted_value;
           }
 
 
@@ -190,8 +161,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
             input_method = InputMethod.getInputMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR, InputMethod.ANY.getXMLName ()));
             
-            read_user_modifiable = ah.getStringConditional (USER_MODIFIABLE_ATTR) != null;
-            user_modifiable = ah.getBooleanConditional (USER_MODIFIABLE_ATTR, false);
+            user_modifiable = ah.getBooleanConditional (USER_MODIFIABLE_ATTR, true);
 
             String pr[] = ah.getListConditional (PATTERN_RESTRICTIONS_ATTR);
             if (pr != null)
@@ -240,7 +210,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
 
 
-        boolean user_defined;
+        boolean user_defined = true;
         
         public boolean getUserDefinedFlag ()
           {
@@ -249,8 +219,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
 
         boolean user_modifiable;
-        
-        boolean read_user_modifiable;
         
         public boolean getUserModifiableFlag ()
           {
@@ -307,7 +275,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         PINPolicy pin_policy;
         
-        PresetPIN preset_pin;
+        byte[] preset_pin;
 
         byte[] user_set_pin;
 
@@ -319,23 +287,29 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
         
         KeyObject (DOMReaderHelper rd, 
                    PINPolicy pin_policy,
-                   boolean start_of_pin_group, 
-                   PresetPIN preset_pin,
-                   boolean device_pin_protected) throws IOException
+                   boolean start_of_pin_group) throws IOException
           {
             rd.getNext (KEY_ENTRY_ELEM);
             this.pin_policy = pin_policy;
             this.start_of_pin_group = start_of_pin_group;
-            this.preset_pin = preset_pin;
-            this.device_pin_protected = device_pin_protected;
-
+ 
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
 
             id = ah.getString (ID_ATTR);
+            
+            
 
             mac = ah.getBinary (MAC_ATTR);
 
             friendly_name = ah.getStringConditional (FRIENDLY_NAME_ATTR);
+            
+            device_pin_protected = ah.getBooleanConditional (DEVICE_PIN_PROTECTION_ATTR, false);
+            
+            preset_pin = ah.getBinaryConditional (PIN_VALUE_ATTR);
+            if (preset_pin != null)
+              {
+                pin_policy.user_defined = false;
+              }
 
             app_usage = AppUsage.getAppUsageFromString (ah.getString (APP_USAGE_ATTR));
 
@@ -374,7 +348,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         public byte[] getPresetPIN ()
           {
-            return preset_pin == null ? null : preset_pin.encrypted_value;
+            return preset_pin;
           }
 
 
@@ -789,34 +763,15 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
                                          PINPolicy pin_policy,
                                          boolean start_of_pin_group) throws IOException
       {
-        KeyObject rk;
-        if (rd.hasNext (PRESET_PIN_ELEM))
-          {
-            rd.getNext (PRESET_PIN_ELEM);
-            PresetPIN preset = new PresetPIN (rd);
-            rd.getChild ();
-            request_objects.add (rk = new KeyObject (rd, pin_policy, start_of_pin_group, preset, false));
-            rd.getParent ();
-          }
-        else
-          {
-            if (pin_policy != null)
-              {
-                pin_policy.user_defined = true;
-                if (!pin_policy.read_user_modifiable)
-                  {
-                    pin_policy.user_modifiable = true;
-                  }
-              }
-            request_objects.add (rk = new KeyObject (rd, pin_policy, start_of_pin_group, null, false));
-          }
+        KeyObject rk = new KeyObject (rd, pin_policy, start_of_pin_group);
+        request_objects.add (rk);
         return rk;
       }
       
 
-    private void readKeyProperties (DOMReaderHelper rd, boolean device_pin_protected) throws IOException
+    private void readKeyProperties (DOMReaderHelper rd) throws IOException
       {
-        request_objects.add (new KeyObject (rd, null, false, null, device_pin_protected));
+        request_objects.add (new KeyObject (rd, null, false));
       }
 
 
@@ -923,7 +878,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           {
             if (rd.hasNext (KEY_ENTRY_ELEM))
               {
-                readKeyProperties (rd, false);
+                readKeyProperties (rd);
               }
             else if (rd.hasNext (PUK_POLICY_ELEM))
               {
@@ -942,13 +897,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             else if (rd.hasNext (PIN_POLICY_ELEM))
               {
                 readPINPolicy (rd, false, null);
-              }
-            else if (rd.hasNext (DEVICE_PIN_PROTECTION_ELEM))
-              {
-                rd.getNext (DEVICE_PIN_PROTECTION_ELEM);
-                rd.getChild ();
-                readKeyProperties (rd, true);
-                rd.getParent ();
               }
             else break;
           }

@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20130813#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20130820#";
 
     String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
 
@@ -69,6 +69,8 @@ public interface KeyGen2Constants
 
     String CLIENT_ATTRIBUTES_ATTR                    = "ClientAttributes";
 
+    String DEVICE_PIN_PROTECTION_ATTR                = "DevicePINProtection";
+
     String FORMAT_ATTR                               = "Format";
 
     String FRIENDLY_NAME_ATTR                        = "FriendlyName";
@@ -113,6 +115,8 @@ public interface KeyGen2Constants
 
     String PATTERN_RESTRICTIONS_ATTR                 = "PatternRestrictions";
 
+    String PIN_VALUE_ATTR                            = "PINValue";
+    
     String PRIVACY_ENABLED_ATTR                      = "PrivacyEnabled";
 
     String POLICY_ATTR                               = "Policy";
@@ -172,13 +176,13 @@ public interface KeyGen2Constants
     
     String DEVICE_CERTIFICATE_PATH_ELEM              = "DeviceCertificatePath";
 
-    String DEVICE_PIN_PROTECTION_ELEM                = "DevicePINProtection";
-
     String EXTENSION_ELEM                            = "Extension";
 
     String ENCRYPTED_EXTENSION_ELEM                  = "EncryptedExtension";
 
     String IMAGE_PREFERENCE_ELEM                     = "ImagePreference";
+
+    String ISSUED_KEY_ELEM                           = "IssuedKey";
 
     String KEY_CREATION_REQUEST_ELEM                 = "KeyCreationRequest";
     
@@ -201,8 +205,6 @@ public interface KeyGen2Constants
     String PLATFORM_NEGOTIATION_REQUEST_ELEM         = "PlatformNegotiationRequest";
     
     String PLATFORM_NEGOTIATION_RESPONSE_ELEM        = "PlatformNegotiationResponse";
-    
-    String PRESET_PIN_ELEM                           = "PresetPIN";
     
     String PRIVATE_KEY_ELEM                          = "PrivateKey";
 

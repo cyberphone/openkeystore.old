@@ -360,29 +360,13 @@ public class ServerState implements Serializable
       }
 
 
-    class PresetValue implements Serializable
-      {
-        private static final long serialVersionUID = 1L;
-        
-        byte[] encrypted_value;
-
-        PresetValue (byte[] encrypted_value) throws IOException
-          {
-            this.encrypted_value = encrypted_value;
-          }
-
-        void write (DOMWriterHelper wr) throws IOException
-          {
-            wr.setBinaryAttribute (VALUE_ATTR, encrypted_value);
-          }
-      }
-
-
-    public class PUKPolicy extends PresetValue implements Serializable
+    public class PUKPolicy implements Serializable
       {
         private static final long serialVersionUID = 1L;
 
         String id;
+        
+        byte[] encrypted_value;
 
         public String getID ()
           {
@@ -393,9 +377,9 @@ public class ServerState implements Serializable
 
         int retry_limit;
 
-        PUKPolicy (byte[] value, PassphraseFormat format, int retry_limit) throws IOException
+        PUKPolicy (byte[] encrypted_value, PassphraseFormat format, int retry_limit) throws IOException
           {
-            super (value);
+            this.encrypted_value = encrypted_value;
             this.id = puk_prefix + ++next_puk_id_suffix;
             this.format = format;
             this.retry_limit = retry_limit;
@@ -404,11 +388,11 @@ public class ServerState implements Serializable
         void writePolicy (DOMWriterHelper wr) throws IOException, GeneralSecurityException
           {
             wr.addChildElement (PUK_POLICY_ELEM);
-            super.write (wr);
 
             wr.setStringAttribute (ID_ATTR, id);
             wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
             wr.setStringAttribute (FORMAT_ATTR, format.getXMLName ());
+            wr.setBinaryAttribute (VALUE_ATTR, encrypted_value);
 
             MacGenerator puk_policy_mac = new MacGenerator ();
             puk_policy_mac.addString (id);
@@ -441,7 +425,7 @@ public class ServerState implements Serializable
           }
 
 
-        boolean user_modifiable;
+        boolean user_modifiable = true;
         
         boolean user_modifiable_set;
         
@@ -457,7 +441,7 @@ public class ServerState implements Serializable
             return this;
           }
         
-        boolean user_defined;
+        boolean user_defined = true;
         
         public boolean getUserDefinedFlag ()
           {
@@ -619,9 +603,9 @@ public class ServerState implements Serializable
             return this;
           }
 
-        public Key addEncryptedExtension (String type, byte[] encrypted_data) throws IOException
+        public Key addEncryptedExtension (String type, byte[] data) throws IOException
           {
-            addExtension (new EncryptedExtension (type, encrypted_data));
+            addExtension (new EncryptedExtension (type, encrypt (data)));
             return this;
           }
 
@@ -648,9 +632,9 @@ public class ServerState implements Serializable
 
         byte[] encrypted_symmetric_key;
         
-        public Key setEncryptedSymmetricKey (byte[] encrypted_symmetric_key) throws IOException
+        public Key setSymmetricKey (byte[] symmetric_key) throws IOException
           {
-            this.encrypted_symmetric_key = encrypted_symmetric_key;
+            this.encrypted_symmetric_key = encrypt (symmetric_key);
             return this;
           }
         
@@ -672,9 +656,9 @@ public class ServerState implements Serializable
 
         byte[] encrypted_private_key;
         
-        public Key setEncryptedPrivateKey (byte[] encrypted_private_key)
+        public Key setPrivateKey (byte[] private_key) throws IOException
           {
-            this.encrypted_private_key = encrypted_private_key;
+            this.encrypted_private_key = encrypt (private_key);
             return this;
           }
 
@@ -828,11 +812,11 @@ public class ServerState implements Serializable
           }
 
         
-        PresetValue preset_pin;
+        byte[] preset_pin;
         
         public byte[] getEncryptedPIN ()
           {
-            return preset_pin == null ? null : preset_pin.encrypted_value;
+            return preset_pin;
           }
         
 
@@ -886,7 +870,7 @@ public class ServerState implements Serializable
             return this;
           }
 
-        Key (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
+        Key (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] preset_pin, boolean device_pin_protection) throws IOException
           {
             this.id = key_prefix + ++next_key_id_suffix;
             this.app_usage = app_usage;
@@ -906,7 +890,7 @@ public class ServerState implements Serializable
                 else
                   {
                     pin_policy.not_first = true;
-                    pin_policy.preset_test = preset_pin == null ? null : preset_pin.encrypted_value;
+                    pin_policy.preset_test = preset_pin;
                   }
               }
           }
@@ -949,32 +933,23 @@ public class ServerState implements Serializable
                 key_pair_mac.addString (algorithm);
               }
 
+            wr.addChildElement (KEY_ENTRY_ELEM);
+
+            wr.setStringAttribute (ID_ATTR, id);
+
+            if (server_seed != null)
+              {
+                wr.setBinaryAttribute (SERVER_SEED_ATTR, server_seed);
+              }
+
             if (device_pin_protection)
               {
-                wr.addChildElement (DEVICE_PIN_PROTECTION_ELEM);
+                wr.setBooleanAttribute (DEVICE_PIN_PROTECTION_ATTR, true);
               }
+
             if (preset_pin != null)
               {
-                wr.addChildElement (PRESET_PIN_ELEM);
-                preset_pin.write (wr);
-              }
-            wr.addChildElement (KEY_ENTRY_ELEM);
-            wr.setStringAttribute (ID_ATTR, id);
-            wr.setStringAttribute (APP_USAGE_ATTR, app_usage.getXMLName ());
-
-            if (export_protection != null)
-              {
-                wr.setStringAttribute (EXPORT_PROTECTION_ATTR, export_protection.getXMLName ());
-              }
-
-            if (endorsed_algorithms != null)
-              {
-                wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, endorsed_algorithms);
-              }
-
-            if (biometric_protection != null)
-              {
-                wr.setStringAttribute (BIOMETRIC_PROTECTION_ATTR, biometric_protection.getXMLName ());
+                wr.setBinaryAttribute (PIN_VALUE_ATTR, preset_pin);
               }
 
             if (enable_pin_caching_set)
@@ -986,32 +961,44 @@ public class ServerState implements Serializable
                 wr.setBooleanAttribute (ENABLE_PIN_CACHING_ATTR, enable_pin_caching);
               }
 
+            if (biometric_protection != null)
+              {
+                wr.setStringAttribute (BIOMETRIC_PROTECTION_ATTR, biometric_protection.getXMLName ());
+              }
+
+            if (export_protection != null)
+              {
+                wr.setStringAttribute (EXPORT_PROTECTION_ATTR, export_protection.getXMLName ());
+              }
+
             if (delete_protection != null)
               {
                 wr.setStringAttribute (DELETE_PROTECTION_ATTR, delete_protection.getXMLName ());
               }
-            
-            if (server_seed != null)
+
+            if (friendly_name != null)
               {
-                wr.setBinaryAttribute (SERVER_SEED_ATTR, server_seed);
+                wr.setStringAttribute (FRIENDLY_NAME_ATTR, friendly_name);
               }
 
-            wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
-            
-            expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
-            
+            wr.setStringAttribute (APP_USAGE_ATTR, app_usage.getXMLName ());
+
             wr.setStringAttribute (KEY_ALGORITHM_ATTR, key_specifier.getKeyAlgorithm ().getURI ());
             if (key_specifier.getParameters () != null)
               {
                 wr.setBinaryAttribute (KEY_PARAMETERS_ATTR, key_specifier.getParameters ());
               }
 
-            wr.getParent ();
-
-            if (device_pin_protection || preset_pin != null)
+            if (endorsed_algorithms != null)
               {
-                wr.getParent ();
+                wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, endorsed_algorithms);
               }
+
+            wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
+            
+            expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
+            
+            wr.getParent ();
           }
       }
 
@@ -1139,6 +1126,19 @@ public class ServerState implements Serializable
     byte[] attest (byte[] data, byte[] mac_counter) throws IOException, GeneralSecurityException
       {
         return server_crypto_interface.mac (data, ArrayUtil.add (SecureKeyStore.KDF_DEVICE_ATTESTATION, mac_counter)); 
+      }
+    
+    byte[] encrypt (byte[] data) throws IOException
+      {
+        try
+          {
+            return server_crypto_interface.encrypt (data);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
+        
       }
     
     void checkFinalResult (byte[] close_session_attestation) throws IOException, GeneralSecurityException
@@ -1411,13 +1411,13 @@ public class ServerState implements Serializable
       }
 
 
-    public PUKPolicy createPUKPolicy (byte[] encrypted_puk, PassphraseFormat format, int retry_limit) throws IOException
+    public PUKPolicy createPUKPolicy (byte[] puk, PassphraseFormat format, int retry_limit) throws IOException
       {
-        return new PUKPolicy (encrypted_puk, format, retry_limit);
+        return new PUKPolicy (encrypt (puk), format, retry_limit);
       }
 
 
-    private Key addKeyProperties (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, PresetValue preset_pin, boolean device_pin_protection) throws IOException
+    private Key addKeyProperties (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] preset_pin, boolean device_pin_protection) throws IOException
       {
         Key key = new Key (app_usage, key_specifier, pin_policy, preset_pin, device_pin_protection);
         requested_keys.put (key.getID (), key);
@@ -1425,28 +1425,20 @@ public class ServerState implements Serializable
       }
 
 
-    public Key createKeyWithPresetPIN (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] encrypted_pin) throws IOException
+    public Key createKeyWithPresetPIN (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy, byte[] pin) throws IOException
       {
         if (pin_policy == null)
           {
             bad ("PresetPIN without PINPolicy is not allowed");
           }
-        return addKeyProperties (app_usage, key_specifier, pin_policy, new PresetValue (encrypted_pin), false);
+        pin_policy.user_defined = false;
+        return addKeyProperties (app_usage, key_specifier, pin_policy, encrypt (pin), false);
       }
 
 
     public Key createKey (AppUsage app_usage, KeySpecifier key_specifier, PINPolicy pin_policy) throws IOException
       {
-        Key key = addKeyProperties (app_usage, key_specifier, pin_policy, null, false);
-        if (pin_policy != null)
-          {
-            pin_policy.user_defined = true;
-            if (!pin_policy.user_modifiable_set)
-              {
-                pin_policy.user_modifiable = true;  // Default for user-defined PINs using KeyGen2
-              }
-          }
-        return key;
+        return addKeyProperties (app_usage, key_specifier, pin_policy, null, false);
       }
 
 

@@ -842,7 +842,7 @@ public class KeyGen2Test
             //////////////////////////////////////////////////////////////////////////
             // Final check, do these keys match the request?
             //////////////////////////////////////////////////////////////////////////
-            for (ProvisioningFinalizationRequestDecoder.DeployedKeyEntry key : prov_final_request.getDeployedKeyEntrys ())
+            for (ProvisioningFinalizationRequestDecoder.IssuedKey key : prov_final_request.getIssuedKeys ())
               {
                 int key_handle = sks.getKeyHandle (eps.getProvisioningHandle (), key.getID ());
                 sks.setCertificatePath (key_handle, key.getCertificatePath (), key.getMAC ());
@@ -1126,9 +1126,9 @@ public class KeyGen2Test
             if (puk_protection)
               {
                 puk_policy =
-                    server_state.createPUKPolicy (server_crypto_interface.encrypt (new byte[]{'0','1','2','3','4','5','6', '7','8','9'}),
-                                                                                   PassphraseFormat.NUMERIC,
-                                                                                   3);
+                    server_state.createPUKPolicy (new byte[]{'0','1','2','3','4','5','6', '7','8','9'},
+                                                  PassphraseFormat.NUMERIC,
+                                                  3);
               }
             if (pin_protection)
               {
@@ -1173,7 +1173,7 @@ public class KeyGen2Test
                 server_state.createDevicePINProtectedKey (AppUsage.AUTHENTICATION, key_alg) :
                   preset_pin ? server_state.createKeyWithPresetPIN (encryption_key ? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                                                key_alg, pin_policy,
-                                                                               server_crypto_interface.encrypt (PREDEF_SERVER_PIN))
+                                                                               PREDEF_SERVER_PIN)
                              :
             server_state.createKey (encryption_key || key_agreement? AppUsage.ENCRYPTION : AppUsage.AUTHENTICATION,
                                                key_alg,
@@ -1181,7 +1181,7 @@ public class KeyGen2Test
             if (symmetric_key || encryption_key)
               {
                 kp.setEndorsedAlgorithms (new String[]{encryption_key ? SymEncryptionAlgorithms.AES256_CBC.getURI () : MacAlgorithms.HMAC_SHA1.getURI ()});
-                kp.setEncryptedSymmetricKey (server_crypto_interface.encrypt (encryption_key ? AES32BITKEY : OTP_SEED));
+                kp.setSymmetricKey (encryption_key ? AES32BITKEY : OTP_SEED);
               }
             if (key_agreement)
               {
@@ -1195,7 +1195,7 @@ public class KeyGen2Test
               }
             if (encrypted_extension)
               {
-                kp.addEncryptedExtension ("http://host/ee", server_crypto_interface.encrypt (new byte[]{0,5}));
+                kp.addEncryptedExtension ("http://host/ee", new byte[]{0,5});
               }
             if (set_logotype)
               {
@@ -1346,7 +1346,7 @@ public class KeyGen2Test
     
                     if (temp_set_private_key)
                       {
-                        key_prop.setEncryptedPrivateKey (server_crypto_interface.encrypt (gen_private_key.getEncoded ()));
+                        key_prop.setPrivateKey (gen_private_key.getEncoded ());
                         temp_set_private_key = false;
                       }
     
@@ -1748,7 +1748,7 @@ public class KeyGen2Test
         enable_pin_caching = true;
         input_method = InputMethod.TRUSTED_GUI;
         doer.perform ();
-        assertFalse ("PIN Not User Modifiable", sks.getKeyProtectionInfo (doer.getFirstKey ()).getPINUserModifiableFlag ());
+        assertTrue ("PIN User Modifiable", sks.getKeyProtectionInfo (doer.getFirstKey ()).getPINUserModifiableFlag ());
         assertTrue ("PIN Not Cached", sks.getKeyProtectionInfo (doer.getFirstKey ()).getEnablePINCachingFlag ());
       }
 
@@ -1760,11 +1760,9 @@ public class KeyGen2Test
         ecc_kmk = true;
         pin_protection = true;
         pin_group_shared = true;
-        preset_pin = true;
         doer1.perform ();
         updatable = false;
         pin_protection = false;
-        preset_pin = false;
         clone_key_protection = doer1.server;
         Doer doer2 = new Doer ();
         doer2.perform ();
@@ -1779,7 +1777,7 @@ public class KeyGen2Test
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
                                                     SignatureAlgorithms.RSA_SHA256.getURI (),
                                                     null,
-                                                    PREDEF_SERVER_PIN,
+                                                    USER_DEFINED_PIN,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
                 Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
                 verify.initVerify (ka.getCertificatePath ()[0]);
@@ -1797,11 +1795,9 @@ public class KeyGen2Test
         updatable = true;
         pin_protection = true;
         pin_group_shared = true;
-        preset_pin = true;
         doer1.perform ();
         updatable = false;
         pin_protection = false;
-        preset_pin = false;
         update_key= doer1.server;
         Doer doer2 = new Doer ();
         doer2.perform ();
@@ -1810,7 +1806,7 @@ public class KeyGen2Test
         byte[] result = sks.signHashedData (key_handle,
                                             SignatureAlgorithms.RSA_SHA256.getURI (),
                                             null,
-                                            PREDEF_SERVER_PIN,
+                                            USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
         Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
         verify.initVerify (ka.getCertificatePath ()[0]);
@@ -1825,11 +1821,9 @@ public class KeyGen2Test
         updatable = true;
         pin_protection = true;
         pin_group_shared = true;
-        preset_pin = true;
         doer1.perform ();
         updatable = true;
         pin_protection = false;
-        preset_pin = false;
         update_kmk = true;
         update_key= doer1.server;
         ecc_kmk = true;
@@ -1840,7 +1834,7 @@ public class KeyGen2Test
         byte[] result = sks.signHashedData (key_handle,
                                             SignatureAlgorithms.RSA_SHA256.getURI (),
                                             null,
-                                            PREDEF_SERVER_PIN,
+                                            USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
         Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
         verify.initVerify (ka.getCertificatePath ()[0]);

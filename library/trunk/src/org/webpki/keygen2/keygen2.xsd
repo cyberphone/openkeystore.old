@@ -41,7 +41,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 13-Aug-2013 
+    Revised: 20-Aug-2013 
     Author: Anders Rundgren
 
     Copyright 2006-2013 WebPKI.org (http://webpki.org).
@@ -59,11 +59,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20130813#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20130820#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20130813#"
+           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20130820#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -145,7 +145,7 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- Optional hints for the "CertificatePath/Logotype" extension -->
+            <!-- Optional hints for the "IssuedKey/Logotype" extension -->
             <xs:element name="ImagePreference" type="kg2:imageData" minOccurs="0" maxOccurs="unbounded"/>
 
          </xs:sequence>
@@ -526,12 +526,6 @@
                <!-- One or more keys that are protected by a specific PIN policy -->
                <xs:element ref="kg2:PINPolicy"/>
 
-               <!-- A key that is protected by the same PIN as the device.
-                    This option (which MAY be supported by the device), is
-                    mainly intended for keys belonging to an organization
-                    that manages the device -->
-               <xs:element ref="kg2:DevicePINProtection"/>
-
             </xs:choice>
 
             <!-- See "PlatformNegotiationRequest/Signature" -->
@@ -612,7 +606,7 @@
          <xs:sequence>
 
             <!-- The now certified keys.  Note: optional -->
-            <xs:element ref="kg2:CertificatePath" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="kg2:IssuedKey" minOccurs="0" maxOccurs="unbounded"/>
 
             <!-- SKS Reference: postUnlockKey -->
             <xs:element name="UnlockKey" type="kg2:targetKey" minOccurs="0" maxOccurs="unbounded"/>
@@ -706,7 +700,7 @@
      Base-object for representing a certified public key, path, and optional attributes
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <xs:element name="CertificatePath">
+    <xs:element name="IssuedKey">
       <xs:complexType>
          <xs:sequence>
 
@@ -992,6 +986,9 @@
          <!-- SKS Reference: createKeyEntry.ID -->
          <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
+         <!-- SKS Reference: createKeyEntry.Algorithm 
+              is taken from the request header "Algorithm" -->
+
          <!-- SKS Reference: createKeyEntry.ServerSeed 
               Default: 0 bytes -->
          <xs:attribute name="ServerSeed" use="optional">
@@ -1002,6 +999,28 @@
                </xs:restriction>
             </xs:simpleType>
          </xs:attribute>
+
+         <!-- A key that is protected by the same PIN as the device.
+              This option (which MAY be supported by the device), is
+              mainly intended for keys belonging to an organization
+              that manages the device.  MUST NOT be combined with
+              "PINPolicy" or "PINValue" -->
+         <xs:attribute name="DevicePINProtection" type="xs:boolean" use="optional"/>
+
+         <!-- SKS Reference: createKeyEntry.PINPolicyHandle 
+              is indirectly taken from the optional embedding element
+              "PINPolicy" -->
+
+         <!-- SKS Reference: createKeyEntry.PINValue
+              Note: this attribute MUST NOT be defined if there is no
+              embedding PINPolicy.  If PINValue is not defined and there is
+              an embedding PINPolicy the PIN to they key is considered as
+              user-defined (createPINPolicy.UserDefined) -->
+         <xs:attribute name="PINValue" type="xs:base64Binary" use="optional"/>
+
+         <!-- SKS Reference: createKeyEntry.EnablePINCaching 
+              Default: false -->
+         <xs:attribute name="EnablePINCaching" type="xs:boolean" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.BiometricProtection 
               Default: "none" -->
@@ -1015,12 +1034,12 @@
               Default: "none" -->
          <xs:attribute name="DeleteProtection" type="kg2:delProtectionTypes" use="optional"/>
 
-         <!-- SKS Reference: createKeyEntry.EnablePINCaching 
-              Default: false -->
-         <xs:attribute name="EnablePINCaching" type="xs:boolean" use="optional"/>
-
          <!-- SKS Reference: createKeyEntry.AppUsage -->
          <xs:attribute name="AppUsage" type="kg2:appUsageTypes" use="required"/>
+
+         <!-- SKS Reference: createKeyEntry.FriendlyName 
+              Default: "" -->
+         <xs:attribute name="FriendlyName" type="kg2:friendlyNameType" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.KeyAlgorithm -->
          <xs:attribute name="KeyAlgorithm" type="xs:anyURI" use="required"/>
@@ -1028,16 +1047,12 @@
          <!-- SKS Reference: createKeyEntry.KeyParameters --> 
          <xs:attribute name="KeyParameters" type="xs:base64Binary" use="optional"/>
 
-         <!-- SKS Reference: createKeyEntry.FriendlyName 
-              Default: "" -->
-         <xs:attribute name="FriendlyName" type="kg2:friendlyNameType" use="optional"/>
-
-         <!-- SKS Reference: createKeyEntry.MAC --> 
-         <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
-
          <!-- SKS Reference: createKeyEntry.EndorsedAlgorithm -->
          <xs:attribute name="EndorsedAlgorithms" type="kg2:uriList" use="optional"/>
         
+         <!-- SKS Reference: createKeyEntry.MAC --> 
+         <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
+
       </xs:complexType>
    </xs:element>
 
@@ -1092,27 +1107,9 @@
       <xs:complexType>
          <xs:sequence>
 
-            <xs:choice>
-
-               <!-- One or more keys protected by user-defined PINs governed by
-                    a common PIN policy -->
-               <xs:element ref="kg2:KeyEntry" maxOccurs="unbounded"/>
-
-               <!-- One or more keys protected by issuer-defined PINs -->
-               <xs:element name="PresetPIN" maxOccurs="unbounded">
-                  <xs:complexType>
-
-                     <xs:sequence>
-                        <xs:element ref="kg2:KeyEntry"/>
-                     </xs:sequence>
-                           
-                     <!-- SKS Reference: createKeyEntry.PINValue -->
-                     <xs:attribute name="Value" type="xs:base64Binary" use="required"/>
-
-                  </xs:complexType>
-               </xs:element>
-
-            </xs:choice>
+            <!-- One or more keys protected by user-defined PINs governed by
+                 a common PIN policy -->
+            <xs:element ref="kg2:KeyEntry" maxOccurs="unbounded"/>
 
          </xs:sequence>
 
@@ -1126,10 +1123,10 @@
 
          <!-- SKS Reference: createPINPolicy.UserDefined 
               "UserDefined" is an implicit variable which is true unless
-              there is a "PresetPIN" object enclosing the "KeyEntry" object -->
+              there is a "PINValue" attribute in the "KeyEntry" object -->
 
          <!-- SKS Reference: createPINPolicy.UserModifiable 
-              Default: false for preset PINs, true for user-defined PINs -->
+              Default: true -->
          <xs:attribute name="UserModifiable" type="xs:boolean" use="optional"/>
 
          <!-- SKS Reference: createPINPolicy.Format -->
@@ -1165,14 +1162,6 @@
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       Request sub-object for creating a key protected by the key "host" device PIN-code
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:element name="DevicePINProtection">
-      <xs:complexType>
-         <xs:sequence>
-            <xs:element ref="kg2:KeyEntry"/>
-         </xs:sequence>
-      </xs:complexType>
-   </xs:element>
 
    <xs:complexType name="imageData">
 

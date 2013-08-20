@@ -136,7 +136,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             ////////////////////////////////////////////////////////////////////////
             for (ServerState.Key key : server_state.getKeys ())
               {
-                wr.addChildElement (CERTIFICATE_PATH_ELEM);
+                wr.addChildElement (ISSUED_KEY_ELEM);
                 wr.setStringAttribute (ID_ATTR, key.id);
                 if (key.trust_anchor_set)
                   {
