@@ -29,12 +29,11 @@ public class Test extends JSONSerializer
   {
     class HT implements JSONObject
       {
-
         @Override
         public void writeObject (JSONWriter wr) throws IOException
           {
             wr.setString ("HTL", "656756#");
-            wr.setInt ("INTEGER", -689);
+            wr.setInteger ("INTEGER", -689);
           }
       }
     
@@ -56,10 +55,7 @@ public class Test extends JSONSerializer
         wr.setObject ("HRT", new RT ());
         wr.setObjectArray ("ARR", new JSONObject[]{});
         wr.setObjectArray ("BARR", new JSONObject[]{new HT (), new HT ()});
-        wr.setInt ("Intra", 78);
-        System.out.println ("WRONG=" + new String (wr.getCanonicalizedSubset ("RTl", "68"), "UTF-8"));
-        System.out.println ("GOOD=" + new String (wr.getCanonicalizedSubset ("RTl", "67"), "UTF-8"));
-        System.out.println ("GOOD=" + new String (wr.getCanonicalizedSubset ("Intra", "78"), "UTF-8"));
+        wr.setInteger ("Intra", 78);
         return wr.serializeJSONStructure ();
       }
     

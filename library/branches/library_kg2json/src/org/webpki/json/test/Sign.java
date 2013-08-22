@@ -19,6 +19,7 @@ package org.webpki.json.test;
 import java.io.IOException;
 
 import org.webpki.crypto.KeyStoreSigner;
+import org.webpki.crypto.URLFriendlyRandom;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -35,12 +36,19 @@ public class Sign extends JSONSerializer
   {
     class HT implements JSONObject
       {
+        boolean fantastic;
+
+        HT (boolean fantastic)
+          {
+            this.fantastic = fantastic;
+          }
 
         @Override
         public void writeObject (JSONWriter wr) throws IOException
           {
             wr.setString ("HTL", "656756#");
-            wr.setInt ("INTEGER", -689);
+            wr.setInteger ("INTEGER", -689);
+            wr.setBoolean ("Fantastic", fantastic);
           }
       }
     
@@ -50,7 +58,7 @@ public class Sign extends JSONSerializer
         public void writeObject (JSONWriter wr) throws IOException
           {
             wr.setString ("RTl", "67");
-            wr.setObject ("YT", new HT ());
+            wr.setObject ("YT", new HT (false));
             wr.setString ("er","33");
           }
       }
@@ -58,15 +66,18 @@ public class Sign extends JSONSerializer
     @Override
     protected byte[] getJSONData () throws IOException
       {
+        String instant = URLFriendlyRandom.generate (20);
         JSONWriter wr = new JSONWriter ("MyJSONMessage", "http://example.com");
         wr.setObject ("HRT", new RT ());
         wr.setObjectArray ("ARR", new JSONObject[]{});
-        wr.setObjectArray ("BARR", new JSONObject[]{new HT ()});
-        wr.setInt ("Intra", 78);
+        wr.setObjectArray ("BARR", new JSONObject[]{new HT (true), new HT (false)});
+        wr.setString ("Instant", instant);
+        wr.setStringArray ("STRINGS", new String[]{"One", "Two", "Three"});
+        wr.setInteger ("Intra", 78);
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setKey (null, DemoKeyStore.getSignerPassword ());
         JSONEnvelopedSignatureEncoder signature = new JSONEnvelopedSignatureEncoder (new JSONX509Signer (signer));
-        signature.sign (wr, "Intra", "78");
+        signature.sign (wr, "Instant", instant);
         return wr.serializeJSONStructure ();
       }
     
@@ -76,7 +87,7 @@ public class Sign extends JSONSerializer
           {
             System.out.println (new String (new Sign ().getJSONData (), "UTF-8"));
           }
-        catch (IOException e)
+        catch (Exception e)
           {
             e.printStackTrace ();
           }

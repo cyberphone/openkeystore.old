@@ -18,15 +18,13 @@ package org.webpki.json;
 
 import java.io.IOException;
 
-import org.webpki.json.JSONWriter.JSONHolder;
-
 /**
  * Encoder for enveloped JSON signatures.
  */
 public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
   {
-    JSONHolder signature;
-    String element;
+    JSONWriter.JSONHolder signature;
+    String name;
     String value;
     JSONSigner signer;
     
@@ -42,7 +40,7 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
         @Override
         public void writeObject (JSONWriter wr) throws IOException
           {
-            wr.setString (ELEMENT_JSON, element);
+            wr.setString (NAME_JSON, name);
             wr.setString (VALUE_JSON, value);
           }
       }
@@ -73,14 +71,14 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
         this.signer = signer;
       }
 
-    public void sign (JSONWriter wr, String element, String value) throws IOException
+    public void sign (JSONWriter wr, String name, String value) throws IOException
       {
-        this.element = element;
+        this.name = name;
         this.value = value;
         wr.setObject (ENVELOPED_SIGNATURE_JSON, new EnvelopedSignature ());
         signature.addProperty (SIGNATURE_VALUE_JSON, 
                                new JSONWriter.JSONValue (true, 
                                                          true,
-                                                         JSONWriter.getBase64 (signer.signData (wr.getCanonicalizedSubset (element, value)))));
+                                                         JSONWriter.getBase64 (signer.signData (wr.getCanonicalizedSubset (name, value)))));
       }
   }

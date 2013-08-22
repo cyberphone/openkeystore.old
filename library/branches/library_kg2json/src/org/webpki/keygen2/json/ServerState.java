@@ -406,7 +406,7 @@ public class ServerState implements Serializable
             super.write (wr);
 
             wr.setString (FORMAT_JSON, format.getXMLName ());
-            wr.setInt (RETRY_LIMIT_JSON, retry_limit);
+            wr.setInteger (RETRY_LIMIT_JSON, retry_limit);
 
             MacGenerator puk_policy_mac = new MacGenerator ();
             puk_policy_mac.addString (id);
@@ -500,7 +500,7 @@ public class ServerState implements Serializable
                 wr.setBoolean (USER_MODIFIABLE_JSON, user_modifiable);
               }
             wr.setString (FORMAT_JSON, format.getXMLName ());
-            wr.setInt (RETRY_LIMIT_JSON, retry_limit);
+            wr.setInteger (RETRY_LIMIT_JSON, retry_limit);
             if (grouping != null)
               {
                 wr.setString (GROUPING_JSON, grouping.getXMLName ());
@@ -514,8 +514,8 @@ public class ServerState implements Serializable
                   }
                 wr.setList (PATTERN_RESTRICTIONS_JSON, prs.toArray (new String[0]));
               }
-            wr.setInt (MAX_LENGTH_JSON, max_length);
-            wr.setInt (MIN_LENGTH_JSON, min_length);
+            wr.setInteger (MAX_LENGTH_JSON, max_length);
+            wr.setInteger (MIN_LENGTH_JSON, min_length);
             if (input_method != null)
               {
                 wr.setString (INPUT_METHOD_JSON, input_method.getXMLName ());

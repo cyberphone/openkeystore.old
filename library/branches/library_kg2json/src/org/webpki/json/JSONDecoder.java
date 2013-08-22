@@ -24,17 +24,17 @@ import java.io.IOException;
 public abstract class JSONDecoder
   {
     /**
-     * Internal use only     
+     * INTERNAL USE ONLY     
      */
     protected abstract void unmarshallJSONData (JSONReaderHelper rd) throws IOException;
     
     /**
-     * Internal use only     
+     * INTERNAL USE ONLY     
      */
     protected abstract String getVersion ();
 
     /**
-     * Internal use only     
+     * INTERNAL USE ONLY     
      */
-    protected abstract String getTopElement ();
+    protected abstract String getRootProperty ();
   }

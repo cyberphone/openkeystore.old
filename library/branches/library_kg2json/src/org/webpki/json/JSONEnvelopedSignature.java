@@ -23,17 +23,27 @@ class JSONEnvelopedSignature
   {
     public static final String ENVELOPED_SIGNATURE_JSON   = "EnvelopedSignature";
 
-    static final String ALGORITHM_JSON             = "Algorithm";
+    public static final String ALGORITHM_JSON             = "Algorithm";
 
-    static final String REFERENCE_JSON             = "Reference";
+    public static final String REFERENCE_JSON             = "Reference";
 
-    static final String ELEMENT_JSON               = "Element";
+    public static final String NAME_JSON                  = "Name";
 
-    static final String VALUE_JSON                 = "Value";
+    public static final String VALUE_JSON                 = "Value";
     
-    static final String SIGNATURE_VALUE_JSON       = "SignatureValue";
+    public static final String SIGNATURE_VALUE_JSON       = "SignatureValue";
 
-    static final String SIGNATURE_INFO_JSON        = "SignatureInfo";
+    public static final String SIGNATURE_INFO_JSON        = "SignatureInfo";
 
-    static final String KEY_INFO_JSON              = "KeyInfo";
+    public static final String KEY_INFO_JSON              = "KeyInfo";
+
+    public static final String X509_CERTIFICATE_PATH_JSON = "X509CertificatePath";
+
+    public static final String SIGNATURE_CERTIFICATE_JSON = "SignatureCertificate";
+
+    public static final String ISSUER_JSON                = "Issuer";
+
+    public static final String SERIAL_JSON                = "SerialNumber";
+
+    public static final String SUBJECT_JSON               = "Subject";
   }

@@ -36,7 +36,6 @@ import org.webpki.util.DebugFormatter;
 
 import org.webpki.crypto.VerifierInterface;
 
-import org.webpki.json.JSONEnvelopedSignature;
 import org.webpki.json.JSONEnvelopedSignatureDecoder;
 import org.webpki.json.JSONReaderHelper;
 
@@ -900,7 +899,7 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
 
 
     @Override
-    protected String getTopElement ()
+    protected String getRootProperty ()
       {
         return KEY_CREATION_REQUEST_JSON;
       }
@@ -926,7 +925,7 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
 
         deferred_certification = rd.getBooleanConditional (DEFERRED_CERTIFICATION_JSON);
 
-        algorithm = getKeyGen2URI (JSONEnvelopedSignature.ALGORITHM_JSON);
+        algorithm = getKeyGen2URI (JSONEnvelopedSignatureDecoder.ALGORITHM_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the actual request and management elements [1..n]

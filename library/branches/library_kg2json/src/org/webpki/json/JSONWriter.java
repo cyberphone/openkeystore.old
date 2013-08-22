@@ -17,6 +17,9 @@
 package org.webpki.json;
 
 import java.io.IOException;
+
+import java.math.BigInteger;
+
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
@@ -27,6 +30,8 @@ import org.webpki.util.Base64;
  */
 public class JSONWriter
   {
+    public static final String VERSION_JSON = "Version";
+    
     static class JSONValue
       {
         boolean simple;
@@ -73,7 +78,7 @@ public class JSONWriter
         root = new JSONHolder ();
         current = new JSONHolder ();
         root.addProperty (top_element, new JSONValue (false, false, current));
-        current.addProperty ("VERSION", new JSONValue (true, true, version));
+        current.addProperty (VERSION_JSON, new JSONValue (true, true, version));
       }
 
     public void setString (String name, String value) throws IOException
@@ -81,9 +86,19 @@ public class JSONWriter
         current.addProperty (name, new JSONValue (true, true, value));
       }
 
-    public void setInt (String name, int value) throws IOException
+    public void setInteger (String name, int value) throws IOException
       {
         current.addProperty (name, new JSONValue (true, false, Integer.toString (value)));
+      }
+
+    public void setBigInteger (String name, BigInteger value) throws IOException
+      {
+        current.addProperty (name, new JSONValue (true, false, value.toString ()));
+      }
+
+    public void setBoolean (String name, boolean value) throws IOException
+      {
+        current.addProperty (name, new JSONValue (true, false, Boolean.toString (value)));
       }
 
     public void setObject (String name, JSONObject json_object) throws IOException
@@ -111,10 +126,29 @@ public class JSONWriter
         current.addProperty (name, new JSONValue (false, false, array));
       }
 
-    public void setBoolean (String name, boolean value)
+    void setStringArray (String name, String[] values, boolean quoted) throws IOException
       {
-        // TODO Auto-generated method stub
-        
+        Vector<String> array = new Vector<String> ();
+        for (String value : values)
+          {
+            array.add (value);
+          }
+        current.addProperty (name, new JSONValue (false, quoted, array));
+      }
+
+    public void setBinaryArray (String name, Vector<byte[]> values) throws IOException
+      {
+        Vector<String> array = new Vector<String> ();
+        for (byte[] value : values)
+          {
+            array.add (getBase64 (value));
+          }
+        setStringArray (name, array.toArray (new String[0]), true);
+      }
+
+    public void setStringArray (String name, String[] values) throws IOException
+      {
+        setStringArray (name, values, true);
       }
 
     static String getBase64 (byte[] value) throws IOException
@@ -130,12 +164,6 @@ public class JSONWriter
         setString (name, getBase64 (value));
       }
 
-    public void getParent ()
-      {
-        // TODO Auto-generated method stub
-        
-      }
-
     public byte[] serializeJSONStructure () throws IOException
       {
         buffer = new StringBuffer ();
@@ -144,7 +172,7 @@ public class JSONWriter
         return buffer.append ('\n').toString ().getBytes ("UTF-8");
       }
     
-    private void beginObject (boolean array_flag)
+    void beginObject (boolean array_flag)
       {
         indentLine ();
         spaceOut ();
@@ -156,7 +184,7 @@ public class JSONWriter
         buffer.append ('{');
         indentLine ();
       }
-    private void newLine ()
+    void newLine ()
       {
         if (pretty)
           {
@@ -164,18 +192,18 @@ public class JSONWriter
           }
       }
 
-    private void indentLine ()
+    void indentLine ()
       {
         indent += 2;
       }
 
-    private void undentLine ()
+    void undentLine ()
       {
         indent -= 2;
       }
 
     
-    private void endObject ()
+    void endObject ()
       {
         newLine ();
         undentLine ();
@@ -185,7 +213,7 @@ public class JSONWriter
       }
 
 
-    private void printObject (JSONHolder object, boolean array_flag)
+    void printObject (JSONHolder object, boolean array_flag)
       {
         beginObject (array_flag);
         boolean next = false;
@@ -206,27 +234,18 @@ public class JSONWriter
               }
             else if (json_value.value instanceof Vector)
               {
-                Vector<JSONHolder> array = (Vector<JSONHolder>) json_value.value;
-                if (array.isEmpty ())
+                if (((Vector) json_value.value).isEmpty ())
                   {
                     singleSpace ();
                     buffer.append ("[]");
                   }
+                else if (((Vector) json_value.value).firstElement () instanceof JSONHolder)
+                  {
+                    printArrayObjects ((Vector<JSONHolder>) json_value.value);
+                  }
                 else
                   {
-                    boolean array_next = false;
-                    for (JSONHolder element : array)
-                      {
-                        if (array_next)
-                          {
-                            buffer.append (',');
-                          }
-                        newLine ();
-                        printObject (element, !array_next);
-                        array_next = true;
-                      }
-                    buffer.append (']');
-                    indent--;
+                    printArraySimple ((Vector<String>) json_value.value, json_value.quoted);
                   }
               }
             else
@@ -238,7 +257,84 @@ public class JSONWriter
         endObject ();
       }
 
-    private void printSimpleValue (JSONValue json_value)
+    void printArraySimple (Vector<String> array, boolean quoted)
+      {
+        int i = 0;
+        for (String string : array)
+          {
+            i += string.length ();
+          }
+        boolean broken_lines = i > 100;
+        boolean next = false;
+        if (broken_lines)
+          {
+            indentLine ();
+            newLine ();
+            spaceOut ();
+          }
+        else
+          {
+            singleSpace ();
+          }
+        buffer.append ('[');
+        if (broken_lines)
+          {
+            indentLine ();
+            newLine ();
+          }
+        for (String string : array)
+          {
+            if (next)
+              {
+                buffer.append (',');
+                if (broken_lines)
+                  {
+                    newLine ();
+                  }
+              }
+            if (broken_lines)
+              {
+                spaceOut ();
+              }
+            if (quoted)
+              {
+                buffer.append ('"');
+              }
+            buffer.append (string);
+            if (quoted)
+              {
+                buffer.append ('"');
+              }
+            next = true;
+          }
+        if (broken_lines)
+          {
+            undentLine ();
+            newLine ();
+            spaceOut ();
+            undentLine ();
+          }
+        buffer.append (']');
+      }
+
+    void printArrayObjects (Vector<JSONHolder> array)
+      {
+        boolean next = false;
+        for (JSONHolder element : array)
+          {
+            if (next)
+              {
+                buffer.append (',');
+              }
+            newLine ();
+            printObject (element, !next);
+            next = true;
+          }
+        buffer.append (']');
+        indent--;
+      }
+
+    void printSimpleValue (JSONValue json_value)
       {
         if (json_value.quoted)
           {
@@ -251,7 +347,7 @@ public class JSONWriter
           }
       }
 
-    private void singleSpace ()
+    void singleSpace ()
       {
         if (pretty)
           {
@@ -259,13 +355,13 @@ public class JSONWriter
           }
       }
 
-    private void printProperty (String name)
+    void printProperty (String name)
       {
         spaceOut ();
         buffer.append ('\"').append (name).append ("\":");
       }
 
-    private void spaceOut ()
+    void spaceOut ()
       {
         for (int i = 0; i < indent; i++)
           {
@@ -273,16 +369,6 @@ public class JSONWriter
           }
       }
 
-    public void addElement (String name)
-      {
-        // TODO Auto-generated method stub
-        
-      }
-
-    public void setList (String name, String[] values)
-      {
-      }
-    
     public byte[] getCanonicalizedSubset (String name, String value) throws IOException
       {
         StringBuffer save_buffer = buffer;
@@ -304,7 +390,7 @@ public class JSONWriter
         return result;
       }
 
-    private void findSubset (JSONHolder json_holder, String parent, String name, String value)
+    void findSubset (JSONHolder json_holder, String parent, String name, String value)
       {
         for (String property : json_holder.properties.keySet ())
           {
@@ -313,7 +399,7 @@ public class JSONWriter
               {
                 continue;
               }
-            if (property.equals (name) && json_value.simple && value.equals (json_value.value))
+            if (property.equals (name) && json_value.simple && json_value.quoted && value.equals (json_value.value))
               {
                 if (parent != null)
                   {

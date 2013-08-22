@@ -18,8 +18,13 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+
 import java.security.cert.X509Certificate;
 
+import java.util.Vector;
+
+import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SignerInterface;
@@ -29,14 +34,6 @@ import org.webpki.crypto.SignerInterface;
  */
 public class JSONX509Signer implements JSONEnvelopedSignatureEncoder.JSONSigner
   {
-    public static final String X509_CERTIFICATE_PATH_JSON = "X509CertificatePath";
-
-    static final String SIGNATURE_CERTIFICATE_JSON = "SignatureCertificate";
-
-    static final String ISSUER_JSON = "Issuer";
-    static final String SERIAL_JSON = "SerialNumber";
-    static final String SUBJECT_JSON = "Subject";
-
     SignatureAlgorithms algorithm;
 
     SignerInterface signer;
@@ -49,9 +46,9 @@ public class JSONX509Signer implements JSONEnvelopedSignatureEncoder.JSONSigner
         public void writeObject (JSONWriter wr) throws IOException
           {
             X509Certificate signer_cert = certificate_path[0];
-            wr.setString (ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
-            wr.setString (SERIAL_JSON, signer_cert.getSerialNumber ().toString ());
-            wr.setString (SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
+            wr.setString (JSONEnvelopedSignatureEncoder.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
+            wr.setBigInteger (JSONEnvelopedSignatureEncoder.SERIAL_JSON, signer_cert.getSerialNumber ());
+            wr.setString (JSONEnvelopedSignatureEncoder.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
           }
       }
 
@@ -63,15 +60,32 @@ public class JSONX509Signer implements JSONEnvelopedSignatureEncoder.JSONSigner
     public JSONX509Signer (SignerInterface signer) throws IOException
       {
         this.signer = signer;
-        certificate_path = signer.prepareSigning (true);
+        certificate_path = CertificateUtil.getSortedPath (signer.prepareSigning (true));
         algorithm = KeyAlgorithms.getKeyAlgorithm (certificate_path[0].getPublicKey ()).getRecommendedSignatureAlgorithm ();
+      }
+
+    public static void writeX509CertificatePath (JSONWriter wr, X509Certificate[] certificate_path) throws IOException
+      {
+        Vector<byte[]> certificates = new Vector<byte[]> ();
+        for (X509Certificate certificate : certificate_path)
+          {
+            try
+              {
+                certificates.add (certificate.getEncoded ());
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+          }
+        wr.setBinaryArray (JSONEnvelopedSignatureEncoder.X509_CERTIFICATE_PATH_JSON, certificates);
       }
 
     @Override
     public void writeObject (JSONWriter wr) throws IOException
       {
-        wr.setObject (SIGNATURE_CERTIFICATE_JSON, new SignatureCertificate ());
-        wr.setString (X509_CERTIFICATE_PATH_JSON, "MMIB");
+        wr.setObject (JSONEnvelopedSignatureEncoder.SIGNATURE_CERTIFICATE_JSON, new SignatureCertificate ());
+        writeX509CertificatePath (wr, certificate_path);
       }
 
     @Override

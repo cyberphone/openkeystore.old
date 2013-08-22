@@ -19,7 +19,7 @@ package org.webpki.json;
 import java.io.IOException;
 
 /**
- * Base class for java classes which can be created from JSON data.
+ * Interface for java classes creating JSON {} data.
  */
 public interface JSONObject
   {
