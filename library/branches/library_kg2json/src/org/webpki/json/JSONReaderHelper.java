@@ -20,11 +20,9 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.InputStream;
+import java.math.BigInteger;
 
 import java.util.Vector;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
 
 import org.webpki.util.ArrayUtil;
 
@@ -32,13 +30,68 @@ import org.webpki.util.ArrayUtil;
  * Base class for java classes who can be translated from JSON data.
  *
  */
-public abstract class JSONReaderHelper
+public class JSONReaderHelper
   {
+    public enum JSON {SIMPLE,SIMPLE_QUOTED,OBJECT,SIMPLE_ARRAY,SIMPLE_QUOTED_ARRAY, OBJECT_ARRAY};
 
-    public String getString (String name)
+    JSONWriter.JSONHolder root;
+
+    JSONReaderHelper (JSONWriter.JSONHolder root)
       {
-        // TODO Auto-generated method stub
-        return null;
+        this.root = root;
+      }
+
+    JSONWriter.JSONValue getProperty (String name) throws IOException
+      {
+        if (root.reader.hasNext ())
+          {
+            String found = root.reader.next ();
+            if (!name.equals (found))
+              {
+                throw new IOException ("Looking for \"" + name + "\" found \"" + found + "\"");
+              }
+            return root.properties.get (name);
+          }
+        throw new IOException ("No more properties found in object when looking for \"" + name + "\"");
+      }
+
+    String getString (String name, boolean quoted) throws IOException
+      {
+        JSONWriter.JSONValue value = getProperty (name);
+        if (!value.simple)
+          {
+            throw new IOException ("Simple element expected for \"" + name + "\"");
+          }
+        quoteTest (value.quoted, quoted, name);
+        return (String) value.value;
+      }
+
+    void quoteTest (boolean found, boolean expected, String name) throws IOException
+      {
+        if (found != expected)
+          {
+            throw new IOException ((expected ? "Quotes missing for \"" : "Unexpected quoting for \"") + name + "\" argument");
+          }
+      }
+
+    public String getString (String name) throws IOException
+      {
+        return getString (name, true);
+      }
+
+    public BigInteger getBigInteger (String name) throws IOException
+      {
+        return new BigInteger (getString (name, false));
+      }
+
+    public JSONReaderHelper getObject (String name) throws IOException
+      {
+        JSONWriter.JSONValue value = getProperty (name);
+        if (value.simple && !(value.value instanceof JSONWriter.JSONHolder))
+          {
+            throw new IOException ("\"" + name + "\" is not a JSON object");
+          }
+        return new JSONReaderHelper ((JSONWriter.JSONHolder) value.value);
       }
 
     public boolean getBooleanConditional (String name)
@@ -119,9 +172,91 @@ public abstract class JSONReaderHelper
         return false;
       }
 
-    public String[] getList (String name)
+    Vector<Object> getArray (String name, boolean quoted, boolean simple_array) throws IOException
       {
-        // TODO Auto-generated method stub
-        return null;
+        JSONWriter.JSONValue value = getProperty (name);
+        if (value.simple && !(value.value instanceof Vector))
+          {
+            throw new IOException ("\"" + name + "\" is not an array");
+          }
+        Vector<Object> array = ((Vector<Object>) value.value);
+        if (!array.isEmpty ())
+          {
+            if (simple_array)
+              {
+                if (!(array.firstElement () instanceof String))
+                  {
+                    throw new IOException ("\"" + name + "\" is not a simple array");
+                  }
+                quoteTest (value.quoted, quoted, name);
+              }
+            else
+              {
+                if (!(array.firstElement () instanceof JSONWriter.JSONHolder))
+                  {
+                    throw new IOException ("\"" + name + "\" is not an object array");
+                  }
+              }
+          }
+        return array;
+      }
+
+    String [] getSimpleList (String name, boolean quoted) throws IOException
+      {
+        Vector<Object> array = getArray (name, quoted, true);
+        return array.toArray (new String[0]);
+      }
+
+    public String[] getList (String name) throws IOException
+      {
+        return getSimpleList (name, true);
+      }
+
+    public JSONReaderHelper[] getObjectArray (String name) throws IOException
+      {
+        Vector<JSONReaderHelper> readers = new Vector<JSONReaderHelper> ();
+        for (Object json_object: getArray (name, false, false))
+          {
+            readers.add (new JSONReaderHelper ((JSONWriter.JSONHolder) json_object));
+          }
+        return readers.toArray (new JSONReaderHelper[0]);
+      }
+
+    public String[] getProperties ()
+      {
+        return root.properties.keySet ().toArray (new String[0]);
+      }
+
+    public boolean hasProperty (String name)
+      {
+        return root.properties.get (name) != null;
+      }
+
+    public JSON getPropertyType (String name) throws IOException
+      {
+        JSONWriter.JSONValue value = root.properties.get (name);
+        if (value == null)
+          {
+            return null;
+          }
+        if (value.simple)
+          {
+            return value.quoted ? JSON.SIMPLE_QUOTED : JSON.SIMPLE;
+          }
+        if (value.value instanceof JSONWriter.JSONHolder)
+          {
+            return JSON.OBJECT;
+          }
+        Vector<Object> array = (Vector<Object>) value.value;
+        if (array.isEmpty () || array.firstElement () instanceof String)
+          {
+            return value.quoted ? JSON.SIMPLE_QUOTED_ARRAY : JSON.SIMPLE_ARRAY;
+          }
+        return JSON.OBJECT_ARRAY;
+      }
+
+    public void scanAway (String name) throws IOException
+      {
+        getProperty (name);
       }
   }

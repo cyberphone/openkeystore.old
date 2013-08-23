@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import java.math.BigInteger;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
@@ -30,8 +31,6 @@ import org.webpki.util.Base64;
  */
 public class JSONWriter
   {
-    public static final String VERSION_JSON = "Version";
-    
     static class JSONValue
       {
         boolean simple;
@@ -46,9 +45,11 @@ public class JSONWriter
           }
       }
 
-    class JSONHolder
+    static class JSONHolder
       {
         LinkedHashMap<String,JSONValue> properties = new LinkedHashMap<String,JSONValue> ();
+        
+        Iterator<String> reader;
 
         JSONHolder ()
           {
@@ -73,12 +74,17 @@ public class JSONWriter
     
     boolean pretty = true;
     
-    public JSONWriter (String top_element, String version) throws IOException
+    public JSONWriter (String root_proprty, String version) throws IOException
       {
         root = new JSONHolder ();
         current = new JSONHolder ();
-        root.addProperty (top_element, new JSONValue (false, false, current));
-        current.addProperty (VERSION_JSON, new JSONValue (true, true, version));
+        root.addProperty (root_proprty, new JSONValue (false, false, current));
+        current.addProperty (JSONDecoderCache.VERSION_JSON, new JSONValue (true, true, version));
+      }
+    
+    JSONWriter (JSONHolder root)
+      {
+        this.root = root;
       }
 
     public void setString (String name, String value) throws IOException
@@ -169,7 +175,8 @@ public class JSONWriter
         buffer = new StringBuffer ();
         indent = 0;
         printObject (root, false);
-        return buffer.append ('\n').toString ().getBytes ("UTF-8");
+        newLine ();
+        return buffer.toString ().getBytes ("UTF-8");
       }
     
     void beginObject (boolean array_flag)
@@ -184,6 +191,7 @@ public class JSONWriter
         buffer.append ('{');
         indentLine ();
       }
+
     void newLine ()
       {
         if (pretty)

@@ -47,7 +47,7 @@ public class JSONX509Signer implements JSONEnvelopedSignatureEncoder.JSONSigner
           {
             X509Certificate signer_cert = certificate_path[0];
             wr.setString (JSONEnvelopedSignatureEncoder.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
-            wr.setBigInteger (JSONEnvelopedSignatureEncoder.SERIAL_JSON, signer_cert.getSerialNumber ());
+            wr.setBigInteger (JSONEnvelopedSignatureEncoder.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
             wr.setString (JSONEnvelopedSignatureEncoder.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
           }
       }

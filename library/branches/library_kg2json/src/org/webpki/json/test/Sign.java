@@ -34,6 +34,9 @@ import org.webpki.json.JSONX509Signer;
  */
 public class Sign extends JSONSerializer
   {
+    static final String VERSION = "http://example.com/signature";
+    static final String ROOT_PROPERTY = "MyLittleSignature";
+    
     class HT implements JSONObject
       {
         boolean fantastic;
@@ -67,7 +70,7 @@ public class Sign extends JSONSerializer
     protected byte[] getJSONData () throws IOException
       {
         String instant = URLFriendlyRandom.generate (20);
-        JSONWriter wr = new JSONWriter ("MyJSONMessage", "http://example.com");
+        JSONWriter wr = new JSONWriter (ROOT_PROPERTY, VERSION);
         wr.setObject ("HRT", new RT ());
         wr.setObjectArray ("ARR", new JSONObject[]{});
         wr.setObjectArray ("BARR", new JSONObject[]{new HT (true), new HT (false)});
@@ -85,7 +88,7 @@ public class Sign extends JSONSerializer
       {
         try
           {
-            System.out.println (new String (new Sign ().getJSONData (), "UTF-8"));
+            System.out.print (new String (new Sign ().getJSONData (), "UTF-8"));
           }
         catch (Exception e)
           {

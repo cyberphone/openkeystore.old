@@ -18,6 +18,9 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import java.util.Vector;
+
+import org.webpki.json.JSONWriter.JSONValue;
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -35,8 +38,12 @@ public class JSONParser
     static final char COMMA_CHARACTER     = ',';
     
     int index;
+    
     int max_length;
+    
     String json_data;
+
+    JSONWriter.JSONHolder root;
     
     public void parse (byte[] json_utf8) throws IOException
       {
@@ -44,10 +51,7 @@ public class JSONParser
         index = 0;
         max_length = json_data.length ();
         scanFor (LEFT_CURLY_BRACKET);
-        scanProperty ();
-        scanFor (LEFT_CURLY_BRACKET);
-        scanObject ();
-        scanFor (RIGHT_CURLY_BRACKET);
+        scanObject (root = new JSONWriter.JSONHolder ());
         while (index < max_length)
           {
             if (!isWhiteSpace (json_data.charAt (index++)))
@@ -57,7 +61,7 @@ public class JSONParser
           }
       }
 
-    void scanProperty () throws IOException
+    String scanProperty () throws IOException
       {
         scanFor (DOUBLE_QUOTE);
         StringBuffer property = new StringBuffer ();
@@ -71,10 +75,11 @@ public class JSONParser
             throw new IOException ("Empty property");
           }
         scanFor (COLON_CHARACTER);
+        return property.toString ();
       }
     
 
-    void scanObject () throws IOException
+    JSONWriter.JSONValue scanObject (JSONWriter.JSONHolder holder) throws IOException
       {
         boolean next = false;
         while (testChar () != RIGHT_CURLY_BRACKET)
@@ -84,58 +89,74 @@ public class JSONParser
                 scanFor(COMMA_CHARACTER);
               }
             next = true;
-            scanProperty ();
+            String name = scanProperty ();
+            JSONWriter.JSONValue value;
             switch (scan ())
               {
                 case LEFT_CURLY_BRACKET:
-                  scanObject ();
+                  value = scanObject (new JSONWriter.JSONHolder ());
                   break;
 
                 case DOUBLE_QUOTE:
-                  scanSimple (true);
+                  value = scanSimple (true);
                   break;
 
                 case LEFT_BRACKET:
-                  scanArray ();
+                  value = scanArray ();
                   break;
 
                 default:
                   index--;
-                  scanSimple (false);
+                  value = scanSimple (false);
               }
+            holder.addProperty (name, value);
           }
         scan ();
+        holder.reader = holder.properties.keySet ().iterator ();
+        return new JSONWriter.JSONValue (false, false, holder);
       }
 
-    void scanArray () throws IOException
+    JSONValue scanArray () throws IOException
       {
+        Vector array = null;
+        JSONWriter.JSONValue value = null;
         boolean next = false;
-        while (testChar ()!= RIGHT_BRACKET)
+        while (testChar () != RIGHT_BRACKET)
           {
             if (next)
               {
                 scanFor (COMMA_CHARACTER);
               }
-            next = true;
             switch (scan ())
               {
                 case LEFT_CURLY_BRACKET:
-                  scanObject ();
+                  value = scanObject (new JSONWriter.JSONHolder ());
                   break;
 
                 case DOUBLE_QUOTE:
-                  scanSimple (true);
+                  value = scanSimple (true);
                   break;
 
                 default:
                   index--;
-                  scanSimple (false);
+                  value = scanSimple (false);
               }
+            if (!next)
+              {
+                next = true;
+                array = new Vector ();
+              }
+            array.add (value.value);
           }
         scan ();
+        if (next)
+          {
+            return new JSONWriter.JSONValue (false, value.quoted, array);
+          }
+        return new JSONWriter.JSONValue (false, false, new Vector<String> ());
       }
 
-    void scanSimple (boolean quoted) throws IOException
+    JSONValue scanSimple (boolean quoted) throws IOException
       {
         StringBuffer simple = new StringBuffer ();
         if (quoted)
@@ -145,7 +166,7 @@ public class JSONParser
               {
                 
               }
-            simple.append (json_data.substring (start, index));
+            simple.append (json_data.substring (start, index - 1));
           }
         else
           {
@@ -160,12 +181,14 @@ public class JSONParser
                 throw new IOException ("Missing value");
               }
           }
+        return new JSONWriter.JSONValue (true, quoted, simple.toString ());
       }
 
     char testChar () throws IOException
       {
+        int save = index;
         char c = scan ();
-        index--;
+        index = save;
         return c;
       }
 
@@ -211,6 +234,7 @@ public class JSONParser
           {
             JSONParser parser = new JSONParser ();
             parser.parse (ArrayUtil.readFile (argc[0]));
+            System.out.print (new String (new JSONWriter (parser.root).serializeJSONStructure (), "UTF-8"));
           }
         catch (Exception e)
           {

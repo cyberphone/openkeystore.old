@@ -43,7 +43,7 @@ class JSONEnvelopedSignature
 
     public static final String ISSUER_JSON                = "Issuer";
 
-    public static final String SERIAL_JSON                = "SerialNumber";
+    public static final String SERIAL_NUMBER_JSON         = "SerialNumber";
 
     public static final String SUBJECT_JSON               = "Subject";
   }
