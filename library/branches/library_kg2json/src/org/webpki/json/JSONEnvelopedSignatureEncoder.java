@@ -24,8 +24,13 @@ import java.io.IOException;
 public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
   {
     JSONWriter.JSONHolder signature;
+    
+    JSONWriter.JSONHolder signature_info;
+    
     String name;
+    
     String value;
+
     JSONSigner signer;
     
     interface JSONSigner extends JSONObject
@@ -62,7 +67,7 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
         public void writeObject (JSONWriter wr) throws IOException
           {
             signature = wr.current;
-            wr.setObject (SIGNATURE_INFO_JSON, new SignatureInfo ());
+            signature_info = wr.localSetObject (SIGNATURE_INFO_JSON, new SignatureInfo ());
           }
       }
 
@@ -79,6 +84,6 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
         signature.addProperty (SIGNATURE_VALUE_JSON, 
                                new JSONWriter.JSONValue (true, 
                                                          true,
-                                                         JSONWriter.getBase64 (signer.signData (wr.getCanonicalizedSubset (name, value)))));
+                                                         JSONWriter.getBase64 (signer.signData (wr.getCanonicalizedSubset (signature_info, name, value)))));
       }
   }

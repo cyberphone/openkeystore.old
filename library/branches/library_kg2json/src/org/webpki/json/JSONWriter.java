@@ -27,7 +27,8 @@ import java.util.Vector;
 import org.webpki.util.Base64;
 
 /**
- * Base class for java classes who can be translated from JSON data.
+ * Class that writes JSON data based on a tree.
+ * 
  */
 public class JSONWriter
   {
@@ -67,6 +68,10 @@ public class JSONWriter
     JSONHolder root;
 
     JSONHolder current;
+    
+    JSONHolder signature_info;     // Only used for reading signatures
+
+    int buffer_at_signature_info;  //    -"-
 
     StringBuffer buffer;
     
@@ -109,12 +114,18 @@ public class JSONWriter
 
     public void setObject (String name, JSONObject json_object) throws IOException
       {
+        localSetObject (name, json_object);
+      }
+
+    JSONHolder localSetObject (String name, JSONObject json_object) throws IOException
+      {
         JSONHolder save = current;
         JSONHolder holder = new JSONHolder ();
         current = holder;
         json_object.writeObject (this);
         current = save;
         current.addProperty (name, new JSONValue (false, false, holder));
+        return holder;
       }
 
     public void setObjectArray (String name, JSONObject[] json_objects) throws IOException
@@ -263,6 +274,11 @@ public class JSONWriter
               }
           }
         endObject ();
+        if (object == signature_info)
+          {
+            buffer_at_signature_info = buffer.length ();
+            signature_info = null;
+          }
       }
 
     void printArraySimple (Vector<String> array, boolean quoted)
@@ -377,20 +393,26 @@ public class JSONWriter
           }
       }
 
-    public byte[] getCanonicalizedSubset (String name, String value) throws IOException
+    byte[] getCanonicalizedSubset (JSONHolder signature_info_in, String name, String value) throws IOException
       {
         StringBuffer save_buffer = buffer;
         int save_indent = indent;
         buffer = new StringBuffer ();
         indent = 0;
+        buffer_at_signature_info = 0;
+        signature_info = signature_info_in;
         pretty = false;
         findSubset (root, null, name, value);
         int length = buffer.length ();
         if (length == 0)
           {
-            throw new IOException ("Subset not found");
+            throw new IOException ("\"" + JSONEnvelopedSignature.REFERENCE_JSON + "\" not found");
           }
-        buffer.setLength (length -= 2);
+        if (signature_info != null)
+          {
+            throw new IOException ("\"" + JSONEnvelopedSignature.REFERENCE_JSON + "\" must not point to a property that is deeper nested than \"" + JSONEnvelopedSignature.ENVELOPED_SIGNATURE_JSON + "\"");
+          }
+        buffer.setLength (buffer_at_signature_info);
         byte[] result = buffer.toString ().getBytes ("UTF-8");
         buffer = save_buffer;
         indent = save_indent;

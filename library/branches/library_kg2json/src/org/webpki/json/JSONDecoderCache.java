@@ -30,8 +30,6 @@ public class JSONDecoderCache
   {
     public static final String VERSION_JSON = "Version";
     
-    JSONWriter.JSONHolder root;
-    
     boolean test_unread = true;
     
     static class MessageTypes
@@ -62,8 +60,7 @@ public class JSONDecoderCache
     public JSONDecoder parse (byte[] json_utf8) throws IOException
       {
         JSONParser parser = new JSONParser ();
-        parser.parse (json_utf8);
-        root = parser.root;
+        JSONWriter.JSONHolder root = parser.parse (json_utf8);
         if (root.properties.size () != 1)
           {
             throw new IOException ("Expected a single property, got: " + root.properties.size ());
@@ -75,6 +72,7 @@ public class JSONDecoderCache
             throw new IOException ("Expected an object as message body");
           }
         JSONReaderHelper reader = new JSONReaderHelper ((JSONWriter.JSONHolder)value.value);
+        reader.root = root;
         String version = reader.getString (VERSION_JSON);
         Class<? extends JSONDecoder> decoder_class = class_map.get (new MessageTypes (version, root_property));
         if (decoder_class == null)
@@ -84,10 +82,11 @@ public class JSONDecoderCache
         try
           {
             JSONDecoder decoder = (JSONDecoder)decoder_class.newInstance ();
+            decoder.root = root;
             decoder.unmarshallJSONData (reader);
             if (test_unread)
               {
-                checkForUnread (reader.root, root_property);
+                checkForUnread (reader.current, root_property);
               }
             return decoder;
           }
@@ -172,8 +171,8 @@ public class JSONDecoderCache
             JSONDecoderCache parser = new JSONDecoderCache ();
             parser.setCheckForUnread (new Boolean(argc[2]));
             parser.addToCache (argc[0]);
-            parser.parse (ArrayUtil.readFile (argc[1]));
-            System.out.print (new String (new JSONWriter (parser.root).serializeJSONStructure (), "UTF-8"));
+            JSONDecoder doc = parser.parse (ArrayUtil.readFile (argc[1]));
+            System.out.print (new String (new JSONWriter (doc.root).serializeJSONStructure (), "UTF-8"));
           }
         catch (Exception e)
           {

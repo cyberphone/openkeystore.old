@@ -62,7 +62,7 @@ public class Verify extends JSONDecoder
                 case OBJECT:
                   if (property.equals (JSONEnvelopedSignatureDecoder.ENVELOPED_SIGNATURE_JSON))
                     {
-                      JSONEnvelopedSignatureDecoder signature = new JSONEnvelopedSignatureDecoder (rd.getObject (property));
+                      JSONEnvelopedSignatureDecoder signature = new JSONEnvelopedSignatureDecoder (rd);
                     }
                   else
                     {

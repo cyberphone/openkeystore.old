@@ -116,7 +116,7 @@ abstract class KeyGen2Validator extends JSONDecoder
 
     String[] getKeyGen2NonEmptyList (String name) throws IOException
       {
-        String[] list = rd.getList (name);
+        String[] list = rd.getStringList (name);
         if (list.length == 0)
           {
             bad ("Empty list not allowed: " + name);

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Vector;
 
 import org.webpki.json.JSONWriter.JSONValue;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -43,15 +44,14 @@ public class JSONParser
     
     String json_data;
 
-    JSONWriter.JSONHolder root;
-    
-    public void parse (byte[] json_utf8) throws IOException
+    public JSONWriter.JSONHolder parse (byte[] json_utf8) throws IOException
       {
         json_data = new String (json_utf8, "UTF-8");
         index = 0;
         max_length = json_data.length ();
         scanFor (LEFT_CURLY_BRACKET);
-        scanObject (root = new JSONWriter.JSONHolder ());
+        JSONWriter.JSONHolder root = new JSONWriter.JSONHolder ();
+        scanObject (root);
         while (index < max_length)
           {
             if (!isWhiteSpace (json_data.charAt (index++)))
@@ -59,6 +59,7 @@ public class JSONParser
                 throw new IOException ("Improperly terminated JSON object");
               }
           }
+        return root;
       }
 
     String scanProperty () throws IOException
@@ -233,8 +234,8 @@ public class JSONParser
         try
           {
             JSONParser parser = new JSONParser ();
-            parser.parse (ArrayUtil.readFile (argc[0]));
-            System.out.print (new String (new JSONWriter (parser.root).serializeJSONStructure (), "UTF-8"));
+            JSONWriter.JSONHolder root = parser.parse (ArrayUtil.readFile (argc[0]));
+            System.out.print (new String (new JSONWriter (root).serializeJSONStructure (), "UTF-8"));
           }
         catch (Exception e)
           {

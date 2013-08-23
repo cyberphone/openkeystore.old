@@ -69,7 +69,7 @@ public class Sign extends JSONSerializer
     @Override
     protected byte[] getJSONData () throws IOException
       {
-        String instant = URLFriendlyRandom.generate (20);
+        String instant = "hy878787";//URLFriendlyRandom.generate (20);
         JSONWriter wr = new JSONWriter (ROOT_PROPERTY, VERSION);
         wr.setObject ("HRT", new RT ());
         wr.setObjectArray ("ARR", new JSONObject[]{});

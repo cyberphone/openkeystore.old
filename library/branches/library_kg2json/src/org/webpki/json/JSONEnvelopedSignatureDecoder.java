@@ -20,6 +20,12 @@ import java.io.IOException;
 
 import java.math.BigInteger;
 
+import java.security.GeneralSecurityException;
+import java.security.Signature;
+import java.security.cert.X509Certificate;
+
+import org.webpki.crypto.CertificateUtil;
+import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.VerifierInterface;
 
 /**
@@ -29,10 +35,39 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
   {
     String algorithm;
     
+    String name;
+    
+    String value;
+    
+    byte[] canonicalized_data;
+    
+    byte[] signature_value;
+    
+    X509Certificate[] certificate_path;
+    
     public JSONEnvelopedSignatureDecoder (JSONReaderHelper rd) throws IOException
       {
-        getSignatureInfo (rd.getObject (SIGNATURE_INFO_JSON));
-        rd.getString (SIGNATURE_VALUE_JSON);
+        rd = rd.getObject (ENVELOPED_SIGNATURE_JSON);
+        JSONReaderHelper signature_info = rd.getObject (SIGNATURE_INFO_JSON);
+        getSignatureInfo (signature_info);
+        signature_value = rd.getBinary (SIGNATURE_VALUE_JSON);
+        JSONWriter writer = new JSONWriter (rd.root);
+        canonicalized_data = writer.getCanonicalizedSubset (signature_info.current, name, value);
+        try
+          {
+            Signature sig = Signature.getInstance (SignatureAlgorithms.getAlgorithmFromURI (algorithm).getJCEName ());
+            sig.initVerify (certificate_path[0].getPublicKey ());
+            sig.update (canonicalized_data);
+            if (sig.verify (signature_value))
+              {
+                System.out.println ("DID IT");
+              }
+            else throw new IOException ("BADD");
+          }
+        catch (GeneralSecurityException e)
+          {
+            
+          }
       }
 
     void getSignatureInfo (JSONReaderHelper rd) throws IOException
@@ -57,7 +92,7 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
 
     void getX509CertificatePath (JSONReaderHelper rd) throws IOException
       {
-        String[] certificates_in_bas64 = rd.getList (X509_CERTIFICATE_PATH_JSON);
+        certificate_path = CertificateUtil.getSortedPathFromBlobs (rd.getBinaryList (X509_CERTIFICATE_PATH_JSON));
       }
 
     void getSignatureCertificate (JSONReaderHelper rd) throws IOException
@@ -69,19 +104,22 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
 
     void getReference (JSONReaderHelper rd) throws IOException
       {
-        String name = rd.getString (NAME_JSON);
-        String value = rd.getString (VALUE_JSON);
+        name = rd.getString (NAME_JSON);
+        value = rd.getString (VALUE_JSON);
       }
 
-    public static JSONEnvelopedSignatureDecoder read (JSONReaderHelper rd, String element, String value) throws IOException
+    public static JSONEnvelopedSignatureDecoder read (JSONReaderHelper rd, String expected_name, String expected_value) throws IOException
       {
-        // TODO Auto-generated method stub
-        return null;
+        JSONEnvelopedSignatureDecoder verifier = new JSONEnvelopedSignatureDecoder (rd);
+        if (!expected_name.equals (verifier.name) || !expected_value.equals (verifier.value))
+          {
+            throw new IOException ("Non-matching \"" + REFERENCE_JSON + "\" to signature");
+          }
+        return verifier;
       }
 
-    public void validate (VerifierInterface verifier)
+    public void validate (VerifierInterface verifier) throws IOException
       {
-        // TODO Auto-generated method stub
-        
+        verifier.verifyCertificatePath (certificate_path);
       }
   }

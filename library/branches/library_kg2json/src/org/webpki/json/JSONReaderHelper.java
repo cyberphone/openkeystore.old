@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.util.Vector;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64;
 
 /**
  * Base class for java classes who can be translated from JSON data.
@@ -36,21 +37,30 @@ public class JSONReaderHelper
 
     JSONWriter.JSONHolder root;
 
-    JSONReaderHelper (JSONWriter.JSONHolder root)
+    JSONWriter.JSONHolder current;
+
+    JSONReaderHelper (JSONWriter.JSONHolder current)
       {
-        this.root = root;
+        this.current = current;
+      }
+
+    JSONReaderHelper createJSONReaderHelper (JSONWriter.JSONHolder current)
+      {
+        JSONReaderHelper new_rd = new JSONReaderHelper (current);
+        new_rd.root = root;
+        return new_rd;
       }
 
     JSONWriter.JSONValue getProperty (String name) throws IOException
       {
-        if (root.reader.hasNext ())
+        if (current.reader.hasNext ())
           {
-            String found = root.reader.next ();
+            String found = current.reader.next ();
             if (!name.equals (found))
               {
                 throw new IOException ("Looking for \"" + name + "\" found \"" + found + "\"");
               }
-            return root.properties.get (name);
+            return current.properties.get (name);
           }
         throw new IOException ("No more properties found in object when looking for \"" + name + "\"");
       }
@@ -79,6 +89,16 @@ public class JSONReaderHelper
         return getString (name, true);
       }
 
+    static byte[] getBinaryFromBase64 (String base64) throws IOException
+      {
+        return new Base64().getBinaryFromBase64String (base64);
+      }
+
+    public byte[] getBinary (String name) throws IOException
+      {
+        return getBinaryFromBase64 (getString (name));
+      }
+
     public BigInteger getBigInteger (String name) throws IOException
       {
         return new BigInteger (getString (name, false));
@@ -91,7 +111,7 @@ public class JSONReaderHelper
           {
             throw new IOException ("\"" + name + "\" is not a JSON object");
           }
-        return new JSONReaderHelper ((JSONWriter.JSONHolder) value.value);
+        return createJSONReaderHelper ((JSONWriter.JSONHolder) value.value);
       }
 
     public boolean getBooleanConditional (String name)
@@ -104,12 +124,6 @@ public class JSONReaderHelper
       {
         // TODO Auto-generated method stub
         return false;
-      }
-
-    public byte[] getBinary (String name)
-      {
-        // TODO Auto-generated method stub
-        return null;
       }
 
     public void getNext (String name)
@@ -207,9 +221,19 @@ public class JSONReaderHelper
         return array.toArray (new String[0]);
       }
 
-    public String[] getList (String name) throws IOException
+    public String[] getStringList (String name) throws IOException
       {
         return getSimpleList (name, true);
+      }
+
+    public Vector<byte[]> getBinaryList (String name) throws IOException
+      {
+        Vector<byte[]> blobs = new Vector<byte[]> ();
+        for (String blob : getStringList (name))
+          {
+            blobs.add (getBinaryFromBase64 (blob));
+          }
+        return blobs;
       }
 
     public JSONReaderHelper[] getObjectArray (String name) throws IOException
@@ -217,24 +241,24 @@ public class JSONReaderHelper
         Vector<JSONReaderHelper> readers = new Vector<JSONReaderHelper> ();
         for (Object json_object: getArray (name, false, false))
           {
-            readers.add (new JSONReaderHelper ((JSONWriter.JSONHolder) json_object));
+            readers.add (createJSONReaderHelper ((JSONWriter.JSONHolder) json_object));
           }
         return readers.toArray (new JSONReaderHelper[0]);
       }
 
     public String[] getProperties ()
       {
-        return root.properties.keySet ().toArray (new String[0]);
+        return current.properties.keySet ().toArray (new String[0]);
       }
 
     public boolean hasProperty (String name)
       {
-        return root.properties.get (name) != null;
+        return current.properties.get (name) != null;
       }
 
     public JSON getPropertyType (String name) throws IOException
       {
-        JSONWriter.JSONValue value = root.properties.get (name);
+        JSONWriter.JSONValue value = current.properties.get (name);
         if (value == null)
           {
             return null;

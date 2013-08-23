@@ -23,6 +23,8 @@ import java.io.IOException;
  */
 public abstract class JSONDecoder
   {
+    JSONWriter.JSONHolder root;  // Of parsed document
+
     /**
      * INTERNAL USE ONLY     
      */
