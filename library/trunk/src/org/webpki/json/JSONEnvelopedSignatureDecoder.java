@@ -57,6 +57,7 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
         signature_value = rd.getBinary (SIGNATURE_VALUE_JSON);
         JSONWriter writer = new JSONWriter (rd.root);
         canonicalized_data = writer.getCanonicalizedSubset (signature_info.current, name, value);
+// TODO this is just a temporary hack...
         try
           {
             Signature sig = Signature.getInstance (algorithm.getJCEName ());
@@ -66,7 +67,7 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
               {
                 System.out.println ("DID IT");
               }
-            else throw new IOException ("BADD");
+            else throw new IOException ("BAD");
           }
         catch (GeneralSecurityException e)
           {

@@ -426,4 +426,27 @@ public class JSONWriter
       {
         canonicalization_debug_file = file;
       }
+
+    public static byte[] parseAndPrettyPrint (byte[] json_utf8) throws IOException
+      {
+        return new JSONWriter (new JSONParser ().parse (json_utf8)).serializeJSONStructure ();
+      }
+
+    public static void main (String[] argc)
+      {
+        if (argc.length != 1)
+          {
+            System.out.println ("\nJSON-input-document");
+            System.exit (0);
+          }
+        try
+          {
+            System.out.print (new String (parseAndPrettyPrint (ArrayUtil.readFile (argc[0])), "UTF-8"));
+          }
+        catch (Exception e)
+          {
+            System.out.println ("Error: " + e.getMessage ());
+            e.printStackTrace ();
+          }
+      }
   }

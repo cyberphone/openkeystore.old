@@ -47,9 +47,9 @@ public class JSONX509Signer implements JSONSigner
         public void writeObject (JSONWriter wr) throws IOException
           {
             X509Certificate signer_cert = certificate_path[0];
-            wr.setString (JSONEnvelopedSignatureEncoder.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
-            wr.setBigInteger (JSONEnvelopedSignatureEncoder.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
-            wr.setString (JSONEnvelopedSignatureEncoder.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
+            wr.setString (JSONEnvelopedSignature.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
+            wr.setBigInteger (JSONEnvelopedSignature.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
+            wr.setString (JSONEnvelopedSignature.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
           }
       }
 
@@ -79,13 +79,13 @@ public class JSONX509Signer implements JSONSigner
                 throw new IOException (e);
               }
           }
-        wr.setBinaryArray (JSONEnvelopedSignatureEncoder.X509_CERTIFICATE_PATH_JSON, certificates);
+        wr.setBinaryArray (JSONEnvelopedSignature.X509_CERTIFICATE_PATH_JSON, certificates);
       }
 
     @Override
     public void writeObject (JSONWriter wr) throws IOException
       {
-        wr.setObject (JSONEnvelopedSignatureEncoder.SIGNATURE_CERTIFICATE_JSON, new SignatureCertificate ());
+        wr.setObject (JSONEnvelopedSignature.SIGNATURE_CERTIFICATE_JSON, new SignatureCertificate ());
         writeX509CertificatePath (wr, certificate_path);
       }
 

@@ -24,8 +24,10 @@ import org.webpki.util.ArrayUtil;
 
 /**
  * Parses JSON into a DOM-like tree.
+ * Only used internally.
+ * 
  */
-public class JSONParser
+class JSONParser
   {
     static final char LEFT_CURLY_BRACKET  = '{';
     static final char RIGHT_CURLY_BRACKET = '}';
@@ -42,7 +44,7 @@ public class JSONParser
     
     String json_data;
 
-    public JSONHolder parse (byte[] json_utf8) throws IOException
+    JSONHolder parse (byte[] json_utf8) throws IOException
       {
         json_data = new String (json_utf8, "UTF-8");
         index = 0;
@@ -224,21 +226,6 @@ public class JSONParser
                 continue;
               }
             return c;
-          }
-      }
-
-    public static void main (String[] argc)
-      {
-        try
-          {
-            JSONParser parser = new JSONParser ();
-            JSONHolder root = parser.parse (ArrayUtil.readFile (argc[0]));
-            System.out.print (new String (new JSONWriter (root).serializeJSONStructure (), "UTF-8"));
-          }
-        catch (Exception e)
-          {
-            System.out.println ("Error: " + e.getMessage ());
-            e.printStackTrace ();
           }
       }
   }
