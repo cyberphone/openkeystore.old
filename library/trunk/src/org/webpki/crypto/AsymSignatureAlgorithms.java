@@ -67,6 +67,13 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms
 
 
     @Override
+    public boolean isSymmetric ()
+      {
+        return false;
+      }
+
+
+    @Override
     public boolean isMandatorySKSAlgorithm ()
       {
         return sks_mandatory;

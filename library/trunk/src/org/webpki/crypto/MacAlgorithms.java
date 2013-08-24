@@ -43,6 +43,13 @@ public enum MacAlgorithms implements SignatureAlgorithms
       }
 
     @Override
+    public boolean isSymmetric ()
+      {
+        return true;
+      }
+
+
+    @Override
     public boolean isMandatorySKSAlgorithm ()
       {
         return sks_mandatory;

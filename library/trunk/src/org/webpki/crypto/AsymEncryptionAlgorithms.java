@@ -47,6 +47,13 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
 
 
     @Override
+    public boolean isSymmetric ()
+      {
+        return false;
+      }
+
+
+    @Override
     public boolean isMandatorySKSAlgorithm ()
       {
         return true;

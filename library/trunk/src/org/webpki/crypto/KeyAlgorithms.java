@@ -177,24 +177,12 @@ public enum KeyAlgorithms implements SKSAlgorithms
 
 
     @Override
-    public String getURI ()
+    public boolean isSymmetric ()
       {
-        return uri;
-      }
-
-    
-    public String getJCEName ()
-      {
-        return jcename;
+        return false;
       }
 
 
-    public String getECDomainOID ()
-      {
-        return ec_domain_oid;
-      }
-
-    
     @Override
     public boolean isMandatorySKSAlgorithm ()
       {
@@ -202,6 +190,33 @@ public enum KeyAlgorithms implements SKSAlgorithms
       }
 
 
+    @Override
+    public String getJCEName ()
+      {
+        return jcename;
+      }
+
+
+    @Override
+    public String getURI ()
+      {
+        return uri;
+      }
+
+
+    @Override
+    public String getOID ()
+      {
+        return null;
+      }
+
+    
+    public String getECDomainOID ()
+      {
+        return ec_domain_oid;
+      }
+
+    
     public boolean isECKey ()
       {
         return ec_domain_oid != null;
@@ -281,12 +296,5 @@ public enum KeyAlgorithms implements SKSAlgorithms
               }
           }
         throw new IOException ("Unknown algorithm: " + uri);
-      }
-
-
-    @Override
-    public String getOID ()
-      {
-        return null;
       }
   }
