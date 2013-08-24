@@ -38,7 +38,7 @@ import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.MacAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.SymKeyVerifierInterface;
@@ -81,7 +81,7 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
             this.pub_key = pub_key;
           }
 
-        public byte[] signData (byte[] data, SignatureAlgorithms sign_alg) throws IOException, GeneralSecurityException
+        public byte[] signData (byte[] data, AsymSignatureAlgorithms sign_alg) throws IOException, GeneralSecurityException
           {
             Signature s = Signature.getInstance (sign_alg.getJCEName ());
             s.initSign (priv_key);

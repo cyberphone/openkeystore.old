@@ -30,7 +30,7 @@ import org.webpki.util.Base64;
 
 import org.webpki.xml.XMLObjectWrapper;
 
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 
@@ -49,7 +49,7 @@ abstract class XMLSignerCore
 
     private HashAlgorithms digest_algorithm = HashAlgorithms.SHA256;
 
-    private SignatureAlgorithms signature_algorithm;
+    private AsymSignatureAlgorithms signature_algorithm;
 
     private boolean debug;
 
@@ -65,7 +65,7 @@ abstract class XMLSignerCore
       }
 
 
-    public void setSignatureAlgorithm (SignatureAlgorithms signature_algorithm)
+    public void setSignatureAlgorithm (AsymSignatureAlgorithms signature_algorithm)
       {
         if (signature_algorithm != null)
           {
@@ -112,7 +112,7 @@ abstract class XMLSignerCore
 
     abstract PublicKey populateKeys (XMLSignatureWrapper dsig_wrapper) throws GeneralSecurityException, IOException;
 
-    abstract byte[] getSignatureBlob (byte[] data, SignatureAlgorithms sig_alg) throws GeneralSecurityException, IOException;
+    abstract byte[] getSignatureBlob (byte[] data, AsymSignatureAlgorithms sig_alg) throws GeneralSecurityException, IOException;
 
     
     private void setupSignatureData () throws GeneralSecurityException, IOException

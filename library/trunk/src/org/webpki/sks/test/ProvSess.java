@@ -54,7 +54,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MacAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -160,8 +160,8 @@ public class ProvSess
             else
               {
                 PublicKey device_public_key = device_certificate.getPublicKey ();
-                SignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
-                    SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256;
+                AsymSignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
+                    AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256;
     
                 // Verify that the session key signature was signed by the device key
                 Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());

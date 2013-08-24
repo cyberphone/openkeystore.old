@@ -28,7 +28,7 @@ import org.webpki.wasp.SignatureProfileResponseEncoder;
 import org.webpki.xmldsig.CanonicalizationAlgorithms;
 
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import static org.webpki.wasp.WASPConstants.*;
 
@@ -98,7 +98,7 @@ public class PDFProfileRequestDecoder extends XMLObjectWrapper implements Signat
 
         digest_algorithm = ah.getStringConditional (DIGEST_ALG_ATTR, HashAlgorithms.SHA1.getURI ());
 
-        signature_algorithm = ah.getStringConditional (SIGNATURE_ALG_ATTR, SignatureAlgorithms.RSA_SHA1.getURI ());
+        signature_algorithm = ah.getStringConditional (SIGNATURE_ALG_ATTR, AsymSignatureAlgorithms.RSA_SHA1.getURI ());
 
         document_canonicalization_algorithm = ah.getStringConditional (DOC_CN_ALG_ATTR, DOC_SIGN_CN_ALG);
       }
@@ -118,7 +118,7 @@ public class PDFProfileRequestDecoder extends XMLObjectWrapper implements Signat
       {
         return CanonicalizationAlgorithms.testAlgorithmURI (canonicalization_algorithm) &&
                HashAlgorithms.testAlgorithmURI (digest_algorithm) &&
-               SignatureAlgorithms.testAlgorithmURI (signature_algorithm) &&
+               AsymSignatureAlgorithms.testAlgorithmURI (signature_algorithm) &&
                document_canonicalization_algorithm.equals (DOC_SIGN_CN_ALG);
       }
 

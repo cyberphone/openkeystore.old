@@ -150,7 +150,7 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
       }
 
 
-    public byte[] signData (byte[] data, SignatureAlgorithms algorithm) throws IOException
+    public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
       {
         try
           {

@@ -38,7 +38,7 @@ import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.AuthorityInfoAccessCAIssuersCache;
 import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyContainerTypes;
 import org.webpki.crypto.KeyUsageBits;
 
@@ -248,7 +248,7 @@ public class SreqEnc
 
         if (rsasha1DS)
           {
-            xml.setSignatureAlgorithm (SignatureAlgorithms.RSA_SHA1);
+            xml.setSignatureAlgorithm (AsymSignatureAlgorithms.RSA_SHA1);
           }
 
 //        CMSProfile0Request cms = new CMSProfile0Request ();

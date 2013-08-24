@@ -25,7 +25,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.webpki.crypto.SignerInterface;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.DocumentException;
@@ -152,7 +152,7 @@ public class PDFSigner
             PdfLiteral slit = (PdfLiteral)sg.get (PdfName.CONTENTS);
             byte[] outc = new byte[(slit.getPosLength () - 2) / 2];
             PdfPKCS7 sig = sg.getSigner ();
-            sig.setExternalDigest (signer.signData (hash, SignatureAlgorithms.RSA_SHA1), hash, "RSA");
+            sig.setExternalDigest (signer.signData (hash, AsymSignatureAlgorithms.RSA_SHA1), hash, "RSA");
             PdfDictionary dic = new PdfDictionary ();
             byte[] ssig = sig.getEncodedPKCS7 ();
             System.arraycopy (ssig, 0, outc, 0, ssig.length);

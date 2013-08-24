@@ -22,12 +22,12 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 public interface AsymKeySignerInterface
   {
 
-    public byte[] signData (byte[] data, SignatureAlgorithms algorithm) throws IOException, GeneralSecurityException;
+    public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException, GeneralSecurityException;
 
     public PublicKey getPublicKey () throws IOException, GeneralSecurityException;
 

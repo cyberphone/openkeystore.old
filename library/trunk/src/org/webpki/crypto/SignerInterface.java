@@ -37,7 +37,7 @@ public interface SignerInterface
     /**
      * Signs data using the key.
      */
-    public byte[] signData (byte[] data, SignatureAlgorithms algorithm) throws IOException;
+    public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException;
 
     /**
      * Returns a descriptor of the signer certificate.

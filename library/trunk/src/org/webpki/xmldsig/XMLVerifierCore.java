@@ -29,7 +29,7 @@ import org.webpki.util.ArrayUtil;
 
 import org.webpki.xml.XMLObjectWrapper;
 
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 
 
@@ -39,7 +39,7 @@ abstract class XMLVerifierCore
 
     private HashAlgorithms digest_algorithm;  // Only tested for main Reference not for keyinfo types
 
-    private SignatureAlgorithms signature_algorithm;
+    private AsymSignatureAlgorithms signature_algorithm;
 
     private boolean debug;
 
@@ -157,7 +157,7 @@ abstract class XMLVerifierCore
       }
 
 
-    public SignatureAlgorithms getSignatureAlgorithm ()
+    public AsymSignatureAlgorithms getSignatureAlgorithm ()
       {
         return signature_algorithm;
       }

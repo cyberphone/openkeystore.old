@@ -36,7 +36,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import org.webpki.keygen2.KeySpecifier;
 
@@ -116,9 +116,9 @@ public class PKCS12Import
         else if (app_usage == AppUsage.SIGNATURE)
           {
             endorsed_algs = rsa_flag ? 
-                new String[]{SignatureAlgorithms.RSA_SHA1.getURI (), SignatureAlgorithms.RSA_SHA256.getURI ()}
+                new String[]{AsymSignatureAlgorithms.RSA_SHA1.getURI (), AsymSignatureAlgorithms.RSA_SHA256.getURI ()}
                                  :
-                new String[]{SignatureAlgorithms.ECDSA_SHA256.getURI ()};
+                new String[]{AsymSignatureAlgorithms.ECDSA_SHA256.getURI ()};
           }
         SecureKeyStore sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.client")).newInstance ();
         EnumeratedKey ek = new EnumeratedKey ();

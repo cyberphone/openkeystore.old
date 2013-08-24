@@ -68,6 +68,14 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
       }
 
 
+    @Override
+    public boolean isMandatorySKSAlgorithm ()
+      {
+        return sks_mandatory;
+      }
+
+
+    @Override
     public String getJCEName ()
       {
         return jcename;
@@ -78,6 +86,13 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
     public String getURI ()
       {
         return uri;
+      }
+
+
+    @Override
+    public String getOID ()
+      {
+        return null;
       }
 
 
@@ -116,19 +131,5 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
               }
           }
         throw new IOException ("Unknown algorithm: " + uri);
-      }
-
-
-    @Override
-    public boolean isMandatorySKSAlgorithm ()
-      {
-        return sks_mandatory;
-      }
-
-
-    @Override
-    public String getOID ()
-      {
-        return null;
       }
   }

@@ -24,4 +24,6 @@ public interface SKSAlgorithms
     public String getURI ();
     
     public String getOID ();
+
+    public String getJCEName ();
   }

@@ -29,7 +29,7 @@ import org.webpki.wasp.SignatureProfileResponseEncoder;
 import org.webpki.xmldsig.CanonicalizationAlgorithms;
 
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import static org.webpki.wasp.WASPConstants.*;
 
@@ -100,9 +100,9 @@ public class XDSProfileRequestDecoder extends XMLObjectWrapper implements Signat
       }
 
 
-    public SignatureAlgorithms getSignatureAlgorithm () throws IOException
+    public AsymSignatureAlgorithms getSignatureAlgorithm () throws IOException
       {
-        return signature_algorithm == null ? null : SignatureAlgorithms.getAlgorithmFromURI (signature_algorithm);
+        return signature_algorithm == null ? null : AsymSignatureAlgorithms.getAlgorithmFromURI (signature_algorithm);
       }
 
 
@@ -149,7 +149,7 @@ public class XDSProfileRequestDecoder extends XMLObjectWrapper implements Signat
       {
         return (canonicalization_algorithm == null || CanonicalizationAlgorithms.testAlgorithmURI (canonicalization_algorithm)) &&
                (digest_algorithm == null || HashAlgorithms.testAlgorithmURI (digest_algorithm)) &&
-               (signature_algorithm == null || SignatureAlgorithms.testAlgorithmURI (signature_algorithm)) &&
+               (signature_algorithm == null || AsymSignatureAlgorithms.testAlgorithmURI (signature_algorithm)) &&
                document_canonicalization_algorithm.equals (DOC_SIGN_CN_ALG);
       }
 

@@ -24,7 +24,7 @@ import java.security.cert.X509Certificate;
 import java.security.Signature;
 import java.security.GeneralSecurityException;
 
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.VerifierInterface;
@@ -237,9 +237,9 @@ public class PKCS7Verifier
      * Gets the signature algorithm.
      * @return The algorithm identifier.
      */
-    public SignatureAlgorithms getSignatureAlgorithm () throws IOException
+    public AsymSignatureAlgorithms getSignatureAlgorithm () throws IOException
       {
-        for (SignatureAlgorithms alg : SignatureAlgorithms.values ())
+        for (AsymSignatureAlgorithms alg : AsymSignatureAlgorithms.values ())
           {
             if (alg.getDigestAlgorithm () == digest_algorithm)
               {

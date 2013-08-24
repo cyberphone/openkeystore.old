@@ -17,7 +17,7 @@
 package org.webpki.wasp;
 
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import org.webpki.xmldsig.CanonicalizationAlgorithms;
 
@@ -32,7 +32,7 @@ public class AuthenticationProfile
 
     HashAlgorithms digest_algorithm;
 
-    SignatureAlgorithms signature_algorithm;
+    AsymSignatureAlgorithms signature_algorithm;
 
     AuthenticationProfile ()
       {
@@ -58,7 +58,7 @@ public class AuthenticationProfile
         return digest_algorithm;
       }
 
-    public SignatureAlgorithms getSignatureAlgorithm ()
+    public AsymSignatureAlgorithms getSignatureAlgorithm ()
       {
         return signature_algorithm;
       }
@@ -85,7 +85,7 @@ public class AuthenticationProfile
         this.digest_algorithm = digest_algorithm;
       }
 
-    public void setSignatureAlgorithm (SignatureAlgorithms signature_algorithm)
+    public void setSignatureAlgorithm (AsymSignatureAlgorithms signature_algorithm)
       {
         signature_algorithm.getURI ();
         this.signature_algorithm = signature_algorithm;

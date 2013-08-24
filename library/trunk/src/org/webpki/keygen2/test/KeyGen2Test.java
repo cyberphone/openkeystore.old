@@ -74,7 +74,7 @@ import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.MacAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 
@@ -1312,7 +1312,7 @@ public class KeyGen2Test
                                                          new BigInteger (String.valueOf (new Date ().getTime ())),
                                                          start.getTime (),
                                                          end.getTime (), 
-                                                         SignatureAlgorithms.RSA_SHA256,
+                                                         AsymSignatureAlgorithms.RSA_SHA256,
                                                          new AsymKeySignerInterface ()
                         {
     
@@ -1323,7 +1323,7 @@ public class KeyGen2Test
                             }
     
                           @Override
-                          public byte[] signData (byte[] data, SignatureAlgorithms algorithm) throws IOException, GeneralSecurityException
+                          public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException, GeneralSecurityException
                             {
                               Signature signer = Signature.getInstance (algorithm.getJCEName ());
                               signer.initSign ((PrivateKey) DemoKeyStore.getSubCAKeyStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
@@ -1775,11 +1775,11 @@ public class KeyGen2Test
                 j++;
                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                 byte[] result = sks.signHashedData (ek.getKeyHandle (),
-                                                    SignatureAlgorithms.RSA_SHA256.getURI (),
+                                                    AsymSignatureAlgorithms.RSA_SHA256.getURI (),
                                                     null,
                                                     USER_DEFINED_PIN,
                                                     HashAlgorithms.SHA256.digest (TEST_STRING));
-                Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+                Signature verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
                 verify.initVerify (ka.getCertificatePath ()[0]);
                 verify.update (TEST_STRING);
                 assertTrue ("Bad signature", verify.verify (result));
@@ -1804,11 +1804,11 @@ public class KeyGen2Test
         int key_handle = doer2.getFirstKey ();
         KeyAttributes ka = sks.getKeyAttributes (key_handle);
         byte[] result = sks.signHashedData (key_handle,
-                                            SignatureAlgorithms.RSA_SHA256.getURI (),
+                                            AsymSignatureAlgorithms.RSA_SHA256.getURI (),
                                             null,
                                             USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
-        Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+        Signature verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
         verify.initVerify (ka.getCertificatePath ()[0]);
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
@@ -1832,11 +1832,11 @@ public class KeyGen2Test
         int key_handle = doer2.getFirstKey ();
         KeyAttributes ka = sks.getKeyAttributes (key_handle);
         byte[] result = sks.signHashedData (key_handle,
-                                            SignatureAlgorithms.RSA_SHA256.getURI (),
+                                            AsymSignatureAlgorithms.RSA_SHA256.getURI (),
                                             null,
                                             USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
-        Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+        Signature verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
         verify.initVerify (ka.getCertificatePath ()[0]);
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
@@ -1873,11 +1873,11 @@ public class KeyGen2Test
         doer.perform ();
         int key_handle = doer.getFirstKey ();
         byte[] result = sks.signHashedData (key_handle,
-                                            SignatureAlgorithms.RSA_SHA256.getURI (),
+                                            AsymSignatureAlgorithms.RSA_SHA256.getURI (),
                                             null,
                                             USER_DEFINED_PIN,
                                             HashAlgorithms.SHA256.digest (TEST_STRING));
-        Signature sign = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+        Signature sign = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
         sign.initSign (doer.server.gen_private_key);
         sign.update (TEST_STRING);
         assertTrue ("Bad signature", ArrayUtil.compare (sign.sign (), result));
@@ -1955,7 +1955,7 @@ public class KeyGen2Test
             try
               {
                 sks.signHashedData (key_handle,
-                                    SignatureAlgorithms.ECDSA_SHA256.getURI (),
+                                    AsymSignatureAlgorithms.ECDSA_SHA256.getURI (),
                                     null,
                                     BAD_PIN,
                                     HashAlgorithms.SHA256.digest (TEST_STRING));
@@ -1991,7 +1991,7 @@ public class KeyGen2Test
             try
               {
                 sks.signHashedData (key_handle,
-                                    SignatureAlgorithms.ECDSA_SHA256.getURI (),
+                                    AsymSignatureAlgorithms.ECDSA_SHA256.getURI (),
                                     null,
                                     BAD_PIN,
                                     HashAlgorithms.SHA256.digest (TEST_STRING));

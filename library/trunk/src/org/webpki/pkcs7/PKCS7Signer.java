@@ -23,7 +23,7 @@ import java.util.Vector;
 import java.security.cert.X509Certificate;
 import java.security.GeneralSecurityException;
 
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.SignerInterface;
 
@@ -44,7 +44,7 @@ public class PKCS7Signer
 
     private boolean include_cert_path;
 
-    private SignatureAlgorithms signature_algorithm = SignatureAlgorithms.RSA_SHA1;
+    private AsymSignatureAlgorithms signature_algorithm = AsymSignatureAlgorithms.RSA_SHA1;
 
     private SignerInterface signer_implem;
 
@@ -53,7 +53,7 @@ public class PKCS7Signer
     static final String PKCS7_DATA        = "1.2.840.113549.1.7.1";
 
 
-    public void setSignatureAlgorithm (SignatureAlgorithms signature_algorithm)
+    public void setSignatureAlgorithm (AsymSignatureAlgorithms signature_algorithm)
       {
         this.signature_algorithm = signature_algorithm;
       }

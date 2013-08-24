@@ -28,7 +28,7 @@ import org.webpki.xmldsig.CanonicalizationAlgorithms;
 import org.webpki.crypto.VerifierInterface;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import static org.webpki.wasp.WASPConstants.*;
 
@@ -77,9 +77,9 @@ public class AuthenticationRequestDecoder extends AuthenticationRequest
   
         if ((value = ah.getStringConditional (SIGNATURE_ALG_ATTR)) != null)
           {
-            if (SignatureAlgorithms.testAlgorithmURI (value))
+            if (AsymSignatureAlgorithms.testAlgorithmURI (value))
               {
-                ap.signature_algorithm = SignatureAlgorithms.getAlgorithmFromURI (value);
+                ap.signature_algorithm = AsymSignatureAlgorithms.getAlgorithmFromURI (value);
               }
             else
               {

@@ -58,7 +58,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MacAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 
 import org.webpki.keygen2.KeySpecifier;
@@ -313,7 +313,7 @@ public class SKSTest
         assertFalse ("Managed sessions MUST be deleted", sess.exists ());
         try
           {
-            key3.signData (SignatureAlgorithms.RSA_SHA256, "", TEST_STRING);
+            key3.signData (AsymSignatureAlgorithms.RSA_SHA256, "", TEST_STRING);
             fail ("Bad PIN should not work");
           }
         catch (SKSException e)
@@ -322,13 +322,13 @@ public class SKSTest
           }
         try
           {
-            byte[] result = key3.signData (SignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
-            Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+            byte[] result = key3.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
+            Signature verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
             verify.initVerify (key3.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key3", verify.verify (result));
-            result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
-            verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
+            result = key1.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+            verify = Signature.getInstance (AsymSignatureAlgorithms.ECDSA_SHA256.getJCEName ());
             verify.initVerify (key2.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key1", verify.verify (result));
@@ -510,7 +510,7 @@ public class SKSTest
                   {
                     key.setPIN (good_puk, pin);
                     assertTrue ("Shouldn't pass", pass);
-                    key.signData (SignatureAlgorithms.ECDSA_SHA256, pin, TEST_STRING);
+                    key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, pin, TEST_STRING);
                     key.changePIN (pin, good_pin);
                   }
                 catch (SKSException e)
@@ -518,7 +518,7 @@ public class SKSTest
                     assertFalse ("Should pass", pass);
                   }
               }
-            key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+            key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
           }
       }
 
@@ -598,7 +598,7 @@ public class SKSTest
           {
             try
               {
-                key.signData (SignatureAlgorithms.RSA_SHA256, good_pin + "2", TEST_STRING);
+                key.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin + "2", TEST_STRING);
                 fail ("Bad PIN should not work");
               }
             catch (SKSException e)
@@ -608,7 +608,7 @@ public class SKSTest
           }
         try
           {
-            key.signData (SignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
+            key.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
           }
         catch (SKSException e)
           {
@@ -618,7 +618,7 @@ public class SKSTest
           {
             try
               {
-                key.signData (SignatureAlgorithms.RSA_SHA256, good_pin + "2", TEST_STRING);
+                key.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin + "2", TEST_STRING);
                 fail ("Bad PIN should not work");
               }
             catch (SKSException e)
@@ -628,7 +628,7 @@ public class SKSTest
           }
         try
           {
-            key.signData (SignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
+            key.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
             fail ("Good PIN but too many errors should NOT work");
           }
         catch (SKSException e)
@@ -722,7 +722,7 @@ public class SKSTest
           {
             try
               {
-                key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin + "4", TEST_STRING);
+                key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin + "4", TEST_STRING);
                 assertTrue ("PIN fail", i < 3);
               }
             catch (SKSException e)
@@ -732,7 +732,7 @@ public class SKSTest
           }
         try
           {
-            key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+            key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
             fail ("PIN fail");
           }
         catch (SKSException e)
@@ -830,7 +830,7 @@ public class SKSTest
             assertFalse ("Managed sessions MUST be deleted", sess.exists ());
             try
               {
-                key2.signData (SignatureAlgorithms.RSA_SHA256, "1111", TEST_STRING);
+                key2.signData (AsymSignatureAlgorithms.RSA_SHA256, "1111", TEST_STRING);
                 fail ("Bad PIN should not work");
               }
             catch (SKSException e)
@@ -839,13 +839,13 @@ public class SKSTest
               }
             try
               {
-                byte[] result = key2.signData (SignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
-                Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+                byte[] result = key2.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
+                Signature verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
                 verify.initVerify (key2.getPublicKey ());
                 verify.update (TEST_STRING);
                 assertTrue ("Bad signature key2", verify.verify (result));
-                result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
-                verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
+                result = key1.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+                verify = Signature.getInstance (AsymSignatureAlgorithms.ECDSA_SHA256.getJCEName ());
                 verify.initVerify (key1.getPublicKey ());
                 verify.update (TEST_STRING);
                 assertTrue ("Bad signature key1", verify.verify (result));
@@ -912,7 +912,7 @@ public class SKSTest
         try
           {
             device.sks.asymmetricKeyDecrypt (key.key_handle, 
-                                             SignatureAlgorithms.RSA_SHA256.getURI (), 
+                                             AsymSignatureAlgorithms.RSA_SHA256.getURI (), 
                                              null,
                                              good_pin.getBytes ("UTF-8"), 
                                              enc);
@@ -1022,7 +1022,7 @@ public class SKSTest
             key4.changePIN (s_pin, other_pin);
             try
               {
-                key1.signData (SignatureAlgorithms.RSA_SHA256, other_pin, TEST_STRING);
+                key1.signData (AsymSignatureAlgorithms.RSA_SHA256, other_pin, TEST_STRING);
               }
             catch (SKSException e)
               {
@@ -1216,8 +1216,8 @@ public class SKSTest
         int key_handle = device.sks.getKeyHandle (sess.provisioning_handle, "Key.1");
         assertTrue ("Key Handle", key_handle == key.key_handle);
         sess.closeSession ();
-        byte[] result = key.signData (SignatureAlgorithms.ECDSA_SHA256, null, TEST_STRING);
-        Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
+        byte[] result = key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, null, TEST_STRING);
+        Signature verify = Signature.getInstance (AsymSignatureAlgorithms.ECDSA_SHA256.getJCEName ());
         verify.initVerify (key.getPublicKey ());
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
@@ -1253,14 +1253,14 @@ public class SKSTest
         sess.closeSession ();
         assertTrue ("Must be 0", key.getKeyProtectionInfo ().getKeyBackup () == 0);
 
-        byte[] result = key.signData (SignatureAlgorithms.RSA_SHA256, null, TEST_STRING);
-        Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+        byte[] result = key.signData (AsymSignatureAlgorithms.RSA_SHA256, null, TEST_STRING);
+        Signature verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
         verify.initVerify (key.getPublicKey ());
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
 
-        result = key.signData (SignatureAlgorithms.RSA_SHA1, null, TEST_STRING);
-        verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA1.getJCEName ());
+        result = key.signData (AsymSignatureAlgorithms.RSA_SHA1, null, TEST_STRING);
+        verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA1.getJCEName ());
         verify.initVerify (key.getPublicKey ());
         verify.update (TEST_STRING);
         assertTrue ("Bad signature", verify.verify (result));
@@ -1493,7 +1493,7 @@ public class SKSTest
         assertFalse ("Managed sessions MUST be deleted", sess.exists ());
         try
           {
-            key1.signData (SignatureAlgorithms.ECDSA_SHA256, "bad", TEST_STRING);
+            key1.signData (AsymSignatureAlgorithms.ECDSA_SHA256, "bad", TEST_STRING);
             fail ("Bad PIN should not work");
           }
         catch (SKSException e)
@@ -1502,8 +1502,8 @@ public class SKSTest
           }
         try
           {
-            byte[] result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
-            Signature verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
+            byte[] result = key1.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+            Signature verify = Signature.getInstance (AsymSignatureAlgorithms.ECDSA_SHA256.getJCEName ());
             verify.initVerify (key2.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature", verify.verify (result));
@@ -1687,7 +1687,7 @@ public class SKSTest
         assertFalse ("Managed sessions MUST be deleted", sess.exists ());
         try
           {
-            key3.signData (SignatureAlgorithms.RSA_SHA256, "1111", TEST_STRING);
+            key3.signData (AsymSignatureAlgorithms.RSA_SHA256, "1111", TEST_STRING);
             fail ("Bad PIN should not work");
           }
         catch (SKSException e)
@@ -1696,13 +1696,13 @@ public class SKSTest
           }
         try
           {
-            byte[] result = key3.signData (SignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
-            Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+            byte[] result = key3.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
+            Signature verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
             verify.initVerify (key3.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key3", verify.verify (result));
-            result = key1.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
-            verify = Signature.getInstance (SignatureAlgorithms.ECDSA_SHA256.getJCEName ());
+            result = key1.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+            verify = Signature.getInstance (AsymSignatureAlgorithms.ECDSA_SHA256.getJCEName ());
             verify.initVerify (key1.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature key1", verify.verify (result));
@@ -1916,7 +1916,7 @@ public class SKSTest
                                          pin_policy,
                                          AppUsage.AUTHENTICATION).setCertificate (cn ());
             sess.closeSession ();
-            key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+            key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
             try
               {
                 key.changePIN (good_pin, "8437");
@@ -2516,8 +2516,8 @@ public class SKSTest
             assertTrue ("Encryption error", ArrayUtil.compare (key.asymmetricKeyDecrypt (AsymEncryptionAlgorithms.RSA_PKCS_1_5, 
                                                                                          good_pin, 
                                                                                          enc), TEST_STRING));
-            byte[] result = key.signData (SignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
-            Signature verify = Signature.getInstance (SignatureAlgorithms.RSA_SHA256.getJCEName ());
+            byte[] result = key.signData (AsymSignatureAlgorithms.RSA_SHA256, good_pin, TEST_STRING);
+            Signature verify = Signature.getInstance (AsymSignatureAlgorithms.RSA_SHA256.getJCEName ());
             verify.initVerify (key.getPublicKey ());
             verify.update (TEST_STRING);
             assertTrue ("Bad signature", verify.verify (result));
@@ -2683,7 +2683,7 @@ public class SKSTest
               }
             try
               {
-                key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+                key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
                 assertTrue ("Bad kmk should throw", i == 0);
               }
             catch (SKSException e)
@@ -2726,7 +2726,7 @@ public class SKSTest
             sess2.postUnlockKey (key);
             if (i == 1) new_key.postUpdateKey (key);
             sess2.closeSession ();
-            key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+            key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
             assertFalse ("taken", new_key.exists ());
           }
       }
@@ -2763,8 +2763,8 @@ public class SKSTest
             sess2.postUnlockKey (key);
             if (i == 1) new_key.postCloneKey (key);
             sess2.closeSession ();
-            new_key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
-            key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+            new_key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+            key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
           }
       }
 
@@ -2803,8 +2803,8 @@ public class SKSTest
                 if (i % 2 == 1) new_key.postCloneKey (key);
                 sess2.closeSession ();
                 assertTrue ("Shouldn't", i < 4);
-                new_key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
-                key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+                new_key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+                key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
               }
             catch (SKSException e)
               {
@@ -2816,14 +2816,14 @@ public class SKSTest
     @Test
     public void test57 () throws Exception
       {
-        algOrder (new String[]{SignatureAlgorithms.RSA_SHA1.getURI (),
-                               SignatureAlgorithms.RSA_SHA1.getURI ()},
-                  SignatureAlgorithms.RSA_SHA1.getURI ());
-        algOrder (new String[]{SignatureAlgorithms.RSA_SHA256.getURI (),
-                               SignatureAlgorithms.RSA_SHA1.getURI ()},
-                  SignatureAlgorithms.RSA_SHA1.getURI ());
-        algOrder (new String[]{SignatureAlgorithms.RSA_SHA1.getURI (),
-                               SignatureAlgorithms.RSA_SHA256.getURI ()},
+        algOrder (new String[]{AsymSignatureAlgorithms.RSA_SHA1.getURI (),
+                               AsymSignatureAlgorithms.RSA_SHA1.getURI ()},
+                  AsymSignatureAlgorithms.RSA_SHA1.getURI ());
+        algOrder (new String[]{AsymSignatureAlgorithms.RSA_SHA256.getURI (),
+                               AsymSignatureAlgorithms.RSA_SHA1.getURI ()},
+                  AsymSignatureAlgorithms.RSA_SHA1.getURI ());
+        algOrder (new String[]{AsymSignatureAlgorithms.RSA_SHA1.getURI (),
+                               AsymSignatureAlgorithms.RSA_SHA256.getURI ()},
                   null);
       }
     @Test
@@ -2937,10 +2937,10 @@ public class SKSTest
                                          pin_policy,
                                          AppUsage.AUTHENTICATION).setCertificate (cn ());
             sess.closeSession ();
-            key.signData (SignatureAlgorithms.ECDSA_SHA256, input_method == InputMethod.TRUSTED_GUI ? null : good_pin, TEST_STRING);
+            key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, input_method == InputMethod.TRUSTED_GUI ? null : good_pin, TEST_STRING);
             if (input_method == InputMethod.ANY)
               {
-                key.signData (SignatureAlgorithms.ECDSA_SHA256, null, TEST_STRING);
+                key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, null, TEST_STRING);
               }
           }
       }
@@ -3306,7 +3306,7 @@ public class SKSTest
           {
             try
               {
-                key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin + "3", TEST_STRING);
+                key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin + "3", TEST_STRING);
                 fail ("Bad PIN should not work");
               }
             catch (SKSException e)
@@ -3331,7 +3331,7 @@ public class SKSTest
         assertTrue ("Should be PIN blocked", kpi.isPINBlocked ());
         assertFalse ("Should not be PUK blocked", kpi.isPUKBlocked ());
         key.unlockKey (good_puk);
-        key.signData (SignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
+        key.signData (AsymSignatureAlgorithms.ECDSA_SHA256, good_pin, TEST_STRING);
       }
 
     @Test

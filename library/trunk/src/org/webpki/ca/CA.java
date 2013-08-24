@@ -47,7 +47,7 @@ import org.webpki.asn1.DerDecoder;
 import org.webpki.asn1.cert.DistinguishedName;
 import org.webpki.asn1.cert.SubjectAltNameTypes;
 
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.HashAlgorithms;
@@ -205,7 +205,7 @@ public class CA
                                        DistinguishedName issuer_name,
                                        BigInteger serial_number,
                                        Date start_date, Date end_date,
-                                       SignatureAlgorithms certalg,
+                                       AsymSignatureAlgorithms certalg,
                                        AsymKeySignerInterface signer,
                                        PublicKey subject_public_key) throws IOException
       {

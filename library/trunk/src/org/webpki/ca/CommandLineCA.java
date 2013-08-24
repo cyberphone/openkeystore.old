@@ -46,7 +46,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.asn1.cert.DistinguishedName;
 
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.KeyUsageBits;
@@ -127,9 +127,9 @@ public class CommandLineCA
             return argvalue.elementAt (0).trim ();
           }
 
-        SignatureAlgorithms getAlgorithm () throws IOException
+        AsymSignatureAlgorithms getAlgorithm () throws IOException
           {
-            return SignatureAlgorithms.valueOf (getString ());
+            return AsymSignatureAlgorithms.valueOf (getString ());
           }
 
         KeyAlgorithms getECCDomain () throws IOException
@@ -253,7 +253,7 @@ public class CommandLineCA
           }
 
 
-        public byte[] signData (byte[] data, SignatureAlgorithms certalg) throws IOException, GeneralSecurityException
+        public byte[] signData (byte[] data, AsymSignatureAlgorithms certalg) throws IOException, GeneralSecurityException
           {
             Signature s = Signature.getInstance (certalg.getJCEName ());
             s.initSign (sign_key);
@@ -463,7 +463,7 @@ public class CommandLineCA
       {
         StringBuffer s = new StringBuffer ();
         boolean comma = false;
-        for (SignatureAlgorithms sigalg : SignatureAlgorithms.values ())
+        for (AsymSignatureAlgorithms sigalg : AsymSignatureAlgorithms.values ())
           {
             if (comma)
               {
@@ -603,7 +603,7 @@ public class CommandLineCA
     CmdLineArgument CMD_sig_alg       = create (CmdLineArgumentGroup.GENERAL,
                                                 "sigalg", "signature-algorithm",
                                                 "Set signature algorithm for signing the certificate, select from: " + sigAlgs (),
-                                                SignatureAlgorithms.RSA_SHA1.toString ());
+                                                AsymSignatureAlgorithms.RSA_SHA1.toString ());
 
     CmdLineArgument CMD_out_keystore  = create (CmdLineArgumentGroup.GENERAL,
                                                 "out/keystore", "file",
@@ -803,7 +803,7 @@ public class CommandLineCA
             ///////////////////////////////////////////////////////////////
             // Get signature algorithm
             ///////////////////////////////////////////////////////////////
-            SignatureAlgorithms certalg = CMD_sig_alg.getAlgorithm ();
+            AsymSignatureAlgorithms certalg = CMD_sig_alg.getAlgorithm ();
 
             ///////////////////////////////////////////////////////////////
             // Get the subject DN

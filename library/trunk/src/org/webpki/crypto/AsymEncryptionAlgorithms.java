@@ -47,12 +47,13 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
 
 
     @Override
-    public String getOID ()
+    public boolean isMandatorySKSAlgorithm ()
       {
-        return oid;
+        return true;
       }
 
 
+    @Override
     public String getJCEName ()
       {
         return jcename;
@@ -63,6 +64,13 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
     public String getURI ()
       {
         return uri;
+      }
+
+
+    @Override
+    public String getOID ()
+      {
+        return oid;
       }
 
 
@@ -89,12 +97,5 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
               }
           }
         throw new IOException ("Unknown algorithm: " + uri);
-      }
-
-
-    @Override
-    public boolean isMandatorySKSAlgorithm ()
-      {
-        return true;
       }
   }

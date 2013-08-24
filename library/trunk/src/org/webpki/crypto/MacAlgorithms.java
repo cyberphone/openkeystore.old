@@ -23,7 +23,7 @@ import java.security.GeneralSecurityException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-public enum MacAlgorithms
+public enum MacAlgorithms implements SignatureAlgorithms
   {
     HMAC_MD5    ("http://www.w3.org/2001/04/xmldsig-more#hmac-md5",    "HmacMD5",    false),
     HMAC_SHA1   ("http://www.w3.org/2000/09/xmldsig#hmac-sha1",        "HmacSHA1",   true),
@@ -42,22 +42,30 @@ public enum MacAlgorithms
         this.sks_mandatory = sks_mandatory;
       }
 
-
-    public String getURI ()
+    @Override
+    public boolean isMandatorySKSAlgorithm ()
       {
-        return uri;
+        return sks_mandatory;
       }
 
-
+    @Override
     public String getJCEName ()
       {
         return jcename;
       }
 
     
-    public boolean isMandatorySKSAlgorithm ()
+    @Override
+    public String getURI ()
       {
-        return sks_mandatory;
+        return uri;
+      }
+
+
+    @Override
+    public String getOID ()
+      {
+        return null;
       }
 
 
@@ -100,5 +108,4 @@ public enum MacAlgorithms
           }
         throw new IOException ("Unknown algorithm: " + uri);
       }
-
   }

@@ -34,7 +34,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import javax.crypto.KeyAgreement;
 
 import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 public class KeyExperiments
   {
@@ -71,11 +71,11 @@ public class KeyExperiments
     static byte[] data = {4, 5, 6, 7, 8, 0};
  
     
-    private static void signverify (KeyPair kp, SignatureAlgorithms optional) throws Exception
+    private static void signverify (KeyPair kp, AsymSignatureAlgorithms optional) throws Exception
       {
-        SignatureAlgorithms sign_alg = optional == null ?
+        AsymSignatureAlgorithms sign_alg = optional == null ?
                        kp.getPublic () instanceof RSAPublicKey ? 
-                                SignatureAlgorithms.RSA_SHA256 : SignatureAlgorithms.ECDSA_SHA256
+                                AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256
                                                         : 
                        optional;
  

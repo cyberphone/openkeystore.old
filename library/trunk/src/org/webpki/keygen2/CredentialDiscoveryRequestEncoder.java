@@ -42,7 +42,7 @@ import org.webpki.xmldsig.XMLSigner;
 
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SignerInterface;
 import org.webpki.keygen2.ServerState.ProtocolPhase;
 
@@ -247,7 +247,7 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
           }
 
         @Override
-        public byte[] signData (byte[] data, SignatureAlgorithms algorithm) throws IOException, GeneralSecurityException
+        public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException, GeneralSecurityException
           {
             return server_crypto_interface.generateKeyManagementAuthorization (key_management_key, data);
           }
@@ -339,7 +339,7 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         for (LookupDescriptor im_des : lookup_descriptors)
           {
             XMLAsymKeySigner ds = new XMLAsymKeySigner (im_des);
-            ds.setSignatureAlgorithm (im_des.key_management_key instanceof ECPublicKey ? SignatureAlgorithms.ECDSA_SHA256 : SignatureAlgorithms.RSA_SHA256);
+            ds.setSignatureAlgorithm (im_des.key_management_key instanceof ECPublicKey ? AsymSignatureAlgorithms.ECDSA_SHA256 : AsymSignatureAlgorithms.RSA_SHA256);
             ds.removeXMLSignatureNS ();
             ds.createEnvelopedSignature (im_des);
             im_des.root.getDocumentElement ().removeAttributeNS ("http://www.w3.org/2000/xmlns/", prefix == null ? "xmlns" : prefix);

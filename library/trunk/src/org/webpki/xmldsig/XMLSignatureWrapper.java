@@ -52,7 +52,7 @@ import org.webpki.xml.DOMWriterHelper;
 import org.webpki.xml.XMLObjectWrapper;
 
 import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MacAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.CertificateUtil;
@@ -154,7 +154,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
 
         Element element;
         CanonicalizationAlgorithms cn_alg;
-        SignatureAlgorithms asym_signature_alg;
+        AsymSignatureAlgorithms asym_signature_alg;
         MacAlgorithms sym_signature_alg;
         byte[] signature_val;
       }
@@ -388,9 +388,9 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
         
         rd.getNext (SIGNATURE_METHOD_ELEM);
         String signature_alg = aHelper.getString (ALGORITHM_ATTR);
-        if  (SignatureAlgorithms.testAlgorithmURI (signature_alg))
+        if  (AsymSignatureAlgorithms.testAlgorithmURI (signature_alg))
           {
-            signedinfo_object.asym_signature_alg = SignatureAlgorithms.getAlgorithmFromURI (signature_alg);
+            signedinfo_object.asym_signature_alg = AsymSignatureAlgorithms.getAlgorithmFromURI (signature_alg);
           }
         else
           {

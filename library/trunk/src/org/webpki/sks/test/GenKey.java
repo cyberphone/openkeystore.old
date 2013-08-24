@@ -39,7 +39,7 @@ import org.webpki.ca.CertSpec;
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.MacAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 
 import org.webpki.crypto.test.DemoKeyStore;
@@ -97,7 +97,7 @@ public class GenKey
                                   BigInteger.valueOf (serial_number++).shiftLeft (64).add (BigInteger.valueOf (new Date ().getTime ())),
                                   start.getTime (),
                                   end.getTime (), 
-                                  SignatureAlgorithms.RSA_SHA256,
+                                  AsymSignatureAlgorithms.RSA_SHA256,
                                   new AsymKeySignerInterface ()
             {
     
@@ -108,7 +108,7 @@ public class GenKey
                 }
     
               @Override
-              public byte[] signData (byte[] data, SignatureAlgorithms algorithm) throws IOException, GeneralSecurityException
+              public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException, GeneralSecurityException
                 {
                   Signature signer = Signature.getInstance (algorithm.getJCEName ());
                   signer.initSign ((PrivateKey) DemoKeyStore.getSubCAKeyStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
@@ -226,7 +226,7 @@ public class GenKey
         prov_sess.sks.changePIN (key_handle, getConditionalAuthorization (old_pin), getConditionalAuthorization (new_pin));
       }
     
-    public byte[] signData (SignatureAlgorithms alg_id, String pin, byte[] data) throws IOException
+    public byte[] signData (AsymSignatureAlgorithms alg_id, String pin, byte[] data) throws IOException
       {
         return prov_sess.sks.signHashedData (key_handle,
                                              alg_id.getURI (),

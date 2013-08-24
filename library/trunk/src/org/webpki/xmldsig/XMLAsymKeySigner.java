@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 
 
@@ -35,7 +35,7 @@ public class XMLAsymKeySigner extends XMLSignerCore
         return r.public_key = signer_impl.getPublicKey ();
       }
 
-    byte[] getSignatureBlob (byte[] data, SignatureAlgorithms sig_alg) throws GeneralSecurityException, IOException
+    byte[] getSignatureBlob (byte[] data, AsymSignatureAlgorithms sig_alg) throws GeneralSecurityException, IOException
       {
         return signer_impl.signData (data, sig_alg);
       }

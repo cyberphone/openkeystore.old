@@ -33,7 +33,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#rsa1024",
                  "RSA",
                  1024,
-                 SignatureAlgorithms.RSA_SHA1,
+                 AsymSignatureAlgorithms.RSA_SHA1,
                  false,
                  true),
 
@@ -41,7 +41,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#rsa2048",
                  "RSA",
                  2048,
-                 SignatureAlgorithms.RSA_SHA256,
+                 AsymSignatureAlgorithms.RSA_SHA256,
                  false,
                  true),
 
@@ -49,7 +49,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#rsa3072",
                  "RSA",
                  3072,
-                 SignatureAlgorithms.RSA_SHA512,
+                 AsymSignatureAlgorithms.RSA_SHA512,
                  false,
                  false),
 
@@ -57,7 +57,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#rsa4096",
                  "RSA",
                  4096,
-                 SignatureAlgorithms.RSA_SHA512,
+                 AsymSignatureAlgorithms.RSA_SHA512,
                  false,
                  false),
 
@@ -65,7 +65,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#rsa1024.exp",
                  "RSA",
                  1024,
-                 SignatureAlgorithms.RSA_SHA1,
+                 AsymSignatureAlgorithms.RSA_SHA1,
                  true,
                  false),
 
@@ -73,7 +73,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#rsa2048.exp",
                  "RSA",
                  2048,
-                 SignatureAlgorithms.RSA_SHA256,
+                 AsymSignatureAlgorithms.RSA_SHA256,
                  true,
                  false),
 
@@ -81,7 +81,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#rsa3072.exp",
                  "RSA",
                  3072,
-                 SignatureAlgorithms.RSA_SHA512,
+                 AsymSignatureAlgorithms.RSA_SHA512,
                  true,
                  false),
 
@@ -89,7 +89,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#rsa4096.exp",
                  "RSA",
                  4096,
-                 SignatureAlgorithms.RSA_SHA512,
+                 AsymSignatureAlgorithms.RSA_SHA512,
                  true,
                  false),
 
@@ -97,7 +97,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#ec.b163",
                  "sect163r2",
                  163,
-                 SignatureAlgorithms.ECDSA_SHA256,
+                 AsymSignatureAlgorithms.ECDSA_SHA256,
                  false,
                  false),
 
@@ -105,7 +105,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#ec.b233",
                  "sect233r1",
                  233,
-                 SignatureAlgorithms.ECDSA_SHA512,
+                 AsymSignatureAlgorithms.ECDSA_SHA512,
                  false,
                  false),
 
@@ -113,7 +113,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#ec.b283",
                  "sect283r1",
                  283,
-                 SignatureAlgorithms.ECDSA_SHA512,
+                 AsymSignatureAlgorithms.ECDSA_SHA512,
                  false,
                  false),
 
@@ -121,7 +121,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#ec.p192",
                  "secp192r1",
                  192,
-                 SignatureAlgorithms.ECDSA_SHA256,
+                 AsymSignatureAlgorithms.ECDSA_SHA256,
                  false,
                  false),
 
@@ -129,7 +129,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#ec.p256",
                  "secp256r1",
                  256,
-                 SignatureAlgorithms.ECDSA_SHA256,
+                 AsymSignatureAlgorithms.ECDSA_SHA256,
                  false,
                  true),
 
@@ -137,7 +137,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#ec.p384",
                  "secp384r1",
                  384,
-                 SignatureAlgorithms.ECDSA_SHA512,
+                 AsymSignatureAlgorithms.ECDSA_SHA512,
                  false,
                  false),
 
@@ -145,7 +145,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "http://xmlns.webpki.org/sks/algorithm#ec.p521",
                  "secp521r1",
                  521,
-                 SignatureAlgorithms.ECDSA_SHA512,
+                 AsymSignatureAlgorithms.ECDSA_SHA512,
                  false,
                  false);
 
@@ -153,7 +153,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
     private final String uri;                    // As expressed in XML messages
     private final String jcename;                // As expressed for JCE
     private final int length_in_bits;
-    private final SignatureAlgorithms pref_alg;  // A sort of a "guide"
+    private final AsymSignatureAlgorithms pref_alg;  // A sort of a "guide"
     private final boolean has_parameters;        // Parameter value required?
     private final boolean sks_mandatory;         // If required in SKS
 
@@ -162,7 +162,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                            String uri,
                            String jcename,
                            int length_in_bits,
-                           SignatureAlgorithms pref_alg,
+                           AsymSignatureAlgorithms pref_alg,
                            boolean has_parameters,
                            boolean sks_mandatory)
       {
@@ -220,7 +220,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
       }
  
 
-    public SignatureAlgorithms getRecommendedSignatureAlgorithm ()
+    public AsymSignatureAlgorithms getRecommendedSignatureAlgorithm ()
       {
         return pref_alg;
       }

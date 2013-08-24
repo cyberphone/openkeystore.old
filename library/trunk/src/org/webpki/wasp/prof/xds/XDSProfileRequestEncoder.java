@@ -26,7 +26,7 @@ import org.webpki.xmldsig.CanonicalizationAlgorithms;
 
 import org.webpki.wasp.SignatureProfileEncoder;
 
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 
 import static org.webpki.wasp.WASPConstants.*;
@@ -47,7 +47,7 @@ public class XDSProfileRequestEncoder extends XMLObjectWrapper implements Signat
 
     HashAlgorithms digest_algorithm;
 
-    SignatureAlgorithms signature_algorithm;
+    AsymSignatureAlgorithms signature_algorithm;
 
     String document_canonicalization_algorithm;
 
@@ -95,7 +95,7 @@ public class XDSProfileRequestEncoder extends XMLObjectWrapper implements Signat
         this.digest_algorithm = digest_algorithm;
       }
 
-    public void setSignatureAlgorithm (SignatureAlgorithms signature_algorithm)
+    public void setSignatureAlgorithm (AsymSignatureAlgorithms signature_algorithm)
       {
         this.signature_algorithm = signature_algorithm;
       }

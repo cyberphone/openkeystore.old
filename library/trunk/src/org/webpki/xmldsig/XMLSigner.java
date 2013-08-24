@@ -25,7 +25,7 @@ import java.security.PublicKey;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SignerInterface;
 import org.webpki.crypto.CertificateUtil;
 
@@ -57,7 +57,7 @@ public class XMLSigner extends XMLSignerCore
         return certificate.getPublicKey ();
       }
 
-    byte[] getSignatureBlob (byte[] data, SignatureAlgorithms sig_alg) throws GeneralSecurityException, IOException
+    byte[] getSignatureBlob (byte[] data, AsymSignatureAlgorithms sig_alg) throws GeneralSecurityException, IOException
       {
         return signer_implem.signData (data, sig_alg);
       }

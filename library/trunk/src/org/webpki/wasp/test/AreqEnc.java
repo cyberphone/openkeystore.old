@@ -27,7 +27,7 @@ import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import org.webpki.wasp.AuthenticationProfile;
 import org.webpki.wasp.AuthenticationRequestEncoder;
@@ -116,7 +116,7 @@ public class AreqEnc
 
         if (rsasha1DS)
           {
-            ap.setSignatureAlgorithm (SignatureAlgorithms.RSA_SHA1);
+            ap.setSignatureAlgorithm (AsymSignatureAlgorithms.RSA_SHA1);
           }
 
         if (certflt)
