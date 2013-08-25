@@ -25,14 +25,14 @@ import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.json.JSONEnvelopedSignatureEncoder;
 import org.webpki.json.JSONObject;
-import org.webpki.json.JSONSerializer;
+import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONWriter;
 import org.webpki.json.JSONX509Signer;
 
 /**
  * Simple test program
  */
-public class Sign extends JSONSerializer
+public class Sign extends JSONEncoder
   {
     static final String VERSION = "http://example.com/signature";
     static final String ROOT_PROPERTY = "MyLittleSignature";

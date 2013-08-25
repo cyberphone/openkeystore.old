@@ -18,16 +18,19 @@ package org.webpki.json;
 
 import java.io.IOException;
 
-import org.webpki.crypto.VerifierInterface;
+import java.security.GeneralSecurityException;
+
+import org.webpki.crypto.MACAlgorithms;
+import org.webpki.crypto.SymKeyVerifierInterface;
 
 /**
- * Initiatiator object for X.509 signature verifiers.
+ * Initiatiator object for symmetric key signature verifiers.
  */
-public class JSONX509Verifier extends JSONVerifier
+public class JSONSymKeyVerifier extends JSONVerifier
   {
-    VerifierInterface verifier;
+    SymKeyVerifierInterface verifier;
 
-    public JSONX509Verifier (VerifierInterface verifier) throws IOException
+    public JSONSymKeyVerifier (SymKeyVerifierInterface verifier) throws IOException
       {
         this.verifier = verifier;
       }
@@ -35,12 +38,21 @@ public class JSONX509Verifier extends JSONVerifier
     @Override
     void verify (JSONEnvelopedSignatureDecoder signature_decoder) throws IOException
       {
-        verifier.verifyCertificatePath (signature_decoder.certificate_path);
-      }
+        try
+          {
+            signature_decoder.checkVerification (verifier.verifyData (signature_decoder.canonicalized_data,
+                                                                      signature_decoder.signature_value,
+                                                                      (MACAlgorithms)signature_decoder.algorithm));
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
+       }
 
     @Override
     JSONEnvelopedSignatureDecoder.SIGNATURE getVerifierType () throws IOException
       {
-        return JSONEnvelopedSignatureDecoder.SIGNATURE.X509_CERTIFICATE;
+        return JSONEnvelopedSignatureDecoder.SIGNATURE.SYMMETRIC_KEY;
       }
   }

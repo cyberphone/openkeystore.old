@@ -46,4 +46,22 @@ class JSONEnvelopedSignature
     public static final String SERIAL_NUMBER_JSON         = "SerialNumber";
 
     public static final String SUBJECT_JSON               = "Subject";
+
+    public static final String PUBLIC_KEY_JSON            = "PublicKey";
+
+    public static final String RSA_JSON                   = "RSA";
+
+    public static final String MODULUS_JSON               = "Modulus";
+ 
+    public static final String EXPONENT_JSON              = "Exponent";
+
+    public static final String EC_JSON                    = "EC";
+
+    public static final String NAMED_CURVE_JSON           = "NamedCurve";
+
+    public static final String X_JSON                     = "X";
+
+    public static final String Y_JSON                     = "Y";
+
+    public static final String KEY_ID_JSON                = "KeyID";
   }

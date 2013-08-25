@@ -677,7 +677,7 @@ public class KeyGen2Test
 
             prov_init_response.signRequest (new SymKeySignerInterface ()
               {
-                public MACAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
+                public MACAlgorithms getMACAlgorithm () throws IOException, GeneralSecurityException
                   {
                     return MACAlgorithms.HMAC_SHA256;
                   }

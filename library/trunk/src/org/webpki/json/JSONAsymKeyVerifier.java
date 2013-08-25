@@ -18,29 +18,32 @@ package org.webpki.json;
 
 import java.io.IOException;
 
-import org.webpki.crypto.VerifierInterface;
+import java.security.PublicKey;
 
 /**
- * Initiatiator object for X.509 signature verifiers.
+ * Initiatiator object for asymmetric key signature verifiers.
  */
-public class JSONX509Verifier extends JSONVerifier
+public class JSONAsymKeyVerifier extends JSONVerifier
   {
-    VerifierInterface verifier;
+    PublicKey public_key;
 
-    public JSONX509Verifier (VerifierInterface verifier) throws IOException
+    public JSONAsymKeyVerifier (PublicKey public_key) throws IOException
       {
-        this.verifier = verifier;
+        this.public_key = public_key;
       }
 
     @Override
     void verify (JSONEnvelopedSignatureDecoder signature_decoder) throws IOException
       {
-        verifier.verifyCertificatePath (signature_decoder.certificate_path);
-      }
+        if (!public_key.equals (signature_decoder.public_key))
+          {
+            throw new IOException ("Provided public key differs from the signature key");
+          }
+       }
 
     @Override
     JSONEnvelopedSignatureDecoder.SIGNATURE getVerifierType () throws IOException
       {
-        return JSONEnvelopedSignatureDecoder.SIGNATURE.X509_CERTIFICATE;
+        return JSONEnvelopedSignatureDecoder.SIGNATURE.ASYMMETRIC_KEY;
       }
   }

@@ -21,7 +21,7 @@ import java.io.IOException;
 /**
  * Base class for java classes which are used for creating JSON data.
  */
-public abstract class JSONSerializer
+public abstract class JSONEncoder
   {
     protected abstract byte[] getJSONData () throws IOException;
   }

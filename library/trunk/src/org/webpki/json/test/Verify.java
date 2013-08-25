@@ -18,6 +18,10 @@ package org.webpki.json.test;
 
 import java.io.IOException;
 
+import java.security.Security;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONEnvelopedSignatureDecoder;
@@ -39,6 +43,7 @@ public class Verify extends JSONDecoder
           }
         try
           {
+            Security.insertProviderAt (new BouncyCastleProvider(), 1);
             if (argc.length == 2)
               {
                 JSONWriter.setCanonicalizationDebugFile (argc[1]);

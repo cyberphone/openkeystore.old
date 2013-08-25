@@ -19,13 +19,13 @@ package org.webpki.json.test;
 import java.io.IOException;
 
 import org.webpki.json.JSONObject;
-import org.webpki.json.JSONSerializer;
+import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONWriter;
 
 /**
  * Simple test program
  */
-public class Test extends JSONSerializer
+public class Test extends JSONEncoder
   {
     class HT implements JSONObject
       {
