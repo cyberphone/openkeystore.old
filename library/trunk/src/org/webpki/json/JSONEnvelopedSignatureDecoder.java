@@ -243,7 +243,6 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
           {
             throw new IOException ("\"" + SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
           }
-            
       }
 
     public byte[] getSignatureValue ()
