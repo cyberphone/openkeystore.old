@@ -24,9 +24,11 @@ import org.webpki.crypto.SignatureAlgorithms;
  * Support class for signature generators.
  * 
  */
-interface JSONSigner extends JSONObject
+public abstract class JSONSigner
   {
-    public SignatureAlgorithms getAlgorithm ();
+    abstract SignatureAlgorithms getAlgorithm ();
   
-    public byte[] signData (byte[] data) throws IOException;
+    abstract byte[] signData (byte[] data) throws IOException;
+
+    abstract void writeKeyInfoData (JSONWriter wr) throws IOException;
   }

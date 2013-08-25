@@ -50,7 +50,14 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
           {
             wr.setString (ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
             wr.setObject (REFERENCE_JSON, new Reference ());
-            wr.setObject (KEY_INFO_JSON, signer);
+            wr.setObject (KEY_INFO_JSON, new JSONObject ()
+              {
+                @Override
+                public void writeObject (JSONWriter wr) throws IOException
+                  {
+                    signer.writeKeyInfoData (wr);
+                  }
+              });
           }
       }
 

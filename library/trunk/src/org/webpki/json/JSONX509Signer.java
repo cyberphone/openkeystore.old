@@ -33,7 +33,7 @@ import org.webpki.crypto.SignerInterface;
 /**
  * Initiatiator object for X.509 signatures.
  */
-public class JSONX509Signer implements JSONSigner
+public class JSONX509Signer extends JSONSigner
   {
     AsymSignatureAlgorithms algorithm;
 
@@ -83,21 +83,21 @@ public class JSONX509Signer implements JSONSigner
       }
 
     @Override
-    public void writeObject (JSONWriter wr) throws IOException
-      {
-        wr.setObject (JSONEnvelopedSignature.SIGNATURE_CERTIFICATE_JSON, new SignatureCertificate ());
-        writeX509CertificatePath (wr, certificate_path);
-      }
-
-    @Override
-    public SignatureAlgorithms getAlgorithm ()
+     SignatureAlgorithms getAlgorithm ()
       {
         return algorithm;
       }
 
     @Override
-    public byte[] signData (byte[] data) throws IOException
+    byte[] signData (byte[] data) throws IOException
       {
         return signer.signData (data, algorithm);
+      }
+
+    @Override
+    void writeKeyInfoData (JSONWriter wr) throws IOException
+      {
+        wr.setObject (JSONEnvelopedSignature.SIGNATURE_CERTIFICATE_JSON, new SignatureCertificate ());
+        writeX509CertificatePath (wr, certificate_path);
       }
   }

@@ -21,14 +21,14 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.security.Signature;
 
 import java.security.cert.X509Certificate;
 
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
-import org.webpki.crypto.CertificateUtil;
-import org.webpki.crypto.VerifierInterface;
+import org.webpki.crypto.MACAlgorithms;
 
 /**
  * Decoder for enveloped JSON signatures.
@@ -48,41 +48,41 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
     byte[] signature_value;
     
     X509Certificate[] certificate_path;
+
+    PublicKey public_key;
     
     public JSONEnvelopedSignatureDecoder (JSONReaderHelper rd) throws IOException
       {
         rd = rd.getObject (ENVELOPED_SIGNATURE_JSON);
         JSONReaderHelper signature_info = rd.getObject (SIGNATURE_INFO_JSON);
-        getSignatureInfo (signature_info);
+        String algorithm_string = getSignatureInfo (signature_info);
         signature_value = rd.getBinary (SIGNATURE_VALUE_JSON);
         JSONWriter writer = new JSONWriter (rd.root);
         canonicalized_data = writer.getCanonicalizedSubset (signature_info.current, name, value);
-// TODO this is just a temporary hack...
-        try
+        switch (getSignatureType ())
           {
-            Signature sig = Signature.getInstance (algorithm.getJCEName ());
-            sig.initVerify (certificate_path[0].getPublicKey ());
-            sig.update (canonicalized_data);
-            if (sig.verify (signature_value))
-              {
-                System.out.println ("DID IT");
-              }
-            else throw new IOException ("BAD");
-          }
-        catch (GeneralSecurityException e)
-          {
-            
+            case X509_CERTIFICATE:
+              asymmetricSignatureVerification (certificate_path[0].getPublicKey (), algorithm_string);
+              break;
+
+            case ASYMMETRIC_KEY:
+              asymmetricSignatureVerification (public_key, algorithm_string);
+              break;
+
+            default:
+              algorithm = MACAlgorithms.getAlgorithmFromURI (algorithm_string);
           }
       }
 
-    void getSignatureInfo (JSONReaderHelper rd) throws IOException
+    String getSignatureInfo (JSONReaderHelper rd) throws IOException
       {
         String algorithm_string = rd.getString (ALGORITHM_JSON);
         getReference (rd.getObject (REFERENCE_JSON));
-        getKeyInfo (rd.getObject (KEY_INFO_JSON), algorithm_string);
+        getKeyInfo (rd.getObject (KEY_INFO_JSON));
+        return algorithm_string;
       }
 
-    void getKeyInfo (JSONReaderHelper rd, String algorithm_string) throws IOException
+    void getKeyInfo (JSONReaderHelper rd) throws IOException
       {
         if (rd.hasProperty (SIGNATURE_CERTIFICATE_JSON))
           {
@@ -93,12 +93,30 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
           {
             getX509CertificatePath (rd);
           }
-        algorithm = AsymSignatureAlgorithms.getAlgorithmFromURI (algorithm_string);
       }
 
     void getX509CertificatePath (JSONReaderHelper rd) throws IOException
       {
-        certificate_path = CertificateUtil.getSortedPathFromBlobs (rd.getBinaryList (X509_CERTIFICATE_PATH_JSON));
+        certificate_path = JSONX509Verifier.readX509CertificatePath (rd);
+      }
+
+    void asymmetricSignatureVerification (PublicKey public_key, String algorithm_string) throws IOException
+      {
+        algorithm = AsymSignatureAlgorithms.getAlgorithmFromURI (algorithm_string);
+        try
+          {
+            Signature sig = Signature.getInstance (algorithm.getJCEName ());
+            sig.initVerify (certificate_path[0].getPublicKey ());
+            sig.update (canonicalized_data);
+            if (!sig.verify (signature_value))
+              {
+                throw new IOException ("Bad signature for \"" + REFERENCE_JSON + "\": " + name + "/" + value);
+              }
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
       }
 
     void getSignatureCertificate (JSONReaderHelper rd) throws IOException
@@ -114,6 +132,15 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
         value = rd.getString (VALUE_JSON);
       }
 
+    public SIGNATURE getSignatureType ()
+      {
+        if (certificate_path != null)
+          {
+            return SIGNATURE.X509_CERTIFICATE;
+          }
+        return public_key == null ? SIGNATURE.SYMMETRIC_KEY : SIGNATURE.ASYMMETRIC_KEY;
+      }
+
     public static JSONEnvelopedSignatureDecoder read (JSONReaderHelper rd, String expected_name, String expected_value) throws IOException
       {
         JSONEnvelopedSignatureDecoder verifier = new JSONEnvelopedSignatureDecoder (rd);
@@ -124,8 +151,12 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
         return verifier;
       }
 
-    public void validate (VerifierInterface verifier) throws IOException
+    public void validate (JSONVerifier verifier) throws IOException
       {
-        verifier.verifyCertificatePath (certificate_path);
+        if (verifier.getValidatorType () != getSignatureType ())
+          {
+            throw new IOException ("Verifier type doesn't match the received signature type");
+          }
+        verifier.verify (this);
       }
   }

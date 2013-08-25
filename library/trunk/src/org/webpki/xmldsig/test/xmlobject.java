@@ -37,7 +37,7 @@ import org.webpki.xml.DOMAttributeReaderHelper;
 
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyStoreVerifier;
-import org.webpki.crypto.MacAlgorithms;
+import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.SymKeySignerInterface;
@@ -222,14 +222,14 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
                 XMLSymKeySigner xmls = new XMLSymKeySigner (new SymKeySignerInterface ()
                   {
 
-                    public MacAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
+                    public MACAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
                       {
-                        return MacAlgorithms.HMAC_SHA256;
+                        return MACAlgorithms.HMAC_SHA256;
                       }
 
                     public byte[] signData (byte[] data) throws IOException, GeneralSecurityException
                       {
-                        return MacAlgorithms.HMAC_SHA256.digest (symkey, data);
+                        return MACAlgorithms.HMAC_SHA256.digest (symkey, data);
                       }
                     
                   });
@@ -262,13 +262,13 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
               {
                 XMLSymKeyVerifier verifier = new XMLSymKeyVerifier (new SymKeyVerifierInterface ()
                   {
-                    public boolean verifyData (byte[] data, byte[] digest, MacAlgorithms algorithm) throws IOException, GeneralSecurityException
+                    public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException, GeneralSecurityException
                       {
-                        if (algorithm != MacAlgorithms.HMAC_SHA256)
+                        if (algorithm != MACAlgorithms.HMAC_SHA256)
                           {
                             throw new GeneralSecurityException ("Bad sym ALG");
                           }
-                        return ArrayUtil.compare (digest, MacAlgorithms.HMAC_SHA256.digest (symkey, data));
+                        return ArrayUtil.compare (digest, MACAlgorithms.HMAC_SHA256.digest (symkey, data));
                       }
                   });
                 verifier.validateEnvelopedSignature (o);

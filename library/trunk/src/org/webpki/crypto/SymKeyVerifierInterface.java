@@ -24,6 +24,6 @@ import java.security.GeneralSecurityException;
 public interface SymKeyVerifierInterface
   {
 
-    public boolean verifyData (byte[] data, byte[] digest, MacAlgorithms algorithm) throws IOException, GeneralSecurityException;
+    public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException, GeneralSecurityException;
 
   }

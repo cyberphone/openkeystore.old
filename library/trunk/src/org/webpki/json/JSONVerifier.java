@@ -14,18 +14,17 @@
  *  limitations under the License.
  *
  */
-package org.webpki.crypto;
-
+package org.webpki.json;
 
 import java.io.IOException;
 
-import java.security.GeneralSecurityException;
-
-public interface SymKeySignerInterface
+/**
+ * Support class for signature verifiers.
+ * 
+ */
+public abstract class JSONVerifier
   {
+    abstract void verify (JSONEnvelopedSignatureDecoder signature_decoder) throws IOException;
 
-    public byte[] signData (byte[] data) throws IOException, GeneralSecurityException;
-
-    public MACAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException;
-
+    abstract JSONEnvelopedSignatureDecoder.SIGNATURE getValidatorType () throws IOException;
   }

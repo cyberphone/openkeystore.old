@@ -57,7 +57,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.crypto.MacAlgorithms;
+import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 
@@ -2151,7 +2151,7 @@ public class SKSTest
                                          good_pin /* pin_value */,
                                          pin_policy,
                                          key_usage,
-                                         new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate (cn ());
+                                         new String[]{MACAlgorithms.HMAC_SHA1.getURI ()}).setCertificate (cn ());
             key.setSymmetricKey (symmetric_key);
             sess.closeSession ();
             assertTrue ("IMPORTED must be set", key.getKeyProtectionInfo ().getKeyBackup () == KeyProtectionInfo.KEYBACKUP_IMPORTED);
@@ -2177,16 +2177,16 @@ public class SKSTest
                                      good_pin /* pin_value */,
                                      pin_policy,
                                      AppUsage.AUTHENTICATION,
-                                     new String[]{MacAlgorithms.HMAC_SHA1.getURI ()}).setCertificate (cn ());
+                                     new String[]{MACAlgorithms.HMAC_SHA1.getURI ()}).setCertificate (cn ());
         key.setSymmetricKey (symmetric_key);
         sess.closeSession ();
         assertTrue ("Not symmetric key", device.sks.getKeyAttributes (key.key_handle).isSymmetricKey ());
-        byte[] result = key.performHMAC (MacAlgorithms.HMAC_SHA1, good_pin, TEST_STRING);
-        assertTrue ("HMAC error", ArrayUtil.compare (result, MacAlgorithms.HMAC_SHA1.digest (symmetric_key, TEST_STRING)));
+        byte[] result = key.performHMAC (MACAlgorithms.HMAC_SHA1, good_pin, TEST_STRING);
+        assertTrue ("HMAC error", ArrayUtil.compare (result, MACAlgorithms.HMAC_SHA1.digest (symmetric_key, TEST_STRING)));
         try
           {
             sess.sks.performHMAC (key.key_handle, 
-                                  MacAlgorithms.HMAC_SHA256.getURI (),
+                                  MACAlgorithms.HMAC_SHA256.getURI (),
                                   null,
                                   good_pin.getBytes ("UTF-8"),
                                   TEST_STRING);
@@ -2302,7 +2302,7 @@ public class SKSTest
     @Test
     public void test42 () throws Exception
       {
-        for (MacAlgorithms hmac : MacAlgorithms.values ())
+        for (MACAlgorithms hmac : MACAlgorithms.values ())
           {
             byte[] data = TEST_STRING;
             byte[] symmetric_key = new byte[20];
@@ -2523,7 +2523,7 @@ public class SKSTest
             assertTrue ("Bad signature", verify.verify (result));
             try
               {
-                key.performHMAC (MacAlgorithms.HMAC_SHA256, good_pin, TEST_STRING);
+                key.performHMAC (MACAlgorithms.HMAC_SHA256, good_pin, TEST_STRING);
                 fail ("Sym key!");
               }
             catch (SKSException e)

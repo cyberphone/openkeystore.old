@@ -38,7 +38,7 @@ import org.webpki.ca.CertSpec;
 
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
-import org.webpki.crypto.MacAlgorithms;
+import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 
@@ -254,7 +254,7 @@ public class GenKey
                                                   data);
       }
 
-    public byte[] performHMAC (MacAlgorithms alg_id, String pin, byte[] data) throws SKSException
+    public byte[] performHMAC (MACAlgorithms alg_id, String pin, byte[] data) throws SKSException
       {
         return prov_sess.sks.performHMAC (key_handle,
                                           alg_id.getURI (),

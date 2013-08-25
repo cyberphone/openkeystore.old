@@ -73,7 +73,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyUsageBits;
-import org.webpki.crypto.MacAlgorithms;
+import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
@@ -677,9 +677,9 @@ public class KeyGen2Test
 
             prov_init_response.signRequest (new SymKeySignerInterface ()
               {
-                public MacAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
+                public MACAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
                   {
-                    return MacAlgorithms.HMAC_SHA256;
+                    return MACAlgorithms.HMAC_SHA256;
                   }
 
                 public byte[] signData (byte[] data) throws IOException, GeneralSecurityException
@@ -1180,7 +1180,7 @@ public class KeyGen2Test
                                                pin_policy);
             if (symmetric_key || encryption_key)
               {
-                kp.setEndorsedAlgorithms (new String[]{encryption_key ? SymEncryptionAlgorithms.AES256_CBC.getURI () : MacAlgorithms.HMAC_SHA1.getURI ()});
+                kp.setEndorsedAlgorithms (new String[]{encryption_key ? SymEncryptionAlgorithms.AES256_CBC.getURI () : MACAlgorithms.HMAC_SHA1.getURI ()});
                 kp.setSymmetricKey (encryption_key ? AES32BITKEY : OTP_SEED);
               }
             if (key_agreement)
@@ -1690,10 +1690,10 @@ public class KeyGen2Test
             assertTrue ("Prop value error", props1[i].getValue ().equals (props2[i].getValue ()));
           }
         assertTrue ("HMAC error", ArrayUtil.compare (sks.performHMAC (key_handle,
-                                                                      MacAlgorithms.HMAC_SHA1.getURI (),
+                                                                      MACAlgorithms.HMAC_SHA1.getURI (),
                                                                       null,
                                                                       USER_DEFINED_PIN, TEST_STRING),
-                                                     MacAlgorithms.HMAC_SHA1.digest (OTP_SEED, TEST_STRING)));
+                                                     MACAlgorithms.HMAC_SHA1.digest (OTP_SEED, TEST_STRING)));
       }
 
     @Test
