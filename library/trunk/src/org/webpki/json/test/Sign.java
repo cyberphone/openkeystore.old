@@ -117,13 +117,11 @@ public class Sign extends JSONEncoder
         wr.setString (ID, instant);
         wr.setStringArray ("STRINGS", new String[]{"One", "Two", "Three"});
         wr.setInteger ("Intra", 78);
-/*
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setKey (null, DemoKeyStore.getSignerPassword ());
         JSONEnvelopedSignatureEncoder signature = new JSONEnvelopedSignatureEncoder (new JSONX509Signer (signer));
-        JSONEnvelopedSignatureEncoder signature = new JSONEnvelopedSignatureEncoder (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
-        signature.sign (wr, "Instant", instant);
-*/
+        signature.sign (wr, ID, instant);
+        /*
         try
           {
             PrivateKey private_key = (PrivateKey)DemoKeyStore.getECDSAStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
@@ -135,6 +133,7 @@ public class Sign extends JSONEncoder
           {
             throw new IOException (e);
           }
+*/
         return wr.serializeJSONStructure ();
       }
     

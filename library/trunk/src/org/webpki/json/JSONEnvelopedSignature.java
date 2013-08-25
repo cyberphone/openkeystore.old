@@ -16,11 +16,39 @@
  */
 package org.webpki.json;
 
+import java.io.IOException;
+
+import java.security.GeneralSecurityException;
+
+import java.security.cert.X509Certificate;
+
 /**
  * Common class for enveloped JSON signatures.
  */
 class JSONEnvelopedSignature
   {
+    static X509Certificate pathCheck (X509Certificate child, X509Certificate parent) throws IOException
+      {
+        if (child != null)
+          {
+            String issuer = child.getIssuerX500Principal ().getName ();
+            String subject = parent.getSubjectX500Principal ().getName ();
+            if (!issuer.equals (subject))
+              {
+                throw new IOException ("Path issuer order error, '" + issuer + "' versus '" + subject + "'");
+              }
+            try
+              {
+                child.verify (parent.getPublicKey ());
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+          }
+        return parent;
+      }
+
     public static final String ENVELOPED_SIGNATURE_JSON   = "EnvelopedSignature";
 
     public static final String ALGORITHM_JSON             = "Algorithm";

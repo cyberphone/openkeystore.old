@@ -179,24 +179,7 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
         for (byte[] certificate_blob : rd.getBinaryList (JSONEnvelopedSignature.X509_CERTIFICATE_PATH_JSON))
           {
             X509Certificate certificate = CertificateUtil.getCertificateFromBlob (certificate_blob);
-            if (last_certificate != null)
-              {
-                String issuer = last_certificate.getIssuerX500Principal ().getName ();
-                String subject = certificate.getSubjectX500Principal ().getName ();
-                if (!issuer.equals (subject))
-                  {
-                    throw new IOException ("Path issuer order error, '" + issuer + "' versus '" + subject + "'");
-                  }
-                try
-                  {
-                    last_certificate.verify (certificate.getPublicKey ());
-                  }
-                catch (GeneralSecurityException e)
-                  {
-                    throw new IOException (e);
-                  }
-              }
-            certificates.add (last_certificate = certificate);
+            certificates.add (pathCheck (last_certificate, last_certificate = certificate));
           }
         return certificates.toArray (new X509Certificate[0]);
       }
