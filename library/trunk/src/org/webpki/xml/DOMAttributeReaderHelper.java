@@ -26,6 +26,7 @@ import java.util.GregorianCalendar;
 
 import org.webpki.util.Base64;
 import org.webpki.util.StringUtil;
+import org.webpki.util.ISODateTime;
 
 /**
  * Utility class making traversal of DOM documents easier in simple cases.
@@ -307,7 +308,7 @@ public class DOMAttributeReaderHelper
      */
     public GregorianCalendar getDateTime (String name) throws NoSuchElementException, IOException
       {
-        return DOMReaderHelper.parseDateTime (getString (name));
+        return ISODateTime.parseDateTime (getString (name));
       }
 
     /**
@@ -328,7 +329,7 @@ public class DOMAttributeReaderHelper
     public GregorianCalendar getDateTimeConditional (String name, GregorianCalendar defaultValue) throws IOException
       {
         String s = getStringConditional (name);
-        return s != null ? DOMReaderHelper.parseDateTime (s) : defaultValue;
+        return s != null ? ISODateTime.parseDateTime (s) : defaultValue;
       }
 
     /**

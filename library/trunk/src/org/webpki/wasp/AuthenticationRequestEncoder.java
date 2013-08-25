@@ -31,6 +31,8 @@ import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.URLFriendlyRandom;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.ISODateTime;
+
 import org.webpki.wasp.SignatureRequestEncoder;
 
 import static org.webpki.wasp.WASPConstants.*;
@@ -213,7 +215,7 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
           {
             bad ("ID attributes");
           }
-        if (!DOMWriterHelper.formatDateTime (server_time).equals (DOMWriterHelper.formatDateTime (areresp.server_time.getTime ())))
+        if (!ISODateTime.formatDateTime (server_time).equals (ISODateTime.formatDateTime (areresp.server_time.getTime ())))
           {
             bad ("ServerTime attribute");
           }

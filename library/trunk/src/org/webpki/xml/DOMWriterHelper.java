@@ -35,6 +35,7 @@ import org.w3c.dom.CDATASection;
 
 import org.webpki.util.Base64;
 import org.webpki.util.StringUtil;
+import org.webpki.util.ISODateTime;
 
 /**
  * Utility class making creation of DOM documents easier in simple cases.
@@ -446,33 +447,6 @@ public class DOMWriterHelper
       }
 
     
-    public static String formatDateTime (Date t)
-      {
-        GregorianCalendar gc = new GregorianCalendar ();
-        gc.setTime (t);
-        
-        StringBuffer s = new StringBuffer (new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss").format (t));
-        
-        int tzo = (gc.get(Calendar.ZONE_OFFSET) + gc.get(Calendar.DST_OFFSET)) / (60 * 1000);
-        
-        if (tzo > 0)
-          {
-            int tzh = tzo / 60, tzm = tzo % 60;
-            s.append (tzh < 10 ? "+0" : "+").append(tzh).append(tzm < 10 ? ":0" : ":").append(tzm);
-          }
-        else if (tzo < 0)
-          {
-            int tzh = (-tzo) / 60, tzm = (-tzo) % 60;
-            s.append (tzh < 10 ? "-0" : "-").append(tzh).append(tzm < 10 ? ":0" : ":").append(tzm);
-          }
-        else
-          {
-            s.append ("Z");
-          }
-
-        return s.toString ();
-      }
-    
     /**
      * Add a text element to the current element.
      * <p>The text content of the new element will be the 
@@ -486,7 +460,7 @@ public class DOMWriterHelper
      */
     public void addDateTime (String name, Date value)
       {
-        addString (name, formatDateTime (value));
+        addString (name, ISODateTime.formatDateTime (value));
       }
     
 
@@ -662,7 +636,7 @@ public class DOMWriterHelper
      */
     public void setDateTimeAttribute (String name, Date value)
       {
-        setStringAttribute (name, formatDateTime (value));
+        setStringAttribute (name, ISODateTime.formatDateTime (value));
       }
     
     // TODO: document

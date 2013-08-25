@@ -18,6 +18,22 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import java.math.BigInteger;
+
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+
+import java.security.cert.X509Certificate;
+
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
+
+import java.security.spec.ECPoint;
+
+import java.util.Vector;
+
+import org.webpki.crypto.KeyAlgorithms;
+
 /**
  * Encoder for enveloped JSON signatures.
  */
@@ -59,6 +75,74 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
                   }
               });
           }
+      }
+
+    static void writeCryptoBinary (JSONWriter wr, BigInteger value, String name) throws IOException
+      {
+        byte[] crypto_binary = value.toByteArray ();
+        if (crypto_binary[0] == 0x00)
+          {
+            byte[] wo_zero = new byte[crypto_binary.length - 1];
+            System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
+            crypto_binary = wo_zero;
+          }
+        wr.setBinary (name, crypto_binary);
+      }
+
+    public static void writePublicKey (JSONWriter wr, final PublicKey public_key) throws IOException
+      {
+        wr.setObject (JSONEnvelopedSignature.PUBLIC_KEY_JSON, new JSONObject ()
+          {
+           @Override
+            public void writeObject (JSONWriter wr) throws IOException
+              {
+                final KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
+                if (key_alg.isRSAKey ())
+                  {
+                    wr.setObject (JSONEnvelopedSignature.RSA_JSON, new JSONObject ()
+                      {
+                        @Override
+                        public void writeObject (JSONWriter wr) throws IOException
+                          {
+                            RSAPublicKey rsa_public = (RSAPublicKey)public_key;
+                            writeCryptoBinary (wr, rsa_public.getModulus (), JSONEnvelopedSignature.MODULUS_JSON);
+                            writeCryptoBinary (wr, rsa_public.getPublicExponent (), JSONEnvelopedSignature.EXPONENT_JSON);
+                          }
+                      });
+                  }
+                else
+                  {
+                    wr.setObject (JSONEnvelopedSignature.EC_JSON, new JSONObject ()
+                      {
+                        @Override
+                        public void writeObject (JSONWriter wr) throws IOException
+                          {
+                            wr.setString (NAMED_CURVE_JSON, key_alg.getURI ());
+                            ECPoint ec_point = ((ECPublicKey)public_key).getW ();
+                            writeCryptoBinary (wr, ec_point.getAffineX (), JSONEnvelopedSignature.X_JSON);
+                            writeCryptoBinary (wr, ec_point.getAffineY (), JSONEnvelopedSignature.Y_JSON);
+                          }
+                      });
+                  }
+              }
+          });
+      }
+
+    public static void writeX509CertificatePath (JSONWriter wr, X509Certificate[] certificate_path) throws IOException
+      {
+        Vector<byte[]> certificates = new Vector<byte[]> ();
+        for (X509Certificate certificate : certificate_path)
+          {
+            try
+              {
+                certificates.add (certificate.getEncoded ());
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+          }
+        wr.setBinaryArray (X509_CERTIFICATE_PATH_JSON, certificates);
       }
 
     class EnvelopedSignature implements JSONObject

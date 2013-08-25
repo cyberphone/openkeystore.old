@@ -18,46 +18,43 @@ package org.webpki.json;
 
 import java.io.IOException;
 
-import java.security.cert.X509Certificate;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 
+import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.SignatureAlgorithms;
-import org.webpki.crypto.SignerInterface;
 
 /**
- * Initiatiator object for X.509 signatures.
+ * Initiatiator object for asymmetric key signatures.
  */
-public class JSONX509Signer extends JSONSigner
+public class JSONAsymKeySigner extends JSONSigner
   {
     AsymSignatureAlgorithms algorithm;
 
-    SignerInterface signer;
+    AsymKeySignerInterface signer;
     
-    X509Certificate[] certificate_path;
+    PublicKey public_key;
     
-    class SignatureCertificate implements JSONObject
-      {
-        @Override
-        public void writeObject (JSONWriter wr) throws IOException
-          {
-            X509Certificate signer_cert = certificate_path[0];
-            wr.setString (JSONEnvelopedSignature.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
-            wr.setBigInteger (JSONEnvelopedSignature.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
-            wr.setString (JSONEnvelopedSignature.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
-          }
-      }
-
     public void setSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
       {
         this.algorithm = algorithm;
       }
 
-    public JSONX509Signer (SignerInterface signer) throws IOException
+    public JSONAsymKeySigner (AsymKeySignerInterface signer) throws IOException
       {
         this.signer = signer;
-        certificate_path = signer.prepareSigning (true);
-        algorithm = KeyAlgorithms.getKeyAlgorithm (certificate_path[0].getPublicKey ()).getRecommendedSignatureAlgorithm ();
+        try
+          {
+            public_key = signer.getPublicKey ();
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
+        algorithm = KeyAlgorithms.getKeyAlgorithm (public_key).getRecommendedSignatureAlgorithm ();
       }
 
     @Override
@@ -69,13 +66,19 @@ public class JSONX509Signer extends JSONSigner
     @Override
     byte[] signData (byte[] data) throws IOException
       {
-        return signer.signData (data, algorithm);
+        try
+          {
+            return signer.signData (data, algorithm);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
       }
 
     @Override
     void writeKeyInfoData (JSONWriter wr) throws IOException
       {
-        wr.setObject (JSONEnvelopedSignature.SIGNATURE_CERTIFICATE_JSON, new SignatureCertificate ());
-        JSONEnvelopedSignatureEncoder.writeX509CertificatePath (wr, certificate_path);
+        JSONEnvelopedSignatureEncoder.writePublicKey (wr, public_key);
       }
   }

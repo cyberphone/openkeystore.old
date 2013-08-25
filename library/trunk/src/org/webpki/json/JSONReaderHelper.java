@@ -20,9 +20,11 @@ import java.io.IOException;
 
 import java.math.BigInteger;
 
+import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import org.webpki.util.Base64;
+import org.webpki.util.ISODateTime;
 
 /**
  * Base class for java classes who can be translated from JSON data.
@@ -84,6 +86,11 @@ public class JSONReaderHelper
     public String getString (String name) throws IOException
       {
         return getString (name, true);
+      }
+
+    public GregorianCalendar getDateTime (String name) throws IOException
+      {
+        return ISODateTime.parseDateTime (getString (name));
       }
 
     static byte[] getBinaryFromBase64 (String base64) throws IOException

@@ -18,11 +18,24 @@ package org.webpki.json.test;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Security;
+import java.security.Signature;
+
+import java.util.Date;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import org.webpki.crypto.AsymKeySignerInterface;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.URLFriendlyRandom;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
+import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONEnvelopedSignatureEncoder;
 import org.webpki.json.JSONObject;
 import org.webpki.json.JSONEncoder;
@@ -36,7 +49,33 @@ public class Sign extends JSONEncoder
   {
     static final String VERSION = "http://example.com/signature";
     static final String ROOT_PROPERTY = "MyLittleSignature";
+    static final String ID = "ID";
     
+    static class AsymSigner implements AsymKeySignerInterface
+      {
+        PrivateKey priv_key;
+        PublicKey pub_key;
+  
+        AsymSigner (PrivateKey priv_key, PublicKey pub_key)
+          {
+            this.priv_key = priv_key;
+            this.pub_key = pub_key;
+          }
+  
+        public byte[] signData (byte[] data, AsymSignatureAlgorithms sign_alg) throws IOException, GeneralSecurityException
+          {
+            Signature s = Signature.getInstance (sign_alg.getJCEName ());
+            s.initSign (priv_key);
+            s.update (data);
+            return s.sign ();
+          }
+  
+        public PublicKey getPublicKey () throws IOException, GeneralSecurityException
+          {
+            return pub_key;
+          }
+      }
+
     class HT implements JSONObject
       {
         boolean fantastic;
@@ -71,16 +110,31 @@ public class Sign extends JSONEncoder
       {
         String instant = URLFriendlyRandom.generate (20);
         JSONWriter wr = new JSONWriter (ROOT_PROPERTY, VERSION);
+        wr.setDateTime ("Now", new Date ());
         wr.setObject ("HRT", new RT ());
         wr.setObjectArray ("ARR", new JSONObject[]{});
         wr.setObjectArray ("BARR", new JSONObject[]{new HT (true), new HT (false)});
-        wr.setString ("Instant", instant);
+        wr.setString (ID, instant);
         wr.setStringArray ("STRINGS", new String[]{"One", "Two", "Three"});
         wr.setInteger ("Intra", 78);
+/*
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setKey (null, DemoKeyStore.getSignerPassword ());
         JSONEnvelopedSignatureEncoder signature = new JSONEnvelopedSignatureEncoder (new JSONX509Signer (signer));
+        JSONEnvelopedSignatureEncoder signature = new JSONEnvelopedSignatureEncoder (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
         signature.sign (wr, "Instant", instant);
+*/
+        try
+          {
+            PrivateKey private_key = (PrivateKey)DemoKeyStore.getECDSAStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
+            PublicKey public_key = DemoKeyStore.getECDSAStore ().getCertificate ("mykey").getPublicKey ();
+            JSONEnvelopedSignatureEncoder signature = new JSONEnvelopedSignatureEncoder (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
+            signature.sign (wr, ID, instant);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
         return wr.serializeJSONStructure ();
       }
     
@@ -88,6 +142,7 @@ public class Sign extends JSONEncoder
       {
         try
           {
+            Security.insertProviderAt (new BouncyCastleProvider(), 1);
             System.out.print (new String (new Sign ().getJSONData (), "UTF-8"));
           }
         catch (Exception e)

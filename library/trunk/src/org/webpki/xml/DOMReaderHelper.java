@@ -31,6 +31,7 @@ import org.w3c.dom.NodeList;
 
 import org.webpki.util.Base64;
 import org.webpki.util.StringUtil;
+import org.webpki.util.ISODateTime;
 
 /**
  * Utility class making traversal of DOM documents easier in simple cases.
@@ -698,97 +699,6 @@ public class DOMReaderHelper
     
 
     /**
-     * Parse <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code> type:
-     * 
-     *   _date       = ["-"] 2*C 2Y "-" 2M "-" 2D
-     *   _time       = 2h ":" 2m ":" 2s ["." 1*s]
-     *   _timeZone   = "Z" / ("+" / "-" 2h ":" 2m)
-     *   dateTime    = _date "T" _time [_timeZone]
-     */
-    public static GregorianCalendar parseDateTime (String s) throws IOException
-      {
-        GregorianCalendar gc = new GregorianCalendar ();
-        gc.clear ();
-        
-        String t = s;
-        int i;
-
-        if(t.startsWith ("-"))
-          {
-            gc.set (GregorianCalendar.ERA, GregorianCalendar.BC);
-            gc.set (GregorianCalendar.YEAR, Integer.parseInt (t.substring (1, i = t.indexOf("-", 1))));
-          }
-        else
-          {
-            gc.set (GregorianCalendar.ERA, GregorianCalendar.AD);
-            gc.set (GregorianCalendar.YEAR, Integer.parseInt (t.substring (0, i = t.indexOf ("-"))));
-          }
-        t = t.substring (i+1);
-
-        // Check delimiters (whos positions are now known).
-        if (t.charAt(2) != '-' || t.charAt(5) != 'T' ||
-            t.charAt(8) != ':' || t.charAt(11) != ':')
-          throw new IOException ("Malformed dateTime (" + s + ").");
-
-        gc.set (GregorianCalendar.MONTH, Integer.parseInt (t.substring (0,2)) - 1);
-        t = t.substring (3);
-
-        gc.set (GregorianCalendar.DAY_OF_MONTH, Integer.parseInt (t.substring (0,2)));
-        t = t.substring (3);
-
-        gc.set (GregorianCalendar.HOUR_OF_DAY, Integer.parseInt (t.substring (0,2)));
-        t = t.substring (3);
-
-        gc.set (GregorianCalendar.MINUTE, Integer.parseInt (t.substring (0,2)));
-        t = t.substring (3);
-
-        gc.set (GregorianCalendar.SECOND, Integer.parseInt(t.substring (0,2)));
-        t = t.substring (2);
-            
-        // Find time zone info.
-        if (t.endsWith ("Z"))
-          {
-            gc.setTimeZone (TimeZone.getTimeZone("UTC"));
-            t = t.substring (0, t.length() - 1);
-          }
-        else if ((i = t.indexOf ("+")) != -1 || (i = t.indexOf ("-")) != -1)
-          {
-            if (t.charAt (t.length() - 3) != ':')
-              throw new IOException ("Malformed dateTime (" + s + ").");
-              
-            int tzHour = Integer.parseInt(t.substring (t.charAt(i) == '+' ? i + 1 : i, t.length() - 3)),
-                tzMinute = Integer.parseInt(t.substring (t.length() - 2));
-            gc.setTimeZone (new SimpleTimeZone (((60 * tzHour) + tzMinute) * 60 * 1000, ""));
-
-            t = t.substring (0, i);
-          }
-        else
-          {
-            gc.setTimeZone (TimeZone.getTimeZone("UTC"));
-          }
-
-        if (t.length() > 0)
-          {
-            // Milliseconds.
-            if(t.charAt(0) != '.' || t.length () < 2)
-              throw new IOException ("Malformed dateTime (" + s + ").");
-
-            t = t.substring (1);
-
-            // We can only handle (exactly) millisecond precision.
-            gc.set (GregorianCalendar.MILLISECOND, Integer.parseInt ((t + "000").substring (0, 3)));
-
-            // Round up when necessary.
-            if (t.length() > 3 && t.charAt(3) > '4')
-              {
-                gc.add (GregorianCalendar.MILLISECOND, 1);
-              }
-          }
-
-        return gc;
-      }
-    
-    /**
      * Get the <code><a href="http://www.w3.org/TR/xmlschema-2/#dateTime">dateTime</a></code>
      * contents of the current {@link Element Element} as a {@link GregorianCalendar GregorianCalendar}.
      * <p>Precision will be truncated to milliseconds.
@@ -801,7 +711,7 @@ public class DOMReaderHelper
      */
     public GregorianCalendar getDateTime () throws NoSuchElementException, IOException
       {
-        return parseDateTime (getString ());
+        return ISODateTime.parseDateTime (getString ());
       }
     
     /**
@@ -820,7 +730,7 @@ public class DOMReaderHelper
      */
     public GregorianCalendar getDateTime (String name) throws NoSuchElementException, IOException
       {
-        return parseDateTime (getString (name));
+        return ISODateTime.parseDateTime (getString (name));
       }
     
     /**
@@ -841,7 +751,7 @@ public class DOMReaderHelper
     public GregorianCalendar getDateTimeConditional (String name) throws NoSuchElementException, IOException
       {
         String s = getStringConditional (name);
-        return s != null ? parseDateTime (s) : null;
+        return s != null ? ISODateTime.parseDateTime (s) : null;
       }
 
 

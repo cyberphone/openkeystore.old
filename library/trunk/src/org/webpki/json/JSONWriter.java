@@ -20,10 +20,12 @@ import java.io.IOException;
 
 import java.math.BigInteger;
 
+import java.util.Date;
 import java.util.Vector;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64;
+import org.webpki.util.ISODateTime;
 
 /**
  * Class that writes JSON data based on a tree.
@@ -78,6 +80,11 @@ public class JSONWriter
     public void setBoolean (String name, boolean value) throws IOException
       {
         current.addProperty (name, new JSONValue (true, false, Boolean.toString (value)));
+      }
+
+    public void setDateTime (String name, Date t) throws IOException
+      {
+        setString (name, ISODateTime.formatDateTime (t));
       }
 
     public void setObject (String name, JSONObject json_object) throws IOException
