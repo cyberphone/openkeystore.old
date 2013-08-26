@@ -17,56 +17,115 @@
 package org.webpki.json.test;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
-import org.webpki.json.JSONObject;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.RSAKeyGenParameterSpec;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import org.webpki.crypto.KeyAlgorithms;
+
+import org.webpki.json.JSONDecoderCache;
+import org.webpki.json.JSONEnvelopedSignatureDecoder;
+import org.webpki.json.JSONEnvelopedSignatureEncoder;
 import org.webpki.json.JSONEncoder;
+import org.webpki.json.JSONDecoder;
+import org.webpki.json.JSONReaderHelper;
 import org.webpki.json.JSONWriter;
+import org.webpki.json.test.Keys.Reader;
+import org.webpki.json.test.Keys.Writer;
 
 /**
- * Simple test program
+ * Testing public keys
  */
-public class Test extends JSONEncoder
+public class Test
   {
-    class HT implements JSONObject
-      {
-        @Override
-        public void writeObject (JSONWriter wr) throws IOException
-          {
-            wr.setString ("HTL", "656756#");
-            wr.setInteger ("INTEGER", -689);
-          }
-      }
+    static final String KEYS="Keys";
+    static final String VERSION = "http://keys/test";
     
-    class RT implements JSONObject
+    private static final String BOOL_TRUE = "boolTrue";
+    private static final String BOOL_FALSE = "boolFalse";
+    private static final String BOOL_UNKNOWM = "boolUnknown";
+
+    private static final String STRING = "string";
+    private static final String STRING_VALUE = "Hi!";
+    private static final String STRING_UNKNOWM = "nostring";
+
+    static JSONDecoderCache cache = new JSONDecoderCache ();
+    
+    public static class Reader extends JSONDecoder
       {
-        @Override
-        public void writeObject (JSONWriter wr) throws IOException
+        void test (boolean ok) throws IOException
           {
-            wr.setString ("RTl", "67");
-            wr.setObject ("YT", new HT ());
-            wr.setString ("er","33");
+            if (!ok) throw new IOException ("Bad");
+          }
+
+        @Override
+        protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
+          {
+            test (rd.getBoolean (BOOL_TRUE));
+            test (!rd.getBoolean (BOOL_FALSE));
+            test (!rd.getBooleanConditional (BOOL_UNKNOWM));
+            test (!rd.getBooleanConditional (BOOL_UNKNOWM));
+            test (rd.getString (STRING).equals (STRING_VALUE));
+            test (rd.getStringConditional (STRING_UNKNOWM) == null);
+          }
+  
+        @Override
+        protected String getVersion ()
+          {
+             return VERSION;
+          }
+  
+        @Override
+        protected String getRootProperty ()
+          {
+            return KEYS;
           }
       }
 
-    @Override
-    protected byte[] getJSONData () throws IOException
+    static class Writer extends JSONEncoder
       {
-        JSONWriter wr = new JSONWriter ("MyJSONMessage", "http://example.com");
-        wr.setObject ("HRT", new RT ());
-        wr.setObjectArray ("ARR", new JSONObject[]{});
-        wr.setObjectArray ("BARR", new JSONObject[]{new HT (), new HT ()});
-        wr.setInteger ("Intra", 78);
-        return wr.serializeJSONStructure ();
+        @Override
+        protected byte[] getJSONData () throws IOException
+          {
+            JSONWriter wr = new JSONWriter (KEYS, VERSION);
+            wr.setBoolean (BOOL_TRUE, true);
+            wr.setBoolean (BOOL_FALSE, false);
+            wr.setString (STRING, STRING_VALUE);
+            return wr.serializeJSONStructure ();
+          }
       }
-    
+
     public static void main (String[] argc)
       {
+        byte[] data = null;
         try
           {
-            System.out.println (new String (new Test ().getJSONData (), "UTF-8"));
+            cache.addToCache (Reader.class);
+            data = new Writer ().getJSONData ();
+            Reader reader = (Reader) cache.parse (data);
           }
-        catch (IOException e)
+        catch (Exception e)
           {
+            try
+              {
+                System.out.println (new String (data, "UTF-8"));
+              }
+            catch (UnsupportedEncodingException e1)
+              {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+              }
             e.printStackTrace ();
           }
       }
