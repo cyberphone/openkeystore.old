@@ -28,7 +28,7 @@ import org.webpki.util.Base64;
 import org.webpki.util.ISODateTime;
 
 /**
- * Class that writes JSON data based on a tree.
+ * Class that writes JSON data based on a DOM-like tree.
  * 
  */
 public class JSONWriter
@@ -356,7 +356,6 @@ public class JSONWriter
                   buffer.append (c);
               }
           }
-          
         if (quoted)
           {
             buffer.append ('"');
