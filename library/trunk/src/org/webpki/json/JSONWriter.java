@@ -229,7 +229,7 @@ public class JSONWriter
             if (json_value.simple)
               {
                 singleSpace ();
-                printSimpleValue (json_value);
+                printEscapedString ((String)json_value.value, json_value.quoted);
               }
             else if (json_value.value instanceof Vector)
               {
@@ -300,15 +300,7 @@ public class JSONWriter
               {
                 spaceOut ();
               }
-            if (quoted)
-              {
-                buffer.append ('"');
-              }
-            buffer.append (string);
-            if (quoted)
-              {
-                buffer.append ('"');
-              }
+            printEscapedString (string, quoted);
             next = true;
           }
         if (broken_lines)
@@ -319,6 +311,61 @@ public class JSONWriter
             undentLine ();
           }
         buffer.append (']');
+      }
+
+    void printEscapedString (String value, boolean quoted)
+      {
+        if (quoted)
+          {
+            buffer.append ('"');
+          }
+        for (char c : value.toCharArray ())
+          {
+            switch (c)
+              {
+                case '"':
+                case '\\':
+                  escapeCharacter (c);
+                  break;
+
+/* "Nobody" escape slashes although it is the standard...
+                  case '/':
+*/
+
+                case '\b':
+                  escapeCharacter ('b');
+                  break;
+
+                case '\f':
+                  escapeCharacter ('f');
+                  break;
+
+                case '\n':
+                  escapeCharacter ('n');
+                  break;
+
+                case '\r':
+                  escapeCharacter ('r');
+                  break;
+
+                case '\t':
+                  escapeCharacter ('t');
+                  break;
+
+                default:
+                  buffer.append (c);
+              }
+          }
+          
+        if (quoted)
+          {
+            buffer.append ('"');
+          }
+      }
+
+    void escapeCharacter (char c)
+      {
+        buffer.append ('\\').append (c);
       }
 
     void printArrayObjects (Vector<JSONHolder> array)
@@ -336,19 +383,6 @@ public class JSONWriter
           }
         buffer.append (']');
         indent--;
-      }
-
-    void printSimpleValue (JSONValue json_value)
-      {
-        if (json_value.quoted)
-          {
-            buffer.append ('"');
-          }
-        buffer.append ((String)json_value.value);
-        if (json_value.quoted)
-          {
-            buffer.append ('"');
-          }
       }
 
     void singleSpace ()

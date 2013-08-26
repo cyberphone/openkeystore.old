@@ -35,6 +35,7 @@ class JSONParser
     static final char LEFT_BRACKET        = '[';
     static final char RIGHT_BRACKET       = ']';
     static final char COMMA_CHARACTER     = ',';
+    static final char BACK_SLASH          = '\\';
     
     int index;
     
@@ -160,12 +161,50 @@ class JSONParser
         StringBuffer simple = new StringBuffer ();
         if (quoted)
           {
-            int start = index;
-            while (scan () != DOUBLE_QUOTE)
+            while (true)
               {
-                
+                char c = nextChar ();
+                if (c == DOUBLE_QUOTE)
+                  {
+                    break;
+                  }
+                if (c == BACK_SLASH)
+                  {
+                    switch (c = nextChar ())
+                      {
+                        case '"':
+                        case '\\':
+                          break;
+
+/* "Nobody" escape slashes although it is the standard...
+                        case '/':
+*/
+                        case 'b':
+                          c = '\b';
+                          break;
+
+                        case 'f':
+                          c = '\f';
+                          break;
+
+                        case 'n':
+                          c = '\n';
+                          break;
+
+                        case 'r':
+                          c = '\r';
+                          break;
+
+                        case 't':
+                          c = '\t';
+                          break;
+                          
+                        default:
+                          throw new IOException ("Unsupported escape:" + c);
+                      }
+                  }
+                simple.append (c);
               }
-            simple.append (json_data.substring (start, index - 1));
           }
         else
           {

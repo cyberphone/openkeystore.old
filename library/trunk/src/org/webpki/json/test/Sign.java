@@ -164,6 +164,7 @@ public class Sign extends JSONEncoder
         wr.setObjectArray ("BARR", new JSONObject[]{new HT (true), new HT (false)});
         wr.setString (ID, instant);
         wr.setStringArray ("STRINGS", new String[]{"One", "Two", "Three"});
+        wr.setString ("EscapeMe", "A\\\n\"" );
         wr.setInteger ("Intra", 78);
         if (action == ACTION.X509)
           {
