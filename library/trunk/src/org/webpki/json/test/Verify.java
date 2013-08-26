@@ -26,6 +26,7 @@ import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONEnvelopedSignatureDecoder;
 import org.webpki.json.JSONReaderHelper;
+import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONWriter;
 import org.webpki.util.ArrayUtil;
 
@@ -50,8 +51,7 @@ public class Verify extends JSONDecoder
               }
             JSONDecoderCache parser = new JSONDecoderCache ();
             parser.addToCache (Verify.class);
-            JSONDecoder doc = parser.parse (ArrayUtil.readFile (argc[0]));
-            System.out.print (new String (JSONWriter.serializeParsedJSONDocument (doc), "UTF-8"));
+            parser.parse (ArrayUtil.readFile (argc[0]));
           }
         catch (Exception e)
           {
@@ -81,6 +81,19 @@ public class Verify extends JSONDecoder
                   if (property.equals (JSONEnvelopedSignatureDecoder.ENVELOPED_SIGNATURE_JSON))
                     {
                       JSONEnvelopedSignatureDecoder signature = new JSONEnvelopedSignatureDecoder (rd);
+                      switch (signature.getSignatureType ())
+                        {
+                          case ASYMMETRIC_KEY:
+                            break;
+  
+                          case SYMMETRIC_KEY:
+                            signature.verify (new JSONSymKeyVerifier (new Sign.SymmetricOperations ()));
+                            System.out.println ("Symmetric key signature validated for Key ID: " + signature.getKeyID ());
+                            break;
+  
+                          default:
+                            break;
+                        }
                     }
                   else
                     {

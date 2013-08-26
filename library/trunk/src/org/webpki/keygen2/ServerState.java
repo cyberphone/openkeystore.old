@@ -1130,15 +1130,7 @@ public class ServerState implements Serializable
     
     byte[] encrypt (byte[] data) throws IOException
       {
-        try
-          {
-            return server_crypto_interface.encrypt (data);
-          }
-        catch (GeneralSecurityException e)
-          {
-            throw new IOException (e);
-          }
-        
+        return server_crypto_interface.encrypt (data);
       }
     
     void checkFinalResult (byte[] close_session_attestation) throws IOException, GeneralSecurityException
@@ -1232,7 +1224,7 @@ public class ServerState implements Serializable
             new XMLSymKeyVerifier (new SymKeyVerifierInterface()
               {
                 @Override
-                public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException, GeneralSecurityException
+                public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException
                   {
                     return ArrayUtil.compare (server_crypto_interface.mac (data, SecureKeyStore.KDF_EXTERNAL_SIGNATURE), digest);
                   }

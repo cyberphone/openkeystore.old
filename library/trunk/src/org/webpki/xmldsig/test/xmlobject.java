@@ -81,15 +81,22 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
             this.pub_key = pub_key;
           }
 
-        public byte[] signData (byte[] data, AsymSignatureAlgorithms sign_alg) throws IOException, GeneralSecurityException
+        public byte[] signData (byte[] data, AsymSignatureAlgorithms sign_alg) throws IOException
           {
-            Signature s = Signature.getInstance (sign_alg.getJCEName ());
-            s.initSign (priv_key);
-            s.update (data);
-            return s.sign ();
+            try
+              {
+                Signature s = Signature.getInstance (sign_alg.getJCEName ());
+                s.initSign (priv_key);
+                s.update (data);
+                return s.sign ();
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
           }
 
-        public PublicKey getPublicKey () throws IOException, GeneralSecurityException
+        public PublicKey getPublicKey () throws IOException
           {
             return pub_key;
           }
@@ -222,12 +229,12 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
                 XMLSymKeySigner xmls = new XMLSymKeySigner (new SymKeySignerInterface ()
                   {
 
-                    public MACAlgorithms getMACAlgorithm () throws IOException, GeneralSecurityException
+                    public MACAlgorithms getMACAlgorithm () throws IOException
                       {
                         return MACAlgorithms.HMAC_SHA256;
                       }
 
-                    public byte[] signData (byte[] data) throws IOException, GeneralSecurityException
+                    public byte[] signData (byte[] data) throws IOException
                       {
                         return MACAlgorithms.HMAC_SHA256.digest (symkey, data);
                       }
@@ -262,11 +269,11 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
               {
                 XMLSymKeyVerifier verifier = new XMLSymKeyVerifier (new SymKeyVerifierInterface ()
                   {
-                    public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException, GeneralSecurityException
+                    public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException
                       {
                         if (algorithm != MACAlgorithms.HMAC_SHA256)
                           {
-                            throw new GeneralSecurityException ("Bad sym ALG");
+                            throw new IOException ("Bad sym ALG");
                           }
                         return ArrayUtil.compare (digest, MACAlgorithms.HMAC_SHA256.digest (symkey, data));
                       }

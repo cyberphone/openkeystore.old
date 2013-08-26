@@ -72,16 +72,9 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
         public KeyManagementKeyUpdateHolder update (PublicKey key_management_key) throws IOException
           {
             KeyManagementKeyUpdateHolder kmk = new KeyManagementKeyUpdateHolder (key_management_key);
-            try
-              {
-                kmk.authorization = server_state.server_crypto_interface.generateKeyManagementAuthorization (key_management_key,
-                                                                                                             ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION,
-                                                                                                             this.key_management_key.getEncoded ()));
-              }
-            catch (GeneralSecurityException e)
-              {
-                throw new IOException (e);
-              }
+            kmk.authorization = server_state.server_crypto_interface.generateKeyManagementAuthorization (key_management_key,
+                                                                                                         ArrayUtil.add (SecureKeyStore.KMK_ROLL_OVER_AUTHORIZATION,
+                                                                                                         this.key_management_key.getEncoded ()));
             children.add (kmk);
             return kmk;
           }
@@ -118,24 +111,17 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
                                                      int session_life_time,
                                                      short session_key_limit)  throws IOException
       {
-        try
+        server_state.checkState (true, ProtocolPhase.PROVISIONING_INITIALIZATION);
+        this.server_state = server_state;
+        super.submit_url = server_state.issuer_uri = submit_url;
+        super.session_life_time = server_state.session_life_time = session_life_time;
+        super.session_key_limit = server_state.session_key_limit = session_key_limit;
+        super.nonce = server_state.vm_nonce;
+        server_session_id = server_state.server_session_id;
+        server_ephemeral_key = server_state.server_ephemeral_key = server_state.server_crypto_interface.generateEphemeralKey ();
+        for (String client_attribute : server_state.basic_capabilities.client_attributes)
           {
-            server_state.checkState (true, ProtocolPhase.PROVISIONING_INITIALIZATION);
-            this.server_state = server_state;
-            super.submit_url = server_state.issuer_uri = submit_url;
-            super.session_life_time = server_state.session_life_time = session_life_time;
-            super.session_key_limit = server_state.session_key_limit = session_key_limit;
-            super.nonce = server_state.vm_nonce;
-            server_session_id = server_state.server_session_id;
-            server_ephemeral_key = server_state.server_ephemeral_key = server_state.server_crypto_interface.generateEphemeralKey ();
-            for (String client_attribute : server_state.basic_capabilities.client_attributes)
-              {
-                client_attributes.add (client_attribute);
-              }
-          }
-        catch (GeneralSecurityException e)
-          {
-            throw new IOException (e);
+            client_attributes.add (client_attribute);
           }
       }
 

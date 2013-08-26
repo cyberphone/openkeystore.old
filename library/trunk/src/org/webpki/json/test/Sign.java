@@ -31,6 +31,9 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyStoreSigner;
+import org.webpki.crypto.MACAlgorithms;
+import org.webpki.crypto.SymKeySignerInterface;
+import org.webpki.crypto.SymKeyVerifierInterface;
 import org.webpki.crypto.URLFriendlyRandom;
 
 import org.webpki.crypto.test.DemoKeyStore;
@@ -39,17 +42,47 @@ import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONEnvelopedSignatureEncoder;
 import org.webpki.json.JSONObject;
 import org.webpki.json.JSONEncoder;
+import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONWriter;
 import org.webpki.json.JSONX509Signer;
+import org.webpki.util.ArrayUtil;
 
 /**
  * Simple test program
  */
 public class Sign extends JSONEncoder
   {
+    static enum ACTION {SYM, ASYM, X509};
+    
     static final String VERSION = "http://example.com/signature";
     static final String ROOT_PROPERTY = "MyLittleSignature";
     static final String ID = "ID";
+    
+    static class SymmetricOperations implements SymKeySignerInterface, SymKeyVerifierInterface
+      {
+        static final byte[] KEY = {(byte)0xF4, (byte)0xC7, (byte)0x4F, (byte)0x33, (byte)0x98, (byte)0xC4, (byte)0x9C, (byte)0xF4,
+                                   (byte)0x6D, (byte)0x93, (byte)0xEC, (byte)0x98, (byte)0x18, (byte)0x83, (byte)0x26, (byte)0x61,
+                                   (byte)0xA4, (byte)0x0B, (byte)0xAE, (byte)0x4D, (byte)0x20, (byte)0x4D, (byte)0x75, (byte)0x50,
+                                   (byte)0x36, (byte)0x14, (byte)0x10, (byte)0x20, (byte)0x74, (byte)0x34, (byte)0x69, (byte)0x09};
+
+        @Override
+        public byte[] signData (byte[] data) throws IOException
+          {
+            return getMACAlgorithm ().digest (KEY, data);
+          }
+  
+        @Override
+        public MACAlgorithms getMACAlgorithm () throws IOException
+          {
+            return MACAlgorithms.HMAC_SHA256;
+          }
+
+        @Override
+        public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException
+          {
+            return ArrayUtil.compare (digest, getMACAlgorithm ().digest (KEY, data));
+          }
+      }
     
     static class AsymSigner implements AsymKeySignerInterface
       {
@@ -62,15 +95,22 @@ public class Sign extends JSONEncoder
             this.pub_key = pub_key;
           }
   
-        public byte[] signData (byte[] data, AsymSignatureAlgorithms sign_alg) throws IOException, GeneralSecurityException
+        public byte[] signData (byte[] data, AsymSignatureAlgorithms sign_alg) throws IOException
           {
-            Signature s = Signature.getInstance (sign_alg.getJCEName ());
-            s.initSign (priv_key);
-            s.update (data);
-            return s.sign ();
+            try
+              {
+                Signature s = Signature.getInstance (sign_alg.getJCEName ());
+                s.initSign (priv_key);
+                s.update (data);
+                return s.sign ();
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
           }
   
-        public PublicKey getPublicKey () throws IOException, GeneralSecurityException
+        public PublicKey getPublicKey () throws IOException
           {
             return pub_key;
           }
@@ -105,6 +145,14 @@ public class Sign extends JSONEncoder
           }
       }
 
+    ACTION action;
+    public Sign (ACTION action)
+      {
+        this.action = action;
+      }
+
+    JSONEnvelopedSignatureEncoder signature;
+    
     @Override
     protected byte[] getJSONData () throws IOException
       {
@@ -117,36 +165,61 @@ public class Sign extends JSONEncoder
         wr.setString (ID, instant);
         wr.setStringArray ("STRINGS", new String[]{"One", "Two", "Three"});
         wr.setInteger ("Intra", 78);
-        KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
-        signer.setKey (null, DemoKeyStore.getSignerPassword ());
-        JSONEnvelopedSignatureEncoder signature = new JSONEnvelopedSignatureEncoder (new JSONX509Signer (signer));
+        if (action == ACTION.X509)
+          {
+            KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
+            signer.setKey (null, DemoKeyStore.getSignerPassword ());
+            signature = new JSONEnvelopedSignatureEncoder (new JSONX509Signer (signer));
+          }
+        else if (action == ACTION.ASYM)
+          {
+            try
+              {
+                PrivateKey private_key = (PrivateKey)DemoKeyStore.getECDSAStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
+                PublicKey public_key = DemoKeyStore.getECDSAStore ().getCertificate ("mykey").getPublicKey ();
+                signature = new JSONEnvelopedSignatureEncoder (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+          }
+        else
+          {
+            signature = new JSONEnvelopedSignatureEncoder (new JSONSymKeySigner (new SymmetricOperations ()));
+          }
         signature.sign (wr, ID, instant);
-        /*
-        try
-          {
-            PrivateKey private_key = (PrivateKey)DemoKeyStore.getECDSAStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
-            PublicKey public_key = DemoKeyStore.getECDSAStore ().getCertificate ("mykey").getPublicKey ();
-            JSONEnvelopedSignatureEncoder signature = new JSONEnvelopedSignatureEncoder (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
-            signature.sign (wr, ID, instant);
-          }
-        catch (GeneralSecurityException e)
-          {
-            throw new IOException (e);
-          }
-*/
         return wr.serializeJSONStructure ();
       }
     
+    static void show ()
+      {
+        System.out.println (ACTION.SYM.toString () + "|" + ACTION.ASYM.toString () + "|" + ACTION.X509.toString () + " output-file\n");
+        System.exit (0);
+      }
+
     public static void main (String[] argc)
       {
-        try
+        if (argc.length != 2)
           {
-            Security.insertProviderAt (new BouncyCastleProvider(), 1);
-            System.out.print (new String (new Sign ().getJSONData (), "UTF-8"));
+            show ();
           }
-        catch (Exception e)
+        for (ACTION action : ACTION.values ())
           {
-            e.printStackTrace ();
+            if (action.toString ().equalsIgnoreCase (argc[0]))
+              {
+                try
+                  {
+                    Security.insertProviderAt (new BouncyCastleProvider(), 1);
+                    ArrayUtil.writeFile (argc[1], new Sign (action).getJSONData ());
+                  }
+                catch (Exception e)
+                  {
+                    e.printStackTrace ();
+                  }
+                return;
+              }
           }
+        show ();
       }
   }

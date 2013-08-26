@@ -19,13 +19,11 @@ package org.webpki.crypto;
 
 import java.io.IOException;
 
-import java.security.GeneralSecurityException;
-
 public interface SymKeySignerInterface
   {
 
-    public byte[] signData (byte[] data) throws IOException, GeneralSecurityException;
+    public byte[] signData (byte[] data) throws IOException;
 
-    public MACAlgorithms getMACAlgorithm () throws IOException, GeneralSecurityException;
+    public MACAlgorithms getMACAlgorithm () throws IOException;
 
   }

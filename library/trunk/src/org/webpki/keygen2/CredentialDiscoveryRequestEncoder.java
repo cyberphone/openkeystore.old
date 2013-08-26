@@ -241,13 +241,13 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
           }
 
         @Override
-        public PublicKey getPublicKey () throws IOException, GeneralSecurityException
+        public PublicKey getPublicKey () throws IOException
           {
             return key_management_key;
           }
 
         @Override
-        public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException, GeneralSecurityException
+        public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
           {
             return server_crypto_interface.generateKeyManagementAuthorization (key_management_key, data);
           }

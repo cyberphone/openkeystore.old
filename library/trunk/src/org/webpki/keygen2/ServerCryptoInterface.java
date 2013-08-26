@@ -28,21 +28,21 @@ import java.security.interfaces.ECPublicKey;
 
 public interface ServerCryptoInterface extends Serializable
   {
-    ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException;
+    ECPublicKey generateEphemeralKey () throws IOException;
     
     void generateAndVerifySessionKey (ECPublicKey client_ephemeral_key,
                                       byte[] kdf_data,
                                       byte[] session_key_mac_data,
                                       X509Certificate device_certificate,
-                                      byte[] session_attestation) throws IOException, GeneralSecurityException;;
+                                      byte[] session_attestation) throws IOException;
 
-    public byte[] mac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException;
+    public byte[] mac (byte[] data, byte[] key_modifier) throws IOException;
     
-    public byte[] encrypt (byte[] data) throws IOException, GeneralSecurityException;
+    public byte[] encrypt (byte[] data) throws IOException;
 
-    public byte[] generateNonce () throws IOException, GeneralSecurityException;
+    public byte[] generateNonce () throws IOException;
 
-    public byte[] generateKeyManagementAuthorization (PublicKey key_management_key, byte[] data) throws IOException, GeneralSecurityException;
+    public byte[] generateKeyManagementAuthorization (PublicKey key_management_key, byte[] data) throws IOException;
     
     public PublicKey[] enumerateKeyManagementKeys () throws IOException, GeneralSecurityException;
   }

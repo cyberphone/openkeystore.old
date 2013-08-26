@@ -18,7 +18,6 @@ package org.webpki.xmldsig;
 
 import java.io.IOException;
 
-import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
@@ -30,12 +29,12 @@ public class XMLAsymKeySigner extends XMLSignerCore
 
     AsymKeySignerInterface signer_impl;
 
-    PublicKey populateKeys (XMLSignatureWrapper r) throws GeneralSecurityException, IOException
+    PublicKey populateKeys (XMLSignatureWrapper r) throws IOException
       {
         return r.public_key = signer_impl.getPublicKey ();
       }
 
-    byte[] getSignatureBlob (byte[] data, AsymSignatureAlgorithms sig_alg) throws GeneralSecurityException, IOException
+    byte[] getSignatureBlob (byte[] data, AsymSignatureAlgorithms sig_alg) throws IOException
       {
         return signer_impl.signData (data, sig_alg);
       }
@@ -48,5 +47,4 @@ public class XMLAsymKeySigner extends XMLSignerCore
       {
         this.signer_impl = signer_impl;
       }
-
   }

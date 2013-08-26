@@ -18,8 +18,6 @@ package org.webpki.json;
 
 import java.io.IOException;
 
-import java.security.GeneralSecurityException;
-
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.SymKeyVerifierInterface;
 
@@ -29,7 +27,7 @@ import org.webpki.crypto.SymKeyVerifierInterface;
 public class JSONSymKeyVerifier extends JSONVerifier
   {
     SymKeyVerifierInterface verifier;
-
+    
     public JSONSymKeyVerifier (SymKeyVerifierInterface verifier) throws IOException
       {
         this.verifier = verifier;
@@ -38,17 +36,10 @@ public class JSONSymKeyVerifier extends JSONVerifier
     @Override
     void verify (JSONEnvelopedSignatureDecoder signature_decoder) throws IOException
       {
-        try
-          {
-            signature_decoder.checkVerification (verifier.verifyData (signature_decoder.canonicalized_data,
-                                                                      signature_decoder.signature_value,
-                                                                      (MACAlgorithms)signature_decoder.algorithm));
-          }
-        catch (GeneralSecurityException e)
-          {
-            throw new IOException (e);
-          }
-       }
+        signature_decoder.checkVerification (verifier.verifyData (signature_decoder.canonicalized_data,
+                                                                  signature_decoder.signature_value,
+                                                                  (MACAlgorithms)signature_decoder.algorithm));
+      }
 
     @Override
     JSONEnvelopedSignatureDecoder.SIGNATURE getVerifierType () throws IOException

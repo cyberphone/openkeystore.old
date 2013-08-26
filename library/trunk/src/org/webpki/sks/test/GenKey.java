@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -102,18 +103,33 @@ public class GenKey
             {
     
               @Override
-              public PublicKey getPublicKey () throws IOException, GeneralSecurityException
+              public PublicKey getPublicKey () throws IOException
                 {
-                  return ((X509Certificate)DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey")).getPublicKey ();
+                  try
+                    {
+                      return ((X509Certificate)DemoKeyStore.getSubCAKeyStore ().getCertificate ("mykey")).getPublicKey ();
+                    }
+                  catch (GeneralSecurityException e)
+                    {
+                      throw new IOException (e);
+                    }
                 }
     
               @Override
-              public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException, GeneralSecurityException
+              public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
                 {
-                  Signature signer = Signature.getInstance (algorithm.getJCEName ());
-                  signer.initSign ((PrivateKey) DemoKeyStore.getSubCAKeyStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
-                  signer.update (data);
-                  return signer.sign ();
+                  try
+                    {
+                      Signature signer = Signature.getInstance (algorithm.getJCEName ());
+                      signer.initSign ((PrivateKey) DemoKeyStore.getSubCAKeyStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ()));
+                      signer.update (data);
+                      return signer.sign ();
+                    }
+                  catch (GeneralSecurityException e)
+                    {
+                      throw new IOException (e);
+                    }
+                  
                 }
               
             }, public_key);

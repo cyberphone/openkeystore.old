@@ -116,14 +116,21 @@ public class ProvSess
         byte[] session_key;
         
         @Override
-        public ECPublicKey generateEphemeralKey () throws IOException, GeneralSecurityException
+        public ECPublicKey generateEphemeralKey () throws IOException
           {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
-            ECGenParameterSpec eccgen = new ECGenParameterSpec (KeyAlgorithms.P_256.getJCEName ());
-            generator.initialize (eccgen, new SecureRandom ());
-            KeyPair kp = generator.generateKeyPair();
-            server_ec_private_key = (ECPrivateKey) kp.getPrivate ();
-            return (ECPublicKey) kp.getPublic ();
+            try
+              {
+                KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
+                ECGenParameterSpec eccgen = new ECGenParameterSpec (KeyAlgorithms.P_256.getJCEName ());
+                generator.initialize (eccgen, new SecureRandom ());
+                KeyPair kp = generator.generateKeyPair();
+                server_ec_private_key = (ECPrivateKey) kp.getPrivate ();
+                return (ECPublicKey) kp.getPublic ();
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
           }
   
         @Override
@@ -131,70 +138,90 @@ public class ProvSess
                                                  byte[] kdf_data,
                                                  byte[] session_key_mac_data,
                                                  X509Certificate device_certificate,
-                                                 byte[] session_attestation) throws IOException, GeneralSecurityException
+                                                 byte[] session_attestation) throws IOException
           {
-  
-            // SP800-56A C(2, 0, ECC CDH)
-            KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
-            key_agreement.init (server_ec_private_key);
-            key_agreement.doPhase (client_ephemeral_key, true);
-            byte[] Z = key_agreement.generateSecret ();
-  
-            // The custom KDF
-            Mac mac = Mac.getInstance (MACAlgorithms.HMAC_SHA256.getJCEName ());
-            mac.init (new SecretKeySpec (Z, "RAW"));
-            session_key = mac.doFinal (kdf_data);
-            
-            // The session key signature
-            mac = Mac.getInstance (MACAlgorithms.HMAC_SHA256.getJCEName ());
-            mac.init (new SecretKeySpec (session_key, "RAW"));
-            byte[] session_key_attest = mac.doFinal (session_key_mac_data);
-            
-            if (device_certificate == null)
+            try
               {
-                if (!ArrayUtil.compare (session_key_attest, session_attestation))
+                // SP800-56A C(2, 0, ECC CDH)
+                KeyAgreement key_agreement = KeyAgreement.getInstance ("ECDH");
+                key_agreement.init (server_ec_private_key);
+                key_agreement.doPhase (client_ephemeral_key, true);
+                byte[] Z = key_agreement.generateSecret ();
+      
+                // The custom KDF
+                Mac mac = Mac.getInstance (MACAlgorithms.HMAC_SHA256.getJCEName ());
+                mac.init (new SecretKeySpec (Z, "RAW"));
+                session_key = mac.doFinal (kdf_data);
+                
+                // The session key signature
+                mac = Mac.getInstance (MACAlgorithms.HMAC_SHA256.getJCEName ());
+                mac.init (new SecretKeySpec (session_key, "RAW"));
+                byte[] session_key_attest = mac.doFinal (session_key_mac_data);
+                
+                if (device_certificate == null)
                   {
-                    throw new IOException ("Verify attestation failed");
+                    if (!ArrayUtil.compare (session_key_attest, session_attestation))
+                      {
+                        throw new IOException ("Verify attestation failed");
+                      }
+                  }
+                else
+                  {
+                    PublicKey device_public_key = device_certificate.getPublicKey ();
+                    AsymSignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
+                        AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256;
+        
+                    // Verify that the session key signature was signed by the device key
+                    Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
+                    verifier.initVerify (device_public_key);
+                    verifier.update (session_key_attest);
+                    if (!verifier.verify (session_attestation))
+                      {
+                        throw new IOException ("Verify provisioning signature failed");
+                      }
                   }
               }
-            else
+            catch (GeneralSecurityException e)
               {
-                PublicKey device_public_key = device_certificate.getPublicKey ();
-                AsymSignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
-                    AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256;
-    
-                // Verify that the session key signature was signed by the device key
-                Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
-                verifier.initVerify (device_public_key);
-                verifier.update (session_key_attest);
-                if (!verifier.verify (session_attestation))
-                  {
-                    throw new IOException ("Verify provisioning signature failed");
-                  }
+                throw new IOException (e);
               }
           }
   
         @Override
-        public byte[] mac (byte[] data, byte[] key_modifier) throws IOException, GeneralSecurityException
+        public byte[] mac (byte[] data, byte[] key_modifier) throws IOException
           {
-            Mac mac = Mac.getInstance (MACAlgorithms.HMAC_SHA256.getJCEName ());
-            mac.init (new SecretKeySpec (ArrayUtil.add (session_key, key_modifier), "RAW"));
-            return mac.doFinal (data);
+            try
+              {
+                Mac mac = Mac.getInstance (MACAlgorithms.HMAC_SHA256.getJCEName ());
+                mac.init (new SecretKeySpec (ArrayUtil.add (session_key, key_modifier), "RAW"));
+                return mac.doFinal (data);
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
           }
 
         @Override
-        public byte[] encrypt (byte[] data) throws IOException, GeneralSecurityException
+        public byte[] encrypt (byte[] data) throws IOException
           {
-            byte[] key = mac (SecureKeyStore.KDF_ENCRYPTION_KEY, new byte[0]);
-            Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
-            byte[] iv = new byte[16];
-            new SecureRandom ().nextBytes (iv);
-            crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (iv));
-            return ArrayUtil.add (iv, crypt.doFinal (data));
+            try
+              {
+                byte[] key = mac (SecureKeyStore.KDF_ENCRYPTION_KEY, new byte[0]);
+                Cipher crypt = Cipher.getInstance ("AES/CBC/PKCS5Padding");
+                byte[] iv = new byte[16];
+                new SecureRandom ().nextBytes (iv);
+                crypt.init (Cipher.ENCRYPT_MODE, new SecretKeySpec (key, "AES"), new IvParameterSpec (iv));
+                return ArrayUtil.add (iv, crypt.doFinal (data));
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
           }
 
         @Override
-        public byte[] generateNonce () throws IOException, GeneralSecurityException
+        public byte[] generateNonce () throws IOException
           {
             byte[] rnd = new byte[32];
             new SecureRandom ().nextBytes (rnd);
@@ -202,12 +229,19 @@ public class ProvSess
           }
 
         @Override
-        public byte[] generateKeyManagementAuthorization (PublicKey key_management_key, byte[] data) throws IOException, GeneralSecurityException
+        public byte[] generateKeyManagementAuthorization (PublicKey key_management_key, byte[] data) throws IOException
           {
-            Signature km_sign = Signature.getInstance (key_management_key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
-            km_sign.initSign (key_management_keys.get (key_management_key));
-            km_sign.update (data);
-            return km_sign.sign ();
+            try
+              {
+                Signature km_sign = Signature.getInstance (key_management_key instanceof RSAPublicKey ? "SHA256WithRSA" : "SHA256WithECDSA");
+                km_sign.initSign (key_management_keys.get (key_management_key));
+                km_sign.update (data);
+                return km_sign.sign ();
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
           }
 
         @Override

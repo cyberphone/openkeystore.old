@@ -22,7 +22,6 @@ import java.security.cert.X509Certificate;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
-import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.SignerInterface;
 
 /**
@@ -36,18 +35,6 @@ public class JSONX509Signer extends JSONSigner
     
     X509Certificate[] certificate_path;
     
-    class SignatureCertificate implements JSONObject
-      {
-        @Override
-        public void writeObject (JSONWriter wr) throws IOException
-          {
-            X509Certificate signer_cert = certificate_path[0];
-            wr.setString (JSONEnvelopedSignature.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
-            wr.setBigInteger (JSONEnvelopedSignature.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
-            wr.setString (JSONEnvelopedSignature.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
-          }
-      }
-
     public void setSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
       {
         this.algorithm = algorithm;
@@ -61,7 +48,7 @@ public class JSONX509Signer extends JSONSigner
       }
 
     @Override
-     SignatureAlgorithms getAlgorithm ()
+    AsymSignatureAlgorithms getAlgorithm ()
       {
         return algorithm;
       }
@@ -75,7 +62,17 @@ public class JSONX509Signer extends JSONSigner
     @Override
     void writeKeyInfoData (JSONWriter wr) throws IOException
       {
-        wr.setObject (JSONEnvelopedSignature.SIGNATURE_CERTIFICATE_JSON, new SignatureCertificate ());
+        wr.setObject (JSONEnvelopedSignature.SIGNATURE_CERTIFICATE_JSON, new JSONObject ()
+          {
+            @Override
+            public void writeObject (JSONWriter wr) throws IOException
+              {
+                X509Certificate signer_cert = certificate_path[0];
+                wr.setString (JSONEnvelopedSignature.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
+                wr.setBigInteger (JSONEnvelopedSignature.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
+                wr.setString (JSONEnvelopedSignature.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
+              }
+          });
         JSONEnvelopedSignatureEncoder.writeX509CertificatePath (wr, certificate_path);
       }
   }

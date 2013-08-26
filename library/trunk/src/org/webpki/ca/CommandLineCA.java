@@ -253,16 +253,24 @@ public class CommandLineCA
           }
 
 
-        public byte[] signData (byte[] data, AsymSignatureAlgorithms certalg) throws IOException, GeneralSecurityException
+        public byte[] signData (byte[] data, AsymSignatureAlgorithms certalg) throws IOException
           {
-            Signature s = Signature.getInstance (certalg.getJCEName ());
-            s.initSign (sign_key);
-            s.update (data);
-            return s.sign ();
+            Signature s;
+            try
+              {
+                s = Signature.getInstance (certalg.getJCEName ());
+                s.initSign (sign_key);
+                s.update (data);
+                return s.sign ();
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
           }
 
 
-        public PublicKey getPublicKey () throws IOException, GeneralSecurityException
+        public PublicKey getPublicKey () throws IOException
           {
             return public_key;
           }

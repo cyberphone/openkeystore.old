@@ -20,8 +20,6 @@ import java.io.IOException;
 
 import java.util.Vector;
 
-import org.webpki.util.ArrayUtil;
-
 /**
  * Parses JSON into a DOM-like tree.
  * Only used internally.

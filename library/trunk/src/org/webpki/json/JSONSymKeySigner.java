@@ -18,37 +18,33 @@ package org.webpki.json;
 
 import java.io.IOException;
 
-import java.security.PublicKey;
-
-import org.webpki.crypto.AsymKeySignerInterface;
-import org.webpki.crypto.AsymSignatureAlgorithms;
-import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.MACAlgorithms;
+import org.webpki.crypto.SymKeySignerInterface;
 
 /**
- * Initiatiator object for asymmetric key signatures.
+ * Initiatiator object for symmetric key signatures.
  */
-public class JSONAsymKeySigner extends JSONSigner
+public class JSONSymKeySigner extends JSONSigner
   {
-    AsymSignatureAlgorithms algorithm;
+    MACAlgorithms algorithm;
 
-    AsymKeySignerInterface signer;
+    SymKeySignerInterface signer;
     
-    PublicKey public_key;
-    
-    public void setSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
+    String key_id = "symmetric-key";
+
+    public void setKeyID (String key_id)
       {
-        this.algorithm = algorithm;
+        this.key_id = key_id;
       }
 
-    public JSONAsymKeySigner (AsymKeySignerInterface signer) throws IOException
+    public JSONSymKeySigner (SymKeySignerInterface signer) throws IOException
       {
         this.signer = signer;
-        public_key = signer.getPublicKey ();
-        algorithm = KeyAlgorithms.getKeyAlgorithm (public_key).getRecommendedSignatureAlgorithm ();
+        algorithm = signer.getMACAlgorithm ();
       }
 
     @Override
-    AsymSignatureAlgorithms getAlgorithm ()
+    MACAlgorithms getAlgorithm ()
       {
         return algorithm;
       }
@@ -56,12 +52,12 @@ public class JSONAsymKeySigner extends JSONSigner
     @Override
     byte[] signData (byte[] data) throws IOException
       {
-        return signer.signData (data, algorithm);
+        return signer.signData (data);
       }
 
     @Override
     void writeKeyInfoData (JSONWriter wr) throws IOException
       {
-        JSONEnvelopedSignatureEncoder.writePublicKey (wr, public_key);
+        wr.setString (JSONEnvelopedSignature.KEY_ID_JSON, key_id);
       }
   }
