@@ -93,7 +93,7 @@ public class JSONDecoderCache
           }
         try
           {
-            JSONDecoder decoder = (JSONDecoder)decoder_class.newInstance ();
+            JSONDecoder decoder = decoder_class.newInstance ();
             decoder.root = root;
             decoder.unmarshallJSONData (reader);
             if (test_unread)
@@ -142,32 +142,32 @@ public class JSONDecoderCache
           }
       }
 
-    public void addToCache (Class<? extends JSONDecoder> message_type) throws IOException
+    public void addToCache (Class<? extends JSONDecoder> json_decoder) throws IOException
       {
         try
           {
-            JSONDecoder decoder = message_type.newInstance ();
+            JSONDecoder decoder = json_decoder.newInstance ();
             class_map.put (new RegisteredJSONDecoder (decoder.getVersion (), decoder.getRootProperty ()), decoder.getClass ());
           }
         catch (InstantiationException ie)
           {
-            throw new IOException ("Class " + message_type.getName () + " is not a valid JSONDecoder");
+            throw new IOException ("Class " + json_decoder.getName () + " is not a valid JSONDecoder");
           }
         catch (IllegalAccessException iae)
           {
-            throw new IOException ("Class " + message_type.getName () + " is not a valid JSONDecoder");
+            throw new IOException ("Class " + json_decoder.getName () + " is not a valid JSONDecoder");
           }
       }
 
-    public void addToCache (String message_type) throws IOException
+    public void addToCache (String json_decoder_path) throws IOException
       {
         try
           {
-            addToCache (Class.forName (message_type).asSubclass (JSONDecoder.class));
+            addToCache (Class.forName (json_decoder_path).asSubclass (JSONDecoder.class));
           }
         catch (ClassNotFoundException cnfe)
           {
-            throw new IOException ("Class " + message_type + " can't be found");
+            throw new IOException ("Class " + json_decoder_path + " can't be found");
           }
       }
 
