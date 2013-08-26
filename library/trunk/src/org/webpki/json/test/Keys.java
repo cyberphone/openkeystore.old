@@ -51,7 +51,7 @@ public class Keys
     static final int ROUNDS = 1000;
     static JSONDecoderCache cache = new JSONDecoderCache ();
     
-    static class Reader extends JSONDecoder
+    public static class Reader extends JSONDecoder
       {
         PublicKey public_key;
 
