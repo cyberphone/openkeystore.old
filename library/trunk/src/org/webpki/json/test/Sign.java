@@ -189,6 +189,7 @@ public class Sign extends JSONEncoder
             signature = new JSONEnvelopedSignatureEncoder (new JSONSymKeySigner (new SymmetricOperations ()));
           }
         signature.sign (wr, ID, instant);
+        wr.setString ("Additional", "Not signed since it comes after the EnvelopedSignature");
         return wr.serializeJSONStructure ();
       }
     
