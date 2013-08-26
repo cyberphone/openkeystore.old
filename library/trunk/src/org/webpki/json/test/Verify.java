@@ -18,16 +18,24 @@ package org.webpki.json.test;
 
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import org.webpki.crypto.KeyStoreVerifier;
+import org.webpki.crypto.test.DemoKeyStore;
+
+import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONEnvelopedSignatureDecoder;
 import org.webpki.json.JSONReaderHelper;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONWriter;
+import org.webpki.json.JSONX509Verifier;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -84,6 +92,16 @@ public class Verify extends JSONDecoder
                       switch (signature.getSignatureType ())
                         {
                           case ASYMMETRIC_KEY:
+                            try
+                              {
+                                PublicKey public_key = DemoKeyStore.getECDSAStore ().getCertificate ("mykey").getPublicKey ();
+                                signature.verify (new JSONAsymKeyVerifier (public_key));
+                                System.out.println ("Asymmetric key signature validated for: " + public_key.toString ());
+                              }
+                            catch (GeneralSecurityException e)
+                              {
+                                throw new IOException (e);
+                              }
                             break;
   
                           case SYMMETRIC_KEY:
@@ -92,6 +110,9 @@ public class Verify extends JSONDecoder
                             break;
   
                           default:
+                            KeyStoreVerifier verifier = new KeyStoreVerifier (DemoKeyStore.getExampleDotComKeyStore ());
+                            signature.verify (new JSONX509Verifier (verifier));
+                            System.out.println ("X509 signature validated for: " + verifier.getSignerCertificateInfo ().toString ());
                             break;
                         }
                     }

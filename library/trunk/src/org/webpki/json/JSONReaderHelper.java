@@ -27,7 +27,7 @@ import org.webpki.util.Base64;
 import org.webpki.util.ISODateTime;
 
 /**
- * Base class for java classes who can be translated from JSON data.
+ * Reader object that is spawned by JSONDecoder implementations.
  *
  */
 public class JSONReaderHelper
@@ -64,6 +64,19 @@ public class JSONReaderHelper
         throw new IOException ("No more properties found in object when looking for \"" + name + "\"");
       }
 
+    static byte[] getBinaryFromBase64 (String base64) throws IOException
+      {
+        return new Base64().getBinaryFromBase64String (base64);
+      }
+
+    void quoteTest (boolean found, boolean expected, String name) throws IOException
+      {
+        if (found != expected)
+          {
+            throw new IOException ((expected ? "Quotes missing for \"" : "Unexpected quoting for \"") + name + "\" argument");
+          }
+      }
+
     String getString (String name, boolean quoted) throws IOException
       {
         JSONValue value = getProperty (name);
@@ -75,27 +88,33 @@ public class JSONReaderHelper
         return (String) value.value;
       }
 
-    void quoteTest (boolean found, boolean expected, String name) throws IOException
-      {
-        if (found != expected)
-          {
-            throw new IOException ((expected ? "Quotes missing for \"" : "Unexpected quoting for \"") + name + "\" argument");
-          }
-      }
-
     public String getString (String name) throws IOException
       {
         return getString (name, true);
       }
 
+    public int getInt (String name) throws IOException
+      {
+        return Integer.parseInt (getString (name, false));
+      }
+
+    public boolean getBoolean (String name) throws IOException
+      {
+        String bool = getString (name, false);
+        if (bool.equals ("true"))
+          {
+            return true;
+          }
+        else if (bool.equals ("false"))
+          {
+            return false;
+          }
+        throw new IOException ("Malformed boolean: " + bool);
+      }
+
     public GregorianCalendar getDateTime (String name) throws IOException
       {
         return ISODateTime.parseDateTime (getString (name));
-      }
-
-    static byte[] getBinaryFromBase64 (String base64) throws IOException
-      {
-        return new Base64().getBinaryFromBase64String (base64);
       }
 
     public byte[] getBinary (String name) throws IOException
@@ -118,76 +137,58 @@ public class JSONReaderHelper
         return createJSONReaderHelper ((JSONHolder) value.value);
       }
 
-    public boolean getBooleanConditional (String name)
+    public String getStringConditional (String name) throws IOException
       {
-        // TODO Auto-generated method stub
-        return false;
-      }
-
-    public boolean hasNext (String name)
-      {
-        // TODO Auto-generated method stub
-        return false;
-      }
-
-    public void getNext (String name)
-      {
-        // TODO Auto-generated method stub
-
-      }
-
-    public boolean hasNext ()
-      {
-        // TODO Auto-generated method stub
-        return false;
-      }
-
-    public void getParent ()
-      {
-        // TODO Auto-generated method stub
-
-      }
-
-    public void getChild ()
-      {
-        // TODO Auto-generated method stub
-
-      }
-
-    public String getStringConditional (String name)
-      {
-        // TODO Auto-generated method stub
+        if (hasProperty (name))
+          {
+            return getString (name);
+          }
         return null;
       }
 
-    public int getInt (String name)
+    public boolean getBooleanConditional (String name) throws IOException
       {
-        // TODO Auto-generated method stub
-        return 0;
-      }
-
-    public byte[] getBinaryConditional (String name)
-      {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-    public String getStringConditional (String name, String default_value)
-      {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-    public String[] getListConditional (String name)
-      {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-    public boolean getBooleanConditional (String name, boolean default_value)
-      {
-        // TODO Auto-generated method stub
+        if (hasProperty (name))
+          {
+            return getBoolean (name);
+          }
         return false;
+      }
+
+    public byte[] getBinaryConditional (String name) throws IOException
+      {
+        if (hasProperty (name))
+          {
+            return getBinary (name);
+          }
+        return null;
+      }
+
+    public String getStringConditional (String name, String default_value) throws IOException
+      {
+        if (hasProperty (name))
+          {
+            return getString (name);
+          }
+        return default_value;
+      }
+
+    public String[] getStringListConditional (String name) throws IOException
+      {
+        if (hasProperty (name))
+          {
+            return getStringList (name);
+          }
+        return null;
+      }
+
+    public boolean getBooleanConditional (String name, boolean default_value) throws IOException
+      {
+        if (hasProperty (name))
+          {
+            return getBoolean (name);
+          }
+        return default_value;
       }
 
     Vector<Object> getArray (String name, boolean quoted, boolean simple_array) throws IOException
