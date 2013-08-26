@@ -151,11 +151,11 @@ public class JSONDecoderCache
           }
         catch (InstantiationException ie)
           {
-            throw new IOException ("Class " + json_decoder.getName () + " is not a valid JSONDecoder");
+            throw new IOException ("Class " + json_decoder.getName () + " is not a valid JSONDecoder", ie);
           }
         catch (IllegalAccessException iae)
           {
-            throw new IOException ("Class " + json_decoder.getName () + " is not a valid JSONDecoder");
+            throw new IOException ("Class " + json_decoder.getName () + " is not a valid JSONDecoder", iae);
           }
       }
 
@@ -167,7 +167,7 @@ public class JSONDecoderCache
           }
         catch (ClassNotFoundException cnfe)
           {
-            throw new IOException ("Class " + json_decoder_path + " can't be found");
+            throw new IOException ("Class " + json_decoder_path + " can't be found", cnfe);
           }
       }
 
