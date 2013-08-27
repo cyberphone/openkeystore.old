@@ -129,7 +129,7 @@ public class Sign extends JSONEncoder
         public void writeObject (JSONWriter wr) throws IOException
           {
             wr.setString ("HTL", "656756#");
-            wr.setInteger ("INTEGER", -689);
+            wr.setInt ("INTEGER", -689);
             wr.setBoolean ("Fantastic", fantastic);
           }
       }
@@ -165,7 +165,7 @@ public class Sign extends JSONEncoder
         wr.setString (ID, instant);
         wr.setStringArray ("STRINGS", new String[]{"One", "Two", "Three"});
         wr.setString ("EscapeMe", "A\\\n\"" );
-        wr.setInteger ("Intra", 78);
+        wr.setInt ("Intra", 78);
         if (action == ACTION.X509)
           {
             KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);

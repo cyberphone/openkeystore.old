@@ -113,12 +113,43 @@ public class Test
             return wr.serializeJSONStructure ();
           }
       }
+    
+    public static class ESC extends JSONDecoder
+      {
+        @Override
+        protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
+          {
+            if (rd.getString ("Escape").equals ("\t\n \r\f\\\""))
+              {
+                System.out.println ("Escape succeeded:\n" + ESCAPING);
+              }
+            else
+              {
+                throw new IOException ("Escape error");
+              }
+          }
+  
+        @Override
+        protected String getVersion ()
+          {
+            return "http://example.com";
+          }
+  
+        @Override
+        protected String getRootProperty ()
+          {
+            return "ESC";
+          }
+      }
+
+    static final String ESCAPING = "{ \"ESC\" : { \"Version\": \"http://example.com\", \"Escape\":\"\\t\\n \\r\\f\\\\\\\"\" }}";
 
     public static void main (String[] argc)
       {
         try
           {
             cache.addToCache (Reader.class);
+            cache.addToCache (ESC.class);
             byte[] data = new Writer ().getJSONData ();
             Reader reader = (Reader) cache.parse (data);
             byte[] output = JSONWriter.serializeParsedJSONDocument (reader);
@@ -127,6 +158,7 @@ public class Test
               {
                 System.out.println ("Input and output are equivalent");
               }
+            cache.parse (ESCAPING.getBytes ("UTF-8"));
           }
         catch (Exception e)
           {

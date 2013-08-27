@@ -67,7 +67,7 @@ public class JSONWriter
         current.addProperty (name, new JSONValue (true, true, value));
       }
 
-    public void setInteger (String name, int value) throws IOException
+    public void setInt (String name, int value) throws IOException
       {
         current.addProperty (name, new JSONValue (true, false, Integer.toString (value)));
       }
