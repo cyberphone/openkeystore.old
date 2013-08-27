@@ -1,0 +1,72 @@
+<body>
+<h2>JSON - Encoder, Decoder and Signature Package</h2>
+This package contains classes for parsing and generating messages in JSON.
+To make the system slightly more on par with XML Schemas the JSON library supports:<br>
+<ul>
+<li>Registration of JSON decoders (=supporting a specific message) and automatic instantiation during parsing</li>
+<li>Strict property sequences including detection of missing reads</li>
+<li>Strong validation of input</li>
+</ul>
+<p>
+In addition, there is a set of classes supporting a [very] scaled-down JSON counterpart to
+enveloped XML signatures.
+</p>
+Sample signed JSON message:
+<pre style="margin-left:20pt">
+  {
+    <font color="red">"MyLittleSignature":
+      {
+        "Version": "http://example.com/signature",
+        "Now": "2013-08-27T16:32:11+02:00",
+        "Objects":
+          [{
+             "HTL": "656756#",
+             "INTEGER": -689,
+             "Fantastic": true
+           },
+           {
+             "HTL": "656756#",
+             "INTEGER": -689,
+             "Fantastic": false
+           }],
+        </font><font color="blue">"ID": "YW_yxu6voZ3uK5Et3xOA"</font><font color="red">,
+        "STRINGS": ["One","Two","Three"],
+        "EscapeMe": "A\\\n\"",
+        "EnvelopedSignature":
+          {
+            "SignatureInfo":
+              {
+                "Algorithm": "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+                "Reference":
+                  {
+                    "Name": </font><font color="blue">"ID"</font><font color="red">,
+                    "Value": </font><font color="blue">"YW_yxu6voZ3uK5Et3xOA"</font><font color="red">
+                  },
+                "KeyInfo":
+                  {
+                    "SignatureCertificate":
+                      {
+                        "Issuer": "CN=Demo Sub CA,DC=webpki,DC=org",
+                        "SerialNumber": 1159906465500,
+                        "Subject": "CN=example.com,O=Example Organization"
+                      },
+                    "X509CertificatePath":
+                      [
+                        "MIIDizCCAnOgAwIBAgIGAQ4P0BbcMA0...SL73xSRl0l3EWzTxSpkiIJGl5kJorHs",
+                        "MIIDZTCCAk2gAwIBAgIBAjANBgkqhki...0KZcfh05Xfk8V1EccGAKrZV5SHDz3U",
+                        "MIIDZjCCAk6gAwIBAgIBATANBgkqhki...vdiPNIlcGnauOs8rI3fkaO8PtUgHnUw"
+                      ]
+                  }
+              }</font>,
+            "SignatureValue": <font color="green">"iKiNnCJEBIWwlok/bmi6j/43E...TuD2AeyjCToPs81uEzpkIHD0UWZ9ItRb7Uc"</font>
+          },
+        "Additional": "Not signed since it comes after the EnvelopedSignature"
+      }
+  }
+</pre>
+The signature scheme signs the JSON object identified by the <code>Reference</code> using the
+data in <font color="blue"><code>blue</code></font>, down to and including the <code>SignatureInfo</code> object.
+<p>Canonicalization is performed by simply removing all whitespace like:<br>
+<code><font color="red">"MyLittleSignature":{"Version":"http://example.com/signature","Now":"2013-08-27T16:32:11+02:00"...Uw"]}}</font></code>
+</p>
+</body>
