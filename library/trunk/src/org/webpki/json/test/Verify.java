@@ -43,31 +43,6 @@ import org.webpki.util.ArrayUtil;
  */
 public class Verify extends JSONDecoder
   {
-    public static void main (String[] argc)
-      {
-        if (argc.length != 1 && argc.length != 2)
-          {
-            System.out.println ("\ninstance-document-file [canonicalize-debug-file]");
-            System.exit (0);
-          }
-        try
-          {
-            Security.insertProviderAt (new BouncyCastleProvider(), 1);
-            if (argc.length == 2)
-              {
-                JSONWriter.setCanonicalizationDebugFile (argc[1]);
-              }
-            JSONDecoderCache parser = new JSONDecoderCache ();
-            parser.addToCache (Verify.class);
-            parser.parse (ArrayUtil.readFile (argc[0]));
-          }
-        catch (Exception e)
-          {
-            System.out.println ("Error: " + e.getMessage ());
-            e.printStackTrace ();
-          }
-      }
-
     @Override
     protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
       {
@@ -145,5 +120,41 @@ public class Verify extends JSONDecoder
     protected String getRootProperty ()
       {
         return Sign.ROOT_PROPERTY;
+      }
+
+    public static void main (String[] argc)
+      {
+        if (argc.length != 1 && argc.length != 2)
+          {
+            System.out.println ("\ninstance-document-file [canonicalize-debug-file|-rnnnn]");
+            System.exit (0);
+          }
+        try
+          {
+            Security.insertProviderAt (new BouncyCastleProvider(), 1);
+            int repeat = 1;
+            if (argc.length == 2)
+              {
+                if (argc[1].startsWith ("-r"))
+                  {
+                    repeat = Integer.parseInt (argc[1].substring (2));
+                  }
+                else
+                  {
+                    JSONWriter.setCanonicalizationDebugFile (argc[1]);
+                  }
+              }
+            JSONDecoderCache parser = new JSONDecoderCache ();
+            parser.addToCache (Verify.class);
+            while (repeat-- > 0)
+              {
+                parser.parse (ArrayUtil.readFile (argc[0]));
+              }
+          }
+        catch (Exception e)
+          {
+            System.out.println ("Error: " + e.getMessage ());
+            e.printStackTrace ();
+          }
       }
   }

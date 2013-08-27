@@ -173,11 +173,11 @@ public class JSONReaderHelper
         return default_value;
       }
 
-    public String[] getStringListConditional (String name) throws IOException
+    public String[] getStringArrayConditional (String name) throws IOException
       {
         if (hasProperty (name))
           {
-            return getStringList (name);
+            return getStringArray (name);
           }
         return null;
       }
@@ -220,21 +220,21 @@ public class JSONReaderHelper
         return array;
       }
 
-    String [] getSimpleList (String name, boolean quoted) throws IOException
+    String [] getSimpleArray (String name, boolean quoted) throws IOException
       {
         Vector<Object> array = getArray (name, quoted, true);
         return array.toArray (new String[0]);
       }
 
-    public String[] getStringList (String name) throws IOException
+    public String[] getStringArray (String name) throws IOException
       {
-        return getSimpleList (name, true);
+        return getSimpleArray (name, true);
       }
 
-    public Vector<byte[]> getBinaryList (String name) throws IOException
+    public Vector<byte[]> getBinaryArray (String name) throws IOException
       {
         Vector<byte[]> blobs = new Vector<byte[]> ();
-        for (String blob : getStringList (name))
+        for (String blob : getStringArray (name))
           {
             blobs.add (getBinaryFromBase64 (blob));
           }

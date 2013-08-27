@@ -17,48 +17,42 @@
 package org.webpki.json.test;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.RSAKeyGenParameterSpec;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.json.JSONDecoderCache;
-import org.webpki.json.JSONEnvelopedSignatureDecoder;
-import org.webpki.json.JSONEnvelopedSignatureEncoder;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONReaderHelper;
 import org.webpki.json.JSONWriter;
-import org.webpki.json.test.Keys.Reader;
-import org.webpki.json.test.Keys.Writer;
+
+import org.webpki.util.ArrayUtil;
 
 /**
  * Testing public keys
  */
 public class Test
   {
-    static final String KEYS="Keys";
-    static final String VERSION = "http://keys/test";
+    static final String MESSAGE="ParserTest";
+    static final String VERSION = "http://example.com/test";
     
-    private static final String BOOL_TRUE = "boolTrue";
-    private static final String BOOL_FALSE = "boolFalse";
-    private static final String BOOL_UNKNOWM = "boolUnknown";
+    static final String BOOL_TRUE = "boolTrue";
+    static final String BOOL_FALSE = "boolFalse";
+    static final String BOOL_UNKNOWM = "boolUnknown";
 
-    private static final String STRING = "string";
-    private static final String STRING_VALUE = "Hi!";
-    private static final String STRING_UNKNOWM = "nostring";
+    static final String STRING = "string";
+    static final String STRING_VALUE = "Hi!";
+    static final String STRING_UNKNOWM = "nostring";
+
+    static final String STRING_WITH_DEFAULT1 = "stringWithDefault1";
+    static final String STRING_WITH_DEFAULT2 = "stringWithDefault2";
+    static final String STRING_DEFAULT = "defstring";
+    
+    static final String BLOB = "blob";
+    static final byte[] BLOB_VALUE = {0,1,2,3};
+    
+    static final String EMPTY_STRING_LIST = "esl";
+
+    static final String STRING_LIST = "stringlist";
+    static final String[] STRING_LIST_VALUE = {"one","two","three"};
 
     static JSONDecoderCache cache = new JSONDecoderCache ();
     
@@ -78,6 +72,16 @@ public class Test
             test (!rd.getBooleanConditional (BOOL_UNKNOWM));
             test (rd.getString (STRING).equals (STRING_VALUE));
             test (rd.getStringConditional (STRING_UNKNOWM) == null);
+            test (rd.getStringConditional (STRING_WITH_DEFAULT1, STRING_DEFAULT).equals (STRING_DEFAULT));
+            test (rd.getStringConditional (STRING_WITH_DEFAULT2, STRING_DEFAULT).equals (STRING_VALUE));
+            test (ArrayUtil.compare (rd.getBinary (BLOB), BLOB_VALUE));
+            test (rd.getStringArray (EMPTY_STRING_LIST).length == 0);
+            String[] list = rd.getStringArray (STRING_LIST);
+            test (list.length == STRING_LIST_VALUE.length);
+            for (int i = 0; i < list.length; i++)
+              {
+                test (list[i].equals (STRING_LIST_VALUE[i]));
+              }
           }
   
         @Override
@@ -89,7 +93,7 @@ public class Test
         @Override
         protected String getRootProperty ()
           {
-            return KEYS;
+            return MESSAGE;
           }
       }
 
@@ -98,34 +102,34 @@ public class Test
         @Override
         protected byte[] getJSONData () throws IOException
           {
-            JSONWriter wr = new JSONWriter (KEYS, VERSION);
+            JSONWriter wr = new JSONWriter (MESSAGE, VERSION);
             wr.setBoolean (BOOL_TRUE, true);
             wr.setBoolean (BOOL_FALSE, false);
             wr.setString (STRING, STRING_VALUE);
+            wr.setString (STRING_WITH_DEFAULT2, STRING_VALUE);
+            wr.setBinary (BLOB, BLOB_VALUE);
+            wr.setStringArray (EMPTY_STRING_LIST, new String[0]);
+            wr.setStringArray (STRING_LIST, STRING_LIST_VALUE);
             return wr.serializeJSONStructure ();
           }
       }
 
     public static void main (String[] argc)
       {
-        byte[] data = null;
         try
           {
             cache.addToCache (Reader.class);
-            data = new Writer ().getJSONData ();
+            byte[] data = new Writer ().getJSONData ();
             Reader reader = (Reader) cache.parse (data);
+            byte[] output = JSONWriter.serializeParsedJSONDocument (reader);
+            System.out.println (new String (data, "UTF-8"));
+            if (ArrayUtil.compare (data, output))
+              {
+                System.out.println ("Input and output are equivalent");
+              }
           }
         catch (Exception e)
           {
-            try
-              {
-                System.out.println (new String (data, "UTF-8"));
-              }
-            catch (UnsupportedEncodingException e1)
-              {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-              }
             e.printStackTrace ();
           }
       }

@@ -176,7 +176,7 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
       {
         X509Certificate last_certificate = null;
         Vector<X509Certificate> certificates = new Vector<X509Certificate> ();
-        for (byte[] certificate_blob : rd.getBinaryList (JSONEnvelopedSignature.X509_CERTIFICATE_PATH_JSON))
+        for (byte[] certificate_blob : rd.getBinaryArray (JSONEnvelopedSignature.X509_CERTIFICATE_PATH_JSON))
           {
             X509Certificate certificate = CertificateUtil.getCertificateFromBlob (certificate_blob);
             certificates.add (pathCheck (last_certificate, last_certificate = certificate));
