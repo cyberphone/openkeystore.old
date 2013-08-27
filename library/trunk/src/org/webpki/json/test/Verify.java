@@ -43,6 +43,8 @@ import org.webpki.util.ArrayUtil;
  */
 public class Verify extends JSONDecoder
   {
+    static int count;
+
     @Override
     protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
       {
@@ -71,7 +73,7 @@ public class Verify extends JSONDecoder
                               {
                                 PublicKey public_key = DemoKeyStore.getECDSAStore ().getCertificate ("mykey").getPublicKey ();
                                 signature.verify (new JSONAsymKeyVerifier (public_key));
-                                System.out.println ("Asymmetric key signature validated for: " + public_key.toString ());
+                                debugOutput ("Asymmetric key signature validated for: " + public_key.toString ());
                               }
                             catch (GeneralSecurityException e)
                               {
@@ -81,13 +83,13 @@ public class Verify extends JSONDecoder
   
                           case SYMMETRIC_KEY:
                             signature.verify (new JSONSymKeyVerifier (new Sign.SymmetricOperations ()));
-                            System.out.println ("Symmetric key signature validated for Key ID: " + signature.getKeyID ());
+                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyID ());
                             break;
   
                           default:
                             KeyStoreVerifier verifier = new KeyStoreVerifier (DemoKeyStore.getExampleDotComKeyStore ());
                             signature.verify (new JSONX509Verifier (verifier));
-                            System.out.println ("X509 signature validated for: " + verifier.getSignerCertificateInfo ().toString ());
+                            debugOutput ("X509 signature validated for: " + verifier.getSignerCertificateInfo ().toString ());
                             break;
                         }
                     }
@@ -107,6 +109,14 @@ public class Verify extends JSONDecoder
                 default:
                   rd.scanAway (property);
               }
+          }
+      }
+
+    void debugOutput (String string)
+      {
+        if (count == 1)
+          {
+            System.out.println (string);
           }
       }
 
@@ -146,7 +156,7 @@ public class Verify extends JSONDecoder
               }
             JSONDecoderCache parser = new JSONDecoderCache ();
             parser.addToCache (Verify.class);
-            while (repeat-- > 0)
+            while (count++ < repeat)
               {
                 parser.parse (ArrayUtil.readFile (argc[0]));
               }
