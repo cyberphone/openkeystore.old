@@ -251,13 +251,20 @@ class JSONParser
                       }
                   }
               }
-            if (simple.length () < min_length)
+            String result = simple.toString ();
+            if (result.length () < min_length)
               {
-                throw new IOException ("Missing value");
+                throw new IOException ("Missing value: " + result);
               }
-            if (!numeric)
+            if (numeric)
               {
-                String result = simple.toString ();
+                if (result.charAt (min_length - 1) == '0' && (min_length == 2 || result.length () > 1))
+                  {
+                    throw new IOException ("Leading zeroes are not allowed: " + result);
+                  }
+              }
+            else
+              {
                 if (!result.equals ("true") && !result.equals ("false"))
                   {
                     throw new IOException ("Expected a boolean, got: " + result);
