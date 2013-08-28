@@ -242,7 +242,7 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
       {
         if (getSignatureType () != SIGNATURE.SYMMETRIC_KEY)
           {
-            throw new IOException ("\"" + KEY_ID_JSON + "\" does not apply to :" + getSignatureType ().toString ());
+            throw new IOException ("\"" + KEY_ID_JSON + "\" does not apply to: " + getSignatureType ().toString ());
           }
         return key_id;
       }
