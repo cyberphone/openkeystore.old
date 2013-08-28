@@ -162,9 +162,9 @@ public class RelativeDistinguishedName
             nameOrOID = t;
           }
             
-        // e-mail as IA5String, all others as Printable or UTF-8 
+        // e-mail and dc as IA5String, all others as Printable or UTF-8 
         // (if contatining non-printable characters).
-        add(nameOrOID, nameOrOID.equals ("1.2.840.113549.1.9.1") ? 
+        add(nameOrOID, (nameOrOID.equals ("1.2.840.113549.1.9.1") || nameOrOID.equals ("0.9.2342.19200300.100.1.25")) ? 
                         (ASN1String)new ASN1IA5String (value) : 
                         ASN1PrintableString.isPrintableString (value)?
                          (ASN1String)new ASN1PrintableString (value) :

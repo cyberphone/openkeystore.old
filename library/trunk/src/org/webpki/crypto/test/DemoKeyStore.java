@@ -35,7 +35,7 @@ public class DemoKeyStore
 
     public static KeyStore getMarionKeyStore () throws IOException
       {
-        return new DemoKeyStore ().getKeyStore ("marion.ks");
+        return new DemoKeyStore ().getKeyStore ("marion.jks");
       }
 
     public static KeyStore getECDSAStore () throws IOException
@@ -45,22 +45,22 @@ public class DemoKeyStore
 
     public static KeyStore getExampleDotComKeyStore () throws IOException
       {
-        return new DemoKeyStore ().getKeyStore ("example.ks");
+        return new DemoKeyStore ().getKeyStore ("example.jks");
       }
 
     public static KeyStore getMybankDotComKeyStore () throws IOException
       {
-        return new DemoKeyStore ().getKeyStore ("mybank.ks");
+        return new DemoKeyStore ().getKeyStore ("mybank.jks");
       }
 
     public static KeyStore getCAKeyStore () throws IOException
       {
-        return new DemoKeyStore ().getKeyStore ("root.ks");
+        return new DemoKeyStore ().getKeyStore ("root.jks");
       }
 
     public static KeyStore getSubCAKeyStore () throws IOException
       {
-        return new DemoKeyStore ().getKeyStore ("subca.ks");
+        return new DemoKeyStore ().getKeyStore ("subca.jks");
       }
 
     private KeyStore getKeyStore (String name) throws IOException
