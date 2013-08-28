@@ -36,6 +36,8 @@ import org.webpki.crypto.KeyAlgorithms;
 
 /**
  * Encoder for enveloped JSON signatures.
+ * Only used internally except for the public static methods.
+ * 
  */
 public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
   {
@@ -47,7 +49,7 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
     
     String referenced_value;
 
-    JSONSigner signer;
+    JSONSigner saved_signer;
     
     static void writeCryptoBinary (JSONWriter wr, BigInteger value, String name) throws IOException
       {
@@ -118,13 +120,9 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
         wr.setBinaryArray (X509_CERTIFICATE_PATH_JSON, certificates);
       }
 
-    public JSONEnvelopedSignatureEncoder (JSONSigner signer)
+    JSONEnvelopedSignatureEncoder (JSONSigner signer, JSONWriter wr, String name, String value) throws IOException
       {
-        this.signer = signer;
-      }
-
-    public void sign (JSONWriter wr, String name, String value) throws IOException
-      {
+        saved_signer = signer;
         referenced_name = name;
         referenced_value = value;
         wr.setObject (ENVELOPED_SIGNATURE_JSON, new JSONObjectWriter ()
@@ -138,7 +136,7 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
                     @Override
                     public void writeObject (JSONWriter wr) throws IOException
                       {
-                        wr.setString (ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
+                        wr.setString (ALGORITHM_JSON, saved_signer.getAlgorithm ().getURI ());
                         wr.setObject (REFERENCE_JSON, new JSONObjectWriter ()
                           {
                             @Override
@@ -153,16 +151,21 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
                             @Override
                             public void writeObject (JSONWriter wr) throws IOException
                               {
-                                signer.writeKeyInfoData (wr);
+                                saved_signer.writeKeyInfoData (wr);
                               }
                           });
                       }
                   });
               }
           });
+      }
+
+    void sign (JSONWriter wr) throws IOException
+      {
         signature.addProperty (SIGNATURE_VALUE_JSON, 
-                               new JSONValue (true, 
-                                              true,
-                                              JSONWriter.getBase64 (signer.signData (wr.getCanonicalizedSubset (signature_info, name, value)))));
+                               new JSONValue (JSONTypes.STRING, 
+                                              JSONWriter.getBase64 (saved_signer.signData (wr.getCanonicalizedSubset (signature_info, 
+                                                                                                                      referenced_name,
+                                                                                                                      referenced_value)))));
       }
   }

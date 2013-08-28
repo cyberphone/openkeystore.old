@@ -22,7 +22,8 @@ import java.util.Vector;
 
 /**
  * Parses JSON into a DOM-like tree.
- * Only used internally.
+ * Only used internally.  The real stuff is supposed to use the
+ * {@link JSONDocumentCache} and {@link JSONDocument} classes.
  * 
  */
 class JSONParser
@@ -78,7 +79,6 @@ class JSONParser
         return property.toString ();
       }
     
-
     JSONValue scanObject (JSONObject holder) throws IOException
       {
         boolean next = false;
@@ -112,12 +112,12 @@ class JSONParser
           }
         scan ();
         holder.reader = holder.properties.keySet ().iterator ();
-        return new JSONValue (false, false, holder);
+        return new JSONValue (JSONTypes.OBJECT, holder);
       }
 
     JSONValue scanArray (String name) throws IOException
       {
-        Vector array = null;
+        Vector<JSONValue> array = new Vector<JSONValue> ();
         JSONValue value = null;
         JSONValue last = null;
         while (testChar () != RIGHT_BRACKET)
@@ -139,46 +139,28 @@ class JSONParser
                 default:
                   value = scanSimpleType ();
               }
-            if (last == null)
+            if (last != null && last.type != value.type)
               {
-                array = new Vector ();
-              }
-            else
-              {
-                    // Simple value <=> {}
-                if ((last.simple ^ value.simple) ||
-
-                    // "string" <=> int/boolean
-                    (last.quoted ^ value.quoted) ||
-
-                    // int <=> boolean
-                    (last.simple && !last.quoted && ((String)(value.value)).charAt (0) > 'a' ^ ((String)(last.value)).charAt (0) > 'a'))
-                  {
-                    throw new IOException ("Elements differ in type for array: " + name);
-                  }
+                throw new IOException ("Elements differ in type for array: " + name);
               }
             last = value;
-            array.add (value.value);
+            array.add (value);
           }
         scan ();
-        if (last == null)
-          {
-            return new JSONValue (false, false, new Vector<String> ());
-          }
-        return new JSONValue (false, value.quoted, array);
+        return new JSONValue (JSONTypes.ARRAY, array);
       }
 
     JSONValue scanSimpleType () throws IOException
       {
         index--;
-        StringBuffer simple = new StringBuffer ();
+        StringBuffer temp_buffer = new StringBuffer ();
         char c;
         boolean first = true;
-        boolean numeric = true;
+        boolean number = true;
         int min_length = 1;
         while (!isWhiteSpace (c = testChar ()) && c != COMMA_CHARACTER && c != RIGHT_BRACKET && c != RIGHT_CURLY_BRACKET)
           {
-            simple.append (c);
+            temp_buffer.append (c);
             index++;
             if (first)
               {
@@ -188,24 +170,24 @@ class JSONParser
                   }
                 else
                   {
-                    numeric = isNumber (c);
+                    number = isNumber (c);
                   }
                 first = false;
               }
             else
               {
-                if (numeric ^ isNumber (c))
+                if (number ^ isNumber (c))
                   {
-                    throw new IOException ("Expected an integer or boolean, got: " + simple.toString ());
+                    throw new IOException ("Expected an integer or boolean, got: " + temp_buffer.toString ());
                   }
               }
           }
-        String result = simple.toString ();
+        String result = temp_buffer.toString ();
         if (result.length () < min_length)
           {
             throw new IOException ("Missing value: " + result);
           }
-        if (numeric)
+        if (number)
           {
             if (result.charAt (min_length - 1) == '0' && (min_length == 2 || result.length () > 1))
               {
@@ -219,12 +201,12 @@ class JSONParser
                 throw new IOException ("Expected a boolean, got: " + result);
               }
           }
-        return new JSONValue (true, false, result);
+        return new JSONValue (number ? JSONTypes.INTEGER : JSONTypes.BOOLEAN, result);
       }
 
     JSONValue scanQuotedString () throws IOException
       {
-        StringBuffer simple = new StringBuffer ();
+        StringBuffer result = new StringBuffer ();
         while (true)
           {
             char c = nextChar ();
@@ -268,9 +250,9 @@ class JSONParser
                       throw new IOException ("Unsupported escape:" + c);
                   }
               }
-            simple.append (c);
+            result.append (c);
           }
-        return new JSONValue (true, true, simple.toString ());
+        return new JSONValue (JSONTypes.STRING, result.toString ());
       }
 
     boolean isNumber (char c)

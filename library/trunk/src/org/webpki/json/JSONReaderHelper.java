@@ -48,7 +48,7 @@ public class JSONReaderHelper
         return new_rd;
       }
 
-    JSONValue getProperty (String name) throws IOException
+    JSONValue getProperty (String name, JSONTypes expected) throws IOException
       {
         if (current.reader.hasNext ())
           {
@@ -57,7 +57,12 @@ public class JSONReaderHelper
               {
                 throw new IOException ("Looking for \"" + name + "\" found \"" + found + "\"");
               }
-            return current.properties.get (name);
+            JSONValue value = current.properties.get (name);
+            if (value.type != expected)
+              {
+                throw new IOException ("Type mismatch for \"" + name + "\": Read=" + value.type.toString () + ", Expected=" + expected.toString ());
+              }
+            return value;
           }
         throw new IOException ("No more properties found in object when looking for \"" + name + "\"");
       }
@@ -67,47 +72,25 @@ public class JSONReaderHelper
         return new Base64().getBinaryFromBase64String (base64);
       }
 
-    void quoteTest (boolean found, boolean expected, String name) throws IOException
+    String getString (String name, JSONTypes expected) throws IOException
       {
-        if (found != expected)
-          {
-            throw new IOException ((expected ? "Quotes missing for \"" : "Unexpected quoting for \"") + name + "\" argument");
-          }
-      }
-
-    String getString (String name, boolean quoted) throws IOException
-      {
-        JSONValue value = getProperty (name);
-        if (!value.simple)
-          {
-            throw new IOException ("Simple element expected for \"" + name + "\"");
-          }
-        quoteTest (value.quoted, quoted, name);
+        JSONValue value = getProperty (name, expected);
         return (String) value.value;
       }
 
     public String getString (String name) throws IOException
       {
-        return getString (name, true);
+        return getString (name, JSONTypes.STRING);
       }
 
     public int getInt (String name) throws IOException
       {
-        return Integer.parseInt (getString (name, false));
+        return Integer.parseInt (getString (name, JSONTypes.INTEGER));
       }
 
     public boolean getBoolean (String name) throws IOException
       {
-        String bool = getString (name, false);
-        if (bool.equals ("true"))
-          {
-            return true;
-          }
-        else if (bool.equals ("false"))
-          {
-            return false;
-          }
-        throw new IOException ("Malformed boolean: " + bool);
+        return new Boolean (getString (name, JSONTypes.BOOLEAN));
       }
 
     public GregorianCalendar getDateTime (String name) throws IOException
@@ -122,16 +105,12 @@ public class JSONReaderHelper
 
     public BigInteger getBigInteger (String name) throws IOException
       {
-        return new BigInteger (getString (name, false));
+        return new BigInteger (getString (name, JSONTypes.INTEGER));
       }
 
     public JSONReaderHelper getObject (String name) throws IOException
       {
-        JSONValue value = getProperty (name);
-        if (value.simple && !(value.value instanceof JSONObject))
-          {
-            throw new IOException ("\"" + name + "\" is not a JSON object");
-          }
+        JSONValue value = getProperty (name, JSONTypes.OBJECT);
         return createJSONReaderHelper ((JSONObject) value.value);
       }
 
@@ -189,44 +168,31 @@ public class JSONReaderHelper
         return default_value;
       }
 
-    Vector<Object> getArray (String name, boolean quoted, boolean simple_array) throws IOException
+    Vector<JSONValue> getArray (String name, JSONTypes expected) throws IOException
       {
-        JSONValue value = getProperty (name);
-        if (value.simple && !(value.value instanceof Vector))
+        JSONValue value = getProperty (name, JSONTypes.ARRAY);
+        @SuppressWarnings("unchecked")
+        Vector<JSONValue> array = ((Vector<JSONValue>) value.value);
+        if (!array.isEmpty () && array.firstElement ().type != expected)
           {
-            throw new IOException ("\"" + name + "\" is not an array");
-          }
-        Vector<Object> array = ((Vector<Object>) value.value);
-        if (!array.isEmpty ())
-          {
-            if (simple_array)
-              {
-                if (!(array.firstElement () instanceof String))
-                  {
-                    throw new IOException ("\"" + name + "\" is not a simple array");
-                  }
-                quoteTest (value.quoted, quoted, name);
-              }
-            else
-              {
-                if (!(array.firstElement () instanceof JSONObject))
-                  {
-                    throw new IOException ("\"" + name + "\" is not an object array");
-                  }
-              }
+            throw new IOException ("Array type mismatch for \"" + name + "\"");
           }
         return array;
       }
 
-    String [] getSimpleArray (String name, boolean quoted) throws IOException
+    String [] getSimpleArray (String name, JSONTypes expected) throws IOException
       {
-        Vector<Object> array = getArray (name, quoted, true);
+        Vector<String> array = new Vector<String> ();
+        for (JSONValue value : getArray (name, expected))
+          {
+            array.add ((String)value.value);
+          }
         return array.toArray (new String[0]);
       }
 
     public String[] getStringArray (String name) throws IOException
       {
-        return getSimpleArray (name, true);
+        return getSimpleArray (name, JSONTypes.STRING);
       }
 
     public Vector<byte[]> getBinaryArray (String name) throws IOException
@@ -242,9 +208,9 @@ public class JSONReaderHelper
     public JSONReaderHelper[] getObjectArray (String name) throws IOException
       {
         Vector<JSONReaderHelper> readers = new Vector<JSONReaderHelper> ();
-        for (Object json_object: getArray (name, false, false))
+        for (JSONValue value : getArray (name, JSONTypes.OBJECT))
           {
-            readers.add (createJSONReaderHelper ((JSONObject) json_object));
+            readers.add (createJSONReaderHelper ((JSONObject) value.value));
           }
         return readers.toArray (new JSONReaderHelper[0]);
       }
@@ -262,19 +228,7 @@ public class JSONReaderHelper
     public JSONTypes getPropertyType (String name) throws IOException
       {
         JSONValue value = current.properties.get (name);
-        if (value == null)
-          {
-            return null;
-          }
-        if (value.simple)
-          {
-            return JSONTypes.STRING;
-          }
-        if (value.value instanceof JSONObject)
-          {
-            return JSONTypes.OBJECT;
-          }
-        return JSONTypes.ARRAY;
+        return value == null ? null : value.type;
       }
 
     public JSONTypes getArrayType (String name) throws IOException
@@ -284,20 +238,20 @@ public class JSONReaderHelper
           {
             throw new IOException ("Property \"" + name + "\" does not exist in this object");
           }
-        if (value.simple || value.value instanceof JSONObject)
+        if (value.type != JSONTypes.ARRAY)
           {
             throw new IOException ("Property \"" + name + "\" is not an array");
           }
-        Vector<Object> array = ((Vector<Object>) value.value);
+        Vector<JSONValue> array = ((Vector<JSONValue>) value.value);
         if (array.isEmpty ())
           {
             return null;
           }
-        return array.firstElement () instanceof JSONObject ? JSONTypes.OBJECT : JSONTypes.STRING;
+        return array.firstElement ().type;
       }
 
     public void scanAway (String name) throws IOException
       {
-        getProperty (name);
+        getProperty (name, getPropertyType (name));
       }
   }

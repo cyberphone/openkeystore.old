@@ -48,7 +48,7 @@ import org.webpki.json.JSONX509Signer;
 import org.webpki.util.ArrayUtil;
 
 /**
- * Simple test program
+ * Simple signature test generator
  */
 public class Sign extends JSONEncoder
   {
@@ -145,16 +145,66 @@ public class Sign extends JSONEncoder
           }
       }
 
+    class SO implements JSONObjectWriter
+      {
+        int value;
+        String instance;
+        
+        SO (int value, String instance)
+          {
+            this.value = value;
+            this.instance = instance;
+          }
+
+        @Override
+        public void writeObject (JSONWriter wr) throws IOException
+          {
+            wr.setString (ID, instance);
+            wr.setInt ("VALUE", value);
+            createSymmetricKeySignature (wr, ID, instance);
+          }
+      }
+
     ACTION action;
-    public Sign (ACTION action)
+    public Sign (ACTION action, boolean multiple)
       {
         this.action = action;
+        this.multiple = multiple;
       }
+    
+    boolean multiple;
 
     JSONEnvelopedSignatureEncoder signature;
     
+    void createX509Signature (JSONWriter wr, String name, String value) throws IOException
+      {
+        KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
+        signer.setKey (null, DemoKeyStore.getSignerPassword ());
+        wr.setEnvelopedSignature (new JSONX509Signer (signer), name, value);
+      }
+    
+    void createAsymmetricKeySignature (JSONWriter wr, String name, String value) throws IOException
+      {
+        try
+          {
+            PrivateKey private_key = (PrivateKey)DemoKeyStore.getECDSAStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
+            PublicKey public_key = DemoKeyStore.getECDSAStore ().getCertificate ("mykey").getPublicKey ();
+            wr.setEnvelopedSignature (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)), name, value);
+          }
+        catch (GeneralSecurityException e)
+          {
+            throw new IOException (e);
+          }
+      }
+    
+    void createSymmetricKeySignature (JSONWriter wr, String name, String value) throws IOException
+      {
+        wr.setEnvelopedSignature (new JSONSymKeySigner (new SymmetricOperations ()), name, value);
+      }
+    
+    
     @Override
-    protected byte[] getJSONData () throws IOException
+    public byte[] getJSONData () throws IOException
       {
         String instant = URLFriendlyRandom.generate (20);
         JSONWriter wr = new JSONWriter (ROOT_PROPERTY, VERSION);
@@ -162,47 +212,39 @@ public class Sign extends JSONEncoder
         wr.setObject ("HRT", new RT ());
         wr.setObjectArray ("ARR", new JSONObjectWriter[]{});
         wr.setObjectArray ("BARR", new JSONObjectWriter[]{new HT (true), new HT (false)});
+        if (multiple)
+          {
+            wr.setObjectArray ("SignedObjects", new JSONObjectWriter[]{new SO (35, "this"), new SO (-90, "that")});
+          }
         wr.setString (ID, instant);
         wr.setStringArray ("STRINGS", new String[]{"One", "Two", "Three"});
         wr.setString ("EscapeMe", "A\\\n\"" );
         wr.setInt ("Intra", 78);
         if (action == ACTION.X509)
           {
-            KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
-            signer.setKey (null, DemoKeyStore.getSignerPassword ());
-            signature = new JSONEnvelopedSignatureEncoder (new JSONX509Signer (signer));
+            createX509Signature (wr, ID, instant);
           }
         else if (action == ACTION.ASYM)
           {
-            try
-              {
-                PrivateKey private_key = (PrivateKey)DemoKeyStore.getECDSAStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
-                PublicKey public_key = DemoKeyStore.getECDSAStore ().getCertificate ("mykey").getPublicKey ();
-                signature = new JSONEnvelopedSignatureEncoder (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
-              }
-            catch (GeneralSecurityException e)
-              {
-                throw new IOException (e);
-              }
+            createAsymmetricKeySignature (wr, ID, instant);
           }
         else
           {
-            signature = new JSONEnvelopedSignatureEncoder (new JSONSymKeySigner (new SymmetricOperations ()));
+            createSymmetricKeySignature (wr, ID, instant);
           }
-        signature.sign (wr, ID, instant);
         wr.setString ("Additional", "Not signed since it comes after the EnvelopedSignature");
         return wr.serializeJSONStructure ();
       }
     
     static void show ()
       {
-        System.out.println (ACTION.SYM.toString () + "|" + ACTION.ASYM.toString () + "|" + ACTION.X509.toString () + " output-file\n");
+        System.out.println (ACTION.SYM.toString () + "|" + ACTION.ASYM.toString () + "|" + ACTION.X509.toString () + " multiple(true|false) output-file\n");
         System.exit (0);
       }
 
     public static void main (String[] argc)
       {
-        if (argc.length != 2)
+        if (argc.length != 3)
           {
             show ();
           }
@@ -213,7 +255,7 @@ public class Sign extends JSONEncoder
                 try
                   {
                     Security.insertProviderAt (new BouncyCastleProvider(), 1);
-                    ArrayUtil.writeFile (argc[1], new Sign (action).getJSONData ());
+                    ArrayUtil.writeFile (argc[2], new Sign (action, new Boolean (argc[1])).getJSONData ());
                   }
                 catch (Exception e)
                   {

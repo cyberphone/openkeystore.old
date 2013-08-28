@@ -21,14 +21,13 @@ package org.webpki.json;
  */
 class JSONValue
   {
-    boolean simple;
-    boolean quoted;
+    JSONTypes type;
+
     Object value;  // Holds either a String, JSONObject or Vector<JSONValue>
 
-    JSONValue (boolean simple, boolean quoted, Object value)
+    JSONValue (JSONTypes type, Object value)
       {
-        this.simple = simple;
-        this.quoted = quoted;
+        this.type = type;
         this.value = value;
       }
   }

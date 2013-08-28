@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.webpki.util.ArrayUtil;
@@ -49,12 +50,14 @@ public class JSONWriter
     
     boolean pretty = true;
     
-    public JSONWriter (String root_proprty, String version) throws IOException
+    Vector<JSONEnvelopedSignatureEncoder> signatures = new Vector<JSONEnvelopedSignatureEncoder> ();
+    
+    public JSONWriter (String root_property, String version) throws IOException
       {
         root = new JSONObject ();
         current = new JSONObject ();
-        root.addProperty (root_proprty, new JSONValue (false, false, current));
-        current.addProperty (JSONDecoderCache.VERSION_JSON, new JSONValue (true, true, version));
+        root.addProperty (root_property, new JSONValue (JSONTypes.OBJECT, current));
+        current.addProperty (JSONDecoderCache.VERSION_JSON, new JSONValue (JSONTypes.STRING, version));
       }
 
     JSONWriter (JSONObject root)
@@ -64,22 +67,22 @@ public class JSONWriter
 
     public void setString (String name, String value) throws IOException
       {
-        current.addProperty (name, new JSONValue (true, true, value));
+        current.addProperty (name, new JSONValue (JSONTypes.STRING, value));
       }
 
     public void setInt (String name, int value) throws IOException
       {
-        current.addProperty (name, new JSONValue (true, false, Integer.toString (value)));
+        current.addProperty (name, new JSONValue (JSONTypes.INTEGER, Integer.toString (value)));
       }
 
     public void setBigInteger (String name, BigInteger value) throws IOException
       {
-        current.addProperty (name, new JSONValue (true, false, value.toString ()));
+        current.addProperty (name, new JSONValue (JSONTypes.INTEGER, value.toString ()));
       }
 
     public void setBoolean (String name, boolean value) throws IOException
       {
-        current.addProperty (name, new JSONValue (true, false, Boolean.toString (value)));
+        current.addProperty (name, new JSONValue (JSONTypes.BOOLEAN, Boolean.toString (value)));
       }
 
     public void setDateTime (String name, Date t) throws IOException
@@ -99,33 +102,33 @@ public class JSONWriter
         current = holder;
         json_object.writeObject (this);
         current = save;
-        current.addProperty (name, new JSONValue (false, false, holder));
+        current.addProperty (name, new JSONValue (JSONTypes.OBJECT, holder));
         return holder;
       }
 
     public void setObjectArray (String name, JSONObjectWriter[] json_objects) throws IOException
       {
         JSONObject save = current;
-        Vector<JSONObject> array = new Vector<JSONObject> ();
+        Vector<JSONValue> array = new Vector<JSONValue> ();
         for (JSONObjectWriter json_object : json_objects)
           {
             JSONObject holder = new JSONObject ();
             current = holder;
             json_object.writeObject (this);
-            array.add (holder);
+            array.add (new JSONValue (JSONTypes.OBJECT, holder));
           }
         current = save;
-        current.addProperty (name, new JSONValue (false, false, array));
+        current.addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
       }
 
     void setStringArray (String name, String[] values, boolean quoted) throws IOException
       {
-        Vector<String> array = new Vector<String> ();
+        Vector<JSONValue> array = new Vector<JSONValue> ();
         for (String value : values)
           {
-            array.add (value);
+            array.add (new JSONValue (JSONTypes.STRING, value));
           }
-        current.addProperty (name, new JSONValue (false, quoted, array));
+        current.addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
       }
 
     public void setBinaryArray (String name, Vector<byte[]> values) throws IOException
@@ -158,6 +161,12 @@ public class JSONWriter
 
     public byte[] serializeJSONStructure () throws IOException
       {
+        Iterator<JSONEnvelopedSignatureEncoder> unfinished = signatures.iterator ();
+        while (unfinished.hasNext ())
+          {
+            unfinished.next ().sign (this);
+            unfinished.remove ();
+          }
         buffer = new StringBuffer ();
         indent = 0;
         printObject (root, false);
@@ -226,31 +235,37 @@ public class JSONWriter
             newLine ();
             next = true;
             printProperty (property);
-            if (json_value.simple)
+            switch (json_value.type)
               {
-                singleSpace ();
-                printEscapedString ((String)json_value.value, json_value.quoted);
-              }
-            else if (json_value.value instanceof Vector)
-              {
-                if (((Vector) json_value.value).isEmpty ())
-                  {
-                    singleSpace ();
-                    buffer.append ("[]");
-                  }
-                else if (((Vector) json_value.value).firstElement () instanceof JSONObject)
-                  {
-                    printArrayObjects ((Vector<JSONObject>) json_value.value);
-                  }
-                else
-                  {
-                    printArraySimple ((Vector<String>) json_value.value, json_value.quoted);
-                  }
-              }
-            else
-              {
-                newLine ();
-                printObject ((JSONObject) json_value.value, false);
+                case INTEGER:
+                case BOOLEAN:
+                case STRING:
+                  singleSpace ();
+                  printSimpleValue (json_value);
+                  break;
+     
+                case ARRAY:
+                  @SuppressWarnings("unchecked")
+                  Vector<JSONValue> array = (Vector<JSONValue>) json_value.value;
+                  if (array.isEmpty ())
+                    {
+                      singleSpace ();
+                      buffer.append ('[');
+                    }
+                  else if (array.firstElement ().type == JSONTypes.OBJECT)
+                    {
+                      printArrayObjects (array);
+                    }
+                  else
+                    {
+                      printArraySimple (array);
+                    }
+                  buffer.append (']');
+                  break;
+
+                case OBJECT:
+                  newLine ();
+                  printObject ((JSONObject) json_value.value, false);
               }
           }
         endObject ();
@@ -261,12 +276,12 @@ public class JSONWriter
           }
       }
 
-    void printArraySimple (Vector<String> array, boolean quoted)
+    void printArraySimple (Vector<JSONValue> array)
       {
         int i = 0;
-        for (String string : array)
+        for (JSONValue value : array)
           {
-            i += string.length ();
+            i += ((String)value.value).length ();
           }
         boolean broken_lines = i > 100;
         boolean next = false;
@@ -286,7 +301,7 @@ public class JSONWriter
             indentLine ();
             newLine ();
           }
-        for (String string : array)
+        for (JSONValue value : array)
           {
             if (next)
               {
@@ -300,7 +315,7 @@ public class JSONWriter
               {
                 spaceOut ();
               }
-            printEscapedString (string, quoted);
+            printSimpleValue (value);
             next = true;
           }
         if (broken_lines)
@@ -310,16 +325,34 @@ public class JSONWriter
             spaceOut ();
             undentLine ();
           }
-        buffer.append (']');
       }
 
-    void printEscapedString (String value, boolean quoted)
+    void printArrayObjects (Vector<JSONValue> array)
       {
-        if (quoted)
+        boolean next = false;
+        for (JSONValue value : array)
           {
-            buffer.append ('"');
+            if (next)
+              {
+                buffer.append (',');
+              }
+            newLine ();
+            printObject ((JSONObject)value.value, !next);
+            next = true;
           }
-        for (char c : value.toCharArray ())
+        indent--;
+      }
+
+    void printSimpleValue (JSONValue value)
+      {
+        String string = (String) value.value;
+        if (value.type != JSONTypes.STRING)
+          {
+            buffer.append (string);
+            return;
+          }
+        buffer.append ('"');
+        for (char c : string.toCharArray ())
           {
             switch (c)
               {
@@ -356,32 +389,12 @@ public class JSONWriter
                   buffer.append (c);
               }
           }
-        if (quoted)
-          {
-            buffer.append ('"');
-          }
+        buffer.append ('"');
       }
 
     void escapeCharacter (char c)
       {
         buffer.append ('\\').append (c);
-      }
-
-    void printArrayObjects (Vector<JSONObject> array)
-      {
-        boolean next = false;
-        for (JSONObject element : array)
-          {
-            if (next)
-              {
-                buffer.append (',');
-              }
-            newLine ();
-            printObject (element, !next);
-            next = true;
-          }
-        buffer.append (']');
-        indent--;
       }
 
     void singleSpace ()
@@ -419,7 +432,7 @@ public class JSONWriter
         int length = buffer.length ();
         if (length == 0)
           {
-            throw new IOException ("\"" + JSONEnvelopedSignature.REFERENCE_JSON + "\" not found");
+            throw new IOException ("\"" + JSONEnvelopedSignature.REFERENCE_JSON + "\" " + name + "/" + value + " not found");
           }
         if (signature_info != null)
           {
@@ -437,16 +450,27 @@ public class JSONWriter
         return result;
       }
 
+    @SuppressWarnings("unchecked")
     void findSubset (JSONObject json_holder, String parent, String name, String value)
       {
-        for (String property : json_holder.properties.keySet ())
+        for (String property_name : json_holder.properties.keySet ())
           {
-            JSONValue json_value = json_holder.properties.get (property);
-            if (json_value.value instanceof Vector)
+            JSONValue property = json_holder.properties.get (property_name);
+            if (property.type == JSONTypes.ARRAY)
               {
-                continue;
+                for (JSONValue array_element : (Vector<JSONValue>) property.value)
+                  {
+                    if (array_element.type == JSONTypes.OBJECT)
+                      {
+                        findSubset ((JSONObject) array_element.value, null, name, value);
+                      }
+                  }
               }
-            if (property.equals (name) && json_value.simple && json_value.quoted && value.equals (json_value.value))
+            else if (property.type == JSONTypes.OBJECT)
+              {
+                findSubset ((JSONObject) property.value, property_name, name, value);
+              }
+            else if (property.type == JSONTypes.STRING && property_name.equals (name) && value.equals (property.value))
               {
                 if (parent != null)
                   {
@@ -454,10 +478,6 @@ public class JSONWriter
                   }
                 printObject (json_holder, false);
                 break;
-              }
-            if (!json_value.simple)
-              {
-                findSubset ((JSONObject) json_value.value, property, name, value);
               }
           }
       }
@@ -470,6 +490,11 @@ public class JSONWriter
     public static byte[] parseAndPrettyPrint (byte[] json_utf8) throws IOException
       {
         return new JSONWriter (new JSONParser ().parse (json_utf8)).serializeJSONStructure ();
+      }
+
+    public void setEnvelopedSignature (JSONSigner signer, String name, String value) throws IOException
+      {
+        signatures.add (new JSONEnvelopedSignatureEncoder (signer, this, name, value));
       }
 
     public static void main (String[] argc)

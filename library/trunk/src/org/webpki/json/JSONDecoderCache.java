@@ -112,6 +112,7 @@ public class JSONDecoderCache
           }
       }
 
+    @SuppressWarnings("unchecked")
     void checkForUnread (JSONObject json_object, String property) throws IOException
       {
         if (json_object.reader.hasNext ())
@@ -121,21 +122,17 @@ public class JSONDecoderCache
         for (String name : json_object.properties.keySet ())
           {
             JSONValue value = json_object.properties.get (name);
-            if (!value.simple)
+            if (value.type == JSONTypes.OBJECT)
               {
-                if (value.value instanceof JSONObject)
+                checkForUnread ((JSONObject)value.value, name);
+              }
+            else if (value.type == JSONTypes.ARRAY)
+              {
+                for (JSONValue object : (Vector<JSONValue>)value.value)
                   {
-                    checkForUnread ((JSONObject)value.value, name);
-                  }
-                else
-                  {
-                    Vector<Object> array = (Vector<Object>)value.value;
-                    for (Object object : array)
+                    if (object.type == JSONTypes.OBJECT)
                       {
-                        if (object instanceof JSONObject)
-                          {
-                            checkForUnread ((JSONObject)object, name);
-                          }
+                        checkForUnread ((JSONObject)object.value, name);
                       }
                   }
               }
