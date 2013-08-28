@@ -39,9 +39,9 @@ import org.webpki.crypto.KeyAlgorithms;
  */
 public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
   {
-    JSONHolder signature;
+    JSONObject signature;
     
-    JSONHolder signature_info;
+    JSONObject signature_info;
     
     String referenced_name;
     
@@ -63,7 +63,7 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
 
     public static void writePublicKey (JSONWriter wr, final PublicKey public_key) throws IOException
       {
-        wr.setObject (PUBLIC_KEY_JSON, new JSONObject ()
+        wr.setObject (PUBLIC_KEY_JSON, new JSONObjectWriter ()
           {
             @Override
             public void writeObject (JSONWriter wr) throws IOException
@@ -71,7 +71,7 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
                 final KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
                 if (key_alg.isRSAKey ())
                   {
-                    wr.setObject (RSA_JSON, new JSONObject ()
+                    wr.setObject (RSA_JSON, new JSONObjectWriter ()
                       {
                         @Override
                         public void writeObject (JSONWriter wr) throws IOException
@@ -84,7 +84,7 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
                   }
                 else
                   {
-                    wr.setObject (EC_JSON, new JSONObject ()
+                    wr.setObject (EC_JSON, new JSONObjectWriter ()
                       {
                         @Override
                         public void writeObject (JSONWriter wr) throws IOException
@@ -127,19 +127,19 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
       {
         referenced_name = name;
         referenced_value = value;
-        wr.setObject (ENVELOPED_SIGNATURE_JSON, new JSONObject ()
+        wr.setObject (ENVELOPED_SIGNATURE_JSON, new JSONObjectWriter ()
           {
             @Override
             public void writeObject (JSONWriter wr) throws IOException
               {
                 signature = wr.current;
-                signature_info = wr.localSetObject (SIGNATURE_INFO_JSON, new JSONObject ()
+                signature_info = wr.localSetObject (SIGNATURE_INFO_JSON, new JSONObjectWriter ()
                   {
                     @Override
                     public void writeObject (JSONWriter wr) throws IOException
                       {
                         wr.setString (ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
-                        wr.setObject (REFERENCE_JSON, new JSONObject ()
+                        wr.setObject (REFERENCE_JSON, new JSONObjectWriter ()
                           {
                             @Override
                             public void writeObject (JSONWriter wr) throws IOException
@@ -148,7 +148,7 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
                                 wr.setString (VALUE_JSON, referenced_value);
                               }
                           });
-                        wr.setObject (KEY_INFO_JSON, new JSONObject ()
+                        wr.setObject (KEY_INFO_JSON, new JSONObjectWriter ()
                           {
                             @Override
                             public void writeObject (JSONWriter wr) throws IOException

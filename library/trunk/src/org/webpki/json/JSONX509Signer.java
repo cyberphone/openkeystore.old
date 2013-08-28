@@ -62,7 +62,7 @@ public class JSONX509Signer extends JSONSigner
     @Override
     void writeKeyInfoData (JSONWriter wr) throws IOException
       {
-        wr.setObject (JSONEnvelopedSignature.SIGNATURE_CERTIFICATE_JSON, new JSONObject ()
+        wr.setObject (JSONEnvelopedSignature.SIGNATURE_CERTIFICATE_JSON, new JSONObjectWriter ()
           {
             @Override
             public void writeObject (JSONWriter wr) throws IOException

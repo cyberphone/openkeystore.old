@@ -72,18 +72,18 @@ public class JSONDecoderCache
     public JSONDecoder parse (byte[] json_utf8) throws IOException
       {
         JSONParser parser = new JSONParser ();
-        JSONHolder root = parser.parse (json_utf8);
+        JSONObject root = parser.parse (json_utf8);
         if (root.properties.size () != 1)
           {
             throw new IOException ("Expected a single property, got: " + root.properties.size ());
           }
         String root_property = root.properties.keySet ().iterator ().next ();
         JSONValue value = root.properties.get (root_property);
-        if (!(value.value instanceof JSONHolder))
+        if (!(value.value instanceof JSONObject))
           {
             throw new IOException ("Expected an object as message body");
           }
-        JSONReaderHelper reader = new JSONReaderHelper ((JSONHolder)value.value);
+        JSONReaderHelper reader = new JSONReaderHelper ((JSONObject)value.value);
         reader.root = root;
         String version = reader.getString (VERSION_JSON);
         Class<? extends JSONDecoder> decoder_class = class_map.get (new RegisteredJSONDecoder (version, root_property));
@@ -112,7 +112,7 @@ public class JSONDecoderCache
           }
       }
 
-    void checkForUnread (JSONHolder json_object, String property) throws IOException
+    void checkForUnread (JSONObject json_object, String property) throws IOException
       {
         if (json_object.reader.hasNext ())
           {
@@ -123,18 +123,18 @@ public class JSONDecoderCache
             JSONValue value = json_object.properties.get (name);
             if (!value.simple)
               {
-                if (value.value instanceof JSONHolder)
+                if (value.value instanceof JSONObject)
                   {
-                    checkForUnread ((JSONHolder)value.value, name);
+                    checkForUnread ((JSONObject)value.value, name);
                   }
                 else
                   {
                     Vector<Object> array = (Vector<Object>)value.value;
                     for (Object object : array)
                       {
-                        if (object instanceof JSONHolder)
+                        if (object instanceof JSONObject)
                           {
-                            checkForUnread ((JSONHolder)object, name);
+                            checkForUnread ((JSONObject)object, name);
                           }
                       }
                   }

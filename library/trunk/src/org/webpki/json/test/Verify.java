@@ -25,6 +25,7 @@ import java.security.Security;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.crypto.KeyStoreVerifier;
+
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.json.JSONAsymKeyVerifier;
@@ -33,6 +34,7 @@ import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONEnvelopedSignatureDecoder;
 import org.webpki.json.JSONReaderHelper;
 import org.webpki.json.JSONSymKeyVerifier;
+import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONWriter;
 import org.webpki.json.JSONX509Verifier;
 
@@ -99,12 +101,15 @@ public class Verify extends JSONDecoder
                     }
                   break;
 
-                case OBJECT_ARRAY:
-                  for (JSONReaderHelper next : rd.getObjectArray (property))
+                case ARRAY:
+                  if (rd.getArrayType (property) == JSONTypes.OBJECT)
                     {
-                      recurse (next, false);
+                      for (JSONReaderHelper next : rd.getObjectArray (property))
+                        {
+                          recurse (next, false);
+                        }
+                      break;
                     }
-                  break;
 
                 default:
                   rd.scanAway (property);

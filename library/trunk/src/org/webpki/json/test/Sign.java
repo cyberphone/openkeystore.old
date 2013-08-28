@@ -40,7 +40,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONEnvelopedSignatureEncoder;
-import org.webpki.json.JSONObject;
+import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONWriter;
@@ -116,7 +116,7 @@ public class Sign extends JSONEncoder
           }
       }
 
-    class HT implements JSONObject
+    class HT implements JSONObjectWriter
       {
         boolean fantastic;
 
@@ -134,7 +134,7 @@ public class Sign extends JSONEncoder
           }
       }
     
-    class RT implements JSONObject
+    class RT implements JSONObjectWriter
       {
         @Override
         public void writeObject (JSONWriter wr) throws IOException
@@ -160,8 +160,8 @@ public class Sign extends JSONEncoder
         JSONWriter wr = new JSONWriter (ROOT_PROPERTY, VERSION);
         wr.setDateTime ("Now", new Date ());
         wr.setObject ("HRT", new RT ());
-        wr.setObjectArray ("ARR", new JSONObject[]{});
-        wr.setObjectArray ("BARR", new JSONObject[]{new HT (true), new HT (false)});
+        wr.setObjectArray ("ARR", new JSONObjectWriter[]{});
+        wr.setObjectArray ("BARR", new JSONObjectWriter[]{new HT (true), new HT (false)});
         wr.setString (ID, instant);
         wr.setStringArray ("STRINGS", new String[]{"One", "Two", "Three"});
         wr.setString ("EscapeMe", "A\\\n\"" );

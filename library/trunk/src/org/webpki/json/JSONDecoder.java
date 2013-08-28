@@ -23,7 +23,7 @@ import java.io.IOException;
  */
 public abstract class JSONDecoder
   {
-    JSONHolder root;  // Of parsed document
+    JSONObject root;  // Of parsed document
 
     /**
      * INTERNAL USE ONLY     

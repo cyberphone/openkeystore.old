@@ -18,10 +18,27 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+
 /**
- * Interface for java classes creating JSON {} data.
+ * Local support class for holding JSON objects.
  */
-public interface JSONObject
+class JSONObject
   {
-    public void writeObject (JSONWriter wr) throws IOException;
+    LinkedHashMap<String, JSONValue> properties = new LinkedHashMap<String, JSONValue> ();
+
+    Iterator<String> reader;
+
+    JSONObject ()
+      {
+      }
+
+    void addProperty (String name, JSONValue value) throws IOException
+      {
+        if (properties.put (name, value) != null)
+          {
+            throw new IOException ("Duplicate: " + name);
+          }
+      }
   }

@@ -43,13 +43,13 @@ class JSONParser
     
     String json_data;
 
-    JSONHolder parse (byte[] json_utf8) throws IOException
+    JSONObject parse (byte[] json_utf8) throws IOException
       {
         json_data = new String (json_utf8, "UTF-8");
         index = 0;
         max_length = json_data.length ();
         scanFor (LEFT_CURLY_BRACKET);
-        JSONHolder root = new JSONHolder ();
+        JSONObject root = new JSONObject ();
         scanObject (root);
         while (index < max_length)
           {
@@ -79,7 +79,7 @@ class JSONParser
       }
     
 
-    JSONValue scanObject (JSONHolder holder) throws IOException
+    JSONValue scanObject (JSONObject holder) throws IOException
       {
         boolean next = false;
         while (testChar () != RIGHT_CURLY_BRACKET)
@@ -94,11 +94,11 @@ class JSONParser
             switch (scan ())
               {
                 case LEFT_CURLY_BRACKET:
-                  value = scanObject (new JSONHolder ());
+                  value = scanObject (new JSONObject ());
                   break;
 
                 case DOUBLE_QUOTE:
-                  value = scanSimple (true);
+                  value = scanQuotedString ();
                   break;
 
                 case LEFT_BRACKET:
@@ -106,8 +106,7 @@ class JSONParser
                   break;
 
                 default:
-                  index--;
-                  value = scanSimple (false);
+                  value = scanSimpleType ();
               }
             holder.addProperty (name, value);
           }
@@ -130,16 +129,15 @@ class JSONParser
             switch (scan ())
               {
                 case LEFT_CURLY_BRACKET:
-                  value = scanObject (new JSONHolder ());
+                  value = scanObject (new JSONObject ());
                   break;
 
                 case DOUBLE_QUOTE:
-                  value = scanSimple (true);
+                  value = scanQuotedString ();
                   break;
 
                 default:
-                  index--;
-                  value = scanSimple (false);
+                  value = scanSimpleType ();
               }
             if (last == null)
               {
@@ -170,108 +168,109 @@ class JSONParser
         return new JSONValue (false, value.quoted, array);
       }
 
-    JSONValue scanSimple (boolean quoted) throws IOException
+    JSONValue scanSimpleType () throws IOException
       {
+        index--;
         StringBuffer simple = new StringBuffer ();
-        if (quoted)
+        char c;
+        boolean first = true;
+        boolean numeric = true;
+        int min_length = 1;
+        while (!isWhiteSpace (c = testChar ()) && c != COMMA_CHARACTER && c != RIGHT_BRACKET && c != RIGHT_CURLY_BRACKET)
           {
-            while (true)
+            simple.append (c);
+            index++;
+            if (first)
               {
-                char c = nextChar ();
-                if (c == DOUBLE_QUOTE)
+                if (c == '-')
                   {
-                    break;
+                    min_length = 2;
                   }
-                if (c == BACK_SLASH)
+                else
                   {
-                    switch (c = nextChar ())
-                      {
-                        case '"':
-                        case '\\':
-                          break;
-
-/* 
-      Nobody (in their right mind...) escape slashes although it is the RFC
-                        case '/':
-*/
-                        case 'b':
-                          c = '\b';
-                          break;
-
-                        case 'f':
-                          c = '\f';
-                          break;
-
-                        case 'n':
-                          c = '\n';
-                          break;
-
-                        case 'r':
-                          c = '\r';
-                          break;
-
-                        case 't':
-                          c = '\t';
-                          break;
-                          
-                        default:
-                          throw new IOException ("Unsupported escape:" + c);
-                      }
+                    numeric = isNumber (c);
                   }
-                simple.append (c);
+                first = false;
+              }
+            else
+              {
+                if (numeric ^ isNumber (c))
+                  {
+                    throw new IOException ("Expected an integer or boolean, got: " + simple.toString ());
+                  }
+              }
+          }
+        String result = simple.toString ();
+        if (result.length () < min_length)
+          {
+            throw new IOException ("Missing value: " + result);
+          }
+        if (numeric)
+          {
+            if (result.charAt (min_length - 1) == '0' && (min_length == 2 || result.length () > 1))
+              {
+                throw new IOException ("Leading zeroes are not allowed: " + result);
               }
           }
         else
           {
-            char c;
-            boolean first = true;
-            boolean numeric = true;
-            int min_length = 1;
-            while (!isWhiteSpace (c = testChar ()) && c != COMMA_CHARACTER && c != RIGHT_BRACKET && c != RIGHT_CURLY_BRACKET)
+            if (!result.equals ("true") && !result.equals ("false"))
               {
-                simple.append (c);
-                index++;
-                if (first)
-                  {
-                    if (c == '-')
-                      {
-                        min_length = 2;
-                      }
-                    else
-                      {
-                        numeric = isNumber (c);
-                      }
-                    first = false;
-                  }
-                else
-                  {
-                    if (numeric ^ isNumber (c))
-                      {
-                        throw new IOException ("Expected an integer or boolean, got: " + simple.toString ());
-                      }
-                  }
-              }
-            String result = simple.toString ();
-            if (result.length () < min_length)
-              {
-                throw new IOException ("Missing value: " + result);
-              }
-            if (numeric)
-              {
-                if (result.charAt (min_length - 1) == '0' && (min_length == 2 || result.length () > 1))
-                  {
-                    throw new IOException ("Leading zeroes are not allowed: " + result);
-                  }
-              }
-            else
-              {
-                if (!result.equals ("true") && !result.equals ("false"))
-                  {
-                    throw new IOException ("Expected a boolean, got: " + result);
-                  }
+                throw new IOException ("Expected a boolean, got: " + result);
               }
           }
-        return new JSONValue (true, quoted, simple.toString ());
+        return new JSONValue (true, false, result);
+      }
+
+    JSONValue scanQuotedString () throws IOException
+      {
+        StringBuffer simple = new StringBuffer ();
+        while (true)
+          {
+            char c = nextChar ();
+            if (c == DOUBLE_QUOTE)
+              {
+                break;
+              }
+            if (c == BACK_SLASH)
+              {
+                switch (c = nextChar ())
+                  {
+                    case '"':
+                    case '\\':
+                      break;
+
+/* 
+    Nobody (in their right mind...) escape slashes although it is the RFC
+                      case '/':
+*/
+                    case 'b':
+                      c = '\b';
+                      break;
+
+                    case 'f':
+                      c = '\f';
+                      break;
+
+                    case 'n':
+                      c = '\n';
+                      break;
+
+                    case 'r':
+                      c = '\r';
+                      break;
+
+                    case 't':
+                      c = '\t';
+                      break;
+                      
+                    default:
+                      throw new IOException ("Unsupported escape:" + c);
+                  }
+              }
+            simple.append (c);
+          }
+        return new JSONValue (true, true, simple.toString ());
       }
 
     boolean isNumber (char c)

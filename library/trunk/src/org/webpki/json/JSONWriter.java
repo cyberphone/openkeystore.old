@@ -28,18 +28,18 @@ import org.webpki.util.Base64;
 import org.webpki.util.ISODateTime;
 
 /**
- * Class that writes JSON data based on a DOM-like tree.
+ * Class that writes JSON data to a DOM-like tree.
  * 
  */
 public class JSONWriter
   {
     static String canonicalization_debug_file;
 
-    JSONHolder root;
+    JSONObject root;
 
-    JSONHolder current;
+    JSONObject current;
     
-    JSONHolder signature_info;     // Only used for reading signatures
+    JSONObject signature_info;     // Only used for reading signatures
 
     int buffer_at_signature_info;  //    -"-
 
@@ -51,13 +51,13 @@ public class JSONWriter
     
     public JSONWriter (String root_proprty, String version) throws IOException
       {
-        root = new JSONHolder ();
-        current = new JSONHolder ();
+        root = new JSONObject ();
+        current = new JSONObject ();
         root.addProperty (root_proprty, new JSONValue (false, false, current));
         current.addProperty (JSONDecoderCache.VERSION_JSON, new JSONValue (true, true, version));
       }
 
-    JSONWriter (JSONHolder root)
+    JSONWriter (JSONObject root)
       {
         this.root = root;
       }
@@ -87,15 +87,15 @@ public class JSONWriter
         setString (name, ISODateTime.formatDateTime (t));
       }
 
-    public void setObject (String name, JSONObject json_object) throws IOException
+    public void setObject (String name, JSONObjectWriter json_object) throws IOException
       {
         localSetObject (name, json_object);
       }
 
-    JSONHolder localSetObject (String name, JSONObject json_object) throws IOException
+    JSONObject localSetObject (String name, JSONObjectWriter json_object) throws IOException
       {
-        JSONHolder save = current;
-        JSONHolder holder = new JSONHolder ();
+        JSONObject save = current;
+        JSONObject holder = new JSONObject ();
         current = holder;
         json_object.writeObject (this);
         current = save;
@@ -103,13 +103,13 @@ public class JSONWriter
         return holder;
       }
 
-    public void setObjectArray (String name, JSONObject[] json_objects) throws IOException
+    public void setObjectArray (String name, JSONObjectWriter[] json_objects) throws IOException
       {
-        JSONHolder save = current;
-        Vector<JSONHolder> array = new Vector<JSONHolder> ();
-        for (JSONObject json_object : json_objects)
+        JSONObject save = current;
+        Vector<JSONObject> array = new Vector<JSONObject> ();
+        for (JSONObjectWriter json_object : json_objects)
           {
-            JSONHolder holder = new JSONHolder ();
+            JSONObject holder = new JSONObject ();
             current = holder;
             json_object.writeObject (this);
             array.add (holder);
@@ -212,7 +212,7 @@ public class JSONWriter
       }
 
 
-    void printObject (JSONHolder object, boolean array_flag)
+    void printObject (JSONObject object, boolean array_flag)
       {
         beginObject (array_flag);
         boolean next = false;
@@ -238,9 +238,9 @@ public class JSONWriter
                     singleSpace ();
                     buffer.append ("[]");
                   }
-                else if (((Vector) json_value.value).firstElement () instanceof JSONHolder)
+                else if (((Vector) json_value.value).firstElement () instanceof JSONObject)
                   {
-                    printArrayObjects ((Vector<JSONHolder>) json_value.value);
+                    printArrayObjects ((Vector<JSONObject>) json_value.value);
                   }
                 else
                   {
@@ -250,7 +250,7 @@ public class JSONWriter
             else
               {
                 newLine ();
-                printObject ((JSONHolder) json_value.value, false);
+                printObject ((JSONObject) json_value.value, false);
               }
           }
         endObject ();
@@ -367,10 +367,10 @@ public class JSONWriter
         buffer.append ('\\').append (c);
       }
 
-    void printArrayObjects (Vector<JSONHolder> array)
+    void printArrayObjects (Vector<JSONObject> array)
       {
         boolean next = false;
-        for (JSONHolder element : array)
+        for (JSONObject element : array)
           {
             if (next)
               {
@@ -406,7 +406,7 @@ public class JSONWriter
           }
       }
 
-    byte[] getCanonicalizedSubset (JSONHolder signature_info_in, String name, String value) throws IOException
+    byte[] getCanonicalizedSubset (JSONObject signature_info_in, String name, String value) throws IOException
       {
         StringBuffer save_buffer = buffer;
         int save_indent = indent;
@@ -437,7 +437,7 @@ public class JSONWriter
         return result;
       }
 
-    void findSubset (JSONHolder json_holder, String parent, String name, String value)
+    void findSubset (JSONObject json_holder, String parent, String name, String value)
       {
         for (String property : json_holder.properties.keySet ())
           {
@@ -457,7 +457,7 @@ public class JSONWriter
               }
             if (!json_value.simple)
               {
-                findSubset ((JSONHolder) json_value.value, property, name, value);
+                findSubset ((JSONObject) json_value.value, property, name, value);
               }
           }
       }

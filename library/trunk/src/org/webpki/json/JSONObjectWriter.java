@@ -16,19 +16,12 @@
  */
 package org.webpki.json;
 
-/**
- * Local support class for holding individual values of JSON objects.
- */
-class JSONValue
-  {
-    boolean simple;
-    boolean quoted;
-    Object value;  // Holds either a String, JSONObject or Vector<JSONValue>
+import java.io.IOException;
 
-    JSONValue (boolean simple, boolean quoted, Object value)
-      {
-        this.simple = simple;
-        this.quoted = quoted;
-        this.value = value;
-      }
+/**
+ * Interface for java classes creating JSON {} data.
+ */
+public interface JSONObjectWriter
+  {
+    public void writeObject (JSONWriter wr) throws IOException;
   }

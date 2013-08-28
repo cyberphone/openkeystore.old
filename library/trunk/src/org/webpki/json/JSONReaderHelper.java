@@ -32,18 +32,16 @@ import org.webpki.util.ISODateTime;
  */
 public class JSONReaderHelper
   {
-    public enum JSON {SIMPLE,SIMPLE_QUOTED,OBJECT,SIMPLE_ARRAY,SIMPLE_QUOTED_ARRAY, OBJECT_ARRAY};
+    JSONObject root;
 
-    JSONHolder root;
+    JSONObject current;
 
-    JSONHolder current;
-
-    JSONReaderHelper (JSONHolder current)
+    JSONReaderHelper (JSONObject current)
       {
         this.current = current;
       }
 
-    JSONReaderHelper createJSONReaderHelper (JSONHolder current)
+    JSONReaderHelper createJSONReaderHelper (JSONObject current)
       {
         JSONReaderHelper new_rd = new JSONReaderHelper (current);
         new_rd.root = root;
@@ -130,11 +128,11 @@ public class JSONReaderHelper
     public JSONReaderHelper getObject (String name) throws IOException
       {
         JSONValue value = getProperty (name);
-        if (value.simple && !(value.value instanceof JSONHolder))
+        if (value.simple && !(value.value instanceof JSONObject))
           {
             throw new IOException ("\"" + name + "\" is not a JSON object");
           }
-        return createJSONReaderHelper ((JSONHolder) value.value);
+        return createJSONReaderHelper ((JSONObject) value.value);
       }
 
     public String getStringConditional (String name) throws IOException
@@ -211,7 +209,7 @@ public class JSONReaderHelper
               }
             else
               {
-                if (!(array.firstElement () instanceof JSONHolder))
+                if (!(array.firstElement () instanceof JSONObject))
                   {
                     throw new IOException ("\"" + name + "\" is not an object array");
                   }
@@ -246,7 +244,7 @@ public class JSONReaderHelper
         Vector<JSONReaderHelper> readers = new Vector<JSONReaderHelper> ();
         for (Object json_object: getArray (name, false, false))
           {
-            readers.add (createJSONReaderHelper ((JSONHolder) json_object));
+            readers.add (createJSONReaderHelper ((JSONObject) json_object));
           }
         return readers.toArray (new JSONReaderHelper[0]);
       }
@@ -261,7 +259,7 @@ public class JSONReaderHelper
         return current.properties.get (name) != null;
       }
 
-    public JSON getPropertyType (String name) throws IOException
+    public JSONTypes getPropertyType (String name) throws IOException
       {
         JSONValue value = current.properties.get (name);
         if (value == null)
@@ -270,18 +268,32 @@ public class JSONReaderHelper
           }
         if (value.simple)
           {
-            return value.quoted ? JSON.SIMPLE_QUOTED : JSON.SIMPLE;
+            return JSONTypes.STRING;
           }
-        if (value.value instanceof JSONHolder)
+        if (value.value instanceof JSONObject)
           {
-            return JSON.OBJECT;
+            return JSONTypes.OBJECT;
           }
-        Vector<Object> array = (Vector<Object>) value.value;
-        if (array.isEmpty () || array.firstElement () instanceof String)
+        return JSONTypes.ARRAY;
+      }
+
+    public JSONTypes getArrayType (String name) throws IOException
+      {
+        JSONValue value = current.properties.get (name);
+        if (value == null)
           {
-            return value.quoted ? JSON.SIMPLE_QUOTED_ARRAY : JSON.SIMPLE_ARRAY;
+            throw new IOException ("Property \"" + name + "\" does not exist in this object");
           }
-        return JSON.OBJECT_ARRAY;
+        if (value.simple || value.value instanceof JSONObject)
+          {
+            throw new IOException ("Property \"" + name + "\" is not an array");
+          }
+        Vector<Object> array = ((Vector<Object>) value.value);
+        if (array.isEmpty ())
+          {
+            return null;
+          }
+        return array.firstElement () instanceof JSONObject ? JSONTypes.OBJECT : JSONTypes.STRING;
       }
 
     public void scanAway (String name) throws IOException

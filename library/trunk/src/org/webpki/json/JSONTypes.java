@@ -16,29 +16,8 @@
  */
 package org.webpki.json;
 
-import java.io.IOException;
-
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-
 /**
- * Local support class for holding JSON objects.
+ * Basic JSON types read by the parser.
+ *
  */
-class JSONHolder
-  {
-    LinkedHashMap<String, JSONValue> properties = new LinkedHashMap<String, JSONValue> ();
-
-    Iterator<String> reader;
-
-    JSONHolder ()
-      {
-      }
-
-    void addProperty (String name, JSONValue value) throws IOException
-      {
-        if (properties.put (name, value) != null)
-          {
-            throw new IOException ("Duplicate: " + name);
-          }
-      }
-  }
+public enum JSONTypes {BOOLEAN, INTEGER, STRING, ARRAY, OBJECT};
