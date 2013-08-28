@@ -29,7 +29,12 @@ import org.webpki.util.Base64;
 import org.webpki.util.ISODateTime;
 
 /**
- * Class that writes JSON data to a DOM-like tree.
+ * Class that writes formatted JSON data to a DOM-like tree.
+ * <p>
+ * It also performs canonicalization when reading and writing enveloped signatures.
+ * <p>
+ * The current version is only intended to support the XSD-like document features
+ * supported by the reading system {@link JSONDecoderCache} and {@link JSONDecoder}. 
  * 
  */
 public class JSONWriter
@@ -159,26 +164,11 @@ public class JSONWriter
         setString (name, getBase64 (value));
       }
 
-    public byte[] serializeJSONStructure () throws IOException
+    public void setEnvelopedSignature (JSONSigner signer, String name, String value) throws IOException
       {
-        Iterator<JSONEnvelopedSignatureEncoder> unfinished = signatures.iterator ();
-        while (unfinished.hasNext ())
-          {
-            unfinished.next ().sign (this);
-            unfinished.remove ();
-          }
-        buffer = new StringBuffer ();
-        indent = 0;
-        printObject (root, false);
-        newLine ();
-        return buffer.toString ().getBytes ("UTF-8");
+        signatures.add (new JSONEnvelopedSignatureEncoder (signer, this, name, value));
       }
 
-    public static byte[] serializeParsedJSONDocument (JSONDecoder document) throws IOException
-      {
-        return new JSONWriter (document.root).serializeJSONStructure ();
-      }
-    
     void beginObject (boolean array_flag)
       {
         indentLine ();
@@ -210,7 +200,6 @@ public class JSONWriter
         indent -= 2;
       }
 
-    
     void endObject ()
       {
         newLine ();
@@ -219,7 +208,6 @@ public class JSONWriter
         undentLine ();
         buffer.append ('}');
       }
-
 
     void printObject (JSONObject object, boolean array_flag)
       {
@@ -482,6 +470,26 @@ public class JSONWriter
           }
       }
 
+    public byte[] serializeJSONStructure () throws IOException
+      {
+        Iterator<JSONEnvelopedSignatureEncoder> unfinished = signatures.iterator ();
+        while (unfinished.hasNext ())
+          {
+            unfinished.next ().sign (this);
+            unfinished.remove ();
+          }
+        buffer = new StringBuffer ();
+        indent = 0;
+        printObject (root, false);
+        newLine ();
+        return buffer.toString ().getBytes ("UTF-8");
+      }
+
+    public static byte[] serializeParsedJSONDocument (JSONDecoder document) throws IOException
+      {
+        return new JSONWriter (document.root).serializeJSONStructure ();
+      }
+  
     public static void setCanonicalizationDebugFile (String file)
       {
         canonicalization_debug_file = file;
@@ -490,11 +498,6 @@ public class JSONWriter
     public static byte[] parseAndPrettyPrint (byte[] json_utf8) throws IOException
       {
         return new JSONWriter (new JSONParser ().parse (json_utf8)).serializeJSONStructure ();
-      }
-
-    public void setEnvelopedSignature (JSONSigner signer, String name, String value) throws IOException
-      {
-        signatures.add (new JSONEnvelopedSignatureEncoder (signer, this, name, value));
       }
 
     public static void main (String[] argc)

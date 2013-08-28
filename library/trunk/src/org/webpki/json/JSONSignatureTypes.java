@@ -16,29 +16,8 @@
  */
 package org.webpki.json;
 
-import java.io.IOException;
-
 /**
- * Base class for java classes which can be created from JSON data.
- * <p>
- * It is designed to use {@link JSONDecoderCache} to get automatic instantiation.
+ * Supported signature types
  */
-public abstract class JSONDecoder
-  {
-    JSONObject root;  // Of parsed document
+public enum JSONSignatureTypes {X509_CERTIFICATE, ASYMMETRIC_KEY, SYMMETRIC_KEY};
 
-    /**
-     * INTERNAL USE ONLY     
-     */
-    protected abstract void unmarshallJSONData (JSONReaderHelper rd) throws IOException;
-    
-    /**
-     * INTERNAL USE ONLY     
-     */
-    protected abstract String getVersion ();
-
-    /**
-     * INTERNAL USE ONLY     
-     */
-    protected abstract String getRootProperty ();
-  }

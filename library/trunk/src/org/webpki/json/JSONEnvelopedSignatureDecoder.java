@@ -49,8 +49,6 @@ import org.bouncycastle.jce.spec.ECNamedCurveSpec;
  */
 public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
   {
-    public enum SIGNATURE {X509_CERTIFICATE, ASYMMETRIC_KEY, SYMMETRIC_KEY};
-
     SignatureAlgorithms algorithm;
     
     String referenced_name;
@@ -240,7 +238,7 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
 
     public String getKeyID () throws IOException
       {
-        if (getSignatureType () != SIGNATURE.SYMMETRIC_KEY)
+        if (getSignatureType () != JSONSignatureTypes.SYMMETRIC_KEY)
           {
             throw new IOException ("\"" + KEY_ID_JSON + "\" does not apply to: " + getSignatureType ().toString ());
           }
@@ -253,13 +251,13 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
         referenced_value = rd.getString (VALUE_JSON);
       }
 
-    public SIGNATURE getSignatureType ()
+    public JSONSignatureTypes getSignatureType ()
       {
         if (certificate_path != null)
           {
-            return SIGNATURE.X509_CERTIFICATE;
+            return JSONSignatureTypes.X509_CERTIFICATE;
           }
-        return public_key == null ? SIGNATURE.SYMMETRIC_KEY : SIGNATURE.ASYMMETRIC_KEY;
+        return public_key == null ? JSONSignatureTypes.SYMMETRIC_KEY : JSONSignatureTypes.ASYMMETRIC_KEY;
       }
 
     public static JSONEnvelopedSignatureDecoder read (JSONReaderHelper rd, String expected_name, String expected_value) throws IOException

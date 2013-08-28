@@ -42,8 +42,8 @@ public class JSONSymKeyVerifier extends JSONVerifier
       }
 
     @Override
-    JSONEnvelopedSignatureDecoder.SIGNATURE getVerifierType () throws IOException
+    JSONSignatureTypes getVerifierType () throws IOException
       {
-        return JSONEnvelopedSignatureDecoder.SIGNATURE.SYMMETRIC_KEY;
+        return JSONSignatureTypes.SYMMETRIC_KEY;
       }
   }

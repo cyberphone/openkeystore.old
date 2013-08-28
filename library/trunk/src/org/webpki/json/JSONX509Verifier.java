@@ -39,8 +39,8 @@ public class JSONX509Verifier extends JSONVerifier
       }
 
     @Override
-    JSONEnvelopedSignatureDecoder.SIGNATURE getVerifierType () throws IOException
+    JSONSignatureTypes getVerifierType () throws IOException
       {
-        return JSONEnvelopedSignatureDecoder.SIGNATURE.X509_CERTIFICATE;
+        return JSONSignatureTypes.X509_CERTIFICATE;
       }
   }

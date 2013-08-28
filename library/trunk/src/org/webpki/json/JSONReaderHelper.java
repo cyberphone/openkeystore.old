@@ -242,6 +242,7 @@ public class JSONReaderHelper
           {
             throw new IOException ("Property \"" + name + "\" is not an array");
           }
+        @SuppressWarnings("unchecked")
         Vector<JSONValue> array = ((Vector<JSONValue>) value.value);
         if (array.isEmpty ())
           {

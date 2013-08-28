@@ -26,5 +26,5 @@ public abstract class JSONVerifier
   {
     abstract void verify (JSONEnvelopedSignatureDecoder signature_decoder) throws IOException;
 
-    abstract JSONEnvelopedSignatureDecoder.SIGNATURE getVerifierType () throws IOException;
+    abstract JSONSignatureTypes getVerifierType () throws IOException;
   }
