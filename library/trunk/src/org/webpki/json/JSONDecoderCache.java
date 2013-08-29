@@ -24,13 +24,15 @@ import java.util.Vector;
 import org.webpki.util.ArrayUtil;
 
 /**
- * Caches JSONDecoder classes simulating XSD validation and lookup.
- * This scheme assumes that JSON documents follow a convention:<br>
+ * Stores {@link JSONDecoder} classes for automatic instantiation during parsing.
+ * This is (sort of) an emulation of XML schema caches.
+ * <p>
+ * The cache system assumes that JSON documents follow a strict convention:<br>
  * &nbsp;<br>
  * <code>&nbsp;&nbsp;{<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&quot;</code><i>MessageName</i><code>&quot;<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Version&quot;:&nbsp;&quot;</code><i>VersionString</i><code>&quot;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;@jmns&quot;:&nbsp;&quot;</code><i>Namespace</i><code>&quot;<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;</code><i>Arbitrary JSON Payload</i><code><br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>
@@ -40,29 +42,32 @@ import org.webpki.util.ArrayUtil;
  */
 public class JSONDecoderCache
   {
-    public static final String VERSION_JSON = "Version";
+    /**
+     * JMNS = JSON Message Name Space
+     */
+    public static final String JMNS_JSON = "@jmns";
     
     boolean test_unread = true;
     
     static class RegisteredJSONDecoder
       {
-        String version, root_property;
+        String jmns, root_property;
         
-        RegisteredJSONDecoder (String version, String root_property)
+        RegisteredJSONDecoder (String jmns, String root_property)
           {
-            this.version = version;
+            this.jmns = jmns;
             this.root_property = root_property;
           }
         
         public int hashCode ()
           {
-            return version.hashCode () ^ root_property.hashCode ();
+            return jmns.hashCode () ^ root_property.hashCode ();
           }
         
         public boolean equals (Object o)
           {
             return o instanceof RegisteredJSONDecoder &&
-                   version.equals (((RegisteredJSONDecoder)o).version) &&
+                   jmns.equals (((RegisteredJSONDecoder)o).jmns) &&
                    root_property.equals (((RegisteredJSONDecoder)o).root_property);
           }
       }
@@ -85,11 +90,11 @@ public class JSONDecoderCache
           }
         JSONReaderHelper reader = new JSONReaderHelper ((JSONObject)value.value);
         reader.root = root;
-        String version = reader.getString (VERSION_JSON);
-        Class<? extends JSONDecoder> decoder_class = class_map.get (new RegisteredJSONDecoder (version, root_property));
+        String jmns = reader.getString (JMNS_JSON);
+        Class<? extends JSONDecoder> decoder_class = class_map.get (new RegisteredJSONDecoder (jmns, root_property));
         if (decoder_class == null)
           {
-            throw new IOException ("Unknown JSONDecoder type: " + root_property + ", " + version);
+            throw new IOException ("Unknown JSONDecoder type: " + root_property + ", " + jmns);
           }
         try
           {
@@ -144,7 +149,7 @@ public class JSONDecoderCache
         try
           {
             JSONDecoder decoder = json_decoder.newInstance ();
-            class_map.put (new RegisteredJSONDecoder (decoder.getVersion (), decoder.getRootProperty ()), decoder.getClass ());
+            class_map.put (new RegisteredJSONDecoder (decoder.getJMNS (), decoder.getRootProperty ()), decoder.getClass ());
           }
         catch (InstantiationException ie)
           {

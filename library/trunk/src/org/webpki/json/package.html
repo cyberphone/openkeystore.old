@@ -3,7 +3,7 @@
 This package contains classes for parsing and generating messages in JSON.
 To make the system slightly more on par with XML Schemas the JSON library also supports:<br>
 <ul>
-<li>Registration of JSON decoders (=supporting a specific message) and automatic instantiation during parsing</li>
+<li>Registration of JSON decoders (=supporting a specific message) and automatic instantiation during parsing. See {@link org.webpki.json.JSONDecoderCache}</li>
 <li>Strict property sequences including detection of missing reads</li>
 <li>Strong validation of input</li>
 </ul>
@@ -14,9 +14,9 @@ enveloped XML signatures.
 Sample signed JSON message:
 <pre style="margin-left:20pt">
   {
-    <font color="C00000">"MyLittleSignature":
+    <font color="C00000">"TestSignatures":
       {
-        "Version": "http://example.com/signature",
+        "@jmns": "http://example.com/signature",
         "Now": "2013-08-27T16:32:11+02:00",
         "Objects":
           [{

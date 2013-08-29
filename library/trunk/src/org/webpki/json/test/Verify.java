@@ -126,9 +126,9 @@ public class Verify extends JSONDecoder
       }
 
     @Override
-    protected String getVersion ()
+    protected String getJMNS ()
       {
-        return Sign.VERSION;
+        return Sign.JMNS;
       }
 
     @Override

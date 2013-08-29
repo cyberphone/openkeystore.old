@@ -55,8 +55,8 @@ public class Sign extends JSONEncoder
   {
     static enum ACTION {SYM, ASYM, X509};
     
-    static final String VERSION = "http://example.com/signature";
-    static final String ROOT_PROPERTY = "MyLittleSignature";
+    static final String JMNS = "http://example.com/signature";
+    static final String ROOT_PROPERTY = "TestSignatures";
     static final String ID = "ID";
     
     static class SymmetricOperations implements SymKeySignerInterface, SymKeyVerifierInterface
@@ -208,7 +208,7 @@ public class Sign extends JSONEncoder
     public byte[] getJSONData () throws IOException
       {
         String instant = URLFriendlyRandom.generate (20);
-        JSONWriter wr = new JSONWriter (ROOT_PROPERTY, VERSION);
+        JSONWriter wr = new JSONWriter (ROOT_PROPERTY, JMNS);
         wr.setDateTime ("Now", new Date ());
         wr.setObject ("HRT", new RT ());
         wr.setObjectArray ("ARR", new JSONObjectWriter[]{});

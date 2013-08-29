@@ -35,7 +35,7 @@ public abstract class JSONDecoder
     /**
      * INTERNAL USE ONLY     
      */
-    protected abstract String getVersion ();
+    protected abstract String getJMNS ();
 
     /**
      * INTERNAL USE ONLY     

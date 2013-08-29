@@ -32,7 +32,7 @@ import org.webpki.util.ArrayUtil;
 public class Test
   {
     static final String MESSAGE="ParserTest";
-    static final String VERSION = "http://example.com/test";
+    static final String JMNS = "http://example.com/test";
     
     static final String BOOL_TRUE = "boolTrue";
     static final String BOOL_FALSE = "boolFalse";
@@ -85,9 +85,9 @@ public class Test
           }
   
         @Override
-        protected String getVersion ()
+        protected String getJMNS ()
           {
-             return VERSION;
+             return JMNS;
           }
   
         @Override
@@ -102,7 +102,7 @@ public class Test
         @Override
         protected byte[] getJSONData () throws IOException
           {
-            JSONWriter wr = new JSONWriter (MESSAGE, VERSION);
+            JSONWriter wr = new JSONWriter (MESSAGE, JMNS);
             wr.setBoolean (BOOL_TRUE, true);
             wr.setBoolean (BOOL_FALSE, false);
             wr.setString (STRING, STRING_VALUE);
@@ -130,7 +130,7 @@ public class Test
           }
   
         @Override
-        protected String getVersion ()
+        protected String getJMNS ()
           {
             return "http://example.com";
           }

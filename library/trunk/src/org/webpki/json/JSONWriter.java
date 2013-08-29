@@ -62,7 +62,7 @@ public class JSONWriter
         root = new JSONObject ();
         current = new JSONObject ();
         root.addProperty (root_property, new JSONValue (JSONTypes.OBJECT, current));
-        current.addProperty (JSONDecoderCache.VERSION_JSON, new JSONValue (JSONTypes.STRING, version));
+        current.addProperty (JSONDecoderCache.JMNS_JSON, new JSONValue (JSONTypes.STRING, version));
       }
 
     JSONWriter (JSONObject root)

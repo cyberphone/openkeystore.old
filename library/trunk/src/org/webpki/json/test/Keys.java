@@ -47,7 +47,7 @@ import org.webpki.json.JSONWriter;
 public class Keys
   {
     static final String KEYS="Keys";
-    static final String VERSION = "http://keys/test";
+    static final String JMNS = "http://keys/test";
     static final int ROUNDS = 1000;
     static JSONDecoderCache cache = new JSONDecoderCache ();
     
@@ -67,9 +67,9 @@ public class Keys
           }
   
         @Override
-        protected String getVersion ()
+        protected String getJMNS ()
           {
-             return VERSION;
+             return JMNS;
           }
   
         @Override
@@ -91,7 +91,7 @@ public class Keys
         @Override
         protected byte[] getJSONData () throws IOException
           {
-            JSONWriter wr = new JSONWriter (KEYS, VERSION);
+            JSONWriter wr = new JSONWriter (KEYS, JMNS);
             JSONEnvelopedSignatureEncoder.writePublicKey (wr, public_key);
             return wr.serializeJSONStructure ();
           }
