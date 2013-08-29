@@ -193,8 +193,8 @@ class JSONParser
                       break;
 
 /* 
-    Nobody (in their right mind...) escape slashes although it is the RFC
-                      case '/':
+    Nobody (in their right mind...) escape slashes although it is in the RFC
+                    case '/':
 */
                     case 'b':
                       c = '\b';
