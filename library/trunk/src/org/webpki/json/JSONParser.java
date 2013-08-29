@@ -19,6 +19,7 @@ package org.webpki.json;
 import java.io.IOException;
 
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 /**
  * Parses JSON into a DOM-like tree.
@@ -37,6 +38,9 @@ class JSONParser
     static final char RIGHT_BRACKET       = ']';
     static final char COMMA_CHARACTER     = ',';
     static final char BACK_SLASH          = '\\';
+    
+    static final Pattern INTEGER_PATTERN = Pattern.compile ("^0|[-]?[1-9][0-9]*$");
+    static final Pattern BOOLEAN_PATTERN = Pattern.compile ("^true|false$");
     
     int index;
     
@@ -155,51 +159,16 @@ class JSONParser
         index--;
         StringBuffer temp_buffer = new StringBuffer ();
         char c;
-        boolean first = true;
-        boolean number = true;
-        int min_length = 1;
         while (!isWhiteSpace (c = testChar ()) && c != COMMA_CHARACTER && c != RIGHT_BRACKET && c != RIGHT_CURLY_BRACKET)
           {
             temp_buffer.append (c);
             index++;
-            if (first)
-              {
-                if (c == '-')
-                  {
-                    min_length = 2;
-                  }
-                else
-                  {
-                    number = isNumber (c);
-                  }
-                first = false;
-              }
-            else
-              {
-                if (number ^ isNumber (c))
-                  {
-                    throw new IOException ("Expected an integer or boolean, got: " + temp_buffer.toString ());
-                  }
-              }
           }
         String result = temp_buffer.toString ();
-        if (result.length () < min_length)
+        boolean number = INTEGER_PATTERN.matcher (result).matches ();
+        if (!number && !BOOLEAN_PATTERN.matcher (result).matches ())
           {
-            throw new IOException ("Missing value: " + result);
-          }
-        if (number)
-          {
-            if (result.charAt (min_length - 1) == '0' && (min_length == 2 || result.length () > 1))
-              {
-                throw new IOException ("Leading zeroes are not allowed: " + result);
-              }
-          }
-        else
-          {
-            if (!result.equals ("true") && !result.equals ("false"))
-              {
-                throw new IOException ("Expected a boolean, got: " + result);
-              }
+            throw new IOException ("Expected integer or boolean, got: " + result);
           }
         return new JSONValue (number ? JSONTypes.INTEGER : JSONTypes.BOOLEAN, result);
       }
