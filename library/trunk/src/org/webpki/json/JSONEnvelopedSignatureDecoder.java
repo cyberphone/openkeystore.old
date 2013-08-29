@@ -51,6 +51,8 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
   {
     SignatureAlgorithms algorithm;
     
+    String algorithm_string;
+    
     String referenced_name;
     
     String referenced_value;
@@ -69,18 +71,18 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
       {
         rd = rd.getObject (ENVELOPED_SIGNATURE_JSON);
         JSONReaderHelper signature_info = rd.getObject (SIGNATURE_INFO_JSON);
-        String algorithm_string = getSignatureInfo (signature_info);
+        getSignatureInfo (signature_info);
         signature_value = rd.getBinary (SIGNATURE_VALUE_JSON);
         JSONWriter writer = new JSONWriter (rd.root);
         canonicalized_data = writer.getCanonicalizedSubset (signature_info.current, referenced_name, referenced_value);
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:
-              asymmetricSignatureVerification (certificate_path[0].getPublicKey (), algorithm_string);
+              asymmetricSignatureVerification (certificate_path[0].getPublicKey ());
               break;
 
             case ASYMMETRIC_KEY:
-              asymmetricSignatureVerification (public_key, algorithm_string);
+              asymmetricSignatureVerification (public_key);
               break;
 
             default:
@@ -88,12 +90,11 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
           }
       }
 
-    String getSignatureInfo (JSONReaderHelper rd) throws IOException
+    void getSignatureInfo (JSONReaderHelper rd) throws IOException
       {
-        String algorithm_string = rd.getString (ALGORITHM_JSON);
+        algorithm_string = rd.getString (ALGORITHM_JSON);
         getReference (rd.getObject (REFERENCE_JSON));
         getKeyInfo (rd.getObject (KEY_INFO_JSON));
-        return algorithm_string;
       }
 
     void getKeyInfo (JSONReaderHelper rd) throws IOException
@@ -195,7 +196,7 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
           }
       }
 
-    void asymmetricSignatureVerification (PublicKey public_key, String algorithm_string) throws IOException
+    void asymmetricSignatureVerification (PublicKey public_key) throws IOException
       {
         algorithm = AsymSignatureAlgorithms.getAlgorithmFromURI (algorithm_string);
         try

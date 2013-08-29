@@ -19,6 +19,7 @@ package org.webpki.json;
 import java.io.IOException;
 
 import java.util.Vector;
+
 import java.util.regex.Pattern;
 
 /**
