@@ -37,7 +37,8 @@ import org.webpki.util.ArrayUtil;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;</code><i>Arbitrary JSON Payload</i><code><br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
- * &nbsp;&nbsp;}</code><br>
+ * &nbsp;&nbsp;}</code><p>
+ * Another restriction imposed by this particular JSON model is that property order <b>must</b> be honored.
  * 
  */
 public class JSONDecoderCache

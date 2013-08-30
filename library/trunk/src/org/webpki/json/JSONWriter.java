@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Vector;
 
 import org.webpki.util.ArrayUtil;
@@ -54,8 +53,6 @@ public class JSONWriter
     int indent;
     
     boolean pretty = true;
-    
-    Vector<JSONEnvelopedSignatureEncoder> signatures = new Vector<JSONEnvelopedSignatureEncoder> ();
     
     public JSONWriter (String root_property, String version) throws IOException
       {
@@ -104,10 +101,10 @@ public class JSONWriter
       {
         JSONObject save = current;
         JSONObject holder = new JSONObject ();
+        save.addProperty (name, new JSONValue (JSONTypes.OBJECT, holder));
         current = holder;
         json_object.writeObject (this);
         current = save;
-        current.addProperty (name, new JSONValue (JSONTypes.OBJECT, holder));
         return holder;
       }
 
@@ -115,15 +112,15 @@ public class JSONWriter
       {
         JSONObject save = current;
         Vector<JSONValue> array = new Vector<JSONValue> ();
+        save.addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
         for (JSONObjectWriter json_object : json_objects)
           {
             JSONObject holder = new JSONObject ();
+            array.add (new JSONValue (JSONTypes.OBJECT, holder));
             current = holder;
             json_object.writeObject (this);
-            array.add (new JSONValue (JSONTypes.OBJECT, holder));
           }
         current = save;
-        current.addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
       }
 
     void setStringArray (String name, String[] values, boolean quoted) throws IOException
@@ -154,7 +151,6 @@ public class JSONWriter
     static String getBase64 (byte[] value) throws IOException
       {
         Base64 base64_encoder = new Base64 ();
-        base64_encoder.setPaddingOn (false);
         base64_encoder.setLineBreakOn (false);
         return base64_encoder.getBase64StringFromBinary (value);
       }
@@ -166,7 +162,7 @@ public class JSONWriter
 
     public void setEnvelopedSignature (JSONSigner signer, String name, String value) throws IOException
       {
-        signatures.add (new JSONEnvelopedSignatureEncoder (signer, this, name, value));
+        new JSONEnvelopedSignatureEncoder (signer, this, name, value);
       }
 
     void beginObject (boolean array_flag)
@@ -430,7 +426,15 @@ public class JSONWriter
         byte[] result = buffer.toString ().getBytes ("UTF-8");
         if (canonicalization_debug_file != null)
           {
-            ArrayUtil.writeFile (canonicalization_debug_file, result);
+            byte[] other = ArrayUtil.readFile (canonicalization_debug_file);
+            ArrayUtil.writeFile (canonicalization_debug_file,
+                                 ArrayUtil.add (other, 
+                                                ArrayUtil.add (new StringBuffer ("\n\n" + JSONEnvelopedSignature.REFERENCE_JSON + "=")
+                                                                .append (name)
+                                                                .append ('/')
+                                                                .append (value)
+                                                                .append (":\n").toString ().getBytes ("UTF-8"),
+                                                               result)));
           }
         buffer = save_buffer;
         indent = save_indent;
@@ -472,12 +476,6 @@ public class JSONWriter
 
     public byte[] serializeJSONStructure () throws IOException
       {
-        Iterator<JSONEnvelopedSignatureEncoder> unfinished = signatures.iterator ();
-        while (unfinished.hasNext ())
-          {
-            unfinished.next ().sign (this);
-            unfinished.remove ();
-          }
         buffer = new StringBuffer ();
         indent = 0;
         printObject (root, false);
@@ -490,8 +488,9 @@ public class JSONWriter
         return new JSONWriter (document.root).serializeJSONStructure ();
       }
   
-    public static void setCanonicalizationDebugFile (String file)
+    public static void setCanonicalizationDebugFile (String file) throws IOException
       {
+        ArrayUtil.writeFile (file, "Canonicalization Debug Output".getBytes ("UTF-8"));
         canonicalization_debug_file = file;
       }
 
