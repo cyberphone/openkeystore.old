@@ -62,7 +62,7 @@ public class JSONDecoderCache
         Class<? extends JSONDecoder> decoder_class = class_map.get (context);
         if (decoder_class == null)
           {
-            throw new IOException ("Unknown JSONDecoder type");
+            throw new IOException ("Unknown JSONDecoder type: " + context);
           }
         try
           {

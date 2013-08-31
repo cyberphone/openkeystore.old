@@ -53,10 +53,6 @@ public class JSONSignatureDecoder extends JSONSignature
     
     String algorithm_string;
     
-    String referenced_name;
-    
-    String referenced_value;
-    
     byte[] canonicalized_data;
     
     byte[] signature_value;
@@ -69,12 +65,14 @@ public class JSONSignatureDecoder extends JSONSignature
     
     public JSONSignatureDecoder (JSONReaderHelper rd) throws IOException
       {
-        rd = rd.getObject (SIGNATURE_JSON);
-        JSONReaderHelper signature_info = rd.getObject (SIGNATURE_INFO_JSON);
-        getSignatureInfo (signature_info);
-        signature_value = rd.getBinary (SIGNATURE_VALUE_JSON);
-        JSONWriter writer = new JSONWriter (rd.root);
-        canonicalized_data = writer.getCanonicalizedSubset (signature_info.current, referenced_name, referenced_value);
+        JSONReaderHelper signature = rd.getObject (SIGNATURE_JSON);
+        algorithm_string = signature.getString (ALGORITHM_JSON);
+        getKeyInfo (signature.getObject (KEY_INFO_JSON));
+        signature_value = signature.getBinary (SIGNATURE_VALUE_JSON);
+        JSONValue save = signature.current.properties.get (SIGNATURE_VALUE_JSON);
+        signature.current.properties.remove (SIGNATURE_VALUE_JSON);
+        canonicalized_data = JSONWriter.getCanonicalizedSubset (rd.current);
+        signature.current.properties.put (SIGNATURE_VALUE_JSON, save);
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:
@@ -88,13 +86,6 @@ public class JSONSignatureDecoder extends JSONSignature
             default:
               algorithm = MACAlgorithms.getAlgorithmFromURI (algorithm_string);
           }
-      }
-
-    void getSignatureInfo (JSONReaderHelper rd) throws IOException
-      {
-        algorithm_string = rd.getString (ALGORITHM_JSON);
-        getReference (rd.getObject (REFERENCE_JSON));
-        getKeyInfo (rd.getObject (KEY_INFO_JSON));
       }
 
     void getKeyInfo (JSONReaderHelper rd) throws IOException
@@ -192,7 +183,21 @@ public class JSONSignatureDecoder extends JSONSignature
       {
         if (!success)
           {
-            throw new IOException ("Bad signature for \"" + REFERENCE_JSON + "\": " + referenced_name + "/" + referenced_value);
+            String key;
+            switch (getSignatureType ())
+              {
+                case X509_CERTIFICATE:
+                  key = certificate_path[0].toString ();
+                  break;
+  
+                case ASYMMETRIC_KEY:
+                  key = public_key.toString ();
+                  break;
+  
+                default:
+                  key = getKeyID ();
+               }
+            throw new IOException ("Bad signed_object for key: " + key);
           }
       }
 
@@ -246,12 +251,6 @@ public class JSONSignatureDecoder extends JSONSignature
         return key_id;
       }
 
-    void getReference (JSONReaderHelper rd) throws IOException
-      {
-        referenced_name = rd.getString (NAME_JSON);
-        referenced_value = rd.getString (VALUE_JSON);
-      }
-
     public JSONSignatureTypes getSignatureType ()
       {
         if (certificate_path != null)
@@ -261,13 +260,9 @@ public class JSONSignatureDecoder extends JSONSignature
         return public_key == null ? JSONSignatureTypes.SYMMETRIC_KEY : JSONSignatureTypes.ASYMMETRIC_KEY;
       }
 
-    public static JSONSignatureDecoder read (JSONReaderHelper rd, String expected_name, String expected_value) throws IOException
+    public static JSONSignatureDecoder read (JSONReaderHelper rd) throws IOException
       {
         JSONSignatureDecoder verifier = new JSONSignatureDecoder (rd);
-        if (!expected_name.equals (verifier.referenced_name) || !expected_value.equals (verifier.referenced_value))
-          {
-            throw new IOException ("Non-matching \"" + REFERENCE_JSON + "\" to signature");
-          }
         return verifier;
       }
 

@@ -53,15 +53,7 @@ class JSONSignature
 
     public static final String ALGORITHM_JSON             = "Algorithm";
 
-    public static final String REFERENCE_JSON             = "Reference";
-
-    public static final String NAME_JSON                  = "Name";
-
-    public static final String VALUE_JSON                 = "Value";
-    
     public static final String SIGNATURE_VALUE_JSON       = "SignatureValue";
-
-    public static final String SIGNATURE_INFO_JSON        = "SignatureInfo";
 
     public static final String KEY_INFO_JSON              = "KeyInfo";
 

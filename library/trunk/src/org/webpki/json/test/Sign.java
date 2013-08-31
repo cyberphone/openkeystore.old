@@ -161,7 +161,7 @@ public class Sign extends JSONEncoder
           {
             wr.setString (ID, instance);
             wr.setInt ("VALUE", value);
-            createSymmetricKeySignature (wr, ID, instance);
+            createSymmetricKeySignature (wr);
           }
       }
 
@@ -176,20 +176,20 @@ public class Sign extends JSONEncoder
 
     JSONSignatureEncoder signature;
     
-    void createX509Signature (JSONWriter wr, String name, String value) throws IOException
+    void createX509Signature (JSONWriter wr) throws IOException
       {
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setKey (null, DemoKeyStore.getSignerPassword ());
-        wr.setEnvelopedSignature (new JSONX509Signer (signer), name, value);
+        wr.setEnvelopedSignature (new JSONX509Signer (signer));
       }
     
-    void createAsymmetricKeySignature (JSONWriter wr, String name, String value) throws IOException
+    void createAsymmetricKeySignature (JSONWriter wr) throws IOException
       {
         try
           {
             PrivateKey private_key = (PrivateKey)DemoKeyStore.getECDSAStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
             PublicKey public_key = DemoKeyStore.getECDSAStore ().getCertificate ("mykey").getPublicKey ();
-            wr.setEnvelopedSignature (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)), name, value);
+            wr.setEnvelopedSignature (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
           }
         catch (GeneralSecurityException e)
           {
@@ -197,9 +197,9 @@ public class Sign extends JSONEncoder
           }
       }
     
-    void createSymmetricKeySignature (JSONWriter wr, String name, String value) throws IOException
+    void createSymmetricKeySignature (JSONWriter wr) throws IOException
       {
-        wr.setEnvelopedSignature (new JSONSymKeySigner (new SymmetricOperations ()), name, value);
+        wr.setEnvelopedSignature (new JSONSymKeySigner (new SymmetricOperations ()));
       }
     
     
@@ -222,17 +222,16 @@ public class Sign extends JSONEncoder
         wr.setInt ("Intra", 78);
         if (action == ACTION.X509)
           {
-            createX509Signature (wr, ID, instant);
+            createX509Signature (wr);
           }
         else if (action == ACTION.ASYM)
           {
-            createAsymmetricKeySignature (wr, ID, instant);
+            createAsymmetricKeySignature (wr);
           }
         else
           {
-            createSymmetricKeySignature (wr, ID, instant);
+            createSymmetricKeySignature (wr);
           }
-        wr.setString ("Additional", "Not signed since it comes after the EnvelopedSignature");
         return wr.serializeJSONStructure ();
       }
     

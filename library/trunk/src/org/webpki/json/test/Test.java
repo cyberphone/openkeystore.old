@@ -125,11 +125,11 @@ public class Test
         @Override
         protected String getContext ()
           {
-            return "http://example.com";
+            return "http://example.com/escape";
           }
       }
 
-    static final String ESCAPING = "{ \"ESC\" : { \"Version\": \"http://example.com\", \"Escape\":\"\\t\\n \\r\\f\\\\\\\"\" }}";
+    static final String ESCAPING = "{ \"@context\" : \"http://example.com/escape\", \"Escape\":\"\\t\\n \\r\\f\\\\\\\"\" }";
 
     public static void main (String[] argc)
       {

@@ -29,7 +29,7 @@ class JSONObject
     LinkedHashMap<String, JSONValue> properties = new LinkedHashMap<String, JSONValue> ();
 
     HashSet<String> read_flag = new HashSet<String> ();
-
+    
     JSONObject ()
       {
       }

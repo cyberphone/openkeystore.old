@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.util.Date;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import org.webpki.util.ArrayUtil;
@@ -44,15 +45,13 @@ public class JSONWriter
 
     JSONObject current;
     
-    JSONObject signature_info;     // Only used for reading signatures
-
-    int buffer_at_signature_info;  //    -"-
-
     StringBuffer buffer;
     
     int indent;
     
     boolean pretty = true;
+    
+    boolean sort = false;
     
     public JSONWriter (String context) throws IOException
       {
@@ -158,9 +157,9 @@ public class JSONWriter
         setString (name, getBase64 (value));
       }
 
-    public void setEnvelopedSignature (JSONSigner signer, String name, String value) throws IOException
+    public void setEnvelopedSignature (JSONSigner signer) throws IOException
       {
-        new JSONSignatureEncoder (signer, this, name, value);
+        new JSONSignatureEncoder (signer, this);
       }
 
     void beginObject (boolean array_flag)
@@ -207,7 +206,7 @@ public class JSONWriter
       {
         beginObject (array_flag);
         boolean next = false;
-        for (String property : object.properties.keySet ())
+        for (String property : sort ? new TreeSet<String> (object.properties.keySet ()).descendingSet () :  object.properties.keySet ())
           {
             JSONValue json_value = object.properties.get (property);
             if (next)
@@ -251,11 +250,6 @@ public class JSONWriter
               }
           }
         endObject ();
-        if (object == signature_info)
-          {
-            buffer_at_signature_info = buffer.length ();
-            signature_info = null;
-          }
       }
 
     void printArraySimple (Vector<JSONValue> array)
@@ -401,75 +395,20 @@ public class JSONWriter
           }
       }
 
-    byte[] getCanonicalizedSubset (JSONObject signature_info_in, String name, String value) throws IOException
+    static byte[] getCanonicalizedSubset (JSONObject signature_object_in) throws IOException
       {
-        StringBuffer save_buffer = buffer;
-        int save_indent = indent;
-        buffer = new StringBuffer ();
-        indent = 0;
-        buffer_at_signature_info = 0;
-        signature_info = signature_info_in;
-        pretty = false;
-        findSubset (root, null, name, value);
-        int length = buffer.length ();
-        if (length == 0)
-          {
-            throw new IOException ("\"" + JSONSignature.REFERENCE_JSON + "\" " + name + "/" + value + " not found");
-          }
-        if (signature_info != null)
-          {
-            throw new IOException ("\"" + JSONSignature.REFERENCE_JSON + "\" must not point to a property that is deeper nested than \"" + JSONSignature.SIGNATURE_JSON + "\"");
-          }
-        buffer.setLength (buffer_at_signature_info);
-        byte[] result = buffer.toString ().getBytes ("UTF-8");
+        JSONWriter writer = new JSONWriter (signature_object_in);
+        writer.pretty = false;
+        writer.sort = true;
+        byte[] result = writer.serializeJSONStructure ();
         if (canonicalization_debug_file != null)
           {
             byte[] other = ArrayUtil.readFile (canonicalization_debug_file);
             ArrayUtil.writeFile (canonicalization_debug_file,
                                  ArrayUtil.add (other, 
-                                                ArrayUtil.add (new StringBuffer ("\n\n" + JSONSignature.REFERENCE_JSON + "=")
-                                                                .append (name)
-                                                                .append ('/')
-                                                                .append (value)
-                                                                .append (":\n").toString ().getBytes ("UTF-8"),
-                                                               result)));
+                                                new StringBuffer ("\n\n").append (writer.buffer).toString ().getBytes ("UTF-8")));
           }
-        buffer = save_buffer;
-        indent = save_indent;
-        pretty = true;
         return result;
-      }
-
-    @SuppressWarnings("unchecked")
-    void findSubset (JSONObject json_holder, String parent, String name, String value)
-      {
-        for (String property_name : json_holder.properties.keySet ())
-          {
-            JSONValue property = json_holder.properties.get (property_name);
-            if (property.type == JSONTypes.ARRAY)
-              {
-                for (JSONValue array_element : (Vector<JSONValue>) property.value)
-                  {
-                    if (array_element.type == JSONTypes.OBJECT)
-                      {
-                        findSubset ((JSONObject) array_element.value, null, name, value);
-                      }
-                  }
-              }
-            else if (property.type == JSONTypes.OBJECT)
-              {
-                findSubset ((JSONObject) property.value, property_name, name, value);
-              }
-            else if (property.type == JSONTypes.STRING && property_name.equals (name) && value.equals (property.value))
-              {
-                if (parent != null)
-                  {
-                    printProperty (parent);
-                  }
-                printObject (json_holder, false);
-                break;
-              }
-          }
       }
 
     public byte[] serializeJSONStructure () throws IOException
