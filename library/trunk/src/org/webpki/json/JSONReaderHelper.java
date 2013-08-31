@@ -50,21 +50,16 @@ public class JSONReaderHelper
 
     JSONValue getProperty (String name, JSONTypes expected) throws IOException
       {
-        if (current.reader.hasNext ())
+        JSONValue value = current.properties.get (name);
+        if (value == null)
           {
-            String found = current.reader.next ();
-            if (!name.equals (found))
-              {
-                throw new IOException ("Looking for \"" + name + "\" found \"" + found + "\"");
-              }
-            JSONValue value = current.properties.get (name);
-            if (value.type != expected)
-              {
-                throw new IOException ("Type mismatch for \"" + name + "\": Read=" + value.type.toString () + ", Expected=" + expected.toString ());
-              }
-            return value;
+            throw new IOException ("Property \"" + name + "\" is missing");
           }
-        throw new IOException ("No more properties found in object when looking for \"" + name + "\"");
+        if (value.type != expected)
+          {
+            throw new IOException ("Type mismatch for \"" + name + "\": Read=" + value.type.toString () + ", Expected=" + expected.toString ());
+          }
+        return value;
       }
 
     static byte[] getBinaryFromBase64 (String base64) throws IOException

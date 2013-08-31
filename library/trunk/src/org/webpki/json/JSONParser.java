@@ -116,7 +116,6 @@ class JSONParser
             holder.addProperty (name, value);
           }
         scan ();
-        holder.reader = holder.properties.keySet ().iterator ();
         return new JSONValue (JSONTypes.OBJECT, holder);
       }
 

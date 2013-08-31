@@ -23,9 +23,9 @@ import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 
 /**
- * Common class for enveloped JSON signatures.
+ * Common class for JSON signatures.
  */
-class JSONEnvelopedSignature
+class JSONSignature
   {
     static X509Certificate pathCheck (X509Certificate child, X509Certificate parent) throws IOException
       {
@@ -49,7 +49,7 @@ class JSONEnvelopedSignature
         return parent;
       }
 
-    public static final String ENVELOPED_SIGNATURE_JSON   = "EnvelopedSignature";
+    public static final String SIGNATURE_JSON             = "Signature";
 
     public static final String ALGORITHM_JSON             = "Algorithm";
 

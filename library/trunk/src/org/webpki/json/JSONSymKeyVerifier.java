@@ -34,7 +34,7 @@ public class JSONSymKeyVerifier extends JSONVerifier
       }
 
     @Override
-    void verify (JSONEnvelopedSignatureDecoder signature_decoder) throws IOException
+    void verify (JSONSignatureDecoder signature_decoder) throws IOException
       {
         signature_decoder.checkVerification (verifier.verifyData (signature_decoder.canonicalized_data,
                                                                   signature_decoder.signature_value,

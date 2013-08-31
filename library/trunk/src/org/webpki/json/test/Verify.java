@@ -31,7 +31,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONDecoderCache;
-import org.webpki.json.JSONEnvelopedSignatureDecoder;
+import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONReaderHelper;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
@@ -50,24 +50,19 @@ public class Verify extends JSONDecoder
     @Override
     protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
       {
-        recurse (rd, true);
+        recurse (rd);
       }
 
-    void recurse (JSONReaderHelper rd, boolean ignore) throws IOException
+    void recurse (JSONReaderHelper rd) throws IOException
       {
         for (String property : rd.getProperties ())
           {
-            if (ignore)
-              {
-                ignore = false;
-                continue;
-              }
             switch (rd.getPropertyType (property))
               {
                 case OBJECT:
-                  if (property.equals (JSONEnvelopedSignatureDecoder.ENVELOPED_SIGNATURE_JSON))
+                  if (property.equals (JSONSignatureDecoder.SIGNATURE_JSON))
                     {
-                      JSONEnvelopedSignatureDecoder signature = new JSONEnvelopedSignatureDecoder (rd);
+                      JSONSignatureDecoder signature = new JSONSignatureDecoder (rd);
                       switch (signature.getSignatureType ())
                         {
                           case ASYMMETRIC_KEY:
@@ -97,7 +92,7 @@ public class Verify extends JSONDecoder
                     }
                   else
                     {
-                      recurse (rd.getObject (property), false);
+                      recurse (rd.getObject (property));
                     }
                   break;
 
@@ -106,7 +101,7 @@ public class Verify extends JSONDecoder
                     {
                       for (JSONReaderHelper next : rd.getObjectArray (property))
                         {
-                          recurse (next, false);
+                          recurse (next);
                         }
                       break;
                     }
@@ -126,15 +121,9 @@ public class Verify extends JSONDecoder
       }
 
     @Override
-    protected String getJMNS ()
+    protected String getContext ()
       {
-        return Sign.JMNS;
-      }
-
-    @Override
-    protected String getRootProperty ()
-      {
-        return Sign.ROOT_PROPERTY;
+        return Sign.CONTEXT;
       }
 
     public static void main (String[] argc)

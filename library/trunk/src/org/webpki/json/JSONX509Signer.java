@@ -62,17 +62,17 @@ public class JSONX509Signer extends JSONSigner
     @Override
     void writeKeyInfoData (JSONWriter wr) throws IOException
       {
-        wr.setObject (JSONEnvelopedSignature.SIGNATURE_CERTIFICATE_JSON, new JSONObjectWriter ()
+        wr.setObject (JSONSignature.SIGNATURE_CERTIFICATE_JSON, new JSONObjectWriter ()
           {
             @Override
             public void writeObject (JSONWriter wr) throws IOException
               {
                 X509Certificate signer_cert = certificate_path[0];
-                wr.setString (JSONEnvelopedSignature.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
-                wr.setBigInteger (JSONEnvelopedSignature.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
-                wr.setString (JSONEnvelopedSignature.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
+                wr.setString (JSONSignature.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
+                wr.setBigInteger (JSONSignature.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
+                wr.setString (JSONSignature.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
               }
           });
-        JSONEnvelopedSignatureEncoder.writeX509CertificatePath (wr, certificate_path);
+        JSONSignatureEncoder.writeX509CertificatePath (wr, certificate_path);
       }
   }

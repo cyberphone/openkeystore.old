@@ -35,10 +35,5 @@ public abstract class JSONDecoder
     /**
      * INTERNAL USE ONLY     
      */
-    protected abstract String getJMNS ();
-
-    /**
-     * INTERNAL USE ONLY     
-     */
-    protected abstract String getRootProperty ();
+    protected abstract String getContext ();
   }

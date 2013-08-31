@@ -34,8 +34,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.json.JSONDecoderCache;
-import org.webpki.json.JSONEnvelopedSignatureDecoder;
-import org.webpki.json.JSONEnvelopedSignatureEncoder;
+import org.webpki.json.JSONSignatureDecoder;
+import org.webpki.json.JSONSignatureEncoder;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONReaderHelper;
@@ -46,8 +46,7 @@ import org.webpki.json.JSONWriter;
  */
 public class Keys
   {
-    static final String KEYS="Keys";
-    static final String JMNS = "http://keys/test";
+    static final String CONTEXT = "http://keys/test";
     static final int ROUNDS = 1000;
     static JSONDecoderCache cache = new JSONDecoderCache ();
     
@@ -63,19 +62,13 @@ public class Keys
         @Override
         protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
           {
-            public_key = JSONEnvelopedSignatureDecoder.readPublicKey (rd);
+            public_key = JSONSignatureDecoder.readPublicKey (rd);
           }
   
         @Override
-        protected String getJMNS ()
+        protected String getContext ()
           {
-             return JMNS;
-          }
-  
-        @Override
-        protected String getRootProperty ()
-          {
-            return KEYS;
+             return CONTEXT;
           }
       }
 
@@ -91,8 +84,8 @@ public class Keys
         @Override
         protected byte[] getJSONData () throws IOException
           {
-            JSONWriter wr = new JSONWriter (KEYS, JMNS);
-            JSONEnvelopedSignatureEncoder.writePublicKey (wr, public_key);
+            JSONWriter wr = new JSONWriter (CONTEXT);
+            JSONSignatureEncoder.writePublicKey (wr, public_key);
             return wr.serializeJSONStructure ();
           }
       }

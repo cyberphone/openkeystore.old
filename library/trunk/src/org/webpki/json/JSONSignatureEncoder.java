@@ -39,7 +39,7 @@ import org.webpki.crypto.KeyAlgorithms;
  * Only used internally except for the public static methods.
  * 
  */
-public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
+public class JSONSignatureEncoder extends JSONSignature
   {
     JSONObject signature;
     
@@ -114,9 +114,9 @@ public class JSONEnvelopedSignatureEncoder extends JSONEnvelopedSignature
         wr.setBinaryArray (X509_CERTIFICATE_PATH_JSON, certificates);
       }
 
-    JSONEnvelopedSignatureEncoder (final JSONSigner signer, JSONWriter wr, final String name, final String value) throws IOException
+    JSONSignatureEncoder (final JSONSigner signer, JSONWriter wr, final String name, final String value) throws IOException
       {
-        wr.setObject (ENVELOPED_SIGNATURE_JSON, new JSONObjectWriter ()
+        wr.setObject (SIGNATURE_JSON, new JSONObjectWriter ()
           {
             @Override
             public void writeObject (JSONWriter wr) throws IOException

@@ -45,9 +45,9 @@ import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 
 /**
- * Decoder for enveloped JSON signatures.
+ * Decoder for JSON signatures.
  */
-public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
+public class JSONSignatureDecoder extends JSONSignature
   {
     SignatureAlgorithms algorithm;
     
@@ -67,9 +67,9 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
 
     String key_id;
     
-    public JSONEnvelopedSignatureDecoder (JSONReaderHelper rd) throws IOException
+    public JSONSignatureDecoder (JSONReaderHelper rd) throws IOException
       {
-        rd = rd.getObject (ENVELOPED_SIGNATURE_JSON);
+        rd = rd.getObject (SIGNATURE_JSON);
         JSONReaderHelper signature_info = rd.getObject (SIGNATURE_INFO_JSON);
         getSignatureInfo (signature_info);
         signature_value = rd.getBinary (SIGNATURE_VALUE_JSON);
@@ -175,7 +175,7 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
       {
         X509Certificate last_certificate = null;
         Vector<X509Certificate> certificates = new Vector<X509Certificate> ();
-        for (byte[] certificate_blob : rd.getBinaryArray (JSONEnvelopedSignature.X509_CERTIFICATE_PATH_JSON))
+        for (byte[] certificate_blob : rd.getBinaryArray (JSONSignature.X509_CERTIFICATE_PATH_JSON))
           {
             X509Certificate certificate = CertificateUtil.getCertificateFromBlob (certificate_blob);
             certificates.add (pathCheck (last_certificate, last_certificate = certificate));
@@ -261,9 +261,9 @@ public class JSONEnvelopedSignatureDecoder extends JSONEnvelopedSignature
         return public_key == null ? JSONSignatureTypes.SYMMETRIC_KEY : JSONSignatureTypes.ASYMMETRIC_KEY;
       }
 
-    public static JSONEnvelopedSignatureDecoder read (JSONReaderHelper rd, String expected_name, String expected_value) throws IOException
+    public static JSONSignatureDecoder read (JSONReaderHelper rd, String expected_name, String expected_value) throws IOException
       {
-        JSONEnvelopedSignatureDecoder verifier = new JSONEnvelopedSignatureDecoder (rd);
+        JSONSignatureDecoder verifier = new JSONSignatureDecoder (rd);
         if (!expected_name.equals (verifier.referenced_name) || !expected_value.equals (verifier.referenced_value))
           {
             throw new IOException ("Non-matching \"" + REFERENCE_JSON + "\" to signature");

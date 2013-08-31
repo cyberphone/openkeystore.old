@@ -54,12 +54,10 @@ public class JSONWriter
     
     boolean pretty = true;
     
-    public JSONWriter (String root_property, String version) throws IOException
+    public JSONWriter (String context) throws IOException
       {
-        root = new JSONObject ();
-        current = new JSONObject ();
-        root.addProperty (root_property, new JSONValue (JSONTypes.OBJECT, current));
-        current.addProperty (JSONDecoderCache.JMNS_JSON, new JSONValue (JSONTypes.STRING, version));
+        current = root = new JSONObject ();
+        current.addProperty (JSONDecoderCache.CONTEXT_JSON, new JSONValue (JSONTypes.STRING, context));
       }
 
     JSONWriter (JSONObject root)
@@ -162,7 +160,7 @@ public class JSONWriter
 
     public void setEnvelopedSignature (JSONSigner signer, String name, String value) throws IOException
       {
-        new JSONEnvelopedSignatureEncoder (signer, this, name, value);
+        new JSONSignatureEncoder (signer, this, name, value);
       }
 
     void beginObject (boolean array_flag)
@@ -416,11 +414,11 @@ public class JSONWriter
         int length = buffer.length ();
         if (length == 0)
           {
-            throw new IOException ("\"" + JSONEnvelopedSignature.REFERENCE_JSON + "\" " + name + "/" + value + " not found");
+            throw new IOException ("\"" + JSONSignature.REFERENCE_JSON + "\" " + name + "/" + value + " not found");
           }
         if (signature_info != null)
           {
-            throw new IOException ("\"" + JSONEnvelopedSignature.REFERENCE_JSON + "\" must not point to a property that is deeper nested than \"" + JSONEnvelopedSignature.ENVELOPED_SIGNATURE_JSON + "\"");
+            throw new IOException ("\"" + JSONSignature.REFERENCE_JSON + "\" must not point to a property that is deeper nested than \"" + JSONSignature.SIGNATURE_JSON + "\"");
           }
         buffer.setLength (buffer_at_signature_info);
         byte[] result = buffer.toString ().getBytes ("UTF-8");
@@ -429,7 +427,7 @@ public class JSONWriter
             byte[] other = ArrayUtil.readFile (canonicalization_debug_file);
             ArrayUtil.writeFile (canonicalization_debug_file,
                                  ArrayUtil.add (other, 
-                                                ArrayUtil.add (new StringBuffer ("\n\n" + JSONEnvelopedSignature.REFERENCE_JSON + "=")
+                                                ArrayUtil.add (new StringBuffer ("\n\n" + JSONSignature.REFERENCE_JSON + "=")
                                                                 .append (name)
                                                                 .append ('/')
                                                                 .append (value)

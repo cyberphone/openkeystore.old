@@ -18,7 +18,7 @@ package org.webpki.json;
 
 import java.io.IOException;
 
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 /**
@@ -28,7 +28,7 @@ class JSONObject
   {
     LinkedHashMap<String, JSONValue> properties = new LinkedHashMap<String, JSONValue> ();
 
-    Iterator<String> reader;
+    HashSet<String> read_flag = new HashSet<String> ();
 
     JSONObject ()
       {

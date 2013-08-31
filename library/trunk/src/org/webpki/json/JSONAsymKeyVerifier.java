@@ -33,7 +33,7 @@ public class JSONAsymKeyVerifier extends JSONVerifier
       }
 
     @Override
-    void verify (JSONEnvelopedSignatureDecoder signature_decoder) throws IOException
+    void verify (JSONSignatureDecoder signature_decoder) throws IOException
       {
         if (!public_key.equals (signature_decoder.public_key))
           {

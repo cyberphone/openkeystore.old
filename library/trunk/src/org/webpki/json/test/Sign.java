@@ -39,7 +39,7 @@ import org.webpki.crypto.URLFriendlyRandom;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.json.JSONAsymKeySigner;
-import org.webpki.json.JSONEnvelopedSignatureEncoder;
+import org.webpki.json.JSONSignatureEncoder;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONSymKeySigner;
@@ -55,8 +55,7 @@ public class Sign extends JSONEncoder
   {
     static enum ACTION {SYM, ASYM, X509};
     
-    static final String JMNS = "http://example.com/signature";
-    static final String ROOT_PROPERTY = "TestSignatures";
+    static final String CONTEXT = "http://example.com/signature";
     static final String ID = "ID";
     
     static class SymmetricOperations implements SymKeySignerInterface, SymKeyVerifierInterface
@@ -175,7 +174,7 @@ public class Sign extends JSONEncoder
     
     boolean multiple;
 
-    JSONEnvelopedSignatureEncoder signature;
+    JSONSignatureEncoder signature;
     
     void createX509Signature (JSONWriter wr, String name, String value) throws IOException
       {
@@ -208,7 +207,7 @@ public class Sign extends JSONEncoder
     public byte[] getJSONData () throws IOException
       {
         String instant = URLFriendlyRandom.generate (20);
-        JSONWriter wr = new JSONWriter (ROOT_PROPERTY, JMNS);
+        JSONWriter wr = new JSONWriter (CONTEXT);
         wr.setDateTime ("Now", new Date ());
         wr.setObject ("HRT", new RT ());
         wr.setObjectArray ("ARR", new JSONObjectWriter[]{});

@@ -46,56 +46,23 @@ public class JSONDecoderCache
     /**
      * JMNS = JSON Message Name Space
      */
-    public static final String JMNS_JSON = "@jmns";
+    public static final String CONTEXT_JSON = "@context";
     
     boolean test_unread = true;
     
-    static class RegisteredJSONDecoder
-      {
-        String jmns, root_property;
-        
-        RegisteredJSONDecoder (String jmns, String root_property)
-          {
-            this.jmns = jmns;
-            this.root_property = root_property;
-          }
-        
-        public int hashCode ()
-          {
-            return jmns.hashCode () ^ root_property.hashCode ();
-          }
-        
-        public boolean equals (Object o)
-          {
-            return o instanceof RegisteredJSONDecoder &&
-                   jmns.equals (((RegisteredJSONDecoder)o).jmns) &&
-                   root_property.equals (((RegisteredJSONDecoder)o).root_property);
-          }
-      }
-
-    Hashtable<RegisteredJSONDecoder,Class<? extends JSONDecoder>> class_map = new Hashtable<RegisteredJSONDecoder,Class<? extends JSONDecoder>> ();
+    Hashtable<String,Class<? extends JSONDecoder>> class_map = new Hashtable<String,Class<? extends JSONDecoder>> ();
     
     public JSONDecoder parse (byte[] json_utf8) throws IOException
       {
         JSONParser parser = new JSONParser ();
         JSONObject root = parser.parse (json_utf8);
-        if (root.properties.size () != 1)
-          {
-            throw new IOException ("Expected a single property, got: " + root.properties.size ());
-          }
-        String root_property = root.properties.keySet ().iterator ().next ();
-        JSONValue value = root.properties.get (root_property);
-        if (!(value.value instanceof JSONObject))
-          {
-            throw new IOException ("Expected an object as message body");
-          }
-        JSONReaderHelper reader = new JSONReaderHelper ((JSONObject)value.value);
+        JSONReaderHelper reader = new JSONReaderHelper (root);
         reader.root = root;
-        String jmns = reader.getString (JMNS_JSON);
-        Class<? extends JSONDecoder> decoder_class = class_map.get (new RegisteredJSONDecoder (jmns, root_property));
+        String context = reader.getString (CONTEXT_JSON);
+        Class<? extends JSONDecoder> decoder_class = class_map.get (context);
         if (decoder_class == null)
           {
-            throw new IOException ("Unknown JSONDecoder type: " + root_property + ", " + jmns);
+            throw new IOException ("Unknown JSONDecoder type");
           }
         try
           {
@@ -104,7 +71,7 @@ public class JSONDecoderCache
             decoder.unmarshallJSONData (reader);
             if (test_unread)
               {
-                checkForUnread (reader.current, root_property);
+                checkForUnread (root);
               }
             return decoder;
           }
@@ -119,18 +86,20 @@ public class JSONDecoderCache
       }
 
     @SuppressWarnings("unchecked")
-    void checkForUnread (JSONObject json_object, String property) throws IOException
+    void checkForUnread (JSONObject json_object) throws IOException
       {
+/*
         if (json_object.reader.hasNext ())
           {
             throw new IOException ("Property \"" + json_object.reader.next () + "\" of \"" + property + "\" wasn't read");
           }
+*/
         for (String name : json_object.properties.keySet ())
           {
             JSONValue value = json_object.properties.get (name);
             if (value.type == JSONTypes.OBJECT)
               {
-                checkForUnread ((JSONObject)value.value, name);
+                checkForUnread ((JSONObject)value.value);
               }
             else if (value.type == JSONTypes.ARRAY)
               {
@@ -138,7 +107,7 @@ public class JSONDecoderCache
                   {
                     if (object.type == JSONTypes.OBJECT)
                       {
-                        checkForUnread ((JSONObject)object.value, name);
+                        checkForUnread ((JSONObject)object.value);
                       }
                   }
               }
@@ -150,7 +119,7 @@ public class JSONDecoderCache
         try
           {
             JSONDecoder decoder = json_decoder.newInstance ();
-            class_map.put (new RegisteredJSONDecoder (decoder.getJMNS (), decoder.getRootProperty ()), decoder.getClass ());
+            class_map.put (decoder.getContext (), decoder.getClass ());
           }
         catch (InstantiationException ie)
           {

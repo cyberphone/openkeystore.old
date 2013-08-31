@@ -31,8 +31,7 @@ import org.webpki.util.ArrayUtil;
  */
 public class Test
   {
-    static final String MESSAGE="ParserTest";
-    static final String JMNS = "http://example.com/test";
+    static final String CONTEXT = "http://example.com/test";
     
     static final String BOOL_TRUE = "boolTrue";
     static final String BOOL_FALSE = "boolFalse";
@@ -85,15 +84,9 @@ public class Test
           }
   
         @Override
-        protected String getJMNS ()
+        protected String getContext ()
           {
-             return JMNS;
-          }
-  
-        @Override
-        protected String getRootProperty ()
-          {
-            return MESSAGE;
+             return CONTEXT;
           }
       }
 
@@ -102,7 +95,7 @@ public class Test
         @Override
         protected byte[] getJSONData () throws IOException
           {
-            JSONWriter wr = new JSONWriter (MESSAGE, JMNS);
+            JSONWriter wr = new JSONWriter (CONTEXT);
             wr.setBoolean (BOOL_TRUE, true);
             wr.setBoolean (BOOL_FALSE, false);
             wr.setString (STRING, STRING_VALUE);
@@ -130,15 +123,9 @@ public class Test
           }
   
         @Override
-        protected String getJMNS ()
+        protected String getContext ()
           {
             return "http://example.com";
-          }
-  
-        @Override
-        protected String getRootProperty ()
-          {
-            return "ESC";
           }
       }
 
