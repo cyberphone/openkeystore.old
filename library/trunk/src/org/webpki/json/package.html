@@ -13,11 +13,22 @@ enveloped XML signatures.
 </p>
 Sample signed JSON message:
 <pre style="margin-left:20pt">
-<font color="C00000">
   {
-    "@context": "http://example.com/test-signature",
-    "Now": "2013-08-27T16:32:11+02:00",
-    "Objects":
+    "@context": "http://example.com/signature",
+    "Now": "2013-08-31T14:58:31+02:00",
+    "HRT":
+      {
+        "RTl": "67",
+        "YT":
+          {
+            "HTL": "656756#",
+            "INTEGER": -689,
+            "Fantastic": false
+          },
+        "er": "33"
+      },
+    "ARR": [],
+    "BARR":
       [{
          "HTL": "656756#",
          "INTEGER": -689,
@@ -28,41 +39,42 @@ Sample signed JSON message:
          "INTEGER": -689,
          "Fantastic": false
        }],
-    </font><font color="blue">"ID": "YW_yxu6voZ3uK5Et3xOA"</font><font color="C00000">,
+    "ID": "8OUbPTamxSHpn6iytuDf",
     "STRINGS": ["One","Two","Three"],
     "EscapeMe": "A\\\n\"",
-    "<b>Signature</b>":
+    "Intra": 78,
+    "Signature":
       {
-        "<b>SignatureInfo</b>":
+        "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
+        "KeyInfo":
           {
-            "<b>Algorithm</b>": "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
-            "<b>Reference</b>":
+            "PublicKey":
               {
-                "<b>Name</b>": </font><font color="blue">"ID"</font><font color="C00000">,
-                "<b>Value</b>": </font><font color="blue">"YW_yxu6voZ3uK5Et3xOA"</font><font color="C00000">
-              },
-            "<b>KeyInfo</b>":
-              {
-                "<b>SignatureCertificate</b>":
+                "EC":
                   {
-                    "<b>Issuer</b>": "CN=Demo Sub CA,DC=webpki,DC=org",
-                    "<b>SerialNumber</b>": 1159906465500,
-                    "<b>Subject</b>": "CN=example.com,O=Example Organization"
-                  },
-                "<b>X509CertificatePath</b>":
-                  [
-                    "MIIDizCCAnOgAwIBAgIGAQ4P0BbcMA0...SL73xSRl0l3EWzTxSpkiIJGl5kJorHs",
-                    "MIIDZTCCAk2gAwIBAgIBAjANBgkqhki...0KZcfh05Xfk8V1EccGAKrZV5SHDz3U",
-                    "MIIDZjCCAk6gAwIBAgIBATANBgkqhki...vdiPNIlcGnauOs8rI3fkaO8PtUgHnUw"
-                  ]
+                    "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.p256",
+                    "X": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=",
+                    "Y": "LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA="
+                  }
               }
-          }</font>,
-        "<b>SignatureValue</b>": <font color="green">"iKiNnCJEBIWwlok/bmi6j/43E...TuD2AeyjCToPs81uEzpkIHD0UWZ9ItRb7Uc"</font>
-      },
-</pre>
-The signature scheme signs the JSON object identified by the <code><b>Reference</b></code> using the
-data in <font color="blue"><code>blue</code></font>, down to and including the <code><b>SignatureInfo</b></code> object.
-<p>Canonicalization is performed by simply removing all whitespace like:<br>
-<code><font color="C00000">"MyLittleSignature":{"@context":"http://example.com/signature","Now":"2013-08-27T16:32:11+02:00"...Uw"]}}</font></code>
+          },
+        "SignatureValue": "MEUCIF32SJ8n+NCr0GSPu6E4ZGgr69iAERphslIyIoUQ9TGfAiEAqevMXFnlJrVIZMc81S3KvDZEZIIDWdslEMrYMNNsNkA="
+      }
+  }
+  </pre>
+The principle for canonicalization is simple: All textual data of the JSON object 
+(including possible child objects) holding the <code>Signature</code> property – minus the <code>SignatureValue</code>
+name-value pair is used <i>after removing all whitespace</i>.
+In addition, <i>properties must be sorted in descending</i>
+UTF-8 order.<p>
+The sample above has the following canonicalization data:<br>
+<code>
+{"Signature":{"KeyInfo":{"PublicKey":{"EC":{"Y":"LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA=","X":<br>
+"lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=","NamedCurve":"http://xmlns.webpki.org/sks/algorithm#<br>
+ec.p256"}}},"Algorithm":"http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256"},"STRINGS":["One","Tw<br>
+o","Three"],"Now":"2013-08-31T14:58:31+02:00","Intra":78,"ID":"8OUbPTamxSHpn6iytuDf","HRT":{"er":"3<br>
+3","YT":{"INTEGER":-689,"HTL":"656756#","Fantastic":false},"RTl":"67"},"EscapeMe":"A\\\n\"","BARR":<br>
+[{"INTEGER":-689,"HTL":"656756#","Fantastic":true},{"INTEGER":-689,"HTL":"656756#","Fantastic":fals<br>
+e}],"ARR":[],"@context":"http://example.com/signature"}</code>
 </p>
 </body>

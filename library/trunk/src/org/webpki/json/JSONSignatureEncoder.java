@@ -35,7 +35,7 @@ import java.util.Vector;
 import org.webpki.crypto.KeyAlgorithms;
 
 /**
- * Encoder for enveloped JSON signatures.
+ * Encoder for JSON signatures.
  * Only used internally except for the public static methods.
  * 
  */
