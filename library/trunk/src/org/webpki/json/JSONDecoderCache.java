@@ -28,17 +28,14 @@ import org.webpki.util.ArrayUtil;
  * This is (sort of) an emulation of XML schema caches.
  * <p>
  * The cache system assumes that JSON documents follow a strict convention:<br>
- * &nbsp;<br>
- * <code>&nbsp;&nbsp;{<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&quot;</code><i>MessageName</i><code>&quot;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;@jmns&quot;:&nbsp;&quot;</code><i>Namespace</i><code>&quot;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;</code><i>Arbitrary JSON Payload</i><code><br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ * &nbsp;<br><code>
+ * &nbsp;&nbsp;{<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;@context&quot;:&nbsp;&quot;</code><i>Message Context</i><code>&quot;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;</code><i>Arbitrary JSON Payload</i><code><br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>
  * &nbsp;&nbsp;}</code><p>
- * Another restriction imposed by this particular JSON model is that property order <b>must</b> be honored.
+ * Another restriction imposed by this particular JSON model is that all properties <b>must</b> be read.
  * 
  */
 public class JSONDecoderCache
@@ -88,15 +85,13 @@ public class JSONDecoderCache
     @SuppressWarnings("unchecked")
     void checkForUnread (JSONObject json_object) throws IOException
       {
-/*
-        if (json_object.reader.hasNext ())
-          {
-            throw new IOException ("Property \"" + json_object.reader.next () + "\" of \"" + property + "\" wasn't read");
-          }
-*/
         for (String name : json_object.properties.keySet ())
           {
             JSONValue value = json_object.properties.get (name);
+            if (!json_object.read_flag.contains (name))
+              {
+                throw new IOException ("Property \"" + name + "\" was never read");
+              }
             if (value.type == JSONTypes.OBJECT)
               {
                 checkForUnread ((JSONObject)value.value);

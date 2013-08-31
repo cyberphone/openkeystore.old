@@ -59,6 +59,7 @@ public class JSONReaderHelper
           {
             throw new IOException ("Type mismatch for \"" + name + "\": Read=" + value.type.toString () + ", Expected=" + expected.toString ());
           }
+        current.read_flag.add (name);
         return value;
       }
 

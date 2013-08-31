@@ -66,6 +66,11 @@ public class JSONSignatureDecoder extends JSONSignature
     public JSONSignatureDecoder (JSONReaderHelper rd) throws IOException
       {
         JSONReaderHelper signature = rd.getObject (SIGNATURE_JSON);
+        String version = signature.getStringConditional (VERSION_JSON, SIGNATURE_VERSION_ID);
+        if (!version.equals (SIGNATURE_VERSION_ID))
+          {
+            throw new IOException ("Unknown \"" + SIGNATURE_JSON + "\" version: " + version);
+          }
         algorithm_string = signature.getString (ALGORITHM_JSON);
         getKeyInfo (signature.getObject (KEY_INFO_JSON));
         signature_value = signature.getBinary (SIGNATURE_VALUE_JSON);
