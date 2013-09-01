@@ -95,11 +95,7 @@ public class JSONSignatureDecoder extends JSONSignature
 
     void getKeyInfo (JSONReaderHelper rd) throws IOException
       {
-        if (rd.hasProperty (SIGNATURE_CERTIFICATE_JSON))
-          {
-            getSignatureCertificate (rd, rd.getObject (SIGNATURE_CERTIFICATE_JSON));
-          }
-        else if (rd.hasProperty (X509_CERTIFICATE_PATH_JSON))
+        if (rd.hasProperty (X509_CERTIFICATE_PATH_JSON))
           {
             getX509CertificatePath (rd);
           }
@@ -186,6 +182,20 @@ public class JSONSignatureDecoder extends JSONSignature
     void getX509CertificatePath (JSONReaderHelper rd) throws IOException
       {
         certificate_path = readX509CertificatePath (rd);
+        if (rd.hasProperty (SIGNATURE_CERTIFICATE_JSON))
+          {
+            rd = rd.getObject (SIGNATURE_CERTIFICATE_JSON);
+            String issuer = rd.getString (ISSUER_JSON);
+            BigInteger serial_number = rd.getBigInteger (SERIAL_NUMBER_JSON);
+            String subject = rd.getString (SUBJECT_JSON);
+            X509Certificate signature_certificate = certificate_path[0];
+            if (!signature_certificate.getIssuerX500Principal ().getName ().equals (issuer) ||
+                !signature_certificate.getSerialNumber ().equals (serial_number) ||
+                !signature_certificate.getSubjectX500Principal ().getName ().equals (subject))
+              {
+                throw new IOException ("\"" + SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
+              }
+          }
       }
 
     void checkVerification (boolean success) throws IOException
@@ -206,7 +216,7 @@ public class JSONSignatureDecoder extends JSONSignature
                 default:
                   key = getKeyID ();
                }
-            throw new IOException ("Bad signed_object for key: " + key);
+            throw new IOException ("Bad signature for key: " + key);
           }
       }
 
@@ -223,21 +233,6 @@ public class JSONSignatureDecoder extends JSONSignature
         catch (GeneralSecurityException e)
           {
             throw new IOException (e);
-          }
-      }
-
-    void getSignatureCertificate (JSONReaderHelper outer, JSONReaderHelper rd) throws IOException
-      {
-        String issuer = rd.getString (ISSUER_JSON);
-        BigInteger serial_number = rd.getBigInteger (SERIAL_NUMBER_JSON);
-        String subject = rd.getString (SUBJECT_JSON);
-        getX509CertificatePath (outer);
-        X509Certificate signature_certificate = certificate_path[0];
-        if (!signature_certificate.getIssuerX500Principal ().getName ().equals (issuer) ||
-            !signature_certificate.getSerialNumber ().equals (serial_number) ||
-            !signature_certificate.getSubjectX500Principal ().getName ().equals (subject))
-          {
-            throw new IOException ("\"" + SIGNATURE_CERTIFICATE_JSON + "\" doesn't match actual certificate");
           }
       }
 
