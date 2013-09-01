@@ -49,7 +49,7 @@ class JSONSignature
         return parent;
       }
 
-    public static final String SIGNATURE_VERSION_ID       = "http://xmlns.webpki.org/jsign/v1";
+    public static final String SIGNATURE_VERSION_ID       = "http://xmlns.webpki.org/jcs/v1";
     
     public static final String SIGNATURE_JSON             = "Signature";
 
@@ -60,6 +60,8 @@ class JSONSignature
     public static final String SIGNATURE_VALUE_JSON       = "SignatureValue";
 
     public static final String KEY_INFO_JSON              = "KeyInfo";
+
+    public static final String URL_JSON                   = "URL";
 
     public static final String X509_CERTIFICATE_PATH_JSON = "X509CertificatePath";
 

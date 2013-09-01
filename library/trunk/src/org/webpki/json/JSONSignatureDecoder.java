@@ -107,9 +107,13 @@ public class JSONSignatureDecoder extends JSONSignature
           {
             public_key = readPublicKey (rd);
           }
-        else
+        else if (rd.hasProperty (KEY_ID_JSON))
           {
             key_id = rd.getString (KEY_ID_JSON);
+          }
+        else
+          {
+            throw new IOException ("\"" + URL_JSON + "\" not yet implemented");
           }
       }
 
