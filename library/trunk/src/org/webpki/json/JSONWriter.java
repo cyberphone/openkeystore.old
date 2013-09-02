@@ -206,7 +206,7 @@ public class JSONWriter
       {
         beginObject (array_flag);
         boolean next = false;
-        for (String property : sort ? new TreeSet<String> (object.properties.keySet ()).descendingSet () :  object.properties.keySet ())
+        for (String property : sort ? new TreeSet<String> (object.properties.keySet ()) :  object.properties.keySet ())
           {
             JSONValue json_value = object.properties.get (property);
             if (next)

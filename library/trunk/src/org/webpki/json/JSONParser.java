@@ -192,8 +192,16 @@ class JSONParser
                       break;
 
 /* 
-    Nobody (in their right mind...) escape slashes although it is in the RFC
+    Nobody (in their right mind...) escape slashes although it is in the RFC.
                     case '/':
+*/
+
+/* 
+    If you need to specify characters as explicit UNICODE values, you must
+    do the conversion in a "setter" method; not put it out on the "wire"!
+    Why?  Because 'A' and \u0041 are equivalent but looks different which
+    confuses the canonicalizer.
+                    case 'u':
 */
                     case 'b':
                       c = '\b';

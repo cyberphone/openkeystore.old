@@ -128,8 +128,8 @@ public class Sign extends JSONEncoder
         @Override
         public void writeObject (JSONWriter wr) throws IOException
           {
-            wr.setString ("HTL", "656756#");
-            wr.setInt ("INTEGER", -689);
+            wr.setInt ("Value", -689);
+            wr.setString ("String", "656756#");
             wr.setBoolean ("Fantastic", fantastic);
           }
       }
@@ -139,7 +139,7 @@ public class Sign extends JSONEncoder
         @Override
         public void writeObject (JSONWriter wr) throws IOException
           {
-            wr.setString ("RTl", "67");
+            wr.setString ("rt", "67");
             wr.setObject ("YT", new HT (false));
             wr.setString ("er","33");
           }
@@ -160,7 +160,7 @@ public class Sign extends JSONEncoder
         public void writeObject (JSONWriter wr) throws IOException
           {
             wr.setString (ID, instance);
-            wr.setInt ("VALUE", value);
+            wr.setInt ("Data", value);
             createSymmetricKeySignature (wr);
           }
       }
@@ -209,17 +209,17 @@ public class Sign extends JSONEncoder
         String instant = URLFriendlyRandom.generate (20);
         JSONWriter wr = new JSONWriter (CONTEXT);
         wr.setDateTime ("Now", new Date ());
-        wr.setObject ("HRT", new RT ());
-        wr.setObjectArray ("ARR", new JSONObjectWriter[]{});
-        wr.setObjectArray ("BARR", new JSONObjectWriter[]{new HT (true), new HT (false)});
+        wr.setObject ("RT", new RT ());
+        wr.setObjectArray ("Array", new JSONObjectWriter[]{});
+        wr.setObjectArray ("Barray", new JSONObjectWriter[]{new HT (true), new HT (false)});
         if (multiple)
           {
             wr.setObjectArray ("SignedObjects", new JSONObjectWriter[]{new SO (35, "this"), new SO (-90, "that")});
           }
         wr.setString (ID, instant);
-        wr.setStringArray ("STRINGS", new String[]{"One", "Two", "Three"});
+        wr.setStringArray ("Strings", new String[]{"One", "Two", "Three"});
         wr.setString ("EscapeMe", "A\\\n\"" );
-        wr.setInt ("Intra", 78);
+        wr.setInt ("Int", 78);
         if (action == ACTION.X509)
           {
             createX509Signature (wr);
