@@ -199,8 +199,8 @@ class JSONParser
 /* 
     If you need to specify characters as explicit UNICODE values, you must
     do the conversion in a "setter" method; not put it out on the "wire"!
-    Why?  Because 'A' and \u0041 are equivalent but looks different which
-    confuses the canonicalizer.
+    Why?  Because 'A' and \u0041 are technically equivalent but appear
+    different to a canonicalizer which would require special handling.
                     case 'u':
 */
                     case 'b':
