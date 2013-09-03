@@ -49,7 +49,7 @@ public class AresDec
 
         ares.verifySignature (verifier);
 
-        System.out.println ("\nUSER AUTHENTICATION VERIFIED\n" + verifier.getSignerCertificateInfo ().toString ());
+        System.out.println ("\nUSER AUTHENTICATION VERIFIED\n" + verifier.getSignerCertificate ().toString ());
         return ares;
       }
 

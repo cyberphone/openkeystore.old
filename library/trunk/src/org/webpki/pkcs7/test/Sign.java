@@ -16,6 +16,7 @@
  */
 package org.webpki.pkcs7.test;
 
+import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -45,6 +46,6 @@ public class Sign
                                     pkcs7.signMessage (ArrayUtil.readFile (args[1]))
                                                  :
                                     pkcs7.signDetachedMessage (ArrayUtil.readFile (args[1])));
-        System.out.println ("\nSIGNING SUCCESSFUL\n\n" + signer.getSignerCertificateInfo ().toString ());
+        System.out.println ("\nSIGNING SUCCESSFUL\n\n" + new CertificateInfo (signer.getSignerCertificate ()).toString ());
       }
   }

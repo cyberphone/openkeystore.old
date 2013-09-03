@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import org.webpki.util.ArrayUtil;
 
 import org.webpki.crypto.test.DemoKeyStore;
+import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyStoreVerifier;
 
 import org.webpki.pdf.PDFVerifier;
@@ -56,7 +57,7 @@ public class Verify
         System.out.println ("Signature covers whole document: " + pdf_verifier.getSignatureCoversWholeDocument ());
         System.out.println ("Document revision: " + pdf_verifier.getDocumentRevision ());
         System.out.println ("Document modified: " + pdf_verifier.getDocumentModifiedStatus ());
-        System.out.println ("Signer certificate:\n" + verifier.getSignerCertificateInfo ().toString ());
+        System.out.println ("Signer certificate:\n" + new CertificateInfo (verifier.getSignerCertificate ()).toString ());
         ArrayUtil.writeFile ("c:\\unsigned-file.pdf", pdf_verifier.getUnsignedDocument ());
       }
 

@@ -31,6 +31,7 @@ import org.webpki.xml.XMLSchemaCache;
 import org.webpki.xmldsig.test.xmlobject;
 
 import org.webpki.crypto.test.DemoKeyStore;
+import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.SignerInterface;
 
@@ -161,6 +162,6 @@ System.out.println ("SIGALG=" + authdec.getAuthenticationProfiles ()[0].getSigna
 
         test (in_file, out_file, signer, localfixed, false);
 
-        System.out.println ("Signed by:\n" + signer.getSignerCertificateInfo ().toString ());
+        System.out.println ("Signed by:\n" + new CertificateInfo (signer.getSignerCertificate ()).toString ());
       }
   }

@@ -59,7 +59,7 @@ public class SresDec
 
         prdec.verifySignature (verifier);
 
-        System.out.println ("\nUSER SIGNATURE VERIFIED\n" + verifier.getSignerCertificateInfo ().toString ());
+        System.out.println ("\nUSER SIGNATURE VERIFIED\n" + verifier.getSignerCertificate ().toString ());
         return sres;
       }
 

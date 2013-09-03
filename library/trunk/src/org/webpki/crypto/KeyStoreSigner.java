@@ -227,9 +227,9 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
       }
 
 
-    public CertificateInfo getSignerCertificateInfo () throws IOException
+    public X509Certificate getSignerCertificate () throws IOException
       {
-        return new CertificateInfo (signer_certificate);
+        return signer_certificate;
       }
 
   }

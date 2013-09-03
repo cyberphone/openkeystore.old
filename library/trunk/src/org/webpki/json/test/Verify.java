@@ -24,6 +24,7 @@ import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyStoreVerifier;
 
 import org.webpki.crypto.test.DemoKeyStore;
@@ -86,7 +87,7 @@ public class Verify extends JSONDecoder
                           default:
                             KeyStoreVerifier verifier = new KeyStoreVerifier (DemoKeyStore.getExampleDotComKeyStore ());
                             signature.verify (new JSONX509Verifier (verifier));
-                            debugOutput ("X509 signature validated for: " + verifier.getSignerCertificateInfo ().toString ());
+                            debugOutput ("X509 signature validated for: " + new CertificateInfo (verifier.getSignerCertificate ()).toString ());
                             break;
                         }
                     }

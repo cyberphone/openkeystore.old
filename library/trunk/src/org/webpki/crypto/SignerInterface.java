@@ -42,7 +42,7 @@ public interface SignerInterface
     /**
      * Returns a descriptor of the signer certificate.
      */
-    public CertificateInfo getSignerCertificateInfo () throws IOException;
+    public X509Certificate getSignerCertificate () throws IOException;
     
     /**
      * Tests if a signature operation failed due to authorization errors.

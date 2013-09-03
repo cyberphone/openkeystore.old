@@ -28,6 +28,7 @@ import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Vector;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -49,6 +50,8 @@ public class Keys
     static final String CONTEXT = "http://keys/test";
     static final int ROUNDS = 1000;
     static JSONDecoderCache cache = new JSONDecoderCache ();
+    static KeyAlgorithms[] ec_curves;
+    static int ec_index;
     
     public static class Reader extends JSONDecoder
       {
@@ -101,7 +104,7 @@ public class Keys
         AlgorithmParameterSpec alg_par_spec = rsa ?
             new RSAKeyGenParameterSpec (2048, RSAKeyGenParameterSpec.F4)
                                                   :
-            new ECGenParameterSpec (KeyAlgorithms.P_256.getJCEName ());
+            new ECGenParameterSpec (ec_curves[ec_index++ % ec_curves.length].getJCEName ());
         KeyPairGenerator kpg = KeyPairGenerator.getInstance (rsa ? "RSA" : "EC", provider);
         kpg.initialize (alg_par_spec, new SecureRandom ());
         KeyPair key_pair = kpg.generateKeyPair ();
@@ -126,6 +129,15 @@ public class Keys
           }
         try
           {
+            Vector<KeyAlgorithms> ecs = new Vector<KeyAlgorithms> ();
+            for (KeyAlgorithms ka : KeyAlgorithms.values ())
+              {
+                if (ka.isECKey ())
+                  {
+                    ecs.add (ka);
+                  }
+              }
+            ec_curves = ecs.toArray (new KeyAlgorithms[0]);
             Security.insertProviderAt (new BouncyCastleProvider(), 1);
             cache.addToCache (Reader.class);
             for (int i = 0; i < ROUNDS; i++)

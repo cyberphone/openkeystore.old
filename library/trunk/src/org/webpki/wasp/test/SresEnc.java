@@ -30,6 +30,7 @@ import org.webpki.xml.XMLObjectWrapper;
 import org.webpki.xml.XMLSchemaCache;
 
 import org.webpki.crypto.test.DemoKeyStore;
+import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.SignerInterface;
 
@@ -157,6 +158,6 @@ public class SresEnc
 
         test (in_file, out_file, signer, localfixed, profileindex, false);
 
-        System.out.println ("Signed by:\n" + signer.getSignerCertificateInfo ().toString ());
+        System.out.println ("Signed by:\n" + new CertificateInfo (signer.getSignerCertificate ()).toString ());
       }
   }

@@ -84,7 +84,7 @@ public class AreqDec
 
         if (signed)
           {
-            s.append ("\nSIGNATURE\n" + verifier.getSignerCertificateInfo ().toString () + "\nSIGNATURE");
+            s.append ("\nSIGNATURE\n" + verifier.getSignerCertificate ().toString () + "\nSIGNATURE");
           }
 
         if (outdata)

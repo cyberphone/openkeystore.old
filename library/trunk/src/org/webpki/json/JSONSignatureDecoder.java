@@ -26,7 +26,6 @@ import java.security.PublicKey;
 import java.security.Signature;
 
 import java.security.cert.X509Certificate;
-import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
@@ -38,11 +37,6 @@ import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
-
-import org.bouncycastle.jce.ECNamedCurveTable;
-
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 
 /**
  * Decoder for JSON signatures.
@@ -136,30 +130,10 @@ public class JSONSignatureDecoder extends JSONSignature
               }
             rd = rd.getObject (EC_JSON);
               {
-                String named_curve_uri = rd.getString (NAMED_CURVE_JSON);
-                for (KeyAlgorithms named_curve : KeyAlgorithms.values ())
-                  {
-                    if (named_curve.getURI ().equals (named_curve_uri))
-                      {
-                        if (named_curve.getECDomainOID () == null)
-                          {
-                            throw new IOException ("Invalid EC curve: " + named_curve_uri);
-                          }
-                        ECNamedCurveParameterSpec curve_params = ECNamedCurveTable.getParameterSpec (named_curve.getJCEName ());
-                        if (curve_params == null)
-                          {
-                            throw new IOException ("Provider doesn't support: " + named_curve_uri);
-                          }
-                        ECPoint w = new ECPoint (readCryptoBinary (rd, X_JSON), readCryptoBinary (rd, Y_JSON));
-                        ECParameterSpec ec_params = new ECNamedCurveSpec (named_curve.getJCEName (),
-                                                                          curve_params.getCurve(),
-                                                                          curve_params.getG(),
-                                                                          curve_params.getN());
-                        return KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec_params));
-                      }
-                  }
-                throw new IOException ("Unknown named curve: " + named_curve_uri);
-              }
+                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromURI (rd.getString (NAMED_CURVE_JSON));
+                ECPoint w = new ECPoint (readCryptoBinary (rd, X_JSON), readCryptoBinary (rd, Y_JSON));
+                return KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
+            }
           }
         catch (GeneralSecurityException e)
           {

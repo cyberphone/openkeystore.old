@@ -30,6 +30,6 @@ public interface VerifierInterface
 
     X509Certificate[] getSignerCertificatePath () throws IOException;;
  
-    CertificateInfo getSignerCertificateInfo () throws IOException;
+    X509Certificate getSignerCertificate () throws IOException;
 
   }

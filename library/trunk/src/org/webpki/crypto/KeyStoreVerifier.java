@@ -113,9 +113,8 @@ public class KeyStoreVerifier implements VerifierInterface
       }
 
  
-   public CertificateInfo getSignerCertificateInfo () throws IOException
+   public X509Certificate getSignerCertificate () throws IOException
       {
-        return new CertificateInfo (certificate_path[0], trusted);
+        return certificate_path[0];
       }
-
   }

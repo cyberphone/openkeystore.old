@@ -16,6 +16,7 @@
  */
 package org.webpki.pkcs7.test;
 
+import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.VerifierInterface;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.test.DemoKeyStore;
@@ -51,6 +52,6 @@ public class Verify
           {
             pkcs7.verifyDetachedMessage (ArrayUtil.readFile (args[0]), ArrayUtil.readFile (args[1]));
           }
-        System.out.println ("\nVERIFICATION SUCCESSFUL\n\n" + verifier.getSignerCertificateInfo ().toString ());
+        System.out.println ("\nVERIFICATION SUCCESSFUL\n\n" + new CertificateInfo (verifier.getSignerCertificate ()).toString ());
       }
   }
