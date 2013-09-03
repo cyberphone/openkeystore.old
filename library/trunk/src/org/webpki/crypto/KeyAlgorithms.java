@@ -23,15 +23,12 @@ import java.security.PublicKey;
 
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.ECFieldF2m;
 import java.security.spec.ECFieldFp;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
-
-import org.webpki.asn1.DerDecoder;
-import org.webpki.asn1.ParseUtil;
-
 
 public enum KeyAlgorithms implements SKSAlgorithms
   {
@@ -283,14 +280,11 @@ public enum KeyAlgorithms implements SKSAlgorithms
     private final boolean has_parameters;            // Parameter value required?
     private final boolean sks_mandatory;             // If required in SKS
     private final String ec_domain_oid;              // EC domain as expressed in ASN.1 messages, null for RSA
-    private final BigInteger field;                  // EC
-    private final BigInteger a;                      // EC
-    private final BigInteger b;                      // EC
+    private EllipticCurve elliptic_curve;            // EC
     private final BigInteger x;                      // EC 
     private final BigInteger y;                      // EC 
     private final BigInteger n;                      // EC
     private final int h;                             // EC
-    private final boolean f2m;                       // EC
 
 
     private KeyAlgorithms (String uri,
@@ -316,14 +310,15 @@ public enum KeyAlgorithms implements SKSAlgorithms
         this.has_parameters = has_parameters;
         this.sks_mandatory = sks_mandatory;
         this.ec_domain_oid = ec_domain_oid;
-        this.field = field == null ? null : new BigInteger (field, 16);
-        this.a = a == null ? null : new BigInteger (a, 16);
-        this.b = b == null ? null : new BigInteger (b, 16);
+        this.elliptic_curve = field == null ?
+            null 
+                                            :
+            new EllipticCurve (f2m ? new ECFieldF2m (length_in_bits, new BigInteger (field, 16)) : new ECFieldFp (new BigInteger (field, 16)),
+                               new BigInteger (a, 16), new BigInteger (b, 16));
         this.x = x == null ? null : new BigInteger (x, 16);
         this.y = y == null ? null : new BigInteger (y, 16);
         this.n = n == null ? null : new BigInteger (n, 16);
         this.h = h;
-        this.f2m = f2m;
       }
 
 
@@ -399,8 +394,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
 
     public ECParameterSpec getECParameterSpec ()
       {
-        return new ECParameterSpec (new EllipticCurve (f2m ? new ECFieldF2m (length_in_bits, field) : new ECFieldFp (field), a, b),
-                                    new ECPoint (x, y), n, h);
+        return new ECParameterSpec (elliptic_curve, new ECPoint (x, y), n, h);
       }
  
 
@@ -408,20 +402,15 @@ public enum KeyAlgorithms implements SKSAlgorithms
       {
         if (public_key instanceof ECPublicKey)
           {
-            String ec_domain_oid = ParseUtil.oid (
-                                    ParseUtil.sequence (
-                                      ParseUtil.sequence (
-                                        DerDecoder.decode (public_key.getEncoded ()), 2).get(0), 2).get (1)
-                                                 ).oid ();
+            EllipticCurve ec_curve = ((ECPublicKey) public_key).getParams ().getCurve ();
             for (KeyAlgorithms alg : values ())
               {
-                if (ec_domain_oid.equals (alg.ec_domain_oid) &&
-                    (key_parameters == null || !alg.has_parameters))
+                if (alg.isECKey () && alg.elliptic_curve.equals (ec_curve))
                   {
                     return alg;
                   }
               }
-            throw new IOException ("Unknown EC domain: " + ec_domain_oid);
+            throw new IOException ("Unknown EC curve: " + ec_curve.toString ());
           }
         byte[] modblob = ((RSAPublicKey)public_key).getModulus ().toByteArray ();
         int length_in_bits = (modblob[0] == 0 ? modblob.length - 1 : modblob.length) * 8;
