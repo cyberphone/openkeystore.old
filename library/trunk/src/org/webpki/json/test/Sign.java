@@ -20,13 +20,12 @@ import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
 
 import java.util.Date;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
@@ -241,6 +240,30 @@ public class Sign extends JSONEncoder
         System.exit (0);
       }
 
+    static void installOptionalBCProvider ()
+      {
+        @SuppressWarnings("rawtypes")
+        Class bc = null;
+        try
+          {
+            bc = Class.forName ("org.bouncycastle.jce.provider.BouncyCastleProvider");
+          }
+        catch (ClassNotFoundException e)
+          {
+            System.out.println ("\nBouncyCastle provider not in path - Using the platform provider\n");
+            return;
+          }
+        try
+          {
+            Security.insertProviderAt ((Provider) bc.newInstance (), 1);
+            System.out.println ("\nInstalled BouncyCastle as first provider\n");
+          }
+        catch (Exception e)
+          {
+            System.out.println ("\nFailed to install BouncyCastle!\n");
+          }
+      }
+
     public static void main (String[] argc)
       {
         if (argc.length != 3)
@@ -253,7 +276,7 @@ public class Sign extends JSONEncoder
               {
                 try
                   {
-                    Security.insertProviderAt (new BouncyCastleProvider(), 1);
+                    installOptionalBCProvider ();
                     ArrayUtil.writeFile (argc[2], new Sign (action, new Boolean (argc[1])).getJSONData ());
                   }
                 catch (Exception e)

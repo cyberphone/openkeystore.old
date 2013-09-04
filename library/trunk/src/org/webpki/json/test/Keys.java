@@ -23,14 +23,12 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
 
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Vector;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import java.util.Vector;
 
 import org.webpki.crypto.KeyAlgorithms;
 
@@ -138,7 +136,7 @@ public class Keys
                   }
               }
             ec_curves = ecs.toArray (new KeyAlgorithms[0]);
-            Security.insertProviderAt (new BouncyCastleProvider(), 1);
+            Sign.installOptionalBCProvider ();
             cache.addToCache (Reader.class);
             for (int i = 0; i < ROUNDS; i++)
               {

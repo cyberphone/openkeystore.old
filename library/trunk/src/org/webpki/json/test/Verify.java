@@ -20,9 +20,6 @@ import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-import java.security.Security;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyStoreVerifier;
@@ -136,7 +133,7 @@ public class Verify extends JSONDecoder
           }
         try
           {
-            Security.insertProviderAt (new BouncyCastleProvider(), 1);
+            Sign.installOptionalBCProvider ();
             int repeat = 1;
             if (argc.length == 2)
               {
