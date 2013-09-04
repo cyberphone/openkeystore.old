@@ -50,8 +50,6 @@ public class PDFSigner
 
     private String location;
 
-    private boolean include_cert_path;
-
     private boolean enable_signature_graphics;
 
     private class Attachment
@@ -67,12 +65,6 @@ public class PDFSigner
     public PDFSigner (SignerInterface signer)
       {
         this.signer = signer;
-      }
-
-
-    public void setExtendedCertPath (boolean flag)
-      {
-        include_cert_path = flag;
       }
 
 
@@ -118,7 +110,7 @@ public class PDFSigner
               }
 
             PdfSignatureAppearance sap = stp.getSignatureAppearance ();
-            sap.setCrypto (null, signer.prepareSigning (include_cert_path), null, PdfSignatureAppearance.WINCER_SIGNED);
+            sap.setCrypto (null, signer.getCertificatePath (), null, PdfSignatureAppearance.WINCER_SIGNED);
 
             if (reason != null)
               {

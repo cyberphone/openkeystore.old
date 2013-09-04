@@ -28,28 +28,13 @@ import java.security.cert.X509Certificate;
  */
 public interface SignerInterface
   {
-
     /**
      * Returns the certificate path associated with the key.
      */
-    public X509Certificate[] prepareSigning (boolean fullpath) throws IOException;
+    public X509Certificate[] getCertificatePath () throws IOException;
 
     /**
      * Signs data using the key.
      */
     public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException;
-
-    /**
-     * Returns a descriptor of the signer certificate.
-     */
-    public X509Certificate getSignerCertificate () throws IOException;
-    
-    /**
-     * Tests if a signature operation failed due to authorization errors.
-     * 
-     * @return true if the key wasn't authorized (wrong PIN)
-     * @throws IOException
-     */
-    public boolean authorizationFailed () throws IOException;
-
   }

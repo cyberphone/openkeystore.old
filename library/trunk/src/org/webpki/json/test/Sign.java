@@ -240,6 +240,29 @@ public class Sign extends JSONEncoder
         System.exit (0);
       }
 
+    static StringBuffer info_string;
+    
+    static int info_lengthp2;
+    
+    static void printHeader ()
+      {
+        for (int i = 0; i < info_lengthp2; i++)
+          {
+            info_string.append ('=');
+          }
+        info_string.append ('\n');
+      }
+    
+    static void printInfo (String info)
+      {
+        info_string = new StringBuffer ("\n\n");
+        info_lengthp2 = info.length () + 4;
+        printHeader ();
+        info_string.append ("= ").append (info).append (" =\n");
+        printHeader ();
+        System.out.println (info_string.toString ());
+      }
+
     static void installOptionalBCProvider ()
       {
         @SuppressWarnings("rawtypes")
@@ -250,17 +273,17 @@ public class Sign extends JSONEncoder
           }
         catch (ClassNotFoundException e)
           {
-            System.out.println ("\nBouncyCastle provider not in path - Using the platform provider\n");
+            printInfo ("BouncyCastle provider not in path - Using the platform provider");
             return;
           }
         try
           {
             Security.insertProviderAt ((Provider) bc.newInstance (), 1);
-            System.out.println ("\nInstalled BouncyCastle as first provider\n");
+            printInfo ("Installed BouncyCastle as first provider");
           }
         catch (Exception e)
           {
-            System.out.println ("\nFailed to install BouncyCastle!\n");
+            printInfo ("Failed to install BouncyCastle!");
           }
       }
 

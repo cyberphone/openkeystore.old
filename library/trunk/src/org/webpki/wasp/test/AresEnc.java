@@ -162,6 +162,6 @@ System.out.println ("SIGALG=" + authdec.getAuthenticationProfiles ()[0].getSigna
 
         test (in_file, out_file, signer, localfixed, false);
 
-        System.out.println ("Signed by:\n" + new CertificateInfo (signer.getSignerCertificate ()).toString ());
+        System.out.println ("Signed by:\n" + new CertificateInfo (signer.getCertificatePath ()[0]).toString ());
       }
   }

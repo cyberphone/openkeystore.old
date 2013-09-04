@@ -93,7 +93,6 @@ public class AuthenticationResponseEncoder extends AuthenticationResponse
         ds.setDigestAlgorithm (selected_auth_profile.getDigestAlgorithm ());
         ds.setTransformAlgorithm (selected_auth_profile.getCanonicalizationAlgorithm ());
         ds.setCanonicalizationAlgorithm  (selected_auth_profile.getCanonicalizationAlgorithm ());
-        ds.setExtendedCertPath (selected_auth_profile.getExtendedCertPath ());
         ds.setSignedKeyInfo (selected_auth_profile.getSignedKeyInfo ());
 
         ds.createEnvelopedSignature (getRootDocument (), id);

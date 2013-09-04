@@ -32,22 +32,12 @@ import org.webpki.crypto.CertificateUtil;
 
 public class XMLSigner extends XMLSignerCore
   {
-
-    private boolean include_cert_path;
-
     private SignerInterface signer_implem;
-
-
-    public void setExtendedCertPath (boolean flag)
-      {
-        this.include_cert_path = flag;
-      }
-
 
     PublicKey populateKeys (XMLSignatureWrapper r) throws GeneralSecurityException, IOException
       {
         // Prepare all certificate data
-        r.certificates = signer_implem.prepareSigning (include_cert_path);
+        r.certificates = signer_implem.getCertificatePath ();
         X509Certificate certificate = r.certificates[0];
 
         r.x509IssuerName = certificate.getIssuerX500Principal().getName (X500Principal.RFC2253);

@@ -36,17 +36,15 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
   {
     private PrivateKey private_key;
 
-    private boolean authorization_failed;
-
     private KeyStore signer_cert_keystore;
-
-    private X509Certificate signer_certificate;
 
     private AuthorityInfoAccessCAIssuersSpi aia_caissuer_handler;
 
     private String key_alias;
 
     private KeyContainerTypes container_type;
+    
+    private boolean extended_certpath;
 
 
     private void testKey (String key_alias) throws IOException, GeneralSecurityException
@@ -124,18 +122,13 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
       }
 
     
-    public X509Certificate[] prepareSigning (boolean include_cert_path) throws IOException
+    @Override
+    public X509Certificate[] getCertificatePath () throws IOException
       {
         try
           {
-            signer_certificate = (X509Certificate) signer_cert_keystore.getCertificate (key_alias);
-
-            if (include_cert_path)
-              {
-                return getCertPath (key_alias, true); 
-              }
-
-            return new X509Certificate[] {signer_certificate};
+            X509Certificate[] path = getCertPath (key_alias, true); 
+            return extended_certpath ? path : new X509Certificate[]{path[0]};
           }
         catch (GeneralSecurityException e)
           {
@@ -150,6 +143,7 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
       }
 
 
+    @Override
     public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
       {
         try
@@ -161,8 +155,7 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
           }
         catch (GeneralSecurityException e)
           {
-            authorization_failed = true;
-            throw new IOException (e.getMessage ());
+            throw new IOException (e);
           }
       }
 
@@ -171,12 +164,6 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
       {
         this.signer_cert_keystore = signer_cert_keystore;
         this.container_type = container_type;
-      }
-
-
-    public boolean authorizationFailed ()
-      {
-        return authorization_failed;
       }
 
 
@@ -197,7 +184,6 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
                       {
                         if (key_alias != null)
                           {
-                            authorization_failed = true;
                             throw new IOException ("Missing certificate alias and multiple matches");
                           }
                         key_alias = new_key;
@@ -217,19 +203,17 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
           }
         catch (UnrecoverableKeyException e)
           {
-            authorization_failed = true;
-            throw new IOException (e.getMessage ());
+            throw new IOException (e);
           }
         catch (GeneralSecurityException e)
           {
-            throw new IOException (e.getMessage ());
+            throw new IOException (e);
           }
       }
 
 
-    public X509Certificate getSignerCertificate () throws IOException
+    public void setExtendedCertPath (boolean flag)
       {
-        return signer_certificate;
+        extended_certpath = flag;
       }
-
   }

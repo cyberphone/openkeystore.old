@@ -296,7 +296,7 @@ public class InfoCardWriter
 
     public byte[] getInfoCard (SignerInterface signer) throws IOException
       {
-        sts_certificate = signer.prepareSigning (false)[0];
+        sts_certificate = signer.getCertificatePath ()[0];
         XMLSigner xmls = new XMLSigner (signer);
         return xmls.signXMLWrapper (card, "_Object_InfoCard").writeXML ();
       }

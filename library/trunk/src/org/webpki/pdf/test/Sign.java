@@ -57,7 +57,7 @@ public class Sign
           }
         if (argv[2].equals ("p"))
           {
-            ds.setExtendedCertPath (true);
+            signer.setExtendedCertPath (true);
           }
         for (int i = 6; i < argv.length; i++)
           {

@@ -167,7 +167,6 @@ public class XDSProfileResponseEncoder extends XMLObjectWrapper implements Signa
         ds.setDigestAlgorithm (to_decoder.getDigestAlgorithm ());
         ds.setTransformAlgorithm (to_decoder.getCanonicalizationAlgorithm ());
         ds.setCanonicalizationAlgorithm  (to_decoder.getCanonicalizationAlgorithm ());
-        ds.setExtendedCertPath (to_decoder.getExtendedCertPath ());
         ds.setSignedKeyInfo (to_decoder.getSignedKeyInfo ());
 
         ds.createEnvelopedSignature (getRootDocument (), id);

@@ -158,6 +158,6 @@ public class SresEnc
 
         test (in_file, out_file, signer, localfixed, profileindex, false);
 
-        System.out.println ("Signed by:\n" + new CertificateInfo (signer.getSignerCertificate ()).toString ());
+        System.out.println ("Signed by:\n" + new CertificateInfo (signer.getCertificatePath ()[0]).toString ());
       }
   }

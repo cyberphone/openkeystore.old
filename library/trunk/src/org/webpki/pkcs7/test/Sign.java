@@ -40,12 +40,11 @@ public class Sign
         signer.setKey (null, DemoKeyStore.getSignerPassword ());
         PKCS7Signer pkcs7 = new PKCS7Signer (signer);
 //        pkcs7.setSignatureAlgorithm (org.webpki.crypto.SignatureAlgorithms.RSA_SHA256);
-        pkcs7.setExtendedCertPath (true);
         ArrayUtil.writeFile (args[0], 
                                 args.length == 2 ? 
                                     pkcs7.signMessage (ArrayUtil.readFile (args[1]))
                                                  :
                                     pkcs7.signDetachedMessage (ArrayUtil.readFile (args[1])));
-        System.out.println ("\nSIGNING SUCCESSFUL\n\n" + new CertificateInfo (signer.getSignerCertificate ()).toString ());
+        System.out.println ("\nSIGNING SUCCESSFUL\n\n" + new CertificateInfo (signer.getCertificatePath()[0]).toString ());
       }
   }

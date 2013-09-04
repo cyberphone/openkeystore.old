@@ -52,6 +52,6 @@ public class Verify
           {
             pkcs7.verifyDetachedMessage (ArrayUtil.readFile (args[0]), ArrayUtil.readFile (args[1]));
           }
-        System.out.println ("\nVERIFICATION SUCCESSFUL\n\n" + new CertificateInfo (verifier.getSignerCertificate ()).toString ());
+        System.out.println ("\nVERIFICATION SUCCESSFUL\n\n" + new CertificateInfo (verifier.getSignerCertificatePath ()[0]).toString ());
       }
   }

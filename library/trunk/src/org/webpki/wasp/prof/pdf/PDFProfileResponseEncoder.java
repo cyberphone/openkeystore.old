@@ -157,7 +157,6 @@ public class PDFProfileResponseEncoder extends XMLObjectWrapper implements Signa
                                            to_decoder.document_canonicalization_algorithm,
                                            s_req_dec.getDocumentData ());
         PDFSigner ds = new PDFSigner (signer);
-        ds.setExtendedCertPath (to_decoder.getExtendedCertPath ());
         ds.setSignatureGraphics (true);
         forcedDOMRewrite ();
         byte[] data = ds.addDocumentSignature (s_req_dec.getMainDocument ().getData (), false);

@@ -41,9 +41,6 @@ import org.webpki.asn1.ASN1Null;
 
 public class PKCS7Signer
   {
-
-    private boolean include_cert_path;
-
     private AsymSignatureAlgorithms signature_algorithm = AsymSignatureAlgorithms.RSA_SHA1;
 
     private SignerInterface signer_implem;
@@ -59,18 +56,12 @@ public class PKCS7Signer
       }
 
 
-    public void setExtendedCertPath (boolean option)
-      {
-        this.include_cert_path = option;
-      }
-
-
     private byte[] sign (byte[] message, boolean detached) throws IOException
       {
         try
           {
             Vector<BaseASN1Object> cert_path = new Vector<BaseASN1Object> ();
-            for (X509Certificate c : signer_implem.prepareSigning (include_cert_path))
+            for (X509Certificate c : signer_implem.getCertificatePath ())
               {
                 cert_path.add (ASN1Util.x509Certificate (c));
               }

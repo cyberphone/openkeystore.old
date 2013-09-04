@@ -43,7 +43,7 @@ public class JSONX509Signer extends JSONSigner
     public JSONX509Signer (SignerInterface signer) throws IOException
       {
         this.signer = signer;
-        certificate_path = signer.prepareSigning (true);
+        certificate_path = signer.getCertificatePath ();
         algorithm = KeyAlgorithms.getKeyAlgorithm (certificate_path[0].getPublicKey ()).getRecommendedSignatureAlgorithm ();
       }
 
