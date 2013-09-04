@@ -133,7 +133,7 @@ public class JSONSignatureDecoder extends JSONSignature
                 KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromURI (rd.getString (NAMED_CURVE_JSON));
                 ECPoint w = new ECPoint (readCryptoBinary (rd, X_JSON), readCryptoBinary (rd, Y_JSON));
                 return KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
-            }
+              }
           }
         catch (GeneralSecurityException e)
           {
