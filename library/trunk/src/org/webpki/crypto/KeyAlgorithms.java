@@ -173,7 +173,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "03F0EBA16286A2D57EA0991168D4994637E8343E36",
                  "00D51FBC6C71A0094FA2CDD545B11C5C0C797324F1",
                  "040000000000000000000292FE77E70C12A4234C33",
-                 1,
+                 2,
                  true),
 
     B_233       ("http://xmlns.webpki.org/sks/algorithm#ec.b233",
@@ -189,7 +189,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "00FAC9DFCBAC8313BB2139F1BB755FEF65BC391F8B36F8F8EB7371FD558B",
                  "01006A08A41903350678E58528BEBF8A0BEFF867A7CA36716F7E01F81052",
                  "01000000000000000000000000000013E974E72F8A6922031D2603CFE0D7",
-                 1,
+                 2,
                  true),
 
     B_283       ("http://xmlns.webpki.org/sks/algorithm#ec.b283",
@@ -205,7 +205,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  "05F939258DB7DD90E1934F8C70B0DFEC2EED25B8557EAC9C80E2E198F8CDBECD86B12053",
                  "03676854FE24141CB98FE6D4B20D02B4516FF702350EDDB0826779C813F0DF45BE8112F4",
                  "03FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEF90399660FC938A90165B042A7CEFADB307",
-                 1,
+                 2,
                  true),
 
     P_192       ("http://xmlns.webpki.org/sks/algorithm#ec.p192",
@@ -390,6 +390,11 @@ public enum KeyAlgorithms implements SKSAlgorithms
     public boolean hasParameters ()
       {
         return has_parameters;
+      }
+
+    public EllipticCurve getEllipticCurve ()
+      {
+        return elliptic_curve;
       }
 
     public ECParameterSpec getECParameterSpec ()
