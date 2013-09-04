@@ -97,13 +97,13 @@ public class Keys
         System.exit (0);
       }
 
-    static void Run (boolean rsa, String provider, boolean list) throws GeneralSecurityException, IOException
+    static void Run (boolean rsa, boolean list) throws GeneralSecurityException, IOException
       {
         AlgorithmParameterSpec alg_par_spec = rsa ?
             new RSAKeyGenParameterSpec (2048, RSAKeyGenParameterSpec.F4)
                                                   :
             new ECGenParameterSpec (ec_curves[ec_index++ % ec_curves.length].getJCEName ());
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance (rsa ? "RSA" : "EC", provider);
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance (rsa ? "RSA" : "EC");
         kpg.initialize (alg_par_spec, new SecureRandom ());
         KeyPair key_pair = kpg.generateKeyPair ();
         PublicKey public_key = key_pair.getPublic ();
@@ -140,9 +140,8 @@ public class Keys
             cache.addToCache (Reader.class);
             for (int i = 0; i < ROUNDS; i++)
               {
-                Run (true, "SunRsaSign", new Boolean (argc[0]));
-                Run (true, "BC", new Boolean (argc[0]));
-                Run (false, "BC", new Boolean (argc[0]));
+                Run (true, new Boolean (argc[0]));
+                Run (false, new Boolean (argc[0]));
               }
           }
         catch (Exception e)
