@@ -187,42 +187,26 @@ class JSONParser
               {
                 switch (c = nextChar ())
                   {
+/* 
+      Since JSON supplied as a part of web-page may need additional escaping
+      while JSON data as a part of a protocol needs only needs to be parsable,
+      Canonical JSON only supports the following two escape sequences.
+*/
                     case '"':
                     case '\\':
                       break;
 
-/* 
-    Nobody (in their right mind...) escape slashes although it is in the RFC.
+/*
+      Removed: Redundant and potentially ambiguous
+ 
                     case '/':
-*/
-
-/* 
-    If you need to specify characters as explicit UNICODE values, you must
-    do the conversion in a "setter" method; not put it out on the "wire"!
-    Why?  Because 'A' and \u0041 are technically equivalent but appear
-    different to a canonicalizer which would require special handling.
                     case 'u':
-*/
                     case 'b':
-                      c = '\b';
-                      break;
-
                     case 'f':
-                      c = '\f';
-                      break;
-
                     case 'n':
-                      c = '\n';
-                      break;
-
                     case 'r':
-                      c = '\r';
-                      break;
-
                     case 't':
-                      c = '\t';
-                      break;
-                      
+*/
                     default:
                       throw new IOException ("Unsupported escape:" + c);
                   }

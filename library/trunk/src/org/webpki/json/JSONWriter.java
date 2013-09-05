@@ -332,45 +332,30 @@ public class JSONWriter
           {
             switch (c)
               {
+/* 
+      Since JSON supplied as a part of web-page may need additional escaping
+      while JSON data as a part of a protocol needs only needs to be parsable,
+      Canonical JSON only supports the following two escape sequences.
+*/
                 case '"':
                 case '\\':
-                  escapeCharacter (c);
+                  buffer.append ('\\');
                   break;
 
-/* "Nobody" escape slashes although it is the standard...
-                  case '/':
-*/
+/*
+      Removed: Redundant and potentially ambiguous
 
+                case '/':
                 case '\b':
-                  escapeCharacter ('b');
-                  break;
-
                 case '\f':
-                  escapeCharacter ('f');
-                  break;
-
                 case '\n':
-                  escapeCharacter ('n');
-                  break;
-
                 case '\r':
-                  escapeCharacter ('r');
-                  break;
-
                 case '\t':
-                  escapeCharacter ('t');
-                  break;
-
-                default:
-                  buffer.append (c);
+*/
               }
+            buffer.append (c);
           }
         buffer.append ('"');
-      }
-
-    void escapeCharacter (char c)
-      {
-        buffer.append ('\\').append (c);
       }
 
     void singleSpace ()

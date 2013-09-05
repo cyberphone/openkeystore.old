@@ -133,17 +133,6 @@ public class Sign extends JSONEncoder
           }
       }
     
-    class RT implements JSONObjectWriter
-      {
-        @Override
-        public void writeObject (JSONWriter wr) throws IOException
-          {
-            wr.setString ("rt", "67");
-            wr.setObject ("YT", new HT (false));
-            wr.setString ("er","33");
-          }
-      }
-
     class SO implements JSONObjectWriter
       {
         int value;
@@ -208,16 +197,15 @@ public class Sign extends JSONEncoder
         String instant = URLFriendlyRandom.generate (20);
         JSONWriter wr = new JSONWriter (CONTEXT);
         wr.setDateTime ("Now", new Date ());
-        wr.setObject ("RT", new RT ());
-        wr.setObjectArray ("Array", new JSONObjectWriter[]{});
         wr.setObjectArray ("Barray", new JSONObjectWriter[]{new HT (true), new HT (false)});
+        wr.setObjectArray ("Array", new JSONObjectWriter[]{});
         if (multiple)
           {
             wr.setObjectArray ("SignedObjects", new JSONObjectWriter[]{new SO (35, "this"), new SO (-90, "that")});
           }
         wr.setString (ID, instant);
         wr.setStringArray ("Strings", new String[]{"One", "Two", "Three"});
-        wr.setString ("EscapeMe", "A\\\n\"" );
+        wr.setString ("EscapeMe", "A\\\"" );
         wr.setInt ("Int", 78);
         if (action == ACTION.X509)
           {

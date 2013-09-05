@@ -112,7 +112,7 @@ public class Test
         @Override
         protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
           {
-            if (rd.getString ("Escape").equals ("\t\n \r\f\\\""))
+            if (rd.getString ("Escape").equals ("\tTAB\nNL /\\\""))
               {
                 System.out.println ("Escape succeeded:\n" + ESCAPING);
               }
@@ -129,7 +129,7 @@ public class Test
           }
       }
 
-    static final String ESCAPING = "{ \"@context\" : \"http://example.com/escape\", \"Escape\":\"\\t\\n \\r\\f\\\\\\\"\" }";
+    static final String ESCAPING = "{ \"@context\" : \"http://example.com/escape\", \"Escape\":\"\tTAB\nNL /\\\\\\\"\" }";
 
     public static void main (String[] argc)
       {
