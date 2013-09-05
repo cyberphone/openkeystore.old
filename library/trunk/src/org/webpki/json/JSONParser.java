@@ -127,6 +127,10 @@ class JSONParser
               }
             switch (scan ())
               {
+                case LEFT_BRACKET:
+                  value = scanArray (name);
+                  break;
+
                 case LEFT_CURLY_BRACKET:
                   value = scanObject (new JSONObject ());
                   break;

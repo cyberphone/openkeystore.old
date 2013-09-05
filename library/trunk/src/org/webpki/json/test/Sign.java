@@ -167,6 +167,7 @@ public class Sign extends JSONEncoder
     void createX509Signature (JSONWriter wr) throws IOException
       {
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
+        signer.setExtendedCertPath (true);
         signer.setKey (null, DemoKeyStore.getSignerPassword ());
         wr.setEnvelopedSignature (new JSONX509Signer (signer));
       }
