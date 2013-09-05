@@ -369,7 +369,8 @@ public class JSONWriter
     void printProperty (String name)
       {
         spaceOut ();
-        buffer.append ('\"').append (name).append ("\":");
+        printSimpleValue (new JSONValue (JSONTypes.STRING, name));
+        buffer.append (':');
       }
 
     void spaceOut ()

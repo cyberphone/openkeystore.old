@@ -70,18 +70,13 @@ class JSONParser
     String scanProperty () throws IOException
       {
         scanFor (DOUBLE_QUOTE);
-        StringBuffer property = new StringBuffer ();
-        char c;
-        while ((c = nextChar ()) != DOUBLE_QUOTE)
-          {
-            property.append (c);
-          }
+        String property = (String) scanQuotedString ().value;
         if (property.length () == 0)
           {
             throw new IOException ("Empty property");
           }
         scanFor (COLON_CHARACTER);
-        return property.toString ();
+        return property;
       }
     
     JSONValue scanObject (JSONObject holder) throws IOException
