@@ -1,0 +1,37 @@
+  {
+    "@context": "http://example.com/signature",
+    "Now": "2013-09-06T16:27:00+02:00",
+    "Barray":
+      [{
+         "Value": -689,
+         "String": "656756#",
+         "Fantastic": true
+       },
+       {
+         "Value": -689,
+         "String": "656756#",
+         "Fantastic": false
+       }],
+    "Array": [],
+    "ID": "IWUf_9Au74Yhz2ZBl1e2",
+    "Strings": ["One","Two","Three"],
+    "EscapeMe": "A\\\"",
+    "Int": 78,
+    "Signature":
+      {
+        "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
+        "KeyInfo":
+          {
+            "PublicKey":
+              {
+                "EC":
+                  {
+                    "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.p256",
+                    "X": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=",
+                    "Y": "LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA="
+                  }
+              }
+          },
+        "SignatureValue": "MEQCIHWzUy5XA5ToIzTrhsseKBlJvRt792yw/TYkJ4pQGYmsAiBrr5p5vUT/bwqilJrfGGyMPXu+T58eB8Toa4NpZQVMZA=="
+      }
+  }
