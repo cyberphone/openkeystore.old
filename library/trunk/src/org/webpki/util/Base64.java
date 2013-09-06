@@ -28,9 +28,9 @@ public class Base64
   {
 
     
-  ///////////////////////////////
- ////       ATTRIBUTES      ////
-///////////////////////////////
+      ///////////////////////////////
+     ////       ATTRIBUTES      ////
+    ///////////////////////////////
 
     private final static char[] aBase64 = {
     //   0   1   2   3   4   5   6   7
@@ -49,9 +49,9 @@ public class Base64
     private boolean lineBreakOn;
     private boolean paddingOn;
     
-  ///////////////////////////////
- ////   BEHAVIOUR SETTINGS  ////
-///////////////////////////////
+      ///////////////////////////////
+     ////   BEHAVIOUR SETTINGS  ////
+    ///////////////////////////////
     
     /** Default constructor.<br>
      * <pre>
@@ -244,7 +244,7 @@ public class Base64
         return results;
       }
     
-    private static String byteArrayToString (byte[] blob)
+    static String byteArrayToString (byte[] blob)
       {
         char[] temp = new char[blob.length];
         for (int i = 0; i < blob.length; i++)
@@ -256,9 +256,9 @@ public class Base64
     
 
     
-  ////////////////////
- ////   DECODE   //// Throws IOException on error (if argument isn't base64)
-////////////////////
+      ////////////////////
+     ////   DECODE   //// Throws IOException on error (if argument isn't base64)
+    ////////////////////
 
     private byte[] decode(byte[] encoded) throws IOException
       {
@@ -461,9 +461,9 @@ public class Base64
       }
 
 
-  ////////////////////
- ////   ENCODE   //// Should not cause errors
-////////////////////
+      ////////////////////
+     ////   ENCODE   //// Should not cause errors
+    ////////////////////
 
     private byte[] encode(byte[] uncoded)
       {
@@ -600,9 +600,9 @@ public class Base64
       }
 
 
-  ///////////////////////////////
- ////       DEBUGGING       ////
-///////////////////////////////
+      ///////////////////////////////
+     ////       DEBUGGING       ////
+    ///////////////////////////////
     
     
     final private static String COMMAND_LINE_USAGE = "\nUsage:\n\n  org.webpki.util.Base64 [e|d|dm] <infile> <outfile>\n";

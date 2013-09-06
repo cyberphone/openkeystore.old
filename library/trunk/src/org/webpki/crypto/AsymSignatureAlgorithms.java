@@ -129,6 +129,6 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms
                 return alg;
               }
           }
-        throw new IOException ("Unknown algorithm: " + uri);
+        throw new IOException ("Unknown signature algorithm: " + uri);
       }
   }

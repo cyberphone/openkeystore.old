@@ -180,7 +180,7 @@ public class JSONSignatureDecoder extends JSONSignature
             switch (getSignatureType ())
               {
                 case X509_CERTIFICATE:
-                  key = certificate_path[0].toString ();
+                  key = certificate_path[0].getPublicKey ().toString ();
                   break;
   
                 case ASYMMETRIC_KEY:

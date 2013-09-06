@@ -115,6 +115,6 @@ public enum MACAlgorithms implements SignatureAlgorithms
                 return alg;
               }
           }
-        throw new IOException ("Unknown algorithm: " + uri);
+        throw new IOException ("Unknown MAC algorithm: " + uri);
       }
   }
