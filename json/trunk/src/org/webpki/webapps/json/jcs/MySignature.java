@@ -54,17 +54,17 @@ public class MySignature extends JSONEncoder
     static final String CONTEXT = "http://example.com/signature";
     static final String ID = "ID";
     
+    static final byte[] SYM_KEY = {(byte)0xF4, (byte)0xC7, (byte)0x4F, (byte)0x33, (byte)0x98, (byte)0xC4, (byte)0x9C, (byte)0xF4,
+                               (byte)0x6D, (byte)0x93, (byte)0xEC, (byte)0x98, (byte)0x18, (byte)0x83, (byte)0x26, (byte)0x61,
+                               (byte)0xA4, (byte)0x0B, (byte)0xAE, (byte)0x4D, (byte)0x20, (byte)0x4D, (byte)0x75, (byte)0x50,
+                               (byte)0x36, (byte)0x14, (byte)0x10, (byte)0x20, (byte)0x74, (byte)0x34, (byte)0x69, (byte)0x09};
+
     static class SymmetricOperations implements SymKeySignerInterface, SymKeyVerifierInterface
       {
-        static final byte[] KEY = {(byte)0xF4, (byte)0xC7, (byte)0x4F, (byte)0x33, (byte)0x98, (byte)0xC4, (byte)0x9C, (byte)0xF4,
-                                   (byte)0x6D, (byte)0x93, (byte)0xEC, (byte)0x98, (byte)0x18, (byte)0x83, (byte)0x26, (byte)0x61,
-                                   (byte)0xA4, (byte)0x0B, (byte)0xAE, (byte)0x4D, (byte)0x20, (byte)0x4D, (byte)0x75, (byte)0x50,
-                                   (byte)0x36, (byte)0x14, (byte)0x10, (byte)0x20, (byte)0x74, (byte)0x34, (byte)0x69, (byte)0x09};
-
         @Override
         public byte[] signData (byte[] data) throws IOException
           {
-            return getMACAlgorithm ().digest (KEY, data);
+            return getMACAlgorithm ().digest (SYM_KEY, data);
           }
   
         @Override
@@ -76,7 +76,7 @@ public class MySignature extends JSONEncoder
         @Override
         public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException
           {
-            return ArrayUtil.compare (digest, getMACAlgorithm ().digest (KEY, data));
+            return ArrayUtil.compare (digest, getMACAlgorithm ().digest (SYM_KEY, data));
           }
       }
     

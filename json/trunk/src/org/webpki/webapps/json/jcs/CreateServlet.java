@@ -16,6 +16,7 @@ public class CreateServlet extends HttpServlet
     private static final long serialVersionUID = 1L;
     
     static final String MY_DATA_TO_BE_SIGNED = "mydata";
+    static final String KEY_TYPE = "keytype";
     
     public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
       {
@@ -26,8 +27,18 @@ public class CreateServlet extends HttpServlet
       {
         request.setCharacterEncoding ("UTF-8");
         String data_to_be_signed = request.getParameter (MY_DATA_TO_BE_SIGNED);
+        MySignature.ACTION action = MySignature.ACTION.ASYM;
+        String key_type = request.getParameter (KEY_TYPE);
+        for (MySignature.ACTION a : MySignature.ACTION.values ())
+          {
+            if (a.toString ().equals (key_type))
+              {
+                action = a;
+                break;
+              }
+          }
         response.sendRedirect (ServletUtil.getContextURL (request) + 
                                "/request?" + RequestServlet.JCS_ARGUMENT + "=" + 
-                               Base64URL.getBase64URLFromBinary (new MySignature (MySignature.ACTION.ASYM, data_to_be_signed).getJSONData ()));
+                               Base64URL.getBase64URLFromBinary (new MySignature (action, data_to_be_signed).getJSONData ()));
       }
   }

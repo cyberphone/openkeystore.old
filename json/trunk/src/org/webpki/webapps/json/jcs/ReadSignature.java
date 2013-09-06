@@ -34,6 +34,8 @@ import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONX509Verifier;
 
+import org.webpki.util.DebugFormatter;
+
 /**
  * Simple signature verify program
  */
@@ -74,7 +76,7 @@ public class ReadSignature extends JSONDecoder
   
                           case SYMMETRIC_KEY:
                             signature.verify (new JSONSymKeyVerifier (new MySignature.SymmetricOperations ()));
-                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyID ());
+                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyID () + "\nValue=" + DebugFormatter.getHexString (MySignature.SYM_KEY));
                             break;
   
                           default:
