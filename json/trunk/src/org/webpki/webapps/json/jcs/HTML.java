@@ -203,9 +203,10 @@ public class HTML
                "<tr><td align=\"left\">Arbitrary data that you want to sign:</td></tr>" +
                "<tr><td align=\"left\"><textarea rows=\"10\" cols=\"50\"  maxlength=\"200\" name=\"" + CreateServlet.MY_DATA_TO_BE_SIGNED + "\"></textarea></td></tr>" +
                "<tr><td align=\"center\"><table>" +
-                 "<tr><td valign=\"middle\" rowspan=\"3\">Select signing key:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.SYM + 
+                 "<tr><td valign=\"middle\" rowspan=\"4\">Select signing key:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.SYM + 
                  "\">Symmetric key</td><td>" +
                  "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.ASYM + "\" checked=\"checked\">EC Key (P-256)</td><td>" +
+                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.RSA + "\">RSA Key (2048)</td><td>" +
                  "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.X509 + "\">X.509 Certificate/Private key</td><td>" +
                  "</table></td></tr>" +
                "<tr><td align=\"center\">&nbsp;<br><input type=\"submit\" value=\"Create JSON Signature!\" name=\"sumbit\"></td></tr>" +

@@ -19,6 +19,7 @@ package org.webpki.webapps.json.jcs;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -49,7 +50,7 @@ import org.webpki.util.ArrayUtil;
  */
 public class MySignature extends JSONEncoder
   {
-    static enum ACTION {SYM, ASYM, X509};
+    static enum ACTION {SYM, ASYM, RSA, X509};
     
     static final String CONTEXT = "http://example.com/signature";
     static final String ID = "ID";
@@ -169,12 +170,12 @@ public class MySignature extends JSONEncoder
         wr.setEnvelopedSignature (new JSONX509Signer (signer));
       }
     
-    void createAsymmetricKeySignature (JSONWriter wr) throws IOException
+    void createAsymmetricKeySignature (JSONWriter wr, KeyStore ks) throws IOException
       {
         try
           {
-            PrivateKey private_key = (PrivateKey)DemoKeyStore.getECDSAStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
-            PublicKey public_key = DemoKeyStore.getECDSAStore ().getCertificate ("mykey").getPublicKey ();
+            PrivateKey private_key = (PrivateKey)ks.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
+            PublicKey public_key = ks.getCertificate ("mykey").getPublicKey ();
             wr.setEnvelopedSignature (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
           }
         catch (GeneralSecurityException e)
@@ -201,7 +202,11 @@ public class MySignature extends JSONEncoder
           }
         else if (action == ACTION.ASYM)
           {
-            createAsymmetricKeySignature (wr);
+            createAsymmetricKeySignature (wr, DemoKeyStore.getECDSAStore ());
+          }
+        else if (action == ACTION.RSA)
+          {
+            createAsymmetricKeySignature (wr, DemoKeyStore.getMybankDotComKeyStore ());
           }
         else
           {
