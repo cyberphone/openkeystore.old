@@ -28,9 +28,9 @@ import org.webpki.xmldsig.XMLSigner;
 
 import org.webpki.crypto.SignerInterface;
 import org.webpki.crypto.CertificateFilter;
-import org.webpki.crypto.URLFriendlyRandom;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 import org.webpki.wasp.SignatureRequestEncoder;
@@ -113,7 +113,7 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
         //////////////////////////////////////////////////////////////////////////
         if (id == null)
           {
-            id = "_auth." + Long.toHexString (new Date ().getTime ()) + URLFriendlyRandom.generate (20);
+            id = "_auth." + Long.toHexString (new Date ().getTime ()) + Base64URL.generateURLFriendlyRandom (20);
           }
         wr.setStringAttribute (ID_ATTR, id);
 

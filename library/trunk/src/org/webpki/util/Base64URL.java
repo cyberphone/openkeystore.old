@@ -18,8 +18,11 @@ package org.webpki.util;
 
 import java.io.IOException;
 
+import java.security.SecureRandom;
+
 /**
  * Encodes/decodes base64URL data.
+ * See RFC 4648 Table 2.
  */
 public class Base64URL
   {
@@ -29,7 +32,7 @@ public class Base64URL
  ////       ATTRIBUTES      ////
 ///////////////////////////////
 
-    private final static char[] aBase64URL = {
+    private final static char[] MODIFIED_BASE64 = {
     //   0   1   2   3   4   5   6   7
         'A','B','C','D','E','F','G','H', // 0
         'I','J','K','L','M','N','O','P', // 1
@@ -188,22 +191,22 @@ public class Base64URL
         //encode by threes
         while (j < uncoded.length - uncoded.length%3)
           {
-            encoded[i++] = (byte)(aBase64URL[(uncoded[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte)(aBase64URL[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0xf)]);
-            encoded[i++] = (byte)(aBase64URL[((uncoded[j++] << 2) & 0x3c) | ((uncoded[j] >>> 6) & 0x3)]);
-            encoded[i++] = (byte)(aBase64URL[uncoded[j++] & 0x3F]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] >>> 2) & 0x3F]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0xf)]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 2) & 0x3c) | ((uncoded[j] >>> 6) & 0x3)]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[uncoded[j++] & 0x3F]);
           }
         //encode  "odd" bytes
         if (uncoded.length%3 == 1)
           {
-            encoded[i++] = (byte)(aBase64URL[(uncoded[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte)(aBase64URL[(uncoded[j] << 4) & 0x30]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] >>> 2) & 0x3F]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] << 4) & 0x30]);
           }
         else if (uncoded.length%3 == 2)
           {
-            encoded[i++] = (byte)(aBase64URL[(uncoded[j] >>> 2) & 0x3F]);
-            encoded[i++] = (byte)(aBase64URL[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0xf)]);
-            encoded[i++] = (byte)(aBase64URL[(uncoded[j] << 2) & 0x3c]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] >>> 2) & 0x3F]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0xf)]);
+            encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] << 2) & 0x3c]);
           }
         //return results
         return encoded;
@@ -218,5 +221,17 @@ public class Base64URL
     public static String getBase64URLFromBinary (byte[] binary_blob)
       {
         return Base64.byteArrayToString (encode (binary_blob));
+      }
+
+    public static String generateURLFriendlyRandom (int length_in_characters)
+      {
+        byte[] random = new byte[length_in_characters];
+        new SecureRandom ().nextBytes (random);
+        StringBuffer buffer = new StringBuffer ();
+        for (int i = 0; i < length_in_characters; i++)
+          {
+            buffer.append (MODIFIED_BASE64[random[i] & 0x3F]);
+          }
+        return buffer.toString ();
       }
   }

@@ -33,7 +33,6 @@ import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.SymKeyVerifierInterface;
-import org.webpki.crypto.URLFriendlyRandom;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -46,6 +45,7 @@ import org.webpki.json.JSONWriter;
 import org.webpki.json.JSONX509Signer;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64URL;
 
 /**
  * Simple signature test generator
@@ -195,7 +195,7 @@ public class Sign extends JSONEncoder
     @Override
     public byte[] getJSONData () throws IOException
       {
-        String instant = URLFriendlyRandom.generate (20);
+        String instant = Base64URL.generateURLFriendlyRandom (20);
         JSONWriter wr = new JSONWriter (CONTEXT);
         wr.setDateTime ("Now", new Date ());
         wr.setObjectArray ("Barray", new JSONObjectWriter[]{new HT (true), new HT (false)});
