@@ -20,4 +20,4 @@ package org.webpki.json;
  * Basic JSON types read by the parser.
  *
  */
-public enum JSONTypes {BOOLEAN, INTEGER, STRING, ARRAY, OBJECT};
+public enum JSONTypes {NULL, BOOLEAN, INTEGER, DECIMAL, FLOATING_POINT, STRING, ARRAY, OBJECT};
