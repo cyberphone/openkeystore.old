@@ -34,9 +34,7 @@
   <target name="build">
     <delete dir="${temp_dir}"/>
     <mkdir dir="${temp_dir}"/>
-    <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}" classpathref="compile.classpath" includeAntRuntime="false">
-       <compilerarg value="-Xlint"/>
-    </javac>
+    <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}" classpathref="compile.classpath" includeAntRuntime="false"/>
     <war destfile="${dist_dir}/${application}" webxml="web.xml">
       <classes dir="${temp_dir}"/>
       <lib file="${resources_dir}/third-party-jars/bcprov-jdk16-145.jar"/>

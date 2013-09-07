@@ -1,0 +1,64 @@
+<project name="JSON Clear Text Signature - Web Verifier" default="dist">
+
+    <!-- MUST be configured! -->
+    <property name="lib.common" value="/mobile-phone-ra/enrollment-plugin/lib.common"/>
+
+    <!-- set global properties for this build -->
+    <property name="src.dir" value="src"/>
+    <property name="temp.class.dir" value="${ejbca.tmp.path}/classes"/>
+    <property name="temp.resource.dir" value="${ejbca.tmp.path}/resources"/>
+    <property name="web.dir" value="web"/>
+    <property name="dist.mod.dir"  value="${ejbca.gen.path}"/>
+    <property name="servlet-war" value="jcs-demo.war"/>
+    <property name="debug" value="on"/>
+
+    <path id="compile.classpath">
+        <pathelement path="${ejbca.classpath}"/>
+         <fileset dir="${lib.common}">
+            <include name="*.jar"/>
+         </fileset>
+    </path>
+    
+    <resources id="ejbca-app-xml-mod-id.external">
+<string><![CDATA[    <!-- WebPKI.org Login Demo -->
+    <module>
+        <web>
+            <web-uri>${servlet-war}</web-uri>
+            <context-root>/jcs</context-root>
+        </web>
+    </module>
+</application>]]></string>
+    </resources> 
+
+    <property name="ejbca-app-xml-mod-refid" value="ejbca-app-xml-mod-id.external"/>
+    <property name="ejbca-app-xml-mod" refid="${ejbca-app-xml-mod-refid}"/>
+    
+    <target name="help">
+        <echo message="Available targets are help and dist."/>
+    </target>
+
+    <target name="dist">
+        <echo message="Building WebPKI.org JCS Demo Web App plugin"/>
+        <mkdir dir="${temp.class.dir}" />
+        <javac srcdir="${src.dir}"
+               debug="${debug}"
+               destdir="${temp.class.dir}"
+               classpathref="compile.classpath"
+               includeantruntime="false">
+            <compilerarg value="-Xlint:-path"/>
+        </javac>
+       
+        <!-- Create the web war -->
+        <war jarfile="${dist.mod.dir}/${servlet-war}" webxml="web.xml">
+            <classes dir="${temp.class.dir}"/>
+            <fileset dir="web"/>
+        </war>
+
+        <!-- Update application.xml -->
+        <replace file="${ejbca.app.xml}" value="${ejbca-app-xml-mod}">
+              <replacetoken><![CDATA[</application>]]></replacetoken>
+        </replace>
+
+    </target>
+
+</project>

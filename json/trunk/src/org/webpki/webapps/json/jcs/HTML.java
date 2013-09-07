@@ -153,12 +153,14 @@ public class HTML
                 null,
                 "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
                 "<table style=\"max-width=\"300px\">" +
-                   "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">JCS Home - JSON Clear Text Signature<br>&nbsp;</td></tr>" +
-                   "<tr><td align=\"center\"><a href=\"" + baseurl + "/verify\">Verify a JCS with a browser</a></td></tr>" +
-                   "<tr><td align=\"center\">&nbsp;</td></tr>" +
-                   "<tr><td align=\"center\"><a href=\"" + baseurl + "/create\">Create a JCS</a></td></tr>" +
-                   "<tr><td align=\"center\">&nbsp;</td></tr>" +
-                   "<tr><td align=\"center\">Invoke <a href=\"" + request_url + "\">" + request_url + "</a> for JCS testing with a client device</td></tr>" +
+                   "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">JCS (JSON Clear Text Signature)<br>&nbsp;</td></tr>" +
+                   "<tr><td align=\"left\"><a href=\"" + baseurl + "/verify\">Verify a JCS with a browser</a></td></tr>" +
+                   "<tr><td>&nbsp;</td></tr>" +
+                   "<tr><td align=\"left\"><a href=\"" + baseurl + "/create\">Create a JCS using a browser</a></td></tr>" +
+                   "<tr><td>&nbsp;</td></tr>" +
+                   "<tr><td align=\"left\">URL for testing with a client device: <a href=\"" + request_url + "\">" + request_url + "</a></td></tr>" +
+                   "<tr><td>&nbsp;</td></tr>" +
+                   "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://openkeystore.googlecode.com/svn/resources/trunk/docs/JSON-Clear-Text-Signature-Scheme.pdf\">JCS Documentation</a></td></tr>" +
                  "</table></td></td>"));
       }
 
