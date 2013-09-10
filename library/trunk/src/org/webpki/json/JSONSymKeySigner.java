@@ -56,7 +56,7 @@ public class JSONSymKeySigner extends JSONSigner
       }
 
     @Override
-    void writeKeyInfoData (JSONWriter wr) throws IOException
+    void writeKeyInfoData (JSONObjectWriter wr) throws IOException
       {
         wr.setString (JSONSignature.KEY_ID_JSON, key_id);
       }

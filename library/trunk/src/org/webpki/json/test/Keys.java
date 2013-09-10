@@ -38,7 +38,7 @@ import org.webpki.json.JSONSignatureEncoder;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONReaderHelper;
-import org.webpki.json.JSONWriter;
+import org.webpki.json.JSONObjectWriter;
 
 /**
  * Testing public keys
@@ -83,11 +83,15 @@ public class Keys
           }
 
         @Override
-        protected byte[] getJSONData () throws IOException
+        protected void writeJSONData (JSONObjectWriter wr) throws IOException
           {
-            JSONWriter wr = new JSONWriter (CONTEXT);
             JSONSignatureEncoder.writePublicKey (wr, public_key);
-            return wr.serializeJSONStructure ();
+          }
+
+        @Override
+        protected String getContext ()
+          {
+            return CONTEXT;
           }
       }
 
@@ -107,7 +111,7 @@ public class Keys
         kpg.initialize (alg_par_spec, new SecureRandom ());
         KeyPair key_pair = kpg.generateKeyPair ();
         PublicKey public_key = key_pair.getPublic ();
-        byte[] data = new Writer (public_key).getJSONData ();
+        byte[] data = new Writer (public_key).serializeJSONDocument ();
         Reader reader = (Reader) cache.parse (data);
         if (!reader.getPublicKey ().equals (public_key))
           {

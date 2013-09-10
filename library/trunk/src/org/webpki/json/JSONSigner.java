@@ -30,5 +30,5 @@ public abstract class JSONSigner
   
     abstract byte[] signData (byte[] data) throws IOException;
 
-    abstract void writeKeyInfoData (JSONWriter wr) throws IOException;
+    abstract void writeKeyInfoData (JSONObjectWriter wr) throws IOException;
   }

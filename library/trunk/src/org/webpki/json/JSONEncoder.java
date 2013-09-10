@@ -23,5 +23,24 @@ import java.io.IOException;
  */
 public abstract class JSONEncoder
   {
-    protected abstract byte[] getJSONData () throws IOException;
+    /**
+     * INTERNAL USE ONLY     
+     */
+    protected JSONEncoder () {}
+
+    /**
+     * INTERNAL USE ONLY     
+     */
+    protected abstract void writeJSONData (JSONObjectWriter wr) throws IOException;
+
+    /**
+     * INTERNAL USE ONLY     
+     */
+    protected abstract String getContext ();
+    public byte[] serializeJSONDocument () throws IOException
+      {
+        JSONObjectWriter wr = new JSONObjectWriter (getContext ());
+        writeJSONData (wr);
+        return wr.serializeJSONStructure ();
+      }
   }

@@ -110,6 +110,13 @@ public class JSONReaderHelper
         return createJSONReaderHelper ((JSONObject) value.value);
       }
 
+    @SuppressWarnings("unchecked")
+    public JSONArrayReader getArray (String name) throws IOException
+      {
+        JSONValue value = getProperty (name, JSONTypes.ARRAY);
+        return new JSONArrayReader ((Vector<JSONValue>) value.value);
+      }
+
     public String getStringConditional (String name) throws IOException
       {
         if (hasProperty (name))

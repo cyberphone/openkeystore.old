@@ -128,8 +128,8 @@ class JSONParser
             switch (scan ())
               {
                 case LEFT_BRACKET:
-                  // Limited use in protocols...
-                  throw new IOException ("This system does not yet support multi-dimensional arrays");
+                  value = scanArray (name);
+                  break;
 
                 case LEFT_CURLY_BRACKET:
                   value = scanObject (new JSONObject ());

@@ -70,7 +70,7 @@ public class JSONSignatureDecoder extends JSONSignature
         signature_value = signature.getBinary (SIGNATURE_VALUE_JSON);
         JSONValue save = signature.current.properties.get (SIGNATURE_VALUE_JSON);
         signature.current.properties.remove (SIGNATURE_VALUE_JSON);
-        canonicalized_data = JSONWriter.getCanonicalizedSubset (rd.current);
+        canonicalized_data = JSONObjectWriter.getCanonicalizedSubset (rd.current);
         signature.current.properties.put (SIGNATURE_VALUE_JSON, save);
         switch (getSignatureType ())
           {

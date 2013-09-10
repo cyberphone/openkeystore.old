@@ -41,7 +41,7 @@ import org.webpki.crypto.KeyAlgorithms;
  */
 public class JSONSignatureEncoder extends JSONSignature
   {
-    static void writeCryptoBinary (JSONWriter wr, BigInteger value, String name) throws IOException
+    static void writeCryptoBinary (JSONObjectWriter wr, BigInteger value, String name) throws IOException
       {
         byte[] crypto_binary = value.toByteArray ();
         if (crypto_binary[0] == 0x00)
@@ -53,46 +53,28 @@ public class JSONSignatureEncoder extends JSONSignature
         wr.setBinary (name, crypto_binary);
       }
 
-    public static void writePublicKey (JSONWriter wr, final PublicKey public_key) throws IOException
+    public static void writePublicKey (JSONObjectWriter wr, PublicKey public_key) throws IOException
       {
-        wr.setObject (PUBLIC_KEY_JSON, new JSONObjectWriter ()
+        JSONObjectWriter public_key_writer = wr.setObject (PUBLIC_KEY_JSON);
+        KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
+        if (key_alg.isRSAKey ())
           {
-            @Override
-            public void writeObject (JSONWriter wr) throws IOException
-              {
-                final KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
-                if (key_alg.isRSAKey ())
-                  {
-                    wr.setObject (RSA_JSON, new JSONObjectWriter ()
-                      {
-                        @Override
-                        public void writeObject (JSONWriter wr) throws IOException
-                          {
-                            RSAPublicKey rsa_public = (RSAPublicKey)public_key;
-                            writeCryptoBinary (wr, rsa_public.getModulus (), MODULUS_JSON);
-                            writeCryptoBinary (wr, rsa_public.getPublicExponent (), EXPONENT_JSON);
-                          }
-                      });
-                  }
-                else
-                  {
-                    wr.setObject (EC_JSON, new JSONObjectWriter ()
-                      {
-                        @Override
-                        public void writeObject (JSONWriter wr) throws IOException
-                          {
-                            wr.setString (NAMED_CURVE_JSON, key_alg.getURI ());
-                            ECPoint ec_point = ((ECPublicKey)public_key).getW ();
-                            writeCryptoBinary (wr, ec_point.getAffineX (), X_JSON);
-                            writeCryptoBinary (wr, ec_point.getAffineY (), Y_JSON);
-                          }
-                      });
-                  }
-              }
-          });
+            JSONObjectWriter rsa_key_writer = public_key_writer.setObject (RSA_JSON);
+            RSAPublicKey rsa_public = (RSAPublicKey)public_key;
+            writeCryptoBinary (rsa_key_writer, rsa_public.getModulus (), MODULUS_JSON);
+            writeCryptoBinary (rsa_key_writer, rsa_public.getPublicExponent (), EXPONENT_JSON);
+          }
+        else
+          {
+            JSONObjectWriter ec_key_writer = public_key_writer.setObject (EC_JSON);
+            ec_key_writer.setString (NAMED_CURVE_JSON, key_alg.getURI ());
+            ECPoint ec_point = ((ECPublicKey)public_key).getW ();
+            writeCryptoBinary (ec_key_writer, ec_point.getAffineX (), X_JSON);
+            writeCryptoBinary (ec_key_writer, ec_point.getAffineY (), Y_JSON);
+          }
       }
 
-    public static void writeX509CertificatePath (JSONWriter wr, X509Certificate[] certificate_path) throws IOException
+    public static void writeX509CertificatePath (JSONObjectWriter wr, X509Certificate[] certificate_path) throws IOException
       {
         X509Certificate last_certificate = null;
         Vector<byte[]> certificates = new Vector<byte[]> ();
@@ -110,26 +92,13 @@ public class JSONSignatureEncoder extends JSONSignature
         wr.setBinaryArray (X509_CERTIFICATE_PATH_JSON, certificates);
       }
 
-    JSONSignatureEncoder (final JSONSigner signer, JSONWriter wr) throws IOException
+    JSONSignatureEncoder (final JSONSigner signer, JSONObjectWriter wr) throws IOException
       {
-        JSONObject signature = wr.localSetObject (SIGNATURE_JSON, new JSONObjectWriter ()
-          {
-            @Override
-            public void writeObject (JSONWriter wr) throws IOException
-              {
-                wr.setString (ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
-                wr.setObject (KEY_INFO_JSON, new JSONObjectWriter ()
-                  {
-                    @Override
-                    public void writeObject (JSONWriter wr) throws IOException
-                      {
-                        signer.writeKeyInfoData (wr);
-                      }
-                  });
-              }
-          });
-        signature.addProperty (SIGNATURE_VALUE_JSON, 
-                               new JSONValue (JSONTypes.STRING, 
-                               JSONWriter.getBase64 (signer.signData (JSONWriter.getCanonicalizedSubset (wr.current)))));
+        JSONObjectWriter signature_writer = wr.setObject (SIGNATURE_JSON);
+        signature_writer.setString (ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
+        signer.writeKeyInfoData (signature_writer.setObject (KEY_INFO_JSON));
+        signature_writer.root.addProperty (SIGNATURE_VALUE_JSON, 
+                                    new JSONValue (JSONTypes.STRING, 
+                                    JSONObjectWriter.getBase64 (signer.signData (JSONObjectWriter.getCanonicalizedSubset (wr.root)))));
       }
   }

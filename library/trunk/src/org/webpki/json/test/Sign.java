@@ -36,12 +36,12 @@ import org.webpki.crypto.SymKeyVerifierInterface;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
+import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONSignatureEncoder;
-import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONSymKeySigner;
-import org.webpki.json.JSONWriter;
+import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Signer;
 
 import org.webpki.util.ArrayUtil;
@@ -115,38 +115,22 @@ public class Sign extends JSONEncoder
           }
       }
 
-    class HT implements JSONObjectWriter
+    class HT
       {
-        boolean fantastic;
-
-        HT (boolean fantastic)
+        HT (boolean fantastic, JSONArrayWriter array_writer) throws IOException
           {
-            this.fantastic = fantastic;
-          }
-
-        @Override
-        public void writeObject (JSONWriter wr) throws IOException
-          {
+            JSONObjectWriter wr = array_writer.setObject ();
             wr.setInt ("Value", -689);
             wr.setString ("String", "656756#");
             wr.setBoolean ("Fantastic", fantastic);
           }
       }
     
-    class SO implements JSONObjectWriter
+    class SO
       {
-        int value;
-        String instance;
-        
-        SO (int value, String instance)
+        SO (int value, String instance, JSONArrayWriter array_writer) throws IOException
           {
-            this.value = value;
-            this.instance = instance;
-          }
-
-        @Override
-        public void writeObject (JSONWriter wr) throws IOException
-          {
+            JSONObjectWriter wr = array_writer.setObject ();
             wr.setString (ID, instance);
             wr.setInt ("Data", value);
             createSymmetricKeySignature (wr);
@@ -164,7 +148,7 @@ public class Sign extends JSONEncoder
 
     JSONSignatureEncoder signature;
     
-    void createX509Signature (JSONWriter wr) throws IOException
+    void createX509Signature (JSONObjectWriter wr) throws IOException
       {
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setExtendedCertPath (true);
@@ -172,7 +156,7 @@ public class Sign extends JSONEncoder
         wr.setEnvelopedSignature (new JSONX509Signer (signer));
       }
     
-    void createAsymmetricKeySignature (JSONWriter wr) throws IOException
+    void createAsymmetricKeySignature (JSONObjectWriter wr) throws IOException
       {
         try
           {
@@ -186,23 +170,26 @@ public class Sign extends JSONEncoder
           }
       }
     
-    void createSymmetricKeySignature (JSONWriter wr) throws IOException
+    void createSymmetricKeySignature (JSONObjectWriter wr) throws IOException
       {
         wr.setEnvelopedSignature (new JSONSymKeySigner (new SymmetricOperations ()));
       }
     
     
     @Override
-    public byte[] getJSONData () throws IOException
+    public void writeJSONData (JSONObjectWriter wr) throws IOException
       {
         String instant = Base64URL.generateURLFriendlyRandom (20);
-        JSONWriter wr = new JSONWriter (CONTEXT);
         wr.setDateTime ("Now", new Date ());
-        wr.setObjectArray ("Barray", new JSONObjectWriter[]{new HT (true), new HT (false)});
-        wr.setObjectArray ("Array", new JSONObjectWriter[]{});
+        JSONArrayWriter array_writer = wr.setArray ("Barray");
+        new HT (true, array_writer);
+        new HT (false, array_writer);
+        wr.setArray ("Array");
         if (multiple)
           {
-            wr.setObjectArray ("SignedObjects", new JSONObjectWriter[]{new SO (35, "this"), new SO (-90, "that")});
+            array_writer = wr.setArray ("SignedObjects").setArray ();
+            new SO (35, "this", array_writer);
+            new SO (-90, "that", array_writer);
           }
         wr.setString (ID, instant);
         wr.setStringArray ("Strings", new String[]{"One", "Two", "Three"});
@@ -220,7 +207,6 @@ public class Sign extends JSONEncoder
           {
             createSymmetricKeySignature (wr);
           }
-        return wr.serializeJSONStructure ();
       }
     
     static void show ()
@@ -289,7 +275,7 @@ public class Sign extends JSONEncoder
                 try
                   {
                     installOptionalBCProvider ();
-                    ArrayUtil.writeFile (argc[2], new Sign (action, new Boolean (argc[1])).getJSONData ());
+                    ArrayUtil.writeFile (argc[2], new Sign (action, new Boolean (argc[1])).serializeJSONDocument ());
                   }
                 catch (Exception e)
                   {
@@ -299,5 +285,11 @@ public class Sign extends JSONEncoder
               }
           }
         show ();
+      }
+
+    @Override
+    protected String getContext ()
+      {
+        return CONTEXT;
       }
   }

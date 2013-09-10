@@ -151,7 +151,7 @@ public class JSONDecoderCache
             parser.setCheckForUnreadProperties (new Boolean(argc[2]));
             parser.addToCache (argc[0]);
             JSONDecoder doc = parser.parse (ArrayUtil.readFile (argc[1]));
-            System.out.print (new String (JSONWriter.serializeParsedJSONDocument (doc), "UTF-8"));
+            System.out.print (new String (JSONObjectWriter.serializeParsedJSONDocument (doc), "UTF-8"));
           }
         catch (Exception e)
           {

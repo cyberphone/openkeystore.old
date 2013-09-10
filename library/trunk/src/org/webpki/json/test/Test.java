@@ -18,11 +18,12 @@ package org.webpki.json.test;
 
 import java.io.IOException;
 
+import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONReaderHelper;
-import org.webpki.json.JSONWriter;
+import org.webpki.json.JSONObjectWriter;
 
 import org.webpki.util.ArrayUtil;
 
@@ -81,6 +82,8 @@ public class Test
               {
                 test (list[i].equals (STRING_LIST_VALUE[i]));
               }
+            test (rd.getArray ("KURT").getArray ().getString ().equals ("jurt"));
+            rd.getObject ("MURT").getString ("URK");
           }
   
         @Override
@@ -93,9 +96,8 @@ public class Test
     static class Writer extends JSONEncoder
       {
         @Override
-        protected byte[] getJSONData () throws IOException
+        protected void writeJSONData (JSONObjectWriter wr) throws IOException
           {
-            JSONWriter wr = new JSONWriter (CONTEXT);
             wr.setBoolean (BOOL_TRUE, true);
             wr.setBoolean (BOOL_FALSE, false);
             wr.setString (STRING, STRING_VALUE);
@@ -103,7 +105,16 @@ public class Test
             wr.setBinary (BLOB, BLOB_VALUE);
             wr.setStringArray (EMPTY_STRING_LIST, new String[0]);
             wr.setStringArray (STRING_LIST, STRING_LIST_VALUE);
-            return wr.serializeJSONStructure ();
+            JSONArrayWriter aw = wr.setArray ("KURT");
+            aw.setArray ().setString ("jurt").setString ("Ty");
+            aw.setArray ().setString ("lurt").setString ("Ty");
+            wr.setObject ("MURT").setString ("URK", "urk");
+          }
+
+        @Override
+        protected String getContext ()
+          {
+            return CONTEXT;
           }
       }
     
@@ -137,10 +148,10 @@ public class Test
           {
             cache.addToCache (Reader.class);
             cache.addToCache (ESC.class);
-            byte[] data = new Writer ().getJSONData ();
-            Reader reader = (Reader) cache.parse (data);
-            byte[] output = JSONWriter.serializeParsedJSONDocument (reader);
+            byte[] data = new Writer ().serializeJSONDocument ();
             System.out.println (new String (data, "UTF-8"));
+            Reader reader = (Reader) cache.parse (data);
+            byte[] output = JSONObjectWriter.serializeParsedJSONDocument (reader);
             if (ArrayUtil.compare (data, output))
               {
                 System.out.println ("Input and output are equivalent");

@@ -26,6 +26,7 @@ import org.webpki.crypto.KeyStoreVerifier;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
+import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONDecoderCache;
@@ -33,7 +34,7 @@ import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONReaderHelper;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
-import org.webpki.json.JSONWriter;
+import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Verifier;
 
 import org.webpki.util.ArrayUtil;
@@ -103,11 +104,26 @@ public class Verify extends JSONDecoder
                         }
                       break;
                     }
+                  if (rd.getArrayType (property) == JSONTypes.ARRAY)
+                    {
+                      recurseArray (rd.getArray (property));
+                      break;
+                    }
 
                 default:
                   rd.scanAway (property);
               }
           }
+      }
+
+    void recurseArray (JSONArrayReader array) throws IOException
+      {
+        while (array.getElementType () == JSONTypes.OBJECT)
+          {
+            recurse (array.getObject ());
+          }
+        // TODO Auto-generated method stub
+        
       }
 
     void debugOutput (String string)
@@ -143,7 +159,7 @@ public class Verify extends JSONDecoder
                   }
                 else
                   {
-                    JSONWriter.setCanonicalizationDebugFile (argc[1]);
+                    JSONObjectWriter.setCanonicalizationDebugFile (argc[1]);
                   }
               }
             JSONDecoderCache parser = new JSONDecoderCache ();
