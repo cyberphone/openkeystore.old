@@ -208,16 +208,6 @@ public class JSONReaderHelper
         return blobs;
       }
 
-    public JSONReaderHelper[] getObjectArray (String name) throws IOException
-      {
-        Vector<JSONReaderHelper> readers = new Vector<JSONReaderHelper> ();
-        for (JSONValue value : getArray (name, JSONTypes.OBJECT))
-          {
-            readers.add (createJSONReaderHelper ((JSONObject) value.value));
-          }
-        return readers.toArray (new JSONReaderHelper[0]);
-      }
-
     public String[] getProperties ()
       {
         return current.properties.keySet ().toArray (new String[0]);

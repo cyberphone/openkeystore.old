@@ -53,6 +53,7 @@ public class Test
 
     static final String STRING_LIST = "stringlist";
     static final String[] STRING_LIST_VALUE = {"one","two","three"};
+    static final String SUPER_LONG_LINE = "jurtkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"; 
 
     static JSONDecoderCache cache = new JSONDecoderCache ();
     
@@ -82,7 +83,7 @@ public class Test
               {
                 test (list[i].equals (STRING_LIST_VALUE[i]));
               }
-            test (rd.getArray ("KURT").getArray ().getString ().equals ("jurt"));
+            test (rd.getArray ("KURT").getArray ().getString ().equals (SUPER_LONG_LINE));
             rd.getObject ("MURT").getString ("URK");
           }
   
@@ -106,7 +107,7 @@ public class Test
             wr.setStringArray (EMPTY_STRING_LIST, new String[0]);
             wr.setStringArray (STRING_LIST, STRING_LIST_VALUE);
             JSONArrayWriter aw = wr.setArray ("KURT");
-            aw.setArray ().setString ("jurt").setString ("Ty");
+            aw.setArray ().setString (SUPER_LONG_LINE).setString ("Ty");
             aw.setArray ().setString ("lurt").setString ("Ty");
             wr.setObject ("MURT").setString ("URK", "urk");
           }

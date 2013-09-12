@@ -189,23 +189,47 @@ class JSONParser
 /* 
       Since JSON supplied as a part of web-page may need additional escaping
       while JSON data as a part of a protocol needs only needs to be parsable,
-      Canonical JSON only supports the following two escape sequences.
+      Protocol JSON only requires the following two escape sequences.
 */
                     case '"':
                     case '\\':
                       break;
 
 /*
-      Removed: Redundant and potentially ambiguous
- 
-                    case '/':
-                    case 'u':
-                    case 'b':
-                    case 'f':
-                    case 'n':
-                    case 'r':
-                    case 't':
+      But we are nice and support the rest as well...
+
 */
+                    case '/':
+                      break;
+                      
+                    case 'b':
+                      c = '\b';
+                      break;
+
+                    case 'f':
+                      c = '\f';
+                      break;
+
+                    case 'n':
+                      c = '\n';
+                      break;
+
+                    case 'r':
+                      c = '\r';
+                      break;
+
+                    case 't':
+                      c = '\t';
+                      break;
+
+                    case 'u':
+                      c = 0;
+                      for (int i = 0; i < 4; i++)
+                        {
+                          c = (char) (c << 4 + getHexChar ());
+                        }
+                      break;
+
                     default:
                       throw new IOException ("Unsupported escape:" + c);
                   }
@@ -213,6 +237,42 @@ class JSONParser
             result.append (c);
           }
         return new JSONValue (JSONTypes.STRING, result.toString ());
+      }
+
+    char getHexChar () throws IOException
+      {
+        char c = nextChar ();
+        switch (c)
+          {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+              return (char) (c -'0');
+              
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'e':
+            case 'f':
+              return (char) (c - 'a' + 10);
+              
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+            case 'E':
+            case 'F':
+              return (char) (c - 'A' + 10);
+          }
+        throw new IOException ("Bad hex in \\u esscape: " + c);
       }
 
     boolean isNumber (char c)

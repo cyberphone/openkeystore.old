@@ -37,6 +37,11 @@ public abstract class JSONEncoder
      * INTERNAL USE ONLY     
      */
     protected abstract String getContext ();
+
+    /**
+     * @return Document JSON format
+     * @throws IOException
+     */
     public byte[] serializeJSONDocument () throws IOException
       {
         JSONObjectWriter wr = new JSONObjectWriter (getContext ());

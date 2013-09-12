@@ -49,10 +49,10 @@ public class Verify extends JSONDecoder
     @Override
     protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
       {
-        recurse (rd);
+        recurseObject (rd);
       }
 
-    void recurse (JSONReaderHelper rd) throws IOException
+    void recurseObject (JSONReaderHelper rd) throws IOException
       {
         for (String property : rd.getProperties ())
           {
@@ -91,24 +91,13 @@ public class Verify extends JSONDecoder
                     }
                   else
                     {
-                      recurse (rd.getObject (property));
+                      recurseObject (rd.getObject (property));
                     }
                   break;
 
                 case ARRAY:
-                  if (rd.getArrayType (property) == JSONTypes.OBJECT)
-                    {
-                      for (JSONReaderHelper next : rd.getObjectArray (property))
-                        {
-                          recurse (next);
-                        }
-                      break;
-                    }
-                  if (rd.getArrayType (property) == JSONTypes.ARRAY)
-                    {
-                      recurseArray (rd.getArray (property));
-                      break;
-                    }
+                  recurseArray (rd.getArray (property));
+                  break;
 
                 default:
                   rd.scanAway (property);
@@ -118,12 +107,21 @@ public class Verify extends JSONDecoder
 
     void recurseArray (JSONArrayReader array) throws IOException
       {
-        while (array.getElementType () == JSONTypes.OBJECT)
+        while (array.hasMore ())
           {
-            recurse (array.getObject ());
-          }
-        // TODO Auto-generated method stub
-        
+            if (array.getElementType () == JSONTypes.OBJECT)
+              {
+                recurseObject (array.getObject ());
+              }
+            else if (array.getElementType () == JSONTypes.ARRAY)
+              {
+                recurseArray (array.getArray ());
+              }
+            else
+              {
+                array.scanAway ();
+              }
+          }        
       }
 
     void debugOutput (String string)

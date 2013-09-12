@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.util.Date;
-import java.util.TreeSet;
 import java.util.Vector;
 
 import org.webpki.util.ArrayUtil;
@@ -48,8 +47,6 @@ public class JSONObjectWriter
     int indent;
     
     boolean pretty = true;
-    
-    boolean sort = false;
     
     JSONObjectWriter (String context) throws IOException
       {
@@ -188,7 +185,7 @@ public class JSONObjectWriter
       {
         beginObject (array_flag);
         boolean next = false;
-        for (String property : sort ? new TreeSet<String> (object.properties.keySet ()) :  object.properties.keySet ())
+        for (String property : object.properties.keySet ())
           {
             JSONValue json_value = object.properties.get (property);
             if (next)
@@ -200,29 +197,26 @@ public class JSONObjectWriter
             printProperty (property);
             switch (json_value.type)
               {
-                case INTEGER:
-                case BOOLEAN:
-                case STRING:
-                  printSimpleValue (json_value);
-                  break;
-     
                 case ARRAY:
-                  printArray ((Vector<JSONValue>) json_value.value);
+                  printArray ((Vector<JSONValue>) json_value.value, false);
                   break;
 
                 case OBJECT:
                   newLine ();
                   printObject ((JSONObject) json_value.value, false);
+                  break;
+
+                default:
+                  printSimpleValue (json_value);
               }
           }
         endObject ();
       }
 
     @SuppressWarnings("unchecked")
-    boolean printArray (Vector<JSONValue> array)
+    void printArray (Vector<JSONValue> array, boolean array_flag)
       {
-        boolean simple = false;
-        if (array.isEmpty ())
+         if (array.isEmpty ())
           {
             buffer.append ('[');
           }
@@ -237,27 +231,31 @@ public class JSONObjectWriter
             spaceOut ();
             buffer.append ('[');
             boolean next = false;
-            boolean nested_array = false;
-            for (JSONValue array2 : array)
+            for (JSONValue value : array)
               {
-                indentLine ();
+                Vector<JSONValue> sub_array = (Vector<JSONValue>) value.value;
+                boolean extra_pretty = sub_array.isEmpty () ||
+                                       (sub_array.firstElement ().type != JSONTypes.ARRAY &&
+                                        sub_array.firstElement ().type != JSONTypes.OBJECT);
                 if (next)
                   {
                     buffer.append (',');
-                    if (nested_array)
-                      {
-                        newLine ();
-                        spaceOut ();
-                      }
                   }
                 else
                   {
-                    newLine ();
-                    spaceOut ();
                     next = true;
                   }
-                nested_array = printArray ((Vector<JSONValue>) array2.value);
-                undentLine ();
+                if (extra_pretty)
+                  {
+                    newLine ();
+                    indentLine ();
+                    spaceOut ();
+                  }
+                printArray (sub_array, true);
+                if (extra_pretty)
+                  {
+                    undentLine ();
+                  }
               }
             newLine ();
             spaceOut ();
@@ -265,14 +263,12 @@ public class JSONObjectWriter
           }
         else
           {
-            printArraySimple (array);
-            simple = true;
+            printArraySimple (array, array_flag);
           }
         buffer.append (']');
-        return simple;
       }
 
-    void printArraySimple (Vector<JSONValue> array)
+    void printArraySimple (Vector<JSONValue> array, boolean array_flag)
       {
         int i = 0;
         for (JSONValue value : array)
@@ -281,7 +277,7 @@ public class JSONObjectWriter
           }
         boolean broken_lines = i > 100;
         boolean next = false;
-        if (broken_lines)
+        if (broken_lines && !array_flag)
           {
             indentLine ();
             newLine ();
@@ -315,7 +311,10 @@ public class JSONObjectWriter
             undentLine ();
             newLine ();
             spaceOut ();
-            undentLine ();
+            if (!array_flag)
+              {
+                undentLine ();
+              }
           }
       }
 
@@ -402,7 +401,6 @@ public class JSONObjectWriter
       {
         JSONObjectWriter writer = new JSONObjectWriter (signature_object_in);
         writer.pretty = false;
-        writer.sort = true;
         byte[] result = writer.serializeJSONStructure ();
         if (canonicalization_debug_file != null)
           {
@@ -434,7 +432,7 @@ public class JSONObjectWriter
         canonicalization_debug_file = file;
       }
 
-    public static byte[] parseAndPrettyPrint (byte[] json_utf8) throws IOException
+    public static byte[] parseAndPrettyPrint (byte[] json_utf8, boolean canonical_mode) throws IOException
       {
         return new JSONObjectWriter (new JSONParser ().parse (json_utf8)).serializeJSONStructure ();
       }
@@ -448,7 +446,7 @@ public class JSONObjectWriter
           }
         try
           {
-            System.out.print (new String (parseAndPrettyPrint (ArrayUtil.readFile (argc[0])), "UTF-8"));
+            System.out.print (new String (parseAndPrettyPrint (ArrayUtil.readFile (argc[0]), true), "UTF-8"));
           }
         catch (Exception e)
           {
