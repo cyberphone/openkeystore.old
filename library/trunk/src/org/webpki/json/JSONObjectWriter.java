@@ -18,6 +18,7 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import java.util.Date;
@@ -72,6 +73,11 @@ public class JSONObjectWriter
     public void setBigInteger (String name, BigInteger value) throws IOException
       {
         root.addProperty (name, new JSONValue (JSONTypes.INTEGER, value.toString ()));
+      }
+
+    public void setBigDecimal (String name, BigDecimal value) throws IOException
+      {
+        root.addProperty (name, new JSONValue (JSONTypes.DECIMAL, value.toString ()));
       }
 
     public void setBoolean (String name, boolean value) throws IOException
@@ -350,27 +356,58 @@ public class JSONObjectWriter
 /* 
       Since JSON supplied as a part of web-page may need additional escaping
       while JSON data as a part of a protocol needs only needs to be parsable,
-      Canonical JSON only supports the following two escape sequences.
+      Protocol JSON only requires the following two escape sequences.
 */
                 case '"':
                 case '\\':
-                  buffer.append ('\\');
+                  escapeCharacter (c);
                   break;
 
 /*
-      Removed: Redundant and potentially ambiguous
+      But we are nice and support all the traditional ASCII control characters 
 
-                case '/':
-                case '\b':
-                case '\f':
-                case '\n':
-                case '\r':
-                case '\t':
 */
+                case '\b':
+                  escapeCharacter ('b');
+                  break;
+
+                case '\f':
+                  escapeCharacter ('f');
+                  break;
+
+                case '\n':
+                  escapeCharacter ('n');
+                  break;
+
+                case '\r':
+                  escapeCharacter ('r');
+                  break;
+
+                case '\t':
+                  escapeCharacter ('t');
+                  break;
+
+                default:
+                  if (c < 0x20)
+                    {
+                      escapeCharacter ('u');
+                      for (int i = 0; i < 4; i++)
+                        {
+                          int hex = c >>> 12;
+                          buffer.append ((char)(hex > 9 ? hex + 'a' - 10 : hex + '0'));
+                          c <<= 4;
+                        }
+                      break;
+                    }
+                  buffer.append (c);
               }
-            buffer.append (c);
           }
         buffer.append ('"');
+      }
+
+    void escapeCharacter (char c)
+      {
+        buffer.append ('\\').append (c);
       }
 
     void singleSpace ()

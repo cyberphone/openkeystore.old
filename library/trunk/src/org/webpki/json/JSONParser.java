@@ -167,7 +167,8 @@ class JSONParser
         boolean number = INTEGER_PATTERN.matcher (result).matches ();
         if (!number && !BOOLEAN_PATTERN.matcher (result).matches ())
           {
-            throw new IOException ("Expected integer or boolean, got: " + result);
+ //           throw new IOException ("Expected integer or boolean, got: " + result);
+            return new JSONValue (JSONTypes.DECIMAL, result);
           }
         return new JSONValue (number ? JSONTypes.INTEGER : JSONTypes.BOOLEAN, result);
       }
@@ -226,7 +227,7 @@ class JSONParser
                       c = 0;
                       for (int i = 0; i < 4; i++)
                         {
-                          c = (char) (c << 4 + getHexChar ());
+                          c = (char) ((c << 4) + getHexChar ());
                         }
                       break;
 

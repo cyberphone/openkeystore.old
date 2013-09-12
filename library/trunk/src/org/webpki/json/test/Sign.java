@@ -18,6 +18,8 @@ package org.webpki.json.test;
 
 import java.io.IOException;
 
+import java.math.BigDecimal;
+
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -45,7 +47,6 @@ import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Signer;
 
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.Base64URL;
 
 /**
  * Simple signature test generator
@@ -115,14 +116,14 @@ public class Sign extends JSONEncoder
           }
       }
 
-    class HT
+    class OrderLine
       {
-        HT (boolean fantastic, JSONArrayWriter array_writer) throws IOException
+        public OrderLine (int units, String sku, BigDecimal unit_price, JSONArrayWriter array_writer) throws IOException
           {
             JSONObjectWriter wr = array_writer.setObject ();
-            wr.setInt ("Value", -689);
-            wr.setString ("String", "656756#");
-            wr.setBoolean ("Fantastic", fantastic);
+            wr.setInt ("Units", units);
+            wr.setString ("SKU", sku);
+            wr.setBigDecimal ("UnitPrice", unit_price);
           }
       }
     
@@ -179,22 +180,20 @@ public class Sign extends JSONEncoder
     @Override
     public void writeJSONData (JSONObjectWriter wr) throws IOException
       {
-        String instant = Base64URL.generateURLFriendlyRandom (20);
         wr.setDateTime ("Now", new Date ());
-        JSONArrayWriter array_writer = wr.setArray ("Barray");
-        new HT (true, array_writer);
-        new HT (false, array_writer);
-        wr.setArray ("Array");
+        JSONObjectWriter order = wr.setObject ("Order");
+        order.setString ("Currency", "USD");
+        order.setBigDecimal ("VAT", new BigDecimal ("1.45"));
+        JSONArrayWriter array_writer = order.setArray ("OrderLines");
+        new OrderLine (1, "TR-46565666", new BigDecimal ("4.50"), array_writer);
+        new OrderLine (3, "JK-56566655", new BigDecimal ("39.99"), array_writer);
         if (multiple)
           {
             array_writer = wr.setArray ("SignedObjects").setArray ();
             new SO (35, "this", array_writer);
             new SO (-90, "that", array_writer);
           }
-        wr.setString (ID, instant);
-        wr.setStringArray ("Strings", new String[]{"One", "Two", "Three"});
-        wr.setString ("EscapeMe", "A\\\"" );
-        wr.setInt ("Int", 78);
+        wr.setString ("EscapeMe", "\u000F\nA\u0042\\\"" );
         if (action == ACTION.X509)
           {
             createX509Signature (wr);
