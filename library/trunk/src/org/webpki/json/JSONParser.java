@@ -168,6 +168,7 @@ class JSONParser
         if (!number && !BOOLEAN_PATTERN.matcher (result).matches ())
           {
  //           throw new IOException ("Expected integer or boolean, got: " + result);
+ // TODO INCOMPLETE!!!
             return new JSONValue (JSONTypes.DECIMAL, result);
           }
         return new JSONValue (number ? JSONTypes.INTEGER : JSONTypes.BOOLEAN, result);
