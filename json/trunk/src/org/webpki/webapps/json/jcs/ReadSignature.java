@@ -22,12 +22,12 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.PublicKey;
 
-import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyStoreVerifier;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
+import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONSignatureDecoder;
@@ -48,10 +48,10 @@ public class ReadSignature extends JSONDecoder
     @Override
     protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
       {
-        recurse (rd);
+        recurseObject (rd);
       }
 
-    void recurse (JSONReaderHelper rd) throws IOException
+    void recurseObject (JSONReaderHelper rd) throws IOException
       {
         for (String property : rd.getProperties ())
           {
@@ -92,24 +92,37 @@ public class ReadSignature extends JSONDecoder
                     }
                   else
                     {
-                      recurse (rd.getObject (property));
+                      recurseObject (rd.getObject (property));
                     }
                   break;
 
                 case ARRAY:
-                  if (rd.getArrayType (property) == JSONTypes.OBJECT)
-                    {
-                      for (JSONReaderHelper next : rd.getObjectArray (property))
-                        {
-                          recurse (next);
-                        }
-                      break;
-                    }
+                  recurseArray (rd.getArray (property));
+                  break;
 
                 default:
                   rd.scanAway (property);
               }
           }
+      }
+
+    void recurseArray (JSONArrayReader array) throws IOException
+      {
+        while (array.hasMore ())
+          {
+            if (array.getElementType () == JSONTypes.OBJECT)
+              {
+                recurseObject (array.getObject ());
+              }
+            else if (array.getElementType () == JSONTypes.ARRAY)
+              {
+                recurseArray (array.getArray ());
+              }
+            else
+              {
+                array.scanAway ();
+              }
+          }        
       }
 
     void debugOutput (String string)

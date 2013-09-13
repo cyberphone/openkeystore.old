@@ -39,6 +39,6 @@ public class CreateServlet extends HttpServlet
           }
         response.sendRedirect (ServletUtil.getContextURL (request) + 
                                "/request?" + RequestServlet.JCS_ARGUMENT + "=" + 
-                               Base64URL.getBase64URLFromBinary (new MySignature (action, data_to_be_signed).getJSONData ()));
+                               Base64URL.getBase64URLFromBinary (new MySignature (action, data_to_be_signed).serializeJSONDocument ()));
       }
   }

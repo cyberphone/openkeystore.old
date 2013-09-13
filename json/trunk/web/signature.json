@@ -1,30 +1,31 @@
   {
     "@context": "http://example.com/signature",
-    "Now": "2013-09-06T16:27:00+02:00",
-    "Barray":
-      [{
-         "Value": -689,
-         "String": "656756#",
-         "Fantastic": true
-       },
-       {
-         "Value": -689,
-         "String": "656756#",
-         "Fantastic": false
-       }],
-    "Array": [],
-    "ID": "IWUf_9Au74Yhz2ZBl1e2",
-    "Strings": ["One","Two","Three"],
-    "EscapeMe": "A\\\"",
-    "Int": 78,
-    "Signature":
+    "Now": "2013-09-13T13:17:08+02:00",
+    "Order": 
+      {
+        "Currency": "USD",
+        "VAT": 1.45,
+        "OrderLines": 
+          [{
+             "Units": 1,
+             "SKU": "TR-46565666",
+             "UnitPrice": 4.50
+           },
+           {
+             "Units": 3,
+             "SKU": "JK-56566655",
+             "UnitPrice": 39.99
+           }]
+      },
+    "EscapeMe": "\u000F\u000aA\u0042\\\"\/",
+    "Signature": 
       {
         "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
-        "KeyInfo":
+        "KeyInfo": 
           {
-            "PublicKey":
+            "PublicKey": 
               {
-                "EC":
+                "EC": 
                   {
                     "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.p256",
                     "X": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=",
@@ -32,6 +33,6 @@
                   }
               }
           },
-        "SignatureValue": "MEQCIHWzUy5XA5ToIzTrhsseKBlJvRt792yw/TYkJ4pQGYmsAiBrr5p5vUT/bwqilJrfGGyMPXu+T58eB8Toa4NpZQVMZA=="
+        "SignatureValue": "MEUCIAeai8SH3aLo6Mp6Fmv1Emz1GZzfn17TgJJQDfiD1wV1AiEAoObC/bKLA0HAC0RjEaz/WQGKlYVdSim77Soqjxic9+g="
       }
   }

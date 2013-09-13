@@ -37,10 +37,9 @@ import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONSignatureEncoder;
-import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONSymKeySigner;
-import org.webpki.json.JSONWriter;
+import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Signer;
 
 import org.webpki.util.ArrayUtil;
@@ -113,24 +112,6 @@ public class MySignature extends JSONEncoder
           }
       }
 
-    class HT implements JSONObjectWriter
-      {
-        boolean fantastic;
-
-        HT (boolean fantastic)
-          {
-            this.fantastic = fantastic;
-          }
-
-        @Override
-        public void writeObject (JSONWriter wr) throws IOException
-          {
-            wr.setInt ("Value", -689);
-            wr.setString ("String", "656756#");
-            wr.setBoolean ("Fantastic", fantastic);
-          }
-      }
-    
     ACTION action;
     String data_to_be_signed;
 
@@ -142,7 +123,7 @@ public class MySignature extends JSONEncoder
     
     JSONSignatureEncoder signature;
     
-    void createX509Signature (JSONWriter wr) throws IOException
+    void createX509Signature (JSONObjectWriter wr) throws IOException
       {
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setExtendedCertPath (true);
@@ -150,7 +131,7 @@ public class MySignature extends JSONEncoder
         wr.setEnvelopedSignature (new JSONX509Signer (signer));
       }
     
-    void createAsymmetricKeySignature (JSONWriter wr, KeyStore ks) throws IOException
+    void createAsymmetricKeySignature (JSONObjectWriter wr, KeyStore ks) throws IOException
       {
         try
           {
@@ -164,16 +145,15 @@ public class MySignature extends JSONEncoder
           }
       }
     
-    void createSymmetricKeySignature (JSONWriter wr) throws IOException
+    void createSymmetricKeySignature (JSONObjectWriter wr) throws IOException
       {
         wr.setEnvelopedSignature (new JSONSymKeySigner (new SymmetricOperations ()));
       }
     
     
     @Override
-    public byte[] getJSONData () throws IOException
+    public void writeJSONData (JSONObjectWriter wr) throws IOException
       {
-        JSONWriter wr = new JSONWriter (CONTEXT);
         wr.setDateTime ("Now", new Date ());
         wr.setString ("MyData", data_to_be_signed);
         if (action == ACTION.X509)
@@ -192,6 +172,11 @@ public class MySignature extends JSONEncoder
           {
             createSymmetricKeySignature (wr);
           }
-        return wr.serializeJSONStructure ();
+      }
+
+    @Override
+    protected String getContext ()
+      {
+        return CONTEXT;
       }
   }

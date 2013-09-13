@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.json.JSONDecoderCache;
-import org.webpki.json.JSONWriter;
+import org.webpki.json.JSONObjectWriter;
 
 import org.webpki.util.Base64URL;
 
@@ -63,7 +63,7 @@ public class RequestServlet extends HttpServlet
                 "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Verification Result<br>&nbsp;</td></tr>" +
 //              "<tr><td align=\"center\">Click <a href=\"" + baseurl + "/browser\">here</a> for testing JCS with a browser</td></tr>" +
               "<tr><td align=\"left\">" + HTML.newLines2HTML (doc.getResult ()) + "</td></tr>" +
-              "<tr><td align=\"left\">Received Message:<pre style=\"max-width:800px\">" + HTML.encode (new String (JSONWriter.serializeParsedJSONDocument (doc), "UTF-8")) + "</pre></td></tr>" +
+              "<tr><td align=\"left\">Received Message:<pre style=\"max-width:800px\">" + HTML.encode (new String (binary_signature, "UTF-8")) + "</pre></td></tr>" +
             "</table></td></td>");
 
           }
