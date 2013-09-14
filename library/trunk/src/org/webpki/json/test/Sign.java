@@ -118,10 +118,11 @@ public class Sign extends JSONEncoder
 
     class OrderLine
       {
-        public OrderLine (int units, String sku, BigDecimal unit_price, JSONArrayWriter array_writer) throws IOException
+        public OrderLine (int units, String sku, String description, BigDecimal unit_price, JSONArrayWriter array_writer) throws IOException
           {
             JSONObjectWriter wr = array_writer.setObject ();
             wr.setInt ("Units", units);
+            wr.setString ("Description", description);
             wr.setString ("SKU", sku);
             wr.setBigDecimal ("UnitPrice", unit_price);
           }
@@ -181,12 +182,12 @@ public class Sign extends JSONEncoder
     public void writeJSONData (JSONObjectWriter wr) throws IOException
       {
         wr.setDateTime ("Now", new Date ());
-        JSONObjectWriter order = wr.setObject ("Order");
-        order.setString ("Currency", "USD");
-        order.setBigDecimal ("VAT", new BigDecimal ("1.45"));
-        JSONArrayWriter array_writer = order.setArray ("OrderLines");
-        new OrderLine (1, "TR-46565666", new BigDecimal ("4.50"), array_writer);
-        new OrderLine (3, "JK-56566655", new BigDecimal ("39.99"), array_writer);
+        JSONObjectWriter payment_request = wr.setObject ("PaymentRequest");
+        payment_request.setString ("Currency", "USD");
+        payment_request.setBigDecimal ("VAT", new BigDecimal ("1.45"));
+        JSONArrayWriter array_writer = payment_request.setArray ("Specification");
+        new OrderLine (3, "TR-46565666", "USB cable", new BigDecimal ("4.50"), array_writer);
+        new OrderLine (1, "JK-56566655", "4G Router", new BigDecimal ("39.99"), array_writer);
         if (multiple)
           {
             array_writer = wr.setArray ("SignedObjects").setArray ();
