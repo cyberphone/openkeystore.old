@@ -34,6 +34,12 @@
   <target name="build">
     <delete dir="${temp_dir}"/>
     <mkdir dir="${temp_dir}"/>
+    <fixcrlf srcdir="web"
+       tab="remove"
+       tablength="4"
+       eol="lf"
+       eof="remove"
+       includes="signature.json"/>
     <javac debug="${debug}" srcdir="${src_dir}" destdir="${temp_dir}" classpathref="compile.classpath" includeAntRuntime="false"/>
     <war destfile="${dist_dir}/${application}" webxml="web.xml">
       <classes dir="${temp_dir}"/>
