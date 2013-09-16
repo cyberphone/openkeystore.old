@@ -34,10 +34,6 @@ public class JSONArrayWriter
 
     void add (JSONTypes type, Object value) throws IOException
       {
-        if (!array.isEmpty () && array.firstElement ().type != type)
-          {
-            throw new IOException ("Mixed types for arrays: " + type + " versus " + array.firstElement ().type);
-          }
         array.add (new JSONValue (type, value));
       }
 

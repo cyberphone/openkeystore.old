@@ -15,42 +15,34 @@ Sample signed JSON message:
 <pre style="margin-left:20pt">
   {
     "@context": "http://example.com/signature",
-    "Now": "2013-08-31T14:58:31+02:00",
-    "HRT":
+    "Now": "2013-09-14T09:14:31+02:00",
+    "PaymentRequest": 
       {
-        "RTl": "67",
-        "YT":
-          {
-            "HTL": "656756#",
-            "INTEGER": -689,
-            "Fantastic": false
-          },
-        "er": "33"
+        "Currency": "USD",
+        "VAT": 1.45,
+        "Specification": 
+          [{
+             "Units": 3,
+             "Description": "USB cable",
+             "SKU": "TR-46565666",
+             "UnitPrice": 4.50
+           },
+           {
+             "Units": 1,
+             "Description": "4G Router",
+             "SKU": "JK-56566655",
+             "UnitPrice": 39.99
+           }]
       },
-    "ARR": [],
-    "BARR":
-      [{
-         "HTL": "656756#",
-         "INTEGER": -689,
-         "Fantastic": true
-       },
-       {
-         "HTL": "656756#",
-         "INTEGER": -689,
-         "Fantastic": false
-       }],
-    "ID": "8OUbPTamxSHpn6iytuDf",
-    "STRINGS": ["One","Two","Three"],
-    "EscapeMe": "A\\\n\"",
-    "Intra": 78,
-    "Signature":
+    "EscapeMe": "\u000f\nAB\\\"/",
+    "Signature": 
       {
         "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
-        "KeyInfo":
+        "KeyInfo": 
           {
-            "PublicKey":
+            "PublicKey": 
               {
-                "EC":
+                "EC": 
                   {
                     "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.p256",
                     "X": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=",
@@ -58,23 +50,9 @@ Sample signed JSON message:
                   }
               }
           },
-        "SignatureValue": "MEUCIF32SJ8n+NCr0GSPu6E4ZGgr69iAERphslIyIoUQ9TGfAiEAqevMXFnlJrVIZMc81S3KvDZEZIIDWdslEMrYMNNsNkA="
+        "SignatureValue": "MEQCIHPE2mqjsMNji+Tt/e37fuXG7FNFOO5F7FCpJ4RD7fqBAiBcjqIns6fxC7Q3lNQ49TIVUOguYBdIbfnbK+svtCLptg=="
       }
   }
   </pre>
-The principle for canonicalization is simple: All textual data of the JSON object 
-(including possible child objects) holding the <code>Signature</code> property – minus the <code>SignatureValue</code>
-name-value pair is used <i>after removing all whitespace</i>.
-In addition, <i>properties must be sorted in descending</i>
-UTF-8 order.<p>
-The sample above has the following canonicalization data:<br>
-<code>
-{"Signature":{"KeyInfo":{"PublicKey":{"EC":{"Y":"LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA=","X":<br>
-"lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=","NamedCurve":"http://xmlns.webpki.org/sks/algorithm#<br>
-ec.p256"}}},"Algorithm":"http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256"},"STRINGS":["One","Tw<br>
-o","Three"],"Now":"2013-08-31T14:58:31+02:00","Intra":78,"ID":"8OUbPTamxSHpn6iytuDf","HRT":{"er":"3<br>
-3","YT":{"INTEGER":-689,"HTL":"656756#","Fantastic":false},"RTl":"67"},"EscapeMe":"A\\\n\"","BARR":<br>
-[{"INTEGER":-689,"HTL":"656756#","Fantastic":true},{"INTEGER":-689,"HTL":"656756#","Fantastic":fals<br>
-e}],"ARR":[],"@context":"http://example.com/signature"}</code>
-</p>
+The signature scheme is described in <a href="https://openkeystore.googlecode.com/svn/resources/trunk/docs/JSON-Clear-Text-Signature-Scheme.pdf">https://openkeystore.googlecode.com/svn/resources/trunk/docs/JSON-Clear-Text-Signature-Scheme.pdf</a>
 </body>

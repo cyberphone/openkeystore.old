@@ -23,7 +23,7 @@ import java.util.Vector;
 import java.util.regex.Pattern;
 
 /**
- * Parses JSON into a DOM-like tree.
+ * Parses a JSON object into a DOM-like tree.
  * Only used internally.  The real stuff is supposed to use the
  * {@link JSONDocumentCache} and {@link JSONDocument} classes.
  * 
@@ -118,12 +118,16 @@ class JSONParser
       {
         Vector<JSONValue> array = new Vector<JSONValue> ();
         JSONValue value = null;
-        JSONValue last = null;
+        boolean next = false;
         while (testChar () != RIGHT_BRACKET)
           {
-            if (last != null)
+            if (next)
               {
                 scanFor (COMMA_CHARACTER);
+              }
+            else
+              {
+                next = true;
               }
             switch (scan ())
               {
@@ -142,11 +146,6 @@ class JSONParser
                 default:
                   value = scanSimpleType ();
               }
-            if (last != null && last.type != value.type)
-              {
-                throw new IOException ("Elements differ in type for array: " + name);
-              }
-            last = value;
             array.add (value);
           }
         scan ();

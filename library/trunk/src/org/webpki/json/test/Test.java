@@ -22,6 +22,7 @@ import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONDecoder;
+import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONReaderHelper;
 import org.webpki.json.JSONObjectWriter;
 
@@ -140,9 +141,17 @@ public class Test
           {
             return "http://example.com/escape";
           }
+
+        @Override
+        protected String getQualifier ()
+          {
+            return "Escaper";
+          }
       }
 
-    static final String ESCAPING = "{ \"@context\" : \"http://example.com/escape\", \"Esca\\npe\":\"\\u0041\\u000A\\tTAB\\nNL /\\\\\\\"\" }";
+    static final String ESCAPING = "{ \"@context\" : \"http://example.com/escape\", " +
+                                     "\"@qualifier\" : \"Escaper\", " +
+                                     "\"Esca\\npe\":\"\\u0041\\u000A\\tTAB\\nNL /\\\\\\\"\" }";
 
     public static void main (String[] argc)
       {
@@ -150,10 +159,10 @@ public class Test
           {
             cache.addToCache (Reader.class);
             cache.addToCache (ESC.class);
-            byte[] data = new Writer ().serializeJSONDocument ();
+            byte[] data = new Writer ().serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
             System.out.println (new String (data, "UTF-8"));
             Reader reader = (Reader) cache.parse (data);
-            byte[] output = JSONObjectWriter.serializeParsedJSONDocument (reader);
+            byte[] output = JSONObjectWriter.serializeParsedJSONDocument (reader, JSONOutputFormats.PRETTY_PRINT);
             if (ArrayUtil.compare (data, output))
               {
                 System.out.println ("Input and output are equivalent");

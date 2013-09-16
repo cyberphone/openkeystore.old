@@ -19,33 +19,43 @@ package org.webpki.json;
 import java.io.IOException;
 
 /**
- * Base class for java classes which are used for creating JSON data.
+ * Base class for java classes which are used for creating specific JSON object types.
  */
 public abstract class JSONEncoder
   {
     /**
-     * INTERNAL USE ONLY     
+     * INTERNAL USE ONLY.     
      */
     protected JSONEncoder () {}
 
     /**
-     * INTERNAL USE ONLY     
+     * INTERNAL USE ONLY.    
      */
     protected abstract void writeJSONData (JSONObjectWriter wr) throws IOException;
 
     /**
-     * INTERNAL USE ONLY     
+     * INTERNAL USE ONLY.
+     * Emulation of XML namespace     
      */
     protected abstract String getContext ();
+
+    /**
+     * INTERNAL USE ONLY.
+     * Optional type indicator for JSON objects belonging to the same <code>@context</code>.
+     */
+    protected String getQualifier ()
+      {
+        return null;
+      }
 
     /**
      * @return Document JSON format
      * @throws IOException
      */
-    public byte[] serializeJSONDocument () throws IOException
+    public byte[] serializeJSONDocument (JSONOutputFormats output_format) throws IOException
       {
         JSONObjectWriter wr = new JSONObjectWriter (getContext ());
         writeJSONData (wr);
-        return wr.serializeJSONStructure ();
+        return wr.serializeJSONStructure (output_format);
       }
   }

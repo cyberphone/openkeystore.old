@@ -19,7 +19,7 @@ package org.webpki.json;
 import java.io.IOException;
 
 /**
- * Base class for java classes which can be created from JSON data.
+ * Base class for java classes which can be created from specific JSON object types.
  * <p>
  * It is designed to use {@link JSONDecoderCache} to get automatic instantiation.
  */
@@ -28,12 +28,21 @@ public abstract class JSONDecoder
     JSONObject root;  // Of parsed document
 
     /**
-     * INTERNAL USE ONLY     
+     * INTERNAL USE ONLY.    
      */
     protected abstract void unmarshallJSONData (JSONReaderHelper rd) throws IOException;
     
     /**
-     * INTERNAL USE ONLY     
+     * INTERNAL USE ONLY.     
      */
     protected abstract String getContext ();
+
+    /**
+     * INTERNAL USE ONLY.
+     * Optional type indicator for JSON objects belonging to the same <code>@context</code>.
+     */
+    protected String getQualifier ()
+      {
+        return null;
+      }
   }

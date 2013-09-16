@@ -33,6 +33,7 @@ import java.util.Vector;
 import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.json.JSONDecoderCache;
+import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONSignatureEncoder;
 import org.webpki.json.JSONEncoder;
@@ -111,7 +112,7 @@ public class Keys
         kpg.initialize (alg_par_spec, new SecureRandom ());
         KeyPair key_pair = kpg.generateKeyPair ();
         PublicKey public_key = key_pair.getPublic ();
-        byte[] data = new Writer (public_key).serializeJSONDocument ();
+        byte[] data = new Writer (public_key).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
         Reader reader = (Reader) cache.parse (data);
         if (!reader.getPublicKey ().equals (public_key))
           {

@@ -48,6 +48,8 @@ public class JSONObjectWriter
     int indent;
     
     boolean pretty = true;
+
+    boolean java_script_eol;
     
     JSONObjectWriter (String context) throws IOException
       {
@@ -163,6 +165,10 @@ public class JSONObjectWriter
       {
         if (pretty)
           {
+            if (java_script_eol)
+              {
+                buffer.append ('\\');
+              }
             buffer.append ('\n');
           }
       }
@@ -437,8 +443,7 @@ public class JSONObjectWriter
     static byte[] getCanonicalizedSubset (JSONObject signature_object_in) throws IOException
       {
         JSONObjectWriter writer = new JSONObjectWriter (signature_object_in);
-        writer.pretty = false;
-        byte[] result = writer.serializeJSONStructure ();
+        byte[] result = writer.serializeJSONStructure (JSONOutputFormats.CANONICALIZED);
         if (canonicalization_debug_file != null)
           {
             byte[] other = ArrayUtil.readFile (canonicalization_debug_file);
@@ -449,18 +454,23 @@ public class JSONObjectWriter
         return result;
       }
 
-    byte[] serializeJSONStructure () throws IOException
+    byte[] serializeJSONStructure (JSONOutputFormats output_format) throws IOException
       {
         buffer = new StringBuffer ();
         indent = 0;
+        pretty = output_format != JSONOutputFormats.CANONICALIZED;
+        java_script_eol = output_format == JSONOutputFormats.JAVA_SCRIPT;
         printObject (root, false);
-        newLine ();
+        if (output_format == JSONOutputFormats.PRETTY_PRINT)
+          {
+            newLine ();
+          }
         return buffer.toString ().getBytes ("UTF-8");
       }
 
-    public static byte[] serializeParsedJSONDocument (JSONDecoder document) throws IOException
+    public static byte[] serializeParsedJSONDocument (JSONDecoder document, JSONOutputFormats output_format) throws IOException
       {
-        return new JSONObjectWriter (document.root).serializeJSONStructure ();
+        return new JSONObjectWriter (document.root).serializeJSONStructure (output_format);
       }
   
     public static void setCanonicalizationDebugFile (String file) throws IOException
@@ -469,9 +479,9 @@ public class JSONObjectWriter
         canonicalization_debug_file = file;
       }
 
-    public static byte[] parseAndPrettyPrint (byte[] json_utf8, boolean canonical_mode) throws IOException
+    public static byte[] parseAndPrettyPrint (byte[] json_utf8) throws IOException
       {
-        return new JSONObjectWriter (new JSONParser ().parse (json_utf8)).serializeJSONStructure ();
+        return new JSONObjectWriter (new JSONParser ().parse (json_utf8)).serializeJSONStructure (JSONOutputFormats.PRETTY_PRINT);
       }
 
     public static void main (String[] argc)
@@ -483,7 +493,7 @@ public class JSONObjectWriter
           }
         try
           {
-            System.out.print (new String (parseAndPrettyPrint (ArrayUtil.readFile (argc[0]), true), "UTF-8"));
+            System.out.print (new String (parseAndPrettyPrint (ArrayUtil.readFile (argc[0])), "UTF-8"));
           }
         catch (Exception e)
           {

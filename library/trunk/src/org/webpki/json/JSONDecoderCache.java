@@ -31,6 +31,7 @@ import org.webpki.util.ArrayUtil;
  * &nbsp;<br><code>
  * &nbsp;&nbsp;{<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;@context&quot;:&nbsp;&quot;</code><i>Message Context</i><code>&quot;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;@qualifier&quot;:&nbsp;&quot;</code><i>Optional Message Type Qualifier</i><code>&quot;<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;</code><i>Arbitrary JSON Payload</i><code><br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>
@@ -41,10 +42,17 @@ import org.webpki.util.ArrayUtil;
 public class JSONDecoderCache
   {
     /**
-     * JMNS = JSON Message Name Space
+     * Emulation of XML namespace
      */
     public static final String CONTEXT_JSON = "@context";
     
+    /**
+     * Emulation of XML top-level element. Optional
+     */
+    public static final String QUALIFIER_JSON = "@qualifier";
+    
+    static final char CONTEXT_QUALIFIER_DIVIDER = '$';
+
     boolean test_unread = true;
     
     Hashtable<String,Class<? extends JSONDecoder>> class_map = new Hashtable<String,Class<? extends JSONDecoder>> ();
@@ -55,11 +63,15 @@ public class JSONDecoderCache
         JSONObject root = parser.parse (json_utf8);
         JSONReaderHelper reader = new JSONReaderHelper (root);
         reader.root = root;
-        String context = reader.getString (CONTEXT_JSON);
-        Class<? extends JSONDecoder> decoder_class = class_map.get (context);
+        String object_type_identifier = reader.getString (CONTEXT_JSON);
+        if (reader.hasProperty (QUALIFIER_JSON))
+          {
+            object_type_identifier += CONTEXT_QUALIFIER_DIVIDER + reader.getString (QUALIFIER_JSON);
+          }
+        Class<? extends JSONDecoder> decoder_class = class_map.get (object_type_identifier);
         if (decoder_class == null)
           {
-            throw new IOException ("Unknown JSONDecoder type: " + context);
+            throw new IOException ("Unknown JSONDecoder type: " + object_type_identifier);
           }
         try
           {
@@ -114,7 +126,15 @@ public class JSONDecoderCache
         try
           {
             JSONDecoder decoder = json_decoder.newInstance ();
-            class_map.put (decoder.getContext (), decoder.getClass ());
+            String object_type_identifier = decoder.getContext ();
+            if (decoder.getQualifier () != null)
+              {
+                object_type_identifier += CONTEXT_QUALIFIER_DIVIDER + decoder.getQualifier ();
+              }
+            if (class_map.put (object_type_identifier, decoder.getClass ()) != null)
+              {
+                throw new IOException ("JSON document type already defined: " + object_type_identifier);
+              }
           }
         catch (InstantiationException ie)
           {
@@ -140,18 +160,26 @@ public class JSONDecoderCache
 
     public static void main (String[] argc)
       {
-        if (argc.length != 3)
+        if (argc.length != 4)
           {
-            System.out.println ("\nclass-name instance-document test-unread");
+            System.out.println ("\nclass-name instance-document test-unread format(" + JSONOutputFormats.CANONICALIZED + "|" + JSONOutputFormats.JAVA_SCRIPT + "|" +  JSONOutputFormats.PRETTY_PRINT + ")");
             System.exit (0);
           }
         try
           {
-            JSONDecoderCache parser = new JSONDecoderCache ();
-            parser.setCheckForUnreadProperties (new Boolean(argc[2]));
-            parser.addToCache (argc[0]);
-            JSONDecoder doc = parser.parse (ArrayUtil.readFile (argc[1]));
-            System.out.print (new String (JSONObjectWriter.serializeParsedJSONDocument (doc), "UTF-8"));
+            for (JSONOutputFormats of : JSONOutputFormats.values ())
+              {
+                if (of.toString ().equals (argc[3]))
+                  {
+                    JSONDecoderCache parser = new JSONDecoderCache ();
+                    parser.setCheckForUnreadProperties (new Boolean(argc[2]));
+                    parser.addToCache (argc[0]);
+                    JSONDecoder doc = parser.parse (ArrayUtil.readFile (argc[1]));
+                    System.out.print (new String (JSONObjectWriter.serializeParsedJSONDocument (doc, of), "UTF-8"));
+                    return;
+                  }
+              }
+            throw new IOException ("Unknown format: " + argc[3]);
           }
         catch (Exception e)
           {

@@ -44,6 +44,11 @@ import org.webpki.util.ArrayUtil;
  */
 public class Verify extends JSONDecoder
   {
+    static
+      {
+        Sign.installOptionalBCProvider ();
+      }
+
     static int count;
 
     @Override
@@ -147,7 +152,6 @@ public class Verify extends JSONDecoder
           }
         try
           {
-            Sign.installOptionalBCProvider ();
             int repeat = 1;
             if (argc.length == 2)
               {

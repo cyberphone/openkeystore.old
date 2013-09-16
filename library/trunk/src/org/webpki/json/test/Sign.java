@@ -40,6 +40,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
+import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONSignatureEncoder;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONSymKeySigner;
@@ -275,7 +276,7 @@ public class Sign extends JSONEncoder
                 try
                   {
                     installOptionalBCProvider ();
-                    ArrayUtil.writeFile (argc[2], new Sign (action, new Boolean (argc[1])).serializeJSONDocument ());
+                    ArrayUtil.writeFile (argc[2], new Sign (action, new Boolean (argc[1])).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT));
                   }
                 catch (Exception e)
                   {
