@@ -32,21 +32,20 @@ public class JSONArrayWriter
         this.array = array;
       }
 
-    void add (JSONTypes type, Object value) throws IOException
+    JSONArrayWriter add (JSONTypes type, Object value) throws IOException
       {
         array.add (new JSONValue (type, value));
+        return this;
       }
 
     public JSONArrayWriter setString (String value) throws IOException
       {
-        add (JSONTypes.STRING, value);
-        return this;
+        return add (JSONTypes.STRING, value);
       }
 
     public JSONArrayWriter setInt (int value) throws IOException
       {
-        add (JSONTypes.INTEGER, String.valueOf (value));
-        return this;
+        return add (JSONTypes.INTEGER, String.valueOf (value));
       }
 
     public JSONArrayWriter setArray () throws IOException

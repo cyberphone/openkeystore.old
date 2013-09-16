@@ -62,73 +62,84 @@ public class JSONObjectWriter
         this.root = root;
       }
 
-    public void setString (String name, String value) throws IOException
+    JSONObjectWriter addProperty (String name, JSONValue value) throws IOException
       {
-        root.addProperty (name, new JSONValue (JSONTypes.STRING, value));
+        root.addProperty (name, value);
+        return this;
       }
 
-    public void setInt (String name, int value) throws IOException
+    public JSONObjectWriter setString (String name, String value) throws IOException
       {
-        root.addProperty (name, new JSONValue (JSONTypes.INTEGER, Integer.toString (value)));
+        return addProperty (name, new JSONValue (JSONTypes.STRING, value));
       }
 
-    public void setBigInteger (String name, BigInteger value) throws IOException
+    public JSONObjectWriter setInt (String name, int value) throws IOException
       {
-        root.addProperty (name, new JSONValue (JSONTypes.INTEGER, value.toString ()));
+        return addProperty (name, new JSONValue (JSONTypes.INTEGER, Integer.toString (value)));
       }
 
-    public void setBigDecimal (String name, BigDecimal value) throws IOException
+    public JSONObjectWriter setBigInteger (String name, BigInteger value) throws IOException
       {
-        root.addProperty (name, new JSONValue (JSONTypes.DECIMAL, value.toString ()));
+        return addProperty (name, new JSONValue (JSONTypes.INTEGER, value.toString ()));
       }
 
-    public void setBoolean (String name, boolean value) throws IOException
+    public JSONObjectWriter setBigDecimal (String name, BigDecimal value) throws IOException
       {
-        root.addProperty (name, new JSONValue (JSONTypes.BOOLEAN, Boolean.toString (value)));
+        return addProperty (name, new JSONValue (JSONTypes.DECIMAL, value.toString ()));
       }
 
-    public void setDateTime (String name, Date t) throws IOException
+    public JSONObjectWriter setBoolean (String name, boolean value) throws IOException
       {
-        setString (name, ISODateTime.formatDateTime (t));
+        return addProperty (name, new JSONValue (JSONTypes.BOOLEAN, Boolean.toString (value)));
+      }
+
+    public JSONObjectWriter setDateTime (String name, Date t) throws IOException
+      {
+        return setString (name, ISODateTime.formatDateTime (t));
+      }
+
+    public JSONObjectWriter setBinary (String name, byte[] value) throws IOException 
+      {
+        return setString (name, getBase64 (value));
       }
 
     public JSONObjectWriter setObject (String name) throws IOException
       {
         JSONObject holder = new JSONObject ();
-        root.addProperty (name, new JSONValue (JSONTypes.OBJECT, holder));
+        addProperty (name, new JSONValue (JSONTypes.OBJECT, holder));
         return new JSONObjectWriter (holder);
       }
 
     public JSONArrayWriter setArray (String name) throws IOException
       {
         Vector<JSONValue> array = new Vector<JSONValue> ();
-        root.addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
+        addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
         return new JSONArrayWriter (array);
       }
 
-    void setStringArray (String name, String[] values, boolean quoted) throws IOException
+    JSONObjectWriter setStringArray (String name, String[] values, JSONTypes json_type) throws IOException
       {
         Vector<JSONValue> array = new Vector<JSONValue> ();
         for (String value : values)
           {
-            array.add (new JSONValue (JSONTypes.STRING, value));
+            array.add (new JSONValue (json_type, value));
           }
-        root.addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
+        return addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
       }
 
-    public void setBinaryArray (String name, Vector<byte[]> values) throws IOException
+    public JSONObjectWriter setBinaryArray (String name, Vector<byte[]> values) throws IOException
       {
         Vector<String> array = new Vector<String> ();
         for (byte[] value : values)
           {
             array.add (getBase64 (value));
           }
-        setStringArray (name, array.toArray (new String[0]), true);
+        return setStringArray (name, array.toArray (new String[0]));
       }
 
-    public void setStringArray (String name, String[] values) throws IOException
+    public JSONObjectWriter setStringArray (String name, String[] values) throws IOException
       {
-        setStringArray (name, values, true);
+        return setStringArray (name, values, JSONTypes.STRING);
       }
 
     static String getBase64 (byte[] value) throws IOException
@@ -136,11 +147,6 @@ public class JSONObjectWriter
         Base64 base64_encoder = new Base64 ();
         base64_encoder.setLineBreakOn (false);
         return base64_encoder.getBase64StringFromBinary (value);
-      }
-
-    public void setBinary (String name, byte[] value) throws IOException 
-      {
-        setString (name, getBase64 (value));
       }
 
     public void setEnvelopedSignature (JSONSigner signer) throws IOException

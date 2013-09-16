@@ -36,9 +36,13 @@ class JSONObject
 
     void addProperty (String name, JSONValue value) throws IOException
       {
+        if (name.length () == 0)
+          {
+            throw new IOException ("Empty property names not allowed");
+          }
         if (properties.put (name, value) != null)
           {
-            throw new IOException ("Duplicate: " + name);
+            throw new IOException ("Duplicate property: " + name);
           }
       }
   }
