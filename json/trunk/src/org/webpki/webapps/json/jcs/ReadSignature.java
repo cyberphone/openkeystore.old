@@ -17,13 +17,20 @@
 package org.webpki.webapps.json.jcs;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.PublicKey;
 
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
+
+import java.security.spec.ECPoint;
+
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyStoreVerifier;
+import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -70,7 +77,27 @@ public class ReadSignature extends JSONDecoder
                                         DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getECDSAStore ();
                                 PublicKey public_key = ks.getCertificate ("mykey").getPublicKey ();
                                 signature.verify (new JSONAsymKeyVerifier (public_key));
-                                debugOutput ("Asymmetric key signature validated for:\n" + public_key.toString ());
+                                KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
+                                StringBuffer asym_text = new StringBuffer ("Asymmetric key signature validated for:\n")
+                                         .append (key_alg.isECKey () ? "EC" : "RSA")
+                                         .append (" Public Key (").append (key_alg.getPublicKeySizeInBits ())
+                                         .append (" bits)\n");
+                                if (key_alg.isECKey ())
+                                  {
+                                    ECPoint ec_point = ((ECPublicKey)public_key).getW ();
+                                    asym_text.append ("X: ")
+                                             .append (cryptoBinary (ec_point.getAffineX ()))
+                                             .append ("\nY: ")
+                                             .append (cryptoBinary (ec_point.getAffineY ()));
+                                  }
+                                else
+                                  {
+                                   asym_text.append ("Modulus: ")
+                                             .append (cryptoBinary (((RSAPublicKey)public_key).getModulus ()))
+                                             .append ("\nExponent: ")
+                                             .append (cryptoBinary (((RSAPublicKey)public_key).getPublicExponent ()));
+                                  }
+                                debugOutput (asym_text.toString ());
                               }
                             catch (GeneralSecurityException e)
                               {
@@ -104,6 +131,30 @@ public class ReadSignature extends JSONDecoder
                   rd.scanAway (property);
               }
           }
+      }
+
+    private String cryptoBinary (BigInteger value)
+      {
+        byte[] crypto_binary = value.toByteArray ();
+        if (crypto_binary[0] == 0x00)
+          {
+            byte[] wo_zero = new byte[crypto_binary.length - 1];
+            System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
+            crypto_binary = wo_zero;
+          }
+        String pre = "";
+        StringBuffer result = new StringBuffer ();
+        int i = 0;
+        for (char c : DebugFormatter.getHexString (crypto_binary).toCharArray ())
+          {
+            if (++i % 80 == 0)
+              {
+                result.append ('\n');
+                pre = "\n";
+              }
+            result.append (c);
+          }
+        return pre + result.toString ();
       }
 
     void recurseArray (JSONArrayReader array) throws IOException

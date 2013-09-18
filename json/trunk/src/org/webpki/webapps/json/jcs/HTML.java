@@ -127,7 +127,7 @@ public class HTML
         return s.toString ();
       }
     
-    private static void output (HttpServletResponse response, String html) throws IOException, ServletException
+    static void output (HttpServletResponse response, String html) throws IOException, ServletException
       {
         response.setContentType ("text/html; charset=utf-8");
         response.setHeader ("Pragma", "No-Cache");
@@ -172,7 +172,7 @@ public class HTML
                 "<table><form method=\"POST\" action=\"" + request.getRequestURL ().toString () + "\">"  +
                    "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Testing JSON Signatures<br>&nbsp;</td></tr>" +
                    "<tr><td align=\"left\">Paste a JSON signature in the text box or try with the default:</td></tr>" +
-                   "<tr><td align=\"left\"><textarea rows=\"20\" cols=\"100\" maxlength=\"3000\" name=\"" + RequestServlet.JCS_ARGUMENT + "\">" + encode (signature) + "</textarea></td></tr>" +
+                   "<tr><td align=\"left\"><textarea style=\"padding:10px;background:#FFFFD0\" rows=\"20\" cols=\"100\" maxlength=\"3000\" name=\"" + RequestServlet.JCS_ARGUMENT + "\">" + encode (signature) + "</textarea></td></tr>" +
                    "<tr><td align=\"center\">&nbsp;<br><input type=\"submit\" value=\"Verify JSON Signature!\" name=\"sumbit\"></td></tr>" +
                  "</form></table></td></td>"));
       }

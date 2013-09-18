@@ -14,6 +14,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>IFRAMEServlet</servlet-name>
+        <servlet-class>org.webpki.webapps.json.jcs.IFRAMEServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>HomeServlet</servlet-name>
         <servlet-class>org.webpki.webapps.json.jcs.HomeServlet</servlet-class>
     </servlet>
@@ -31,6 +36,11 @@
     <servlet-mapping>
         <servlet-name>RequestServlet</servlet-name>
         <url-pattern>/request</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>IFRAMEServlet</servlet-name>
+        <url-pattern>/iframe</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

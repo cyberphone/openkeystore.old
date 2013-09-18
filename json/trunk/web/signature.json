@@ -1,40 +1,40 @@
-  {
-    "@context": "http://example.com/signature",
-    "Now": "2013-09-14T09:14:31+02:00",
-    "PaymentRequest": 
-      {
-        "Currency": "USD",
-        "VAT": 1.45,
-        "Specification": 
-          [{
-             "Units": 3,
-             "Description": "USB cable",
-             "SKU": "TR-46565666",
-             "UnitPrice": 4.50
-           },
-           {
-             "Units": 1,
-             "Description": "4G Router",
-             "SKU": "JK-56566655",
-             "UnitPrice": 39.99
-           }]
-      },
-    "EscapeMe": "\u000F\u000aA\u0042\\\"\/",
-    "Signature": 
-      {
-        "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
-        "KeyInfo": 
-          {
-            "PublicKey": 
-              {
-                "EC": 
-                  {
-                    "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.p256",
-                    "X": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=",
-                    "Y": "LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA="
-                  }
-              }
-          },
-        "SignatureValue": "MEQCIHPE2mqjsMNji+Tt/e37fuXG7FNFOO5F7FCpJ4RD7fqBAiBcjqIns6fxC7Q3lNQ49TIVUOguYBdIbfnbK+svtCLptg=="
-      }
-  }
+{
+  "@context": "http://example.com/signature",
+  "Now": "2013-09-18T22:56:08+02:00",
+  "PaymentRequest": 
+    {
+      "Currency": "USD",
+      "VAT": 1.45,
+      "Specification": 
+        [{
+           "Units": 3,
+           "Description": "USB cable",
+           "SKU": "TR-46565666",
+           "UnitPrice": 4.50
+         },
+         {
+           "Units": 1,
+           "Description": "4G Router",
+           "SKU": "JK-56566655",
+           "UnitPrice": 39.99
+         }]
+    },
+  "EscapeMe": "\u000f\nAB\\\"/",
+  "Signature": 
+    {
+      "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
+      "KeyInfo": 
+        {
+          "PublicKey": 
+            {
+              "EC": 
+                {
+                  "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.p256",
+                  "X": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=",
+                  "Y": "LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA="
+                }
+            }
+        },
+      "SignatureValue": "MEUCIQCgZtSFUVAEmFAfjyzjyba363QkpMRHlMhIAw8y+4BeqwIgV9w1taW+vS/Ikglnz6hn+Lyyf6YGSw5FhqW1N34wrkI="
+    }
+}
