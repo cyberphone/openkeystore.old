@@ -543,8 +543,8 @@ public class JSONObjectWriter
     byte[] serializeJSONStructure (JSONOutputFormats output_format) throws IOException
       {
         buffer = new StringBuffer ();
-        indent = 0;
         indent_factor = output_format == JSONOutputFormats.PRETTY_HTML ? html_indent : STANDARD_INDENT;
+        indent = -indent_factor;
         pretty = output_format != JSONOutputFormats.CANONICALIZED;
         java_script_eol = output_format == JSONOutputFormats.PRETTY_JAVASCRIPT;
         html_mode = output_format == JSONOutputFormats.PRETTY_HTML;
