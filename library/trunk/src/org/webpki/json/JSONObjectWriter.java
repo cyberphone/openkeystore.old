@@ -41,15 +41,28 @@ public class JSONObjectWriter
   {
     static String canonicalization_debug_file;
 
+    static final int STANDARD_INDENT = 2;
+
     JSONObject root;
 
     StringBuffer buffer;
     
     int indent;
     
-    boolean pretty = true;
+    boolean pretty;
 
     boolean java_script_eol;
+
+    boolean html_mode;
+    
+    int indent_factor;
+    
+    static String html_variable_color = "#008000";
+    static String html_string_color   = "#0000C0";
+    static String html_property_color = "#C00000";
+    static String html_keyword_color  = "#606060";
+    static int html_indent = 4;
+    
     
     JSONObjectWriter (String context) throws IOException
       {
@@ -175,18 +188,22 @@ public class JSONObjectWriter
               {
                 buffer.append ('\\');
               }
+            if (html_mode)
+              {
+                buffer.append ("<br>");
+              }
             buffer.append ('\n');
           }
       }
 
     void indentLine ()
       {
-        indent += 2;
+        indent += indent_factor;
       }
 
     void undentLine ()
       {
-        indent -= 2;
+        indent -= indent_factor;
       }
 
     void endObject ()
@@ -225,7 +242,7 @@ public class JSONObjectWriter
                   break;
 
                 default:
-                  printSimpleValue (json_value);
+                  printSimpleValue (json_value, false);
               }
           }
         endObject ();
@@ -321,7 +338,7 @@ public class JSONObjectWriter
               {
                 spaceOut ();
               }
-            printSimpleValue (value);
+            printSimpleValue (value, false);
             next = true;
           }
         if (broken_lines)
@@ -352,17 +369,66 @@ public class JSONObjectWriter
         indent--;
       }
 
-    void printSimpleValue (JSONValue value)
+    void printSimpleValue (JSONValue value, boolean property)
       {
         String string = (String) value.value;
         if (value.type != JSONTypes.STRING)
           {
+            if (html_mode)
+              {
+                buffer.append ("<font color=\"")
+                      .append (html_variable_color)
+                      .append ("\">");
+              }
             buffer.append (string);
+            if (html_mode)
+              {
+                buffer.append ("</font>");
+              }
             return;
           }
-        buffer.append ('"');
+        if (html_mode)
+          {
+            buffer.append ("&quot;<font color=\"")
+                  .append (property ? string.startsWith ("@") ? html_keyword_color : html_property_color : html_string_color)
+                  .append ("\">");
+          }
+        else
+          {
+            buffer.append ('"');
+          }
         for (char c : string.toCharArray ())
           {
+            if (html_mode)
+              {
+                switch (c)
+                  {
+/* 
+      HTML needs specific escapes as well...
+*/
+                    case '<':
+                      buffer.append ("&lt;");
+                      continue;
+    
+                    case '>':
+                      buffer.append ("&gt;");
+                      continue;
+    
+                    case '&':
+                      buffer.append ("&amp;");
+                      continue;
+
+                    case '"':
+                      buffer.append ("\\&quot;");
+                      continue;
+                  }
+              }
+
+/* 
+      Since JSON supplied as a part of web-page may need additional escaping
+      while JSON data as a part of a protocol needs only needs to be parsable,
+      Protocol JSON only requires the following two escape sequences.
+*/
             switch (c)
               {
 /* 
@@ -414,7 +480,14 @@ public class JSONObjectWriter
                   buffer.append (c);
               }
           }
-        buffer.append ('"');
+        if (html_mode)
+          {
+            buffer.append ("</font>&quot;");
+          }
+        else
+          {
+            buffer.append ('"');
+          }
       }
 
     void escapeCharacter (char c)
@@ -426,14 +499,21 @@ public class JSONObjectWriter
       {
         if (pretty)
           {
-            buffer.append (' ');
+            if (html_mode)
+              {
+                buffer.append ("&nbsp;");
+              }
+            else
+              {
+                buffer.append (' ');
+              }
           }
       }
 
     void printProperty (String name)
       {
         spaceOut ();
-        printSimpleValue (new JSONValue (JSONTypes.STRING, name));
+        printSimpleValue (new JSONValue (JSONTypes.STRING, name), true);
         buffer.append (':');
         singleSpace ();
       }
@@ -464,8 +544,10 @@ public class JSONObjectWriter
       {
         buffer = new StringBuffer ();
         indent = 0;
+        indent_factor = output_format == JSONOutputFormats.PRETTY_HTML ? html_indent : STANDARD_INDENT;
         pretty = output_format != JSONOutputFormats.CANONICALIZED;
-        java_script_eol = output_format == JSONOutputFormats.JAVA_SCRIPT;
+        java_script_eol = output_format == JSONOutputFormats.PRETTY_JAVASCRIPT;
+        html_mode = output_format == JSONOutputFormats.PRETTY_HTML;
         printObject (root, false);
         if (output_format == JSONOutputFormats.PRETTY_PRINT)
           {
@@ -485,21 +567,29 @@ public class JSONObjectWriter
         canonicalization_debug_file = file;
       }
 
-    public static byte[] parseAndPrettyPrint (byte[] json_utf8) throws IOException
+    public static byte[] parseAndFormat (byte[] json_utf8, JSONOutputFormats output_format) throws IOException
       {
-        return new JSONObjectWriter (new JSONParser ().parse (json_utf8)).serializeJSONStructure (JSONOutputFormats.PRETTY_PRINT);
+        return new JSONObjectWriter (new JSONParser ().parse (json_utf8)).serializeJSONStructure (output_format);
       }
 
     public static void main (String[] argc)
       {
-        if (argc.length != 1)
+        if (argc.length != 2)
           {
-            System.out.println ("\nJSON-input-document");
+            System.out.println ("\nJSON-input-document format(" + JSONOutputFormats.getOptions () + ")");
             System.exit (0);
           }
         try
           {
-            System.out.print (new String (parseAndPrettyPrint (ArrayUtil.readFile (argc[0])), "UTF-8"));
+            JSONOutputFormats format = JSONOutputFormats.getFormatFromString (argc[1]);
+            String pre = "";
+            String post = "";
+            if (format == JSONOutputFormats.PRETTY_HTML)
+              {
+                pre = "<html><body>";
+                post = "</body></html>";
+              }
+            System.out.print (pre + new String (parseAndFormat (ArrayUtil.readFile (argc[0]), format), "UTF-8") + post);
           }
         catch (Exception e)
           {

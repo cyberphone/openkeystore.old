@@ -16,8 +16,39 @@
  */
 package org.webpki.json;
 
+import java.io.IOException;
+
 /**
  * JSON output types.
  * It is used by {@link JSONObjectWriter}.
  */
-public enum JSONOutputFormats {CANONICALIZED, JAVA_SCRIPT, PRETTY_PRINT};
+public enum JSONOutputFormats 
+  {
+    CANONICALIZED, PRETTY_JAVASCRIPT, PRETTY_PRINT, PRETTY_HTML;
+    
+    public static String getOptions ()
+      {
+        StringBuffer options = new StringBuffer ();
+        for (JSONOutputFormats format : JSONOutputFormats.values ())
+          {
+            if (options.length () > 0)
+              {
+                options.append ('|');
+              }
+            options.append (format.toString ());
+          }
+        return options.toString ();
+      }
+
+    public static JSONOutputFormats getFormatFromString (String string) throws IOException
+      {
+        for (JSONOutputFormats format : JSONOutputFormats.values ())
+          {
+            if (string.equals (format.toString ()))
+              {
+                return format;
+              }
+          }
+        throw new IOException ("No such format: " + string);
+      }
+  }

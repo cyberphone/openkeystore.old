@@ -158,7 +158,7 @@ public class Base64URL
     
     /** [Decoding] Converts a base64url encoded String to a binary byte array.
      * For every 4 base64 bytes you'll get 3 binary bytes.
-     * @param base64 encoded data
+     * @param base64url encoded data
      * @return decoded data as a byte array
      * @exception IOException if the input data isn't valid base64 data
      * or if the input String contains characters
@@ -166,7 +166,7 @@ public class Base64URL
      */
     public static byte[] getBinaryFromBase64URL (String base64url) throws IOException
       {
-        return decode(Base64.stringToByteArray (base64url));
+        return decode (Base64.stringToByteArray (base64url));
       }
     
       ////////////////////

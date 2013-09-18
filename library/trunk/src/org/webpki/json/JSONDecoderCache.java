@@ -31,12 +31,13 @@ import org.webpki.util.ArrayUtil;
  * &nbsp;<br><code>
  * &nbsp;&nbsp;{<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;@context&quot;:&nbsp;&quot;</code><i>Message Context</i><code>&quot;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;@qualifier&quot;:&nbsp;&quot;</code><i>Optional Message Type Qualifier</i><code>&quot;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;@qualifier&quot;:&nbsp;&quot;</code><i>Message Type Qualifier</i><code>&quot;<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;</code><i>Arbitrary JSON Payload</i><code><br>
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>
  * &nbsp;&nbsp;}</code><p>
- * Another restriction imposed by this particular JSON model is that all properties <b>must</b> be read.
+ * Note: <code>@qualifier</code> is only required if multiple objects share the same <code>@context</code>.<p>
+ * A restriction imposed by this particular JSON processing model is that all properties must by default be read.
  * 
  */
 public class JSONDecoderCache
@@ -162,7 +163,7 @@ public class JSONDecoderCache
       {
         if (argc.length != 4)
           {
-            System.out.println ("\nclass-name instance-document test-unread format(" + JSONOutputFormats.CANONICALIZED + "|" + JSONOutputFormats.JAVA_SCRIPT + "|" +  JSONOutputFormats.PRETTY_PRINT + ")");
+            System.out.println ("\nclass-name instance-document test-unread format(" + JSONOutputFormats.CANONICALIZED + "|" + JSONOutputFormats.PRETTY_JAVASCRIPT + "|" +  JSONOutputFormats.PRETTY_PRINT + ")");
             System.exit (0);
           }
         try
