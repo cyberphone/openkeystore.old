@@ -68,10 +68,10 @@ public class JSONSignatureDecoder extends JSONSignature
         algorithm_string = signature.getString (ALGORITHM_JSON);
         getKeyInfo (signature.getObject (KEY_INFO_JSON));
         signature_value = signature.getBinary (SIGNATURE_VALUE_JSON);
-        JSONValue save = signature.current.properties.get (SIGNATURE_VALUE_JSON);
-        signature.current.properties.remove (SIGNATURE_VALUE_JSON);
-        canonicalized_data = JSONObjectWriter.getCanonicalizedSubset (rd.current);
-        signature.current.properties.put (SIGNATURE_VALUE_JSON, save);
+        JSONValue save = signature.json.properties.get (SIGNATURE_VALUE_JSON);
+        signature.json.properties.remove (SIGNATURE_VALUE_JSON);
+        canonicalized_data = JSONObjectWriter.getCanonicalizedSubset (rd.json);
+        signature.json.properties.put (SIGNATURE_VALUE_JSON, save);
         switch (getSignatureType ())
           {
             case X509_CERTIFICATE:

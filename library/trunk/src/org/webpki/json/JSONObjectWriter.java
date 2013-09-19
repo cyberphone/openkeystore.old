@@ -33,7 +33,7 @@ import org.webpki.util.ISODateTime;
  * <p>
  * It also performs canonicalization when reading and writing enveloped signatures.
  * <p>
- * The current version is only intended to support the XSD-like document features
+ * The current version is primarily intended to support the XSD-like document features
  * supported by the reading system {@link JSONDecoderCache} and {@link JSONDecoder}. 
  * 
  */
@@ -64,6 +64,11 @@ public class JSONObjectWriter
     static int html_indent = 4;
     
     
+    public JSONObjectWriter (JSONReaderHelper reader)
+      {
+        this (reader.json);
+      }
+
     JSONObjectWriter (String context) throws IOException
       {
         this (new JSONObject ());
@@ -74,7 +79,7 @@ public class JSONObjectWriter
       {
         this.root = root;
       }
-
+    
     JSONObjectWriter addProperty (String name, JSONValue value) throws IOException
       {
         root.addProperty (name, value);
@@ -569,7 +574,7 @@ public class JSONObjectWriter
 
     public static byte[] parseAndFormat (byte[] json_utf8, JSONOutputFormats output_format) throws IOException
       {
-        return new JSONObjectWriter (new JSONParser ().parse (json_utf8)).serializeJSONStructure (output_format);
+        return new JSONObjectWriter (JSONParser.parse (json_utf8)).serializeJSONStructure (output_format);
       }
 
     public static void main (String[] argc)

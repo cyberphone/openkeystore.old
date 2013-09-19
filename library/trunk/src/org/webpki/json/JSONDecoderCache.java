@@ -60,10 +60,7 @@ public class JSONDecoderCache
     
     public JSONDecoder parse (byte[] json_utf8) throws IOException
       {
-        JSONParser parser = new JSONParser ();
-        JSONObject root = parser.parse (json_utf8);
-        JSONReaderHelper reader = new JSONReaderHelper (root);
-        reader.root = root;
+        JSONReaderHelper reader = JSONParser.parse (json_utf8);
         String object_type_identifier = reader.getString (CONTEXT_JSON);
         if (reader.hasProperty (QUALIFIER_JSON))
           {
@@ -77,11 +74,11 @@ public class JSONDecoderCache
         try
           {
             JSONDecoder decoder = decoder_class.newInstance ();
-            decoder.root = root;
+            decoder.root = reader.json;
             decoder.unmarshallJSONData (reader);
             if (test_unread)
               {
-                checkForUnread (root);
+                checkForUnread (reader.json);
               }
             return decoder;
           }

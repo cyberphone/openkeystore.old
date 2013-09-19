@@ -32,25 +32,16 @@ import org.webpki.util.ISODateTime;
  */
 public class JSONReaderHelper
   {
-    JSONObject root;
+    JSONObject json;
 
-    JSONObject current;
-
-    JSONReaderHelper (JSONObject current)
+    JSONReaderHelper (JSONObject json)
       {
-        this.current = current;
-      }
-
-    JSONReaderHelper createJSONReaderHelper (JSONObject current)
-      {
-        JSONReaderHelper new_rd = new JSONReaderHelper (current);
-        new_rd.root = root;
-        return new_rd;
+        this.json = json;
       }
 
     JSONValue getProperty (String name, JSONTypes expected) throws IOException
       {
-        JSONValue value = current.properties.get (name);
+        JSONValue value = json.properties.get (name);
         if (value == null)
           {
             throw new IOException ("Property \"" + name + "\" is missing");
@@ -59,7 +50,7 @@ public class JSONReaderHelper
           {
             throw new IOException ("Type mismatch for \"" + name + "\": Read=" + value.type.toString () + ", Expected=" + expected.toString ());
           }
-        current.read_flag.add (name);
+        json.read_flag.add (name);
         return value;
       }
 
@@ -107,7 +98,7 @@ public class JSONReaderHelper
     public JSONReaderHelper getObject (String name) throws IOException
       {
         JSONValue value = getProperty (name, JSONTypes.OBJECT);
-        return createJSONReaderHelper ((JSONObject) value.value);
+        return new JSONReaderHelper ((JSONObject) value.value);
       }
 
     @SuppressWarnings("unchecked")
@@ -210,23 +201,23 @@ public class JSONReaderHelper
 
     public String[] getProperties ()
       {
-        return current.properties.keySet ().toArray (new String[0]);
+        return json.properties.keySet ().toArray (new String[0]);
       }
 
     public boolean hasProperty (String name)
       {
-        return current.properties.get (name) != null;
+        return json.properties.get (name) != null;
       }
 
     public JSONTypes getPropertyType (String name) throws IOException
       {
-        JSONValue value = current.properties.get (name);
+        JSONValue value = json.properties.get (name);
         return value == null ? null : value.type;
       }
 
     public JSONTypes getArrayType (String name) throws IOException
       {
-        JSONValue value = current.properties.get (name);
+        JSONValue value = json.properties.get (name);
         if (value == null)
           {
             throw new IOException ("Property \"" + name + "\" does not exist in this object");

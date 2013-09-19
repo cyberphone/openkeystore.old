@@ -24,11 +24,9 @@ import java.util.regex.Pattern;
 
 /**
  * Parses a JSON object into a DOM-like tree.
- * Only used internally.  The real stuff is supposed to use the
- * {@link JSONDocumentCache} and {@link JSONDocument} classes.
  * 
  */
-class JSONParser
+public class JSONParser
   {
     static final char LEFT_CURLY_BRACKET  = '{';
     static final char RIGHT_CURLY_BRACKET = '}';
@@ -48,11 +46,12 @@ class JSONParser
     int max_length;
     
     String json_data;
-
-    JSONObject parse (byte[] json_utf8) throws IOException
+    
+    JSONParser () {}
+    
+    JSONReaderHelper internal_parse (String json_string) throws IOException
       {
-        json_data = new String (json_utf8, "UTF-8");
-        index = 0;
+        json_data = json_string;
         max_length = json_data.length ();
         scanFor (LEFT_CURLY_BRACKET);
         JSONObject root = new JSONObject ();
@@ -64,7 +63,17 @@ class JSONParser
                 throw new IOException ("Improperly terminated JSON object");
               }
           }
-        return root;
+        return new JSONReaderHelper (root);
+      }
+
+    public static JSONReaderHelper parse (String json_string) throws IOException
+      {
+        return new JSONParser ().internal_parse (json_string);
+      }
+
+    public static JSONReaderHelper parse (byte[] json_utf8) throws IOException
+      {
+        return parse (new String (json_utf8, "UTF-8"));
       }
 
     String scanProperty () throws IOException
