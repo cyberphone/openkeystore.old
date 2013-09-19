@@ -41,8 +41,6 @@ import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONOutputFormats;
-import org.webpki.json.JSONSignatureEncoder;
-import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Signer;
@@ -52,11 +50,10 @@ import org.webpki.util.ArrayUtil;
 /**
  * Simple signature test generator
  */
-public class Sign extends JSONEncoder
+public class Sign
   {
     static enum ACTION {SYM, ASYM, X509};
     
-    static final String CONTEXT = "http://example.com/signature";
     static final String ID = "ID";
     
     static class SymmetricOperations implements SymKeySignerInterface, SymKeyVerifierInterface
@@ -149,9 +146,7 @@ public class Sign extends JSONEncoder
     
     boolean multiple;
 
-    JSONSignatureEncoder signature;
-    
-    void createX509Signature (JSONObjectWriter wr) throws IOException
+    static void createX509Signature (JSONObjectWriter wr) throws IOException
       {
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setExtendedCertPath (true);
@@ -159,7 +154,7 @@ public class Sign extends JSONEncoder
         wr.setEnvelopedSignature (new JSONX509Signer (signer));
       }
     
-    void createAsymmetricKeySignature (JSONObjectWriter wr) throws IOException
+    static void createAsymmetricKeySignature (JSONObjectWriter wr) throws IOException
       {
         try
           {
@@ -173,13 +168,12 @@ public class Sign extends JSONEncoder
           }
       }
     
-    void createSymmetricKeySignature (JSONObjectWriter wr) throws IOException
+    static void createSymmetricKeySignature (JSONObjectWriter wr) throws IOException
       {
         wr.setEnvelopedSignature (new JSONSymKeySigner (new SymmetricOperations ()));
       }
     
     
-    @Override
     public void writeJSONData (JSONObjectWriter wr) throws IOException
       {
         wr.setDateTime ("Now", new Date ());
@@ -276,7 +270,9 @@ public class Sign extends JSONEncoder
                 try
                   {
                     installOptionalBCProvider ();
-                    ArrayUtil.writeFile (argc[2], new Sign (action, new Boolean (argc[1])).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT));
+                    JSONObjectWriter wr = new JSONObjectWriter ();
+                    new Sign (action, new Boolean (argc[1])).writeJSONData (wr);
+                    ArrayUtil.writeFile (argc[2], wr.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT));
                   }
                 catch (Exception e)
                   {
@@ -286,11 +282,5 @@ public class Sign extends JSONEncoder
               }
           }
         show ();
-      }
-
-    @Override
-    protected String getContext ()
-      {
-        return CONTEXT;
       }
   }

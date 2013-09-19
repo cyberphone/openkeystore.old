@@ -64,9 +64,20 @@ public class JSONObjectWriter
     static int html_indent = 4;
     
     
+    /**
+     * To be used for updating read JSON objects.
+     */
     public JSONObjectWriter (JSONReaderHelper reader)
       {
         this (reader.json);
+      }
+
+    /**
+     * Creates a fresh JSON object and associated writer.
+     */
+    public JSONObjectWriter ()
+      {
+        this (new JSONObject ());
       }
 
     JSONObjectWriter (String context) throws IOException
@@ -123,9 +134,16 @@ public class JSONObjectWriter
 
     public JSONObjectWriter setObject (String name) throws IOException
       {
-        JSONObject holder = new JSONObject ();
-        addProperty (name, new JSONValue (JSONTypes.OBJECT, holder));
-        return new JSONObjectWriter (holder);
+        JSONObject sub_object = new JSONObject ();
+        addProperty (name, new JSONValue (JSONTypes.OBJECT, sub_object));
+        return new JSONObjectWriter (sub_object);
+      }
+
+    public JSONObjectWriter createContainerObject (String name) throws IOException
+      {
+        JSONObjectWriter container = new JSONObjectWriter (new JSONObject ());
+        container.addProperty (name, new JSONValue (JSONTypes.OBJECT, this.root));
+        return container;
       }
 
     public JSONArrayWriter setArray (String name) throws IOException
@@ -534,7 +552,7 @@ public class JSONObjectWriter
     static byte[] getCanonicalizedSubset (JSONObject signature_object_in) throws IOException
       {
         JSONObjectWriter writer = new JSONObjectWriter (signature_object_in);
-        byte[] result = writer.serializeJSONStructure (JSONOutputFormats.CANONICALIZED);
+        byte[] result = writer.serializeJSONObject (JSONOutputFormats.CANONICALIZED);
         if (canonicalization_debug_file != null)
           {
             byte[] other = ArrayUtil.readFile (canonicalization_debug_file);
@@ -545,7 +563,7 @@ public class JSONObjectWriter
         return result;
       }
 
-    byte[] serializeJSONStructure (JSONOutputFormats output_format) throws IOException
+    public byte[] serializeJSONObject (JSONOutputFormats output_format) throws IOException
       {
         buffer = new StringBuffer ();
         indent_factor = output_format == JSONOutputFormats.PRETTY_HTML ? html_indent : STANDARD_INDENT;
@@ -563,7 +581,7 @@ public class JSONObjectWriter
 
     public static byte[] serializeParsedJSONDocument (JSONDecoder document, JSONOutputFormats output_format) throws IOException
       {
-        return new JSONObjectWriter (document.root).serializeJSONStructure (output_format);
+        return new JSONObjectWriter (document.root).serializeJSONObject (output_format);
       }
   
     public static void setCanonicalizationDebugFile (String file) throws IOException
@@ -574,7 +592,7 @@ public class JSONObjectWriter
 
     public static byte[] parseAndFormat (byte[] json_utf8, JSONOutputFormats output_format) throws IOException
       {
-        return new JSONObjectWriter (JSONParser.parse (json_utf8)).serializeJSONStructure (output_format);
+        return new JSONObjectWriter (JSONParser.parse (json_utf8)).serializeJSONObject (output_format);
       }
 
     public static void main (String[] argc)

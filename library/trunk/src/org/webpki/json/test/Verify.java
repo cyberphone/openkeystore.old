@@ -28,8 +28,7 @@ import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONAsymKeyVerifier;
-import org.webpki.json.JSONDecoder;
-import org.webpki.json.JSONDecoderCache;
+import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONReaderHelper;
 import org.webpki.json.JSONSymKeyVerifier;
@@ -42,7 +41,7 @@ import org.webpki.util.ArrayUtil;
 /**
  * Simple signature verify program
  */
-public class Verify extends JSONDecoder
+public class Verify
   {
     static
       {
@@ -50,12 +49,6 @@ public class Verify extends JSONDecoder
       }
 
     static int count;
-
-    @Override
-    protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
-      {
-        recurseObject (rd);
-      }
 
     void recurseObject (JSONReaderHelper rd) throws IOException
       {
@@ -137,12 +130,6 @@ public class Verify extends JSONDecoder
           }
       }
 
-    @Override
-    protected String getContext ()
-      {
-        return Sign.CONTEXT;
-      }
-
     public static void main (String[] argc)
       {
         if (argc.length != 1 && argc.length != 2)
@@ -164,11 +151,10 @@ public class Verify extends JSONDecoder
                     JSONObjectWriter.setCanonicalizationDebugFile (argc[1]);
                   }
               }
-            JSONDecoderCache parser = new JSONDecoderCache ();
-            parser.addToCache (Verify.class);
             while (count++ < repeat)
               {
-                parser.parse (ArrayUtil.readFile (argc[0]));
+                Verify doc = new Verify ();
+                doc.recurseObject (JSONParser.parse (ArrayUtil.readFile (argc[0])));
               }
           }
         catch (Exception e)

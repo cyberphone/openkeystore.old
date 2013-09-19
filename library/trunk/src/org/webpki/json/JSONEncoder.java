@@ -56,6 +56,6 @@ public abstract class JSONEncoder
       {
         JSONObjectWriter wr = new JSONObjectWriter (getContext ());
         writeJSONData (wr);
-        return wr.serializeJSONStructure (output_format);
+        return wr.serializeJSONObject (output_format);
       }
   }
