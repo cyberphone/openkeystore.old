@@ -1,6 +1,5 @@
 {
-  "@context": "http://example.com/signature",
-  "Now": "2013-09-18T22:56:08+02:00",
+  "Now": "2013-09-19T10:51:24+02:00",
   "PaymentRequest": 
     {
       "Currency": "USD",
@@ -19,7 +18,7 @@
            "UnitPrice": 39.99
          }]
     },
-  "EscapeMe": "\u000f\nAB\\\"/",
+  "EscapeMe": "\u000F\u000aA\u0042\\\"\/",
   "Signature": 
     {
       "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
@@ -35,6 +34,6 @@
                 }
             }
         },
-      "SignatureValue": "MEUCIQCgZtSFUVAEmFAfjyzjyba363QkpMRHlMhIAw8y+4BeqwIgV9w1taW+vS/Ikglnz6hn+Lyyf6YGSw5FhqW1N34wrkI="
+      "SignatureValue": "MEYCIQClBw5Sl/ULIzk+0zxHNfDzOsBojIqGJc4txv3ukdHtuwIhAJ0vS1sH1pMDl8ebi/Ga5GBN7jzoiVr/3JLLkBWGkbw8"
     }
 }

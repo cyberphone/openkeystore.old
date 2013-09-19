@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.webpki.json.JSONDecoderCache;
+import org.webpki.json.JSONParser;
 
 import org.webpki.util.Base64URL;
 
@@ -20,42 +20,20 @@ public class RequestServlet extends HttpServlet
     
     static final String JCS_ARGUMENT = "JCS";
     
-    JSONDecoderCache json_cache;
-    
     static void error (HttpServletResponse response, String error_message) throws IOException, ServletException
       {
         HTML.errorPage (response, error_message);
       }
     
-    @Override
-    public
-    void init ()
-      {
-        try
-          {
-            super.init ();
-            json_cache = new JSONDecoderCache ();
-            json_cache.addToCache (ReadSignature.class);
-          }
-        catch (ServletException e)
-          {
-            throw new RuntimeException (e);
-          }
-        catch (IOException e)
-          {
-            throw new RuntimeException (e);
-          }
-      }
-
     void verifySignature (HttpServletRequest request, HttpServletResponse response, byte[] signed_json) throws IOException, ServletException
       {
-        ReadSignature doc = (ReadSignature) json_cache.parse (signed_json);
+        ReadSignature doc = new ReadSignature ();
+        doc.recurseObject (JSONParser.parse (signed_json));
         request.getSession ().setAttribute (JCS_ARGUMENT, signed_json);
         HTML.printResultPage (response,
             "<table>"  +
             "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">Verification Result<br>&nbsp;</td></tr>" +
             "<tr><td align=\"left\">" + HTML.newLines2HTML (doc.getResult ()) + "</td></tr>" +
- //           "<tr><td align=\"left\">Received Message:<br>" + new String (JSONObjectWriter.parseAndPrint (signed_json, JSONOutputFormats.PRETTY_HTML), "UTF-8") + "</td></tr>" +
             "<tr><td align=\"left\">Received Message:</td></tr>" +
             "<tr><td align=\"left\"><iframe src=\"" + ServletUtil.getContextURL (request) + "/iframe\" width=\"800\" height=\"500\">NO FRAMES?</iframe></td></tr>" +
             "</table></td></td>");

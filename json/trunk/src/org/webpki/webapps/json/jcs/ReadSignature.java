@@ -36,7 +36,6 @@ import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONAsymKeyVerifier;
-import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONReaderHelper;
 import org.webpki.json.JSONSymKeyVerifier;
@@ -48,14 +47,33 @@ import org.webpki.util.DebugFormatter;
 /**
  * Simple signature verify program
  */
-public class ReadSignature extends JSONDecoder
+public class ReadSignature
   {
     private StringBuffer result = new StringBuffer ();
 
-    @Override
-    protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
+
+    private String cryptoBinary (BigInteger value)
       {
-        recurseObject (rd);
+        byte[] crypto_binary = value.toByteArray ();
+        if (crypto_binary[0] == 0x00)
+          {
+            byte[] wo_zero = new byte[crypto_binary.length - 1];
+            System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
+            crypto_binary = wo_zero;
+          }
+        String pre = "";
+        StringBuffer result = new StringBuffer ();
+        int i = 0;
+        for (char c : DebugFormatter.getHexString (crypto_binary).toCharArray ())
+          {
+            if (++i % 80 == 0)
+              {
+                result.append ('\n');
+                pre = "\n";
+              }
+            result.append (c);
+          }
+        return pre + result.toString ();
       }
 
     void recurseObject (JSONReaderHelper rd) throws IOException
@@ -81,18 +99,19 @@ public class ReadSignature extends JSONDecoder
                                 StringBuffer asym_text = new StringBuffer ("Asymmetric key signature validated for:\n")
                                          .append (key_alg.isECKey () ? "EC" : "RSA")
                                          .append (" Public Key (").append (key_alg.getPublicKeySizeInBits ())
-                                         .append (" bits)\n");
+                                         .append (" bits)");
                                 if (key_alg.isECKey ())
                                   {
+                                    asym_text.append (", Curve=").append (key_alg.getJCEName ());
                                     ECPoint ec_point = ((ECPublicKey)public_key).getW ();
-                                    asym_text.append ("X: ")
+                                    asym_text.append ("\nX: ")
                                              .append (cryptoBinary (ec_point.getAffineX ()))
                                              .append ("\nY: ")
                                              .append (cryptoBinary (ec_point.getAffineY ()));
                                   }
                                 else
                                   {
-                                   asym_text.append ("Modulus: ")
+                                   asym_text.append ("\nModulus: ")
                                              .append (cryptoBinary (((RSAPublicKey)public_key).getModulus ()))
                                              .append ("\nExponent: ")
                                              .append (cryptoBinary (((RSAPublicKey)public_key).getPublicExponent ()));
@@ -133,30 +152,6 @@ public class ReadSignature extends JSONDecoder
           }
       }
 
-    private String cryptoBinary (BigInteger value)
-      {
-        byte[] crypto_binary = value.toByteArray ();
-        if (crypto_binary[0] == 0x00)
-          {
-            byte[] wo_zero = new byte[crypto_binary.length - 1];
-            System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
-            crypto_binary = wo_zero;
-          }
-        String pre = "";
-        StringBuffer result = new StringBuffer ();
-        int i = 0;
-        for (char c : DebugFormatter.getHexString (crypto_binary).toCharArray ())
-          {
-            if (++i % 80 == 0)
-              {
-                result.append ('\n');
-                pre = "\n";
-              }
-            result.append (c);
-          }
-        return pre + result.toString ();
-      }
-
     void recurseArray (JSONArrayReader array) throws IOException
       {
         while (array.hasMore ())
@@ -185,10 +180,4 @@ public class ReadSignature extends JSONDecoder
       {
         return result.length () == 0 ? "No signature(s) found!\n" : result.toString ();
       }
-
-    @Override
-    protected String getContext ()
-      {
-        return MySignature.CONTEXT;
-      }
-   }
+  }

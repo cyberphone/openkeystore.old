@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.util.Base64URL;
 import org.webpki.webutil.ServletUtil;
@@ -38,8 +39,10 @@ public class CreateServlet extends HttpServlet
                 break;
               }
           }
+        JSONObjectWriter wr = new JSONObjectWriter ();
+        new MySignature (action, data_to_be_signed).writeJSONData (wr);
         response.sendRedirect (ServletUtil.getContextURL (request) + 
                                "/request?" + RequestServlet.JCS_ARGUMENT + "=" + 
-                               Base64URL.getBase64URLFromBinary (new MySignature (action, data_to_be_signed).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT)));
+                               Base64URL.getBase64URLFromBinary (wr.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)));
       }
   }

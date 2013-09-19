@@ -36,8 +36,6 @@ import org.webpki.crypto.SymKeyVerifierInterface;
 import org.webpki.crypto.test.DemoKeyStore;
 
 import org.webpki.json.JSONAsymKeySigner;
-import org.webpki.json.JSONSignatureEncoder;
-import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONSymKeySigner;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Signer;
@@ -47,12 +45,9 @@ import org.webpki.util.ArrayUtil;
 /**
  * Simple signature test generator
  */
-public class MySignature extends JSONEncoder
+public class MySignature
   {
     static enum ACTION {SYM, ASYM, RSA, X509};
-    
-    static final String CONTEXT = "http://example.com/signature";
-    static final String ID = "ID";
     
     static final byte[] SYM_KEY = {(byte)0xF4, (byte)0xC7, (byte)0x4F, (byte)0x33, (byte)0x98, (byte)0xC4, (byte)0x9C, (byte)0xF4,
                                    (byte)0x6D, (byte)0x93, (byte)0xEC, (byte)0x98, (byte)0x18, (byte)0x83, (byte)0x26, (byte)0x61,
@@ -121,8 +116,6 @@ public class MySignature extends JSONEncoder
         this.data_to_be_signed = data_to_be_signed; 
       }
     
-    JSONSignatureEncoder signature;
-    
     void createX509Signature (JSONObjectWriter wr) throws IOException
       {
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
@@ -150,8 +143,6 @@ public class MySignature extends JSONEncoder
         wr.setEnvelopedSignature (new JSONSymKeySigner (new SymmetricOperations ()));
       }
     
-    
-    @Override
     public void writeJSONData (JSONObjectWriter wr) throws IOException
       {
         wr.setDateTime ("Now", new Date ());
@@ -172,11 +163,5 @@ public class MySignature extends JSONEncoder
           {
             createSymmetricKeySignature (wr);
           }
-      }
-
-    @Override
-    protected String getContext ()
-      {
-        return CONTEXT;
       }
   }
