@@ -27,6 +27,12 @@ public class JSONX509Verifier extends JSONVerifier
   {
     VerifierInterface verifier;
 
+    /**
+     * Verifier for X509-based keys.
+     * Note that you can also access the received X509 key from {@link JSONSignatureDecoder}.
+     * @param verifier Verifier which presumably would do full PKIX path validation etc.
+     * @throws IOException
+     */
     public JSONX509Verifier (VerifierInterface verifier) throws IOException
       {
         this.verifier = verifier;

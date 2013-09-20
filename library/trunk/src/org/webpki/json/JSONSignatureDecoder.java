@@ -220,12 +220,29 @@ public class JSONSignatureDecoder extends JSONSignature
         return algorithm;
       }
 
+    void checkRequest (JSONSignatureTypes signature_type) throws IOException
+      {
+        if (signature_type != getSignatureType ())
+          {
+            throw new IOException ("Request doesn't match received signature: " + getSignatureType ().toString ());
+          }
+      }
+
+    public X509Certificate[] getCertificatePath () throws IOException
+      {
+        checkRequest (JSONSignatureTypes.X509_CERTIFICATE);
+        return certificate_path;
+      }
+
+    public PublicKey getPublicKey () throws IOException
+      {
+        checkRequest (JSONSignatureTypes.ASYMMETRIC_KEY);
+        return public_key;
+      }
+
     public String getKeyID () throws IOException
       {
-        if (getSignatureType () != JSONSignatureTypes.SYMMETRIC_KEY)
-          {
-            throw new IOException ("\"" + KEY_ID_JSON + "\" does not apply to: " + getSignatureType ().toString ());
-          }
+        checkRequest (JSONSignatureTypes.SYMMETRIC_KEY);
         return key_id;
       }
 

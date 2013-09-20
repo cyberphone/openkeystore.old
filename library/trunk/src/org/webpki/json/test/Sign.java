@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
@@ -52,21 +53,21 @@ import org.webpki.util.ArrayUtil;
  */
 public class Sign
   {
-    static enum ACTION {SYM, ASYM, X509};
+    static enum ACTION {SYM, EC, RSA, X509};
     
     static final String ID = "ID";
     
-    static class SymmetricOperations implements SymKeySignerInterface, SymKeyVerifierInterface
-      {
-        static final byte[] KEY = {(byte)0xF4, (byte)0xC7, (byte)0x4F, (byte)0x33, (byte)0x98, (byte)0xC4, (byte)0x9C, (byte)0xF4,
-                                   (byte)0x6D, (byte)0x93, (byte)0xEC, (byte)0x98, (byte)0x18, (byte)0x83, (byte)0x26, (byte)0x61,
-                                   (byte)0xA4, (byte)0x0B, (byte)0xAE, (byte)0x4D, (byte)0x20, (byte)0x4D, (byte)0x75, (byte)0x50,
-                                   (byte)0x36, (byte)0x14, (byte)0x10, (byte)0x20, (byte)0x74, (byte)0x34, (byte)0x69, (byte)0x09};
+    public static final byte[] SYMMETRIC_KEY = {(byte)0xF4, (byte)0xC7, (byte)0x4F, (byte)0x33, (byte)0x98, (byte)0xC4, (byte)0x9C, (byte)0xF4,
+                                                (byte)0x6D, (byte)0x93, (byte)0xEC, (byte)0x98, (byte)0x18, (byte)0x83, (byte)0x26, (byte)0x61,
+                                                (byte)0xA4, (byte)0x0B, (byte)0xAE, (byte)0x4D, (byte)0x20, (byte)0x4D, (byte)0x75, (byte)0x50,
+                                                (byte)0x36, (byte)0x14, (byte)0x10, (byte)0x20, (byte)0x74, (byte)0x34, (byte)0x69, (byte)0x09};
 
+    public static class SymmetricOperations implements SymKeySignerInterface, SymKeyVerifierInterface
+      {
         @Override
         public byte[] signData (byte[] data) throws IOException
           {
-            return getMACAlgorithm ().digest (KEY, data);
+            return getMACAlgorithm ().digest (SYMMETRIC_KEY, data);
           }
   
         @Override
@@ -78,7 +79,7 @@ public class Sign
         @Override
         public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException
           {
-            return ArrayUtil.compare (digest, getMACAlgorithm ().digest (KEY, data));
+            return ArrayUtil.compare (digest, getMACAlgorithm ().digest (SYMMETRIC_KEY, data));
           }
       }
     
@@ -146,7 +147,7 @@ public class Sign
     
     boolean multiple;
 
-    static void createX509Signature (JSONObjectWriter wr) throws IOException
+    public static void createX509Signature (JSONObjectWriter wr) throws IOException
       {
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setExtendedCertPath (true);
@@ -154,12 +155,13 @@ public class Sign
         wr.setEnvelopedSignature (new JSONX509Signer (signer));
       }
     
-    static void createAsymmetricKeySignature (JSONObjectWriter wr) throws IOException
+    public static void createAsymmetricKeySignature (JSONObjectWriter wr, boolean rsa) throws IOException
       {
         try
           {
-            PrivateKey private_key = (PrivateKey)DemoKeyStore.getECDSAStore ().getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
-            PublicKey public_key = DemoKeyStore.getECDSAStore ().getCertificate ("mykey").getPublicKey ();
+            KeyStore ks = rsa ? DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getECDSAStore ();
+            PrivateKey private_key = (PrivateKey)ks.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
+            PublicKey public_key = ks.getCertificate ("mykey").getPublicKey ();
             wr.setEnvelopedSignature (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
           }
         catch (GeneralSecurityException e)
@@ -168,7 +170,7 @@ public class Sign
           }
       }
     
-    static void createSymmetricKeySignature (JSONObjectWriter wr) throws IOException
+    public static void createSymmetricKeySignature (JSONObjectWriter wr) throws IOException
       {
         wr.setEnvelopedSignature (new JSONSymKeySigner (new SymmetricOperations ()));
       }
@@ -194,19 +196,19 @@ public class Sign
           {
             createX509Signature (wr);
           }
-        else if (action == ACTION.ASYM)
+        else if (action == ACTION.SYM)
           {
-            createAsymmetricKeySignature (wr);
+            createSymmetricKeySignature (wr);
           }
         else
           {
-            createSymmetricKeySignature (wr);
+            createAsymmetricKeySignature (wr, action == ACTION.RSA);
           }
       }
     
     static void show ()
       {
-        System.out.println (ACTION.SYM.toString () + "|" + ACTION.ASYM.toString () + "|" + ACTION.X509.toString () + " multiple(true|false) output-file\n");
+        System.out.println (ACTION.SYM.toString () + "|" + ACTION.EC.toString () + "|" + ACTION.RSA.toString () + "|" + ACTION.X509.toString () + " multiple(true|false) output-file\n");
         System.exit (0);
       }
 

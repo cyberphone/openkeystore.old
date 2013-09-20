@@ -34,7 +34,7 @@ public class AddSignature
         Sign.installOptionalBCProvider ();
       }
 
-    static enum ACTION {SYM, ASYM, X509};
+    static enum ACTION {SYM, EC, RSA, X509};
     
     
     byte[] sign (JSONObjectWriter wr, ACTION action, boolean contain) throws IOException
@@ -47,20 +47,20 @@ public class AddSignature
           {
             Sign.createX509Signature (wr);
           }
-        else if (action == ACTION.ASYM)
+        else if (action == ACTION.SYM)
           {
-            Sign.createAsymmetricKeySignature (wr);
+            Sign.createSymmetricKeySignature (wr);
           }
         else
           {
-            Sign.createSymmetricKeySignature (wr);
+            Sign.createAsymmetricKeySignature (wr, action == ACTION.RSA);
           }
         return wr.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
       }
     
     static void show ()
       {
-        System.out.println (ACTION.SYM.toString () + "|" + ACTION.ASYM.toString () + "|" + ACTION.X509.toString () + " contain(true|false) input-file\n");
+        System.out.println (ACTION.SYM.toString () + "|" + ACTION.EC.toString () + "|" + ACTION.RSA.toString () + "|" + ACTION.X509.toString () + " contain(true|false) input-file\n");
         System.exit (0);
       }
 

@@ -432,6 +432,13 @@
      </antcall>
   </target>
 
+  <!-- JUnit test of the JSON API.  The extra parameters for SKS/KeyGen2 are simply ignored... -->
+  <target name="testjson">
+    <antcall target="_test">
+       <param name="test.class" value="org.webpki.json.test.JSONTest"/>
+     </antcall>
+  </target>
+  
   <!-- A web service that accepts SKS WS calls from applications and in turn
        calls the designated SKS implementation -->
   <target name="sks-service">

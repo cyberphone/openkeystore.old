@@ -19,6 +19,7 @@ package org.webpki.json.test;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.PublicKey;
 
 import org.webpki.crypto.CertificateInfo;
@@ -65,7 +66,9 @@ public class Verify
                           case ASYMMETRIC_KEY:
                             try
                               {
-                                PublicKey public_key = DemoKeyStore.getECDSAStore ().getCertificate ("mykey").getPublicKey ();
+                                KeyStore ks = signature.getSignatureAlgorithm ().getURI ().contains ("rsa") ? 
+                                    DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getECDSAStore ();
+                                PublicKey public_key = ks.getCertificate ("mykey").getPublicKey ();
                                 signature.verify (new JSONAsymKeyVerifier (public_key));
                                 debugOutput ("Asymmetric key signature validated for: " + public_key.toString ());
                               }
