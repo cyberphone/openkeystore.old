@@ -30,7 +30,7 @@ public abstract class JSONDecoder
     /**
      * INTERNAL USE ONLY.    
      */
-    protected abstract void unmarshallJSONData (JSONReaderHelper rd) throws IOException;
+    protected abstract void unmarshallJSONData (JSONObjectReader rd) throws IOException;
     
     /**
      * INTERNAL USE ONLY.     

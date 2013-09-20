@@ -75,9 +75,9 @@ public class JSONArrayReader
         return array.elementAt (index).type;
       }
 
-    public JSONReaderHelper getObject () throws IOException
+    public JSONObjectReader getObject () throws IOException
       {
-        return new JSONReaderHelper ((JSONObject) get (JSONTypes.OBJECT));
+        return new JSONObjectReader ((JSONObject) get (JSONTypes.OBJECT));
       }
 
     public void scanAway () throws IOException

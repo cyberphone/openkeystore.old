@@ -57,9 +57,9 @@ public class JSONSignatureDecoder extends JSONSignature
 
     String key_id;
     
-    public JSONSignatureDecoder (JSONReaderHelper rd) throws IOException
+    public JSONSignatureDecoder (JSONObjectReader rd) throws IOException
       {
-        JSONReaderHelper signature = rd.getObject (SIGNATURE_JSON);
+        JSONObjectReader signature = rd.getObject (SIGNATURE_JSON);
         String version = signature.getStringConditional (VERSION_JSON, SIGNATURE_VERSION_ID);
         if (!version.equals (SIGNATURE_VERSION_ID))
           {
@@ -87,7 +87,7 @@ public class JSONSignatureDecoder extends JSONSignature
           }
       }
 
-    void getKeyInfo (JSONReaderHelper rd) throws IOException
+    void getKeyInfo (JSONObjectReader rd) throws IOException
       {
         if (rd.hasProperty (X509_CERTIFICATE_PATH_JSON))
           {
@@ -107,7 +107,7 @@ public class JSONSignatureDecoder extends JSONSignature
           }
       }
 
-    static BigInteger readCryptoBinary (JSONReaderHelper rd, String property) throws IOException
+    static BigInteger readCryptoBinary (JSONObjectReader rd, String property) throws IOException
       {
         byte[] crypto_binary = rd.getBinary (property);
         if (crypto_binary[0] == 0x00)
@@ -117,7 +117,7 @@ public class JSONSignatureDecoder extends JSONSignature
         return new BigInteger (1, crypto_binary);
       }
 
-    public static PublicKey readPublicKey (JSONReaderHelper rd) throws IOException
+    public static PublicKey readPublicKey (JSONObjectReader rd) throws IOException
       {
         rd = rd.getObject (PUBLIC_KEY_JSON);
         try
@@ -141,7 +141,7 @@ public class JSONSignatureDecoder extends JSONSignature
           }
       }
 
-    public static X509Certificate[] readX509CertificatePath (JSONReaderHelper rd) throws IOException
+    public static X509Certificate[] readX509CertificatePath (JSONObjectReader rd) throws IOException
       {
         X509Certificate last_certificate = null;
         Vector<X509Certificate> certificates = new Vector<X509Certificate> ();
@@ -153,7 +153,7 @@ public class JSONSignatureDecoder extends JSONSignature
         return certificates.toArray (new X509Certificate[0]);
       }
 
-    void getX509CertificatePath (JSONReaderHelper rd) throws IOException
+    void getX509CertificatePath (JSONObjectReader rd) throws IOException
       {
         certificate_path = readX509CertificatePath (rd);
         if (rd.hasProperty (SIGNATURE_CERTIFICATE_JSON))
@@ -238,7 +238,7 @@ public class JSONSignatureDecoder extends JSONSignature
         return public_key == null ? JSONSignatureTypes.SYMMETRIC_KEY : JSONSignatureTypes.ASYMMETRIC_KEY;
       }
 
-    public static JSONSignatureDecoder read (JSONReaderHelper rd) throws IOException
+    public static JSONSignatureDecoder read (JSONObjectReader rd) throws IOException
       {
         JSONSignatureDecoder verifier = new JSONSignatureDecoder (rd);
         return verifier;

@@ -30,7 +30,7 @@ import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONSignatureDecoder;
-import org.webpki.json.JSONReaderHelper;
+import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
 import org.webpki.json.JSONObjectWriter;
@@ -50,7 +50,7 @@ public class Verify
 
     static int count;
 
-    void recurseObject (JSONReaderHelper rd) throws IOException
+    void recurseObject (JSONObjectReader rd) throws IOException
       {
         for (String property : rd.getProperties ())
           {

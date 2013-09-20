@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 /**
  * Parses a JSON object into a DOM-like tree.
+ * Note: the current version only accepts JSON objects {}.
  * 
  */
 public class JSONParser
@@ -49,7 +50,7 @@ public class JSONParser
     
     JSONParser () {}
     
-    JSONReaderHelper internal_parse (String json_string) throws IOException
+    JSONObjectReader internal_parse (String json_string) throws IOException
       {
         json_data = json_string;
         max_length = json_data.length ();
@@ -63,15 +64,15 @@ public class JSONParser
                 throw new IOException ("Improperly terminated JSON object");
               }
           }
-        return new JSONReaderHelper (root);
+        return new JSONObjectReader (root);
       }
 
-    public static JSONReaderHelper parse (String json_string) throws IOException
+    public static JSONObjectReader parse (String json_string) throws IOException
       {
         return new JSONParser ().internal_parse (json_string);
       }
 
-    public static JSONReaderHelper parse (byte[] json_utf8) throws IOException
+    public static JSONObjectReader parse (byte[] json_utf8) throws IOException
       {
         return parse (new String (json_utf8, "UTF-8"));
       }

@@ -97,8 +97,6 @@ public class JSONSignatureEncoder extends JSONSignature
         JSONObjectWriter signature_writer = wr.setObject (SIGNATURE_JSON);
         signature_writer.setString (ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
         signer.writeKeyInfoData (signature_writer.setObject (KEY_INFO_JSON));
-        signature_writer.root.addProperty (SIGNATURE_VALUE_JSON, 
-                                    new JSONValue (JSONTypes.STRING, 
-                                    JSONObjectWriter.getBase64 (signer.signData (JSONObjectWriter.getCanonicalizedSubset (wr.root)))));
+        signature_writer.setBinary (SIGNATURE_VALUE_JSON, signer.signData (JSONObjectWriter.getCanonicalizedSubset (wr.root)));
       }
   }

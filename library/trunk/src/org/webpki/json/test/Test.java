@@ -23,7 +23,7 @@ import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONOutputFormats;
-import org.webpki.json.JSONReaderHelper;
+import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 
 import org.webpki.util.ArrayUtil;
@@ -66,7 +66,7 @@ public class Test
           }
 
         @Override
-        protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
+        protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
           {
             test (rd.getBoolean (BOOL_TRUE));
             test (!rd.getBoolean (BOOL_FALSE));
@@ -123,7 +123,7 @@ public class Test
     public static class ESC extends JSONDecoder
       {
         @Override
-        protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
+        protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
           {
             String escape = rd.getString ("Esca\npe");
             if (escape.equals ("A\n\tTAB\nNL /\\\""))

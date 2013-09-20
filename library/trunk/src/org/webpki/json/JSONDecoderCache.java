@@ -60,7 +60,7 @@ public class JSONDecoderCache
     
     public JSONDecoder parse (byte[] json_utf8) throws IOException
       {
-        JSONReaderHelper reader = JSONParser.parse (json_utf8);
+        JSONObjectReader reader = JSONParser.parse (json_utf8);
         String object_type_identifier = reader.getString (CONTEXT_JSON);
         if (reader.hasProperty (QUALIFIER_JSON))
           {

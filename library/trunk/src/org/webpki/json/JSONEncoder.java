@@ -23,6 +23,8 @@ import java.io.IOException;
  */
 public abstract class JSONEncoder
   {
+    JSONObject root;  // Of written document
+
     /**
      * INTERNAL USE ONLY.     
      */
@@ -49,12 +51,18 @@ public abstract class JSONEncoder
       }
 
     /**
-     * @return Document JSON format
+     * @return Document in JSON format
      * @throws IOException
      */
     public byte[] serializeJSONDocument (JSONOutputFormats output_format) throws IOException
       {
-        JSONObjectWriter wr = new JSONObjectWriter (getContext ());
+        JSONObjectWriter wr = new JSONObjectWriter ();
+        root = wr.root;
+        wr.setString (JSONDecoderCache.CONTEXT_JSON, getContext ());
+        if (getQualifier () != null)
+          {
+            wr.setString (JSONDecoderCache.QUALIFIER_JSON, getQualifier ());
+          }
         writeJSONData (wr);
         return wr.serializeJSONObject (output_format);
       }

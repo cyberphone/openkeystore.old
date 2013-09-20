@@ -32,9 +32,6 @@ import org.webpki.util.ISODateTime;
  * Class that writes formatted JSON data to a DOM-like tree.
  * <p>
  * It also performs canonicalization when reading and writing enveloped signatures.
- * <p>
- * The current version is primarily intended to support the XSD-like document features
- * supported by the reading system {@link JSONDecoderCache} and {@link JSONDecoder}. 
  * 
  */
 public class JSONObjectWriter
@@ -67,7 +64,7 @@ public class JSONObjectWriter
     /**
      * To be used for updating read JSON objects.
      */
-    public JSONObjectWriter (JSONReaderHelper reader)
+    public JSONObjectWriter (JSONObjectReader reader)
       {
         this (reader.json);
       }
@@ -78,12 +75,6 @@ public class JSONObjectWriter
     public JSONObjectWriter ()
       {
         this (new JSONObject ());
-      }
-
-    JSONObjectWriter (String context) throws IOException
-      {
-        this (new JSONObject ());
-        root.addProperty (JSONDecoderCache.CONTEXT_JSON, new JSONValue (JSONTypes.STRING, context));
       }
 
     JSONObjectWriter (JSONObject root)

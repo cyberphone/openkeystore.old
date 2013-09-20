@@ -27,14 +27,15 @@ import org.webpki.util.Base64;
 import org.webpki.util.ISODateTime;
 
 /**
- * Reader object that is spawned by JSONDecoder implementations.
+ * JSON object reader.
+ * Returned by the parser methods.
  *
  */
-public class JSONReaderHelper
+public class JSONObjectReader
   {
     JSONObject json;
 
-    JSONReaderHelper (JSONObject json)
+    JSONObjectReader (JSONObject json)
       {
         this.json = json;
       }
@@ -95,10 +96,10 @@ public class JSONReaderHelper
         return new BigInteger (getString (name, JSONTypes.INTEGER));
       }
 
-    public JSONReaderHelper getObject (String name) throws IOException
+    public JSONObjectReader getObject (String name) throws IOException
       {
         JSONValue value = getProperty (name, JSONTypes.OBJECT);
-        return new JSONReaderHelper ((JSONObject) value.value);
+        return new JSONObjectReader ((JSONObject) value.value);
       }
 
     @SuppressWarnings("unchecked")
