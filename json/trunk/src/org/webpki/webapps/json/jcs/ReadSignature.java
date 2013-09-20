@@ -19,8 +19,6 @@ package org.webpki.webapps.json.jcs;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 import java.security.PublicKey;
 
 import java.security.interfaces.ECPublicKey;
@@ -29,18 +27,15 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECPoint;
 
 import org.webpki.crypto.CertificateInfo;
-import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.KeyAlgorithms;
 
-import org.webpki.crypto.test.DemoKeyStore;
-
 import org.webpki.json.JSONArrayReader;
-import org.webpki.json.JSONAsymKeyVerifier;
 import org.webpki.json.JSONSignatureDecoder;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSymKeyVerifier;
 import org.webpki.json.JSONTypes;
-import org.webpki.json.JSONX509Verifier;
+
+import org.webpki.json.test.Sign;
 
 import org.webpki.util.DebugFormatter;
 
@@ -89,50 +84,38 @@ public class ReadSignature
                       switch (signature.getSignatureType ())
                         {
                           case ASYMMETRIC_KEY:
-                            try
+                            PublicKey public_key = signature.getPublicKey ();
+                            KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
+                            StringBuffer asym_text = new StringBuffer ("Asymmetric key signature validated for:\n")
+                                     .append (key_alg.isECKey () ? "EC" : "RSA")
+                                     .append (" Public Key (").append (key_alg.getPublicKeySizeInBits ())
+                                     .append (" bits)");
+                            if (key_alg.isECKey ())
                               {
-                                KeyStore ks = signature.getSignatureAlgorithm ().getURI ().contains ("rsa") ? 
-                                        DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getECDSAStore ();
-                                PublicKey public_key = ks.getCertificate ("mykey").getPublicKey ();
-                                signature.verify (new JSONAsymKeyVerifier (public_key));
-                                KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
-                                StringBuffer asym_text = new StringBuffer ("Asymmetric key signature validated for:\n")
-                                         .append (key_alg.isECKey () ? "EC" : "RSA")
-                                         .append (" Public Key (").append (key_alg.getPublicKeySizeInBits ())
-                                         .append (" bits)");
-                                if (key_alg.isECKey ())
-                                  {
-                                    asym_text.append (", Curve=").append (key_alg.getJCEName ());
-                                    ECPoint ec_point = ((ECPublicKey)public_key).getW ();
-                                    asym_text.append ("\nX: ")
-                                             .append (cryptoBinary (ec_point.getAffineX ()))
-                                             .append ("\nY: ")
-                                             .append (cryptoBinary (ec_point.getAffineY ()));
-                                  }
-                                else
-                                  {
-                                   asym_text.append ("\nModulus: ")
-                                             .append (cryptoBinary (((RSAPublicKey)public_key).getModulus ()))
-                                             .append ("\nExponent: ")
-                                             .append (cryptoBinary (((RSAPublicKey)public_key).getPublicExponent ()));
-                                  }
-                                debugOutput (asym_text.toString ());
+                                asym_text.append (", Curve=").append (key_alg.getJCEName ());
+                                ECPoint ec_point = ((ECPublicKey)public_key).getW ();
+                                asym_text.append ("\nX: ")
+                                         .append (cryptoBinary (ec_point.getAffineX ()))
+                                         .append ("\nY: ")
+                                         .append (cryptoBinary (ec_point.getAffineY ()));
                               }
-                            catch (GeneralSecurityException e)
+                            else
                               {
-                                throw new IOException (e);
+                               asym_text.append ("\nModulus: ")
+                                         .append (cryptoBinary (((RSAPublicKey)public_key).getModulus ()))
+                                         .append ("\nExponent: ")
+                                         .append (cryptoBinary (((RSAPublicKey)public_key).getPublicExponent ()));
                               }
+                            debugOutput (asym_text.toString ());
                             break;
   
                           case SYMMETRIC_KEY:
-                            signature.verify (new JSONSymKeyVerifier (new MySignature.SymmetricOperations ()));
-                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyID () + "\nValue=" + DebugFormatter.getHexString (MySignature.SYM_KEY));
+                            signature.verify (new JSONSymKeyVerifier (new Sign.SymmetricOperations ()));
+                            debugOutput ("Symmetric key signature validated for Key ID: " + signature.getKeyID () + "\nValue=" + DebugFormatter.getHexString (Sign.SYMMETRIC_KEY));
                             break;
   
                           default:
-                            KeyStoreVerifier verifier = new KeyStoreVerifier (DemoKeyStore.getExampleDotComKeyStore ());
-                            signature.verify (new JSONX509Verifier (verifier));
-                            debugOutput ("X509 signature validated for:\n" + new CertificateInfo (verifier.getSignerCertificate ()).toString ());
+                            debugOutput ("X509 signature validated for:\n" + new CertificateInfo (signature.getCertificatePath ()[0]).toString ());
                             break;
                         }
                     }

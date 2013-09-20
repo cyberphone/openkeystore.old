@@ -29,7 +29,7 @@ public class CreateServlet extends HttpServlet
       {
         request.setCharacterEncoding ("UTF-8");
         String data_to_be_signed = request.getParameter (MY_DATA_TO_BE_SIGNED);
-        MySignature.ACTION action = MySignature.ACTION.ASYM;
+        MySignature.ACTION action = MySignature.ACTION.EC;
         String key_type = request.getParameter (KEY_TYPE);
         for (MySignature.ACTION a : MySignature.ACTION.values ())
           {

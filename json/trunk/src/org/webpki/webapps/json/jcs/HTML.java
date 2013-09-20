@@ -207,7 +207,7 @@ public class HTML
                "<tr><td align=\"center\"><table>" +
                  "<tr><td valign=\"middle\" rowspan=\"4\">Select signing key:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.SYM + 
                  "\">Symmetric key</td><td>" +
-                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.ASYM + "\" checked=\"checked\">EC Key (P-256)</td><td>" +
+                 "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.EC + "\" checked=\"checked\">EC Key (P-256)</td><td>" +
                  "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.RSA + "\">RSA Key (2048)</td><td>" +
                  "<tr><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.X509 + "\">X.509 Certificate/Private key</td><td>" +
                  "</table></td></tr>" +
