@@ -61,7 +61,7 @@ import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 
-import org.webpki.keygen2.KeySpecifier;
+import org.webpki.kg2xml.KeySpecifier;
 
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;

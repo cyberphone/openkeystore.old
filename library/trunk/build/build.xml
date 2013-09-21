@@ -290,7 +290,7 @@
              </fileset>
         </classpath>
     	<redirector output="${doc_dir}/keygen2schema.html"/>
-        <arg value="${src_dir}/org/webpki/keygen2/keygen2.xsd"/>
+        <arg value="${src_dir}/org/webpki/kg2xml/keygen2.xsd"/>
     </java>
   </target>
 
@@ -421,7 +421,7 @@
   <!-- JUnit test of the KeyGen2 protocol and the SKS API -->
   <target name="testkg2">
     <antcall target="_test">
-       <param name="test.class" value="org.webpki.keygen2.test.KeyGen2Test"/>
+       <param name="test.class" value="org.webpki.kg2xml.test.KeyGen2Test"/>
      </antcall>
   </target>
 
