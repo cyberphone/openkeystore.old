@@ -189,6 +189,10 @@ public class JSONParser
         while (true)
           {
             char c = nextChar ();
+            if (c < ' ')
+              {
+                throw new IOException ("Unescaped control character: 0x" + Integer.toString (c, 16));
+              }
             if (c == DOUBLE_QUOTE)
               {
                 break;
