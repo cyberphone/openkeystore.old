@@ -38,8 +38,6 @@ import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 
-import org.webpki.kg2xml.KeySpecifier;
-
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
 import org.webpki.sks.DeleteProtection;

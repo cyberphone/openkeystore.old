@@ -202,7 +202,7 @@
     	   srcdir="${src_dir}"
     	   destdir="${temp_dir}" 
     	   classpathref="compile.classpath"
-    	   includeAntRuntime="false" excludes="**/sks/ws/**/*">
+    	   includeAntRuntime="false" excludes="**/sks/ws/**/*,**/keygen2/**">
        <compilerarg value="-Xlint:-path"/>
     </javac>
   	

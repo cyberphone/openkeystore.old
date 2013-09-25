@@ -34,8 +34,6 @@ abstract class PlatformNegotiationRequest extends XMLObjectWrapper
     
     String abort_url; // Optional
 
-    boolean privacy_enabled;
-    
     PlatformNegotiationRequest () {}
 
     /**

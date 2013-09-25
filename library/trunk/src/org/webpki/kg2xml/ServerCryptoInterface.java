@@ -32,7 +32,7 @@ public interface ServerCryptoInterface extends Serializable
     
     void generateAndVerifySessionKey (ECPublicKey client_ephemeral_key,
                                       byte[] kdf_data,
-                                      byte[] session_key_mac_data,
+                                      byte[] attestation_arguments,
                                       X509Certificate device_certificate,
                                       byte[] session_attestation) throws IOException;
 

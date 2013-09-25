@@ -58,9 +58,6 @@ import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
-import org.webpki.kg2xml.KeySpecifier;
-import org.webpki.kg2xml.ServerCryptoInterface;
-
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
 import org.webpki.sks.DeleteProtection;
@@ -80,7 +77,7 @@ import org.webpki.util.DebugFormatter;
 
 public class ProvSess
   {
-    static class SoftHSM implements ServerCryptoInterface
+    static class SoftHSM
       {
         ////////////////////////////////////////////////////////////////////////////////////////
         // Private and secret keys would in a HSM implementation be represented as handles
@@ -115,7 +112,6 @@ public class ProvSess
         
         byte[] session_key;
         
-        @Override
         public ECPublicKey generateEphemeralKey () throws IOException
           {
             try
@@ -133,10 +129,9 @@ public class ProvSess
               }
           }
   
-        @Override
         public void generateAndVerifySessionKey (ECPublicKey client_ephemeral_key,
                                                  byte[] kdf_data,
-                                                 byte[] session_key_mac_data,
+                                                 byte[] attestation_arguments,
                                                  X509Certificate device_certificate,
                                                  byte[] session_attestation) throws IOException
           {
@@ -153,13 +148,12 @@ public class ProvSess
                 mac.init (new SecretKeySpec (Z, "RAW"));
                 session_key = mac.doFinal (kdf_data);
                 
-                // The session key signature
-                mac = Mac.getInstance (MACAlgorithms.HMAC_SHA256.getJCEName ());
-                mac.init (new SecretKeySpec (session_key, "RAW"));
-                byte[] session_key_attest = mac.doFinal (session_key_mac_data);
-                
                 if (device_certificate == null)
                   {
+                    // The session key signature
+                    mac = Mac.getInstance (MACAlgorithms.HMAC_SHA256.getJCEName ());
+                    mac.init (new SecretKeySpec (session_key, "RAW"));
+                    byte[] session_key_attest = mac.doFinal (attestation_arguments);
                     if (!ArrayUtil.compare (session_key_attest, session_attestation))
                       {
                         throw new IOException ("Verify attestation failed");
@@ -174,7 +168,7 @@ public class ProvSess
                     // Verify that the session key signature was signed by the device key
                     Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
                     verifier.initVerify (device_public_key);
-                    verifier.update (session_key_attest);
+                    verifier.update (attestation_arguments);
                     if (!verifier.verify (session_attestation))
                       {
                         throw new IOException ("Verify provisioning signature failed");
@@ -187,7 +181,6 @@ public class ProvSess
               }
           }
   
-        @Override
         public byte[] mac (byte[] data, byte[] key_modifier) throws IOException
           {
             try
@@ -202,7 +195,6 @@ public class ProvSess
               }
           }
 
-        @Override
         public byte[] encrypt (byte[] data) throws IOException
           {
             try
@@ -220,7 +212,6 @@ public class ProvSess
               }
           }
 
-        @Override
         public byte[] generateNonce () throws IOException
           {
             byte[] rnd = new byte[32];
@@ -228,7 +219,6 @@ public class ProvSess
             return rnd;
           }
 
-        @Override
         public byte[] generateKeyManagementAuthorization (PublicKey key_management_key, byte[] data) throws IOException
           {
             try
@@ -244,7 +234,6 @@ public class ProvSess
               }
           }
 
-        @Override
         public PublicKey[] enumerateKeyManagementKeys () throws IOException, GeneralSecurityException
           {
             return key_management_keys.keySet ().toArray (new PublicKey[0]);
@@ -424,19 +413,23 @@ public class ProvSess
            kdf.addString (ISSUER_URI);
            kdf.addArray (getDeviceID ());
 
-           MacGenerator session_key_mac_data = new MacGenerator ();
-           session_key_mac_data.addString (session_key_algorithm);
-           session_key_mac_data.addBool (privacy_enabled);
-           session_key_mac_data.addArray (server_ephemeral_key.getEncoded ());
-           session_key_mac_data.addArray (sess.getClientEphemeralKey ().getEncoded ());
-           session_key_mac_data.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
-           session_key_mac_data.addInt ((int) (client_time.getTime () / 1000));
-           session_key_mac_data.addInt (session_life_time);
-           session_key_mac_data.addShort (session_key_limit);
+           MacGenerator attestation_arguments = new MacGenerator ();
+           attestation_arguments.addString (client_session_id);
+           attestation_arguments.addString (server_session_id);
+           attestation_arguments.addString (ISSUER_URI);
+           attestation_arguments.addArray (getDeviceID ());
+           attestation_arguments.addString (session_key_algorithm);
+           attestation_arguments.addBool (privacy_enabled);
+           attestation_arguments.addArray (server_ephemeral_key.getEncoded ());
+           attestation_arguments.addArray (sess.getClientEphemeralKey ().getEncoded ());
+           attestation_arguments.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
+           attestation_arguments.addInt ((int) (client_time.getTime () / 1000));
+           attestation_arguments.addInt (session_life_time);
+           attestation_arguments.addShort (session_key_limit);
 
            server_sess_key.generateAndVerifySessionKey (sess.getClientEphemeralKey (),
                                                         kdf.getResult (),
-                                                        session_key_mac_data.getResult (),
+                                                        attestation_arguments.getResult (),
                                                         privacy_enabled ? null : device.device_info.getCertificatePath ()[0],
                                                         sess.getAttestation ());
      }

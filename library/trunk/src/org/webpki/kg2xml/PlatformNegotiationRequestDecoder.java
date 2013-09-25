@@ -68,6 +68,7 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
         return signature != null;
       }
 
+    boolean privacy_enabled;
 
     public boolean getPrivacyEnabledFlag ()
       {

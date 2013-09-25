@@ -17,9 +17,12 @@
 package org.webpki.kg2xml;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.w3c.dom.Document;
 
+import org.webpki.sks.SecureKeyStore;
+import org.webpki.util.Base64URL;
 import org.webpki.xml.DOMWriterHelper;
 
 import org.webpki.xmldsig.XMLSignatureWrapper;
@@ -49,6 +52,11 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         server_state.checkState (true, ProtocolPhase.PLATFORM_NEGOTIATION);
         this.server_state = server_state;
         this.submit_url = submit_url;
+        if (server_session_id == null)
+          {
+            server_session_id = Long.toHexString (new Date().getTime());
+            server_session_id += Base64URL.generateURLFriendlyRandom (SecureKeyStore.MAX_LENGTH_ID_TYPE - server_session_id.length ());
+          }
         this.server_session_id = server_state.server_session_id = server_session_id;
       }
     
@@ -65,15 +73,6 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
     public void setAbortURL (String abort_url)
       {
         this.abort_url = abort_url;
-      }
-
-
-    boolean privacy_enabled_set;
-    
-    public void setPrivacyEnabled (boolean flag)
-      {
-        privacy_enabled_set = true;
-        privacy_enabled = flag;
       }
 
 
@@ -116,9 +115,9 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         ////////////////////////////////////////////////////////////////////////
         BasicCapabilities.write (wr, server_state.basic_capabilities);
 
-        if (privacy_enabled_set)
+        if (server_state.privacy_enabled_set)
           {
-            wr.setBooleanAttribute (PRIVACY_ENABLED_ATTR, privacy_enabled);
+            wr.setBooleanAttribute (PRIVACY_ENABLED_ATTR, server_state.privacy_enabled);
           }
         
         if (needs_dsig_ns) XMLSignatureWrapper.addXMLSignatureNS (wr);

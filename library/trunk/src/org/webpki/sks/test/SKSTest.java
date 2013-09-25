@@ -61,8 +61,6 @@ import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 
-import org.webpki.kg2xml.KeySpecifier;
-
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
 import org.webpki.sks.DeleteProtection;
@@ -3244,17 +3242,11 @@ public class SKSTest
     public void test70 () throws Exception
       {
         checkIDObject ("", false);
-        checkIDObject ("*", false);
         checkIDObject (" ", false);
-        checkIDObject ("/", false);
-        checkIDObject ("9", false);
+        checkIDObject ("9", true);
         checkIDObject ("h09876543210987654321098765432109", false);
         checkIDObject ("h0987654321098765432109876543210", true);
-        checkIDObject ("h9", true);
-        checkIDObject ("J", true);
-        checkIDObject ("-J", true);
-        checkIDObject (".J", true);
-        checkIDObject ("_J", true);
+        checkIDObject ("#9+/\\@,:_-.;=&%$\"*", true);
         checkIDObject (" I_am_a_bad_name", false);
       }
 

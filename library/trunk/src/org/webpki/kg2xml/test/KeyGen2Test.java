@@ -976,12 +976,15 @@ public class KeyGen2Test
             // Create the state container
             ////////////////////////////////////////////////////////////////////////////////////
             server_state = new ServerState (server_crypto_interface);
+            if (privacy_enabled)
+              {
+                server_state.setPrivacyEnabled (true);
+              }
 
             ////////////////////////////////////////////////////////////////////////////////////
             // First keygen2 request
             ////////////////////////////////////////////////////////////////////////////////////
-            String server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
-            PlatformNegotiationRequestEncoder platform_request =  new PlatformNegotiationRequestEncoder (server_state, PLATFORM_URL, server_session_id);
+            PlatformNegotiationRequestEncoder platform_request =  new PlatformNegotiationRequestEncoder (server_state, PLATFORM_URL, null);
             if (set_abort_url)
               {
                 platform_request.setAbortURL (ABORT_URL);
@@ -1005,10 +1008,6 @@ public class KeyGen2Test
             if (plain_unlock_key != null)
               {
                 platform_request.setAction (Action.UNLOCK);
-              }
-            if (privacy_enabled)
-              {
-                platform_request.setPrivacyEnabled (true);
               }
             if (virtual_machine)
               {

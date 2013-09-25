@@ -1151,6 +1151,20 @@ public class ServerState implements Serializable
         throw new IOException (error_msg);
       }
     
+    boolean privacy_enabled;
+    boolean privacy_enabled_set;
+    
+    public void setPrivacyEnabled (boolean flag) throws IOException
+      {
+        if (!request_phase || current_phase != ProtocolPhase.PLATFORM_NEGOTIATION)
+          {
+            throw new IOException ("Must be specified before any requests");
+          }
+        privacy_enabled_set = true;
+        privacy_enabled = flag;
+      }
+
+
  
     // Constructor
     public ServerState (ServerCryptoInterface server_crypto_interface)
@@ -1198,21 +1212,25 @@ public class ServerState implements Serializable
             kdf.addString (client_session_id);
             kdf.addString (server_session_id);
             kdf.addString (issuer_uri);
-            kdf.addArray (device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : device_certificate.getEncoded ());
+            kdf.addArray (getDeviceID ());
 
-            MacGenerator session_key_mac_data = new MacGenerator ();
-            session_key_mac_data.addString (provisioning_session_algorithm);
-            session_key_mac_data.addBool (device_certificate == null);
-            session_key_mac_data.addArray (server_ephemeral_key.getEncoded ());
-            session_key_mac_data.addArray (client_ephemeral_key.getEncoded ());
-            session_key_mac_data.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
-            session_key_mac_data.addInt ((int) (prov_init_response.client_time.getTime () / 1000));
-            session_key_mac_data.addInt (session_life_time);
-            session_key_mac_data.addShort (session_key_limit);
+            MacGenerator attestation_arguments = new MacGenerator ();
+            attestation_arguments.addString (client_session_id);
+            attestation_arguments.addString (server_session_id);
+            attestation_arguments.addString (issuer_uri);
+            attestation_arguments.addArray (getDeviceID ());
+            attestation_arguments.addString (provisioning_session_algorithm);
+            attestation_arguments.addBool (device_certificate == null);
+            attestation_arguments.addArray (server_ephemeral_key.getEncoded ());
+            attestation_arguments.addArray (client_ephemeral_key.getEncoded ());
+            attestation_arguments.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
+            attestation_arguments.addInt ((int) (prov_init_response.client_time.getTime () / 1000));
+            attestation_arguments.addInt (session_life_time);
+            attestation_arguments.addShort (session_key_limit);
 
             server_crypto_interface.generateAndVerifySessionKey (client_ephemeral_key,
                                                                  kdf.getResult (),
-                                                                 session_key_mac_data.getResult (),
+                                                                 attestation_arguments.getResult (),
                                                                  device_certificate == null ? null : device_certificate,
                                                                  prov_init_response.attestation);
             if (((server_certificate == null ^ prov_init_response.server_certificate_fingerprint == null)) ||
@@ -1237,6 +1255,11 @@ public class ServerState implements Serializable
         current_phase = ProtocolPhase.CREDENTIAL_DISCOVERY;
       }
 
+
+    byte[] getDeviceID () throws GeneralSecurityException
+      {
+        return device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : device_certificate.getEncoded ();
+      }
 
     public void update (CredentialDiscoveryResponseDecoder credential_discovery_response) throws IOException
       {

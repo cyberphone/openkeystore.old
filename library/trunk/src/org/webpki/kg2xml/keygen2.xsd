@@ -165,7 +165,7 @@
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
-         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksID" use="required"/>
 
          <!-- A Nonce MUST be generated if the VirtualMachine option is used -->
          <xs:attribute name="Nonce" type="xs:base64Binary" use="optional"/>
@@ -382,7 +382,7 @@
          <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- MUST be equal to "ProvisioningInitializationRequest/@ID" -->
-         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksID" use="required"/>
 
          <!-- Copy of "ProvisioningInitializationRequest/@ServerTime" -->
          <xs:attribute name="ServerTime" type="xs:dateTime" use="required"/>
@@ -448,7 +448,7 @@
 
          <!-- MUST be equal to"ProvisioningInitializationResponse/@ID"
               within a specific session -->
-         <xs:attribute name="ClientSessionID" type="kg2:sksNCName" use="required"/>
+         <xs:attribute name="ClientSessionID" type="kg2:sksID" use="required"/>
 
          <!-- Where to HTTP POST the credential discovery response.  Note that
               applicable session cookies MUST be submitted in the request
@@ -494,7 +494,7 @@
          <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- MUST be equal to "ProvisioningInitializationRequest/@ID" -->
-         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksID" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -548,7 +548,7 @@
 
          <!-- MUST be equal to"ProvisioningInitializationResponse/@ID"
               within a specific session -->
-         <xs:attribute name="ClientSessionID" type="kg2:sksNCName" use="required"/>
+         <xs:attribute name="ClientSessionID" type="kg2:sksID" use="required"/>
 
          <!-- Where to HTTP POST the key operation response.  Note that
               applicable session cookies MUST be submitted in the request
@@ -587,7 +587,7 @@
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
-         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksID" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -621,7 +621,7 @@
 
          <!-- MUST be equal to "ProvisioningInitializationResponse/@ID"
               within a specific session -->
-         <xs:attribute name="ClientSessionID" type="kg2:sksNCName" use="required"/>
+         <xs:attribute name="ClientSessionID" type="kg2:sksID" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
@@ -657,7 +657,7 @@
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
-         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksID" use="required"/>
 
          <!-- SKS Reference: closeProvisioningSession -->
          <xs:attribute name="Attestation" type="xs:base64Binary" use="required"/>
@@ -1166,10 +1166,10 @@
    <xs:complexType name="targetKey">
 
       <!-- One of the two IDs identifying a provisioning session -->
-      <xs:attribute name="ClientSessionID" type="kg2:sksNCName" use="required"/>
+      <xs:attribute name="ClientSessionID" type="kg2:sksID" use="required"/>
 
       <!-- The other ID identifying a provisioning session -->
-      <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
+      <xs:attribute name="ServerSessionID" type="kg2:sksID" use="required"/>
 
       <!-- Handle to the end entity certificate (key ID) -->
       <xs:attribute name="CertificateFingerprint" type="xs:base64Binary" use="required"/>
@@ -1189,10 +1189,10 @@
          <xs:attribute name="EndEntityCertificate" type="xs:base64Binary" use="optional"/>
 
          <!-- One of the two IDs identifying a provisioning session -->
-         <xs:attribute name="ClientSessionID" type="kg2:sksNCName" use="required"/>
+         <xs:attribute name="ClientSessionID" type="kg2:sksID" use="required"/>
 
          <!-- The other ID identifying a provisioning session -->
-         <xs:attribute name="ServerSessionID" type="kg2:sksNCName" use="required"/>
+         <xs:attribute name="ServerSessionID" type="kg2:sksID" use="required"/>
 
          <!-- Locked?  Default: false -->
          <xs:attribute name="Locked" type="xs:boolean" use="optional"/>
@@ -1228,17 +1228,10 @@
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="sksID">
-      <xs:restriction base="xs:ID">
-         <xs:pattern value="[0-9,a-z,A-Z,_,\-,\.]*"/>
+      <xs:restriction base="xs:string">
+         <xs:minLength value="1"/>
          <xs:maxLength value="32"/>
       </xs:restriction>
-   </xs:simpleType>
-
-   <xs:simpleType name="sksNCName">
-      <xs:restriction base="xs:NCName">
-         <xs:pattern value="[0-9,a-z,A-Z,_,\-,\.]*"/>
-         <xs:maxLength value="32"/>
-       </xs:restriction>
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

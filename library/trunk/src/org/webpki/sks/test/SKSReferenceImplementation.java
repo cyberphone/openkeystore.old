@@ -48,7 +48,6 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -113,6 +112,15 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     static final boolean SKS_BIOMETRIC_SUPPORT             = true;  // Change here to test or disable
     static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
 
+    static final char[] MODIFIED_BASE64 = {'A','B','C','D','E','F','G','H',
+                                           'I','J','K','L','M','N','O','P',
+                                           'Q','R','S','T','U','V','W','X',
+                                           'Y','Z','a','b','c','d','e','f',
+                                           'g','h','i','j','k','l','m','n',
+                                           'o','p','q','r','s','t','u','v',
+                                           'w','x','y','z','0','1','2','3',
+                                           '4','5','6','7','8','9','-','_'};
+
     int next_key_handle = 1;
     LinkedHashMap<Integer,KeyEntry> keys = new LinkedHashMap<Integer,KeyEntry> ();
 
@@ -158,19 +166,15 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           {
             flag = true;
           }
-        else for (int i = 0; i < identifier.length (); i++)
+        else for (char c : identifier.toCharArray ())
           {
-            char c = identifier.charAt (i);
             /////////////////////////////////////////////////
-            // The restricted XML NCName
+            // The restricted ID
             /////////////////////////////////////////////////
-            if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && c != '_')
+            if (c < '!' || c > '~')
               {
-                if (i == 0 || ((c < '0' || c > '9') && c != '-' && c != '.'))
-                  {
-                    flag = true;
-                    break;
-                  }
+                flag = true;
+                break;
               }
           }
         if (flag)
@@ -787,6 +791,70 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
           }
       }
 
+
+    class AttestationSignatureGenerator
+      {
+        Signature signer;
+        
+        AttestationSignatureGenerator () throws GeneralSecurityException
+          {
+            PrivateKey attester = getAttestationKey ();
+            signer = Signature.getInstance (attester instanceof RSAPrivateKey ? "SHA256withRSA" : "SHA256withECDSA");
+            signer.initSign (attester);
+          }
+  
+        private byte[] short2bytes (int s)
+          {
+            return new byte[] { (byte) (s >>> 8), (byte) s };
+          }
+  
+        private byte[] int2bytes (int i)
+          {
+            return new byte[] { (byte) (i >>> 24), (byte) (i >>> 16), (byte) (i >>> 8), (byte) i };
+          }
+  
+        void addBlob (byte[] data) throws GeneralSecurityException
+          {
+            signer.update (int2bytes (data.length));
+            signer.update (data);
+          }
+  
+        void addArray (byte[] data) throws GeneralSecurityException
+          {
+            signer.update (short2bytes (data.length));
+            signer.update (data);
+          }
+  
+        void addString (String string) throws IOException, GeneralSecurityException
+          {
+            addArray (string.getBytes ("UTF-8"));
+          }
+  
+        void addInt (int i) throws GeneralSecurityException
+          {
+            signer.update (int2bytes (i));
+          }
+  
+        void addShort (int s) throws GeneralSecurityException
+          {
+            signer.update (short2bytes (s));
+          }
+  
+        void addByte (byte b) throws GeneralSecurityException
+          {
+            signer.update (b);
+          }
+  
+        void addBool (boolean flag) throws GeneralSecurityException
+          {
+            signer.update (flag ? (byte) 0x01 : (byte) 0x00);
+          }
+  
+        byte[] getResult () throws GeneralSecurityException
+          {
+            return signer.sign ();
+          }
+      }
 
     class PostProvisioningObject implements Serializable
       {
@@ -2775,7 +2843,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Create ClientSessionID
         ///////////////////////////////////////////////////////////////////////////////////
-        String client_session_id = "C-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
+        byte[] random = new byte[MAX_LENGTH_ID_TYPE];
+        new SecureRandom ().nextBytes (random);
+        StringBuffer client_session_id_buffer = new StringBuffer ();
+        for (byte b : random)
+          {
+            client_session_id_buffer.append (MODIFIED_BASE64[b & 0x3F]);
+          }
+        String client_session_id = client_session_id_buffer.toString ();
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Prepare for the big crypto...
@@ -2813,29 +2888,47 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
             session_key = kdf.getResult ();
 
             ///////////////////////////////////////////////////////////////////////////////////
-            // SessionKey attest
+            // Finally, create the Attestation
             ///////////////////////////////////////////////////////////////////////////////////
-            MacBuilder ska = new MacBuilder (session_key);
-            ska.addString (algorithm);
-            ska.addBool (privacy_enabled);
-            ska.addArray (server_ephemeral_key.getEncoded ());
-            ska.addArray (client_ephemeral_key.getEncoded ());
-            ska.addArray (key_management_key == null ? ZERO_LENGTH_ARRAY : key_management_key.getEncoded ());
-            ska.addInt (client_time);
-            ska.addInt (session_life_time);
-            ska.addShort (session_key_limit);
-            attestation = ska.getResult ();
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Optionally sign attestation
-            ///////////////////////////////////////////////////////////////////////////////////
-            if (!privacy_enabled)
+            if (privacy_enabled)
               {
-                PrivateKey attester = getAttestationKey ();
-                Signature signer = Signature.getInstance (attester instanceof RSAPrivateKey ? "SHA256withRSA" : "SHA256withECDSA");
-                signer.initSign (attester);
-                signer.update (attestation);
-                attestation = signer.sign ();
+                ///////////////////////////////////////////////////////////////////////////////////
+                // SessionKey attest
+                ///////////////////////////////////////////////////////////////////////////////////
+                MacBuilder ska = new MacBuilder (session_key);
+                ska.addString (client_session_id);
+                ska.addString (server_session_id);
+                ska.addString (issuer_uri);
+                ska.addArray (getDeviceID (privacy_enabled));
+                ska.addString (algorithm);
+                ska.addBool (privacy_enabled);
+                ska.addArray (server_ephemeral_key.getEncoded ());
+                ska.addArray (client_ephemeral_key.getEncoded ());
+                ska.addArray (key_management_key == null ? ZERO_LENGTH_ARRAY : key_management_key.getEncoded ());
+                ska.addInt (client_time);
+                ska.addInt (session_life_time);
+                ska.addShort (session_key_limit);
+                attestation = ska.getResult ();
+              }
+            else
+              {
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Device private key attest
+                ///////////////////////////////////////////////////////////////////////////////////
+                AttestationSignatureGenerator pka = new AttestationSignatureGenerator ();
+                pka.addString (client_session_id);
+                pka.addString (server_session_id);
+                pka.addString (issuer_uri);
+                pka.addArray (getDeviceID (privacy_enabled));
+                pka.addString (algorithm);
+                pka.addBool (privacy_enabled);
+                pka.addArray (server_ephemeral_key.getEncoded ());
+                pka.addArray (client_ephemeral_key.getEncoded ());
+                pka.addArray (key_management_key == null ? ZERO_LENGTH_ARRAY : key_management_key.getEncoded ());
+                pka.addInt (client_time);
+                pka.addInt (session_life_time);
+                pka.addShort (session_key_limit);
+                attestation = pka.getResult ();
               }
           }
         catch (Exception e)
