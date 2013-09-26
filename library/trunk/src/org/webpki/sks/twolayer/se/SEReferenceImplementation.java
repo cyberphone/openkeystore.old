@@ -91,12 +91,6 @@ public class SEReferenceImplementation
     static final boolean SKS_BIOMETRIC_SUPPORT             = true;  // Change here to test or disable
     static final boolean SKS_RSA_EXPONENT_SUPPORT          = true;  // Change here to test or disable
 
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // Specific TEE/SE constants.  We want the SE to provide strong entropy without hampering
-    // the TEE from introducing monotonic sequence numbers to facilitate easy lookup
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    public static final int MAX_LENGTH_TEE_CS_PREFIX = 16;
-
     static final char[] MODIFIED_BASE64 = {'A','B','C','D','E','F','G','H',
                                            'I','J','K','L','M','N','O','P',
                                            'Q','R','S','T','U','V','W','X',
@@ -1641,7 +1635,6 @@ public class SEReferenceImplementation
                                                              String algorithm,
                                                              boolean privacy_enabled,
                                                              String server_session_id,
-                                                             String tee_client_session_id_prefix,
                                                              ECPublicKey server_ephemeral_key,
                                                              String issuer_uri,
                                                              PublicKey key_management_key, // May be null
@@ -1668,16 +1661,7 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Check ID syntax
         ///////////////////////////////////////////////////////////////////////////////////
-        checkIDSyntax (tee_client_session_id_prefix, "TEEClientSessionIDPrefix");
         checkIDSyntax (server_session_id, "ServerSessionID");
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Check TEEClientSessionIDPrefix
-        ///////////////////////////////////////////////////////////////////////////////////
-        if (tee_client_session_id_prefix.length () >  MAX_LENGTH_TEE_CS_PREFIX)
-          {
-            abort ("\"TEEClientSessionIDPrefix\" length error: " + tee_client_session_id_prefix.length ());
-          }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Check server ECDH key compatibility
@@ -1701,14 +1685,14 @@ public class SEReferenceImplementation
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
-        // Create ClientSessionID.  The SE adds up to 31 random (but valid) characters
+        // Create ClientSessionID.
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] random = new byte[SecureKeyStore.MAX_LENGTH_ID_TYPE - tee_client_session_id_prefix.length ()];
+        byte[] random = new byte[SecureKeyStore.MAX_LENGTH_ID_TYPE];
         new SecureRandom ().nextBytes (random);
-        StringBuffer buffer = new StringBuffer (tee_client_session_id_prefix);
-        for (int i = 0; i < random.length; i++)
+        StringBuffer buffer = new StringBuffer ();
+        for (byte b : random)
           {
-            buffer.append (MODIFIED_BASE64[random[i] & 0x3F]);
+            buffer.append (MODIFIED_BASE64[b & 0x3F]);
           }
         String client_session_id = buffer.toString ();
 

@@ -136,19 +136,15 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
           {
             flag = true;
           }
-        else for (int i = 0; i < identifier.length (); i++)
+        else for (char c : identifier.toCharArray ())
           {
-            char c = identifier.charAt (i);
             /////////////////////////////////////////////////
-            // The restricted XML NCName
+            // The restricted ID
             /////////////////////////////////////////////////
-            if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && c != '_')
+            if (c < '!' || c > '~')
               {
-                if (i == 0 || ((c < '0' || c > '9') && c != '-' && c != '.'))
-                  {
-                    flag = true;
-                    break;
-                  }
+                flag = true;
+                break;
               }
           }
         if (flag)
@@ -2143,18 +2139,12 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         checkIDSyntax (server_session_id, "ServerSessionID", this);
         
         ///////////////////////////////////////////////////////////////////////////////////
-        // Create TEEClientSessionIDPrefix which typically is a sequence number in TEE
-        ///////////////////////////////////////////////////////////////////////////////////
-        String tee_client_session_id_prefix = "C" + new DecimalFormat ("#000000000").format (next_prov_handle);
-
-        ///////////////////////////////////////////////////////////////////////////////////
         // The assumption here is that the SE can do crypto parameter validation...
         ///////////////////////////////////////////////////////////////////////////////////
         SEProvisioningData se_pd = SEReferenceImplementation.createProvisioningData (OS_INSTANCE_KEY,
                                                                                      algorithm,
                                                                                      privacy_enabled,
                                                                                      server_session_id,
-                                                                                     tee_client_session_id_prefix,
                                                                                      server_ephemeral_key,
                                                                                      issuer_uri,
                                                                                      key_management_key,
