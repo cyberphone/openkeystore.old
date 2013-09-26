@@ -25,8 +25,6 @@ import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
 
-import java.text.DecimalFormat;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
