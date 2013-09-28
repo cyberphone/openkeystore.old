@@ -20,16 +20,26 @@ import java.io.IOException;
 
 import java.util.Vector;
 
-import org.webpki.xml.DOMReaderHelper;
-import org.webpki.xml.DOMAttributeReaderHelper;
+import org.webpki.json.JSONArrayReader;
+import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class PlatformNegotiationResponseDecoder extends PlatformNegotiationResponse
+public class PlatformNegotiationResponseDecoder extends KeyGen2Validator
   {
+    String server_session_id;
+    
+    byte[] nonce;  // For VMs
+
     Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
 
     BasicCapabilities basic_capabilities = new BasicCapabilities (true);
+
+    @Override
+    protected String getQualifier ()
+      {
+        return PLATFORM_NEGOTIATION_RESPONSE_JSON;
+      }
 
     public BasicCapabilities getBasicCapabilities ()
       {
@@ -48,32 +58,35 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
       }
 
     
-    protected void fromXML (DOMReaderHelper rd) throws IOException
+    @Override
+    protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
       {
-        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
         //////////////////////////////////////////////////////////////////////////
-        // Get the top-level attributes
+        // Get the top-level properties
         //////////////////////////////////////////////////////////////////////////
-        server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
+        server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
         
-        nonce = ah.getBinaryConditional (NONCE_ATTR);
+        nonce = rd.getBinaryConditional (NONCE_JSON);
 
-        BasicCapabilities.read (ah, basic_capabilities);
+        BasicCapabilities.read (rd, basic_capabilities);
         
-        //////////////////////////////////////////////////////////////////////////
-        // Get the child elements
-        //////////////////////////////////////////////////////////////////////////
-        rd.getChild ();
-
-        while (rd.hasNext (IMAGE_PREFERENCE_ELEM))
+        if (rd.hasProperty (IMAGE_PREFERENCES_JSON))
           {
-            ImagePreference im_pref = new ImagePreference ();
-            rd.getNext (IMAGE_PREFERENCE_ELEM);
-            im_pref.type = ah.getString (TYPE_ATTR);
-            im_pref.mime_type = ah.getString (MIME_TYPE_ATTR);
-            im_pref.width = ah.getInt (WIDTH_ATTR);
-            im_pref.height = ah.getInt (HEIGHT_ATTR);
-            image_preferences.add (im_pref);
+            //////////////////////////////////////////////////////////////////////////
+            // Get the [objects...]
+            //////////////////////////////////////////////////////////////////////////
+            JSONArrayReader array = rd.getArray (IMAGE_PREFERENCES_JSON);
+            do
+              {
+                ImagePreference im_pref = new ImagePreference ();
+                JSONObjectReader ip = array.getObject ();
+                im_pref.type = KeyGen2Validator.getURI (ip, TYPE_JSON);
+                im_pref.mime_type = ip.getString (MIME_TYPE_JSON);
+                im_pref.width = ip.getInt (WIDTH_JSON);
+                im_pref.height = ip.getInt (HEIGHT_JSON);
+                image_preferences.add (im_pref);
+              }
+            while (array.hasMore ());
           }
       }
   }

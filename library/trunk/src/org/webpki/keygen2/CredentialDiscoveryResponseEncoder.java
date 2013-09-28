@@ -18,20 +18,21 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
-import java.security.cert.CertificateEncodingException;
+import java.security.GeneralSecurityException;
+
 import java.security.cert.X509Certificate;
 
-import org.webpki.xml.DOMWriterHelper;
+import org.webpki.json.JSONArrayWriter;
+import org.webpki.json.JSONEncoder;
+import org.webpki.json.JSONObjectWriter;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryResponse
+public class CredentialDiscoveryResponseEncoder extends JSONEncoder
   {
-
     class MatchingCredential
       {
         byte[] end_entity_certificate;
@@ -61,7 +62,7 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
               {
                 mc.end_entity_certificate = end_entity_certificate.getEncoded ();
               }
-            catch (CertificateEncodingException e)
+            catch (GeneralSecurityException e)
               {
                 throw new IOException (e);
               }
@@ -73,26 +74,22 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
       }
 
  
-    private String prefix;  // Default: no prefix
-    
     Vector<LookupResult> lookup_results = new Vector<LookupResult> ();
     
     LinkedHashMap<String,CredentialDiscoveryRequestDecoder.LookupSpecifier> ref;
+
+    String client_session_id;
+
+    String server_session_id;
 
 
     // Constructors
 
     public CredentialDiscoveryResponseEncoder (CredentialDiscoveryRequestDecoder cred_disc_dec)
       {
-        super.server_session_id = cred_disc_dec.server_session_id;
-        super.client_session_id = cred_disc_dec.client_session_id;
+        server_session_id = cred_disc_dec.server_session_id;
+        client_session_id = cred_disc_dec.client_session_id;
         this.ref = cred_disc_dec.lookup_specifiers;
-      }
-
-
-    public void setPrefix (String prefix)
-      {
-        this.prefix = prefix;
       }
 
 
@@ -108,16 +105,15 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
       }
 
 
-    protected void toXML (DOMWriterHelper wr) throws IOException
+    @Override
+    protected void writeJSONData (JSONObjectWriter wr) throws IOException
       {
-        wr.initializeRootObject (prefix);
-
         //////////////////////////////////////////////////////////////////////////
-        // Set top-level attributes
+        // Set top-level properties
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, client_session_id);
+        wr.setString (SERVER_SESSION_ID_JSON, server_session_id);
 
-        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
+        wr.setString (CLIENT_SESSION_ID_JSON, client_session_id);
 
         ////////////////////////////////////////////////////////////////////////
         // Lookup results
@@ -130,23 +126,35 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
           {
             throw new IOException ("Missing outputed results");
           }
+        JSONArrayWriter lookups = wr.setArray (LOOKUP_RESULTS_JSON);
         for (LookupResult lo_res : lookup_results)
           {
-            wr.addChildElement (LOOKUP_RESULT_ELEM);
-            wr.setStringAttribute (ID_ATTR, lo_res.id);
+            JSONObjectWriter lookup_writer = lookups.setObject (); 
+            lookup_writer.setString (ID_JSON, lo_res.id);
+            JSONArrayWriter matcher_array = lookup_writer.setArray (MATCHING_CREDENTIALS_JSON);
             for (MatchingCredential mc : lo_res.matching_credentials)
               {
-                wr.addChildElement (MATCHING_CREDENTIAL_ELEM);
-                wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, mc.client_session_id);
-                wr.setStringAttribute (SERVER_SESSION_ID_ATTR, mc.server_session_id);
-                wr.setBinaryAttribute (END_ENTITY_CERTIFICATE_ATTR, mc.end_entity_certificate);
+                JSONObjectWriter match_object = matcher_array.setObject ();
+                match_object.setString (CLIENT_SESSION_ID_JSON, mc.client_session_id);
+                match_object.setString (SERVER_SESSION_ID_JSON, mc.server_session_id);
+                match_object.setBinary (END_ENTITY_CERTIFICATE_JSON, mc.end_entity_certificate);
                 if (mc.locked)
                   {
-                    wr.setBooleanAttribute (LOCKED_ATTR, mc.locked);
+                    match_object.setBoolean (LOCKED_JSON, mc.locked);
                   }
-                wr.getParent ();
               }
-            wr.getParent ();
           }
+      }
+
+    @Override
+    protected String getQualifier ()
+      {
+        return CREDENTIAL_DISCOVERY_RESPONSE_JSON;
+      }
+
+    @Override
+    protected String getContext ()
+      {
+        return KEYGEN2_NS;
       }
   }

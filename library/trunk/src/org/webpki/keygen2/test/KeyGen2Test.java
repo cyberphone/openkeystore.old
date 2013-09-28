@@ -134,8 +134,7 @@ import org.webpki.util.ArrayUtil;
 import org.webpki.util.HTMLHeader;
 import org.webpki.util.ImageData;
 
-import org.webpki.xml.XMLSchemaCache;
-import org.webpki.xml.XMLObjectWrapper;
+import org.webpki.json.JSONDecoderCache;
 
 /*
  * KeyGen2 "Protocol Exerciser" / JUnit Test
@@ -321,14 +320,14 @@ public class KeyGen2Test
           "SubmitURL=\"http://issuer.example.com/keyinit\" " +
           "xmlns=\"" + KeyGen2Constants.KEYGEN2_NS + "\">";
       
-        private static XMLSchemaCache xml_cache;
+        private static JSONDecoderCache json_cache;
         
         static
         {
           try
             {
-              xml_cache = new XMLSchemaCache ();
-              xml_cache.addWrapper (KeyCreationRequestDecoder.class);
+              json_cache = new JSONDecoderCache ();
+              json_cache.addWrapper (KeyCreationRequestDecoder.class);
             }
           catch (IOException e)
             {
@@ -400,7 +399,7 @@ public class KeyGen2Test
         KeyCreationRequestDecoder parse () throws Exception
           {
             finishPIN ();
-            return (KeyCreationRequestDecoder)xml_cache.parse (xml.append ("</KeyCreationRequest>").toString ().getBytes ("UTF-8"));
+            return (KeyCreationRequestDecoder)json_cache.parse (xml.append ("</KeyCreationRequest>").toString ().getBytes ("UTF-8"));
           }
       }
 

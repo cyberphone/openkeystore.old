@@ -21,8 +21,8 @@ import java.io.Serializable;
 
 import java.util.LinkedHashSet;
 
-import org.webpki.xml.DOMAttributeReaderHelper;
-import org.webpki.xml.DOMWriterHelper;
+import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -71,9 +71,9 @@ public class BasicCapabilities implements Serializable
       }
 
 
-    private static void conditionalInput (DOMAttributeReaderHelper ah, LinkedHashSet<String> args, String tag) throws IOException
+    private static void conditionalURIInput (JSONObjectReader rd, LinkedHashSet<String> args, String tag) throws IOException
       {
-        String[] opt_uri_list = ah.getListConditional (tag);
+        String[] opt_uri_list = KeyGen2Validator.getURIListConditional (rd, tag);
         if (opt_uri_list != null)
           {
             for (String uri : opt_uri_list)
@@ -83,28 +83,28 @@ public class BasicCapabilities implements Serializable
           }
       }
 
-    static void read (DOMAttributeReaderHelper ah, BasicCapabilities basic_capabilities) throws IOException
+    static void read (JSONObjectReader rd, BasicCapabilities basic_capabilities) throws IOException
       {
-        conditionalInput (ah, basic_capabilities.algorithms, ALGORITHMS_ATTR);
-        conditionalInput (ah, basic_capabilities.client_attributes, CLIENT_ATTRIBUTES_ATTR);
-        conditionalInput (ah, basic_capabilities.extensions, EXTENSIONS_ATTR);
+        conditionalURIInput (rd, basic_capabilities.algorithms, ALGORITHMS_JSON);
+        conditionalURIInput (rd, basic_capabilities.client_attributes, CLIENT_ATTRIBUTES_JSON);
+        conditionalURIInput (rd, basic_capabilities.extensions, EXTENSIONS_JSON);
       }
 
 
-    private static void conditionalOutput (DOMWriterHelper wr, LinkedHashSet<String> arg_set, String tag)
+    private static void conditionalURIOutput (JSONObjectWriter wr, LinkedHashSet<String> arg_set, String tag) throws IOException
       {
         if (!arg_set.isEmpty ())
           {
-            wr.setListAttribute (tag, arg_set.toArray (new String[0]));
+            wr.setStringArray (tag, arg_set.toArray (new String[0]));
           }
       }
 
 
-    static void write (DOMWriterHelper wr, BasicCapabilities basic_capabilities) throws IOException
+    static void write (JSONObjectWriter wr, BasicCapabilities basic_capabilities) throws IOException
       {
-        conditionalOutput (wr,  basic_capabilities.algorithms, ALGORITHMS_ATTR);
-        conditionalOutput (wr,  basic_capabilities.client_attributes, CLIENT_ATTRIBUTES_ATTR);
-        conditionalOutput (wr,  basic_capabilities.extensions, EXTENSIONS_ATTR);
+        conditionalURIOutput (wr,  basic_capabilities.algorithms, ALGORITHMS_JSON);
+        conditionalURIOutput (wr,  basic_capabilities.client_attributes, CLIENT_ATTRIBUTES_JSON);
+        conditionalURIOutput (wr,  basic_capabilities.extensions, EXTENSIONS_JSON);
       }
 
     

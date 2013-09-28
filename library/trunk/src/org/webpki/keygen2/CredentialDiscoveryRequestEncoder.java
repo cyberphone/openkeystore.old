@@ -20,39 +20,36 @@ import java.io.IOException;
 
 import java.math.BigInteger;
 
-import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
-import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 
 import java.util.Date;
 import java.util.Vector;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import org.webpki.xml.DOMReaderHelper;
-import org.webpki.xml.DOMWriterHelper;
-import org.webpki.xml.XMLObjectWrapper;
-
-import org.webpki.xmldsig.XMLAsymKeySigner;
-import org.webpki.xmldsig.XMLEnvelopedInput;
-import org.webpki.xmldsig.XMLSignatureWrapper;
-import org.webpki.xmldsig.XMLSigner;
-
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
-import org.webpki.crypto.SignerInterface;
+
+import org.webpki.json.JSONArrayWriter;
+import org.webpki.json.JSONAsymKeySigner;
+import org.webpki.json.JSONObjectWriter;
+
 import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryRequest
+public class CredentialDiscoveryRequestEncoder extends ServerEncoder
   {
     ServerCryptoInterface server_crypto_interface;
 
-    public class LookupDescriptor extends XMLObjectWrapper implements XMLEnvelopedInput, AsymKeySignerInterface
+    String submit_url;
+    
+    String server_session_id;
+    
+    String client_session_id;
+
+    public class LookupDescriptor implements AsymKeySignerInterface
       {
         PublicKey key_management_key;
 
@@ -69,9 +66,6 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         Date issued_before;
         Date issued_after;
         
-        Document root;
-        
-
         LookupDescriptor (PublicKey key_management_key)
           {
             this.key_management_key = key_management_key;
@@ -134,110 +128,52 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
             return this;
           }
 
-        @Override
-        public String element ()
+        void write (JSONObjectWriter wr) throws IOException
           {
-            return LOOKUP_SPECIFIER_ELEM;
-          }
-
-        @Override
-        protected void fromXML (DOMReaderHelper rd) throws IOException
-          {
-            throw new IOException ("Should not be called");
-          }
-
-        @Override
-        protected boolean hasQualifiedElements ()
-          {
-            return true;
-          }
-
-        @Override
-        protected void init () throws IOException
-          {
-          }
-
-        @Override
-        public String namespace ()
-          {
-            return KEYGEN2_NS;
-          }
-
-        @Override
-        protected void toXML (DOMWriterHelper wr) throws IOException
-          {
-            wr.initializeRootObject (prefix);
-
-            wr.setBinaryAttribute (NONCE_ATTR, nonce);
+            wr.setString (ID_JSON, id);
             
-            wr.setStringAttribute (ID_ATTR, id);
+            wr.setBinary (NONCE_JSON, nonce);
+            
             if (search_filter)
               {
-                wr.addChildElement (SEARCH_FILTER_ELEM);
+                JSONObjectWriter search_writer = wr.setObject (SEARCH_FILTER_JSON);
                 if (subject_reg_ex != null)
                   {
-                    wr.setStringAttribute (SUBJECT_ATTR, subject_reg_ex);
+                    search_writer.setString (SUBJECT_JSON, subject_reg_ex);
                   }
                 if (issuer_reg_ex != null)
                   {
-                    wr.setStringAttribute (ISSUER_ATTR, issuer_reg_ex);
+                    search_writer.setString (ISSUER_JSON, issuer_reg_ex);
                   }
                 if (serial != null)
                   {
-                    wr.setBigIntegerAttribute (SERIAL_ATTR, serial);
+                    search_writer.setBigInteger (SERIAL_JSON, serial);
                   }
                 if (email_address != null)
                   {
-                    wr.setStringAttribute (EMAIL_ATTR, email_address);
+                    search_writer.setString (EMAIL_JSON, email_address);
                   }
                 if (policy != null)
                   {
-                    wr.setStringAttribute (POLICY_ATTR, policy);
+                    search_writer.setString (POLICY_JSON, policy);
                   }
                 if (excluded_policies != null)
                   {
-                    wr.setListAttribute (EXCLUDED_POLICIES_ATTR, excluded_policies);
+                    search_writer.setStringArray (EXCLUDED_POLICIES_JSON, excluded_policies);
                   }
                 if (issued_before != null)
                   {
-                    wr.setDateTimeAttribute (ISSUED_BEFORE_ATTR, issued_before);
+                    search_writer.setDateTime (ISSUED_BEFORE_JSON, issued_before);
                   }
                 if (issued_after != null)
                   {
-                    wr.setDateTimeAttribute (ISSUED_AFTER_ATTR, issued_after);
+                    search_writer.setDateTime (ISSUED_AFTER_JSON, issued_after);
                   }
-                wr.getParent ();
               }
-          }
-
-        @Override
-        public Document getEnvelopeRoot () throws IOException
-          {
-            return root = getRootDocument ();
-          }
-
-        @Override
-        public Element getInsertElem () throws IOException
-          {
-            return null;
-          }
-
-        @Override
-        public String getReferenceURI () throws IOException
-          {
-            return id;
-          }
-
-        @Override
-        public XMLSignatureWrapper getSignature () throws IOException
-          {
-            throw new IOException ("Should not be called");
-          }
-
-        @Override
-        public Element getTargetElem () throws IOException
-          {
-            return null;
+            JSONAsymKeySigner signer = new JSONAsymKeySigner (this);
+            signer.setSignatureAlgorithm (key_management_key instanceof RSAPublicKey ?
+                                                  AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256);
+            wr.setEnvelopedSignature (signer);
           }
 
         @Override
@@ -253,9 +189,7 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
           }
       }
 
- 
-    private String prefix;  // Default: no prefix
-    
+
     Vector<LookupDescriptor> lookup_descriptors = new Vector<LookupDescriptor> ();
 
     String lookup_prefix = "Lookup.";
@@ -264,8 +198,6 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
     
     int next_lookup_id_suffix = 0;
     
-    boolean ecc_keys;
-
     // Constructors
 
     public CredentialDiscoveryRequestEncoder (ServerState server_state, String submit_url) throws IOException
@@ -274,56 +206,29 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         client_session_id = server_state.client_session_id;
         server_session_id = server_state.server_session_id;
         server_crypto_interface = server_state.server_crypto_interface;
-        super.submit_url = submit_url;
+        this.submit_url = submit_url;
       }
 
 
-    public void setPrefix (String prefix)
-      {
-        this.prefix = prefix;
-      }
-
-
-    public void signRequest (SignerInterface signer) throws IOException
-      {
-        XMLSigner ds = new XMLSigner (signer);
-        ds.removeXMLSignatureNS ();
-        Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_session_id);
-      }
-
-    
     public LookupDescriptor addLookupDescriptor (PublicKey key_management_key)
       {
         LookupDescriptor lo_des = new LookupDescriptor (key_management_key);
         lookup_descriptors.add (lo_des);
-        if (key_management_key instanceof ECPublicKey)
-          {
-            ecc_keys = true;
-          }
         return lo_des;
       }
 
 
-    protected void toXML (DOMWriterHelper wr) throws IOException
+    @Override
+    void writeServerRequest (JSONObjectWriter wr) throws IOException
       {
-        wr.initializeRootObject (prefix);
-
         //////////////////////////////////////////////////////////////////////////
-        // Set top-level attributes
+        // Set top-level properties
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, server_session_id);
+        wr.setString (SERVER_SESSION_ID_JSON, server_session_id);
 
-        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, client_session_id);
+        wr.setString (CLIENT_SESSION_ID_JSON, client_session_id);
 
-        wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
-        
-        XMLSignatureWrapper.addXMLSignatureNS (wr);
-        
-        if (ecc_keys)
-          {
-            XMLSignatureWrapper.addXMLSignature11NS (wr);
-          }
+        wr.setString (SUBMIT_URL_JSON, submit_url);
 
         ////////////////////////////////////////////////////////////////////////
         // Lookup descriptors
@@ -336,14 +241,16 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
         concat.addString (client_session_id);
         concat.addString (server_session_id);
         nonce = HashAlgorithms.SHA256.digest (concat.getResult ());
+        JSONArrayWriter array = wr.setArray (LOOKUP_SPECIFIERS_JSON);
         for (LookupDescriptor im_des : lookup_descriptors)
           {
-            XMLAsymKeySigner ds = new XMLAsymKeySigner (im_des);
-            ds.setSignatureAlgorithm (im_des.key_management_key instanceof ECPublicKey ? AsymSignatureAlgorithms.ECDSA_SHA256 : AsymSignatureAlgorithms.RSA_SHA256);
-            ds.removeXMLSignatureNS ();
-            ds.createEnvelopedSignature (im_des);
-            im_des.root.getDocumentElement ().removeAttributeNS ("http://www.w3.org/2000/xmlns/", prefix == null ? "xmlns" : prefix);
-            wr.addWrapped (im_des);
+            im_des.write (array.setObject ());
           }
+      }
+
+    @Override
+    protected String getQualifier ()
+      {
+        return CREDENTIAL_DISCOVERY_REQUEST_JSON;
       }
   }

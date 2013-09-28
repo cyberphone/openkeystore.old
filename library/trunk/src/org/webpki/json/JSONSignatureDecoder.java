@@ -255,12 +255,6 @@ public class JSONSignatureDecoder extends JSONSignature
         return public_key == null ? JSONSignatureTypes.SYMMETRIC_KEY : JSONSignatureTypes.ASYMMETRIC_KEY;
       }
 
-    public static JSONSignatureDecoder read (JSONObjectReader rd) throws IOException
-      {
-        JSONSignatureDecoder verifier = new JSONSignatureDecoder (rd);
-        return verifier;
-      }
-
     public void verify (JSONVerifier verifier) throws IOException
       {
         if (verifier.getVerifierType () != getSignatureType ())

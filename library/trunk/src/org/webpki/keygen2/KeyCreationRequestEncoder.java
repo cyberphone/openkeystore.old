@@ -22,37 +22,33 @@ import java.security.GeneralSecurityException;
 
 import java.util.Vector;
 
-import org.w3c.dom.Document;
-
 import org.webpki.sks.SecureKeyStore;
 
-import org.webpki.xml.DOMWriterHelper;
-
-import org.webpki.xmldsig.XMLSigner;
-import org.webpki.xmldsig.XMLSignatureWrapper;
-
 import org.webpki.crypto.SignerInterface;
+
+import org.webpki.json.JSONEncoder;
+import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONSignatureEncoder;
+import org.webpki.json.JSONX509Signer;
 
 import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class KeyCreationRequestEncoder extends KeyCreationRequest
+public class KeyCreationRequestEncoder extends JSONEncoder
   {
     String submit_url;
 
     boolean deferred_certification;
 
-    String prefix;  // Default: no prefix
-
     ServerState server_state;
-    
-    private boolean need_signature_ns;
     
     Vector<String> written_pin = new Vector<String> ();
 
     Vector<String> written_puk = new Vector<String> ();
+    
+    JSONObjectWriter wr;
 
     private String algorithm = SecureKeyStore.ALGORITHM_KEY_ATTEST_1;
 
@@ -86,19 +82,11 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
       }
 
 
-    public void setPrefix (String prefix)
-      {
-        this.prefix = prefix;
-      }
-
-
+    private JSONX509Signer signature;
+    
     public void signRequest (SignerInterface signer) throws IOException
       {
-        XMLSigner ds = new XMLSigner (signer);
-        ds.removeXMLSignatureNS ();
-        need_signature_ns = true;
-        Document doc = getRootDocument ();
-        ds.createEnvelopedSignature (doc, server_state.server_session_id);
+        signature = new JSONX509Signer (signer);
       }
     
     
@@ -108,29 +96,23 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
       }
 
 
-    protected void toXML (DOMWriterHelper wr) throws IOException
+    @Override
+    protected void writeJSONData (JSONObjectWriter wr) throws IOException
       {
-        wr.initializeRootObject (prefix);
-
-        if (need_signature_ns)
-          {
-            XMLSignatureWrapper.addXMLSignatureNS (wr);
-          }
-
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setStringAttribute (ID_ATTR, server_state.server_session_id);
+        wr.setString (ID_JSON, server_state.server_session_id);
 
-        wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, server_state.client_session_id);
+        wr.setString (CLIENT_SESSION_ID_JSON, server_state.client_session_id);
 
-        wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
+        wr.setString (SUBMIT_URL_JSON, submit_url);
 
-        wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, algorithm);
+        wr.setString (JSONSignatureEncoder.ALGORITHM_JSON, algorithm);
 
         if (deferred_certification)
           {
-            wr.setBooleanAttribute (DEFERRED_CERTIFICATION_ATTR, deferred_certification);
+            wr.setBoolean (DEFERRED_CERTIFICATION_JSON, deferred_certification);
           }
 
         ////////////////////////////////////////////////////////////////////////
@@ -202,5 +184,21 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
           {
             wr.getParent ();
           }
+        if (signature != null)
+          {
+            wr.setEnvelopedSignature (signature);
+          }
+      }
+
+    @Override
+    protected String getQualifier ()
+      {
+        return KEY_CREATION_REQUEST_JSON;
+      }
+
+    @Override
+    protected String getContext ()
+      {
+        return KEYGEN2_NS;
       }
   }

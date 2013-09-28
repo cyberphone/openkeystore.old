@@ -35,27 +35,19 @@ import java.io.IOException;
 
 import java.util.Vector;
 
-import org.webpki.xml.DOMWriterHelper;
+import org.webpki.json.JSONArrayWriter;
+import org.webpki.json.JSONEncoder;
+import org.webpki.json.JSONObjectWriter;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class PlatformNegotiationResponseEncoder extends PlatformNegotiationResponse
+public class PlatformNegotiationResponseEncoder extends JSONEncoder
   {
-    private String prefix;  // Default: no prefix
+    String server_session_id;
     
+    byte[] nonce;  // For VMs
+
     Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
-
-
-    public void setPrefix (String prefix) throws IOException
-      {
-        this.prefix = prefix;
-      }
-
-
-    public String getPrefix ()
-      {
-        return prefix;
-      }
 
 
     public PlatformNegotiationResponseEncoder addImagePreference (String type_url,
@@ -89,18 +81,17 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
         this.nonce = nonce;
       }
 
-    protected void toXML (DOMWriterHelper wr) throws IOException
+    @Override
+    protected void writeJSONData (JSONObjectWriter wr) throws IOException
       {
-        wr.initializeRootObject (prefix);
-
-        wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
+        wr.setString (SERVER_SESSION_ID_JSON, server_session_id);
         
         ////////////////////////////////////////////////////////////////////////
         // VM mandatory option
         ////////////////////////////////////////////////////////////////////////
         if (nonce != null)
           {
-            wr.setBinaryAttribute (NONCE_ATTR, nonce);
+            wr.setBinary (NONCE_JSON, nonce);
           }
 
         ////////////////////////////////////////////////////////////////////////
@@ -111,14 +102,29 @@ public class PlatformNegotiationResponseEncoder extends PlatformNegotiationRespo
         ////////////////////////////////////////////////////////////////////////
         // Optional image preferences
         ////////////////////////////////////////////////////////////////////////
-        for (ImagePreference im_pref : image_preferences)
+        if (!image_preferences.isEmpty ())
           {
-            wr.addChildElement (IMAGE_PREFERENCE_ELEM);
-            wr.setStringAttribute (TYPE_ATTR, im_pref.type);
-            wr.setStringAttribute (MIME_TYPE_ATTR, im_pref.mime_type);
-            wr.setIntAttribute (WIDTH_ATTR, im_pref.width);
-            wr.setIntAttribute (HEIGHT_ATTR, im_pref.height);
-            wr.getParent ();
+            JSONArrayWriter array = wr.setArray (IMAGE_PREFERENCES_JSON);
+            for (ImagePreference im_pref : image_preferences)
+              {
+                array.setObject ()
+                  .setString (TYPE_JSON, im_pref.type)
+                  .setString (MIME_TYPE_JSON, im_pref.mime_type)
+                  .setInt (WIDTH_JSON, im_pref.width)
+                  .setInt (HEIGHT_JSON, im_pref.height);
+              }
           }
+      }
+    
+    @Override
+    protected String getQualifier ()
+      {
+        return PLATFORM_NEGOTIATION_RESPONSE_JSON;
+      }
+
+    @Override
+    protected String getContext ()
+      {
+        return KEYGEN2_NS;
       }
   }

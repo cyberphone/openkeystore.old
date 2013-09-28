@@ -71,10 +71,10 @@ public class ServerState implements Serializable
 
     enum PostOperation
       {
-        DELETE_KEY            (SecureKeyStore.METHOD_POST_DELETE_KEY,           DELETE_KEY_ELEM), 
-        UNLOCK_KEY            (SecureKeyStore.METHOD_POST_UNLOCK_KEY,           UNLOCK_KEY_ELEM), 
-        UPDATE_KEY            (SecureKeyStore.METHOD_POST_UPDATE_KEY,           UPDATE_KEY_ELEM), 
-        CLONE_KEY_PROTECTION  (SecureKeyStore.METHOD_POST_CLONE_KEY_PROTECTION, CLONE_KEY_PROTECTION_ELEM);
+        DELETE_KEY            (SecureKeyStore.METHOD_POST_DELETE_KEY,           DELETE_KEY_JSON), 
+        UNLOCK_KEY            (SecureKeyStore.METHOD_POST_UNLOCK_KEY,           UNLOCK_KEY_JSON), 
+        UPDATE_KEY            (SecureKeyStore.METHOD_POST_UPDATE_KEY,           UPDATE_KEY_JSON), 
+        CLONE_KEY_PROTECTION  (SecureKeyStore.METHOD_POST_CLONE_KEY_PROTECTION, CLONE_KEY_PROTECTION_JSON);
         
         private byte[] method;
         
@@ -159,8 +159,8 @@ public class ServerState implements Serializable
         
         void writeCore (DOMWriterHelper wr, byte[] mac_data) throws IOException
           {
-            wr.setBinaryAttribute (MAC_ATTR, mac_data);
-            wr.setStringAttribute (TYPE_ATTR, type);
+            wr.setBinaryAttribute (MAC_JSON, mac_data);
+            wr.setStringAttribute (TYPE_JSON, type);
           }
         
         ExtensionInterface (String type)
@@ -193,7 +193,7 @@ public class ServerState implements Serializable
 
         void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
           {
-            wr.addBinary (EXTENSION_ELEM, data);
+            wr.addBinary (EXTENSION_JSON, data);
             writeCore (wr, mac_data);
           }
       }
@@ -222,7 +222,7 @@ public class ServerState implements Serializable
 
         void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
           {
-            wr.addBinary (ENCRYPTED_EXTENSION_ELEM, encrypted_data);
+            wr.addBinary (ENCRYPTED_EXTENSION_JSON, encrypted_data);
             writeCore (wr, mac_data);
           }
       }
@@ -256,9 +256,9 @@ public class ServerState implements Serializable
 
         void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
           {
-            wr.addBinary (LOGOTYPE_ELEM, logotype.getData ());
+            wr.addBinary (LOGOTYPE_JSON, logotype.getData ());
             writeCore (wr, mac_data);
-            wr.setStringAttribute (MIME_TYPE_ATTR, logotype.getMimeType ());
+            wr.setStringAttribute (MIME_TYPE_JSON, logotype.getMimeType ());
           }
       }
 
@@ -340,18 +340,18 @@ public class ServerState implements Serializable
           {
             if (properties.isEmpty ())
               {
-                throw new IOException ("Empty " + PROPERTY_BAG_ELEM + ": " + type);
+                throw new IOException ("Empty " + PROPERTY_BAG_JSON + ": " + type);
               }
-            wr.addChildElement (PROPERTY_BAG_ELEM);
+            wr.addChildElement (PROPERTY_BAG_JSON);
             writeCore (wr, mac_data);
             for (Property property : properties.values ())
               {
-                wr.addChildElement (PROPERTY_ELEM);
-                wr.setStringAttribute (NAME_ATTR, property.name);
-                wr.setStringAttribute (VALUE_ATTR, property.value);
+                wr.addChildElement (PROPERTY_JSON);
+                wr.setStringAttribute (NAME_JSON, property.name);
+                wr.setStringAttribute (VALUE_JSON, property.value);
                 if (property.writable)
                   {
-                    wr.setBooleanAttribute (WRITABLE_ATTR, property.writable);
+                    wr.setBooleanAttribute (WRITABLE_JSON, property.writable);
                   }
                 wr.getParent ();
               }
@@ -387,19 +387,19 @@ public class ServerState implements Serializable
 
         void writePolicy (DOMWriterHelper wr) throws IOException, GeneralSecurityException
           {
-            wr.addChildElement (PUK_POLICY_ELEM);
+            wr.addChildElement (PUK_POLICY_JSON);
 
-            wr.setStringAttribute (ID_ATTR, id);
-            wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
-            wr.setStringAttribute (FORMAT_ATTR, format.getXMLName ());
-            wr.setBinaryAttribute (VALUE_ATTR, encrypted_value);
+            wr.setStringAttribute (ID_JSON, id);
+            wr.setIntAttribute (RETRY_LIMIT_JSON, retry_limit);
+            wr.setStringAttribute (FORMAT_JSON, format.getXMLName ());
+            wr.setBinaryAttribute (VALUE_JSON, encrypted_value);
 
             MacGenerator puk_policy_mac = new MacGenerator ();
             puk_policy_mac.addString (id);
             puk_policy_mac.addArray (encrypted_value);
             puk_policy_mac.addByte (format.getSKSValue ());
             puk_policy_mac.addShort (retry_limit);
-            wr.setBinaryAttribute (MAC_ATTR, mac (puk_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PUK_POLICY));
+            wr.setBinaryAttribute (MAC_JSON, mac (puk_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PUK_POLICY));
           }
       }
 
@@ -479,20 +479,20 @@ public class ServerState implements Serializable
 
         void writePolicy (DOMWriterHelper wr) throws IOException, GeneralSecurityException
           {
-            wr.addChildElement (PIN_POLICY_ELEM);
-            wr.setStringAttribute (ID_ATTR, id);
-            wr.setIntAttribute (MAX_LENGTH_ATTR, max_length);
-            wr.setIntAttribute (MIN_LENGTH_ATTR, min_length);
-            wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
+            wr.addChildElement (PIN_POLICY_JSON);
+            wr.setStringAttribute (ID_JSON, id);
+            wr.setIntAttribute (MAX_LENGTH_JSON, max_length);
+            wr.setIntAttribute (MIN_LENGTH_JSON, min_length);
+            wr.setIntAttribute (RETRY_LIMIT_JSON, retry_limit);
             if (user_modifiable_set)
               {
-                wr.setBooleanAttribute (USER_MODIFIABLE_ATTR, user_modifiable);
+                wr.setBooleanAttribute (USER_MODIFIABLE_JSON, user_modifiable);
               }
             if (grouping != null)
               {
-                wr.setStringAttribute (GROUPING_ATTR, grouping.getXMLName ());
+                wr.setStringAttribute (GROUPING_JSON, grouping.getXMLName ());
               }
-            wr.setStringAttribute (FORMAT_ATTR, format.getXMLName ());
+            wr.setStringAttribute (FORMAT_JSON, format.getXMLName ());
             if (!pattern_restrictions.isEmpty ())
               {
                 Vector<String> prs = new Vector<String> ();
@@ -500,11 +500,11 @@ public class ServerState implements Serializable
                   {
                     prs.add (pr.getXMLName ());
                   }
-                wr.setListAttribute (PATTERN_RESTRICTIONS_ATTR, prs.toArray (new String[0]));
+                wr.setListAttribute (PATTERN_RESTRICTIONS_JSON, prs.toArray (new String[0]));
               }
             if (input_method != null)
               {
-                wr.setStringAttribute (INPUT_METHOD_ATTR, input_method.getXMLName ());
+                wr.setStringAttribute (INPUT_METHOD_JSON, input_method.getXMLName ());
               }
 
             MacGenerator pin_policy_mac = new MacGenerator ();
@@ -519,7 +519,7 @@ public class ServerState implements Serializable
             pin_policy_mac.addShort (min_length);
             pin_policy_mac.addShort (max_length);
             pin_policy_mac.addByte (input_method == null ? InputMethod.ANY.getSKSValue () : input_method.getSKSValue ());
-            wr.setBinaryAttribute (MAC_ATTR, mac (pin_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PIN_POLICY));
+            wr.setBinaryAttribute (MAC_JSON, mac (pin_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PIN_POLICY));
           }
 
         public PINPolicy setInputMethod (InputMethod input_method)
@@ -933,68 +933,68 @@ public class ServerState implements Serializable
                 key_pair_mac.addString (algorithm);
               }
 
-            wr.addChildElement (KEY_ENTRY_ELEM);
+            wr.addChildElement (KEY_ENTRY_JSON);
 
-            wr.setStringAttribute (ID_ATTR, id);
+            wr.setStringAttribute (ID_JSON, id);
 
             if (server_seed != null)
               {
-                wr.setBinaryAttribute (SERVER_SEED_ATTR, server_seed);
+                wr.setBinaryAttribute (SERVER_SEED_JSON, server_seed);
               }
 
             if (device_pin_protection)
               {
-                wr.setBooleanAttribute (DEVICE_PIN_PROTECTION_ATTR, true);
+                wr.setBooleanAttribute (DEVICE_PIN_PROTECTION_JSON, true);
               }
 
             if (preset_pin != null)
               {
-                wr.setBinaryAttribute (PIN_VALUE_ATTR, preset_pin);
+                wr.setBinaryAttribute (PIN_VALUE_JSON, preset_pin);
               }
 
             if (enable_pin_caching_set)
               {
                 if (enable_pin_caching && (pin_policy == null || pin_policy.input_method != InputMethod.TRUSTED_GUI))
                   {
-                    bad ("\"" + ENABLE_PIN_CACHING_ATTR +"\" must be combined with " + InputMethod.TRUSTED_GUI.toString ());
+                    bad ("\"" + ENABLE_PIN_CACHING_JSON +"\" must be combined with " + InputMethod.TRUSTED_GUI.toString ());
                   }
-                wr.setBooleanAttribute (ENABLE_PIN_CACHING_ATTR, enable_pin_caching);
+                wr.setBooleanAttribute (ENABLE_PIN_CACHING_JSON, enable_pin_caching);
               }
 
             if (biometric_protection != null)
               {
-                wr.setStringAttribute (BIOMETRIC_PROTECTION_ATTR, biometric_protection.getXMLName ());
+                wr.setStringAttribute (BIOMETRIC_PROTECTION_JSON, biometric_protection.getXMLName ());
               }
 
             if (export_protection != null)
               {
-                wr.setStringAttribute (EXPORT_PROTECTION_ATTR, export_protection.getXMLName ());
+                wr.setStringAttribute (EXPORT_PROTECTION_JSON, export_protection.getXMLName ());
               }
 
             if (delete_protection != null)
               {
-                wr.setStringAttribute (DELETE_PROTECTION_ATTR, delete_protection.getXMLName ());
+                wr.setStringAttribute (DELETE_PROTECTION_JSON, delete_protection.getXMLName ());
               }
 
             if (friendly_name != null)
               {
-                wr.setStringAttribute (FRIENDLY_NAME_ATTR, friendly_name);
+                wr.setStringAttribute (FRIENDLY_NAME_JSON, friendly_name);
               }
 
-            wr.setStringAttribute (APP_USAGE_ATTR, app_usage.getXMLName ());
+            wr.setStringAttribute (APP_USAGE_JSON, app_usage.getXMLName ());
 
-            wr.setStringAttribute (KEY_ALGORITHM_ATTR, key_specifier.getKeyAlgorithm ().getURI ());
+            wr.setStringAttribute (KEY_ALGORITHM_JSON, key_specifier.getKeyAlgorithm ().getURI ());
             if (key_specifier.getParameters () != null)
               {
-                wr.setBinaryAttribute (KEY_PARAMETERS_ATTR, key_specifier.getParameters ());
+                wr.setBinaryAttribute (KEY_PARAMETERS_JSON, key_specifier.getParameters ());
               }
 
             if (endorsed_algorithms != null)
               {
-                wr.setListAttribute (ENDORSED_ALGORITHMS_ATTR, endorsed_algorithms);
+                wr.setListAttribute (ENDORSED_ALGORITHMS_JSON, endorsed_algorithms);
               }
 
-            wr.setBinaryAttribute (MAC_ATTR, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
+            wr.setBinaryAttribute (MAC_JSON, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
             
             expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
             
@@ -1151,6 +1151,20 @@ public class ServerState implements Serializable
         throw new IOException (error_msg);
       }
     
+    boolean privacy_enabled;
+    boolean privacy_enabled_set;
+    
+    public void setPrivacyEnabled (boolean flag) throws IOException
+      {
+        if (!request_phase || current_phase != ProtocolPhase.PLATFORM_NEGOTIATION)
+          {
+            throw new IOException ("Must be specified before any requests");
+          }
+        privacy_enabled_set = true;
+        privacy_enabled = flag;
+      }
+
+
  
     // Constructor
     public ServerState (ServerCryptoInterface server_crypto_interface)
@@ -1198,28 +1212,32 @@ public class ServerState implements Serializable
             kdf.addString (client_session_id);
             kdf.addString (server_session_id);
             kdf.addString (issuer_uri);
-            kdf.addArray (device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : device_certificate.getEncoded ());
+            kdf.addArray (getDeviceID ());
 
-            MacGenerator session_key_mac_data = new MacGenerator ();
-            session_key_mac_data.addString (provisioning_session_algorithm);
-            session_key_mac_data.addBool (device_certificate == null);
-            session_key_mac_data.addArray (server_ephemeral_key.getEncoded ());
-            session_key_mac_data.addArray (client_ephemeral_key.getEncoded ());
-            session_key_mac_data.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
-            session_key_mac_data.addInt ((int) (prov_init_response.client_time.getTime () / 1000));
-            session_key_mac_data.addInt (session_life_time);
-            session_key_mac_data.addShort (session_key_limit);
+            MacGenerator attestation_arguments = new MacGenerator ();
+            attestation_arguments.addString (client_session_id);
+            attestation_arguments.addString (server_session_id);
+            attestation_arguments.addString (issuer_uri);
+            attestation_arguments.addArray (getDeviceID ());
+            attestation_arguments.addString (provisioning_session_algorithm);
+            attestation_arguments.addBool (device_certificate == null);
+            attestation_arguments.addArray (server_ephemeral_key.getEncoded ());
+            attestation_arguments.addArray (client_ephemeral_key.getEncoded ());
+            attestation_arguments.addArray (key_management_key == null ? new byte[0] : key_management_key.getEncoded ());
+            attestation_arguments.addInt ((int) (prov_init_response.client_time.getTime () / 1000));
+            attestation_arguments.addInt (session_life_time);
+            attestation_arguments.addShort (session_key_limit);
 
             server_crypto_interface.generateAndVerifySessionKey (client_ephemeral_key,
                                                                  kdf.getResult (),
-                                                                 session_key_mac_data.getResult (),
+                                                                 attestation_arguments.getResult (),
                                                                  device_certificate == null ? null : device_certificate,
                                                                  prov_init_response.attestation);
             if (((server_certificate == null ^ prov_init_response.server_certificate_fingerprint == null)) ||
                 (server_certificate != null && !ArrayUtil.compare (prov_init_response.server_certificate_fingerprint, 
                                                                    HashAlgorithms.SHA256.digest (server_certificate.getEncoded ()))))
               {
-                throw new IOException ("Attribute '" + SERVER_CERT_FP_ATTR + "' is missing or is invalid");
+                throw new IOException ("Attribute '" + SERVER_CERT_FP_JSON + "' is missing or is invalid");
               }
             new XMLSymKeyVerifier (new SymKeyVerifierInterface()
               {
@@ -1237,6 +1255,11 @@ public class ServerState implements Serializable
         current_phase = ProtocolPhase.CREDENTIAL_DISCOVERY;
       }
 
+
+    byte[] getDeviceID () throws GeneralSecurityException
+      {
+        return device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : device_certificate.getEncoded ();
+      }
 
     public void update (CredentialDiscoveryResponseDecoder credential_discovery_response) throws IOException
       {

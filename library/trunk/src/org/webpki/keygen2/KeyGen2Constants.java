@@ -18,223 +18,216 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20130820#";
-
-    String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20130813#";
 
 
-    // XML attributes
+    // JSON properties
 
-    String ABORT_URL_ATTR                            = "AbortURL";
+    String ABORT_URL_JSON                            = "AbortURL";
 
-    String ACTION_ATTR                               = "Action";
+    String ACTION_JSON                               = "Action";
 
-    String ALGORITHMS_ATTR                           = "Algorithms";
+    String ALGORITHMS_JSON                           = "Algorithms";
 
-    String APP_USAGE_ATTR                            = "AppUsage";
+    String APP_USAGE_JSON                            = "AppUsage";
 
-    String ATTESTATION_ATTR                          = "Attestation";
+    String ATTESTATION_JSON                          = "Attestation";
 
-    String AUTHORIZATION_ATTR                        = "Authorization";
+    String AUTHORIZATION_JSON                        = "Authorization";
 
-    String BIOMETRIC_PROTECTION_ATTR                 = "BiometricProtection";
+    String BIOMETRIC_PROTECTION_JSON                 = "BiometricProtection";
 
-    String CERTIFICATE_FINGERPRINT_ATTR              = "CertificateFingerprint";
+    String CERTIFICATE_FINGERPRINT_JSON              = "CertificateFingerprint";
 
-    String CLIENT_SESSION_ID_ATTR                    = "ClientSessionID";
+    String CERTIFICATE_PATH_JSON                     = "CertificatePath";
 
-    String CLIENT_TIME_ATTR                          = "ClientTime";
+    String CLIENT_ATTRIBUTE_JSON                     = "ClientAttribute";
 
-    String DEFERRED_CERTIFICATION_ATTR               = "DeferredCertification";
+    String CLIENT_EPHEMERAL_KEY_JSON                 = "ClientEphemeralKey";
 
-    String DELETE_PROTECTION_ATTR                    = "DeleteProtection";
+    String CLIENT_SESSION_ID_JSON                    = "ClientSessionID";
 
-    String EMAIL_ATTR                                = "Email";
+    String CLIENT_TIME_JSON                          = "ClientTime";
 
-    String ENDORSED_ALGORITHMS_ATTR                  = "EndorsedAlgorithms";
-
-    String ENABLE_PIN_CACHING_ATTR                   = "EnablePINCaching";
-
-    String END_ENTITY_CERTIFICATE_ATTR               = "EndEntityCertificate";
-
-    String ERROR_URL_ATTR                            = "ErrorURL";
-
-    String EXCLUDED_POLICIES_ATTR                    = "ExcludedPolicies";
-
-    String EXPIRES_ATTR                              = "Expires";
-
-    String EXPORT_PROTECTION_ATTR                    = "ExportProtection";
-
-    String EXTENSIONS_ATTR                           = "Extensions";
-
-    String CLIENT_ATTRIBUTES_ATTR                    = "ClientAttributes";
-
-    String DEVICE_PIN_PROTECTION_ATTR                = "DevicePINProtection";
-
-    String FORMAT_ATTR                               = "Format";
-
-    String FRIENDLY_NAME_ATTR                        = "FriendlyName";
-
-    String GROUPING_ATTR                             = "Grouping";
-
-    String HEIGHT_ATTR                               = "Height";
-
-    String ID_ATTR                                   = "ID";
-
-    String ISSUER_ATTR                               = "Issuer";
-
-    String INPUT_METHOD_ATTR                         = "InputMethod";
-
-    String ISSUED_BEFORE_ATTR                        = "IssuedBefore";
-
-    String ISSUED_AFTER_ATTR                         = "IssuedAfter";
-
-    String KEY_ALGORITHM_ATTR                        = "KeyAlgorithm";
-
-    String KEY_PARAMETERS_ATTR                       = "KeyParameters";
-
-    String KEY_SIZE_ATTR                             = "KeySize";
-
-    String KEY_SIZES_ATTR                            = "KeySizes";
-
-    String LANGUAGES_ATTR                            = "Languages";
-
-    String LOCKED_ATTR                               = "Locked";
-
-    String MAC_ATTR                                  = "MAC";
-
-    String MAX_LENGTH_ATTR                           = "MaxLength";
-
-    String MIME_TYPE_ATTR                            = "MIMEType";
-
-    String MIN_LENGTH_ATTR                           = "MinLength";
-
-    String NAME_ATTR                                 = "Name";
-
-    String NONCE_ATTR                                = "Nonce";
-
-    String PATTERN_RESTRICTIONS_ATTR                 = "PatternRestrictions";
-
-    String PIN_VALUE_ATTR                            = "PINValue";
+    String CLONE_KEY_PROTECTION_JSON                 = "CloneKeyProtection";
     
-    String PRIVACY_ENABLED_ATTR                      = "PrivacyEnabled";
+    String CREDENTIAL_DISCOVERY_REQUEST_JSON         = "CredentialDiscoveryRequest";
 
-    String POLICY_ATTR                               = "Policy";
-
-    String RETRY_LIMIT_ATTR                          = "RetryLimit";
-
-    String SERIAL_ATTR                               = "Serial";
-
-    String SERVER_CERT_FP_ATTR                       = "ServerCertificateFingerprint";
-
-    String SERVER_SEED_ATTR                          = "ServerSeed";
+    String CREDENTIAL_DISCOVERY_RESPONSE_JSON        = "CredentialDiscoveryResponse";
     
-    String SERVER_SESSION_ID_ATTR                    = "ServerSessionID";
+    String DEFERRED_CERTIFICATION_JSON               = "DeferredCertification";
 
-    String SERVER_TIME_ATTR                          = "ServerTime";
-
-    String SESSION_KEY_LIMIT_ATTR                    = "SessionKeyLimit";
-
-    String SESSION_LIFE_TIME_ATTR                    = "SessionLifeTime";
-
-    String SETTABLE_EXPONENT_ATTR                    = "SettableExponent";
-
-    String SUBJECT_ATTR                              = "Subject";
-
-    String SUBMIT_URL_ATTR                           = "SubmitURL";
-
-    String SUCCESS_URL_ATTR                          = "SuccessURL";
-
-    String TRUST_ANCHOR_ATTR                         = "TrustAnchor";
-
-    String TYPE_ATTR                                 = "Type";
-
-    String USER_MODIFIABLE_ATTR                      = "UserModifiable";
-
-    String VALUE_ATTR                                = "Value";
-
-    String WIDTH_ATTR                                = "Width";
-
-    String WRITABLE_ATTR                             = "Writable";
-
-
-    // XML elements
+    String DELETE_KEY_JSON                           = "DeleteKey";
     
-    String CERTIFICATE_PATH_ELEM                     = "CertificatePath";
+    String DELETE_PROTECTION_JSON                    = "DeleteProtection";
 
-    String CLIENT_ATTRIBUTE_ELEM                     = "ClientAttribute";
+    String DEVICE_CERTIFICATE_PATH_JSON              = "DeviceCertificatePath";
 
-    String CLIENT_EPHEMERAL_KEY_ELEM                 = "ClientEphemeralKey";
+    String DEVICE_PIN_PROTECTION_JSON                = "DevicePINProtection";
 
-    String CLONE_KEY_PROTECTION_ELEM                 = "CloneKeyProtection";
+    String EMAIL_JSON                                = "Email";
+
+    String ENDORSED_ALGORITHMS_JSON                  = "EndorsedAlgorithms";
+
+    String ENABLE_PIN_CACHING_JSON                   = "EnablePINCaching";
+
+    String ENCRYPTED_EXTENSION_JSON                  = "EncryptedExtension";
+
+    String END_ENTITY_CERTIFICATE_JSON               = "EndEntityCertificate";
+
+    String ERROR_URL_JSON                            = "ErrorURL";
+
+    String EXCLUDED_POLICIES_JSON                    = "ExcludedPolicies";
+
+    String EXPIRES_JSON                              = "Expires";
+
+    String EXPORT_PROTECTION_JSON                    = "ExportProtection";
+
+    String EXTENSION_JSON                            = "Extension";
+
+    String EXTENSIONS_JSON                           = "Extensions";
+
+    String CLIENT_ATTRIBUTES_JSON                    = "ClientAttributes";
+
+    String FORMAT_JSON                               = "Format";
+
+    String FRIENDLY_NAME_JSON                        = "FriendlyName";
+
+    String GROUPING_JSON                             = "Grouping";
+
+    String HEIGHT_JSON                               = "Height";
+
+    String ID_JSON                                   = "ID";
+
+    String IMAGE_PREFERENCES_JSON                    = "ImagePreferences";
+
+    String INPUT_METHOD_JSON                         = "InputMethod";
+
+    String ISSUER_JSON                               = "Issuer";
+
+    String ISSUED_BEFORE_JSON                        = "IssuedBefore";
+
+    String ISSUED_AFTER_JSON                         = "IssuedAfter";
+
+    String KEY_ALGORITHM_JSON                        = "KeyAlgorithm";
+
+    String KEY_CREATION_REQUEST_JSON                 = "KeyCreationRequest";
     
-    String CREDENTIAL_DISCOVERY_REQUEST_ELEM         = "CredentialDiscoveryRequest";
+    String KEY_CREATION_RESPONSE_JSON                = "KeyCreationResponse";
 
-    String CREDENTIAL_DISCOVERY_RESPONSE_ELEM        = "CredentialDiscoveryResponse";
+    String KEY_ENTRY_JSON                            = "KeyEntry";       
+
+    String KEY_MANAGEMENT_KEY_JSON                   = "KeyManagementKey";
+
+    String KEY_PARAMETERS_JSON                       = "KeyParameters";
+
+    String KEY_SIZE_JSON                             = "KeySize";
+
+    String KEY_SIZES_JSON                            = "KeySizes";
+
+    String LANGUAGES_JSON                            = "Languages";
+
+    String LOCKED_JSON                               = "Locked";
+
+    String LOGOTYPE_JSON                             = "Logotype";
+
+    String LOOKUP_RESULTS_JSON                       = "LookupResults";
+
+    String LOOKUP_SPECIFIERS_JSON                    = "LookupSpecifiers";
+
+    String MAC_JSON                                  = "MAC";
+
+    String MATCHING_CREDENTIALS_JSON                 = "MatchingCredentials";
+
+    String MAX_LENGTH_JSON                           = "MaxLength";
+
+    String MIME_TYPE_JSON                            = "MIMEType";
+
+    String MIN_LENGTH_JSON                           = "MinLength";
+
+    String NAME_JSON                                 = "Name";
+
+    String NONCE_JSON                                = "Nonce";
+
+    String PATTERN_RESTRICTIONS_JSON                 = "PatternRestrictions";
+
+    String PIN_POLICY_JSON                           = "PINPolicy";       
+
+    String PLATFORM_NEGOTIATION_REQUEST_JSON         = "PlatformNegotiationRequest";
     
-    String DELETE_KEY_ELEM                           = "DeleteKey";
+    String PLATFORM_NEGOTIATION_RESPONSE_JSON        = "PlatformNegotiationResponse";
     
-    String DEVICE_CERTIFICATE_PATH_ELEM              = "DeviceCertificatePath";
+    String POLICY_JSON                               = "Policy";
 
-    String EXTENSION_ELEM                            = "Extension";
-
-    String ENCRYPTED_EXTENSION_ELEM                  = "EncryptedExtension";
-
-    String IMAGE_PREFERENCE_ELEM                     = "ImagePreference";
-
-    String ISSUED_KEY_ELEM                           = "IssuedKey";
-
-    String KEY_CREATION_REQUEST_ELEM                 = "KeyCreationRequest";
+    String PRESET_PIN_JSON                           = "PresetPIN";
     
-    String KEY_CREATION_RESPONSE_ELEM                = "KeyCreationResponse";
+    String PRIVACY_ENABLED_JSON                      = "PrivacyEnabled";
 
-    String KEY_ENTRY_ELEM                            = "KeyEntry";       
+    String PRIVATE_KEY_JSON                          = "PrivateKey";
 
-    String KEY_MANAGEMENT_KEY_ELEM                   = "KeyManagementKey";
+    String PROPERTY_JSON                             = "Property";       
 
-    String MATCHING_CREDENTIAL_ELEM                  = "MatchingCredential";
+    String PROPERTY_BAG_JSON                         = "PropertyBag";       
 
-    String LOGOTYPE_ELEM                             = "Logotype";
-
-    String LOOKUP_RESULT_ELEM                        = "LookupResult";
-
-    String LOOKUP_SPECIFIER_ELEM                     = "LookupSpecifier";
-
-    String PIN_POLICY_ELEM                           = "PINPolicy";       
-
-    String PLATFORM_NEGOTIATION_REQUEST_ELEM         = "PlatformNegotiationRequest";
+    String PROVISIONING_INITIALIZATION_REQUEST_JSON  = "ProvisioningInitializationRequest";
     
-    String PLATFORM_NEGOTIATION_RESPONSE_ELEM        = "PlatformNegotiationResponse";
+    String PROVISIONING_INITIALIZATION_RESPONSE_JSON = "ProvisioningInitializationResponse";
+
+    String PROVISIONING_FINALIZATION_REQUEST_JSON    = "ProvisioningFinalizationRequest";
     
-    String PRIVATE_KEY_ELEM                          = "PrivateKey";
+    String PROVISIONING_FINALIZATION_RESPONSE_JSON   = "ProvisioningFinalizationResponse";
 
-    String PROPERTY_BAG_ELEM                         = "PropertyBag";       
+    String PUBLIC_KEY_JSON                           = "PublicKey";
 
-    String PROPERTY_ELEM                             = "Property";       
+    String PUK_POLICY_JSON                           = "PUKPolicy";       
 
-    String PROVISIONING_INITIALIZATION_REQUEST_ELEM  = "ProvisioningInitializationRequest";
+    String RETRY_LIMIT_JSON                          = "RetryLimit";
+
+    String SEARCH_FILTER_JSON                        = "SearchFilter";
+
+    String SERIAL_JSON                               = "Serial";
+
+    String SERVER_EPHEMERAL_KEY_JSON                 = "ServerEphemeralKey";
+
+    String SERVER_CERT_FP_JSON                       = "ServerCertificateFingerprint";
+
+    String SERVER_SEED_JSON                          = "ServerSeed";
     
-    String PROVISIONING_INITIALIZATION_RESPONSE_ELEM = "ProvisioningInitializationResponse";
+    String SERVER_SESSION_ID_JSON                    = "ServerSessionID";
 
-    String PROVISIONING_FINALIZATION_REQUEST_ELEM    = "ProvisioningFinalizationRequest";
-    
-    String PROVISIONING_FINALIZATION_RESPONSE_ELEM   = "ProvisioningFinalizationResponse";
+    String SERVER_TIME_JSON                          = "ServerTime";
 
-    String PUBLIC_KEY_ELEM                           = "PublicKey";
+    String SESSION_KEY_LIMIT_JSON                    = "SessionKeyLimit";
 
-    String PUK_POLICY_ELEM                           = "PUKPolicy";       
+    String SESSION_LIFE_TIME_JSON                    = "SessionLifeTime";
 
-    String SERVER_EPHEMERAL_KEY_ELEM                 = "ServerEphemeralKey";
+    String SETTABLE_EXPONENT_JSON                    = "SettableExponent";
 
-    String SYMMETRIC_KEY_ELEM                        = "SymmetricKey";
+    String SUBJECT_JSON                              = "Subject";
 
-    String SEARCH_FILTER_ELEM                        = "SearchFilter";
+    String SUBMIT_URL_JSON                           = "SubmitURL";
 
-    String UNLOCK_KEY_ELEM                           = "UnlockKey";
+    String SUCCESS_URL_JSON                          = "SuccessURL";
 
-    String UPDATE_KEY_MANAGEMENT_KEY_ELEM            = "UpdateKeyManagementKey";
+    String SYMMETRIC_KEY_JSON                        = "SymmetricKey";
 
-    String UPDATE_KEY_ELEM                           = "UpdateKey";
+    String TRUST_ANCHOR_JSON                         = "TrustAnchor";
 
-    String VIRTUAL_MACHINE_ELEM                      = "VirtualMachine";
+    String TYPE_JSON                                 = "Type";
+
+    String UNLOCK_KEY_JSON                           = "UnlockKey";
+
+    String UPDATE_KEY_MANAGEMENT_KEY_JSON            = "UpdateKeyManagementKey";
+
+    String UPDATE_KEY_JSON                           = "UpdateKey";
+
+    String USER_MODIFIABLE_JSON                      = "UserModifiable";
+
+    String VALUE_JSON                                = "Value";
+
+    String VIRTUAL_MACHINE_JSON                      = "VirtualMachine";
+
+    String WIDTH_JSON                                = "Width";
+
+    String WRITABLE_JSON                             = "Writable";
   }

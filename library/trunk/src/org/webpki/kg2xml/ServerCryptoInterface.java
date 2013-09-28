@@ -19,7 +19,6 @@ package org.webpki.kg2xml;
 import java.io.IOException;
 import java.io.Serializable;
 
-import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
 import java.security.cert.X509Certificate;
@@ -44,5 +43,5 @@ public interface ServerCryptoInterface extends Serializable
 
     public byte[] generateKeyManagementAuthorization (PublicKey key_management_key, byte[] data) throws IOException;
     
-    public PublicKey[] enumerateKeyManagementKeys () throws IOException, GeneralSecurityException;
+    public PublicKey[] enumerateKeyManagementKeys () throws IOException;
   }

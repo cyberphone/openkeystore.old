@@ -18,22 +18,20 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import org.webpki.xml.DOMReaderHelper;
-import org.webpki.xml.DOMAttributeReaderHelper;
-
-import org.webpki.xmldsig.XMLSignatureWrapper;
-import org.webpki.xmldsig.XMLVerifier;
-
-import org.webpki.crypto.VerifierInterface;
+import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class PlatformNegotiationRequestDecoder extends PlatformNegotiationRequest
+public class PlatformNegotiationRequestDecoder extends ClientDecoder
   {
-    private XMLSignatureWrapper signature;  // Optional
-
     BasicCapabilities basic_capabilities = new BasicCapabilities (true);
     
+    String server_session_id;
+
+    String submit_url;
+    
+    String abort_url; // Optional
+
     public BasicCapabilities getBasicCapabilities ()
       {
         return basic_capabilities;
@@ -57,50 +55,37 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
       }
 
 
-    public void verifySignature (VerifierInterface verifier) throws IOException
-      {
-        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);
-      }
-
-
-    public boolean isSigned ()
-      {
-        return signature != null;
-      }
-
+    boolean privacy_enabled;
 
     public boolean getPrivacyEnabledFlag ()
       {
         return privacy_enabled;
       }
 
-
-    protected void fromXML (DOMReaderHelper rd) throws IOException
+    
+    @Override
+    void readServerRequest (JSONObjectReader rd) throws IOException
       {
-        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Read the top level attributes
+        // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
+        server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 
-        server_session_id = ah.getString (ID_ATTR);
+        submit_url = getURL (rd, SUBMIT_URL_JSON);
 
-        submit_url = ah.getString (SUBMIT_URL_ATTR);
-
-        abort_url = ah.getStringConditional (ABORT_URL_ATTR);
-
-        privacy_enabled = ah.getBooleanConditional (PRIVACY_ENABLED_ATTR);
-
-        BasicCapabilities.read (ah, basic_capabilities);
-
-        //////////////////////////////////////////////////////////////////////////
-        // Get the child elements
-        //////////////////////////////////////////////////////////////////////////
-        rd.getChild ();
-
-        if (rd.hasNext ())// Must be a Signature otherwise schema validation has gone wrong...
+        if (rd.hasProperty (ABORT_URL_JSON))
           {
-            signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
+            abort_url = getURL (rd, ABORT_URL_JSON);
           }
+
+        privacy_enabled = rd.getBooleanConditional (PRIVACY_ENABLED_JSON);
+
+        BasicCapabilities.read (rd, basic_capabilities);
+      }
+
+    @Override
+    protected String getQualifier ()
+      {
+        return PLATFORM_NEGOTIATION_REQUEST_JSON;
       }
   }

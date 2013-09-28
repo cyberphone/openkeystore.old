@@ -34,19 +34,47 @@ import org.webpki.sks.PatternRestriction;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
 
-import org.webpki.xml.DOMReaderHelper;
-import org.webpki.xml.DOMAttributeReaderHelper;
-
-import org.webpki.xmldsig.XMLVerifier;
-import org.webpki.xmldsig.XMLSignatureWrapper;
-
 import org.webpki.crypto.VerifierInterface;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class KeyCreationRequestDecoder extends KeyCreationRequest
+public class KeyCreationRequestDecoder extends KeyGen2Validator
   {
-    public class PUKPolicy
+    abstract class PresetValueReference
+      {
+        byte[] encrypted_value;
+
+        PresetValueReference () throws IOException
+          {
+            encrypted_value = getKeyGen2EncryptedProtectionValue ();
+          }
+        
+        public byte[] getEncryptedValue ()
+          {
+            return encrypted_value;
+          }
+      }
+
+
+    public class PresetPIN extends PresetValueReference
+      {
+        boolean user_modifiable;
+
+        PresetPIN (JSONReaderHelper rd) throws IOException
+          {
+            super ();
+            user_modifiable = rd.getBooleanConditional (USER_MODIFIABLE_JSON);
+          }
+
+
+        public boolean isUserModifiable ()
+          {
+            return user_modifiable;
+          }
+      }
+
+
+    public class PUKPolicy extends PresetValueReference
       {
         byte[] mac;
         
@@ -57,16 +85,14 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
         short retry_limit;
         
         String id;
-        
-        byte[] encrypted_value;
  
-        PUKPolicy (DOMReaderHelper rd) throws IOException
+        PUKPolicy (JSONReaderHelper rd) throws IOException
           {
-            encrypted_value = rd.getAttributeHelper ().getBinary (VALUE_ATTR);
-            retry_limit = (short)rd.getAttributeHelper ().getInt (RETRY_LIMIT_ATTR);
-            id = rd.getAttributeHelper ().getString (ID_ATTR);
-            format = PassphraseFormat.getPassphraseFormatFromString (rd.getAttributeHelper ().getString (FORMAT_ATTR));
-            mac = rd.getAttributeHelper ().getBinary (MAC_ATTR);
+            super ();
+            retry_limit = getAuthorizationRetryLimit (0);
+            id = getKeyGen2ID (ID_JSON);
+            format = getPassphraseFormat ();
+            mac = getKeyGen2MAC ();
           }
 
 
@@ -79,11 +105,6 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
         public PassphraseFormat getFormat ()
           {
             return format;
-          }
-
-        public byte[] getEncryptedValue ()
-          {
-            return encrypted_value;
           }
 
 
@@ -136,34 +157,34 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         Set<PatternRestriction> pattern_restrictions = EnumSet.noneOf (PatternRestriction.class);
 
-        PINPolicy (DOMReaderHelper rd) throws IOException
+        PINPolicy (JSONReaderHelper rd) throws IOException
           {
-            DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+          
+            mac = rd.getBinary (MAC_JSON);
             
-            mac = ah.getBinary (MAC_ATTR);
-            
-            id = ah.getString (ID_ATTR);
+            id = rd.getString (ID_JSON);
 
-            min_length = (short)ah.getInt (MIN_LENGTH_ATTR);
+            min_length = getKeyGen2PINLength (MIN_LENGTH_JSON);
 
-            max_length = (short)ah.getInt (MAX_LENGTH_ATTR);
+            max_length = getKeyGen2PINLength (MAX_LENGTH_JSON);
 
             if (min_length > max_length)
               {
                 bad ("PIN length: min > max");
               }
 
-            retry_limit = (short)ah.getInt (RETRY_LIMIT_ATTR);
+            retry_limit = getAuthorizationRetryLimit (1);
 
-            format = PassphraseFormat.getPassphraseFormatFromString (ah.getString (FORMAT_ATTR));
+            format = getPassphraseFormat ();
 
-            grouping = Grouping.getGroupingFromString (ah.getStringConditional (GROUPING_ATTR, Grouping.NONE.getXMLName ()));
+            grouping = Grouping.getGroupingFromString (rd.getStringConditional (GROUPING_JSON, Grouping.NONE.getXMLName ()));
 
-            input_method = InputMethod.getInputMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR, InputMethod.ANY.getXMLName ()));
+            input_method = InputMethod.getInputMethodFromString (rd.getStringConditional (INPUT_METHOD_JSON, InputMethod.ANY.getXMLName ()));
             
-            user_modifiable = ah.getBooleanConditional (USER_MODIFIABLE_ATTR, true);
+            read_user_modifiable = rd.getStringConditional (USER_MODIFIABLE_JSON) != null;
+            user_modifiable = rd.getBooleanConditional (USER_MODIFIABLE_JSON, false);
 
-            String pr[] = ah.getListConditional (PATTERN_RESTRICTIONS_ATTR);
+            String pr[] = rd.getListConditional (PATTERN_RESTRICTIONS_JSON);
             if (pr != null)
               {
                 for (String pattern : pr)
@@ -210,7 +231,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
           }
 
 
-        boolean user_defined = true;
+        boolean user_defined;
         
         public boolean getUserDefinedFlag ()
           {
@@ -219,6 +240,8 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
 
         boolean user_modifiable;
+        
+        boolean read_user_modifiable;
         
         public boolean getUserModifiableFlag ()
           {
@@ -275,7 +298,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         PINPolicy pin_policy;
         
-        byte[] preset_pin;
+        PresetPIN preset_pin;
 
         byte[] user_set_pin;
 
@@ -285,58 +308,53 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         KeySpecifier key_specifier;
         
-        KeyObject (DOMReaderHelper rd, 
+        KeyObject (JSONReaderHelper rd, 
                    PINPolicy pin_policy,
-                   boolean start_of_pin_group) throws IOException
+                   boolean start_of_pin_group, 
+                   PresetPIN preset_pin,
+                   boolean device_pin_protected) throws IOException
           {
-            rd.getNext (KEY_ENTRY_ELEM);
+            rd.getNext (KEY_ENTRY_JSON);
+            rd.getChild ();
             this.pin_policy = pin_policy;
             this.start_of_pin_group = start_of_pin_group;
- 
-            DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+            this.preset_pin = preset_pin;
+            this.device_pin_protected = device_pin_protected;
 
-            id = ah.getString (ID_ATTR);
-            
-            
+            id = rd.getString (ID_JSON);
 
-            mac = ah.getBinary (MAC_ATTR);
+            key_specifier = new KeySpecifier (getKeyGen2URI (KEY_ALGORITHM_JSON),
+                                              rd.getBinaryConditional (KEY_PARAMETERS_JSON));
 
-            friendly_name = ah.getStringConditional (FRIENDLY_NAME_ATTR);
-            
-            device_pin_protected = ah.getBooleanConditional (DEVICE_PIN_PROTECTION_ATTR, false);
-            
-            preset_pin = ah.getBinaryConditional (PIN_VALUE_ATTR);
-            if (preset_pin != null)
+            if (rd.hasNext (ENDORSED_ALGORITHMS_JSON))
               {
-                pin_policy.user_defined = false;
-              }
-
-            app_usage = AppUsage.getAppUsageFromString (ah.getString (APP_USAGE_ATTR));
-
-            enable_pin_caching = ah.getBooleanConditional (ENABLE_PIN_CACHING_ATTR);
-            
-            endorsed_algorithms = ah.getListConditional (ENDORSED_ALGORITHMS_ATTR);
-            if (endorsed_algorithms == null)
-              {
-                endorsed_algorithms = new String[0];
+                endorsed_algorithms = BasicCapabilities.getSortedAlgorithms (getKeyGen2URIList (ENDORSED_ALGORITHMS_JSON));
               }
             else
               {
-                endorsed_algorithms = BasicCapabilities.getSortedAlgorithms (endorsed_algorithms);
+                endorsed_algorithms = new String[0];
               }
 
-            server_seed = ah.getBinaryConditional (SERVER_SEED_ATTR);
+            server_seed = rd.getBinaryConditional (SERVER_SEED_JSON);
 
-            biometric_protection = BiometricProtection.getBiometricProtectionFromString (ah.getStringConditional (BIOMETRIC_PROTECTION_ATTR, 
+            app_usage = AppUsage.getAppUsageFromString (rd.getString (APP_USAGE_JSON));
+
+            enable_pin_caching = rd.getBooleanConditional (ENABLE_PIN_CACHING_JSON);
+            
+            biometric_protection = BiometricProtection.getBiometricProtectionFromString (rd.getStringConditional (BIOMETRIC_PROTECTION_JSON, 
                                                                                          BiometricProtection.NONE.getXMLName ()));
 
-            delete_protection = DeleteProtection.getDeletePolicyFromString (ah.getStringConditional (DELETE_PROTECTION_ATTR, 
+            delete_protection = DeleteProtection.getDeletePolicyFromString (rd.getStringConditional (DELETE_PROTECTION_JSON, 
                                                                             DeleteProtection.NONE.getXMLName ()));
-            export_protection = ExportProtection.getExportPolicyFromString (ah.getStringConditional (EXPORT_PROTECTION_ATTR, 
+
+            export_protection = ExportProtection.getExportPolicyFromString (rd.getStringConditional (EXPORT_PROTECTION_JSON, 
                                                                             ExportProtection.NON_EXPORTABLE.getXMLName ()));
 
-            key_specifier = new KeySpecifier (ah.getString (KEY_ALGORITHM_ATTR),
-                                              ah.getBinaryConditional (KEY_PARAMETERS_ATTR));
+            friendly_name = rd.getStringConditional (FRIENDLY_NAME_JSON);
+
+            mac = rd.getBinary (MAC_JSON);
+
+            rd.getParent ();
           }
 
 
@@ -348,7 +366,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         public byte[] getPresetPIN ()
           {
-            return preset_pin;
+            return preset_pin == null ? null : preset_pin.encrypted_value;
           }
 
 
@@ -753,35 +771,54 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
       }
 
     
-    private void bad (String error_msg) throws IOException
-      {
-        throw new IOException (error_msg);
-      }
-
-
-    private KeyObject readKeyProperties (DOMReaderHelper rd,
+    private KeyObject readKeyProperties (JSONReaderHelper rd,
                                          PINPolicy pin_policy,
                                          boolean start_of_pin_group) throws IOException
       {
-        KeyObject rk = new KeyObject (rd, pin_policy, start_of_pin_group);
-        request_objects.add (rk);
+        KeyObject rk;
+        if (rd.hasNext (PRESET_PIN_JSON))
+          {
+            rd.getNext (PRESET_PIN_JSON);
+            rd.getChild ();
+            PresetPIN preset = new PresetPIN (rd);
+            request_objects.add (rk = new KeyObject (rd, pin_policy, start_of_pin_group, preset, false));
+            rd.getParent ();
+          }
+        else
+          {
+            if (pin_policy != null)
+              {
+                pin_policy.user_defined = true;
+                if (!pin_policy.read_user_modifiable)
+                  {
+                    pin_policy.user_modifiable = true;
+                  }
+              }
+            request_objects.add (rk = new KeyObject (rd, pin_policy, start_of_pin_group, null, false));
+          }
         return rk;
       }
       
 
-    private void readKeyProperties (DOMReaderHelper rd) throws IOException
+    private void readKeyProperties (JSONReaderHelper rd, boolean device_pin_protected) throws IOException
       {
-        request_objects.add (new KeyObject (rd, null, false));
+        request_objects.add (new KeyObject (rd, null, false, null, device_pin_protected));
       }
 
 
-    private void readPINPolicy (DOMReaderHelper rd, boolean puk_start, PUKPolicy puk_policy) throws IOException
+    private PassphraseFormat getPassphraseFormat () throws IOException
+      {
+        return PassphraseFormat.getPassphraseFormatFromString (rd.getString (FORMAT_JSON));
+      }
+
+
+    private void readPINPolicy (JSONReaderHelper rd, boolean puk_start, PUKPolicy puk_policy) throws IOException
       {
         boolean start = true;
-        rd.getNext (PIN_POLICY_ELEM);
+        rd.getNext (PIN_POLICY_JSON);
+        rd.getChild ();
         PINPolicy upp = new PINPolicy (rd);
         upp.puk_policy = puk_policy;
-        rd.getChild ();
         do
           {
             KeyObject rk = readKeyProperties (rd, upp, start);
@@ -800,7 +837,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
     private boolean deferred_certification;
 
-    private XMLSignatureWrapper signature;  // Optional
+    private JSONEnvelopedSignatureDecoder signature;  // Optional
 
     private String server_session_id;
 
@@ -835,7 +872,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
-        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);
+        signature.validate (verifier);
       }
 
 
@@ -851,41 +888,57 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
       }
 
 
-    protected void fromXML (DOMReaderHelper rd) throws IOException
+    @Override
+    protected String getVersion ()
       {
-        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
+        return KEYGEN2_NS;
+      }
+
+
+    @Override
+    protected String getRootProperty ()
+      {
+        return KEY_CREATION_REQUEST_JSON;
+      }
+
+
+    @Override
+    protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
+      {
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Initiate the KeyGen2-specific validator
+        /////////////////////////////////////////////////////////////////////////////////////////
+        super.rd = rd;
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Read the top level attributes
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        server_session_id = ah.getString (ID_ATTR);
+        server_session_id = getKeyGen2ID (ID_JSON);
 
-        client_session_id = ah.getString (CLIENT_SESSION_ID_ATTR);
+        client_session_id = getKeyGen2ID (CLIENT_SESSION_ID_JSON);
 
-        submit_url = ah.getString (SUBMIT_URL_ATTR);
+        submit_url = getKeyGen2URL (SUBMIT_URL_JSON);
 
-        deferred_certification = ah.getBooleanConditional (DEFERRED_CERTIFICATION_ATTR);
+        deferred_certification = rd.getBooleanConditional (DEFERRED_CERTIFICATION_JSON);
 
-        algorithm = ah.getString (XMLSignatureWrapper.ALGORITHM_ATTR);
-
-        rd.getChild ();
+        algorithm = getKeyGen2URI (JSONEnvelopedSignatureDecoder.ALGORITHM_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the request and management elements [1..n]
+        // Get the actual request and management elements [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
          while (true)
           {
-            if (rd.hasNext (KEY_ENTRY_ELEM))
+            if (rd.hasNext (KEY_ENTRY_JSON))
               {
-                readKeyProperties (rd);
+                readKeyProperties (rd, false);
               }
-            else if (rd.hasNext (PUK_POLICY_ELEM))
+            else if (rd.hasNext (PUK_POLICY_JSON))
               {
                 boolean start = true;
-                rd.getNext (PUK_POLICY_ELEM);
-                PUKPolicy pk = new PUKPolicy (rd);
+                rd.getNext (PUK_POLICY_JSON);
                 rd.getChild ();
+                PUKPolicy pk = new PUKPolicy (rd);
                 do
                   {
                     readPINPolicy (rd, start, pk);
@@ -894,21 +947,26 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
                 while (rd.hasNext ());
                 rd.getParent ();
               }
-            else if (rd.hasNext (PIN_POLICY_ELEM))
+            else if (rd.hasNext (PIN_POLICY_JSON))
               {
                 readPINPolicy (rd, false, null);
               }
+            else if (rd.hasNext (DEVICE_PIN_PROTECTION_JSON))
+              {
+                rd.getNext (DEVICE_PIN_PROTECTION_JSON);
+                rd.getChild ();
+                readKeyProperties (rd, true);
+                rd.getParent ();
+              }
             else break;
           }
- 
+
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional signature
         /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext ()) // Must be a Signature otherwise schema validation has gone wrong...
+        if (rd.hasNext ()) // Must be a signature otherwise something has gone wrong...
           {
-            signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
+            signature = JSONEnvelopedSignatureDecoder.read (rd, ID_JSON, server_session_id);
           }
       }
-
   }
-

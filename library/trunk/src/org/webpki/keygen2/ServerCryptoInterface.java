@@ -19,7 +19,6 @@ package org.webpki.keygen2;
 import java.io.IOException;
 import java.io.Serializable;
 
-import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
 import java.security.cert.X509Certificate;
@@ -32,7 +31,7 @@ public interface ServerCryptoInterface extends Serializable
     
     void generateAndVerifySessionKey (ECPublicKey client_ephemeral_key,
                                       byte[] kdf_data,
-                                      byte[] session_key_mac_data,
+                                      byte[] attestation_arguments,
                                       X509Certificate device_certificate,
                                       byte[] session_attestation) throws IOException;
 
@@ -44,5 +43,5 @@ public interface ServerCryptoInterface extends Serializable
 
     public byte[] generateKeyManagementAuthorization (PublicKey key_management_key, byte[] data) throws IOException;
     
-    public PublicKey[] enumerateKeyManagementKeys () throws IOException, GeneralSecurityException;
+    public PublicKey[] enumerateKeyManagementKeys () throws IOException;
   }

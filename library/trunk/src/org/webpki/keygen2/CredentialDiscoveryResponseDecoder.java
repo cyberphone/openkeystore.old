@@ -24,12 +24,12 @@ import java.util.Vector;
 
 import org.webpki.crypto.CertificateUtil;
 
-import org.webpki.xml.DOMReaderHelper;
-import org.webpki.xml.DOMAttributeReaderHelper;
+import org.webpki.json.JSONArrayReader;
+import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryResponse
+public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
   {
     public class MatchingCredential
       {
@@ -72,23 +72,20 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
         
         Vector<MatchingCredential> matching_credentials = new Vector<MatchingCredential> ();
 
-        LookupResult (DOMReaderHelper rd) throws IOException
+        LookupResult (JSONObjectReader rd) throws IOException
           {
-            DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-            rd.getNext (LOOKUP_RESULT_ELEM);
-            id = ah.getString (ID_ATTR);
-            rd.getChild ();
-            while (rd.hasNext ())
+            id = KeyGen2Validator.getID (rd, ID_JSON);
+            JSONArrayReader matches = rd.getArray (MATCHING_CREDENTIALS_JSON);
+            while (matches.hasMore ())
               {
-                rd.getNext (MATCHING_CREDENTIAL_ELEM);
-                MatchingCredential mc = new MatchingCredential ();
-                mc.client_session_id = ah.getString (CLIENT_SESSION_ID_ATTR);
-                mc.server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
-                mc.end_entity_certificate = CertificateUtil.getCertificateFromBlob (ah.getBinary (END_ENTITY_CERTIFICATE_ATTR));
-                mc.locked = ah.getBooleanConditional (LOCKED_ATTR);
-                matching_credentials.add (mc);
+                JSONObjectReader match_object = matches.getObject ();
+                MatchingCredential matching_credential = new MatchingCredential ();
+                matching_credential.client_session_id = KeyGen2Validator.getID (match_object, CLIENT_SESSION_ID_JSON);
+                matching_credential.server_session_id = KeyGen2Validator.getID (match_object, SERVER_SESSION_ID_JSON);
+                matching_credential.end_entity_certificate = CertificateUtil.getCertificateFromBlob (match_object.getBinary (END_ENTITY_CERTIFICATE_JSON));
+                matching_credential.locked = match_object.getBooleanConditional (LOCKED_JSON);
+                matching_credentials.add (matching_credential);
               }
-            rd.getParent ();
           }
 
 
@@ -127,28 +124,25 @@ public class CredentialDiscoveryResponseDecoder extends CredentialDiscoveryRespo
       }
     
     
-    protected void fromXML (DOMReaderHelper rd) throws IOException
+    @Override
+    protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
       {
-        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Read the top level attributes
+        // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
+        server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 
-        server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
-
-        client_session_id = ah.getString (ID_ATTR);
-
-        rd.getChild ();
+        client_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the lookup_results [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
+        JSONArrayReader lookups = rd.getArray (LOOKUP_RESULTS_JSON);
         do 
           {
-            LookupResult o = new LookupResult (rd);
-            lookup_results.add (o);
+            LookupResult lookup_result = new LookupResult (lookups.getObject ());
+            lookup_results.add (lookup_result);
           }
-        while (rd.hasNext (LOOKUP_RESULT_ELEM));
+        while (lookups.hasMore ());
       }
   }

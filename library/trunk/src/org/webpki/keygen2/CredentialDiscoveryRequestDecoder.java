@@ -21,24 +21,22 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import java.security.PublicKey;
+
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 
-import org.w3c.dom.Element;
-
-import org.webpki.xml.DOMReaderHelper;
-import org.webpki.xml.DOMAttributeReaderHelper;
-
-import org.webpki.xmldsig.XMLAsymKeyVerifier;
-import org.webpki.xmldsig.XMLSignatureWrapper;
-import org.webpki.xmldsig.XMLVerifier;
-
+import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
-import org.webpki.crypto.VerifierInterface;
+
+import org.webpki.json.JSONArrayReader;
+import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONSignatureDecoder;
+
+import org.webpki.util.ArrayUtil;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryRequest
+public class CredentialDiscoveryRequestDecoder extends ClientDecoder
   {
 
     public class LookupSpecifier
@@ -54,38 +52,33 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         GregorianCalendar issued_before;
         GregorianCalendar issued_after;
 
-        byte[] nonce;
-        
-        XMLSignatureWrapper signature;
-        
-        Element element;
-        
         PublicKey key_management_key;
 
-        LookupSpecifier () { }
-
-
-        LookupSpecifier (DOMReaderHelper rd) throws IOException
+        LookupSpecifier (JSONObjectReader rd) throws IOException
           {
-            DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-            element = rd.getNext (LOOKUP_SPECIFIER_ELEM);
-            id = ah.getString (ID_ATTR);
-            nonce = ah.getBinary (NONCE_ATTR);
-            rd.getChild ();
-            if (rd.hasNext (SEARCH_FILTER_ELEM))
+            id = KeyGen2Validator.getID (rd, ID_JSON);
+            if (!ArrayUtil.compare (nonce_reference, rd.getBinary (NONCE_JSON)))
               {
-                rd.getNext ();
-                issuer_reg_ex = ah.getStringConditional (ISSUER_ATTR);
-                subject_reg_ex = ah.getStringConditional (SUBJECT_ATTR);
-                serial = ah.getBigIntegerConditional (SERIAL_ATTR);
-                email_address = ah.getStringConditional (EMAIL_ATTR);
-                policy = ah.getStringConditional (POLICY_ATTR);
-                excluded_policies = ah.getListConditional (EXCLUDED_POLICIES_ATTR);
-                issued_before = ah.getDateTimeConditional (ISSUED_BEFORE_ATTR);
-                issued_after = ah.getDateTimeConditional (ISSUED_AFTER_ATTR);
+                throw new IOException ("\"" + NONCE_JSON + "\"  error");
               }
-            signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
-            rd.getParent ();
+            if (rd.hasProperty (SEARCH_FILTER_JSON))
+              {
+                JSONObjectReader search = rd.getObject (SEARCH_FILTER_JSON);
+                issuer_reg_ex = search.getStringConditional (ISSUER_JSON);
+                subject_reg_ex = search.getStringConditional (SUBJECT_JSON);
+                serial = KeyGen2Validator.getBigIntegerConditional (search, SERIAL_JSON);
+                email_address = search.getStringConditional (EMAIL_JSON);
+                policy = search.getStringConditional (POLICY_JSON);
+                excluded_policies = search.getStringArrayConditional (EXCLUDED_POLICIES_JSON);
+                issued_before = KeyGen2Validator.getDateTimeConditional (search, ISSUED_BEFORE_JSON);
+                issued_after = KeyGen2Validator.getDateTimeConditional (search, ISSUED_AFTER_JSON);
+              }
+            JSONSignatureDecoder signature = new JSONSignatureDecoder (rd);
+            key_management_key = signature.getPublicKey ();
+            if (((AsymSignatureAlgorithms) signature.getSignatureAlgorithm ()).getDigestAlgorithm () != HashAlgorithms.SHA256)
+              {
+                throw new IOException ("Lookup signature must use SHA256");
+              }
           }
 
 
@@ -146,10 +139,9 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
 
     String server_session_id;
 
-    private String submit_url;
+    String submit_url;
 
-    private XMLSignatureWrapper signature;                  // Optional
-
+    byte[] nonce_reference;
 
     public String getServerSessionID ()
       {
@@ -175,60 +167,45 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
       }
     
     
-    public void verifySignature (VerifierInterface verifier) throws IOException
+    @Override
+    void readServerRequest (JSONObjectReader rd) throws IOException
       {
-        new XMLVerifier (verifier).validateEnvelopedSignature (this, null, signature, server_session_id);
-      }
-
-
-    public boolean isSigned ()
-      {
-        return signature != null;
-      }
-
-
-    protected void fromXML (DOMReaderHelper rd) throws IOException
-      {
-        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Read the top level attributes
+        // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
+        server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 
-        client_session_id = ah.getString (CLIENT_SESSION_ID_ATTR);
+        client_session_id = getID (rd, CLIENT_SESSION_ID_JSON);
 
-        server_session_id = ah.getString (ID_ATTR);
-
-        submit_url = ah.getString (SUBMIT_URL_ATTR);
+        submit_url = getURL (rd, SUBMIT_URL_JSON);
         
-        rd.getChild ();
-
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the lookup_specifiers [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        do 
-          {
-            LookupSpecifier o = new LookupSpecifier (rd);
-            if (lookup_specifiers.put (o.id, o) != null)
-              {
-                throw new IOException ("Duplicate id: " + o.id);
-              }
-            XMLAsymKeyVerifier verifier = new XMLAsymKeyVerifier ();
-            verifier.validateEnvelopedSignature (this, o.element, o.signature, o.id);
-            if (verifier.getSignatureAlgorithm ().getDigestAlgorithm () != HashAlgorithms.SHA256)
-              {
-                throw new IOException ("Lookup signature must use SHA256");
-              }
-            o.key_management_key = verifier.getPublicKey ();
-          }
-        while (rd.hasNext (LOOKUP_SPECIFIER_ELEM));
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Get optional signature
+        // Calculate proper nonce
         /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext ())// Must be a Signature otherwise schema validation has gone wrong...
+        MacGenerator mac = new MacGenerator ();
+        mac.addString (client_session_id);
+        mac.addString (server_session_id);
+        nonce_reference = HashAlgorithms.SHA256.digest (mac.getResult ());
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Get the array handle
+        /////////////////////////////////////////////////////////////////////////////////////////
+        JSONArrayReader specs = rd.getArray (LOOKUP_SPECIFIERS_JSON);
+        do 
           {
-            signature = (XMLSignatureWrapper)wrap (rd.getNext (XMLSignatureWrapper.SIGNATURE_ELEM));
+            /////////////////////////////////////////////////////////////////////////////////////////
+            // Read a specifier object
+            /////////////////////////////////////////////////////////////////////////////////////////
+            LookupSpecifier ls = new LookupSpecifier (specs.getObject ());
+            if (lookup_specifiers.put (ls.id, ls) != null)
+              {
+                throw new IOException ("Duplicate id: " + ls.id);
+              }
           }
+        while (specs.hasMore ());
       }
   }
