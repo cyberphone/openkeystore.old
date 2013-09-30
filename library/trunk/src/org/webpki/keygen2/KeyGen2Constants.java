@@ -57,9 +57,11 @@ public interface KeyGen2Constants
 
     String CREDENTIAL_DISCOVERY_RESPONSE_JSON        = "CredentialDiscoveryResponse";
     
+    String DATA_JSON                                 = "Data";
+    
     String DEFERRED_CERTIFICATION_JSON               = "DeferredCertification";
 
-    String DELETE_KEY_JSON                           = "DeleteKey";
+    String DELETE_KEYS_JSON                          = "DeleteKeys";
     
     String DELETE_PROTECTION_JSON                    = "DeleteProtection";
 
@@ -74,6 +76,8 @@ public interface KeyGen2Constants
     String ENABLE_PIN_CACHING_JSON                   = "EnablePINCaching";
 
     String ENCRYPTED_EXTENSION_JSON                  = "EncryptedExtension";
+
+    String ENCRYPTED_KEY_JSON                        = "EncryptedKey";
 
     String END_ENTITY_CERTIFICATE_JSON               = "EndEntityCertificate";
 
@@ -100,14 +104,16 @@ public interface KeyGen2Constants
     String ID_JSON                                   = "ID";
 
     String IMAGE_PREFERENCES_JSON                    = "ImagePreferences";
-
+    
     String INPUT_METHOD_JSON                         = "InputMethod";
 
     String ISSUER_JSON                               = "Issuer";
 
+    String ISSUED_AFTER_JSON                         = "IssuedAfter";
+
     String ISSUED_BEFORE_JSON                        = "IssuedBefore";
 
-    String ISSUED_AFTER_JSON                         = "IssuedAfter";
+    String ISSUED_KEYS_JSON                          = "IssuedKeys";
 
     String KEY_ALGORITHM_JSON                        = "KeyAlgorithm";
 
@@ -165,9 +171,9 @@ public interface KeyGen2Constants
 
     String PRIVATE_KEY_JSON                          = "PrivateKey";
 
-    String PROPERTY_JSON                             = "Property";       
+    String PROPERTIES_JSON                           = "Properties";       
 
-    String PROPERTY_BAG_JSON                         = "PropertyBag";       
+    String PROPERTY_BAGS_JSON                        = "PropertyBags";       
 
     String PROVISIONING_INITIALIZATION_REQUEST_JSON  = "ProvisioningInitializationRequest";
     
@@ -215,7 +221,7 @@ public interface KeyGen2Constants
 
     String TYPE_JSON                                 = "Type";
 
-    String UNLOCK_KEY_JSON                           = "UnlockKey";
+    String UNLOCK_KEYS_JSON                          = "UnlockKeys";
 
     String UPDATE_KEY_MANAGEMENT_KEYS_JSON           = "UpdateKeyManagementKeys";
 

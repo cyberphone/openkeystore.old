@@ -41,6 +41,9 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.SymKeyVerifierInterface;
 
+import org.webpki.json.JSONArrayWriter;
+import org.webpki.json.JSONObjectWriter;
+
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
 import org.webpki.sks.DeleteProtection;
@@ -53,10 +56,6 @@ import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.MimeTypedObject;
-
-import org.webpki.xml.DOMWriterHelper;
-
-import org.webpki.xmldsig.XMLSymKeyVerifier;
 
 public class ServerState implements Serializable
   {
@@ -71,8 +70,8 @@ public class ServerState implements Serializable
 
     enum PostOperation
       {
-        DELETE_KEY            (SecureKeyStore.METHOD_POST_DELETE_KEY,           DELETE_KEY_JSON), 
-        UNLOCK_KEY            (SecureKeyStore.METHOD_POST_UNLOCK_KEY,           UNLOCK_KEY_JSON), 
+        DELETE_KEY            (SecureKeyStore.METHOD_POST_DELETE_KEY,           DELETE_KEYS_JSON), 
+        UNLOCK_KEY            (SecureKeyStore.METHOD_POST_UNLOCK_KEY,           UNLOCK_KEYS_JSON), 
         UPDATE_KEY            (SecureKeyStore.METHOD_POST_UPDATE_KEY,           UPDATE_KEY_JSON), 
         CLONE_KEY_PROTECTION  (SecureKeyStore.METHOD_POST_CLONE_KEY_PROTECTION, CLONE_KEY_PROTECTION_JSON);
         
@@ -138,7 +137,7 @@ public class ServerState implements Serializable
     public abstract class ExtensionInterface implements Serializable
       {
         private static final long serialVersionUID = 1L;
-
+        
         String type;
         
         public String getType ()
@@ -153,19 +152,22 @@ public class ServerState implements Serializable
             return "";
           }
         
+        public abstract String getJSONArrayString ();
+        
         public abstract byte[] getExtensionData () throws IOException;
         
-        abstract void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException;
-        
-        void writeCore (DOMWriterHelper wr, byte[] mac_data) throws IOException
-          {
-            wr.setBinaryAttribute (MAC_JSON, mac_data);
-            wr.setStringAttribute (TYPE_JSON, type);
-          }
+        abstract void writeExtensionBody (JSONObjectWriter wr) throws IOException;
         
         ExtensionInterface (String type)
           {
             this.type = type;
+          }
+
+        void writeExtension (JSONObjectWriter wr, byte[] mac_data) throws IOException
+          {
+            wr.setString (TYPE_JSON, type);
+            writeExtensionBody (wr);
+            wr.setBinary (MAC_JSON, mac_data);
           }
       }
 
@@ -181,20 +183,28 @@ public class ServerState implements Serializable
             this.data = data;
           }
 
+        @Override
         public byte getSubType ()
           {
             return SecureKeyStore.SUB_TYPE_EXTENSION;
           }
 
+        @Override
         public byte[] getExtensionData () throws IOException
           {
             return data;
           }
 
-        void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
+        @Override
+        void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
-            wr.addBinary (EXTENSION_JSON, data);
-            writeCore (wr, mac_data);
+            wr.setBinary (EXTENSION_JSON, data);
+          }
+
+        @Override
+        public String getJSONArrayString ()
+          {
+            return EXTENSION_JSON;
           }
       }
 
@@ -210,20 +220,28 @@ public class ServerState implements Serializable
             this.encrypted_data = encrypted_data;
           }
 
+        @Override
         public byte getSubType ()
           {
             return SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION;
           }
 
+        @Override
         public byte[] getExtensionData () throws IOException
           {
             return encrypted_data;
           }
-
-        void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
+        
+        @Override
+        void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
-            wr.addBinary (ENCRYPTED_EXTENSION_JSON, encrypted_data);
-            writeCore (wr, mac_data);
+            wr.setBinary (ENCRYPTED_EXTENSION_JSON, encrypted_data);
+          }
+
+        @Override
+        public String getJSONArrayString ()
+          {
+            return ENCRYPTED_EXTENSION_JSON;
           }
       }
 
@@ -239,26 +257,36 @@ public class ServerState implements Serializable
             this.logotype = logotype;
           }
 
+        @Override
         public byte getSubType ()
           {
             return SecureKeyStore.SUB_TYPE_LOGOTYPE;
           }
 
+        @Override
         public byte[] getExtensionData () throws IOException
           {
             return logotype.getData ();
           }
 
+        @Override
         public String getQualifier () throws IOException
           {
             return logotype.getMimeType ();
           }
 
-        void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
+        @Override
+        void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
-            wr.addBinary (LOGOTYPE_JSON, logotype.getData ());
-            writeCore (wr, mac_data);
-            wr.setStringAttribute (MIME_TYPE_JSON, logotype.getMimeType ());
+            wr.setBinary (LOGOTYPE_JSON, logotype.getData ());
+            wr.setString (MIME_TYPE_JSON, logotype.getMimeType ());
+          }
+
+        @Override
+        public String getJSONArrayString ()
+          {
+            // TODO Auto-generated method stub
+            return null;
           }
       }
 
@@ -314,11 +342,13 @@ public class ServerState implements Serializable
             super (type);
           }
         
+        @Override
         public byte getSubType ()
           {
             return SecureKeyStore.SUB_TYPE_PROPERTY_BAG;
           }
         
+        @Override
         public byte[] getExtensionData () throws IOException
           {
             MacGenerator convert = new MacGenerator ();
@@ -336,26 +366,30 @@ public class ServerState implements Serializable
             return properties.values ().toArray (new Property[0]);
           }
 
-        void writeExtension (DOMWriterHelper wr, byte[] mac_data) throws IOException
+        @Override
+        void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
             if (properties.isEmpty ())
               {
-                throw new IOException ("Empty " + PROPERTY_BAG_JSON + ": " + type);
+                throw new IOException ("Empty " + PROPERTY_BAGS_JSON + ": " + type);
               }
-            wr.addChildElement (PROPERTY_BAG_JSON);
-            writeCore (wr, mac_data);
+            JSONArrayWriter arr = wr.setArray (PROPERTIES_JSON);
             for (Property property : properties.values ())
               {
-                wr.addChildElement (PROPERTY_JSON);
-                wr.setStringAttribute (NAME_JSON, property.name);
-                wr.setStringAttribute (VALUE_JSON, property.value);
+                JSONObjectWriter prop_wr = arr.setObject ();
+                prop_wr.setString (NAME_JSON, property.name);
+                prop_wr.setString (VALUE_JSON, property.value);
                 if (property.writable)
                   {
-                    wr.setBooleanAttribute (WRITABLE_JSON, property.writable);
+                    prop_wr.setBoolean (WRITABLE_JSON, property.writable);
                   }
-                wr.getParent ();
               }
-            wr.getParent ();
+          }
+
+        @Override
+        public String getJSONArrayString ()
+          {
+            return PROPERTY_BAGS_JSON;
           }
       }
 
@@ -385,21 +419,21 @@ public class ServerState implements Serializable
             this.retry_limit = retry_limit;
           }
 
-        void writePolicy (DOMWriterHelper wr) throws IOException, GeneralSecurityException
+        void writePolicy (JSONObjectWriter wr) throws IOException, GeneralSecurityException
           {
             wr.addChildElement (PUK_POLICY_JSON);
 
-            wr.setStringAttribute (ID_JSON, id);
-            wr.setIntAttribute (RETRY_LIMIT_JSON, retry_limit);
-            wr.setStringAttribute (FORMAT_JSON, format.getXMLName ());
-            wr.setBinaryAttribute (VALUE_JSON, encrypted_value);
+            wr.setString (ID_JSON, id);
+            wr.setInt (RETRY_LIMIT_JSON, retry_limit);
+            wr.setString (FORMAT_JSON, format.getXMLName ());
+            wr.setBinary (VALUE_JSON, encrypted_value);
 
             MacGenerator puk_policy_mac = new MacGenerator ();
             puk_policy_mac.addString (id);
             puk_policy_mac.addArray (encrypted_value);
             puk_policy_mac.addByte (format.getSKSValue ());
             puk_policy_mac.addShort (retry_limit);
-            wr.setBinaryAttribute (MAC_JSON, mac (puk_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PUK_POLICY));
+            wr.setBinary (MAC_JSON, mac (puk_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PUK_POLICY));
           }
       }
 
@@ -477,22 +511,22 @@ public class ServerState implements Serializable
             this.id = pin_prefix + ++next_pin_id_suffix;
           }
 
-        void writePolicy (DOMWriterHelper wr) throws IOException, GeneralSecurityException
+        void writePolicy (JSONObjectWriter wr) throws IOException, GeneralSecurityException
           {
             wr.addChildElement (PIN_POLICY_JSON);
-            wr.setStringAttribute (ID_JSON, id);
-            wr.setIntAttribute (MAX_LENGTH_JSON, max_length);
-            wr.setIntAttribute (MIN_LENGTH_JSON, min_length);
-            wr.setIntAttribute (RETRY_LIMIT_JSON, retry_limit);
+            wr.setString (ID_JSON, id);
+            wr.setInt (MAX_LENGTH_JSON, max_length);
+            wr.setInt (MIN_LENGTH_JSON, min_length);
+            wr.setInt (RETRY_LIMIT_JSON, retry_limit);
             if (user_modifiable_set)
               {
-                wr.setBooleanAttribute (USER_MODIFIABLE_JSON, user_modifiable);
+                wr.setBoolean (USER_MODIFIABLE_JSON, user_modifiable);
               }
             if (grouping != null)
               {
-                wr.setStringAttribute (GROUPING_JSON, grouping.getXMLName ());
+                wr.setString (GROUPING_JSON, grouping.getXMLName ());
               }
-            wr.setStringAttribute (FORMAT_JSON, format.getXMLName ());
+            wr.setString (FORMAT_JSON, format.getXMLName ());
             if (!pattern_restrictions.isEmpty ())
               {
                 Vector<String> prs = new Vector<String> ();
@@ -500,11 +534,11 @@ public class ServerState implements Serializable
                   {
                     prs.add (pr.getXMLName ());
                   }
-                wr.setListAttribute (PATTERN_RESTRICTIONS_JSON, prs.toArray (new String[0]));
+                wr.setList (PATTERN_RESTRICTIONS_JSON, prs.toArray (new String[0]));
               }
             if (input_method != null)
               {
-                wr.setStringAttribute (INPUT_METHOD_JSON, input_method.getXMLName ());
+                wr.setString (INPUT_METHOD_JSON, input_method.getXMLName ());
               }
 
             MacGenerator pin_policy_mac = new MacGenerator ();
@@ -519,7 +553,7 @@ public class ServerState implements Serializable
             pin_policy_mac.addShort (min_length);
             pin_policy_mac.addShort (max_length);
             pin_policy_mac.addByte (input_method == null ? InputMethod.ANY.getSKSValue () : input_method.getSKSValue ());
-            wr.setBinaryAttribute (MAC_JSON, mac (pin_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PIN_POLICY));
+            wr.setBinary (MAC_JSON, mac (pin_policy_mac.getResult (), SecureKeyStore.METHOD_CREATE_PIN_POLICY));
           }
 
         public PINPolicy setInputMethod (InputMethod input_method)
@@ -895,7 +929,7 @@ public class ServerState implements Serializable
               }
           }
 
-        void writeRequest (DOMWriterHelper wr) throws IOException, GeneralSecurityException
+        void writeRequest (JSONObjectWriter wr) throws IOException, GeneralSecurityException
           {
             key_init_done = true;
             MacGenerator key_pair_mac = new MacGenerator ();
@@ -935,21 +969,21 @@ public class ServerState implements Serializable
 
             wr.addChildElement (KEY_ENTRY_JSON);
 
-            wr.setStringAttribute (ID_JSON, id);
+            wr.setString (ID_JSON, id);
 
             if (server_seed != null)
               {
-                wr.setBinaryAttribute (SERVER_SEED_JSON, server_seed);
+                wr.setBinary (SERVER_SEED_JSON, server_seed);
               }
 
             if (device_pin_protection)
               {
-                wr.setBooleanAttribute (DEVICE_PIN_PROTECTION_JSON, true);
+                wr.setBoolean (DEVICE_PIN_PROTECTION_JSON, true);
               }
 
             if (preset_pin != null)
               {
-                wr.setBinaryAttribute (PIN_VALUE_JSON, preset_pin);
+                wr.setBinary (PIN_VALUE_JSON, preset_pin);
               }
 
             if (enable_pin_caching_set)
@@ -958,43 +992,43 @@ public class ServerState implements Serializable
                   {
                     bad ("\"" + ENABLE_PIN_CACHING_JSON +"\" must be combined with " + InputMethod.TRUSTED_GUI.toString ());
                   }
-                wr.setBooleanAttribute (ENABLE_PIN_CACHING_JSON, enable_pin_caching);
+                wr.setBoolean (ENABLE_PIN_CACHING_JSON, enable_pin_caching);
               }
 
             if (biometric_protection != null)
               {
-                wr.setStringAttribute (BIOMETRIC_PROTECTION_JSON, biometric_protection.getXMLName ());
+                wr.setString (BIOMETRIC_PROTECTION_JSON, biometric_protection.getXMLName ());
               }
 
             if (export_protection != null)
               {
-                wr.setStringAttribute (EXPORT_PROTECTION_JSON, export_protection.getXMLName ());
+                wr.setString (EXPORT_PROTECTION_JSON, export_protection.getXMLName ());
               }
 
             if (delete_protection != null)
               {
-                wr.setStringAttribute (DELETE_PROTECTION_JSON, delete_protection.getXMLName ());
+                wr.setString (DELETE_PROTECTION_JSON, delete_protection.getXMLName ());
               }
 
             if (friendly_name != null)
               {
-                wr.setStringAttribute (FRIENDLY_NAME_JSON, friendly_name);
+                wr.setString (FRIENDLY_NAME_JSON, friendly_name);
               }
 
-            wr.setStringAttribute (APP_USAGE_JSON, app_usage.getXMLName ());
+            wr.setString (APP_USAGE_JSON, app_usage.getXMLName ());
 
-            wr.setStringAttribute (KEY_ALGORITHM_JSON, key_specifier.getKeyAlgorithm ().getURI ());
+            wr.setString (KEY_ALGORITHM_JSON, key_specifier.getKeyAlgorithm ().getURI ());
             if (key_specifier.getParameters () != null)
               {
-                wr.setBinaryAttribute (KEY_PARAMETERS_JSON, key_specifier.getParameters ());
+                wr.setBinary (KEY_PARAMETERS_JSON, key_specifier.getParameters ());
               }
 
             if (endorsed_algorithms != null)
               {
-                wr.setListAttribute (ENDORSED_ALGORITHMS_JSON, endorsed_algorithms);
+                wr.setList (ENDORSED_ALGORITHMS_JSON, endorsed_algorithms);
               }
 
-            wr.setBinaryAttribute (MAC_JSON, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
+            wr.setBinary (MAC_JSON, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
             
             expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
             
