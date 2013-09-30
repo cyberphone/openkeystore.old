@@ -41,7 +41,7 @@ public interface KeyGen2Constants
 
     String CERTIFICATE_PATH_JSON                     = "CertificatePath";
 
-    String CLIENT_ATTRIBUTE_JSON                     = "ClientAttribute";
+    String CLIENT_ATTRIBUTES_JSON                    = "ClientAttributes";
 
     String CLIENT_EPHEMERAL_KEY_JSON                 = "ClientEphemeralKey";
 
@@ -51,6 +51,8 @@ public interface KeyGen2Constants
 
     String CLONE_KEY_PROTECTION_JSON                 = "CloneKeyProtection";
     
+    String CONFIGURATION_JSON                        = "Configuration";
+
     String CREDENTIAL_DISCOVERY_REQUEST_JSON         = "CredentialDiscoveryRequest";
 
     String CREDENTIAL_DISCOVERY_RESPONSE_JSON        = "CredentialDiscoveryResponse";
@@ -61,7 +63,7 @@ public interface KeyGen2Constants
     
     String DELETE_PROTECTION_JSON                    = "DeleteProtection";
 
-    String DEVICE_CERTIFICATE_PATH_JSON              = "DeviceCertificatePath";
+    String DEVICE_CERTIFICATE_JSON                   = "DeviceCertificate";
 
     String DEVICE_PIN_PROTECTION_JSON                = "DevicePINProtection";
 
@@ -86,8 +88,6 @@ public interface KeyGen2Constants
     String EXTENSION_JSON                            = "Extension";
 
     String EXTENSIONS_JSON                           = "Extensions";
-
-    String CLIENT_ATTRIBUTES_JSON                    = "ClientAttributes";
 
     String FORMAT_JSON                               = "Format";
 
@@ -217,13 +217,15 @@ public interface KeyGen2Constants
 
     String UNLOCK_KEY_JSON                           = "UnlockKey";
 
-    String UPDATE_KEY_MANAGEMENT_KEY_JSON            = "UpdateKeyManagementKey";
+    String UPDATE_KEY_MANAGEMENT_KEYS_JSON           = "UpdateKeyManagementKeys";
 
     String UPDATE_KEY_JSON                           = "UpdateKey";
 
     String USER_MODIFIABLE_JSON                      = "UserModifiable";
 
     String VALUE_JSON                                = "Value";
+
+    String VALUES_JSON                               = "Values";
 
     String VIRTUAL_MACHINE_JSON                      = "VirtualMachine";
 

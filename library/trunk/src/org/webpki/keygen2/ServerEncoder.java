@@ -50,7 +50,7 @@ abstract class ServerEncoder extends JSONEncoder
 
     private SignerInterface signer;
     
-    public void signRequest (SignerInterface signer) throws IOException
+    public void setRequestSigner (SignerInterface signer) throws IOException
       {
         this.signer = signer;
       }

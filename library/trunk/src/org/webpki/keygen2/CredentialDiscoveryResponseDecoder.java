@@ -145,4 +145,10 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
           }
         while (lookups.hasMore ());
       }
+
+    @Override
+    protected String getQualifier ()
+      {
+        return CREDENTIAL_DISCOVERY_RESPONSE_JSON;
+      }
   }
