@@ -19,6 +19,7 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import org.webpki.json.JSONObjectReader;
+import org.webpki.kg2xml.Action;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -62,6 +63,12 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
         return privacy_enabled;
       }
 
+    Action action;
+
+    public Action getAction ()
+      {
+        return action;
+      }
     
     @Override
     void readServerRequest (JSONObjectReader rd) throws IOException
@@ -80,11 +87,13 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
 
         privacy_enabled = rd.getBooleanConditional (PRIVACY_ENABLED_JSON);
 
+        action = Action.getActionFromString (rd.getString (ACTION_JSON));
+
         BasicCapabilities.read (rd, basic_capabilities);
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return PLATFORM_NEGOTIATION_REQUEST_JSON;
       }

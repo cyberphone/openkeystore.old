@@ -43,6 +43,7 @@ import org.webpki.crypto.SymKeyVerifierInterface;
 
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONSymKeyVerifier;
 
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
@@ -421,7 +422,7 @@ public class ServerState implements Serializable
 
         void writePolicy (JSONObjectWriter wr) throws IOException, GeneralSecurityException
           {
-            wr.addChildElement (PUK_POLICY_JSON);
+  //          wr.addChildElement (PUK_POLICY_JSON);
 
             wr.setString (ID_JSON, id);
             wr.setInt (RETRY_LIMIT_JSON, retry_limit);
@@ -513,7 +514,7 @@ public class ServerState implements Serializable
 
         void writePolicy (JSONObjectWriter wr) throws IOException, GeneralSecurityException
           {
-            wr.addChildElement (PIN_POLICY_JSON);
+//            wr.addChildElement (PIN_POLICY_JSON);
             wr.setString (ID_JSON, id);
             wr.setInt (MAX_LENGTH_JSON, max_length);
             wr.setInt (MIN_LENGTH_JSON, min_length);
@@ -534,7 +535,7 @@ public class ServerState implements Serializable
                   {
                     prs.add (pr.getXMLName ());
                   }
-                wr.setList (PATTERN_RESTRICTIONS_JSON, prs.toArray (new String[0]));
+                wr.setStringArray (PATTERN_RESTRICTIONS_JSON, prs.toArray (new String[0]));
               }
             if (input_method != null)
               {
@@ -967,7 +968,7 @@ public class ServerState implements Serializable
                 key_pair_mac.addString (algorithm);
               }
 
-            wr.addChildElement (KEY_ENTRY_JSON);
+  //          wr.addChildElement (KEY_ENTRY_JSON);
 
             wr.setString (ID_JSON, id);
 
@@ -983,7 +984,7 @@ public class ServerState implements Serializable
 
             if (preset_pin != null)
               {
-                wr.setBinary (PIN_VALUE_JSON, preset_pin);
+                wr.setBinary (ENCRYPTED_KEY_JSON, preset_pin);
               }
 
             if (enable_pin_caching_set)
@@ -1025,14 +1026,14 @@ public class ServerState implements Serializable
 
             if (endorsed_algorithms != null)
               {
-                wr.setList (ENDORSED_ALGORITHMS_JSON, endorsed_algorithms);
+                wr.setStringArray (ENDORSED_ALGORITHMS_JSON, endorsed_algorithms);
               }
 
             wr.setBinary (MAC_JSON, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
             
             expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
             
-            wr.getParent ();
+//            wr.getParent ();
           }
       }
 
@@ -1273,14 +1274,14 @@ public class ServerState implements Serializable
               {
                 throw new IOException ("Attribute '" + SERVER_CERT_FP_JSON + "' is missing or is invalid");
               }
-            new XMLSymKeyVerifier (new SymKeyVerifierInterface()
+            prov_init_response.signature.verify (new JSONSymKeyVerifier (new SymKeyVerifierInterface()
               {
                 @Override
                 public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException
                   {
                     return ArrayUtil.compare (server_crypto_interface.mac (data, SecureKeyStore.KDF_EXTERNAL_SIGNATURE), digest);
                   }
-              }).validateEnvelopedSignature (prov_init_response, null, prov_init_response.signature, client_session_id);
+              }));
           }
         catch (GeneralSecurityException e)
           {

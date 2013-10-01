@@ -75,4 +75,10 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator
           }
         while (keys.hasMore ());
       }
+
+    @Override
+    public String getQualifier ()
+      {
+        return KEY_CREATION_RESPONSE_JSON;
+      }
   }

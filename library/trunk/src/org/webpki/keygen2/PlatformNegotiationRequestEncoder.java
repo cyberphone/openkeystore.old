@@ -81,7 +81,7 @@ public class PlatformNegotiationRequestEncoder extends ServerEncoder
         //////////////////////////////////////////////////////////////////////////
         // Set top-level properties
         //////////////////////////////////////////////////////////////////////////
-        wr.setString (ACTION_JSON, action.getXMLName ());
+        wr.setString (ACTION_JSON, action.getJSONName ());
 
         if (server_state.privacy_enabled_set)
           {

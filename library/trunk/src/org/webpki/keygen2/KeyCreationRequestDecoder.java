@@ -34,11 +34,12 @@ import org.webpki.sks.PatternRestriction;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
 
-import org.webpki.crypto.VerifierInterface;
+import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONSignatureDecoder;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class KeyCreationRequestDecoder extends KeyGen2Validator
+public class KeyCreationRequestDecoder extends ClientDecoder
   {
     abstract class PresetValueReference
       {
@@ -46,7 +47,7 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
 
         PresetValueReference () throws IOException
           {
-            encrypted_value = getKeyGen2EncryptedProtectionValue ();
+//            encrypted_value = getKeyGen2EncryptedProtectionValue ();
           }
         
         public byte[] getEncryptedValue ()
@@ -60,7 +61,7 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
       {
         boolean user_modifiable;
 
-        PresetPIN (JSONReaderHelper rd) throws IOException
+        PresetPIN (JSONObjectReader rd) throws IOException
           {
             super ();
             user_modifiable = rd.getBooleanConditional (USER_MODIFIABLE_JSON);
@@ -86,13 +87,13 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
         
         String id;
  
-        PUKPolicy (JSONReaderHelper rd) throws IOException
+        PUKPolicy (JSONObjectReader rd) throws IOException
           {
             super ();
-            retry_limit = getAuthorizationRetryLimit (0);
-            id = getKeyGen2ID (ID_JSON);
-            format = getPassphraseFormat ();
-            mac = getKeyGen2MAC ();
+  //          retry_limit = getAuthorizationRetryLimit (0);
+  //          id = getID (rd, ID_JSON);
+            format = getPassphraseFormat (rd);
+            mac = getMAC ();
           }
 
 
@@ -157,25 +158,25 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
 
         Set<PatternRestriction> pattern_restrictions = EnumSet.noneOf (PatternRestriction.class);
 
-        PINPolicy (JSONReaderHelper rd) throws IOException
+        PINPolicy (JSONObjectReader rd) throws IOException
           {
           
             mac = rd.getBinary (MAC_JSON);
             
             id = rd.getString (ID_JSON);
 
-            min_length = getKeyGen2PINLength (MIN_LENGTH_JSON);
+            min_length = getPINLength (rd, MIN_LENGTH_JSON);
 
-            max_length = getKeyGen2PINLength (MAX_LENGTH_JSON);
+            max_length = getPINLength (rd, MAX_LENGTH_JSON);
 
             if (min_length > max_length)
               {
                 bad ("PIN length: min > max");
               }
 
-            retry_limit = getAuthorizationRetryLimit (1);
+ //           retry_limit = getAuthorizationRetryLimit (1);
 
-            format = getPassphraseFormat ();
+            format = getPassphraseFormat (rd);
 
             grouping = Grouping.getGroupingFromString (rd.getStringConditional (GROUPING_JSON, Grouping.NONE.getXMLName ()));
 
@@ -184,7 +185,7 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
             read_user_modifiable = rd.getStringConditional (USER_MODIFIABLE_JSON) != null;
             user_modifiable = rd.getBooleanConditional (USER_MODIFIABLE_JSON, false);
 
-            String pr[] = rd.getListConditional (PATTERN_RESTRICTIONS_JSON);
+            String pr[] = rd.getStringArrayConditional (PATTERN_RESTRICTIONS_JSON);
             if (pr != null)
               {
                 for (String pattern : pr)
@@ -308,14 +309,13 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
 
         KeySpecifier key_specifier;
         
-        KeyObject (JSONReaderHelper rd, 
+        KeyObject (JSONObjectReader rd, 
                    PINPolicy pin_policy,
                    boolean start_of_pin_group, 
                    PresetPIN preset_pin,
                    boolean device_pin_protected) throws IOException
           {
-            rd.getNext (KEY_ENTRY_JSON);
-            rd.getChild ();
+//            rd.getNext (KEY_ENTRY_JSON);
             this.pin_policy = pin_policy;
             this.start_of_pin_group = start_of_pin_group;
             this.preset_pin = preset_pin;
@@ -323,12 +323,12 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
 
             id = rd.getString (ID_JSON);
 
-            key_specifier = new KeySpecifier (getKeyGen2URI (KEY_ALGORITHM_JSON),
+            key_specifier = new KeySpecifier (getURI (rd, KEY_ALGORITHM_JSON),
                                               rd.getBinaryConditional (KEY_PARAMETERS_JSON));
 
-            if (rd.hasNext (ENDORSED_ALGORITHMS_JSON))
+            if (rd.hasProperty (ENDORSED_ALGORITHMS_JSON))
               {
-                endorsed_algorithms = BasicCapabilities.getSortedAlgorithms (getKeyGen2URIList (ENDORSED_ALGORITHMS_JSON));
+                endorsed_algorithms = BasicCapabilities.getSortedAlgorithms (getURIList (rd, ENDORSED_ALGORITHMS_JSON));
               }
             else
               {
@@ -353,8 +353,6 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
             friendly_name = rd.getStringConditional (FRIENDLY_NAME_JSON);
 
             mac = rd.getBinary (MAC_JSON);
-
-            rd.getParent ();
           }
 
 
@@ -771,18 +769,16 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
       }
 
     
-    private KeyObject readKeyProperties (JSONReaderHelper rd,
+    private KeyObject readKeyProperties (JSONObjectReader rd,
                                          PINPolicy pin_policy,
                                          boolean start_of_pin_group) throws IOException
       {
         KeyObject rk;
-        if (rd.hasNext (PRESET_PIN_JSON))
+        if (rd.hasProperty (PRESET_PIN_JSON))
           {
-            rd.getNext (PRESET_PIN_JSON);
-            rd.getChild ();
+//            rd.getNext (PRESET_PIN_JSON);
             PresetPIN preset = new PresetPIN (rd);
             request_objects.add (rk = new KeyObject (rd, pin_policy, start_of_pin_group, preset, false));
-            rd.getParent ();
           }
         else
           {
@@ -800,23 +796,23 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
       }
       
 
-    private void readKeyProperties (JSONReaderHelper rd, boolean device_pin_protected) throws IOException
+    private void readKeyProperties (JSONObjectReader rd, boolean device_pin_protected) throws IOException
       {
         request_objects.add (new KeyObject (rd, null, false, null, device_pin_protected));
       }
 
 
-    private PassphraseFormat getPassphraseFormat () throws IOException
+    private PassphraseFormat getPassphraseFormat (JSONObjectReader rd) throws IOException
       {
         return PassphraseFormat.getPassphraseFormatFromString (rd.getString (FORMAT_JSON));
       }
 
 
-    private void readPINPolicy (JSONReaderHelper rd, boolean puk_start, PUKPolicy puk_policy) throws IOException
+    private void readPINPolicy (JSONObjectReader rd, boolean puk_start, PUKPolicy puk_policy) throws IOException
       {
         boolean start = true;
+/*
         rd.getNext (PIN_POLICY_JSON);
-        rd.getChild ();
         PINPolicy upp = new PINPolicy (rd);
         upp.puk_policy = puk_policy;
         do
@@ -826,8 +822,8 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
             puk_start = false;
             start = false;
           }
-        while (rd.hasNext ());
-        rd.getParent ();
+        while (rd.hasProperty ());
+*/
       }
 
 
@@ -836,8 +832,6 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
     private String submit_url;
 
     private boolean deferred_certification;
-
-    private JSONEnvelopedSignatureDecoder signature;  // Optional
 
     private String server_session_id;
 
@@ -870,72 +864,41 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
       }
 
 
-    public void verifySignature (VerifierInterface verifier) throws IOException
-      {
-        signature.validate (verifier);
-      }
-
-
-    public boolean isSigned ()
-      {
-        return signature != null;
-      }
-
-
     public boolean getDeferredCertificationFlag ()
       {
         return deferred_certification;
       }
 
-
     @Override
-    protected String getVersion ()
-      {
-        return KEYGEN2_NS;
-      }
-
-
-    @Override
-    protected String getRootProperty ()
-      {
-        return KEY_CREATION_REQUEST_JSON;
-      }
-
-
-    @Override
-    protected void unmarshallJSONData (JSONReaderHelper rd) throws IOException
+    void readServerRequest (JSONObjectReader rd) throws IOException
       {
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Initiate the KeyGen2-specific validator
-        /////////////////////////////////////////////////////////////////////////////////////////
-        super.rd = rd;
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Read the top level attributes
+        // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
 
-        server_session_id = getKeyGen2ID (ID_JSON);
+        server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 
-        client_session_id = getKeyGen2ID (CLIENT_SESSION_ID_JSON);
+        client_session_id = getID (rd, CLIENT_SESSION_ID_JSON);
 
-        submit_url = getKeyGen2URL (SUBMIT_URL_JSON);
+        submit_url = getURL (rd, SUBMIT_URL_JSON);
 
         deferred_certification = rd.getBooleanConditional (DEFERRED_CERTIFICATION_JSON);
 
-        algorithm = getKeyGen2URI (JSONEnvelopedSignatureDecoder.ALGORITHM_JSON);
+        algorithm = getURI (rd, JSONSignatureDecoder.ALGORITHM_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the actual request and management elements [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
          while (true)
           {
-            if (rd.hasNext (KEY_ENTRY_JSON))
+            if (rd.hasProperty (KEY_ENTRY_JSON))
               {
                 readKeyProperties (rd, false);
               }
-            else if (rd.hasNext (PUK_POLICY_JSON))
+            else if (rd.hasProperty (PUK_POLICY_JSON))
               {
                 boolean start = true;
+/*
                 rd.getNext (PUK_POLICY_JSON);
                 rd.getChild ();
                 PUKPolicy pk = new PUKPolicy (rd);
@@ -944,29 +907,25 @@ public class KeyCreationRequestDecoder extends KeyGen2Validator
                     readPINPolicy (rd, start, pk);
                     start = false;
                   }
-                while (rd.hasNext ());
-                rd.getParent ();
+                while (rd.hasProperty ());
+*/
               }
-            else if (rd.hasNext (PIN_POLICY_JSON))
+            else if (rd.hasProperty (PIN_POLICY_JSON))
               {
                 readPINPolicy (rd, false, null);
               }
-            else if (rd.hasNext (DEVICE_PIN_PROTECTION_JSON))
+            else if (rd.hasProperty (DEVICE_PIN_PROTECTION_JSON))
               {
-                rd.getNext (DEVICE_PIN_PROTECTION_JSON);
-                rd.getChild ();
+//                rd.getNext (DEVICE_PIN_PROTECTION_JSON);
                 readKeyProperties (rd, true);
-                rd.getParent ();
               }
             else break;
           }
+      }
 
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the optional signature
-        /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext ()) // Must be a signature otherwise something has gone wrong...
-          {
-            signature = JSONEnvelopedSignatureDecoder.read (rd, ID_JSON, server_session_id);
-          }
+    @Override
+    public String getQualifier ()
+      {
+        return KEY_CREATION_REQUEST_JSON;
       }
   }

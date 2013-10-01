@@ -174,7 +174,7 @@ abstract class KeyGen2Validator extends JSONDecoder
       }
 
     @Override
-    final protected String getContext ()
+    final public String getContext ()
       {
         return KeyGen2Constants.KEYGEN2_NS;
       }

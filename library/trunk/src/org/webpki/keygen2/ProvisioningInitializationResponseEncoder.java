@@ -152,7 +152,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
         ////////////////////////////////////////////////////////////////////////
         if (device_certificate_path != null)
           {
-            JSONSignatureEncoder.writeX509CertificatePath (wr.setObject (CLIENT_EPHEMERAL_KEY_JSON),
+            JSONSignatureEncoder.writeX509CertificatePath (wr.setObject (DEVICE_CERTIFICATE_JSON),
                                                            device_certificate_path);
           }
 

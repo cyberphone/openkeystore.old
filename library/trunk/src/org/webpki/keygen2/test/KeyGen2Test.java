@@ -128,13 +128,14 @@ import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.sks.ws.WSSpecific;
 
-import org.webpki.tools.XML2HTMLPrinter;
-
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.HTMLHeader;
 import org.webpki.util.ImageData;
 
+import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONDecoderCache;
+import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
 
 /*
  * KeyGen2 "Protocol Exerciser" / JUnit Test
@@ -313,7 +314,7 @@ public class KeyGen2Test
     static class KeyCreator
       {
         private static final String kg2keycre = 
-          "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+          "<?json version=\"1.0\" encoding=\"UTF-8\"?>" +
           "<KeyCreationRequest Algorithm=\"http://xmlns.webpki.org/sks/algorithm#key.1\" " +
           "ClientSessionID=\"C-139622a0ac98f2f44a35c9753ca\" " +
           "ID=\"S-139622a0a9993085d38d1586b76\" " +
@@ -327,14 +328,14 @@ public class KeyGen2Test
           try
             {
               json_cache = new JSONDecoderCache ();
-              json_cache.addWrapper (KeyCreationRequestDecoder.class);
+              json_cache.addToCache (KeyCreationRequestDecoder.class);
             }
           catch (IOException e)
             {
             }
         }
         
-        private StringBuffer xml = new StringBuffer (kg2keycre);
+        private StringBuffer json = new StringBuffer (kg2keycre);
         
         private int key_id;
         
@@ -354,7 +355,7 @@ public class KeyGen2Test
               {
                 grouping = Grouping.NONE;
               }
-            xml.append ("<PINPolicy Format=\"")
+            json.append ("<PINPolicy Format=\"")
                .append (format.getXMLName ())
                .append ("\" ID=\"PIN.")
                .append (++pin_id)
@@ -363,17 +364,17 @@ public class KeyGen2Test
                .append ("\"");
             if (patterns != null)
               {
-                xml.append (" PatternRestrictions=\"");
+                json.append (" PatternRestrictions=\"");
                 String blank="";
                 for (PatternRestriction pattern : patterns)
                   {
-                    xml.append (blank);
+                    json.append (blank);
                     blank = " ";
-                    xml.append (pattern.getXMLName ());
+                    json.append (pattern.getXMLName ());
                   }
-                xml.append ("\"");
+                json.append ("\"");
               }
-            xml.append (" MAC=\"3dGegeDJ1enpEzCgwdbXJirNZ95wooM6ordOGW/AJ+0=\" MaxLength=\"8\" MinLength=\"4\" RetryLimit=\"3\">");
+            json.append (" MAC=\"3dGegeDJ1enpEzCgwdbXJirNZ95wooM6ordOGW/AJ+0=\" MaxLength=\"8\" MinLength=\"4\" RetryLimit=\"3\">");
             return this;
           }
         
@@ -382,13 +383,13 @@ public class KeyGen2Test
             if (pin_active)
               {
                 pin_active = false;
-                xml.append ("</PINPolicy>");
+                json.append ("</PINPolicy>");
               }
           }
 
         KeyCreator addKey (AppUsage app_usage)
           {
-            xml.append ("<KeyEntry AppUsage=\"")
+            json.append ("<KeyEntry AppUsage=\"")
                .append (app_usage.getXMLName ())
                .append ("\" ID=\"Key.")
                .append (++key_id)
@@ -399,7 +400,7 @@ public class KeyGen2Test
         KeyCreationRequestDecoder parse () throws Exception
           {
             finishPIN ();
-            return (KeyCreationRequestDecoder)json_cache.parse (xml.append ("</KeyCreationRequest>").toString ().getBytes ("UTF-8"));
+            return (KeyCreationRequestDecoder)json_cache.parse (json.append ("</KeyCreationRequest>").toString ().getBytes ("UTF-8"));
           }
       }
 
@@ -468,7 +469,7 @@ public class KeyGen2Test
 
     class Client
       {
-        XMLSchemaCache client_xml_cache;
+        JSONDecoderCache client_xml_cache;
         
         int provisioning_handle;
         
@@ -484,12 +485,12 @@ public class KeyGen2Test
         
         Client () throws IOException
           {
-            client_xml_cache = new XMLSchemaCache ();
-            client_xml_cache.addWrapper (PlatformNegotiationRequestDecoder.class);
-            client_xml_cache.addWrapper (ProvisioningInitializationRequestDecoder.class);
-            client_xml_cache.addWrapper (CredentialDiscoveryRequestDecoder.class);
-            client_xml_cache.addWrapper (KeyCreationRequestDecoder.class);
-            client_xml_cache.addWrapper (ProvisioningFinalizationRequestDecoder.class);
+            client_xml_cache = new JSONDecoderCache ();
+            client_xml_cache.addToCache (PlatformNegotiationRequestDecoder.class);
+            client_xml_cache.addToCache (ProvisioningInitializationRequestDecoder.class);
+            client_xml_cache.addToCache (CredentialDiscoveryRequestDecoder.class);
+            client_xml_cache.addToCache (KeyCreationRequestDecoder.class);
+            client_xml_cache.addToCache (ProvisioningFinalizationRequestDecoder.class);
           }
 
         private void abort (String message) throws IOException, SKSException
@@ -571,9 +572,9 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Get platform request and respond with SKS compatible data
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] platformResponse (byte[] xmldata) throws IOException
+        byte[] platformResponse (byte[] json_data) throws IOException
           {
-            platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (xmldata);
+            platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (json_data);
             if (set_abort_url)
               {
                 assertTrue ("Abort URL", platform_req.getAbortURL ().equals (ABORT_URL));
@@ -624,15 +625,15 @@ public class KeyGen2Test
                     platform_response.setNonce (nonce);
                   }
               }
-            return platform_response.writeXML ();
+            return platform_response.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Get provisioning session request and respond with ephemeral keys and and attest
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] provSessResponse (byte[] xmldata) throws IOException
+        byte[] provSessResponse (byte[] json_data) throws IOException
           {
-            prov_sess_req = (ProvisioningInitializationRequestDecoder) client_xml_cache.parse (xmldata);
+            prov_sess_req = (ProvisioningInitializationRequestDecoder) client_xml_cache.parse (json_data);
             scanForKeyManagementKeyUpdates (prov_sess_req.getKeyManagementKeyUpdateHolderRoot ());
             assertTrue ("Submit URL", prov_sess_req.getSubmitURL ().equals (ISSUER_URL));
             assertFalse ("VM", virtual_machine ^ ACME_INDUSTRIES.equals (prov_sess_req.getVirtualMachineFriendlyName ()));
@@ -675,7 +676,7 @@ public class KeyGen2Test
                   }
               }
 
-            prov_init_response.signRequest (new SymKeySignerInterface ()
+            prov_init_response.setResponseSigner (new SymKeySignerInterface ()
               {
                 public MACAlgorithms getMACAlgorithm () throws IOException
                   {
@@ -687,15 +688,15 @@ public class KeyGen2Test
                     return sks.signProvisioningSessionData (provisioning_handle, data);
                   }
               });
-            return prov_init_response.writeXML ();
+            return prov_init_response.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Get credential doscovery request
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] creDiscResponse (byte[] xmldata) throws IOException, GeneralSecurityException
+        byte[] creDiscResponse (byte[] json_data) throws IOException, GeneralSecurityException
           {
-            cre_disc_req = (CredentialDiscoveryRequestDecoder) client_xml_cache.parse (xmldata);
+            cre_disc_req = (CredentialDiscoveryRequestDecoder) client_xml_cache.parse (json_data);
             assertTrue ("Submit URL", cre_disc_req.getSubmitURL ().equals (CRE_DISC_URL));
             CredentialDiscoveryResponseEncoder cdre = new CredentialDiscoveryResponseEncoder (cre_disc_req);
             for (CredentialDiscoveryRequestDecoder.LookupSpecifier ls : cre_disc_req.getLookupSpecifiers ())
@@ -732,15 +733,15 @@ public class KeyGen2Test
                       }
                   }
               }
-            return cdre.writeXML ();
+            return cdre.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Get key initialization request and respond with freshly generated public keys
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] keyCreResponse (byte[] xmldata) throws IOException
+        byte[] keyCreResponse (byte[] json_data) throws IOException
           {
-            key_creation_request = (KeyCreationRequestDecoder) client_xml_cache.parse (xmldata);
+            key_creation_request = (KeyCreationRequestDecoder) client_xml_cache.parse (json_data);
             assertTrue ("Submit URL", key_creation_request.getSubmitURL ().equals (KEY_INIT_URL));
             KeyCreationResponseEncoder key_creation_response = new KeyCreationResponseEncoder (key_creation_request);
             for (KeyCreationRequestDecoder.UserPINDescriptor upd : key_creation_request.getUserPINDescriptors ())
@@ -807,16 +808,16 @@ public class KeyGen2Test
                                                     key_data.getAttestation (),
                                                     key.getID ());
               }
-            return key_creation_response.writeXML ();
+            return key_creation_response.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Get the certificates and attributes and return a success message
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] creFinalizeResponse (byte[] xmldata) throws IOException, GeneralSecurityException
+        byte[] creFinalizeResponse (byte[] json_data) throws IOException, GeneralSecurityException
           {
             ProvisioningFinalizationRequestDecoder prov_final_request =
-                           (ProvisioningFinalizationRequestDecoder) client_xml_cache.parse (xmldata);
+                           (ProvisioningFinalizationRequestDecoder) client_xml_cache.parse (json_data);
             assertTrue ("Submit URL", prov_final_request.getSubmitURL ().equals (FIN_PROV_URL));
             /* 
                Note: we could have used the saved provisioning_handle but that would not
@@ -914,7 +915,7 @@ public class KeyGen2Test
                                                              sks.closeProvisioningSession (eps.getProvisioningHandle (),
                                                                                            prov_final_request.getCloseSessionNonce (),
                                                                                            prov_final_request.getCloseSessionMAC ()));
-            return fin_prov_response.writeXML ();
+            return fin_prov_response.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
       }
     
@@ -926,7 +927,7 @@ public class KeyGen2Test
         static final int LOGO_WIDTH = 200;
         static final int LOGO_HEIGHT = 150;
         
-        XMLSchemaCache server_xml_cache;
+        JSONDecoderCache server_xml_cache;
         
         int pin_retry_limit = 3;
 
@@ -940,15 +941,15 @@ public class KeyGen2Test
 
         Server () throws Exception
           {
-            server_xml_cache = new XMLSchemaCache ();
-            server_xml_cache.addWrapper (PlatformNegotiationResponseDecoder.class);
-            server_xml_cache.addWrapper (ProvisioningInitializationResponseDecoder.class);
-            server_xml_cache.addWrapper (CredentialDiscoveryResponseDecoder.class);
-            server_xml_cache.addWrapper (KeyCreationResponseDecoder.class);
-            server_xml_cache.addWrapper (ProvisioningFinalizationResponseDecoder.class);
+            server_xml_cache = new JSONDecoderCache ();
+            server_xml_cache.addToCache (PlatformNegotiationResponseDecoder.class);
+            server_xml_cache.addToCache (ProvisioningInitializationResponseDecoder.class);
+            server_xml_cache.addToCache (CredentialDiscoveryResponseDecoder.class);
+            server_xml_cache.addToCache (KeyCreationResponseDecoder.class);
+            server_xml_cache.addToCache (ProvisioningFinalizationResponseDecoder.class);
           }
         
-        void getProvSess (XMLObjectWrapper xml_object) throws IOException
+        void getProvSess (JSONDecoder xml_object) throws IOException
           {
             ////////////////////////////////////////////////////////////////////////////////////
             // Begin by creating the "SessionKey" that holds the key to just about everything
@@ -975,12 +976,16 @@ public class KeyGen2Test
             // Create the state container
             ////////////////////////////////////////////////////////////////////////////////////
             server_state = new ServerState (server_crypto_interface);
+            if (privacy_enabled)
+              {
+                server_state.setPrivacyEnabled (true);
+              }
 
             ////////////////////////////////////////////////////////////////////////////////////
             // First keygen2 request
             ////////////////////////////////////////////////////////////////////////////////////
-            String server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
-            PlatformNegotiationRequestEncoder platform_request =  new PlatformNegotiationRequestEncoder (server_state, PLATFORM_URL, server_session_id);
+//            String server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
+            PlatformNegotiationRequestEncoder platform_request =  new PlatformNegotiationRequestEncoder (server_state, PLATFORM_URL, null);
             if (set_abort_url)
               {
                 platform_request.setAbortURL (ABORT_URL);
@@ -1005,10 +1010,6 @@ public class KeyGen2Test
               {
                 platform_request.setAction (Action.UNLOCK);
               }
-            if (privacy_enabled)
-              {
-                platform_request.setPrivacyEnabled (true);
-              }
             if (virtual_machine)
               {
                 basic_capabilities.addExtension (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE);
@@ -1016,17 +1017,17 @@ public class KeyGen2Test
                 basic_capabilities.addExtension (FOR_THE_CLIENT_UNKNOWN_VM);
                 KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
                 signer.setKey (null, DemoKeyStore.getSignerPassword ());
-                platform_request.signRequest (signer);
+                platform_request.setRequestSigner (signer);
               }
-            return platform_request.writeXML ();
+            return platform_request.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 
         //////////////////////////////////////////////////////////////////////////////////
         // Create a provisioning session request for the client
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] provSessRequest (byte[] xmldata) throws IOException, GeneralSecurityException
+        byte[] provSessRequest (byte[] json_data) throws IOException, GeneralSecurityException
           {
-            PlatformNegotiationResponseDecoder platform_response = (PlatformNegotiationResponseDecoder) server_xml_cache.parse (xmldata);
+            PlatformNegotiationResponseDecoder platform_response = (PlatformNegotiationResponseDecoder) server_xml_cache.parse (json_data);
             server_state.update (platform_response);
             BasicCapabilities basic_capabilties = platform_response.getBasicCapabilities ();
             if (ask_for_exponent)
@@ -1069,17 +1070,17 @@ public class KeyGen2Test
                 prov_init_request.setVirtualMachine (VM_CONFIG_DATA, SPECIFIC_VM, ACME_INDUSTRIES);
                 KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
                 signer.setKey (null, DemoKeyStore.getSignerPassword ());
-                prov_init_request.signRequest (signer);
+                prov_init_request.setRequestSigner (signer);
               }
-            return prov_init_request.writeXML ();
+            return prov_init_request.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Create credential discover request for the client
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] creDiscRequest (byte[] xmldata) throws IOException, GeneralSecurityException
+        byte[] creDiscRequest (byte[] json_data) throws IOException, GeneralSecurityException
           {
-            getProvSess (server_xml_cache.parse (xmldata));
+            getProvSess (server_xml_cache.parse (json_data));
             CredentialDiscoveryRequestEncoder cdre = new CredentialDiscoveryRequestEncoder (server_state, CRE_DISC_URL);
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[0]);
 
@@ -1098,15 +1099,15 @@ public class KeyGen2Test
                           .setIssuedAfter (new Date ())
                           .setSubjectRegEx ("CN=John")
                           .setIssuerRegEx ("CN=Root CA");
-            return cdre.writeXML ();
+            return cdre.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Create a key creation request for the client
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] keyCreRequest (byte[] xmldata) throws IOException, GeneralSecurityException
+        byte[] keyCreRequest (byte[] json_data) throws IOException, GeneralSecurityException
           {
-            XMLObjectWrapper xml_object = server_xml_cache.parse (xmldata);
+            JSONDecoder xml_object = server_xml_cache.parse (json_data);
             if (xml_object instanceof ProvisioningInitializationResponseDecoder)
               {
                 getProvSess (xml_object);
@@ -1245,20 +1246,20 @@ public class KeyGen2Test
                 server_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.P_256), pin_policy);
               }
 
-            return new KeyCreationRequestEncoder (server_state, KEY_INIT_URL).writeXML ();
+            return new KeyCreationRequestEncoder (server_state, KEY_INIT_URL).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Get the key create response and respond with certified public keys and attributes
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] creFinalizeRequest (byte[] xmldata) throws IOException, GeneralSecurityException
+        byte[] creFinalizeRequest (byte[] json_data) throws IOException, GeneralSecurityException
           {
             if (plain_unlock_key == null)
               {
                 boolean temp_set_private_key = set_private_key;
                 boolean otp = symmetric_key && !encryption_key;
-                KeyCreationResponseDecoder key_init_response = (KeyCreationResponseDecoder) server_xml_cache.parse (xmldata);
+                KeyCreationResponseDecoder key_init_response = (KeyCreationResponseDecoder) server_xml_cache.parse (json_data);
                 server_state.update (key_init_response);
                 for (ServerState.Key key_prop : server_state.getKeys ())
                   {
@@ -1368,7 +1369,7 @@ public class KeyGen2Test
               }
             else
               {
-                CredentialDiscoveryResponseDecoder cdrd = (CredentialDiscoveryResponseDecoder) server_xml_cache.parse (xmldata);
+                CredentialDiscoveryResponseDecoder cdrd = (CredentialDiscoveryResponseDecoder) server_xml_cache.parse (json_data);
                 server_state.update (cdrd);
                 CredentialDiscoveryResponseDecoder.LookupResult[] lres = cdrd.getLookupResults ();
 // TODO verify
@@ -1378,15 +1379,15 @@ public class KeyGen2Test
                                                plain_unlock_key.server_km);
               }
 
-            return new ProvisioningFinalizationRequestEncoder (server_state, FIN_PROV_URL).writeXML ();
+            return new ProvisioningFinalizationRequestEncoder (server_state, FIN_PROV_URL).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Finally we get the attestested response
         ///////////////////////////////////////////////////////////////////////////////////
-        void creFinalizeResponse (byte[] xmldata) throws IOException
+        void creFinalizeResponse (byte[] json_data) throws IOException
           {
-            ProvisioningFinalizationResponseDecoder prov_final_response = (ProvisioningFinalizationResponseDecoder) server_xml_cache.parse (xmldata);
+            ProvisioningFinalizationResponseDecoder prov_final_response = (ProvisioningFinalizationResponseDecoder) server_xml_cache.parse (json_data);
             server_state.update (prov_final_response);
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1410,7 +1411,7 @@ public class KeyGen2Test
       {
         Server server;
         Client client;
-        XMLSchemaCache xmlschemas = new XMLSchemaCache ();
+        JSONDecoderCache xmlschemas = new JSONDecoderCache ();
         int pass;
         
         private void write (byte[] data) throws Exception
@@ -1451,37 +1452,38 @@ public class KeyGen2Test
               }
           }
         
-        byte[] fileLogger (byte[] xmldata) throws Exception
+        byte[] fileLogger (byte[] json_data) throws Exception
           {
-            XMLObjectWrapper xo = xmlschemas.parse (xmldata);
+            JSONDecoder xo = xmlschemas.parse (json_data);
             writeString ("&nbsp;<br><table><tr><td bgcolor=\"#F0F0F0\" style=\"border:solid;border-width:1px;padding:4px\">&nbsp;Pass #" + 
                          (++pass) +
                          ":&nbsp;" + 
-                         xo.element () +
+                         xo.getQualifier () +
                          "<a id=\"" +
-                         xo.element () +
+                         xo.getQualifier() +
                          "." +
                          _name.getMethodName() +
                          "." +
                          round +
-                         "\"/>&nbsp;</td></tr></table>&nbsp;<br>");
-            writeString (XML2HTMLPrinter.convert (new String (xmldata, "UTF-8")));
-            return xmldata;
+                         "\"/>&nbsp;</td></tr></table><p style=\"padding-left:10pt\">");
+            fos.write (JSONObjectWriter.serializeParsedJSONDocument (xo, JSONOutputFormats.PRETTY_HTML));
+            writeString ("</p>");
+            return json_data;
           }
 
         
         Doer () throws Exception
           {
-            xmlschemas.addWrapper (PlatformNegotiationRequestDecoder.class);
-            xmlschemas.addWrapper (PlatformNegotiationResponseDecoder.class);
-            xmlschemas.addWrapper (ProvisioningInitializationRequestDecoder.class);
-            xmlschemas.addWrapper (ProvisioningInitializationResponseDecoder.class);
-            xmlschemas.addWrapper (CredentialDiscoveryRequestDecoder.class);
-            xmlschemas.addWrapper (CredentialDiscoveryResponseDecoder.class);
-            xmlschemas.addWrapper (KeyCreationRequestDecoder.class);
-            xmlschemas.addWrapper (KeyCreationResponseDecoder.class);
-            xmlschemas.addWrapper (ProvisioningFinalizationRequestDecoder.class);
-            xmlschemas.addWrapper (ProvisioningFinalizationResponseDecoder.class);
+            xmlschemas.addToCache (PlatformNegotiationRequestDecoder.class);
+            xmlschemas.addToCache (PlatformNegotiationResponseDecoder.class);
+            xmlschemas.addToCache (ProvisioningInitializationRequestDecoder.class);
+            xmlschemas.addToCache (ProvisioningInitializationResponseDecoder.class);
+            xmlschemas.addToCache (CredentialDiscoveryRequestDecoder.class);
+            xmlschemas.addToCache (CredentialDiscoveryResponseDecoder.class);
+            xmlschemas.addToCache (KeyCreationRequestDecoder.class);
+            xmlschemas.addToCache (KeyCreationResponseDecoder.class);
+            xmlschemas.addToCache (ProvisioningFinalizationRequestDecoder.class);
+            xmlschemas.addToCache (ProvisioningFinalizationResponseDecoder.class);
           }
         
         void perform () throws Exception
@@ -1525,24 +1527,24 @@ public class KeyGen2Test
             writeOption ("Virtual Machine option", virtual_machine);
             server = new Server ();
             client = new Client ();
-            byte[] xml;
-            xml = fileLogger (server.platformRequest ());
-            xml = fileLogger (client.platformResponse (xml));
-            xml = fileLogger (server.provSessRequest (xml));
-            xml = fileLogger (client.provSessResponse (xml));
+            byte[] json;
+            json = fileLogger (server.platformRequest ());
+            json = fileLogger (client.platformResponse (json));
+            json = fileLogger (server.provSessRequest (json));
+            json = fileLogger (client.provSessResponse (json));
             if (delete_key != null || clone_key_protection != null || update_key != null || plain_unlock_key != null)
               {
-                xml = fileLogger (server.creDiscRequest (xml));
-                xml = fileLogger (client.creDiscResponse (xml));
+                json = fileLogger (server.creDiscRequest (json));
+                json = fileLogger (client.creDiscResponse (json));
               }
             if (plain_unlock_key == null)
               {
-                xml = fileLogger (server.keyCreRequest (xml));
-                xml = fileLogger (client.keyCreResponse (xml));
+                json = fileLogger (server.keyCreRequest (json));
+                json = fileLogger (client.keyCreResponse (json));
               }
-            xml = fileLogger (server.creFinalizeRequest (xml));
-            xml = fileLogger (client.creFinalizeResponse (xml));
-            server.creFinalizeResponse (xml);
+            json = fileLogger (server.creFinalizeRequest (json));
+            json = fileLogger (client.creFinalizeResponse (json));
+            server.creFinalizeResponse (json);
             writeString ("\n");
             EnumeratedKey ek = new EnumeratedKey ();
             while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)

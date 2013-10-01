@@ -89,7 +89,7 @@ public class Test
           }
   
         @Override
-        protected String getContext ()
+        public String getContext ()
           {
              return CONTEXT;
           }
@@ -137,13 +137,13 @@ public class Test
           }
   
         @Override
-        protected String getContext ()
+        public String getContext ()
           {
             return "http://example.com/escape";
           }
 
         @Override
-        protected String getQualifier ()
+        public String getQualifier ()
           {
             return "Escaper";
           }

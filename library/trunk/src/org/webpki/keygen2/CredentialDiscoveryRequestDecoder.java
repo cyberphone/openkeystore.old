@@ -208,4 +208,10 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
           }
         while (specs.hasMore ());
       }
+
+    @Override
+    public String getQualifier ()
+      {
+        return CREDENTIAL_DISCOVERY_REQUEST_JSON;
+      }
   }

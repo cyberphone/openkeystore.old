@@ -147,7 +147,7 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return CREDENTIAL_DISCOVERY_RESPONSE_JSON;
       }

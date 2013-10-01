@@ -35,12 +35,6 @@ public class PlatformNegotiationResponseDecoder extends KeyGen2Validator
 
     BasicCapabilities basic_capabilities = new BasicCapabilities (true);
 
-    @Override
-    protected String getQualifier ()
-      {
-        return PLATFORM_NEGOTIATION_RESPONSE_JSON;
-      }
-
     public BasicCapabilities getBasicCapabilities ()
       {
         return basic_capabilities;
@@ -88,5 +82,11 @@ public class PlatformNegotiationResponseDecoder extends KeyGen2Validator
               }
             while (array.hasMore ());
           }
+      }
+
+    @Override
+    public String getQualifier ()
+      {
+        return PLATFORM_NEGOTIATION_RESPONSE_JSON;
       }
   }

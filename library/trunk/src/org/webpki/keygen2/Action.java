@@ -20,28 +20,28 @@ import java.io.IOException;
 
 public enum Action
   {
-    CREATE       ("create",  false, true),
-    UNLOCK       ("unlock",  true, false),
-    UPDATE       ("update",  true, true),
-    RESUME       ("resume",  true, true);
+    CREATE       ("create", false, true),
+    UNLOCK       ("unlock", true,  false),
+    UPDATE       ("update", true,  true),
+    RESUME       ("resume", true,  true);
 
-    private final String xml_name;       // As expressed in XML
+    private final String json_name;              // As expressed in JSON
     
     private final boolean lookup_allowed;        // CredentialDiscovery permitted
 
     private final boolean key_init_allowed;      // KeyInitialization permitted
 
-    private Action (String xml_name, boolean lookup_allowed, boolean key_init_allowed)
+    private Action (String json_name, boolean lookup_allowed, boolean key_init_allowed)
       {
-        this.xml_name = xml_name;
+        this.json_name = json_name;
         this.lookup_allowed = lookup_allowed;
         this.key_init_allowed = key_init_allowed;
       }
 
 
-    public String getXMLName ()
+    public String getJSONName ()
       {
-        return xml_name;
+        return json_name;
       }
     
 
@@ -57,16 +57,15 @@ public enum Action
       }
 
 
-    public static Action getActionFromString (String xml_name) throws IOException
+    public static Action getActionFromString (String json_name) throws IOException
       {
         for (Action action : Action.values ())
           {
-            if (xml_name.equals (action.xml_name))
+            if (json_name.equals (action.json_name))
               {
                 return action;
               }
           }
-        throw new IOException ("Unknown action: " + xml_name);
+        throw new IOException ("Unknown action: " + json_name);
       }
-
   }

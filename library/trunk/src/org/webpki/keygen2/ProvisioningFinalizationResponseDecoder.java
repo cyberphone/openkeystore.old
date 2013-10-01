@@ -50,7 +50,7 @@ public class ProvisioningFinalizationResponseDecoder extends KeyGen2Validator
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return PROVISIONING_FINALIZATION_RESPONSE_JSON;
       }

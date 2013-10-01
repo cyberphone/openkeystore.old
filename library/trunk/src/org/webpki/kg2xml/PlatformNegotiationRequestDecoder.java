@@ -31,7 +31,7 @@ import static org.webpki.kg2xml.KeyGen2Constants.*;
 public class PlatformNegotiationRequestDecoder extends PlatformNegotiationRequest
   {
     private XMLSignatureWrapper signature;  // Optional
-
+    
     BasicCapabilities basic_capabilities = new BasicCapabilities (true);
     
     public BasicCapabilities getBasicCapabilities ()
@@ -54,6 +54,13 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
     public String getAbortURL ()
       {
         return abort_url;
+      }
+
+    Action action;
+
+    public Action getAction ()
+      {
+        return action;
       }
 
 
@@ -89,6 +96,8 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
         submit_url = ah.getString (SUBMIT_URL_ATTR);
 
         abort_url = ah.getStringConditional (ABORT_URL_ATTR);
+        
+        action = Action.getActionFromString (ah.getString (ACTION_ATTR));
 
         privacy_enabled = ah.getBooleanConditional (PRIVACY_ENABLED_ATTR);
 

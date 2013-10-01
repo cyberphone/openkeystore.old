@@ -260,7 +260,7 @@ public class KeyGen2Test
         String dir = System.getProperty ("test.dir");
         if (dir.length () > 0)
           {
-            fos = new FileOutputStream (dir + "/keygen2.junit.run.html");
+            fos = new FileOutputStream (dir + "/kg2xml.junit.run.html");
             fos.write (HTMLHeader.createHTMLHeader (false, true,"KeyGen2 JUinit test output", null).append ("<body><h3>KeyGen2 JUnit Test</h3><p>").toString ().getBytes ("UTF-8"));
           }
         Security.insertProviderAt (new BouncyCastleProvider(), 1);

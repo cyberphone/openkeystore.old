@@ -36,7 +36,7 @@ import org.webpki.keygen2.ServerState.ProtocolPhase;
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
-public class KeyCreationRequestEncoder extends JSONEncoder
+public class KeyCreationRequestEncoder extends ServerEncoder
   {
     String submit_url;
 
@@ -97,10 +97,10 @@ public class KeyCreationRequestEncoder extends JSONEncoder
 
 
     @Override
-    protected void writeJSONData (JSONObjectWriter wr) throws IOException
+    void writeServerRequest (JSONObjectWriter wr) throws IOException
       {
         //////////////////////////////////////////////////////////////////////////
-        // Set top-level attributes
+        // Set top-level 
         //////////////////////////////////////////////////////////////////////////
         wr.setString (ID_JSON, server_state.server_session_id);
 
@@ -131,12 +131,12 @@ public class KeyCreationRequestEncoder extends JSONEncoder
                 if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
                     getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
                   {
-                    wr.getParent ();
+//                    wr.getParent ();
                   }
                 if (last_req_key != null && last_req_key.pin_policy != null &&
                     last_req_key.pin_policy != req_key.pin_policy)
                   {
-                    wr.getParent ();
+//                    wr.getParent ();
                   }
                 if (getPUKPolicy (req_key) != null)
                   {
@@ -178,11 +178,11 @@ public class KeyCreationRequestEncoder extends JSONEncoder
           }
         if (last_req_key != null && last_req_key.pin_policy != null)
           {
-            wr.getParent ();
+//            wr.getParent ();
           }
         if (last_req_key != null && getPUKPolicy (last_req_key) != null)
           {
-            wr.getParent ();
+ //           wr.getParent ();
           }
         if (signature != null)
           {
@@ -194,11 +194,5 @@ public class KeyCreationRequestEncoder extends JSONEncoder
     protected String getQualifier ()
       {
         return KEY_CREATION_REQUEST_JSON;
-      }
-
-    @Override
-    protected String getContext ()
-      {
-        return KEYGEN2_NS;
       }
   }

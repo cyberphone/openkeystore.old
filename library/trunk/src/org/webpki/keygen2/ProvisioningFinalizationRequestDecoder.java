@@ -537,4 +537,10 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
             post_delete_keys.add (readPostOperation (keys, PostOperation.DELETE_KEY));
           }
       }
+
+    @Override
+    public String getQualifier ()
+      {
+        return PROVISIONING_FINALIZATION_REQUEST_JSON;
+      }
   }

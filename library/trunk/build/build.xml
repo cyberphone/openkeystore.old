@@ -202,7 +202,7 @@
     	   srcdir="${src_dir}"
     	   destdir="${temp_dir}" 
     	   classpathref="compile.classpath"
-    	   includeAntRuntime="false" excludes="**/sks/ws/**/*,**/keygen2/**">
+    	   includeAntRuntime="false" excludes="**/sks/ws/**/*">
        <compilerarg value="-Xlint:-path"/>
     </javac>
   	
@@ -419,12 +419,18 @@
   </target>
 
   <!-- JUnit test of the KeyGen2 protocol and the SKS API -->
-  <target name="testkg2">
+  <target name="testkg2xml">
     <antcall target="_test">
        <param name="test.class" value="org.webpki.kg2xml.test.KeyGen2Test"/>
      </antcall>
   </target>
 
+  <target name="testkeygen2">
+    <antcall target="_test">
+       <param name="test.class" value="org.webpki.keygen2.test.KeyGen2Test"/>
+     </antcall>
+  </target>
+  
   <!-- JUnit test of the SKS API -->
   <target name="testsks">
     <antcall target="_test">

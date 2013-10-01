@@ -104,9 +104,9 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
       {
         server_state.checkState (true, ProtocolPhase.PROVISIONING_INITIALIZATION);
         this.server_state = server_state;
-        submit_url = server_state.issuer_uri = submit_url;
-        session_life_time = server_state.session_life_time = session_life_time;
-        session_key_limit = server_state.session_key_limit = session_key_limit;
+        this.submit_url = server_state.issuer_uri = submit_url;
+        this.session_life_time = server_state.session_life_time = session_life_time;
+        this.session_key_limit = server_state.session_key_limit = session_key_limit;
         nonce = server_state.vm_nonce;
         server_session_id = server_state.server_session_id;
         server_ephemeral_key = server_state.server_ephemeral_key = server_state.server_crypto_interface.generateEphemeralKey ();
