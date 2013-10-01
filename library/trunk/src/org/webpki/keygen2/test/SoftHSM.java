@@ -103,7 +103,7 @@ public class SoftHSM implements ServerCryptoInterface
     @Override
     public void generateAndVerifySessionKey (ECPublicKey client_ephemeral_key,
                                              byte[] kdf_data,
-                                             byte[] session_key_mac_data,
+                                             byte[] attestation_arguments,
                                              X509Certificate device_certificate,
                                              byte[] session_attestation) throws IOException
       {
@@ -120,14 +120,14 @@ public class SoftHSM implements ServerCryptoInterface
             mac.init (new SecretKeySpec (Z, "RAW"));
             session_key = mac.doFinal (kdf_data);
             
-            // The session key signature
-            mac = Mac.getInstance (MACAlgorithms.HMAC_SHA256.getJCEName ());
-            mac.init (new SecretKeySpec (session_key, "RAW"));
-            byte[] session_key_attest = mac.doFinal (session_key_mac_data);
-            
             if (device_certificate == null)
               {
                 // Privacy enabled mode
+                mac = Mac.getInstance (MACAlgorithms.HMAC_SHA256.getJCEName ());
+                mac.init (new SecretKeySpec (session_key, "RAW"));
+                byte[] session_key_attest = mac.doFinal (attestation_arguments);
+                
+                // Verify that the session key signature is correct
                 if (!ArrayUtil.compare (session_key_attest, session_attestation))
                   {
                     throw new IOException ("Verify attestation failed");
@@ -140,10 +140,10 @@ public class SoftHSM implements ServerCryptoInterface
                 AsymSignatureAlgorithms signature_algorithm = device_public_key instanceof RSAPublicKey ?
                     AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256;
       
-                // Verify that the session key signature was signed by the device key
+                // Verify that attestation was signed by the device key
                 Signature verifier = Signature.getInstance (signature_algorithm.getJCEName ());
                 verifier.initVerify (device_public_key);
-                verifier.update (session_key_attest);
+                verifier.update (attestation_arguments);
                 if (!verifier.verify (session_attestation))
                   {
                     throw new IOException ("Verify provisioning signature failed");
