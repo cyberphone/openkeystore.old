@@ -30,6 +30,8 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
 
+import org.bouncycastle.jce.spec.ECNamedCurveSpec;
+
 public enum KeyAlgorithms implements SKSAlgorithms
   {
     RSA1024     ("http://xmlns.webpki.org/sks/algorithm#rsa1024",
@@ -399,7 +401,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
 
     public ECParameterSpec getECParameterSpec ()
       {
-        return new ECParameterSpec (elliptic_curve, new ECPoint (x, y), n, h);
+        return new ECNamedCurveSpec (jcename, elliptic_curve, new ECPoint (x, y), n);
       }
  
 
