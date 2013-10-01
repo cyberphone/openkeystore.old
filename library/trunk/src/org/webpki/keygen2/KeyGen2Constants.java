@@ -75,7 +75,7 @@ public interface KeyGen2Constants
 
     String ENABLE_PIN_CACHING_JSON                   = "EnablePINCaching";
 
-    String ENCRYPTED_EXTENSION_JSON                  = "EncryptedExtension";
+    String ENCRYPTED_EXTENSIONS_JSON                 = "EncryptedExtensions";
 
     String ENCRYPTED_KEY_JSON                        = "EncryptedKey";
 
@@ -88,8 +88,6 @@ public interface KeyGen2Constants
     String EXPIRES_JSON                              = "Expires";
 
     String EXPORT_PROTECTION_JSON                    = "ExportProtection";
-
-    String EXTENSION_JSON                            = "Extension";
 
     String EXTENSIONS_JSON                           = "Extensions";
 
@@ -135,7 +133,7 @@ public interface KeyGen2Constants
 
     String LOCKED_JSON                               = "Locked";
 
-    String LOGOTYPE_JSON                             = "Logotype";
+    String LOGOTYPES_JSON                            = "Logotypes";
 
     String LOOKUP_RESULTS_JSON                       = "LookupResults";
 
@@ -183,7 +181,7 @@ public interface KeyGen2Constants
     
     String PROVISIONING_FINALIZATION_RESPONSE_JSON   = "ProvisioningFinalizationResponse";
 
-    String GENERATED_KEYS_JSON                           = "PublicKey";
+    String GENERATED_KEYS_JSON                       = "GeneratedKeys";
 
     String PUK_POLICY_JSON                           = "PUKPolicy";       
 

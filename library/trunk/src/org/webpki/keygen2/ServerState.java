@@ -199,13 +199,13 @@ public class ServerState implements Serializable
         @Override
         void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
-            wr.setBinary (EXTENSION_JSON, data);
+            wr.setBinary (DATA_JSON, data);
           }
 
         @Override
         public String getJSONArrayString ()
           {
-            return EXTENSION_JSON;
+            return EXTENSIONS_JSON;
           }
       }
 
@@ -236,13 +236,13 @@ public class ServerState implements Serializable
         @Override
         void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
-            wr.setBinary (ENCRYPTED_EXTENSION_JSON, encrypted_data);
+            wr.setBinary (DATA_JSON, encrypted_data);
           }
 
         @Override
         public String getJSONArrayString ()
           {
-            return ENCRYPTED_EXTENSION_JSON;
+            return ENCRYPTED_EXTENSIONS_JSON;
           }
       }
 
@@ -279,15 +279,14 @@ public class ServerState implements Serializable
         @Override
         void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
-            wr.setBinary (LOGOTYPE_JSON, logotype.getData ());
             wr.setString (MIME_TYPE_JSON, logotype.getMimeType ());
+            wr.setBinary (DATA_JSON, logotype.getData ());
           }
 
         @Override
         public String getJSONArrayString ()
           {
-            // TODO Auto-generated method stub
-            return null;
+            return LOGOTYPES_JSON;
           }
       }
 

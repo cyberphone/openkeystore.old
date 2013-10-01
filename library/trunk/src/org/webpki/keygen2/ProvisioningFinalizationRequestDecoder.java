@@ -338,17 +338,17 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
                 new PropertyBag (property_bag, this);
               }
 
-            for (JSONObjectReader logotype : getObjectArrayConditional (rd, LOGOTYPE_JSON))
+            for (JSONObjectReader logotype : getObjectArrayConditional (rd, LOGOTYPES_JSON))
               {
                 new Logotype (logotype, this);
               }
 
-            for (JSONObjectReader extension : getObjectArrayConditional (rd, EXTENSION_JSON))
+            for (JSONObjectReader extension : getObjectArrayConditional (rd, EXTENSIONS_JSON))
               {
                 new StandardExtension (extension, this);
               }
 
-            for (JSONObjectReader encrypted_extension : getObjectArrayConditional (rd, ENCRYPTED_EXTENSION_JSON))
+            for (JSONObjectReader encrypted_extension : getObjectArrayConditional (rd, ENCRYPTED_EXTENSIONS_JSON))
               {
                 new EncryptedExtension (encrypted_extension, this);
               }
