@@ -41,6 +41,8 @@ import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 
+import org.webpki.util.ArrayUtil;
+
 /**
  * Testing public keys
  */
@@ -114,7 +116,7 @@ public class Keys
         PublicKey public_key = key_pair.getPublic ();
         byte[] data = new Writer (public_key).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
         Reader reader = (Reader) cache.parse (data);
-        if (!reader.getPublicKey ().equals (public_key))
+        if (!ArrayUtil.compare (reader.getPublicKey ().getEncoded (),public_key.getEncoded ()))
           {
             throw new IOException ("Unmatching keys:" + public_key.toString ());
           }
