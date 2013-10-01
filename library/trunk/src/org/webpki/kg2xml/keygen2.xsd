@@ -967,7 +967,7 @@
          </xs:sequence>
 
          <!-- SKS Reference: createKeyEntry.Attestation -->
-         <xs:attribute name="Attestation" type="xs:base64Binary" use="optional"/>
+         <xs:attribute name="Attestation" type="xs:base64Binary" use="required"/>
 
          <!-- A unique key-ID which MUST match a "KeyEntry/@ID"
               in the corresponding "KeyCreationRequest" -->

@@ -24,7 +24,6 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class ProvisioningFinalizationResponseDecoder extends KeyGen2Validator
   {
-      
     String client_session_id;
 
     String server_session_id;
@@ -36,7 +35,6 @@ public class ProvisioningFinalizationResponseDecoder extends KeyGen2Validator
       {
         return attestation;
       }
-
     
     @Override
     protected void unmarshallJSONData (JSONObjectReader rd) throws IOException

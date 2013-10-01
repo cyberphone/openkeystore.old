@@ -77,12 +77,12 @@ public class ServerState implements Serializable
         
         private byte[] method;
         
-        private String xml_elem;
+        private String json_prop;
         
-        PostOperation (byte[] method, String xml_elem)
+        PostOperation (byte[] method, String json_prop)
           {
             this.method = method;
-            this.xml_elem = xml_elem;
+            this.json_prop = json_prop;
           }
 
         byte[] getMethod ()
@@ -90,9 +90,9 @@ public class ServerState implements Serializable
             return method;
           }
         
-        String getXMLElem ()
+        String getJSONProp ()
           {
-            return xml_elem;
+            return json_prop;
           }
       }
     

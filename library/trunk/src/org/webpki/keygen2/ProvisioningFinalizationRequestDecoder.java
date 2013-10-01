@@ -509,10 +509,10 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
 
         submit_url = getURL (rd, SUBMIT_URL_JSON);
         
-        close_session_mac = rd.getBinary (MAC_JSON);
-        
         close_session_nonce = rd.getBinary (NONCE_JSON);
 
+        close_session_mac = rd.getBinary (MAC_JSON);
+        
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the issued_keys [0..n]
         /////////////////////////////////////////////////////////////////////////////////////////

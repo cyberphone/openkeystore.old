@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.webpki.kg2xml;
+package org.webpki.keygen2;
 
 import java.io.IOException;
 
@@ -22,16 +22,19 @@ import java.util.LinkedHashMap;
 
 import java.security.PublicKey;
 
-import org.webpki.xml.DOMReaderHelper;
-import org.webpki.xml.DOMAttributeReaderHelper;
+import org.webpki.json.JSONArrayReader;
+import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONSignatureDecoder;
 
-import org.webpki.xmldsig.XMLSignatureWrapper;
+import static org.webpki.keygen2.KeyGen2Constants.*;
 
-import static org.webpki.kg2xml.KeyGen2Constants.*;
-
-public class KeyCreationResponseDecoder extends KeyCreationResponse
+public class KeyCreationResponseDecoder extends KeyGen2Validator
   {
     LinkedHashMap<String,GeneratedPublicKey> generated_keys = new LinkedHashMap<String,GeneratedPublicKey> ();
+
+    String client_session_id;
+
+    String server_session_id;
 
     class GeneratedPublicKey
       {
@@ -44,40 +47,32 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
         byte[] attestation;
       }
 
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // XML Reader
-    /////////////////////////////////////////////////////////////////////////////////////////////
-
-    protected void fromXML (DOMReaderHelper rd) throws IOException
+    @Override
+    protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
       {
-        DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
         //////////////////////////////////////////////////////////////////////////
-        // Get the top-level attributes
+        // Get the top-level properties
         //////////////////////////////////////////////////////////////////////////
-        client_session_id = ah.getString (ID_ATTR);
+        server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 
-        server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
-
-        rd.getChild ();
+        client_session_id = getID (rd, CLIENT_SESSION_ID_JSON);
 
         //////////////////////////////////////////////////////////////////////////
-        // Get the child elements
+        // Get the generated keys [1..n]
         //////////////////////////////////////////////////////////////////////////
+        JSONArrayReader keys = rd.getArray (GENERATED_KEYS_JSON);
         do
           {
+            JSONObjectReader key_rd = keys.getObject ();
             GeneratedPublicKey gk = new GeneratedPublicKey ();
-            rd.getNext (PUBLIC_KEY_ELEM);
-            gk.id = ah.getString (ID_ATTR);
-            gk.attestation = ah.getBinary (ATTESTATION_ATTR);
-            rd.getChild ();
-            gk.public_key = XMLSignatureWrapper.readPublicKey (rd);
-            rd.getParent ();
+            gk.id = key_rd.getString (ID_JSON);
+            gk.attestation = key_rd.getBinary (ATTESTATION_JSON);
+            gk.public_key = JSONSignatureDecoder.readPublicKey (key_rd);
             if (generated_keys.put (gk.id, gk) != null)
               {
                 ServerState.bad ("Duplicate key id:" + gk.id);
               }
           }
-        while (rd.hasNext (PUBLIC_KEY_ELEM));
+        while (keys.hasMore ());
       }
   }

@@ -183,7 +183,7 @@ public interface KeyGen2Constants
     
     String PROVISIONING_FINALIZATION_RESPONSE_JSON   = "ProvisioningFinalizationResponse";
 
-    String PUBLIC_KEY_JSON                           = "PublicKey";
+    String GENERATED_KEYS_JSON                           = "PublicKey";
 
     String PUK_POLICY_JSON                           = "PUKPolicy";       
 
