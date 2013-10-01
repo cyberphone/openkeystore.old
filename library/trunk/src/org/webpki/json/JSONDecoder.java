@@ -35,13 +35,13 @@ public abstract class JSONDecoder
     /**
      * INTERNAL USE ONLY.     
      */
-    protected abstract String getContext ();
+    public abstract String getContext ();
 
     /**
      * INTERNAL USE ONLY.
      * Optional type indicator for JSON objects belonging to the same <code>@context</code>.
      */
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return null;
       }
