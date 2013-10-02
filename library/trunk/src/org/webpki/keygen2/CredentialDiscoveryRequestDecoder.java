@@ -192,21 +192,16 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
         nonce_reference = HashAlgorithms.SHA256.digest (mac.getResult ());
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the array handle
+        // Get the lookup specifiers [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        JSONArrayReader specs = rd.getArray (LOOKUP_SPECIFIERS_JSON);
-        do 
+        for (JSONObjectReader spec : getObjectArray (rd, LOOKUP_SPECIFIERS_JSON))
           {
-            /////////////////////////////////////////////////////////////////////////////////////////
-            // Read a specifier object
-            /////////////////////////////////////////////////////////////////////////////////////////
-            LookupSpecifier ls = new LookupSpecifier (specs.getObject ());
+            LookupSpecifier ls = new LookupSpecifier (spec);
             if (lookup_specifiers.put (ls.id, ls) != null)
               {
                 throw new IOException ("Duplicate id: " + ls.id);
               }
           }
-        while (specs.hasMore ());
       }
 
     @Override

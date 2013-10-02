@@ -82,8 +82,8 @@ public class KeyCreationResponseEncoder extends JSONEncoder
           {
             JSONObjectWriter key_wr = keys.setObject ();
             key_wr.setString (ID_JSON, gk.id);
-            key_wr.setBinary (ATTESTATION_JSON, gk.key_attestation);
             JSONSignatureEncoder.writePublicKey (key_wr, gk.public_key);
+            key_wr.setBinary (ATTESTATION_JSON, gk.key_attestation);
           }
       }
 

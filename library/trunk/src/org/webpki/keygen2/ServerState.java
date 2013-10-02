@@ -967,8 +967,6 @@ public class ServerState implements Serializable
                 key_pair_mac.addString (algorithm);
               }
 
-  //          wr.addChildElement (KEY_ENTRY_JSON);
-
             wr.setString (ID_JSON, id);
 
             if (server_seed != null)
@@ -1031,8 +1029,6 @@ public class ServerState implements Serializable
             wr.setBinary (MAC_JSON, mac (key_pair_mac.getResult (), SecureKeyStore.METHOD_CREATE_KEY_ENTRY));
             
             expected_attest_mac_count = getMACSequenceCounterAndUpdate ();
-            
-//            wr.getParent ();
           }
       }
 

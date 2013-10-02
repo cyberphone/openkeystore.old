@@ -887,39 +887,19 @@ public class KeyCreationRequestDecoder extends ClientDecoder
         algorithm = getURI (rd, JSONSignatureDecoder.ALGORITHM_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the actual request and management elements [1..n]
+        // Get the key requests and protection elements [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-         while (true)
+        for (JSONObjectReader puk : getObjectArrayConditional (rd, PUK_SPECIFIERS_JSON))
           {
-            if (rd.hasProperty (KEY_ENTRY_JSON))
-              {
-                readKeyProperties (rd, false);
-              }
-            else if (rd.hasProperty (PUK_POLICY_JSON))
-              {
-                boolean start = true;
-/*
-                rd.getNext (PUK_POLICY_JSON);
-                rd.getChild ();
-                PUKPolicy pk = new PUKPolicy (rd);
-                do
-                  {
-                    readPINPolicy (rd, start, pk);
-                    start = false;
-                  }
-                while (rd.hasProperty ());
-*/
-              }
-            else if (rd.hasProperty (PIN_POLICY_JSON))
-              {
-                readPINPolicy (rd, false, null);
-              }
-            else if (rd.hasProperty (DEVICE_PIN_PROTECTION_JSON))
-              {
-//                rd.getNext (DEVICE_PIN_PROTECTION_JSON);
-                readKeyProperties (rd, true);
-              }
-            else break;
+            bad ("PUK not impl");
+          }
+        for (JSONObjectReader pin : getObjectArrayConditional (rd, PIN_SPECIFIERS_JSON))
+          {
+            bad ("PIN not impl");
+          }
+        for (JSONObjectReader key : getObjectArrayConditional (rd, KEY_SPECIFIERS_JSON))
+          {
+            readKeyProperties (key, false);
           }
       }
 

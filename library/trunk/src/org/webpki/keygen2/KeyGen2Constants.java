@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20130813#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131002#";
 
 
     // JSON properties
@@ -111,7 +111,7 @@ public interface KeyGen2Constants
 
     String ISSUED_BEFORE_JSON                        = "IssuedBefore";
 
-    String ISSUED_KEYS_JSON                          = "IssuedKeys";
+    String ISSUED_CREDENTIALS_JSON                   = "IssuedCredentials";
 
     String KEY_ALGORITHM_JSON                        = "KeyAlgorithm";
 
@@ -119,7 +119,7 @@ public interface KeyGen2Constants
     
     String KEY_CREATION_RESPONSE_JSON                = "KeyCreationResponse";
 
-    String KEY_ENTRY_JSON                            = "KeyEntry";       
+    String KEY_SPECIFIERS_JSON                       = "KeySpecifiers";       
 
     String KEY_MANAGEMENT_KEY_JSON                   = "KeyManagementKey";
 
@@ -155,7 +155,7 @@ public interface KeyGen2Constants
 
     String PATTERN_RESTRICTIONS_JSON                 = "PatternRestrictions";
 
-    String PIN_POLICY_JSON                           = "PINPolicy";       
+    String PIN_SPECIFIERS_JSON                       = "PINSpecifiers";       
 
     String PLATFORM_NEGOTIATION_REQUEST_JSON         = "PlatformNegotiationRequest";
     
@@ -183,7 +183,7 @@ public interface KeyGen2Constants
 
     String GENERATED_KEYS_JSON                       = "GeneratedKeys";
 
-    String PUK_POLICY_JSON                           = "PUKPolicy";       
+    String PUK_SPECIFIERS_JSON                       = "PUKSpecifiers";       
 
     String RETRY_LIMIT_JSON                          = "RetryLimit";
 

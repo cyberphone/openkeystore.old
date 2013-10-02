@@ -22,7 +22,6 @@ import java.util.LinkedHashMap;
 
 import java.security.PublicKey;
 
-import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 
@@ -60,10 +59,8 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator
         //////////////////////////////////////////////////////////////////////////
         // Get the generated keys [1..n]
         //////////////////////////////////////////////////////////////////////////
-        JSONArrayReader keys = rd.getArray (GENERATED_KEYS_JSON);
-        do
+        for (JSONObjectReader key_rd : getObjectArray (rd, GENERATED_KEYS_JSON))
           {
-            JSONObjectReader key_rd = keys.getObject ();
             GeneratedPublicKey gk = new GeneratedPublicKey ();
             gk.id = key_rd.getString (ID_JSON);
             gk.attestation = key_rd.getBinary (ATTESTATION_JSON);
@@ -73,7 +70,6 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator
                 ServerState.bad ("Duplicate key id:" + gk.id);
               }
           }
-        while (keys.hasMore ());
       }
 
     @Override

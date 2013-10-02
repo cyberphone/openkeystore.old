@@ -28,6 +28,11 @@ abstract class ServerEncoder extends JSONEncoder
   {
     abstract void writeServerRequest (JSONObjectWriter wr) throws IOException;
     
+    final void bad (String message) throws IOException
+      {
+        throw new IOException (message);
+      }
+    
     @Override
     final protected String getContext ()
       {

@@ -108,7 +108,7 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
           }
       }
 
-    void issueKey (JSONObjectWriter wr, Key key) throws IOException, GeneralSecurityException
+    void issueCredential (JSONObjectWriter wr, Key key) throws IOException, GeneralSecurityException
       {
         ////////////////////////////////////////////////////////////////////////
         // Always: the ID, X509 Certificate(s) and MAC
@@ -223,10 +223,10 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
             ////////////////////////////////////////////////////////////////////////
             if (!server_state.requested_keys.isEmpty ())
               {
-                JSONArrayWriter key_arr = wr.setArray (ISSUED_KEYS_JSON);
+                JSONArrayWriter key_arr = wr.setArray (ISSUED_CREDENTIALS_JSON);
                 for (ServerState.Key key : server_state.getKeys ())
                   {
-                    issueKey (key_arr.setObject (), key);
+                    issueCredential (key_arr.setObject (), key);
                   }
               }
             

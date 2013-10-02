@@ -161,15 +161,22 @@ abstract class KeyGen2Validator extends JSONDecoder
 
     static Vector<JSONObjectReader> getObjectArrayConditional (JSONObjectReader rd, String name) throws IOException
       {
-        Vector<JSONObjectReader> result = new Vector<JSONObjectReader> ();
         if (rd.hasProperty (name))
           {
-            JSONArrayReader arr = rd.getArray (name);
-            while (arr.hasMore ())
-              {
-                result.add (arr.getObject ());
-             }
+            return getObjectArray (rd, name);
           }
+        return new Vector<JSONObjectReader> ();
+      }
+
+    static Vector<JSONObjectReader> getObjectArray (JSONObjectReader rd, String name) throws IOException
+      {
+        Vector<JSONObjectReader> result = new Vector<JSONObjectReader> ();
+        JSONArrayReader arr = rd.getArray (name);
+        do
+          {
+            result.add (arr.getObject ());
+          }
+        while (arr.hasMore ());
         return result;
       }
 

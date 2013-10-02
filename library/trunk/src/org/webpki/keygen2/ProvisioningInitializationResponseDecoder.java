@@ -116,9 +116,9 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
         /////////////////////////////////////////////////////////////////////////////////////////
         // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
-        server_session_id = rd.getString (SERVER_SESSION_ID_JSON);
+        server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 
-        client_session_id = rd.getString (CLIENT_SESSION_ID_JSON);
+        client_session_id = getID (rd, CLIENT_SESSION_ID_JSON);
 
         server_time = rd.getDateTime (SERVER_TIME_JSON).getTime ();
 
@@ -144,28 +144,22 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional client attributes
         /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasProperty (CLIENT_ATTRIBUTES_JSON))
+        for (JSONObjectReader type_rd : getObjectArrayConditional (rd, CLIENT_ATTRIBUTES_JSON))
           {
-            JSONArrayReader types = rd.getArray (CLIENT_ATTRIBUTES_JSON);
-            do
+            String type = type_rd.getString (TYPE_JSON);
+            HashSet<String> set = new HashSet<String> ();
+            JSONArrayReader values = type_rd.getArray (VALUES_JSON);
+            while (values.hasMore ())
               {
-                JSONObjectReader type_rd = types.getObject ();
-                String type = type_rd.getString (TYPE_JSON);
-                HashSet<String> set = new HashSet<String> ();
-                JSONArrayReader values = type_rd.getArray (VALUES_JSON);
-                while (values.hasMore ())
+                if (set.add (values.getString ()))
                   {
-                    if (set.add (values.getString ()))
-                      {
-                        throw new IOException ("Duplicate value for: " + type);
-                      }
-                  }
-                if (client_attribute_values.put (type, set) != null)
-                  {
-                    throw new IOException ("Duplicate: " + type);
+                    throw new IOException ("Duplicate value for: " + type);
                   }
               }
-            while (types.hasMore ());
+            if (client_attribute_values.put (type, set) != null)
+              {
+                throw new IOException ("Duplicate: " + type);
+              }
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////

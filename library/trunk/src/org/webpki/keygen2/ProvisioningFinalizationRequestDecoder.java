@@ -126,7 +126,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         
         public abstract byte[] getExtensionData () throws IOException;
         
-        Extension (JSONObjectReader rd, IssuedKey cpk) throws IOException
+        Extension (JSONObjectReader rd, IssuedCredential cpk) throws IOException
           {
             type = rd.getString (TYPE_JSON);
             mac = rd.getBinary (MAC_JSON);
@@ -139,7 +139,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
       {
         byte[] data;
 
-        StandardExtension (JSONObjectReader rd, IssuedKey cpk) throws IOException
+        StandardExtension (JSONObjectReader rd, IssuedCredential cpk) throws IOException
           {
             super (rd, cpk);
             data = rd.getBinary (DATA_JSON);
@@ -164,7 +164,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
       {
         byte[] data;
          
-        EncryptedExtension (JSONObjectReader rd, IssuedKey cpk) throws IOException
+        EncryptedExtension (JSONObjectReader rd, IssuedCredential cpk) throws IOException
           {
             super (rd, cpk);
             this.data = rd.getBinary (DATA_JSON);
@@ -202,7 +202,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
       {
         Vector<Property> properties = new Vector<Property> ();
 
-        PropertyBag (JSONObjectReader rd, IssuedKey cpk) throws IOException
+        PropertyBag (JSONObjectReader rd, IssuedCredential cpk) throws IOException
           {
             super (rd, cpk);
             JSONArrayReader props = rd.getArray (PROPERTIES_JSON);
@@ -253,7 +253,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         
         String mime_type;
   
-        Logotype (JSONObjectReader rd, IssuedKey cpk) throws IOException
+        Logotype (JSONObjectReader rd, IssuedCredential cpk) throws IOException
           {
             super (rd, cpk);
             mime_type = rd.getString (MIME_TYPE_JSON);
@@ -280,7 +280,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
       }
 
 
-    public class IssuedKey
+    public class IssuedCredential
       {
         X509Certificate[] certificate_path;
 
@@ -302,10 +302,10 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         
         PostOperation post_operation;
 
-        IssuedKey () { }
+        IssuedCredential () { }
 
 
-        IssuedKey (JSONObjectReader rd) throws IOException
+        IssuedCredential (JSONObjectReader rd) throws IOException
           {
             id = rd.getString (ID_JSON);
             certificate_path = JSONSignatureDecoder.readX509CertificatePath (rd);            
@@ -432,7 +432,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
                                   post_op);
       }
 
-    private Vector<IssuedKey> issued_keys = new Vector<IssuedKey> ();
+    private Vector<IssuedCredential> issued_keys = new Vector<IssuedCredential> ();
     
     private Vector<PostOperation> post_unlock_keys = new Vector<PostOperation> ();
       
@@ -467,9 +467,9 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
       }
 
 
-    public IssuedKey[] getIssuedKeys ()
+    public IssuedCredential[] getIssuedCredentials ()
       {
-        return issued_keys.toArray (new IssuedKey[0]);
+        return issued_keys.toArray (new IssuedCredential[0]);
       }
     
     
@@ -516,9 +516,9 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the issued_keys [0..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        for (JSONObjectReader keys : getObjectArrayConditional (rd, ISSUED_KEYS_JSON))
+        for (JSONObjectReader keys : getObjectArrayConditional (rd, ISSUED_CREDENTIALS_JSON))
           {
-            issued_keys.add (new IssuedKey (keys));
+            issued_keys.add (new IssuedCredential (keys));
           }
  
         /////////////////////////////////////////////////////////////////////////////////////////

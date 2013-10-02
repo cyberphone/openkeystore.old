@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import java.util.Vector;
 
-import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -64,23 +63,17 @@ public class PlatformNegotiationResponseDecoder extends KeyGen2Validator
 
         BasicCapabilities.read (rd, basic_capabilities);
         
-        if (rd.hasProperty (IMAGE_PREFERENCES_JSON))
+        //////////////////////////////////////////////////////////////////////////
+        // Get the optional image preferences
+        //////////////////////////////////////////////////////////////////////////
+        for (JSONObjectReader ip : getObjectArrayConditional (rd, IMAGE_PREFERENCES_JSON))
           {
-            //////////////////////////////////////////////////////////////////////////
-            // Get the [objects...]
-            //////////////////////////////////////////////////////////////////////////
-            JSONArrayReader array = rd.getArray (IMAGE_PREFERENCES_JSON);
-            do
-              {
-                ImagePreference im_pref = new ImagePreference ();
-                JSONObjectReader ip = array.getObject ();
-                im_pref.type = KeyGen2Validator.getURI (ip, TYPE_JSON);
-                im_pref.mime_type = ip.getString (MIME_TYPE_JSON);
-                im_pref.width = ip.getInt (WIDTH_JSON);
-                im_pref.height = ip.getInt (HEIGHT_JSON);
-                image_preferences.add (im_pref);
-              }
-            while (array.hasMore ());
+            ImagePreference im_pref = new ImagePreference ();
+            im_pref.type = getURI (ip, TYPE_JSON);
+            im_pref.mime_type = ip.getString (MIME_TYPE_JSON);
+            im_pref.width = ip.getInt (WIDTH_JSON);
+            im_pref.height = ip.getInt (HEIGHT_JSON);
+            image_preferences.add (im_pref);
           }
       }
 

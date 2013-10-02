@@ -235,7 +235,7 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
         ////////////////////////////////////////////////////////////////////////
         if (lookup_descriptors.isEmpty ())
           {
-            throw new IOException ("There must be at least one descriptor defined");
+            bad ("There must be at least one descriptor defined");
           }
         MacGenerator concat = new MacGenerator ();
         concat.addString (client_session_id);

@@ -24,12 +24,9 @@ import java.util.Vector;
 
 import org.webpki.sks.SecureKeyStore;
 
-import org.webpki.crypto.SignerInterface;
-
-import org.webpki.json.JSONEncoder;
+import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONSignatureEncoder;
-import org.webpki.json.JSONX509Signer;
 
 import org.webpki.keygen2.ServerState.ProtocolPhase;
 
@@ -64,12 +61,6 @@ public class KeyCreationRequestEncoder extends ServerEncoder
       }
 
 
-    private static void bad (String error_msg) throws IOException
-      {
-        throw new IOException (error_msg);
-      }
-
-
     public void setDeferredCertification (boolean flag)
       {
         deferred_certification = flag;
@@ -82,14 +73,6 @@ public class KeyCreationRequestEncoder extends ServerEncoder
       }
 
 
-    private JSONX509Signer signature;
-    
-    public void signRequest (SignerInterface signer) throws IOException
-      {
-        signature = new JSONX509Signer (signer);
-      }
-    
-    
     private ServerState.PUKPolicy getPUKPolicy (ServerState.Key kp)
       {
         return kp.pin_policy == null ? null : kp.pin_policy.puk_policy;
@@ -100,9 +83,9 @@ public class KeyCreationRequestEncoder extends ServerEncoder
     void writeServerRequest (JSONObjectWriter wr) throws IOException
       {
         //////////////////////////////////////////////////////////////////////////
-        // Set top-level 
+        // Set top-level properties
         //////////////////////////////////////////////////////////////////////////
-        wr.setString (ID_JSON, server_state.server_session_id);
+        wr.setString (SERVER_SESSION_ID_JSON, server_state.server_session_id);
 
         wr.setString (CLIENT_SESSION_ID_JSON, server_state.client_session_id);
 
@@ -123,6 +106,20 @@ public class KeyCreationRequestEncoder extends ServerEncoder
             bad ("Empty request not allowd!");
           }
         server_state.key_attestation_algorithm = algorithm;
+        JSONArrayWriter keys = wr.setArray (KEY_SPECIFIERS_JSON);
+        for (ServerState.Key req_key : server_state.requested_keys.values ())
+          {
+            try
+              {
+                req_key.writeRequest (keys.setObject ());
+              }
+            catch (GeneralSecurityException e)
+              {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+              }
+          }
+/*
         ServerState.Key last_req_key = null;
         try
           {
@@ -184,10 +181,7 @@ public class KeyCreationRequestEncoder extends ServerEncoder
           {
  //           wr.getParent ();
           }
-        if (signature != null)
-          {
-            wr.setEnvelopedSignature (signature);
-          }
+*/
       }
 
     @Override

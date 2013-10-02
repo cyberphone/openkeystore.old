@@ -843,7 +843,7 @@ public class KeyGen2Test
             //////////////////////////////////////////////////////////////////////////
             // Final check, do these keys match the request?
             //////////////////////////////////////////////////////////////////////////
-            for (ProvisioningFinalizationRequestDecoder.IssuedKey key : prov_final_request.getIssuedKeys ())
+            for (ProvisioningFinalizationRequestDecoder.IssuedCredential key : prov_final_request.getIssuedCredentials ())
               {
                 int key_handle = sks.getKeyHandle (eps.getProvisioningHandle (), key.getID ());
                 sks.setCertificatePath (key_handle, key.getCertificatePath (), key.getMAC ());
