@@ -103,6 +103,10 @@ public interface KeyGen2Constants
 
     String IMAGE_PREFERENCES_JSON                    = "ImagePreferences";
     
+    String IMPORTED_PRIVATE_KEY_JSON                 = "ImportedPrivateKey";
+
+    String IMPORTED_SYMMETRIC_KEY_JSON               = "ImportedSymmetricKey";
+
     String INPUT_METHOD_JSON                         = "InputMethod";
 
     String ISSUER_JSON                               = "Issuer";
@@ -167,8 +171,6 @@ public interface KeyGen2Constants
     
     String PRIVACY_ENABLED_JSON                      = "PrivacyEnabled";
 
-    String PRIVATE_KEY_JSON                          = "PrivateKey";
-
     String PROPERTIES_JSON                           = "Properties";       
 
     String PROPERTY_BAGS_JSON                        = "PropertyBags";       
@@ -184,6 +186,10 @@ public interface KeyGen2Constants
     String GENERATED_KEYS_JSON                       = "GeneratedKeys";
 
     String PUK_SPECIFIERS_JSON                       = "PUKSpecifiers";       
+
+    String RETURNED_CLIENT_ATTRIBUTES_JSON           = "ReturnedClientAttributes";
+
+    String REQUESTED_CLIENT_ATTRIBUTES_JSON          = "RequestedClientAttributes";
 
     String RETRY_LIMIT_JSON                          = "RetryLimit";
 
@@ -212,8 +218,6 @@ public interface KeyGen2Constants
     String SUBMIT_URL_JSON                           = "SubmitURL";
 
     String SUCCESS_URL_JSON                          = "SuccessURL";
-
-    String SYMMETRIC_KEY_JSON                        = "SymmetricKey";
 
     String TRUST_ANCHOR_JSON                         = "TrustAnchor";
 

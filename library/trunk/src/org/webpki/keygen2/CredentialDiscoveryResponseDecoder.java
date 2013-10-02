@@ -132,7 +132,7 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
         /////////////////////////////////////////////////////////////////////////////////////////
         server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 
-        client_session_id = getID (rd, SERVER_SESSION_ID_JSON);
+        client_session_id = getID (rd, CLIENT_SESSION_ID_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the lookup_results [1..n]

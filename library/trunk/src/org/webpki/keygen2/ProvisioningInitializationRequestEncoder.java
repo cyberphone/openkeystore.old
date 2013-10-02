@@ -231,7 +231,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
         ////////////////////////////////////////////////////////////////////////
         if (!client_attributes.isEmpty ())
           {
-            wr.setStringArray (CLIENT_ATTRIBUTES_JSON, client_attributes.toArray (new String[0]));
+            wr.setStringArray (REQUESTED_CLIENT_ATTRIBUTES_JSON, client_attributes.toArray (new String[0]));
           }
 
         ////////////////////////////////////////////////////////////////////////

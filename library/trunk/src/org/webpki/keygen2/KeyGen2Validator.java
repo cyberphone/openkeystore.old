@@ -98,9 +98,9 @@ abstract class KeyGen2Validator extends JSONDecoder
         return mac;
       }
 
-    static byte[] getEncryptedProtectionValue (JSONObjectReader rd) throws IOException
+    static byte[] getEncryptedKey (JSONObjectReader rd, String name_of_key) throws IOException
       {
-        byte[] encrypted_value = rd.getBinary (KeyGen2Constants.VALUE_JSON);
+        byte[] encrypted_value = rd.getBinary (name_of_key);
         if (encrypted_value.length < SecureKeyStore.AES_CBC_PKCS5_PADDING ||
             encrypted_value.length > SecureKeyStore.MAX_LENGTH_PIN_PUK + SecureKeyStore.AES_CBC_PKCS5_PADDING)
           {

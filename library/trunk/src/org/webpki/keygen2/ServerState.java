@@ -417,16 +417,15 @@ public class ServerState implements Serializable
             this.id = puk_prefix + ++next_puk_id_suffix;
             this.format = format;
             this.retry_limit = retry_limit;
+            puk_policies.add (this);
           }
 
-        void writePolicy (JSONObjectWriter wr) throws IOException, GeneralSecurityException
+        void writePolicy (JSONObjectWriter wr) throws IOException
           {
-  //          wr.addChildElement (PUK_POLICY_JSON);
-
             wr.setString (ID_JSON, id);
             wr.setInt (RETRY_LIMIT_JSON, retry_limit);
             wr.setString (FORMAT_JSON, format.getXMLName ());
-            wr.setBinary (VALUE_JSON, encrypted_value);
+            wr.setBinary (ENCRYPTED_KEY_JSON, encrypted_value);
 
             MacGenerator puk_policy_mac = new MacGenerator ();
             puk_policy_mac.addString (id);
@@ -509,14 +508,14 @@ public class ServerState implements Serializable
         private PINPolicy ()
           {
             this.id = pin_prefix + ++next_pin_id_suffix;
+            pin_policies.add (this);
           }
 
-        void writePolicy (JSONObjectWriter wr) throws IOException, GeneralSecurityException
+        void writePolicy (JSONObjectWriter wr) throws IOException
           {
-//            wr.addChildElement (PIN_POLICY_JSON);
             wr.setString (ID_JSON, id);
-            wr.setInt (MAX_LENGTH_JSON, max_length);
             wr.setInt (MIN_LENGTH_JSON, min_length);
+            wr.setInt (MAX_LENGTH_JSON, max_length);
             wr.setInt (RETRY_LIMIT_JSON, retry_limit);
             if (user_modifiable_set)
               {
@@ -540,6 +539,7 @@ public class ServerState implements Serializable
               {
                 wr.setString (INPUT_METHOD_JSON, input_method.getXMLName ());
               }
+            System.out.println ("SPUK=" + (puk_policy == null ? SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id));
 
             MacGenerator pin_policy_mac = new MacGenerator ();
             pin_policy_mac.addString (id);
@@ -929,7 +929,7 @@ public class ServerState implements Serializable
               }
           }
 
-        void writeRequest (JSONObjectWriter wr) throws IOException, GeneralSecurityException
+        void writeRequest (JSONObjectWriter wr) throws IOException
           {
             key_init_done = true;
             MacGenerator key_pair_mac = new MacGenerator ();
@@ -981,7 +981,7 @@ public class ServerState implements Serializable
 
             if (preset_pin != null)
               {
-                wr.setBinary (ENCRYPTED_KEY_JSON, preset_pin);
+                wr.setBinary (PRESET_PIN_JSON, preset_pin);
               }
 
             if (enable_pin_caching_set)
@@ -1148,12 +1148,12 @@ public class ServerState implements Serializable
         return  new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
       }
 
-    byte[] mac (byte[] data, byte[] method) throws IOException, GeneralSecurityException
+    byte[] mac (byte[] data, byte[] method) throws IOException
       {
         return server_crypto_interface.mac (data, ArrayUtil.add (method, getMACSequenceCounterAndUpdate ()));
       }
     
-    byte[] attest (byte[] data, byte[] mac_counter) throws IOException, GeneralSecurityException
+    byte[] attest (byte[] data, byte[] mac_counter) throws IOException
       {
         return server_crypto_interface.mac (data, ArrayUtil.add (SecureKeyStore.KDF_DEVICE_ATTESTATION, mac_counter)); 
       }
@@ -1307,33 +1307,26 @@ public class ServerState implements Serializable
           {
             ServerState.bad ("Different number of requested and received keys");
           }
-        try
+        for (KeyCreationResponseDecoder.GeneratedPublicKey gpk : key_create_response.generated_keys.values ())
           {
-            for (KeyCreationResponseDecoder.GeneratedPublicKey gpk : key_create_response.generated_keys.values ())
+            ServerState.Key kp = requested_keys.get (gpk.id);
+            if (kp == null)
               {
-                ServerState.Key kp = requested_keys.get (gpk.id);
-                if (kp == null)
-                  {
-                    ServerState.bad ("Missing key id:" + gpk.id);
-                  }
-                if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
-                  {
-                    ServerState.bad ("Wrong key type returned for key id:" + gpk.id);
-                  }
-                MacGenerator attestation = new MacGenerator ();
-                // Write key attestation data
-                attestation.addString (gpk.id);
-                attestation.addArray (gpk.public_key.getEncoded ());
-                 if (!ArrayUtil.compare (attest (attestation.getResult (), kp.expected_attest_mac_count),
-                                         kp.attestation = gpk.attestation))
-                  {
-                    ServerState.bad ("Attestation failed for key id:" + gpk.id);
-                  }
+                ServerState.bad ("Missing key id:" + gpk.id);
               }
-          }
-        catch (GeneralSecurityException e)
-          {
-            throw new IOException (e);
+            if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
+              {
+                ServerState.bad ("Wrong key type returned for key id:" + gpk.id);
+              }
+            MacGenerator attestation = new MacGenerator ();
+            // Write key attestation data
+            attestation.addString (gpk.id);
+            attestation.addArray (gpk.public_key.getEncoded ());
+             if (!ArrayUtil.compare (attest (attestation.getResult (), kp.expected_attest_mac_count),
+                                     kp.attestation = gpk.attestation))
+              {
+                ServerState.bad ("Attestation failed for key id:" + gpk.id);
+              }
           }
         current_phase = ProtocolPhase.PROVISIONING_FINALIZATION;
       }
@@ -1435,6 +1428,7 @@ public class ServerState implements Serializable
         return server_session_id;
       }
 
+    Vector<PINPolicy> pin_policies = new Vector<PINPolicy> ();
     
     public PINPolicy createPINPolicy (PassphraseFormat format, int min_length, int max_length, int retry_limit, PUKPolicy puk_policy) throws IOException
       {
@@ -1455,6 +1449,7 @@ public class ServerState implements Serializable
         return pin_policy;
       }
 
+    Vector<PUKPolicy> puk_policies = new Vector<PUKPolicy> ();
 
     public PUKPolicy createPUKPolicy (byte[] puk, PassphraseFormat format, int retry_limit) throws IOException
       {

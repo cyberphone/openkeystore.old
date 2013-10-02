@@ -193,7 +193,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
         
         session_life_time = rd.getInt (SESSION_LIFE_TIME_JSON);
         
-        String[] attrs = rd.getStringArrayConditional (CLIENT_ATTRIBUTES_JSON);
+        String[] attrs = rd.getStringArrayConditional (REQUESTED_CLIENT_ATTRIBUTES_JSON);
         if (attrs != null)
           {
             for (String attr : attrs)
@@ -222,6 +222,8 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         if (rd.hasProperty (VIRTUAL_MACHINE_JSON))
           {
+            //TODO
+            rd.getBinaryConditional (NONCE_JSON);
             if (!rd.hasProperty (JSONSignatureDecoder.SIGNATURE_JSON))
               {
                 throw new IOException ("Virtual Machine requests must be signed");

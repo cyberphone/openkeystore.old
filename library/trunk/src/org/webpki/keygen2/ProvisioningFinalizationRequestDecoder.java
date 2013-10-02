@@ -320,15 +320,15 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
                   }
               }
 
-            if (rd.hasProperty (SYMMETRIC_KEY_JSON))
+            if (rd.hasProperty (IMPORTED_SYMMETRIC_KEY_JSON))
               {
-                JSONObjectReader sym_key = rd.getObject(SYMMETRIC_KEY_JSON);
+                JSONObjectReader sym_key = rd.getObject(IMPORTED_SYMMETRIC_KEY_JSON);
                 encrypted_symmetric_key = sym_key.getBinary (ENCRYPTED_KEY_JSON);
                 symmetric_key_mac = sym_key.getBinary (MAC_JSON);
               }
-            else if (rd.hasProperty (PRIVATE_KEY_JSON))
+            else if (rd.hasProperty (IMPORTED_PRIVATE_KEY_JSON))
               {
-                JSONObjectReader priv_key = rd.getObject(SYMMETRIC_KEY_JSON);
+                JSONObjectReader priv_key = rd.getObject(IMPORTED_PRIVATE_KEY_JSON);
                 encrypted_private_key = priv_key.getBinary (ENCRYPTED_KEY_JSON);
                 private_key_mac = priv_key.getBinary (MAC_JSON);
               }

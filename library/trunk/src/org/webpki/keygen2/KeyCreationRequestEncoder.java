@@ -18,9 +18,7 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.security.GeneralSecurityException;
-
-import java.util.Vector;
+import java.util.Iterator;
 
 import org.webpki.sks.SecureKeyStore;
 
@@ -28,6 +26,7 @@ import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONSignatureEncoder;
 
+import org.webpki.keygen2.ServerState.PINPolicy;
 import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -41,12 +40,6 @@ public class KeyCreationRequestEncoder extends ServerEncoder
 
     ServerState server_state;
     
-    Vector<String> written_pin = new Vector<String> ();
-
-    Vector<String> written_puk = new Vector<String> ();
-    
-    JSONObjectWriter wr;
-
     private String algorithm = SecureKeyStore.ALGORITHM_KEY_ATTEST_1;
 
 
@@ -79,6 +72,22 @@ public class KeyCreationRequestEncoder extends ServerEncoder
       }
 
 
+    void writeKeys (JSONObjectWriter wr, PINPolicy pin_policy) throws IOException
+      {
+        JSONArrayWriter keys = null;
+        for (ServerState.Key req_key : server_state.requested_keys.values ())
+          {
+            if (req_key.pin_policy == pin_policy)
+              {
+                if (keys == null)
+                  {
+                    keys = wr.setArray (KEY_SPECIFIERS_JSON);
+                  }
+                req_key.writeRequest (keys.setObject ());
+              }
+          }
+      }
+
     @Override
     void writeServerRequest (JSONObjectWriter wr) throws IOException
       {
@@ -98,6 +107,8 @@ public class KeyCreationRequestEncoder extends ServerEncoder
             wr.setBoolean (DEFERRED_CERTIFICATION_JSON, deferred_certification);
           }
 
+        server_state.key_attestation_algorithm = algorithm;
+
         ////////////////////////////////////////////////////////////////////////
         // There MUST not be zero keys to initialize...
         ////////////////////////////////////////////////////////////////////////
@@ -105,83 +116,36 @@ public class KeyCreationRequestEncoder extends ServerEncoder
           {
             bad ("Empty request not allowd!");
           }
-        server_state.key_attestation_algorithm = algorithm;
-        JSONArrayWriter keys = wr.setArray (KEY_SPECIFIERS_JSON);
-        for (ServerState.Key req_key : server_state.requested_keys.values ())
+        if (!server_state.puk_policies.isEmpty ())
           {
-            try
+            JSONArrayWriter puk = wr.setArray (PUK_SPECIFIERS_JSON);
+            for (ServerState.PUKPolicy puk_policy : server_state.puk_policies)
               {
-                req_key.writeRequest (keys.setObject ());
-              }
-            catch (GeneralSecurityException e)
-              {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-              }
-          }
-/*
-        ServerState.Key last_req_key = null;
-        try
-          {
-            for (ServerState.Key req_key : server_state.requested_keys.values ())
-              {
-                if (last_req_key != null && getPUKPolicy (last_req_key) != null &&
-                    getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
+                JSONObjectWriter puk_wr = puk.setObject ();
+                puk_policy.writePolicy (puk_wr);
+                JSONArrayWriter pin = puk_wr.setArray (PIN_SPECIFIERS_JSON);
+                Iterator<ServerState.PINPolicy> pin_policies = server_state.pin_policies.iterator ();
+                while (pin_policies.hasNext ())
                   {
-//                    wr.getParent ();
+                    ServerState.PINPolicy pin_policy = pin_policies.next ();
+                    JSONObjectWriter pin_wr = pin.setObject ();
+                    pin_policy.writePolicy (pin_wr);
+                    pin_policies.remove ();
+                    writeKeys (pin_wr, pin_policy);
                   }
-                if (last_req_key != null && last_req_key.pin_policy != null &&
-                    last_req_key.pin_policy != req_key.pin_policy)
-                  {
-//                    wr.getParent ();
-                  }
-                if (getPUKPolicy (req_key) != null)
-                  {
-                    if (written_puk.contains (getPUKPolicy (req_key).id))
-                      {
-                        if (getPUKPolicy (last_req_key) != getPUKPolicy (req_key))
-                          {
-                            bad ("PUK grouping error");
-                          }
-                      }
-                    else
-                      {
-                        getPUKPolicy (req_key).writePolicy (wr);
-                        written_puk.add (getPUKPolicy (req_key).id);
-                      }
-                  }
-                if (req_key.pin_policy != null)
-                  {
-                    if (written_pin.contains (req_key.pin_policy.id))
-                      {
-                        if (last_req_key.pin_policy != req_key.pin_policy)
-                          {
-                            bad ("PIN grouping error");
-                          }
-                      }
-                    else
-                      {
-                        req_key.pin_policy.writePolicy (wr);
-                        written_pin.add (req_key.pin_policy.id);
-                      }
-                  }
-                req_key.writeRequest (wr);
-                last_req_key = req_key;
               }
           }
-        catch (GeneralSecurityException e)
+        if (!server_state.pin_policies.isEmpty ())
           {
-            throw new IOException (e);
+            JSONArrayWriter pin = wr.setArray (PIN_SPECIFIERS_JSON);
+            for (ServerState.PINPolicy pin_policy : server_state.pin_policies)
+              {
+                JSONObjectWriter pin_wr = pin.setObject ();
+                pin_policy.writePolicy (pin_wr);
+                writeKeys (pin_wr, pin_policy);
+              }
           }
-        if (last_req_key != null && last_req_key.pin_policy != null)
-          {
-//            wr.getParent ();
-          }
-        if (last_req_key != null && getPUKPolicy (last_req_key) != null)
-          {
- //           wr.getParent ();
-          }
-*/
+        writeKeys (wr, null);
       }
 
     @Override
