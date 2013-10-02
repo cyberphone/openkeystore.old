@@ -2,6 +2,8 @@ package org.webpki.webapps.json.jcs;
 
 import java.io.IOException;
 
+import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
 
 import javax.servlet.http.HttpServlet;
@@ -18,6 +20,8 @@ public class RequestServlet extends HttpServlet
   {
     private static final long serialVersionUID = 1L;
     
+    static Logger logger = Logger.getLogger (RequestServlet.class.getName ());
+
     static final String JCS_ARGUMENT = "JCS";
     
     static void error (HttpServletResponse response, String error_message) throws IOException, ServletException
@@ -27,6 +31,7 @@ public class RequestServlet extends HttpServlet
     
     void verifySignature (HttpServletRequest request, HttpServletResponse response, byte[] signed_json) throws IOException, ServletException
       {
+        logger.info ("JSON Signature Verification Entered");
         ReadSignature doc = new ReadSignature ();
         doc.recurseObject (JSONParser.parse (signed_json));
         request.getSession ().setAttribute (JCS_ARGUMENT, signed_json);

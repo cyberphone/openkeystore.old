@@ -202,8 +202,10 @@ public class HTML
             "<tr><td width=\"100%\" align=\"center\" valign=\"middle\">" +
             "<table><form method=\"POST\" action=\"" + request.getRequestURL ().toString () + "\">"  +
                "<tr><td align=\"center\" style=\"font-weight:bolder;font-size:10pt;font-family:arial,verdana\">JSON Signature Creation<br>&nbsp;</td></tr>" +
-               "<tr><td align=\"left\">Arbitrary data that you want to sign:</td></tr>" +
-               "<tr><td align=\"left\"><textarea rows=\"10\" cols=\"50\"  maxlength=\"200\" name=\"" + CreateServlet.MY_DATA_TO_BE_SIGNED + "\"></textarea></td></tr>" +
+               "<tr><td align=\"left\">Paste an unsigned JSON object in the text box or try with the default:</td></tr>" +
+               "<tr><td align=\"left\"><textarea style=\"padding:10px;background:#FFFFD0\" rows=\"10\" cols=\"50\"  maxlength=\"1000\" name=\"" + CreateServlet.MY_JSON_OBJECT_TO_BE_SIGNED + "\">{" +
+               		"\n  &quot;prop1&quot;: 199\n}" +
+               		"</textarea></td></tr>" +
                "<tr><td align=\"center\"><table>" +
                  "<tr><td valign=\"middle\" rowspan=\"4\">Select signing key:&nbsp;</td><td align=\"left\"><input type=\"radio\" name=\"" + CreateServlet.KEY_TYPE + "\" value=\"" + MySignature.ACTION.SYM + 
                  "\">Symmetric key</td><td>" +

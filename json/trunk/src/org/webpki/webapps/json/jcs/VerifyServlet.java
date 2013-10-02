@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
+
 import org.webpki.webutil.ServletUtil;
 
 public class VerifyServlet extends HttpServlet

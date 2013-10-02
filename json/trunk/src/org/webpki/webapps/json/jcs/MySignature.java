@@ -18,9 +18,8 @@ package org.webpki.webapps.json.jcs;
 
 import java.io.IOException;
 
-import java.util.Date;
-
 import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
 
 import org.webpki.json.test.Sign;
 
@@ -32,18 +31,8 @@ public class MySignature
     static enum ACTION {SYM, EC, RSA, X509};
     
     ACTION action;
-    String data_to_be_signed;
-
-    public MySignature (ACTION action, String data_to_be_signed)
+    byte[] sign (JSONObjectWriter wr, ACTION action) throws IOException
       {
-        this.action = action;
-        this.data_to_be_signed = data_to_be_signed; 
-      }
-    
-    public void writeJSONData (JSONObjectWriter wr) throws IOException
-      {
-        wr.setDateTime ("Now", new Date ());
-        wr.setString ("MyData", data_to_be_signed);
         if (action == ACTION.X509)
           {
             Sign.createX509Signature (wr);
@@ -56,5 +45,6 @@ public class MySignature
           {
             Sign.createAsymmetricKeySignature (wr, action == ACTION.RSA);
           }
+        return wr.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
       }
   }
