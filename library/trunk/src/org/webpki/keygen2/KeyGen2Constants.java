@@ -125,7 +125,7 @@ public interface KeyGen2Constants
     
     String KEY_CREATION_RESPONSE_JSON                = "KeyCreationResponse";
 
-    String KEY_SPECIFIERS_JSON                       = "KeySpecifiers";       
+    String KEY_ENTRY_SPECIFIERS_JSON                 = "KeyEntrySpecifiers";       
 
     String KEY_MANAGEMENT_KEY_JSON                   = "KeyManagementKey";
 
@@ -161,7 +161,7 @@ public interface KeyGen2Constants
 
     String PATTERN_RESTRICTIONS_JSON                 = "PatternRestrictions";
 
-    String PIN_SPECIFIERS_JSON                       = "PINSpecifiers";       
+    String PIN_POLICY_SPECIFIERS_JSON                = "PINPolicySpecifiers";       
 
     String PLATFORM_NEGOTIATION_REQUEST_JSON         = "PlatformNegotiationRequest";
     
@@ -185,7 +185,7 @@ public interface KeyGen2Constants
 
     String GENERATED_KEYS_JSON                       = "GeneratedKeys";
 
-    String PUK_SPECIFIERS_JSON                       = "PUKSpecifiers";       
+    String PUK_POLICY_SPECIFIERS_JSON                = "PUKPolicySpecifiers";       
 
     String RETURNED_CLIENT_ATTRIBUTES_JSON           = "ReturnedClientAttributes";
 

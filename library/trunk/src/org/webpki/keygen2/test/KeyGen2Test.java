@@ -353,7 +353,7 @@ public class KeyGen2Test
               {
                 grouping = Grouping.NONE;
               }
-            json.append ("\"PINSpecifiers\":[{ \"Format\" :\"")
+            json.append ("\"" + KeyGen2Constants.PIN_POLICY_SPECIFIERS_JSON + "\":[{ \"Format\" :\"")
                .append (format.getXMLName ())
                .append ("\", \"ID\":\"PIN.")
                .append (++pin_id)
@@ -380,7 +380,7 @@ public class KeyGen2Test
           {
             if (key_spec)
               {
-                json.append ("\"KeySpecifiers\" :[");
+                json.append ('"').append (KeyGen2Constants.KEY_ENTRY_SPECIFIERS_JSON).append ("\" :[");
               }
             if (!key_spec) json.append (',');
             json.append ("{ \"AppUsage\":\"")

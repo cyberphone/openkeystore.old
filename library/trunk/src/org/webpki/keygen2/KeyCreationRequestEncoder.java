@@ -81,7 +81,7 @@ public class KeyCreationRequestEncoder extends ServerEncoder
               {
                 if (keys == null)
                   {
-                    keys = wr.setArray (KEY_SPECIFIERS_JSON);
+                    keys = wr.setArray (KEY_ENTRY_SPECIFIERS_JSON);
                   }
                 req_key.writeRequest (keys.setObject ());
               }
@@ -118,12 +118,12 @@ public class KeyCreationRequestEncoder extends ServerEncoder
           }
         if (!server_state.puk_policies.isEmpty ())
           {
-            JSONArrayWriter puk = wr.setArray (PUK_SPECIFIERS_JSON);
+            JSONArrayWriter puk = wr.setArray (PUK_POLICY_SPECIFIERS_JSON);
             for (ServerState.PUKPolicy puk_policy : server_state.puk_policies)
               {
                 JSONObjectWriter puk_wr = puk.setObject ();
                 puk_policy.writePolicy (puk_wr);
-                JSONArrayWriter pin = puk_wr.setArray (PIN_SPECIFIERS_JSON);
+                JSONArrayWriter pin = puk_wr.setArray (PIN_POLICY_SPECIFIERS_JSON);
                 Iterator<ServerState.PINPolicy> pin_policies = server_state.pin_policies.iterator ();
                 while (pin_policies.hasNext ())
                   {
@@ -137,7 +137,7 @@ public class KeyCreationRequestEncoder extends ServerEncoder
           }
         if (!server_state.pin_policies.isEmpty ())
           {
-            JSONArrayWriter pin = wr.setArray (PIN_SPECIFIERS_JSON);
+            JSONArrayWriter pin = wr.setArray (PIN_POLICY_SPECIFIERS_JSON);
             for (ServerState.PINPolicy pin_policy : server_state.pin_policies)
               {
                 JSONObjectWriter pin_wr = pin.setObject ();

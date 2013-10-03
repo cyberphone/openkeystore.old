@@ -864,15 +864,15 @@ public class KeyCreationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the key requests and protection elements [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        for (JSONObjectReader puk : getObjectArrayConditional (rd, PUK_SPECIFIERS_JSON))
+        for (JSONObjectReader puk : getObjectArrayConditional (rd, PUK_POLICY_SPECIFIERS_JSON))
           {
             readPINProtectedKeys (puk, new PUKPolicy (puk));
           }
-        if (rd.hasProperty (PIN_SPECIFIERS_JSON))
+        if (rd.hasProperty (PIN_POLICY_SPECIFIERS_JSON))
           {
             readPINProtectedKeys (rd, null);
           }
-        for (JSONObjectReader key : getObjectArrayConditional (rd, KEY_SPECIFIERS_JSON))
+        for (JSONObjectReader key : getObjectArrayConditional (rd, KEY_ENTRY_SPECIFIERS_JSON))
           {
             readKeyProperties (key, key.getBooleanConditional (DEVICE_PIN_PROTECTION_JSON));
           }
@@ -881,12 +881,12 @@ public class KeyCreationRequestDecoder extends ClientDecoder
     void readPINProtectedKeys (JSONObjectReader rd, PUKPolicy puk_policy) throws IOException
       {
         boolean startofpuk = puk_policy != null;
-        for (JSONObjectReader pin : getObjectArray (rd, PIN_SPECIFIERS_JSON))
+        for (JSONObjectReader pin : getObjectArray (rd, PIN_POLICY_SPECIFIERS_JSON))
           {
             PINPolicy pin_policy = new PINPolicy (pin);
             pin_policy.puk_policy = puk_policy;
             boolean start = true;
-            for (JSONObjectReader key : getObjectArray (pin, KEY_SPECIFIERS_JSON))
+            for (JSONObjectReader key : getObjectArray (pin, KEY_ENTRY_SPECIFIERS_JSON))
               {
                 readKeyProperties (key, pin_policy, start).start_of_puk_group = startofpuk;
                 start = false;
