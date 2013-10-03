@@ -73,9 +73,9 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
                       PostProvisioningTargetKey target_key,
                       MacGenerator post_op_mac) throws IOException, GeneralSecurityException
       {
-        wr.setString (CLIENT_SESSION_ID_JSON, target_key.client_session_id);
-        wr.setString (SERVER_SESSION_ID_JSON, target_key.server_session_id);
         wr.setBinary (CERTIFICATE_FINGERPRINT_JSON, HashAlgorithms.SHA256.digest (target_key.certificate_data));
+        wr.setString (SERVER_SESSION_ID_JSON, target_key.server_session_id);
+        wr.setString (CLIENT_SESSION_ID_JSON, target_key.client_session_id);
         byte[] device_id = server_state.device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : server_state.device_certificate.getEncoded ();
         byte[] key_id = server_state.server_crypto_interface.mac (target_key.certificate_data, device_id);
         byte[] authorization = server_state.server_crypto_interface.generateKeyManagementAuthorization (target_key.key_management_key,

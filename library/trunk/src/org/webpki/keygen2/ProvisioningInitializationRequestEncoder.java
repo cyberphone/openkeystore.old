@@ -142,7 +142,6 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
         this.server_time = server_time;
       }
     
-    
     private void scanForUpdatedKeys (JSONObjectWriter wr, KeyManagementKeyUpdateHolder kmk) throws IOException
       {
         if (!kmk.children.isEmpty ())
@@ -151,8 +150,8 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
             for (KeyManagementKeyUpdateHolder child : kmk.children)
               {
                 JSONObjectWriter kmku_object = kmku_arr.setObject ();
-                kmku_object.setBinary (AUTHORIZATION_JSON, child.authorization);
                 JSONSignatureEncoder.writePublicKey (kmku_object, child.key_management_key);
+                kmku_object.setBinary (AUTHORIZATION_JSON, child.authorization);
                 scanForUpdatedKeys (kmku_object, child);
               }
           }
@@ -240,8 +239,8 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
         if (virtual_machine_data != null)
           {
             wr.setObject (VIRTUAL_MACHINE_JSON)
-              .setBinary (CONFIGURATION_JSON, virtual_machine_data)
               .setString (TYPE_JSON, virtual_machine_type)
+              .setBinary (CONFIGURATION_JSON, virtual_machine_data)
               .setString (FRIENDLY_NAME_JSON, virtual_machine_friendly_name);
           }
       }

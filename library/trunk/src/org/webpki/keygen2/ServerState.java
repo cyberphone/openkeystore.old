@@ -539,7 +539,6 @@ public class ServerState implements Serializable
               {
                 wr.setString (INPUT_METHOD_JSON, input_method.getXMLName ());
               }
-            System.out.println ("SPUK=" + (puk_policy == null ? SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE : puk_policy.id));
 
             MacGenerator pin_policy_mac = new MacGenerator ();
             pin_policy_mac.addString (id);

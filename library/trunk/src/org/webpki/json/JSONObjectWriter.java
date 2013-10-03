@@ -244,7 +244,6 @@ public class JSONObjectWriter
             newLine ();
             next = true;
             printProperty (property);
-            System.out.println ("PROP=" + property);
             switch (json_value.type)
               {
                 case ARRAY:

@@ -146,7 +146,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
                 KeyManagementKeyUpdateHolder child = new KeyManagementKeyUpdateHolder (JSONSignatureDecoder.readPublicKey (kmk_upd));
                 child.authorization = authorization;
                 kmk.children.add (child);
-                scanForUpdateKeys (rd, child);
+                scanForUpdateKeys (kmk_upd, child);
               }
             while (upd_arr.hasMore ());
           }

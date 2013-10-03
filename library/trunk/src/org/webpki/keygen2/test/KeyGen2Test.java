@@ -341,6 +341,8 @@ public class KeyGen2Test
         
         private int pin_id;
         
+        boolean key_spec = true;
+        
         KeyCreator () throws IOException
           {
           }
@@ -370,23 +372,30 @@ public class KeyGen2Test
                   }
                 json.append ("],");
               }
-            json.append (" \"MAC\": \"3dGegeDJ1enpEzCgwdbXJirNZ95wooM6ordOGW/AJ+0=\", \"MaxLength\":8, \"MinLength\":4, \"RetryLimit\":3}");
+            json.append (" \"MAC\": \"3dGegeDJ1enpEzCgwdbXJirNZ95wooM6ordOGW/AJ+0=\", \"MaxLength\":8, \"MinLength\":4, \"RetryLimit\":3,");
             return this;
           }
         
         KeyCreator addKey (AppUsage app_usage)
           {
-            json.append ("<KeyEntry AppUsage=\"")
+            if (key_spec)
+              {
+                json.append ("\"KeySpecifiers\" :[");
+              }
+            if (!key_spec) json.append (',');
+            json.append ("{ \"AppUsage\":\"")
                .append (app_usage.getXMLName ())
-               .append ("\" ID=\"Key.")
+               .append ("\", \"ID\":\"Key.")
                .append (++key_id)
-               .append ("\" KeyAlgorithm=\"http://xmlns.webpki.org/sks/algorithm#rsa2048\" MAC=\"Jrqigi79Yw6SoLobsBA5S8b74gTKrIJPh3tQRKci33Y=\"/>");
+               .append ("\", \"KeyAlgorithm\":\"http://xmlns.webpki.org/sks/algorithm#rsa2048\", \"MAC\":\"Jrqigi79Yw6SoLobsBA5S8b74gTKrIJPh3tQRKci33Y=\"}");
+            key_spec = false;
             return this;
           }
 
         KeyCreationRequestDecoder parse () throws Exception
           {
-            return (KeyCreationRequestDecoder)json_cache.parse (json.append ("}").toString ().getBytes ("UTF-8"));
+            json.append ("]}]}");
+            return (KeyCreationRequestDecoder)json_cache.parse (json.toString ().getBytes ("UTF-8"));
           }
       }
 
@@ -1440,7 +1449,6 @@ public class KeyGen2Test
         
         byte[] fileLogger (byte[] json_data) throws Exception
           {
-System.out.println (new String (json_data,"UTF-8"));
             JSONDecoder xo = xmlschemas.parse (json_data);
             writeString ("&nbsp;<br><table><tr><td bgcolor=\"#F0F0F0\" style=\"border:solid;border-width:1px;padding:4px\">&nbsp;Pass #" + 
                          (++pass) +
@@ -1817,7 +1825,7 @@ System.out.println (new String (json_data,"UTF-8"));
         assertTrue ("Bad signature", verify.verify (result));
       }
 
-  //  @Test
+    @Test
     public void UpdateKeyManagementKey () throws Exception
       {
         Doer doer1 = new Doer ();
@@ -2034,7 +2042,7 @@ System.out.println (new String (json_data,"UTF-8"));
         doer.perform ();
       }
 
-   // @Test
+    @Test
     public void MassiveUserPINCollection () throws Exception
       {
         assertTrue (PINCheck (PassphraseFormat.ALPHANUMERIC, null, "AB123"));
