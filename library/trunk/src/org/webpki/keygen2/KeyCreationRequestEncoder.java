@@ -24,7 +24,6 @@ import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
-import org.webpki.json.JSONSignatureEncoder;
 
 import org.webpki.keygen2.ServerState.PINPolicy;
 import org.webpki.keygen2.ServerState.ProtocolPhase;
@@ -94,13 +93,13 @@ public class KeyCreationRequestEncoder extends ServerEncoder
         //////////////////////////////////////////////////////////////////////////
         // Set top-level properties
         //////////////////////////////////////////////////////////////////////////
+        wr.setString (KEY_ENTRY_ALGORITHM_JSON, algorithm);
+
         wr.setString (SERVER_SESSION_ID_JSON, server_state.server_session_id);
 
         wr.setString (CLIENT_SESSION_ID_JSON, server_state.client_session_id);
 
         wr.setString (SUBMIT_URL_JSON, submit_url);
-
-        wr.setString (JSONSignatureEncoder.ALGORITHM_JSON, algorithm);
 
         if (deferred_certification)
           {

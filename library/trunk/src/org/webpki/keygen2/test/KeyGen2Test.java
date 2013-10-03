@@ -322,7 +322,7 @@ public class KeyGen2Test
             "\"ServerSessionID\": \"1417ace50e9IoDMto6NHlN1JWvysvZsC\",\n" +
             "\"ClientSessionID\": \"KzyjlYG3YurWzSr2d9O9X3y_1EUsadmE\",\n" +
             "\"SubmitURL\": \"http://issuer.example.com/keyinit\",\n" +
-            "\"Algorithm\": \"http://xmlns.webpki.org/sks/algorithm#key.1\",\n";     
+            "\"" + KeyGen2Constants.KEY_ENTRY_ALGORITHM_JSON + "\": \"http://xmlns.webpki.org/sks/algorithm#key.1\",\n";     
         private static JSONDecoderCache json_cache;
         
         static

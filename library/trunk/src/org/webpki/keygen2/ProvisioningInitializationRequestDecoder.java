@@ -187,7 +187,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
 
         submit_url = getURL (rd, SUBMIT_URL_JSON);
         
-        algorithm = rd.getString (JSONSignatureDecoder.ALGORITHM_JSON);
+        algorithm = rd.getString (SESSION_KEY_ALGORITHM_JSON);
         
         session_key_limit = (short)rd.getInt (SESSION_KEY_LIMIT_JSON);
         

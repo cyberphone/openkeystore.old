@@ -116,6 +116,8 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
         /////////////////////////////////////////////////////////////////////////////////////////
         // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
+        attestation = rd.getBinary (SESSION_ATTESTATION_JSON);
+        
         server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 
         client_session_id = getID (rd, CLIENT_SESSION_ID_JSON);
@@ -124,8 +126,6 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
 
         client_time = rd.getDateTime (CLIENT_TIME_JSON).getTime ();
 
-        attestation = rd.getBinary (ATTESTATION_JSON);
-        
         server_certificate_fingerprint = rd.getBinaryConditional (SERVER_CERT_FP_JSON);
         
         /////////////////////////////////////////////////////////////////////////////////////////

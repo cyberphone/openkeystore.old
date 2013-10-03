@@ -187,7 +187,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setString (JSONSignatureEncoder.ALGORITHM_JSON, server_state.provisioning_session_algorithm);
+        wr.setString (SESSION_KEY_ALGORITHM_JSON, server_state.provisioning_session_algorithm);
 
         wr.setString (SERVER_SESSION_ID_JSON, server_session_id);
         

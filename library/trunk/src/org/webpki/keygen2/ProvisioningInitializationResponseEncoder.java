@@ -130,11 +130,11 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
 
         wr.setString (CLIENT_SESSION_ID_JSON, client_session_id);
 
+        wr.setBinary (SESSION_ATTESTATION_JSON, attestation);
+        
         wr.setDateTime (SERVER_TIME_JSON, server_time);
 
         wr.setDateTime (CLIENT_TIME_JSON, client_time);
-        
-        wr.setBinary (ATTESTATION_JSON, attestation);
         
         if (server_certificate_fingerprint != null)
           {

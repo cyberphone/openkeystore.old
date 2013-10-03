@@ -35,7 +35,6 @@ import org.webpki.util.ArrayUtil;
 import org.webpki.util.DebugFormatter;
 
 import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONSignatureDecoder;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -859,7 +858,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
         deferred_certification = rd.getBooleanConditional (DEFERRED_CERTIFICATION_JSON);
 
-        algorithm = getURI (rd, JSONSignatureDecoder.ALGORITHM_JSON);
+        algorithm = getURI (rd, KEY_ENTRY_ALGORITHM_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the key requests and protection elements [1..n]

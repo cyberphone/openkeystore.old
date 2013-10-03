@@ -36,8 +36,6 @@ public interface KeyGen2Constants
 
     String APP_USAGE_JSON                            = "AppUsage";
 
-    String ATTESTATION_JSON                          = "Attestation";
-
     String AUTHORIZATION_JSON                        = "Authorization";
 
     String BIOMETRIC_PROTECTION_JSON                 = "BiometricProtection";
@@ -54,6 +52,8 @@ public interface KeyGen2Constants
 
     String CLONE_KEY_PROTECTION_JSON                 = "CloneKeyProtection";
     
+    String CLOSE_ATTESTATION_JSON                    = "CloseAttestation";
+
     String CONFIGURATION_JSON                        = "Configuration";
 
     String CREDENTIAL_DISCOVERY_REQUEST_JSON         = "CredentialDiscoveryRequest";
@@ -124,9 +124,13 @@ public interface KeyGen2Constants
 
     String KEY_ALGORITHM_JSON                        = "KeyAlgorithm";
 
+    String KEY_ATTESTATION_JSON                      = "KeyAttestation";
+
     String KEY_CREATION_REQUEST_JSON                 = "KeyCreationRequest";
     
     String KEY_CREATION_RESPONSE_JSON                = "KeyCreationResponse";
+
+    String KEY_ENTRY_ALGORITHM_JSON                  = "KeyEntryAlgorithm";       
 
     String KEY_ENTRY_SPECIFIERS_JSON                 = "KeyEntrySpecifiers";       
 
@@ -209,6 +213,10 @@ public interface KeyGen2Constants
     String SERVER_SESSION_ID_JSON                    = "ServerSessionID";
 
     String SERVER_TIME_JSON                          = "ServerTime";
+
+    String SESSION_ATTESTATION_JSON                  = "SessionAttestation";
+
+    String SESSION_KEY_ALGORITHM_JSON                = "SessionKeyAlgorithm";
 
     String SESSION_KEY_LIMIT_JSON                    = "SessionKeyLimit";
 
