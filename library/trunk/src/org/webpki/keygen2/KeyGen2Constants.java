@@ -44,6 +44,8 @@ public interface KeyGen2Constants
 
     String CERTIFICATE_PATH_JSON                     = "CertificatePath";
 
+    String CHALLENGE_JSON                            = "Challenge";
+
     String CLIENT_EPHEMERAL_KEY_JSON                 = "ClientEphemeralKey";
 
     String CLIENT_SESSION_ID_JSON                    = "ClientSessionID";

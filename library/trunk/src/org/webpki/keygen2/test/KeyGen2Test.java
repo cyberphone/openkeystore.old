@@ -910,7 +910,7 @@ public class KeyGen2Test
             ProvisioningFinalizationResponseEncoder fin_prov_response = 
                 new ProvisioningFinalizationResponseEncoder (prov_final_request,
                                                              sks.closeProvisioningSession (eps.getProvisioningHandle (),
-                                                                                           prov_final_request.getCloseSessionNonce (),
+                                                                                           prov_final_request.getCloseSessionChallenge (),
                                                                                            prov_final_request.getCloseSessionMAC ()));
             return fin_prov_response.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }

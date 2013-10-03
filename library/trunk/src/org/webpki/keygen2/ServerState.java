@@ -1091,7 +1091,7 @@ public class ServerState implements Serializable
     
     PublicKey key_management_key;
     
-    byte[] saved_close_nonce;
+    byte[] saved_close_challenge;
     
     byte[] vm_nonce;
     
@@ -1165,7 +1165,7 @@ public class ServerState implements Serializable
     void checkFinalResult (byte[] close_session_attestation) throws IOException, GeneralSecurityException
       {
         MacGenerator check = new MacGenerator ();
-        check.addArray (saved_close_nonce);
+        check.addArray (saved_close_challenge);
         check.addString (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1);
         if (!ArrayUtil.compare (attest (check.getResult (),
                                         getMACSequenceCounterAndUpdate ()),

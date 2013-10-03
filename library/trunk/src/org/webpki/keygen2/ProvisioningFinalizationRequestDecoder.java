@@ -446,7 +446,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
 
     private byte[] close_session_mac;
     
-    private byte[] close_session_nonce;
+    private byte[] close_session_challenge;
 
 
     public String getServerSessionID ()
@@ -491,9 +491,9 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
       }
 
     
-    public byte[] getCloseSessionNonce ()
+    public byte[] getCloseSessionChallenge ()
       {
-        return close_session_nonce;
+        return close_session_challenge;
       }
 
 
@@ -509,7 +509,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
 
         submit_url = getURL (rd, SUBMIT_URL_JSON);
         
-        close_session_nonce = rd.getBinary (NONCE_JSON);
+        close_session_challenge = rd.getBinary (CHALLENGE_JSON);
 
         close_session_mac = rd.getBinary (MAC_JSON);
         
