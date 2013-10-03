@@ -28,6 +28,7 @@ import java.security.cert.X509Certificate;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONSignatureEncoder;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -35,7 +36,7 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder
   {
     class MatchingCredential
       {
-        byte[] end_entity_certificate;
+        X509Certificate end_entity_certificate;
 
         String client_session_id;
 
@@ -58,14 +59,7 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder
         public void addMatchingCredential (X509Certificate end_entity_certificate, String client_session_id, String server_session_id, boolean locked) throws IOException
           {
             MatchingCredential mc = new MatchingCredential ();
-            try
-              {
-                mc.end_entity_certificate = end_entity_certificate.getEncoded ();
-              }
-            catch (GeneralSecurityException e)
-              {
-                throw new IOException (e);
-              }
+            mc.end_entity_certificate = end_entity_certificate;
             mc.client_session_id = client_session_id;
             mc.server_session_id = server_session_id;
             mc.locked = locked;
@@ -137,7 +131,8 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder
                 JSONObjectWriter match_object = matcher_array.setObject ();
                 match_object.setString (CLIENT_SESSION_ID_JSON, mc.client_session_id);
                 match_object.setString (SERVER_SESSION_ID_JSON, mc.server_session_id);
-                match_object.setBinary (END_ENTITY_CERTIFICATE_JSON, mc.end_entity_certificate);
+                JSONSignatureEncoder.writeX509CertificatePath (match_object,
+                                                               new X509Certificate[]{mc.end_entity_certificate});
                 if (mc.locked)
                   {
                     match_object.setBoolean (LOCKED_JSON, mc.locked);

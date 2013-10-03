@@ -79,7 +79,9 @@ public interface KeyGen2Constants
 
     String ENCRYPTED_KEY_JSON                        = "EncryptedKey";
 
-    String END_ENTITY_CERTIFICATE_JSON               = "EndEntityCertificate";
+    String ENCRYPTED_PRESET_PIN_JSON                 = "EncryptedPresetPIN";
+    
+    String ENCRYPTED_PUK_JSON                        = "EncryptedPUK";
 
     String ERROR_URL_JSON                            = "ErrorURL";
 
@@ -167,8 +169,6 @@ public interface KeyGen2Constants
     
     String POLICY_JSON                               = "Policy";
 
-    String PRESET_PIN_JSON                           = "PresetPIN";
-    
     String PRIVACY_ENABLED_JSON                      = "PrivacyEnabled";
 
     String PROPERTIES_JSON                           = "Properties";       

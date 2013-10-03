@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
 
-import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 
@@ -73,7 +72,7 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
                 issued_before = KeyGen2Validator.getDateTimeConditional (search, ISSUED_BEFORE_JSON);
                 issued_after = KeyGen2Validator.getDateTimeConditional (search, ISSUED_AFTER_JSON);
               }
-            JSONSignatureDecoder signature = new JSONSignatureDecoder (rd);
+            JSONSignatureDecoder signature = JSONSignatureDecoder.readSignature (rd);
             key_management_key = signature.getPublicKey ();
             if (((AsymSignatureAlgorithms) signature.getSignatureAlgorithm ()).getDigestAlgorithm () != HashAlgorithms.SHA256)
               {

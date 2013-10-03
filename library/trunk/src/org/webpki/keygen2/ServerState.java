@@ -425,7 +425,7 @@ public class ServerState implements Serializable
             wr.setString (ID_JSON, id);
             wr.setInt (RETRY_LIMIT_JSON, retry_limit);
             wr.setString (FORMAT_JSON, format.getXMLName ());
-            wr.setBinary (ENCRYPTED_KEY_JSON, encrypted_value);
+            wr.setBinary (ENCRYPTED_PUK_JSON, encrypted_value);
 
             MacGenerator puk_policy_mac = new MacGenerator ();
             puk_policy_mac.addString (id);
@@ -980,7 +980,7 @@ public class ServerState implements Serializable
 
             if (preset_pin != null)
               {
-                wr.setBinary (PRESET_PIN_JSON, preset_pin);
+                wr.setBinary (ENCRYPTED_PRESET_PIN_JSON, preset_pin);
               }
 
             if (enable_pin_caching_set)

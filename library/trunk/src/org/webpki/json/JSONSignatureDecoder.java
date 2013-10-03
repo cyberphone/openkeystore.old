@@ -16,6 +16,7 @@
  */
 package org.webpki.json;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import java.math.BigInteger;
@@ -25,6 +26,7 @@ import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.Signature;
 
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
@@ -32,7 +34,6 @@ import java.security.spec.RSAPublicKeySpec;
 
 import java.util.Vector;
 
-import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.SignatureAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
@@ -57,7 +58,7 @@ public class JSONSignatureDecoder extends JSONSignature
 
     String key_id;
     
-    public JSONSignatureDecoder (JSONObjectReader rd) throws IOException
+    JSONSignatureDecoder (JSONObjectReader rd) throws IOException
       {
         JSONObjectReader signature = rd.getObject (SIGNATURE_JSON);
         String version = signature.getStringConditional (VERSION_JSON, SIGNATURE_VERSION_ID);
@@ -85,6 +86,11 @@ public class JSONSignatureDecoder extends JSONSignature
             default:
               algorithm = MACAlgorithms.getAlgorithmFromURI (algorithm_string);
           }
+      }
+
+    static public JSONSignatureDecoder readSignature (JSONObjectReader rd) throws IOException
+      {
+        return new JSONSignatureDecoder (rd);
       }
 
     void getKeyInfo (JSONObjectReader rd) throws IOException
@@ -147,8 +153,16 @@ public class JSONSignatureDecoder extends JSONSignature
         Vector<X509Certificate> certificates = new Vector<X509Certificate> ();
         for (byte[] certificate_blob : rd.getBinaryArray (JSONSignature.X509_CERTIFICATE_PATH_JSON))
           {
-            X509Certificate certificate = CertificateUtil.getCertificateFromBlob (certificate_blob);
-            certificates.add (pathCheck (last_certificate, last_certificate = certificate));
+            try
+              {
+                CertificateFactory cf = CertificateFactory.getInstance ("X.509");
+                X509Certificate certificate = (X509Certificate)cf.generateCertificate (new ByteArrayInputStream (certificate_blob));
+                certificates.add (pathCheck (last_certificate, last_certificate = certificate));
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
           }
         return certificates.toArray (new X509Certificate[0]);
       }

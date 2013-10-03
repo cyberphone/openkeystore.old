@@ -22,10 +22,9 @@ import java.security.cert.X509Certificate;
 
 import java.util.Vector;
 
-import org.webpki.crypto.CertificateUtil;
-
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONSignatureDecoder;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -82,7 +81,7 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
                 MatchingCredential matching_credential = new MatchingCredential ();
                 matching_credential.client_session_id = KeyGen2Validator.getID (match_object, CLIENT_SESSION_ID_JSON);
                 matching_credential.server_session_id = KeyGen2Validator.getID (match_object, SERVER_SESSION_ID_JSON);
-                matching_credential.end_entity_certificate = CertificateUtil.getCertificateFromBlob (match_object.getBinary (END_ENTITY_CERTIFICATE_JSON));
+                matching_credential.end_entity_certificate = JSONSignatureDecoder.readX509CertificatePath (match_object)[0];
                 matching_credential.locked = match_object.getBooleanConditional (LOCKED_JSON);
                 matching_credentials.add (matching_credential);
               }

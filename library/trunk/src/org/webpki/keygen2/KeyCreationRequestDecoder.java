@@ -89,7 +89,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
  
         PUKPolicy (JSONObjectReader rd) throws IOException
           {
-            super (rd, ENCRYPTED_KEY_JSON);
+            super (rd, ENCRYPTED_PUK_JSON);
             retry_limit = getAuthorizationRetryLimit (rd, 0);
             id = KeyGen2Validator.getID (rd, ID_JSON);
             format = getPassphraseFormat (rd);
@@ -773,9 +773,9 @@ public class KeyCreationRequestDecoder extends ClientDecoder
       {
         KeyObject rk;
         PresetPIN preset = null;
-        if (rd.hasProperty (PRESET_PIN_JSON))
+        if (rd.hasProperty (ENCRYPTED_PRESET_PIN_JSON))
           {
-            preset = new PresetPIN (rd, PRESET_PIN_JSON);
+            preset = new PresetPIN (rd, ENCRYPTED_PRESET_PIN_JSON);
           }
         else
           {
@@ -799,25 +799,6 @@ public class KeyCreationRequestDecoder extends ClientDecoder
     private PassphraseFormat getPassphraseFormat (JSONObjectReader rd) throws IOException
       {
         return PassphraseFormat.getPassphraseFormatFromString (rd.getString (FORMAT_JSON));
-      }
-
-
-    private void readPINPolicy (JSONObjectReader rd, boolean puk_start, PUKPolicy puk_policy) throws IOException
-      {
-        boolean start = true;
-/*
-        rd.getNext (PIN_POLICY_JSON);
-        PINPolicy upp = new PINPolicy (rd);
-        upp.puk_policy = puk_policy;
-        do
-          {
-            KeyObject rk = readKeyProperties (rd, upp, start);
-            rk.start_of_puk_group = puk_start;
-            puk_start = false;
-            start = false;
-          }
-        while (rd.hasProperty ());
-*/
       }
 
 
