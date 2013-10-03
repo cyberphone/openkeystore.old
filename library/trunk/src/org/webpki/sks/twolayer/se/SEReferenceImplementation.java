@@ -1632,7 +1632,7 @@ public class SEReferenceImplementation
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     public static SEProvisioningData createProvisioningData (byte[] os_instance_key,
-                                                             String algorithm,
+                                                             String session_key_algorithm,
                                                              boolean privacy_enabled,
                                                              String server_session_id,
                                                              ECPublicKey server_ephemeral_key,
@@ -1645,9 +1645,9 @@ public class SEReferenceImplementation
         ///////////////////////////////////////////////////////////////////////////////////
         // Check provisioning session algorithm compatibility
         ///////////////////////////////////////////////////////////////////////////////////
-        if (!algorithm.equals (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1))
+        if (!session_key_algorithm.equals (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1))
           {
-            abort ("Unknown \"Algorithm\" : " + algorithm);
+            abort ("Unknown \"SessionKeyAlgorithm\" : " + session_key_algorithm);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1739,7 +1739,7 @@ public class SEReferenceImplementation
                 ska.addString (server_session_id);
                 ska.addString (issuer_uri);
                 ska.addArray (getDeviceID (privacy_enabled));
-                ska.addString (algorithm);
+                ska.addString (session_key_algorithm);
                 ska.addBool (privacy_enabled);
                 ska.addArray (server_ephemeral_key.getEncoded ());
                 ska.addArray (client_ephemeral_key.getEncoded ());
@@ -1759,7 +1759,7 @@ public class SEReferenceImplementation
                 pka.addString (server_session_id);
                 pka.addString (issuer_uri);
                 pka.addArray (getDeviceID (privacy_enabled));
-                pka.addString (algorithm);
+                pka.addString (session_key_algorithm);
                 pka.addBool (privacy_enabled);
                 pka.addArray (server_ephemeral_key.getEncoded ());
                 pka.addArray (client_ephemeral_key.getEncoded ());
@@ -2110,7 +2110,7 @@ public class SEReferenceImplementation
     public static SEKeyData createKeyPair (byte[] os_instance_key,
                                            byte[] provisioning_state,
                                            String id,
-                                           String algorithm,
+                                           String key_entry_algorithm,
                                            byte[] server_seed,
                                            boolean device_pin_protection,
                                            String pin_policy_id,
@@ -2132,9 +2132,9 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Validate input as much as possible
             ///////////////////////////////////////////////////////////////////////////////////
-            if (!algorithm.equals (SecureKeyStore.ALGORITHM_KEY_ATTEST_1))
+            if (!key_entry_algorithm.equals (SecureKeyStore.ALGORITHM_KEY_ATTEST_1))
               {
-                abort ("Unsupported \"Algorithm\" : " + algorithm, SKSException.ERROR_ALGORITHM);
+                abort ("Unknown \"KeyEntryAlgorithm\" : " + key_entry_algorithm, SKSException.ERROR_ALGORITHM);
               }
             if (server_seed != null && (server_seed.length == 0 || server_seed.length > SecureKeyStore.MAX_LENGTH_SERVER_SEED))
               {
@@ -2165,7 +2165,7 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             MacBuilder verifier = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.METHOD_CREATE_KEY_ENTRY);
             verifier.addString (id);
-            verifier.addString (algorithm);
+            verifier.addString (key_entry_algorithm);
             verifier.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
             verifier.addString (pin_policy_id);
             byte[] decrypted_pin_value = null;

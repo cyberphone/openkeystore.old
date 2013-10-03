@@ -2788,7 +2788,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized ProvisioningSession createProvisioningSession (String algorithm,
+    public synchronized ProvisioningSession createProvisioningSession (String session_key_algorithm,
                                                                        boolean privacy_enabled,
                                                                        String server_session_id,
                                                                        ECPublicKey server_ephemeral_key,
@@ -2801,9 +2801,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check provisioning session algorithm compatibility
         ///////////////////////////////////////////////////////////////////////////////////
-        if (!algorithm.equals (ALGORITHM_SESSION_ATTEST_1))
+        if (!session_key_algorithm.equals (ALGORITHM_SESSION_ATTEST_1))
           {
-            abort ("Unknown \"Algorithm\" : " + algorithm);
+            abort ("Unknown \"SessionKeyAlgorithm\" : " + session_key_algorithm);
           }
 
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2900,7 +2900,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 ska.addString (server_session_id);
                 ska.addString (issuer_uri);
                 ska.addArray (getDeviceID (privacy_enabled));
-                ska.addString (algorithm);
+                ska.addString (session_key_algorithm);
                 ska.addBool (privacy_enabled);
                 ska.addArray (server_ephemeral_key.getEncoded ());
                 ska.addArray (client_ephemeral_key.getEncoded ());
@@ -2920,7 +2920,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
                 pka.addString (server_session_id);
                 pka.addString (issuer_uri);
                 pka.addArray (getDeviceID (privacy_enabled));
-                pka.addString (algorithm);
+                pka.addString (session_key_algorithm);
                 pka.addBool (privacy_enabled);
                 pka.addArray (server_ephemeral_key.getEncoded ());
                 pka.addArray (client_ephemeral_key.getEncoded ());
@@ -3235,7 +3235,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     @Override
     public synchronized KeyData createKeyEntry (int provisioning_handle,
                                                 String id,
-                                                String algorithm,
+                                                String key_entry_algorithm,
                                                 byte[] server_seed,
                                                 boolean device_pin_protection,
                                                 int pin_policy_handle,
@@ -3259,9 +3259,9 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Validate input as much as possible
         ///////////////////////////////////////////////////////////////////////////////////
-        if (!algorithm.equals (ALGORITHM_KEY_ATTEST_1))
+        if (!key_entry_algorithm.equals (ALGORITHM_KEY_ATTEST_1))
           {
-            provisioning.abort ("Unsupported \"Algorithm\" : " + algorithm, SKSException.ERROR_ALGORITHM);
+            provisioning.abort ("Unknown \"KeyEntryAlgorithm\" : " + key_entry_algorithm, SKSException.ERROR_ALGORITHM);
           }
         Algorithm kalg = supported_algorithms.get (key_algorithm);
         if (kalg == null || (kalg.mask & ALG_KEY_GEN) == 0)
@@ -3341,7 +3341,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_ENTRY);
         verifier.addString (id);
-        verifier.addString (algorithm);
+        verifier.addString (key_entry_algorithm);
         verifier.addArray (server_seed == null ? ZERO_LENGTH_ARRAY : server_seed);
         verifier.addString (pin_policy_id);
         if (decrypt_pin)

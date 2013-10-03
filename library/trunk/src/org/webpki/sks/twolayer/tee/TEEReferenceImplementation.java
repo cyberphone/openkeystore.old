@@ -2121,7 +2121,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     //                                                                            //
     ////////////////////////////////////////////////////////////////////////////////
     @Override
-    public synchronized ProvisioningSession createProvisioningSession (String algorithm,
+    public synchronized ProvisioningSession createProvisioningSession (String session_key_algorithm,
                                                                        boolean privacy_enabled,
                                                                        String server_session_id,
                                                                        ECPublicKey server_ephemeral_key,
@@ -2140,7 +2140,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         // The assumption here is that the SE can do crypto parameter validation...
         ///////////////////////////////////////////////////////////////////////////////////
         SEProvisioningData se_pd = SEReferenceImplementation.createProvisioningData (OS_INSTANCE_KEY,
-                                                                                     algorithm,
+                                                                                     session_key_algorithm,
                                                                                      privacy_enabled,
                                                                                      server_session_id,
                                                                                      server_ephemeral_key,
@@ -2427,7 +2427,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     @Override
     public synchronized KeyData createKeyEntry (int provisioning_handle,
                                                 String id,
-                                                String algorithm,
+                                                String key_entry_algorithm,
                                                 byte[] server_seed,
                                                 boolean device_pin_protection,
                                                 int pin_policy_handle,
@@ -2451,9 +2451,9 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Validate input as much as possible
         ///////////////////////////////////////////////////////////////////////////////////
-        if (!algorithm.equals (ALGORITHM_KEY_ATTEST_1))
+        if (!key_entry_algorithm.equals (ALGORITHM_KEY_ATTEST_1))
           {
-            provisioning.abort ("Unsupported \"Algorithm\" : " + algorithm, SKSException.ERROR_ALGORITHM);
+            provisioning.abort ("Unknown \"KeyEntryAlgorithm\" : " + key_entry_algorithm, SKSException.ERROR_ALGORITHM);
           }
         if (server_seed != null && (server_seed.length == 0 || server_seed.length > MAX_LENGTH_SERVER_SEED))
           {
@@ -2528,7 +2528,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
             se_key_data = SEReferenceImplementation.createKeyPair (OS_INSTANCE_KEY,
                                                                    provisioning.provisioning_state,
                                                                    id,
-                                                                   algorithm,
+                                                                   key_entry_algorithm,
                                                                    server_seed,
                                                                    device_pin_protection,
                                                                    pin_policy_id,

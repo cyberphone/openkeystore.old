@@ -243,6 +243,10 @@ public class ProvSess
     
     SoftHSM server_sess_key = new SoftHSM ();
 
+    static String override_key_entry_algorithm;
+    
+    static String override_session_key_algorithm; 
+
     String session_key_algorithm = SecureKeyStore.ALGORITHM_SESSION_ATTEST_1;
     
     static final String ISSUER_URI = "http://issuer.example.com/provsess";
@@ -393,9 +397,10 @@ public class ProvSess
         PublicKey key_management_key = kmk_id == null ? null : server_sess_key.enumerateKeyManagementKeys ()[kmk_id];
         sks = device.sks;
         server_session_id = serv_sess == null ? "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong()) : serv_sess;
+        String sess_key_alg = override_session_key_algorithm == null ? session_key_algorithm : override_session_key_algorithm;
         client_time = new Date ();
            ProvisioningSession sess = 
-                device.sks.createProvisioningSession (session_key_algorithm,
+                device.sks.createProvisioningSession (sess_key_alg,
                                                       privacy_enabled,
                                                       server_session_id,
                                                       server_ephemeral_key = ext_epk == null ? server_sess_key.generateEphemeralKey () : ext_epk,
@@ -418,7 +423,7 @@ public class ProvSess
            attestation_arguments.addString (server_session_id);
            attestation_arguments.addString (ISSUER_URI);
            attestation_arguments.addArray (getDeviceID ());
-           attestation_arguments.addString (session_key_algorithm);
+           attestation_arguments.addString (sess_key_alg);
            attestation_arguments.addBool (privacy_enabled);
            attestation_arguments.addArray (server_ephemeral_key.getEncoded ());
            attestation_arguments.addArray (sess.getClientEphemeralKey ().getEncoded ());
@@ -650,7 +655,7 @@ public class ProvSess
     
 
     public GenKey createKey (String id,
-                             String attestation_algorithm,
+                             String key_entry_algorithm,
                              byte[] server_seed,
                              PINPol pin_policy,
                              String pin_value,
@@ -663,13 +668,14 @@ public class ProvSess
                              KeySpecifier key_specifier,
                              String[] endorsed_algorithms) throws SKSException, IOException, GeneralSecurityException
       {
+        key_entry_algorithm = override_key_entry_algorithm == null ? key_entry_algorithm : override_key_entry_algorithm;
         String key_algorithm = custom_key_algorithm == null ? key_specifier.getKeyAlgorithm ().getURI () : custom_key_algorithm;
         byte[] key_parameters = custom_key_parameters == null ? key_specifier.getParameters () : custom_key_parameters;
         String[] sorted_algorithms = endorsed_algorithms == null ? new String[0] : endorsed_algorithms;
         byte actual_export_policy = override_export_protection ? overriden_export_protection : export_protection.getSKSValue ();
         MacGenerator key_entry_mac = new MacGenerator ();
         key_entry_mac.addString (id);
-        key_entry_mac.addString (attestation_algorithm);
+        key_entry_mac.addString (key_entry_algorithm);
         key_entry_mac.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
         byte[] encrypted_pin_value = null;
         if (pin_policy == null)
@@ -713,7 +719,7 @@ public class ProvSess
           }
         KeyData key_entry = sks.createKeyEntry (provisioning_handle, 
                                                 id,
-                                                attestation_algorithm, 
+                                                key_entry_algorithm, 
                                                 server_seed,
                                                 device_pin_protected,
                                                 pin_policy == null ? 0 : pin_policy.pin_policy_handle, 

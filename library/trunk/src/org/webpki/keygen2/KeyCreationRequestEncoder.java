@@ -65,12 +65,6 @@ public class KeyCreationRequestEncoder extends ServerEncoder
       }
 
 
-    private ServerState.PUKPolicy getPUKPolicy (ServerState.Key kp)
-      {
-        return kp.pin_policy == null ? null : kp.pin_policy.puk_policy;
-      }
-
-
     void writeKeys (JSONObjectWriter wr, PINPolicy pin_policy) throws IOException
       {
         JSONArrayWriter keys = null;

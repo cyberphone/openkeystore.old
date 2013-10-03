@@ -82,6 +82,8 @@ import org.webpki.sks.ws.WSSpecific;
 
 import org.webpki.util.ArrayUtil;
 
+import org.webpki.keygen2.KeyGen2Constants;
+
 public class SKSTest
   {
     static final byte[] TEST_STRING = new byte[]{'S','u','c','c','e','s','s',' ','o','r',' ','n','o','t','?'};
@@ -3483,6 +3485,41 @@ public class SKSTest
         catch (SKSException e)
           {
             checkException (e, "Session is not updatable: " + sess.provisioning_handle);
+          }
+      }
+    @Test
+    public void test80 () throws Exception
+      {
+        try
+          {
+            ProvSess.override_session_key_algorithm = "http://blah";
+            new ProvSess (device);
+            fail ("Not good");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Unknown \"" + KeyGen2Constants.SESSION_KEY_ALGORITHM_JSON + "\" : " + ProvSess.override_session_key_algorithm);
+            ProvSess.override_session_key_algorithm = null;
+          }
+      }
+    @Test
+    public void test81 () throws Exception
+      {
+        try
+          {
+            ProvSess.override_key_entry_algorithm = "http://somewhere";
+            ProvSess sess = new ProvSess (device);
+            sess.createKey ("Key.1",
+                            KeyAlgorithms.P_256,
+                            null /* pin_value */,
+                            null,
+                            AppUsage.AUTHENTICATION).setCertificate (cn ());
+             fail ("Not good");
+          }
+        catch (SKSException e)
+          {
+            checkException (e, "Unknown \"" + KeyGen2Constants.KEY_ENTRY_ALGORITHM_JSON + "\" : " + ProvSess.override_key_entry_algorithm);
+            ProvSess.override_key_entry_algorithm = null;
           }
       }
   }

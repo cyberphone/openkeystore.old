@@ -215,9 +215,6 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
     
             wr.setString (SUBMIT_URL_JSON, submit_url);
     
-            byte[] nonce;
-            wr.setBinary (NONCE_JSON, nonce = server_state.server_crypto_interface.generateNonce ());
-    
             ////////////////////////////////////////////////////////////////////////
             // Write [0..n] Credentials
             ////////////////////////////////////////////////////////////////////////
@@ -247,7 +244,8 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
             close.addString (server_state.client_session_id);
             close.addString (server_state.server_session_id);
             close.addString (server_state.issuer_uri);
-            close.addArray (server_state.saved_close_nonce = nonce);
+            close.addArray (server_state.saved_close_nonce = server_state.server_crypto_interface.generateNonce ());
+            wr.setBinary (NONCE_JSON, server_state.saved_close_nonce);
             wr.setBinary (MAC_JSON, mac (close.getResult (), SecureKeyStore.METHOD_CLOSE_PROVISIONING_SESSION));
           }
         catch (GeneralSecurityException e)
