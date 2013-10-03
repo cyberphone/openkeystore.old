@@ -30,11 +30,11 @@ public class EnumeratedProvisioningSession
       }
     
 
-    String algorithm;
+    String session_key_algorithm;
     
-    public String getAlgorithm ()
+    public String getSessionKeyAlgorithm ()
       {
-        return algorithm;
+        return session_key_algorithm;
       }
 
 
@@ -100,7 +100,7 @@ public class EnumeratedProvisioningSession
     
     
     public EnumeratedProvisioningSession (int provisioning_handle,
-                                          String algorithm,
+                                          String session_key_algorithm,
                                           boolean privacy_enabled,
                                           PublicKey key_management_key,
                                           int client_time,
@@ -109,7 +109,7 @@ public class EnumeratedProvisioningSession
                                           String client_session_id,
                                           String issuer_uri)
       {
-        this.algorithm = algorithm;
+        this.session_key_algorithm = session_key_algorithm;
         this.privacy_enabled = privacy_enabled;
         this.key_management_key = key_management_key;
         this.client_time = client_time;

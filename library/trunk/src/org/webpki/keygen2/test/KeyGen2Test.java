@@ -653,7 +653,7 @@ public class KeyGen2Test
                                                                  sess.getClientSessionID (),
                                                                  prov_sess_req.getServerTime (),
                                                                  client_time,
-                                                                 sess.getAttestation (),
+                                                                 sess.getSessionAttestation (),
                                                                  platform_req.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
             if (https)
               {
@@ -802,7 +802,7 @@ public class KeyGen2Test
                                                        key.getEndorsedAlgorithms (),
                                                        key.getMAC ());
                 key_creation_response.addPublicKey (key_data.getPublicKey (),
-                                                    key_data.getAttestation (),
+                                                    key_data.getKeyAttestation (),
                                                     key.getID ());
               }
             return key_creation_response.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);

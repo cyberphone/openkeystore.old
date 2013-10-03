@@ -361,7 +361,7 @@ public class SKSWSImplementation
                                                                                         session_key_limit);
             client_session_id.value = sess.getClientSessionID ();
             client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
-            attestation.value = sess.getAttestation ();
+            attestation.value = sess.getSessionAttestation ();
             log_result = " : ProvisioningHandle=" + sess.getProvisioningHandle ();
             return sess.getProvisioningHandle ();
           }
@@ -444,7 +444,7 @@ public class SKSWSImplementation
               }
             else
               {
-                algorithm.value = eps.getAlgorithm ();
+                algorithm.value = eps.getSessionKeyAlgorithm ();
                 privacy_enabled.value = eps.getPrivacyEnabled ();
                 key_management_key.value = eps.getKeyManagementKey () == null ? null : eps.getKeyManagementKey ().getEncoded ();
                 client_time.value = eps.getClientTime ();
@@ -682,7 +682,7 @@ public class SKSWSImplementation
                                                                endorsed_algorithms.toArray (new String[0]),
                                                                mac);
             public_key.value = kd.getPublicKey ().getEncoded ();
-            attestation.value = kd.getAttestation ();
+            attestation.value = kd.getKeyAttestation ();
             log_result = " : KeyHandle=" + kd.getKeyHandle ();
             return kd.getKeyHandle ();
           }
