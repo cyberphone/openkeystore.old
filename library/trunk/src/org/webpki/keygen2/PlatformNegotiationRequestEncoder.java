@@ -100,7 +100,7 @@ public class PlatformNegotiationRequestEncoder extends ServerEncoder
         ////////////////////////////////////////////////////////////////////////
         // Basic capabilities
         ////////////////////////////////////////////////////////////////////////
-        BasicCapabilities.write (wr, server_state.basic_capabilities);
+        BasicCapabilities.write (wr, server_state.basic_capabilities, true);
       }
 
     @Override

@@ -61,7 +61,7 @@ public class PlatformNegotiationResponseDecoder extends KeyGen2Validator
         
         nonce = rd.getBinaryConditional (NONCE_JSON);
 
-        BasicCapabilities.read (rd, basic_capabilities);
+        BasicCapabilities.read (rd, basic_capabilities, false);
         
         //////////////////////////////////////////////////////////////////////////
         // Get the optional image preferences

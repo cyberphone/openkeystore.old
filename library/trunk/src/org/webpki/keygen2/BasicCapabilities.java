@@ -71,9 +71,9 @@ public class BasicCapabilities implements Serializable
       }
 
 
-    private static void conditionalURIInput (JSONObjectReader rd, LinkedHashSet<String> args, String tag) throws IOException
+    private static void conditionalURIInput (JSONObjectReader rd, LinkedHashSet<String> args, String tag, boolean query) throws IOException
       {
-        String[] opt_uri_list = KeyGen2Validator.getURIListConditional (rd, tag);
+        String[] opt_uri_list = KeyGen2Validator.getURIListConditional (rd, tagName (tag, query));
         if (opt_uri_list != null)
           {
             for (String uri : opt_uri_list)
@@ -83,28 +83,36 @@ public class BasicCapabilities implements Serializable
           }
       }
 
-    static void read (JSONObjectReader rd, BasicCapabilities basic_capabilities) throws IOException
+    static String tagName (String tag, boolean query)
       {
-        conditionalURIInput (rd, basic_capabilities.algorithms, ALGORITHMS_JSON);
-        conditionalURIInput (rd, basic_capabilities.client_attributes, CLIENT_ATTRIBUTES_JSON);
-        conditionalURIInput (rd, basic_capabilities.extensions, EXTENSIONS_JSON);
+        return query ? 
+            BASIC_CAP_PRE_QUERY + tag + BASIC_CAP_POST_QUERY
+                     :
+            BASIC_CAP_PRE_RESPONSE + tag + BASIC_CAP_POST_RESPONSE;
+      }
+
+    static void read (JSONObjectReader rd, BasicCapabilities basic_capabilities, boolean query) throws IOException
+      {
+        conditionalURIInput (rd, basic_capabilities.algorithms, BASIC_CAP_ALGORITHM, query);
+        conditionalURIInput (rd, basic_capabilities.client_attributes, BASIC_CAP_CLIENT_ATTRI, query);
+        conditionalURIInput (rd, basic_capabilities.extensions, BASIC_CAP_EXTENSION, query);
       }
 
 
-    private static void conditionalURIOutput (JSONObjectWriter wr, LinkedHashSet<String> arg_set, String tag) throws IOException
+    private static void conditionalURIOutput (JSONObjectWriter wr, LinkedHashSet<String> arg_set, String tag, boolean query) throws IOException
       {
         if (!arg_set.isEmpty ())
           {
-            wr.setStringArray (tag, arg_set.toArray (new String[0]));
+            wr.setStringArray (tagName (tag, query), arg_set.toArray (new String[0]));
           }
       }
 
 
-    static void write (JSONObjectWriter wr, BasicCapabilities basic_capabilities) throws IOException
+    static void write (JSONObjectWriter wr, BasicCapabilities basic_capabilities, boolean query) throws IOException
       {
-        conditionalURIOutput (wr,  basic_capabilities.algorithms, ALGORITHMS_JSON);
-        conditionalURIOutput (wr,  basic_capabilities.client_attributes, CLIENT_ATTRIBUTES_JSON);
-        conditionalURIOutput (wr,  basic_capabilities.extensions, EXTENSIONS_JSON);
+        conditionalURIOutput (wr,  basic_capabilities.algorithms, BASIC_CAP_ALGORITHM, query);
+        conditionalURIOutput (wr,  basic_capabilities.client_attributes, BASIC_CAP_CLIENT_ATTRI, query);
+        conditionalURIOutput (wr,  basic_capabilities.extensions, BASIC_CAP_EXTENSION, query);
       }
 
     

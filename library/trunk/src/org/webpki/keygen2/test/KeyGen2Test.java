@@ -194,6 +194,8 @@ public class KeyGen2Test
     
     boolean encrypted_extension;
     
+    boolean standard_extension;
+    
     boolean set_trust_anchor;
     
     boolean update_kmk;
@@ -1193,6 +1195,10 @@ public class KeyGen2Test
               {
                 kp.addEncryptedExtension ("http://host/ee", new byte[]{0,5});
               }
+            if (standard_extension)
+              {
+                kp.addExtension ("http://host/ee", new byte[]{0,5});
+              }
             if (set_logotype)
               {
                 kp.addLogotype (KeyGen2URIs.LOGOTYPES.CARD, new ImageData (new byte[]{8,6,4,4}, "image/png"));
@@ -1504,6 +1510,7 @@ public class KeyGen2Test
             writeOption ("Symmetric Key", symmetric_key);
             writeOption ("Encryption Key", encryption_key);
             writeOption ("Encrypted Extension", encrypted_extension);
+            writeOption ("Standard Extension", standard_extension);
             writeOption ("Delete Protection", delete_protection != null);
             writeOption ("Export Protection", export_protection != null);
             writeOption ("Private Key Import", set_private_key);
@@ -1649,6 +1656,17 @@ public class KeyGen2Test
         ecc_key = true;
         property_bag = true;
         encrypted_extension = true;
+        server_seed = true;
+        doer.perform ();
+      }
+
+    @Test
+    public void StandardExtension () throws Exception
+      {
+        Doer doer = new Doer ();
+        pin_protection = true;
+        ecc_key = true;
+        standard_extension = true;
         server_seed = true;
         doer.perform ();
       }

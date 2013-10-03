@@ -89,7 +89,7 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
 
         action = Action.getActionFromString (rd.getString (ACTION_JSON));
 
-        BasicCapabilities.read (rd, basic_capabilities);
+        BasicCapabilities.read (rd, basic_capabilities, true);
       }
 
     @Override

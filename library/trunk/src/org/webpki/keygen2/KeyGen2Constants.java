@@ -20,14 +20,19 @@ public interface KeyGen2Constants
   {
     String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131002#";
 
+    String BASIC_CAP_ALGORITHM                       = "Algorithm";
+    String BASIC_CAP_CLIENT_ATTRI                    = "ClientAttribute";
+    String BASIC_CAP_EXTENSION                       = "Extension";
+    String BASIC_CAP_PRE_QUERY                       = "";
+    String BASIC_CAP_POST_QUERY                      = "SupportQuery";
+    String BASIC_CAP_PRE_RESPONSE                    = "Supported";
+    String BASIC_CAP_POST_RESPONSE                   = "s";
 
     // JSON properties
 
     String ABORT_URL_JSON                            = "AbortURL";
 
     String ACTION_JSON                               = "Action";
-
-    String ALGORITHMS_JSON                           = "Algorithms";
 
     String APP_USAGE_JSON                            = "AppUsage";
 
@@ -40,8 +45,6 @@ public interface KeyGen2Constants
     String CERTIFICATE_FINGERPRINT_JSON              = "CertificateFingerprint";
 
     String CERTIFICATE_PATH_JSON                     = "CertificatePath";
-
-    String CLIENT_ATTRIBUTES_JSON                    = "ClientAttributes";
 
     String CLIENT_EPHEMERAL_KEY_JSON                 = "ClientEphemeralKey";
 
