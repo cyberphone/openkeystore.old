@@ -142,7 +142,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         StandardExtension (JSONObjectReader rd, IssuedCredential cpk) throws IOException
           {
             super (rd, cpk);
-            data = rd.getBinary (DATA_JSON);
+            data = rd.getBinary (EXTENSION_DATA_JSON);
           }
 
         @Override
@@ -167,7 +167,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         EncryptedExtension (JSONObjectReader rd, IssuedCredential cpk) throws IOException
           {
             super (rd, cpk);
-            this.data = rd.getBinary (DATA_JSON);
+            this.data = rd.getBinary (EXTENSION_DATA_JSON);
           }
 
 
@@ -257,7 +257,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
           {
             super (rd, cpk);
             mime_type = rd.getString (MIME_TYPE_JSON);
-            data = rd.getBinary (DATA_JSON);
+            data = rd.getBinary (EXTENSION_DATA_JSON);
           }
 
         @Override
@@ -320,17 +320,19 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
                   }
               }
 
-            if (rd.hasProperty (IMPORTED_SYMMETRIC_KEY_JSON))
+            if (rd.hasProperty (IMPORT_KEY_JSON))
               {
-                JSONObjectReader sym_key = rd.getObject(IMPORTED_SYMMETRIC_KEY_JSON);
-                encrypted_symmetric_key = sym_key.getBinary (ENCRYPTED_KEY_JSON);
-                symmetric_key_mac = sym_key.getBinary (MAC_JSON);
-              }
-            else if (rd.hasProperty (IMPORTED_PRIVATE_KEY_JSON))
-              {
-                JSONObjectReader priv_key = rd.getObject(IMPORTED_PRIVATE_KEY_JSON);
-                encrypted_private_key = priv_key.getBinary (ENCRYPTED_KEY_JSON);
-                private_key_mac = priv_key.getBinary (MAC_JSON);
+                JSONObjectReader import_key = rd.getObject(IMPORT_KEY_JSON);
+                if (import_key.hasProperty (PRIVATE_KEY_JSON))
+                  {
+                    encrypted_private_key = import_key.getBinary (PRIVATE_KEY_JSON);
+                    private_key_mac = import_key.getBinary (MAC_JSON);
+                  }
+                else
+                  {
+                    encrypted_symmetric_key = import_key.getBinary (SYMMETRIC_KEY_JSON);
+                    symmetric_key_mac = import_key.getBinary (MAC_JSON);
+                  }
               }
 
             for (JSONObjectReader property_bag : getObjectArrayConditional (rd, PROPERTY_BAGS_JSON))

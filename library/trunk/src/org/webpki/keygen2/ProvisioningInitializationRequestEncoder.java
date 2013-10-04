@@ -146,7 +146,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
       {
         if (!kmk.children.isEmpty ())
           {
-            JSONArrayWriter kmku_arr = wr.setArray (UPDATE_KEY_MANAGEMENT_KEYS_JSON);
+            JSONArrayWriter kmku_arr = wr.setArray (UPDATABLE_KEY_MANAGEMENT_KEYS_JSON);
             for (KeyManagementKeyUpdateHolder child : kmk.children)
               {
                 JSONObjectWriter kmku_object = kmku_arr.setObject ();

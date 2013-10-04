@@ -199,7 +199,7 @@ public class ServerState implements Serializable
         @Override
         void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
-            wr.setBinary (DATA_JSON, data);
+            wr.setBinary (EXTENSION_DATA_JSON, data);
           }
 
         @Override
@@ -236,7 +236,7 @@ public class ServerState implements Serializable
         @Override
         void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
-            wr.setBinary (DATA_JSON, encrypted_data);
+            wr.setBinary (EXTENSION_DATA_JSON, encrypted_data);
           }
 
         @Override
@@ -280,7 +280,7 @@ public class ServerState implements Serializable
         void writeExtensionBody (JSONObjectWriter wr) throws IOException
           {
             wr.setString (MIME_TYPE_JSON, logotype.getMimeType ());
-            wr.setBinary (DATA_JSON, logotype.getData ());
+            wr.setBinary (EXTENSION_DATA_JSON, logotype.getData ());
           }
 
         @Override

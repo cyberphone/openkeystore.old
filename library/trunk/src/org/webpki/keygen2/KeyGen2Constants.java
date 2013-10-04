@@ -62,7 +62,7 @@ public interface KeyGen2Constants
 
     String CREDENTIAL_DISCOVERY_RESPONSE_JSON        = "CredentialDiscoveryResponse";
     
-    String DATA_JSON                                 = "Data";
+    String EXTENSION_DATA_JSON                       = "ExtensionData";
     
     String DEFERRED_CERTIFICATION_JSON               = "DeferredCertification";
 
@@ -81,8 +81,6 @@ public interface KeyGen2Constants
     String ENABLE_PIN_CACHING_JSON                   = "EnablePINCaching";
 
     String ENCRYPTED_EXTENSIONS_JSON                 = "EncryptedExtensions";
-
-    String ENCRYPTED_KEY_JSON                        = "EncryptedKey";
 
     String ENCRYPTED_PRESET_PIN_JSON                 = "EncryptedPresetPIN";
     
@@ -110,9 +108,7 @@ public interface KeyGen2Constants
 
     String IMAGE_PREFERENCES_JSON                    = "ImagePreferences";
     
-    String IMPORTED_PRIVATE_KEY_JSON                 = "ImportedPrivateKey";
-
-    String IMPORTED_SYMMETRIC_KEY_JSON               = "ImportedSymmetricKey";
+    String IMPORT_KEY_JSON                           = "ImportKey";
 
     String INPUT_METHOD_JSON                         = "InputMethod";
 
@@ -180,6 +176,8 @@ public interface KeyGen2Constants
 
     String PRIVACY_ENABLED_JSON                      = "PrivacyEnabled";
 
+    String PRIVATE_KEY_JSON                          = "PrivateKey";
+
     String PROPERTIES_JSON                           = "Properties";       
 
     String PROPERTY_BAGS_JSON                        = "PropertyBags";       
@@ -232,13 +230,15 @@ public interface KeyGen2Constants
 
     String SUCCESS_URL_JSON                          = "SuccessURL";
 
+    String SYMMETRIC_KEY_JSON                        = "SymmetricKey";
+
     String TRUST_ANCHOR_JSON                         = "TrustAnchor";
 
     String TYPE_JSON                                 = "Type";
 
     String UNLOCK_KEYS_JSON                          = "UnlockKeys";
 
-    String UPDATE_KEY_MANAGEMENT_KEYS_JSON           = "UpdateKeyManagementKeys";
+    String UPDATABLE_KEY_MANAGEMENT_KEYS_JSON        = "UpdatableKeyManagementKeys";
 
     String UPDATE_KEY_JSON                           = "UpdateKey";
 

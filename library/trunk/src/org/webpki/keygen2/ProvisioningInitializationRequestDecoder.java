@@ -136,9 +136,9 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
     
     private void scanForUpdateKeys (JSONObjectReader rd, KeyManagementKeyUpdateHolder kmk) throws IOException
       {
-        if (rd.hasProperty (UPDATE_KEY_MANAGEMENT_KEYS_JSON))
+        if (rd.hasProperty (UPDATABLE_KEY_MANAGEMENT_KEYS_JSON))
           {
-            JSONArrayReader upd_arr = rd.getArray (UPDATE_KEY_MANAGEMENT_KEYS_JSON);
+            JSONArrayReader upd_arr = rd.getArray (UPDATABLE_KEY_MANAGEMENT_KEYS_JSON);
             do
               {
                 JSONObjectReader kmk_upd = upd_arr.getObject ();

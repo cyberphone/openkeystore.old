@@ -147,7 +147,7 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
             MacGenerator set_symkey = new MacGenerator ();
             set_symkey.addArray (ee_cert);
             set_symkey.addArray (key.encrypted_symmetric_key);
-            mac (wr.setObject (IMPORTED_SYMMETRIC_KEY_JSON).setBinary (ENCRYPTED_KEY_JSON, key.encrypted_symmetric_key),
+            mac (wr.setObject (IMPORT_KEY_JSON).setBinary (SYMMETRIC_KEY_JSON, key.encrypted_symmetric_key),
                  set_symkey.getResult (), SecureKeyStore.METHOD_IMPORT_SYMMETRIC_KEY);
           }
 
@@ -159,7 +159,7 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
             MacGenerator set_privkey = new MacGenerator ();
             set_privkey.addArray (ee_cert);
             set_privkey.addArray (key.encrypted_private_key);
-            mac (wr.setObject (IMPORTED_PRIVATE_KEY_JSON).setBinary (ENCRYPTED_KEY_JSON, key.encrypted_private_key),
+            mac (wr.setObject (IMPORT_KEY_JSON).setBinary (PRIVATE_KEY_JSON, key.encrypted_private_key),
                 set_privkey.getResult (), SecureKeyStore.METHOD_IMPORT_PRIVATE_KEY);
           }
 
