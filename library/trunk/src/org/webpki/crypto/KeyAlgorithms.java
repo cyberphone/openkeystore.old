@@ -275,7 +275,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false);
 
 
-    private final String uri;                        // As expressed in XML messages
+    private final String uri;                        // As expressed in XML and JSON
     private final String jcename;                    // As expressed for JCE
     private final int length_in_bits;
     private final AsymSignatureAlgorithms pref_alg;  // A sort of a "guide"
@@ -401,7 +401,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
 
     public ECParameterSpec getECParameterSpec ()
       {
-        return new ECNamedCurveSpec (jcename, elliptic_curve, new ECPoint (x, y), n);
+        return new ECNamedCurveSpec (jcename, elliptic_curve, new ECPoint (x, y), n, BigInteger.valueOf (h));
       }
  
 
