@@ -34,7 +34,7 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
       {
         MatchingCredential () {}
         
-        X509Certificate end_entity_certificate;
+        X509Certificate[] certificate_path;
         
         String client_session_id;
         
@@ -52,9 +52,9 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
             return server_session_id;
           }
         
-        public X509Certificate getEndEntityCertificate ()
+        public X509Certificate[] getCertificatePath ()
           {
-            return end_entity_certificate;
+            return certificate_path;
           }
         
         public boolean isLocked ()
@@ -81,7 +81,7 @@ public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
                 MatchingCredential matching_credential = new MatchingCredential ();
                 matching_credential.client_session_id = KeyGen2Validator.getID (match_object, CLIENT_SESSION_ID_JSON);
                 matching_credential.server_session_id = KeyGen2Validator.getID (match_object, SERVER_SESSION_ID_JSON);
-                matching_credential.end_entity_certificate = JSONSignatureDecoder.readX509CertificatePath (match_object)[0];
+                matching_credential.certificate_path = JSONSignatureDecoder.readX509CertificatePath (match_object);
                 matching_credential.locked = match_object.getBooleanConditional (LOCKED_JSON);
                 matching_credentials.add (matching_credential);
               }

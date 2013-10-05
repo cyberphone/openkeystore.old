@@ -59,11 +59,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20130820#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20131002#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20130820#"
+           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20131002#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -1184,9 +1184,15 @@
 
    <xs:element name="MatchingCredential">
       <xs:complexType>
+      
 
-         <!-- The End Entity Certificate -->
-         <xs:attribute name="EndEntityCertificate" type="xs:base64Binary" use="optional"/>
+         <!-- The End Entity Certificate path -->
+         <xs:sequence>
+
+             <!-- MUST contain a valid X509 certificate path[1..n] -->
+             <xs:element ref="ds:X509Data"/>
+
+         </xs:sequence>
 
          <!-- One of the two IDs identifying a provisioning session -->
          <xs:attribute name="ClientSessionID" type="kg2:sksID" use="required"/>

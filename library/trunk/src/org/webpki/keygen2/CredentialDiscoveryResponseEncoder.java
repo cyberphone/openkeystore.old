@@ -34,7 +34,7 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder
   {
     class MatchingCredential
       {
-        X509Certificate end_entity_certificate;
+        X509Certificate[] certificate_path;
 
         String client_session_id;
 
@@ -54,10 +54,10 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder
             this.id = id;
           }
         
-        public void addMatchingCredential (X509Certificate end_entity_certificate, String client_session_id, String server_session_id, boolean locked) throws IOException
+        public void addMatchingCredential (X509Certificate[] certificate_path, String client_session_id, String server_session_id, boolean locked) throws IOException
           {
             MatchingCredential mc = new MatchingCredential ();
-            mc.end_entity_certificate = end_entity_certificate;
+            mc.certificate_path = certificate_path;
             mc.client_session_id = client_session_id;
             mc.server_session_id = server_session_id;
             mc.locked = locked;
@@ -129,8 +129,7 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder
                 JSONObjectWriter match_object = matcher_array.setObject ();
                 match_object.setString (CLIENT_SESSION_ID_JSON, mc.client_session_id);
                 match_object.setString (SERVER_SESSION_ID_JSON, mc.server_session_id);
-                JSONSignatureEncoder.writeX509CertificatePath (match_object,
-                                                               new X509Certificate[]{mc.end_entity_certificate});
+                JSONSignatureEncoder.writeX509CertificatePath (match_object, mc.certificate_path);
                 if (mc.locked)
                   {
                     match_object.setBoolean (LOCKED_JSON, mc.locked);

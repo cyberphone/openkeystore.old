@@ -18,7 +18,7 @@ package org.webpki.kg2xml;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20130820#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131002#";
 
     String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
 
@@ -54,8 +54,6 @@ public interface KeyGen2Constants
     String ENDORSED_ALGORITHMS_ATTR                  = "EndorsedAlgorithms";
 
     String ENABLE_PIN_CACHING_ATTR                   = "EnablePINCaching";
-
-    String END_ENTITY_CERTIFICATE_ATTR               = "EndEntityCertificate";
 
     String ERROR_URL_ATTR                            = "ErrorURL";
 

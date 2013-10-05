@@ -721,7 +721,7 @@ public class KeyGen2Test
                                   {
                                     continue;
                                   }
-                                lr.addMatchingCredential (cert_path[0],
+                                lr.addMatchingCredential (cert_path,
                                                           eps.getClientSessionID (),
                                                           eps.getServerSessionID (),
                                                           sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());

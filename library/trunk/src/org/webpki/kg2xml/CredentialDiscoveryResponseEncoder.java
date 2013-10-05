@@ -22,10 +22,10 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 import org.webpki.xml.DOMWriterHelper;
+import org.webpki.xmldsig.XMLSignatureWrapper;
 
 import static org.webpki.kg2xml.KeyGen2Constants.*;
 
@@ -34,7 +34,7 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
 
     class MatchingCredential
       {
-        byte[] end_entity_certificate;
+        X509Certificate[] certificate_path;
 
         String client_session_id;
 
@@ -54,17 +54,10 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
             this.id = id;
           }
         
-        public void addMatchingCredential (X509Certificate end_entity_certificate, String client_session_id, String server_session_id, boolean locked) throws IOException
+        public void addMatchingCredential (X509Certificate[] certificate_path, String client_session_id, String server_session_id, boolean locked) throws IOException
           {
             MatchingCredential mc = new MatchingCredential ();
-            try
-              {
-                mc.end_entity_certificate = end_entity_certificate.getEncoded ();
-              }
-            catch (CertificateEncodingException e)
-              {
-                throw new IOException (e);
-              }
+            mc.certificate_path = certificate_path;
             mc.client_session_id = client_session_id;
             mc.server_session_id = server_session_id;
             mc.locked = locked;
@@ -111,6 +104,7 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
     protected void toXML (DOMWriterHelper wr) throws IOException
       {
         wr.initializeRootObject (prefix);
+        XMLSignatureWrapper.addXMLSignatureNS (wr);
 
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
@@ -139,11 +133,11 @@ public class CredentialDiscoveryResponseEncoder extends CredentialDiscoveryRespo
                 wr.addChildElement (MATCHING_CREDENTIAL_ELEM);
                 wr.setStringAttribute (CLIENT_SESSION_ID_ATTR, mc.client_session_id);
                 wr.setStringAttribute (SERVER_SESSION_ID_ATTR, mc.server_session_id);
-                wr.setBinaryAttribute (END_ENTITY_CERTIFICATE_ATTR, mc.end_entity_certificate);
                 if (mc.locked)
                   {
                     wr.setBooleanAttribute (LOCKED_ATTR, mc.locked);
                   }
+                XMLSignatureWrapper.writeX509DataSubset (wr, mc.certificate_path);
                 wr.getParent ();
               }
             wr.getParent ();
