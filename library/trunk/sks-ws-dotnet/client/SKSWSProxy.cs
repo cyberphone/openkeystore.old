@@ -539,8 +539,8 @@ namespace org.webpki.sks.ws.client
         internal string _device_id;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="Algorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal string _algorithm;
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="SessionKeyAlgorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal string _session_key_algorithm;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivacyEnabled", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -575,7 +575,7 @@ namespace org.webpki.sks.ws.client
         internal short _session_key_limit;
 
         public createProvisioningSession_Request(string DeviceID,
-                                                 string Algorithm,
+                                                 string SessionKeyAlgorithm,
                                                  bool PrivacyEnabled,
                                                  string ServerSessionID,
                                                  byte[] ServerEphemeralKey,
@@ -586,7 +586,7 @@ namespace org.webpki.sks.ws.client
                                                  short SessionKeyLimit)
         {
             _device_id = DeviceID;
-            _algorithm = Algorithm;
+            _session_key_algorithm = SessionKeyAlgorithm;
             _privacy_enabled = PrivacyEnabled;
             _server_session_id = ServerSessionID;
             _server_ephemeral_key = ServerEphemeralKey;
@@ -621,9 +621,9 @@ namespace org.webpki.sks.ws.client
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="Attestation", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="SessionAttestation", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
-        internal byte[] _attestation;
+        internal byte[] _session_attestation;
         #pragma warning restore 0649
 
         internal ProvisioningSession () {}
@@ -643,9 +643,9 @@ namespace org.webpki.sks.ws.client
             get { return Conversions.DecodeX509ECPublicKey(_client_ephemeral_key); }
         }
 
-        public byte[] Attestation
+        public byte[] SessionAttestation
         {
-            get { return _attestation; }
+            get { return _session_attestation; }
         }
     }
 
@@ -662,8 +662,8 @@ namespace org.webpki.sks.ws.client
         internal int _provisioning_handle;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="Nonce", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _nonce;
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="Challenge", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _challenge;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -671,12 +671,12 @@ namespace org.webpki.sks.ws.client
 
         public closeProvisioningSession_Request(string DeviceID,
                                                 int ProvisioningHandle,
-                                                byte[] Nonce,
+                                                byte[] Challenge,
                                                 byte[] MAC)
         {
             _device_id = DeviceID;
             _provisioning_handle = ProvisioningHandle;
-            _nonce = Nonce;
+            _challenge = Challenge;
             _mac = MAC;
         }
     }
@@ -686,9 +686,9 @@ namespace org.webpki.sks.ws.client
     public class closeProvisioningSession_Response
     {
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=0)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="Attestation", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="CloseAttestation", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
-        internal byte[] _attestation;
+        internal byte[] _close_attestation;
         #pragma warning restore 0649
     }
 
@@ -729,9 +729,9 @@ namespace org.webpki.sks.ws.client
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=1)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="Algorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="SessionKeyAlgorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
-        internal string _algorithm;
+        internal string _session_key_algorithm;
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
@@ -781,9 +781,9 @@ namespace org.webpki.sks.ws.client
             get { return _provisioning_handle; }
         }
 
-        public string Algorithm
+        public string SessionKeyAlgorithm
         {
-            get { return _algorithm; }
+            get { return _session_key_algorithm; }
         }
 
         public bool PrivacyEnabled
@@ -902,8 +902,8 @@ namespace org.webpki.sks.ws.client
         internal string _id;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="PUKValue", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _puk_value;
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="EncryptedPUK", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _encrypted_puk;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="Format", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -920,7 +920,7 @@ namespace org.webpki.sks.ws.client
         public createPUKPolicy_Request(string DeviceID,
                                        int ProvisioningHandle,
                                        string ID,
-                                       byte[] PUKValue,
+                                       byte[] EncryptedPUK,
                                        sbyte Format,
                                        short RetryLimit,
                                        byte[] MAC)
@@ -928,7 +928,7 @@ namespace org.webpki.sks.ws.client
             _device_id = DeviceID;
             _provisioning_handle = ProvisioningHandle;
             _id = ID;
-            _puk_value = PUKValue;
+            _encrypted_puk = EncryptedPUK;
             _format = Format;
             _retry_limit = RetryLimit;
             _mac = MAC;
@@ -1066,8 +1066,8 @@ namespace org.webpki.sks.ws.client
         internal string _id;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="Algorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal string _algorithm;
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyEntryAlgorithm", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal string _key_entry_algorithm;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=4)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="ServerSeed", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -1128,7 +1128,7 @@ namespace org.webpki.sks.ws.client
         public createKeyEntry_Request(string DeviceID,
                                       int ProvisioningHandle,
                                       string ID,
-                                      string Algorithm,
+                                      string KeyEntryAlgorithm,
                                       byte[] ServerSeed,
                                       bool DevicePINProtection,
                                       int PINPolicyHandle,
@@ -1147,7 +1147,7 @@ namespace org.webpki.sks.ws.client
             _device_id = DeviceID;
             _provisioning_handle = ProvisioningHandle;
             _id = ID;
-            _algorithm = Algorithm;
+            _key_entry_algorithm = KeyEntryAlgorithm;
             _server_seed = ServerSeed;
             _device_pin_protection = DevicePINProtection;
             _pin_policy_handle = PINPolicyHandle;
@@ -1182,9 +1182,9 @@ namespace org.webpki.sks.ws.client
         #pragma warning restore 0649
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="Attestation", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="KeyAttestation", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
         #pragma warning disable 0649
-        internal byte[] _attestation;
+        internal byte[] _key_attestation;
         #pragma warning restore 0649
 
         internal KeyData () {}
@@ -1199,9 +1199,9 @@ namespace org.webpki.sks.ws.client
             get { return Conversions.DecodeX509PublicKey(_public_key); }
         }
 
-        public byte[] Attestation
+        public byte[] KeyAttestation
         {
-            get { return _attestation; }
+            get { return _key_attestation; }
         }
     }
 
@@ -2741,7 +2741,7 @@ namespace org.webpki.sks.ws.client
             }
         }
 
-        public ProvisioningSession createProvisioningSession(string Algorithm,
+        public ProvisioningSession createProvisioningSession(string SessionKeyAlgorithm,
                                                              bool PrivacyEnabled,
                                                              string ServerSessionID,
                                                              PublicKey ServerEphemeralKey,
@@ -2754,7 +2754,7 @@ namespace org.webpki.sks.ws.client
             try
             {
                 return base.Channel.createProvisioningSession(new createProvisioningSession_Request(device_id,
-                                                                                                    Algorithm,
+                                                                                                    SessionKeyAlgorithm,
                                                                                                     PrivacyEnabled,
                                                                                                     ServerSessionID,
                                                                                                     Conversions.EncodeX509ECPublicKey(ServerEphemeralKey),
@@ -2771,15 +2771,15 @@ namespace org.webpki.sks.ws.client
         }
 
         public byte[] closeProvisioningSession(int ProvisioningHandle,
-                                               byte[] Nonce,
+                                               byte[] Challenge,
                                                byte[] MAC)
         {
             try
             {
                 return base.Channel.closeProvisioningSession(new closeProvisioningSession_Request(device_id,
                                                                                                   ProvisioningHandle,
-                                                                                                  Nonce,
-                                                                                                  MAC))._attestation;
+                                                                                                  Challenge,
+                                                                                                  MAC))._close_attestation;
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
             {
@@ -2833,7 +2833,7 @@ namespace org.webpki.sks.ws.client
 
         public int createPUKPolicy(int ProvisioningHandle,
                                    string ID,
-                                   byte[] PUKValue,
+                                   byte[] EncryptedPUK,
                                    PassphraseFormat Format,
                                    short RetryLimit,
                                    byte[] MAC)
@@ -2843,7 +2843,7 @@ namespace org.webpki.sks.ws.client
                 return base.Channel.createPUKPolicy(new createPUKPolicy_Request(device_id,
                                                                                 ProvisioningHandle,
                                                                                 ID,
-                                                                                PUKValue,
+                                                                                EncryptedPUK,
                                                                                 (sbyte)Format,
                                                                                 RetryLimit,
                                                                                 MAC))._puk_policy_handle;
@@ -2893,7 +2893,7 @@ namespace org.webpki.sks.ws.client
 
         public KeyData createKeyEntry(int ProvisioningHandle,
                                       string ID,
-                                      string Algorithm,
+                                      string KeyEntryAlgorithm,
                                       byte[] ServerSeed,
                                       bool DevicePINProtection,
                                       int PINPolicyHandle,
@@ -2914,7 +2914,7 @@ namespace org.webpki.sks.ws.client
                 return base.Channel.createKeyEntry(new createKeyEntry_Request(device_id,
                                                                               ProvisioningHandle,
                                                                               ID,
-                                                                              Algorithm,
+                                                                              KeyEntryAlgorithm,
                                                                               ServerSeed,
                                                                               DevicePINProtection,
                                                                               PINPolicyHandle,

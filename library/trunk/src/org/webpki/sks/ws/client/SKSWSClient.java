@@ -235,7 +235,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       }
 
     @Override
-    public ProvisioningSession createProvisioningSession (String algorithm,
+    public ProvisioningSession createProvisioningSession (String session_key_algorithm,
                                                           boolean privacy_enabled,
                                                           String server_session_id,
                                                           ECPublicKey server_ephemeral_key,
@@ -249,9 +249,9 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
           {
             Holder<String> client_session_id = new Holder<String> ();
             Holder<byte[]>client_ephemeral_key = new Holder<byte[]> ();
-            Holder<byte[]>attestation = new Holder<byte[]> ();
+            Holder<byte[]>session_attestation = new Holder<byte[]> ();
             int provisioning_handle = getSKSWS ().createProvisioningSession (device_id,
-                                                                             algorithm,
+                                                                             session_key_algorithm,
                                                                              privacy_enabled,
                                                                              server_session_id,
                                                                              server_ephemeral_key.getEncoded (),
@@ -262,10 +262,10 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                                                              session_key_limit,
                                                                              client_session_id,
                                                                              client_ephemeral_key,
-                                                                             attestation);
+                                                                             session_attestation);
             return new ProvisioningSession (provisioning_handle, 
                                             client_session_id.value,
-                                            attestation.value,
+                                            session_attestation.value,
                                             getECPublicKey (client_ephemeral_key.value));
           }
         catch (SKSException_Exception e)
@@ -281,14 +281,14 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
 
     @Override
     public byte[] closeProvisioningSession (int provisioning_handle,
-                                            byte[] nonce,
+                                            byte[] challenge,
                                             byte[] mac) throws SKSException
       {
         try
           {
             return getSKSWS ().closeProvisioningSession (device_id,
                                                          provisioning_handle,
-                                                         nonce,
+                                                         challenge,
                                                          mac);
           }
         catch (SKSException_Exception e)
@@ -302,7 +302,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
       {
         try
           {
-            Holder<String> algorithm = new Holder<String> ();
+            Holder<String> session_key_algorithm = new Holder<String> ();
             Holder<Boolean> privacy_enabled = new Holder<Boolean> ();
             Holder<byte[]> key_management_key = new Holder<byte[]> ();
             Holder<Integer> client_time = new Holder<Integer> ();
@@ -313,7 +313,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             provisioning_handle = getSKSWS ().enumerateProvisioningSessions (device_id,
                                                                              provisioning_handle,
                                                                              provisioning_state,
-                                                                             algorithm,
+                                                                             session_key_algorithm,
                                                                              privacy_enabled,
                                                                              key_management_key,
                                                                              client_time,
@@ -323,7 +323,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                                                              issuer_uri);
             return provisioning_handle == EnumeratedProvisioningSession.INIT_ENUMERATION ? 
                        null : new EnumeratedProvisioningSession (provisioning_handle,
-                                                                 algorithm.value,
+                                                                 session_key_algorithm.value,
                                                                  privacy_enabled.value,
                                                                  key_management_key.value == null ? null : createPublicKeyFromBlob (key_management_key.value),
                                                                  client_time.value,
@@ -375,7 +375,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
     @Override
     public int createPUKPolicy (int provisioning_handle,
                                 String id,
-                                byte[] puk_value, 
+                                byte[] encrypted_puk, 
                                 byte format, 
                                 short retry_limit, 
                                 byte[] mac) throws SKSException
@@ -385,7 +385,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             return getSKSWS().createPUKPolicy (device_id,
                                                provisioning_handle,
                                                id,
-                                               puk_value,
+                                               encrypted_puk,
                                                format,
                                                retry_limit,
                                                mac);
@@ -437,7 +437,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
     @Override
     public KeyData createKeyEntry (int provisioning_handle,
                                    String id,
-                                   String algorithm,
+                                   String key_entry_algorithm,
                                    byte[] server_seed,
                                    boolean device_pin_protection,
                                    int pin_policy_handle,
@@ -456,7 +456,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
         try
           {
             Holder<byte[]> public_key = new Holder<byte[]> ();
-            Holder<byte[]> attestation = new Holder<byte[]> ();
+            Holder<byte[]> key_attestation = new Holder<byte[]> ();
             List<String> lalg = new ArrayList<String> ();
             for (String alg : endorsed_algorithms)
               {
@@ -465,7 +465,7 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
             int key_handle = getSKSWS ().createKeyEntry (device_id,
                                                          provisioning_handle,
                                                          id,
-                                                         algorithm,
+                                                         key_entry_algorithm,
                                                          server_seed,
                                                          device_pin_protection,
                                                          pin_policy_handle,
@@ -481,10 +481,10 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
                                                          lalg,
                                                          mac,
                                                          public_key,
-                                                         attestation);
+                                                         key_attestation);
             return new KeyData (key_handle,
                                 createPublicKeyFromBlob (public_key.value),
-                                attestation.value);
+                                key_attestation.value);
           }
         catch (GeneralSecurityException e)
           {

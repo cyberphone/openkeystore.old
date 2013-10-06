@@ -204,6 +204,8 @@ public interface KeyGen2Constants
 
     String IMAGE_PREFERENCE_ELEM                     = "ImagePreference";
 
+    String IMPORT_KEY_ELEM                           = "ImportKey";
+
     String ISSUED_CREDENTIAL_ELEM                    = "IssuedCredential";
 
     String KEY_CREATION_REQUEST_ELEM                 = "KeyCreationRequest";

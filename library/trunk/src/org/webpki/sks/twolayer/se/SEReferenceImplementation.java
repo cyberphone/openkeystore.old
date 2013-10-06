@@ -1592,7 +1592,7 @@ public class SEReferenceImplementation
                                                   String server_session_id,
                                                   String client_session_id,
                                                   String issuer_uri,
-                                                  byte[] nonce,
+                                                  byte[] challenge,
                                                   byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1613,14 +1613,14 @@ public class SEReferenceImplementation
         verifier.addString (client_session_id);
         verifier.addString (server_session_id);
         verifier.addString (issuer_uri);
-        verifier.addArray (nonce);
+        verifier.addArray (challenge);
         verifier.verify (mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Generate the attestation in advance => checking SessionKeyLimit before "commit"
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder close_attestation = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.KDF_DEVICE_ATTESTATION);
-        close_attestation.addArray (nonce);
+        close_attestation.addArray (challenge);
         close_attestation.addString (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1);
         return close_attestation.getResult ();
       }

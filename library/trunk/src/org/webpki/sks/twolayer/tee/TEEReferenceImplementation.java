@@ -1892,7 +1892,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public synchronized byte[] closeProvisioningSession (int provisioning_handle,
-                                                         byte[] nonce,
+                                                         byte[] challenge,
                                                          byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -1911,7 +1911,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                                                              provisioning.server_session_id,
                                                                              provisioning.client_session_id,
                                                                              provisioning.issuer_uri, 
-                                                                             nonce, 
+                                                                             challenge, 
                                                                              mac);
           }
         catch (SKSException e)

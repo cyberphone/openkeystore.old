@@ -321,8 +321,8 @@ public class SKSWSImplementation
     @WebResult(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     public int createProvisioningSession (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                           String device_id,
-                                          @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                          String algorithm,
+                                          @WebParam(name="SessionKeyAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                          String session_key_algorithm,
                                           @WebParam(name="PrivacyEnabled", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                           boolean privacy_enabled,
                                           @WebParam(name="ServerSessionID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -343,14 +343,14 @@ public class SKSWSImplementation
                                           Holder<String> client_session_id,
                                           @WebParam(name="ClientEphemeralKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                           Holder<byte[]> client_ephemeral_key,
-                                          @WebParam(name="Attestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                                          Holder<byte[]> attestation)
+                                          @WebParam(name="SessionAttestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                          Holder<byte[]> session_attestation)
     throws SKSException
       {
         String log_result = "";
         try
           {
-            ProvisioningSession sess = getDevice (device_id).createProvisioningSession (algorithm,
+            ProvisioningSession sess = getDevice (device_id).createProvisioningSession (session_key_algorithm,
                                                                                         privacy_enabled,
                                                                                         server_session_id,
                                                                                         getECPublicKey (server_ephemeral_key),
@@ -361,7 +361,7 @@ public class SKSWSImplementation
                                                                                         session_key_limit);
             client_session_id.value = sess.getClientSessionID ();
             client_ephemeral_key.value = sess.getClientEphemeralKey ().getEncoded ();
-            attestation.value = sess.getSessionAttestation ();
+            session_attestation.value = sess.getSessionAttestation ();
             log_result = " : ProvisioningHandle=" + sess.getProvisioningHandle ();
             return sess.getProvisioningHandle ();
           }
@@ -379,13 +379,13 @@ public class SKSWSImplementation
     @WebMethod(operationName="closeProvisioningSession")
     @RequestWrapper(localName="closeProvisioningSession", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     @ResponseWrapper(localName="closeProvisioningSession.Response", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-    @WebResult(name="Attestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+    @WebResult(name="CloseAttestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
     public byte[] closeProvisioningSession (@WebParam(name="DeviceID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                             String device_id,
                                             @WebParam(name="ProvisioningHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                             int provisioning_handle,
-                                            @WebParam(name="Nonce", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                            byte[] nonce,
+                                            @WebParam(name="Challenge", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                            byte[] challenge,
                                             @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                             byte[] mac)
     throws SKSException
@@ -393,7 +393,7 @@ public class SKSWSImplementation
         String log_result = "";
         try
           {
-            return getDevice (device_id).closeProvisioningSession (provisioning_handle, nonce, mac);
+            return getDevice (device_id).closeProvisioningSession (provisioning_handle, challenge, mac);
           }
         catch (SKSException e)
           {
@@ -416,8 +416,8 @@ public class SKSWSImplementation
                                               int provisioning_handle,
                                               @WebParam(name="ProvisioningState", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                               boolean provisioning_state,
-                                              @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                                              Holder<String> algorithm,
+                                              @WebParam(name="SessionKeyAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                                              Holder<String> session_key_algorithm,
                                               @WebParam(name="PrivacyEnabled", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                               Holder<Boolean> privacy_enabled,
                                               @WebParam(name="KeyManagementKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
@@ -444,7 +444,7 @@ public class SKSWSImplementation
               }
             else
               {
-                algorithm.value = eps.getSessionKeyAlgorithm ();
+                session_key_algorithm.value = eps.getSessionKeyAlgorithm ();
                 privacy_enabled.value = eps.getPrivacyEnabled ();
                 key_management_key.value = eps.getKeyManagementKey () == null ? null : eps.getKeyManagementKey ().getEncoded ();
                 client_time.value = eps.getClientTime ();
@@ -518,8 +518,8 @@ public class SKSWSImplementation
                                 int provisioning_handle,
                                 @WebParam(name="ID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                 String id,
-                                @WebParam(name="PUKValue", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                byte[] puk_value,
+                                @WebParam(name="EncryptedPUK", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                byte[] encrypted_puk,
                                 @WebParam(name="Format", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                 byte format,
                                 @WebParam(name="RetryLimit", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -533,7 +533,7 @@ public class SKSWSImplementation
           {
             int puk_policy_handle = getDevice (device_id).createPUKPolicy (provisioning_handle,
                                                                            id,
-                                                                           puk_value,
+                                                                           encrypted_puk,
                                                                            format,
                                                                            retry_limit,
                                                                            mac);
@@ -625,8 +625,8 @@ public class SKSWSImplementation
                                int provisioning_handle,
                                @WebParam(name="ID", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                String id,
-                               @WebParam(name="Algorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                               String algorithm,
+                               @WebParam(name="KeyEntryAlgorithm", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                               String key_entry_algorithm,
                                @WebParam(name="ServerSeed", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                byte[] server_seed,
                                @WebParam(name="DevicePINProtection", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
@@ -657,8 +657,8 @@ public class SKSWSImplementation
                                byte[] mac,
                                @WebParam(name="PublicKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
                                Holder<byte[]> public_key,
-                               @WebParam(name="Attestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
-                               Holder<byte[]> attestation)
+                               @WebParam(name="KeyAttestation", targetNamespace="http://xmlns.webpki.org/sks/v1.00", mode=WebParam.Mode.OUT)
+                               Holder<byte[]> key_attestation)
     throws SKSException
       {
         String log_result = null;
@@ -666,7 +666,7 @@ public class SKSWSImplementation
           {
             KeyData kd = getDevice (device_id).createKeyEntry (provisioning_handle,
                                                                id,
-                                                               algorithm,
+                                                               key_entry_algorithm,
                                                                server_seed,
                                                                device_pin_protection,
                                                                pin_policy_handle,
@@ -682,7 +682,7 @@ public class SKSWSImplementation
                                                                endorsed_algorithms.toArray (new String[0]),
                                                                mac);
             public_key.value = kd.getPublicKey ().getEncoded ();
-            attestation.value = kd.getKeyAttestation ();
+            key_attestation.value = kd.getKeyAttestation ();
             log_result = " : KeyHandle=" + kd.getKeyHandle ();
             return kd.getKeyHandle ();
           }

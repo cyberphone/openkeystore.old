@@ -130,7 +130,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         public abstract byte[] getExtensionData () throws IOException;
         
-        Extension (DOMReaderHelper rd, IssuedKey cpk) throws IOException
+        Extension (DOMReaderHelper rd, IssuedCredential cpk) throws IOException
           {
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
             type = ah.getString (TYPE_ATTR);
@@ -144,7 +144,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
       {
         byte[] data;
 
-        StandardExtension (byte[] data, DOMReaderHelper rd, IssuedKey cpk) throws IOException
+        StandardExtension (byte[] data, DOMReaderHelper rd, IssuedCredential cpk) throws IOException
           {
             super (rd, cpk);
             this.data = data;
@@ -171,7 +171,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
       {
         byte[] data;
          
-        EncryptedExtension (byte[] data, DOMReaderHelper rd, IssuedKey cpk) throws IOException
+        EncryptedExtension (byte[] data, DOMReaderHelper rd, IssuedCredential cpk) throws IOException
           {
             super (rd, cpk);
             this.data = data;
@@ -208,7 +208,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
 
     class PropertyBag extends Extension
       {
-        private PropertyBag (DOMReaderHelper rd, IssuedKey cpk) throws IOException
+        private PropertyBag (DOMReaderHelper rd, IssuedCredential cpk) throws IOException
           {
             super (rd, cpk);
           }
@@ -250,7 +250,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         String mime_type;
   
-        Logotype (byte[] data, String mime_type, DOMReaderHelper rd, IssuedKey cpk) throws IOException
+        Logotype (byte[] data, String mime_type, DOMReaderHelper rd, IssuedCredential cpk) throws IOException
           {
             super (rd, cpk);
             this.mime_type = mime_type;
@@ -277,7 +277,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
       }
 
 
-    public class IssuedKey
+    public class IssuedCredential
       {
         X509Certificate[] certificate_path;
 
@@ -299,10 +299,10 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         PostOperation post_operation;
 
-        IssuedKey () { }
+        IssuedCredential () { }
 
 
-        IssuedKey (DOMReaderHelper rd) throws IOException
+        IssuedCredential (DOMReaderHelper rd) throws IOException
           {
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
             rd.getNext (ISSUED_CREDENTIAL_ELEM);
@@ -321,15 +321,22 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
                   }
               }
 
-            if (rd.hasNext (SYMMETRIC_KEY_ELEM))
+            if (rd.hasNext (IMPORT_KEY_ELEM))
               {
-                encrypted_symmetric_key = rd.getBinary (SYMMETRIC_KEY_ELEM);
-                symmetric_key_mac = ah.getBinary (MAC_ATTR);
-              }
-            else if (rd.hasNext (PRIVATE_KEY_ELEM))
-              {
-                encrypted_private_key = rd.getBinary (PRIVATE_KEY_ELEM);
-                private_key_mac = ah.getBinary (MAC_ATTR);
+                rd.getNext ();
+                rd.getChild ();
+                if (rd.hasNext (SYMMETRIC_KEY_ELEM))
+                  {
+                    encrypted_symmetric_key = rd.getBinary (SYMMETRIC_KEY_ELEM);
+                    rd.getParent ();
+                    symmetric_key_mac = ah.getBinary (MAC_ATTR);
+                  }
+                else if (rd.hasNext (PRIVATE_KEY_ELEM))
+                  {
+                    encrypted_private_key = rd.getBinary (PRIVATE_KEY_ELEM);
+                    rd.getParent ();
+                    private_key_mac = ah.getBinary (MAC_ATTR);
+                  }
               }
 
             while (rd.hasNext ())
@@ -445,7 +452,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
                                   post_op);
       }
 
-    private Vector<IssuedKey> issued_keys = new Vector<IssuedKey> ();
+    private Vector<IssuedCredential> issued_keys = new Vector<IssuedCredential> ();
     
     private Vector<PostOperation> post_unlock_keys = new Vector<PostOperation> ();
       
@@ -482,9 +489,9 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
       }
 
 
-    public IssuedKey[] getIssuedKeys ()
+    public IssuedCredential[] getIssuedKeys ()
       {
-        return issued_keys.toArray (new IssuedKey[0]);
+        return issued_keys.toArray (new IssuedCredential[0]);
       }
     
     
@@ -549,7 +556,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         /////////////////////////////////////////////////////////////////////////////////////////
         while (rd.hasNext (ISSUED_CREDENTIAL_ELEM))
           {
-            issued_keys.add (new IssuedKey (rd));
+            issued_keys.add (new IssuedCredential (rd));
           }
  
         /////////////////////////////////////////////////////////////////////////////////////////

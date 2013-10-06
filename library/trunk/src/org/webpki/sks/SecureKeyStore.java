@@ -176,7 +176,7 @@ public interface SecureKeyStore
                                                    short session_key_limit) throws SKSException;
 
     byte[] closeProvisioningSession (int provisioning_handle,
-                                     byte[] nonce,
+                                     byte[] challenge,
                                      byte[] mac) throws SKSException;
 
     EnumeratedProvisioningSession enumerateProvisioningSessions (int provisioning_handle,

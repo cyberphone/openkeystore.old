@@ -81,7 +81,7 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
-            <xs:element name="Algorithm" type="xs:string"/>
+            <xs:element name="SessionKeyAlgorithm" type="xs:string"/>
             <xs:element name="PrivacyEnabled" type="xs:boolean"/>
             <xs:element name="ServerSessionID" type="xs:string"/>
             <xs:element name="ServerEphemeralKey" type="xs:base64Binary"/>
@@ -99,7 +99,7 @@
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ClientSessionID" type="xs:string"/>
             <xs:element name="ClientEphemeralKey" type="xs:base64Binary"/>
-            <xs:element name="Attestation" type="xs:base64Binary"/>
+            <xs:element name="SessionAttestation" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -114,7 +114,7 @@
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
-            <xs:element name="Nonce" type="xs:base64Binary"/>
+            <xs:element name="Challenge" type="xs:base64Binary"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
@@ -122,7 +122,7 @@
       <xs:element name="closeProvisioningSession.Response">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="Attestation" type="xs:base64Binary"/>
+            <xs:element name="CloseAttestation" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -145,7 +145,7 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
-            <xs:element name="Algorithm" type="xs:string" nillable="true" minOccurs="0"/>
+            <xs:element name="SessionKeyAlgorithm" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="PrivacyEnabled" type="xs:boolean" nillable="true" minOccurs="0"/>
             <xs:element name="KeyManagementKey" type="xs:base64Binary" nillable="true" minOccurs="0"/>
             <xs:element name="ClientTime" type="xs:int" nillable="true" minOccurs="0"/>
@@ -205,7 +205,7 @@
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ID" type="xs:string"/>
-            <xs:element name="PUKValue" type="xs:base64Binary"/>
+            <xs:element name="EncryptedPUK" type="xs:base64Binary"/>
             <xs:element name="Format" type="xs:byte"/>
             <xs:element name="RetryLimit" type="xs:short"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
@@ -264,7 +264,7 @@
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="ProvisioningHandle" type="xs:int"/>
             <xs:element name="ID" type="xs:string"/>
-            <xs:element name="Algorithm" type="xs:string"/>
+            <xs:element name="KeyEntryAlgorithm" type="xs:string"/>
             <xs:element name="ServerSeed" type="xs:base64Binary" nillable="true" minOccurs="0"/>
             <xs:element name="DevicePINProtection" type="xs:boolean"/>
             <xs:element name="PINPolicyHandle" type="xs:int"/>
@@ -287,7 +287,7 @@
           <xs:sequence>
             <xs:element name="KeyHandle" type="xs:int"/>
             <xs:element name="PublicKey" type="xs:base64Binary"/>
-            <xs:element name="Attestation" type="xs:base64Binary"/>
+            <xs:element name="KeyAttestation" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

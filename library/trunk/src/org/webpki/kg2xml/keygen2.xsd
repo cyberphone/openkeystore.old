@@ -712,40 +712,27 @@
                  without warnings.  Individual certificates in excess of 16KB
                  MAY though rejected -->
             <xs:element ref="ds:X509Data"/>
+            
+            <xs:element name="ImportKey" minOccurs="0">
+               <xs:complexType>
 
-            <xs:choice minOccurs="0">
+                  <xs:choice>
  
-               <!-- SKS Reference: importSymmetricKey 
-                    Optional imported symmetric key -->
-               <xs:element name="SymmetricKey">
-                  <xs:complexType>
-                     <xs:simpleContent>
-                        <xs:extension base="xs:base64Binary">
- 
-                           <!-- Mandatory MAC (Message Authentication Code) -->
-                           <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
+                     <!-- SKS Reference: importSymmetricKey 
+                          Optional imported symmetric key -->
+                     <xs:element name="SymmetricKey" type="xs:base64Binary"/>
 
-                        </xs:extension>
-                     </xs:simpleContent>
-                  </xs:complexType>
-               </xs:element>
+                     <!-- SKS Reference: importPrivateKey 
+                          Optional imported private key -->
+                     <xs:element name="PrivateKey" type="xs:base64Binary"/>
 
-               <!-- SKS Reference: importPrivateKey 
-                    Optional imported private key -->
-               <xs:element name="PrivateKey">
-                  <xs:complexType>
-                     <xs:simpleContent>
-                        <xs:extension base="xs:base64Binary">
-      
-                           <!-- Mandatory MAC (Message Authentication Code) -->
-                           <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
+                  </xs:choice>
 
-                        </xs:extension>
-                     </xs:simpleContent>
-                  </xs:complexType>
-               </xs:element>
+                  <!-- Mandatory MAC (Message Authentication Code) -->
+                  <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
-            </xs:choice>
+               </xs:complexType>
+            </xs:element>
 
             <xs:choice minOccurs="0" maxOccurs="unbounded">
 

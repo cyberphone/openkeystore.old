@@ -2522,7 +2522,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public synchronized byte[] closeProvisioningSession (int provisioning_handle,
-                                                         byte[] nonce,
+                                                         byte[] challenge,
                                                          byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2537,14 +2537,14 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         verifier.addString (provisioning.client_session_id);
         verifier.addString (provisioning.server_session_id);
         verifier.addString (provisioning.issuer_uri);
-        verifier.addArray (nonce);
+        verifier.addArray (challenge);
         provisioning.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Generate the attestation in advance => checking SessionKeyLimit before "commit"
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder close_attestation = provisioning.getMacBuilderForMethodCall (KDF_DEVICE_ATTESTATION);
-        close_attestation.addArray (nonce);
+        close_attestation.addArray (challenge);
         close_attestation.addString (ALGORITHM_SESSION_ATTEST_1);
         byte[] attestation = close_attestation.getResult ();
 

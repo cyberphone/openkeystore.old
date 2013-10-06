@@ -167,11 +167,13 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                 ////////////////////////////////////////////////////////////////////////
                 if (key.encrypted_symmetric_key != null)
                   {
-                    wr.addBinary (SYMMETRIC_KEY_ELEM, key.encrypted_symmetric_key);
+                    wr.addChildElement (IMPORT_KEY_ELEM);
                     MacGenerator set_symkey = new MacGenerator ();
                     set_symkey.addArray (ee_cert);
                     set_symkey.addArray (key.encrypted_symmetric_key);
                     mac (wr, set_symkey.getResult (), SecureKeyStore.METHOD_IMPORT_SYMMETRIC_KEY);
+                    wr.addBinary (SYMMETRIC_KEY_ELEM, key.encrypted_symmetric_key);
+                    wr.getParent ();
                   }
  
                 ////////////////////////////////////////////////////////////////////////
@@ -179,11 +181,13 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
                 ////////////////////////////////////////////////////////////////////////
                 if (key.encrypted_private_key != null)
                   {
-                    wr.addBinary (PRIVATE_KEY_ELEM, key.encrypted_private_key);
+                    wr.addChildElement (IMPORT_KEY_ELEM);
                     MacGenerator restore_privkey = new MacGenerator ();
                     restore_privkey.addArray (ee_cert);
                     restore_privkey.addArray (key.encrypted_private_key);
                     mac (wr, restore_privkey.getResult (), SecureKeyStore.METHOD_IMPORT_PRIVATE_KEY);
+                    wr.addBinary (PRIVATE_KEY_ELEM, key.encrypted_private_key);
+                    wr.getParent ();
                   }
  
                 ////////////////////////////////////////////////////////////////////////
