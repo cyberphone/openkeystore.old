@@ -108,7 +108,7 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
 
         client_time = ah.getDateTime (CLIENT_TIME_ATTR).getTime ();
 
-        attestation = ah.getBinary (ATTESTATION_ATTR);
+        attestation = ah.getBinary (SESSION_ATTESTATION_ATTR);
         
         server_certificate_fingerprint = ah.getBinaryConditional (SERVER_CERT_FP_ATTR);
         
@@ -125,9 +125,9 @@ public class ProvisioningInitializationResponseDecoder extends ProvisioningIniti
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional device certificate path
         /////////////////////////////////////////////////////////////////////////////////////////
-        if (rd.hasNext (DEVICE_CERTIFICATE_PATH_ELEM))
+        if (rd.hasNext (DEVICE_CERTIFICATE_ELEM))
           {
-            rd.getNext (DEVICE_CERTIFICATE_PATH_ELEM);
+            rd.getNext (DEVICE_CERTIFICATE_ELEM);
             rd.getChild ();
             device_certificate_path = XMLSignatureWrapper.readSortedX509DataSubset (rd);
             rd.getParent ();

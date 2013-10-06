@@ -172,7 +172,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
       {
         for (KeyManagementKeyUpdateHolder child : kmk.children)
           {
-            wr.addChildElement (UPDATE_KEY_MANAGEMENT_KEY_ELEM);
+            wr.addChildElement (UPDATABLE_KEY_MANAGEMENT_KEY_ELEM);
             wr.setBinaryAttribute (AUTHORIZATION_ATTR, child.authorization);
             XMLSignatureWrapper.writePublicKey (wr, child.key_management_key);
             scanForUpdatedKeys (wr, child);
@@ -215,7 +215,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
 
         wr.setIntAttribute (SESSION_KEY_LIMIT_ATTR, session_key_limit);
 
-        wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, server_state.provisioning_session_algorithm);
+        wr.setStringAttribute (SESSION_KEY_ALGORITHM_ATTR, server_state.provisioning_session_algorithm);
         
         if (!client_attributes.isEmpty ())
           {

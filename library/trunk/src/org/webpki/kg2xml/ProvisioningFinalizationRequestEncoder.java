@@ -127,7 +127,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
     
             byte[] nonce;
-            wr.setBinaryAttribute (NONCE_ATTR, nonce = server_state.server_crypto_interface.generateNonce ());
+            wr.setBinaryAttribute (CHALLENGE_ATTR, nonce = server_state.server_crypto_interface.generateNonce ());
     
             XMLSignatureWrapper.addXMLSignatureNS (wr);
     
@@ -136,7 +136,7 @@ public class ProvisioningFinalizationRequestEncoder extends ProvisioningFinaliza
             ////////////////////////////////////////////////////////////////////////
             for (ServerState.Key key : server_state.getKeys ())
               {
-                wr.addChildElement (ISSUED_KEY_ELEM);
+                wr.addChildElement (ISSUED_CREDENTIAL_ELEM);
                 wr.setStringAttribute (ID_ATTR, key.id);
                 if (key.trust_anchor_set)
                   {

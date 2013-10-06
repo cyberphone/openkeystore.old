@@ -315,7 +315,7 @@ public class KeyGen2Test
       {
         private static final String kg2keycre = 
           "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-          "<KeyCreationRequest Algorithm=\"http://xmlns.webpki.org/sks/algorithm#key.1\" " +
+          "<KeyCreationRequest " + KeyGen2Constants.KEY_ENTRY_ALGORITHM_ATTR  + "=\"http://xmlns.webpki.org/sks/algorithm#key.1\" " +
           "ClientSessionID=\"C-139622a0ac98f2f44a35c9753ca\" " +
           "ID=\"S-139622a0a9993085d38d1586b76\" " +
           "SubmitURL=\"http://issuer.example.com/keyinit\" " +
@@ -355,7 +355,7 @@ public class KeyGen2Test
               {
                 grouping = Grouping.NONE;
               }
-            xml.append ("<PINPolicy Format=\"")
+            xml.append ("<" + KeyGen2Constants.PIN_POLICY_SPECIFIER_ELEM + " Format=\"")
                .append (format.getXMLName ())
                .append ("\" ID=\"PIN.")
                .append (++pin_id)
@@ -383,13 +383,13 @@ public class KeyGen2Test
             if (pin_active)
               {
                 pin_active = false;
-                xml.append ("</PINPolicy>");
+                xml.append ("</" + KeyGen2Constants.PIN_POLICY_SPECIFIER_ELEM + ">");
               }
           }
 
         KeyCreator addKey (AppUsage app_usage)
           {
-            xml.append ("<KeyEntry AppUsage=\"")
+            xml.append ("<" + KeyGen2Constants.KEY_ENTRY_SPECIFIER_ELEM + " AppUsage=\"")
                .append (app_usage.getXMLName ())
                .append ("\" ID=\"Key.")
                .append (++key_id)
@@ -789,7 +789,7 @@ public class KeyGen2Test
                   }
                 KeyData key_data = sks.createKeyEntry (provisioning_handle,
                                                        key.getID (),
-                                                       key_creation_request.getAlgorithm (),
+                                                       key_creation_request.getKeyEntryAlgorithm (),
                                                        key.getServerSeed (),
                                                        key.isDevicePINProtected (),
                                                        pin_policy_handle,

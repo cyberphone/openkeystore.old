@@ -62,7 +62,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
  
         PUKPolicy (DOMReaderHelper rd) throws IOException
           {
-            encrypted_value = rd.getAttributeHelper ().getBinary (VALUE_ATTR);
+            encrypted_value = rd.getAttributeHelper ().getBinary (ENCRYPTED_PUK_ATTR);
             retry_limit = (short)rd.getAttributeHelper ().getInt (RETRY_LIMIT_ATTR);
             id = rd.getAttributeHelper ().getString (ID_ATTR);
             format = PassphraseFormat.getPassphraseFormatFromString (rd.getAttributeHelper ().getString (FORMAT_ATTR));
@@ -289,7 +289,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
                    PINPolicy pin_policy,
                    boolean start_of_pin_group) throws IOException
           {
-            rd.getNext (KEY_ENTRY_ELEM);
+            rd.getNext (KEY_ENTRY_SPECIFIER_ELEM);
             this.pin_policy = pin_policy;
             this.start_of_pin_group = start_of_pin_group;
  
@@ -305,7 +305,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             
             device_pin_protected = ah.getBooleanConditional (DEVICE_PIN_PROTECTION_ATTR, false);
             
-            preset_pin = ah.getBinaryConditional (PIN_VALUE_ATTR);
+            preset_pin = ah.getBinaryConditional (ENCRYPTED_PRESET_PIN_ATTR);
             if (preset_pin != null)
               {
                 pin_policy.user_defined = false;
@@ -778,7 +778,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
     private void readPINPolicy (DOMReaderHelper rd, boolean puk_start, PUKPolicy puk_policy) throws IOException
       {
         boolean start = true;
-        rd.getNext (PIN_POLICY_ELEM);
+        rd.getNext (PIN_POLICY_SPECIFIER_ELEM);
         PINPolicy upp = new PINPolicy (rd);
         upp.puk_policy = puk_policy;
         rd.getChild ();
@@ -825,11 +825,11 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
 
     
-    String algorithm;
+    String key_entry_algorithm;
     
-    public String getAlgorithm ()
+    public String getKeyEntryAlgorithm ()
       {
-        return algorithm;
+        return key_entry_algorithm;
       }
 
 
@@ -867,7 +867,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
         deferred_certification = ah.getBooleanConditional (DEFERRED_CERTIFICATION_ATTR);
 
-        algorithm = ah.getString (XMLSignatureWrapper.ALGORITHM_ATTR);
+        key_entry_algorithm = ah.getString (KEY_ENTRY_ALGORITHM_ATTR);
 
         rd.getChild ();
 
@@ -876,14 +876,14 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
         /////////////////////////////////////////////////////////////////////////////////////////
          while (true)
           {
-            if (rd.hasNext (KEY_ENTRY_ELEM))
+            if (rd.hasNext (KEY_ENTRY_SPECIFIER_ELEM))
               {
                 readKeyProperties (rd);
               }
-            else if (rd.hasNext (PUK_POLICY_ELEM))
+            else if (rd.hasNext (PUK_POLICY_SPECIFIER_ELEM))
               {
                 boolean start = true;
-                rd.getNext (PUK_POLICY_ELEM);
+                rd.getNext (PUK_POLICY_SPECIFIER_ELEM);
                 PUKPolicy pk = new PUKPolicy (rd);
                 rd.getChild ();
                 do
@@ -894,7 +894,7 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
                 while (rd.hasNext ());
                 rd.getParent ();
               }
-            else if (rd.hasNext (PIN_POLICY_ELEM))
+            else if (rd.hasNext (PIN_POLICY_SPECIFIER_ELEM))
               {
                 readPINPolicy (rd, false, null);
               }

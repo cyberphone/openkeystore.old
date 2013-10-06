@@ -51,7 +51,7 @@ public class ProvisioningFinalizationResponseDecoder extends ProvisioningFinaliz
 
         server_session_id = ah.getString (SERVER_SESSION_ID_ATTR);
         
-        attestation = ah.getBinary (ATTESTATION_ATTR);
+        attestation = ah.getBinary (CLOSE_ATTESTATION_ATTR);
 
         rd.getChild ();
       }

@@ -385,14 +385,14 @@ public class ServerState implements Serializable
             this.retry_limit = retry_limit;
           }
 
-        void writePolicy (DOMWriterHelper wr) throws IOException, GeneralSecurityException
+        void writePolicy (DOMWriterHelper wr) throws IOException
           {
-            wr.addChildElement (PUK_POLICY_ELEM);
+            wr.addChildElement (PUK_POLICY_SPECIFIER_ELEM);
 
             wr.setStringAttribute (ID_ATTR, id);
             wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
             wr.setStringAttribute (FORMAT_ATTR, format.getXMLName ());
-            wr.setBinaryAttribute (VALUE_ATTR, encrypted_value);
+            wr.setBinaryAttribute (ENCRYPTED_PUK_ATTR, encrypted_value);
 
             MacGenerator puk_policy_mac = new MacGenerator ();
             puk_policy_mac.addString (id);
@@ -477,9 +477,9 @@ public class ServerState implements Serializable
             this.id = pin_prefix + ++next_pin_id_suffix;
           }
 
-        void writePolicy (DOMWriterHelper wr) throws IOException, GeneralSecurityException
+        void writePolicy (DOMWriterHelper wr) throws IOException
           {
-            wr.addChildElement (PIN_POLICY_ELEM);
+            wr.addChildElement (PIN_POLICY_SPECIFIER_ELEM);
             wr.setStringAttribute (ID_ATTR, id);
             wr.setIntAttribute (MAX_LENGTH_ATTR, max_length);
             wr.setIntAttribute (MIN_LENGTH_ATTR, min_length);
@@ -933,7 +933,7 @@ public class ServerState implements Serializable
                 key_pair_mac.addString (algorithm);
               }
 
-            wr.addChildElement (KEY_ENTRY_ELEM);
+            wr.addChildElement (KEY_ENTRY_SPECIFIER_ELEM);
 
             wr.setStringAttribute (ID_ATTR, id);
 
@@ -949,7 +949,7 @@ public class ServerState implements Serializable
 
             if (preset_pin != null)
               {
-                wr.setBinaryAttribute (PIN_VALUE_ATTR, preset_pin);
+                wr.setBinaryAttribute (ENCRYPTED_PRESET_PIN_ATTR, preset_pin);
               }
 
             if (enable_pin_caching_set)
@@ -1118,7 +1118,7 @@ public class ServerState implements Serializable
         return  new byte[]{(byte)(q >>> 8), (byte)(q &0xFF)};
       }
 
-    byte[] mac (byte[] data, byte[] method) throws IOException, GeneralSecurityException
+    byte[] mac (byte[] data, byte[] method) throws IOException
       {
         return server_crypto_interface.mac (data, ArrayUtil.add (method, getMACSequenceCounterAndUpdate ()));
       }

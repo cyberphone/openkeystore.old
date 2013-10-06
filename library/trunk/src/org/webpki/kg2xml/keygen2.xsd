@@ -41,7 +41,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 20-Aug-2013 
+    Revised: 02-Oct-2013 
     Author: Anders Rundgren
 
     Copyright 2006-2013 WebPKI.org (http://webpki.org).
@@ -145,7 +145,7 @@
       <xs:complexType>
          <xs:sequence>
 
-            <!-- Optional hints for the "IssuedKey/Logotype" extension -->
+            <!-- Optional hints for the "IssuedCredential/Logotype" extension -->
             <xs:element name="ImagePreference" type="kg2:imageData" minOccurs="0" maxOccurs="unbounded"/>
 
          </xs:sequence>
@@ -215,7 +215,7 @@
 
                      </xs:choice>
 
-                     <xs:element ref="kg2:UpdateKeyManagementKey" minOccurs="0"/>
+                     <xs:element ref="kg2:UpdatableKeyManagementKey" minOccurs="0"/>
 
                   </xs:sequence>
                </xs:complexType>
@@ -223,7 +223,7 @@
 
             <!-- Virtual Machine support is optional and MUST be verified
                  before requested by enquiring the basic capability extension
-                 "http://xmlns.webpki.org/keygen2/1.0#feature.vm" +
+                 "http://xmlns.webpki.org/keygen2#feature.vm" +
                  one or more specific Virtual Machines types.
                  Virtual Machine support MUST feature signed
                  "ProvisioningInitializationRequest" and
@@ -255,10 +255,10 @@
 
          </xs:sequence> 
 
-         <!-- "Algorithm" specifies the algorithm to use for creating an
+         <!-- "SessionKeyAlgorithm" specifies the algorithm to use for creating an
               SKS "SessionKey".  Currently the only documented algorithm URI is:
               "http://xmlns.webpki.org/sks/algorithm#session.1" -->
-         <xs:attribute name="Algorithm" type="xs:anyURI" use="required"/>
+         <xs:attribute name="SessionKeyAlgorithm" type="xs:anyURI" use="required"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
@@ -293,7 +293,7 @@
          <!-- "ClientAttributes" specifies additional client-attributes that may
               be needed for granting a certificate or be used for inclusion in
               issued certificates. Currently the only documented parameters have
-              the format: "http://xmlns.webpki.org/keygen2/1.0#clientattribute.*".
+              the format: "http://xmlns.webpki.org/keygen2#clientattribute.*".
               This request MUST NOT be emitted in the "PrivacyEnabled" mode.
 
               If the server asks for an unknown attribute, the client SHOULD
@@ -346,10 +346,10 @@
                </xs:complexType>
             </xs:element>
 
-            <!-- "DeviceCertificatePath" holds the SKS device certificate path.
+            <!-- "DeviceCertificate" holds the SKS device certificate path.
                  Note: This element MUST be defined when "PrivacyEnabled" is false
                  whereas it MUST NOT be defined when "PrivacyEnabled" is true  -->
-            <xs:element name="DeviceCertificatePath" minOccurs="0">
+            <xs:element name="DeviceCertificate" minOccurs="0">
                <xs:complexType>
                   <xs:sequence>
 
@@ -390,9 +390,9 @@
          <!-- The provisioning client's local clock is a mandatory item -->
          <xs:attribute name="ClientTime" type="xs:dateTime" use="required"/>
 
-         <!-- The "Attestation" attribute holds the output from
+         <!-- The "SessionAttestation" attribute holds the output from
               the SKS "createProvisioningSession" method -->
-         <xs:attribute name="Attestation" type="xs:base64Binary" use="required"/>
+         <xs:attribute name="SessionAttestation" type="xs:base64Binary" use="required"/>
 
          <!-- The "ServerCertificateFingerprint" attribute MUST be populated with
               the SHA256 hash of the associated server certificate if the
@@ -515,16 +515,16 @@
             <xs:choice maxOccurs="unbounded">
 
                <!-- A key that requires no PIN code -->
-               <xs:element ref="kg2:KeyEntry"/>
+               <xs:element ref="kg2:KeyEntrySpecifier"/>
 
                <!-- One or more keys that are protected by a specific PIN policy.
                     In addition to the PIN there is a master PUK code that can
                     unlock keys that have been locked due to the use of erroneous
                     PIN codes -->
-               <xs:element ref="kg2:PUKPolicy"/>
+               <xs:element ref="kg2:PUKPolicySpecifier"/>
 
                <!-- One or more keys that are protected by a specific PIN policy -->
-               <xs:element ref="kg2:PINPolicy"/>
+               <xs:element ref="kg2:PINPolicySpecifier"/>
 
             </xs:choice>
 
@@ -555,10 +555,10 @@
               as well -->
          <xs:attribute name="SubmitURL" type="kg2:httpURI" use="required"/>
 
-         <!-- "Algorithm" is mandatory.  Currently the only
+         <!-- "KeyEntryAlgorithm" is mandatory.  Currently the only
                documented key generation and attestation algorithm is:
               "http://xmlns.webpki.org/sks/algorithm#key.1" -->
-         <xs:attribute name="Algorithm" type="xs:anyURI" use="required"/>
+         <xs:attribute name="KeyEntryAlgorithm" type="xs:anyURI" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -577,7 +577,7 @@
          <xs:sequence>
 
             <!-- The keys to be certified -->
-            <xs:element ref="kg2:PublicKey" maxOccurs="unbounded"/>
+            <xs:element ref="kg2:GeneratedKey" maxOccurs="unbounded"/>
 
          </xs:sequence>
 
@@ -606,7 +606,7 @@
          <xs:sequence>
 
             <!-- The now certified keys.  Note: optional -->
-            <xs:element ref="kg2:IssuedKey" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="kg2:IssuedCredential" minOccurs="0" maxOccurs="unbounded"/>
 
             <!-- SKS Reference: postUnlockKey -->
             <xs:element name="UnlockKey" type="kg2:targetKey" minOccurs="0" maxOccurs="unbounded"/>
@@ -634,7 +634,7 @@
          <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
 
          <!-- SKS Reference: closeProvisioningSession -->
-         <xs:attribute name="Nonce" type="xs:base64Binary" use="required"/>
+         <xs:attribute name="Challenge" type="xs:base64Binary" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -660,7 +660,7 @@
          <xs:attribute name="ServerSessionID" type="kg2:sksID" use="required"/>
 
          <!-- SKS Reference: closeProvisioningSession -->
-         <xs:attribute name="Attestation" type="xs:base64Binary" use="required"/>
+         <xs:attribute name="CloseAttestation" type="xs:base64Binary" use="required"/>
 
       </xs:complexType>
    </xs:element>
@@ -687,7 +687,7 @@
 
       <!-- Arbitrary extension objects MAY be requested.  Although most
            clients are likely to for example support HOTP
-           ("http://xmlns.webpki.org/keygen2/1.0#provider.ietf-hotp"),
+           ("http://xmlns.webpki.org/keygen2#provider.ietf-hotp"),
            application support is outside of the core SKS specification
            and SHOULD be requested rather than taken for granted.
            A provisioning client MAY dynamically check for application
@@ -700,7 +700,7 @@
      Base-object for representing a certified public key, path, and optional attributes
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <xs:element name="IssuedKey">
+    <xs:element name="IssuedCredential">
       <xs:complexType>
          <xs:sequence>
 
@@ -766,10 +766,10 @@
                     Logotypes MAY be ignored by the client software.  Currently
                     KeyGen2 supports the following predefined type URIs:
 
-                    - "http://xmlns.webpki.org/keygen2/1.0#logotype.icon" 
-                    - "http://xmlns.webpki.org/keygen2/1.0#logotype.card" 
-                    - "http://xmlns.webpki.org/keygen2/1.0#logotype.list" 
-                    - "http://xmlns.webpki.org/keygen2/1.0#logotype.application"
+                    - "http://xmlns.webpki.org/keygen2#logotype.icon" 
+                    - "http://xmlns.webpki.org/keygen2#logotype.card" 
+                    - "http://xmlns.webpki.org/keygen2#logotype.list" 
+                    - "http://xmlns.webpki.org/keygen2#logotype.application"
 
                     "Icon" is intended to be useful in a selection window
                     where multiple credentials are featured as a map of
@@ -846,7 +846,7 @@
 
          <!-- SKS Reference: setCertificatePath.ID 
               A unique key-ID which MUST match the corresponding
-              "KeyCreationResponse/PublicKey/@ID" -->
+              "KeyCreationResponse/GeneratedKey/@ID" -->
          <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
          <!-- SKS Reference: setCertificatePath.MAC -->
@@ -924,7 +924,7 @@
                     Object holding a KeyManagementKey upgrade object
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:element name="UpdateKeyManagementKey">
+   <xs:element name="UpdatableKeyManagementKey">
       <xs:complexType>
          <xs:sequence>
 
@@ -937,7 +937,7 @@
 
             </xs:choice>
 
-         <xs:element ref="kg2:UpdateKeyManagementKey" minOccurs="0"/>
+         <xs:element ref="kg2:UpdatableKeyManagementKey" minOccurs="0"/>
 
          </xs:sequence>
 
@@ -951,7 +951,7 @@
                     Base-object for representing a created public key
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:element name="PublicKey">
+   <xs:element name="GeneratedKey">
       <xs:complexType>
          <xs:sequence>
 
@@ -966,10 +966,10 @@
 
          </xs:sequence>
 
-         <!-- SKS Reference: createKeyEntry.Attestation -->
-         <xs:attribute name="Attestation" type="xs:base64Binary" use="required"/>
+         <!-- SKS Reference: createKeyEntry.KeyAttestation -->
+         <xs:attribute name="KeyAttestation" type="xs:base64Binary" use="required"/>
 
-         <!-- A unique key-ID which MUST match a "KeyEntry/@ID"
+         <!-- A unique key-ID which MUST match a "KeyEntrySpecifier/@ID"
               in the corresponding "KeyCreationRequest" -->
          <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
@@ -980,14 +980,14 @@
         Base-object for requesting the creation of a key entry and associated key pair
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:element name="KeyEntry">
+   <xs:element name="KeyEntrySpecifier">
       <xs:complexType>
 
          <!-- SKS Reference: createKeyEntry.ID -->
          <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
-         <!-- SKS Reference: createKeyEntry.Algorithm 
-              is taken from the request header "Algorithm" -->
+         <!-- SKS Reference: createKeyEntry.KeyEntryAlgorithm 
+              is taken from the request header "KeyEntryAlgorithm" -->
 
          <!-- SKS Reference: createKeyEntry.ServerSeed 
               Default: 0 bytes -->
@@ -1004,19 +1004,19 @@
               This option (which MAY be supported by the device), is
               mainly intended for keys belonging to an organization
               that manages the device.  MUST NOT be combined with
-              "PINPolicy" or "PINValue" -->
+              "PINPolicySpecifier" or "EncryptedPresetPIN" -->
          <xs:attribute name="DevicePINProtection" type="xs:boolean" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.PINPolicyHandle 
               is indirectly taken from the optional embedding element
-              "PINPolicy" -->
+              "PINPolicySpecifier" -->
 
          <!-- SKS Reference: createKeyEntry.PINValue
-              Note: this attribute MUST NOT be defined if there is no
-              embedding PINPolicy.  If PINValue is not defined and there is
-              an embedding PINPolicy the PIN to they key is considered as
-              user-defined (createPINPolicy.UserDefined) -->
-         <xs:attribute name="PINValue" type="xs:base64Binary" use="optional"/>
+              Note: this attribute MUST NOT be defined if there is no embedding
+              PINPolicySpecifier.  If EncryptedPresetPIN is not defined and there is
+              an embedding PINPolicySpecifier the PIN to they key is considered
+              as user-defined (createPINPolicy.UserDefined) -->
+         <xs:attribute name="EncryptedPresetPIN" type="xs:base64Binary" use="optional"/>
 
          <!-- SKS Reference: createKeyEntry.EnablePINCaching 
               Default: false -->
@@ -1072,20 +1072,20 @@
       a common master PUK code
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:element name="PUKPolicy">
+   <xs:element name="PUKPolicySpecifier">
       <xs:complexType>
          <xs:sequence>
 
             <!-- The PIN-protected key groups -->
-            <xs:element ref="kg2:PINPolicy" maxOccurs="unbounded"/>
+            <xs:element ref="kg2:PINPolicySpecifier" maxOccurs="unbounded"/>
 
          </xs:sequence>
 
          <!-- SKS Reference: createPUKPolicy.ID -->
          <xs:attribute name="ID" type="kg2:sksID" use="required"/>
 
-         <!-- SKS Reference: createPUKPolicy.PUKValue -->
-         <xs:attribute name="Value" type="xs:base64Binary" use="required"/>
+         <!-- SKS Reference: createPUKPolicy.EncryptedPUK -->
+         <xs:attribute name="EncryptedPUK" type="xs:base64Binary" use="required"/>
 
          <!-- SKS Reference: createPUKPolicy.Format -->
          <xs:attribute name="Format" type="kg2:pinFormats" use="required"/>
@@ -1103,13 +1103,13 @@
       Request sub-object for creating a set of keys associated with a user PIN policy
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:element name="PINPolicy">
+   <xs:element name="PINPolicySpecifier">
       <xs:complexType>
          <xs:sequence>
 
             <!-- One or more keys protected by user-defined PINs governed by
                  a common PIN policy -->
-            <xs:element ref="kg2:KeyEntry" maxOccurs="unbounded"/>
+            <xs:element ref="kg2:KeyEntrySpecifier" maxOccurs="unbounded"/>
 
          </xs:sequence>
 
@@ -1119,11 +1119,11 @@
          <!-- SKS Reference: createPINPolicy.PUKPolicyHandle 
               "PUKPolicyHandle" is an implicit and implementation-dependent
               PUK reference object which is defined by the presence of an
-              enclosing "PUKPolicy" object -->
+              enclosing "PUKPolicySpecifier" object -->
 
          <!-- SKS Reference: createPINPolicy.UserDefined 
-              "UserDefined" is an implicit variable which is true unless
-              there is a "PINValue" attribute in the "KeyEntry" object -->
+              "UserDefined" is an implicit variable which is true unless there
+              is a "EncryptedPresetPIN" attribute in the "KeyEntrySpecifier" object -->
 
          <!-- SKS Reference: createPINPolicy.UserModifiable 
               Default: true -->

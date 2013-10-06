@@ -76,7 +76,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
 
     private XMLSignatureWrapper signature;  // Optional
 
-    String algorithm;
+    String session_key_algorithm;
     
     public String getServerSessionID ()
       {
@@ -104,7 +104,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
     
     public String getSessionKeyAlgorithm ()
       {
-        return algorithm;
+        return session_key_algorithm;
       }
 
 
@@ -154,7 +154,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
 
     private void scanForUpdateKeys (DOMReaderHelper rd, KeyManagementKeyUpdateHolder kmk) throws IOException
       {
-        while (rd.hasNext (UPDATE_KEY_MANAGEMENT_KEY_ELEM))
+        while (rd.hasNext (UPDATABLE_KEY_MANAGEMENT_KEY_ELEM))
           {
             rd.getNext ();
             byte[] authorization = rd.getAttributeHelper ().getBinary (AUTHORIZATION_ATTR);
@@ -182,7 +182,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
 
         submit_url = ah.getString (SUBMIT_URL_ATTR);
         
-        algorithm = ah.getString (XMLSignatureWrapper.ALGORITHM_ATTR);
+        session_key_algorithm = ah.getString (SESSION_KEY_ALGORITHM_ATTR);
         
         session_key_limit = (short)ah.getInt (SESSION_KEY_LIMIT_ATTR);
         

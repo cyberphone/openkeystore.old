@@ -105,9 +105,9 @@ public class KeyCreationResponseEncoder extends KeyCreationResponse
       
         for (GeneratedPublicKey gk : generated_keys)
           {
-            wr.addChildElement (PUBLIC_KEY_ELEM);
+            wr.addChildElement (GENERATED_KEY_ELEM);
             wr.setStringAttribute (ID_ATTR, gk.id);
-            wr.setBinaryAttribute (ATTESTATION_ATTR, gk.key_attestation);
+            wr.setBinaryAttribute (KEY_ATTESTATION_ATTR, gk.key_attestation);
             XMLSignatureWrapper.writePublicKey (wr, gk.public_key);
             wr.getParent ();
           }

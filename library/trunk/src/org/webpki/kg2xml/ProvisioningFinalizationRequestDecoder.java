@@ -305,7 +305,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         IssuedKey (DOMReaderHelper rd) throws IOException
           {
             DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
-            rd.getNext (ISSUED_KEY_ELEM);
+            rd.getNext (ISSUED_CREDENTIAL_ELEM);
             id = ah.getString (ID_ATTR);
             mac = ah.getBinary (MAC_ATTR);
             trust_anchor = ah.getBooleanConditional (TRUST_ANCHOR_ATTR);
@@ -540,14 +540,14 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         
         close_session_mac = ah.getBinary (MAC_ATTR);
         
-        close_session_nonce = ah.getBinary (NONCE_ATTR);
+        close_session_nonce = ah.getBinary (CHALLENGE_ATTR);
 
         rd.getChild ();
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the issued_keys [0..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        while (rd.hasNext (ISSUED_KEY_ELEM))
+        while (rd.hasNext (ISSUED_CREDENTIAL_ELEM))
           {
             issued_keys.add (new IssuedKey (rd));
           }

@@ -33,8 +33,6 @@ public interface KeyGen2Constants
 
     String APP_USAGE_ATTR                            = "AppUsage";
 
-    String ATTESTATION_ATTR                          = "Attestation";
-
     String AUTHORIZATION_ATTR                        = "Authorization";
 
     String BIOMETRIC_PROTECTION_ATTR                 = "BiometricProtection";
@@ -51,9 +49,9 @@ public interface KeyGen2Constants
 
     String EMAIL_ATTR                                = "Email";
 
-    String ENDORSED_ALGORITHMS_ATTR                  = "EndorsedAlgorithms";
-
     String ENABLE_PIN_CACHING_ATTR                   = "EnablePINCaching";
+
+    String ENDORSED_ALGORITHMS_ATTR                  = "EndorsedAlgorithms";
 
     String ERROR_URL_ATTR                            = "ErrorURL";
 
@@ -65,7 +63,11 @@ public interface KeyGen2Constants
 
     String EXTENSIONS_ATTR                           = "Extensions";
 
+    String CHALLENGE_ATTR                            = "Challenge";
+
     String CLIENT_ATTRIBUTES_ATTR                    = "ClientAttributes";
+
+    String CLOSE_ATTESTATION_ATTR                    = "CloseAttestation";
 
     String DEVICE_PIN_PROTECTION_ATTR                = "DevicePINProtection";
 
@@ -88,6 +90,10 @@ public interface KeyGen2Constants
     String ISSUED_AFTER_ATTR                         = "IssuedAfter";
 
     String KEY_ALGORITHM_ATTR                        = "KeyAlgorithm";
+
+    String KEY_ATTESTATION_ATTR                      = "KeyAttestation";
+
+    String KEY_ENTRY_ALGORITHM_ATTR                  = "KeyEntryAlgorithm";
 
     String KEY_PARAMETERS_ATTR                       = "KeyParameters";
 
@@ -113,7 +119,7 @@ public interface KeyGen2Constants
 
     String PATTERN_RESTRICTIONS_ATTR                 = "PatternRestrictions";
 
-    String PIN_VALUE_ATTR                            = "PINValue";
+    String ENCRYPTED_PRESET_PIN_ATTR                 = "EncryptedPresetPIN";
     
     String PRIVACY_ENABLED_ATTR                      = "PrivacyEnabled";
 
@@ -130,6 +136,10 @@ public interface KeyGen2Constants
     String SERVER_SESSION_ID_ATTR                    = "ServerSessionID";
 
     String SERVER_TIME_ATTR                          = "ServerTime";
+
+    String SESSION_ATTESTATION_ATTR                  = "SessionAttestation";
+
+    String SESSION_KEY_ALGORITHM_ATTR                = "SessionKeyAlgorithm";
 
     String SESSION_KEY_LIMIT_ATTR                    = "SessionKeyLimit";
 
@@ -172,21 +182,25 @@ public interface KeyGen2Constants
     
     String DELETE_KEY_ELEM                           = "DeleteKey";
     
-    String DEVICE_CERTIFICATE_PATH_ELEM              = "DeviceCertificatePath";
+    String DEVICE_CERTIFICATE_ELEM                   = "DeviceCertificate";
 
     String EXTENSION_ELEM                            = "Extension";
 
     String ENCRYPTED_EXTENSION_ELEM                  = "EncryptedExtension";
 
+    String ENCRYPTED_PUK_ATTR                        = "EncryptedPUK";
+    
+    String GENERATED_KEY_ELEM                        = "GeneratedKey";
+
     String IMAGE_PREFERENCE_ELEM                     = "ImagePreference";
 
-    String ISSUED_KEY_ELEM                           = "IssuedKey";
+    String ISSUED_CREDENTIAL_ELEM                    = "IssuedCredential";
 
     String KEY_CREATION_REQUEST_ELEM                 = "KeyCreationRequest";
     
     String KEY_CREATION_RESPONSE_ELEM                = "KeyCreationResponse";
 
-    String KEY_ENTRY_ELEM                            = "KeyEntry";       
+    String KEY_ENTRY_SPECIFIER_ELEM                  = "KeyEntrySpecifier";       
 
     String KEY_MANAGEMENT_KEY_ELEM                   = "KeyManagementKey";
 
@@ -198,7 +212,7 @@ public interface KeyGen2Constants
 
     String LOOKUP_SPECIFIER_ELEM                     = "LookupSpecifier";
 
-    String PIN_POLICY_ELEM                           = "PINPolicy";       
+    String PIN_POLICY_SPECIFIER_ELEM                 = "PINPolicySpecifier";       
 
     String PLATFORM_NEGOTIATION_REQUEST_ELEM         = "PlatformNegotiationRequest";
     
@@ -218,9 +232,7 @@ public interface KeyGen2Constants
     
     String PROVISIONING_FINALIZATION_RESPONSE_ELEM   = "ProvisioningFinalizationResponse";
 
-    String PUBLIC_KEY_ELEM                           = "PublicKey";
-
-    String PUK_POLICY_ELEM                           = "PUKPolicy";       
+    String PUK_POLICY_SPECIFIER_ELEM                 = "PUKPolicySpecifier";       
 
     String SERVER_EPHEMERAL_KEY_ELEM                 = "ServerEphemeralKey";
 
@@ -230,7 +242,7 @@ public interface KeyGen2Constants
 
     String UNLOCK_KEY_ELEM                           = "UnlockKey";
 
-    String UPDATE_KEY_MANAGEMENT_KEY_ELEM            = "UpdateKeyManagementKey";
+    String UPDATABLE_KEY_MANAGEMENT_KEY_ELEM         = "UpdatableKeyManagementKey";
 
     String UPDATE_KEY_ELEM                           = "UpdateKey";
 

@@ -62,6 +62,6 @@ public class ProvisioningFinalizationResponseEncoder extends ProvisioningFinaliz
 
         wr.setStringAttribute (SERVER_SESSION_ID_ATTR, server_session_id);
 
-        wr.setBinaryAttribute (ATTESTATION_ATTR, attestation);
+        wr.setBinaryAttribute (CLOSE_ATTESTATION_ATTR, attestation);
       }
   }

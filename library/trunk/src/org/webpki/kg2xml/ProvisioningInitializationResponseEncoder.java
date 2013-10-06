@@ -118,7 +118,7 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
 
         wr.setDateTimeAttribute (CLIENT_TIME_ATTR, client_time);
         
-        wr.setBinaryAttribute (ATTESTATION_ATTR, attestation);
+        wr.setBinaryAttribute (SESSION_ATTESTATION_ATTR, attestation);
         
         if (server_certificate_fingerprint != null)
           {
@@ -137,7 +137,7 @@ public class ProvisioningInitializationResponseEncoder extends ProvisioningIniti
         ////////////////////////////////////////////////////////////////////////
         if (device_certificate_path != null)
           {
-            wr.addChildElement (DEVICE_CERTIFICATE_PATH_ELEM);
+            wr.addChildElement (DEVICE_CERTIFICATE_ELEM);
             XMLSignatureWrapper.writeX509DataSubset (wr, device_certificate_path);
             wr.getParent();
           }

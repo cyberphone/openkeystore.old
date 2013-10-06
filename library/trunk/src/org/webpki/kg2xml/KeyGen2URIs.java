@@ -20,30 +20,30 @@ public interface KeyGen2URIs
   {
     public interface LOGOTYPES
       {
-        String ICON                        = "http://xmlns.webpki.org/keygen2/1.0#logotype.icon";
+        String ICON                        = "http://xmlns.webpki.org/keygen2#logotype.icon";
 
-        String CARD                        = "http://xmlns.webpki.org/keygen2/1.0#logotype.card";
+        String CARD                        = "http://xmlns.webpki.org/keygen2#logotype.card";
 
-        String LIST                        = "http://xmlns.webpki.org/keygen2/1.0#logotype.list";
+        String LIST                        = "http://xmlns.webpki.org/keygen2#logotype.list";
 
-        String APPLICATION                 = "http://xmlns.webpki.org/keygen2/1.0#logotype.application";
+        String APPLICATION                 = "http://xmlns.webpki.org/keygen2#logotype.application";
       }
 
     public interface CLIENT_ATTRIBUTES
       {
-        String IMEI_NUMBER                 = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.imei-number";
+        String IMEI_NUMBER                 = "http://xmlns.webpki.org/keygen2#clientattribute.imei-number";
   
-        String MAC_ADDRESS                 = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.mac-address";
+        String MAC_ADDRESS                 = "http://xmlns.webpki.org/keygen2#clientattribute.mac-address";
   
-        String IP_ADDRESS                  = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.ip-address";
+        String IP_ADDRESS                  = "http://xmlns.webpki.org/keygen2#clientattribute.ip-address";
 
-        String OS_VENDOR                   = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.os-vendor";
+        String OS_VENDOR                   = "http://xmlns.webpki.org/keygen2#clientattribute.os-vendor";
 
-        String OS_VERSION                  = "http://xmlns.webpki.org/keygen2/1.0#clientattribute.os-version";
+        String OS_VERSION                  = "http://xmlns.webpki.org/keygen2#clientattribute.os-version";
       }
 
     public interface FEATURE
       {
-        String VIRTUAL_MACHINE             = "http://xmlns.webpki.org/keygen2/1.0#feature.vm";
+        String VIRTUAL_MACHINE             = "http://xmlns.webpki.org/keygen2#feature.vm";
       }
   }

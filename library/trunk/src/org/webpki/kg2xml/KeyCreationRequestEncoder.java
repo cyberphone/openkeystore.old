@@ -54,7 +54,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
     Vector<String> written_puk = new Vector<String> ();
 
-    private String algorithm = SecureKeyStore.ALGORITHM_KEY_ATTEST_1;
+    private String key_entry_algorithm = SecureKeyStore.ALGORITHM_KEY_ATTEST_1;
 
 
     // Constructors
@@ -82,7 +82,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
     public void setKeyAttestationAlgorithm (String key_attestation_algorithm_uri)
       {
-        this.algorithm = key_attestation_algorithm_uri;
+        this.key_entry_algorithm = key_attestation_algorithm_uri;
       }
 
 
@@ -126,7 +126,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
 
         wr.setStringAttribute (SUBMIT_URL_ATTR, submit_url);
 
-        wr.setStringAttribute (XMLSignatureWrapper.ALGORITHM_ATTR, algorithm);
+        wr.setStringAttribute (KEY_ENTRY_ALGORITHM_ATTR, key_entry_algorithm);
 
         if (deferred_certification)
           {
@@ -140,7 +140,7 @@ public class KeyCreationRequestEncoder extends KeyCreationRequest
           {
             bad ("Empty request not allowd!");
           }
-        server_state.key_attestation_algorithm = algorithm;
+        server_state.key_attestation_algorithm = key_entry_algorithm;
         ServerState.Key last_req_key = null;
         try
           {

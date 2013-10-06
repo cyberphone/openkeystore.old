@@ -67,9 +67,9 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
         do
           {
             GeneratedPublicKey gk = new GeneratedPublicKey ();
-            rd.getNext (PUBLIC_KEY_ELEM);
+            rd.getNext (GENERATED_KEY_ELEM);
             gk.id = ah.getString (ID_ATTR);
-            gk.attestation = ah.getBinary (ATTESTATION_ATTR);
+            gk.attestation = ah.getBinary (KEY_ATTESTATION_ATTR);
             rd.getChild ();
             gk.public_key = XMLSignatureWrapper.readPublicKey (rd);
             rd.getParent ();
@@ -78,6 +78,6 @@ public class KeyCreationResponseDecoder extends KeyCreationResponse
                 ServerState.bad ("Duplicate key id:" + gk.id);
               }
           }
-        while (rd.hasNext (PUBLIC_KEY_ELEM));
+        while (rd.hasNext (GENERATED_KEY_ELEM));
       }
   }
