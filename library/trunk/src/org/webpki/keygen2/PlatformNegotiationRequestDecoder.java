@@ -19,7 +19,6 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import org.webpki.json.JSONObjectReader;
-import org.webpki.kg2xml.Action;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
