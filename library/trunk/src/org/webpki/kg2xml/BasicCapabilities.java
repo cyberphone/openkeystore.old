@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xml.DOMWriterHelper;
 
+import static org.webpki.keygen2.KeyGen2Constants.BASIC_CAP_ALGORITHM;
 import static org.webpki.kg2xml.KeyGen2Constants.*;
 
 public class BasicCapabilities implements Serializable
@@ -71,9 +72,9 @@ public class BasicCapabilities implements Serializable
       }
 
 
-    private static void conditionalInput (DOMAttributeReaderHelper ah, LinkedHashSet<String> args, String tag) throws IOException
+    private static void conditionalInput (DOMAttributeReaderHelper ah, LinkedHashSet<String> args, String tag, boolean query) throws IOException
       {
-        String[] opt_uri_list = ah.getListConditional (tag);
+        String[] opt_uri_list = ah.getListConditional (tagName (tag, query));
         if (opt_uri_list != null)
           {
             for (String uri : opt_uri_list)
@@ -83,28 +84,28 @@ public class BasicCapabilities implements Serializable
           }
       }
 
-    static void read (DOMAttributeReaderHelper ah, BasicCapabilities basic_capabilities) throws IOException
+    static void read (DOMAttributeReaderHelper ah, BasicCapabilities basic_capabilities, boolean query) throws IOException
       {
-        conditionalInput (ah, basic_capabilities.algorithms, ALGORITHMS_ATTR);
-        conditionalInput (ah, basic_capabilities.client_attributes, CLIENT_ATTRIBUTES_ATTR);
-        conditionalInput (ah, basic_capabilities.extensions, EXTENSIONS_ATTR);
+        conditionalInput (ah, basic_capabilities.algorithms, BASIC_CAP_ALGORITHM, query);
+        conditionalInput (ah, basic_capabilities.client_attributes, BASIC_CAP_CLIENT_ATTRI, query);
+        conditionalInput (ah, basic_capabilities.extensions, BASIC_CAP_EXTENSION, query);
       }
 
 
-    private static void conditionalOutput (DOMWriterHelper wr, LinkedHashSet<String> arg_set, String tag)
+    private static void conditionalOutput (DOMWriterHelper wr, LinkedHashSet<String> arg_set, String tag, boolean query)
       {
         if (!arg_set.isEmpty ())
           {
-            wr.setListAttribute (tag, arg_set.toArray (new String[0]));
+            wr.setListAttribute (tagName (tag, query), arg_set.toArray (new String[0]));
           }
       }
 
 
-    static void write (DOMWriterHelper wr, BasicCapabilities basic_capabilities) throws IOException
+    static void write (DOMWriterHelper wr, BasicCapabilities basic_capabilities, boolean query) throws IOException
       {
-        conditionalOutput (wr,  basic_capabilities.algorithms, ALGORITHMS_ATTR);
-        conditionalOutput (wr,  basic_capabilities.client_attributes, CLIENT_ATTRIBUTES_ATTR);
-        conditionalOutput (wr,  basic_capabilities.extensions, EXTENSIONS_ATTR);
+        conditionalOutput (wr,  basic_capabilities.algorithms, BASIC_CAP_ALGORITHM, query);
+        conditionalOutput (wr,  basic_capabilities.client_attributes, BASIC_CAP_CLIENT_ATTRI, query);
+        conditionalOutput (wr,  basic_capabilities.extensions, BASIC_CAP_EXTENSION, query);
       }
 
     
@@ -155,6 +156,14 @@ public class BasicCapabilities implements Serializable
         return extensions.toArray (new String[0]);
       }
 
+
+    static String tagName (String tag, boolean query)
+      {
+        return query ? 
+            BASIC_CAP_PRE_QUERY + tag + BASIC_CAP_POST_QUERY
+                     :
+            BASIC_CAP_PRE_RESPONSE + tag + BASIC_CAP_POST_RESPONSE;
+      }
 
     public void checkCapabilities (BasicCapabilities actual_capabilities) throws IOException
       {

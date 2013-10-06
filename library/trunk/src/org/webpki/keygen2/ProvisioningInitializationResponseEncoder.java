@@ -161,7 +161,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
         ////////////////////////////////////////////////////////////////////////
         if (!client_attribute_values.isEmpty ())
           {
-            JSONArrayWriter types = wr.setArray (RETURNED_CLIENT_ATTRIBUTES_JSON);
+            JSONArrayWriter types = wr.setArray (CLIENT_ATTRIBUTES_JSON);
             for (String type : client_attribute_values.keySet ())
               {
                 JSONObjectWriter entry = types.setObject ();

@@ -101,7 +101,7 @@ public class PlatformNegotiationRequestDecoder extends PlatformNegotiationReques
 
         privacy_enabled = ah.getBooleanConditional (PRIVACY_ENABLED_ATTR);
 
-        BasicCapabilities.read (ah, basic_capabilities);
+        BasicCapabilities.read (ah, basic_capabilities, true);
 
         //////////////////////////////////////////////////////////////////////////
         // Get the child elements

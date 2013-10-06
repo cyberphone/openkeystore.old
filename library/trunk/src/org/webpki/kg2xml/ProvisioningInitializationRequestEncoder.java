@@ -219,7 +219,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
         
         if (!client_attributes.isEmpty ())
           {
-            wr.setListAttribute (CLIENT_ATTRIBUTES_ATTR, client_attributes.toArray (new String[0]));
+            wr.setListAttribute (REQUESTED_CLIENT_ATTRIBUTES_ATTR, client_attributes.toArray (new String[0]));
           }
         
         ////////////////////////////////////////////////////////////////////////

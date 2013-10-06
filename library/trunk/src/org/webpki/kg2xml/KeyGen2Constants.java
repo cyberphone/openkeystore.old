@@ -23,6 +23,14 @@ public interface KeyGen2Constants
     String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
 
 
+    String BASIC_CAP_ALGORITHM                       = "Algorithm";
+    String BASIC_CAP_CLIENT_ATTRI                    = "ClientAttribute";
+    String BASIC_CAP_EXTENSION                       = "Extension";
+    String BASIC_CAP_PRE_QUERY                       = "";
+    String BASIC_CAP_POST_QUERY                      = "SupportQuery";
+    String BASIC_CAP_PRE_RESPONSE                    = "Supported";
+    String BASIC_CAP_POST_RESPONSE                   = "s";
+
     // XML attributes
 
     String ABORT_URL_ATTR                            = "AbortURL";
@@ -126,6 +134,8 @@ public interface KeyGen2Constants
     String POLICY_ATTR                               = "Policy";
 
     String RETRY_LIMIT_ATTR                          = "RetryLimit";
+
+    String REQUESTED_CLIENT_ATTRIBUTES_ATTR          = "RequestedClientAttributes";
 
     String SERIAL_ATTR                               = "Serial";
 

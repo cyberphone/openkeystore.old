@@ -46,6 +46,8 @@ public interface KeyGen2Constants
 
     String CHALLENGE_JSON                            = "Challenge";
 
+    String CLIENT_ATTRIBUTES_JSON                    = "ClientAttributes";
+
     String CLIENT_EPHEMERAL_KEY_JSON                 = "ClientEphemeralKey";
 
     String CLIENT_SESSION_ID_JSON                    = "ClientSessionID";
@@ -193,8 +195,6 @@ public interface KeyGen2Constants
     String GENERATED_KEYS_JSON                       = "GeneratedKeys";
 
     String PUK_POLICY_SPECIFIERS_JSON                = "PUKPolicySpecifiers";       
-
-    String RETURNED_CLIENT_ATTRIBUTES_JSON           = "ReturnedClientAttributes";
 
     String REQUESTED_CLIENT_ATTRIBUTES_JSON          = "RequestedClientAttributes";
 

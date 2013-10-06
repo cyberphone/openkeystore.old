@@ -58,7 +58,7 @@ public class PlatformNegotiationResponseDecoder extends PlatformNegotiationRespo
         
         nonce = ah.getBinaryConditional (NONCE_ATTR);
 
-        BasicCapabilities.read (ah, basic_capabilities);
+        BasicCapabilities.read (ah, basic_capabilities, false);
         
         //////////////////////////////////////////////////////////////////////////
         // Get the child elements

@@ -144,7 +144,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional client attributes
         /////////////////////////////////////////////////////////////////////////////////////////
-        for (JSONObjectReader type_rd : getObjectArrayConditional (rd, RETURNED_CLIENT_ATTRIBUTES_JSON))
+        for (JSONObjectReader type_rd : getObjectArrayConditional (rd, CLIENT_ATTRIBUTES_JSON))
           {
             String type = type_rd.getString (TYPE_JSON);
             HashSet<String> set = new HashSet<String> ();

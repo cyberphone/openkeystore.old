@@ -188,7 +188,7 @@ public class ProvisioningInitializationRequestDecoder extends ProvisioningInitia
         
         session_life_time = ah.getInt (SESSION_LIFE_TIME_ATTR);
         
-        String[] attrs = ah.getListConditional (CLIENT_ATTRIBUTES_ATTR);
+        String[] attrs = ah.getListConditional (REQUESTED_CLIENT_ATTRIBUTES_ATTR);
         if (attrs != null)
           {
             for (String attr : attrs)

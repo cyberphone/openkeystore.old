@@ -113,7 +113,7 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
         ////////////////////////////////////////////////////////////////////////
         // Basic capabilities
         ////////////////////////////////////////////////////////////////////////
-        BasicCapabilities.write (wr, server_state.basic_capabilities);
+        BasicCapabilities.write (wr, server_state.basic_capabilities, true);
 
         if (server_state.privacy_enabled_set)
           {

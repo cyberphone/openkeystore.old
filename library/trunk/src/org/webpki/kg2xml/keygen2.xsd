@@ -97,7 +97,24 @@
               not default or even may be unavailable due to export restrictions.
               An omission performing a proper capability negotiation could in
               fact lead to run-time errors in the client implementation! -->
-         <xs:attributeGroup ref="kg2:basicCapabilities"/>
+
+         <!-- If non-mandatory algorithms are preferred, the following attribute
+              can host a list of such.  If the response does not contain a requested
+              algorithm it means that it is not supported -->
+         <xs:attribute name="AlgorithmSupportQuery" type="kg2:uriList" use="optional"/>
+
+         <!-- Client attribute" are things that are supported by the SKS or the
+              platform the SKS is running in -->
+         <xs:attribute name="ClientAttributeSupportQuery" type="kg2:uriList" use="optional"/>
+
+         <!-- Arbitrary extension objects MAY be requested.  Although most
+              clients are likely to for example support HOTP
+              ("http://xmlns.webpki.org/keygen2#provider.ietf-hotp"),
+              application support is outside of the core SKS specification
+              and SHOULD be requested rather than taken for granted.
+              A provisioning client MAY dynamically check for application
+              availability -->
+         <xs:attribute name="ExtensionSupportQuery" type="kg2:uriList" use="optional"/>
 
          <!-- GUI notification -->
          <xs:attribute name="Action" type="kg2:action" use="required"/>
@@ -161,7 +178,12 @@
               In the case a capability is secret, a client MAY not
               return a capability except for signed requests from a
               known (pre-configured) party -->
-         <xs:attributeGroup ref="kg2:basicCapabilities"/>
+
+         <xs:attribute name="SupportedAlgorithms" type="kg2:uriList" use="optional"/>
+
+         <xs:attribute name="SupportedClientAttributes" type="kg2:uriList" use="optional"/>
+
+         <xs:attribute name="SupportedExtensions" type="kg2:uriList" use="optional"/>
 
          <!-- MUST be equal to "PlatformNegotiationRequest/@ID"
               within a specific session -->
@@ -290,7 +312,7 @@
             </xs:simpleType>
          </xs:attribute>
 
-         <!-- "ClientAttributes" specifies additional client-attributes that may
+         <!-- Client attributes specifies additional client-attributes that may
               be needed for granting a certificate or be used for inclusion in
               issued certificates. Currently the only documented parameters have
               the format: "http://xmlns.webpki.org/keygen2#clientattribute.*".
@@ -299,11 +321,10 @@
               If the server asks for an unknown attribute, the client SHOULD
               continue anyway but (of course) not provide an element in the
               response for the particular attribute.
-              See "ProvisioningInitializationResponse/ClientAttribute".
 
               In case it is not obvious that the client supports an attribute,
-              the server SHOULD specify those in "BasicCapabilities@ClientAttributes" -->
-         <xs:attribute name="ClientAttributes" type="kg2:uriList" use="optional"/>
+              the server SHOULD specify those in "ClientAttributeQuery" -->
+         <xs:attribute name="RequestedClientAttributes" type="kg2:uriList" use="optional"/>
 
          <!-- Where to HTTP POST the provisioning session response.
               Note that applicable session cookies MUST be submitted
@@ -360,10 +381,11 @@
                </xs:complexType>
             </xs:element>
 
-            <!-- "ClientAttribute" holds an optional set of attributes requested by
-                 the server in "ProvisioningInitializationRequest@ClientAttributes".
+            <!-- "ClientAttribute" holds an optional set of attributes
+                 requested by the server in 
+                 "ProvisioningInitializationRequest@RequestedClientAttributes".
                  Multi-valued attribute types MAY be repeated. There MUST NOT be
-                 any "ClientAttribute" elements when "PrivacyEnabled" is true  -->
+                 any client attribute elements when "PrivacyEnabled" is true  -->
             <xs:element name="ClientAttribute" minOccurs="0" maxOccurs="unbounded">
                <xs:complexType>
                   <xs:attribute name="Type" type="xs:anyURI" use="required"/>
@@ -669,32 +691,6 @@
                          End of provisioning finalization object definition
    ===========================================================================================-->
 
-
-   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            Object representing basic algorithm/capability requirements/support
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-   <xs:attributeGroup name="basicCapabilities">
-
-      <!-- If non-mandatory algorithms are preferred, the following attribute
-           can host a list of such.  If the response does not contain a requested
-           algorithm it means that it is not supported -->
-      <xs:attribute name="Algorithms" type="kg2:uriList" use="optional"/>
-
-      <!-- "ClientAttributes" are things that are supported by the SKS or the
-            platform the SKS is running in -->
-      <xs:attribute name="ClientAttributes" type="kg2:uriList" use="optional"/>
-
-      <!-- Arbitrary extension objects MAY be requested.  Although most
-           clients are likely to for example support HOTP
-           ("http://xmlns.webpki.org/keygen2#provider.ietf-hotp"),
-           application support is outside of the core SKS specification
-           and SHOULD be requested rather than taken for granted.
-           A provisioning client MAY dynamically check for application
-           availability -->
-      <xs:attribute name="Extensions" type="kg2:uriList" use="optional"/>
-
-   </xs:attributeGroup>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Base-object for representing a certified public key, path, and optional attributes
