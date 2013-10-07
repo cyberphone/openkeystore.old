@@ -335,16 +335,6 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
                   }
               }
 
-            for (JSONObjectReader property_bag : getObjectArrayConditional (rd, PROPERTY_BAGS_JSON))
-              {
-                new PropertyBag (property_bag, this);
-              }
-
-            for (JSONObjectReader logotype : getObjectArrayConditional (rd, LOGOTYPES_JSON))
-              {
-                new Logotype (logotype, this);
-              }
-
             for (JSONObjectReader extension : getObjectArrayConditional (rd, EXTENSIONS_JSON))
               {
                 new StandardExtension (extension, this);
@@ -353,6 +343,16 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
             for (JSONObjectReader encrypted_extension : getObjectArrayConditional (rd, ENCRYPTED_EXTENSIONS_JSON))
               {
                 new EncryptedExtension (encrypted_extension, this);
+              }
+
+            for (JSONObjectReader property_bag : getObjectArrayConditional (rd, PROPERTY_BAGS_JSON))
+              {
+                new PropertyBag (property_bag, this);
+              }
+
+            for (JSONObjectReader logotype : getObjectArrayConditional (rd, LOGOTYPES_JSON))
+              {
+                new Logotype (logotype, this);
               }
 
             if (rd.hasProperty (CLONE_KEY_PROTECTION_JSON))

@@ -167,10 +167,10 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
         // Optional: property bags, extensions, and logotypes.
         // Note: Order must be followed!
         ////////////////////////////////////////////////////////////////////////
-        writeExtensions (wr, key, ee_cert, SecureKeyStore.SUB_TYPE_PROPERTY_BAG);
-        writeExtensions (wr, key, ee_cert, SecureKeyStore.SUB_TYPE_LOGOTYPE);
         writeExtensions (wr, key, ee_cert, SecureKeyStore.SUB_TYPE_EXTENSION);
         writeExtensions (wr, key, ee_cert, SecureKeyStore.SUB_TYPE_ENCRYPTED_EXTENSION);
+        writeExtensions (wr, key, ee_cert, SecureKeyStore.SUB_TYPE_PROPERTY_BAG);
+        writeExtensions (wr, key, ee_cert, SecureKeyStore.SUB_TYPE_LOGOTYPE);
 
         ////////////////////////////////////////////////////////////////////////
         // Optional: post operation associated with the provisioned key
