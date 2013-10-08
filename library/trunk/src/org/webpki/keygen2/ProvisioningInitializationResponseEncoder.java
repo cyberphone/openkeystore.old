@@ -34,7 +34,6 @@ import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
-import org.webpki.json.JSONSignatureEncoder;
 import org.webpki.json.JSONSymKeySigner;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -144,16 +143,14 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////
-        JSONSignatureEncoder.writePublicKey (wr.setObject (CLIENT_EPHEMERAL_KEY_JSON),
-                                             client_ephemeral_key);
+        wr.setObject (CLIENT_EPHEMERAL_KEY_JSON).setPublicKey (client_ephemeral_key);
 
         ////////////////////////////////////////////////////////////////////////
         // Device certificate path
         ////////////////////////////////////////////////////////////////////////
         if (device_certificate_path != null)
           {
-            JSONSignatureEncoder.writeX509CertificatePath (wr.setObject (DEVICE_CERTIFICATE_JSON),
-                                                           device_certificate_path);
+            wr.setObject (DEVICE_CERTIFICATE_JSON).setX509CertificatePath (device_certificate_path);
           }
 
         ////////////////////////////////////////////////////////////////////////
@@ -177,7 +174,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
         ////////////////////////////////////////////////////////////////////////
         // Mandatory session signature
         ////////////////////////////////////////////////////////////////////////
-        wr.setEnvelopedSignature (session_signature);
+        wr.setSignature (session_signature);
       }
 
     @Override

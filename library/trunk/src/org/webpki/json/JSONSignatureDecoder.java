@@ -88,20 +88,15 @@ public class JSONSignatureDecoder extends JSONSignature
           }
       }
 
-    static public JSONSignatureDecoder readSignature (JSONObjectReader rd) throws IOException
-      {
-        return new JSONSignatureDecoder (rd);
-      }
-
     void getKeyInfo (JSONObjectReader rd) throws IOException
       {
         if (rd.hasProperty (X509_CERTIFICATE_PATH_JSON))
           {
-            getX509CertificatePath (rd);
+            readX509CertificateEntry (rd);
           }
         else if (rd.hasProperty (PUBLIC_KEY_JSON))
           {
-            public_key = readPublicKey (rd);
+            public_key = getPublicKey (rd);
           }
         else if (rd.hasProperty (KEY_ID_JSON))
           {
@@ -123,7 +118,7 @@ public class JSONSignatureDecoder extends JSONSignature
         return new BigInteger (1, crypto_binary);
       }
 
-    public static PublicKey readPublicKey (JSONObjectReader rd) throws IOException
+    static PublicKey getPublicKey (JSONObjectReader rd) throws IOException
       {
         rd = rd.getObject (PUBLIC_KEY_JSON);
         try
@@ -147,7 +142,7 @@ public class JSONSignatureDecoder extends JSONSignature
           }
       }
 
-    public static X509Certificate[] readX509CertificatePath (JSONObjectReader rd) throws IOException
+    static X509Certificate[] getX509CertificatePath (JSONObjectReader rd) throws IOException
       {
         X509Certificate last_certificate = null;
         Vector<X509Certificate> certificates = new Vector<X509Certificate> ();
@@ -167,9 +162,9 @@ public class JSONSignatureDecoder extends JSONSignature
         return certificates.toArray (new X509Certificate[0]);
       }
 
-    void getX509CertificatePath (JSONObjectReader rd) throws IOException
+    void readX509CertificateEntry (JSONObjectReader rd) throws IOException
       {
-        certificate_path = readX509CertificatePath (rd);
+        certificate_path = getX509CertificatePath (rd);
         if (rd.hasProperty (SIGNATURE_CERTIFICATE_JSON))
           {
             rd = rd.getObject (SIGNATURE_CERTIFICATE_JSON);
@@ -242,7 +237,7 @@ public class JSONSignatureDecoder extends JSONSignature
           }
       }
 
-    public X509Certificate[] getCertificatePath () throws IOException
+    public X509Certificate[] getX509CertificatePath () throws IOException
       {
         checkRequest (JSONSignatureTypes.X509_CERTIFICATE);
         return certificate_path;

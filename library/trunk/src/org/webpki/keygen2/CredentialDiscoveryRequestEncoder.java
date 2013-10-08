@@ -173,7 +173,7 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
             JSONAsymKeySigner signer = new JSONAsymKeySigner (this);
             signer.setSignatureAlgorithm (key_management_key instanceof RSAPublicKey ?
                                                   AsymSignatureAlgorithms.RSA_SHA256 : AsymSignatureAlgorithms.ECDSA_SHA256);
-            wr.setEnvelopedSignature (signer);
+            wr.setSignature (signer);
           }
 
         @Override

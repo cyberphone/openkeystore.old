@@ -49,7 +49,7 @@ abstract class ServerEncoder extends JSONEncoder
         ////////////////////////////////////////////////////////////////////////
         if (signer != null)
           {
-            wr.setEnvelopedSignature (new JSONX509Signer (signer));
+            wr.setSignature (new JSONX509Signer (signer));
           }
       }
 

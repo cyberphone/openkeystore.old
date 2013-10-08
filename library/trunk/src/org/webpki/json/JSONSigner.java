@@ -26,6 +26,8 @@ import org.webpki.crypto.SignatureAlgorithms;
  */
 public abstract class JSONSigner
   {
+    JSONSigner () {}
+
     abstract SignatureAlgorithms getAlgorithm ();
   
     abstract byte[] signData (byte[] data) throws IOException;

@@ -72,7 +72,7 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
                 issued_before = KeyGen2Validator.getDateTimeConditional (search, ISSUED_BEFORE_JSON);
                 issued_after = KeyGen2Validator.getDateTimeConditional (search, ISSUED_AFTER_JSON);
               }
-            JSONSignatureDecoder signature = JSONSignatureDecoder.readSignature (rd);
+            JSONSignatureDecoder signature = rd.getSignature ();
             key_management_key = signature.getPublicKey ();
             if (((AsymSignatureAlgorithms) signature.getSignatureAlgorithm ()).getDigestAlgorithm () != HashAlgorithms.SHA256)
               {

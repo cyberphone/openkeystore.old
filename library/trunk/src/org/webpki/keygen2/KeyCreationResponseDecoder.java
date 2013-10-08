@@ -23,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.security.PublicKey;
 
 import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONSignatureDecoder;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -64,7 +63,7 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator
             GeneratedPublicKey gk = new GeneratedPublicKey ();
             gk.id = key_rd.getString (ID_JSON);
             gk.attestation = key_rd.getBinary (KEY_ATTESTATION_JSON);
-            gk.public_key = JSONSignatureDecoder.readPublicKey (key_rd);
+            gk.public_key = key_rd.getPublicKey ();
             if (generated_keys.put (gk.id, gk) != null)
               {
                 ServerState.bad ("Duplicate key id:" + gk.id);

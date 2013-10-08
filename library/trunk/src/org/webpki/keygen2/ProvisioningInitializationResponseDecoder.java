@@ -131,14 +131,14 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the ephemeral client key
         /////////////////////////////////////////////////////////////////////////////////////////
-        client_ephemeral_key = (ECPublicKey) JSONSignatureDecoder.readPublicKey (rd.getObject (CLIENT_EPHEMERAL_KEY_JSON));
+        client_ephemeral_key = (ECPublicKey) rd.getObject (CLIENT_EPHEMERAL_KEY_JSON).getPublicKey ();
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional device certificate path
         /////////////////////////////////////////////////////////////////////////////////////////
         if (rd.hasProperty (DEVICE_CERTIFICATE_JSON))
           {
-            device_certificate_path = JSONSignatureDecoder.readX509CertificatePath (rd.getObject (DEVICE_CERTIFICATE_JSON));
+            device_certificate_path = rd.getObject (DEVICE_CERTIFICATE_JSON).getX509CertificatePath ();
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +165,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the mandatory provisioning session data signature
         /////////////////////////////////////////////////////////////////////////////////////////
-        signature = JSONSignatureDecoder.readSignature (rd);
+        signature = rd.getSignature ();
       }
 
     @Override

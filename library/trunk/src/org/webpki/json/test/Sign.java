@@ -152,7 +152,7 @@ public class Sign
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setExtendedCertPath (true);
         signer.setKey (null, DemoKeyStore.getSignerPassword ());
-        wr.setEnvelopedSignature (new JSONX509Signer (signer));
+        wr.setSignature (new JSONX509Signer (signer));
       }
     
     public static void createAsymmetricKeySignature (JSONObjectWriter wr, boolean rsa) throws IOException
@@ -162,7 +162,7 @@ public class Sign
             KeyStore ks = rsa ? DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getECDSAStore ();
             PrivateKey private_key = (PrivateKey)ks.getKey ("mykey", DemoKeyStore.getSignerPassword ().toCharArray ());
             PublicKey public_key = ks.getCertificate ("mykey").getPublicKey ();
-            wr.setEnvelopedSignature (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
+            wr.setSignature (new JSONAsymKeySigner (new AsymSigner (private_key, public_key)));
           }
         catch (GeneralSecurityException e)
           {
@@ -172,7 +172,7 @@ public class Sign
     
     public static void createSymmetricKeySignature (JSONObjectWriter wr) throws IOException
       {
-        wr.setEnvelopedSignature (new JSONSymKeySigner (new SymmetricOperations ()));
+        wr.setSignature (new JSONSymKeySigner (new SymmetricOperations ()));
       }
     
     

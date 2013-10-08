@@ -20,6 +20,10 @@ import java.io.IOException;
 
 import java.math.BigInteger;
 
+import java.security.PublicKey;
+
+import java.security.cert.X509Certificate;
+
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
@@ -234,6 +238,21 @@ public class JSONObjectReader
             return null;
           }
         return array.firstElement ().type;
+      }
+
+    public JSONSignatureDecoder getSignature () throws IOException
+      {
+        return new JSONSignatureDecoder (this);
+      }
+    
+    public PublicKey getPublicKey () throws IOException
+      {
+        return JSONSignatureDecoder.getPublicKey (this);
+      }
+    
+    public X509Certificate[] getX509CertificatePath () throws IOException
+      {
+        return JSONSignatureDecoder.getX509CertificatePath (this);
       }
 
     public void scanAway (String name) throws IOException

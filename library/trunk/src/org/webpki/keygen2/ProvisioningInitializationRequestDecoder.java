@@ -143,7 +143,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
               {
                 JSONObjectReader kmk_upd = upd_arr.getObject ();
                 byte[] authorization = kmk_upd.getBinary (AUTHORIZATION_JSON);
-                KeyManagementKeyUpdateHolder child = new KeyManagementKeyUpdateHolder (JSONSignatureDecoder.readPublicKey (kmk_upd));
+                KeyManagementKeyUpdateHolder child = new KeyManagementKeyUpdateHolder (kmk_upd.getPublicKey ());
                 child.authorization = authorization;
                 kmk.children.add (child);
                 scanForUpdateKeys (kmk_upd, child);
@@ -205,7 +205,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the server key
         /////////////////////////////////////////////////////////////////////////////////////////
-        server_ephemeral_key = (ECPublicKey) JSONSignatureDecoder.readPublicKey (rd.getObject (SERVER_EPHEMERAL_KEY_JSON));
+        server_ephemeral_key = (ECPublicKey) rd.getObject (SERVER_EPHEMERAL_KEY_JSON).getPublicKey ();
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional key management key
@@ -213,7 +213,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
         if (rd.hasProperty (KEY_MANAGEMENT_KEY_JSON))
           {
             JSONObjectReader kmkrd = rd.getObject (KEY_MANAGEMENT_KEY_JSON);
-            key_management_key = JSONSignatureDecoder.readPublicKey (kmkrd);
+            key_management_key = kmkrd.getPublicKey ();
             scanForUpdateKeys (kmkrd, kmk_root = new KeyManagementKeyUpdateHolder (key_management_key));
           }
 

@@ -28,7 +28,6 @@ import org.webpki.util.ArrayUtil;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
-import org.webpki.json.JSONSignatureDecoder;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -308,7 +307,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         IssuedCredential (JSONObjectReader rd) throws IOException
           {
             id = rd.getString (ID_JSON);
-            certificate_path = JSONSignatureDecoder.readX509CertificatePath (rd);            
+            certificate_path = rd.getX509CertificatePath ();            
             mac = rd.getBinary (MAC_JSON);
 
             trust_anchor = rd.getBooleanConditional (TRUST_ANCHOR_JSON);

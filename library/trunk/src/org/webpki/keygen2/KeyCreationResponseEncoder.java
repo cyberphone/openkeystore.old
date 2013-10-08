@@ -25,7 +25,6 @@ import java.security.PublicKey;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
-import org.webpki.json.JSONSignatureEncoder;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -82,7 +81,7 @@ public class KeyCreationResponseEncoder extends JSONEncoder
           {
             JSONObjectWriter key_wr = keys.setObject ();
             key_wr.setString (ID_JSON, gk.id);
-            JSONSignatureEncoder.writePublicKey (key_wr, gk.public_key);
+            key_wr.setPublicKey (gk.public_key);
             key_wr.setBinary (KEY_ATTESTATION_JSON, gk.key_attestation);
           }
       }

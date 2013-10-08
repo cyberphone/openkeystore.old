@@ -34,7 +34,6 @@ import org.webpki.util.ArrayUtil;
 
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
-import org.webpki.json.JSONSignatureEncoder;
 
 import org.webpki.keygen2.ServerState.ProtocolPhase;
 
@@ -150,7 +149,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
             for (KeyManagementKeyUpdateHolder child : kmk.children)
               {
                 JSONObjectWriter kmku_object = kmku_arr.setObject ();
-                JSONSignatureEncoder.writePublicKey (kmku_object, child.key_management_key);
+                kmku_object.setPublicKey (child.key_management_key);
                 kmku_object.setBinary (AUTHORIZATION_JSON, child.authorization);
                 scanForUpdatedKeys (kmku_object, child);
               }
@@ -212,8 +211,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////
-        JSONSignatureEncoder.writePublicKey (wr.setObject (SERVER_EPHEMERAL_KEY_JSON),
-                                             server_ephemeral_key);
+        wr.setObject (SERVER_EPHEMERAL_KEY_JSON).setPublicKey (server_ephemeral_key);
 
         ////////////////////////////////////////////////////////////////////////
         // Key management key
@@ -221,7 +219,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
         if (kmk_root != null)
           {
             JSONObjectWriter kmk_writer = wr.setObject (KEY_MANAGEMENT_KEY_JSON);
-            JSONSignatureEncoder.writePublicKey (kmk_writer, kmk_root.key_management_key);
+            kmk_writer.setPublicKey (kmk_root.key_management_key);
             scanForUpdatedKeys (kmk_writer, kmk_root);
           }
 

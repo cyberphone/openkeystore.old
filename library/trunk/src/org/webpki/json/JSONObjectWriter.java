@@ -21,6 +21,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import java.security.PublicKey;
+
+import java.security.cert.X509Certificate;
+
 import java.util.Date;
 import java.util.Vector;
 
@@ -176,9 +180,22 @@ public class JSONObjectWriter
         return base64_encoder.getBase64StringFromBinary (value);
       }
 
-    public void setEnvelopedSignature (JSONSigner signer) throws IOException
+    public JSONObjectWriter setSignature (JSONSigner signer) throws IOException
       {
         new JSONSignatureEncoder (signer, this);
+        return this;
+      }
+    
+    public JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
+      {
+        JSONSignatureEncoder.setPublicKey (this, public_key);
+        return this;
+      }
+
+    public JSONObjectWriter setX509CertificatePath (X509Certificate[] certificate_path) throws IOException
+      {
+        JSONSignatureEncoder.setX509CertificatePath (this, certificate_path);
+        return this;
       }
 
     void beginObject (boolean array_flag)

@@ -60,7 +60,7 @@ public class Verify
                 case OBJECT:
                   if (property.equals (JSONSignatureDecoder.SIGNATURE_JSON))
                     {
-                      JSONSignatureDecoder signature = JSONSignatureDecoder.readSignature (rd);
+                      JSONSignatureDecoder signature = rd.getSignature ();
                       switch (signature.getSignatureType ())
                         {
                           case ASYMMETRIC_KEY:

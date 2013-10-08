@@ -34,8 +34,6 @@ import org.webpki.crypto.KeyAlgorithms;
 
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONOutputFormats;
-import org.webpki.json.JSONSignatureDecoder;
-import org.webpki.json.JSONSignatureEncoder;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONObjectReader;
@@ -66,7 +64,7 @@ public class Keys
         @Override
         protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
           {
-            public_key = JSONSignatureDecoder.readPublicKey (rd);
+            public_key = rd.getPublicKey ();
           }
   
         @Override
@@ -88,7 +86,7 @@ public class Keys
         @Override
         protected void writeJSONData (JSONObjectWriter wr) throws IOException
           {
-            JSONSignatureEncoder.writePublicKey (wr, public_key);
+            wr.setPublicKey (public_key);
           }
 
         @Override

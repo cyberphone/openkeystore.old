@@ -36,7 +36,7 @@ import org.webpki.crypto.KeyAlgorithms;
 
 /**
  * Encoder for JSON signatures.
- * Only used internally except for the public static methods.
+ * Only used internally.
  * 
  */
 public class JSONSignatureEncoder extends JSONSignature
@@ -53,7 +53,7 @@ public class JSONSignatureEncoder extends JSONSignature
         wr.setBinary (name, crypto_binary);
       }
 
-    public static void writePublicKey (JSONObjectWriter wr, PublicKey public_key) throws IOException
+    static void setPublicKey (JSONObjectWriter wr, PublicKey public_key) throws IOException
       {
         JSONObjectWriter public_key_writer = wr.setObject (PUBLIC_KEY_JSON);
         KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
@@ -74,7 +74,7 @@ public class JSONSignatureEncoder extends JSONSignature
           }
       }
 
-    public static void writeX509CertificatePath (JSONObjectWriter wr, X509Certificate[] certificate_path) throws IOException
+    static void setX509CertificatePath (JSONObjectWriter wr, X509Certificate[] certificate_path) throws IOException
       {
         X509Certificate last_certificate = null;
         Vector<byte[]> certificates = new Vector<byte[]> ();
@@ -92,7 +92,7 @@ public class JSONSignatureEncoder extends JSONSignature
         wr.setBinaryArray (X509_CERTIFICATE_PATH_JSON, certificates);
       }
 
-    JSONSignatureEncoder (final JSONSigner signer, JSONObjectWriter wr) throws IOException
+    JSONSignatureEncoder (JSONSigner signer, JSONObjectWriter wr) throws IOException
       {
         JSONObjectWriter signature_writer = wr.setObject (SIGNATURE_JSON);
         signature_writer.setString (ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
