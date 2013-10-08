@@ -24,6 +24,8 @@ import java.io.IOException;
  */
 public abstract class JSONVerifier
   {
+    JSONVerifier () {}
+
     abstract void verify (JSONSignatureDecoder signature_decoder) throws IOException;
 
     abstract JSONSignatureTypes getVerifierType () throws IOException;

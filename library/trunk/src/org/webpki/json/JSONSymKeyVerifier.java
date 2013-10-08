@@ -28,6 +28,13 @@ public class JSONSymKeyVerifier extends JSONVerifier
   {
     SymKeyVerifierInterface verifier;
     
+    /**
+     * Verifier for symmetric keys.
+     * Note that you can access the received KeyID from {@link JSONSignatureDecoder}
+     * which is useful if there are multiple keys possible.
+     * @param verifier Verifies that the key and signature value match.
+     * @throws IOException
+     */
     public JSONSymKeyVerifier (SymKeyVerifierInterface verifier) throws IOException
       {
         this.verifier = verifier;
