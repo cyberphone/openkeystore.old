@@ -80,7 +80,7 @@ public class ReadSignature
                 case OBJECT:
                   if (property.equals (JSONSignatureDecoder.SIGNATURE_JSON))
                     {
-                      JSONSignatureDecoder signature = JSONSignatureDecoder.readSignature (rd);
+                      JSONSignatureDecoder signature = rd.getSignature ();
                       switch (signature.getSignatureType ())
                         {
                           case ASYMMETRIC_KEY:
@@ -115,7 +115,7 @@ public class ReadSignature
                             break;
   
                           default:
-                            debugOutput ("X509 signature validated for:\n" + new CertificateInfo (signature.getCertificatePath ()[0]).toString ());
+                            debugOutput ("X509 signature validated for:\n" + new CertificateInfo (signature.getX509CertificatePath ()[0]).toString ());
                             break;
                         }
                     }
