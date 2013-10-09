@@ -52,6 +52,8 @@ public class Keys
     static KeyAlgorithms[] ec_curves;
     static int ec_index;
 
+    static final byte[] EC_OID = {0x06, 0x07, 0x2A, (byte) 0x86,  0x48, (byte) 0xCE, 0x3D, 0x02, 0x01};
+
     static
       {
         Sign.installOptionalBCProvider ();
@@ -119,7 +121,25 @@ public class Keys
         PublicKey public_key = key_pair.getPublic ();
         byte[] data = new Writer (public_key).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
         Reader reader = (Reader) cache.parse (data);
-        if (!ArrayUtil.compare (reader.getPublicKey ().getEncoded (),public_key.getEncoded ()))
+        boolean ec_flag = false;
+        byte[] gen_pk = public_key.getEncoded ();
+        for (int j = 4; j < 11; j++)
+          {
+            ec_flag = true;
+            for (int i = 0; i < EC_OID.length; i++)
+              {
+                if (gen_pk[j + i] != EC_OID[i])
+                  {
+                    ec_flag = false;
+                  }
+              }
+            if (ec_flag) break;
+          }
+        if (ec_flag == rsa)
+          {
+            throw new IOException ("Failed to find EC");
+          }
+        if (!ArrayUtil.compare (reader.getPublicKey ().getEncoded (), gen_pk))
           {
             throw new IOException ("Unmatching keys:" + public_key.toString ());
           }
