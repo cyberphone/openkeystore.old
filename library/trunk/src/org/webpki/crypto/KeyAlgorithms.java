@@ -17,20 +17,16 @@
 package org.webpki.crypto;
 
 import java.io.IOException;
-import java.math.BigInteger;
 
+import java.security.KeyFactory;
 import java.security.PublicKey;
 
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
-import java.security.spec.ECFieldF2m;
-import java.security.spec.ECFieldFp;
 import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
-
-import org.bouncycastle.jce.spec.ECNamedCurveSpec;
+import java.security.spec.X509EncodedKeySpec;
 
 public enum KeyAlgorithms implements SKSAlgorithms
   {
@@ -41,14 +37,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false,
                  true,
                  null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 0,
-                 false),
+                 null),
 
     RSA2048     ("http://xmlns.webpki.org/sks/algorithm#rsa2048",
                  "RSA",
@@ -57,14 +46,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false,
                  true,
                  null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 0,
-                 false),
+                 null),
 
     RSA3072     ("http://xmlns.webpki.org/sks/algorithm#rsa3072",
                  "RSA",
@@ -73,14 +55,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false,
                  false,
                  null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 0,
-                 false),
+                 null),
 
     RSA4096     ("http://xmlns.webpki.org/sks/algorithm#rsa4096",
                  "RSA",
@@ -89,14 +64,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false,
                  false,
                  null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 0,
-                 false),
+                 null),
 
     RSA1024_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa1024.exp",
                  "RSA",
@@ -105,14 +73,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  true,
                  false,
                  null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 0,
-                 false),
+                 null),
 
     RSA2048_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa2048.exp",
                  "RSA",
@@ -121,14 +82,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  true,
                  false,
                  null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 0,
-                 false),
+                 null),
 
     RSA3072_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa3072.exp",
                  "RSA",
@@ -137,14 +91,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  true,
                  false,
                  null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 0,
-                 false),
+                 null),
 
     RSA4096_EXP ("http://xmlns.webpki.org/sks/algorithm#rsa4096.exp",
                  "RSA",
@@ -153,14 +100,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  true,
                  false,
                  null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 null,
-                 0,
-                 false),
+                 null),
 
     B_163       ("http://xmlns.webpki.org/sks/algorithm#ec.b163",
                  "sect163r2",
@@ -169,14 +109,16 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false,
                  false,
                  "1.3.132.0.15",
-                 "0800000000000000000000000000000000000000C9",
-                 "000000000000000000000000000000000000000001",
-                 "020A601907B8C953CA1481EB10512F78744A3205FD",
-                 "03F0EBA16286A2D57EA0991168D4994637E8343E36",
-                 "00D51FBC6C71A0094FA2CDD545B11C5C0C797324F1",
-                 "040000000000000000000292FE77E70C12A4234C33",
-                 2,
-                 true),
+                 new byte[]
+                    {(byte)0x30, (byte)0x40, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
+                     (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05, (byte)0x2B,
+                     (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x0F, (byte)0x03, (byte)0x2C, (byte)0x00, (byte)0x04,
+                     (byte)0x03, (byte)0x9A, (byte)0xC6, (byte)0x0F, (byte)0x63, (byte)0x03, (byte)0xC3, (byte)0x77,
+                     (byte)0x14, (byte)0xFD, (byte)0x80, (byte)0xC5, (byte)0xA8, (byte)0xEE, (byte)0x72, (byte)0x95,
+                     (byte)0x72, (byte)0x10, (byte)0xAC, (byte)0x6C, (byte)0xA7, (byte)0x02, (byte)0xD7, (byte)0x30,
+                     (byte)0x15, (byte)0xEC, (byte)0xE1, (byte)0x53, (byte)0xC1, (byte)0x50, (byte)0x74, (byte)0x47,
+                     (byte)0x56, (byte)0x8A, (byte)0xBC, (byte)0x0F, (byte)0x05, (byte)0x53, (byte)0x78, (byte)0xB1,
+                     (byte)0x30, (byte)0x8E}),
 
     B_233       ("http://xmlns.webpki.org/sks/algorithm#ec.b233",
                  "sect233r1",
@@ -185,14 +127,18 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false,
                  false,
                  "1.3.132.0.27",
-                 "020000000000000000000000000000000000000004000000000000000001",
-                 "000000000000000000000000000000000000000000000000000000000001",
-                 "0066647EDE6C332C7F8C0923BB58213B333B20E9CE4281FE115F7D8F90AD",
-                 "00FAC9DFCBAC8313BB2139F1BB755FEF65BC391F8B36F8F8EB7371FD558B",
-                 "01006A08A41903350678E58528BEBF8A0BEFF867A7CA36716F7E01F81052",
-                 "01000000000000000000000000000013E974E72F8A6922031D2603CFE0D7",
-                 2,
-                 true),
+                 new byte[]
+                    {(byte)0x30, (byte)0x52, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
+                     (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05, (byte)0x2B,
+                     (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x1B, (byte)0x03, (byte)0x3E, (byte)0x00, (byte)0x04,
+                     (byte)0x01, (byte)0x8D, (byte)0x7E, (byte)0x41, (byte)0xF5, (byte)0xE9, (byte)0xCE, (byte)0x74,
+                     (byte)0x00, (byte)0x6C, (byte)0x4E, (byte)0xE9, (byte)0x9C, (byte)0xAB, (byte)0x12, (byte)0x4F,
+                     (byte)0x67, (byte)0x58, (byte)0x5A, (byte)0x10, (byte)0x4C, (byte)0x9A, (byte)0xCE, (byte)0xAA,
+                     (byte)0x45, (byte)0x01, (byte)0x50, (byte)0xB5, (byte)0x59, (byte)0x91, (byte)0x01, (byte)0x21,
+                     (byte)0x9C, (byte)0x0B, (byte)0x90, (byte)0x24, (byte)0xA3, (byte)0x55, (byte)0x27, (byte)0x0D,
+                     (byte)0xE4, (byte)0xC9, (byte)0xD2, (byte)0xCB, (byte)0x7A, (byte)0x86, (byte)0x79, (byte)0x33,
+                     (byte)0xF6, (byte)0x18, (byte)0xB8, (byte)0x4D, (byte)0xB8, (byte)0xD0, (byte)0x9C, (byte)0x81,
+                     (byte)0xB4, (byte)0x99, (byte)0x3B, (byte)0x94}),
 
     B_283       ("http://xmlns.webpki.org/sks/algorithm#ec.b283",
                  "sect283r1",
@@ -201,14 +147,19 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false,
                  false,
                  "1.3.132.0.17",
-                 "0800000000000000000000000000000000000000000000000000000000000000000010A1",
-                 "000000000000000000000000000000000000000000000000000000000000000000000001",
-                 "027B680AC8B8596DA5A4AF8A19A0303FCA97FD7645309FA2A581485AF6263E313B79A2F5",
-                 "05F939258DB7DD90E1934F8C70B0DFEC2EED25B8557EAC9C80E2E198F8CDBECD86B12053",
-                 "03676854FE24141CB98FE6D4B20D02B4516FF702350EDDB0826779C813F0DF45BE8112F4",
-                 "03FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEF90399660FC938A90165B042A7CEFADB307",
-                 2,
-                 true),
+                 new byte[]
+                    {(byte)0x30, (byte)0x5E, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
+                     (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05, (byte)0x2B,
+                     (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x11, (byte)0x03, (byte)0x4A, (byte)0x00, (byte)0x04,
+                     (byte)0x05, (byte)0xE9, (byte)0x16, (byte)0xB8, (byte)0x17, (byte)0x2C, (byte)0xF3, (byte)0xDA,
+                     (byte)0xDF, (byte)0x3D, (byte)0x9E, (byte)0xFB, (byte)0x0D, (byte)0xC3, (byte)0x24, (byte)0x20,
+                     (byte)0x7E, (byte)0x4F, (byte)0x1E, (byte)0x74, (byte)0xAE, (byte)0xFB, (byte)0xB3, (byte)0x0F,
+                     (byte)0xD7, (byte)0xEC, (byte)0x09, (byte)0x71, (byte)0xB3, (byte)0x49, (byte)0xE2, (byte)0xD1,
+                     (byte)0xED, (byte)0xED, (byte)0x64, (byte)0xF7, (byte)0x07, (byte)0x0C, (byte)0xA7, (byte)0x5A,
+                     (byte)0xCD, (byte)0xEC, (byte)0x73, (byte)0x4C, (byte)0xFD, (byte)0x2B, (byte)0x57, (byte)0xFF,
+                     (byte)0xC9, (byte)0x44, (byte)0xDC, (byte)0x76, (byte)0x1B, (byte)0xDF, (byte)0x33, (byte)0x51,
+                     (byte)0xCF, (byte)0x07, (byte)0x7D, (byte)0x84, (byte)0xEC, (byte)0x23, (byte)0xC6, (byte)0x2C,
+                     (byte)0x1E, (byte)0x12, (byte)0x0D, (byte)0x95, (byte)0xFD, (byte)0xC7, (byte)0xC7, (byte)0x0C}),
 
     P_192       ("http://xmlns.webpki.org/sks/algorithm#ec.p192",
                  "secp192r1",
@@ -217,14 +168,17 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false,
                  false,
                  "1.2.840.10045.3.1.1",
-                 "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF",
-                 "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFC",
-                 "64210519E59C80E70FA7E9AB72243049FEB8DEECC146B9B1",
-                 "188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012",
-                 "07192B95FFC8DA78631011ED6B24CDD573F977A11E794811",
-                 "FFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831",
-                 1,
-                 false),
+                 new byte[]
+                    {(byte)0x30, (byte)0x49, (byte)0x30, (byte)0x13, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
+                     (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x08, (byte)0x2A,
+                     (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x03, (byte)0x01, (byte)0x01, (byte)0x03,
+                     (byte)0x32, (byte)0x00, (byte)0x04, (byte)0xCC, (byte)0xE7, (byte)0x03, (byte)0x5B, (byte)0xF6,
+                     (byte)0xAB, (byte)0xA7, (byte)0xFD, (byte)0xF5, (byte)0x71, (byte)0xDB, (byte)0x98, (byte)0xF4,
+                     (byte)0x97, (byte)0xEF, (byte)0x84, (byte)0x86, (byte)0x4C, (byte)0x45, (byte)0x2A, (byte)0xF8,
+                     (byte)0x0F, (byte)0xD9, (byte)0x04, (byte)0x9C, (byte)0x5F, (byte)0xF7, (byte)0xE8, (byte)0xF3,
+                     (byte)0xC3, (byte)0xBE, (byte)0xF7, (byte)0x06, (byte)0x6E, (byte)0xCC, (byte)0x33, (byte)0xA7,
+                     (byte)0xAC, (byte)0x61, (byte)0x5C, (byte)0x58, (byte)0x7C, (byte)0x98, (byte)0x25, (byte)0x82,
+                     (byte)0x17, (byte)0xD7, (byte)0x69}),
 
     P_256       ("http://xmlns.webpki.org/sks/algorithm#ec.p256",
                  "secp256r1",
@@ -233,14 +187,19 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false,
                  true,
                  "1.2.840.10045.3.1.7",
-                 "FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF",
-                 "FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC",
-                 "5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B",
-                 "6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296",
-                 "4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5",
-                 "FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551",
-                 1,
-                 false),
+                 new byte[]
+                    {(byte)0x30, (byte)0x59, (byte)0x30, (byte)0x13, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
+                     (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x08, (byte)0x2A,
+                     (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x03, (byte)0x01, (byte)0x07, (byte)0x03,
+                     (byte)0x42, (byte)0x00, (byte)0x04, (byte)0x8B, (byte)0xDF, (byte)0x5D, (byte)0xA2, (byte)0xBE,
+                     (byte)0x57, (byte)0x73, (byte)0xAC, (byte)0x78, (byte)0x86, (byte)0xD3, (byte)0xE5, (byte)0xE6,
+                     (byte)0xC4, (byte)0xA5, (byte)0x6C, (byte)0x32, (byte)0xE2, (byte)0x28, (byte)0xBE, (byte)0xA0,
+                     (byte)0x0F, (byte)0x8F, (byte)0xBF, (byte)0x29, (byte)0x1E, (byte)0xC6, (byte)0x67, (byte)0xB3,
+                     (byte)0x51, (byte)0x99, (byte)0xB7, (byte)0xAD, (byte)0x13, (byte)0x0C, (byte)0x5A, (byte)0x7C,
+                     (byte)0x66, (byte)0x4B, (byte)0x47, (byte)0xF6, (byte)0x1F, (byte)0x41, (byte)0xE9, (byte)0xB3,
+                     (byte)0xB2, (byte)0x40, (byte)0xC0, (byte)0x65, (byte)0xF8, (byte)0x8F, (byte)0x30, (byte)0x0A,
+                     (byte)0xCA, (byte)0x5F, (byte)0xB5, (byte)0x09, (byte)0x6E, (byte)0x95, (byte)0xCF, (byte)0x78,
+                     (byte)0x7C, (byte)0x0D, (byte)0xB2}),
 
     P_384       ("http://xmlns.webpki.org/sks/algorithm#ec.p384",
                  "secp384r1",
@@ -249,14 +208,22 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false,
                  false,
                  "1.3.132.0.34",
-                 "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFF",
-                 "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFC",
-                 "B3312FA7E23EE7E4988E056BE3F82D19181D9C6EFE8141120314088F5013875AC656398D8A2ED19D2A85C8EDD3EC2AEF",
-                 "AA87CA22BE8B05378EB1C71EF320AD746E1D3B628BA79B9859F741E082542A385502F25DBF55296C3A545E3872760AB7",
-                 "3617DE4A96262C6F5D9E98BF9292DC29F8F41DBD289A147CE9DA3113B5F0B8C00A60B1CE1D7E819D7A431D7C90EA0E5F",
-                 "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC7634D81F4372DDF581A0DB248B0A77AECEC196ACCC52973",
-                 1,
-                 false),
+                 new byte[]
+                    {(byte)0x30, (byte)0x76, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A, (byte)0x86,
+                     (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05, (byte)0x2B,
+                     (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x22, (byte)0x03, (byte)0x62, (byte)0x00, (byte)0x04,
+                     (byte)0x63, (byte)0x5C, (byte)0x35, (byte)0x5C, (byte)0xC0, (byte)0xDF, (byte)0x90, (byte)0x16,
+                     (byte)0xA6, (byte)0x18, (byte)0xF1, (byte)0x50, (byte)0xA7, (byte)0x73, (byte)0xE7, (byte)0x05,
+                     (byte)0x22, (byte)0x36, (byte)0xF7, (byte)0xDC, (byte)0x9F, (byte)0xD8, (byte)0xA5, (byte)0xAC,
+                     (byte)0x71, (byte)0x9F, (byte)0x1C, (byte)0x9A, (byte)0x71, (byte)0x94, (byte)0x8B, (byte)0x81,
+                     (byte)0x15, (byte)0x32, (byte)0x24, (byte)0x92, (byte)0x11, (byte)0x11, (byte)0xDC, (byte)0x7E,
+                     (byte)0x9D, (byte)0x70, (byte)0x1A, (byte)0x9B, (byte)0x83, (byte)0x33, (byte)0x8B, (byte)0x59,
+                     (byte)0xC1, (byte)0x93, (byte)0x34, (byte)0x7F, (byte)0x58, (byte)0x0D, (byte)0x91, (byte)0xC4,
+                     (byte)0xD2, (byte)0x20, (byte)0x8F, (byte)0x64, (byte)0x16, (byte)0x16, (byte)0xEE, (byte)0x07,
+                     (byte)0x51, (byte)0xC3, (byte)0xF8, (byte)0x56, (byte)0x5B, (byte)0xCD, (byte)0x49, (byte)0xFE,
+                     (byte)0xE0, (byte)0xE2, (byte)0xD5, (byte)0xC5, (byte)0x79, (byte)0xD1, (byte)0xA6, (byte)0x18,
+                     (byte)0x82, (byte)0xBD, (byte)0x65, (byte)0x83, (byte)0xB6, (byte)0x84, (byte)0x77, (byte)0xE8,
+                     (byte)0x1F, (byte)0xB8, (byte)0xD7, (byte)0x3D, (byte)0x79, (byte)0x88, (byte)0x2E, (byte)0x98}),
 
     P_521       ("http://xmlns.webpki.org/sks/algorithm#ec.p521",
                  "secp521r1",
@@ -265,14 +232,27 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  false,
                  false,
                  "1.3.132.0.35",
-                 "01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-                 "01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC",
-                 "0051953EB9618E1C9A1F929A21A0B68540EEA2DA725B99B315F3B8B489918EF109E156193951EC7E937B1652C0BD3BB1BF073573DF883D2C34F1EF451FD46B503F00",
-                 "00C6858E06B70404E9CD9E3ECB662395B4429C648139053FB521F828AF606B4D3DBAA14B5E77EFE75928FE1DC127A2FFA8DE3348B3C1856A429BF97E7E31C2E5BD66",
-                 "011839296A789A3BC0045C8A5FB42C7D1BD998F54449579B446817AFBD17273E662C97EE72995EF42640C550B9013FAD0761353C7086A272C24088BE94769FD16650",
-                 "01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA51868783BF2F966B7FCC0148F709A5D03BB5C9B8899C47AEBB6FB71E91386409",
-                 1,
-                 false);
+                 new byte[]
+                    {(byte)0x30, (byte)0x81, (byte)0x9B, (byte)0x30, (byte)0x10, (byte)0x06, (byte)0x07, (byte)0x2A,
+                     (byte)0x86, (byte)0x48, (byte)0xCE, (byte)0x3D, (byte)0x02, (byte)0x01, (byte)0x06, (byte)0x05,
+                     (byte)0x2B, (byte)0x81, (byte)0x04, (byte)0x00, (byte)0x23, (byte)0x03, (byte)0x81, (byte)0x86,
+                     (byte)0x00, (byte)0x04, (byte)0x01, (byte)0xFC, (byte)0xA0, (byte)0x56, (byte)0x27, (byte)0xB7,
+                     (byte)0x68, (byte)0x25, (byte)0xC5, (byte)0x83, (byte)0xD1, (byte)0x34, (byte)0x0A, (byte)0xAE,
+                     (byte)0x96, (byte)0x1D, (byte)0xDC, (byte)0xE0, (byte)0x95, (byte)0xC5, (byte)0xE0, (byte)0x25,
+                     (byte)0x1F, (byte)0x46, (byte)0xF6, (byte)0x36, (byte)0xD7, (byte)0x3F, (byte)0xD9, (byte)0x5A,
+                     (byte)0x15, (byte)0xE3, (byte)0x05, (byte)0xBA, (byte)0x14, (byte)0x06, (byte)0x1B, (byte)0xEB,
+                     (byte)0xD4, (byte)0x88, (byte)0xFC, (byte)0x0D, (byte)0x87, (byte)0x02, (byte)0x15, (byte)0x4E,
+                     (byte)0x7E, (byte)0xC0, (byte)0x9F, (byte)0xF6, (byte)0x1C, (byte)0x80, (byte)0x2C, (byte)0xE6,
+                     (byte)0x0D, (byte)0xF5, (byte)0x0E, (byte)0x6C, (byte)0xD9, (byte)0x55, (byte)0xFA, (byte)0xBD,
+                     (byte)0x6B, (byte)0x55, (byte)0xA1, (byte)0x0E, (byte)0x00, (byte)0x55, (byte)0x12, (byte)0x35,
+                     (byte)0x8D, (byte)0xFC, (byte)0x0A, (byte)0x42, (byte)0xE5, (byte)0x78, (byte)0x09, (byte)0xD6,
+                     (byte)0xF6, (byte)0x0C, (byte)0xBE, (byte)0x15, (byte)0x0A, (byte)0x7D, (byte)0xC2, (byte)0x2E,
+                     (byte)0x98, (byte)0xA1, (byte)0xE1, (byte)0x6A, (byte)0xF1, (byte)0x1F, (byte)0xD2, (byte)0x9F,
+                     (byte)0x9A, (byte)0x81, (byte)0x65, (byte)0x51, (byte)0x8F, (byte)0x6E, (byte)0xF1, (byte)0x3B,
+                     (byte)0x95, (byte)0x6B, (byte)0xCE, (byte)0x51, (byte)0x09, (byte)0xFF, (byte)0x23, (byte)0xDC,
+                     (byte)0xE8, (byte)0x71, (byte)0x1A, (byte)0x94, (byte)0xC7, (byte)0x8E, (byte)0x4A, (byte)0xA9,
+                     (byte)0x22, (byte)0xA8, (byte)0x87, (byte)0x64, (byte)0xD0, (byte)0x36, (byte)0xAF, (byte)0xD3,
+                     (byte)0x69, (byte)0xAC, (byte)0xCA, (byte)0xCB, (byte)0x1A, (byte)0x96});
 
 
     private final String uri;                        // As expressed in XML and JSON
@@ -282,11 +262,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
     private final boolean has_parameters;            // Parameter value required?
     private final boolean sks_mandatory;             // If required in SKS
     private final String ec_domain_oid;              // EC domain as expressed in ASN.1 messages, null for RSA
-    private EllipticCurve elliptic_curve;            // EC
-    private final BigInteger x;                      // EC 
-    private final BigInteger y;                      // EC 
-    private final BigInteger n;                      // EC
-    private final int h;                             // EC
+    private final ECParameterSpec ec_parm_spec;      // EC for creating a BC/JDK compatible method
 
 
     private KeyAlgorithms (String uri,
@@ -296,14 +272,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                            boolean has_parameters,
                            boolean sks_mandatory,
                            String ec_domain_oid,
-                           String field,
-                           String a,
-                           String b,
-                           String x, 
-                           String y, 
-                           String n,
-                           int h,
-                           boolean f2m)
+                           byte[] sample_public_key)
       {
         this.uri = uri;
         this.jcename = jcename;
@@ -312,15 +281,20 @@ public enum KeyAlgorithms implements SKSAlgorithms
         this.has_parameters = has_parameters;
         this.sks_mandatory = sks_mandatory;
         this.ec_domain_oid = ec_domain_oid;
-        this.elliptic_curve = field == null ?
-            null 
-                                            :
-            new EllipticCurve (f2m ? new ECFieldF2m (length_in_bits, new BigInteger (field, 16)) : new ECFieldFp (new BigInteger (field, 16)),
-                               new BigInteger (a, 16), new BigInteger (b, 16));
-        this.x = x == null ? null : new BigInteger (x, 16);
-        this.y = y == null ? null : new BigInteger (y, 16);
-        this.n = n == null ? null : new BigInteger (n, 16);
-        this.h = h;
+        ECParameterSpec temp_ec_parm_spec = null;
+        if (sample_public_key != null)
+          {
+            try
+              {
+                temp_ec_parm_spec = ((ECPublicKey) KeyFactory.getInstance ("EC").generatePublic (
+                    new X509EncodedKeySpec (sample_public_key))).getParams ();
+              }
+            catch (Exception e)
+              {
+                new RuntimeException (e);
+              }
+          }
+        this.ec_parm_spec = temp_ec_parm_spec;
       }
 
 
@@ -394,14 +368,10 @@ public enum KeyAlgorithms implements SKSAlgorithms
         return has_parameters;
       }
 
-    public EllipticCurve getEllipticCurve ()
-      {
-        return elliptic_curve;
-      }
 
     public ECParameterSpec getECParameterSpec ()
       {
-        return new ECNamedCurveSpec (jcename, elliptic_curve, new ECPoint (x, y), n, BigInteger.valueOf (h));
+        return ec_parm_spec;
       }
  
 
@@ -412,7 +382,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
             EllipticCurve ec_curve = ((ECPublicKey) public_key).getParams ().getCurve ();
             for (KeyAlgorithms alg : values ())
               {
-                if (alg.isECKey () && alg.elliptic_curve.equals (ec_curve))
+                if (alg.isECKey () && alg.ec_parm_spec.getCurve ().equals (ec_curve))
                   {
                     return alg;
                   }

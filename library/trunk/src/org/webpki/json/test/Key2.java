@@ -40,23 +40,19 @@ import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.DebugFormatter;
 
 /**
  * Testing public keys
  */
-public class Keys
+public class Key2
   {
     static final String CONTEXT = "http://keys/test";
     static final int ROUNDS = 1000;
     static JSONDecoderCache cache = new JSONDecoderCache ();
     static KeyAlgorithms[] ec_curves;
     static int ec_index;
-
-    static
-      {
-        Sign.installOptionalBCProvider ();
-      }
-
+    
     public static class Reader extends JSONDecoder
       {
         PublicKey public_key;
@@ -137,20 +133,33 @@ public class Keys
           }
         try
           {
-            Vector<KeyAlgorithms> ecs = new Vector<KeyAlgorithms> ();
+            Sign.installOptionalBCProvider ();
             for (KeyAlgorithms ka : KeyAlgorithms.values ())
               {
                 if (ka.isECKey ())
                   {
-                    ecs.add (ka);
+                    AlgorithmParameterSpec alg_par_spec = new ECGenParameterSpec (ka.getJCEName ());
+                    KeyPairGenerator kpg = KeyPairGenerator.getInstance ("EC");
+                    kpg.initialize (alg_par_spec, new SecureRandom ());
+                    KeyPair key_pair = kpg.generateKeyPair ();
+                    byte[] public_key = key_pair.getPublic ().getEncoded ();
+                    int i = -1;
+                    System.out.print (ka.getURI () + "\nnew byte[]\n{");
+                    for (byte b : public_key)
+                      {
+                        if (++i != 0)
+                          {
+                            System.out.print (",");
+                            if (i % 8 == 0 && i != public_key.length)
+                              {
+                                System.out.println ();
+                              }
+                            System.out.print (" ");
+                          }
+                        System.out.print ("(byte)0x" + DebugFormatter.getHexString (new byte[]{b}));
+                      }
+                    System.out.println ("}\n");
                   }
-              }
-            ec_curves = ecs.toArray (new KeyAlgorithms[0]);
-            cache.addToCache (Reader.class);
-            for (int i = 0; i < ROUNDS; i++)
-              {
-                Run (true, new Boolean (argc[0]));
-                Run (false, new Boolean (argc[0]));
               }
           }
         catch (Exception e)
