@@ -58,6 +58,8 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
   {
     public static final String DEFAULT_URL_PROPERTY = "org.webpki.sks.ws.client.url";
     
+    static final byte[] EC_OID = {0x06, 0x07, 0x2A, (byte) 0x86,  0x48, (byte) 0xCE, 0x3D, 0x02, 0x01};
+    
     private SKSWSProxy proxy;
     
     private String port;
@@ -122,18 +124,20 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
 
     private PublicKey createPublicKeyFromBlob (byte[] blob) throws GeneralSecurityException
       {
-        X509EncodedKeySpec ks = new X509EncodedKeySpec (blob);
-        KeyFactory kf = null;
-        try
+        boolean ec_flag = false;
+        for (int j = 4; j < 11; j++)
           {
-            kf = KeyFactory.getInstance ("RSA");
-            return kf.generatePublic(ks);
+            ec_flag = true;
+            for (int i = 0; i < EC_OID.length; i++)
+              {
+                if (blob[j + i] != EC_OID[i])
+                  {
+                    ec_flag = false;
+                  }
+              }
+            if (ec_flag) break;
           }
-        catch (GeneralSecurityException e1)
-          {
-            kf = KeyFactory.getInstance ("EC");
-            return kf.generatePublic(ks);
-          }
+        return KeyFactory.getInstance (ec_flag ? "EC" : "RSA").generatePublic (new X509EncodedKeySpec (blob));
       }
     
     private X509Certificate[] getCertArrayFromBlobs (List<byte[]> blobs) throws IOException

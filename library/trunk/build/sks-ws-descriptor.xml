@@ -75,6 +75,8 @@
     
     static boolean debug;
     
+    static final byte[] EC_OID = {0x06, 0x07, 0x2A, (byte) 0x86,  0x48, (byte) 0xCE, 0x3D, 0x02, 0x01};
+    
     static
       {
         try
@@ -179,24 +181,26 @@
 
     PublicKey createPublicKeyFromBlob (byte[] blob) throws SKSException
       {
-        X509EncodedKeySpec ks = new X509EncodedKeySpec (blob);
-        KeyFactory kf = null;
-        try
+        boolean ec_flag = false;
+        for (int j = 4; j < 11; j++)
           {
-            kf = KeyFactory.getInstance ("RSA");
-            return kf.generatePublic(ks);
+            ec_flag = true;
+            for (int i = 0; i < EC_OID.length; i++)
+              {
+                if (blob[j + i] != EC_OID[i])
+                  {
+                    ec_flag = false;
+                  }
+              }
+            if (ec_flag) break;
           }
-        catch (GeneralSecurityException e1)
+        try
+          { 
+            return KeyFactory.getInstance (ec_flag ? "EC" : "RSA").generatePublic (new X509EncodedKeySpec (blob));
+          }
+        catch (GeneralSecurityException e)
           {
-            try
-              {
-                kf = KeyFactory.getInstance ("EC");
-                return kf.generatePublic(ks);
-              }
-            catch (GeneralSecurityException e2)
-              {
-                throw new SKSException (e2);
-              }
+            throw new SKSException (e);
           }
       }
 
