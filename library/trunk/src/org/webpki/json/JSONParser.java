@@ -202,7 +202,7 @@ public class JSONParser
                 try
                   {
                     Double.parseDouble (result);
-                    type = JSONTypes.FLOATING_POINT;
+                    type = JSONTypes.DOUBLE;
                   }
                 catch (NumberFormatException e)
                   {

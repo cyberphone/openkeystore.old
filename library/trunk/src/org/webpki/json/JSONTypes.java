@@ -16,27 +16,27 @@
  */
 package org.webpki.json;
 
-import java.io.IOException;
-
 /**
  * Basic JSON types read by the parser.
  *
  */
 public enum JSONTypes 
   {
-    NULL (null),
-    BOOLEAN (null),
-    INTEGER (null),
-    DECIMAL (new JSONTypes[]{INTEGER}),
-    FLOATING_POINT (new JSONTypes[]{INTEGER, DECIMAL}),
-    STRING (null),
-    ARRAY (null),
-    OBJECT (null);
+    NULL    (false, null),
+    BOOLEAN (false, null),
+    INTEGER (false, null),
+    DECIMAL (false, new JSONTypes[]{INTEGER}),
+    DOUBLE  (false, new JSONTypes[]{INTEGER, DECIMAL}),
+    STRING  (false, null),
+    ARRAY   (true,  null),
+    OBJECT  (true,  null);
     
+    boolean complex;
     JSONTypes[] sub_types;  // Also accepted during "get"
     
-    JSONTypes (JSONTypes[] sub_types)
+    JSONTypes (boolean complex, JSONTypes[] sub_types)
       {
+        this.complex = complex;
         this.sub_types = sub_types;
       }
     

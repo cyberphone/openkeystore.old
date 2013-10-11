@@ -82,7 +82,7 @@ public class JSONArrayReader
 
     public double getDouble () throws IOException
       {
-        return new Double ((String) get (JSONTypes.FLOATING_POINT));
+        return new Double ((String) get (JSONTypes.DOUBLE));
       }
 
     public boolean getBoolean () throws IOException

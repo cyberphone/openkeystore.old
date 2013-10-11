@@ -108,7 +108,7 @@ public class JSONObjectReader
 
     public double getDouble (String name) throws IOException
       {
-        return new Double (getString (name, JSONTypes.FLOATING_POINT));
+        return new Double (getString (name, JSONTypes.DOUBLE));
       }
 
     public boolean getIfNULL (String name) throws IOException

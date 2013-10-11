@@ -200,7 +200,7 @@ public class JSONTest
       {
         MISS_ARG   ("Missing argument"),
         ARRAY_LIMIT ("Trying to read past of array limit: "),
-        SYNTAX     ("Syntax");
+        SYNTAX     ("Undecodable argument");
         
         String mess;
         PARSER_ERR (String mess)
@@ -255,21 +255,23 @@ public class JSONTest
         assertTrue (simpleObjectType  ("null").getIfNULL ("name"));
         assertFalse ((or = simpleObjectType ("3")).getIfNULL ("name"));
         assertTrue (or.getInt ("name") == 3);
+        assertFalse ((ar = simpleArrayType ("3")).getIfNULL ());
+        assertTrue (ar.getInt () == 3);
+        assertTrue ((ar = simpleArrayType ("null")).getIfNULL ());
+        expected_error = PARSER_ERR.ARRAY_LIMIT;
         try
           {
-            assertFalse ((ar = simpleArrayType ("3")).getIfNULL ());
             assertTrue (ar.getInt () == 3);
-            assertTrue ((ar = simpleArrayType ("null")).getIfNULL ());
-
-            expected_error = PARSER_ERR.ARRAY_LIMIT;
-            assertTrue (ar.getInt () == 3);
-
-            expected_error = PARSER_ERR.MISS_ARG;
+            fail ("Didn't bomb");
+          }
+        catch (IOException e)
+          {
+            checkException (e);
+          }
+        expected_error = PARSER_ERR.MISS_ARG;
+        try
+          {
             assertTrue (simpleArrayType (",0").getInt () == 0);
-            fail ("Didn't bomb");
-            assertTrue (simpleArrayType ("0,").getInt () == 0);
-            fail ("Didn't bomb");
-            assertTrue (simpleObjectType ("").getInt ("name") == 0);
             fail ("Didn't bomb");
           }
         catch (IOException e)
@@ -278,14 +280,53 @@ public class JSONTest
           }
         try
           {
-            expected_error = PARSER_ERR.ARRAY_LIMIT;
+            assertTrue (simpleArrayType ("0,").getInt () == 0);
+            fail ("Didn't bomb");
+          }
+        catch (IOException e)
+          {
+            checkException (e);
+          }
+        try
+          {
+            assertTrue (simpleObjectType ("").getInt ("name") == 0);
+            fail ("Didn't bomb");
+          }
+        catch (IOException e)
+          {
+            checkException (e);
+          }
+        expected_error = PARSER_ERR.ARRAY_LIMIT;
+        try
+          {
             assertTrue (simpleArrayType ("").getInt () == 0);
             fail ("Didn't bomb");
-            expected_error = null;
-            assertTrue ((ar = simpleArrayType ("4")).getInt () == 4);
-
-            expected_error = PARSER_ERR.ARRAY_LIMIT;
+          }
+        catch (IOException e)
+          {
+            checkException (e);
+          }
+        assertTrue ((ar = simpleArrayType ("4")).getInt () == 4);
+        try
+          {
             assertTrue (ar.getInt () == 0);
+            fail ("Didn't bomb");
+          }
+        catch (IOException e)
+          {
+            checkException (e);
+          }
+        expected_error = PARSER_ERR.SYNTAX;
+        badInt ("+1");
+        badInt ("-0");
+        badInt ("-");
+      }
+
+    void badInt (String string)
+      {
+        try
+          {
+            simpleArrayType   (string);
             fail ("Didn't bomb");
           }
         catch (IOException e)
