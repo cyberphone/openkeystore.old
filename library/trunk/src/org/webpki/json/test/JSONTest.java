@@ -16,10 +16,13 @@
  */
 package org.webpki.json.test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import java.security.Security;
 
@@ -28,6 +31,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONEncoder;
@@ -35,6 +39,7 @@ import org.webpki.json.JSONDecoder;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONParser;
 
 import org.webpki.util.ArrayUtil;
 
@@ -190,5 +195,116 @@ public class JSONTest
           }
         ESC escape = (ESC) cache.parse (ESCAPING.getBytes ("UTF-8"));
         assertTrue ("Escaping", escape.escape.equals ("A\n\tTAB\nNL /\\\""));
+      }
+    enum PARSER_ERR 
+      {
+        MISS_ARG   ("Missing argument"),
+        ARRAY_LIMIT ("Trying to read past of array limit: "),
+        SYNTAX     ("Syntax");
+        
+        String mess;
+        PARSER_ERR (String mess)
+          {
+            this.mess = mess;
+          }
+       
+    }
+    PARSER_ERR expected_error;
+    
+    void checkException (IOException e)
+      {
+        if (expected_error == null)
+          {
+            fail (e.getMessage ());
+          }
+        String error = e.getMessage ();
+        if (error.length () > expected_error.mess.length ())
+          {
+            error = error.substring (0, expected_error.mess.length ());
+          }
+        if (!expected_error.mess.equals (error))
+          {
+            fail ("Wrong error: " + e.getMessage ());
+          }
+      }
+    
+    @Test
+    public void ParserPrimitives () throws Exception
+      {
+        JSONArrayReader ar; 
+        JSONObjectReader or; 
+        assertTrue (simpleArrayType   ("4").getInt () == 4);
+        assertTrue (simpleObjectType  ("4").getInt ("name") == 4);
+        assertTrue (simpleArrayType   ("40000000000000000").getBigInteger ().equals (new BigInteger ("40000000000000000")));
+        assertTrue (simpleObjectType  ("40000000000000000").getBigInteger ("name").equals (new BigInteger ("40000000000000000")));
+        assertTrue (simpleArrayType   ("40000000000000000").getBigDecimal ().equals (new BigDecimal ("40000000000000000")));
+        assertTrue (simpleObjectType  ("40000000000000000").getBigDecimal ("name").equals (new BigDecimal ("40000000000000000")));
+        assertTrue (simpleArrayType   ("40000000000000000.45").getBigDecimal ().equals (new BigDecimal ("40000000000000000.45")));
+        assertTrue (simpleObjectType  ("40000000000000000.45").getBigDecimal ("name").equals (new BigDecimal ("40000000000000000.45")));
+        assertTrue (simpleArrayType   ("40000000000000000").getDouble () == new Double ("40000000000000000"));
+        assertTrue (simpleObjectType  ("40000000000000000").getDouble ("name") == new Double ("40000000000000000"));
+        assertTrue (simpleArrayType   ("40000000000000000.45").getDouble () == new Double ("40000000000000000.45"));
+        assertTrue (simpleObjectType  ("40000000000000000.45").getDouble ("name") == new Double ("40000000000000000.45"));
+        assertTrue (simpleArrayType   ("40.45e10").getDouble () == new Double ("40.45e10"));
+        assertTrue (simpleObjectType  ("40.45e10").getDouble ("name") == new Double ("40.45e10"));
+        assertTrue (simpleArrayType   ("true").getBoolean ());
+        assertTrue (simpleObjectType  ("true").getBoolean ("name"));
+        assertFalse (simpleArrayType  ("false").getBoolean ());
+        assertFalse (simpleObjectType ("false").getBoolean ("name"));
+        assertTrue (simpleArrayType   ("null").getIfNULL ());
+        assertTrue (simpleObjectType  ("null").getIfNULL ("name"));
+        assertFalse ((or = simpleObjectType ("3")).getIfNULL ("name"));
+        assertTrue (or.getInt ("name") == 3);
+        try
+          {
+            assertFalse ((ar = simpleArrayType ("3")).getIfNULL ());
+            assertTrue (ar.getInt () == 3);
+            assertTrue ((ar = simpleArrayType ("null")).getIfNULL ());
+
+            expected_error = PARSER_ERR.ARRAY_LIMIT;
+            assertTrue (ar.getInt () == 3);
+
+            expected_error = PARSER_ERR.MISS_ARG;
+            assertTrue (simpleArrayType (",0").getInt () == 0);
+            fail ("Didn't bomb");
+            assertTrue (simpleArrayType ("0,").getInt () == 0);
+            fail ("Didn't bomb");
+            assertTrue (simpleObjectType ("").getInt ("name") == 0);
+            fail ("Didn't bomb");
+          }
+        catch (IOException e)
+          {
+            checkException (e);
+          }
+        try
+          {
+            expected_error = PARSER_ERR.ARRAY_LIMIT;
+            assertTrue (simpleArrayType ("").getInt () == 0);
+            fail ("Didn't bomb");
+            expected_error = null;
+            assertTrue ((ar = simpleArrayType ("4")).getInt () == 4);
+
+            expected_error = PARSER_ERR.ARRAY_LIMIT;
+            assertTrue (ar.getInt () == 0);
+            fail ("Didn't bomb");
+          }
+        catch (IOException e)
+          {
+            checkException (e);
+          }
+      }
+
+    JSONObjectReader simpleObjectType (String string) throws IOException
+      {
+        return JSONParser.parse (new StringBuffer ("{\"name\":")
+                                  .append (string)
+                                  .append ('}').toString ());
+      }
+
+    private JSONArrayReader simpleArrayType (String string) throws IOException
+      {
+        return JSONParser.parse (new StringBuffer ("{\"name\":[")
+                                   .append (string)
+                                   .append ("]}").toString ()).getArray ("name");
       }
   }

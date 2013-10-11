@@ -92,6 +92,11 @@ public class JSONObjectWriter
         return this;
       }
 
+    public void setupForRewrite (String name)
+      {
+        root.properties.put (name, null);
+      }
+
     public JSONObjectWriter setString (String name, String value) throws IOException
       {
         return addProperty (name, new JSONValue (JSONTypes.STRING, value));

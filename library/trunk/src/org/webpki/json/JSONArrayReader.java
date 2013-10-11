@@ -17,6 +17,8 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import java.util.Vector;
 
@@ -51,7 +53,7 @@ public class JSONArrayReader
       {
         inRangeCheck ();
         JSONValue value = array.elementAt (index++);
-        if (value.type != expected_type)
+        if (!expected_type.isCompatible (value.type))
           {
             throw new IOException ("Incompatible request: " + expected_type + " versus " + value.type);
           }
@@ -61,6 +63,41 @@ public class JSONArrayReader
     public String getString () throws IOException
       {
         return (String) get (JSONTypes.STRING);
+      }
+
+    public int getInt () throws IOException
+      {
+        return Integer.parseInt ((String) get (JSONTypes.INTEGER));
+      }
+
+    public BigInteger getBigInteger () throws IOException
+      {
+        return new BigInteger ((String) get (JSONTypes.INTEGER));
+      }
+
+    public BigDecimal getBigDecimal () throws IOException
+      {
+        return new BigDecimal ((String) get (JSONTypes.DECIMAL));
+      }
+
+    public double getDouble () throws IOException
+      {
+        return new Double ((String) get (JSONTypes.FLOATING_POINT));
+      }
+
+    public boolean getBoolean () throws IOException
+      {
+        return new Boolean ((String) get (JSONTypes.BOOLEAN));
+      }
+
+    public boolean getIfNULL () throws IOException
+      {
+        if (getElementType () == JSONTypes.NULL)
+          {
+            scanAway ();
+            return true;
+          }
+        return false;
       }
 
     @SuppressWarnings("unchecked")

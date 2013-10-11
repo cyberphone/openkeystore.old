@@ -18,6 +18,7 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import java.security.PublicKey;
@@ -44,16 +45,16 @@ public class JSONObjectReader
         this.json = json;
       }
 
-    JSONValue getProperty (String name, JSONTypes expected) throws IOException
+    JSONValue getProperty (String name, JSONTypes expected_type) throws IOException
       {
         JSONValue value = json.properties.get (name);
         if (value == null)
           {
             throw new IOException ("Property \"" + name + "\" is missing");
           }
-        if (value.type != expected)
+        if (!expected_type.isCompatible (value.type))
           {
-            throw new IOException ("Type mismatch for \"" + name + "\": Read=" + value.type.toString () + ", Expected=" + expected.toString ());
+            throw new IOException ("Type mismatch for \"" + name + "\": Read=" + value.type.toString () + ", Expected=" + expected_type.toString ());
           }
         json.read_flag.add (name);
         return value;
@@ -98,6 +99,26 @@ public class JSONObjectReader
     public BigInteger getBigInteger (String name) throws IOException
       {
         return new BigInteger (getString (name, JSONTypes.INTEGER));
+      }
+
+    public BigDecimal getBigDecimal (String name) throws IOException
+      {
+        return new BigDecimal (getString (name, JSONTypes.DECIMAL));
+      }
+
+    public double getDouble (String name) throws IOException
+      {
+        return new Double (getString (name, JSONTypes.FLOATING_POINT));
+      }
+
+    public boolean getIfNULL (String name) throws IOException
+      {
+        if (getPropertyType (name) == JSONTypes.NULL)
+          {
+            scanAway (name);
+            return true;
+          }
+        return false;
       }
 
     public JSONObjectReader getObject (String name) throws IOException

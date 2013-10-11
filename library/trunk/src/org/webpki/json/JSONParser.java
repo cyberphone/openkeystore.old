@@ -41,6 +41,7 @@ public class JSONParser
     
     static final Pattern INTEGER_PATTERN = Pattern.compile ("^0|[-]?[1-9][0-9]*$");
     static final Pattern BOOLEAN_PATTERN = Pattern.compile ("^true|false$");
+    static final Pattern DECIMAL_PATTERN = Pattern.compile ("^[-]?[0-9]+[\\.][0-9]+$");
     
     int index;
     
@@ -173,14 +174,43 @@ public class JSONParser
             index++;
           }
         String result = temp_buffer.toString ();
-        boolean number = INTEGER_PATTERN.matcher (result).matches ();
-        if (!number && !BOOLEAN_PATTERN.matcher (result).matches ())
+        if (result.length () == 0)
           {
- //           throw new IOException ("Expected integer or boolean, got: " + result);
- // TODO INCOMPLETE!!!
-            return new JSONValue (JSONTypes.DECIMAL, result);
+            throw new IOException ("Missing argument");
           }
-        return new JSONValue (number ? JSONTypes.INTEGER : JSONTypes.BOOLEAN, result);
+        JSONTypes type = JSONTypes.INTEGER;
+        if (!INTEGER_PATTERN.matcher (result).matches ())
+          {
+            if (BOOLEAN_PATTERN.matcher (result).matches ())
+              {
+                type = JSONTypes.BOOLEAN;
+              }
+            else if (result.equals ("null"))
+              {
+                type = JSONTypes.NULL;
+              }
+            else if (DECIMAL_PATTERN.matcher (result).matches ())
+              {
+                type = JSONTypes.DECIMAL;
+              }
+            else if (result.toLowerCase ().indexOf ('e') < 0)
+              {
+                throw new IOException ("Undecodable argument");
+              }
+            else
+              {
+                try
+                  {
+                    Double.parseDouble (result);
+                    type = JSONTypes.FLOATING_POINT;
+                  }
+                catch (NumberFormatException e)
+                  {
+                    throw new IOException (e);
+                  }
+              }
+          }
+        return new JSONValue (type, result);
       }
 
     JSONValue scanQuotedString () throws IOException
