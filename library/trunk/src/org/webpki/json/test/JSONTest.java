@@ -40,6 +40,7 @@ import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONParser;
+import org.webpki.json.JSONTypes;
 
 import org.webpki.util.ArrayUtil;
 
@@ -200,6 +201,7 @@ public class JSONTest
       {
         MISS_ARG   ("Missing argument"),
         ARRAY_LIMIT ("Trying to read past of array limit: "),
+        EXPECTED    ("Expected '"),
         SYNTAX     ("Undecodable argument");
         
         String mess;
@@ -233,6 +235,8 @@ public class JSONTest
       {
         JSONArrayReader ar; 
         JSONObjectReader or; 
+        assertTrue (simpleArrayType   ("10  ").getInt () == 10);
+        assertTrue (simpleObjectType  ("10  ").getInt ("name") == 10);
         assertTrue (simpleArrayType   ("4").getInt () == 4);
         assertTrue (simpleObjectType  ("4").getInt ("name") == 4);
         assertTrue (simpleArrayType   ("40000000000000000").getBigInteger ().equals (new BigInteger ("40000000000000000")));
@@ -241,12 +245,15 @@ public class JSONTest
         assertTrue (simpleObjectType  ("40000000000000000").getBigDecimal ("name").equals (new BigDecimal ("40000000000000000")));
         assertTrue (simpleArrayType   ("40000000000000000.45").getBigDecimal ().equals (new BigDecimal ("40000000000000000.45")));
         assertTrue (simpleObjectType  ("40000000000000000.45").getBigDecimal ("name").equals (new BigDecimal ("40000000000000000.45")));
+        assertTrue (simpleArrayType   ("0.0").getBigDecimal ().equals (new BigDecimal ("0.0")));
+        assertTrue (simpleObjectType  ("0.0").getBigDecimal ("name").equals (new BigDecimal ("0.0")));
         assertTrue (simpleArrayType   ("40000000000000000").getDouble () == new Double ("40000000000000000"));
         assertTrue (simpleObjectType  ("40000000000000000").getDouble ("name") == new Double ("40000000000000000"));
-        assertTrue (simpleArrayType   ("40000000000000000.45").getDouble () == new Double ("40000000000000000.45"));
-        assertTrue (simpleObjectType  ("40000000000000000.45").getDouble ("name") == new Double ("40000000000000000.45"));
-        assertTrue (simpleArrayType   ("40.45e10").getDouble () == new Double ("40.45e10"));
-        assertTrue (simpleObjectType  ("40.45e10").getDouble ("name") == new Double ("40.45e10"));
+        assertTrue (simpleArrayType   ("40000000000000000.45").getDouble () == 40000000000000000.45);
+        assertTrue (simpleObjectType  ("40000000000000000.45").getDouble ("name") == 40000000000000000.45);
+        assertTrue (simpleArrayType   ("40.45e10").getDouble () == 40.45e10);
+        assertTrue (simpleObjectType  ("40.45e10").getDouble ("name") == 40.45e10);
+        assertTrue (simpleArrayType   ("   true   ").getBoolean ());
         assertTrue (simpleArrayType   ("true").getBoolean ());
         assertTrue (simpleObjectType  ("true").getBoolean ("name"));
         assertFalse (simpleArrayType  ("false").getBoolean ());
@@ -317,22 +324,44 @@ public class JSONTest
             checkException (e);
           }
         expected_error = PARSER_ERR.SYNTAX;
-        badInt ("+1");
-        badInt ("-0");
-        badInt ("-");
+        badArgument ("-");
+        badArgument ("flase");
+        expected_error = PARSER_ERR.EXPECTED;
+        badArgument ("1.0 e4");
+        floatingPoint ("1.0e4", 1.0e4);
+        floatingPoint (     "1.0e4"    , 1.0e4);
+        floatingPoint ("-0.0", -0.0);
+        floatingPoint ("+0.0", +0.0);
+        floatingPoint ("+1", +1);
+        floatingPoint ("-0", -0);
+        floatingPoint (".1", .1);
+        floatingPoint ("1.", 1.0);
+        floatingPoint ("01", 01);
       }
 
-    void badInt (String string)
+    private void badArgument (String string)
       {
         try
           {
-            simpleArrayType   (string);
+            simpleObjectType (string);
+            fail ("Didn't bomb");
+            simpleArrayType (string);
             fail ("Didn't bomb");
           }
         catch (IOException e)
           {
             checkException (e);
           }
+      }
+
+    void floatingPoint (String string, double ref) throws Exception
+      {
+        assertTrue (simpleArrayType  (string).getDouble () == ref);
+        assertTrue (simpleObjectType (string).getDouble ("name") == ref);
+        assertTrue (simpleArrayType  (string).getElementType () == JSONTypes.DOUBLE);
+        assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.DOUBLE);
+        assertTrue (simpleArrayType  (string + "  ").getElementType () == JSONTypes.DOUBLE);
+        assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.DOUBLE);
       }
 
     JSONObjectReader simpleObjectType (String string) throws IOException

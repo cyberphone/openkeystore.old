@@ -39,9 +39,10 @@ public class JSONParser
     static final char COMMA_CHARACTER     = ',';
     static final char BACK_SLASH          = '\\';
     
-    static final Pattern INTEGER_PATTERN = Pattern.compile ("^0|[-]?[1-9][0-9]*$");
-    static final Pattern BOOLEAN_PATTERN = Pattern.compile ("^true|false$");
-    static final Pattern DECIMAL_PATTERN = Pattern.compile ("^[-]?[0-9]+[\\.][0-9]+$");
+    static final Pattern INTEGER_PATTERN         = Pattern.compile ("^(0)|(-?[1-9][0-9]*)$");
+    static final Pattern BOOLEAN_PATTERN         = Pattern.compile ("^true|false$");
+    static final Pattern DECIMAL_INITIAL_PATTERN = Pattern.compile ("^(\\+|-)?[0-9]+[\\.][0-9]+$");
+    static final Pattern DECIMAL_REJECT_PATTERN  = Pattern.compile ("^(\\+.*)|([-][0]*[\\.][0]*)$");
     
     int index;
     
@@ -93,7 +94,7 @@ public class JSONParser
     JSONValue scanObject (JSONObject holder) throws IOException
       {
         boolean next = false;
-        while (testChar () != RIGHT_CURLY_BRACKET)
+        while (testNextNonWhiteSpaceChar () != RIGHT_CURLY_BRACKET)
           {
             if (next)
               {
@@ -130,7 +131,7 @@ public class JSONParser
         Vector<JSONValue> array = new Vector<JSONValue> ();
         JSONValue value = null;
         boolean next = false;
-        while (testChar () != RIGHT_BRACKET)
+        while (testNextNonWhiteSpaceChar () != RIGHT_BRACKET)
           {
             if (next)
               {
@@ -168,10 +169,13 @@ public class JSONParser
         index--;
         StringBuffer temp_buffer = new StringBuffer ();
         char c;
-        while (!isWhiteSpace (c = testChar ()) && c != COMMA_CHARACTER && c != RIGHT_BRACKET && c != RIGHT_CURLY_BRACKET)
+        while ((c = testNextNonWhiteSpaceChar ()) != COMMA_CHARACTER && c != RIGHT_BRACKET && c != RIGHT_CURLY_BRACKET)
           {
+            if (isWhiteSpace (c = nextChar ()))
+              {
+                break;
+              }
             temp_buffer.append (c);
-            index++;
           }
         String result = temp_buffer.toString ();
         if (result.length () == 0)
@@ -189,13 +193,10 @@ public class JSONParser
               {
                 type = JSONTypes.NULL;
               }
-            else if (DECIMAL_PATTERN.matcher (result).matches ())
+            else if (DECIMAL_INITIAL_PATTERN.matcher (result).matches ())
               {
-                type = JSONTypes.DECIMAL;
-              }
-            else if (result.toLowerCase ().indexOf ('e') < 0)
-              {
-                throw new IOException ("Undecodable argument");
+                type = DECIMAL_REJECT_PATTERN.matcher (result).matches () ?
+                                                         JSONTypes.DOUBLE : JSONTypes.DECIMAL;
               }
             else
               {
@@ -206,7 +207,7 @@ public class JSONParser
                   }
                 catch (NumberFormatException e)
                   {
-                    throw new IOException (e);
+                    throw new IOException ("Undecodable argument: " + result + " msg=" + e.getMessage ());
                   }
               }
           }
@@ -325,7 +326,7 @@ public class JSONParser
         return c >= '0' && c <= '9';
       }
 
-    char testChar () throws IOException
+    char testNextNonWhiteSpaceChar () throws IOException
       {
         int save = index;
         char c = scan ();
