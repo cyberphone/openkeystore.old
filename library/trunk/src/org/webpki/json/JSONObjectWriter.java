@@ -66,7 +66,7 @@ public class JSONObjectWriter
     
     
     /**
-     * To be used for updating read JSON objects.
+     * For updating already read JSON objects.
      */
     public JSONObjectWriter (JSONObjectReader reader)
       {
