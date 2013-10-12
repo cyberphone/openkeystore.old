@@ -17,8 +17,13 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
+import java.util.Date;
 import java.util.Vector;
+
+import org.webpki.util.ISODateTime;
 
 /**
  * For writing array elements.
@@ -45,7 +50,32 @@ public class JSONArrayWriter
 
     public JSONArrayWriter setInt (int value) throws IOException
       {
-        return add (JSONTypes.INTEGER, String.valueOf (value));
+        return add (JSONTypes.INTEGER, Integer.toString (value));
+      }
+
+    public JSONArrayWriter setLong (long value) throws IOException
+      {
+        return add (JSONTypes.INTEGER, Long.toString (value));
+      }
+
+    public JSONArrayWriter setBigDecimal (BigDecimal value) throws IOException
+      {
+        return add (JSONTypes.INTEGER, value.toString ());
+      }
+
+    public JSONArrayWriter setBigInteger (BigInteger value) throws IOException
+      {
+        return add (JSONTypes.INTEGER, value.toString ());
+      }
+
+    public JSONArrayWriter setDouble (double value) throws IOException
+      {
+        return add (JSONTypes.DOUBLE, Double.toString (value));
+      }
+
+    public JSONArrayWriter setDateTime (Date date_time) throws IOException
+      {
+        return setString (ISODateTime.formatDateTime (date_time));
       }
 
     public JSONArrayWriter setArray () throws IOException

@@ -81,6 +81,11 @@ public class JSONObjectReader
         return Integer.parseInt (getString (name, JSONTypes.INTEGER));
       }
 
+    public long getLong (String name) throws IOException
+      {
+        return Long.parseLong (getString (name, JSONTypes.INTEGER));
+      }
+
     public boolean getBoolean (String name) throws IOException
       {
         return new Boolean (getString (name, JSONTypes.BOOLEAN));

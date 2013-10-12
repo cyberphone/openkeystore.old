@@ -21,10 +21,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import java.security.Security;
+import java.util.Date;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -45,7 +47,7 @@ import org.webpki.json.JSONTypes;
 import org.webpki.util.ArrayUtil;
 
 /**
- * Testing public keys
+ * JSON JUnit suite
  */
 public class JSONTest
   {
@@ -196,21 +198,26 @@ public class JSONTest
           }
         ESC escape = (ESC) cache.parse (ESCAPING.getBytes ("UTF-8"));
         assertTrue ("Escaping", escape.escape.equals ("A\n\tTAB\nNL /\\\""));
+        byte[] data = new Writer ().serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
+        Reader reader = (Reader) cache.parse (data);
+        byte[] output = JSONObjectWriter.serializeParsedJSONDocument (reader, JSONOutputFormats.PRETTY_PRINT);
+        assertTrue (ArrayUtil.compare (data, output));
       }
+
     enum PARSER_ERR 
       {
-        MISS_ARG   ("Missing argument"),
+        MISS_ARG    ("Missing argument"),
         ARRAY_LIMIT ("Trying to read past of array limit: "),
         EXPECTED    ("Expected '"),
-        SYNTAX     ("Undecodable argument");
+        SYNTAX      ("Undecodable argument");
         
         String mess;
         PARSER_ERR (String mess)
           {
             this.mess = mess;
           }
-       
-    }
+      }
+
     PARSER_ERR expected_error;
     
     void checkException (IOException e)
@@ -325,10 +332,14 @@ public class JSONTest
           }
         expected_error = PARSER_ERR.SYNTAX;
         badArgument ("-");
+        badArgument (".");
+        badArgument ("e-3");
         badArgument ("flase");
         expected_error = PARSER_ERR.EXPECTED;
         badArgument ("1.0 e4");
         floatingPoint ("1.0e4", 1.0e4);
+        floatingPoint ("0.9999e-99", 0.9999e-99);
+        floatingPoint ("1.0E+4", 10000);
         floatingPoint (     "1.0e4"    , 1.0e4);
         floatingPoint ("-0.0", -0.0);
         floatingPoint ("+0.0", +0.0);
@@ -337,6 +348,53 @@ public class JSONTest
         floatingPoint (".1", .1);
         floatingPoint ("1.", 1.0);
         floatingPoint ("01", 01);
+        longVariables (1235454234343434l);
+        longVariables (0xa885abafaba0l);
+        bigDecimalValues (new BigDecimal ("3232323243243234234243234234243243243243243234243"));
+        bigDecimalValues (new BigDecimal ("323232324324.3234234243234234243243243243243234243"));
+        bigIntegerValues (new BigInteger ("3232323243243234234243234234243243243243243234243"));
+        dateTime (new Date ());
+      }
+
+    void dateTime (Date value) throws IOException
+      {
+        value = new Date ((value.getTime () / 1000) * 1000);
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setDateTime (value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getDateTime ().getTime ().equals (value));
+        or = new JSONObjectWriter ();
+        or.setDateTime ("name", value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getDateTime("name").getTime ().equals (value));
+      }
+
+    void bigIntegerValues (BigInteger value) throws IOException
+      {
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setBigInteger (value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getBigInteger ().equals (value));
+        or = new JSONObjectWriter ();
+        or.setBigInteger ("name", value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBigInteger("name").equals (value));
+      }
+
+    void bigDecimalValues (BigDecimal value) throws IOException
+      {
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setBigDecimal (value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getBigDecimal ().equals (value));
+        or = new JSONObjectWriter ();
+        or.setBigDecimal ("name", value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBigDecimal("name").equals (value));
+      }
+
+    void longVariables (long value) throws IOException
+      {
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setLong (value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getLong () == value);
+        or = new JSONObjectWriter ();
+        or.setLong ("name", value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getLong ("name") == value);
       }
 
     private void badArgument (String string)
@@ -362,6 +420,9 @@ public class JSONTest
         assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.DOUBLE);
         assertTrue (simpleArrayType  (string + "  ").getElementType () == JSONTypes.DOUBLE);
         assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.DOUBLE);
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setDouble (ref);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getDouble () == ref);
       }
 
     JSONObjectReader simpleObjectType (String string) throws IOException

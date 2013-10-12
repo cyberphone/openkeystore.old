@@ -107,6 +107,11 @@ public class JSONObjectWriter
         return addProperty (name, new JSONValue (JSONTypes.INTEGER, Integer.toString (value)));
       }
 
+    public JSONObjectWriter setLong (String name, long value) throws IOException
+      {
+        return addProperty (name, new JSONValue (JSONTypes.INTEGER, Long.toString (value)));
+      }
+
     public JSONObjectWriter setBigInteger (String name, BigInteger value) throws IOException
       {
         return addProperty (name, new JSONValue (JSONTypes.INTEGER, value.toString ()));
@@ -122,9 +127,9 @@ public class JSONObjectWriter
         return addProperty (name, new JSONValue (JSONTypes.BOOLEAN, Boolean.toString (value)));
       }
 
-    public JSONObjectWriter setDateTime (String name, Date t) throws IOException
+    public JSONObjectWriter setDateTime (String name, Date date_time) throws IOException
       {
-        return setString (name, ISODateTime.formatDateTime (t));
+        return setString (name, ISODateTime.formatDateTime (date_time));
       }
 
     public JSONObjectWriter setBinary (String name, byte[] value) throws IOException 

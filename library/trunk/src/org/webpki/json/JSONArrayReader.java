@@ -20,7 +20,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import java.util.GregorianCalendar;
 import java.util.Vector;
+
+import org.webpki.util.ISODateTime;
 
 /**
  * For writing array elements.
@@ -70,6 +73,11 @@ public class JSONArrayReader
         return Integer.parseInt ((String) get (JSONTypes.INTEGER));
       }
 
+    public long getLong () throws NumberFormatException, IOException
+      {
+        return Long.parseLong ((String) get (JSONTypes.INTEGER));
+      }
+
     public BigInteger getBigInteger () throws IOException
       {
         return new BigInteger ((String) get (JSONTypes.INTEGER));
@@ -78,6 +86,11 @@ public class JSONArrayReader
     public BigDecimal getBigDecimal () throws IOException
       {
         return new BigDecimal ((String) get (JSONTypes.DECIMAL));
+      }
+
+    public GregorianCalendar getDateTime () throws IOException
+      {
+        return ISODateTime.parseDateTime (getString ());
       }
 
     public double getDouble () throws IOException
