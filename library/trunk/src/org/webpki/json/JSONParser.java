@@ -318,7 +318,7 @@ public class JSONParser
             case 'F':
               return (char) (c - 'A' + 10);
           }
-        throw new IOException ("Bad hex in \\u esscape: " + c);
+        throw new IOException ("Bad hex in \\u escape: " + c);
       }
 
     boolean isNumber (char c)
