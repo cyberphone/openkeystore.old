@@ -112,12 +112,12 @@ public class ProvSess
         
         byte[] session_key;
         
-        public ECPublicKey generateEphemeralKey () throws IOException
+        public ECPublicKey generateEphemeralKey (KeyAlgorithms ec_key_algorithm) throws IOException
           {
             try
               {
                 KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
-                ECGenParameterSpec eccgen = new ECGenParameterSpec (KeyAlgorithms.P_256.getJCEName ());
+                ECGenParameterSpec eccgen = new ECGenParameterSpec (ec_key_algorithm.getJCEName ());
                 generator.initialize (eccgen, new SecureRandom ());
                 KeyPair kp = generator.generateKeyPair();
                 server_ec_private_key = (ECPrivateKey) kp.getPrivate ();
@@ -248,6 +248,7 @@ public class ProvSess
     static String override_session_key_algorithm; 
 
     String session_key_algorithm = SecureKeyStore.ALGORITHM_SESSION_ATTEST_1;
+    
     
     static final String ISSUER_URI = "http://issuer.example.com/provsess";
     
@@ -403,7 +404,7 @@ public class ProvSess
                 device.sks.createProvisioningSession (sess_key_alg,
                                                       privacy_enabled,
                                                       server_session_id,
-                                                      server_ephemeral_key = ext_epk == null ? server_sess_key.generateEphemeralKey () : ext_epk,
+                                                      server_ephemeral_key = ext_epk == null ? server_sess_key.generateEphemeralKey (KeyAlgorithms.P_256) : ext_epk,
                                                       ISSUER_URI,
                                                       key_management_key,
                                                       (int)(client_time.getTime () / 1000),

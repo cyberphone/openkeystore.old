@@ -83,12 +83,12 @@ public class SoftHSM implements ServerCryptoInterface
     byte[] session_key;
   
     @Override
-    public ECPublicKey generateEphemeralKey () throws IOException
+    public ECPublicKey generateEphemeralKey (KeyAlgorithms ec_key_algorithm) throws IOException
       {
         try
           {
             KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
-            ECGenParameterSpec eccgen = new ECGenParameterSpec (KeyAlgorithms.P_256.getJCEName ());
+            ECGenParameterSpec eccgen = new ECGenParameterSpec (ec_key_algorithm.getJCEName ());
             generator.initialize (eccgen, new SecureRandom ());
             KeyPair kp = generator.generateKeyPair();
             server_ec_private_key = (ECPrivateKey) kp.getPrivate ();

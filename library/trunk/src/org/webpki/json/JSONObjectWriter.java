@@ -127,6 +127,11 @@ public class JSONObjectWriter
         return addProperty (name, new JSONValue (JSONTypes.BOOLEAN, Boolean.toString (value)));
       }
 
+    public JSONObjectWriter setNULL (String name) throws IOException
+      {
+        return addProperty (name, new JSONValue (JSONTypes.NULL, "null"));
+      }
+
     public JSONObjectWriter setDateTime (String name, Date date_time) throws IOException
       {
         return setString (name, ISODateTime.formatDateTime (date_time));

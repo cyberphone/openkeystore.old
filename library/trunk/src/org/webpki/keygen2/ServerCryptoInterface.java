@@ -25,9 +25,11 @@ import java.security.cert.X509Certificate;
 
 import java.security.interfaces.ECPublicKey;
 
+import org.webpki.crypto.KeyAlgorithms;
+
 public interface ServerCryptoInterface extends Serializable
   {
-    ECPublicKey generateEphemeralKey () throws IOException;
+    ECPublicKey generateEphemeralKey (KeyAlgorithms ec_key_algorithm) throws IOException;
     
     void generateAndVerifySessionKey (ECPublicKey client_ephemeral_key,
                                       byte[] kdf_data,

@@ -73,6 +73,16 @@ public class JSONArrayWriter
         return add (JSONTypes.DOUBLE, Double.toString (value));
       }
 
+    public JSONArrayWriter setBoolean (boolean value) throws IOException
+      {
+        return add (JSONTypes.BOOLEAN, Boolean.toString (value));
+      }
+
+    public JSONArrayWriter setNULL () throws IOException
+      {
+        return add (JSONTypes.NULL, "null");
+      }
+
     public JSONArrayWriter setDateTime (Date date_time) throws IOException
       {
         return setString (ISODateTime.formatDateTime (date_time));

@@ -118,7 +118,7 @@ public class ProvisioningInitializationRequestEncoder extends ProvisioningInitia
         super.session_key_limit = server_state.session_key_limit = session_key_limit;
         super.nonce = server_state.vm_nonce;
         server_session_id = server_state.server_session_id;
-        server_ephemeral_key = server_state.server_ephemeral_key = server_state.server_crypto_interface.generateEphemeralKey ();
+        server_ephemeral_key = server_state.server_ephemeral_key = server_state.generateEphemeralKey ();
         for (String client_attribute : server_state.basic_capabilities.client_attributes)
           {
             client_attributes.add (client_attribute);

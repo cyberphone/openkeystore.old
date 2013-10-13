@@ -167,43 +167,6 @@ public class JSONTest
           }
       }
 
-    void checkException (Exception e, String compare_message)
-      {
-        String m = e.getMessage ();
-        if (m == null || !m.equals (compare_message))
-          {
-            fail ("Exception: " + m);
-          }
-      }
-    
-    static final String ESCAPING = "{ \"@context\" : \"http://example.com/escape\", " +
-                                     "\"@qualifier\" : \"Escaper\", " +
-                                     "\"Esca\\npe\":\"\\u0041\\u000A\\tTAB\\nNL /\\\\\\\"\" }";
-    static final String ESCAPING2 = "{ \"@context\" : \"http://example.com/escape\", " +
-                                    "\"Esca\\npe\":\"\\u0041\\u000A\\tTAB\\nNL /\\\\\\\"\" }";
-    @Test
-    public void XSDTest1 () throws Exception
-      {
-        JSONDecoderCache cache = new JSONDecoderCache ();        
-        cache.addToCache (Reader.class);
-        cache.addToCache (ESC.class);
-        try
-          {
-            cache.parse (ESCAPING2.getBytes ("UTF-8"));
-            fail ("Should have failed");
-          }
-        catch (Exception e)
-          {
-            checkException (e, "Unknown JSONDecoder type: http://example.com/escape");
-          }
-        ESC escape = (ESC) cache.parse (ESCAPING.getBytes ("UTF-8"));
-        assertTrue ("Escaping", escape.escape.equals ("A\n\tTAB\nNL /\\\""));
-        byte[] data = new Writer ().serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
-        Reader reader = (Reader) cache.parse (data);
-        byte[] output = JSONObjectWriter.serializeParsedJSONDocument (reader, JSONOutputFormats.PRETTY_PRINT);
-        assertTrue (ArrayUtil.compare (data, output));
-      }
-
     enum PARSER_ERR 
       {
         MISS_ARG    ("Missing argument"),
@@ -237,6 +200,136 @@ public class JSONTest
           }
       }
     
+    void checkException (Exception e, String compare_message)
+      {
+        String m = e.getMessage ();
+        if (m == null || !m.equals (compare_message))
+          {
+            fail ("Exception: " + m);
+          }
+      }
+
+    void booleanValues (boolean value) throws IOException
+      {
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setBoolean (value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getBoolean () == value);
+        or = new JSONObjectWriter ();
+        or.setBoolean ("name", value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBoolean ("name") == value);
+      }
+
+    void dateTime (Date value) throws IOException
+      {
+        value = new Date ((value.getTime () / 1000) * 1000);
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setDateTime (value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getDateTime ().getTime ().equals (value));
+        or = new JSONObjectWriter ();
+        or.setDateTime ("name", value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getDateTime("name").getTime ().equals (value));
+      }
+
+    void bigIntegerValues (BigInteger value) throws IOException
+      {
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setBigInteger (value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getBigInteger ().equals (value));
+        or = new JSONObjectWriter ();
+        or.setBigInteger ("name", value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBigInteger("name").equals (value));
+      }
+
+    void bigDecimalValues (BigDecimal value) throws IOException
+      {
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setBigDecimal (value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getBigDecimal ().equals (value));
+        or = new JSONObjectWriter ();
+        or.setBigDecimal ("name", value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBigDecimal("name").equals (value));
+      }
+
+    void longVariables (long value) throws IOException
+      {
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setLong (value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getLong () == value);
+        or = new JSONObjectWriter ();
+        or.setLong ("name", value);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getLong ("name") == value);
+      }
+
+    void badArgument (String string)
+      {
+        try
+          {
+            simpleObjectType (string);
+            fail ("Didn't bomb");
+            simpleArrayType (string);
+            fail ("Didn't bomb");
+          }
+        catch (IOException e)
+          {
+            checkException (e);
+          }
+      }
+
+    void floatingPoint (String string, double ref) throws Exception
+      {
+        assertTrue (simpleArrayType  (string).getDouble () == ref);
+        assertTrue (simpleObjectType (string).getDouble ("name") == ref);
+        assertTrue (simpleArrayType  (string).getElementType () == JSONTypes.DOUBLE);
+        assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.DOUBLE);
+        assertTrue (simpleArrayType  (string + "  ").getElementType () == JSONTypes.DOUBLE);
+        assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.DOUBLE);
+        JSONObjectWriter or = new JSONObjectWriter ();
+        or.setArray ("name").setDouble (ref);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getDouble () == ref);
+      }
+
+    JSONObjectReader simpleObjectType (String string) throws IOException
+      {
+        return JSONParser.parse (new StringBuffer ("{\"name\":")
+                                  .append (string)
+                                  .append ('}').toString ());
+      }
+
+    JSONArrayReader simpleArrayType (String string) throws IOException
+      {
+        return JSONParser.parse (new StringBuffer ("{\"name\":[")
+                                   .append (string)
+                                   .append ("]}").toString ()).getArray ("name");
+      }
+    
+    static final String ESCAPING = "{ \"@context\" : \"http://example.com/escape\", " +
+                                     "\"@qualifier\" : \"Escaper\", " +
+                                     "\"Esca\\npe\":\"\\u0041\\u000A\\tTAB\\nNL /\\\\\\\"\" }";
+    static final String ESCAPING2 = "{ \"@context\" : \"http://example.com/escape\", " +
+                                    "\"Esca\\npe\":\"\\u0041\\u000A\\tTAB\\nNL /\\\\\\\"\" }";
+    @Test
+    public void DocumentCache () throws Exception
+      {
+        JSONDecoderCache cache = new JSONDecoderCache ();        
+        cache.addToCache (Reader.class);
+        cache.addToCache (ESC.class);
+        try
+          {
+            cache.parse (ESCAPING2.getBytes ("UTF-8"));
+            fail ("Should have failed");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "Unknown JSONDecoder type: http://example.com/escape");
+          }
+        ESC escape = (ESC) cache.parse (ESCAPING.getBytes ("UTF-8"));
+        assertTrue ("Escaping", escape.escape.equals ("A\n\tTAB\nNL /\\\""));
+        byte[] data = new Writer ().serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
+        Reader reader = (Reader) cache.parse (data);
+        byte[] output = JSONObjectWriter.serializeParsedJSONDocument (reader, JSONOutputFormats.PRETTY_PRINT);
+        assertTrue (ArrayUtil.compare (data, output));
+      }
+
     @Test
     public void ParserPrimitives () throws Exception
       {
@@ -354,88 +447,7 @@ public class JSONTest
         bigDecimalValues (new BigDecimal ("323232324324.3234234243234234243243243243243234243"));
         bigIntegerValues (new BigInteger ("3232323243243234234243234234243243243243243234243"));
         dateTime (new Date ());
-      }
-
-    void dateTime (Date value) throws IOException
-      {
-        value = new Date ((value.getTime () / 1000) * 1000);
-        JSONObjectWriter or = new JSONObjectWriter ();
-        or.setArray ("name").setDateTime (value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getDateTime ().getTime ().equals (value));
-        or = new JSONObjectWriter ();
-        or.setDateTime ("name", value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getDateTime("name").getTime ().equals (value));
-      }
-
-    void bigIntegerValues (BigInteger value) throws IOException
-      {
-        JSONObjectWriter or = new JSONObjectWriter ();
-        or.setArray ("name").setBigInteger (value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getBigInteger ().equals (value));
-        or = new JSONObjectWriter ();
-        or.setBigInteger ("name", value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBigInteger("name").equals (value));
-      }
-
-    void bigDecimalValues (BigDecimal value) throws IOException
-      {
-        JSONObjectWriter or = new JSONObjectWriter ();
-        or.setArray ("name").setBigDecimal (value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getBigDecimal ().equals (value));
-        or = new JSONObjectWriter ();
-        or.setBigDecimal ("name", value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getBigDecimal("name").equals (value));
-      }
-
-    void longVariables (long value) throws IOException
-      {
-        JSONObjectWriter or = new JSONObjectWriter ();
-        or.setArray ("name").setLong (value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getLong () == value);
-        or = new JSONObjectWriter ();
-        or.setLong ("name", value);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getLong ("name") == value);
-      }
-
-    private void badArgument (String string)
-      {
-        try
-          {
-            simpleObjectType (string);
-            fail ("Didn't bomb");
-            simpleArrayType (string);
-            fail ("Didn't bomb");
-          }
-        catch (IOException e)
-          {
-            checkException (e);
-          }
-      }
-
-    void floatingPoint (String string, double ref) throws Exception
-      {
-        assertTrue (simpleArrayType  (string).getDouble () == ref);
-        assertTrue (simpleObjectType (string).getDouble ("name") == ref);
-        assertTrue (simpleArrayType  (string).getElementType () == JSONTypes.DOUBLE);
-        assertTrue (simpleObjectType (string).getPropertyType ("name") == JSONTypes.DOUBLE);
-        assertTrue (simpleArrayType  (string + "  ").getElementType () == JSONTypes.DOUBLE);
-        assertTrue (simpleObjectType (string + "  ").getPropertyType ("name") == JSONTypes.DOUBLE);
-        JSONObjectWriter or = new JSONObjectWriter ();
-        or.setArray ("name").setDouble (ref);
-        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getDouble () == ref);
-      }
-
-    JSONObjectReader simpleObjectType (String string) throws IOException
-      {
-        return JSONParser.parse (new StringBuffer ("{\"name\":")
-                                  .append (string)
-                                  .append ('}').toString ());
-      }
-
-    private JSONArrayReader simpleArrayType (String string) throws IOException
-      {
-        return JSONParser.parse (new StringBuffer ("{\"name\":[")
-                                   .append (string)
-                                   .append ("]}").toString ()).getArray ("name");
+        booleanValues (true);
+        booleanValues (false);
       }
   }

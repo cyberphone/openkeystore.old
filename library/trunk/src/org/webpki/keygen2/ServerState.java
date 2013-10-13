@@ -1183,6 +1183,8 @@ public class ServerState implements Serializable
     boolean privacy_enabled;
     boolean privacy_enabled_set;
     
+    KeyAlgorithms ephemeral_key_algorithm = KeyAlgorithms.P_256;
+    
     public void setPrivacyEnabled (boolean flag) throws IOException
       {
         if (!request_phase || current_phase != ProtocolPhase.PLATFORM_NEGOTIATION)
@@ -1194,7 +1196,12 @@ public class ServerState implements Serializable
       }
 
 
+    public void setEphemeralKeyAlgorithm (KeyAlgorithms ephemeral_key_algorithm)
+      {
+        this.ephemeral_key_algorithm = ephemeral_key_algorithm;
+      }
  
+
     // Constructor
     public ServerState (ServerCryptoInterface server_crypto_interface)
       {
@@ -1498,5 +1505,10 @@ public class ServerState implements Serializable
     public Object getServiceSpecificObject (String name)
       {
         return service_specific_objects.get (name);
+      }
+
+    public ECPublicKey generateEphemeralKey () throws IOException
+      {
+        return server_crypto_interface.generateEphemeralKey (ephemeral_key_algorithm);
       }
   }
