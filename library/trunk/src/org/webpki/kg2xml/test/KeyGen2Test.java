@@ -200,6 +200,8 @@ public class KeyGen2Test
     
     boolean virtual_machine;
     
+    boolean brain_pool;
+    
     boolean get_client_attributes;
     
     boolean https;  // Use server-cert
@@ -271,7 +273,7 @@ public class KeyGen2Test
             DeviceInfo dev = sks.getDeviceInfo ();
             fos.write (("<b>SKS Description: " + dev.getVendorDescription () +
                         "<br>SKS Vendor: " + dev.getVendorName () +
-                        "<br>SKS API Level: " + dev.getAPILevel () +
+                        "<br>SKS API Level: " + (dev.getAPILevel () / 100) + '.' + (dev.getAPILevel () % 100) +
                         "<br>SKS Interface: " + (sks instanceof WSSpecific ? "WebService" : "Direct") +
                         "<br>&nbsp<br></b>").getBytes ("UTF-8"));
           }
@@ -980,6 +982,10 @@ public class KeyGen2Test
               {
                 server_state.setPrivacyEnabled (true);
               }
+            if (brain_pool)
+              {
+                server_state.setEphemeralKeyAlgorithm (KeyAlgorithms.BP_P_256);
+              }
 
             ////////////////////////////////////////////////////////////////////////////////////
             // First keygen2 request
@@ -1158,7 +1164,7 @@ public class KeyGen2Test
             KeySpecifier key_alg = null;
             if (ecc_key)
               {
-                key_alg = new KeySpecifier (KeyAlgorithms.P_256);
+                key_alg = new KeySpecifier (KeyAlgorithms.NIST_P_256);
               }
             else if (ask_for_exponent)
               {
@@ -1242,7 +1248,7 @@ public class KeyGen2Test
               }
             if (two_keys)
               {
-                server_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.P_256), pin_policy);
+                server_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.NIST_P_256), pin_policy);
               }
 
             return new KeyCreationRequestEncoder (server_state, KEY_INIT_URL).writeXML ();
@@ -1584,6 +1590,13 @@ public class KeyGen2Test
     public void RSAExponentPreferences () throws Exception
       {
         ask_for_exponent = true;
+        new Doer ().perform ();
+      }
+
+    @Test
+    public void BrainpoolOption () throws Exception
+      {
+        brain_pool = true;
         new Doer ().perform ();
       }
 

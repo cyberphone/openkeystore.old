@@ -200,6 +200,8 @@ public class KeyGen2Test
     
     boolean update_kmk;
     
+    boolean brain_pool;
+    
     boolean virtual_machine;
     
     boolean get_client_attributes;
@@ -273,7 +275,7 @@ public class KeyGen2Test
             DeviceInfo dev = sks.getDeviceInfo ();
             fos.write (("<b>SKS Description: " + dev.getVendorDescription () +
                         "<br>SKS Vendor: " + dev.getVendorName () +
-                        "<br>SKS API Level: " + dev.getAPILevel () +
+                        "<br>SKS API Level: " + (dev.getAPILevel () / 100) + '.' + (dev.getAPILevel () % 100) +
                         "<br>SKS Interface: " + (sks instanceof WSSpecific ? "WebService" : "Direct") +
                         "<br>&nbsp<br></b>").getBytes ("UTF-8"));
           }
@@ -977,6 +979,10 @@ public class KeyGen2Test
               {
                 server_state.setPrivacyEnabled (true);
               }
+            if (brain_pool)
+              {
+                server_state.setEphemeralKeyAlgorithm (KeyAlgorithms.BP_P_256);
+              }
 
             ////////////////////////////////////////////////////////////////////////////////////
             // First keygen2 request
@@ -1156,7 +1162,7 @@ public class KeyGen2Test
             KeySpecifier key_alg = null;
             if (ecc_key)
               {
-                key_alg = new KeySpecifier (KeyAlgorithms.P_256);
+                key_alg = new KeySpecifier (KeyAlgorithms.NIST_P_256);
               }
             else if (ask_for_exponent)
               {
@@ -1244,7 +1250,7 @@ public class KeyGen2Test
               }
             if (two_keys)
               {
-                server_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.P_256), pin_policy);
+                server_state.createKey (AppUsage.SIGNATURE, new KeySpecifier (KeyAlgorithms.NIST_P_256), pin_policy);
               }
 
             return new KeyCreationRequestEncoder (server_state, KEY_INIT_URL).serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
@@ -1523,6 +1529,7 @@ public class KeyGen2Test
             writeOption ("ECC KMK", ecc_kmk);
             writeOption ("Update KMK", update_kmk);
             writeOption ("Multiple Keys", two_keys);
+            writeOption ("Brainpool EC", brain_pool);
             writeOption ("HTTPS server certificate", https);
             writeOption ("TrustAnchor option", set_trust_anchor);
             writeOption ("Abort URL option", set_abort_url);
@@ -1588,6 +1595,13 @@ public class KeyGen2Test
     public void RSAExponentPreferences () throws Exception
       {
         ask_for_exponent = true;
+        new Doer ().perform ();
+      }
+
+    @Test
+    public void BrainpoolOption () throws Exception
+      {
+        brain_pool = true;
         new Doer ().perform ();
       }
 

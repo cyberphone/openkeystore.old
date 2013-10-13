@@ -1183,7 +1183,7 @@ public class ServerState implements Serializable
     boolean privacy_enabled;
     boolean privacy_enabled_set;
     
-    KeyAlgorithms ephemeral_key_algorithm = KeyAlgorithms.P_256;
+    KeyAlgorithms ephemeral_key_algorithm = KeyAlgorithms.NIST_P_256;
     
     public void setPrivacyEnabled (boolean flag) throws IOException
       {

@@ -245,7 +245,9 @@ public class ProvSess
 
     static String override_key_entry_algorithm;
     
-    static String override_session_key_algorithm; 
+    static String override_session_key_algorithm;
+    
+    static KeyAlgorithms override_server_ephemeral_key_algorithm;
 
     String session_key_algorithm = SecureKeyStore.ALGORITHM_SESSION_ATTEST_1;
     
@@ -277,7 +279,7 @@ public class ProvSess
     boolean override_export_protection;
     
     byte overriden_export_protection;
-    
+       
     boolean user_defined_pins = true;
     
     boolean user_modifiable_pins = false;
@@ -390,7 +392,7 @@ public class ProvSess
     ///////////////////////////////////////////////////////////////////////////////////
     // Create provisioning session
     ///////////////////////////////////////////////////////////////////////////////////
-    private ProvSess (Device device, short session_key_limit, Integer kmk_id, boolean privacy_enabled, ECPublicKey ext_epk, String serv_sess) throws GeneralSecurityException, IOException
+    ProvSess (Device device, short session_key_limit, Integer kmk_id, boolean privacy_enabled, String serv_sess) throws GeneralSecurityException, IOException
       {
         this.device = device;
         this.kmk_id = kmk_id;
@@ -404,7 +406,10 @@ public class ProvSess
                 device.sks.createProvisioningSession (sess_key_alg,
                                                       privacy_enabled,
                                                       server_session_id,
-                                                      server_ephemeral_key = ext_epk == null ? server_sess_key.generateEphemeralKey (KeyAlgorithms.P_256) : ext_epk,
+                                                      server_ephemeral_key = server_sess_key.generateEphemeralKey
+                                                        (
+                                                          override_server_ephemeral_key_algorithm == null ? KeyAlgorithms.NIST_P_256 : override_server_ephemeral_key_algorithm
+                                                        ),
                                                       ISSUER_URI,
                                                       key_management_key,
                                                       (int)(client_time.getTime () / 1000),
@@ -445,19 +450,14 @@ public class ProvSess
         this.kmk_id = kmk_id;
       }
 
-    public ProvSess (Device device, short session_key_limit, Integer kmk_id, boolean privacy_enabled) throws GeneralSecurityException, IOException
-      {
-        this (device, session_key_limit, kmk_id, privacy_enabled, null, null);
-      }
-
     public ProvSess (Device device, short session_key_limit, Integer kmk_id) throws GeneralSecurityException, IOException
       {
-        this (device, session_key_limit, kmk_id, false);
+        this (device, session_key_limit, kmk_id, false, null);
       }
 
     public ProvSess (Device device, String serv_sess_id) throws GeneralSecurityException, IOException
       {
-        this (device, (short) 50, null, false, null, serv_sess_id);
+        this (device, (short) 50, null, false, serv_sess_id);
       }
 
     public ProvSess (Device device) throws GeneralSecurityException, IOException
@@ -468,11 +468,6 @@ public class ProvSess
     public ProvSess (Device device, short session_key_limit) throws GeneralSecurityException, IOException
       {
         this (device, session_key_limit, null);
-      }
-
-    public ProvSess (Device device, ECPublicKey ext_epk) throws GeneralSecurityException, IOException
-      {
-        this (device, (short) 50, null, false, ext_epk, null);
       }
 
     public ProvSess (Device device, Integer kmk_id) throws GeneralSecurityException, IOException

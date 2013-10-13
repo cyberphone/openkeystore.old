@@ -1164,6 +1164,12 @@ public class ServerState implements Serializable
         privacy_enabled = flag;
       }
 
+    KeyAlgorithms ephemeral_key_algorithm = KeyAlgorithms.NIST_P_256;
+    
+    public void setEphemeralKeyAlgorithm (KeyAlgorithms ephemeral_key_algorithm)
+      {
+        this.ephemeral_key_algorithm = ephemeral_key_algorithm;
+      }
 
  
     // Constructor
@@ -1478,6 +1484,6 @@ public class ServerState implements Serializable
 
     public ECPublicKey generateEphemeralKey () throws IOException
       {
-        return server_crypto_interface.generateEphemeralKey (KeyAlgorithms.P_256);
+        return server_crypto_interface.generateEphemeralKey (ephemeral_key_algorithm);
       }
   }
