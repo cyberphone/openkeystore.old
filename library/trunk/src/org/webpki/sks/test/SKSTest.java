@@ -1040,7 +1040,7 @@ public class SKSTest
     public void test1 () throws Exception
       {
         new ProvSess (device).closeSession ();
-        ProvSess.override_server_ephemeral_key_algorithm = KeyAlgorithms.BP_P_256;
+        ProvSess.override_server_ephemeral_key_algorithm = KeyAlgorithms.BRAINPOOL_P_256;
         new ProvSess (device).closeSession ();
         ProvSess.override_server_ephemeral_key_algorithm = null;
       }

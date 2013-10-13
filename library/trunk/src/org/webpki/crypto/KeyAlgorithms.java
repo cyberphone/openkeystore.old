@@ -102,7 +102,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
                  null,
                  null),
 
-    B_163       ("http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",
+    NIST_B_163  ("http://xmlns.webpki.org/sks/algorithm#ec.nist.b163",
                  "sect163r2",
                  163,
                  AsymSignatureAlgorithms.ECDSA_SHA256,
@@ -254,7 +254,8 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0x22, (byte)0xA8, (byte)0x87, (byte)0x64, (byte)0xD0, (byte)0x36, (byte)0xAF, (byte)0xD3,
                      (byte)0x69, (byte)0xAC, (byte)0xCA, (byte)0xCB, (byte)0x1A, (byte)0x96}),
 
-    BP_P_256    ("http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1",
+    BRAINPOOL_P_256 (
+                 "http://xmlns.webpki.org/sks/algorithm#ec.brainpool.p256r1",
                  "brainpoolP256r1",
                  256,
                  AsymSignatureAlgorithms.ECDSA_SHA256,

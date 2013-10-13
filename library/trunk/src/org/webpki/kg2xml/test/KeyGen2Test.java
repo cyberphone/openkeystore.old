@@ -984,7 +984,7 @@ public class KeyGen2Test
               }
             if (brain_pool)
               {
-                server_state.setEphemeralKeyAlgorithm (KeyAlgorithms.BP_P_256);
+                server_state.setEphemeralKeyAlgorithm (KeyAlgorithms.BRAINPOOL_P_256);
               }
 
             ////////////////////////////////////////////////////////////////////////////////////
