@@ -1,5 +1,5 @@
 {
-  "Now": "2013-09-19T10:51:24+02:00",
+  "Now": "2013-10-14T05:44:21+02:00",
   "PaymentRequest": 
     {
       "Currency": "USD",
@@ -18,7 +18,7 @@
            "UnitPrice": 39.99
          }]
     },
-  "EscapeMe": "\u000F\u000aA\u0042\\\"\/",
+  "EscapeMe": "\u000f\nAB\\\"/",
   "Signature": 
     {
       "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",
@@ -28,12 +28,12 @@
             {
               "EC": 
                 {
-                  "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.p256",
+                  "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
                   "X": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=",
                   "Y": "LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA="
                 }
             }
         },
-      "SignatureValue": "MEYCIQClBw5Sl/ULIzk+0zxHNfDzOsBojIqGJc4txv3ukdHtuwIhAJ0vS1sH1pMDl8ebi/Ga5GBN7jzoiVr/3JLLkBWGkbw8"
+      "SignatureValue": "MEYCIQClqQ94PiW0tx3tMzNi6jW+fNrFqhRc5mFK9F/pY+fsyAIhAMVL4bM3FZrOTg7UpLKTJNyg4KPiIkqr5O46aXFB0u8m"
     }
 }
