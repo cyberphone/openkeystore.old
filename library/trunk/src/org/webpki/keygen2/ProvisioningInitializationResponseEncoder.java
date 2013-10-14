@@ -62,7 +62,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
     JSONSymKeySigner session_signature;
 
 
-    void addClient (String type, String value)
+    void addClientAttributeValueClient (String type, String value)
       {
         HashSet<String> set = client_attribute_values.get (type);
         if (set == null)
@@ -107,7 +107,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
 
     public ProvisioningInitializationResponseEncoder setClientAttributeValue (String type, String value)
       {
-        addClient (type, value);
+        addClientAttributeValueClient (type, value);
         return this;
       }
 
