@@ -83,6 +83,11 @@ public class PlatformNegotiationRequestEncoder extends ServerEncoder
         //////////////////////////////////////////////////////////////////////////
         wr.setString (ACTION_JSON, action.getJSONName ());
 
+        if (server_state.languages != null)
+          {
+            wr.setStringArray (LANGUAGES_JSON, server_state.languages);
+          }
+
         if (server_state.privacy_enabled_set)
           {
             wr.setBoolean (PRIVACY_ENABLED_JSON, server_state.privacy_enabled);

@@ -24,36 +24,13 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class PlatformNegotiationRequestDecoder extends ClientDecoder
   {
-    BasicCapabilities basic_capabilities = new BasicCapabilities (true);
+    Action action;
+
+    public Action getAction ()
+      {
+        return action;
+      }
     
-    String server_session_id;
-
-    String submit_url;
-    
-    String abort_url; // Optional
-
-    public BasicCapabilities getBasicCapabilities ()
-      {
-        return basic_capabilities;
-      }
-
-    public String getServerSessionID ()
-      {
-        return server_session_id;
-      }
-
-
-    public String getSubmitURL ()
-      {
-        return submit_url;
-      }
-
-
-    public String getAbortURL ()
-      {
-        return abort_url;
-      }
-
 
     boolean privacy_enabled;
 
@@ -62,19 +39,58 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
         return privacy_enabled;
       }
 
-    Action action;
 
-    public Action getAction ()
-      {
-        return action;
-      }
+    BasicCapabilities basic_capabilities = new BasicCapabilities (true);
     
+    public BasicCapabilities getBasicCapabilities ()
+      {
+        return basic_capabilities;
+      }
+
+
+    String server_session_id;
+
+    public String getServerSessionID ()
+      {
+        return server_session_id;
+      }
+
+
+    String submit_url;
+
+    public String getSubmitURL ()
+      {
+        return submit_url;
+      }
+
+
+    String abort_url; // Optional
+
+    public String getAbortURL ()
+      {
+        return abort_url;
+      }
+
+
+    String[] languages;
+
+    public String[] getLanguages ()
+      {
+        return languages;
+      }
+
     @Override
     void readServerRequest (JSONObjectReader rd) throws IOException
       {
         /////////////////////////////////////////////////////////////////////////////////////////
         // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
+        action = Action.getActionFromString (rd.getString (ACTION_JSON));
+
+        languages = rd.getStringArrayConditional (LANGUAGES_JSON);
+
+        privacy_enabled = rd.getBooleanConditional (PRIVACY_ENABLED_JSON);
+
         server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 
         submit_url = getURL (rd, SUBMIT_URL_JSON);
@@ -83,10 +99,6 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
           {
             abort_url = getURL (rd, ABORT_URL_JSON);
           }
-
-        privacy_enabled = rd.getBooleanConditional (PRIVACY_ENABLED_JSON);
-
-        action = Action.getActionFromString (rd.getString (ACTION_JSON));
 
         BasicCapabilities.read (rd, basic_capabilities, true);
       }
