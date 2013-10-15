@@ -24,6 +24,7 @@ import java.security.PublicKey;
 
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyStoreVerifier;
+import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -66,7 +67,7 @@ public class Verify
                           case ASYMMETRIC_KEY:
                             try
                               {
-                                KeyStore ks = signature.getSignatureAlgorithm ().getURI ().contains ("rsa") ? 
+                                KeyStore ks = ((AsymSignatureAlgorithms)signature.getSignatureAlgorithm ()).isRSA () ? 
                                     DemoKeyStore.getMybankDotComKeyStore () : DemoKeyStore.getECDSAStore ();
                                 PublicKey public_key = ks.getCertificate ("mykey").getPublicKey ();
                                 signature.verify (new JSONAsymKeyVerifier (public_key));

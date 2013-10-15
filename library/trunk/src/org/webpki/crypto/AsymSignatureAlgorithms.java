@@ -21,48 +21,55 @@ import java.io.IOException;
 public enum AsymSignatureAlgorithms implements SignatureAlgorithms
   {
     RSA_NONE     ("http://xmlns.webpki.org/sks/algorithm#rsa.pkcs1.none", 
-                  null,                    "NONEwithRSA",     null,                  true),
+                  null,                    "NONEwithRSA",     null,                  true,  true),
         
     RSA_SHA1     ("http://www.w3.org/2000/09/xmldsig#rsa-sha1",              
-                  "1.2.840.113549.1.1.5",  "SHA1withRSA",     HashAlgorithms.SHA1,   true),
+                  "1.2.840.113549.1.1.5",  "SHA1withRSA",     HashAlgorithms.SHA1,   true,  true),
         
     RSA_SHA256   ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",       
-                  "1.2.840.113549.1.1.11", "SHA256withRSA",   HashAlgorithms.SHA256, true),
+                  "1.2.840.113549.1.1.11", "SHA256withRSA",   HashAlgorithms.SHA256, true,  true),
         
     RSA_SHA384   ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha384",       
-                  "1.2.840.113549.1.1.12", "SHA384withRSA",   HashAlgorithms.SHA384, false),
+                  "1.2.840.113549.1.1.12", "SHA384withRSA",   HashAlgorithms.SHA384, false, true),
         
     RSA_SHA512   ("http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",       
-                  "1.2.840.113549.1.1.13", "SHA512withRSA",   HashAlgorithms.SHA512, false),
+                  "1.2.840.113549.1.1.13", "SHA512withRSA",   HashAlgorithms.SHA512, false, true),
         
     ECDSA_NONE   ("http://xmlns.webpki.org/sks/algorithm#ecdsa.none",
-                  null,                    "NONEwithECDSA",   null,                  true),
+                  null,                    "NONEwithECDSA",   null,                  true,  false),
         
     ECDSA_SHA1   ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha1",       
-                  "1.2.840.10045.1",       "SHA1withECDSA",   HashAlgorithms.SHA1,   true),
+                  "1.2.840.10045.1",       "SHA1withECDSA",   HashAlgorithms.SHA1,   true,  false),
         
     ECDSA_SHA256 ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",     
-                  "1.2.840.10045.4.3.2",   "SHA256withECDSA", HashAlgorithms.SHA256, true),
+                  "1.2.840.10045.4.3.2",   "SHA256withECDSA", HashAlgorithms.SHA256, true,  false),
         
     ECDSA_SHA384 ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384",     
-                  "1.2.840.10045.4.3.3",   "SHA384withECDSA", HashAlgorithms.SHA384, false),
+                  "1.2.840.10045.4.3.3",   "SHA384withECDSA", HashAlgorithms.SHA384, false, false),
         
     ECDSA_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512",     
-                  "1.2.840.10045.4.3.4",   "SHA512withECDSA", HashAlgorithms.SHA512, false);
+                  "1.2.840.10045.4.3.4",   "SHA512withECDSA", HashAlgorithms.SHA512, false, false);
 
     private final String oid;       // As expressed in OIDs
-    private final String uri;       // As expressed in XML messages
+    private final String uri;       // As expressed in XML and JSON messages
     private final String jcename;   // As expressed for JCE
     private final HashAlgorithms digest_alg;
     private boolean sks_mandatory;  // If required in SKS
+    private boolean rsa;            // RSA algorithm
 
-    private AsymSignatureAlgorithms (String uri, String oid, String jcename, HashAlgorithms digest_alg, boolean sks_mandatory)
+    private AsymSignatureAlgorithms (String uri,
+                                     String oid,
+                                     String jcename,
+                                     HashAlgorithms digest_alg,
+                                     boolean sks_mandatory,
+                                     boolean rsa)
       {
         this.uri = uri;
         this.oid = oid;
         this.jcename = jcename;
         this.digest_alg = digest_alg;
         this.sks_mandatory = sks_mandatory;
+        this.rsa = rsa;
       }
 
 
@@ -104,6 +111,12 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms
     public HashAlgorithms getDigestAlgorithm ()
       {
         return digest_alg;
+      }
+
+
+    public boolean isRSA ()
+      {
+        return rsa;
       }
 
 
