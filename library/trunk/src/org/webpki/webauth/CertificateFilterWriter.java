@@ -87,9 +87,9 @@ class CertificateFilterWriter extends CertificateFilterIOBase
 
     static void writeOptionalString (JSONObjectWriter wr, String name, String optional_value) throws IOException
       {
-    	if (optional_value != null)
-    	  {
-    		wr.setString (name, optional_value);
-    	  }
-	  }
+        if (optional_value != null)
+          {
+            wr.setString (name, optional_value);
+          }
+      }
   }

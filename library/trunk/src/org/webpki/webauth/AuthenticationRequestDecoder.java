@@ -40,13 +40,15 @@ public class AuthenticationRequestDecoder extends ClientDecoder
     
     Vector<CertificateFilter> certificate_filters = new Vector<CertificateFilter> ();
 
-	String submit_url;
+    String submit_url;
 
-	String abort_url;
+    String abort_url;
 
-	String[] languages;
+    String[] languages;
 
-	int expires;
+    int expires;
+    
+    boolean extended_cert_path;
     
     public AsymSignatureAlgorithms[] getSignatureAlgorithms ()
       {
@@ -106,8 +108,8 @@ public class AuthenticationRequestDecoder extends ClientDecoder
     // JSON Reader
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override
-	void readServerRequest (JSONObjectReader rd) throws IOException
+    @Override
+    void readServerRequest (JSONObjectReader rd) throws IOException
       {
         /////////////////////////////////////////////////////////////////////////////////////////
         // Read the top level properties
@@ -121,6 +123,8 @@ public class AuthenticationRequestDecoder extends ClientDecoder
         abort_url = rd.getStringConditional (ABORT_URL_ATTR);
 
         languages = InputValidator.getListConditional (rd, LANGUAGES_ATTR);
+        
+        extended_cert_path = rd.getBooleanConditional (EXTENDED_CERT_PATH_ATTR);
 
         expires = rd.hasProperty (EXPIRES_ATTR) ? rd.getInt (EXPIRES_ATTR) : -1;  // Default: no timeout and associated GUI
 
@@ -129,15 +133,15 @@ public class AuthenticationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         for (String sig_alg_string : InputValidator.getURIList (rd, SIGNATURE_ALG_ATTR))
           {
-        	AsymSignatureAlgorithms sig_alg = AsymSignatureAlgorithms.getAlgorithmFromURI (sig_alg_string);
-        	if (!algorithms.add (sig_alg))
-			  {
-        		bad ("Duplicate \"" + SIGNATURE_ALG_ATTR + "\" : " + sig_alg_string);
-			  }
-        	if (sig_alg.getDigestAlgorithm() == null)
+            AsymSignatureAlgorithms sig_alg = AsymSignatureAlgorithms.getAlgorithmFromURI (sig_alg_string);
+            if (!algorithms.add (sig_alg))
               {
-        		bad ("Not a proper signature algorithm: " + sig_alg_string);
-        	  }
+                bad ("Duplicate \"" + SIGNATURE_ALG_ATTR + "\" : " + sig_alg_string);
+              }
+            if (sig_alg.getDigestAlgorithm() == null)
+              {
+                bad ("Not a proper signature algorithm: " + sig_alg_string);
+              }
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -146,10 +150,10 @@ public class AuthenticationRequestDecoder extends ClientDecoder
         String[] features = InputValidator.getURIListConditional (rd, CLIENT_FEATURES_ATTR);
         if (features != null) for (String feature : features)
           {
-        	if (!client_features.add (feature))
-        	  {
-        		bad ("Duplicate \"" + CLIENT_FEATURES_ATTR + "\"  :" + feature);
-        	  }
+            if (!client_features.add (feature))
+              {
+                bad ("Duplicate \"" + CLIENT_FEATURES_ATTR + "\"  :" + feature);
+              }
           }
         
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -157,7 +161,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         for (JSONObjectReader cf : InputValidator.getObjectArrayConditional (rd, CERTIFICATE_FILTER_ELEM))
           {
-        	certificate_filters.add (CertificateFilterReader.read (cf));
+            certificate_filters.add (CertificateFilterReader.read (cf));
           }
       }
   }

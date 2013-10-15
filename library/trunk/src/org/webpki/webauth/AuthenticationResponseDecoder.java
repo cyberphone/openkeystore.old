@@ -79,8 +79,8 @@ public class AuthenticationResponseDecoder extends InputValidator
     // JSON Reader
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override
-	protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
+    @Override
+    protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
       {
         //////////////////////////////////////////////////////////////////////////
         // Get the top-level properties
@@ -100,17 +100,17 @@ public class AuthenticationResponseDecoder extends InputValidator
         //////////////////////////////////////////////////////////////////////////
         for (JSONObjectReader feature : InputValidator.getObjectArrayConditional (rd, CLIENT_FEATURES_ATTR))
           {
-        	String type = InputValidator.getURI (feature, TYPE_ATTR);
-      	    HashSet<String> set = client_platform_features.get (type);
-      	    if (set != null)
-      	      {
-      	    	bad ("Duplicated \"" + TYPE_ATTR + "\" : " + type);
-      	      }
-  	    	client_platform_features.put (type, set = new HashSet<String> ());
-        	for (String value : InputValidator.getNonEmptyList (feature, VALUES_ATTR))
-        	  {
-        		set.add (value);
-        	  }
+            String type = InputValidator.getURI (feature, TYPE_ATTR);
+            HashSet<String> set = client_platform_features.get (type);
+            if (set != null)
+              {
+                bad ("Duplicated \"" + TYPE_ATTR + "\" : " + type);
+              }
+            client_platform_features.put (type, set = new HashSet<String> ());
+            for (String value : InputValidator.getNonEmptyList (feature, VALUES_ATTR))
+              {
+                set.add (value);
+              }
           }
 
         //////////////////////////////////////////////////////////////////////////
@@ -122,6 +122,6 @@ public class AuthenticationResponseDecoder extends InputValidator
 
     public void verifySignature (VerifierInterface verifier) throws IOException
       {
-    	signature.verify (new JSONX509Verifier (verifier));
+        signature.verify (new JSONX509Verifier (verifier));
       }
   }

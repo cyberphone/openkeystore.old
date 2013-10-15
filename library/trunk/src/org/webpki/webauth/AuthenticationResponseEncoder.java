@@ -54,7 +54,7 @@ public class AuthenticationResponseEncoder extends JSONEncoder
                                           Date client_time,
                                           X509Certificate server_certificate) throws IOException
       {
-    	this.signer = signer;
+        this.signer = signer;
         this.id = auth_req_decoder.getID ();
         this.server_time = auth_req_decoder.getServerTime ();
         this.request_url = request_url;
@@ -80,8 +80,8 @@ public class AuthenticationResponseEncoder extends JSONEncoder
       }
 */
 
-	@Override
-	protected void writeJSONData (JSONObjectWriter wr) throws IOException
+    @Override
+    protected void writeJSONData (JSONObjectWriter wr) throws IOException
       {
         wr.setString (ID_ATTR, id);
 
@@ -104,9 +104,9 @@ public class AuthenticationResponseEncoder extends JSONEncoder
         wr.setSignature (signer);
       }
 
-	@Override
-	protected String getContext ()
-	  {
-		return WebAuthConstants.WEBAUTH_NS;
-	  }
+    @Override
+    protected String getContext ()
+      {
+        return WebAuthConstants.WEBAUTH_NS;
+      }
   }

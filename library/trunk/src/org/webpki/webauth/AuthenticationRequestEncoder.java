@@ -45,6 +45,9 @@ public class AuthenticationRequestEncoder extends ServerEncoder
     String[] languages;                                                        // Optional
     
     boolean full_path;                                                         // Optional
+    
+    boolean extended_cert_path_set;                                            // Optional
+    boolean extended_cert_path;
 
     int expires;
     
@@ -69,9 +72,9 @@ public class AuthenticationRequestEncoder extends ServerEncoder
       }
 
 
-    public AuthenticationRequestEncoder addAlgorithm (AsymSignatureAlgorithms algorithm)
+    public AuthenticationRequestEncoder addSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
       {
-    	algorithms.add (algorithm.getURI());
+        algorithms.add (algorithm.getURI());
         return this;
       }
 
@@ -82,22 +85,33 @@ public class AuthenticationRequestEncoder extends ServerEncoder
         return this;
       }
 
+    
+    public AuthenticationRequestEncoder setExtendedCertPath (boolean extended_cert_path)
+      {
+        this.extended_cert_path = extended_cert_path;
+        extended_cert_path_set = true;
+        return this;
+      }
 
-    public void setID (String id)
+
+    public AuthenticationRequestEncoder setID (String id)
       {
         this.id = id;
+        return this;
       }
 
 
-    public void setServerTime (Date server_time)
+    public AuthenticationRequestEncoder setServerTime (Date server_time)
       {
         this.server_time = server_time;
+        return this;
       }
 
 
-    public void setLanguages (String[] languages)
+    public AuthenticationRequestEncoder setLanguages (String[] languages)
       {
         this.languages = languages;
+        return this;
       }
 
 
@@ -108,8 +122,8 @@ public class AuthenticationRequestEncoder extends ServerEncoder
       }
 
 
-	@Override
-	void writeServerRequest(JSONObjectWriter wr) throws IOException
+    @Override
+    void writeServerRequest(JSONObjectWriter wr) throws IOException
       {
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
@@ -144,6 +158,17 @@ public class AuthenticationRequestEncoder extends ServerEncoder
             wr.setInt (EXPIRES_ATTR, expires);
           }
 
+        if (extended_cert_path_set)
+          {
+            wr.setBoolean (EXTENDED_CERT_PATH_ATTR, extended_cert_path);
+          }
+        
+        if (algorithms.isEmpty ())
+          {
+            bad ("Missing \"" + SIGNATURE_ALG_ATTR + "\"");
+          }
+        wr.setStringArray (SIGNATURE_ALG_ATTR, algorithms.toArray (new String[0]));
+
         //////////////////////////////////////////////////////////////////////////
         // Optional "client platform features"
         //////////////////////////////////////////////////////////////////////////
@@ -157,11 +182,11 @@ public class AuthenticationRequestEncoder extends ServerEncoder
         //////////////////////////////////////////////////////////////////////////
         if (!certificate_filters.isEmpty ())
           {
-        	JSONArrayWriter cf_arr = wr.setArray (CERTIFICATE_FILTER_ELEM);
-	        for (CertificateFilter cf : certificate_filters)
-	          {
-	            CertificateFilterWriter.write (cf_arr.setObject (), cf);
-	          }
+            JSONArrayWriter cf_arr = wr.setArray (CERTIFICATE_FILTER_ELEM);
+            for (CertificateFilter cf : certificate_filters)
+              {
+                CertificateFilterWriter.write (cf_arr.setObject (), cf);
+              }
           }
       }
 
