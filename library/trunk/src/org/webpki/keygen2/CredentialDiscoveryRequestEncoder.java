@@ -249,7 +249,7 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return CREDENTIAL_DISCOVERY_REQUEST_JSON;
       }

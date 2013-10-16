@@ -34,7 +34,7 @@ abstract class ServerEncoder extends JSONEncoder
       }
     
     @Override
-    final protected String getContext ()
+    public final String getContext ()
       {
         return WebAuthConstants.WEBAUTH_NS;
       }

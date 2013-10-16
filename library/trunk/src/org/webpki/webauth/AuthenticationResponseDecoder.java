@@ -75,6 +75,12 @@ public class AuthenticationResponseDecoder extends InputValidator
         return client_platform_features;
       }
 
+
+    public void verifySignature (VerifierInterface verifier) throws IOException
+      {
+        signature.verify (new JSONX509Verifier (verifier));
+      }
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     // JSON Reader
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,8 +126,9 @@ public class AuthenticationResponseDecoder extends InputValidator
         certificate_path = signature.getX509CertificatePath ();
       }
 
-    public void verifySignature (VerifierInterface verifier) throws IOException
+    @Override
+    public String getQualifier ()
       {
-        signature.verify (new JSONX509Verifier (verifier));
+        return AUTHENTICATION_RESPONSE_ATTR;
       }
   }

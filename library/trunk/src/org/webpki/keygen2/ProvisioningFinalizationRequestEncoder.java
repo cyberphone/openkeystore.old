@@ -254,7 +254,7 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return PROVISIONING_FINALIZATION_REQUEST_JSON;
       }

@@ -33,12 +33,11 @@ public abstract class JSONDecoder
     protected abstract void unmarshallJSONData (JSONObjectReader rd) throws IOException;
     
     /**
-     * INTERNAL USE ONLY.     
+     * Emulation of XML namespace     
      */
     public abstract String getContext ();
 
     /**
-     * INTERNAL USE ONLY.
      * Optional type indicator for JSON objects belonging to the same <code>@context</code>.
      */
     public String getQualifier ()

@@ -121,6 +121,33 @@ public class AuthenticationRequestEncoder extends ServerEncoder
         return this;
       }
 
+    public void checkRequestResponseIntegrity (AuthenticationResponseDecoder areresp, byte[] expected_fingerprint) throws IOException
+      {
+        if (expected_fingerprint != null &&
+            (areresp.server_certificate_fingerprint == null || !ArrayUtil.compare (areresp.server_certificate_fingerprint, expected_fingerprint)))
+          {
+            bad ("Server certificate fingerprint");
+          }
+        if (!id.equals (areresp.id))
+          {
+            bad ("ID attributes");
+          }
+        if (!ISODateTime.formatDateTime (server_time).equals (ISODateTime.formatDateTime (areresp.server_time.getTime ())))
+          {
+            bad ("ServerTime attribute");
+          }
+        if (certificate_filters.size () > 0 && areresp.certificate_path != null)
+          {
+            for (CertificateFilter cf : certificate_filters)
+              {
+                if (cf.matches (areresp.certificate_path, null, null))
+                  {
+                    return;
+                  }
+              }
+            bad ("Certificates does not match filter(s)");
+          }
+      }
 
     @Override
     void writeServerRequest(JSONObjectWriter wr) throws IOException
@@ -165,9 +192,9 @@ public class AuthenticationRequestEncoder extends ServerEncoder
         
         if (algorithms.isEmpty ())
           {
-            bad ("Missing \"" + SIGNATURE_ALG_ATTR + "\"");
+            bad ("Missing \"" + SIGNATURE_ALGORITHMS_ATTR + "\"");
           }
-        wr.setStringArray (SIGNATURE_ALG_ATTR, algorithms.toArray (new String[0]));
+        wr.setStringArray (SIGNATURE_ALGORITHMS_ATTR, algorithms.toArray (new String[0]));
 
         //////////////////////////////////////////////////////////////////////////
         // Optional "client platform features"
@@ -190,32 +217,9 @@ public class AuthenticationRequestEncoder extends ServerEncoder
           }
       }
 
-
-    public void checkRequestResponseIntegrity (AuthenticationResponseDecoder areresp, byte[] expected_fingerprint) throws IOException
+    @Override
+    public String getQualifier ()
       {
-        if (expected_fingerprint != null &&
-            (areresp.server_certificate_fingerprint == null || !ArrayUtil.compare (areresp.server_certificate_fingerprint, expected_fingerprint)))
-          {
-            bad ("Server certificate fingerprint");
-          }
-        if (!id.equals (areresp.id))
-          {
-            bad ("ID attributes");
-          }
-        if (!ISODateTime.formatDateTime (server_time).equals (ISODateTime.formatDateTime (areresp.server_time.getTime ())))
-          {
-            bad ("ServerTime attribute");
-          }
-        if (certificate_filters.size () > 0 && areresp.certificate_path != null)
-          {
-            for (CertificateFilter cf : certificate_filters)
-              {
-                if (cf.matches (areresp.certificate_path, null, null))
-                  {
-                    return;
-                  }
-              }
-            bad ("Certificates does not match filter(s)");
-          }
+        return AUTHENTICATION_REQUEST_ATTR;
       }
   }

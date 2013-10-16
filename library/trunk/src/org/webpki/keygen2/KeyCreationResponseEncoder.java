@@ -87,13 +87,13 @@ public class KeyCreationResponseEncoder extends JSONEncoder
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return KEY_CREATION_RESPONSE_JSON;
       }
 
     @Override
-    protected String getContext ()
+    public String getContext ()
       {
         return KEYGEN2_NS;
       }

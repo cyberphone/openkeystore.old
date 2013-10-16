@@ -17,6 +17,7 @@
 package org.webpki.webauth;
 
 import java.io.IOException;
+
 import java.util.LinkedHashSet;
 import java.util.Vector;
 
@@ -131,12 +132,12 @@ public class AuthenticationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the signature algorithms [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        for (String sig_alg_string : InputValidator.getURIList (rd, SIGNATURE_ALG_ATTR))
+        for (String sig_alg_string : InputValidator.getURIList (rd, SIGNATURE_ALGORITHMS_ATTR))
           {
             AsymSignatureAlgorithms sig_alg = AsymSignatureAlgorithms.getAlgorithmFromURI (sig_alg_string);
             if (!algorithms.add (sig_alg))
               {
-                bad ("Duplicate \"" + SIGNATURE_ALG_ATTR + "\" : " + sig_alg_string);
+                bad ("Duplicate \"" + SIGNATURE_ALGORITHMS_ATTR + "\" : " + sig_alg_string);
               }
             if (sig_alg.getDigestAlgorithm() == null)
               {
@@ -163,5 +164,11 @@ public class AuthenticationRequestDecoder extends ClientDecoder
           {
             certificate_filters.add (CertificateFilterReader.read (cf));
           }
+      }
+
+    @Override
+    public String getQualifier ()
+      {
+        return AUTHENTICATION_REQUEST_ATTR;
       }
   }

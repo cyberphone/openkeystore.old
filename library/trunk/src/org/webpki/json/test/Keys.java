@@ -97,7 +97,7 @@ public class Keys
           }
 
         @Override
-        protected String getContext ()
+        public String getContext ()
           {
             return CONTEXT;
           }

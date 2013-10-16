@@ -36,16 +36,14 @@ public abstract class JSONEncoder
     protected abstract void writeJSONData (JSONObjectWriter wr) throws IOException;
 
     /**
-     * INTERNAL USE ONLY.
      * Emulation of XML namespace     
      */
-    protected abstract String getContext ();
+    public abstract String getContext ();
 
     /**
-     * INTERNAL USE ONLY.
      * Optional type indicator for JSON objects belonging to the same <code>@context</code>.
      */
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return null;
       }

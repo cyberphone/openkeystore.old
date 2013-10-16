@@ -42,33 +42,37 @@ public interface WebAuthConstants
 
     // JSON properties
 
-    String ID_ATTR                         = "ID";
-
-    String SUBMIT_URL_ATTR                 = "SubmitURL";
-
-    String REQUEST_URL_ATTR                = "RequestURL";
-
     String ABORT_URL_ATTR                  = "AbortURL";
 
-    String SERVER_TIME_ATTR                = "ServerTime";
+    String AUTHENTICATION_REQUEST_ATTR     = "AuthenticationRequest";
 
-    String CLIENT_TIME_ATTR                = "ClientTime";
-
-    String LANGUAGES_ATTR                  = "Languages";
-
-    String EXPIRES_ATTR                    = "Expires";
-
-    String SERVER_CERT_FP_ATTR             = "ServerCertificateFingerprint";
-
-    String REQUESTED_CLIENT_FEATURES_ATTR  = "RequestedClientFeatures";
+    String AUTHENTICATION_RESPONSE_ATTR    = "AuthenticationResponse";
 
     String CLIENT_FEATURES_ATTR            = "ClientFeatures";
 
-    String SIGNATURE_ALG_ATTR              = "SignatureAlgorithm";
+    String CLIENT_TIME_ATTR                = "ClientTime";
+
+    String EXPIRES_ATTR                    = "Expires";
+
+    String EXTENDED_CERT_PATH_ATTR         = "ExtendedCertPath";
+
+    String ID_ATTR                         = "ID";
+
+    String LANGUAGES_ATTR                  = "Languages";
+
+    String REQUESTED_CLIENT_FEATURES_ATTR  = "RequestedClientFeatures";
+
+    String REQUEST_URL_ATTR                = "RequestURL";
+
+    String SERVER_CERT_FP_ATTR             = "ServerCertificateFingerprint";
+
+    String SERVER_TIME_ATTR                = "ServerTime";
+
+    String SIGNATURE_ALGORITHMS_ATTR       = "SignatureAlgorithms";
     
+    String SUBMIT_URL_ATTR                 = "SubmitURL";
+
     String TYPE_ATTR                       = "Type";
 
     String VALUES_ATTR                     = "Values";
-
-    String EXTENDED_CERT_PATH_ATTR         = "ExtendedCertPath";
   }

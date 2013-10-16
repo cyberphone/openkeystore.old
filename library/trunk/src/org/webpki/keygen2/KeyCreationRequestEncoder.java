@@ -142,7 +142,7 @@ public class KeyCreationRequestEncoder extends ServerEncoder
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return KEY_CREATION_REQUEST_JSON;
       }

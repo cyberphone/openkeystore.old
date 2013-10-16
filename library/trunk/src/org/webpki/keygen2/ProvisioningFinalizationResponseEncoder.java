@@ -56,13 +56,13 @@ public class ProvisioningFinalizationResponseEncoder extends JSONEncoder
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return PROVISIONING_FINALIZATION_RESPONSE_JSON;
       }
 
     @Override
-    protected String getContext ()
+    public String getContext ()
       {
         return KEYGEN2_NS;
       }

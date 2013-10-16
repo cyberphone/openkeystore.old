@@ -109,7 +109,7 @@ public class PlatformNegotiationRequestEncoder extends ServerEncoder
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return PLATFORM_NEGOTIATION_REQUEST_JSON;
       }

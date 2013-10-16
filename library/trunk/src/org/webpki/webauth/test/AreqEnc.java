@@ -93,11 +93,19 @@ public class AreqEnc
          
         AuthenticationRequestEncoder areqenc = new AuthenticationRequestEncoder ("https://example.com/home");
 
-        areqenc.setExtendedCertPath (certpath);
+        if (certpath)
+          {
+            areqenc.setExtendedCertPath (true);
+          }
 
         if (rsasha1DS)
           {
             areqenc.addSignatureAlgorithm (AsymSignatureAlgorithms.RSA_SHA1);
+          }
+        else
+          {
+            areqenc.addSignatureAlgorithm (AsymSignatureAlgorithms.RSA_SHA256);
+            areqenc.addSignatureAlgorithm (AsymSignatureAlgorithms.ECDSA_SHA256);
           }
 
         if (certflt)

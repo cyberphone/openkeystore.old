@@ -650,10 +650,9 @@ public class KeyGen2Test
             provisioning_handle = sess.getProvisioningHandle ();
             
             ProvisioningInitializationResponseEncoder prov_init_response = 
-                  new ProvisioningInitializationResponseEncoder (sess.getClientEphemeralKey (),
-                                                                 prov_sess_req.getServerSessionID (),
+                  new ProvisioningInitializationResponseEncoder (prov_sess_req,
+                                                                 sess.getClientEphemeralKey (),
                                                                  sess.getClientSessionID (),
-                                                                 prov_sess_req.getServerTime (),
                                                                  client_time,
                                                                  sess.getSessionAttestation (),
                                                                  platform_req.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());

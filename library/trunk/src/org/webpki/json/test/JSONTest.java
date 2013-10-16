@@ -138,7 +138,7 @@ public class JSONTest
           }
 
         @Override
-        protected String getContext ()
+        public String getContext ()
           {
             return CONTEXT;
           }

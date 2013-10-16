@@ -117,13 +117,13 @@ public class PlatformNegotiationResponseEncoder extends JSONEncoder
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return PLATFORM_NEGOTIATION_RESPONSE_JSON;
       }
 
     @Override
-    protected String getContext ()
+    public String getContext ()
       {
         return KEYGEN2_NS;
       }

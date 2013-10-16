@@ -45,7 +45,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
     
     String client_session_id;
 
-    Date server_time;
+    String server_time_verbatim;
     
     Date client_time;
     
@@ -74,18 +74,17 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
     
     // Constructors
 
-    public ProvisioningInitializationResponseEncoder (ECPublicKey client_ephemeral_key,
-                                                      String server_session_id,
+    public ProvisioningInitializationResponseEncoder (ProvisioningInitializationRequestDecoder prov_init_req,
+                                                      ECPublicKey client_ephemeral_key,
                                                       String client_session_id,
-                                                      Date server_time,
                                                       Date client_time,
                                                       byte[] attestation,
                                                       X509Certificate[] device_certificate_path)  throws IOException
       {
+        this.server_session_id = prov_init_req.server_session_id;
+        this.server_time_verbatim = prov_init_req.server_time_verbatim;
         this.client_ephemeral_key = client_ephemeral_key;
-        this.server_session_id = server_session_id;
         this.client_session_id = client_session_id;
-        this.server_time = server_time;
         this.client_time = client_time;
         this.attestation = attestation;
         this.device_certificate_path = device_certificate_path;
@@ -131,7 +130,7 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
 
         wr.setBinary (SESSION_ATTESTATION_JSON, attestation);
         
-        wr.setDateTime (SERVER_TIME_JSON, server_time);
+        wr.setString (SERVER_TIME_JSON, server_time_verbatim);
 
         wr.setDateTime (CLIENT_TIME_JSON, client_time);
         
@@ -178,13 +177,13 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return PROVISIONING_INITIALIZATION_RESPONSE_JSON;
       }
 
     @Override
-    protected String getContext ()
+    public String getContext ()
       {
         return KEYGEN2_NS;
       }

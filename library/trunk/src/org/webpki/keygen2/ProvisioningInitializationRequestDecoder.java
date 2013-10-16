@@ -29,6 +29,8 @@ import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 
+import org.webpki.util.ISODateTime;
+
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
 
@@ -157,6 +159,8 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
     byte[] nonce;
 
     Date server_time;
+    
+    String server_time_verbatim;
 
     String submit_url;
     
@@ -182,8 +186,10 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
         // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
         server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
+        
+        server_time_verbatim = rd.getString (SERVER_TIME_JSON);
 
-        server_time = rd.getDateTime (SERVER_TIME_JSON).getTime ();
+        server_time = ISODateTime.parseDateTime (server_time_verbatim).getTime ();
 
         submit_url = getURL (rd, SUBMIT_URL_JSON);
         

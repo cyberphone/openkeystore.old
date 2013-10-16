@@ -105,8 +105,14 @@ public class AuthenticationResponseEncoder extends JSONEncoder
       }
 
     @Override
-    protected String getContext ()
+    public String getContext ()
       {
         return WebAuthConstants.WEBAUTH_NS;
+      }
+
+    @Override
+    public String getQualifier ()
+      {
+        return AUTHENTICATION_RESPONSE_ATTR;
       }
   }

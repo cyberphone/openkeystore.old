@@ -244,7 +244,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
       }
 
     @Override
-    protected String getQualifier ()
+    public String getQualifier ()
       {
         return PROVISIONING_INITIALIZATION_REQUEST_JSON;
       }

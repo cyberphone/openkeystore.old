@@ -114,7 +114,7 @@ public class Test
           }
 
         @Override
-        protected String getContext ()
+        public String getContext ()
           {
             return CONTEXT;
           }
