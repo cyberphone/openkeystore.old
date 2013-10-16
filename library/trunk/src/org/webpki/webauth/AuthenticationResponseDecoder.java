@@ -91,29 +91,29 @@ public class AuthenticationResponseDecoder extends InputValidator
         //////////////////////////////////////////////////////////////////////////
         // Get the top-level properties
         //////////////////////////////////////////////////////////////////////////
-        id = rd.getString (ID_ATTR);
+        id = rd.getString (ID_JSON);
 
-        server_time = rd.getDateTime (SERVER_TIME_ATTR);
+        server_time = rd.getDateTime (SERVER_TIME_JSON);
 
-        request_url = rd.getString (REQUEST_URL_ATTR);
+        request_url = rd.getString (REQUEST_URL_JSON);
 
-        client_time = rd.getDateTime (CLIENT_TIME_ATTR);
+        client_time = rd.getDateTime (CLIENT_TIME_JSON);
 
-        server_certificate_fingerprint = rd.getBinaryConditional (SERVER_CERT_FP_ATTR);
+        server_certificate_fingerprint = rd.getBinaryConditional (SERVER_CERT_FP_JSON);
         
         //////////////////////////////////////////////////////////////////////////
         // Get the optional client platform features
         //////////////////////////////////////////////////////////////////////////
-        for (JSONObjectReader feature : InputValidator.getObjectArrayConditional (rd, CLIENT_FEATURES_ATTR))
+        for (JSONObjectReader feature : InputValidator.getObjectArrayConditional (rd, CLIENT_FEATURES_JSON))
           {
-            String type = InputValidator.getURI (feature, TYPE_ATTR);
+            String type = InputValidator.getURI (feature, TYPE_JSON);
             HashSet<String> set = client_platform_features.get (type);
             if (set != null)
               {
-                bad ("Duplicated \"" + TYPE_ATTR + "\" : " + type);
+                bad ("Duplicated \"" + TYPE_JSON + "\" : " + type);
               }
             client_platform_features.put (type, set = new HashSet<String> ());
-            for (String value : InputValidator.getNonEmptyList (feature, VALUES_ATTR))
+            for (String value : InputValidator.getNonEmptyList (feature, VALUES_JSON))
               {
                 set.add (value);
               }
@@ -129,6 +129,6 @@ public class AuthenticationResponseDecoder extends InputValidator
     @Override
     public String getQualifier ()
       {
-        return AUTHENTICATION_RESPONSE_ATTR;
+        return AUTHENTICATION_RESPONSE_JSON;
       }
   }

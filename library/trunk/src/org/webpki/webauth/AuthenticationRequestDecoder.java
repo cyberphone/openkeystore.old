@@ -59,7 +59,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder
 
     public CertificateFilter[] getCertificateFilters ()
       {
-        return certificate_filters.isEmpty() ? null : certificate_filters.toArray (new CertificateFilter[0]);
+        return certificate_filters.toArray (new CertificateFilter[0]);
       }
 
 
@@ -115,29 +115,29 @@ public class AuthenticationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
-        id = InputValidator.getID (rd, ID_ATTR);
+        id = InputValidator.getID (rd, ID_JSON);
 
-        server_time = rd.getString (SERVER_TIME_ATTR);
+        server_time = rd.getString (SERVER_TIME_JSON);
 
-        submit_url = rd.getString (SUBMIT_URL_ATTR);
+        submit_url = rd.getString (SUBMIT_URL_JSON);
 
-        abort_url = rd.getStringConditional (ABORT_URL_ATTR);
+        abort_url = rd.getStringConditional (ABORT_URL_JSON);
 
-        languages = InputValidator.getListConditional (rd, LANGUAGES_ATTR);
+        languages = InputValidator.getListConditional (rd, LANGUAGES_JSON);
         
-        extended_cert_path = rd.getBooleanConditional (EXTENDED_CERT_PATH_ATTR);
+        extended_cert_path = rd.getBooleanConditional (EXTENDED_CERT_PATH_JSON);
 
-        expires = rd.hasProperty (EXPIRES_ATTR) ? rd.getInt (EXPIRES_ATTR) : -1;  // Default: no timeout and associated GUI
+        expires = rd.hasProperty (EXPIRES_JSON) ? rd.getInt (EXPIRES_JSON) : -1;  // Default: no timeout and associated GUI
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the signature algorithms [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        for (String sig_alg_string : InputValidator.getURIList (rd, SIGNATURE_ALGORITHMS_ATTR))
+        for (String sig_alg_string : InputValidator.getURIList (rd, SIGNATURE_ALGORITHMS_JSON))
           {
             AsymSignatureAlgorithms sig_alg = AsymSignatureAlgorithms.getAlgorithmFromURI (sig_alg_string);
             if (!algorithms.add (sig_alg))
               {
-                bad ("Duplicate \"" + SIGNATURE_ALGORITHMS_ATTR + "\" : " + sig_alg_string);
+                bad ("Duplicate \"" + SIGNATURE_ALGORITHMS_JSON + "\" : " + sig_alg_string);
               }
             if (sig_alg.getDigestAlgorithm() == null)
               {
@@ -148,19 +148,19 @@ public class AuthenticationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         // Optional client features [0..1]
         /////////////////////////////////////////////////////////////////////////////////////////
-        String[] features = InputValidator.getURIListConditional (rd, CLIENT_FEATURES_ATTR);
+        String[] features = InputValidator.getURIListConditional (rd, CLIENT_FEATURES_JSON);
         if (features != null) for (String feature : features)
           {
             if (!client_features.add (feature))
               {
-                bad ("Duplicate \"" + CLIENT_FEATURES_ATTR + "\"  :" + feature);
+                bad ("Duplicate \"" + CLIENT_FEATURES_JSON + "\"  :" + feature);
               }
           }
         
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional certificate filters [0..n]
         /////////////////////////////////////////////////////////////////////////////////////////
-        for (JSONObjectReader cf : InputValidator.getObjectArrayConditional (rd, CERTIFICATE_FILTER_ELEM))
+        for (JSONObjectReader cf : InputValidator.getObjectArrayConditional (rd, CERTIFICATE_FILTERS_JSON))
           {
             certificate_filters.add (CertificateFilterReader.read (cf));
           }
@@ -169,6 +169,6 @@ public class AuthenticationRequestDecoder extends ClientDecoder
     @Override
     public String getQualifier ()
       {
-        return AUTHENTICATION_REQUEST_ATTR;
+        return AUTHENTICATION_REQUEST_JSON;
       }
   }

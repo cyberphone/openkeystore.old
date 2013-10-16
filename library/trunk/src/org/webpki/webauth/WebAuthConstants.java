@@ -21,14 +21,12 @@ import org.webpki.crypto.KeyContainerTypes;
 
 public interface WebAuthConstants
   {
-    String WEBAUTH_NS          = "http://xmlns.webpki.org/webauth/beta/20130604#";
+    String WEBAUTH_NS          = "http://xmlns.webpki.org/webauth/beta/20131016#";
     
     int MAX_ID_LENGTH          = 32;
 
 
     // Package only definitions
-
-    String CERTIFICATE_FILTER_ELEM = "CertificateFilter";
 
     KeyContainerTypes[] KEYCONTAINER2NAME  = new KeyContainerTypes[] {KeyContainerTypes.FILE,
                                                                       KeyContainerTypes.TPM,
@@ -42,37 +40,39 @@ public interface WebAuthConstants
 
     // JSON properties
 
-    String ABORT_URL_ATTR                  = "AbortURL";
+    String ABORT_URL_JSON                  = "AbortURL";
 
-    String AUTHENTICATION_REQUEST_ATTR     = "AuthenticationRequest";
+    String AUTHENTICATION_REQUEST_JSON     = "AuthenticationRequest";
 
-    String AUTHENTICATION_RESPONSE_ATTR    = "AuthenticationResponse";
+    String AUTHENTICATION_RESPONSE_JSON    = "AuthenticationResponse";
 
-    String CLIENT_FEATURES_ATTR            = "ClientFeatures";
+    String CERTIFICATE_FILTERS_JSON        = "CertificateFilters";
 
-    String CLIENT_TIME_ATTR                = "ClientTime";
+    String CLIENT_FEATURES_JSON            = "ClientFeatures";
 
-    String EXPIRES_ATTR                    = "Expires";
+    String CLIENT_TIME_JSON                = "ClientTime";
 
-    String EXTENDED_CERT_PATH_ATTR         = "ExtendedCertPath";
+    String EXPIRES_JSON                    = "Expires";
 
-    String ID_ATTR                         = "ID";
+    String EXTENDED_CERT_PATH_JSON         = "ExtendedCertPath";
 
-    String LANGUAGES_ATTR                  = "Languages";
+    String ID_JSON                         = "ID";
 
-    String REQUESTED_CLIENT_FEATURES_ATTR  = "RequestedClientFeatures";
+    String LANGUAGES_JSON                  = "Languages";
 
-    String REQUEST_URL_ATTR                = "RequestURL";
+    String REQUESTED_CLIENT_FEATURES_JSON  = "RequestedClientFeatures";
 
-    String SERVER_CERT_FP_ATTR             = "ServerCertificateFingerprint";
+    String REQUEST_URL_JSON                = "RequestURL";
 
-    String SERVER_TIME_ATTR                = "ServerTime";
+    String SERVER_CERT_FP_JSON             = "ServerCertificateFingerprint";
 
-    String SIGNATURE_ALGORITHMS_ATTR       = "SignatureAlgorithms";
+    String SERVER_TIME_JSON                = "ServerTime";
+
+    String SIGNATURE_ALGORITHMS_JSON       = "SignatureAlgorithms";
     
-    String SUBMIT_URL_ATTR                 = "SubmitURL";
+    String SUBMIT_URL_JSON                 = "SubmitURL";
 
-    String TYPE_ATTR                       = "Type";
+    String TYPE_JSON                       = "Type";
 
-    String VALUES_ATTR                     = "Values";
+    String VALUES_JSON                     = "Values";
   }

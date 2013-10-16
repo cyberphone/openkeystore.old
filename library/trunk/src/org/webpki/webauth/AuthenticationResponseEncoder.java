@@ -83,17 +83,17 @@ public class AuthenticationResponseEncoder extends JSONEncoder
     @Override
     protected void writeJSONData (JSONObjectWriter wr) throws IOException
       {
-        wr.setString (ID_ATTR, id);
+        wr.setString (ID_JSON, id);
 
-        wr.setString (SERVER_TIME_ATTR, server_time);
+        wr.setString (SERVER_TIME_JSON, server_time);
 
-        wr.setString (REQUEST_URL_ATTR, request_url);
+        wr.setString (REQUEST_URL_JSON, request_url);
 
-        wr.setDateTime (CLIENT_TIME_ATTR, client_time);
+        wr.setDateTime (CLIENT_TIME_JSON, client_time);
 
         if (server_certificate_fingerprint != null)
           {
-            wr.setBinary (SERVER_CERT_FP_ATTR, server_certificate_fingerprint);
+            wr.setBinary (SERVER_CERT_FP_JSON, server_certificate_fingerprint);
           }
 /*        
         for (ClientPlatformFeature client_platform_feature : client_platform_features)
@@ -113,6 +113,6 @@ public class AuthenticationResponseEncoder extends JSONEncoder
     @Override
     public String getQualifier ()
       {
-        return AUTHENTICATION_RESPONSE_ATTR;
+        return AUTHENTICATION_RESPONSE_JSON;
       }
   }

@@ -160,48 +160,48 @@ public class AuthenticationRequestEncoder extends ServerEncoder
             id = Long.toHexString (new Date().getTime());
             id += Base64URL.generateURLFriendlyRandom (MAX_ID_LENGTH - id.length ());
           }
-        wr.setString (ID_ATTR, id);
+        wr.setString (ID_JSON, id);
 
         if (server_time == null)
           {
             server_time = new Date ();
           }
-        wr.setDateTime (SERVER_TIME_ATTR, server_time);
+        wr.setDateTime (SERVER_TIME_JSON, server_time);
 
-        wr.setString (SUBMIT_URL_ATTR, submit_url);
+        wr.setString (SUBMIT_URL_JSON, submit_url);
 
         if (abort_url != null)
           {
-            wr.setString (ABORT_URL_ATTR, abort_url);
+            wr.setString (ABORT_URL_JSON, abort_url);
           }
 
         if (languages != null)
           {
-            wr.setStringArray (LANGUAGES_ATTR, languages);
+            wr.setStringArray (LANGUAGES_JSON, languages);
           }
 
         if (expires > 0)
           {
-            wr.setInt (EXPIRES_ATTR, expires);
+            wr.setInt (EXPIRES_JSON, expires);
           }
 
         if (extended_cert_path_set)
           {
-            wr.setBoolean (EXTENDED_CERT_PATH_ATTR, extended_cert_path);
+            wr.setBoolean (EXTENDED_CERT_PATH_JSON, extended_cert_path);
           }
         
         if (algorithms.isEmpty ())
           {
-            bad ("Missing \"" + SIGNATURE_ALGORITHMS_ATTR + "\"");
+            bad ("Missing \"" + SIGNATURE_ALGORITHMS_JSON + "\"");
           }
-        wr.setStringArray (SIGNATURE_ALGORITHMS_ATTR, algorithms.toArray (new String[0]));
+        wr.setStringArray (SIGNATURE_ALGORITHMS_JSON, algorithms.toArray (new String[0]));
 
         //////////////////////////////////////////////////////////////////////////
         // Optional "client platform features"
         //////////////////////////////////////////////////////////////////////////
         if (!requested_client_platform_features.isEmpty ())
           {
-            wr.setStringArray (REQUESTED_CLIENT_FEATURES_ATTR, requested_client_platform_features.toArray (new String[0]));
+            wr.setStringArray (REQUESTED_CLIENT_FEATURES_JSON, requested_client_platform_features.toArray (new String[0]));
           }
 
         //////////////////////////////////////////////////////////////////////////
@@ -209,7 +209,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
         //////////////////////////////////////////////////////////////////////////
         if (!certificate_filters.isEmpty ())
           {
-            JSONArrayWriter cf_arr = wr.setArray (CERTIFICATE_FILTER_ELEM);
+            JSONArrayWriter cf_arr = wr.setArray (CERTIFICATE_FILTERS_JSON);
             for (CertificateFilter cf : certificate_filters)
               {
                 CertificateFilterWriter.write (cf_arr.setObject (), cf);
@@ -220,6 +220,6 @@ public class AuthenticationRequestEncoder extends ServerEncoder
     @Override
     public String getQualifier ()
       {
-        return AUTHENTICATION_REQUEST_ATTR;
+        return AUTHENTICATION_REQUEST_JSON;
       }
   }

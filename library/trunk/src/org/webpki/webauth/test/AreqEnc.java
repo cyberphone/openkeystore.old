@@ -18,6 +18,8 @@ package org.webpki.webauth.test;
 
 import java.io.IOException;
 
+import java.security.Provider;
+import java.security.Security;
 import java.util.GregorianCalendar;
 
 import org.webpki.util.ArrayUtil;
@@ -37,6 +39,57 @@ import org.webpki.webauth.AuthenticationResponseDecoder;
 
 public class AreqEnc
   {
+    static StringBuffer info_string;
+    
+    static int info_lengthp2;
+    
+    static void printHeader ()
+      {
+        for (int i = 0; i < info_lengthp2; i++)
+          {
+            info_string.append ('=');
+          }
+        info_string.append ('\n');
+      }
+    
+    static void printInfo (String info)
+      {
+        info_string = new StringBuffer ("\n\n");
+        info_lengthp2 = info.length () + 4;
+        printHeader ();
+        info_string.append ("= ").append (info).append (" =\n");
+        printHeader ();
+        System.out.println (info_string.toString ());
+      }
+
+    static void installOptionalBCProvider ()
+      {
+        @SuppressWarnings("rawtypes")
+        Class bc = null;
+        try
+          {
+            bc = Class.forName ("org.bouncycastle.jce.provider.BouncyCastleProvider");
+          }
+        catch (ClassNotFoundException e)
+          {
+            printInfo ("BouncyCastle provider not in path - Using the platform provider");
+            return;
+          }
+        try
+          {
+            Security.insertProviderAt ((Provider) bc.newInstance (), 1);
+            printInfo ("Installed BouncyCastle as first provider");
+          }
+        catch (Exception e)
+          {
+            printInfo ("Failed to install BouncyCastle!");
+          }
+      }
+    
+    static
+      {
+        installOptionalBCProvider ();
+      }
 
     private static void show ()
       {
@@ -140,6 +193,8 @@ public class AreqEnc
           {
             KeyStoreSigner req_signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
             req_signer.setKey (null, DemoKeyStore.getSignerPassword ());
+// TODO
+            req_signer.setExtendedCertPath (true);
             areqenc.setRequestSigner (req_signer);
           }
 
