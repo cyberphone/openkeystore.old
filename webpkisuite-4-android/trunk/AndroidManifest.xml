@@ -63,8 +63,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:taskAffinity=".wasp.WebAuthActivity"
-            android:name=".wasp.WebAuthActivity"
+            android:taskAffinity=".webauth.WebAuthActivity"
+            android:name=".webauth.WebAuthActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_webauth"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
@@ -87,7 +87,7 @@
             android:label="@string/title_activity_cert_view">
         </activity>
         <activity
-            android:name=".application.CredentialsActivity"
+            android:name="org.webpki.mobile.android.application.CredentialsActivity"
             android:label="@string/title_activity_credentials">
         </activity>
         
