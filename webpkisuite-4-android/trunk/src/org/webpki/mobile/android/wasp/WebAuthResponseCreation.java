@@ -19,6 +19,7 @@ package org.webpki.mobile.android.wasp;
 import java.io.IOException;
 
 import java.security.cert.X509Certificate;
+
 import java.util.Date;
 
 import android.os.AsyncTask;
@@ -26,11 +27,13 @@ import android.os.AsyncTask;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
 import org.webpki.android.sks.SKSException;
-import org.webpki.android.wasp.AuthenticationResponseEncoder;
 
-import org.webpki.android.crypto.CertificateInfo;
-import org.webpki.android.crypto.SignatureAlgorithms;
+import org.webpki.android.webauth.AuthenticationResponseEncoder;
+
+import org.webpki.android.crypto.AsymSignatureAlgorithms;
 import org.webpki.android.crypto.SignerInterface;
+
+import org.webpki.android.json.JSONX509Signer;
 
 /**
  * This worker class creates the actual authentication response.
@@ -59,43 +62,37 @@ public class WebAuthResponseCreation extends AsyncTask<Void, String, String>
           {
             publishProgress (BaseProxyActivity.PROGRESS_AUTHENTICATING);
 
-            AuthenticationResponseEncoder authentication_response = new AuthenticationResponseEncoder ();
-
-            authentication_response.createSignedResponse (new SignerInterface ()
-              {
-                @Override
-                public boolean authorizationFailed () throws IOException
+            JSONX509Signer signer = new JSONX509Signer (
+                new SignerInterface ()
                   {
-                    return false;
-                  }
-  
-                @Override
-                public CertificateInfo getSignerCertificateInfo () throws IOException
-                  {
-                    return null;
-                  }
-  
-                @Override
-                public X509Certificate[] prepareSigning (boolean full_path) throws IOException
-                  {
-                    X509Certificate[] cert_path = webauth_activity.sks.getKeyAttributes (key_handle).getCertificatePath ();
-                    return full_path ? cert_path : new X509Certificate[]{cert_path[0]};
-                  }
-  
-                @Override
-                public byte[] signData (byte[] data, SignatureAlgorithms sign_alg) throws IOException
-                  {
-                    return webauth_activity.sks.signHashedData (key_handle,
-                                                                sign_alg.getURI (),
-                                                                null,
-                                                                authorization.getBytes ("UTF-8"),
-                                                                sign_alg.getDigestAlgorithm ().digest (data));
-                  }},
-                  webauth_activity.authentication_request,
-                  webauth_activity.authentication_request.getSubmitURL (),
-                  new Date (),
-                  webauth_activity.getServerCertificate ());
-            webauth_activity.postXMLData (webauth_activity.authentication_request.getSubmitURL (), authentication_response, true);
+                    @Override
+                    public X509Certificate[] getCertificatePath () throws IOException
+                      {
+                        X509Certificate[] certificate_path = webauth_activity.sks.getKeyAttributes (key_handle).getCertificatePath ();
+                        if (webauth_activity.authentication_request.wantsExtendedCertPath ())
+                          {
+                            return certificate_path;
+                          }
+                        return new X509Certificate[]{certificate_path[0]};
+                      }
+      
+                    @Override
+                    public byte[] signData (byte[] data, AsymSignatureAlgorithms sign_alg) throws IOException
+                      {
+                        return webauth_activity.sks.signHashedData (key_handle,
+                                                                    sign_alg.getURI (),
+                                                                    null,
+                                                                    authorization.getBytes ("UTF-8"),
+                                                                    sign_alg.getDigestAlgorithm ().digest (data));
+                      }});
+            signer.setSignatureAlgorithm (webauth_activity.matching_keys.get (key_handle));
+            AuthenticationResponseEncoder authentication_response =
+                new AuthenticationResponseEncoder (signer,
+                                                   webauth_activity.authentication_request,
+                                                   webauth_activity.getInitializationURL (),
+                                                   new Date (),
+                                                   webauth_activity.getServerCertificate ());
+            webauth_activity.postJSONData (webauth_activity.authentication_request.getSubmitURL (), authentication_response, true);
             return webauth_activity.getRedirectURL ();
           }
         catch (SKSException e)

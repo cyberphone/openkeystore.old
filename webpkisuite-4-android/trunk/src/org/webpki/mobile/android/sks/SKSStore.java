@@ -29,14 +29,18 @@ import java.security.Security;
 import java.security.spec.ECGenParameterSpec;
 
 import java.util.Date;
+import java.util.HashSet;
 
 import org.spongycastle.asn1.x509.BasicConstraints;
 import org.spongycastle.asn1.x509.KeyUsage;
 import org.spongycastle.asn1.x509.X509Extensions;
+
 import org.spongycastle.jce.X509Principal;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 
 import org.spongycastle.x509.X509V3CertificateGenerator;
+
+import org.webpki.android.sks.SKSException;
 
 import android.content.Context;
 
@@ -49,6 +53,8 @@ public abstract class SKSStore
     private static final String PERSISTENCE_SKS      = "SKS";  // SKS persistence file
     
     private static SKSImplementation sks;
+    
+    private static HashSet<String> supported_algorithms;
 
     public static synchronized SKSImplementation createSKS (String caller_for_log, Context caller, boolean save_if_new)
       {
@@ -58,6 +64,7 @@ public abstract class SKSStore
               {
                 Security.insertProviderAt (new BouncyCastleProvider (), 1);
                 sks = (SKSImplementation) new ObjectInputStream (caller.openFileInput(PERSISTENCE_SKS)).readObject ();
+                getAlgorithms ();
                 Log.i (caller_for_log, "SKS found, restoring it");
               }
             catch (Exception e)
@@ -89,16 +96,26 @@ public abstract class SKSStore
                       {
                         serializeSKS (caller_for_log, caller);
                       }
+                    getAlgorithms ();
                   }
                 catch (Exception e2)
                   {
                     Log.e (caller_for_log, e2.getMessage ());
-                   }
+                  }
               }
           }
         return sks;
       }
     
+    private static void getAlgorithms () throws SKSException
+      {
+        supported_algorithms = new HashSet<String> ();
+        for (String alg : sks.getDeviceInfo ().getSupportedAlgorithms ())
+          {
+            supported_algorithms.add (alg);
+          }
+      }
+
     public static synchronized void serializeSKS (String caller_for_log, Context caller)
       {
         if (sks != null)
@@ -114,5 +131,10 @@ public abstract class SKSStore
                 Log.e (caller_for_log, "Couldn't write SKS");
               }
           }
+      }
+
+    public static boolean isSupported (String algorithm)
+      {
+        return supported_algorithms.contains (algorithm);
       }
   }

@@ -107,14 +107,9 @@ public final class CameraManager {
       if (parametersFlattened != null) {
         parameters = theCamera.getParameters();
         parameters.unflatten(parametersFlattened);
-        try {
           theCamera.setParameters(parameters);
           configManager.setDesiredCameraParameters(theCamera, true);
-        } catch (RuntimeException re2) {
-          // Well, darn. Give up
-          Log.w(TAG, "Camera rejected even safe-mode parameters! No configuration");
         }
-      }
     }
 
   }

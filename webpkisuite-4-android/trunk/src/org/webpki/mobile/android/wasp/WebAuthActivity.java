@@ -16,7 +16,7 @@
  */
 package org.webpki.mobile.android.wasp;
 
-import java.util.Vector;
+import java.util.LinkedHashMap;
 
 import android.os.Bundle;
 
@@ -24,8 +24,10 @@ import org.webpki.mobile.android.R;
 
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
+import org.webpki.android.crypto.AsymSignatureAlgorithms;
 
-import org.webpki.android.wasp.AuthenticationRequestDecoder;
+
+import org.webpki.android.webauth.AuthenticationRequestDecoder;
 
 public class WebAuthActivity extends BaseProxyActivity
   {
@@ -33,7 +35,7 @@ public class WebAuthActivity extends BaseProxyActivity
 
     AuthenticationRequestDecoder authentication_request;
     
-    Vector<Integer> matching_keys = new Vector<Integer> ();
+    LinkedHashMap<Integer,AsymSignatureAlgorithms> matching_keys = new LinkedHashMap<Integer,AsymSignatureAlgorithms> ();
 
     @Override
     public void onCreate (Bundle savedInstanceState)

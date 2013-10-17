@@ -184,10 +184,10 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
                                                                         key.getKeySpecifier ().getParameters (),
                                                                         key.getEndorsedAlgorithms (),
                                                                         key.getMAC ());
-                key_creation_response.addPublicKey (key_data.getPublicKey (), key_data.getAttestation (), key.getID ());
+                key_creation_response.addPublicKey (key_data.getPublicKey (), key_data.getKeyAttestation (), key.getID ());
               }
 
-            keygen2_activity.postXMLData (keygen2_activity.key_creation_request.getSubmitURL (), key_creation_response, false);
+            keygen2_activity.postJSONData (keygen2_activity.key_creation_request.getSubmitURL (), key_creation_response, false);
 
             publishProgress (BaseProxyActivity.PROGRESS_DEPLOY_CERTS);
 
@@ -219,7 +219,7 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
             //////////////////////////////////////////////////////////////////////////
             // Final check, do these keys match the request?
             //////////////////////////////////////////////////////////////////////////
-            for (ProvisioningFinalizationRequestDecoder.DeployedKeyEntry key : prov_final_request.getDeployedKeyEntrys ())
+            for (ProvisioningFinalizationRequestDecoder.IssuedCredential key : prov_final_request.getIssuedCredentials ())
               {
                 int key_handle = keygen2_activity.sks.getKeyHandle (eps.getProvisioningHandle (),
                                                                     key.getID ());
@@ -291,10 +291,10 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
             //////////////////////////////////////////////////////////////////////////
             // Create final and attested message
             //////////////////////////////////////////////////////////////////////////
-            keygen2_activity.postXMLData (prov_final_request.getSubmitURL (),
+            keygen2_activity.postJSONData (prov_final_request.getSubmitURL (),
                                           new ProvisioningFinalizationResponseEncoder (prov_final_request,
                                                                                        keygen2_activity.sks.closeProvisioningSession (eps.getProvisioningHandle (),
-                                                                                       prov_final_request.getCloseSessionNonce (),
+                                                                                       prov_final_request.getCloseSessionChallenge (),
                                                                                        prov_final_request.getCloseSessionMAC ())),
                                           true);
             return keygen2_activity.getRedirectURL ();

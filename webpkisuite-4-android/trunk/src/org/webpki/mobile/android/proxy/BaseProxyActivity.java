@@ -41,9 +41,12 @@ import android.util.Log;
 
 import org.apache.http.HttpStatus;
 
+import org.webpki.android.json.JSONDecoder;
+import org.webpki.android.json.JSONDecoderCache;
+import org.webpki.android.json.JSONEncoder;
+import org.webpki.android.json.JSONOutputFormats;
+
 import org.webpki.android.net.HTTPSWrapper;
-import org.webpki.android.xml.XMLSchemaCache;
-import org.webpki.android.xml.XMLObjectWrapper;
 
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
@@ -68,7 +71,9 @@ public abstract class BaseProxyActivity extends Activity
     
     private static final String VERSION_MACRO           = "$VER$";
     
-    private XMLSchemaCache schema_cache;
+    private static final String JSON_CONTENT            = "application/json";
+    
+    private JSONDecoderCache schema_cache;
 
     ProgressDialog progress_display;
 
@@ -263,13 +268,14 @@ public abstract class BaseProxyActivity extends Activity
         closeProxy ();
       }
 
-    public void postXMLData (String url,
-                             XMLObjectWrapper xml_object,
+    public void postJSONData (String url,
+                             JSONEncoder json_object,
                              boolean interrupt_expected) throws IOException, InterruptedProtocolException
       {
-        logOK ("Writing \"" + xml_object.element () + "\" object to: " + url);
+        logOK ("Writing \"" + json_object.getQualifier () + "\" object to: " + url);
         addOptionalCookies (url);
-        https_wrapper.makePostRequest (url, xml_object.writeXML ());
+        https_wrapper.setHeader ("Content-Type", JSON_CONTENT);
+        https_wrapper.makePostRequest (url, json_object.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT));
         if (https_wrapper.getResponseCode () == HttpStatus.SC_MOVED_TEMPORARILY)
           {
             if ((redirect_url = https_wrapper.getHeaderValue ("Location")) == null)
@@ -288,10 +294,19 @@ public abstract class BaseProxyActivity extends Activity
               {
                 throw new IOException (https_wrapper.getResponseMessage ());
               }
+            checkContentType ();
             if (interrupt_expected)
               {
                 throw new IOException ("Redirect expected");
               }
+          }
+      }
+
+    private void checkContentType () throws IOException
+      {
+        if (!https_wrapper.getContentType ().startsWith (JSON_CONTENT))
+          {
+            throw new IOException ("Unexpected content: " + https_wrapper.getContentType ());
           }
       }
 
@@ -329,20 +344,20 @@ public abstract class BaseProxyActivity extends Activity
         closeProxy ();
       }
 
-    public void addSchema (Class<? extends XMLObjectWrapper> wrapper_class) throws IOException
+    public void addSchema (Class<? extends JSONDecoder> decoder_class) throws IOException
       {
-        schema_cache.addWrapper (wrapper_class);
-        logOK ("Added XML schema for: " + wrapper_class.getName ());
+        schema_cache.addToCache (decoder_class);
+        logOK ("Added JSON decoder for: " + decoder_class.getName ());
       }
 
-    public XMLObjectWrapper parseXML (byte[] xmldata) throws IOException
+    public JSONDecoder parseXML (byte[] xmldata) throws IOException
       {
-        XMLObjectWrapper xml_object = schema_cache.parse (xmldata);
-        logOK ("Successfully read \"" + xml_object.element () + "\" object");
-        return xml_object;
+        JSONDecoder json_object = schema_cache.parse (xmldata);
+        logOK ("Successfully read \"" + json_object.getQualifier () + "\" object");
+        return json_object;
       }
 
-    public XMLObjectWrapper parseResponse () throws IOException
+    public JSONDecoder parseResponse () throws IOException
       {
         return parseXML (https_wrapper.getData ());
       }
@@ -357,7 +372,7 @@ public abstract class BaseProxyActivity extends Activity
         logOK (getProtocolName () + " protocol run: " + new SimpleDateFormat ("yyyy-MM-dd' 'HH:mm:ss").format (new Date ()));
         https_wrapper = new HTTPSWrapper ();
         initSKS ();
-        schema_cache = new XMLSchemaCache ();
+        schema_cache = new JSONDecoderCache ();
         Intent intent = getIntent ();
         Uri uri = intent.getData ();
         if (uri == null)
@@ -389,6 +404,7 @@ public abstract class BaseProxyActivity extends Activity
           {
             initial_request_data = https_wrapper.getData ();
             server_certificate = https_wrapper.getServerCertificate ();
+            checkContentType ();
           }
         else if (https_wrapper.getResponseCode () == HttpStatus.SC_MOVED_TEMPORARILY)
           {

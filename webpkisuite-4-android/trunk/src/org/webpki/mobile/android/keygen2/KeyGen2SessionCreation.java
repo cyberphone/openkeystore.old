@@ -18,7 +18,6 @@ package org.webpki.mobile.android.keygen2;
 
 import java.io.IOException;
 
-import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 
 import java.util.Date;
@@ -46,9 +45,11 @@ import org.webpki.mobile.android.proxy.InterruptedProtocolException;
 
 import org.webpki.mobile.android.R;
 
-import org.webpki.android.crypto.MacAlgorithms;
+import org.webpki.android.crypto.MACAlgorithms;
 import org.webpki.android.crypto.SymKeySignerInterface;
 import org.webpki.android.crypto.CertificateFilter;
+
+import org.webpki.android.json.JSONDecoder;
 
 import org.webpki.android.keygen2.CredentialDiscoveryRequestDecoder;
 import org.webpki.android.keygen2.CredentialDiscoveryResponseEncoder;
@@ -66,8 +67,6 @@ import org.webpki.android.sks.Grouping;
 import org.webpki.android.sks.PassphraseFormat;
 import org.webpki.android.sks.ProvisioningSession;
 import org.webpki.android.sks.DeviceInfo;
-
-import org.webpki.android.xml.XMLObjectWrapper;
 
 /**
  * This worker class creates the SKS/KeyGen2 SessionKey.
@@ -310,7 +309,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
             default_icon.setDensity (Bitmap.DENSITY_NONE);
             platform_response.addImagePreference (KeyGen2URIs.LOGOTYPES.LIST, "image/png", default_icon.getWidth () , default_icon.getHeight ());
 
-            keygen2_activity.postXMLData (keygen2_activity.platform_request.getSubmitURL (), platform_response, false);
+            keygen2_activity.postJSONData (keygen2_activity.platform_request.getSubmitURL (), platform_response, false);
 
             keygen2_activity.prov_init_request = (ProvisioningInitializationRequestDecoder) keygen2_activity.parseResponse ();
             Date client_time = new Date ();
@@ -328,12 +327,11 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
             keygen2_activity.provisioning_handle = session.getProvisioningHandle ();
 
             ProvisioningInitializationResponseEncoder prov_sess_response =
-                new ProvisioningInitializationResponseEncoder (session.getClientEphemeralKey (),
-                                                               keygen2_activity.prov_init_request.getServerSessionID (),
+                new ProvisioningInitializationResponseEncoder (keygen2_activity.prov_init_request,
+                                                               session.getClientEphemeralKey (),
                                                                session.getClientSessionID (),
-                                                               keygen2_activity.prov_init_request.getServerTime (),
                                                                client_time,
-                                                               session.getAttestation (),
+                                                               session.getSessionAttestation (),
                                                                keygen2_activity.platform_request.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
 
             if (keygen2_activity.getServerCertificate () != null)
@@ -341,21 +339,23 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                 prov_sess_response.setServerCertificate (keygen2_activity.getServerCertificate ());
               }
 
-            prov_sess_response.signRequest (new SymKeySignerInterface ()
+            prov_sess_response.setResponseSigner (new SymKeySignerInterface ()
               {
-                public MacAlgorithms getMacAlgorithm () throws IOException, GeneralSecurityException
-                  {
-                    return MacAlgorithms.HMAC_SHA256;
-                  }
-
-                public byte[] signData (byte[] data) throws IOException, GeneralSecurityException
+                @Override
+                public byte[] signData (byte[] data) throws IOException
                   {
                     return keygen2_activity.sks.signProvisioningSessionData (keygen2_activity.provisioning_handle, data);
                   }
+
+                @Override
+                public MACAlgorithms getMACAlgorithm () throws IOException
+                  {
+                    return MACAlgorithms.HMAC_SHA256;
+                  }
               });
 
-            keygen2_activity.postXMLData (keygen2_activity.prov_init_request.getSubmitURL (), prov_sess_response, false);
-            XMLObjectWrapper xml_object = keygen2_activity.parseResponse ();
+            keygen2_activity.postJSONData (keygen2_activity.prov_init_request.getSubmitURL (), prov_sess_response, false);
+            JSONDecoder xml_object = keygen2_activity.parseResponse ();
             if (xml_object instanceof CredentialDiscoveryRequestDecoder)
               {
                 publishProgress (BaseProxyActivity.PROGRESS_LOOKUP);
@@ -386,7 +386,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                                     cf.setPolicy (ls.getPolicy ());
                                     if (cf.matches (cert_path, null, null))
                                       {
-                                        lr.addMatchingCredential (cert_path[0],
+                                        lr.addMatchingCredential (cert_path,
                                                                   eps.getClientSessionID (),
                                                                   eps.getServerSessionID (),
                                                                   keygen2_activity.sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());
@@ -396,7 +396,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                           }
                       }
                   }
-                keygen2_activity.postXMLData (cred_disc_request.getSubmitURL (), cred_disc_response, false);
+                keygen2_activity.postJSONData (cred_disc_request.getSubmitURL (), cred_disc_response, false);
                 xml_object = keygen2_activity.parseResponse ();
               }
              keygen2_activity.key_creation_request = (KeyCreationRequestDecoder) xml_object;

@@ -36,15 +36,18 @@ import android.view.inputmethod.EditorInfo;
 
 import java.security.cert.X509Certificate;
 
+import java.security.interfaces.RSAPublicKey;
+
 import org.webpki.mobile.android.R;
 
 import org.webpki.android.sks.AppUsage;
 import org.webpki.android.sks.EnumeratedKey;
 import org.webpki.android.sks.KeyAttributes;
 
+import org.webpki.android.crypto.AsymSignatureAlgorithms;
 import org.webpki.android.crypto.CertificateFilter;
 
-import org.webpki.android.wasp.AuthenticationRequestDecoder;
+import org.webpki.android.webauth.AuthenticationRequestDecoder;
 
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
@@ -71,9 +74,9 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
             webauth_activity.addSchema (AuthenticationRequestDecoder.class);
             webauth_activity.authentication_request = (AuthenticationRequestDecoder) webauth_activity.parseXML (webauth_activity.initial_request_data);
             webauth_activity.setAbortURL (webauth_activity.authentication_request.getAbortURL ());
-             EnumeratedKey ek = new EnumeratedKey ();
-             sks = SKSStore.createSKS (WebAuthActivity.WEBAUTH, webauth_activity, false);
-             while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
+            EnumeratedKey ek = new EnumeratedKey ();
+            sks = SKSStore.createSKS (WebAuthActivity.WEBAUTH, webauth_activity, false);
+            while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
               {
                 Log.i (WebAuthActivity.WEBAUTH, "KeyHandle=" + ek.getKeyHandle ());
                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
@@ -87,9 +90,25 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                     continue;
                   }
                 X509Certificate[] cert_path = ka.getCertificatePath ();
+                boolean did_it = false;
+                boolean rsa_flag = cert_path[0].getPublicKey () instanceof RSAPublicKey;
+                AsymSignatureAlgorithms signature_algorithm = null;
+                for (AsymSignatureAlgorithms sig_alg : webauth_activity.authentication_request.getSignatureAlgorithms ())
+                  {
+                    if (rsa_flag == sig_alg.isRSA () && SKSStore.isSupported (sig_alg.getURI ()))
+                      {
+                        signature_algorithm = sig_alg;
+                        did_it = true;
+                        break;
+                      }
+                  }
+                if (!did_it)
+                  {
+                    continue;
+                  }
                 if (webauth_activity.authentication_request.getCertificateFilters ().length > 0)
                   {
-                    boolean did_it = false;
+                    did_it = false;
                     ////////////////////////////////////////////////////////////////////////////////////
                     // The requester wants to discriminate keys further...
                     ////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +125,7 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                         continue;
                       }
                   }
-                webauth_activity.matching_keys.add (ek.getKeyHandle ());
+                webauth_activity.matching_keys.put (ek.getKeyHandle (), signature_algorithm);
               }
             return true;
           }
@@ -115,6 +134,11 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
             webauth_activity.logException (e);
           }
         return false;
+      }
+
+    int firstKey ()
+      {
+        return webauth_activity.matching_keys.keySet ().iterator ().next ();
       }
 
     @Override
@@ -165,7 +189,7 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                         ///////////////////////////////////////////////////////////////////////////////////
                         if (((CheckBox) webauth_activity.findViewById (R.id.grantCheckBox)).isChecked ())
                           {
-                            sks.setGrant (webauth_activity.matching_keys.firstElement (), webauth_activity.getRequestingHost (), true);
+                            sks.setGrant (firstKey (), webauth_activity.getRequestingHost (), true);
                           }
                         webauth_activity.setContentView (R.layout.activity_webauth_pin);
                         ((LinearLayout)webauth_activity.findViewById (R.id.credential_element)).setOnClickListener (new View.OnClickListener ()
@@ -177,8 +201,8 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                               }
                           });
                         CredentialListDataFactory credential_data_factory = new CredentialListDataFactory (webauth_activity, sks);
-                        ((ImageView) webauth_activity.findViewById (R.id.auth_cred_logo)).setImageBitmap (credential_data_factory.getListIcon (webauth_activity.matching_keys.firstElement ()));
-                        ((TextView) webauth_activity.findViewById (R.id.auth_cred_domain)).setText (credential_data_factory.getDomain (webauth_activity.matching_keys.firstElement ()));
+                        ((ImageView) webauth_activity.findViewById (R.id.auth_cred_logo)).setImageBitmap (credential_data_factory.getListIcon (firstKey ()));
+                        ((TextView) webauth_activity.findViewById (R.id.auth_cred_domain)).setText (credential_data_factory.getDomain (firstKey ()));
                         if (android.os.Build.VERSION.SDK_INT < 16)
                           {
                             webauth_activity.findViewById (R.id.pinWindow).setVisibility (View.GONE);
@@ -196,7 +220,7 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                               {
                                 new WebAuthResponseCreation (webauth_activity,
                                                              pin.getText ().toString (),
-                                                             webauth_activity.matching_keys.firstElement ()).execute ();
+                                                             firstKey ()).execute ();
                               }
                           });
                         cancel.setOnClickListener (new View.OnClickListener ()
@@ -237,7 +261,7 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
             try
               {
                 if (!webauth_activity.matching_keys.isEmpty () &&
-                    sks.isGranted (webauth_activity.matching_keys.firstElement (), webauth_activity.getRequestingHost ()))
+                    sks.isGranted (firstKey (), webauth_activity.getRequestingHost ()))
                   {
                     ((CheckBox) webauth_activity.findViewById (R.id.grantCheckBox)).setChecked (true);
                     ok.performClick ();
