@@ -17,6 +17,7 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -24,8 +25,10 @@ import java.util.LinkedHashMap;
 /**
  * Local support class for holding JSON objects.
  */
-class JSONObject
+class JSONObject implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     LinkedHashMap<String, JSONValue> properties = new LinkedHashMap<String, JSONValue> ();
 
     HashSet<String> read_flag = new HashSet<String> ();

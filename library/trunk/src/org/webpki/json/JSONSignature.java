@@ -17,6 +17,7 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import java.security.GeneralSecurityException;
 
@@ -25,8 +26,10 @@ import java.security.cert.X509Certificate;
 /**
  * Common class for JSON signatures.
  */
-class JSONSignature
+class JSONSignature implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     static X509Certificate pathCheck (X509Certificate child, X509Certificate parent) throws IOException
       {
         if (child != null)

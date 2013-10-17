@@ -17,14 +17,17 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Base class for java classes which can be created from specific JSON object types.
  * <p>
  * It is designed to use {@link JSONDecoderCache} to get automatic instantiation.
  */
-public abstract class JSONDecoder
+public abstract class JSONDecoder implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     JSONObject root;  // Of parsed document
 
     /**

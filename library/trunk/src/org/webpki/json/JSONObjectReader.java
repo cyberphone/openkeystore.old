@@ -17,6 +17,7 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -36,8 +37,10 @@ import org.webpki.util.ISODateTime;
  * Returned by the parser methods.
  *
  */
-public class JSONObjectReader
+public class JSONObjectReader implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     JSONObject json;
 
     JSONObjectReader (JSONObject json)

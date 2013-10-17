@@ -17,6 +17,8 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.io.Serializable;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -28,8 +30,10 @@ import org.webpki.util.ISODateTime;
 /**
  * For writing array elements.
  */
-public class JSONArrayWriter
+public class JSONArrayWriter implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     Vector<JSONValue> array;
 
     JSONArrayWriter (Vector<JSONValue> array)

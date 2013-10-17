@@ -17,12 +17,15 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Base class for java classes which are used for creating specific JSON object types.
  */
-public abstract class JSONEncoder
+public abstract class JSONEncoder implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     JSONObject root;  // Of written document
 
     /**

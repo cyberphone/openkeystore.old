@@ -17,6 +17,7 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import java.util.Hashtable;
 import java.util.Vector;
@@ -40,8 +41,10 @@ import org.webpki.util.ArrayUtil;
  * A restriction imposed by this particular JSON processing model is that all properties must by default be read.
  * 
  */
-public class JSONDecoderCache
+public class JSONDecoderCache implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     /**
      * Emulation of XML namespace
      */

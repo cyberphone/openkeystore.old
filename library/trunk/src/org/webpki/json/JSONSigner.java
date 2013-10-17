@@ -17,6 +17,7 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.webpki.crypto.SignatureAlgorithms;
 
@@ -24,8 +25,10 @@ import org.webpki.crypto.SignatureAlgorithms;
  * Support class for signature generators.
  * 
  */
-public abstract class JSONSigner
+public abstract class JSONSigner implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     JSONSigner () {}
 
     abstract SignatureAlgorithms getAlgorithm ();

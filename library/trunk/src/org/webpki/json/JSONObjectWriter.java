@@ -17,6 +17,7 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -38,8 +39,10 @@ import org.webpki.util.ISODateTime;
  * It also performs canonicalization when reading and writing enveloped signatures.
  * 
  */
-public class JSONObjectWriter
+public class JSONObjectWriter implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     static String canonicalization_debug_file;
 
     static final int STANDARD_INDENT = 2;

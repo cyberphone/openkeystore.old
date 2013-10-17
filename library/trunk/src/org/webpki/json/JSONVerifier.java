@@ -17,13 +17,16 @@
 package org.webpki.json;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Support class for signature verifiers.
  * 
  */
-public abstract class JSONVerifier
+public abstract class JSONVerifier implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     JSONVerifier () {}
 
     abstract void verify (JSONSignatureDecoder signature_decoder) throws IOException;

@@ -16,11 +16,15 @@
  */
 package org.webpki.json;
 
+import java.io.Serializable;
+
 /**
  * Local support class for holding individual values of JSON objects.
  */
-class JSONValue
+class JSONValue implements Serializable
   {
+    private static final long serialVersionUID = 1L;
+
     JSONTypes type;
 
     Object value;  // Holds either a String, JSONObject or Vector<JSONValue>
