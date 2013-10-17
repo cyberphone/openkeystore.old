@@ -1,0 +1,142 @@
+<project name="Android webpki classes" default="dist" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="debug"  value="on"/>
+  <property name="webpki_src_dir" value="../library/src" />
+  <property name="temp_dir" value=".tmp" />
+  <property name="class_dir" value=".classes" />
+  <property name="dist_dir" value="dist" />
+  <property name="test_dir" value="test" />
+  <property name="android-json-src" value="secure-json-4-android-v1.00" />
+  <property name="target-name" value="webpki.org"/>
+  
+   <target name="help">
+    <echo message="Targets: help dist xerces."/>
+  </target>
+  
+  <target name="json-zip">
+    <echo message="Producing ${android-json-src} .zip and .zip.SHA1 files..."/> 
+    <delete dir="${temp_dir}"/>
+    <mkdir dir="${temp_dir}"/>
+    <delete file="${dd}/${android-json-src}.zip" failonerror="false"/>
+    <copy todir="${temp_dir}/org/webpki/android">
+      <fileset dir="${webpki_src_dir}/org/webpki">
+        <exclude name="**/.svn/**"/>
+        <exclude name="**/test/**"/>
+        <exclude name="**/*.html"/>
+        <include name="**/json/*"/>
+        <include name="**/util/ISODateTime.java"/>
+        <include name="**/util/ArrayUtil.java"/>
+        <include name="**/util/Base64.java"/>
+        <include name="**/crypto/VerifierInterface.java"/>
+        <include name="**/crypto/SymKeyVerifierInterface.java"/>
+        <include name="**/crypto/SignerInterface.java"/>
+        <include name="**/crypto/AsymKeySignerInterface.java"/>
+        <include name="**/crypto/SymKeySignerInterface.java"/>
+        <include name="**/crypto/SKSAlgorithms.java"/>
+        <include name="**/crypto/KeyAlgorithms.java"/>
+        <include name="**/crypto/MACAlgorithms.java"/>
+        <include name="**/crypto/HashAlgorithms.java"/>
+        <include name="**/crypto/SignatureAlgorithms.java"/>
+        <include name="**/crypto/AsymSignatureAlgorithms.java"/>
+        <include name="**/crypto/SymSignatureAlgorithms.java"/>
+      </fileset>
+    </copy>
+    <replace summary="true" dir="${temp_dir}" value="org.webpki.android.">
+       <include name="**/*"/>
+       <replacetoken><![CDATA[org.webpki.]]></replacetoken>
+     </replace>
+    <delete dir="${class_dir}"/>
+    <mkdir dir="${class_dir}" />
+    <javac debug="${debug}" srcdir="${temp_dir}" destdir="${class_dir}" includeAntRuntime="false"/>
+    <zip destfile="${dist_dir}/${android-json-src}.zip">
+      <zipfileset dir="${temp_dir}" prefix="${android-json-src}/src"/>
+    </zip>
+    <checksum file="${dist_dir}/${android-json-src}.zip" fileext=".SHA1" algorithm="sha1" forceOverwrite="yes"/>
+  </target>
+    
+  <target name="compile">
+    <mkdir dir="${temp_dir}"/>
+    <mkdir dir="${class_dir}" />
+
+    <copy todir="${temp_dir}/org/webpki/android" preservelastmodified="true">
+      <fileset dir="${webpki_src_dir}/org/webpki">
+        <exclude name="**/test/**"/>
+        <exclude name="**/infocard/**"/>
+        <exclude name="**/tools/**"/>
+        <exclude name="**/kg2xml/**"/>
+        <exclude name="**/wasp/**"/>
+        <exclude name="**/xml/**"/>
+        <exclude name="**/xmldsig/**"/>
+        <exclude name="**/xmlenc/**"/>
+        <exclude name="**/pdf/**"/>
+        <exclude name="**/sks/ws/**"/>
+        <exclude name="**/sks/twolayer/**"/>
+        <exclude name="**/securityproxy/**"/>
+        <exclude name="**/ca/**"/>
+        <exclude name="**/pkcs7/**"/>
+        <exclude name="**/webutil/**"/>
+        <exclude name="**/keygen2/*RequestEncoder.java"/>
+        <exclude name="**/keygen2/*ResponseDecoder.java"/>
+        <exclude name="**/keygen2/ServerState.java"/>
+        <exclude name="**/keygen2/ServerEncoder.java"/>
+        <exclude name="**/keygen2/ServerCryptoInterface.java"/>
+         <exclude name="**/webauth/*RequestEncoder.java"/>
+        <exclude name="**/webauth/*ResponseDecoder.java"/>
+        </fileset>
+    </copy>
+
+    <replace summary="true" dir="${temp_dir}" value="org.webpki.android.">
+       <include name="**/*"/>
+       <replacetoken><![CDATA[org.webpki.]]></replacetoken>
+     </replace>
+
+    <replaceregexp file="${temp_dir}/org/webpki/android/crypto/KeyStoreReader.java"
+        match="(\/\/\ JKS\ magic\ number\ \+\ version\ \(2\).*)(byte\[\]\ jks\ \=\ \{)(\(byte\)0xfe,\ \(byte\)0xed,\ \(byte\)0xfe,\ \(byte\)0xed,\ 0,\ 0,\ 0,\ 2)(\}\;)"
+        replace="\20, 0, 0, 1, 0, 0, 0, 20\4 // BKS: (int)VERSION + (int)SALT_LENGTH"
+        flags="s"/>
+
+    <replaceregexp
+        match="&quot;SunX509&quot;"
+        replace="&quot;X509&quot;"
+        flags="g">
+        <fileset dir="${temp_dir}/org/webpki/android/">
+          <include name="**/*.java"/>
+        </fileset>
+    </replaceregexp>
+    
+    <replaceregexp
+        match="&quot;JKS&quot;"
+        replace="&quot;BKS&quot;"
+        flags="g">
+        <fileset dir="${temp_dir}/org/webpki/android/">
+          <include name="**/*.java"/>
+        </fileset>
+    </replaceregexp>
+
+    <javac debug="${debug}" srcdir="${temp_dir}" destdir="${class_dir}" includeAntRuntime="false"/>
+  </target>
+
+  <target name="dist" depends="clean,compile">    
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist_dir}" />
+    
+    <!-- Create Android class library -->
+    <jar jarfile="${dist_dir}/${target-name}-android.mod.jar">
+      <fileset dir="${class_dir}"/>
+      <fileset dir="${temp_dir}">
+          <exclude name="**/*.java"/>
+          <exclude name="**/*.html"/>
+          <exclude name="**/doc-files/*"/>
+       </fileset>
+    </jar>
+  </target>
+
+  <target name="clean">
+    <delete dir="${class_dir}"/>
+    <delete dir="${temp_dir}"/>
+    <delete dir="${dist_dir}"/>
+  </target>
+
+</project>
+
