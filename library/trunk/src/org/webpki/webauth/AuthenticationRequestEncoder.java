@@ -55,7 +55,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
 
     Vector<CertificateFilter> certificate_filters = new Vector<CertificateFilter> ();
 
-    Vector<String> requested_client_platform_features = new Vector<String> ();
+    Vector<String> requested_client_features = new Vector<String> ();
     
     Date server_time;
 
@@ -115,9 +115,9 @@ public class AuthenticationRequestEncoder extends ServerEncoder
       }
 
 
-    public AuthenticationRequestEncoder requestClientPlatformFeature (String feature_uri)
+    public AuthenticationRequestEncoder requestClientFeature (String feature_uri)
       {
-        requested_client_platform_features.add (feature_uri);
+        requested_client_features.add (feature_uri);
         return this;
       }
 
@@ -136,7 +136,20 @@ public class AuthenticationRequestEncoder extends ServerEncoder
           {
             bad ("ServerTime attribute");
           }
-        if (certificate_filters.size () > 0 && areresp.certificate_path != null)
+        boolean sig_alg_found = false;
+        for (String sig_alg : algorithms)
+          {
+            if (sig_alg.equals (areresp.signature_algorithm))
+              {
+                sig_alg_found = true;
+                break;
+              }
+          }
+        if (!sig_alg_found)
+          {
+            bad ("Wrong signature algorithm: " + areresp.signature_algorithm);
+          }
+        if (extended_cert_path && certificate_filters.size () > 0 && areresp.certificate_path != null)
           {
             for (CertificateFilter cf : certificate_filters)
               {
@@ -199,9 +212,9 @@ public class AuthenticationRequestEncoder extends ServerEncoder
         //////////////////////////////////////////////////////////////////////////
         // Optional "client platform features"
         //////////////////////////////////////////////////////////////////////////
-        if (!requested_client_platform_features.isEmpty ())
+        if (!requested_client_features.isEmpty ())
           {
-            wr.setStringArray (REQUESTED_CLIENT_FEATURES_JSON, requested_client_platform_features.toArray (new String[0]));
+            wr.setStringArray (REQUESTED_CLIENT_FEATURES_JSON, requested_client_features.toArray (new String[0]));
           }
 
         //////////////////////////////////////////////////////////////////////////

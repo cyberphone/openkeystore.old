@@ -48,6 +48,8 @@ public class AuthenticationResponseDecoder extends InputValidator
     String id;
     
     X509Certificate[] certificate_path;
+    
+    String signature_algorithm;
 
     HashMap<String,HashSet<String>> client_platform_features = new HashMap<String,HashSet<String>> ();
 
@@ -124,6 +126,7 @@ public class AuthenticationResponseDecoder extends InputValidator
         //////////////////////////////////////////////////////////////////////////
         signature = rd.getSignature ();
         certificate_path = signature.getX509CertificatePath ();
+        signature_algorithm = signature.getSignatureAlgorithm ().getURI ();
       }
 
     @Override

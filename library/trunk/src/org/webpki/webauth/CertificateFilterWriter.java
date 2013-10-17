@@ -32,7 +32,7 @@ class CertificateFilterWriter extends CertificateFilterIOBase
       {
         if (cf.getSha1 () != null)
           {
-            wr.setBinary (CF_SHA1_ATTR, cf.getSha1 ());
+            wr.setBinary (CF_SHA1_FP_ATTR, cf.getSha1 ());
           }
         writeOptionalString (wr, CF_ISSUER_ATTR, cf.getIssuerRegEx ());
         writeOptionalString (wr, CF_SUBJECT_ATTR, cf.getSubjectRegEx ());

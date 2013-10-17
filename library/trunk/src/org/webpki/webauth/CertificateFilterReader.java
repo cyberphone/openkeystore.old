@@ -32,7 +32,7 @@ class CertificateFilterReader extends CertificateFilterIOBase
     static CertificateFilter read (JSONObjectReader rd) throws IOException
       {
         CertificateFilter cf = new CertificateFilter ();
-        cf.setSha1 (rd.getBinaryConditional (CF_SHA1_ATTR));
+        cf.setSha1 (rd.getBinaryConditional (CF_SHA1_FP_ATTR));
         cf.setIssuerRegEx (rd.getStringConditional (CF_ISSUER_ATTR));
         cf.setSubjectRegEx (rd.getStringConditional (CF_SUBJECT_ATTR));
         cf.setEmailAddress (rd.getStringConditional (CF_EMAIL_ATTR));

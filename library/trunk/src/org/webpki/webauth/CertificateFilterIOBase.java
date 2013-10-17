@@ -18,7 +18,7 @@ package org.webpki.webauth;
 
 abstract class CertificateFilterIOBase
   {
-    static final String CF_SHA1_ATTR            = "SHA1";
+    static final String CF_SHA1_FP_ATTR         = "SHA1FingerPrint";
     static final String CF_ISSUER_ATTR          = "Issuer";
     static final String CF_SUBJECT_ATTR         = "Subject";
     static final String CF_EMAIL_ATTR           = "Email";

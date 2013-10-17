@@ -186,7 +186,7 @@ public class AreqEnc
 
         if (request_client_feature)
           {
-            areqenc.requestClientPlatformFeature ("http://xmlns.example.com/feature1");
+            areqenc.requestClientFeature ("http://xmlns.example.com/feature1");
           }
 
         if (signrequest)

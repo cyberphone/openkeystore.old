@@ -87,7 +87,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder
       }
 
 
-    public String[] getRequestedClientPlatformFeatures ()
+    public String[] getRequestedClientFeatures ()
       {
         return client_features.toArray (new String[0]);
       }
@@ -102,6 +102,11 @@ public class AuthenticationRequestDecoder extends ClientDecoder
     public int getExpires ()
       {
         return expires;
+      }
+    
+    public boolean wantsExtendedCertPath ()
+      {
+        return extended_cert_path;
       }
 
     
