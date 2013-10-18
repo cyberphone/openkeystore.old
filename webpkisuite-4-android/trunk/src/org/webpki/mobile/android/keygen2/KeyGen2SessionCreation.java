@@ -318,7 +318,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                                                                 keygen2_activity.platform_request.getPrivacyEnabledFlag (),
                                                                 keygen2_activity.prov_init_request.getServerSessionID (),
                                                                 keygen2_activity.prov_init_request.getServerEphemeralKey (),
-                                                                keygen2_activity.prov_init_request.getSubmitURL (), // IssuerURI
+                                                                keygen2_activity.platform_request.getSubmitURL (), // IssuerURI
                                                                 keygen2_activity.prov_init_request.getKeyManagementKey (),
                                                                 (int) (client_time.getTime () / 1000),
                                                                 keygen2_activity.prov_init_request.getSessionLifeTime (),
@@ -381,9 +381,9 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                                     CertificateFilter cf = new CertificateFilter ();
                                     cf.setIssuerRegEx (ls.getIssuerRegEx ());
                                     cf.setSubjectRegEx (ls.getSubjectRegEx ());
-                                    cf.setSerial (ls.getSerial ());
-                                    cf.setEmailAddress (ls.getEmailAddress ());
-                                    cf.setPolicy (ls.getPolicy ());
+                                    cf.setSerialNumber (ls.getSerialNumber ());
+                                    cf.setEmailRegEx (ls.getEmailRegEx ());
+                                    cf.setPolicyRegEx (ls.getPolicyRegEx ());
                                     if (cf.matches (cert_path, null, null))
                                       {
                                         lr.addMatchingCredential (cert_path,
