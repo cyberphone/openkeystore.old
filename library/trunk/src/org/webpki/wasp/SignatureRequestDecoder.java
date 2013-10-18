@@ -81,11 +81,11 @@ public class SignatureRequestDecoder extends SignatureRequest
         rd.getNext (CERTIFICATE_FILTER_ELEM);
         DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
         CertificateFilter cf = new CertificateFilter ();
-        cf.setSha1 (ah.getBinaryConditional (CF_SHA1_ATTR));
+        cf.setFingerPrint (ah.getBinaryConditional (CF_SHA1_ATTR));
         cf.setIssuerRegEx (ah.getStringConditional (CF_ISSUER_ATTR));
         cf.setSubjectRegEx (ah.getStringConditional (CF_SUBJECT_ATTR));
-        cf.setEmailAddress (ah.getStringConditional (CF_EMAIL_ATTR));
-        cf.setSerial (ah.getBigIntegerConditional (CF_SERIAL_ATTR));
+        cf.setEmailRegEx (ah.getStringConditional (CF_EMAIL_ATTR));
+        cf.setSerialNumber (ah.getBigIntegerConditional (CF_SERIAL_ATTR));
         cf.setPolicy (ah.getStringConditional (CF_POLICY_ATTR));
         String[] scontainers = ah.getListConditional (CF_CONTAINERS_ATTR);
         KeyContainerTypes[] containers = null;

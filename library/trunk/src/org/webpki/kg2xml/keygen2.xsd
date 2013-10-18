@@ -1194,17 +1194,17 @@
 
          <!-- Qualifiers. At least one MUST be defined.  Note that "IssuedBefore"
               and "IssuedAfter" can be used to create a region that should either
-              be included or excluded depending on which one is biggest.  The "Subject"
-              and "Issuer" attributes are regular expressions matching RFC 2253 names.
+              be included or excluded depending on which one is biggest.
               Note that the "Issuer" attribute is searched for through the entire path.
               "Email" attributes MUST be searched for in both the subject DN and in
-              subject alt name extensions -->
-         <xs:attribute name="Issuer" type="kg2:distinguishedNameExpr" use="optional"/>
-         <xs:attribute name="Subject" type="kg2:distinguishedNameExpr" use="optional"/>
-         <xs:attribute name="Serial" type="xs:integer" use="optional"/>
-         <xs:attribute name="Email" type="xs:string" use="optional"/>
-         <xs:attribute name="Policy" type="kg2:oidValue" use="optional"/>
-         <xs:attribute name="ExcludedPolicies" type="kg2:oidValueList" use="optional"/>
+              subject alt name extensions.  If a single email address matches the
+              regular expression the search condition is true.  For "Policy" attributes
+              to match each found policy attribute MUST match the regular expression. -->
+         <xs:attribute name="IssuerRegEx" type="kg2:distinguishedNameExpr" use="optional"/>
+         <xs:attribute name="SubjectRegEx" type="kg2:distinguishedNameExpr" use="optional"/>
+         <xs:attribute name="SerialNumber" type="xs:integer" use="optional"/>
+         <xs:attribute name="EmailRegEx" type="kg2:regularExpression" use="optional"/>
+         <xs:attribute name="PolicyRegEx" type="kg2:regularExpression" use="optional"/>
          <xs:attribute name="IssuedBefore" type="xs:dateTime" use="optional"/>
          <xs:attribute name="IssuedAfter" type="xs:dateTime" use="optional"/>
 
@@ -1376,21 +1376,6 @@
                                  URI and OID definitions
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-   <xs:simpleType name="oidValue">
-      <xs:restriction base="xs:string">
-         <xs:pattern value="[1-9][0-9]*(\.[1-9][0-9]*)*"/>
-      </xs:restriction>
-   </xs:simpleType>
-
-   <xs:simpleType name="oidValueList">
-      <xs:restriction>
-         <xs:simpleType>
-            <xs:list itemType="kg2:oidValue"/>
-         </xs:simpleType>
-         <xs:minLength value="1"/>
-      </xs:restriction>
-   </xs:simpleType>
-
    <xs:simpleType name="httpURI">
       <xs:restriction base="xs:anyURI">
          <xs:pattern value="https?://.*"/>
@@ -1452,9 +1437,9 @@
    </xs:simpleType>
 
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     "Subject" attributes MUST be represented as regular expressions compatible with
-     the XML Schema "pattern" facet.  Note that the regular expressions MUST be
-     targeted for RFC 4514 encoded data
+     "Subject" and "Issuer" attributes MUST be represented as regular expressions
+     compatible with the XML Schema "pattern" facet.  Note that the regular
+     expressions MUST be targeted for RFC 4514 encoded data
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
    <xs:simpleType name="distinguishedNameExpr">
@@ -1466,6 +1451,12 @@
    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                                   Miscellenous
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+   <xs:simpleType name="regularExpression">
+      <xs:restriction base="xs:string">
+         <xs:pattern value="\S.*"/>
+      </xs:restriction>
+   </xs:simpleType>
 
    <xs:simpleType name="friendlyNameType">
       <xs:restriction base="xs:string">

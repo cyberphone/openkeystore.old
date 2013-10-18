@@ -18,11 +18,14 @@ package org.webpki.wasp.test;
 
 import java.io.IOException;
 import java.util.GregorianCalendar;
+
 import java.security.KeyStore;
 import java.security.PrivateKey;
 
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+
+import javax.security.auth.x500.X500Principal;
 
 import org.webpki.util.ArrayUtil;
 
@@ -34,7 +37,6 @@ import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.CertificateSelection;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.CertificateUtil;
-import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.AuthorityInfoAccessCAIssuersCache;
 import org.webpki.crypto.test.DemoKeyStore;
 import org.webpki.crypto.HashAlgorithms;
@@ -90,23 +92,22 @@ public class SreqEnc
     static CertificateFilter[] createCertificateFilters () throws Exception
       {
         KeyStore ks = DemoKeyStore.getMarionKeyStore ();
-        Certificate[]certs = ks.getCertificateChain ("mykey");
-        CertificateInfo ci = new CertificateInfo ((X509Certificate) certs[1]);
+        X509Certificate cert = (X509Certificate)ks.getCertificateChain ("mykey")[1];
         
         CertificateFilter cf1 = new CertificateFilter ()
               .setPolicy ("1.25.453.22.22.88")
               .setKeyUsage (new CertificateFilter.KeyUsage ().require (KeyUsageBits.digitalSignature))
-              .setSha1 (ci.getCertificateHash ())  // CA
-              .setIssuerDN (ci.getIssuer ());
+              .setFingerPrint (HashAlgorithms.SHA256.digest (cert.getEncoded ()))  // CA
+              .setIssuer (cert.getIssuerX500Principal ());
 
         CertificateFilter cf2 = new CertificateFilter ()
-              .setSha1 (new byte[]{1,4,5,3,6,7,8,3,0,3,5,6,1,4,5,3,6,7,8,3})
-              .setIssuerDN ("CN=SuckerTrust GlobalCA, emailaddress=boss@fire.hell, c=TV")
+              .setFingerPrint (new byte[]{1,4,5,3,6,7,8,3,0,3,5,6,1,4,5,3,6,7,8,3})
+              .setIssuer (new X500Principal ("CN=SuckerTrust GlobalCA, emailaddress=boss@fire.hell, c=TV"))
               .setContainers (new KeyContainerTypes[]{KeyContainerTypes.TPM, KeyContainerTypes.SIM})
               .setExtendedKeyUsage ("1.56.245.123")
               .setKeyUsage (new CertificateFilter.KeyUsage ().require (KeyUsageBits.nonRepudiation)
                                                              .disAllow (KeyUsageBits.keyEncipherment))
-              .setEmailAddress ("try@this.com");
+              .setEmail ("try@this.com");
         return new CertificateFilter[] {cf1, cf2};
       }
 

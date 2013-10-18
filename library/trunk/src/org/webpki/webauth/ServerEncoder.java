@@ -26,6 +26,8 @@ import org.webpki.json.JSONX509Signer;
 
 abstract class ServerEncoder extends JSONEncoder
   {
+    private static final long serialVersionUID = 1L;
+
     abstract void writeServerRequest (JSONObjectWriter wr) throws IOException;
     
     final void bad (String message) throws IOException

@@ -89,18 +89,18 @@ public class SignatureRequestEncoder extends SignatureRequest
     static void writeCertificateFilter (DOMWriterHelper wr, CertificateFilter cf) throws IOException
       {
         wr.addEmptyElement (CERTIFICATE_FILTER_ELEM);
-        if (cf.getSha1 () != null)
+        if (cf.getFingerPrint () != null)
           {
-            wr.setBinaryAttribute (CF_SHA1_ATTR, cf.getSha1 ());
+            wr.setBinaryAttribute (CF_SHA1_ATTR, cf.getFingerPrint ());
           }
         writeOptionalStringAttribute (wr, CF_ISSUER_ATTR, cf.getIssuerRegEx ());
         writeOptionalStringAttribute (wr, CF_SUBJECT_ATTR, cf.getSubjectRegEx ());
-        writeOptionalStringAttribute (wr, CF_EMAIL_ATTR, cf.getEmailAddress ());
-        if (cf.getSerial () != null)
+        writeOptionalStringAttribute (wr, CF_EMAIL_ATTR, cf.getEmailRegEx ());
+        if (cf.getSerialNumber () != null)
           {
-            wr.setBigIntegerAttribute (CF_SERIAL_ATTR, cf.getSerial ());
+            wr.setBigIntegerAttribute (CF_SERIAL_ATTR, cf.getSerialNumber ());
           }
-        writeOptionalStringAttribute (wr, CF_POLICY_ATTR, cf.getPolicy ());
+        writeOptionalStringAttribute (wr, CF_POLICY_ATTR, cf.getPolicyRegEx ());
         if (cf.getContainers () != null)
           {
             KeyContainerTypes[] containers = cf.getContainers ();
@@ -141,7 +141,7 @@ public class SignatureRequestEncoder extends SignatureRequest
               }
             wr.setStringAttribute (CF_KEY_USAGE_ATTR, coded_key_usage.toString ().substring (0, i + 1));
           }
-        writeOptionalStringAttribute (wr, CF_EXT_KEY_USAGE_ATTR, cf.getExtKeyUsage ());
+        writeOptionalStringAttribute (wr, CF_EXT_KEY_USAGE_ATTR, cf.getExtKeyUsageRegEx ());
       }
     // Constructors
 

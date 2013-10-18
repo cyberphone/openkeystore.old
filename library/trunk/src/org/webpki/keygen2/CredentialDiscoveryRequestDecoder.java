@@ -37,6 +37,7 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class CredentialDiscoveryRequestDecoder extends ClientDecoder
   {
+    private static final long serialVersionUID = 1L;
 
     public class LookupSpecifier
       {
@@ -44,10 +45,9 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
         
         String issuer_reg_ex;
         String subject_reg_ex;
-        BigInteger serial;
-        String email_address;
-        String policy;
-        String[] excluded_policies;
+        BigInteger serial_number;
+        String email_reg_ex;
+        String policy_reg_ex;
         GregorianCalendar issued_before;
         GregorianCalendar issued_after;
 
@@ -63,12 +63,15 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
             if (rd.hasProperty (SEARCH_FILTER_JSON))
               {
                 JSONObjectReader search = rd.getObject (SEARCH_FILTER_JSON);
-                issuer_reg_ex = search.getStringConditional (ISSUER_JSON);
-                subject_reg_ex = search.getStringConditional (SUBJECT_JSON);
-                serial = KeyGen2Validator.getBigIntegerConditional (search, SERIAL_JSON);
-                email_address = search.getStringConditional (EMAIL_JSON);
-                policy = search.getStringConditional (POLICY_JSON);
-                excluded_policies = search.getStringArrayConditional (EXCLUDED_POLICIES_JSON);
+                if (search.getProperties ().length == 0)
+                  {
+                    throw new IOException ("Empty \"" + SEARCH_FILTER_JSON + "\" not allowed");
+                  }
+                issuer_reg_ex = search.getStringConditional (ISSUER_REG_EXT_JSON);
+                subject_reg_ex = search.getStringConditional (SUBJECT_REG_EX_JSON);
+                serial_number = KeyGen2Validator.getBigIntegerConditional (search, SERIAL_NUMBER_JSON);
+                email_reg_ex = search.getStringConditional (EMAIL_REG_EX_JSON);
+                policy_reg_ex = search.getStringConditional (POLICY_REG_EX_JSON);
                 issued_before = KeyGen2Validator.getDateTimeConditional (search, ISSUED_BEFORE_JSON);
                 issued_after = KeyGen2Validator.getDateTimeConditional (search, ISSUED_AFTER_JSON);
               }
@@ -101,24 +104,19 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
             return issuer_reg_ex;
           }
         
-        public BigInteger getSerial ()
+        public BigInteger getSerialNumber ()
           {
-            return serial;
+            return serial_number;
           }
         
-        public String getEmailAddress ()
+        public String getEmailRegEx ()
           {
-            return email_address;
+            return email_reg_ex;
           }
         
-        public String getPolicy ()
+        public String getPolicyRegEx ()
           {
-            return policy;
-          }
-        
-        public String[] getExcludedPolicies ()
-          {
-            return excluded_policies;
+            return policy_reg_ex;
           }
         
         public GregorianCalendar getIssuedBefore ()

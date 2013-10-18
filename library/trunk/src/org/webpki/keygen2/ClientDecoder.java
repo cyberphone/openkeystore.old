@@ -26,6 +26,8 @@ import org.webpki.json.JSONX509Verifier;
 
 abstract class ClientDecoder extends KeyGen2Validator
   {
+    private static final long serialVersionUID = 1L;
+
     private JSONSignatureDecoder signature;  // Optional
 
     abstract void readServerRequest (JSONObjectReader rd) throws IOException;

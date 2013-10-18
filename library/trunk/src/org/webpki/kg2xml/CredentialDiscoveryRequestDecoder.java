@@ -47,10 +47,9 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         
         String issuer_reg_ex;
         String subject_reg_ex;
-        BigInteger serial;
-        String email_address;
-        String policy;
-        String[] excluded_policies;
+        BigInteger serial_number;
+        String email_reg_ex;
+        String policy_reg_ex;
         GregorianCalendar issued_before;
         GregorianCalendar issued_after;
 
@@ -75,12 +74,11 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
             if (rd.hasNext (SEARCH_FILTER_ELEM))
               {
                 rd.getNext ();
-                issuer_reg_ex = ah.getStringConditional (ISSUER_ATTR);
-                subject_reg_ex = ah.getStringConditional (SUBJECT_ATTR);
-                serial = ah.getBigIntegerConditional (SERIAL_ATTR);
-                email_address = ah.getStringConditional (EMAIL_ATTR);
-                policy = ah.getStringConditional (POLICY_ATTR);
-                excluded_policies = ah.getListConditional (EXCLUDED_POLICIES_ATTR);
+                issuer_reg_ex = ah.getStringConditional (ISSUER_REG_EX_ATTR);
+                subject_reg_ex = ah.getStringConditional (SUBJECT_REG_EX_ATTR);
+                serial_number = ah.getBigIntegerConditional (SERIAL_NUMBER_ATTR);
+                email_reg_ex = ah.getStringConditional (EMAIL_REG_EX_ATTR);
+                policy_reg_ex = ah.getStringConditional (POLICY_REG_EX_ATTR);
                 issued_before = ah.getDateTimeConditional (ISSUED_BEFORE_ATTR);
                 issued_after = ah.getDateTimeConditional (ISSUED_AFTER_ATTR);
               }
@@ -109,24 +107,19 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
             return issuer_reg_ex;
           }
         
-        public BigInteger getSerial ()
+        public BigInteger getSerialNumber ()
           {
-            return serial;
+            return serial_number;
           }
         
-        public String getEmailAddress ()
+        public String getEmailRegEx ()
           {
-            return email_address;
+            return email_reg_ex;
           }
         
-        public String getPolicy ()
+        public String getPolicyRegEx ()
           {
-            return policy;
-          }
-        
-        public String[] getExcludedPolicies ()
-          {
-            return excluded_policies;
+            return policy_reg_ex;
           }
         
         public GregorianCalendar getIssuedBefore ()

@@ -24,6 +24,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class PlatformNegotiationRequestDecoder extends ClientDecoder
   {
+    private static final long serialVersionUID = 1L;
+
     Action action;
 
     public Action getAction ()

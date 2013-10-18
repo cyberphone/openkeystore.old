@@ -24,6 +24,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class ProvisioningFinalizationResponseDecoder extends KeyGen2Validator
   {
+    private static final long serialVersionUID = 1L;
+
     String client_session_id;
 
     String server_session_id;

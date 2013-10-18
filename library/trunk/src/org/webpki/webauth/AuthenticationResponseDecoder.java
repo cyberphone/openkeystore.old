@@ -35,6 +35,8 @@ import static org.webpki.webauth.WebAuthConstants.*;
 
 public class AuthenticationResponseDecoder extends InputValidator
   {
+    private static final long serialVersionUID = 1L;
+
     GregorianCalendar server_time;
 
     private GregorianCalendar client_time;

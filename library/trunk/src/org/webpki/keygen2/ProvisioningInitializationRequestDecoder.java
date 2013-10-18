@@ -36,6 +36,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class ProvisioningInitializationRequestDecoder extends ClientDecoder
   {
+    private static final long serialVersionUID = 1L;
+
     public class KeyManagementKeyUpdateHolder
       {
         Vector<KeyManagementKeyUpdateHolder> children = new Vector<KeyManagementKeyUpdateHolder> ();

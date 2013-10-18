@@ -32,6 +32,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class PlatformNegotiationRequestEncoder extends ServerEncoder
   {
+    private static final long serialVersionUID = 1L;
+
     Action action = Action.UPDATE;
 
     String server_session_id;

@@ -40,6 +40,9 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class KeyCreationRequestDecoder extends ClientDecoder
   {
+    private static final long serialVersionUID = 1L;
+
+
     abstract class PresetValueReference
       {
         byte[] encrypted_value;

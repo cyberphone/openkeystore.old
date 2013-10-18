@@ -33,6 +33,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class KeyCreationRequestEncoder extends ServerEncoder
   {
+    private static final long serialVersionUID = 1L;
+
     String submit_url;
 
     boolean deferred_certification;

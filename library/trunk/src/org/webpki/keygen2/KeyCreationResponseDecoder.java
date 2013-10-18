@@ -28,6 +28,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class KeyCreationResponseDecoder extends KeyGen2Validator
   {
+    private static final long serialVersionUID = 1L;
+
     LinkedHashMap<String,GeneratedPublicKey> generated_keys = new LinkedHashMap<String,GeneratedPublicKey> ();
 
     String client_session_id;

@@ -33,30 +33,29 @@ import java.security.MessageDigest;
 import javax.security.auth.x500.X500Principal;
 
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.DebugFormatter;
 
 
 public class CertificateFilter
   {
     // Global - Needs path expansion
 
-    private byte[] sha1;
+    private byte[] finger_print;
 
-    private String issuer_regex;
+    private String issuer_reg_ex;
 
     // Local
 
-    private String subject_regex;
+    private String subject_reg_ex;
 
-    private String email_address;
+    private String email_reg_ex;
 
-    private String policy_oid;
+    private String policy_reg_ex;
 
-    private BigInteger serial;
+    private BigInteger serial_number;
 
     private KeyUsage key_usage;
 
-    private String ext_key_usage_oid;
+    private String ext_key_usage_reg_ex;
 
     private KeyContainerTypes[] containers;
 
@@ -105,75 +104,55 @@ public class CertificateFilter
       }
 
 
-    private String quote (String dn_verbatim)
+    private String quote (X500Principal principal)
       {
-        return Pattern.quote (CertificateUtil.convertLegacyToRFC2253 (dn_verbatim));
+        return Pattern.quote (principal.getName ());
       }
 
 
-    private String multiple (String[] dn_verbatim)
+    private String conditionalCompile (String regex)
       {
-        if (dn_verbatim.length <= 1)
+        if (regex != null)
           {
-            return quote (dn_verbatim[0]);
+            Pattern.compile (regex);
           }
-        StringBuffer s = new StringBuffer ('(');
-        for (int i = 0; i < dn_verbatim.length; i++)
-          {
-            if (i > 0)
-              {
-                s.append ('|');
-              }
-            s.append (quote (dn_verbatim[i]));
-          }
-        return s.append (')').toString ();
+        return regex;
       }
 
 
-    private String compile (String dn_expression)
+    public byte[] getFingerPrint ()
       {
-        if (dn_expression == null)
-          {
-            return null;
-          }
-        Pattern.compile (dn_expression);
-        return dn_expression;
-      }
-
-
-    public byte[] getSha1 ()
-      {
-        return sha1;
+        return finger_print;
       }
 
 
     public String getIssuerRegEx ()
       {
-        return issuer_regex;
+        return issuer_reg_ex;
       }
 
 
     public String getSubjectRegEx ()
       {
-        return subject_regex;
+        return subject_reg_ex;
       }
 
 
-    public String getEmailAddress ()
+    public String getEmailRegEx ()
       {
-        return email_address;
+        return email_reg_ex;
       }
 
 
-    public String getPolicy ()
+    public String getPolicyRegEx ()
       {
-        return policy_oid;
+        return policy_reg_ex;
       }
 
 
-    public BigInteger getSerial ()
+    public BigInteger getSerialNumber ()
       {
-        return serial;
+        return serial_number;
       }
 
     public KeyContainerTypes[] getContainers ()
@@ -188,85 +167,77 @@ public class CertificateFilter
       }
 
 
-    public String getExtKeyUsage ()
+    public String getExtKeyUsageRegEx ()
       {
-        return ext_key_usage_oid;
+        return ext_key_usage_reg_ex;
       }
 
 
 
-    public CertificateFilter setSha1 (byte[] sha1)
+    public CertificateFilter setFingerPrint (byte[] finger_print)
       {
-        this.sha1 = sha1;
+        this.finger_print = finger_print;
         return this;
       }
 
 
-    public CertificateFilter setSha1 (String sha1_in_hex) throws IOException
+    public CertificateFilter setIssuer (X500Principal issuer)
       {
-        return setSha1 (DebugFormatter.getByteArrayFromHex (sha1_in_hex));
-      }
-
-
-    public CertificateFilter setIssuerDN (String dn_verbatim)
-      {
-        this.issuer_regex = quote (dn_verbatim);
+        this.issuer_reg_ex = quote (issuer);
         return this;
       }
 
 
-    public CertificateFilter setIssuerDN (String[] dn_verbatim)
+    public CertificateFilter setSubject (X500Principal subject)
       {
-        this.issuer_regex = multiple (dn_verbatim);
+        this.subject_reg_ex = quote (subject);
         return this;
       }
 
 
-    public CertificateFilter setSubjectDN (String dn_verbatim)
+    public CertificateFilter setIssuerRegEx (String issuer_reg_ex)
       {
-        this.subject_regex = quote (dn_verbatim);
+        this.issuer_reg_ex = conditionalCompile (issuer_reg_ex);
         return this;
       }
 
 
-    public CertificateFilter setSubjectDN (String[] dn_verbatim)
+    public CertificateFilter setSubjectRegEx (String subject_reg_ex)
       {
-        this.subject_regex = multiple (dn_verbatim);
+        this.subject_reg_ex = conditionalCompile (subject_reg_ex);
         return this;
       }
 
 
-    public CertificateFilter setIssuerRegEx (String dn_expression)
+    public CertificateFilter setEmail (String email_address)
       {
-        this.issuer_regex = compile (dn_expression);
+        this.email_reg_ex = Pattern.quote (email_address);
         return this;
       }
 
 
-    public CertificateFilter setSubjectRegEx (String dn_expression)
+    public CertificateFilter setEmailRegEx (String email_reg_ex)
       {
-        this.subject_regex = compile (dn_expression);
+        this.email_reg_ex = conditionalCompile (email_reg_ex);
         return this;
       }
 
 
-    public CertificateFilter setEmailAddress (String email_address)
+    public CertificateFilter setPolicyRegEx (String policy_reg_ex)
       {
-        this.email_address = email_address;
+        this.policy_reg_ex = conditionalCompile (policy_reg_ex);
         return this;
       }
-
 
     public CertificateFilter setPolicy (String policy_oid)
       {
-        this.policy_oid = policy_oid;
+        this.policy_reg_ex = Pattern.quote (policy_oid);
         return this;
       }
 
-
-    public CertificateFilter setSerial (BigInteger serial)
+    public CertificateFilter setSerialNumber (BigInteger serial_number)
       {
-        this.serial = serial;
+        this.serial_number = serial_number;
         return this;
       }
 
@@ -283,17 +254,29 @@ public class CertificateFilter
         return this;
       }
 
-
     public CertificateFilter setExtendedKeyUsage (String ext_key_usage_oid)
       {
-        this.ext_key_usage_oid = ext_key_usage_oid;
+        this.ext_key_usage_reg_ex = Pattern.quote (ext_key_usage_oid);
         return this;
       }
 
+/**
+ * 
+ * @param ext_key_usage_reg_ex The argument<br>
+ *   <code>&quot;1\\.3\\.6\\.1\\.5\\.5\\.7\\.3\\.2|1\\.3\\.6\\.1\\.5\\.5\\.7\\.3\\.4&quot;</code><br>
+ *   requires matching end-entity certificates to have exactly two extended key usages,
+ *   <code>clientAuthentication</code> and <code>emailProtection</code>
+ * @return {@link CertificateFilter}
+ */
+    public CertificateFilter setExtendedKeyUsageRegEx (String ext_key_usage_reg_ex)
+      {
+        this.ext_key_usage_reg_ex = conditionalCompile (ext_key_usage_reg_ex);
+        return this;
+      }
 
     public boolean needsPathExpansion ()
       {
-        return sha1 != null || issuer_regex != null;
+        return finger_print != null || issuer_reg_ex != null;
       }
 
 
@@ -342,19 +325,20 @@ public class CertificateFilter
           {
             return true;
           }
-        String[] eku = CertificateUtil.getExtendedKeyUsage (certificate);
-        if (eku == null)
+        String[] ekus = CertificateUtil.getExtendedKeyUsage (certificate);
+        if (ekus == null)
           {
             return false;
           }
-        for (String oid : eku)
+        Pattern regex = Pattern.compile (specifier);
+        for (String eku : ekus)
           {
-            if (oid.equals (specifier))
+            if (!regex.matcher (eku).matches ())
               {
-                return true;
+                return false;
               }
           }
-        return false;
+        return true;
       }
 
 
@@ -369,9 +353,10 @@ public class CertificateFilter
           {
             return false;
           }
+        Pattern regex = Pattern.compile (specifier);
         for (String email_address : email_addresses)
           {
-            if (specifier.equals (email_address))
+            if (regex.matcher (email_address).matches ())
               {
                 return true;
               }
@@ -391,14 +376,15 @@ public class CertificateFilter
           {
             return false;
           }
+        Pattern regex = Pattern.compile (specifier);
         for (String policy_oid : policies)
           {
-            if (specifier.equals (policy_oid))
+            if (!regex.matcher (policy_oid).matches ())
               {
-                return true;
+                return false;
               }
           }
-        return false;
+        return true;
       }
 
 
@@ -445,7 +431,7 @@ public class CertificateFilter
       }
 
 
-    private static boolean matchSha1 (byte[] specifier, X509Certificate[] cert_path) throws GeneralSecurityException
+    private static boolean matchFingerPrint (byte[] specifier, X509Certificate[] cert_path) throws GeneralSecurityException
       {
         if (specifier == null)
           {
@@ -454,7 +440,7 @@ public class CertificateFilter
         for (X509Certificate certificate : cert_path)
           {
             if (ArrayUtil.compare (specifier,
-                                   MessageDigest.getInstance ("SHA1").digest (certificate.getEncoded ())))
+                                   MessageDigest.getInstance ("SHA256").digest (certificate.getEncoded ())))
               {
                 return true;
               }
@@ -477,9 +463,9 @@ public class CertificateFilter
                                               KeyUsage default_key_usage,
                                               KeyContainerTypes container) throws IOException
       {
-        if (sha1 != null && sha1.length != 20)
+        if (finger_print != null && finger_print.length != 32)
           {
-            throw new IOException ("\"Sha1\" hash not 20 bytes!");
+            throw new IOException ("\"Sha256\" hash not 32 bytes!");
           }
         if (key_usage != null && key_usage.required.isEmpty () && key_usage.disallowed.isEmpty ())
           {
@@ -487,15 +473,15 @@ public class CertificateFilter
           }
         try
           {
-            return matchSerial (serial, cert_path[0]) &&
-                   matchSha1 (sha1, cert_path) &&
+            return matchSerial (serial_number, cert_path[0]) &&
+                   matchFingerPrint (finger_print, cert_path) &&
                    matchContainers (containers, container) &&
                    matchKeyUsage (key_usage == null ? default_key_usage : key_usage, cert_path[0]) &&
-                   matchExtendedKeyUsage (ext_key_usage_oid, cert_path[0]) &&
-                   matchPolicy (policy_oid, cert_path[0]) &&
-                   matchEmailAddress (email_address, cert_path[0]) &&
-                   matchDistinguishedName (issuer_regex, cert_path, true) &&
-                   matchDistinguishedName (subject_regex, cert_path, false);
+                   matchExtendedKeyUsage (ext_key_usage_reg_ex, cert_path[0]) &&
+                   matchPolicy (policy_reg_ex, cert_path[0]) &&
+                   matchEmailAddress (email_reg_ex, cert_path[0]) &&
+                   matchDistinguishedName (issuer_reg_ex, cert_path, true) &&
+                   matchDistinguishedName (subject_reg_ex, cert_path, false);
           }
         catch (GeneralSecurityException gse)
           {

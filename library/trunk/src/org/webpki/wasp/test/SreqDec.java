@@ -48,11 +48,11 @@ public class SreqDec
     static void printcf (CertificateFilter cf, StringBuffer s)
       {
         s.append ("\nCERTFILTER:");
-        if (cf.getSha1 () != null) s.append ("\nSha1=" +  DebugFormatter.getHexString(cf.getSha1 ()));
+        if (cf.getFingerPrint () != null) s.append ("\nSha1=" +  DebugFormatter.getHexString(cf.getFingerPrint ()));
         if (cf.getIssuerRegEx () != null) s.append ("\nIssuer=" + cf.getIssuerRegEx ());
         if (cf.getSubjectRegEx () != null) s.append ("\nSubject=" + cf.getSubjectRegEx ());
-        if (cf.getSerial () != null) s.append ("\nSerial=" + cf.getSerial ());
-        if (cf.getPolicy () != null) s.append ("\nPolicy=" + cf.getPolicy ());
+        if (cf.getSerialNumber () != null) s.append ("\nSerial=" + cf.getSerialNumber ());
+        if (cf.getPolicyRegEx () != null) s.append ("\nPolicy=" + cf.getPolicyRegEx ());
         if (cf.getContainers () != null)
           {
             s.append ("\nContainers=");
@@ -68,7 +68,7 @@ public class SreqDec
               }
           }
         if (cf.getKeyUsage () != null) s.append ("\nKeyUsage=" + cf.getKeyUsage ());
-        if (cf.getExtKeyUsage () != null) s.append ("\nExtKeyUsage=" + cf.getExtKeyUsage ());
+        if (cf.getExtKeyUsageRegEx () != null) s.append ("\nExtKeyUsage=" + cf.getExtKeyUsageRegEx ());
         s.append ("\nCERTFILTER\n");
       }
 

@@ -31,6 +31,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class CredentialDiscoveryResponseEncoder extends JSONEncoder
   {
+    private static final long serialVersionUID = 1L;
+
     class MatchingCredential
       {
         X509Certificate[] certificate_path;

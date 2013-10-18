@@ -35,6 +35,8 @@ import static org.webpki.webauth.WebAuthConstants.*;
 
 public class AuthenticationResponseEncoder extends JSONEncoder
   {
+    private static final long serialVersionUID = 1L;
+
     private String server_time;
 
     private Date client_time;

@@ -18,13 +18,13 @@ package org.webpki.webauth;
 
 abstract class CertificateFilterIOBase
   {
-    static final String CF_SHA1_FP_ATTR         = "SHA1FingerPrint";
-    static final String CF_ISSUER_ATTR          = "Issuer";
-    static final String CF_SUBJECT_ATTR         = "Subject";
-    static final String CF_EMAIL_ATTR           = "Email";
-    static final String CF_SERIAL_ATTR          = "Serial";
-    static final String CF_POLICY_ATTR          = "Policy";
-    static final String CF_CONTAINERS_ATTR      = "Containers";
-    static final String CF_KEY_USAGE_ATTR       = "KeyUsage";
-    static final String CF_EXT_KEY_USAGE_ATTR   = "ExtKeyUsage";
+    static final String CF_FINGER_PRINT_ATTR          = "FingerPrint";
+    static final String CF_ISSUER_REG_EX_ATTR         = "IssuerRegEx";
+    static final String CF_SUBJECT_REG_EX_ATTR        = "SubjectRegEx";
+    static final String CF_EMAIL_REG_EX_ATTR          = "EmailRegEx";
+    static final String CF_SERIAL_NUMBER_ATTR         = "SerialNumber";
+    static final String CF_POLICY_REG_EX_ATTR         = "PolicyRegEx";
+    static final String CF_CONTAINERS_ATTR            = "Containers";
+    static final String CF_KEY_USAGE_ATTR             = "KeyUsage";
+    static final String CF_EXT_KEY_USAGE_REG_EX_ATTR  = "ExtKeyUsageRegEx";
   }

@@ -29,6 +29,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class CredentialDiscoveryResponseDecoder extends KeyGen2Validator
   {
+    private static final long serialVersionUID = 1L;
+
     public class MatchingCredential
       {
         MatchingCredential () {}

@@ -27,6 +27,10 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.Vector;
 
+import java.util.regex.Pattern;
+
+import javax.security.auth.x500.X500Principal;
+
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
@@ -41,6 +45,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class CredentialDiscoveryRequestEncoder extends ServerEncoder
   {
+    private static final long serialVersionUID = 1L;
+
     ServerCryptoInterface server_crypto_interface;
 
     String submit_url;
@@ -60,9 +66,8 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
         String issuer_reg_ex;
         String subject_reg_ex;
         BigInteger serial;
-        String email_address;
-        String policy;
-        String[] excluded_policies;
+        String email_reg_ex;
+        String policy_reg_ex;
         Date issued_before;
         Date issued_after;
         
@@ -72,57 +77,89 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
             this.id = lookup_prefix + ++next_lookup_id_suffix;
           }
         
-        public LookupDescriptor setSubjectRegEx (String subject_reg_ex)
+        private void nullCheck (Object object) throws IOException
           {
+            if (object == null)
+              {
+                bad ("Null search parameter not allowed");
+              }
+          }
+
+        public LookupDescriptor setSubjectRegEx (String subject_reg_ex) throws IOException
+          {
+            nullCheck (subject_reg_ex);
             search_filter = true;
             this.subject_reg_ex = subject_reg_ex;
             return this;
           }
 
-        public LookupDescriptor setIssuerRegEx (String issuer_reg_ex)
+        public LookupDescriptor setSubject (X500Principal subject) throws IOException
           {
+            nullCheck (subject);
+            return setSubjectRegEx (Pattern.quote (subject.getName ()));
+          }
+
+        public LookupDescriptor setIssuerRegEx (String issuer_reg_ex) throws IOException
+          {
+            nullCheck (issuer_reg_ex);
             search_filter = true;
             this.issuer_reg_ex = issuer_reg_ex;
             return this;
           }
 
-        public LookupDescriptor setSerial (BigInteger serial)
+        public LookupDescriptor setIssuer (X500Principal issuer) throws IOException
           {
+            nullCheck (issuer);
+            return setIssuerRegEx (Pattern.quote (issuer.getName ()));
+          }
+
+        public LookupDescriptor setSerial (BigInteger serial) throws IOException
+          {
+            nullCheck (serial);
             search_filter = true;
             this.serial = serial;
             return this;
           }
 
-        public LookupDescriptor setEmailAddress (String email_address)
+        public LookupDescriptor setEmailRegEx (String email_reg_ex) throws IOException
           {
+            nullCheck (email_reg_ex);
             search_filter = true;
-            this.email_address = email_address;
+            this.email_reg_ex = email_reg_ex;
             return this;
           }
 
-        public LookupDescriptor setPolicy (String policy)
+        public LookupDescriptor setEmail (String email_address) throws IOException
           {
+            nullCheck (email_address);
+            return setEmailRegEx (Pattern.quote (email_address));
+          }
+
+        public LookupDescriptor setPolicyRegEx (String policy_reg_ex) throws IOException
+          {
+            nullCheck (policy_reg_ex);
             search_filter = true;
-            this.policy = policy;
+            this.policy_reg_ex = policy_reg_ex;
             return this;
           }
 
-        public LookupDescriptor setExcludedPolicies (String[] excluded_policies)
+        public LookupDescriptor setPolicy (String policy_oid) throws IOException
           {
-            search_filter = true;
-            this.excluded_policies = excluded_policies;
-            return this;
+            nullCheck (policy_oid);
+            return setPolicyRegEx (Pattern.quote (policy_oid));
           }
 
-        public LookupDescriptor setIssuedBefore (Date issued_before)
+        public LookupDescriptor setIssuedBefore (Date issued_before) throws IOException
           {
+            nullCheck (issued_before);
             search_filter = true;
             this.issued_before = issued_before;
             return this;
           }
 
-        public LookupDescriptor setIssuedAfter (Date issued_after)
+        public LookupDescriptor setIssuedAfter (Date issued_after) throws IOException
           {
+            nullCheck (issued_after);
             search_filter = true;
             this.issued_after = issued_after;
             return this;
@@ -139,27 +176,23 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
                 JSONObjectWriter search_writer = wr.setObject (SEARCH_FILTER_JSON);
                 if (subject_reg_ex != null)
                   {
-                    search_writer.setString (SUBJECT_JSON, subject_reg_ex);
+                    search_writer.setString (SUBJECT_REG_EX_JSON, subject_reg_ex);
                   }
                 if (issuer_reg_ex != null)
                   {
-                    search_writer.setString (ISSUER_JSON, issuer_reg_ex);
+                    search_writer.setString (ISSUER_REG_EXT_JSON, issuer_reg_ex);
                   }
                 if (serial != null)
                   {
-                    search_writer.setBigInteger (SERIAL_JSON, serial);
+                    search_writer.setBigInteger (SERIAL_NUMBER_JSON, serial);
                   }
-                if (email_address != null)
+                if (email_reg_ex != null)
                   {
-                    search_writer.setString (EMAIL_JSON, email_address);
+                    search_writer.setString (EMAIL_REG_EX_JSON, email_reg_ex);
                   }
-                if (policy != null)
+                if (policy_reg_ex != null)
                   {
-                    search_writer.setString (POLICY_JSON, policy);
-                  }
-                if (excluded_policies != null)
-                  {
-                    search_writer.setStringArray (EXCLUDED_POLICIES_JSON, excluded_policies);
+                    search_writer.setString (POLICY_REG_EX_JSON, policy_reg_ex);
                   }
                 if (issued_before != null)
                   {

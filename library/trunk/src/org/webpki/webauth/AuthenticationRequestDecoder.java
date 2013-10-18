@@ -31,6 +31,8 @@ import static org.webpki.webauth.WebAuthConstants.*;
 
 public class AuthenticationRequestDecoder extends ClientDecoder
   {
+    private static final long serialVersionUID = 1L;
+
     String server_time;
 
     String id;

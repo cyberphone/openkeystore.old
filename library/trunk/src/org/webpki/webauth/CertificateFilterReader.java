@@ -31,13 +31,17 @@ class CertificateFilterReader extends CertificateFilterIOBase
   {
     static CertificateFilter read (JSONObjectReader rd) throws IOException
       {
+        if (rd.getProperties ().length == 0)
+          {
+            throw new IOException ("Empty certificate filter not allowed");
+          }
         CertificateFilter cf = new CertificateFilter ();
-        cf.setSha1 (rd.getBinaryConditional (CF_SHA1_FP_ATTR));
-        cf.setIssuerRegEx (rd.getStringConditional (CF_ISSUER_ATTR));
-        cf.setSubjectRegEx (rd.getStringConditional (CF_SUBJECT_ATTR));
-        cf.setEmailAddress (rd.getStringConditional (CF_EMAIL_ATTR));
-        cf.setSerial (InputValidator.getBigIntegerConditional (rd, CF_SERIAL_ATTR));
-        cf.setPolicy (rd.getStringConditional (CF_POLICY_ATTR));
+        cf.setFingerPrint (rd.getBinaryConditional (CF_FINGER_PRINT_ATTR));
+        cf.setIssuerRegEx (rd.getStringConditional (CF_ISSUER_REG_EX_ATTR));
+        cf.setSubjectRegEx (rd.getStringConditional (CF_SUBJECT_REG_EX_ATTR));
+        cf.setEmailRegEx (rd.getStringConditional (CF_EMAIL_REG_EX_ATTR));
+        cf.setSerialNumber (InputValidator.getBigIntegerConditional (rd, CF_SERIAL_NUMBER_ATTR));
+        cf.setPolicyRegEx (rd.getStringConditional (CF_POLICY_REG_EX_ATTR));
         String[] scontainers = InputValidator.getListConditional (rd, CF_CONTAINERS_ATTR);
         KeyContainerTypes[] containers = null;
         if (scontainers != null)
@@ -79,7 +83,7 @@ class CertificateFilterReader extends CertificateFilterIOBase
               }
           }
         cf.setKeyUsage (key_usage);
-        cf.setExtendedKeyUsage (rd.getStringConditional (CF_EXT_KEY_USAGE_ATTR));
+        cf.setExtendedKeyUsageRegEx (rd.getStringConditional (CF_EXT_KEY_USAGE_REG_EX_ATTR));
         return cf;
       }
   }

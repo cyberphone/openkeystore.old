@@ -30,18 +30,18 @@ class CertificateFilterWriter extends CertificateFilterIOBase
   {
     static void write (JSONObjectWriter wr, CertificateFilter cf) throws IOException
       {
-        if (cf.getSha1 () != null)
+        if (cf.getFingerPrint () != null)
           {
-            wr.setBinary (CF_SHA1_FP_ATTR, cf.getSha1 ());
+            wr.setBinary (CF_FINGER_PRINT_ATTR, cf.getFingerPrint ());
           }
-        writeOptionalString (wr, CF_ISSUER_ATTR, cf.getIssuerRegEx ());
-        writeOptionalString (wr, CF_SUBJECT_ATTR, cf.getSubjectRegEx ());
-        writeOptionalString (wr, CF_EMAIL_ATTR, cf.getEmailAddress ());
-        if (cf.getSerial () != null)
+        writeOptionalString (wr, CF_ISSUER_REG_EX_ATTR, cf.getIssuerRegEx ());
+        writeOptionalString (wr, CF_SUBJECT_REG_EX_ATTR, cf.getSubjectRegEx ());
+        writeOptionalString (wr, CF_EMAIL_REG_EX_ATTR, cf.getEmailRegEx ());
+        if (cf.getSerialNumber () != null)
           {
-            wr.setBigInteger (CF_SERIAL_ATTR, cf.getSerial ());
+            wr.setBigInteger (CF_SERIAL_NUMBER_ATTR, cf.getSerialNumber ());
           }
-        writeOptionalString (wr, CF_POLICY_ATTR, cf.getPolicy ());
+        writeOptionalString (wr, CF_POLICY_REG_EX_ATTR, cf.getPolicyRegEx ());
         if (cf.getContainers () != null)
           {
             KeyContainerTypes[] containers = cf.getContainers ();
@@ -82,7 +82,7 @@ class CertificateFilterWriter extends CertificateFilterIOBase
               }
             wr.setString (CF_KEY_USAGE_ATTR, coded_key_usage.toString ().substring (0, i + 1));
           }
-        writeOptionalString (wr, CF_EXT_KEY_USAGE_ATTR, cf.getExtKeyUsage ());
+        writeOptionalString (wr, CF_EXT_KEY_USAGE_REG_EX_ATTR, cf.getExtKeyUsageRegEx ());
       }
 
     static void writeOptionalString (JSONObjectWriter wr, String name, String optional_value) throws IOException

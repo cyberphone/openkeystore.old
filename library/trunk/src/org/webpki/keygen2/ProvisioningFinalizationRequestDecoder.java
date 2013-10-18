@@ -33,6 +33,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
   {
+    private static final long serialVersionUID = 1L;
+
     public class PostOperation
       {
         public static final int DELETE_KEY            = 0;

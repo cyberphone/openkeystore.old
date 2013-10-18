@@ -36,6 +36,8 @@ import static org.webpki.webauth.WebAuthConstants.*;
 
 public class AuthenticationRequestEncoder extends ServerEncoder
   {
+    private static final long serialVersionUID = 1L;
+
     String id;
 
     String submit_url;

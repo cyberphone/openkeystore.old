@@ -49,6 +49,7 @@ import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import javax.crypto.KeyAgreement;
+import javax.security.auth.x500.X500Principal;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -715,9 +716,9 @@ public class KeyGen2Test
                                 CertificateFilter cf = new CertificateFilter ();
                                 cf.setIssuerRegEx (ls.getIssuerRegEx ());
                                 cf.setSubjectRegEx (ls.getSubjectRegEx ());
-                                cf.setSerial (ls.getSerial ());
-                                cf.setEmailAddress (ls.getEmailAddress ());
-                                cf.setPolicy (ls.getPolicy ());
+                                cf.setSerialNumber (ls.getSerialNumber ());
+                                cf.setEmailRegEx (ls.getEmailRegEx ());
+                                cf.setPolicyRegEx (ls.getPolicyRegEx ());
                                 if (!cf.matches (cert_path, null, null))
                                   {
                                     continue;
@@ -1087,20 +1088,19 @@ public class KeyGen2Test
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[0]);
 
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[2])
-                          .setEmailAddress ("john.doe@example.com");
+                          .setEmail ("john.doe@example.com");
 
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[2])
-                          .setEmailAddress ("jane.doe@example.com");
+                          .setEmail ("jane.doe@example.com");
 
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[1])
-                          .setEmailAddress ("john.doe@example.com")
-                          .setExcludedPolicies (new String[]{"1.3.4","34.90"})
+                          .setEmail ("john.doe@example.com")
                           .setPolicy ("5.4.8")
                           .setSerial (new BigInteger ("123"))
                           .setIssuedBefore (new Date (new Date ().getTime () - 100000))
                           .setIssuedAfter (new Date ())
-                          .setSubjectRegEx ("CN=John")
-                          .setIssuerRegEx ("CN=Root CA");
+                          .setSubject (new X500Principal ("CN=John"))
+                          .setIssuer (new X500Principal ("CN=Root CA"));
             return cdre.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 

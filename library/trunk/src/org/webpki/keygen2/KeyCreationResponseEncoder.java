@@ -30,6 +30,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 public class KeyCreationResponseEncoder extends JSONEncoder
   {
+    private static final long serialVersionUID = 1L;
+
     String client_session_id;
 
     String server_session_id;
