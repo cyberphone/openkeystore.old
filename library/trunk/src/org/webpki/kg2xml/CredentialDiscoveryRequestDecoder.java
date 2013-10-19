@@ -33,6 +33,7 @@ import org.webpki.xmldsig.XMLAsymKeyVerifier;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLVerifier;
 
+import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.VerifierInterface;
 
@@ -49,7 +50,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         String subject_reg_ex;
         BigInteger serial_number;
         String email_reg_ex;
-        String policy_reg_ex;
+        String policy_rules;
         GregorianCalendar issued_before;
         GregorianCalendar issued_after;
 
@@ -74,11 +75,11 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
             if (rd.hasNext (SEARCH_FILTER_ELEM))
               {
                 rd.getNext ();
-                issuer_reg_ex = ah.getStringConditional (ISSUER_REG_EX_ATTR);
-                subject_reg_ex = ah.getStringConditional (SUBJECT_REG_EX_ATTR);
-                serial_number = ah.getBigIntegerConditional (SERIAL_NUMBER_ATTR);
-                email_reg_ex = ah.getStringConditional (EMAIL_REG_EX_ATTR);
-                policy_reg_ex = ah.getStringConditional (POLICY_REG_EX_ATTR);
+                issuer_reg_ex = ah.getStringConditional (CertificateFilter.CF_ISSUER_REG_EX);
+                subject_reg_ex = ah.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX);
+                serial_number = ah.getBigIntegerConditional (CertificateFilter.CF_SERIAL_NUMBER);
+                email_reg_ex = ah.getStringConditional (CertificateFilter.CF_EMAIL_REG_EX);
+                policy_rules = ah.getStringConditional (CertificateFilter.CF_POLICY_RULES);
                 issued_before = ah.getDateTimeConditional (ISSUED_BEFORE_ATTR);
                 issued_after = ah.getDateTimeConditional (ISSUED_AFTER_ATTR);
               }
@@ -117,9 +118,9 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
             return email_reg_ex;
           }
         
-        public String getPolicyRegEx ()
+        public String getPolicyRules ()
           {
-            return policy_reg_ex;
+            return policy_rules;
           }
         
         public GregorianCalendar getIssuedBefore ()

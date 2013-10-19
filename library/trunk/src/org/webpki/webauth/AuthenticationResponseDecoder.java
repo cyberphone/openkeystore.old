@@ -19,8 +19,8 @@ package org.webpki.webauth;
 import java.io.IOException;
 
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 import java.security.cert.X509Certificate;
 
@@ -53,7 +53,7 @@ public class AuthenticationResponseDecoder extends InputValidator
     
     String signature_algorithm;
 
-    HashMap<String,HashSet<String>> client_platform_features = new HashMap<String,HashSet<String>> ();
+    LinkedHashMap<String,LinkedHashSet<String>> client_platform_features = new LinkedHashMap<String,LinkedHashSet<String>> ();
 
 
     public String getRequestURL ()
@@ -74,7 +74,7 @@ public class AuthenticationResponseDecoder extends InputValidator
       }
 
 
-    public HashMap<String,HashSet<String>> getClientPlatformFeatures ()
+    public LinkedHashMap<String,LinkedHashSet<String>> getClientPlatformFeatures ()
       {
         return client_platform_features;
       }
@@ -99,9 +99,9 @@ public class AuthenticationResponseDecoder extends InputValidator
 
         server_time = rd.getDateTime (SERVER_TIME_JSON);
 
-        request_url = rd.getString (REQUEST_URL_JSON);
-
         client_time = rd.getDateTime (CLIENT_TIME_JSON);
+
+        request_url = rd.getString (REQUEST_URL_JSON);
 
         server_certificate_fingerprint = rd.getBinaryConditional (SERVER_CERT_FP_JSON);
         
@@ -111,12 +111,12 @@ public class AuthenticationResponseDecoder extends InputValidator
         for (JSONObjectReader feature : InputValidator.getObjectArrayConditional (rd, CLIENT_FEATURES_JSON))
           {
             String type = InputValidator.getURI (feature, TYPE_JSON);
-            HashSet<String> set = client_platform_features.get (type);
+            LinkedHashSet<String> set = client_platform_features.get (type);
             if (set != null)
               {
                 bad ("Duplicated \"" + TYPE_JSON + "\" : " + type);
               }
-            client_platform_features.put (type, set = new HashSet<String> ());
+            client_platform_features.put (type, set = new LinkedHashSet<String> ());
             for (String value : InputValidator.getNonEmptyList (feature, VALUES_JSON))
               {
                 set.add (value);

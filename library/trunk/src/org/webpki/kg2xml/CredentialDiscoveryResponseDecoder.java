@@ -22,8 +22,6 @@ import java.security.cert.X509Certificate;
 
 import java.util.Vector;
 
-import org.webpki.crypto.CertificateUtil;
-
 import org.webpki.xml.DOMReaderHelper;
 import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xmldsig.XMLSignatureWrapper;

@@ -20,8 +20,8 @@ import java.io.IOException;
 
 import java.math.BigInteger;
 
-import java.util.Set;
-import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 import java.util.regex.Pattern;
 
@@ -37,6 +37,16 @@ import org.webpki.util.ArrayUtil;
 
 public class CertificateFilter
   {
+    public static final String CF_FINGER_PRINT          = "FingerPrint";
+    public static final String CF_ISSUER_REG_EX         = "IssuerRegEx";
+    public static final String CF_SUBJECT_REG_EX        = "SubjectRegEx";
+    public static final String CF_EMAIL_REG_EX          = "EmailRegEx";
+    public static final String CF_SERIAL_NUMBER         = "SerialNumber";
+    public static final String CF_POLICY_RULES          = "PolicyRules";
+    public static final String CF_KEY_CONTAINER_LIST    = "KeyContainerList";
+    public static final String CF_KEY_USAGE_RULES       = "KeyUsageRules";
+    public static final String CF_EXT_KEY_USAGE_RULES   = "ExtKeyUsageRules";
+
     // Global - Needs path expansion
 
     private byte[] finger_print;
@@ -49,60 +59,170 @@ public class CertificateFilter
 
     private String email_reg_ex;
 
-    private String policy_reg_ex;
+    private String policy_rules;
 
     private BigInteger serial_number;
 
-    private KeyUsage key_usage;
+    private String key_usage_rules;
 
-    private String ext_key_usage_reg_ex;
+    private String ext_key_usage_rules;
 
-    private KeyContainerTypes[] containers;
+    private String key_container_list;
 
+    static final Pattern oid_pattern = Pattern.compile ("[1-9][0-9]*(\\.[1-9][0-9]*)*"); 
 
-    public static class KeyUsage
+    static abstract class BaseRuleParser
       {
-        Set<KeyUsageBits> required = EnumSet.noneOf (KeyUsageBits.class);
+        static final char DISALLOWED = '-';
+        static final char DELIMITER = ',';
+        
+        LinkedHashMap<String,Boolean> rules = new LinkedHashMap<String,Boolean> ();
 
-        Set<KeyUsageBits> disallowed = EnumSet.noneOf (KeyUsageBits.class);
-
-        private void test_for_ambiguity (Set<KeyUsageBits> currset, KeyUsageBits key_usage) throws IOException
+        BaseRuleParser (String rule_string) throws IOException
           {
-            if (currset.contains (key_usage))
+            if (rule_string != null)
               {
-                throw new IOException ("Ambigious key usage setting for bit: " + key_usage);
+                boolean not_ready = true;
+                do
+                  {
+                    int i = rule_string.indexOf (DELIMITER);
+                    if (i < 0)
+                      {
+                        i = rule_string.length ();
+                        not_ready = false;
+                      }
+                    String rule = rule_string.substring (0, i).trim ();
+                    if (not_ready)
+                      {
+                        rule_string = rule_string.substring (++i);
+                      }
+                    boolean required = true;
+                    if (treatUnspecifiedAsMatching () && rule.charAt (0) == DISALLOWED)
+                      {
+                        required = false;
+                        rule = rule.substring (1);
+                      }
+                    if (rules.put (parse (rule), required) != null)
+                      {
+                        throw new IOException ("Duplicate rule: " + rule);
+                      }
+                  }
+                while (not_ready);
               }
-          } 
-
-
-        public KeyUsage disAllow (KeyUsageBits key_usage) throws IOException
-          {
-            test_for_ambiguity (required, key_usage);
-            disallowed.add (key_usage);
-            return this;
           }
-
-
-        public KeyUsage require (KeyUsageBits key_usage) throws IOException
+        
+        String normalized ()
           {
-            test_for_ambiguity (disallowed, key_usage);
-            required.add (key_usage);
-            return this;
+            if (rules.isEmpty ())
+              {
+                return null;
+              }
+            StringBuffer nice = new StringBuffer ();
+            boolean next = false;
+            for (String rule : rules.keySet ())
+              {
+                if (next)
+                  {
+                    nice.append (DELIMITER);
+                  }
+                else
+                  {
+                    next = true;
+                  }
+                if (!rules.get (rule))
+                  {
+                    nice.append (DISALLOWED);
+                  }
+                nice.append (rule);
+              }
+            return nice.toString ();
           }
+  
+        abstract String parse (String argument) throws IOException;
 
-
-        public Set<KeyUsageBits> getDisAllowedBits ()
+        boolean treatUnspecifiedAsMatching ()
           {
-            return disallowed;
+            return true;
           }
-
-
-        public Set<KeyUsageBits> getRequiredBits ()
+        
+        boolean checkRule (String rule)
           {
-            return required;
+            Boolean required = rules.get (rule);
+            if (required != null)
+              {
+                if (required)
+                  {
+                    rules.remove (rule);
+                  }
+                return required;
+              }
+            return treatUnspecifiedAsMatching ();
+          }
+  
+        boolean gotAllRequired ()
+          {
+            for (String rule : rules.keySet ())
+              {
+                if (rules.get (rule))
+                  {
+                    return false;
+                  }
+              }
+            return true;
+          }
+      }
+  
+    static class KeyUsageRuleParser extends BaseRuleParser
+      {
+        KeyUsageRuleParser (String rule_string) throws IOException
+          {
+            super (rule_string);
+          }
+  
+        @Override
+        String parse (String argument) throws IOException
+          {
+            return KeyUsageBits.getKeyUsageBit (argument).toString ();
+          }
+      }
+    
+    static class OIDRuleParser extends BaseRuleParser
+      {
+        OIDRuleParser (String rule_string) throws IOException
+          {
+            super (rule_string);
+          }
+  
+        @Override
+        String parse (String argument) throws IOException
+          {
+            if (!oid_pattern.matcher (argument).matches ())
+              {
+                throw new IOException ("Bad OID: " + argument);
+              }
+            return argument;
           }
       }
 
+    static class KeyContainerListParser extends BaseRuleParser
+      {
+        KeyContainerListParser (String rule_string) throws IOException
+          {
+            super (rule_string);
+          }
+  
+        @Override
+        String parse (String argument) throws IOException
+          {
+            return KeyContainerTypes.getKeyContainerType (argument).getName ();
+          }
+
+        @Override
+        boolean treatUnspecifiedAsMatching ()
+          {
+            return false;
+          }
+      }
 
     private String quote (X500Principal principal)
       {
@@ -144,9 +264,9 @@ public class CertificateFilter
       }
 
 
-    public String getPolicyRegEx ()
+    public String getPolicyRules ()
       {
-        return policy_reg_ex;
+        return policy_rules;
       }
 
 
@@ -155,27 +275,31 @@ public class CertificateFilter
         return serial_number;
       }
 
-    public KeyContainerTypes[] getContainers ()
+    public String getKeyContainerList ()
       {
-        return containers;
+        return key_container_list;
       }
 
 
-    public KeyUsage getKeyUsage ()
+    public String getKeyUsageRules ()
       {
-        return key_usage;
+        return key_usage_rules;
       }
 
 
-    public String getExtKeyUsageRegEx ()
+    public String getExtKeyUsageRules ()
       {
-        return ext_key_usage_reg_ex;
+        return ext_key_usage_rules;
       }
 
 
 
-    public CertificateFilter setFingerPrint (byte[] finger_print)
+    public CertificateFilter setFingerPrint (byte[] finger_print) throws IOException
       {
+        if (finger_print != null && finger_print.length != 32)
+          {
+            throw new IOException ("\"Sha256\" fingerprint <> 32 bytes!");
+          }
         this.finger_print = finger_print;
         return this;
       }
@@ -223,15 +347,9 @@ public class CertificateFilter
       }
 
 
-    public CertificateFilter setPolicyRegEx (String policy_reg_ex)
+    public CertificateFilter setPolicyRules (String policy_rules) throws IOException
       {
-        this.policy_reg_ex = conditionalCompile (policy_reg_ex);
-        return this;
-      }
-
-    public CertificateFilter setPolicy (String policy_oid)
-      {
-        this.policy_reg_ex = Pattern.quote (policy_oid);
+        this.policy_rules = new OIDRuleParser (policy_rules).normalized ();
         return this;
       }
 
@@ -241,36 +359,46 @@ public class CertificateFilter
         return this;
       }
 
-    public CertificateFilter setContainers (KeyContainerTypes[] containers)
+    public CertificateFilter setKeyContainerList (String key_container_list) throws IOException
       {
-        this.containers = containers;
+        this.key_container_list = new KeyContainerListParser (key_container_list).normalized ();
         return this;
       }
 
-
-    public CertificateFilter setKeyUsage (KeyUsage key_usage)
+    public static LinkedHashSet<KeyContainerTypes> getKeyContainerList (String key_container_list) throws IOException
       {
-        this.key_usage = key_usage;
+        KeyContainerListParser parser = new KeyContainerListParser (key_container_list);
+        if (parser.rules.isEmpty ())
+          {
+            return null;
+          }
+        LinkedHashSet<KeyContainerTypes> containers = new LinkedHashSet<KeyContainerTypes> ();
+        for (String container : parser.rules.keySet ())
+          {
+            containers.add (KeyContainerTypes.getKeyContainerType (container));
+          }
+        return containers;
+      }
+
+    public CertificateFilter setKeyUsageRules (String key_usage_rules) throws IOException
+      {
+        this.key_usage_rules = new KeyUsageRuleParser (key_usage_rules).normalized ();
         return this;
       }
 
-    public CertificateFilter setExtendedKeyUsage (String ext_key_usage_oid)
-      {
-        this.ext_key_usage_reg_ex = Pattern.quote (ext_key_usage_oid);
-        return this;
-      }
 
 /**
  * 
- * @param ext_key_usage_reg_ex The argument<br>
- *   <code>&quot;1\\.3\\.6\\.1\\.5\\.5\\.7\\.3\\.2|1\\.3\\.6\\.1\\.5\\.5\\.7\\.3\\.4&quot;</code><br>
+ * @param ext_key_usage_rules The argument<br>
+ *   <code>&quot;1.3.6.1.5.5.7.3.2,1.3.6.1.5.5.7.3.4&quot;</code><br>
  *   requires matching end-entity certificates to have exactly two extended key usages,
  *   <code>clientAuthentication</code> and <code>emailProtection</code>
  * @return {@link CertificateFilter}
+ * @throws IOException 
  */
-    public CertificateFilter setExtendedKeyUsageRegEx (String ext_key_usage_reg_ex)
+    public CertificateFilter setExtendedKeyUsageRules (String ext_key_usage_rules) throws IOException
       {
-        this.ext_key_usage_reg_ex = conditionalCompile (ext_key_usage_reg_ex);
+        this.ext_key_usage_rules = new OIDRuleParser (ext_key_usage_rules).normalized ();
         return this;
       }
 
@@ -280,7 +408,7 @@ public class CertificateFilter
       }
 
 
-    public static boolean matchKeyUsage (KeyUsage specifier, X509Certificate certificate) throws IOException
+    public static boolean matchKeyUsage (String specifier, X509Certificate certificate) throws IOException
       {
         if (specifier == null)
           {
@@ -291,31 +419,21 @@ public class CertificateFilter
           {
             return false;
           }
-        for (KeyUsageBits ku : specifier.required)
-          {
-            if (ku.ordinal () < key_usage.length)
-              {
-                if (!key_usage[ku.ordinal()])
-                  {
-                    return false;
-                  }
-              }
-            else
-              {
-                return false;
-              }
-          }
-        for (KeyUsageBits ku : specifier.disallowed)
+        KeyUsageRuleParser rule_parser = new KeyUsageRuleParser (specifier);
+        for (KeyUsageBits ku : KeyUsageBits.values ())
           {
             if (ku.ordinal () < key_usage.length)
               {
                 if (key_usage[ku.ordinal()])
                   {
-                    return false;
+                    if (!rule_parser.checkRule (ku.toString ()))
+                      {
+                        return false;
+                      }
                   }
               }
           }
-        return true;
+        return rule_parser.gotAllRequired ();
       }
 
 
@@ -330,15 +448,15 @@ public class CertificateFilter
           {
             return false;
           }
-        Pattern regex = Pattern.compile (specifier);
+        OIDRuleParser rule_parser = new OIDRuleParser (specifier);
         for (String eku : ekus)
           {
-            if (!regex.matcher (eku).matches ())
+            if (!rule_parser.checkRule (eku))
               {
                 return false;
               }
           }
-        return true;
+        return rule_parser.gotAllRequired ();
       }
 
 
@@ -376,19 +494,19 @@ public class CertificateFilter
           {
             return false;
           }
-        Pattern regex = Pattern.compile (specifier);
-        for (String policy_oid : policies)
+        OIDRuleParser rule_parser = new OIDRuleParser (specifier);
+        for (String policy : policies)
           {
-            if (!regex.matcher (policy_oid).matches ())
+            if (!rule_parser.checkRule (policy))
               {
                 return false;
               }
           }
-        return true;
+        return rule_parser.gotAllRequired ();
       }
 
 
-    private static boolean matchContainers (KeyContainerTypes[] specifier, KeyContainerTypes actual)
+    private static boolean matchContainers (String specifier, KeyContainerTypes actual) throws IOException
       {
         if (specifier == null)  // no requirement
           {
@@ -398,14 +516,8 @@ public class CertificateFilter
           {
             return false;
           }
-        for (KeyContainerTypes container : specifier)
-          {
-            if (actual == container)
-              {
-                return true;
-              }
-          }
-        return false;
+        KeyContainerListParser rule_parser = new KeyContainerListParser (specifier);
+        return rule_parser.checkRule (actual.getName ());
       }
 
 
@@ -460,25 +572,16 @@ public class CertificateFilter
 
 
     public boolean matches (X509Certificate[] cert_path,
-                                              KeyUsage default_key_usage,
-                                              KeyContainerTypes container) throws IOException
+                                              KeyContainerTypes key_container) throws IOException
       {
-        if (finger_print != null && finger_print.length != 32)
-          {
-            throw new IOException ("\"Sha256\" hash not 32 bytes!");
-          }
-        if (key_usage != null && key_usage.required.isEmpty () && key_usage.disallowed.isEmpty ())
-          {
-            throw new IOException ("KeyUsage without any specifier is not allowed!");
-          }
         try
           {
             return matchSerial (serial_number, cert_path[0]) &&
                    matchFingerPrint (finger_print, cert_path) &&
-                   matchContainers (containers, container) &&
-                   matchKeyUsage (key_usage == null ? default_key_usage : key_usage, cert_path[0]) &&
-                   matchExtendedKeyUsage (ext_key_usage_reg_ex, cert_path[0]) &&
-                   matchPolicy (policy_reg_ex, cert_path[0]) &&
+                   matchContainers (key_container_list, key_container) &&
+                   matchKeyUsage (key_usage_rules, cert_path[0]) &&
+                   matchExtendedKeyUsage (ext_key_usage_rules, cert_path[0]) &&
+                   matchPolicy (policy_rules, cert_path[0]) &&
                    matchEmailAddress (email_reg_ex, cert_path[0]) &&
                    matchDistinguishedName (issuer_reg_ex, cert_path, true) &&
                    matchDistinguishedName (subject_reg_ex, cert_path, false);
@@ -488,5 +591,4 @@ public class CertificateFilter
             throw new IOException (gse);
           }
       }
-
   }

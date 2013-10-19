@@ -1199,12 +1199,12 @@
               "Email" attributes MUST be searched for in both the subject DN and in
               subject alt name extensions.  If a single email address matches the
               regular expression the search condition is true.  For "Policy" attributes
-              to match each found policy attribute MUST match the regular expression. -->
+              to match each found policy attribute MUST match the rule list. -->
          <xs:attribute name="IssuerRegEx" type="kg2:distinguishedNameExpr" use="optional"/>
          <xs:attribute name="SubjectRegEx" type="kg2:distinguishedNameExpr" use="optional"/>
          <xs:attribute name="SerialNumber" type="xs:integer" use="optional"/>
          <xs:attribute name="EmailRegEx" type="kg2:regularExpression" use="optional"/>
-         <xs:attribute name="PolicyRegEx" type="kg2:regularExpression" use="optional"/>
+         <xs:attribute name="PolicyRules" type="kg2:policyRules" use="optional"/>
          <xs:attribute name="IssuedBefore" type="xs:dateTime" use="optional"/>
          <xs:attribute name="IssuedAfter" type="xs:dateTime" use="optional"/>
 
@@ -1388,6 +1388,12 @@
             <xs:list itemType="xs:anyURI"/>
          </xs:simpleType>
          <xs:minLength value="1"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="policyRules">
+      <xs:restriction base="xs:string">
+         <xs:pattern value="-?[1-9][0-9]*(\.[1-9][0-9]*)*(,-?[1-9][0-9]*(\.[1-9][0-9]*)*)*"/>
       </xs:restriction>
    </xs:simpleType>
 

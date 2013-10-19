@@ -137,6 +137,18 @@ public class AuthenticationRequestDecoder extends ClientDecoder
         expires = rd.hasProperty (EXPIRES_JSON) ? rd.getInt (EXPIRES_JSON) : -1;  // Default: no timeout and associated GUI
 
         /////////////////////////////////////////////////////////////////////////////////////////
+        // Optional client features [0..1]
+        /////////////////////////////////////////////////////////////////////////////////////////
+        String[] features = InputValidator.getURIListConditional (rd, CLIENT_FEATURES_JSON);
+        if (features != null) for (String feature : features)
+          {
+            if (!client_features.add (feature))
+              {
+                bad ("Duplicate \"" + CLIENT_FEATURES_JSON + "\"  :" + feature);
+              }
+          }
+        
+        /////////////////////////////////////////////////////////////////////////////////////////
         // Get the signature algorithms [1..n]
         /////////////////////////////////////////////////////////////////////////////////////////
         for (String sig_alg_string : InputValidator.getURIList (rd, SIGNATURE_ALGORITHMS_JSON))
@@ -152,18 +164,6 @@ public class AuthenticationRequestDecoder extends ClientDecoder
               }
           }
 
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Optional client features [0..1]
-        /////////////////////////////////////////////////////////////////////////////////////////
-        String[] features = InputValidator.getURIListConditional (rd, CLIENT_FEATURES_JSON);
-        if (features != null) for (String feature : features)
-          {
-            if (!client_features.add (feature))
-              {
-                bad ("Duplicate \"" + CLIENT_FEATURES_JSON + "\"  :" + feature);
-              }
-          }
-        
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the optional certificate filters [0..n]
         /////////////////////////////////////////////////////////////////////////////////////////

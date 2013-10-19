@@ -165,6 +165,10 @@ public class KeyGen2Test
     
     boolean fixed_pin;
     
+    boolean languages;
+    
+    boolean key_container_list;
+    
     Server clone_key_protection;
     
     Server update_key;
@@ -575,6 +579,8 @@ public class KeyGen2Test
         byte[] platformResponse (byte[] json_data) throws IOException
           {
             platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (json_data);
+            assertTrue ("Languages", platform_req.getLanguages () == null ^ languages);
+            assertTrue ("Key containers", platform_req.getKeyContainerList () == null ^ key_container_list);
             if (set_abort_url)
               {
                 assertTrue ("Abort URL", platform_req.getAbortURL ().equals (ABORT_URL));
@@ -718,8 +724,8 @@ public class KeyGen2Test
                                 cf.setSubjectRegEx (ls.getSubjectRegEx ());
                                 cf.setSerialNumber (ls.getSerialNumber ());
                                 cf.setEmailRegEx (ls.getEmailRegEx ());
-                                cf.setPolicyRegEx (ls.getPolicyRegEx ());
-                                if (!cf.matches (cert_path, null, null))
+                                cf.setPolicyRules (ls.getPolicyRules ());
+                                if (!cf.matches (cert_path, null))
                                   {
                                     continue;
                                   }
@@ -983,6 +989,14 @@ public class KeyGen2Test
               {
                 server_state.setEphemeralKeyAlgorithm (KeyAlgorithms.BRAINPOOL_P_256);
               }
+            if (languages)
+              {
+                server_state.setLanguages (new String[]{"en","de","fr"});
+              }
+            if (key_container_list)
+              {
+                server_state.setKeyContainerList ("uicc,embedded");
+              }
 
             ////////////////////////////////////////////////////////////////////////////////////
             // First keygen2 request
@@ -1095,11 +1109,11 @@ public class KeyGen2Test
 
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[1])
                           .setEmail ("john.doe@example.com")
-                          .setPolicy ("5.4.8")
-                          .setSerial (new BigInteger ("123"))
+                          .setPolicyRules ("5.4.8, -5.4.9")
+                          .setSerialNumber (new BigInteger ("123"))
                           .setIssuedBefore (new Date (new Date ().getTime () - 100000))
                           .setIssuedAfter (new Date ())
-                          .setSubject (new X500Principal ("CN=John"))
+                          .setSubject (new X500Principal ("CN=John,serialNumber=123"))
                           .setIssuer (new X500Principal ("CN=Root CA"));
             return cdre.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
@@ -1510,6 +1524,7 @@ public class KeyGen2Test
             writeOption ("Fixed PIN", fixed_pin);
             writeOption ("Privacy Enabled", privacy_enabled);
             writeOption ("ECC Key", ecc_key);
+            writeOption ("Languages", languages);
             writeOption ("Server Seed", server_seed);
             writeOption ("PropertyBag", property_bag);
             writeOption ("Symmetric Key", symmetric_key);
@@ -2070,6 +2085,22 @@ public class KeyGen2Test
       {
         Doer doer = new Doer ();
         virtual_machine = true;
+        doer.perform ();
+      }
+
+    @Test
+    public void Languages () throws Exception
+      {
+        Doer doer = new Doer ();
+        languages = true;
+        doer.perform ();
+      }
+
+    @Test
+    public void KeyContainerList () throws Exception
+      {
+        Doer doer = new Doer ();
+        key_container_list = true;
         doer.perform ();
       }
 

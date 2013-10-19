@@ -81,9 +81,9 @@ public class AuthenticationRequestEncoder extends ServerEncoder
       }
 
 
-    public AuthenticationRequestEncoder addCertificateFilter (CertificateFilter cf)
+    public AuthenticationRequestEncoder addCertificateFilter (CertificateFilter certificate_filter)
       {
-        certificate_filters.add (cf);
+        certificate_filters.add (certificate_filter);
         return this;
       }
 
@@ -155,7 +155,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
           {
             for (CertificateFilter cf : certificate_filters)
               {
-                if (cf.matches (areresp.certificate_path, null, null))
+                if (cf.matches (areresp.certificate_path, null))
                   {
                     return;
                   }

@@ -16,5 +16,38 @@
  */
 package org.webpki.crypto;
 
+import java.io.IOException;
 
-public enum KeyContainerTypes {FILE, TPM, SIM, EXTERNAL}
+
+public enum KeyContainerTypes 
+  {
+    SOFTWARE ("software"),
+    EMBEDDED ("embedded"),  // TPM, SKS, TEE, TXT
+    UICC     ("uicc"),      // SIM card
+    SD_CARD  ("sdcard"),
+    EXTERNAL ("external");  // Smart card, HSM
+    
+    String name;
+    
+    KeyContainerTypes (String name)
+      {
+        this.name = name;  
+      }
+    
+    public String getName ()
+      {
+        return name;
+      }
+
+    public static KeyContainerTypes getKeyContainerType (String arg) throws IOException
+      {
+        for (KeyContainerTypes type : values ())
+          {
+            if (type.toString ().equalsIgnoreCase (arg))
+              {
+                return type;
+              }
+          }
+        throw new IOException ("Bad container name: " + arg);
+      }
+  }

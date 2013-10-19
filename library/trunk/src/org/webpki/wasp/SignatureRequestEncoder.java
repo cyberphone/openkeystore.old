@@ -39,7 +39,6 @@ import org.webpki.xmldsig.XMLSigner;
 import org.webpki.crypto.SignerInterface;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.KeyContainerTypes;
-import org.webpki.crypto.KeyUsageBits;
 
 import static org.webpki.wasp.WASPConstants.*;
 
@@ -100,7 +99,8 @@ public class SignatureRequestEncoder extends SignatureRequest
           {
             wr.setBigIntegerAttribute (CF_SERIAL_ATTR, cf.getSerialNumber ());
           }
-        writeOptionalStringAttribute (wr, CF_POLICY_ATTR, cf.getPolicyRegEx ());
+        writeOptionalStringAttribute (wr, CF_POLICY_ATTR, cf.getPolicyRules ());
+/*
         if (cf.getContainers () != null)
           {
             KeyContainerTypes[] containers = cf.getContainers ();
@@ -118,30 +118,9 @@ public class SignatureRequestEncoder extends SignatureRequest
               }
             wr.setListAttribute (CF_CONTAINERS_ATTR, scontainers);
           }
-        if (cf.getKeyUsage () != null)
-          {
-            StringBuffer coded_key_usage = new StringBuffer ();
-            int i = 0;
-            for (KeyUsageBits ku : KeyUsageBits.values ())
-              {
-                if (cf.getKeyUsage ().getRequiredBits ().contains (ku))
-                  {
-                    i = ku.ordinal ();
-                    coded_key_usage.append ('1');
-                  }
-                else if (cf.getKeyUsage ().getDisAllowedBits ().contains (ku))
-                  {
-                    i = ku.ordinal ();
-                    coded_key_usage.append ('0');
-                  }
-                else
-                  {
-                    coded_key_usage.append ('X');
-                  }
-              }
-            wr.setStringAttribute (CF_KEY_USAGE_ATTR, coded_key_usage.toString ().substring (0, i + 1));
-          }
-        writeOptionalStringAttribute (wr, CF_EXT_KEY_USAGE_ATTR, cf.getExtKeyUsageRegEx ());
+*/
+        writeOptionalStringAttribute (wr, CF_KEY_USAGE_ATTR, cf.getKeyUsageRules ());
+        writeOptionalStringAttribute (wr, CF_EXT_KEY_USAGE_ATTR, cf.getExtKeyUsageRules ());
       }
     // Constructors
 

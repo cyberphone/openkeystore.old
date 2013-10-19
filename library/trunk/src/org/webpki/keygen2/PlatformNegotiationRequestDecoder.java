@@ -18,6 +18,11 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.util.LinkedHashSet;
+
+import org.webpki.crypto.CertificateFilter;
+import org.webpki.crypto.KeyContainerTypes;
+
 import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -81,6 +86,15 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
         return languages;
       }
 
+
+    LinkedHashSet<KeyContainerTypes> key_container_list;
+    
+    public LinkedHashSet<KeyContainerTypes> getKeyContainerList ()
+      {
+        return key_container_list;
+      }
+
+
     @Override
     void readServerRequest (JSONObjectReader rd) throws IOException
       {
@@ -90,6 +104,8 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
         action = Action.getActionFromString (rd.getString (ACTION_JSON));
 
         languages = rd.getStringArrayConditional (LANGUAGES_JSON);
+
+        key_container_list = CertificateFilter.getKeyContainerList (rd.getStringConditional (CertificateFilter.CF_KEY_CONTAINER_LIST));
 
         privacy_enabled = rd.getBooleanConditional (PRIVACY_ENABLED_JSON);
 

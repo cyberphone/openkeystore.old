@@ -51,16 +51,6 @@ public interface WASPConstants
 
     String CERTIFICATE_FILTER_ELEM = "CertificateFilter";
 
-    KeyContainerTypes[] KEYCONTAINER2NAME  = new KeyContainerTypes[] {KeyContainerTypes.FILE,
-                                                                      KeyContainerTypes.TPM,
-                                                                      KeyContainerTypes.SIM,
-                                                                      KeyContainerTypes.EXTERNAL};
-
-    String[] NAME2KEYCONTAINER             = new String[] {"File", 
-                                                           "TPM", 
-                                                           "SIM",
-                                                           "External"};
-
     // Various global XML attributes
 
     String ID_ATTR                         = "ID";

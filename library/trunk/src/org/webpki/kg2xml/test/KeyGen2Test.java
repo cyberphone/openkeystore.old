@@ -722,8 +722,8 @@ public class KeyGen2Test
                                 cf.setSubjectRegEx (ls.getSubjectRegEx ());
                                 cf.setSerialNumber (ls.getSerialNumber ());
                                 cf.setEmailRegEx (ls.getEmailRegEx ());
-                                cf.setPolicyRegEx (ls.getPolicyRegEx ());
-                                if (!cf.matches (cert_path, null, null))
+                                cf.setPolicyRules (ls.getPolicyRules ());
+                                if (!cf.matches (cert_path, null))
                                   {
                                     continue;
                                   }
@@ -1098,8 +1098,8 @@ public class KeyGen2Test
 
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[1])
                           .setEmail ("john.doe@example.com")
-                          .setPolicy ("5.4.8")
-                          .setSerial (new BigInteger ("123"))
+                          .setPolicyRules ("5.4.8,-5.4.9")
+                          .setSerialNumber (new BigInteger ("123"))
                           .setIssuedBefore (new Date (new Date ().getTime () - 100000))
                           .setIssuedAfter (new Date ())
                           .setSubject (new X500Principal ("CN=John"))

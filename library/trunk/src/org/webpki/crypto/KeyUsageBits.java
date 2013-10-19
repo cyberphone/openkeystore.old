@@ -42,5 +42,4 @@ public enum KeyUsageBits
           }
         throw new IOException ("Bad KeyUsage bit: " + arg);
       }
-
   }

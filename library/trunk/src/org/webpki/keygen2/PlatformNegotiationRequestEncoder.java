@@ -24,6 +24,8 @@ import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.util.Base64URL;
 
+import org.webpki.crypto.CertificateFilter;
+
 import org.webpki.json.JSONObjectWriter;
 
 import org.webpki.keygen2.ServerState.ProtocolPhase;
@@ -93,6 +95,11 @@ public class PlatformNegotiationRequestEncoder extends ServerEncoder
         if (server_state.privacy_enabled_set)
           {
             wr.setBoolean (PRIVACY_ENABLED_JSON, server_state.privacy_enabled);
+          }
+
+        if (server_state.key_container_list != null)
+          {
+            wr.setString (CertificateFilter.CF_KEY_CONTAINER_LIST, server_state.key_container_list);
           }
 
         wr.setString (SERVER_SESSION_ID_JSON, server_session_id);

@@ -73,8 +73,7 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
       }
 
 
-    public CertificateSelection getCertificateSelection (CertificateFilter[] cfs, 
-                                                         CertificateFilter.KeyUsage default_key_usage) throws IOException
+    public CertificateSelection getCertificateSelection (CertificateFilter[] cfs) throws IOException
       {
         boolean path_expansion = false;
         for (CertificateFilter cf : cfs)
@@ -97,15 +96,12 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
                     X509Certificate[] curr_path = getCertPath (new_key, path_expansion);
                     if (cfs.length == 0)
                       {
-                        if (CertificateFilter.matchKeyUsage (default_key_usage, curr_path[0]))
-                          {
-                            cs.addEntry (new_key, curr_path[0]);
-                          }
+                        cs.addEntry (new_key, curr_path[0]);
                         continue;
                       }
                     for (CertificateFilter cf : cfs)
                       {
-                        if (cf.matches (curr_path, default_key_usage, container_type))
+                        if (cf.matches (curr_path, container_type))
                           {
                             cs.addEntry (new_key, curr_path[0]);
                             break;  // No need to test other filters for this key; it is already selected

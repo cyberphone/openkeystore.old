@@ -27,11 +27,10 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.Vector;
 
-import java.util.regex.Pattern;
-
 import javax.security.auth.x500.X500Principal;
 
 import org.webpki.crypto.AsymKeySignerInterface;
+import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 
@@ -65,9 +64,9 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
 
         String issuer_reg_ex;
         String subject_reg_ex;
-        BigInteger serial;
+        BigInteger serial_number;
         String email_reg_ex;
-        String policy_reg_ex;
+        String policy_rules;
         Date issued_before;
         Date issued_after;
         
@@ -96,7 +95,7 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
         public LookupDescriptor setSubject (X500Principal subject) throws IOException
           {
             nullCheck (subject);
-            return setSubjectRegEx (Pattern.quote (subject.getName ()));
+            return setSubjectRegEx (new CertificateFilter ().setSubject (subject).getSubjectRegEx ());
           }
 
         public LookupDescriptor setIssuerRegEx (String issuer_reg_ex) throws IOException
@@ -110,14 +109,14 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
         public LookupDescriptor setIssuer (X500Principal issuer) throws IOException
           {
             nullCheck (issuer);
-            return setIssuerRegEx (Pattern.quote (issuer.getName ()));
+            return setIssuerRegEx (new CertificateFilter ().setIssuer (issuer).getIssuerRegEx ());
           }
 
-        public LookupDescriptor setSerial (BigInteger serial) throws IOException
+        public LookupDescriptor setSerialNumber (BigInteger serial_number) throws IOException
           {
-            nullCheck (serial);
+            nullCheck (serial_number);
             search_filter = true;
-            this.serial = serial;
+            this.serial_number = serial_number;
             return this;
           }
 
@@ -129,24 +128,18 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
             return this;
           }
 
-        public LookupDescriptor setEmail (String email_address) throws IOException
+        public LookupDescriptor setEmail (String email) throws IOException
           {
-            nullCheck (email_address);
-            return setEmailRegEx (Pattern.quote (email_address));
+            nullCheck (email);
+            return setEmailRegEx (new CertificateFilter ().setEmail (email).getEmailRegEx ());
           }
 
-        public LookupDescriptor setPolicyRegEx (String policy_reg_ex) throws IOException
+        public LookupDescriptor setPolicyRules (String policy_rules) throws IOException
           {
-            nullCheck (policy_reg_ex);
+            nullCheck (policy_rules);
             search_filter = true;
-            this.policy_reg_ex = policy_reg_ex;
+            this.policy_rules = new CertificateFilter ().setPolicyRules (policy_rules).getPolicyRules ();
             return this;
-          }
-
-        public LookupDescriptor setPolicy (String policy_oid) throws IOException
-          {
-            nullCheck (policy_oid);
-            return setPolicyRegEx (Pattern.quote (policy_oid));
           }
 
         public LookupDescriptor setIssuedBefore (Date issued_before) throws IOException
@@ -176,23 +169,23 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
                 JSONObjectWriter search_writer = wr.setObject (SEARCH_FILTER_JSON);
                 if (subject_reg_ex != null)
                   {
-                    search_writer.setString (SUBJECT_REG_EX_JSON, subject_reg_ex);
+                    search_writer.setString (CertificateFilter.CF_SUBJECT_REG_EX, subject_reg_ex);
                   }
                 if (issuer_reg_ex != null)
                   {
-                    search_writer.setString (ISSUER_REG_EXT_JSON, issuer_reg_ex);
+                    search_writer.setString (CertificateFilter.CF_ISSUER_REG_EX, issuer_reg_ex);
                   }
-                if (serial != null)
+                if (serial_number != null)
                   {
-                    search_writer.setBigInteger (SERIAL_NUMBER_JSON, serial);
+                    search_writer.setBigInteger (CertificateFilter.CF_SERIAL_NUMBER, serial_number);
                   }
                 if (email_reg_ex != null)
                   {
-                    search_writer.setString (EMAIL_REG_EX_JSON, email_reg_ex);
+                    search_writer.setString (CertificateFilter.CF_EMAIL_REG_EX, email_reg_ex);
                   }
-                if (policy_reg_ex != null)
+                if (policy_rules != null)
                   {
-                    search_writer.setString (POLICY_REG_EX_JSON, policy_reg_ex);
+                    search_writer.setString (CertificateFilter.CF_POLICY_RULES, policy_rules);
                   }
                 if (issued_before != null)
                   {

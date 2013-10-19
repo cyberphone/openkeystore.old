@@ -26,18 +26,6 @@ public interface WebAuthConstants
     int MAX_ID_LENGTH          = 32;
 
 
-    // Package only definitions
-
-    KeyContainerTypes[] KEYCONTAINER2NAME  = new KeyContainerTypes[] {KeyContainerTypes.FILE,
-                                                                      KeyContainerTypes.TPM,
-                                                                      KeyContainerTypes.SIM,
-                                                                      KeyContainerTypes.EXTERNAL};
-
-    String[] NAME2KEYCONTAINER             = new String[] {"File", 
-                                                           "TPM", 
-                                                           "SIM",
-                                                           "External"};
-
     // JSON properties
 
     String ABORT_URL_JSON                  = "AbortURL";

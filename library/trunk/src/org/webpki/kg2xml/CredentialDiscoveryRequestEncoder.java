@@ -26,7 +26,6 @@ import java.security.interfaces.ECPublicKey;
 
 import java.util.Date;
 import java.util.Vector;
-import java.util.regex.Pattern;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -43,6 +42,7 @@ import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLSigner;
 
 import org.webpki.crypto.AsymKeySignerInterface;
+import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SignerInterface;
@@ -65,9 +65,9 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
 
         String issuer_reg_ex;
         String subject_reg_ex;
-        BigInteger serial;
+        BigInteger serial_number;
         String email_reg_ex;
-        String policy_reg_ex;
+        String policy_rules;
         Date issued_before;
         Date issued_after;
         
@@ -81,92 +81,86 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
           }
         
         private void nullCheck (Object object) throws IOException
-        {
-          if (object == null)
-            {
-              throw new IOException ("Null search parameter not allowed");
-            }
-        }
+          {
+            if (object == null)
+              {
+                throw new IOException ("Null search parameter not allowed");
+              }
+          }
 
-      public LookupDescriptor setSubjectRegEx (String subject_reg_ex) throws IOException
-        {
-          nullCheck (subject_reg_ex);
-          search_filter = true;
-          this.subject_reg_ex = subject_reg_ex;
-          return this;
-        }
+        public LookupDescriptor setSubjectRegEx (String subject_reg_ex) throws IOException
+          {
+            nullCheck (subject_reg_ex);
+            search_filter = true;
+            this.subject_reg_ex = subject_reg_ex;
+            return this;
+          }
 
-      public LookupDescriptor setSubject (X500Principal subject) throws IOException
-        {
-          nullCheck (subject);
-          return setSubjectRegEx (Pattern.quote (subject.getName ()));
-        }
+        public LookupDescriptor setSubject (X500Principal subject) throws IOException
+          {
+            nullCheck (subject);
+            return setSubjectRegEx (new CertificateFilter ().setSubject (subject).getSubjectRegEx ());
+          }
 
-      public LookupDescriptor setIssuerRegEx (String issuer_reg_ex) throws IOException
-        {
-          nullCheck (issuer_reg_ex);
-          search_filter = true;
-          this.issuer_reg_ex = issuer_reg_ex;
-          return this;
-        }
-
-      public LookupDescriptor setIssuer (X500Principal issuer) throws IOException
-        {
-          nullCheck (issuer);
-          return setIssuerRegEx (Pattern.quote (issuer.getName ()));
-        }
-
-      public LookupDescriptor setSerial (BigInteger serial) throws IOException
-        {
-          nullCheck (serial);
-          search_filter = true;
-          this.serial = serial;
-          return this;
-        }
-
-      public LookupDescriptor setEmailRegEx (String email_reg_ex) throws IOException
-        {
-          nullCheck (email_reg_ex);
-          search_filter = true;
-          this.email_reg_ex = email_reg_ex;
-          return this;
-        }
-
-      public LookupDescriptor setEmail (String email_reg_ex) throws IOException
-        {
-          nullCheck (email_reg_ex);
-          return setEmailRegEx (Pattern.quote (email_reg_ex));
-        }
-
-      public LookupDescriptor setPolicyRegEx (String policy_reg_ex) throws IOException
-        {
-          nullCheck (policy_reg_ex);
-          search_filter = true;
-          this.policy_reg_ex = policy_reg_ex;
-          return this;
-        }
-
-      public LookupDescriptor setPolicy (String policy_oid) throws IOException
-        {
-          nullCheck (policy_oid);
-          return setPolicyRegEx (Pattern.quote (policy_oid));
-        }
-
-      public LookupDescriptor setIssuedBefore (Date issued_before) throws IOException
-        {
-          nullCheck (issued_before);
-          search_filter = true;
-          this.issued_before = issued_before;
-          return this;
-        }
-
-      public LookupDescriptor setIssuedAfter (Date issued_after) throws IOException
-        {
-          nullCheck (issued_after);
-          search_filter = true;
-          this.issued_after = issued_after;
-          return this;
-        }
+        public LookupDescriptor setIssuerRegEx (String issuer_reg_ex) throws IOException
+          {
+            nullCheck (issuer_reg_ex);
+            search_filter = true;
+            this.issuer_reg_ex = issuer_reg_ex;
+            return this;
+          }
+  
+        public LookupDescriptor setIssuer (X500Principal issuer) throws IOException
+          {
+            nullCheck (issuer);
+            return setIssuerRegEx (new CertificateFilter ().setIssuer (issuer).getIssuerRegEx ());
+          }
+  
+        public LookupDescriptor setSerialNumber (BigInteger serial_number) throws IOException
+          {
+            nullCheck (serial_number);
+            search_filter = true;
+            this.serial_number = serial_number;
+            return this;
+          }
+  
+        public LookupDescriptor setEmailRegEx (String email_reg_ex) throws IOException
+          {
+            nullCheck (email_reg_ex);
+            search_filter = true;
+            this.email_reg_ex = email_reg_ex;
+            return this;
+          }
+  
+        public LookupDescriptor setEmail (String email) throws IOException
+          {
+            nullCheck (email);
+            return setEmailRegEx (new CertificateFilter ().setEmail (email).getEmailRegEx ());
+          }
+  
+        public LookupDescriptor setPolicyRules (String policy_rules) throws IOException
+          {
+            nullCheck (policy_rules);
+            search_filter = true;
+            this.policy_rules = new CertificateFilter ().setPolicyRules (policy_rules).getPolicyRules ();
+            return this;
+          }
+  
+        public LookupDescriptor setIssuedBefore (Date issued_before) throws IOException
+          {
+            nullCheck (issued_before);
+            search_filter = true;
+            this.issued_before = issued_before;
+            return this;
+          }
+  
+        public LookupDescriptor setIssuedAfter (Date issued_after) throws IOException
+          {
+            nullCheck (issued_after);
+            search_filter = true;
+            this.issued_after = issued_after;
+            return this;
+          }
 
 
         @Override
@@ -211,23 +205,23 @@ public class CredentialDiscoveryRequestEncoder extends CredentialDiscoveryReques
                 wr.addChildElement (SEARCH_FILTER_ELEM);
                 if (subject_reg_ex != null)
                   {
-                    wr.setStringAttribute (SUBJECT_REG_EX_ATTR, subject_reg_ex);
+                    wr.setStringAttribute (CertificateFilter.CF_SUBJECT_REG_EX, subject_reg_ex);
                   }
                 if (issuer_reg_ex != null)
                   {
-                    wr.setStringAttribute (ISSUER_REG_EX_ATTR, issuer_reg_ex);
+                    wr.setStringAttribute (CertificateFilter.CF_ISSUER_REG_EX, issuer_reg_ex);
                   }
-                if (serial != null)
+                if (serial_number != null)
                   {
-                    wr.setBigIntegerAttribute (SERIAL_NUMBER_ATTR, serial);
+                    wr.setBigIntegerAttribute (CertificateFilter.CF_SERIAL_NUMBER, serial_number);
                   }
                 if (email_reg_ex != null)
                   {
-                    wr.setStringAttribute (EMAIL_REG_EX_ATTR, email_reg_ex);
+                    wr.setStringAttribute (CertificateFilter.CF_EMAIL_REG_EX, email_reg_ex);
                   }
-                if (policy_reg_ex != null)
+                if (policy_rules != null)
                   {
-                    wr.setStringAttribute (POLICY_REG_EX_ATTR, policy_reg_ex);
+                    wr.setStringAttribute (CertificateFilter.CF_POLICY_RULES, policy_rules);
                   }
                 if (issued_before != null)
                   {

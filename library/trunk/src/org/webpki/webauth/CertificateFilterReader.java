@@ -19,15 +19,11 @@ package org.webpki.webauth;
 import java.io.IOException;
 
 import org.webpki.crypto.CertificateFilter;
-import org.webpki.crypto.KeyContainerTypes;
-import org.webpki.crypto.KeyUsageBits;
 
 import org.webpki.json.JSONObjectReader;
 
-import static org.webpki.webauth.WebAuthConstants.*;
 
-
-class CertificateFilterReader extends CertificateFilterIOBase
+class CertificateFilterReader
   {
     static CertificateFilter read (JSONObjectReader rd) throws IOException
       {
@@ -36,54 +32,15 @@ class CertificateFilterReader extends CertificateFilterIOBase
             throw new IOException ("Empty certificate filter not allowed");
           }
         CertificateFilter cf = new CertificateFilter ();
-        cf.setFingerPrint (rd.getBinaryConditional (CF_FINGER_PRINT_ATTR));
-        cf.setIssuerRegEx (rd.getStringConditional (CF_ISSUER_REG_EX_ATTR));
-        cf.setSubjectRegEx (rd.getStringConditional (CF_SUBJECT_REG_EX_ATTR));
-        cf.setEmailRegEx (rd.getStringConditional (CF_EMAIL_REG_EX_ATTR));
-        cf.setSerialNumber (InputValidator.getBigIntegerConditional (rd, CF_SERIAL_NUMBER_ATTR));
-        cf.setPolicyRegEx (rd.getStringConditional (CF_POLICY_REG_EX_ATTR));
-        String[] scontainers = InputValidator.getListConditional (rd, CF_CONTAINERS_ATTR);
-        KeyContainerTypes[] containers = null;
-        if (scontainers != null)
-          {
-            containers = new KeyContainerTypes[scontainers.length];
-            for (int q = 0; q < scontainers.length; q++)
-              {
-                boolean found = false;
-                for (int i = 0; i < NAME2KEYCONTAINER.length; i++)
-                  {
-                    if (NAME2KEYCONTAINER[i].equals (scontainers[q]))
-                      {
-                        found = true;
-                        containers[q] = KEYCONTAINER2NAME[i];
-                        break;
-                      }
-                  }
-                if (!found) throw new IOException ("Unknown container: " + scontainers[q]);
-              }
-          }
-        cf.setContainers (containers);
-        CertificateFilter.KeyUsage key_usage = null;
-        String key_usage_string = rd.getStringConditional (CF_KEY_USAGE_ATTR);
-        if (key_usage_string != null)
-          {
-            key_usage = new CertificateFilter.KeyUsage ();
-            for (int i = 0; i < key_usage_string.length (); i++)
-              {
-                switch (key_usage_string.charAt (i))
-                  {
-                    case '1':
-                      key_usage.require (KeyUsageBits.values ()[i]);
-                      break;
-
-                    case '0':
-                      key_usage.disAllow (KeyUsageBits.values ()[i]);
-                      break;
-                  }
-              }
-          }
-        cf.setKeyUsage (key_usage);
-        cf.setExtendedKeyUsageRegEx (rd.getStringConditional (CF_EXT_KEY_USAGE_REG_EX_ATTR));
+        cf.setFingerPrint (rd.getBinaryConditional (CertificateFilter.CF_FINGER_PRINT));
+        cf.setIssuerRegEx (rd.getStringConditional (CertificateFilter.CF_ISSUER_REG_EX));
+        cf.setSubjectRegEx (rd.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX));
+        cf.setEmailRegEx (rd.getStringConditional (CertificateFilter.CF_EMAIL_REG_EX));
+        cf.setSerialNumber (InputValidator.getBigIntegerConditional (rd, CertificateFilter.CF_SERIAL_NUMBER));
+        cf.setPolicyRules (rd.getStringConditional (CertificateFilter.CF_POLICY_RULES));
+        cf.setKeyContainerList (rd.getStringConditional (CertificateFilter.CF_KEY_CONTAINER_LIST));
+        cf.setKeyUsageRules (rd.getStringConditional (CertificateFilter.CF_KEY_USAGE_RULES));
+        cf.setExtendedKeyUsageRules (rd.getStringConditional (CertificateFilter.CF_EXT_KEY_USAGE_RULES));
         return cf;
       }
   }

@@ -23,9 +23,12 @@ import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 import org.webpki.crypto.HashAlgorithms;
 
+import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONEncoder;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONX509Signer;
@@ -43,6 +46,8 @@ public class AuthenticationResponseEncoder extends JSONEncoder
     
     byte[] server_certificate_fingerprint;
     
+    LinkedHashMap<String,LinkedHashSet<String>> client_platform_features = new LinkedHashMap<String,LinkedHashSet<String>> ();
+
     String id;
     
     String request_url;
@@ -74,13 +79,16 @@ public class AuthenticationResponseEncoder extends JSONEncoder
           }
       }
 
-/*
-    public AuthenticationResponseEncoder addClientPlatformFeature (ClientPlatformFeature client_platform_feature)
+    public AuthenticationResponseEncoder addClientFeature (String type, String value)
       {
-        client_platform_features.add (client_platform_feature);
+        LinkedHashSet<String> set = client_platform_features.get (type);
+        if (set == null)
+          {
+            client_platform_features.put (type, set = new LinkedHashSet<String> ());
+          }
+        set.add (value);
         return this;
       }
-*/
 
     @Override
     protected void writeJSONData (JSONObjectWriter wr) throws IOException
@@ -89,20 +97,28 @@ public class AuthenticationResponseEncoder extends JSONEncoder
 
         wr.setString (SERVER_TIME_JSON, server_time);
 
-        wr.setString (REQUEST_URL_JSON, request_url);
-
         wr.setDateTime (CLIENT_TIME_JSON, client_time);
+
+        wr.setString (REQUEST_URL_JSON, request_url);
 
         if (server_certificate_fingerprint != null)
           {
             wr.setBinary (SERVER_CERT_FP_JSON, server_certificate_fingerprint);
           }
-/*        
-        for (ClientPlatformFeature client_platform_feature : client_platform_features)
+        
+        if (!client_platform_features.isEmpty ())
           {
-            client_platform_feature.write (wr);
+            JSONArrayWriter features = wr.setArray (CLIENT_FEATURES_JSON);
+            for (String type : client_platform_features.keySet ())
+              {
+                JSONArrayWriter arr = features.setObject ().setArray (TYPE_JSON);
+                for (String value : client_platform_features.get (type))
+                  {
+                    arr.setString (value);
+                  }
+              }
           }
-*/
+
         wr.setSignature (signer);
       }
 

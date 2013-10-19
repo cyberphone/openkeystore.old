@@ -235,7 +235,7 @@ public class PDFProfileResponseDecoder extends XMLObjectWrapper implements Signa
           {
             for (CertificateFilter cf : cert_filters)
               {
-                if (cf.matches (signer_certpath, null, null))
+                if (cf.matches (signer_certpath, null))
                   {
                     return true;
                   }

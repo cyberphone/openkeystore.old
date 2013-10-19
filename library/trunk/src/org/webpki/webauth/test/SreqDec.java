@@ -20,8 +20,6 @@ package org.webpki.webauth.test;
 import org.webpki.util.DebugFormatter;
 
 import org.webpki.crypto.CertificateFilter;
-import org.webpki.crypto.KeyContainerTypes;
-
 
 public class SreqDec
   {
@@ -33,23 +31,10 @@ public class SreqDec
         if (cf.getIssuerRegEx () != null) s.append ("\nIssuer=" + cf.getIssuerRegEx ());
         if (cf.getSubjectRegEx () != null) s.append ("\nSubject=" + cf.getSubjectRegEx ());
         if (cf.getSerialNumber () != null) s.append ("\nSerial=" + cf.getSerialNumber ());
-        if (cf.getPolicyRegEx () != null) s.append ("\nPolicy=" + cf.getPolicyRegEx ());
-        if (cf.getContainers () != null)
-          {
-            s.append ("\nContainers=");
-            boolean next = false;
-            for (KeyContainerTypes kct : cf.getContainers ())
-              {
-                if (next)
-                  {
-                    s.append (", ");
-                  }
-                next = true;
-                s.append (kct.toString ());
-              }
-          }
-        if (cf.getKeyUsage () != null) s.append ("\nKeyUsage=" + cf.getKeyUsage ());
-        if (cf.getExtKeyUsageRegEx () != null) s.append ("\nExtKeyUsage=" + cf.getExtKeyUsageRegEx ());
+        if (cf.getPolicyRules () != null) s.append ("\nPolicy=" + cf.getPolicyRules ());
+        if (cf.getKeyContainerList () != null) s.append ("\nContainers=" + cf.getKeyContainerList ());
+        if (cf.getKeyUsageRules () != null) s.append ("\nKeyUsage=" + cf.getKeyUsageRules ());
+        if (cf.getExtKeyUsageRules () != null) s.append ("\nExtKeyUsage=" + cf.getExtKeyUsageRules ());
         s.append ("\nCERTFILTER\n");
       }
 

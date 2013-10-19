@@ -55,8 +55,6 @@ public interface KeyGen2Constants
 
     String DELETE_PROTECTION_ATTR                    = "DeleteProtection";
 
-    String EMAIL_REG_EX_ATTR                         = "EmailRegEx";
-
     String ENABLE_PIN_CACHING_ATTR                   = "EnablePINCaching";
 
     String ENDORSED_ALGORITHMS_ATTR                  = "EndorsedAlgorithms";
@@ -86,8 +84,6 @@ public interface KeyGen2Constants
     String HEIGHT_ATTR                               = "Height";
 
     String ID_ATTR                                   = "ID";
-
-    String ISSUER_REG_EX_ATTR                        = "IssuerRegEx";
 
     String INPUT_METHOD_ATTR                         = "InputMethod";
 
@@ -129,13 +125,9 @@ public interface KeyGen2Constants
     
     String PRIVACY_ENABLED_ATTR                      = "PrivacyEnabled";
 
-    String POLICY_REG_EX_ATTR                        = "PolicyRegEx";
-
     String RETRY_LIMIT_ATTR                          = "RetryLimit";
 
     String REQUESTED_CLIENT_ATTRIBUTES_ATTR          = "RequestedClientAttributes";
-
-    String SERIAL_NUMBER_ATTR                        = "SerialNumber";
 
     String SERVER_CERT_FP_ATTR                       = "ServerCertificateFingerprint";
 
@@ -154,8 +146,6 @@ public interface KeyGen2Constants
     String SESSION_LIFE_TIME_ATTR                    = "SessionLifeTime";
 
     String SETTABLE_EXPONENT_ATTR                    = "SettableExponent";
-
-    String SUBJECT_REG_EX_ATTR                       = "SubjectRegEx";
 
     String SUBMIT_URL_ATTR                           = "SubmitURL";
 

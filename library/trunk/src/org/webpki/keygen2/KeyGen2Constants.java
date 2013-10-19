@@ -76,8 +76,6 @@ public interface KeyGen2Constants
 
     String DEVICE_PIN_PROTECTION_JSON                = "DevicePINProtection";
 
-    String EMAIL_REG_EX_JSON                         = "EmailRegEx";
-
     String ENDORSED_ALGORITHMS_JSON                  = "EndorsedAlgorithms";
 
     String ENABLE_PIN_CACHING_JSON                   = "EnablePINCaching";
@@ -111,8 +109,6 @@ public interface KeyGen2Constants
     String IMPORT_KEY_JSON                           = "ImportKey";
 
     String INPUT_METHOD_JSON                         = "InputMethod";
-
-    String ISSUER_REG_EXT_JSON                       = "IssuerRegEx";
 
     String ISSUED_AFTER_JSON                         = "IssuedAfter";
 
@@ -172,8 +168,6 @@ public interface KeyGen2Constants
     
     String PLATFORM_NEGOTIATION_RESPONSE_JSON        = "PlatformNegotiationResponse";
     
-    String POLICY_REG_EX_JSON                        = "PolicyRegEx";
-
     String PRIVACY_ENABLED_JSON                      = "PrivacyEnabled";
 
     String PRIVATE_KEY_JSON                          = "PrivateKey";
@@ -200,8 +194,6 @@ public interface KeyGen2Constants
 
     String SEARCH_FILTER_JSON                        = "SearchFilter";
 
-    String SERIAL_NUMBER_JSON                        = "SerialNumber";
-
     String SERVER_EPHEMERAL_KEY_JSON                 = "ServerEphemeralKey";
 
     String SERVER_CERT_FP_JSON                       = "ServerCertificateFingerprint";
@@ -221,8 +213,6 @@ public interface KeyGen2Constants
     String SESSION_LIFE_TIME_JSON                    = "SessionLifeTime";
 
     String SETTABLE_EXPONENT_JSON                    = "SettableExponent";
-
-    String SUBJECT_REG_EX_JSON                       = "SubjectRegEx";
 
     String SUBMIT_URL_JSON                           = "SubmitURL";
 

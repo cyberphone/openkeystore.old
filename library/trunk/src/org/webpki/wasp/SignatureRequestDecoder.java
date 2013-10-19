@@ -86,8 +86,9 @@ public class SignatureRequestDecoder extends SignatureRequest
         cf.setSubjectRegEx (ah.getStringConditional (CF_SUBJECT_ATTR));
         cf.setEmailRegEx (ah.getStringConditional (CF_EMAIL_ATTR));
         cf.setSerialNumber (ah.getBigIntegerConditional (CF_SERIAL_ATTR));
-        cf.setPolicy (ah.getStringConditional (CF_POLICY_ATTR));
+        cf.setPolicyRules (ah.getStringConditional (CF_POLICY_ATTR));
         String[] scontainers = ah.getListConditional (CF_CONTAINERS_ATTR);
+  /*
         KeyContainerTypes[] containers = null;
         if (scontainers != null)
           {
@@ -108,27 +109,9 @@ public class SignatureRequestDecoder extends SignatureRequest
               }
           }
         cf.setContainers (containers);
-        CertificateFilter.KeyUsage key_usage = null;
-        String key_usage_string = ah.getStringConditional (CF_KEY_USAGE_ATTR);
-        if (key_usage_string != null)
-          {
-            key_usage = new CertificateFilter.KeyUsage ();
-            for (int i = 0; i < key_usage_string.length (); i++)
-              {
-                switch (key_usage_string.charAt (i))
-                  {
-                    case '1':
-                      key_usage.require (KeyUsageBits.values ()[i]);
-                      break;
-
-                    case '0':
-                      key_usage.disAllow (KeyUsageBits.values ()[i]);
-                      break;
-                  }
-              }
-          }
-        cf.setKeyUsage (key_usage);
-        cf.setExtendedKeyUsage (ah.getStringConditional (CF_EXT_KEY_USAGE_ATTR));
+*/
+        cf.setKeyUsageRules (ah.getStringConditional (CF_KEY_USAGE_ATTR));
+        cf.setExtendedKeyUsageRules (ah.getStringConditional (CF_EXT_KEY_USAGE_ATTR));
         return cf;
       }
 

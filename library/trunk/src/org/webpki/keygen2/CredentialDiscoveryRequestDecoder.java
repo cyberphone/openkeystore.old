@@ -26,6 +26,7 @@ import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
 
 import org.webpki.json.JSONObjectReader;
@@ -47,7 +48,7 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
         String subject_reg_ex;
         BigInteger serial_number;
         String email_reg_ex;
-        String policy_reg_ex;
+        String policy_rules;
         GregorianCalendar issued_before;
         GregorianCalendar issued_after;
 
@@ -67,11 +68,11 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
                   {
                     throw new IOException ("Empty \"" + SEARCH_FILTER_JSON + "\" not allowed");
                   }
-                issuer_reg_ex = search.getStringConditional (ISSUER_REG_EXT_JSON);
-                subject_reg_ex = search.getStringConditional (SUBJECT_REG_EX_JSON);
-                serial_number = KeyGen2Validator.getBigIntegerConditional (search, SERIAL_NUMBER_JSON);
-                email_reg_ex = search.getStringConditional (EMAIL_REG_EX_JSON);
-                policy_reg_ex = search.getStringConditional (POLICY_REG_EX_JSON);
+                issuer_reg_ex = search.getStringConditional (CertificateFilter.CF_ISSUER_REG_EX);
+                subject_reg_ex = search.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX);
+                serial_number = KeyGen2Validator.getBigIntegerConditional (search, CertificateFilter.CF_SERIAL_NUMBER);
+                email_reg_ex = search.getStringConditional (CertificateFilter.CF_EMAIL_REG_EX);
+                policy_rules = search.getStringConditional (CertificateFilter.CF_POLICY_RULES);
                 issued_before = KeyGen2Validator.getDateTimeConditional (search, ISSUED_BEFORE_JSON);
                 issued_after = KeyGen2Validator.getDateTimeConditional (search, ISSUED_AFTER_JSON);
               }
@@ -114,9 +115,9 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
             return email_reg_ex;
           }
         
-        public String getPolicyRegEx ()
+        public String getPolicyRules ()
           {
-            return policy_reg_ex;
+            return policy_rules;
           }
         
         public GregorianCalendar getIssuedBefore ()
@@ -176,10 +177,6 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
 
         submit_url = getURL (rd, SUBMIT_URL_JSON);
         
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // Get the lookup_specifiers [1..n]
-        /////////////////////////////////////////////////////////////////////////////////////////
-
         /////////////////////////////////////////////////////////////////////////////////////////
         // Calculate proper nonce
         /////////////////////////////////////////////////////////////////////////////////////////

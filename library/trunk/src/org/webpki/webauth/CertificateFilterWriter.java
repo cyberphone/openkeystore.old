@@ -19,70 +19,28 @@ package org.webpki.webauth;
 import java.io.IOException;
 
 import org.webpki.crypto.CertificateFilter;
-import org.webpki.crypto.KeyContainerTypes;
-import org.webpki.crypto.KeyUsageBits;
 
 import org.webpki.json.JSONObjectWriter;
 
-import static org.webpki.webauth.WebAuthConstants.*;
-
-class CertificateFilterWriter extends CertificateFilterIOBase
+class CertificateFilterWriter
   {
     static void write (JSONObjectWriter wr, CertificateFilter cf) throws IOException
       {
         if (cf.getFingerPrint () != null)
           {
-            wr.setBinary (CF_FINGER_PRINT_ATTR, cf.getFingerPrint ());
+            wr.setBinary (CertificateFilter.CF_FINGER_PRINT, cf.getFingerPrint ());
           }
-        writeOptionalString (wr, CF_ISSUER_REG_EX_ATTR, cf.getIssuerRegEx ());
-        writeOptionalString (wr, CF_SUBJECT_REG_EX_ATTR, cf.getSubjectRegEx ());
-        writeOptionalString (wr, CF_EMAIL_REG_EX_ATTR, cf.getEmailRegEx ());
+        writeOptionalString (wr, CertificateFilter.CF_ISSUER_REG_EX, cf.getIssuerRegEx ());
+        writeOptionalString (wr, CertificateFilter.CF_SUBJECT_REG_EX, cf.getSubjectRegEx ());
+        writeOptionalString (wr, CertificateFilter.CF_EMAIL_REG_EX, cf.getEmailRegEx ());
         if (cf.getSerialNumber () != null)
           {
-            wr.setBigInteger (CF_SERIAL_NUMBER_ATTR, cf.getSerialNumber ());
+            wr.setBigInteger (CertificateFilter.CF_SERIAL_NUMBER, cf.getSerialNumber ());
           }
-        writeOptionalString (wr, CF_POLICY_REG_EX_ATTR, cf.getPolicyRegEx ());
-        if (cf.getContainers () != null)
-          {
-            KeyContainerTypes[] containers = cf.getContainers ();
-            String[] scontainers = new String[containers.length];
-            for (int q = 0; q < containers.length; q++)
-              {
-                for (int i = 0; i < KEYCONTAINER2NAME.length; i++)
-                  {
-                    if (KEYCONTAINER2NAME[i] == containers[q])
-                      {
-                        scontainers[q] = NAME2KEYCONTAINER[i];
-                        break;
-                      }
-                  }
-              }
-            wr.setStringArray (CF_CONTAINERS_ATTR, scontainers);
-          }
-        if (cf.getKeyUsage () != null)
-          {
-            StringBuffer coded_key_usage = new StringBuffer ();
-            int i = 0;
-            for (KeyUsageBits ku : KeyUsageBits.values ())
-              {
-                if (cf.getKeyUsage ().getRequiredBits ().contains (ku))
-                  {
-                    i = ku.ordinal ();
-                    coded_key_usage.append ('1');
-                  }
-                else if (cf.getKeyUsage ().getDisAllowedBits ().contains (ku))
-                  {
-                    i = ku.ordinal ();
-                    coded_key_usage.append ('0');
-                  }
-                else
-                  {
-                    coded_key_usage.append ('X');
-                  }
-              }
-            wr.setString (CF_KEY_USAGE_ATTR, coded_key_usage.toString ().substring (0, i + 1));
-          }
-        writeOptionalString (wr, CF_EXT_KEY_USAGE_REG_EX_ATTR, cf.getExtKeyUsageRegEx ());
+        writeOptionalString (wr, CertificateFilter.CF_POLICY_RULES, cf.getPolicyRules ());
+        writeOptionalString (wr, CertificateFilter.CF_KEY_CONTAINER_LIST, cf.getKeyContainerList ());
+        writeOptionalString (wr, CertificateFilter.CF_KEY_USAGE_RULES, cf.getKeyUsageRules ());
+        writeOptionalString (wr, CertificateFilter.CF_EXT_KEY_USAGE_RULES, cf.getExtKeyUsageRules ());
       }
 
     static void writeOptionalString (JSONObjectWriter wr, String name, String optional_value) throws IOException

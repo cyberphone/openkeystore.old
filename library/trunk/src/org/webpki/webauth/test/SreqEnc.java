@@ -24,9 +24,8 @@ import javax.security.auth.x500.X500Principal;
 
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
+
 import org.webpki.crypto.test.DemoKeyStore;
-import org.webpki.crypto.KeyContainerTypes;
-import org.webpki.crypto.KeyUsageBits;
 
 
 public class SreqEnc
@@ -37,19 +36,18 @@ public class SreqEnc
         X509Certificate cert = (X509Certificate)ks.getCertificateChain ("mykey")[1];
         
         CertificateFilter cf1 = new CertificateFilter ()
-              .setPolicy ("1.25.453.22.22.88")
-              .setKeyUsage (new CertificateFilter.KeyUsage ().require (KeyUsageBits.digitalSignature))
-              .setFingerPrint (HashAlgorithms.SHA256.digest (cert.getEncoded ()))  // CA
-              .setIssuer (cert.getIssuerX500Principal ());
+        .setPolicyRules ("1.25.453.22.22.88")
+        .setKeyUsageRules ("digitalSignature")
+        .setFingerPrint (HashAlgorithms.SHA256.digest (cert.getEncoded ()))  // CA
+        .setIssuer (cert.getIssuerX500Principal ());
 
-        CertificateFilter cf2 = new CertificateFilter ()
-              .setFingerPrint (new byte[]{1,4,5,3,6,7,8,3,0,3,5,6,1,4,5,3,6,7,8,3})
-              .setIssuer (new X500Principal ("CN=SuckerTrust GlobalCA, emailaddress=boss@fire.hell, c=TV"))
-              .setContainers (new KeyContainerTypes[]{KeyContainerTypes.TPM, KeyContainerTypes.SIM})
-              .setExtendedKeyUsage ("1.56.245.123")
-              .setKeyUsage (new CertificateFilter.KeyUsage ().require (KeyUsageBits.nonRepudiation)
-                                                             .disAllow (KeyUsageBits.keyEncipherment))
-              .setEmail ("try@this.com");
+  CertificateFilter cf2 = new CertificateFilter ()
+        .setFingerPrint (new byte[]{1,4,5,3,6,7,8,3,0,3,5,6,1,4,5,3,6,7,8,3})
+        .setIssuer (new X500Principal ("CN=SuckerTrust GlobalCA, emailaddress=boss@fire.hell, c=TV"))
+        .setKeyContainerList ("uicc,hardware")
+        .setExtendedKeyUsageRules ("1.56.245.123")
+        .setKeyUsageRules ("nonRepudiation,-keyEncipherment")
+        .setEmail ("try@this.com");
         return new CertificateFilter[] {cf1, cf2};
       }
 

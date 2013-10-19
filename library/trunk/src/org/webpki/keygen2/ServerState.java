@@ -35,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Vector;
 
+import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.DeviceID;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
@@ -1207,6 +1208,14 @@ public class ServerState implements Serializable
     public void setLanguages (String[] languages)
       {
         this.languages = languages;
+      }
+
+
+    String key_container_list;
+    
+    public void setKeyContainerList (String key_container_list) throws IOException
+      {
+        this.key_container_list = new CertificateFilter ().setKeyContainerList (key_container_list).getKeyContainerList ();
       }
  
 
