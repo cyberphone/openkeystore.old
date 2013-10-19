@@ -114,7 +114,7 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                     ////////////////////////////////////////////////////////////////////////////////////
                     for (CertificateFilter cf : webauth_activity.authentication_request.getCertificateFilters ())
                       {
-                        if (cf.matches (cert_path, null, null))
+                        if (cf.matches (cert_path, null))
                           {
                             did_it = true;
                             break;

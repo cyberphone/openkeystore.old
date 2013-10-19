@@ -383,8 +383,8 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                                     cf.setSubjectRegEx (ls.getSubjectRegEx ());
                                     cf.setSerialNumber (ls.getSerialNumber ());
                                     cf.setEmailRegEx (ls.getEmailRegEx ());
-                                    cf.setPolicyRegEx (ls.getPolicyRegEx ());
-                                    if (cf.matches (cert_path, null, null))
+                                    cf.setPolicyRules (ls.getPolicyRules ());
+                                    if (cf.matches (cert_path, null))
                                       {
                                         lr.addMatchingCredential (cert_path,
                                                                   eps.getClientSessionID (),
