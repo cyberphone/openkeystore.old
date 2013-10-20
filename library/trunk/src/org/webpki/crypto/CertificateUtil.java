@@ -143,13 +143,13 @@ public class CertificateUtil
           }
         Vector<String> key_usage_set = new Vector<String> ();
         int i = 0;
-        for (KeyUsageBits kubit : KeyUsageBits.values ())
+        for (KeyUsageBits kub : KeyUsageBits.values ())
           {
             if (i < key_usage.length)
               {
                 if (key_usage[i++])
                   {
-                    key_usage_set.add (kubit.toString ());
+                    key_usage_set.add (kub.getPKIXName ());
                   }
               }
           }

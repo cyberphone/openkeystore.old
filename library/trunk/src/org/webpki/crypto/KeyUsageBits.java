@@ -20,22 +20,35 @@ import java.io.IOException;
 
 public enum KeyUsageBits
   {
-           digitalSignature,
-           nonRepudiation,
-           keyEncipherment,
-           dataEncipherment,
-           keyAgreement,
-           keyCertSign,
-           cRLSign,
-           encipherOnly,
-           decipherOnly;
+    DIGITAL_SIGNATURE ("digitalSignature"),
+    NON_REPUDIATION   ("nonRepudiation"),
+    KEY_ENCIPHERMENT  ("keyEncipherment"),
+    DATA_ENCIPHERMENT ("dataEncipherment"),
+    KEY_AGREEMENT     ("keyAgreement"),
+    KEY_CERT_SIGN     ("keyCertSign"),
+    CRL_SIGN          ("cRLSign"),
+    ENCIPHER_ONLY     ("encipherOnly"),
+    DECIPHER_ONLY     ("decipherOnly");
+    
+    String pkix_name;  // Used in WebPKI protocols
+    
+    KeyUsageBits (String pkix_name)
+      {
+        this.pkix_name = pkix_name;
+      }
+    
+
+    public String getPKIXName ()
+      {
+        return pkix_name;
+      }
 
 
     public static KeyUsageBits getKeyUsageBit (String arg) throws IOException
       {
         for (KeyUsageBits kubit : values ())
           {
-            if (kubit.toString ().equalsIgnoreCase (arg))
+            if (kubit.pkix_name.equalsIgnoreCase (arg))
               {
                 return kubit;
               }

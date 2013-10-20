@@ -495,7 +495,7 @@ public class CommandLineCA
                 s.append (", ");
               }
             comma = true;
-            s.append (keybit.toString ());
+            s.append (keybit.getPKIXName ());
           }
         return s.toString ();
       }
@@ -521,7 +521,7 @@ public class CommandLineCA
                 s.append (", ");
               }
             comma = true;
-            s.append (kubit.toString ());
+            s.append (kubit.getPKIXName ());
           }
         return s.append ("] extensions.  Note that any suitable KeyUsage can be set by issuing "+
                          "\"-extension/ku\" commands, which clears the default settings").toString ();

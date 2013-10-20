@@ -77,11 +77,19 @@ public class SignatureRequestEncoder extends SignatureRequest
 
     private String prefix;  // Default: no prefix
 
-    static void writeOptionalStringAttribute (DOMWriterHelper wr, String attribute_name, String value) throws IOException
+    static void writeOptionalStringAttribute (DOMWriterHelper wr, String name, String value) throws IOException
       {
         if (value != null)
           {
-            wr.setStringAttribute (attribute_name, value);
+            wr.setStringAttribute (name, value);
+          }
+      }
+
+    static void writeOptionalStringList (DOMWriterHelper wr, String name, String[] values) throws IOException
+      {
+        if (values != null)
+          {
+            wr.setListAttribute (name, values);
           }
       }
 
@@ -99,7 +107,7 @@ public class SignatureRequestEncoder extends SignatureRequest
           {
             wr.setBigIntegerAttribute (CF_SERIAL_ATTR, cf.getSerialNumber ());
           }
-        writeOptionalStringAttribute (wr, CF_POLICY_ATTR, cf.getPolicyRules ());
+        writeOptionalStringList (wr, CF_POLICY_ATTR, cf.getPolicyRules ());
 /*
         if (cf.getContainers () != null)
           {
@@ -119,8 +127,8 @@ public class SignatureRequestEncoder extends SignatureRequest
             wr.setListAttribute (CF_CONTAINERS_ATTR, scontainers);
           }
 */
-        writeOptionalStringAttribute (wr, CF_KEY_USAGE_ATTR, cf.getKeyUsageRules ());
-        writeOptionalStringAttribute (wr, CF_EXT_KEY_USAGE_ATTR, cf.getExtKeyUsageRules ());
+        writeOptionalStringList (wr, CF_KEY_USAGE_ATTR, cf.getKeyUsageRules ());
+        writeOptionalStringList (wr, CF_EXT_KEY_USAGE_ATTR, cf.getExtKeyUsageRules ());
       }
     // Constructors
 

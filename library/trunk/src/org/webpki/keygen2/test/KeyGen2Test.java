@@ -73,6 +73,7 @@ import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.HashAlgorithms;
+import org.webpki.crypto.KeyContainerTypes;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.MACAlgorithms;
@@ -579,15 +580,15 @@ public class KeyGen2Test
         byte[] platformResponse (byte[] json_data) throws IOException
           {
             platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (json_data);
-            assertTrue ("Languages", platform_req.getLanguages () == null ^ languages);
-            assertTrue ("Key containers", platform_req.getKeyContainerList () == null ^ key_container_list);
+            assertTrue ("Languages", platform_req.getOptionalLanguageList () == null ^ languages);
+            assertTrue ("Key containers", platform_req.getOptionalKeyContainerList () == null ^ key_container_list);
             if (set_abort_url)
               {
-                assertTrue ("Abort URL", platform_req.getAbortURL ().equals (ABORT_URL));
+                assertTrue ("Abort URL", platform_req.getOptionalAbortURL ().equals (ABORT_URL));
               }
             else
               {
-                assertTrue ("Abort URL", platform_req.getAbortURL () == null);
+                assertTrue ("Abort URL", platform_req.getOptionalAbortURL () == null);
               }
             device_info = sks.getDeviceInfo ();
             PlatformNegotiationResponseEncoder platform_response = new PlatformNegotiationResponseEncoder (platform_req);
@@ -725,7 +726,7 @@ public class KeyGen2Test
                                 cf.setSerialNumber (ls.getSerialNumber ());
                                 cf.setEmailRegEx (ls.getEmailRegEx ());
                                 cf.setPolicyRules (ls.getPolicyRules ());
-                                if (!cf.matches (cert_path, null))
+                                if (!cf.matches (cert_path))
                                   {
                                     continue;
                                   }
@@ -995,7 +996,7 @@ public class KeyGen2Test
               }
             if (key_container_list)
               {
-                server_state.setKeyContainerList ("uicc,embedded");
+                server_state.setKeyContainerList (new KeyContainerTypes[]{KeyContainerTypes.SOFTWARE,KeyContainerTypes.EMBEDDED});
               }
 
             ////////////////////////////////////////////////////////////////////////////////////
@@ -1109,7 +1110,7 @@ public class KeyGen2Test
 
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[1])
                           .setEmail ("john.doe@example.com")
-                          .setPolicyRules ("5.4.8, -5.4.9")
+                          .setPolicyRules (new String[]{"5.4.8","-5.4.9"})
                           .setSerialNumber (new BigInteger ("123"))
                           .setIssuedBefore (new Date (new Date ().getTime () - 100000))
                           .setIssuedAfter (new Date ())
@@ -1291,13 +1292,13 @@ public class KeyGen2Test
                         cert_spec.setEndEntityConstraint ();
                         if (auth)
                           {
-                            cert_spec.setKeyUsageBit (KeyUsageBits.digitalSignature);
-                            cert_spec.setKeyUsageBit (KeyUsageBits.keyAgreement);
+                            cert_spec.setKeyUsageBit (KeyUsageBits.DIGITAL_SIGNATURE);
+                            cert_spec.setKeyUsageBit (KeyUsageBits.KEY_AGREEMENT);
                           }
                         else
                           {
-                            cert_spec.setKeyUsageBit (KeyUsageBits.dataEncipherment);
-                            cert_spec.setKeyUsageBit (KeyUsageBits.keyEncipherment);
+                            cert_spec.setKeyUsageBit (KeyUsageBits.DATA_ENCIPHERMENT);
+                            cert_spec.setKeyUsageBit (KeyUsageBits.KEY_ENCIPHERMENT);
                           }
                       }
                     String extra = get_client_attributes ? ", SerialNumber=" + server_state.getClientAttributeValues ().get (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER).iterator ().next () : "";

@@ -66,7 +66,7 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
         String subject_reg_ex;
         BigInteger serial_number;
         String email_reg_ex;
-        String policy_rules;
+        String[] policy_rules;
         Date issued_before;
         Date issued_after;
         
@@ -134,7 +134,7 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
             return setEmailRegEx (new CertificateFilter ().setEmail (email).getEmailRegEx ());
           }
 
-        public LookupDescriptor setPolicyRules (String policy_rules) throws IOException
+        public LookupDescriptor setPolicyRules (String[] policy_rules) throws IOException
           {
             nullCheck (policy_rules);
             search_filter = true;
@@ -185,7 +185,7 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
                   }
                 if (policy_rules != null)
                   {
-                    search_writer.setString (CertificateFilter.CF_POLICY_RULES, policy_rules);
+                    search_writer.setStringArray (CertificateFilter.CF_POLICY_RULES, policy_rules);
                   }
                 if (issued_before != null)
                   {

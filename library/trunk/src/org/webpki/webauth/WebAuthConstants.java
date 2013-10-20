@@ -16,8 +16,6 @@
  */
 package org.webpki.webauth;
 
-import org.webpki.crypto.KeyContainerTypes;
-
 
 public interface WebAuthConstants
   {

@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import java.util.LinkedHashSet;
 
-import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.KeyContainerTypes;
 
 import org.webpki.json.JSONObjectReader;
@@ -73,23 +72,23 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
 
     String abort_url; // Optional
 
-    public String getAbortURL ()
+    public String getOptionalAbortURL ()
       {
         return abort_url;
       }
 
 
-    String[] languages;
+    String[] languages; // Optional
 
-    public String[] getLanguages ()
+    public String[] getOptionalLanguageList ()
       {
         return languages;
       }
 
 
-    LinkedHashSet<KeyContainerTypes> key_container_list;
+    LinkedHashSet<KeyContainerTypes> key_container_list;  // Optional
     
-    public LinkedHashSet<KeyContainerTypes> getKeyContainerList ()
+    public LinkedHashSet<KeyContainerTypes> getOptionalKeyContainerList ()
       {
         return key_container_list;
       }
@@ -105,7 +104,7 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
 
         languages = rd.getStringArrayConditional (LANGUAGES_JSON);
 
-        key_container_list = CertificateFilter.getKeyContainerList (rd.getStringConditional (CertificateFilter.CF_KEY_CONTAINER_LIST));
+        key_container_list = KeyContainerTypes.getOptionalKeyContainerSet (rd.getStringArrayConditional (KeyContainerTypes.KCT_KEY_CONTAINER_LIST));
 
         privacy_enabled = rd.getBooleanConditional (PRIVACY_ENABLED_JSON);
 

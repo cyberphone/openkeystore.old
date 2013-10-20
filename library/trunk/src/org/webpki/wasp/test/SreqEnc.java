@@ -95,17 +95,16 @@ public class SreqEnc
         X509Certificate cert = (X509Certificate)ks.getCertificateChain ("mykey")[1];
         
         CertificateFilter cf1 = new CertificateFilter ()
-              .setPolicyRules ("1.25.453.22.22.88")
-              .setKeyUsageRules ("digitalSignature")
+              .setPolicyRules (new String[]{"1.25.453.22.22.88"})
+              .setKeyUsageRules (new String[]{"digitalSignature"})
               .setFingerPrint (HashAlgorithms.SHA256.digest (cert.getEncoded ()))  // CA
               .setIssuer (cert.getIssuerX500Principal ());
 
         CertificateFilter cf2 = new CertificateFilter ()
               .setFingerPrint (new byte[]{1,4,5,3,6,7,8,3,0,3,5,6,1,4,5,3,6,7,8,3})
               .setIssuer (new X500Principal ("CN=SuckerTrust GlobalCA, emailaddress=boss@fire.hell, c=TV"))
-              .setKeyContainerList ("embedded, uicc")
-              .setExtendedKeyUsageRules ("1.56.245.123")
-              .setKeyUsageRules ("nonRepudiation,-keyEncipherment")
+              .setExtendedKeyUsageRules (new String[]{"1.56.245.123"})
+              .setKeyUsageRules (new String[]{"nonRepudiation","-keyEncipherment"})
               .setEmail ("try@this.com");
         return new CertificateFilter[] {cf1, cf2};
       }

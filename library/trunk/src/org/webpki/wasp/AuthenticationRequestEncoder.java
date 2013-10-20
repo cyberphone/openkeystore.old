@@ -223,7 +223,7 @@ public class AuthenticationRequestEncoder extends AuthenticationRequest
           {
             for (CertificateFilter cf : certificate_filters)
               {
-                if (cf.matches (areresp.signer_certpath, null))
+                if (cf.matches (areresp.signer_certpath))
                   {
                     return;
                   }

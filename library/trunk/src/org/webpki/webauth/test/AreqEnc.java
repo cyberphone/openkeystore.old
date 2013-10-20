@@ -144,7 +144,7 @@ public class AreqEnc
           }
  
          
-        AuthenticationRequestEncoder areqenc = new AuthenticationRequestEncoder ("https://example.com/home");
+        AuthenticationRequestEncoder areqenc = new AuthenticationRequestEncoder ("https://example.com/home", null);
 
         if (certpath)
           {

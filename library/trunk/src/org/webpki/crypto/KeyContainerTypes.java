@@ -18,6 +18,9 @@ package org.webpki.crypto;
 
 import java.io.IOException;
 
+import java.util.LinkedHashSet;
+import java.util.Vector;
+
 
 public enum KeyContainerTypes 
   {
@@ -34,6 +37,8 @@ public enum KeyContainerTypes
         this.name = name;  
       }
     
+    public static final String KCT_KEY_CONTAINER_LIST    = "KeyContainerList";
+
     public String getName ()
       {
         return name;
@@ -49,5 +54,71 @@ public enum KeyContainerTypes
               }
           }
         throw new IOException ("Bad container name: " + arg);
+      }
+
+    static class KeyContainerListParser
+      {
+        LinkedHashSet<String> key_container_types = new LinkedHashSet<String> ();
+  
+        KeyContainerListParser (String[] list_of_granted_types) throws IOException
+          {
+            if (list_of_granted_types != null)
+              {
+                if (list_of_granted_types.length == 0)
+                  {
+                    throw new IOException ("Empty list not allowed");
+                  }
+                for (String type : list_of_granted_types)
+                  {
+                    if (!key_container_types.add (getKeyContainerType (type).getName ()))
+                      {
+                        throw new IOException ("Duplicate key container type: " + type);
+                      }
+                  }
+              }
+          }
+        
+        String[] normalized ()
+          {
+            if (key_container_types.isEmpty ())
+              {
+                return null;
+              }
+             return key_container_types.toArray (new String[0]);
+          }
+      }
+    
+    public static String[] parseOptionalKeyContainerList (String[] list_of_granted_types) throws IOException
+      {
+        return new KeyContainerListParser (list_of_granted_types).normalized ();
+      }
+    
+    public static String[] parseOptionalKeyContainerList (KeyContainerTypes[] list_of_granted_types) throws IOException
+      {
+        if (list_of_granted_types == null)
+          {
+            return null;
+          }
+        Vector<String> list = new Vector<String> ();
+        for (KeyContainerTypes type : list_of_granted_types)
+          {
+            list.add (type.getName ());
+          }
+        return parseOptionalKeyContainerList (list.toArray (new String[0]));
+      }
+
+    public static LinkedHashSet<KeyContainerTypes> getOptionalKeyContainerSet (String[] list_of_granted_types) throws IOException
+      {
+        String[] list = parseOptionalKeyContainerList (list_of_granted_types);
+        if (list == null)
+          {
+            return null;
+          }
+        LinkedHashSet<KeyContainerTypes> set = new LinkedHashSet<KeyContainerTypes> ();
+        for (String type : list)
+          {
+            set.add (getKeyContainerType (type));
+          }
+        return set;
       }
   }

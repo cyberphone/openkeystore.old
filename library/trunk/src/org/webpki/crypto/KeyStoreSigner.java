@@ -42,8 +42,6 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
 
     private String key_alias;
 
-    private KeyContainerTypes container_type;
-    
     private boolean extended_certpath;
 
 
@@ -101,7 +99,7 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
                       }
                     for (CertificateFilter cf : cfs)
                       {
-                        if (cf.matches (curr_path, container_type))
+                        if (cf.matches (curr_path))
                           {
                             cs.addEntry (new_key, curr_path[0]);
                             break;  // No need to test other filters for this key; it is already selected
@@ -159,7 +157,6 @@ public class KeyStoreSigner implements SignerInterface, CertificateSelectorSpi
     public KeyStoreSigner (KeyStore signer_cert_keystore, KeyContainerTypes container_type)
       {
         this.signer_cert_keystore = signer_cert_keystore;
-        this.container_type = container_type;
       }
 
 

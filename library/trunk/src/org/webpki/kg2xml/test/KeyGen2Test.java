@@ -723,7 +723,7 @@ public class KeyGen2Test
                                 cf.setSerialNumber (ls.getSerialNumber ());
                                 cf.setEmailRegEx (ls.getEmailRegEx ());
                                 cf.setPolicyRules (ls.getPolicyRules ());
-                                if (!cf.matches (cert_path, null))
+                                if (!cf.matches (cert_path))
                                   {
                                     continue;
                                   }
@@ -1098,7 +1098,7 @@ public class KeyGen2Test
 
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[1])
                           .setEmail ("john.doe@example.com")
-                          .setPolicyRules ("5.4.8,-5.4.9")
+                          .setPolicyRules (new String[]{"5.4.8","-5.4.9"})
                           .setSerialNumber (new BigInteger ("123"))
                           .setIssuedBefore (new Date (new Date ().getTime () - 100000))
                           .setIssuedAfter (new Date ())
@@ -1276,13 +1276,13 @@ public class KeyGen2Test
                         cert_spec.setEndEntityConstraint ();
                         if (auth)
                           {
-                            cert_spec.setKeyUsageBit (KeyUsageBits.digitalSignature);
-                            cert_spec.setKeyUsageBit (KeyUsageBits.keyAgreement);
+                            cert_spec.setKeyUsageBit (KeyUsageBits.DIGITAL_SIGNATURE);
+                            cert_spec.setKeyUsageBit (KeyUsageBits.KEY_AGREEMENT);
                           }
                         else
                           {
-                            cert_spec.setKeyUsageBit (KeyUsageBits.dataEncipherment);
-                            cert_spec.setKeyUsageBit (KeyUsageBits.keyEncipherment);
+                            cert_spec.setKeyUsageBit (KeyUsageBits.DATA_ENCIPHERMENT);
+                            cert_spec.setKeyUsageBit (KeyUsageBits.KEY_ENCIPHERMENT);
                           }
                       }
                     String extra = get_client_attributes ? ", SerialNumber=" + server_state.getClientAttributeValues ().get (KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER).iterator ().next () : "";

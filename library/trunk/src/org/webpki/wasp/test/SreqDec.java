@@ -53,11 +53,6 @@ public class SreqDec
         if (cf.getSubjectRegEx () != null) s.append ("\nSubject=" + cf.getSubjectRegEx ());
         if (cf.getSerialNumber () != null) s.append ("\nSerial=" + cf.getSerialNumber ());
         if (cf.getPolicyRules () != null) s.append ("\nPolicy=" + cf.getPolicyRules ());
-        if (cf.getKeyContainerList () != null)
-          {
-            s.append ("\nContainers=");
-            s.append (cf.getKeyContainerList ());
-          }
         if (cf.getKeyUsageRules () != null) s.append ("\nKeyUsage=" + cf.getKeyUsageRules ());
         if (cf.getExtKeyUsageRules () != null) s.append ("\nExtKeyUsage=" + cf.getExtKeyUsageRules ());
         s.append ("\nCERTFILTER\n");

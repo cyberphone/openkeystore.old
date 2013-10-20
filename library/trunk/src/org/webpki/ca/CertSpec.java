@@ -134,11 +134,11 @@ public class CertSpec
         ski_extension = true;
         aki_extension = true;
         end_entity = true;
-        setDefaultKeyUsage (new KeyUsageBits[]{KeyUsageBits.digitalSignature,
-                                               KeyUsageBits.nonRepudiation,
-                                               KeyUsageBits.keyAgreement,
-                                               KeyUsageBits.dataEncipherment,
-                                               KeyUsageBits.keyEncipherment});
+        setDefaultKeyUsage (new KeyUsageBits[]{KeyUsageBits.DIGITAL_SIGNATURE,
+                                               KeyUsageBits.NON_REPUDIATION,
+                                               KeyUsageBits.KEY_AGREEMENT,
+                                               KeyUsageBits.DATA_ENCIPHERMENT,
+                                               KeyUsageBits.KEY_ENCIPHERMENT});
       }   
 
 
@@ -147,8 +147,8 @@ public class CertSpec
         ski_extension = true;
         aki_extension = true;
         ca_cert = true;
-        setDefaultKeyUsage (new KeyUsageBits[]{KeyUsageBits.keyCertSign,
-                                               KeyUsageBits.cRLSign});
+        setDefaultKeyUsage (new KeyUsageBits[]{KeyUsageBits.KEY_CERT_SIGN,
+                                               KeyUsageBits.CRL_SIGN});
       }
 
     

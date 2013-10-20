@@ -37,10 +37,9 @@ class CertificateFilterWriter
           {
             wr.setBigInteger (CertificateFilter.CF_SERIAL_NUMBER, cf.getSerialNumber ());
           }
-        writeOptionalString (wr, CertificateFilter.CF_POLICY_RULES, cf.getPolicyRules ());
-        writeOptionalString (wr, CertificateFilter.CF_KEY_CONTAINER_LIST, cf.getKeyContainerList ());
-        writeOptionalString (wr, CertificateFilter.CF_KEY_USAGE_RULES, cf.getKeyUsageRules ());
-        writeOptionalString (wr, CertificateFilter.CF_EXT_KEY_USAGE_RULES, cf.getExtKeyUsageRules ());
+        writeOptionalList (wr, CertificateFilter.CF_POLICY_RULES, cf.getPolicyRules ());
+        writeOptionalList (wr, CertificateFilter.CF_KEY_USAGE_RULES, cf.getKeyUsageRules ());
+        writeOptionalList (wr, CertificateFilter.CF_EXT_KEY_USAGE_RULES, cf.getExtKeyUsageRules ());
       }
 
     static void writeOptionalString (JSONObjectWriter wr, String name, String optional_value) throws IOException
@@ -48,6 +47,14 @@ class CertificateFilterWriter
         if (optional_value != null)
           {
             wr.setString (name, optional_value);
+          }
+      }
+
+    static void writeOptionalList (JSONObjectWriter wr, String name, String[] optional_values) throws IOException
+      {
+        if (optional_values != null)
+          {
+            wr.setStringArray (name, optional_values);
           }
       }
   }

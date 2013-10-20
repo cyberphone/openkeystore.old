@@ -50,7 +50,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
         String subject_reg_ex;
         BigInteger serial_number;
         String email_reg_ex;
-        String policy_rules;
+        String[] policy_rules;
         GregorianCalendar issued_before;
         GregorianCalendar issued_after;
 
@@ -79,7 +79,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
                 subject_reg_ex = ah.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX);
                 serial_number = ah.getBigIntegerConditional (CertificateFilter.CF_SERIAL_NUMBER);
                 email_reg_ex = ah.getStringConditional (CertificateFilter.CF_EMAIL_REG_EX);
-                policy_rules = ah.getStringConditional (CertificateFilter.CF_POLICY_RULES);
+                policy_rules = ah.getListConditional (CertificateFilter.CF_POLICY_RULES);
                 issued_before = ah.getDateTimeConditional (ISSUED_BEFORE_ATTR);
                 issued_after = ah.getDateTimeConditional (ISSUED_AFTER_ATTR);
               }
@@ -118,7 +118,7 @@ public class CredentialDiscoveryRequestDecoder extends CredentialDiscoveryReques
             return email_reg_ex;
           }
         
-        public String getPolicyRules ()
+        public String[] getPolicyRules ()
           {
             return policy_rules;
           }

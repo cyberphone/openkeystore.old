@@ -24,6 +24,7 @@ import java.util.Vector;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.CertificateFilter;
+import org.webpki.crypto.KeyContainerTypes;
 
 import org.webpki.json.JSONArrayWriter;
 import org.webpki.json.JSONObjectWriter;
@@ -46,6 +47,8 @@ public class AuthenticationRequestEncoder extends ServerEncoder
 
     String[] languages;                                                        // Optional
     
+    String[] key_container_list;                                               // Optional
+    
     boolean full_path;                                                         // Optional
     
     boolean extended_cert_path_set;                                            // Optional
@@ -61,16 +64,10 @@ public class AuthenticationRequestEncoder extends ServerEncoder
     
     Date server_time;
 
-    public AuthenticationRequestEncoder (String submit_url, String abort_url)
+    public AuthenticationRequestEncoder (String submit_url, String optional_abort_url)
       {
         this.submit_url = submit_url;
-        this.abort_url = abort_url;
-      }
-
-
-    public AuthenticationRequestEncoder (String submit_url)
-      {
-        this (submit_url, null);
+        this.abort_url = optional_abort_url;
       }
 
 
@@ -95,6 +92,11 @@ public class AuthenticationRequestEncoder extends ServerEncoder
         return this;
       }
 
+    public AuthenticationRequestEncoder setKeyContainerList (KeyContainerTypes[] optional_list_of_granted_types) throws IOException
+      {
+        this.key_container_list = KeyContainerTypes.parseOptionalKeyContainerList (optional_list_of_granted_types);
+        return this;
+      }
 
     public AuthenticationRequestEncoder setID (String id)
       {
@@ -155,7 +157,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
           {
             for (CertificateFilter cf : certificate_filters)
               {
-                if (cf.matches (areresp.certificate_path, null))
+                if (cf.matches (areresp.certificate_path))
                   {
                     return;
                   }
@@ -193,6 +195,11 @@ public class AuthenticationRequestEncoder extends ServerEncoder
         if (languages != null)
           {
             wr.setStringArray (LANGUAGES_JSON, languages);
+          }
+
+        if (key_container_list != null)
+          {
+            wr.setStringArray (KeyContainerTypes.KCT_KEY_CONTAINER_LIST, key_container_list);
           }
 
         if (expires > 0)

@@ -86,7 +86,7 @@ public class SignatureRequestDecoder extends SignatureRequest
         cf.setSubjectRegEx (ah.getStringConditional (CF_SUBJECT_ATTR));
         cf.setEmailRegEx (ah.getStringConditional (CF_EMAIL_ATTR));
         cf.setSerialNumber (ah.getBigIntegerConditional (CF_SERIAL_ATTR));
-        cf.setPolicyRules (ah.getStringConditional (CF_POLICY_ATTR));
+        cf.setPolicyRules (ah.getListConditional (CF_POLICY_ATTR));
         String[] scontainers = ah.getListConditional (CF_CONTAINERS_ATTR);
   /*
         KeyContainerTypes[] containers = null;
@@ -110,8 +110,8 @@ public class SignatureRequestDecoder extends SignatureRequest
           }
         cf.setContainers (containers);
 */
-        cf.setKeyUsageRules (ah.getStringConditional (CF_KEY_USAGE_ATTR));
-        cf.setExtendedKeyUsageRules (ah.getStringConditional (CF_EXT_KEY_USAGE_ATTR));
+        cf.setKeyUsageRules (ah.getListConditional (CF_KEY_USAGE_ATTR));
+        cf.setExtendedKeyUsageRules (ah.getListConditional (CF_EXT_KEY_USAGE_ATTR));
         return cf;
       }
 

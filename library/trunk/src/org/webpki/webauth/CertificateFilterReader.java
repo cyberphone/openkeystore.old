@@ -37,10 +37,9 @@ class CertificateFilterReader
         cf.setSubjectRegEx (rd.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX));
         cf.setEmailRegEx (rd.getStringConditional (CertificateFilter.CF_EMAIL_REG_EX));
         cf.setSerialNumber (InputValidator.getBigIntegerConditional (rd, CertificateFilter.CF_SERIAL_NUMBER));
-        cf.setPolicyRules (rd.getStringConditional (CertificateFilter.CF_POLICY_RULES));
-        cf.setKeyContainerList (rd.getStringConditional (CertificateFilter.CF_KEY_CONTAINER_LIST));
-        cf.setKeyUsageRules (rd.getStringConditional (CertificateFilter.CF_KEY_USAGE_RULES));
-        cf.setExtendedKeyUsageRules (rd.getStringConditional (CertificateFilter.CF_EXT_KEY_USAGE_RULES));
+        cf.setPolicyRules (rd.getStringArrayConditional (CertificateFilter.CF_POLICY_RULES));
+        cf.setKeyUsageRules (rd.getStringArrayConditional (CertificateFilter.CF_KEY_USAGE_RULES));
+        cf.setExtendedKeyUsageRules (rd.getStringArrayConditional (CertificateFilter.CF_EXT_KEY_USAGE_RULES));
         return cf;
       }
   }

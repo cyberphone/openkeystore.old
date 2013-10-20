@@ -23,6 +23,7 @@ import java.util.Vector;
 
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.KeyContainerTypes;
 
 import org.webpki.json.JSONObjectReader;
 
@@ -48,6 +49,8 @@ public class AuthenticationRequestDecoder extends ClientDecoder
     String abort_url;
 
     String[] languages;
+    
+    LinkedHashSet<KeyContainerTypes> key_container_list;
 
     int expires;
     
@@ -62,6 +65,12 @@ public class AuthenticationRequestDecoder extends ClientDecoder
     public CertificateFilter[] getCertificateFilters ()
       {
         return certificate_filters.toArray (new CertificateFilter[0]);
+      }
+
+    
+    public LinkedHashSet<KeyContainerTypes> getOptionalKeyContainerList ()
+      {
+        return key_container_list;
       }
 
 
@@ -131,6 +140,8 @@ public class AuthenticationRequestDecoder extends ClientDecoder
         abort_url = rd.getStringConditional (ABORT_URL_JSON);
 
         languages = InputValidator.getListConditional (rd, LANGUAGES_JSON);
+        
+        key_container_list = KeyContainerTypes.getOptionalKeyContainerSet (InputValidator.getListConditional (rd, KeyContainerTypes.KCT_KEY_CONTAINER_LIST));
         
         extended_cert_path = rd.getBooleanConditional (EXTENDED_CERT_PATH_JSON);
 

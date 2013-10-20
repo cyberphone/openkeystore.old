@@ -35,10 +35,10 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Vector;
 
-import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.DeviceID;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.KeyContainerTypes;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.SymKeyVerifierInterface;
 
@@ -1205,17 +1205,17 @@ public class ServerState implements Serializable
 
     String[] languages;
 
-    public void setLanguages (String[] languages)
+    public void setLanguages (String[] optional_language_list)
       {
-        this.languages = languages;
+        this.languages = optional_language_list;
       }
 
 
-    String key_container_list;
+    String[] key_container_list;
     
-    public void setKeyContainerList (String key_container_list) throws IOException
+    public void setKeyContainerList (KeyContainerTypes[] optional_key_container_list) throws IOException
       {
-        this.key_container_list = new CertificateFilter ().setKeyContainerList (key_container_list).getKeyContainerList ();
+        this.key_container_list = KeyContainerTypes.parseOptionalKeyContainerList (optional_key_container_list);
       }
  
 

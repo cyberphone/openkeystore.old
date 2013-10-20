@@ -22,6 +22,7 @@ import java.math.BigInteger;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Vector;
 
 import java.util.regex.Pattern;
 
@@ -43,7 +44,6 @@ public class CertificateFilter
     public static final String CF_EMAIL_REG_EX          = "EmailRegEx";
     public static final String CF_SERIAL_NUMBER         = "SerialNumber";
     public static final String CF_POLICY_RULES          = "PolicyRules";
-    public static final String CF_KEY_CONTAINER_LIST    = "KeyContainerList";
     public static final String CF_KEY_USAGE_RULES       = "KeyUsageRules";
     public static final String CF_EXT_KEY_USAGE_RULES   = "ExtKeyUsageRules";
 
@@ -59,45 +59,34 @@ public class CertificateFilter
 
     private String email_reg_ex;
 
-    private String policy_rules;
+    private String[] policy_rules;
 
     private BigInteger serial_number;
 
-    private String key_usage_rules;
+    private String[] key_usage_rules;
 
-    private String ext_key_usage_rules;
-
-    private String key_container_list;
+    private String[] ext_key_usage_rules;
 
     static final Pattern oid_pattern = Pattern.compile ("[1-9][0-9]*(\\.[1-9][0-9]*)*"); 
 
+    static final char DISALLOWED = '-';
+
     static abstract class BaseRuleParser
       {
-        static final char DISALLOWED = '-';
-        static final char DELIMITER = ',';
-        
         LinkedHashMap<String,Boolean> rules = new LinkedHashMap<String,Boolean> ();
 
-        BaseRuleParser (String rule_string) throws IOException
+        BaseRuleParser (String[] rule_set) throws IOException
           {
-            if (rule_string != null)
+            if (rule_set != null)
               {
-                boolean not_ready = true;
-                do
+                if (rule_set.length == 0)
                   {
-                    int i = rule_string.indexOf (DELIMITER);
-                    if (i < 0)
-                      {
-                        i = rule_string.length ();
-                        not_ready = false;
-                      }
-                    String rule = rule_string.substring (0, i).trim ();
-                    if (not_ready)
-                      {
-                        rule_string = rule_string.substring (++i);
-                      }
+                    throw new IOException ("Empty list not allowed");
+                  }
+                for (String rule : rule_set)
+                  {
                     boolean required = true;
-                    if (treatUnspecifiedAsMatching () && rule.charAt (0) == DISALLOWED)
+                    if (rule.charAt (0) == DISALLOWED)
                       {
                         required = false;
                         rule = rule.substring (1);
@@ -107,44 +96,25 @@ public class CertificateFilter
                         throw new IOException ("Duplicate rule: " + rule);
                       }
                   }
-                while (not_ready);
               }
           }
         
-        String normalized ()
+        String[] normalized ()
           {
             if (rules.isEmpty ())
               {
                 return null;
               }
-            StringBuffer nice = new StringBuffer ();
-            boolean next = false;
+            LinkedHashSet<String> rule_set = new LinkedHashSet<String> ();
             for (String rule : rules.keySet ())
               {
-                if (next)
-                  {
-                    nice.append (DELIMITER);
-                  }
-                else
-                  {
-                    next = true;
-                  }
-                if (!rules.get (rule))
-                  {
-                    nice.append (DISALLOWED);
-                  }
-                nice.append (rule);
+                rule_set.add (rules.get (rule) ? rule : DISALLOWED + rule);
               }
-            return nice.toString ();
+            return rule_set.toArray (new String[0]);
           }
   
         abstract String parse (String argument) throws IOException;
 
-        boolean treatUnspecifiedAsMatching ()
-          {
-            return true;
-          }
-        
         boolean checkRule (String rule)
           {
             Boolean required = rules.get (rule);
@@ -156,7 +126,7 @@ public class CertificateFilter
                   }
                 return required;
               }
-            return treatUnspecifiedAsMatching ();
+            return true;
           }
   
         boolean gotAllRequired ()
@@ -174,23 +144,23 @@ public class CertificateFilter
   
     static class KeyUsageRuleParser extends BaseRuleParser
       {
-        KeyUsageRuleParser (String rule_string) throws IOException
+        KeyUsageRuleParser (String[] rule_set) throws IOException
           {
-            super (rule_string);
+            super (rule_set);
           }
   
         @Override
         String parse (String argument) throws IOException
           {
-            return KeyUsageBits.getKeyUsageBit (argument).toString ();
+            return KeyUsageBits.getKeyUsageBit (argument).getPKIXName ();
           }
       }
     
     static class OIDRuleParser extends BaseRuleParser
       {
-        OIDRuleParser (String rule_string) throws IOException
+        OIDRuleParser (String[] rule_set) throws IOException
           {
-            super (rule_string);
+            super (rule_set);
           }
   
         @Override
@@ -204,25 +174,6 @@ public class CertificateFilter
           }
       }
 
-    static class KeyContainerListParser extends BaseRuleParser
-      {
-        KeyContainerListParser (String rule_string) throws IOException
-          {
-            super (rule_string);
-          }
-  
-        @Override
-        String parse (String argument) throws IOException
-          {
-            return KeyContainerTypes.getKeyContainerType (argument).getName ();
-          }
-
-        @Override
-        boolean treatUnspecifiedAsMatching ()
-          {
-            return false;
-          }
-      }
 
     private String quote (X500Principal principal)
       {
@@ -264,7 +215,7 @@ public class CertificateFilter
       }
 
 
-    public String getPolicyRules ()
+    public String[] getPolicyRules ()
       {
         return policy_rules;
       }
@@ -275,19 +226,14 @@ public class CertificateFilter
         return serial_number;
       }
 
-    public String getKeyContainerList ()
-      {
-        return key_container_list;
-      }
 
-
-    public String getKeyUsageRules ()
+    public String[] getKeyUsageRules ()
       {
         return key_usage_rules;
       }
 
 
-    public String getExtKeyUsageRules ()
+    public String[] getExtKeyUsageRules ()
       {
         return ext_key_usage_rules;
       }
@@ -347,9 +293,9 @@ public class CertificateFilter
       }
 
 
-    public CertificateFilter setPolicyRules (String policy_rules) throws IOException
+    public CertificateFilter setPolicyRules (String[] rule_set) throws IOException
       {
-        this.policy_rules = new OIDRuleParser (policy_rules).normalized ();
+        this.policy_rules = new OIDRuleParser (rule_set).normalized ();
         return this;
       }
 
@@ -359,33 +305,26 @@ public class CertificateFilter
         return this;
       }
 
-    public CertificateFilter setKeyContainerList (String key_container_list) throws IOException
-      {
-        this.key_container_list = new KeyContainerListParser (key_container_list).normalized ();
-        return this;
-      }
-
-    public static LinkedHashSet<KeyContainerTypes> getKeyContainerList (String key_container_list) throws IOException
-      {
-        KeyContainerListParser parser = new KeyContainerListParser (key_container_list);
-        if (parser.rules.isEmpty ())
-          {
-            return null;
-          }
-        LinkedHashSet<KeyContainerTypes> containers = new LinkedHashSet<KeyContainerTypes> ();
-        for (String container : parser.rules.keySet ())
-          {
-            containers.add (KeyContainerTypes.getKeyContainerType (container));
-          }
-        return containers;
-      }
-
-    public CertificateFilter setKeyUsageRules (String key_usage_rules) throws IOException
+    public CertificateFilter setKeyUsageRules (String[] key_usage_rules) throws IOException
       {
         this.key_usage_rules = new KeyUsageRuleParser (key_usage_rules).normalized ();
         return this;
       }
 
+    public CertificateFilter setKeyUsageRules (KeyUsageBits[] required, KeyUsageBits[] disallowed) throws IOException
+      {
+        Vector<String> list = new Vector<String> ();
+        for (KeyUsageBits kub : required)
+          {
+            list.add (kub.getPKIXName ());
+          }
+        for (KeyUsageBits kub : disallowed)
+          {
+            list.add (DISALLOWED + kub.getPKIXName ());
+          }
+        this.key_usage_rules = new KeyUsageRuleParser (list.toArray (new String[0])).normalized ();
+        return this;
+      }
 
 /**
  * 
@@ -396,7 +335,7 @@ public class CertificateFilter
  * @return {@link CertificateFilter}
  * @throws IOException 
  */
-    public CertificateFilter setExtendedKeyUsageRules (String ext_key_usage_rules) throws IOException
+    public CertificateFilter setExtendedKeyUsageRules (String[] ext_key_usage_rules) throws IOException
       {
         this.ext_key_usage_rules = new OIDRuleParser (ext_key_usage_rules).normalized ();
         return this;
@@ -408,7 +347,7 @@ public class CertificateFilter
       }
 
 
-    public static boolean matchKeyUsage (String specifier, X509Certificate certificate) throws IOException
+    public static boolean matchKeyUsage (String[] specifier, X509Certificate certificate) throws IOException
       {
         if (specifier == null)
           {
@@ -420,13 +359,13 @@ public class CertificateFilter
             return false;
           }
         KeyUsageRuleParser rule_parser = new KeyUsageRuleParser (specifier);
-        for (KeyUsageBits ku : KeyUsageBits.values ())
+        for (KeyUsageBits kub : KeyUsageBits.values ())
           {
-            if (ku.ordinal () < key_usage.length)
+            if (kub.ordinal () < key_usage.length)
               {
-                if (key_usage[ku.ordinal()])
+                if (key_usage[kub.ordinal()])
                   {
-                    if (!rule_parser.checkRule (ku.toString ()))
+                    if (!rule_parser.checkRule (kub.getPKIXName ()))
                       {
                         return false;
                       }
@@ -437,7 +376,7 @@ public class CertificateFilter
       }
 
 
-    private static boolean matchExtendedKeyUsage (String specifier, X509Certificate certificate) throws IOException
+    private static boolean matchExtendedKeyUsage (String[] specifier, X509Certificate certificate) throws IOException
       {
         if (specifier == null)
           {
@@ -483,7 +422,7 @@ public class CertificateFilter
       }
 
 
-    private static boolean matchPolicy (String specifier, X509Certificate certificate) throws IOException
+    private static boolean matchPolicy (String specifier[], X509Certificate certificate) throws IOException
       {
         if (specifier == null)
           {
@@ -503,21 +442,6 @@ public class CertificateFilter
               }
           }
         return rule_parser.gotAllRequired ();
-      }
-
-
-    private static boolean matchContainers (String specifier, KeyContainerTypes actual) throws IOException
-      {
-        if (specifier == null)  // no requirement
-          {
-            return true;
-          }
-        if (actual == null)  // Requirement but unknown by the client!
-          {
-            return false;
-          }
-        KeyContainerListParser rule_parser = new KeyContainerListParser (specifier);
-        return rule_parser.checkRule (actual.getName ());
       }
 
 
@@ -571,14 +495,12 @@ public class CertificateFilter
       }
 
 
-    public boolean matches (X509Certificate[] cert_path,
-                                              KeyContainerTypes key_container) throws IOException
+    public boolean matches (X509Certificate[] cert_path) throws IOException
       {
         try
           {
             return matchSerial (serial_number, cert_path[0]) &&
                    matchFingerPrint (finger_print, cert_path) &&
-                   matchContainers (key_container_list, key_container) &&
                    matchKeyUsage (key_usage_rules, cert_path[0]) &&
                    matchExtendedKeyUsage (ext_key_usage_rules, cert_path[0]) &&
                    matchPolicy (policy_rules, cert_path[0]) &&
@@ -586,9 +508,9 @@ public class CertificateFilter
                    matchDistinguishedName (issuer_reg_ex, cert_path, true) &&
                    matchDistinguishedName (subject_reg_ex, cert_path, false);
           }
-        catch (GeneralSecurityException gse)
+        catch (GeneralSecurityException e)
           {
-            throw new IOException (gse);
+            throw new IOException (e);
           }
       }
   }
