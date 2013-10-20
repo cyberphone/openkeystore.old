@@ -34,6 +34,8 @@ import android.view.View;
 
 import android.view.inputmethod.EditorInfo;
 
+import java.io.IOException;
+
 import java.security.cert.X509Certificate;
 
 import java.security.interfaces.RSAPublicKey;
@@ -46,6 +48,7 @@ import org.webpki.android.sks.KeyAttributes;
 
 import org.webpki.android.crypto.AsymSignatureAlgorithms;
 import org.webpki.android.crypto.CertificateFilter;
+import org.webpki.android.crypto.KeyContainerTypes;
 
 import org.webpki.android.webauth.AuthenticationRequestDecoder;
 
@@ -76,6 +79,19 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
             webauth_activity.setAbortURL (webauth_activity.authentication_request.getAbortURL ());
             EnumeratedKey ek = new EnumeratedKey ();
             sks = SKSStore.createSKS (WebAuthActivity.WEBAUTH, webauth_activity, false);
+
+            ////////////////////////////////////////////////////////////////////////////////////
+            // Maybe the requester wants better protected keys...
+            ////////////////////////////////////////////////////////////////////////////////////
+            if (webauth_activity.authentication_request.getOptionalKeyContainerList () != null &&
+                !webauth_activity.authentication_request.getOptionalKeyContainerList ().contains (KeyContainerTypes.SOFTWARE))
+              {
+                throw new IOException ("The requester asked for another key container type: " + webauth_activity.authentication_request.getOptionalKeyContainerList ().toString ());
+              }
+
+            ////////////////////////////////////////////////////////////////////////////////////
+            // Passed that hurdle, now check keys for compliance...
+            ////////////////////////////////////////////////////////////////////////////////////
             while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
               {
                 Log.i (WebAuthActivity.WEBAUTH, "KeyHandle=" + ek.getKeyHandle ());
@@ -114,7 +130,7 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                     ////////////////////////////////////////////////////////////////////////////////////
                     for (CertificateFilter cf : webauth_activity.authentication_request.getCertificateFilters ())
                       {
-                        if (cf.matches (cert_path, null))
+                        if (cf.matches (cert_path))
                           {
                             did_it = true;
                             break;
