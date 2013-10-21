@@ -176,7 +176,7 @@ public class AreqEnc
 
         if (lang)
           {
-            areqenc.setLanguages (new String[]{"eng"});
+            areqenc.setPreferredLanguages (new String[]{"eng"});
           }
 
         if (fixed_server_time)

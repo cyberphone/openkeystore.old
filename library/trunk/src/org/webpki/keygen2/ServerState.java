@@ -1203,17 +1203,17 @@ public class ServerState implements Serializable
       }
 
 
-    String[] languages;
+    String[] language_list;
 
-    public void setLanguages (String[] optional_language_list)
+    public void setPreferredLanguages (String[] optional_language_list)
       {
-        this.languages = optional_language_list;
+        this.language_list = optional_language_list;
       }
 
 
     String[] key_container_list;
     
-    public void setKeyContainerList (KeyContainerTypes[] optional_key_container_list) throws IOException
+    public void setTargetKeyContainerList (KeyContainerTypes[] optional_key_container_list) throws IOException
       {
         this.key_container_list = KeyContainerTypes.parseOptionalKeyContainerList (optional_key_container_list);
       }

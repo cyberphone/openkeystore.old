@@ -992,11 +992,11 @@ public class KeyGen2Test
               }
             if (languages)
               {
-                server_state.setLanguages (new String[]{"en","de","fr"});
+                server_state.setPreferredLanguages (new String[]{"en","de","fr"});
               }
             if (key_container_list)
               {
-                server_state.setKeyContainerList (new KeyContainerTypes[]{KeyContainerTypes.SOFTWARE,KeyContainerTypes.EMBEDDED});
+                server_state.setTargetKeyContainerList (new KeyContainerTypes[]{KeyContainerTypes.SOFTWARE,KeyContainerTypes.EMBEDDED});
               }
 
             ////////////////////////////////////////////////////////////////////////////////////
@@ -2090,7 +2090,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void Languages () throws Exception
+    public void PreferredLanguages () throws Exception
       {
         Doer doer = new Doer ();
         languages = true;
@@ -2098,7 +2098,7 @@ public class KeyGen2Test
       }
 
     @Test
-    public void KeyContainerList () throws Exception
+    public void TargetKeyContainers () throws Exception
       {
         Doer doer = new Doer ();
         key_container_list = true;

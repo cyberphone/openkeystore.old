@@ -67,7 +67,7 @@ public class AreqDec
 
         s.append ("\nID=" + areq.getID () + "\n");
 
-        if (areq.getLanguages () != null) s.append ("\nLanguages=" + StringUtil.tokenList (areq.getLanguages ()) + "\n");
+        if (areq.getOptionalLanguageList () != null) s.append ("\nLanguages=" + StringUtil.tokenList (areq.getOptionalLanguageList ()) + "\n");
 
         if (signed)
           {

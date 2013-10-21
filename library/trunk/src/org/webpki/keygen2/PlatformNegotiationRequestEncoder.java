@@ -87,9 +87,9 @@ public class PlatformNegotiationRequestEncoder extends ServerEncoder
         //////////////////////////////////////////////////////////////////////////
         wr.setString (ACTION_JSON, action.getJSONName ());
 
-        if (server_state.languages != null)
+        if (server_state.language_list != null)
           {
-            wr.setStringArray (LANGUAGES_JSON, server_state.languages);
+            wr.setStringArray (PREFERREDD_LANGUAGES_JSON, server_state.language_list);
           }
 
         if (server_state.privacy_enabled_set)
@@ -99,7 +99,7 @@ public class PlatformNegotiationRequestEncoder extends ServerEncoder
 
         if (server_state.key_container_list != null)
           {
-            wr.setStringArray (KeyContainerTypes.KCT_KEY_CONTAINER_LIST, server_state.key_container_list);
+            wr.setStringArray (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS, server_state.key_container_list);
           }
 
         wr.setString (SERVER_SESSION_ID_JSON, server_session_id);

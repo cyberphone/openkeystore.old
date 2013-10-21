@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131002#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131021#";
 
     String BASIC_CAP_ALGORITHM                       = "Algorithm";
     String BASIC_CAP_CLIENT_ATTRI                    = "ClientAttribute";
@@ -136,8 +136,6 @@ public interface KeyGen2Constants
 
     String KEY_SIZES_JSON                            = "KeySizes";
 
-    String LANGUAGES_JSON                            = "Languages";
-
     String LOCKED_JSON                               = "Locked";
 
     String LOGOTYPES_JSON                            = "Logotypes";
@@ -168,6 +166,8 @@ public interface KeyGen2Constants
     
     String PLATFORM_NEGOTIATION_RESPONSE_JSON        = "PlatformNegotiationResponse";
     
+    String PREFERREDD_LANGUAGES_JSON                 = "PreferredLanguages";
+
     String PRIVACY_ENABLED_JSON                      = "PrivacyEnabled";
 
     String PRIVATE_KEY_JSON                          = "PrivateKey";

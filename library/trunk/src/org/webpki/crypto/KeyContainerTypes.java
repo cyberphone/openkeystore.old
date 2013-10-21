@@ -28,7 +28,7 @@ public enum KeyContainerTypes
     EMBEDDED ("embedded"),  // TPM, SKS, TEE, TXT
     UICC     ("uicc"),      // SIM card
     SD_CARD  ("sdcard"),
-    EXTERNAL ("external");  // Smart card, HSM
+    EXTERNAL ("external");  // Smart card, Net-HSM
     
     String name;
     
@@ -37,7 +37,7 @@ public enum KeyContainerTypes
         this.name = name;  
       }
     
-    public static final String KCT_KEY_CONTAINER_LIST    = "KeyContainerList";
+    public static final String KCT_TARGET_KEY_CONTAINERS    = "TargetKeyContainers";
 
     public String getName ()
       {

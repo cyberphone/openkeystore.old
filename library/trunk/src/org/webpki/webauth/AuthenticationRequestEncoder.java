@@ -45,7 +45,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
 
     String abort_url;                                                          // Optional
 
-    String[] languages;                                                        // Optional
+    String[] language_list;                                                        // Optional
     
     String[] key_container_list;                                               // Optional
     
@@ -92,7 +92,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
         return this;
       }
 
-    public AuthenticationRequestEncoder setKeyContainerList (KeyContainerTypes[] optional_list_of_granted_types) throws IOException
+    public AuthenticationRequestEncoder setTargetKeyContainerList (KeyContainerTypes[] optional_list_of_granted_types) throws IOException
       {
         this.key_container_list = KeyContainerTypes.parseOptionalKeyContainerList (optional_list_of_granted_types);
         return this;
@@ -112,9 +112,9 @@ public class AuthenticationRequestEncoder extends ServerEncoder
       }
 
 
-    public AuthenticationRequestEncoder setLanguages (String[] languages)
+    public AuthenticationRequestEncoder setPreferredLanguages (String[] language_list)
       {
-        this.languages = languages;
+        this.language_list = language_list;
         return this;
       }
 
@@ -125,25 +125,28 @@ public class AuthenticationRequestEncoder extends ServerEncoder
         return this;
       }
 
-    public void checkRequestResponseIntegrity (AuthenticationResponseDecoder areresp, byte[] expected_fingerprint) throws IOException
+    public void checkRequestResponseIntegrity (AuthenticationResponseDecoder authenication_response, 
+                                              byte[] expected_server_certificate_fingerprint) throws IOException
       {
-        if (expected_fingerprint != null &&
-            (areresp.server_certificate_fingerprint == null || !ArrayUtil.compare (areresp.server_certificate_fingerprint, expected_fingerprint)))
+        if (expected_server_certificate_fingerprint != null &&
+            (authenication_response.server_certificate_fingerprint == null || 
+             !ArrayUtil.compare (authenication_response.server_certificate_fingerprint,
+                                 expected_server_certificate_fingerprint)))
           {
             bad ("Server certificate fingerprint");
           }
-        if (!id.equals (areresp.id))
+        if (!id.equals (authenication_response.id))
           {
             bad ("ID attributes");
           }
-        if (!ISODateTime.formatDateTime (server_time).equals (ISODateTime.formatDateTime (areresp.server_time.getTime ())))
+        if (!ISODateTime.formatDateTime (server_time).equals (ISODateTime.formatDateTime (authenication_response.server_time.getTime ())))
           {
             bad ("ServerTime attribute");
           }
         boolean sig_alg_found = false;
         for (String sig_alg : algorithms)
           {
-            if (sig_alg.equals (areresp.signature_algorithm))
+            if (sig_alg.equals (authenication_response.signature_algorithm))
               {
                 sig_alg_found = true;
                 break;
@@ -151,13 +154,13 @@ public class AuthenticationRequestEncoder extends ServerEncoder
           }
         if (!sig_alg_found)
           {
-            bad ("Wrong signature algorithm: " + areresp.signature_algorithm);
+            bad ("Wrong signature algorithm: " + authenication_response.signature_algorithm);
           }
-        if (extended_cert_path && certificate_filters.size () > 0 && areresp.certificate_path != null)
+        if (extended_cert_path && certificate_filters.size () > 0 && authenication_response.certificate_path != null)
           {
             for (CertificateFilter cf : certificate_filters)
               {
-                if (cf.matches (areresp.certificate_path))
+                if (cf.matches (authenication_response.certificate_path))
                   {
                     return;
                   }
@@ -192,14 +195,14 @@ public class AuthenticationRequestEncoder extends ServerEncoder
             wr.setString (ABORT_URL_JSON, abort_url);
           }
 
-        if (languages != null)
+        if (language_list != null)
           {
-            wr.setStringArray (LANGUAGES_JSON, languages);
+            wr.setStringArray (LANGUAGES_JSON, language_list);
           }
 
         if (key_container_list != null)
           {
-            wr.setStringArray (KeyContainerTypes.KCT_KEY_CONTAINER_LIST, key_container_list);
+            wr.setStringArray (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS, key_container_list);
           }
 
         if (expires > 0)

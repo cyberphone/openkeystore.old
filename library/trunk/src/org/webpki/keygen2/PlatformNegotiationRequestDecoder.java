@@ -102,9 +102,9 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         action = Action.getActionFromString (rd.getString (ACTION_JSON));
 
-        languages = rd.getStringArrayConditional (LANGUAGES_JSON);
+        languages = rd.getStringArrayConditional (PREFERREDD_LANGUAGES_JSON);
 
-        key_container_list = KeyContainerTypes.getOptionalKeyContainerSet (rd.getStringArrayConditional (KeyContainerTypes.KCT_KEY_CONTAINER_LIST));
+        key_container_list = KeyContainerTypes.getOptionalKeyContainerSet (rd.getStringArrayConditional (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS));
 
         privacy_enabled = rd.getBooleanConditional (PRIVACY_ENABLED_JSON);
 

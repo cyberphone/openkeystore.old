@@ -40,12 +40,12 @@ public class CertificateFilter
   {
     public static final String CF_FINGER_PRINT          = "FingerPrint";
     public static final String CF_ISSUER_REG_EX         = "IssuerRegEx";
+    public static final String CF_SERIAL_NUMBER         = "SerialNumber";
     public static final String CF_SUBJECT_REG_EX        = "SubjectRegEx";
     public static final String CF_EMAIL_REG_EX          = "EmailRegEx";
-    public static final String CF_SERIAL_NUMBER         = "SerialNumber";
     public static final String CF_POLICY_RULES          = "PolicyRules";
     public static final String CF_KEY_USAGE_RULES       = "KeyUsageRules";
-    public static final String CF_EXT_KEY_USAGE_RULES   = "ExtKeyUsageRules";
+    public static final String CF_EXT_KEY_USAGE_RULES   = "ExtendedKeyUsageRules";
 
     // Global - Needs path expansion
 
@@ -65,7 +65,7 @@ public class CertificateFilter
 
     private String[] key_usage_rules;
 
-    private String[] ext_key_usage_rules;
+    private String[] extended_key_usage_rules;
 
     static final Pattern oid_pattern = Pattern.compile ("[1-9][0-9]*(\\.[1-9][0-9]*)*"); 
 
@@ -235,7 +235,7 @@ public class CertificateFilter
 
     public String[] getExtKeyUsageRules ()
       {
-        return ext_key_usage_rules;
+        return extended_key_usage_rules;
       }
 
 
@@ -328,16 +328,16 @@ public class CertificateFilter
 
 /**
  * 
- * @param ext_key_usage_rules The argument<br>
- *   <code>&quot;1.3.6.1.5.5.7.3.2,1.3.6.1.5.5.7.3.4&quot;</code><br>
+ * @param extended_key_usage_rules The argument<br>
+ *   <code>&quot;new String[]{"1.3.6.1.5.5.7.3.2","1.3.6.1.5.5.7.3.4"}&quot;</code><br>
  *   requires matching end-entity certificates to have exactly two extended key usages,
  *   <code>clientAuthentication</code> and <code>emailProtection</code>
  * @return {@link CertificateFilter}
  * @throws IOException 
  */
-    public CertificateFilter setExtendedKeyUsageRules (String[] ext_key_usage_rules) throws IOException
+    public CertificateFilter setExtendedKeyUsageRules (String[] extended_key_usage_rules) throws IOException
       {
-        this.ext_key_usage_rules = new OIDRuleParser (ext_key_usage_rules).normalized ();
+        this.extended_key_usage_rules = new OIDRuleParser (extended_key_usage_rules).normalized ();
         return this;
       }
 
@@ -502,7 +502,7 @@ public class CertificateFilter
             return matchSerial (serial_number, cert_path[0]) &&
                    matchFingerPrint (finger_print, cert_path) &&
                    matchKeyUsage (key_usage_rules, cert_path[0]) &&
-                   matchExtendedKeyUsage (ext_key_usage_rules, cert_path[0]) &&
+                   matchExtendedKeyUsage (extended_key_usage_rules, cert_path[0]) &&
                    matchPolicy (policy_rules, cert_path[0]) &&
                    matchEmailAddress (email_reg_ex, cert_path[0]) &&
                    matchDistinguishedName (issuer_reg_ex, cert_path, true) &&

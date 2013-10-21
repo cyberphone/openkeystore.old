@@ -63,8 +63,8 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
         boolean search_filter;
 
         String issuer_reg_ex;
-        String subject_reg_ex;
         BigInteger serial_number;
+        String subject_reg_ex;
         String email_reg_ex;
         String[] policy_rules;
         Date issued_before;
@@ -167,10 +167,6 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
             if (search_filter)
               {
                 JSONObjectWriter search_writer = wr.setObject (SEARCH_FILTER_JSON);
-                if (subject_reg_ex != null)
-                  {
-                    search_writer.setString (CertificateFilter.CF_SUBJECT_REG_EX, subject_reg_ex);
-                  }
                 if (issuer_reg_ex != null)
                   {
                     search_writer.setString (CertificateFilter.CF_ISSUER_REG_EX, issuer_reg_ex);
@@ -178,6 +174,10 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
                 if (serial_number != null)
                   {
                     search_writer.setBigInteger (CertificateFilter.CF_SERIAL_NUMBER, serial_number);
+                  }
+                if (subject_reg_ex != null)
+                  {
+                    search_writer.setString (CertificateFilter.CF_SUBJECT_REG_EX, subject_reg_ex);
                   }
                 if (email_reg_ex != null)
                   {

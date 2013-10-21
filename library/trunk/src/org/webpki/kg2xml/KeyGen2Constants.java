@@ -18,7 +18,7 @@ package org.webpki.kg2xml;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131002#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131021#";
 
     String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
 
@@ -103,7 +103,7 @@ public interface KeyGen2Constants
 
     String KEY_SIZES_ATTR                            = "KeySizes";
 
-    String LANGUAGES_ATTR                            = "Languages";
+    String PREFERRED_LANGUAGES_ATTR                  = "PreferredLanguages";
 
     String LOCKED_ATTR                               = "Locked";
 

@@ -92,7 +92,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder
       }
 
 
-    public String getAbortURL ()
+    public String getOptionalAbortURL ()
       {
         return abort_url;
       }
@@ -104,7 +104,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder
       }
 
 
-    public String[] getLanguages ()
+    public String[] getOptionalLanguageList ()
       {
         return languages;
       }
@@ -141,7 +141,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder
 
         languages = InputValidator.getListConditional (rd, LANGUAGES_JSON);
         
-        key_container_list = KeyContainerTypes.getOptionalKeyContainerSet (InputValidator.getListConditional (rd, KeyContainerTypes.KCT_KEY_CONTAINER_LIST));
+        key_container_list = KeyContainerTypes.getOptionalKeyContainerSet (InputValidator.getListConditional (rd, KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS));
         
         extended_cert_path = rd.getBooleanConditional (EXTENDED_CERT_PATH_JSON);
 

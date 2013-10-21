@@ -45,8 +45,8 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
         String id;
         
         String issuer_reg_ex;
-        String subject_reg_ex;
         BigInteger serial_number;
+        String subject_reg_ex;
         String email_reg_ex;
         String[] policy_rules;
         GregorianCalendar issued_before;
@@ -69,8 +69,8 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
                     throw new IOException ("Empty \"" + SEARCH_FILTER_JSON + "\" not allowed");
                   }
                 issuer_reg_ex = search.getStringConditional (CertificateFilter.CF_ISSUER_REG_EX);
-                subject_reg_ex = search.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX);
                 serial_number = KeyGen2Validator.getBigIntegerConditional (search, CertificateFilter.CF_SERIAL_NUMBER);
+                subject_reg_ex = search.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX);
                 email_reg_ex = search.getStringConditional (CertificateFilter.CF_EMAIL_REG_EX);
                 policy_rules = new CertificateFilter ().setPolicyRules (search.getStringArrayConditional (CertificateFilter.CF_POLICY_RULES)).getPolicyRules ();
                 issued_before = KeyGen2Validator.getDateTimeConditional (search, ISSUED_BEFORE_JSON);

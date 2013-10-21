@@ -59,11 +59,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20131002#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20131021#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20131002#"
+           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20131021#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -124,10 +124,10 @@
          <xs:attribute name="PrivacyEnabled" type="xs:boolean" use="optional"/>
 
          <!-- GUI language in preference order.  Primarily for public computers -->
-         <xs:attribute name="Languages" type="kg2:languageList" use="optional"/>
+         <xs:attribute name="PreferredLanguages" type="kg2:languageList" use="optional"/>
 
          <!-- Key container constraints in preference order -->
-         <xs:attribute name="KeyContainers" type="kg2:containerList" use="optional"/>
+         <xs:attribute name="TargetKeyContainers" type="kg2:containerList" use="optional"/>
 
          <!-- This mandatory server-generated item MUST be unique between
               key provisioning sessions but MUST remain constant among
@@ -1438,12 +1438,7 @@
          <xs:simpleType>
             <xs:list>
                <xs:simpleType>
-                  <xs:restriction base="xs:string">
-                     <xs:enumeration value="File"/>
-                     <xs:enumeration value="TPM"/>
-                     <xs:enumeration value="SIM"/>
-                     <xs:enumeration value="External"/>
-                  </xs:restriction>
+                  <xs:restriction base="xs:string"/>
                </xs:simpleType>
             </xs:list>
          </xs:simpleType>
