@@ -139,7 +139,7 @@ public class AuthenticationRequestDecoder extends ClientDecoder
 
         abort_url = rd.getStringConditional (ABORT_URL_JSON);
 
-        languages = InputValidator.getListConditional (rd, LANGUAGES_JSON);
+        languages = InputValidator.getListConditional (rd, PREFERRED_LANGUAGES_JSON);
         
         key_container_list = KeyContainerTypes.getOptionalKeyContainerSet (InputValidator.getListConditional (rd, KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS));
         

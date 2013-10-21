@@ -18,6 +18,9 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
+import java.math.BigInteger;
+import java.util.Date;
+
 import org.webpki.crypto.SignerInterface;
 
 import org.webpki.json.JSONEncoder;
@@ -60,5 +63,45 @@ abstract class ServerEncoder extends JSONEncoder
     public void setRequestSigner (SignerInterface signer) throws IOException
       {
         this.signer = signer;
+      }
+    
+    void setOptionalString (JSONObjectWriter wr, String name, String value) throws IOException
+      {
+        if (value != null)
+          {
+            wr.setString (name, value);
+          }
+      }
+
+    void setOptionalStringArray (JSONObjectWriter wr, String name, String[] values) throws IOException
+      {
+        if (values != null)
+          {
+            wr.setStringArray (name, values);
+          }
+      }
+
+    void setOptionalBigInteger (JSONObjectWriter wr, String name, BigInteger value) throws IOException
+      {
+        if (value != null)
+          {
+            wr.setBigInteger (name, value);
+          }
+      }
+
+    void setOptionalBinary (JSONObjectWriter wr, String name, byte[] value) throws IOException
+      {
+        if (value != null)
+          {
+            wr.setBinary (name, value);
+          }
+      }
+
+    void setOptionalDateTime (JSONObjectWriter wr, String name, Date date_time) throws IOException
+      {
+        if (date_time != null)
+          {
+            wr.setDateTime (name, date_time);
+          }
       }
   }

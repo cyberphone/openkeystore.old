@@ -197,7 +197,7 @@ public class AuthenticationRequestEncoder extends ServerEncoder
 
         if (language_list != null)
           {
-            wr.setStringArray (LANGUAGES_JSON, language_list);
+            wr.setStringArray (PREFERRED_LANGUAGES_JSON, language_list);
           }
 
         if (key_container_list != null)

@@ -18,9 +18,8 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.math.BigInteger;
-
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
@@ -32,6 +31,9 @@ import org.webpki.crypto.HashAlgorithms;
 import org.webpki.json.JSONObjectReader;
 import org.webpki.json.JSONSignatureDecoder;
 
+import org.webpki.sks.AppUsage;
+import org.webpki.sks.Grouping;
+
 import org.webpki.util.ArrayUtil;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
@@ -40,17 +42,14 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
   {
     private static final long serialVersionUID = 1L;
 
-    public class LookupSpecifier
+    public class LookupSpecifier extends CertificateFilter
       {
         String id;
         
-        String issuer_reg_ex;
-        BigInteger serial_number;
-        String subject_reg_ex;
-        String email_reg_ex;
-        String[] policy_rules;
         GregorianCalendar issued_before;
         GregorianCalendar issued_after;
+        Grouping grouping;
+        AppUsage app_usage;
 
         PublicKey key_management_key;
 
@@ -68,13 +67,24 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
                   {
                     throw new IOException ("Empty \"" + SEARCH_FILTER_JSON + "\" not allowed");
                   }
-                issuer_reg_ex = search.getStringConditional (CertificateFilter.CF_ISSUER_REG_EX);
-                serial_number = KeyGen2Validator.getBigIntegerConditional (search, CertificateFilter.CF_SERIAL_NUMBER);
-                subject_reg_ex = search.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX);
-                email_reg_ex = search.getStringConditional (CertificateFilter.CF_EMAIL_REG_EX);
-                policy_rules = new CertificateFilter ().setPolicyRules (search.getStringArrayConditional (CertificateFilter.CF_POLICY_RULES)).getPolicyRules ();
+                setFingerPrint (search.getBinaryConditional (CertificateFilter.CF_FINGER_PRINT));
+                setIssuerRegEx (search.getStringConditional (CertificateFilter.CF_ISSUER_REG_EX));
+                setSerialNumber (KeyGen2Validator.getBigIntegerConditional (search, CertificateFilter.CF_SERIAL_NUMBER));
+                setSubjectRegEx (search.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX));
+                setEmailRegEx (search.getStringConditional (CertificateFilter.CF_EMAIL_REG_EX));
+                setPolicyRules (search.getStringArrayConditional (CertificateFilter.CF_POLICY_RULES));
+                setKeyUsageRules (search.getStringArrayConditional (CertificateFilter.CF_KEY_USAGE_RULES));
+                setExtendedKeyUsageRules (search.getStringArrayConditional (CertificateFilter.CF_EXT_KEY_USAGE_RULES));
                 issued_before = KeyGen2Validator.getDateTimeConditional (search, ISSUED_BEFORE_JSON);
                 issued_after = KeyGen2Validator.getDateTimeConditional (search, ISSUED_AFTER_JSON);
+                if (search.hasProperty (GROUPING_JSON))
+                  {
+                    grouping = Grouping.getGroupingFromString (search.getString (GROUPING_JSON));
+                  }
+                if (search.hasProperty (APP_USAGE_JSON))
+                  {
+                    app_usage = AppUsage.getAppUsageFromString (search.getString (APP_USAGE_JSON));
+                  }
               }
             JSONSignatureDecoder signature = rd.getSignature ();
             key_management_key = signature.getPublicKey ();
@@ -95,31 +105,6 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
             return key_management_key;
           }
         
-        public String getSubjectRegEx ()
-          {
-            return subject_reg_ex;
-          }
-
-        public String getIssuerRegEx ()
-          {
-            return issuer_reg_ex;
-          }
-        
-        public BigInteger getSerialNumber ()
-          {
-            return serial_number;
-          }
-        
-        public String getEmailRegEx ()
-          {
-            return email_reg_ex;
-          }
-        
-        public String[] getPolicyRules ()
-          {
-            return policy_rules;
-          }
-        
         public GregorianCalendar getIssuedBefore ()
           {
             return issued_before;
@@ -128,6 +113,30 @@ public class CredentialDiscoveryRequestDecoder extends ClientDecoder
         public GregorianCalendar getIssuedAfter ()
           {
             return issued_after;
+          }
+
+        public Grouping getGrouping ()
+          {
+            return grouping;
+          }
+
+        public AppUsage getAppUsage ()
+          {
+            return app_usage;
+          }
+
+        @Override
+        public boolean matches (X509Certificate[] certificate_path) throws IOException
+          {
+            if (issued_before != null && issued_before.getTimeInMillis () < (certificate_path[0].getNotBefore ().getTime ()))
+              {
+                return false;
+              }
+            if (issued_after != null && issued_after.getTimeInMillis () > (certificate_path[0].getNotBefore ().getTime ()))
+              {
+                return false;
+              }
+            return super.matches (certificate_path);
           }
       }
 

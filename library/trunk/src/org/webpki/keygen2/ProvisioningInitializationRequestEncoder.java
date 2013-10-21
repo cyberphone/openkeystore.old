@@ -205,10 +205,7 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
 
         wr.setInt (SESSION_LIFE_TIME_JSON, session_life_time);
 
-        if (nonce != null)
-          {
-            wr.setBinary (NONCE_JSON, nonce);
-          }
+        setOptionalBinary (wr, NONCE_JSON, nonce);
 
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key

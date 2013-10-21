@@ -720,20 +720,18 @@ public class KeyGen2Test
                               {
                                 KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                                 X509Certificate[] cert_path = ka.getCertificatePath ();
-                                CertificateFilter cf = new CertificateFilter ();
-                                cf.setIssuerRegEx (ls.getIssuerRegEx ());
-                                cf.setSubjectRegEx (ls.getSubjectRegEx ());
-                                cf.setSerialNumber (ls.getSerialNumber ());
-                                cf.setEmailRegEx (ls.getEmailRegEx ());
-                                cf.setPolicyRules (ls.getPolicyRules ());
-                                if (!cf.matches (cert_path))
+                                if (ls.matches (cert_path))
                                   {
-                                    continue;
+                                    KeyProtectionInfo kpi = sks.getKeyProtectionInfo (ek.getKeyHandle ()); 
+                                    if ((ls.getGrouping () == null || ls.getGrouping () == kpi.getPINGrouping ()) &&
+                                        (ls.getAppUsage () == null || ls.getAppUsage () == ka.getAppUsage ()))
+                                      {
+                                        lr.addMatchingCredential (cert_path,
+                                                                  eps.getClientSessionID (),
+                                                                  eps.getServerSessionID (),
+                                                                  kpi.isPINBlocked ());
+                                      }
                                   }
-                                lr.addMatchingCredential (cert_path,
-                                                          eps.getClientSessionID (),
-                                                          eps.getServerSessionID (),
-                                                          sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());
                               }
                           }
                       }
@@ -1109,13 +1107,18 @@ public class KeyGen2Test
                           .setEmail ("jane.doe@example.com");
 
             cdre.addLookupDescriptor (server_crypto_interface.enumerateKeyManagementKeys ()[1])
-                          .setEmail ("john.doe@example.com")
-                          .setPolicyRules (new String[]{"5.4.8","-5.4.9"})
-                          .setSerialNumber (new BigInteger ("123"))
                           .setIssuedBefore (new Date (new Date ().getTime () - 100000))
                           .setIssuedAfter (new Date ())
+                          .setGrouping (Grouping.SHARED)
+                          .setAppUsage (AppUsage.UNIVERSAL)
+                          .setFingerPrint (HashAlgorithms.SHA256.digest (TEST_STRING))
+                          .setIssuer (new X500Principal ("CN=Root CA"))
+                          .setSerialNumber (new BigInteger ("123"))
                           .setSubject (new X500Principal ("CN=John,serialNumber=123"))
-                          .setIssuer (new X500Principal ("CN=Root CA"));
+                          .setEmail ("john.doe@example.com")
+                          .setPolicyRules (new String[]{"5.4.8","-5.4.9"})
+                          .setKeyUsageRules (new KeyUsageBits[]{},new KeyUsageBits[]{KeyUsageBits.KEY_CERT_SIGN})
+                          .setExtendedKeyUsageRules (new String[]{"1.3.6.1.5.5.7.3.2","1.3.6.1.5.5.7.3.4"});
             return cdre.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 

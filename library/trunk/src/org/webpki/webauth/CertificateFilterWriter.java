@@ -39,7 +39,7 @@ class CertificateFilterWriter
           }
         writeOptionalList (wr, CertificateFilter.CF_POLICY_RULES, cf.getPolicyRules ());
         writeOptionalList (wr, CertificateFilter.CF_KEY_USAGE_RULES, cf.getKeyUsageRules ());
-        writeOptionalList (wr, CertificateFilter.CF_EXT_KEY_USAGE_RULES, cf.getExtKeyUsageRules ());
+        writeOptionalList (wr, CertificateFilter.CF_EXT_KEY_USAGE_RULES, cf.getExtendedKeyUsageRules ());
       }
 
     static void writeOptionalString (JSONObjectWriter wr, String name, String optional_value) throws IOException

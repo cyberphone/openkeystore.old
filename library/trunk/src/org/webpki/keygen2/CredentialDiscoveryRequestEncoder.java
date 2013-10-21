@@ -18,16 +18,12 @@ package org.webpki.keygen2;
 
 import java.io.IOException;
 
-import java.math.BigInteger;
-
 import java.security.PublicKey;
 
 import java.security.interfaces.RSAPublicKey;
 
 import java.util.Date;
 import java.util.Vector;
-
-import javax.security.auth.x500.X500Principal;
 
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.CertificateFilter;
@@ -39,6 +35,9 @@ import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONObjectWriter;
 
 import org.webpki.keygen2.ServerState.ProtocolPhase;
+
+import org.webpki.sks.AppUsage;
+import org.webpki.sks.Grouping;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
@@ -54,7 +53,7 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
     
     String client_session_id;
 
-    public class LookupDescriptor implements AsymKeySignerInterface
+    public class LookupDescriptor extends CertificateFilter implements AsymKeySignerInterface
       {
         PublicKey key_management_key;
 
@@ -62,13 +61,10 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
         
         boolean search_filter;
 
-        String issuer_reg_ex;
-        BigInteger serial_number;
-        String subject_reg_ex;
-        String email_reg_ex;
-        String[] policy_rules;
         Date issued_before;
         Date issued_after;
+        Grouping grouping;
+        AppUsage app_usage;
         
         LookupDescriptor (PublicKey key_management_key)
           {
@@ -76,71 +72,16 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
             this.id = lookup_prefix + ++next_lookup_id_suffix;
           }
         
-        private void nullCheck (Object object) throws IOException
+        @Override
+        protected void nullCheck (Object object) throws IOException
           {
+            search_filter = true;
             if (object == null)
               {
                 bad ("Null search parameter not allowed");
               }
           }
 
-        public LookupDescriptor setSubjectRegEx (String subject_reg_ex) throws IOException
-          {
-            nullCheck (subject_reg_ex);
-            search_filter = true;
-            this.subject_reg_ex = subject_reg_ex;
-            return this;
-          }
-
-        public LookupDescriptor setSubject (X500Principal subject) throws IOException
-          {
-            nullCheck (subject);
-            return setSubjectRegEx (new CertificateFilter ().setSubject (subject).getSubjectRegEx ());
-          }
-
-        public LookupDescriptor setIssuerRegEx (String issuer_reg_ex) throws IOException
-          {
-            nullCheck (issuer_reg_ex);
-            search_filter = true;
-            this.issuer_reg_ex = issuer_reg_ex;
-            return this;
-          }
-
-        public LookupDescriptor setIssuer (X500Principal issuer) throws IOException
-          {
-            nullCheck (issuer);
-            return setIssuerRegEx (new CertificateFilter ().setIssuer (issuer).getIssuerRegEx ());
-          }
-
-        public LookupDescriptor setSerialNumber (BigInteger serial_number) throws IOException
-          {
-            nullCheck (serial_number);
-            search_filter = true;
-            this.serial_number = serial_number;
-            return this;
-          }
-
-        public LookupDescriptor setEmailRegEx (String email_reg_ex) throws IOException
-          {
-            nullCheck (email_reg_ex);
-            search_filter = true;
-            this.email_reg_ex = email_reg_ex;
-            return this;
-          }
-
-        public LookupDescriptor setEmail (String email) throws IOException
-          {
-            nullCheck (email);
-            return setEmailRegEx (new CertificateFilter ().setEmail (email).getEmailRegEx ());
-          }
-
-        public LookupDescriptor setPolicyRules (String[] policy_rules) throws IOException
-          {
-            nullCheck (policy_rules);
-            search_filter = true;
-            this.policy_rules = new CertificateFilter ().setPolicyRules (policy_rules).getPolicyRules ();
-            return this;
-          }
 
         public LookupDescriptor setIssuedBefore (Date issued_before) throws IOException
           {
@@ -158,6 +99,22 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
             return this;
           }
 
+        public LookupDescriptor setGrouping (Grouping grouping) throws IOException
+          {
+            nullCheck (grouping);
+            search_filter = true;
+            this.grouping = grouping;
+            return this;
+          }
+
+        public LookupDescriptor setAppUsage (AppUsage app_usage) throws IOException
+          {
+            nullCheck (app_usage);
+            search_filter = true;
+            this.app_usage = app_usage;
+            return this;
+          }
+
         void write (JSONObjectWriter wr) throws IOException
           {
             wr.setString (ID_JSON, id);
@@ -167,33 +124,23 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
             if (search_filter)
               {
                 JSONObjectWriter search_writer = wr.setObject (SEARCH_FILTER_JSON);
-                if (issuer_reg_ex != null)
+                setOptionalBinary (search_writer, CertificateFilter.CF_FINGER_PRINT, getFingerPrint ());
+                setOptionalString (search_writer, CertificateFilter.CF_ISSUER_REG_EX, getIssuerRegEx ());
+                setOptionalBigInteger (search_writer, CertificateFilter.CF_SERIAL_NUMBER, getSerialNumber ());
+                setOptionalString (search_writer, CertificateFilter.CF_SUBJECT_REG_EX, getSubjectRegEx ());
+                setOptionalString (search_writer, CertificateFilter.CF_EMAIL_REG_EX, getEmailRegEx ());
+                setOptionalStringArray (search_writer, CertificateFilter.CF_POLICY_RULES, getPolicyRules ());
+                setOptionalStringArray (search_writer, CertificateFilter.CF_KEY_USAGE_RULES, getKeyUsageRules ());
+                setOptionalStringArray (search_writer, CertificateFilter.CF_EXT_KEY_USAGE_RULES, getExtendedKeyUsageRules ());
+                setOptionalDateTime (search_writer, ISSUED_BEFORE_JSON, issued_before);
+                setOptionalDateTime (search_writer, ISSUED_AFTER_JSON, issued_after);
+                if (grouping != null)
                   {
-                    search_writer.setString (CertificateFilter.CF_ISSUER_REG_EX, issuer_reg_ex);
+                    search_writer.setString (GROUPING_JSON, grouping.getXMLName ());
                   }
-                if (serial_number != null)
+                if (app_usage != null)
                   {
-                    search_writer.setBigInteger (CertificateFilter.CF_SERIAL_NUMBER, serial_number);
-                  }
-                if (subject_reg_ex != null)
-                  {
-                    search_writer.setString (CertificateFilter.CF_SUBJECT_REG_EX, subject_reg_ex);
-                  }
-                if (email_reg_ex != null)
-                  {
-                    search_writer.setString (CertificateFilter.CF_EMAIL_REG_EX, email_reg_ex);
-                  }
-                if (policy_rules != null)
-                  {
-                    search_writer.setStringArray (CertificateFilter.CF_POLICY_RULES, policy_rules);
-                  }
-                if (issued_before != null)
-                  {
-                    search_writer.setDateTime (ISSUED_BEFORE_JSON, issued_before);
-                  }
-                if (issued_after != null)
-                  {
-                    search_writer.setDateTime (ISSUED_AFTER_JSON, issued_after);
+                    search_writer.setString (APP_USAGE_JSON, app_usage.getXMLName ());
                   }
               }
             JSONAsymKeySigner signer = new JSONAsymKeySigner (this);

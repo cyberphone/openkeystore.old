@@ -33,7 +33,7 @@ public class SreqDec
         if (cf.getSerialNumber () != null) s.append ("\nSerial=" + cf.getSerialNumber ());
         if (cf.getPolicyRules () != null) s.append ("\nPolicy=" + cf.getPolicyRules ());
         if (cf.getKeyUsageRules () != null) s.append ("\nKeyUsage=" + cf.getKeyUsageRules ());
-        if (cf.getExtKeyUsageRules () != null) s.append ("\nExtKeyUsage=" + cf.getExtKeyUsageRules ());
+        if (cf.getExtendedKeyUsageRules () != null) s.append ("\nExtKeyUsage=" + cf.getExtendedKeyUsageRules ());
         s.append ("\nCERTFILTER\n");
       }
 

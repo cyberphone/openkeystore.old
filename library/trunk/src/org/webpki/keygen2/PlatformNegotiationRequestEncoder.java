@@ -87,29 +87,20 @@ public class PlatformNegotiationRequestEncoder extends ServerEncoder
         //////////////////////////////////////////////////////////////////////////
         wr.setString (ACTION_JSON, action.getJSONName ());
 
-        if (server_state.language_list != null)
-          {
-            wr.setStringArray (PREFERREDD_LANGUAGES_JSON, server_state.language_list);
-          }
+        setOptionalStringArray (wr, PREFERREDD_LANGUAGES_JSON, server_state.language_list);
 
         if (server_state.privacy_enabled_set)
           {
             wr.setBoolean (PRIVACY_ENABLED_JSON, server_state.privacy_enabled);
           }
 
-        if (server_state.key_container_list != null)
-          {
-            wr.setStringArray (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS, server_state.key_container_list);
-          }
+        setOptionalStringArray (wr, KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS, server_state.key_container_list);
 
         wr.setString (SERVER_SESSION_ID_JSON, server_session_id);
 
         wr.setString (SUBMIT_URL_JSON, submit_url);
         
-        if (abort_url != null)
-          {
-            wr.setString (ABORT_URL_JSON, abort_url);
-          }
+        setOptionalString (wr, ABORT_URL_JSON, abort_url);
         
         ////////////////////////////////////////////////////////////////////////
         // Basic capabilities

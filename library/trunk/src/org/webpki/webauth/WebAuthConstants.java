@@ -44,7 +44,7 @@ public interface WebAuthConstants
 
     String ID_JSON                         = "ID";
 
-    String LANGUAGES_JSON                  = "Languages";
+    String PREFERRED_LANGUAGES_JSON        = "PreferredLanguages";
 
     String REQUESTED_CLIENT_FEATURES_JSON  = "RequestedClientFeatures";
 

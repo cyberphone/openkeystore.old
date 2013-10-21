@@ -128,7 +128,7 @@ public class SignatureRequestEncoder extends SignatureRequest
           }
 */
         writeOptionalStringList (wr, CF_KEY_USAGE_ATTR, cf.getKeyUsageRules ());
-        writeOptionalStringList (wr, CF_EXT_KEY_USAGE_ATTR, cf.getExtKeyUsageRules ());
+        writeOptionalStringList (wr, CF_EXT_KEY_USAGE_ATTR, cf.getExtendedKeyUsageRules ());
       }
     // Constructors
 
