@@ -47,7 +47,6 @@ import org.webpki.mobile.android.R;
 
 import org.webpki.android.crypto.MACAlgorithms;
 import org.webpki.android.crypto.SymKeySignerInterface;
-import org.webpki.android.crypto.CertificateFilter;
 
 import org.webpki.android.json.JSONDecoder;
 
@@ -64,6 +63,7 @@ import org.webpki.android.sks.EnumeratedProvisioningSession;
 import org.webpki.android.sks.KeyAttributes;
 import org.webpki.android.sks.AppUsage;
 import org.webpki.android.sks.Grouping;
+import org.webpki.android.sks.KeyProtectionInfo;
 import org.webpki.android.sks.PassphraseFormat;
 import org.webpki.android.sks.ProvisioningSession;
 import org.webpki.android.sks.DeviceInfo;
@@ -378,18 +378,17 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                                   {
                                     KeyAttributes ka = keygen2_activity.sks.getKeyAttributes (ek.getKeyHandle ());
                                     X509Certificate[] cert_path = ka.getCertificatePath ();
-                                    CertificateFilter cf = new CertificateFilter ();
-                                    cf.setIssuerRegEx (ls.getIssuerRegEx ());
-                                    cf.setSubjectRegEx (ls.getSubjectRegEx ());
-                                    cf.setSerialNumber (ls.getSerialNumber ());
-                                    cf.setEmailRegEx (ls.getEmailRegEx ());
-                                    cf.setPolicyRules (ls.getPolicyRules ());
-                                    if (cf.matches (cert_path))
+                                    if (ls.matches (cert_path))
                                       {
-                                        lr.addMatchingCredential (cert_path,
-                                                                  eps.getClientSessionID (),
-                                                                  eps.getServerSessionID (),
-                                                                  keygen2_activity.sks.getKeyProtectionInfo (ek.getKeyHandle ()).isPINBlocked ());
+                                        KeyProtectionInfo kpi = keygen2_activity.sks.getKeyProtectionInfo (ek.getKeyHandle ());
+                                        if ((ls.getGrouping () == null || ls.getGrouping () == kpi.getPINGrouping ()) &&
+                                            (ls.getAppUsage () == null || ls.getAppUsage () == ka.getAppUsage ()))
+                                          {
+                                            lr.addMatchingCredential (cert_path,
+                                                                      eps.getClientSessionID (),
+                                                                      eps.getServerSessionID (),
+                                                                      kpi.isPINBlocked ());
+                                          }
                                       }
                                   }
                               }
