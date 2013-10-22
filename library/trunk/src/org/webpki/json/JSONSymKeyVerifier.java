@@ -26,6 +26,8 @@ import org.webpki.crypto.SymKeyVerifierInterface;
  */
 public class JSONSymKeyVerifier extends JSONVerifier
   {
+    private static final long serialVersionUID = 1L;
+
     SymKeyVerifierInterface verifier;
     
     /**

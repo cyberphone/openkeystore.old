@@ -391,7 +391,7 @@ public class ServerState implements Serializable
 
             wr.setStringAttribute (ID_ATTR, id);
             wr.setIntAttribute (RETRY_LIMIT_ATTR, retry_limit);
-            wr.setStringAttribute (FORMAT_ATTR, format.getXMLName ());
+            wr.setStringAttribute (FORMAT_ATTR, format.getProtocolName ());
             wr.setBinaryAttribute (ENCRYPTED_PUK_ATTR, encrypted_value);
 
             MacGenerator puk_policy_mac = new MacGenerator ();
@@ -490,21 +490,21 @@ public class ServerState implements Serializable
               }
             if (grouping != null)
               {
-                wr.setStringAttribute (GROUPING_ATTR, grouping.getXMLName ());
+                wr.setStringAttribute (GROUPING_ATTR, grouping.getProtocolName ());
               }
-            wr.setStringAttribute (FORMAT_ATTR, format.getXMLName ());
+            wr.setStringAttribute (FORMAT_ATTR, format.getProtocolName ());
             if (!pattern_restrictions.isEmpty ())
               {
                 Vector<String> prs = new Vector<String> ();
                 for (PatternRestriction pr : pattern_restrictions)
                   {
-                    prs.add (pr.getXMLName ());
+                    prs.add (pr.getProtocolName ());
                   }
                 wr.setListAttribute (PATTERN_RESTRICTIONS_ATTR, prs.toArray (new String[0]));
               }
             if (input_method != null)
               {
-                wr.setStringAttribute (INPUT_METHOD_ATTR, input_method.getXMLName ());
+                wr.setStringAttribute (INPUT_METHOD_ATTR, input_method.getProtocolName ());
               }
 
             MacGenerator pin_policy_mac = new MacGenerator ();
@@ -963,17 +963,17 @@ public class ServerState implements Serializable
 
             if (biometric_protection != null)
               {
-                wr.setStringAttribute (BIOMETRIC_PROTECTION_ATTR, biometric_protection.getXMLName ());
+                wr.setStringAttribute (BIOMETRIC_PROTECTION_ATTR, biometric_protection.getProtocolName ());
               }
 
             if (export_protection != null)
               {
-                wr.setStringAttribute (EXPORT_PROTECTION_ATTR, export_protection.getXMLName ());
+                wr.setStringAttribute (EXPORT_PROTECTION_ATTR, export_protection.getProtocolName ());
               }
 
             if (delete_protection != null)
               {
-                wr.setStringAttribute (DELETE_PROTECTION_ATTR, delete_protection.getXMLName ());
+                wr.setStringAttribute (DELETE_PROTECTION_ATTR, delete_protection.getProtocolName ());
               }
 
             if (friendly_name != null)
@@ -981,7 +981,7 @@ public class ServerState implements Serializable
                 wr.setStringAttribute (FRIENDLY_NAME_ATTR, friendly_name);
               }
 
-            wr.setStringAttribute (APP_USAGE_ATTR, app_usage.getXMLName ());
+            wr.setStringAttribute (APP_USAGE_ATTR, app_usage.getProtocolName ());
 
             wr.setStringAttribute (KEY_ALGORITHM_ATTR, key_specifier.getKeyAlgorithm ().getURI ());
             if (key_specifier.getParameters () != null)

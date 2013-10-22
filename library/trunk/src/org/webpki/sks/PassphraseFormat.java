@@ -25,20 +25,20 @@ public enum PassphraseFormat
     STRING        ("string",       SecureKeyStore.PASSPHRASE_FORMAT_STRING),
     BINARY        ("binary",       SecureKeyStore.PASSPHRASE_FORMAT_BINARY);
 
-    private final String xml_name;       // As expressed in XML
+    private final String name;       // As expressed in protocols
     
-    private final byte sks_value;
+    private final byte sks_value;    // As expressed in SKS
 
-    private PassphraseFormat (String xml_name, byte sks_value)
+    private PassphraseFormat (String name, byte sks_value)
       {
-        this.xml_name = xml_name;
+        this.name = name;
         this.sks_value = sks_value;
       }
 
 
-    public String getXMLName ()
+    public String getProtocolName ()
       {
-        return xml_name;
+        return name;
       }
 
     public byte getSKSValue ()
@@ -46,16 +46,16 @@ public enum PassphraseFormat
         return sks_value;
       }
 
-    public static PassphraseFormat getPassphraseFormatFromString (String xml_name) throws IOException
+    public static PassphraseFormat getPassphraseFormatFromString (String name) throws IOException
       {
         for (PassphraseFormat type : PassphraseFormat.values ())
           {
-            if (xml_name.equals (type.xml_name))
+            if (name.equals (type.name))
               {
                 return type;
               }
           }
-        throw new IOException ("Unknown format: " + xml_name);
+        throw new IOException ("Unknown format: " + name);
       }
 
   }

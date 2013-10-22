@@ -26,6 +26,8 @@ import org.webpki.crypto.SymKeySignerInterface;
  */
 public class JSONSymKeySigner extends JSONSigner
   {
+    private static final long serialVersionUID = 1L;
+
     MACAlgorithms algorithm;
 
     SymKeySignerInterface signer;

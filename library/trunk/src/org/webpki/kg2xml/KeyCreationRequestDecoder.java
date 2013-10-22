@@ -157,9 +157,9 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
 
             format = PassphraseFormat.getPassphraseFormatFromString (ah.getString (FORMAT_ATTR));
 
-            grouping = Grouping.getGroupingFromString (ah.getStringConditional (GROUPING_ATTR, Grouping.NONE.getXMLName ()));
+            grouping = Grouping.getGroupingFromString (ah.getStringConditional (GROUPING_ATTR, Grouping.NONE.getProtocolName ()));
 
-            input_method = InputMethod.getInputMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR, InputMethod.ANY.getXMLName ()));
+            input_method = InputMethod.getInputMethodFromString (ah.getStringConditional (INPUT_METHOD_ATTR, InputMethod.ANY.getProtocolName ()));
             
             user_modifiable = ah.getBooleanConditional (USER_MODIFIABLE_ATTR, true);
 
@@ -328,12 +328,12 @@ public class KeyCreationRequestDecoder extends KeyCreationRequest
             server_seed = ah.getBinaryConditional (SERVER_SEED_ATTR);
 
             biometric_protection = BiometricProtection.getBiometricProtectionFromString (ah.getStringConditional (BIOMETRIC_PROTECTION_ATTR, 
-                                                                                         BiometricProtection.NONE.getXMLName ()));
+                                                                                         BiometricProtection.NONE.getProtocolName ()));
 
             delete_protection = DeleteProtection.getDeletePolicyFromString (ah.getStringConditional (DELETE_PROTECTION_ATTR, 
-                                                                            DeleteProtection.NONE.getXMLName ()));
+                                                                            DeleteProtection.NONE.getProtocolName ()));
             export_protection = ExportProtection.getExportPolicyFromString (ah.getStringConditional (EXPORT_PROTECTION_ATTR, 
-                                                                            ExportProtection.NON_EXPORTABLE.getXMLName ()));
+                                                                            ExportProtection.NON_EXPORTABLE.getProtocolName ()));
 
             key_specifier = new KeySpecifier (ah.getString (KEY_ALGORITHM_ATTR),
                                               ah.getBinaryConditional (KEY_PARAMETERS_ATTR));

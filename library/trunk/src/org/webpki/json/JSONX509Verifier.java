@@ -25,6 +25,8 @@ import org.webpki.crypto.VerifierInterface;
  */
 public class JSONX509Verifier extends JSONVerifier
   {
+    private static final long serialVersionUID = 1L;
+
     VerifierInterface verifier;
 
     /**

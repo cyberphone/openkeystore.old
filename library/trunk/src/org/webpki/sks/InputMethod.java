@@ -24,20 +24,20 @@ public enum InputMethod
     PROGRAMMATIC  ("programmatic", SecureKeyStore.INPUT_METHOD_PROGRAMMATIC),
     TRUSTED_GUI   ("trusted-gui",  SecureKeyStore.INPUT_METHOD_TRUSTED_GUI);
 
-    private final String xml_name;       // As expressed in XML
+    private final String name;       // As expressed in protocols
 
-    private final byte sks_value;        // As expressed in SKS
+    private final byte sks_value;    // As expressed in SKS
 
-    private InputMethod (String xml_name, byte sks_value)
+    private InputMethod (String name, byte sks_value)
       {
-        this.xml_name = xml_name;
+        this.name = name;
         this.sks_value = sks_value;
       }
 
 
-    public String getXMLName ()
+    public String getProtocolName ()
       {
-        return xml_name;
+        return name;
       }
 
     
@@ -47,15 +47,15 @@ public enum InputMethod
       }
 
 
-    public static InputMethod getInputMethodFromString (String xml_name) throws IOException
+    public static InputMethod getInputMethodFromString (String name) throws IOException
       {
         for (InputMethod type : InputMethod.values ())
           {
-            if (xml_name.equals (type.xml_name))
+            if (name.equals (type.name))
               {
                 return type;
               }
           }
-        throw new IOException ("Unknown method: " + xml_name);
+        throw new IOException ("Unknown method: " + name);
       }
   }

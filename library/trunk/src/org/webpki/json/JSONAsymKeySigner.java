@@ -29,6 +29,8 @@ import org.webpki.crypto.KeyAlgorithms;
  */
 public class JSONAsymKeySigner extends JSONSigner
   {
+    private static final long serialVersionUID = 1L;
+
     AsymSignatureAlgorithms algorithm;
 
     AsymKeySignerInterface signer;

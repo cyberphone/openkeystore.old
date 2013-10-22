@@ -25,20 +25,20 @@ public enum BiometricProtection
     COMBINED         ("combined",    SecureKeyStore.BIOMETRIC_PROTECTION_COMBINED),
     EXCLUSIVE        ("exclusive",   SecureKeyStore.BIOMETRIC_PROTECTION_EXCLUSIVE);
 
-    private final String xml_name;       // As expressed in XML
+    private final String name;       // As expressed in protocols
     
-    private final byte sks_value;        // As expressed in SKS
+    private final byte sks_value;    // As expressed in SKS
 
-    private BiometricProtection (String xml_name, byte sks_value)
+    private BiometricProtection (String name, byte sks_value)
       {
-        this.xml_name = xml_name;
+        this.name = name;
         this.sks_value = sks_value;
       }
 
 
-    public String getXMLName ()
+    public String getProtocolName ()
       {
-        return xml_name;
+        return name;
       }
     
 
@@ -48,16 +48,16 @@ public enum BiometricProtection
       }
 
 
-    public static BiometricProtection getBiometricProtectionFromString (String xml_name) throws IOException
+    public static BiometricProtection getBiometricProtectionFromString (String name) throws IOException
       {
         for (BiometricProtection biom_type : BiometricProtection.values ())
           {
-            if (xml_name.equals (biom_type.xml_name))
+            if (name.equals (biom_type.name))
               {
                 return biom_type;
               }
           }
-        throw new IOException ("Unknown biometric type: " + xml_name);
+        throw new IOException ("Unknown biometric type: " + name);
       }
 
   }

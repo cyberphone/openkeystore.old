@@ -425,7 +425,7 @@ public class ServerState implements Serializable
           {
             wr.setString (ID_JSON, id);
             wr.setInt (RETRY_LIMIT_JSON, retry_limit);
-            wr.setString (FORMAT_JSON, format.getXMLName ());
+            wr.setString (FORMAT_JSON, format.getProtocolName ());
             wr.setBinary (ENCRYPTED_PUK_JSON, encrypted_value);
 
             MacGenerator puk_policy_mac = new MacGenerator ();
@@ -524,21 +524,21 @@ public class ServerState implements Serializable
               }
             if (grouping != null)
               {
-                wr.setString (GROUPING_JSON, grouping.getXMLName ());
+                wr.setString (GROUPING_JSON, grouping.getProtocolName ());
               }
-            wr.setString (FORMAT_JSON, format.getXMLName ());
+            wr.setString (FORMAT_JSON, format.getProtocolName ());
             if (!pattern_restrictions.isEmpty ())
               {
                 Vector<String> prs = new Vector<String> ();
                 for (PatternRestriction pr : pattern_restrictions)
                   {
-                    prs.add (pr.getXMLName ());
+                    prs.add (pr.getProtocolName ());
                   }
                 wr.setStringArray (PATTERN_RESTRICTIONS_JSON, prs.toArray (new String[0]));
               }
             if (input_method != null)
               {
-                wr.setString (INPUT_METHOD_JSON, input_method.getXMLName ());
+                wr.setString (INPUT_METHOD_JSON, input_method.getProtocolName ());
               }
 
             MacGenerator pin_policy_mac = new MacGenerator ();
@@ -995,17 +995,17 @@ public class ServerState implements Serializable
 
             if (biometric_protection != null)
               {
-                wr.setString (BIOMETRIC_PROTECTION_JSON, biometric_protection.getXMLName ());
+                wr.setString (BIOMETRIC_PROTECTION_JSON, biometric_protection.getProtocolName ());
               }
 
             if (export_protection != null)
               {
-                wr.setString (EXPORT_PROTECTION_JSON, export_protection.getXMLName ());
+                wr.setString (EXPORT_PROTECTION_JSON, export_protection.getProtocolName ());
               }
 
             if (delete_protection != null)
               {
-                wr.setString (DELETE_PROTECTION_JSON, delete_protection.getXMLName ());
+                wr.setString (DELETE_PROTECTION_JSON, delete_protection.getProtocolName ());
               }
 
             if (friendly_name != null)
@@ -1013,7 +1013,7 @@ public class ServerState implements Serializable
                 wr.setString (FRIENDLY_NAME_JSON, friendly_name);
               }
 
-            wr.setString (APP_USAGE_JSON, app_usage.getXMLName ());
+            wr.setString (APP_USAGE_JSON, app_usage.getProtocolName ());
 
             wr.setString (KEY_ALGORITHM_JSON, key_specifier.getKeyAlgorithm ().getURI ());
             if (key_specifier.getParameters () != null)

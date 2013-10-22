@@ -58,6 +58,7 @@ public class Test
 
     static JSONDecoderCache cache = new JSONDecoderCache ();
     
+    @SuppressWarnings("serial")
     public static class Reader extends JSONDecoder
       {
         void test (boolean ok) throws IOException
@@ -95,6 +96,7 @@ public class Test
           }
       }
 
+    @SuppressWarnings("serial")
     static class Writer extends JSONEncoder
       {
         @Override
@@ -120,6 +122,7 @@ public class Test
           }
       }
     
+    @SuppressWarnings("serial")
     public static class ESC extends JSONDecoder
       {
         @Override

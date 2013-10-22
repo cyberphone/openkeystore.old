@@ -25,20 +25,20 @@ public enum Grouping
     SIGNATURE_PLUS_STANDARD  ("signature+standard", SecureKeyStore.PIN_GROUPING_SIGN_PLUS_STD),
     UNIQUE                   ("unique",             SecureKeyStore.PIN_GROUPING_UNIQUE);
 
-    private final String xml_name;       // As expressed in XML
+    private final String name;       // As expressed in protocols
     
-    private final byte sks_value;        // As expressed in SKS
+    private final byte sks_value;    // As expressed in SKS
 
-    private Grouping (String xml_name, byte sks_value)
+    private Grouping (String name, byte sks_value)
       {
-        this.xml_name = xml_name;
+        this.name = name;
         this.sks_value = sks_value;
       }
 
 
-    public String getXMLName ()
+    public String getProtocolName ()
       {
-        return xml_name;
+        return name;
       }
 
     
@@ -48,16 +48,16 @@ public enum Grouping
       }
 
 
-    public static Grouping getGroupingFromString (String xml_name) throws IOException
+    public static Grouping getGroupingFromString (String name) throws IOException
       {
         for (Grouping option : Grouping.values ())
           {
-            if (xml_name.equals (option.xml_name))
+            if (name.equals (option.name))
               {
                 return option;
               }
           }
-        throw new IOException ("Unknown group: " + xml_name);
+        throw new IOException ("Unknown group: " + name);
       }
 
   }

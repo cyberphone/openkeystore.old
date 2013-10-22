@@ -48,7 +48,7 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
                         "AES/CBC/PKCS5Padding", 0,  true,  false, true,   false);
     
 
-    private final String         uri;             // As expressed in XML and JSON
+    private final String         uri;             // As expressed in protocols
     private final String         jcename;         // As expressed for JCE
     private final int            key_length;      // 0 => 16, 24 and 32 are ok
     private final boolean        iv_mode;         // CBC

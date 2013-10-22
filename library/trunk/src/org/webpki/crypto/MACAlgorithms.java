@@ -31,7 +31,7 @@ public enum MACAlgorithms implements SignatureAlgorithms
     HMAC_SHA384 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", "HmacSHA384", false),
     HMAC_SHA512 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", "HmacSHA512", false);
 
-    private final String uri;       // As expressed in XML and JSON
+    private final String uri;       // As expressed in protocols
     private final String jcename;   // As expressed for JCE
     private boolean sks_mandatory;  // If required in SKS
 

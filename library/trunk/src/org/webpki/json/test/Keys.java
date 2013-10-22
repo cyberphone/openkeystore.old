@@ -59,6 +59,7 @@ public class Keys
         Sign.installOptionalBCProvider ();
       }
 
+    @SuppressWarnings("serial")
     public static class Reader extends JSONDecoder
       {
         PublicKey public_key;
@@ -81,6 +82,7 @@ public class Keys
           }
       }
 
+    @SuppressWarnings("serial")
     static class Writer extends JSONEncoder
       {
         PublicKey public_key;

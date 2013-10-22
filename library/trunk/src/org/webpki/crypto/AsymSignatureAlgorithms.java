@@ -51,7 +51,7 @@ public enum AsymSignatureAlgorithms implements SignatureAlgorithms
                   "1.2.840.10045.4.3.4",   "SHA512withECDSA", HashAlgorithms.SHA512, false, false);
 
     private final String oid;       // As expressed in OIDs
-    private final String uri;       // As expressed in XML and JSON messages
+    private final String uri;       // As expressed in protocols
     private final String jcename;   // As expressed for JCE
     private final HashAlgorithms digest_alg;
     private boolean sks_mandatory;  // If required in SKS

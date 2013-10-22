@@ -276,9 +276,9 @@ public enum KeyAlgorithms implements SKSAlgorithms
                      (byte)0xCD, (byte)0xC9, (byte)0x45, (byte)0xF3, (byte)0x21, (byte)0xC5, (byte)0xCF, (byte)0x41,
                      (byte)0x17, (byte)0xF3, (byte)0x3A, (byte)0xB4});
 
-    private final String uri;                        // As expressed in XML and JSON
+    private final String uri;                        // As expressed in protocols
     private final String jcename;                    // As expressed for JCE
-    private final int length_in_bits;
+    private final int length_in_bits;                // You guessed it :-)
     private final AsymSignatureAlgorithms pref_alg;  // A sort of a "guide"
     private final boolean has_parameters;            // Parameter value required?
     private final boolean sks_mandatory;             // If required in SKS

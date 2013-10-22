@@ -25,20 +25,20 @@ public enum ExportProtection
     PUK             ("puk",            SecureKeyStore.EXPORT_DELETE_PROTECTION_PUK),
     NON_EXPORTABLE  ("non-exportable", SecureKeyStore.EXPORT_DELETE_PROTECTION_NOT_ALLOWED);
 
-    private final String xml_name;       // As expressed in XML
+    private final String name;         // As expressed in protocols
     
-    private final byte sks_value;        // As expressed in SKS
+    private final byte sks_value;      // As expressed in SKS
 
-    private ExportProtection (String xml_name, byte sks_value)
+    private ExportProtection (String name, byte sks_value)
       {
-        this.xml_name = xml_name;
+        this.name = name;
         this.sks_value = sks_value;
       }
 
 
-    public String getXMLName ()
+    public String getProtocolName ()
       {
-        return xml_name;
+        return name;
       }
     
 
@@ -48,16 +48,16 @@ public enum ExportProtection
       }
 
 
-    public static ExportProtection getExportPolicyFromString (String xml_name) throws IOException
+    public static ExportProtection getExportPolicyFromString (String name) throws IOException
       {
         for (ExportProtection exp_pol : ExportProtection.values ())
           {
-            if (xml_name.equals (exp_pol.xml_name))
+            if (name.equals (exp_pol.name))
               {
                 return exp_pol;
               }
           }
-        throw new IOException ("Unknown export policy: " + xml_name);
+        throw new IOException ("Unknown export policy: " + name);
       }
 
   }

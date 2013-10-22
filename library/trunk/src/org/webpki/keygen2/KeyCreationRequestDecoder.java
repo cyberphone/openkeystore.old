@@ -179,9 +179,9 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
             format = getPassphraseFormat (rd);
 
-            grouping = Grouping.getGroupingFromString (rd.getStringConditional (GROUPING_JSON, Grouping.NONE.getXMLName ()));
+            grouping = Grouping.getGroupingFromString (rd.getStringConditional (GROUPING_JSON, Grouping.NONE.getProtocolName ()));
 
-            input_method = InputMethod.getInputMethodFromString (rd.getStringConditional (INPUT_METHOD_JSON, InputMethod.ANY.getXMLName ()));
+            input_method = InputMethod.getInputMethodFromString (rd.getStringConditional (INPUT_METHOD_JSON, InputMethod.ANY.getProtocolName ()));
             
             read_user_modifiable = rd.hasProperty (USER_MODIFIABLE_JSON);
             user_modifiable = rd.getBooleanConditional (USER_MODIFIABLE_JSON, false);
@@ -342,13 +342,13 @@ public class KeyCreationRequestDecoder extends ClientDecoder
             enable_pin_caching = rd.getBooleanConditional (ENABLE_PIN_CACHING_JSON);
             
             biometric_protection = BiometricProtection.getBiometricProtectionFromString (rd.getStringConditional (BIOMETRIC_PROTECTION_JSON, 
-                                                                                         BiometricProtection.NONE.getXMLName ()));
+                                                                                         BiometricProtection.NONE.getProtocolName ()));
 
             delete_protection = DeleteProtection.getDeletePolicyFromString (rd.getStringConditional (DELETE_PROTECTION_JSON, 
-                                                                            DeleteProtection.NONE.getXMLName ()));
+                                                                            DeleteProtection.NONE.getProtocolName ()));
 
             export_protection = ExportProtection.getExportPolicyFromString (rd.getStringConditional (EXPORT_PROTECTION_JSON, 
-                                                                            ExportProtection.NON_EXPORTABLE.getXMLName ()));
+                                                                            ExportProtection.NON_EXPORTABLE.getProtocolName ()));
 
             friendly_name = rd.getStringConditional (FRIENDLY_NAME_JSON);
 

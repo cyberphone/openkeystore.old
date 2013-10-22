@@ -359,11 +359,11 @@ public class KeyGen2Test
                 grouping = Grouping.NONE;
               }
             xml.append ("<" + KeyGen2Constants.PIN_POLICY_SPECIFIER_ELEM + " Format=\"")
-               .append (format.getXMLName ())
+               .append (format.getProtocolName ())
                .append ("\" ID=\"PIN.")
                .append (++pin_id)
                .append ("\" Grouping=\"")
-               .append (grouping.getXMLName ())
+               .append (grouping.getProtocolName ())
                .append ("\"");
             if (patterns != null)
               {
@@ -373,7 +373,7 @@ public class KeyGen2Test
                   {
                     xml.append (blank);
                     blank = " ";
-                    xml.append (pattern.getXMLName ());
+                    xml.append (pattern.getProtocolName ());
                   }
                 xml.append ("\"");
               }
@@ -393,7 +393,7 @@ public class KeyGen2Test
         KeyCreator addKey (AppUsage app_usage)
           {
             xml.append ("<" + KeyGen2Constants.KEY_ENTRY_SPECIFIER_ELEM + " AppUsage=\"")
-               .append (app_usage.getXMLName ())
+               .append (app_usage.getProtocolName ())
                .append ("\" ID=\"Key.")
                .append (++key_id)
                .append ("\" KeyAlgorithm=\"http://xmlns.webpki.org/sks/algorithm#rsa2048\" MAC=\"Jrqigi79Yw6SoLobsBA5S8b74gTKrIJPh3tQRKci33Y=\"/>");

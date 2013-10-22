@@ -41,6 +41,8 @@ import org.webpki.crypto.KeyAlgorithms;
  */
 public class JSONSignatureEncoder extends JSONSignature
   {
+    private static final long serialVersionUID = 1L;
+
     static void writeCryptoBinary (JSONObjectWriter wr, BigInteger value, String name) throws IOException
       {
         byte[] crypto_binary = value.toByteArray ();

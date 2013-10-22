@@ -28,20 +28,20 @@ public enum PatternRestriction
     MISSING_GROUP   ("missing-group",  SecureKeyStore.PIN_PATTERN_MISSING_GROUP);   // The PIN must be "alphanumeric" and contain a mix of
                                                                                     // letters, digits and punctuation characters 
 
-    private final String xml_name;       // As expressed in XML
+    private final String name;         // As expressed in protocols
     
-    private final byte sks_mask;         // As expressed in SKS
+    private final byte sks_mask;       // As expressed in SKS
 
-    private PatternRestriction (String xml_name, byte sks_mask)
+    private PatternRestriction (String name, byte sks_mask)
       {
-        this.xml_name = xml_name;
+        this.name = name;
         this.sks_mask = sks_mask;
       }
 
 
-    public String getXMLName ()
+    public String getProtocolName ()
       {
-        return xml_name;
+        return name;
       }
     
     
@@ -51,16 +51,16 @@ public enum PatternRestriction
       }
 
 
-    public static PatternRestriction getPatternRestrictionFromString (String xml_name) throws IOException
+    public static PatternRestriction getPatternRestrictionFromString (String name) throws IOException
       {
         for (PatternRestriction restriction : PatternRestriction.values ())
           {
-            if (xml_name.equals (restriction.xml_name))
+            if (name.equals (restriction.name))
               {
                 return restriction;
               }
           }
-        throw new IOException ("Unknown pattern: " + xml_name);
+        throw new IOException ("Unknown pattern: " + name);
       }
     
 

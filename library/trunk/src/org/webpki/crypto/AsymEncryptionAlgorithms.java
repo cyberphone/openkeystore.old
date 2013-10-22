@@ -35,7 +35,7 @@ public enum AsymEncryptionAlgorithms implements EncryptionAlgorithms
                             "RSA/ECB/NoPadding");
 
     private final String         oid;             // As expressed in OIDs
-    private final String         uri;             // As expressed in XML and JSON
+    private final String         uri;             // As expressed in protocols
     private final String         jcename;         // As expressed for JCE
 
     private AsymEncryptionAlgorithms (String oid, String uri, String jcename)

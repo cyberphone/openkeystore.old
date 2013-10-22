@@ -29,7 +29,7 @@ public enum HashAlgorithms
     SHA384 ("http://www.w3.org/2001/04/xmldsig-more#sha384", "2.16.840.1.101.3.4.2.2", "SHA-384"),
     SHA512 ("http://www.w3.org/2001/04/xmlenc#sha512",       "2.16.840.1.101.3.4.2.3", "SHA-512");
 
-    private final String uri;       // As expressed in XML messages
+    private final String uri;       // As expressed in protocols
     private final String oid;       // As expressed in ASN.1 messages
     private final String jcename;   // As expressed for JCE
 

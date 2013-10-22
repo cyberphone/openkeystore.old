@@ -25,20 +25,20 @@ public enum AppUsage
     ENCRYPTION      ("encryption",     SecureKeyStore.APP_USAGE_ENCRYPTION),
     UNIVERSAL       ("universal",      SecureKeyStore.APP_USAGE_UNIVERSAL);
 
-    private final String xml_name;       // As expressed in XML
+    private final String name;         // As expressed in protocols
     
-    private final byte sks_value;        // As expressed in SKS
+    private final byte sks_value;      // As expressed in SKS
     
-    private AppUsage (String xml_name, byte sks_value)
+    private AppUsage (String name, byte sks_value)
       {
-        this.xml_name = xml_name;
+        this.name = name;
         this.sks_value = sks_value;
       }
 
 
-    public String getXMLName ()
+    public String getProtocolName ()
       {
-        return xml_name;
+        return name;
       }
     
 
@@ -48,15 +48,15 @@ public enum AppUsage
       }
 
 
-    public static AppUsage getAppUsageFromString (String xml_name) throws IOException
+    public static AppUsage getAppUsageFromString (String name) throws IOException
       {
         for (AppUsage key_type : AppUsage.values ())
           {
-            if (xml_name.equals (key_type.xml_name))
+            if (name.equals (key_type.name))
               {
                 return key_type;
               }
           }
-        throw new IOException ("Unknown key usage type: " + xml_name);
+        throw new IOException ("Unknown key usage type: " + name);
       }
   }

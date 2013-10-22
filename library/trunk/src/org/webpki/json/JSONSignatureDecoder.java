@@ -44,6 +44,8 @@ import org.webpki.crypto.KeyAlgorithms;
  */
 public class JSONSignatureDecoder extends JSONSignature
   {
+    private static final long serialVersionUID = 1L;
+
     SignatureAlgorithms algorithm;
     
     String algorithm_string;

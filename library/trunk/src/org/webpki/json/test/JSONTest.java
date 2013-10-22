@@ -82,6 +82,7 @@ public class JSONTest
         Security.insertProviderAt (new BouncyCastleProvider(), 1);
       }
 
+    @SuppressWarnings("serial")
     public static class Reader extends JSONDecoder
       {
         void test (boolean ok) throws IOException
@@ -119,6 +120,7 @@ public class JSONTest
           }
       }
 
+    @SuppressWarnings("serial")
     static class Writer extends JSONEncoder
       {
         @Override
@@ -144,6 +146,7 @@ public class JSONTest
           }
       }
     
+    @SuppressWarnings("serial")
     public static class ESC extends JSONDecoder
       {
         String escape;

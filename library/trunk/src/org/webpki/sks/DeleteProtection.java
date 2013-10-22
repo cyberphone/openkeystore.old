@@ -25,20 +25,20 @@ public enum DeleteProtection
     PUK            ("puk",           SecureKeyStore.EXPORT_DELETE_PROTECTION_PUK),
     NON_DELETABLE  ("non-deletable", SecureKeyStore.EXPORT_DELETE_PROTECTION_NOT_ALLOWED);
 
-    private final String xml_name;       // As expressed in XML
+    private final String name;       // As expressed in protocols
     
-    private final byte sks_value;        // As expressed in SKS
+    private final byte sks_value;    // As expressed in SKS
 
-    private DeleteProtection (String xml_name, byte sks_value)
+    private DeleteProtection (String name, byte sks_value)
       {
-        this.xml_name = xml_name;
+        this.name = name;
         this.sks_value = sks_value;
       }
 
 
-    public String getXMLName ()
+    public String getProtocolName ()
       {
-        return xml_name;
+        return name;
       }
     
 
@@ -48,16 +48,16 @@ public enum DeleteProtection
       }
 
 
-    public static DeleteProtection getDeletePolicyFromString (String xml_name) throws IOException
+    public static DeleteProtection getDeletePolicyFromString (String name) throws IOException
       {
         for (DeleteProtection del_pol : DeleteProtection.values ())
           {
-            if (xml_name.equals (del_pol.xml_name))
+            if (name.equals (del_pol.name))
               {
                 return del_pol;
               }
           }
-        throw new IOException ("Unknown delete policy: " + xml_name);
+        throw new IOException ("Unknown delete policy: " + name);
       }
 
   }

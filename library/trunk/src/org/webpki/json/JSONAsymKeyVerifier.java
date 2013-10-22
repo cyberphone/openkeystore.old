@@ -25,6 +25,8 @@ import java.security.PublicKey;
  */
 public class JSONAsymKeyVerifier extends JSONVerifier
   {
+    private static final long serialVersionUID = 1L;
+
     PublicKey public_key;
 
     /**

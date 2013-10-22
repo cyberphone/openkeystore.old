@@ -136,11 +136,11 @@ public class CredentialDiscoveryRequestEncoder extends ServerEncoder
                 setOptionalDateTime (search_writer, ISSUED_AFTER_JSON, issued_after);
                 if (grouping != null)
                   {
-                    search_writer.setString (GROUPING_JSON, grouping.getXMLName ());
+                    search_writer.setString (GROUPING_JSON, grouping.getProtocolName ());
                   }
                 if (app_usage != null)
                   {
-                    search_writer.setString (APP_USAGE_JSON, app_usage.getXMLName ());
+                    search_writer.setString (APP_USAGE_JSON, app_usage.getProtocolName ());
                   }
               }
             JSONAsymKeySigner signer = new JSONAsymKeySigner (this);

@@ -364,11 +364,11 @@ public class KeyGen2Test
                 grouping = Grouping.NONE;
               }
             json.append ("\"" + KeyGen2Constants.PIN_POLICY_SPECIFIERS_JSON + "\":[{ \"Format\" :\"")
-               .append (format.getXMLName ())
+               .append (format.getProtocolName ())
                .append ("\", \"ID\":\"PIN.")
                .append (++pin_id)
                .append ("\", \"Grouping\" :\"")
-               .append (grouping.getXMLName ())
+               .append (grouping.getProtocolName ())
                .append ("\",");
             if (patterns != null)
               {
@@ -378,7 +378,7 @@ public class KeyGen2Test
                   {
                     json.append (blank);
                     blank = ",";
-                    json.append ('"').append (pattern.getXMLName ()).append ('"');
+                    json.append ('"').append (pattern.getProtocolName ()).append ('"');
                   }
                 json.append ("],");
               }
@@ -394,7 +394,7 @@ public class KeyGen2Test
               }
             if (!key_spec) json.append (',');
             json.append ("{ \"AppUsage\":\"")
-               .append (app_usage.getXMLName ())
+               .append (app_usage.getProtocolName ())
                .append ("\", \"ID\":\"Key.")
                .append (++key_id)
                .append ("\", \"KeyAlgorithm\":\"http://xmlns.webpki.org/sks/algorithm#rsa2048\", \"MAC\":\"Jrqigi79Yw6SoLobsBA5S8b74gTKrIJPh3tQRKci33Y=\"}");
