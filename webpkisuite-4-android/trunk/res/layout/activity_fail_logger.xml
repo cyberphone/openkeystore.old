@@ -6,7 +6,6 @@
     <WebView
         android:id="@+id/failedData"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_marginTop="@dimen/padding_medium"/>
+        android:layout_height="fill_parent"/>
 
 </RelativeLayout>
