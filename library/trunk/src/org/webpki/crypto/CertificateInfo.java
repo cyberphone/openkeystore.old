@@ -359,8 +359,7 @@ public class CertificateInfo
 
     public String getPublicKeyAlgorithm () throws IOException
       {
-        String alg = certificate.getPublicKey ().getAlgorithm ();
-        return alg.equals ("EC") ? "ECC" : alg;
+        return certificate.getPublicKey ().getAlgorithm ();
       }
 
 
