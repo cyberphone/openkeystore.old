@@ -74,8 +74,8 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
         try
           {
             webauth_activity.getProtocolInvocationData ();
-            webauth_activity.addSchema (AuthenticationRequestDecoder.class);
-            webauth_activity.authentication_request = (AuthenticationRequestDecoder) webauth_activity.parseXML (webauth_activity.initial_request_data);
+            webauth_activity.addDecoder (AuthenticationRequestDecoder.class);
+            webauth_activity.authentication_request = (AuthenticationRequestDecoder) webauth_activity.parseJSON (webauth_activity.initial_request_data);
             webauth_activity.setAbortURL (webauth_activity.authentication_request.getOptionalAbortURL ());
             EnumeratedKey ek = new EnumeratedKey ();
             sks = SKSStore.createSKS (WebAuthActivity.WEBAUTH, webauth_activity, false);

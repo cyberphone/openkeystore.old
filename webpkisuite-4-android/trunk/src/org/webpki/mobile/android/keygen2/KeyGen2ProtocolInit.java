@@ -46,12 +46,12 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
         try
           {
             keygen2_activity.getProtocolInvocationData ();
-            keygen2_activity.addSchema (PlatformNegotiationRequestDecoder.class);
-            keygen2_activity.addSchema (ProvisioningInitializationRequestDecoder.class);
-            keygen2_activity.addSchema (KeyCreationRequestDecoder.class);
-            keygen2_activity.addSchema (CredentialDiscoveryRequestDecoder.class);
-            keygen2_activity.addSchema (ProvisioningFinalizationRequestDecoder.class);
-            keygen2_activity.platform_request = (PlatformNegotiationRequestDecoder) keygen2_activity.parseXML (keygen2_activity.initial_request_data);
+            keygen2_activity.addDecoder (PlatformNegotiationRequestDecoder.class);
+            keygen2_activity.addDecoder (ProvisioningInitializationRequestDecoder.class);
+            keygen2_activity.addDecoder (KeyCreationRequestDecoder.class);
+            keygen2_activity.addDecoder (CredentialDiscoveryRequestDecoder.class);
+            keygen2_activity.addDecoder (ProvisioningFinalizationRequestDecoder.class);
+            keygen2_activity.platform_request = (PlatformNegotiationRequestDecoder) keygen2_activity.parseJSON (keygen2_activity.initial_request_data);
             keygen2_activity.setAbortURL (keygen2_activity.platform_request.getOptionalAbortURL ());
             return true;
           }

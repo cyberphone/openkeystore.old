@@ -164,7 +164,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                   }
                 else if (res.unique_error)
                   {
-                    error = "PINs for " + upd.getAppUsage ().getXMLName () + " and " + res.unique_error_app_usage.getXMLName () + " must not be equal";
+                    error = "PINs for " + upd.getAppUsage ().getProtocolName () + " and " + res.unique_error_app_usage.getProtocolName () + " must not be equal";
                   }
                 pin_err.setText (error);
               }
@@ -207,7 +207,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                   {
                     if (upd.getAppUsage () != AppUsage.UNIVERSAL)
                       {
-                        lead_text.append (upd.getAppUsage ().getXMLName ());
+                        lead_text.append (upd.getAppUsage ().getProtocolName ());
                         lead_text.append (' ');
                       }
                   }
@@ -355,12 +355,12 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
               });
 
             keygen2_activity.postJSONData (keygen2_activity.prov_init_request.getSubmitURL (), prov_sess_response, false);
-            JSONDecoder xml_object = keygen2_activity.parseResponse ();
-            if (xml_object instanceof CredentialDiscoveryRequestDecoder)
+            JSONDecoder json_object = keygen2_activity.parseResponse ();
+            if (json_object instanceof CredentialDiscoveryRequestDecoder)
               {
                 publishProgress (BaseProxyActivity.PROGRESS_LOOKUP);
 
-                CredentialDiscoveryRequestDecoder cred_disc_request = (CredentialDiscoveryRequestDecoder) xml_object;
+                CredentialDiscoveryRequestDecoder cred_disc_request = (CredentialDiscoveryRequestDecoder) json_object;
                 CredentialDiscoveryResponseEncoder cred_disc_response = new CredentialDiscoveryResponseEncoder (cred_disc_request);
                 for (CredentialDiscoveryRequestDecoder.LookupSpecifier ls : cred_disc_request.getLookupSpecifiers ())
                   {
@@ -396,9 +396,9 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                       }
                   }
                 keygen2_activity.postJSONData (cred_disc_request.getSubmitURL (), cred_disc_response, false);
-                xml_object = keygen2_activity.parseResponse ();
+                json_object = keygen2_activity.parseResponse ();
               }
-             keygen2_activity.key_creation_request = (KeyCreationRequestDecoder) xml_object;
+             keygen2_activity.key_creation_request = (KeyCreationRequestDecoder) json_object;
              return KeyGen2Activity.CONTINUE_EXECUTION;
           }
         catch (InterruptedProtocolException e)

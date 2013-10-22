@@ -52,7 +52,7 @@ import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
 
 /**
- * Class for taking care of "webpkiproxy://" XML protocol handlers
+ * Class for taking care of "webpkiproxy://" JSON protocol handlers
  */
 public abstract class BaseProxyActivity extends Activity
   {
@@ -344,22 +344,22 @@ public abstract class BaseProxyActivity extends Activity
         closeProxy ();
       }
 
-    public void addSchema (Class<? extends JSONDecoder> decoder_class) throws IOException
+    public void addDecoder (Class<? extends JSONDecoder> decoder_class) throws IOException
       {
         schema_cache.addToCache (decoder_class);
         logOK ("Added JSON decoder for: " + decoder_class.getName ());
       }
 
-    public JSONDecoder parseXML (byte[] xmldata) throws IOException
+    public JSONDecoder parseJSON (byte[] json_data) throws IOException
       {
-        JSONDecoder json_object = schema_cache.parse (xmldata);
+        JSONDecoder json_object = schema_cache.parse (json_data);
         logOK ("Successfully read \"" + json_object.getQualifier () + "\" object");
         return json_object;
       }
 
     public JSONDecoder parseResponse () throws IOException
       {
-        return parseXML (https_wrapper.getData ());
+        return parseJSON (https_wrapper.getData ());
       }
 
     public X509Certificate getServerCertificate ()
