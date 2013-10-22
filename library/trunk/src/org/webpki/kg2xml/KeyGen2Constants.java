@@ -22,15 +22,6 @@ public interface KeyGen2Constants
 
     String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
 
-
-    String BASIC_CAP_ALGORITHM                       = "Algorithm";
-    String BASIC_CAP_CLIENT_ATTRI                    = "ClientAttribute";
-    String BASIC_CAP_EXTENSION                       = "Extension";
-    String BASIC_CAP_PRE_QUERY                       = "";
-    String BASIC_CAP_POST_QUERY                      = "SupportQuery";
-    String BASIC_CAP_PRE_RESPONSE                    = "Supported";
-    String BASIC_CAP_POST_RESPONSE                   = "s";
-
     // XML attributes
 
     String ABORT_URL_ATTR                            = "AbortURL";
@@ -44,8 +35,6 @@ public interface KeyGen2Constants
     String AUTHORIZATION_ATTR                        = "Authorization";
 
     String BIOMETRIC_PROTECTION_ATTR                 = "BiometricProtection";
-
-    String CERTIFICATE_FINGERPRINT_ATTR              = "CertificateFingerprint";
 
     String CLIENT_SESSION_ID_ATTR                    = "ClientSessionID";
 
@@ -129,7 +118,7 @@ public interface KeyGen2Constants
 
     String REQUESTED_CLIENT_ATTRIBUTES_ATTR          = "RequestedClientAttributes";
 
-    String SERVER_CERT_FP_ATTR                       = "ServerCertificateFingerprint";
+    String SERVER_CERT_FP_ATTR                       = "ServerCertificateFingerPrint";
 
     String SERVER_SEED_ATTR                          = "ServerSeed";
     

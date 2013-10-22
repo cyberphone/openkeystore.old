@@ -32,6 +32,7 @@ import org.webpki.xml.DOMAttributeReaderHelper;
 import org.webpki.xmldsig.XMLSignatureWrapper;
 import org.webpki.xmldsig.XMLVerifier;
 
+import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.VerifierInterface;
 
 import static org.webpki.kg2xml.KeyGen2Constants.*;
@@ -446,7 +447,7 @@ public class ProvisioningFinalizationRequestDecoder extends ProvisioningFinaliza
         DOMAttributeReaderHelper ah = rd.getAttributeHelper ();
         return new PostOperation (ah.getString (CLIENT_SESSION_ID_ATTR),
                                   ah.getString (SERVER_SESSION_ID_ATTR),
-                                  ah.getBinary (CERTIFICATE_FINGERPRINT_ATTR),
+                                  ah.getBinary (CertificateFilter.CF_FINGER_PRINT),
                                   ah.getBinary (AUTHORIZATION_ATTR),
                                   ah.getBinary (MAC_ATTR),
                                   post_op);

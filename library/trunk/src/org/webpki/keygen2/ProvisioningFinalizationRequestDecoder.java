@@ -26,6 +26,8 @@ import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.util.ArrayUtil;
 
+import org.webpki.crypto.CertificateFilter;
+
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONObjectReader;
 
@@ -429,7 +431,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
       {
         return new PostOperation (KeyGen2Validator.getID (rd, CLIENT_SESSION_ID_JSON),
                                   KeyGen2Validator.getID (rd, SERVER_SESSION_ID_JSON),
-                                  rd.getBinary (CERTIFICATE_FINGERPRINT_JSON),
+                                  rd.getBinary (CertificateFilter.CF_FINGER_PRINT),
                                   rd.getBinary (AUTHORIZATION_JSON),
                                   rd.getBinary (MAC_JSON),
                                   post_op);

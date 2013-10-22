@@ -24,11 +24,17 @@ import java.util.LinkedHashSet;
 import org.webpki.json.JSONObjectWriter;
 import org.webpki.json.JSONObjectReader;
 
-import static org.webpki.keygen2.KeyGen2Constants.*;
-
 public class BasicCapabilities implements Serializable
   {
     private static final long serialVersionUID = 1L;
+
+    static final String BASIC_CAP_ALGORITHM       = "Algorithm";
+    static final String BASIC_CAP_CLIENT_ATTRI    = "ClientAttribute";
+    static final String BASIC_CAP_EXTENSION       = "Extension";
+    static final String BASIC_CAP_PRE_QUERY       = "";
+    static final String BASIC_CAP_POST_QUERY      = "SupportQuery";
+    static final String BASIC_CAP_PRE_RESPONSE    = "Supported";
+    static final String BASIC_CAP_POST_RESPONSE   = "s";
 
     LinkedHashSet<String> algorithms = new LinkedHashSet<String> ();
 

@@ -26,6 +26,7 @@ import org.webpki.sks.SecureKeyStore;
 
 import org.webpki.util.ArrayUtil;
 
+import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.HashAlgorithms;
 import org.webpki.crypto.CertificateUtil;
 
@@ -74,7 +75,7 @@ public class ProvisioningFinalizationRequestEncoder extends ServerEncoder
                       PostProvisioningTargetKey target_key,
                       MacGenerator post_op_mac) throws IOException, GeneralSecurityException
       {
-        wr.setBinary (CERTIFICATE_FINGERPRINT_JSON, HashAlgorithms.SHA256.digest (target_key.certificate_data));
+        wr.setBinary (CertificateFilter.CF_FINGER_PRINT, HashAlgorithms.SHA256.digest (target_key.certificate_data));
         wr.setString (SERVER_SESSION_ID_JSON, target_key.server_session_id);
         wr.setString (CLIENT_SESSION_ID_JSON, target_key.client_session_id);
         byte[] device_id = server_state.device_certificate == null ? SecureKeyStore.KDF_ANONYMOUS : server_state.device_certificate.getEncoded ();

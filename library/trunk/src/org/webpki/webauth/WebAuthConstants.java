@@ -50,7 +50,7 @@ public interface WebAuthConstants
 
     String REQUEST_URL_JSON                = "RequestURL";
 
-    String SERVER_CERT_FP_JSON             = "ServerCertificateFingerprint";
+    String SERVER_CERT_FP_JSON             = "ServerCertificateFingerPrint";
 
     String SERVER_TIME_JSON                = "ServerTime";
 

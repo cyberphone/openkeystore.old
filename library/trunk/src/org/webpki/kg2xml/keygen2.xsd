@@ -416,10 +416,10 @@
               the SKS "createProvisioningSession" method -->
          <xs:attribute name="SessionAttestation" type="xs:base64Binary" use="required"/>
 
-         <!-- The "ServerCertificateFingerprint" attribute MUST be populated with
+         <!-- The "ServerCertificateFingerPrint" attribute MUST be populated with
               the SHA256 hash of the associated server certificate if the
               "ProvisioningInitializationResponse" was invoked over HTTPS -->
-         <xs:attribute name="ServerCertificateFingerprint" type="xs:base64Binary" use="optional"/>
+         <xs:attribute name="ServerCertificateFingerPrint" type="xs:base64Binary" use="optional"/>
 
       </xs:complexType>
    </xs:element>
@@ -1155,7 +1155,7 @@
       <xs:attribute name="ServerSessionID" type="kg2:sksID" use="required"/>
 
       <!-- Handle to the end entity certificate (key ID) -->
-      <xs:attribute name="CertificateFingerprint" type="xs:base64Binary" use="required"/>
+      <xs:attribute name="FingerPrint" type="xs:base64Binary" use="required"/>
 
       <!-- Mandatory MAC (Message Authentication Code) -->
       <xs:attribute name="MAC" type="xs:base64Binary" use="required"/>
