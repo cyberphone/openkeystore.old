@@ -359,7 +359,7 @@ public class CertificateInfo
 
     public String getPublicKeyAlgorithm () throws IOException
       {
-        return certificate.getPublicKey ().getAlgorithm ();
+        return KeyAlgorithms.getKeyAlgorithm (certificate.getPublicKey ()).getURI ();
       }
 
 
