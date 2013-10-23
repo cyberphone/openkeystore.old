@@ -147,11 +147,8 @@ public class CertViewActivity extends Activity
             printURIs (cert_text, "OCSP&nbsp;reponders", cert_info.getAIAOCSPResponders ());
             String fp = ArrayUtil.toHexString (cert_info.getCertificateHash (), 0, -1, true, ' ');
             add (cert_text, "SHA1&nbsp;fingerprint", fp.substring (0, 29) + "<br>" + fp.substring (29));
-            add (cert_text, "Public&nbsp;key", cert_info.getPublicKeyAlgorithm () + 
-                                               " (" +
-                                               cert_info.getPublicKeySize () +
-                                               " bits)<br>" +
-                                               binaryDump (cert_info.getPublicKeyData (), false));
+            add (cert_text, "Key&nbsp;algorithm", cert_info.getPublicKeyAlgorithm ());
+            add (cert_text, "Public&nbsp;key", binaryDump (cert_info.getPublicKeyData (), false));
             cert_text.append ("</table>");
           }
         catch (Exception e)
