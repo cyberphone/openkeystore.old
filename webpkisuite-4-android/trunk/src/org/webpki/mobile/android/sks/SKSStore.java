@@ -63,7 +63,7 @@ public abstract class SKSStore
             try
               {
                 Security.insertProviderAt (new BouncyCastleProvider (), 1);
-                sks = (SKSImplementation) new ObjectInputStream (caller.openFileInput(PERSISTENCE_SKS)).readObject ();
+                sks = (SKSImplementation) new ObjectInputStream (caller.openFileInput (PERSISTENCE_SKS)).readObject ();
                 getAlgorithms ();
                 Log.i (caller_for_log, "SKS found, restoring it");
               }

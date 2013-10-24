@@ -8,7 +8,8 @@
     <string name="title_activity_keygen2">Credential Enrollment</string>
     <string name="title_activity_webauth">Authentication Request</string>
     <string name="title_activity_properties">Properties</string>
-    <string name="title_activity_fail_logger">Protocol Execution Log</string>
+    <string name="title_activity_fail_logger">Error Log</string>
+    <string name="title_activity_protocol_view">Protocol View</string>
     <string name="title_activity_cert_view">Certificate Properties</string>
     <string name="title_activity_credentials">User Credentials</string>
     

@@ -40,7 +40,7 @@ import org.webpki.android.util.DebugFormatter;
 
 import org.webpki.mobile.android.R;
 
-public class CertViewActivity extends Activity
+public class CertificateViewActivity extends Activity
   {
     public static final String CERTIFICATE_BLOB = "cert_blob";
 

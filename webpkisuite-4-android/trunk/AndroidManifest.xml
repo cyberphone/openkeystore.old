@@ -83,7 +83,11 @@
             android:label="@string/title_activity_fail_logger">
         </activity>
         <activity
-            android:name=".application.CertViewActivity"
+            android:name=".application.ProtocolViewActivity"
+            android:label="@string/title_activity_protocol_view">
+        </activity>
+        <activity
+            android:name=".application.CertificateViewActivity"
             android:label="@string/title_activity_cert_view">
         </activity>
         <activity

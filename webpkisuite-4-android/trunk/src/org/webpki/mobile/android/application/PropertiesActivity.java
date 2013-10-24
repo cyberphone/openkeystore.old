@@ -34,6 +34,7 @@ import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
 
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -78,14 +79,14 @@ public class PropertiesActivity extends ListActivity
         sks = SKSStore.createSKS ("Dialog", getBaseContext (), true);
         if (id == SETTINGS_DEVICE_CERT)
           {
-            Intent intent = new Intent (this, CertViewActivity.class);
+            Intent intent = new Intent (this, CertificateViewActivity.class);
             try
               {
-                intent.putExtra (CertViewActivity.CERTIFICATE_BLOB, sks.getDeviceInfo ().getCertificatePath ()[0].getEncoded ());
+                intent.putExtra (CertificateViewActivity.CERTIFICATE_BLOB, sks.getDeviceInfo ().getCertificatePath ()[0].getEncoded ());
               }
             catch (Exception e)
               {
-                intent.putExtra (CertViewActivity.CERTIFICATE_BLOB, new byte[]{});
+                intent.putExtra (CertificateViewActivity.CERTIFICATE_BLOB, new byte[]{});
               }
             startActivity (intent);
           }
@@ -119,15 +120,20 @@ public class PropertiesActivity extends ListActivity
     @Override
     public void onCreateContextMenu (ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
       {
-         menu.setHeaderTitle ("Select Protocol");
-         menu.add (KeyGen2Activity.KEYGEN2);
-         menu.add (WebAuthActivity.WEBAUTH);
+         if (((AdapterView.AdapterContextMenuInfo)menuInfo).position == SETTINGS_PROTOCOL_LOG)
+           {
+             menu.setHeaderTitle ("Show last run with:");
+             menu.add (KeyGen2Activity.KEYGEN2);
+             menu.add (WebAuthActivity.WEBAUTH);
+           }
       }    
 
     @Override
     public boolean onContextItemSelected (MenuItem item)
       {
-           Toast.makeText (getApplicationContext(), "Item ID at POSITION:"+item.getTitle (), Toast.LENGTH_SHORT).show ();
+        Intent intent = new Intent (this, ProtocolViewActivity.class);
+        intent.putExtra (ProtocolViewActivity.LOG_FILE, item.getTitle ());
+        startActivity (intent);
         return true;
       }
 

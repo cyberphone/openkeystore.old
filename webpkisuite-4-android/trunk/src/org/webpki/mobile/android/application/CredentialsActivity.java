@@ -118,8 +118,8 @@ public class CredentialsActivity extends ListActivity
           {
             try
               {
-                Intent intent = new Intent (this, CertViewActivity.class);
-                intent.putExtra (CertViewActivity.CERTIFICATE_BLOB, 
+                Intent intent = new Intent (this, CertificateViewActivity.class);
+                intent.putExtra (CertificateViewActivity.CERTIFICATE_BLOB, 
                                  sks.getKeyAttributes (list.get (info.position).getKeyHandle ()).getCertificatePath ()[0].getEncoded ());
                 startActivity (intent);
               }
