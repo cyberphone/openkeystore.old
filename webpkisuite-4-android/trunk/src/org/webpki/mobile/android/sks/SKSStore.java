@@ -122,7 +122,7 @@ public abstract class SKSStore
           {
             try
               {
-                ObjectOutputStream oos = new ObjectOutputStream (caller.openFileOutput(PERSISTENCE_SKS, Context.MODE_PRIVATE));
+                ObjectOutputStream oos = new ObjectOutputStream (caller.openFileOutput (PERSISTENCE_SKS, Context.MODE_PRIVATE));
                 oos.writeObject (sks);
                 oos.close ();
               }

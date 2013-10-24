@@ -18,7 +18,9 @@ package org.webpki.mobile.android.proxy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+
 import java.net.URL;
 
 import java.security.cert.X509Certificate;
@@ -33,10 +35,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.net.Uri;
+
 import android.util.Log;
 
 import org.apache.http.HttpStatus;
@@ -75,7 +79,7 @@ public abstract class BaseProxyActivity extends Activity
     
     private JSONDecoderCache schema_cache;
 
-    ProgressDialog progress_display;
+    private ProgressDialog progress_display;
 
     private StringBuffer logger = new StringBuffer ();
 
@@ -97,9 +101,11 @@ public abstract class BaseProxyActivity extends Activity
     
     private boolean init_rejected;
 
-    Vector<String> cookies = new Vector<String> ();
+    private Vector<String> cookies = new Vector<String> ();
+    
+    public Vector<byte[]> protocol_log;
 
-    public byte[] initial_request_data;
+    private byte[] initial_request_object;
     
     protected abstract String getProtocolName ();
     
@@ -114,26 +120,26 @@ public abstract class BaseProxyActivity extends Activity
             .setMessage (message)
             .setCancelable (false)
             .setPositiveButton ("OK", new DialogInterface.OnClickListener ()
-      {
-        public void onClick (DialogInterface dialog, int id)
           {
-            // The user decided that this is not what he/she wants...
-            dialog.cancel ();
-            user_aborted = true;
-            abortTearDown ();
-            if (abort_url == null)
+            public void onClick (DialogInterface dialog, int id)
               {
-                instance.finish ();
+                // The user decided that this is not what he/she wants...
+                dialog.cancel ();
+                user_aborted = true;
+                abortTearDown ();
+                if (abort_url == null)
+                  {
+                    instance.finish ();
+                  }
+                else
+                  {
+                    launchBrowser (abort_url);
+                  }
               }
-            else
-              {
-                launchBrowser (abort_url);
-              }
-          }
-      });
-    // Create and show alert dialog
-    alert_dialog.create ().show ();
-  }
+          });
+        // Create and show alert dialog
+        alert_dialog.create ().show ();
+      }
 
     public void conditionalAbort (final String message)
       {
@@ -256,6 +262,21 @@ public abstract class BaseProxyActivity extends Activity
 
     public void closeProxy ()
       {
+        if (protocol_log != null)
+          {
+            try
+              {
+                ObjectOutputStream oos = new ObjectOutputStream (openFileOutput (getProtocolName (), Context.MODE_PRIVATE));
+                oos.writeObject (protocol_log);
+                oos.close ();
+                Log.i (getProtocolName (), "Wrote protocol log");
+              }
+            catch (Exception e)
+              {
+                Log.e (getProtocolName (), "Couldn't write protocol log");
+              }
+            
+          }
         SKSStore.serializeSKS (getProtocolName (), this);
         finish ();
       }
@@ -275,7 +296,9 @@ public abstract class BaseProxyActivity extends Activity
         logOK ("Writing \"" + json_object.getQualifier () + "\" object to: " + url);
         addOptionalCookies (url);
         https_wrapper.setHeader ("Content-Type", JSON_CONTENT);
-        https_wrapper.makePostRequest (url, json_object.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT));
+        byte[] posted_data = json_object.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
+        protocol_log.add (posted_data);
+        https_wrapper.makePostRequest (url, posted_data);
         if (https_wrapper.getResponseCode () == HttpStatus.SC_MOVED_TEMPORARILY)
           {
             if ((redirect_url = https_wrapper.getHeaderValue ("Location")) == null)
@@ -350,14 +373,15 @@ public abstract class BaseProxyActivity extends Activity
         logOK ("Added JSON decoder for: " + decoder_class.getName ());
       }
 
-    public JSONDecoder parseJSON (byte[] json_data) throws IOException
+    private JSONDecoder parseJSON (byte[] json_data) throws IOException
       {
+        protocol_log.add (json_data);
         JSONDecoder json_object = schema_cache.parse (json_data);
         logOK ("Successfully read \"" + json_object.getQualifier () + "\" object");
         return json_object;
       }
 
-    public JSONDecoder parseResponse () throws IOException
+    public JSONDecoder parseJSONResponse () throws IOException
       {
         return parseJSON (https_wrapper.getData ());
       }
@@ -367,9 +391,15 @@ public abstract class BaseProxyActivity extends Activity
         return server_certificate;
       }
     
+    public JSONDecoder getInitialReguest () throws IOException
+      {
+        return parseJSON (initial_request_object);
+      }
+  
     public void getProtocolInvocationData () throws Exception
       {
         logOK (getProtocolName () + " protocol run: " + new SimpleDateFormat ("yyyy-MM-dd' 'HH:mm:ss").format (new Date ()));
+        protocol_log = new Vector<byte[]> ();
         https_wrapper = new HTTPSWrapper ();
         initSKS ();
         schema_cache = new JSONDecoderCache ();
@@ -402,7 +432,7 @@ public abstract class BaseProxyActivity extends Activity
         https_wrapper.makeGetRequest (initialization_url);
         if (https_wrapper.getResponseCode () == HttpStatus.SC_OK)
           {
-            initial_request_data = https_wrapper.getData ();
+            initial_request_object = https_wrapper.getData ();
             server_certificate = https_wrapper.getServerCertificate ();
             checkContentType ();
           }

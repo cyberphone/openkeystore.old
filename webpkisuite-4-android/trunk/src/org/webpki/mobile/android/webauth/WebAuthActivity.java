@@ -31,7 +31,7 @@ import org.webpki.android.webauth.AuthenticationRequestDecoder;
 
 public class WebAuthActivity extends BaseProxyActivity
   {
-    static final String WEBAUTH = "WebAuth";
+    public static final String WEBAUTH = "WebAuth";
 
     AuthenticationRequestDecoder authentication_request;
     

@@ -30,7 +30,7 @@ import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
 
 public class KeyGen2Activity extends BaseProxyActivity
   {
-    static final String KEYGEN2 = "KeyGen2";
+    public static final String KEYGEN2 = "KeyGen2";
 
     PlatformNegotiationRequestDecoder platform_request;
 

@@ -47,7 +47,13 @@ public class PropertiesActivity extends ListActivity
     static final int SETTINGS_USER_CREDENTIALS = 2;
     static final int SETTINGS_DEVICE_CERT = 3;
     static final int SETTINGS_EXT_DEVICE_ID = 4;
-    String[] items = { "About", "Device ID", "User Credentials", "Device Certificate", "Extended Device ID"};
+    static final int SETTINGS_PROTOCOL_LOG = 5;
+    String[] items = { "About", 
+                       "Device ID",
+                       "User Credentials",
+                       "Device Certificate",
+                       "Extended Device ID",
+                       "Show Protocol Log"};
     SKSImplementation sks;
 
     @Override

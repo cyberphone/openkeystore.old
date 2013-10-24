@@ -311,7 +311,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
 
             keygen2_activity.postJSONData (keygen2_activity.platform_request.getSubmitURL (), platform_response, false);
 
-            keygen2_activity.prov_init_request = (ProvisioningInitializationRequestDecoder) keygen2_activity.parseResponse ();
+            keygen2_activity.prov_init_request = (ProvisioningInitializationRequestDecoder) keygen2_activity.parseJSONResponse ();
             Date client_time = new Date ();
             ProvisioningSession session = 
                 keygen2_activity.sks.createProvisioningSession (keygen2_activity.prov_init_request.getSessionKeyAlgorithm (),
@@ -355,7 +355,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
               });
 
             keygen2_activity.postJSONData (keygen2_activity.prov_init_request.getSubmitURL (), prov_sess_response, false);
-            JSONDecoder json_object = keygen2_activity.parseResponse ();
+            JSONDecoder json_object = keygen2_activity.parseJSONResponse ();
             if (json_object instanceof CredentialDiscoveryRequestDecoder)
               {
                 publishProgress (BaseProxyActivity.PROGRESS_LOOKUP);
@@ -396,7 +396,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                       }
                   }
                 keygen2_activity.postJSONData (cred_disc_request.getSubmitURL (), cred_disc_response, false);
-                json_object = keygen2_activity.parseResponse ();
+                json_object = keygen2_activity.parseJSONResponse ();
               }
              keygen2_activity.key_creation_request = (KeyCreationRequestDecoder) json_object;
              return KeyGen2Activity.CONTINUE_EXECUTION;

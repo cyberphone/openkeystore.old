@@ -191,7 +191,7 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
 
             publishProgress (BaseProxyActivity.PROGRESS_DEPLOY_CERTS);
 
-            ProvisioningFinalizationRequestDecoder prov_final_request = (ProvisioningFinalizationRequestDecoder) keygen2_activity.parseResponse ();
+            ProvisioningFinalizationRequestDecoder prov_final_request = (ProvisioningFinalizationRequestDecoder) keygen2_activity.parseJSONResponse ();
 
             //////////////////////////////////////////////////////////////////////////
             // Note: we could have used the saved provisioning_handle but that
