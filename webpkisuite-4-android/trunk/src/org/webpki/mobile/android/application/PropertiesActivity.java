@@ -145,7 +145,15 @@ public class PropertiesActivity extends ListActivity
             case SETTINGS_ABOUT:
               AlertDialog.Builder about_builder = new AlertDialog.Builder (this);
               about_builder.setTitle ("About");
-              about_builder.setMessage ("This application was developed by PrimeKey solutions AB");
+              String version ="??";
+            try
+              {
+                version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+              }
+            catch (Exception e)
+              {
+              }
+              about_builder.setMessage ("This application was developed by PrimeKey Solutions AB.\n\nCurrent version: " + version);
               about_builder.setIcon (android.R.drawable.btn_star_big_on);
               about_builder.setPositiveButton (android.R.string.ok, new DialogInterface.OnClickListener ()
                 {
