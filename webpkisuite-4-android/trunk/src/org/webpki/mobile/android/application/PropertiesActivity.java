@@ -22,11 +22,16 @@ import org.webpki.android.sks.SKSException;
 
 import org.webpki.mobile.android.R;
 
+import org.webpki.mobile.android.keygen2.KeyGen2Activity;
+import org.webpki.mobile.android.webauth.WebAuthActivity;
+
 import org.webpki.mobile.android.sks.SKSImplementation;
 import org.webpki.mobile.android.sks.SKSStore;
 
 import android.os.Bundle;
 
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 
 import android.widget.ArrayAdapter;
@@ -62,6 +67,7 @@ public class PropertiesActivity extends ListActivity
         super.onCreate (savedInstanceState);
         setContentView (R.layout.activity_properties);
         setListAdapter (new ArrayAdapter<String> (this, android.R.layout.simple_list_item_1, items));
+        registerForContextMenu (getListView ());
       }
 
     @SuppressWarnings("deprecation")
@@ -99,12 +105,32 @@ public class PropertiesActivity extends ListActivity
               }
             showDialog (position);
           }
+        else if (id == SETTINGS_PROTOCOL_LOG)
+          {
+            super.onListItemClick(l, v, position, id); 
+            v.showContextMenu ();            
+          }
         else
           {
             showDialog (position);
           }
       }
-    
+
+    @Override
+    public void onCreateContextMenu (ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
+      {
+         menu.setHeaderTitle ("Select Protocol");
+         menu.add (KeyGen2Activity.KEYGEN2);
+         menu.add (WebAuthActivity.WEBAUTH);
+      }    
+
+    @Override
+    public boolean onContextItemSelected (MenuItem item)
+      {
+           Toast.makeText (getApplicationContext(), "Item ID at POSITION:"+item.getTitle (), Toast.LENGTH_SHORT).show ();
+        return true;
+      }
+
     @Override
     protected Dialog onCreateDialog (int id)
       {
