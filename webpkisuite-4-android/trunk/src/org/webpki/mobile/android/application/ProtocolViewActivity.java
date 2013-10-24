@@ -46,6 +46,8 @@ public class ProtocolViewActivity extends Activity
         super.onCreate (savedInstanceState);
         setContentView (R.layout.activity_protocol_view);
         WebView log_view = (WebView) findViewById (R.id.protocolData);
+        log_view.getSettings ().setSupportZoom (true);
+        log_view.getSettings ().setBuiltInZoomControls (true);
         Intent intent = getIntent ();
         StringBuffer log_message = new StringBuffer ("<html><body style=\"font-size:8pt;font-family:arial,verdana,helvetica\">");
         try
