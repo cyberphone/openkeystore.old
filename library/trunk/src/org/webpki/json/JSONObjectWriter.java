@@ -70,10 +70,15 @@ public class JSONObjectWriter implements Serializable
     
     /**
      * For updating already read JSON objects.
+     * @throws IOException 
      */
-    public JSONObjectWriter (JSONObjectReader reader)
+    public JSONObjectWriter (JSONObjectReader reader) throws IOException
       {
         this (reader.json);
+        if (reader.json.properties.containsKey (null))
+          {
+            throw new IOException ("You cannot update array objects");
+          }
       }
 
     /**
@@ -113,6 +118,11 @@ public class JSONObjectWriter implements Serializable
     public JSONObjectWriter setLong (String name, long value) throws IOException
       {
         return addProperty (name, new JSONValue (JSONTypes.INTEGER, Long.toString (value)));
+      }
+
+    public JSONObjectWriter setDouble (String name, double value) throws IOException
+      {
+        return addProperty (name, new JSONValue (JSONTypes.DOUBLE, Double.toString (value)));
       }
 
     public JSONObjectWriter setBigInteger (String name, BigInteger value) throws IOException
@@ -265,6 +275,24 @@ public class JSONObjectWriter implements Serializable
       }
 
     @SuppressWarnings("unchecked")
+    void printOneElement (JSONValue json_value)
+      {
+        switch (json_value.type)
+          {
+            case ARRAY:
+              printArray ((Vector<JSONValue>) json_value.value, false);
+              break;
+  
+            case OBJECT:
+              newLine ();
+              printObject ((JSONObject) json_value.value, false);
+              break;
+  
+            default:
+              printSimpleValue (json_value, false);
+          }
+      }
+
     void printObject (JSONObject object, boolean array_flag)
       {
         beginObject (array_flag);
@@ -279,20 +307,7 @@ public class JSONObjectWriter implements Serializable
             newLine ();
             next = true;
             printProperty (property);
-            switch (json_value.type)
-              {
-                case ARRAY:
-                  printArray ((Vector<JSONValue>) json_value.value, false);
-                  break;
-
-                case OBJECT:
-                  newLine ();
-                  printObject ((JSONObject) json_value.value, false);
-                  break;
-
-                default:
-                  printSimpleValue (json_value, false);
-              }
+            printOneElement (json_value);
           }
         endObject ();
       }
@@ -304,50 +319,80 @@ public class JSONObjectWriter implements Serializable
           {
             buffer.append ('[');
           }
-        else if (array.firstElement ().type == JSONTypes.OBJECT)
-          {
-            printArrayObjects (array);
-          }
-        else if (array.firstElement ().type == JSONTypes.ARRAY)
-          {
-            newLine ();
-            indentLine ();
-            spaceOut ();
-            buffer.append ('[');
-            boolean next = false;
-            for (JSONValue value : array)
-              {
-                Vector<JSONValue> sub_array = (Vector<JSONValue>) value.value;
-                boolean extra_pretty = sub_array.isEmpty () ||
-                                       (sub_array.firstElement ().type != JSONTypes.ARRAY &&
-                                        sub_array.firstElement ().type != JSONTypes.OBJECT);
-                if (next)
-                  {
-                    buffer.append (',');
-                  }
-                else
-                  {
-                    next = true;
-                  }
-                if (extra_pretty)
-                  {
-                    newLine ();
-                    indentLine ();
-                    spaceOut ();
-                  }
-                printArray (sub_array, true);
-                if (extra_pretty)
-                  {
-                    undentLine ();
-                  }
-              }
-            newLine ();
-            spaceOut ();
-            undentLine ();
-          }
         else
           {
-            printArraySimple (array, array_flag);
+            boolean mixed = false;
+            JSONTypes first_type = array.firstElement ().type;
+            for (JSONValue json_value : array)
+              {
+                if (first_type.complex != json_value.type.complex ||
+                    (first_type.complex && first_type != json_value.type))
+                    
+                  {
+                    mixed = true;
+                    break;
+                  }
+              }
+            if (mixed)
+              {
+                buffer.append ('[');
+                boolean next = false;
+                for (JSONValue value : array)
+                  {
+                    if (next)
+                      {
+                        buffer.append (',');
+                      }
+                    else
+                      {
+                        next = true;
+                      }
+                    printOneElement (value);
+                  }
+              }
+            else if (first_type == JSONTypes.OBJECT)
+              {
+                printArrayObjects (array);
+              }
+            else if (first_type == JSONTypes.ARRAY)
+              {
+                newLine ();
+                indentLine ();
+                spaceOut ();
+                buffer.append ('[');
+                boolean next = false;
+                for (JSONValue value : array)
+                  {
+                    Vector<JSONValue> sub_array = (Vector<JSONValue>) value.value;
+                    boolean extra_pretty = sub_array.isEmpty () || !sub_array.firstElement ().type.complex;
+                    if (next)
+                      {
+                        buffer.append (',');
+                      }
+                    else
+                      {
+                        next = true;
+                      }
+                    if (extra_pretty)
+                      {
+                        newLine ();
+                        indentLine ();
+                        spaceOut ();
+                      }
+                    printArray (sub_array, true);
+                    if (extra_pretty)
+                      {
+                        undentLine ();
+                      }
+                  }
+                newLine ();
+                spaceOut ();
+                undentLine ();
+              }
+            else
+              {
+                printArraySimple (array, array_flag);
+              }
           }
         buffer.append (']');
       }
@@ -589,6 +634,7 @@ public class JSONObjectWriter implements Serializable
         return result;
       }
 
+    @SuppressWarnings("unchecked")
     public byte[] serializeJSONObject (JSONOutputFormats output_format) throws IOException
       {
         buffer = new StringBuffer ();
@@ -597,7 +643,14 @@ public class JSONObjectWriter implements Serializable
         pretty = output_format != JSONOutputFormats.CANONICALIZED;
         java_script_eol = output_format == JSONOutputFormats.PRETTY_JAVASCRIPT;
         html_mode = output_format == JSONOutputFormats.PRETTY_HTML;
-        printObject (root, false);
+        if (root.properties.containsKey (null))
+          {
+            printArray ((Vector<JSONValue>)root.properties.get (null).value, false);
+          }
+        else
+          {
+            printObject (root, false);
+          }
         if (output_format == JSONOutputFormats.PRETTY_PRINT)
           {
             newLine ();

@@ -119,6 +119,12 @@ public class JSONObjectReader implements Serializable
         return new Double (getString (name, JSONTypes.DOUBLE));
       }
 
+    @SuppressWarnings("unchecked")
+    public JSONArrayReader getJSONArrayReader ()
+      {
+        return json.properties.containsKey (null) ? new JSONArrayReader ((Vector<JSONValue>) json.properties.get (null).value) : null;
+      }
+
     public boolean getIfNULL (String name) throws IOException
       {
         if (getPropertyType (name) == JSONTypes.NULL)

@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 
 /**
  * Parses a JSON object into a DOM-like tree.
- * Note: the current version only accepts JSON objects {}.
  * 
  */
 public class JSONParser
@@ -56,9 +55,17 @@ public class JSONParser
       {
         json_data = json_string;
         max_length = json_data.length ();
-        scanFor (LEFT_CURLY_BRACKET);
         JSONObject root = new JSONObject ();
-        scanObject (root);
+        if (testNextNonWhiteSpaceChar () == LEFT_BRACKET)
+          {
+            scan ();
+            root.properties.put (null, scanArray ("outer array"));
+          }
+        else
+          {
+            scanFor (LEFT_CURLY_BRACKET);
+            scanObject (root);
+          }
         while (index < max_length)
           {
             if (!isWhiteSpace (json_data.charAt (index++)))

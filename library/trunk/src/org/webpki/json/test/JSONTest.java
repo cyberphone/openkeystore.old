@@ -453,4 +453,32 @@ public class JSONTest
         booleanValues (true);
         booleanValues (false);
       }
+
+    @Test
+    public void OuterArrays () throws Exception
+      {
+        JSONArrayWriter aw = new JSONArrayWriter ();
+        aw.setString ("hi,there");
+        aw.setObject ().setBoolean ("Boolish", true).setInt ("intish", -567);
+        JSONObjectReader or = JSONParser.parse (aw.serializeJSONArray (JSONOutputFormats.PRETTY_PRINT));
+        JSONArrayReader ar = or.getJSONArrayReader ();
+        assertTrue (ar.getString ().equals ("hi,there"));
+        or = ar.getObject ();
+        assertFalse (ar.hasMore ());
+        assertTrue (or.getBoolean ("Boolish"));
+        assertTrue (or.getInt ("intish") == -567);
+
+        try
+          {
+            aw = new JSONArrayWriter ();
+            aw.setString ("hi,there");
+            or = JSONParser.parse (aw.serializeJSONArray (JSONOutputFormats.PRETTY_PRINT));
+            JSONObjectWriter ow = new JSONObjectWriter (or);
+            fail ("Should have failed");
+          }
+        catch (Exception e)
+          {
+            checkException (e, "You cannot update array objects");
+          }
+      }
   }

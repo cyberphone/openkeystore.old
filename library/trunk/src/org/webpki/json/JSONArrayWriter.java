@@ -35,6 +35,11 @@ public class JSONArrayWriter implements Serializable
     private static final long serialVersionUID = 1L;
 
     Vector<JSONValue> array;
+    
+    public JSONArrayWriter ()
+      {
+        array = new Vector<JSONValue> ();
+      }
 
     JSONArrayWriter (Vector<JSONValue> array)
       {
@@ -104,5 +109,12 @@ public class JSONArrayWriter implements Serializable
         JSONObject holder = new JSONObject ();
         add (JSONTypes.OBJECT, holder);
         return new JSONObjectWriter (holder);
+      }
+
+    public byte[] serializeJSONArray (JSONOutputFormats output_format) throws IOException
+      {
+        JSONObject dummy = new JSONObject ();
+        dummy.properties.put (null, new JSONValue (JSONTypes.ARRAY, array));
+        return new JSONObjectWriter (dummy).serializeJSONObject (output_format);
       }
   }
