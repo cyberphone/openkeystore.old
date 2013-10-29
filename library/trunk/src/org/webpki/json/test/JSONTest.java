@@ -289,6 +289,8 @@ public class JSONTest
         JSONObjectWriter or = new JSONObjectWriter ();
         or.setArray ("name").setDouble (ref);
         assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getArray ("name").getDouble () == ref);
+        or = new JSONObjectWriter ().setDouble ("name", ref);
+        assertTrue (JSONParser.parse (or.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT)).getDouble ("name") == ref);
       }
 
     JSONObjectReader simpleObjectType (String string) throws IOException
@@ -473,7 +475,7 @@ public class JSONTest
             aw = new JSONArrayWriter ();
             aw.setString ("hi,there");
             or = JSONParser.parse (aw.serializeJSONArray (JSONOutputFormats.PRETTY_PRINT));
-            JSONObjectWriter ow = new JSONObjectWriter (or);
+            new JSONObjectWriter (or);
             fail ("Should have failed");
           }
         catch (Exception e)
