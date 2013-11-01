@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="libs/webpki.org-android.mod.jar"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="lib" path="libs/scprov-jdk15-1.46.99.3-UNOFFICIAL-ROBERTO-RELEASE.jar"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
