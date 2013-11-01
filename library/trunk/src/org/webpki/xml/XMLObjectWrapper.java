@@ -232,7 +232,7 @@ public abstract class XMLObjectWrapper
     public void writeXML (OutputStream out) throws IOException
       {
         toXMLDocument ();
-        DOMUtil.writeXML (parsed_root.document, out);
+        DOMUtil.writeXML (parsed_root.element, out);
       }
 
     /**
