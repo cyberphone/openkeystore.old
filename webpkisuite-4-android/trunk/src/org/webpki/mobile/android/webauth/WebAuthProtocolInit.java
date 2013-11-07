@@ -218,7 +218,8 @@ public class WebAuthProtocolInit extends AsyncTask<Void, String, Boolean>
                           });
                         CredentialListDataFactory credential_data_factory = new CredentialListDataFactory (webauth_activity, sks);
                         ((ImageView) webauth_activity.findViewById (R.id.auth_cred_logo)).setImageBitmap (credential_data_factory.getListIcon (firstKey ()));
-                        ((TextView) webauth_activity.findViewById (R.id.auth_cred_domain)).setText (credential_data_factory.getDomain (firstKey ()));
+                        String friendly_name = credential_data_factory.getFriendlyName (firstKey ());
+                        ((TextView) webauth_activity.findViewById (R.id.auth_cred_domain)).setText (friendly_name == null ? credential_data_factory.getDomain (firstKey ()) : friendly_name);
                         if (android.os.Build.VERSION.SDK_INT < 16)
                           {
                             webauth_activity.findViewById (R.id.pinWindow).setVisibility (View.GONE);

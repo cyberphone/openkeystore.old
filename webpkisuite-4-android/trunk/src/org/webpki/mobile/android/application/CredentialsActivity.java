@@ -21,6 +21,7 @@ import java.util.List;
 
 
 import org.webpki.android.sks.EnumeratedKey;
+import org.webpki.android.sks.KeyAttributes;
 import org.webpki.android.sks.SKSException;
 
 import org.webpki.mobile.android.sks.SKSImplementation;
@@ -72,9 +73,11 @@ public class CredentialsActivity extends ListActivity
             EnumeratedKey ek = new EnumeratedKey ();
             while ((ek = sks.enumerateKeys (ek.getKeyHandle ())) != null)
               {
+                KeyAttributes ka = sks.getKeyAttributes (ek.getKeyHandle ());
                 list.add (new CredentialArrayAdapter.CredentialData (credential_data_factory.getDomain (ek.getKeyHandle ()), 
                                                                      ek.getKeyHandle (),
-                                                                     sks.getKeyAttributes (ek.getKeyHandle ()).getCertificatePath ()[0].getSubjectDN ().getName (),
+                                                                     ka.getFriendlyName () == null ?
+                                            ka.getCertificatePath ()[0].getSubjectDN ().getName () : ka.getFriendlyName (),
                                                                      credential_data_factory.getListIcon (ek.getKeyHandle ())));
               }
             setListAdapter (new CredentialArrayAdapter (this, list));

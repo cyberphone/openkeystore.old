@@ -95,4 +95,9 @@ public class CredentialListDataFactory
           }
         return "***ERROR***";
       }
+
+    public String getFriendlyName (int key_handle) throws SKSException
+      {
+        return sks.getKeyAttributes (key_handle).getFriendlyName ();
+      }
   }
