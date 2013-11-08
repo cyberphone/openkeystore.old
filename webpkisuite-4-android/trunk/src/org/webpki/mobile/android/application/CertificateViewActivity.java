@@ -155,6 +155,6 @@ public class CertificateViewActivity extends Activity
           {
             cert_text = new StringBuffer ("<html><body><font color=\"red\">FAILED: ").append (e.getMessage ());
           }
-        log_view.loadData (cert_text.append ("</body></html>").toString (), "text/html", null);
+        log_view.loadData (cert_text.append ("</body></html>").toString (), "text/html; charset=UTF-8", null);
       }
   }
