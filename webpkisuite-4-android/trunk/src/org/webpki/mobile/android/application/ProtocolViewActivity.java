@@ -73,6 +73,6 @@ public class ProtocolViewActivity extends Activity
           {
             log_message.append ("No log data available");
           }
-        log_view.loadData (log_message.append ("</body></html>").toString (), "text/html", null);
+        log_view.loadData (log_message.append ("</body></html>").toString (), "text/html; charset=UTF-8", null);
       }
   }
