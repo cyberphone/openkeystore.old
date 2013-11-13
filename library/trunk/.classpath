@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="generators"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/resources/third-party-jars/itext-1.4.2.jar"/>
 	<classpathentry kind="lib" path="/resources/third-party-jars/junit-4.8.1.jar"/>

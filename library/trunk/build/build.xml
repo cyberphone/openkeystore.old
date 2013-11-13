@@ -7,6 +7,7 @@
   <property name="sks.debug" value="true"/>
   <property name="sks.device" value=""/>
   <property name="src_dir" value="../src" />
+  <property name="src_generators" value="../generators" />
   <property name="dot_net_dir" value="../sks-ws-dotnet" />
   <property name="cpp_dir" value="../sks-ws-cpp" />
   <property name="temp_dir" value="../.tmp" />
@@ -244,7 +245,7 @@
   <target name="doc">
     <fail message="JAVA_HOME must be set to environment!" unless="env.JAVA_HOME"/>
 
-  	<!-- Create the distribution directory -->
+  	<!-- Create the documentation directory -->
     <mkdir dir="${doc_dir}" />
 
   	<!-- Create temp directory -->
@@ -329,6 +330,15 @@
       </fileset>
     </jar>
 
+  	<!-- Compile generators just to check that they are still in concert with the code -->
+    <javac debug="${debug}"
+           srcdir="${src_generators}"
+           destdir="${temp_dir}" 
+           classpathref="compile.classpath"
+           includeAntRuntime="false">
+       <compilerarg value="-Xlint:-path"/>
+    </javac>
+    
   </target>
 
   <target name="clean">
@@ -445,6 +455,41 @@
      </antcall>
   </target>
   
+  <!-- Java to HTML -->
+  <target name="_java2html">
+
+    <!-- Create the documentation directory -->
+    <mkdir dir="${doc_dir}" />
+    <echo message="Writing: ${doc.file}"/>
+
+    <!-- Create temp directory -->
+    <delete dir="${temp_dir}"/>
+    <mkdir dir="${temp_dir}" />
+
+    <!-- Compile all -->
+    <javac debug="${debug}"
+           srcdir="${src_dir}:${src_generators}"
+           destdir="${temp_dir}" 
+           classpathref="compile.classpath"
+           includeAntRuntime="false">
+       <compilerarg value="-Xlint:-path"/>
+    </javac>
+    <java fork="yes"
+          classname="${doc.class}"
+          failonerror="true"
+          classpath="${temp_dir}">
+        <arg value="${doc.file}"/>
+    </java>
+  </target>
+  
+  <!-- HTML Doc task for KeyGen2 -->
+  <target name="dockeygen2">
+    <antcall target="_java2html">
+       <param name="doc.class" value="org.webpki.keygen2.KeyGen2HTMLReference"/>
+       <param name="doc.file" value="${doc_dir}/keygen2.html"/>
+     </antcall>
+  </target>
+
   <!-- A web service that accepts SKS WS calls from applications and in turn
        calls the designated SKS implementation -->
   <target name="sks-service">
