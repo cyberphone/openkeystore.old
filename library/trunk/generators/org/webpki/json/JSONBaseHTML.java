@@ -29,8 +29,8 @@ import org.webpki.util.ArrayUtil;
  */
 public class JSONBaseHTML
   {
-    public static final String MANDATORY = "M";
-    public static final String OPTIONAL = "O";
+    public static final String MANDATORY = "m";
+    public static final String OPTIONAL  = "o";
     
     static int tables;
     
@@ -171,7 +171,7 @@ public class JSONBaseHTML
                 public Column addArrayLink (String link) throws IOException
                   {
                     leftArray ();
-                    link (link);
+                    link (link, " style=\"margin-left:2pt;margin-right:2pt;\"");
                     rightArray ();
                     return this;
                   }
@@ -186,13 +186,32 @@ public class JSONBaseHTML
                     addString ("[");
                   }
 
-                private void link (String link) throws IOException
+                private void link (String link, String style) throws IOException
                   {
                     addString ("<a href=\"#")
                       .addString (link)
-                      .addString ("\" style=\"margin-left:2pt;margin-right:2pt;\">")
+                      .addString ("\"")
+                      .addString (style)
+                      .addString (">")
                       .addString (link)
                       .addString ("</a>");
+                  }
+
+                public Column addLink (String link) throws IOException
+                  {
+                    link (link, "");
+                    return this;
+                  }
+
+                public Column addValue (String value) throws IOException
+                  {
+                    keyWord (value, JSONObjectWriter.html_string_color, false);
+                    return this;
+                  }
+
+                public Column addIntegerValue (String integer_value) throws IOException
+                  {
+                    return addString ("<i>").addString (integer_value).addString ("</i>");
                   }
               }
             
@@ -220,7 +239,7 @@ public class JSONBaseHTML
           {
             html.append ("<tr><td><code>")
                 .append (c)
-                .append ("</code></td><td align=\"center\">" + MANDATORY + "</td><td></td></tr>");
+                .append ("</code></td><td>&nbsp;</td><td></td></tr>");
           }
 
         @Override
@@ -235,9 +254,13 @@ public class JSONBaseHTML
               }
             html.append (protocol)
                 .append (main_object ? "" : "</i>")
-                .append ("</div><table class=\"tftable\" style=\"margin-bottom:10pt\"><tr><th id=\"elem.")
+                .append ("</div>\n<table id=\"table.")
                 .append (table_id)
-                .append ("\">Element</th><th>Usage</th><th style=\"width:30em\">Comment</th></tr>");
+                .append ("\" class=\"tftable\" style=\"margin-bottom:10pt\"><tr><th id=\"elem1.")
+                .append (table_id)
+                .append ("\">Element</th><th>Usage</th><th id=\"elem3.")
+                .append (table_id)
+                .append ("\">Comment</th></tr>");
             int i = 0;
             if (is_object)
               {
@@ -287,7 +310,7 @@ public class JSONBaseHTML
       {
         html = new StringBuffer (
             "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">" +
-            "<html><head><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><style type=\"text/css\">\n" +
+            "<html><head><title>KeyGen2</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><style type=\"text/css\">\n" +
             ".tftable {color:#333333;border-width: 1px;border-color: #a9a9a9;border-collapse: collapse;}\n" +
             ".tftable th {font-size:10pt;background-color:#e0e0e0;border-width:1px;padding:4pt 12pt 4pt 12pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
             ".tftable tr {background-color:#ffffff;}\n" +
@@ -303,12 +326,16 @@ public class JSONBaseHTML
             "    var max = -1;\n" +
             "    for (var i = 1; i <= ").append (tables).append ("; i++)\n" +
             "      {\n" +
-            "        var width = window.document.getElementById ('elem.' + i).offsetWidth;\n" +
+            "        var width = window.document.getElementById ('elem1.' + i).offsetWidth;\n" +
             "        if (width > max) max = width;\n;" +
             "      }\n" +
             "    for (var i = 1; i <= ").append (tables).append ("; i++)\n" +
             "      {\n" +
-            "        window.document.getElementById ('elem.' + i).style.minWidth = '' + (max - 16) + 'px';\n" +
+            "        console.info ('max=' + max);\n" +
+//            "        window.document.getElementById ('table.' + i).style.width = '' + (max + max - 16) + 'px';\n" +
+ //           "        window.document.getElementById ('elem1.' + i).style.minWidth = '' + (max - 16) + 'px';\n" +
+//            "        window.document.getElementById ('elem3.' + i).style.minWidth = '' + (max - 16) + 'px';\n" +
+//          "        window.document.getElementById ('elem.' + i).style.minWidth = '500px';\n" +
             "      }\n" +
             "  }\n" +
             "</script>\n" +

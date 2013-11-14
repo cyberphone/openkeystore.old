@@ -205,8 +205,6 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
 
         wr.setInt (SESSION_LIFE_TIME_JSON, session_life_time);
 
-        setOptionalBinary (wr, NONCE_JSON, nonce);
-
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////
@@ -240,6 +238,11 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
               .setBinary (CONFIGURATION_JSON, virtual_machine_data)
               .setString (FRIENDLY_NAME_JSON, virtual_machine_friendly_name);
           }
+
+        ////////////////////////////////////////////////////////////////////////
+        // Signed requests must have a nonce
+        ////////////////////////////////////////////////////////////////////////
+        setOptionalBinary (wr, NONCE_JSON, nonce);
       }
 
     @Override

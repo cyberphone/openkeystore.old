@@ -74,7 +74,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
         return kmk_root;
       }
 
-    String algorithm;
+    String session_key_algorithm;
     
     public String getServerSessionID ()
       {
@@ -102,7 +102,7 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
     
     public String getSessionKeyAlgorithm ()
       {
-        return algorithm;
+        return session_key_algorithm;
       }
 
 
@@ -187,6 +187,8 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
         /////////////////////////////////////////////////////////////////////////////////////////
         // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
+        session_key_algorithm = rd.getString (SESSION_KEY_ALGORITHM_JSON);
+        
         server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
         
         server_time_verbatim = rd.getString (SERVER_TIME_JSON);
@@ -195,21 +197,10 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
 
         submit_url = getURL (rd, SUBMIT_URL_JSON);
         
-        algorithm = rd.getString (SESSION_KEY_ALGORITHM_JSON);
-        
         session_key_limit = (short)rd.getInt (SESSION_KEY_LIMIT_JSON);
         
         session_life_time = rd.getInt (SESSION_LIFE_TIME_JSON);
         
-        String[] attrs = rd.getStringArrayConditional (REQUESTED_CLIENT_ATTRIBUTES_JSON);
-        if (attrs != null)
-          {
-            for (String attr : attrs)
-              {
-                client_attributes.add (attr);
-              }
-          }
-
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the server key
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -223,6 +214,18 @@ public class ProvisioningInitializationRequestDecoder extends ClientDecoder
             JSONObjectReader kmkrd = rd.getObject (KEY_MANAGEMENT_KEY_JSON);
             key_management_key = kmkrd.getPublicKey ();
             scanForUpdateKeys (kmkrd, kmk_root = new KeyManagementKeyUpdateHolder (key_management_key));
+          }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        // Get the optional requested client attribute URIs
+        /////////////////////////////////////////////////////////////////////////////////////////
+        String[] attrs = rd.getStringArrayConditional (REQUESTED_CLIENT_ATTRIBUTES_JSON);
+        if (attrs != null)
+          {
+            for (String attr : attrs)
+              {
+                client_attributes.add (attr);
+              }
           }
 
         /////////////////////////////////////////////////////////////////////////////////////////
