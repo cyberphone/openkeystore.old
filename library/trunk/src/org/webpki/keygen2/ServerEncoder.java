@@ -52,10 +52,23 @@ abstract class ServerEncoder extends JSONEncoder
         ////////////////////////////////////////////////////////////////////////
         // Optional signature
         ////////////////////////////////////////////////////////////////////////
-        if (signer != null)
+        if (signer == null)
           {
+            checkIfSignatureIsRequired ();
+          }
+        else
+          {
+            checkIfNonceIsSpecified ();
             wr.setSignature (new JSONX509Signer (signer));
           }
+      }
+
+    void checkIfNonceIsSpecified () throws IOException
+      {
+      }
+
+    void checkIfSignatureIsRequired () throws IOException
+      {
       }
 
     private SignerInterface signer;

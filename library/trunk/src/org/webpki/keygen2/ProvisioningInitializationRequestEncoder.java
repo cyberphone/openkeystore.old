@@ -181,6 +181,23 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
 
     short session_key_limit;
 
+    @Override
+    void checkIfSignatureIsRequired () throws IOException
+      {
+        if (virtual_machine_data != null)
+          {
+            bad ("\"" + VIRTUAL_MACHINE_JSON + "\" requires a signed request");
+          }
+      }
+
+    @Override
+    void checkIfNonceIsSpecified () throws IOException
+      {
+        if (nonce == null)
+          {
+            bad ("Signed request needs a \"" + NONCE_JSON + "\"");
+          }
+      }
 
     @Override
     void writeServerRequest (JSONObjectWriter wr) throws IOException
