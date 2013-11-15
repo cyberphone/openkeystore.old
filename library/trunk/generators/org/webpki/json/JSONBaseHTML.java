@@ -29,10 +29,22 @@ import org.webpki.util.ArrayUtil;
  */
 public class JSONBaseHTML
   {
-    public static final String MANDATORY = "m";
-    public static final String OPTIONAL  = "o";
+    public static final String MANDATORY    = "m";
+    public static final String OPTIONAL     = "o";
     
-    static int tables;
+    public interface Types 
+      {
+        String TYPE_BOOLEAN = "bool";
+        String TYPE_SHORT   = "short";
+        String TYPE_BASE64  = "base64";
+        String TYPE_BYTE    = "byte";
+        String TYPE_INT     = "int";
+        String TYPE_OBJECT  = "object";
+        String TYPE_STRING  = "string";
+        String TYPE_URI     = "uri";
+        String TYPE_DATE    = "date";
+        String TYPE_BIGINT  = "bigint";
+      }
     
     public abstract class Content
       {
@@ -46,28 +58,34 @@ public class JSONBaseHTML
     public class ProtocolTable extends Content
       {
         String protocol;
-        boolean is_object;
         boolean main_object;
-        int table_id;
         
         Vector<Row> rows = new Vector<Row> ();
         
         public class Row
           {
             Vector<Column> columns = new Vector<Column> ();
+            boolean set_group;
+            int depth;
             
             public class Column
               {
                 StringBuffer column = new StringBuffer ();
+                Row parent;
                 
-                Column ()
+                Column (Row parent)
                   {
                     columns.add (this);
+                    this.parent = parent;
                   }
 
                 public Column newColumn ()
                   {
                     if (rows.lastElement ().columns.size () == 2 && rows.lastElement ().columns.lastElement ().column.length () ==  0)
+                      {
+                        rows.lastElement ().columns.lastElement ().column.append ("string");
+                      }
+                    if (rows.lastElement ().columns.size () == 3 && rows.lastElement ().columns.lastElement ().column.length () ==  0)
                       {
                         rows.lastElement ().columns.lastElement ().column.append (MANDATORY);
                       }
@@ -84,6 +102,10 @@ public class JSONBaseHTML
                     if (columns.size () == 2)
                       {
                         throw new IOException ("Cannot set string data for column #2");
+                      }
+                    if (columns.size () == 3)
+                      {
+                        throw new IOException ("Cannot set string data for column #3");
                       }
                     column.append (string);
                     return this;
@@ -160,11 +182,21 @@ public class JSONBaseHTML
 
                 public Column setUsage (boolean mandatory) throws IOException
                   {
+                    if (columns.size () != 3)
+                      {
+                        throw new IOException ("This method only applies to column #3");
+                      }
+                    column.append (mandatory ? MANDATORY : OPTIONAL);
+                    return this;
+                  }
+
+                public Column setType (String type) throws IOException
+                  {
                     if (columns.size () != 2)
                       {
                         throw new IOException ("This method only applies to column #2");
                       }
-                    column.append (mandatory ? MANDATORY : OPTIONAL);
+                    column.append (type);
                     return this;
                   }
 
@@ -213,6 +245,14 @@ public class JSONBaseHTML
                   {
                     return addString ("<i>").addString (integer_value).addString ("</i>");
                   }
+
+                public Column setChoice (boolean mandatory, int depth) throws IOException
+                  {
+                    setUsage (mandatory);
+                    parent.depth = depth;
+                    parent.set_group = true;
+                    return this;
+                  }
               }
             
             Row ()
@@ -222,78 +262,84 @@ public class JSONBaseHTML
 
             public Column newColumn ()
               {
-                return new Column ();
+                return new Column (this);
               }
           }
 
-        ProtocolTable (String protocol, boolean is_object, boolean main_object)
+        ProtocolTable (String protocol, boolean main_object)
           {
             super ();
             this.protocol = protocol;
-            this.is_object = is_object;
             this.main_object = main_object;
-            this.table_id = ++tables;
           }
 
         private void addObjectLine (char c)
           {
             html.append ("<tr><td><code>")
                 .append (c)
-                .append ("</code></td><td>&nbsp;</td><td></td></tr>");
+                .append ("</code></td><td>&nbsp;</td><td></td><td></td></tr>");
           }
 
         @Override
         void write () throws IOException
           {
-            html.append ("<div class=\"header\">");
-            if (!main_object)
-              {
-                html.append ("<i id=\"")
-                    .append (protocol)
-                    .append ("\">");
-              }
-            html.append (protocol)
+            html.append ("<tr><td colspan=\"3\" style=\"border-width:0px;font-size:12pt;padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica\" id=\"")
+                .append (protocol)
+                .append ("\">")
+                .append (main_object ? "" : "<i>")
+                .append (protocol)
                 .append (main_object ? "" : "</i>")
-                .append ("</div>\n<table id=\"table.")
-                .append (table_id)
-                .append ("\" class=\"tftable\" style=\"margin-bottom:10pt\"><tr><th id=\"elem1.")
-                .append (table_id)
-                .append ("\">Element</th><th>Usage</th><th id=\"elem3.")
-                .append (table_id)
-                .append ("\">Comment</th></tr>");
+                .append ("</td></tr>\n<tr><th>Element</th><th>Type</th><th>Usage</th><th>Comment</th></tr>");
+            addObjectLine ('{');
             int i = 0;
-            if (is_object)
-              {
-                addObjectLine ('{');
-              }
+            int supress = 0;
             for (Row row : rows)
               {
+                if (row.set_group)
+                  {
+                    supress = row.depth;
+                  }
                 i++;
                 html.append ("<tr>");
-                if (row.columns.size () != 3)
+                if (row.columns.size () != 4)
                   {
                     throw new IOException ("Wrong number of colums for row: " + i);
                   }
-                if (is_object)
-                  {
-                    row.columns.firstElement ().column.insert (0, "<code>&nbsp;&nbsp;</code>");
-                  }
-                if (i < rows.size ())
-                  {
-                    row.columns.firstElement ().column.append ("<code>,</code>");
-                  }
+                row.columns.firstElement ().column.insert (0, "<code>&nbsp;&nbsp;</code>");
                 int q = 0;
                 for (Row.Column column : row.columns)
                   {
-                    html.append (++q == 2 ? "<td align=\"center\">" : "<td>").append (column.column).append ("</td>");
+                    boolean output = true;
+                    q++;
+                    if (q == 3)
+                      {
+                        if (supress != 0)
+                          {
+                            if (row.set_group)
+                              {
+                                html.append ("<td align=\"center\" rowspan=\"")
+                                    .append (supress)
+                                    .append ("\">");
+                              }
+                            else
+                              {
+                                output = false;
+                                supress--;
+                              }
+                          }
+                      }
+                    if (q != 3 || supress == 0)
+                      {
+                        html.append (q == 1 ? "<td style=\"white-space: nowrap\">" : (q < 4 ? "<td align=\"center\">" : "<td>"));
+                      }
+                    if (output)
+                      {
+                        html.append (column.column).append ("</td>");
+                      }
                   }
                 html.append ("</tr>");
               }
-            if (is_object)
-              {
-                addObjectLine ('}');
-              }
-            html.append ("</table>");
+            addObjectLine ('}');
           }
 
         public Row newRow ()
@@ -311,40 +357,19 @@ public class JSONBaseHTML
         html = new StringBuffer (
             "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">" +
             "<html><head><title>KeyGen2</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><style type=\"text/css\">\n" +
-            ".tftable {color:#333333;border-width: 1px;border-color: #a9a9a9;border-collapse: collapse;}\n" +
+            ".tftable {width:80em;border-collapse: collapse;}\n" +
             ".tftable th {font-size:10pt;background-color:#e0e0e0;border-width:1px;padding:4pt 12pt 4pt 12pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
             ".tftable tr {background-color:#ffffff;}\n" +
             ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;;font-family:arial,verdana,helvetica}\n" +
-            ".header {font-size:12pt;padding:10pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica}\n" +
             "a:link {color:blue}" +
             "a:visited {color:blue}" +
             "a:active {color:blue}" +
-            "</style>" +
-            "<script type=\"text/javascript\">\n" +
-            "function tablefix ()\n" +
-            "  {\n" +
-            "    var max = -1;\n" +
-            "    for (var i = 1; i <= ").append (tables).append ("; i++)\n" +
-            "      {\n" +
-            "        var width = window.document.getElementById ('elem1.' + i).offsetWidth;\n" +
-            "        if (width > max) max = width;\n;" +
-            "      }\n" +
-            "    for (var i = 1; i <= ").append (tables).append ("; i++)\n" +
-            "      {\n" +
-            "        console.info ('max=' + max);\n" +
-//            "        window.document.getElementById ('table.' + i).style.width = '' + (max + max - 16) + 'px';\n" +
- //           "        window.document.getElementById ('elem1.' + i).style.minWidth = '' + (max - 16) + 'px';\n" +
-//            "        window.document.getElementById ('elem3.' + i).style.minWidth = '' + (max - 16) + 'px';\n" +
-//          "        window.document.getElementById ('elem.' + i).style.minWidth = '500px';\n" +
-            "      }\n" +
-            "  }\n" +
-            "</script>\n" +
-            "</head><body onload=\"tablefix ()\">");
+            "</style></head><body><table class=\"tftable\">");
         for (Content content : contents)
           {
             content.write ();
           }
-        return html.append ("</body></html>").toString ();
+        return html.append ("</table></body></html>").toString ();
       }
     
     public void writeHTML (String filename) throws IOException
@@ -354,11 +379,183 @@ public class JSONBaseHTML
 
     public ProtocolTable addProtocolTable (String protocol)
       {
-        return new ProtocolTable (protocol, true, true);
+        return new ProtocolTable (protocol, true);
       }
 
-    public ProtocolTable addSubItemTable (String sub_item, boolean is_object)
+    public ProtocolTable addSubItemTable (String sub_item)
       {
-        return new ProtocolTable (sub_item, is_object, false);
+        return new ProtocolTable (sub_item, false);
+      }
+    
+    public void addJSONSignatureDefinitions () throws IOException
+      {
+        addSubItemTable (JSONSignatureEncoder.SIGNATURE_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.ALGORITHM_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.ALGORITHM_JSON)
+            .newColumn ()
+              .setType (Types.TYPE_URI)
+            .newColumn ()
+            .newColumn ()
+              .addString ("JCS: Signature algorithm identifier")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.KEY_INFO_JSON)
+              .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
+            .newColumn ()
+              .setType (Types.TYPE_OBJECT)
+            .newColumn ()
+            .newColumn ()
+              .addString ("JCS: Signature key info placeholder")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.SIGNATURE_VALUE_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.SIGNATURE_VALUE_JSON)
+            .newColumn ()
+              .setType (Types.TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("JCS: Signature value");
+
+        addSubItemTable (JSONSignatureEncoder.KEY_INFO_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+              .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+            .newColumn ()
+              .setType (Types.TYPE_OBJECT)
+            .newColumn ()
+              .setChoice (true, 3)
+            .newColumn ()
+              .addString ("JCS option: Public key")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON)
+              .addString ("[<code>\"</code><i>Certificate path</i><code>\"</code>]")
+            .newColumn ()
+              .setType (Types.TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("JCS option: Sorted X.509 certificate path")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.KEY_ID_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.KEY_ID_JSON)
+            .newColumn ()
+              .setType (Types.TYPE_STRING)
+            .newColumn ()
+            .newColumn ()
+              .addString ("JCS option: Symmetric key id")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
+              .addLink (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
+            .newColumn ()
+              .setType (Types.TYPE_OBJECT)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("JCS: Signature certificate data. Note: only valid for the <code>" +
+                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON + "</code> option");
+
+        addSubItemTable (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.EC_JSON)
+              .addLink (JSONSignatureEncoder.EC_JSON)
+            .newColumn ()
+              .setType (Types.TYPE_OBJECT)
+            .newColumn ()
+              .setChoice (true, 2)
+            .newColumn ()
+              .addString ("JCS option: EC public key")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.RSA_JSON)
+              .addLink (JSONSignatureEncoder.RSA_JSON)
+            .newColumn ()
+              .setType (Types.TYPE_OBJECT)
+            .newColumn ()
+            .newColumn ()
+              .addString ("JCS option: RSA public key");
+
+        addSubItemTable (JSONSignatureEncoder.RSA_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.MODULUS_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.MODULUS_JSON)
+            .newColumn ()
+              .setType (Types.TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("JCS: RSA modulus")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.EXPONENT_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.EXPONENT_JSON)
+            .newColumn ()
+              .setType (Types.TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("JCS: RSA exponent");
+
+      addSubItemTable (JSONSignatureEncoder.EC_JSON)
+        .newRow ()
+          .newColumn ()
+            .addProperty (JSONSignatureEncoder.NAMED_CURVE_JSON)
+            .addSymbolicValue (JSONSignatureEncoder.NAMED_CURVE_JSON)
+          .newColumn ()
+            .setType (Types.TYPE_URI)
+          .newColumn ()
+          .newColumn ()
+            .addString ("JCS: EC named curve")
+        .newRow ()
+          .newColumn ()
+            .addProperty (JSONSignatureEncoder.X_JSON)
+            .addSymbolicValue (JSONSignatureEncoder.X_JSON)
+          .newColumn ()
+            .setType (Types.TYPE_BASE64)
+          .newColumn ()
+          .newColumn ()
+            .addString ("JCS: EC curve point X")
+        .newRow ()
+          .newColumn ()
+            .addProperty (JSONSignatureEncoder.Y_JSON)
+            .addSymbolicValue (JSONSignatureEncoder.Y_JSON)
+          .newColumn ()
+            .setType (Types.TYPE_BASE64)
+          .newColumn ()
+          .newColumn ()
+            .addString ("JCS: EC curve point Y");        
+
+      addSubItemTable (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
+        .newRow ()
+          .newColumn ()
+            .addProperty (JSONSignatureEncoder.ISSUER_JSON)
+            .addSymbolicValue (JSONSignatureEncoder.ISSUER_JSON)
+          .newColumn ()
+            .setType (Types.TYPE_STRING)
+          .newColumn ()
+          .newColumn ()
+            .addString ("JCS: X.500 issuer distinguished name")
+        .newRow ()
+          .newColumn ()
+            .addProperty (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
+            .addIntegerValue (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
+          .newColumn ()
+            .setType (Types.TYPE_BIGINT)
+          .newColumn ()
+          .newColumn ()
+            .addString ("JCS: Certificate serial number")
+        .newRow ()
+          .newColumn ()
+            .addProperty (JSONSignatureEncoder.SUBJECT_JSON)
+            .addSymbolicValue (JSONSignatureEncoder.SUBJECT_JSON)
+          .newColumn ()
+            .setType (Types.TYPE_STRING)
+          .newColumn ()
+          .newColumn ()
+            .addString ("JCS: X.500 subject distinguished name");        
       }
   }
