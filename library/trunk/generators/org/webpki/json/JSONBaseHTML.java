@@ -34,16 +34,19 @@ public class JSONBaseHTML
     
     public interface Types 
       {
-        String TYPE_BOOLEAN = "bool";
-        String TYPE_SHORT   = "short";
-        String TYPE_BASE64  = "base64";
-        String TYPE_BYTE    = "byte";
-        String TYPE_INT     = "int";
-        String TYPE_OBJECT  = "object";
-        String TYPE_STRING  = "string";
-        String TYPE_URI     = "uri";
-        String TYPE_DATE    = "date";
-        String TYPE_BIGINT  = "bigint";
+        String JSON_TYPE_BOOLEAN = "bool";
+        String JSON_TYPE_SHORT   = "short";
+        String JSON_TYPE_BASE64  = "base64";
+        String JSON_TYPE_BYTE    = "byte";
+        String JSON_TYPE_INT     = "int";
+        String JSON_TYPE_OBJECT  = "object";
+        String JSON_TYPE_STRING  = "string";
+        String JSON_TYPE_URI     = "uri";
+        String JSON_TYPE_DATE    = "date";
+        String JSON_TYPE_BIGINT  = "bigint";
+        
+        String SORTED_CERT_PATH  = "Certificate path";
+        String URI_LIST          = "List of URIs";
       }
     
     public abstract class Content
@@ -171,6 +174,13 @@ public class JSONBaseHTML
                     quote ();
                     nocode ();
                     return this;
+                  }
+
+                public Column addArrayList (String symbol_value) throws IOException
+                  {
+                    addString ("[");
+                    addSymbolicValue (symbol_value);
+                    return addString ("]");
                   }
 
                 public Column setUsage (boolean mandatory, int array_min) throws IOException
@@ -395,7 +405,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.ALGORITHM_JSON)
               .addSymbolicValue (JSONSignatureEncoder.ALGORITHM_JSON)
             .newColumn ()
-              .setType (Types.TYPE_URI)
+              .setType (Types.JSON_TYPE_URI)
             .newColumn ()
             .newColumn ()
               .addString ("JCS: Signature algorithm identifier")
@@ -404,7 +414,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.KEY_INFO_JSON)
               .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
             .newColumn ()
-              .setType (Types.TYPE_OBJECT)
+              .setType (Types.JSON_TYPE_OBJECT)
             .newColumn ()
             .newColumn ()
               .addString ("JCS: Signature key info placeholder")
@@ -413,7 +423,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.SIGNATURE_VALUE_JSON)
               .addSymbolicValue (JSONSignatureEncoder.SIGNATURE_VALUE_JSON)
             .newColumn ()
-              .setType (Types.TYPE_BASE64)
+              .setType (Types.JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
               .addString ("JCS: Signature value");
@@ -424,7 +434,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
               .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
             .newColumn ()
-              .setType (Types.TYPE_OBJECT)
+              .setType (Types.JSON_TYPE_OBJECT)
             .newColumn ()
               .setChoice (true, 3)
             .newColumn ()
@@ -432,9 +442,9 @@ public class JSONBaseHTML
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON)
-              .addString ("[<code>\"</code><i>Certificate path</i><code>\"</code>]")
+              .addArrayList (Types.SORTED_CERT_PATH)
             .newColumn ()
-              .setType (Types.TYPE_BASE64)
+              .setType (Types.JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
               .addString ("JCS option: Sorted X.509 certificate path")
@@ -443,7 +453,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.KEY_ID_JSON)
               .addSymbolicValue (JSONSignatureEncoder.KEY_ID_JSON)
             .newColumn ()
-              .setType (Types.TYPE_STRING)
+              .setType (Types.JSON_TYPE_STRING)
             .newColumn ()
             .newColumn ()
               .addString ("JCS option: Symmetric key id")
@@ -452,7 +462,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
               .addLink (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
             .newColumn ()
-              .setType (Types.TYPE_OBJECT)
+              .setType (Types.JSON_TYPE_OBJECT)
             .newColumn ()
               .setUsage (false)
             .newColumn ()
@@ -465,7 +475,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.EC_JSON)
               .addLink (JSONSignatureEncoder.EC_JSON)
             .newColumn ()
-              .setType (Types.TYPE_OBJECT)
+              .setType (Types.JSON_TYPE_OBJECT)
             .newColumn ()
               .setChoice (true, 2)
             .newColumn ()
@@ -475,7 +485,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.RSA_JSON)
               .addLink (JSONSignatureEncoder.RSA_JSON)
             .newColumn ()
-              .setType (Types.TYPE_OBJECT)
+              .setType (Types.JSON_TYPE_OBJECT)
             .newColumn ()
             .newColumn ()
               .addString ("JCS option: RSA public key");
@@ -486,7 +496,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.MODULUS_JSON)
               .addSymbolicValue (JSONSignatureEncoder.MODULUS_JSON)
             .newColumn ()
-              .setType (Types.TYPE_BASE64)
+              .setType (Types.JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
               .addString ("JCS: RSA modulus")
@@ -495,7 +505,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.EXPONENT_JSON)
               .addSymbolicValue (JSONSignatureEncoder.EXPONENT_JSON)
             .newColumn ()
-              .setType (Types.TYPE_BASE64)
+              .setType (Types.JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
               .addString ("JCS: RSA exponent");
@@ -506,7 +516,7 @@ public class JSONBaseHTML
             .addProperty (JSONSignatureEncoder.NAMED_CURVE_JSON)
             .addSymbolicValue (JSONSignatureEncoder.NAMED_CURVE_JSON)
           .newColumn ()
-            .setType (Types.TYPE_URI)
+            .setType (Types.JSON_TYPE_URI)
           .newColumn ()
           .newColumn ()
             .addString ("JCS: EC named curve")
@@ -515,7 +525,7 @@ public class JSONBaseHTML
             .addProperty (JSONSignatureEncoder.X_JSON)
             .addSymbolicValue (JSONSignatureEncoder.X_JSON)
           .newColumn ()
-            .setType (Types.TYPE_BASE64)
+            .setType (Types.JSON_TYPE_BASE64)
           .newColumn ()
           .newColumn ()
             .addString ("JCS: EC curve point X")
@@ -524,7 +534,7 @@ public class JSONBaseHTML
             .addProperty (JSONSignatureEncoder.Y_JSON)
             .addSymbolicValue (JSONSignatureEncoder.Y_JSON)
           .newColumn ()
-            .setType (Types.TYPE_BASE64)
+            .setType (Types.JSON_TYPE_BASE64)
           .newColumn ()
           .newColumn ()
             .addString ("JCS: EC curve point Y");        
@@ -535,7 +545,7 @@ public class JSONBaseHTML
             .addProperty (JSONSignatureEncoder.ISSUER_JSON)
             .addSymbolicValue (JSONSignatureEncoder.ISSUER_JSON)
           .newColumn ()
-            .setType (Types.TYPE_STRING)
+            .setType (Types.JSON_TYPE_STRING)
           .newColumn ()
           .newColumn ()
             .addString ("JCS: X.500 issuer distinguished name")
@@ -544,7 +554,7 @@ public class JSONBaseHTML
             .addProperty (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
             .addIntegerValue (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
           .newColumn ()
-            .setType (Types.TYPE_BIGINT)
+            .setType (Types.JSON_TYPE_BIGINT)
           .newColumn ()
           .newColumn ()
             .addString ("JCS: Certificate serial number")
@@ -553,7 +563,7 @@ public class JSONBaseHTML
             .addProperty (JSONSignatureEncoder.SUBJECT_JSON)
             .addSymbolicValue (JSONSignatureEncoder.SUBJECT_JSON)
           .newColumn ()
-            .setType (Types.TYPE_STRING)
+            .setType (Types.JSON_TYPE_STRING)
           .newColumn ()
           .newColumn ()
             .addString ("JCS: X.500 subject distinguished name");        
