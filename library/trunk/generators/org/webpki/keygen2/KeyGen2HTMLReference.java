@@ -39,26 +39,127 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
     
     static JSONBaseHTML json;
     
+    static class MAC implements JSONBaseHTML.Extender
+      {
+        String sks_method;
+        MAC (String sks_method)
+          {
+            this.sks_method = sks_method;
+          }
+
+        @Override
+        public Column execute (Column column) throws IOException
+          {
+            return column
+              .newRow ()
+                .newColumn ()
+                  .addProperty (MAC_JSON)
+                  .addSymbolicValue (MAC_JSON)
+                .newColumn ()
+                  .setType (JSON_TYPE_BASE64)
+                .newColumn ()
+                .newColumn ()
+                  .addString ("See <code>SKS:")
+                  .addString (sks_method)
+                  .addString ("</code>");
+          }
+      }
+    
+    static class ServerSessionID implements JSONBaseHTML.Extender
+      {
+        @Override
+        public Column execute (Column column) throws IOException
+          {
+            return column
+              .newRow ()
+                .newColumn ()
+                  .addProperty (SERVER_SESSION_ID_JSON)
+                  .addSymbolicValue (SERVER_SESSION_ID_JSON)
+                .newColumn ()
+                .newColumn ()
+                .newColumn ()
+                  .addString ("See <code>SKS:createProvisioningSession." +
+                              SERVER_SESSION_ID_JSON + "</code> and ")
+                  .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON);
+          }
+      }
+
+    static class OptionalSignature implements JSONBaseHTML.Extender
+      {
+        @Override
+        public Column execute (Column column) throws IOException
+          {
+            return column
+              .newRow ()
+                .newColumn ()
+                  .addProperty (JSONSignatureEncoder.SIGNATURE_JSON)
+                  .addLink (JSONSignatureEncoder.SIGNATURE_JSON)
+                .newColumn ()
+                  .setType (JSON_TYPE_OBJECT)
+                .newColumn ()
+                  .setUsage (false)
+                .newColumn ()
+                  .addString ("<i>Optional</i> X509-based signature covering the request. See ")
+                  .addLink (JSONSignatureEncoder.KEY_INFO_JSON);
+          }
+      }
+
     static Column preAmble (String qualifier) throws IOException
       {
         return json.addProtocolTable (qualifier)
-        .newRow ()
-          .newColumn ()
-            .addContext (KEYGEN2_NS)
-          .newColumn ()
-            .setType (JSON_TYPE_URI)
-          .newColumn ()
-          .newColumn ()
-            .addString (KEYGEN2_NAME_SPACE)
           .newRow ()
-          .newColumn ()
-            .addQualifier (qualifier)
-          .newColumn ()
-          .newColumn ()
-          .newColumn ()
-            .addString (OBJECT_ID);
+            .newColumn ()
+              .addContext (KEYGEN2_NS)
+            .newColumn ()
+              .setType (JSON_TYPE_URI)
+            .newColumn ()
+            .newColumn ()
+              .addString (KEYGEN2_NAME_SPACE)
+          .newRow ()
+            .newColumn ()
+              .addQualifier (qualifier)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString (OBJECT_ID);
+      }
+
+    static class StandardServerClientSessionIDs implements JSONBaseHTML.Extender
+      {
+        @Override
+        public Column execute (Column column) throws IOException
+          {
+            return column.newExtensionRow (new ServerSessionID ())
+              .newRow ()
+                .newColumn ()
+                  .addProperty (CLIENT_SESSION_ID_JSON)
+                  .addSymbolicValue (CLIENT_SESSION_ID_JSON)
+                .newColumn ()
+                .newColumn ()
+                .newColumn ()
+                  .addString ("See <code>SKS:createProvisioningSession." +
+                              CLIENT_SESSION_ID_JSON + "</code>");
+          }
       }
     
+    static class SubmitURL implements JSONBaseHTML.Extender
+      {
+        @Override
+        public Column execute (Column column) throws IOException
+          {
+            return column
+              .newRow ()
+                .newColumn ()
+                  .addProperty (SUBMIT_URL_JSON)
+                  .addSymbolicValue (SUBMIT_URL_JSON)
+                .newColumn ()
+                  .setType (JSON_TYPE_URI)
+                .newColumn ()
+                .newColumn ()
+                  .addString ("Where to POST the response");
+          }
+      }
+
     public static void main (String args[]) throws IOException
       {
         if (args.length != 1)
@@ -75,16 +176,9 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setType (JSON_TYPE_URI)
             .newColumn ()
             .newColumn ()
-              .addString ("See <code>SKS:createProvisioningSession." + SESSION_KEY_ALGORITHM_JSON + "</code>")
-          .newRow ()
-            .newColumn ()
-              .addProperty (SERVER_SESSION_ID_JSON)
-              .addSymbolicValue (SERVER_SESSION_ID_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("See <code>SKS:createProvisioningSession." + SERVER_SESSION_ID_JSON + "</code> and ")
-              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
+              .addString ("See <code>SKS:createProvisioningSession." +
+                          SESSION_KEY_ALGORITHM_JSON + "</code>")
+          .newExtensionRow (new ServerSessionID ())
           .newRow ()
             .newColumn ()
               .addProperty (SERVER_TIME_JSON)
@@ -94,15 +188,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("Server time which the client can verify for &quot;sanity&quot;")
-          .newRow ()
-            .newColumn ()
-              .addProperty (SUBMIT_URL_JSON)
-              .addSymbolicValue (SUBMIT_URL_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_URI)
-            .newColumn ()
-            .newColumn ()
-              .addString ("Where to POST the response")
+          .newExtensionRow (new SubmitURL ())
           .newRow ()
             .newColumn ()
               .addProperty (SESSION_KEY_LIMIT_JSON)
@@ -149,7 +235,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false, 1)
             .newColumn ()
-              .addString ("List of client attribute types (expresesed as URI strings) that the client <i>may</i> honor. See ")
+              .addString ("List of client attribute types (expressed as URI strings) that the client <i>may</i> honor. See ")
               .addLink (PROVISIONING_INITIALIZATION_RESPONSE_JSON)
           .newRow ()
             .newColumn ()
@@ -178,36 +264,12 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                            NONCE_JSON + "</code> specified in ")
                .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
                .addString (". Also see <code>" + JSONSignatureEncoder.SIGNATURE_JSON + "</code>")
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureEncoder.SIGNATURE_JSON)
-              .addLink (JSONSignatureEncoder.SIGNATURE_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString ("<i>Optional</i> signature covering the request.  Note that <code>" +
-                          NONCE_JSON + "</code> <i>must</i> be specified for signed requests");
+          .newExtensionRow (new OptionalSignature ())
+              .addString (". Note that <code>" + NONCE_JSON +
+                          "</code> <i>must</i> be specified for signed requests");
 
         preAmble (PROVISIONING_INITIALIZATION_RESPONSE_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (SERVER_SESSION_ID_JSON)
-              .addSymbolicValue (SERVER_SESSION_ID_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("See <code>SKS:createProvisioningSession." + SERVER_SESSION_ID_JSON + "</code> and ")
-              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (CLIENT_SESSION_ID_JSON)
-              .addSymbolicValue (CLIENT_SESSION_ID_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("See <code>SKS:createProvisioningSession." + CLIENT_SESSION_ID_JSON + "</code>")
+          .newExtensionRow (new StandardServerClientSessionIDs ())
           .newRow ()
             .newColumn ()
               .addProperty (SESSION_ATTESTATION_JSON)
@@ -216,7 +278,8 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setType (JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("See <code>SKS:createProvisioningSession." + SESSION_ATTESTATION_JSON + "</code>")
+              .addString ("See <code>SKS:createProvisioningSession." +
+                          SESSION_ATTESTATION_JSON + "</code>")
           .newRow ()
             .newColumn ()
               .addProperty (SERVER_TIME_JSON)
@@ -277,78 +340,9 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addString ("Signature covering the entire response. See <code>" +
                           "SKS:createProvisioningSession</code>");
 
-        json.addProtocolTable (PROVISIONING_FINALIZATION_REQUEST_JSON)
-          .newRow ()
-            .newColumn ()
-              .addQualifier (KEYGEN2_NS)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString (KEYGEN2_NAME_SPACE)
-            .newRow ()
-            .newColumn ()
-              .addContext (PROVISIONING_FINALIZATION_REQUEST_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString (OBJECT_ID)
-          .newRow ()
-            .newColumn ()
-              .addProperty (SESSION_KEY_ALGORITHM_JSON)
-              .addValue (SecureKeyStore.ALGORITHM_SESSION_ATTEST_1)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("See SKS:createProvisioningSession." + SESSION_KEY_ALGORITHM_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (SERVER_SESSION_ID_JSON)
-              .addSymbolicValue (SERVER_SESSION_ID_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("See SKS:createProvisioningSession." + SERVER_SESSION_ID_JSON + " and ")
-              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (SERVER_TIME_JSON)
-              .addSymbolicValue (SERVER_TIME_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("Server time in ISO format (yyyy-mm-ddThh:mm:ss+mm:ss)")
-          .newRow ()
-            .newColumn ()
-              .addProperty (SUBMIT_URL_JSON)
-              .addSymbolicValue (SUBMIT_URL_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("Where to POST the result")
-          .newRow ()
-            .newColumn ()
-              .addProperty (SESSION_KEY_LIMIT_JSON)
-              .addIntegerValue (SESSION_KEY_LIMIT_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("See SKS:createProvisioningSession." + SESSION_KEY_LIMIT_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (SESSION_LIFE_TIME_JSON)
-              .addIntegerValue (SESSION_LIFE_TIME_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("See SKS:createProvisioningSession." + SESSION_LIFE_TIME_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (SERVER_EPHEMERAL_KEY_JSON)
-              .addLink (SERVER_EPHEMERAL_KEY_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("See SKS:createProvisioningSession." + SERVER_EPHEMERAL_KEY_JSON)
+        preAmble (PROVISIONING_FINALIZATION_REQUEST_JSON)
+          .newExtensionRow (new StandardServerClientSessionIDs ())
+          .newExtensionRow (new SubmitURL ())
           .newRow ()
             .newColumn ()
               .addProperty (ISSUED_CREDENTIALS_JSON)
@@ -357,26 +351,21 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false, 1)
             .newColumn ()
-              .addString ("<i>Optional:</i> List of issued credentials");
+              .addString ("<i>Optional:</i> List of issued credentials")
+          .newRow ()
+            .newColumn ()
+              .addProperty (CHALLENGE_JSON)
+              .addSymbolicValue (CHALLENGE_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("See <code>SKS:closeProvisioningSession</code>")
+          .newExtensionRow (new MAC ("closeProvisioningSession"))
+          .newExtensionRow (new OptionalSignature ());
 
         preAmble (PROVISIONING_FINALIZATION_RESPONSE_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (SERVER_SESSION_ID_JSON)
-              .addSymbolicValue (SERVER_SESSION_ID_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("See <code>SKS:createProvisioningSession." + SERVER_SESSION_ID_JSON + "</code> and ")
-              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (CLIENT_SESSION_ID_JSON)
-              .addSymbolicValue (CLIENT_SESSION_ID_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("See <code>SKS:createProvisioningSession." + CLIENT_SESSION_ID_JSON + "</code>")
+          .newExtensionRow (new StandardServerClientSessionIDs ())
           .newRow ()
             .newColumn ()
               .addProperty (CLOSE_ATTESTATION_JSON)
@@ -477,17 +466,24 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
             .newColumn ()
-              .addString ("Must match the identifier used in ")
+              .addString ("See <code>SKS:setCertificatePath.ID</code>")
+              .addString (". Must match the identifier used in ")
               .addLink (KEY_CREATION_REQUEST_JSON)
               .addString (" for a specific key")
           .newRow ()
             .newColumn ()
-              .addProperty (ISSUED_CREDENTIALS_JSON)
-              .addArrayLink (ISSUED_CREDENTIALS_JSON)
+              .addProperty (JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON)
+              .addArrayList (SORTED_CERT_PATH)
+            .newColumn ()
+              .setType (JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .setUsage (false, 1)
-            .newColumn ();
+              .addString ("See <code>SKS:setCertificatePath.X509Certificate</code>")
+              .addString (". Identical representation as the <code>" +
+                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
+                          "</code> in ")
+              .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
+            .newExtensionRow (new MAC ("setCertificatePath"));
 
         json.addSubItemTable (CLIENT_ATTRIBUTES_JSON)
           .newRow ()
@@ -506,7 +502,8 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .setUsage (true, 1)
-            .newColumn ();
+            .newColumn ()
+              .addString ("List of attributes associated with <code>" + TYPE_JSON + "</code>");
 
         json.addSubItemTable (DEVICE_CERTIFICATE_JSON)
           .newRow ()

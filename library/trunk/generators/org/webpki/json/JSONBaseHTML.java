@@ -49,6 +49,11 @@ public class JSONBaseHTML
         String URI_LIST          = "List of URIs";
       }
     
+    public interface Extender
+      {
+        ProtocolTable.Row.Column execute (ProtocolTable.Row.Column column) throws IOException;
+      }
+    
     public abstract class Content
       {
         Content ()
@@ -262,6 +267,11 @@ public class JSONBaseHTML
                     parent.depth = depth;
                     parent.set_group = true;
                     return this;
+                  }
+
+                public Column newExtensionRow (Extender extender) throws IOException
+                  {
+                    return extender.execute (this);
                   }
               }
             
