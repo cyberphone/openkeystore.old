@@ -20,6 +20,8 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 import java.io.IOException;
 
+import org.webpki.crypto.CertificateFilter;
+
 import org.webpki.json.JSONBaseHTML;
 import org.webpki.json.JSONBaseHTML.ProtocolTable.Row.Column;
 import org.webpki.json.JSONSignatureEncoder;
@@ -59,12 +61,40 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                   .setType (JSON_TYPE_BASE64)
                 .newColumn ()
                 .newColumn ()
-                  .addString ("See <code>SKS:")
+                  .addString ("HMAC-SHA256 object authentication. See <code>SKS:")
                   .addString (sks_method)
                   .addString ("</code>");
           }
       }
     
+    static class TargetKeyReference implements JSONBaseHTML.Extender
+      {
+        String sks_method;
+        String json_tag;
+        TargetKeyReference (String json_tag, String sks_method)
+          {
+            this.sks_method = sks_method;
+            this.json_tag = json_tag;
+          }
+  
+        @Override
+        public Column execute (Column column) throws IOException
+          {
+            return column
+              .newRow ()
+                .newColumn ()
+                  .addProperty (json_tag)
+                  .addArrayLink (json_tag)
+                .newColumn ()
+                  .setType (JSON_TYPE_BASE64)
+                .newColumn ()
+                .newColumn ()
+                  .addString ("See <code>SKS:")
+                  .addString (sks_method)
+                  .addString ("</code>");
+          }
+      }
+
     static class ServerSessionID implements JSONBaseHTML.Extender
       {
         @Override
@@ -158,6 +188,46 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                 .newColumn ()
                   .addString ("Where to POST the response");
           }
+      }
+
+    static void targetKeyReference (String operation, String sks_method) throws IOException
+      {
+        json.addSubItemTable (operation)
+          .newRow ()
+            .newColumn ()
+              .addProperty (CertificateFilter.CF_FINGER_PRINT)
+              .addSymbolicValue (CertificateFilter.CF_FINGER_PRINT)
+            .newColumn ()
+               .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("SHA256 fingerprint of target certificate")
+          .newRow ()
+            .newColumn ()
+              .addProperty (SERVER_SESSION_ID_JSON)
+              .addSymbolicValue (SERVER_SESSION_ID_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("For locating the target key")
+          .newRow ()
+            .newColumn ()
+              .addProperty (CLIENT_SESSION_ID_JSON)
+              .addSymbolicValue (CLIENT_SESSION_ID_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("For locating the target key")
+          .newRow ()
+            .newColumn ()
+              .addProperty (AUTHORIZATION_JSON)
+              .addSymbolicValue (AUTHORIZATION_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("See &quot;Target Key Reference&quot; in the SKS reference")
+          .newExtensionRow (new MAC (sks_method));
       }
 
     public static void main (String args[]) throws IOException
@@ -348,10 +418,31 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addProperty (ISSUED_CREDENTIALS_JSON)
               .addArrayLink (ISSUED_CREDENTIALS_JSON)
             .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
             .newColumn ()
               .setUsage (false, 1)
             .newColumn ()
               .addString ("<i>Optional:</i> List of issued credentials")
+          .newRow ()
+            .newColumn ()
+              .addProperty (UNLOCK_KEYS_JSON)
+              .addArrayLink (UNLOCK_KEYS_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
+            .newColumn ()
+              .setUsage (false, 1)
+            .newColumn ()
+              .addString ("<i>Optional:</i> List of keys to be unlocked")
+          .newRow ()
+            .newColumn ()
+              .addProperty (DELETE_KEYS_JSON)
+              .addArrayLink (DELETE_KEYS_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
+            .newColumn ()
+              .setUsage (false, 1)
+            .newColumn ()
+              .addString ("<i>Optional:</i> List of keys to be deleted")
           .newRow ()
             .newColumn ()
               .addProperty (CHALLENGE_JSON)
@@ -483,7 +574,16 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                           JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
                           "</code> in ")
               .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
-            .newExtensionRow (new MAC ("setCertificatePath"));
+            .newExtensionRow (new MAC ("setCertificatePath"))
+            .newExtensionRow (new TargetKeyReference (UPDATE_KEY_JSON, "postUpdateKey"));
+
+        targetKeyReference (UPDATE_KEY_JSON, "postUpdateKey");
+
+        targetKeyReference (CLONE_KEY_PROTECTION_JSON, "postCloneKeyProtection");
+
+        targetKeyReference (UNLOCK_KEYS_JSON, "postUnlockKey");
+
+        targetKeyReference (DELETE_KEYS_JSON, "postDeleteKey");
 
         json.addSubItemTable (CLIENT_ATTRIBUTES_JSON)
           .newRow ()
