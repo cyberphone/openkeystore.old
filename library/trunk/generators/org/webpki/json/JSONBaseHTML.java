@@ -45,7 +45,7 @@ public class JSONBaseHTML
         String JSON_TYPE_DATE    = "date";
         String JSON_TYPE_BIGINT  = "bigint";
         
-        String SORTED_CERT_PATH  = "Certificate path";
+        String SORTED_CERT_PATH  = "Sorted Certificate Path";
         String URI_LIST          = "List of URIs";
       }
     
@@ -65,7 +65,7 @@ public class JSONBaseHTML
 
     public class ProtocolTable extends Content
       {
-        String protocol;
+        String protocols[];
         boolean main_object;
         
         Vector<Row> rows = new Vector<Row> ();
@@ -233,20 +233,20 @@ public class JSONBaseHTML
                     addString ("[");
                   }
 
-                private void link (String link, String style) throws IOException
+                private void link (String name, String style) throws IOException
                   {
                     addString ("<a href=\"#")
-                      .addString (link)
+                      .addString (name)
                       .addString ("\"")
                       .addString (style)
                       .addString (">")
-                      .addString (link)
+                      .addString (name)
                       .addString ("</a>");
                   }
 
-                public Column addLink (String link) throws IOException
+                public Column addLink (String name) throws IOException
                   {
-                    link (link, "");
+                    link (name, "");
                     return this;
                   }
 
@@ -286,31 +286,36 @@ public class JSONBaseHTML
               }
           }
 
-        ProtocolTable (String protocol, boolean main_object)
+        ProtocolTable (String[] protocols, boolean main_object)
           {
             super ();
-            this.protocol = protocol;
+            this.protocols = protocols;
             this.main_object = main_object;
-          }
-
-        private void addObjectLine (char c)
-          {
-            html.append ("<tr><td><code>")
-                .append (c)
-                .append ("</code></td><td>&nbsp;</td><td></td><td></td></tr>");
           }
 
         @Override
         void write () throws IOException
           {
-            html.append ("<tr><td colspan=\"3\" style=\"border-width:0px;font-size:12pt;padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica\" id=\"")
-                .append (protocol)
-                .append ("\">")
-                .append (main_object ? "" : "<i>")
-                .append (protocol)
-                .append (main_object ? "" : "</i>")
-                .append ("</td></tr>\n<tr><th>Element</th><th>Type</th><th>Usage</th><th>Comment</th></tr>");
-            addObjectLine ('{');
+            html.append ("<tr><td colspan=\"3\" style=\"border-width:0px;font-size:12pt;padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica\">");
+            boolean next = false;
+            for (String protocol : protocols)
+              {
+                if (next)
+                  {
+                    html.append (", &nbsp;");
+                  }
+                else
+                  {
+                    next = true;
+                  }
+                html.append ("<span id=\"")
+                    .append (protocol)
+                    .append ("\">")
+                    .append (main_object ? "" : "<i>")
+                    .append (protocol)
+                    .append (main_object ? "" : "</i></span>");
+              }
+            html.append ("</td></tr>\n<tr><th>Element</th><th>Type</th><th>Usage</th><th>Comment</th></tr>");
             int i = 0;
             int supress = 0;
             for (Row row : rows)
@@ -325,7 +330,6 @@ public class JSONBaseHTML
                   {
                     throw new IOException ("Wrong number of colums for row: " + i);
                   }
-                row.columns.firstElement ().column.insert (0, "<code>&nbsp;&nbsp;</code>");
                 int q = 0;
                 for (Row.Column column : row.columns)
                   {
@@ -359,7 +363,6 @@ public class JSONBaseHTML
                   }
                 html.append ("</tr>");
               }
-            addObjectLine ('}');
           }
 
         public Row newRow ()
@@ -399,14 +402,19 @@ public class JSONBaseHTML
 
     public ProtocolTable addProtocolTable (String protocol)
       {
-        return new ProtocolTable (protocol, true);
+        return new ProtocolTable (new String[]{protocol}, true);
       }
 
     public ProtocolTable addSubItemTable (String sub_item)
       {
-        return new ProtocolTable (sub_item, false);
+        return new ProtocolTable (new String[]{sub_item}, false);
       }
     
+    public ProtocolTable addSubItemTable (String[] sub_items)
+      {
+        return new ProtocolTable (sub_items, false);
+      }
+
     public void addJSONSignatureDefinitions () throws IOException
       {
         addSubItemTable (JSONSignatureEncoder.SIGNATURE_JSON)
