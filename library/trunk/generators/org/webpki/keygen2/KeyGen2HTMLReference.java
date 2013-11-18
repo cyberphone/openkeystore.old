@@ -104,7 +104,66 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                   .addString ("</code>");
           }
       }
+    
+    static class LinkedObject implements JSONBaseHTML.Extender
+      {
+        String name;
+        boolean mandatory;
+        String description;
+        
+        LinkedObject (String name, boolean mandatory, String description)
+          {
+            this.name = name;
+            this.mandatory = mandatory;
+            this.description = description;
+          }
 
+        @Override
+        public Column execute (Column column) throws IOException
+          {
+            return column
+              .newRow ()
+                .newColumn ()
+                  .addProperty (name)
+                  .addLink (name)
+                .newColumn ()
+                  .setType (JSON_TYPE_OBJECT)
+                .newColumn ()
+                  .setUsage (mandatory)
+                .newColumn ()
+                  .addString (description);
+          }
+      }
+
+    static class OptionalArrayObject implements JSONBaseHTML.Extender
+      {
+        String name;
+        int min;
+        String description;
+        
+        OptionalArrayObject (String name, int min, String description)
+          {
+            this.name = name;
+            this.min = min;
+            this.description = description;
+          }
+
+        @Override
+        public Column execute (Column column) throws IOException
+          {
+            return column
+              .newRow ()
+                .newColumn ()
+                  .addProperty (name)
+                  .addArrayLink (name)
+                .newColumn ()
+                  .setType (JSON_TYPE_OBJECT)
+                .newColumn ()
+                  .setUsage (false, min)
+                .newColumn ()
+                  .addString (description);
+          }
+      }
     static class ServerSessionID implements JSONBaseHTML.Extender
       {
         @Override
@@ -247,25 +306,14 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("See <code>SKS:createProvisioningSession." + SESSION_LIFE_TIME_JSON + "</code>")
-          .newRow ()
-            .newColumn ()
-              .addProperty (SERVER_EPHEMERAL_KEY_JSON)
-              .addLink (SERVER_EPHEMERAL_KEY_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-            .newColumn ()
-              .addString ("See <code>SKS:createProvisioningSession." + SERVER_EPHEMERAL_KEY_JSON + "</code>")
-          .newRow ()
-            .newColumn ()
-              .addProperty (KEY_MANAGEMENT_KEY_JSON)
-              .addLink (KEY_MANAGEMENT_KEY_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString ("See <code>SKS:createProvisioningSession." + KEY_MANAGEMENT_KEY_JSON + "</code>")
+          .newExtensionRow (new LinkedObject (SERVER_EPHEMERAL_KEY_JSON,
+                                              true,
+                                               "See <code>SKS:createProvisioningSession." +
+                                              SERVER_EPHEMERAL_KEY_JSON + "</code>"))
+          .newExtensionRow (new LinkedObject (KEY_MANAGEMENT_KEY_JSON,
+                                              false,
+                                              "See <code>SKS:createProvisioningSession." +
+                                              KEY_MANAGEMENT_KEY_JSON + "</code>"))
           .newRow ()
             .newColumn ()
               .addProperty (REQUESTED_CLIENT_ATTRIBUTES_JSON)
@@ -277,19 +325,13 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .addString ("List of client attribute types (expressed as URI strings) that the client <i>may</i> honor. See ")
               .addLink (PROVISIONING_INITIALIZATION_RESPONSE_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (VIRTUAL_MACHINE_JSON)
-              .addLink (VIRTUAL_MACHINE_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString (NOT_READY + " Note that the <code>" +
-                          VIRTUAL_MACHINE_JSON +
-                          "</code> option presumes that the <code>" +
-                          PROVISIONING_INITIALIZATION_REQUEST_JSON + "</code> is <i>signed</i>")
+          .newExtensionRow (new LinkedObject (VIRTUAL_MACHINE_JSON,
+                                              false,
+                                              NOT_READY + " Note that the <code>" +
+                                              VIRTUAL_MACHINE_JSON +
+                                              "</code> option presumes that the <code>" +
+                                              PROVISIONING_INITIALIZATION_REQUEST_JSON +
+                                              "</code> is <i>signed</i>"))
           .newRow ()
             .newColumn ()
               .addProperty (NONCE_JSON)
@@ -340,25 +382,12 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("See <code>SKS:createProvisioningSession." + CLIENT_TIME_JSON + "</code>")
-          .newRow ()
-            .newColumn ()
-              .addProperty (CLIENT_EPHEMERAL_KEY_JSON)
-              .addLink (CLIENT_EPHEMERAL_KEY_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-            .newColumn ()
-              .addString ("See <code>SKS:createProvisioningSession." + CLIENT_EPHEMERAL_KEY_JSON + "</code>")
-          .newRow ()
-            .newColumn ()
-              .addProperty (DEVICE_CERTIFICATE_JSON)
-              .addLink (DEVICE_CERTIFICATE_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString ("See <code>SKS:createProvisioningSession</code>")
+          .newExtensionRow (new LinkedObject (CLIENT_EPHEMERAL_KEY_JSON,
+                                              true,
+                                              "See <code>SKS:createProvisioningSession." + CLIENT_EPHEMERAL_KEY_JSON + "</code>"))
+          .newExtensionRow (new LinkedObject (DEVICE_CERTIFICATE_JSON,
+                                              false,
+                                              "See <code>SKS:createProvisioningSession</code>"))
           .newRow ()
             .newColumn ()
               .addProperty (CLIENT_ATTRIBUTES_JSON)
@@ -370,53 +399,26 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .addString ("List of client attribute types and values. See ")
               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureEncoder.SIGNATURE_JSON)
-              .addLink (JSONSignatureEncoder.SIGNATURE_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-            .newColumn ()
-              .addString ("Signature covering the entire response. See <code>" +
-                          "SKS:createProvisioningSession</code>");
+          .newExtensionRow (new LinkedObject (JSONSignatureEncoder.SIGNATURE_JSON,
+                                              true,
+                                              "Signature covering the entire response. See <code>" +
+                                              "SKS:createProvisioningSession</code>"));
 
         preAmble (PROVISIONING_FINALIZATION_REQUEST_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newExtensionRow (new SubmitURL ())
-          .newRow ()
-            .newColumn ()
-              .addProperty (ISSUED_CREDENTIALS_JSON)
-              .addArrayLink (ISSUED_CREDENTIALS_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-              .setUsage (false, 1)
-            .newColumn ()
-              .addString ("<i>Optional:</i> List of issued credentials. See <code>" +
-                          "SKS:setCertificatePath</code>")
-          .newRow ()
-            .newColumn ()
-              .addProperty (UNLOCK_KEYS_JSON)
-              .addArrayLink (UNLOCK_KEYS_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-              .setUsage (false, 1)
-            .newColumn ()
-              .addString ("<i>Optional:</i> List of keys to be unlocked. See <code>" +
-                          "SKS:postUnlockKey</code>")
-          .newRow ()
-            .newColumn ()
-              .addProperty (DELETE_KEYS_JSON)
-              .addArrayLink (DELETE_KEYS_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-              .setUsage (false, 1)
-            .newColumn ()
-              .addString ("<i>Optional:</i> List of keys to be deleted. See <code>" +
-                          "SKS:postDeleteKey</code>")
+          .newExtensionRow (new OptionalArrayObject (ISSUED_CREDENTIALS_JSON,
+                                                     1,
+                                                     "<i>Optional:</i> List of issued credentials. See <code>" +
+                                                     "SKS:setCertificatePath</code>"))
+          .newExtensionRow (new OptionalArrayObject (UNLOCK_KEYS_JSON,
+                                                     1,
+                                                     "<i>Optional:</i> List of keys to be unlocked. See <code>" +
+                                                     "SKS:postUnlockKey</code>"))
+          .newExtensionRow (new OptionalArrayObject (DELETE_KEYS_JSON,
+                                                     1,
+                                                     "<i>Optional:</i> List of keys to be deleted. See <code>" +
+                                                     "SKS:postDeleteKey</code>"))
           .newRow ()
             .newColumn ()
               .addProperty (CHALLENGE_JSON)
@@ -548,33 +550,42 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                           JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
                           "</code> in ")
               .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
-            .newExtensionRow (new MAC ("setCertificatePath"))
-            .newRow ()
-              .newColumn ()
-                .addProperty (TRUST_ANCHOR_JSON)
-                .addSymbolicValue (TRUST_ANCHOR_JSON)
-              .newColumn ()
-                .setType (JSON_TYPE_BOOLEAN)
-              .newColumn ()
-                .setUsage (false)
-              .newColumn ()
-                .addString ("<i>Optional</i> flag (with the default value <code>false</code>), " +
-                            "which tells if <code>" +
-                            JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
-                            "</code> contains a user-installable trust anchor as well. " +
-                            "Trust anchor installation is indepdenent of SKS provisioning")
-            .newRow ()
-              .newColumn ()
-                .addProperty (IMPORT_KEY_JSON)
-                .addLink (IMPORT_KEY_JSON)
-              .newColumn ()
-                .setType (JSON_TYPE_OBJECT)
-              .newColumn ()
-                .setUsage (false)
-              .newColumn ()
-                .addString ("<i>Optional</i> key import operation")
-            .newExtensionRow (new TargetKeyReference (UPDATE_KEY_JSON, false, "postUpdateKey", true))
-            .newExtensionRow (new TargetKeyReference (CLONE_KEY_PROTECTION_JSON, false, "postCloneKeyProtection", false));
+          .newExtensionRow (new MAC ("setCertificatePath"))
+          .newRow ()
+            .newColumn ()
+              .addProperty (TRUST_ANCHOR_JSON)
+              .addSymbolicValue (TRUST_ANCHOR_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BOOLEAN)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("<i>Optional</i> flag (with the default value <code>false</code>), " +
+                          "which tells if <code>" +
+                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
+                          "</code> contains a user-installable trust anchor as well. " +
+                          "Trust anchor installation is indepdenent of SKS provisioning")
+          .newExtensionRow (new LinkedObject (IMPORT_KEY_JSON,
+                                              false,
+                                              "<i>Optional</i> key import operation"))
+          .newExtensionRow (new TargetKeyReference (UPDATE_KEY_JSON, false, "postUpdateKey", true))
+          .newExtensionRow (new TargetKeyReference (CLONE_KEY_PROTECTION_JSON, false, "postCloneKeyProtection", false))
+          .newExtensionRow (new OptionalArrayObject (EXTENSIONS_JSON,
+              1,
+              "<i>Optional:</i> List of extension objects. See <code>" +
+              "SKS:addExtension</code>"))
+          .newExtensionRow (new OptionalArrayObject (ENCRYPTED_EXTENSIONS_JSON,
+              1,
+              "<i>Optional:</i> List of encrypted extension objects. See <code>" +
+              "SKS:addExtension</code>"))
+          .newExtensionRow (new OptionalArrayObject (PROPERTY_BAGS_JSON,
+              1,
+              "<i>Optional:</i> List of property objects. See <code>" +
+              "SKS:addExtension</code>"))
+          .newExtensionRow (new OptionalArrayObject (LOGOTYPES_JSON,
+              1,
+              "<i>Optional:</i> List of logotype objects. See <code>" +
+              "SKS:addExtension</code>"));
 
         json.addSubItemTable (new String[]{UPDATE_KEY_JSON,
                                            CLONE_KEY_PROTECTION_JSON,
@@ -616,6 +627,28 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addString ("See &quot;Target Key Reference&quot; in the SKS reference")
           .newExtensionRow (new MAC ("post* </code> methods<code>"));
         
+        json.addSubItemTable (IMPORT_KEY_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (SYMMETRIC_KEY_JSON)
+              .addSymbolicValue (SYMMETRIC_KEY_JSON)
+            .newColumn ()
+               .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+               .setChoice (true, 2)
+            .newColumn ()
+              .addString ("Encrypted symmetric key")
+          .newRow ()
+            .newColumn ()
+              .addProperty (PRIVATE_KEY_JSON)
+              .addSymbolicValue (PRIVATE_KEY_JSON)
+            .newColumn ()
+               .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("Encrypted PKCS #8 object")
+          .newExtensionRow (new MAC ("import* </code> methods<code>"));
+
         json.addSubItemTable (CLIENT_ATTRIBUTES_JSON)
           .newRow ()
             .newColumn ()
