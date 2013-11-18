@@ -334,6 +334,7 @@ public class JSONBaseHTML
                 for (Row.Column column : row.columns)
                   {
                     boolean output = true;
+                    boolean standard = true;
                     q++;
                     if (q == 3)
                       {
@@ -341,6 +342,7 @@ public class JSONBaseHTML
                           {
                             if (row.set_group)
                               {
+                                standard = false;
                                 html.append ("<td align=\"center\" rowspan=\"")
                                     .append (supress)
                                     .append ("\">");
@@ -348,11 +350,11 @@ public class JSONBaseHTML
                             else
                               {
                                 output = false;
-                                supress--;
                               }
+                            supress--;
                           }
                       }
-                    if (q != 3 || supress == 0)
+                    if (output == standard)
                       {
                         html.append (q == 1 ? "<td style=\"white-space: nowrap\">" : (q < 4 ? "<td align=\"center\">" : "<td>"));
                       }
