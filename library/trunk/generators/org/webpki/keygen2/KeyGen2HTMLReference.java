@@ -431,6 +431,19 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
           .newExtensionRow (new MAC ("closeProvisioningSession"))
           .newExtensionRow (new OptionalSignature ());
 
+        preAmble (KEY_CREATION_RESPONSE_JSON)
+          .newExtensionRow (new StandardServerClientSessionIDs ())
+          .newRow ()
+            .newColumn ()
+              .addProperty (GENERATED_KEYS_JSON)
+              .addArrayLink (GENERATED_KEYS_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
+            .newColumn ()
+              .setUsage (true, 1)
+            .newColumn ()
+              .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>");
+
         preAmble (PROVISIONING_FINALIZATION_RESPONSE_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newRow ()
@@ -580,6 +593,36 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               1,
               "<i>Optional:</i> List of logotype objects. See <code>" +
               "SKS:addExtension</code>"));
+
+        json.addSubItemTable (GENERATED_KEYS_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (ID_JSON)
+              .addSymbolicValue (ID_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("Must match the identifier used in ")
+              .addLink (KEY_CREATION_REQUEST_JSON)
+              .addString (" for a specific key")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+              .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
+            .newColumn ()
+            .newColumn ()
+              .addString ("See <code>SKS:createKeyEntry.PublicKey</code>")
+          .newRow ()
+            .newColumn ()
+              .addProperty (KEY_ATTESTATION_JSON)
+              .addSymbolicValue (KEY_ATTESTATION_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("See <code>SKS:createKeyEntry.KeyAttestation</code>");
 
         json.addSubItemTable (new String[]{UPDATE_KEY_JSON,
                                            CLONE_KEY_PROTECTION_JSON,
