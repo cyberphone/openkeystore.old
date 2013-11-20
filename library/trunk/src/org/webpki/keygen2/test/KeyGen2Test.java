@@ -793,7 +793,7 @@ public class KeyGen2Test
                   }
                 KeyData key_data = sks.createKeyEntry (provisioning_handle,
                                                        key.getID (),
-                                                       key_creation_request.getAlgorithm (),
+                                                       key_creation_request.getKeyEntryAlgorithm (),
                                                        key.getServerSeed (),
                                                        key.isDevicePINProtected (),
                                                        pin_policy_handle,

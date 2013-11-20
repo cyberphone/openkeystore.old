@@ -256,9 +256,9 @@ public class JSONBaseHTML
                     return this;
                   }
 
-                public Column addIntegerValue (String integer_value) throws IOException
+                public Column addUnquotedValue (String unquoted_value) throws IOException
                   {
-                    return addString ("<i>").addString (integer_value).addString ("</i>");
+                    return addString ("<i>").addString (unquoted_value).addString ("</i>");
                   }
 
                 public Column setChoice (boolean mandatory, int depth) throws IOException
@@ -423,7 +423,7 @@ public class JSONBaseHTML
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.VERSION_JSON)
-              .keyWord (JSONSignatureEncoder.SIGNATURE_VERSION_ID, JSONObjectWriter.html_string_color, false)
+              .addValue (JSONSignatureEncoder.SIGNATURE_VERSION_ID)
             .newColumn ()
               .setType (Types.JSON_TYPE_URI)
             .newColumn ()
@@ -582,7 +582,7 @@ public class JSONBaseHTML
         .newRow ()
           .newColumn ()
             .addProperty (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
-            .addIntegerValue (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
+            .addUnquotedValue (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
           .newColumn ()
             .setType (Types.JSON_TYPE_BIGINT)
           .newColumn ()

@@ -833,11 +833,11 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
 
     
-    String algorithm;
+    String key_entry_algorithm;
     
-    public String getAlgorithm ()
+    public String getKeyEntryAlgorithm ()
       {
-        return algorithm;
+        return key_entry_algorithm;
       }
 
 
@@ -853,6 +853,8 @@ public class KeyCreationRequestDecoder extends ClientDecoder
         // Read the top level properties
         /////////////////////////////////////////////////////////////////////////////////////////
 
+        key_entry_algorithm = getURI (rd, KEY_ENTRY_ALGORITHM_JSON);
+
         server_session_id = getID (rd, SERVER_SESSION_ID_JSON);
 
         client_session_id = getID (rd, CLIENT_SESSION_ID_JSON);
@@ -860,8 +862,6 @@ public class KeyCreationRequestDecoder extends ClientDecoder
         submit_url = getURL (rd, SUBMIT_URL_JSON);
 
         deferred_certification = rd.getBooleanConditional (DEFERRED_CERTIFICATION_JSON);
-
-        algorithm = getURI (rd, KEY_ENTRY_ALGORITHM_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the key requests and protection elements [1..n]
