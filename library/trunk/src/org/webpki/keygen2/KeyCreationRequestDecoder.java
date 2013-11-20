@@ -183,8 +183,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
             input_method = InputMethod.getInputMethodFromString (rd.getStringConditional (INPUT_METHOD_JSON, InputMethod.ANY.getProtocolName ()));
             
-            read_user_modifiable = rd.hasProperty (USER_MODIFIABLE_JSON);
-            user_modifiable = rd.getBooleanConditional (USER_MODIFIABLE_JSON, false);
+            user_modifiable = rd.getBooleanConditional (USER_MODIFIABLE_JSON, true);
 
             String pr[] = rd.getStringArrayConditional (PATTERN_RESTRICTIONS_JSON);
             if (pr != null)
@@ -242,8 +241,6 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
 
         boolean user_modifiable;
-        
-        boolean read_user_modifiable;
         
         public boolean getUserModifiableFlag ()
           {
@@ -782,10 +779,6 @@ public class KeyCreationRequestDecoder extends ClientDecoder
         else
           {
             pin_policy.user_defined = true;
-          }
-        if (!pin_policy.read_user_modifiable)
-          {
-            pin_policy.user_modifiable = true;
           }
         request_objects.add (rk = new KeyObject (rd, pin_policy, start_of_pin_group, preset, false));
         return rk;
