@@ -296,7 +296,7 @@ public class JSONBaseHTML
         @Override
         void write () throws IOException
           {
-            html.append ("<tr><td colspan=\"3\" style=\"border-width:0px;font-size:12pt;padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica\">");
+            html.append ("<tr><td colspan=\"4\" style=\"border-width:0px;font-size:12pt;padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica\">");
             boolean next = false;
             for (String protocol : protocols)
               {

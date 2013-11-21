@@ -424,9 +424,9 @@ public class ServerState implements Serializable
         void writePolicy (JSONObjectWriter wr) throws IOException
           {
             wr.setString (ID_JSON, id);
+            wr.setBinary (ENCRYPTED_PUK_JSON, encrypted_value);
             wr.setInt (RETRY_LIMIT_JSON, retry_limit);
             wr.setString (FORMAT_JSON, format.getProtocolName ());
-            wr.setBinary (ENCRYPTED_PUK_JSON, encrypted_value);
 
             MacGenerator puk_policy_mac = new MacGenerator ();
             puk_policy_mac.addString (id);
@@ -518,6 +518,7 @@ public class ServerState implements Serializable
             wr.setInt (MIN_LENGTH_JSON, min_length);
             wr.setInt (MAX_LENGTH_JSON, max_length);
             wr.setInt (RETRY_LIMIT_JSON, retry_limit);
+            wr.setString (FORMAT_JSON, format.getProtocolName ());
             if (user_modifiable_set)
               {
                 wr.setBoolean (USER_MODIFIABLE_JSON, user_modifiable);
@@ -526,7 +527,10 @@ public class ServerState implements Serializable
               {
                 wr.setString (GROUPING_JSON, grouping.getProtocolName ());
               }
-            wr.setString (FORMAT_JSON, format.getProtocolName ());
+            if (input_method != null)
+              {
+                wr.setString (INPUT_METHOD_JSON, input_method.getProtocolName ());
+              }
             if (!pattern_restrictions.isEmpty ())
               {
                 Vector<String> prs = new Vector<String> ();
@@ -535,10 +539,6 @@ public class ServerState implements Serializable
                     prs.add (pr.getProtocolName ());
                   }
                 wr.setStringArray (PATTERN_RESTRICTIONS_JSON, prs.toArray (new String[0]));
-              }
-            if (input_method != null)
-              {
-                wr.setString (INPUT_METHOD_JSON, input_method.getProtocolName ());
               }
 
             MacGenerator pin_policy_mac = new MacGenerator ();

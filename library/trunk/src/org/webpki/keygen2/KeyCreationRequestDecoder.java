@@ -162,8 +162,6 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
         PINPolicy (JSONObjectReader rd) throws IOException
           {
-            mac = rd.getBinary (MAC_JSON);
-            
             id = KeyGen2Validator.getID (rd, ID_JSON);
 
             min_length = getPINLength (rd, MIN_LENGTH_JSON);
@@ -179,12 +177,12 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
             format = getPassphraseFormat (rd);
 
+            user_modifiable = rd.getBooleanConditional (USER_MODIFIABLE_JSON, true);
+
             grouping = Grouping.getGroupingFromString (rd.getStringConditional (GROUPING_JSON, Grouping.NONE.getProtocolName ()));
 
             input_method = InputMethod.getInputMethodFromString (rd.getStringConditional (INPUT_METHOD_JSON, InputMethod.ANY.getProtocolName ()));
             
-            user_modifiable = rd.getBooleanConditional (USER_MODIFIABLE_JSON, true);
-
             String pr[] = rd.getStringArrayConditional (PATTERN_RESTRICTIONS_JSON);
             if (pr != null)
               {
@@ -193,6 +191,8 @@ public class KeyCreationRequestDecoder extends ClientDecoder
                     pattern_restrictions.add (PatternRestriction.getPatternRestrictionFromString (pattern));
                   }
               }
+
+            mac = rd.getBinary (MAC_JSON);
           }
 
 
