@@ -23,6 +23,7 @@ import java.io.IOException;
 import org.webpki.crypto.CertificateFilter;
 
 import org.webpki.json.JSONBaseHTML;
+import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.ProtocolTable.Row.Column;
 import org.webpki.json.JSONSignatureEncoder;
 
@@ -40,6 +41,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
     static final String NOT_READY                     = "DOCUMENTATION NOT READY!!!";
     
     static JSONBaseHTML json;
+    static RowInterface row;
     
     static class MAC implements JSONBaseHTML.Extender
       {
@@ -259,6 +261,66 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
           }
       }
 
+    static void createOption (String property, String type, boolean array_flag, String descrption) throws IOException
+      {
+        Column column = row.newRow ()
+          .newColumn ()
+            .addProperty (property);
+        if (array_flag)
+          {
+            column.addArrayList (property);
+          }
+        else
+          {
+            column.addSymbolicValue (property);
+          }
+        column = column.newColumn ().setType (type).newColumn ();
+        if (array_flag)
+          {
+            column.setUsage (false, 1);
+          }
+        else
+          {
+            column.setUsage (false);
+          }
+        row = column.newColumn ().addString (descrption);
+      }
+    
+    static void createSearchFilter () throws IOException
+      {
+        row = json.addSubItemTable (SEARCH_FILTER_JSON);       
+        createOption (CertificateFilter.CF_FINGER_PRINT, JSON_TYPE_BASE64, false, "SHA256 fingerprint matching any certificate in the path");
+        createOption (CertificateFilter.CF_POLICY_RULES, JSON_TYPE_STRING, true,
+                            "List of X509 policy extension OIDs using the notation <code>&quot;1.4.3&quot;</code> and <code>&quot;-1.4.7&quot;</code> " +
+                            "for required and forbidden policy OIDs respectively.  Policy OIDs encountered in certificates that " +
+                            "are not specified in <code>" + CertificateFilter.CF_POLICY_RULES + "</code> are simply <i>ignored</i>");
+      }
+        /*
+        JSONObjectReader search = rd.getObject (SEARCH_FILTER_JSON);
+         if (search.getProperties ().length == 0)
+           {
+             throw new IOException ("Empty \"" + SEARCH_FILTER_JSON + "\" not allowed");
+           }
+         setFingerPrint (search.getBinaryConditional (CertificateFilter.CF_FINGER_PRINT));
+         setIssuerRegEx (search.getStringConditional (CertificateFilter.CF_ISSUER_REG_EX));
+         setSerialNumber (KeyGen2Validator.getBigIntegerConditional (search, CertificateFilter.CF_SERIAL_NUMBER));
+         setSubjectRegEx (search.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX));
+         setEmailRegEx (search.getStringConditional (CertificateFilter.CF_EMAIL_REG_EX));
+         setPolicyRules (search.getStringArrayConditional (CertificateFilter.CF_POLICY_RULES));
+         setKeyUsageRules (search.getStringArrayConditional (CertificateFilter.CF_KEY_USAGE_RULES));
+         setExtendedKeyUsageRules (search.getStringArrayConditional (CertificateFilter.CF_EXT_KEY_USAGE_RULES));
+         issued_before = KeyGen2Validator.getDateTimeConditional (search, ISSUED_BEFORE_JSON);
+         issued_after = KeyGen2Validator.getDateTimeConditional (search, ISSUED_AFTER_JSON);
+         if (search.hasProperty (GROUPING_JSON))
+           {
+             grouping = Grouping.getGroupingFromString (search.getString (GROUPING_JSON));
+           }
+         if (search.hasProperty (APP_USAGE_JSON))
+           {
+             app_usage = AppUsage.getAppUsageFromString (search.getString (APP_USAGE_JSON));
+           }
+       }
+*/
     public static void main (String args[]) throws IOException
       {
         if (args.length != 1)
@@ -266,6 +328,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             new RuntimeException ("Missing file argument");
           }
         json = new JSONBaseHTML ();
+
         preAmble (PROVISIONING_INITIALIZATION_REQUEST_JSON)
           .newRow ()
             .newColumn ()
@@ -390,6 +453,18 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                                               "See <code>SKS:createProvisioningSession</code>"))
           .newRow ()
             .newColumn ()
+              .addProperty (SERVER_CERT_FP_JSON)
+              .addSymbolicValue (SERVER_CERT_FP_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("SHA256 fingerprint of the server's certificate during receival of the ")
+              .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
+              .addString (" object. Mandatory for HTTPS connections")
+          .newRow ()
+            .newColumn ()
               .addProperty (CLIENT_ATTRIBUTES_JSON)
               .addLink (CLIENT_ATTRIBUTES_JSON)
             .newColumn ()
@@ -468,7 +543,8 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
           .newExtensionRow (new OptionalArrayObject (KEY_ENTRY_SPECIFIERS_JSON,
                                                      1,
                                                      "List of key entries to be created. " +
-                                                     "See <code>SKS:createKeyEntry</code>"));
+                                                     "See <code>SKS:createKeyEntry</code>"))
+          .newExtensionRow (new OptionalSignature ());
 
         preAmble (KEY_CREATION_RESPONSE_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
@@ -482,6 +558,29 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setUsage (true, 1)
             .newColumn ()
               .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>");
+
+        preAmble (PLATFORM_NEGOTIATION_REQUEST_JSON)
+          .newExtensionRow (new OptionalSignature ());
+
+        preAmble (PLATFORM_NEGOTIATION_RESPONSE_JSON);
+
+        preAmble (CREDENTIAL_DISCOVERY_REQUEST_JSON)
+          .newExtensionRow (new StandardServerClientSessionIDs ())
+          .newExtensionRow (new SubmitURL ())
+          .newRow ()
+          .newColumn ()
+            .addProperty (LOOKUP_SPECIFIERS_JSON)
+            .addArrayLink (LOOKUP_SPECIFIERS_JSON)
+          .newColumn ()
+            .setType (JSON_TYPE_OBJECT)
+          .newColumn ()
+            .setUsage (true, 1)
+          .newColumn ()
+            .addString ("List of signed credential lookup specifiers")
+          .newExtensionRow (new OptionalSignature ());
+
+        preAmble (CREDENTIAL_DISCOVERY_RESPONSE_JSON)
+          .newExtensionRow (new StandardServerClientSessionIDs ());
 
         preAmble (PROVISIONING_FINALIZATION_RESPONSE_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
@@ -563,6 +662,43 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("Virtual machine friendly name");
+
+        json.addSubItemTable (LOOKUP_SPECIFIERS_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (ID_JSON)
+              .addSymbolicValue (ID_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("Each specifier must have a unique ID")
+          .newRow ()
+            .newColumn ()
+              .addProperty (NONCE_JSON)
+              .addSymbolicValue (NONCE_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("<code>" + NONCE_JSON + "</code> matching " +
+                          "SHA256 (<code>" +  CLIENT_SESSION_ID_JSON + "</code> || <code>" + SERVER_SESSION_ID_JSON +
+                          "</code>) using the SKS &quot;string&quot; representation for the session ID arguments")
+          .newRow ()
+            .newColumn ()
+              .addProperty (SEARCH_FILTER_JSON)
+              .addLink (SEARCH_FILTER_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("<i>Optional</i> additional search criterions")
+          .newExtensionRow (new LinkedObject (JSONSignatureEncoder.SIGNATURE_JSON,
+                            true,
+                            "Signature using a key management key signature covering the lookup specifier. " +
+                            "See <code>SKS:createProvisioningSession." + KEY_MANAGEMENT_KEY_JSON + "</code>"));
+
+        createSearchFilter ();
         
         json.addSubItemTable (PUK_POLICY_SPECIFIERS_JSON)
           .newRow ()
@@ -770,6 +906,16 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addString ("See <code>SKS:createKeyEntry." + KEY_ALGORITHM_JSON + "</code>")
           .newRow ()
             .newColumn ()
+              .addProperty (KEY_PARAMETERS_JSON)
+              .addSymbolicValue (KEY_PARAMETERS_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("See <code>SKS:createKeyEntry." + KEY_PARAMETERS_JSON + "</code>")
+          .newRow ()
+            .newColumn ()
               .addProperty (ENDORSED_ALGORITHMS_JSON)
               .addArrayList (ENDORSED_ALGORITHMS_JSON)
             .newColumn ()
@@ -789,6 +935,45 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .addString ("See <code>SKS:createKeyEntry." + SERVER_SEED_JSON + "</code>.  " +
                           "If this property is undefined, it is assumed (by KeyGen2) to be a zero-length array")
+          .newRow ()
+            .newColumn ()
+              .addProperty (BIOMETRIC_PROTECTION_JSON)
+              .addSymbolicValue (BIOMETRIC_PROTECTION_JSON)
+            .newColumn ()
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("See <code>SKS:createKeyEntry." + BIOMETRIC_PROTECTION_JSON + "</code>. " +
+                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>none</none>")
+          .newRow ()
+            .newColumn ()
+              .addProperty (DELETE_PROTECTION_JSON)
+              .addSymbolicValue (DELETE_PROTECTION_JSON)
+            .newColumn ()
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("See <code>SKS:createKeyEntry." + DELETE_PROTECTION_JSON + "</code>. " +
+                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>none</none>")
+          .newRow ()
+            .newColumn ()
+              .addProperty (EXPORT_PROTECTION_JSON)
+              .addSymbolicValue (EXPORT_PROTECTION_JSON)
+            .newColumn ()
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("See <code>SKS:createKeyEntry." + EXPORT_PROTECTION_JSON + "</code>. " +
+                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>non-exportable</none>")
+          .newRow ()
+            .newColumn ()
+              .addProperty (FRIENDLY_NAME_JSON)
+              .addSymbolicValue (FRIENDLY_NAME_JSON)
+            .newColumn ()
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("See <code>SKS:createKeyEntry." + FRIENDLY_NAME_JSON + "</code>")
           .newExtensionRow (new MAC ("createKeyEntry"));
 
         json.addSubItemTable (ISSUED_CREDENTIALS_JSON)

@@ -53,6 +53,11 @@ public class JSONBaseHTML
       {
         ProtocolTable.Row.Column execute (ProtocolTable.Row.Column column) throws IOException;
       }
+
+    public interface RowInterface
+      {
+        ProtocolTable.Row newRow ();
+      }
     
     public abstract class Content
       {
@@ -63,7 +68,7 @@ public class JSONBaseHTML
         abstract void write () throws IOException;
       }
 
-    public class ProtocolTable extends Content
+    public class ProtocolTable extends Content implements RowInterface 
       {
         String protocols[];
         boolean main_object;
@@ -76,7 +81,7 @@ public class JSONBaseHTML
             boolean set_group;
             int depth;
             
-            public class Column
+            public class Column implements RowInterface 
               {
                 StringBuffer column = new StringBuffer ();
                 Row parent;
@@ -100,6 +105,7 @@ public class JSONBaseHTML
                     return rows.lastElement ().newColumn ();
                   }
 
+                @Override
                 public Row newRow ()
                   {
                     return new Row ();
@@ -367,6 +373,7 @@ public class JSONBaseHTML
               }
           }
 
+        @Override
         public Row newRow ()
           {
             return new Row ();
