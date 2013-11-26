@@ -128,8 +128,8 @@ public class CredentialDiscoveryResponseEncoder extends JSONEncoder
             for (MatchingCredential mc : lo_res.matching_credentials)
               {
                 JSONObjectWriter match_object = matcher_array.setObject ();
-                match_object.setString (CLIENT_SESSION_ID_JSON, mc.client_session_id);
                 match_object.setString (SERVER_SESSION_ID_JSON, mc.server_session_id);
+                match_object.setString (CLIENT_SESSION_ID_JSON, mc.client_session_id);
                 match_object.setX509CertificatePath (mc.certificate_path);
                 if (mc.locked)
                   {

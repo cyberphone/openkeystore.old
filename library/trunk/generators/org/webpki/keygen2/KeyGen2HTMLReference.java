@@ -21,6 +21,7 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 import java.io.IOException;
 
 import org.webpki.crypto.CertificateFilter;
+import org.webpki.crypto.KeyContainerTypes;
 
 import org.webpki.json.JSONBaseHTML;
 import org.webpki.json.JSONBaseHTML.RowInterface;
@@ -289,38 +290,74 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
     static void createSearchFilter () throws IOException
       {
         row = json.addSubItemTable (SEARCH_FILTER_JSON);       
-        createOption (CertificateFilter.CF_FINGER_PRINT, JSON_TYPE_BASE64, false, "SHA256 fingerprint matching any certificate in the path");
+        createOption (CertificateFilter.CF_FINGER_PRINT, JSON_TYPE_BASE64, false, "SHA256 fingerprint matching any certificate in the <i>certificate path</i>");
+        createOption (CertificateFilter.CF_ISSUER_REG_EX, JSON_TYPE_STRING, false, "Regular expression matching any issuer in the <i>certificate path</i>");
+        createOption (CertificateFilter.CF_SERIAL_NUMBER, JSON_TYPE_BIGINT, false, "Serial number matching that of the <i>end-entity certificate</i>");
+        createOption (CertificateFilter.CF_SUBJECT_REG_EX, JSON_TYPE_STRING, false, "Regular expression matching the subject in the <i>end-entity certificate</i>");
+        createOption (CertificateFilter.CF_EMAIL_REG_EX, JSON_TYPE_STRING, false, "Regular expression matching any of the e-mail addresses in the <i>end-entity certificate</i>. Note that both RFC822 attributes and <code>subjectAltName</code> fields are in scope");
         createOption (CertificateFilter.CF_POLICY_RULES, JSON_TYPE_STRING, true,
-                            "List of X509 policy extension OIDs using the notation <code>&quot;1.4.3&quot;</code> and <code>&quot;-1.4.7&quot;</code> " +
-                            "for required and forbidden policy OIDs respectively.  Policy OIDs encountered in certificates that " +
+                            "List of X509 policy extension OIDs using the notation <nobr><code>&quot;1.4.3&quot;</code></nobr> and <nobr><code>&quot;-1.4.7&quot;</code></nobr> " +
+                            "for a required and forbidden policy OID respectively.  Policy OIDs encountered in <i>end-entity certificates</i> that " +
                             "are not specified in <code>" + CertificateFilter.CF_POLICY_RULES + "</code> are simply <i>ignored</i>");
+        createOption (CertificateFilter.CF_KEY_USAGE_RULES, JSON_TYPE_STRING, true,
+                            "List of X509 key usage flags using the notation <code>&quot;digitalSignature&quot;</code> and <nobr><code>&quot;-dataEncipherment&quot;</code></nobr> " +
+                            "for a required and forbidden key usage respectively.  Key usage flags encountered in <i>end-entity certificates</i> that " +
+                            "are not specified in <code>" + CertificateFilter.CF_KEY_USAGE_RULES + "</code> are simply <i>ignored</i>");
+        createOption (CertificateFilter.CF_EXT_KEY_USAGE_RULES, JSON_TYPE_STRING, true,
+                            "List of X509 extended key usage extension OIDs using the notation <nobr><code>&quot;1.4.3&quot;</code></nobr> and <nobr><code>&quot;-1.4.7&quot;</code></nobr> " +
+                            "for a required and forbidden extended key usage respectively.  Extended key usage OIDs encountered in <i>end-entity certificates</i> that " +
+                            "are not specified in <code>" + CertificateFilter.CF_EXT_KEY_USAGE_RULES + "</code> are simply <i>ignored</i>");
+        createOption (ISSUED_BEFORE_JSON, JSON_TYPE_DATE, false, "Matching <i>end-entity certificates</i> issued before this date. " +
+                            "Note that you can combine this criterion with an earlier <code>" + 
+                            ISSUED_AFTER_JSON + "</code> criterion, effectively creating a time window");
+        createOption (ISSUED_AFTER_JSON, JSON_TYPE_DATE, false, "Matching <i>end-entity certificates</i> issued after this date");
+        createOption (GROUPING_JSON, JSON_TYPE_STRING, false, "Matching keys based on the <code>SKS:createPINPolicy." + GROUPING_JSON + "</code> attribute. " +
+                            "Note that keys that are not PIN-protected must always fail to match");
+        createOption (APP_USAGE_JSON, JSON_TYPE_STRING, false, "Matching keys based on the <code>SKS:createKeyEntry." + APP_USAGE_JSON + "</code> attribute");
       }
-        /*
-        JSONObjectReader search = rd.getObject (SEARCH_FILTER_JSON);
-         if (search.getProperties ().length == 0)
-           {
-             throw new IOException ("Empty \"" + SEARCH_FILTER_JSON + "\" not allowed");
-           }
-         setFingerPrint (search.getBinaryConditional (CertificateFilter.CF_FINGER_PRINT));
-         setIssuerRegEx (search.getStringConditional (CertificateFilter.CF_ISSUER_REG_EX));
-         setSerialNumber (KeyGen2Validator.getBigIntegerConditional (search, CertificateFilter.CF_SERIAL_NUMBER));
-         setSubjectRegEx (search.getStringConditional (CertificateFilter.CF_SUBJECT_REG_EX));
-         setEmailRegEx (search.getStringConditional (CertificateFilter.CF_EMAIL_REG_EX));
-         setPolicyRules (search.getStringArrayConditional (CertificateFilter.CF_POLICY_RULES));
-         setKeyUsageRules (search.getStringArrayConditional (CertificateFilter.CF_KEY_USAGE_RULES));
-         setExtendedKeyUsageRules (search.getStringArrayConditional (CertificateFilter.CF_EXT_KEY_USAGE_RULES));
-         issued_before = KeyGen2Validator.getDateTimeConditional (search, ISSUED_BEFORE_JSON);
-         issued_after = KeyGen2Validator.getDateTimeConditional (search, ISSUED_AFTER_JSON);
-         if (search.hasProperty (GROUPING_JSON))
-           {
-             grouping = Grouping.getGroupingFromString (search.getString (GROUPING_JSON));
-           }
-         if (search.hasProperty (APP_USAGE_JSON))
-           {
-             app_usage = AppUsage.getAppUsageFromString (search.getString (APP_USAGE_JSON));
-           }
-       }
-*/
+
+    static String getKeyContainers () throws IOException
+      {
+        StringBuffer s = new StringBuffer ();
+        int count = 0;
+        for (KeyContainerTypes kct : KeyContainerTypes.values ())
+          {
+            s.append ((count++ != 0 && count != KeyContainerTypes.values ().length) ? "<li style=\"padding-bottom:4pt;padding-top:4pt\">" : "<li>");
+            String desc;
+            switch (kct)
+              {
+                case SOFTWARE:
+                  desc = "Software protected key container";
+                  break;
+
+                case EMBEDDED:
+                  desc = "Hardware protected embedded key container";
+                  break;
+
+                case UICC:
+                  desc = "UICC/SIM card";
+                  break;
+
+                case SD_CARD:
+                  desc = "SD card";
+                  break;
+
+                case EXTERNAL:
+                  desc = "External/connected key container";
+                  break;
+
+                default:
+                  throw new IOException ("Unknown KCT");
+              }
+            s.append ("<code>")
+             .append (kct.getName ())
+             .append ("</code> - ")
+             .append (desc)
+             .append ("</li>");
+          }
+        return s.toString ();
+      }
+
     public static void main (String args[]) throws IOException
       {
         if (args.length != 1)
@@ -530,7 +567,9 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .addString ("Flag telling if the process should be suspended after ")
               .addLink (KEY_CREATION_RESPONSE_JSON)
-              .addString (".  Default value: <code>false</code>")
+              .addString (".  Default value: <code>false</code>. " +
+                          "See the <code>" + ACTION_JSON + "</code> property in ")
+              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
               
           .newExtensionRow (new OptionalArrayObject (PUK_POLICY_SPECIFIERS_JSON,
                                                      1,
@@ -560,27 +599,114 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>");
 
         preAmble (PLATFORM_NEGOTIATION_REQUEST_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (ACTION_JSON)
+              .addSymbolicValue (ACTION_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("The <code>" + ACTION_JSON +
+                          "</code> property gives (through a suitable GUI dialog) the user a hint of what the session in progess is about to perform. " +
+                          "The valid constants are:<ul>" +
+                          "<li><code>" + Action.MANAGE.getJSONName () + "</code> - Create, delete and/or update credentials</li>" +
+                          "<li style=\"padding-bottom:4pt;padding-top:4pt\"><code>" + Action.RESUME.getJSONName () + "</code> - Resume operation after an interrupted <code>" + KEY_CREATION_RESPONSE_JSON + 
+                            "</code>.  See <code>" + DEFERRED_CERTIFICATION_JSON + "</code> in ")
+               .addLink (KEY_CREATION_REQUEST_JSON)
+               .addString (". A confirming client should after this call only accept a ")
+               .addLink (PROVISIONING_FINALIZATION_REQUEST_JSON)
+               .addString ("</li>" +
+                   "<li><code>" + Action.UNLOCK.getJSONName () + "</code> - Unlock existing keys. A conforming client should disallow ")
+               .addLink (KEY_CREATION_REQUEST_JSON)
+               .addString ("</li>" +
+                   "</ul>")
+          .newExtensionRow (new OptionalArrayObject (PREFERREDD_LANGUAGES_JSON,
+                                                     1,
+                                                     "List of preferred languages using ISO 639-1 two-character notation"))
+          .newExtensionRow (new OptionalArrayObject (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS,
+                                                     1,
+                                                     "List of target key container types.  The elements may be:<ul>" +
+                                                     getKeyContainers () +
+                                                     "</ul>" +
+                                                     "The key containers are listed in preference order. " +
+                                                     "If no matching container is available the client may prompt " +
+                                                     "the user for inserting a card or similar"))
+/*
+ 
+        action = Action.getActionFromString (rd.getString (ACTION_JSON));
+
+        languages = rd.getStringArrayConditional (PREFERREDD_LANGUAGES_JSON);
+
+        key_container_list = KeyContainerTypes.getOptionalKeyContainerSet (rd.getStringArrayConditional (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS));
+
+        privacy_enabled = rd.getBooleanConditional (PRIVACY_ENABLED_JSON);
+
+ */
+          .newRow ()
+            .newColumn ()
+              .addProperty (SERVER_SESSION_ID_JSON)
+              .addSymbolicValue (SERVER_SESSION_ID_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("The <code>" + SERVER_SESSION_ID_JSON +
+                          "</code> must remain constant for the entire session")
+          .newExtensionRow (new SubmitURL ())
+          .newRow ()
+            .newColumn ()
+              .addProperty (ABORT_URL_JSON)
+              .addSymbolicValue (ABORT_URL_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_URI)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("Optional URL the provisioning client should launch the browser with if the user cancels the process")
           .newExtensionRow (new OptionalSignature ());
 
-        preAmble (PLATFORM_NEGOTIATION_RESPONSE_JSON);
+        preAmble (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (LOOKUP_RESULTS_JSON)
+              .addLink (LOOKUP_RESULTS_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
+            .newColumn ()
+              .setUsage (true, 1)
+            .newColumn ()
+              .addString ("List of <code>" + LOOKUP_RESULTS_JSON + 
+                          "</code> which must match <code>" + LOOKUP_SPECIFIERS_JSON +
+                          "</code> in terms of <code>" + ID_JSON + "</code>");
 
         preAmble (CREDENTIAL_DISCOVERY_REQUEST_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newExtensionRow (new SubmitURL ())
           .newRow ()
-          .newColumn ()
-            .addProperty (LOOKUP_SPECIFIERS_JSON)
-            .addArrayLink (LOOKUP_SPECIFIERS_JSON)
-          .newColumn ()
-            .setType (JSON_TYPE_OBJECT)
-          .newColumn ()
-            .setUsage (true, 1)
-          .newColumn ()
-            .addString ("List of signed credential lookup specifiers")
+             .newColumn ()
+              .addProperty (LOOKUP_SPECIFIERS_JSON)
+              .addArrayLink (LOOKUP_SPECIFIERS_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
+            .newColumn ()
+              .setUsage (true, 1)
+            .newColumn ()
+              .addString ("List of signed credential lookup specifiers. " +
+                          "See SKS appendix &quot;Remote Key Lookup&quot; for details")
           .newExtensionRow (new OptionalSignature ());
 
         preAmble (CREDENTIAL_DISCOVERY_RESPONSE_JSON)
-          .newExtensionRow (new StandardServerClientSessionIDs ());
+          .newExtensionRow (new StandardServerClientSessionIDs ())
+          .newRow ()
+            .newColumn ()
+              .addProperty (LOOKUP_RESULTS_JSON)
+              .addArrayLink (LOOKUP_RESULTS_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
+            .newColumn ()
+              .setUsage (true, 1)
+            .newColumn ()
+              .addString ("List of credential lookup results. " +
+                          "See SKS appendix &quot;Remote Key Lookup&quot; for details");
 
         preAmble (PROVISIONING_FINALIZATION_RESPONSE_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
@@ -680,9 +806,8 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setType (JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("<code>" + NONCE_JSON + "</code> matching " +
-                          "SHA256 (<code>" +  CLIENT_SESSION_ID_JSON + "</code> || <code>" + SERVER_SESSION_ID_JSON +
-                          "</code>) using the SKS &quot;string&quot; representation for the session ID arguments")
+              .addString ("<code>" + NONCE_JSON + "</code>. " +
+                          "See SKS appendix &quot;Remote Key Lookup&quot; for details")
           .newRow ()
             .newColumn ()
               .addProperty (SEARCH_FILTER_JSON)
@@ -692,14 +817,62 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("<i>Optional</i> additional search criterions")
+              .addString ("<i>Optional</i> additional search criterions. Note that at least one search criterion must be specified if this option is used")
           .newExtensionRow (new LinkedObject (JSONSignatureEncoder.SIGNATURE_JSON,
                             true,
                             "Signature using a key management key signature covering the lookup specifier. " +
-                            "See <code>SKS:createProvisioningSession." + KEY_MANAGEMENT_KEY_JSON + "</code>"));
+                            "See SKS appendix &quot;Remote Key Lookup&quot; for details"));
 
-        createSearchFilter ();
+        json.addSubItemTable (LOOKUP_RESULTS_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (ID_JSON)
+              .addSymbolicValue (ID_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("Each result must have a unique ID matching the request")
+          .newRow ()
+            .newColumn ()
+              .addProperty (MATCHING_CREDENTIALS_JSON)
+              .addArrayLink (MATCHING_CREDENTIALS_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
+            .newColumn ()
+              .setUsage (true, 0)
+            .newColumn ()
+              .addString ("List of matching credentials");
         
+        json.addSubItemTable (MATCHING_CREDENTIALS_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (SERVER_SESSION_ID_JSON)
+              .addSymbolicValue (SERVER_SESSION_ID_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("<code>" + SERVER_SESSION_ID_JSON + "</code> of matching credential")
+          .newRow ()
+            .newColumn ()
+              .addProperty (CLIENT_SESSION_ID_JSON)
+              .addSymbolicValue (CLIENT_SESSION_ID_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("<code>" + CLIENT_SESSION_ID_JSON + "</code> of matching credential")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON)
+              .addArrayList (SORTED_CERT_PATH)
+            .newColumn ()
+              .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("Identical representation as the <code>" +
+                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
+                          "</code> in ")
+              .addLink (JSONSignatureEncoder.KEY_INFO_JSON);
+
         json.addSubItemTable (PUK_POLICY_SPECIFIERS_JSON)
           .newRow ()
             .newColumn ()

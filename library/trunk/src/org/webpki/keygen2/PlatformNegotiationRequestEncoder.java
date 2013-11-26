@@ -36,7 +36,7 @@ public class PlatformNegotiationRequestEncoder extends ServerEncoder
   {
     private static final long serialVersionUID = 1L;
 
-    Action action = Action.UPDATE;
+    Action action = Action.MANAGE;
 
     String server_session_id;
 

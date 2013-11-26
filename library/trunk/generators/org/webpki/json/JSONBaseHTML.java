@@ -321,7 +321,7 @@ public class JSONBaseHTML
                     .append (protocol)
                     .append (main_object ? "" : "</i></span>");
               }
-            html.append ("</td></tr>\n<tr><th>Element</th><th>Type</th><th>Usage</th><th>Comment</th></tr>");
+            html.append ("</td></tr>\n<tr><th>Property</th><th>Type</th><th>Usage</th><th>Comment</th></tr>");
             int i = 0;
             int supress = 0;
             for (Row row : rows)
