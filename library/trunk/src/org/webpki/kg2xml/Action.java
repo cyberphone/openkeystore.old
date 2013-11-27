@@ -20,43 +20,50 @@ import java.io.IOException;
 
 public enum Action
   {
-    CREATE       ("create",  false, true),
-    UNLOCK       ("unlock",  true, false),
-    UPDATE       ("update",  true, true),
-    RESUME       ("resume",  true, true);
-
-    private final String xml_name;       // As expressed in XML
+    MANAGE       ("manage", true, true,  true),
+    UNLOCK       ("unlock", true,  false, true),
+    RESUME       ("resume", false,  false, false);
+  
+    private final String xml_name;               // As expressed in XML
     
+    private final boolean prov_init_required;    // ProvisioningInitialization required else illegal
+  
     private final boolean lookup_allowed;        // CredentialDiscovery permitted
-
+  
     private final boolean key_init_allowed;      // KeyInitialization permitted
-
-    private Action (String xml_name, boolean lookup_allowed, boolean key_init_allowed)
+  
+    private Action (String xml_name, boolean lookup_allowed, boolean key_init_allowed, boolean prov_init_required)
       {
         this.xml_name = xml_name;
         this.lookup_allowed = lookup_allowed;
         this.key_init_allowed = key_init_allowed;
+        this.prov_init_required = prov_init_required;
       }
-
-
+  
+  
     public String getXMLName ()
       {
         return xml_name;
       }
     
-
+  
     public boolean mayLookupCredentials ()
       {
         return lookup_allowed;
       }
-
-
+  
+  
     public boolean mayInitializeKeys ()
       {
         return key_init_allowed;
       }
-
-
+  
+    public boolean mustOrMustNotCreateSession ()
+      {
+        return prov_init_required;
+      }
+  
+  
     public static Action getActionFromString (String xml_name) throws IOException
       {
         for (Action action : Action.values ())
@@ -68,5 +75,4 @@ public enum Action
           }
         throw new IOException ("Unknown action: " + xml_name);
       }
-
   }

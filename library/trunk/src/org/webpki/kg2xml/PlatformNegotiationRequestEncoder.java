@@ -37,7 +37,7 @@ public class PlatformNegotiationRequestEncoder extends PlatformNegotiationReques
   {
     private String prefix;  // Default: no prefix
     
-    Action action = Action.UPDATE;
+    Action action = Action.MANAGE;
 
     boolean needs_dsig_ns;
 

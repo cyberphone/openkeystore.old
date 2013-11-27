@@ -41,7 +41,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 02-Oct-2013 
+    Revised: 26-Nov-2013 
     Author: Anders Rundgren
 
     Copyright 2006-2013 WebPKI.org (http://webpki.org).
@@ -59,11 +59,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20131021#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20131126#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20131021#"
+           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20131126#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -1258,9 +1258,8 @@
 
    <xs:simpleType name="action">
       <xs:restriction base="xs:string">
-         <xs:enumeration value="create"/>
+         <xs:enumeration value="manage"/>
          <xs:enumeration value="unlock"/>
-         <xs:enumeration value="update"/>
          <xs:enumeration value="resume"/>
       </xs:restriction>
    </xs:simpleType>
