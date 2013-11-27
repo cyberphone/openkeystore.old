@@ -46,7 +46,7 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
       }
 
 
-    BasicCapabilities basic_capabilities = new BasicCapabilities (true);
+    BasicCapabilities basic_capabilities = new BasicCapabilities ();
     
     public BasicCapabilities getBasicCapabilities ()
       {

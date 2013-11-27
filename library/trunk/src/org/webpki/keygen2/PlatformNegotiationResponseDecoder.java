@@ -34,7 +34,7 @@ public class PlatformNegotiationResponseDecoder extends KeyGen2Validator
 
     Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
 
-    BasicCapabilities basic_capabilities = new BasicCapabilities (true);
+    BasicCapabilities basic_capabilities = new BasicCapabilities ();
 
     public BasicCapabilities getBasicCapabilities ()
       {

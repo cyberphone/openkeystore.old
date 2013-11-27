@@ -66,7 +66,7 @@ public class PlatformNegotiationResponseEncoder extends JSONEncoder
         return this;
       }
 
-    BasicCapabilities basic_capabilities = new BasicCapabilities (false);
+    BasicCapabilities basic_capabilities = new BasicCapabilities ();
 
     public BasicCapabilities getBasicCapabilities ()
       {

@@ -39,7 +39,6 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
   {
     static final String KEYGEN2_NAME_SPACE            = "KeyGen2 name space";
     static final String OBJECT_ID                     = "Actual KeyGen2 message type";
-    static final String NOT_READY                     = "DOCUMENTATION NOT READY!!!";
     
     static JSONBaseHTML json;
     static RowInterface row;
@@ -167,6 +166,89 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                   .addString (description);
           }
       }
+
+    static class BasicCapabilityQuery implements JSONBaseHTML.Extender
+      {
+        String tag;
+        String description;
+        
+        BasicCapabilityQuery (String tag, String description)
+          {
+            this.tag = tag;
+            this.description = description;
+          }
+
+        @Override
+        public Column execute (Column column) throws IOException
+          {
+            return column
+              .newRow ()
+                .newColumn ()
+                  .addProperty (BasicCapabilities.tagName (tag, true))
+                  .addArrayList (URI_LIST)
+                .newColumn ()
+                  .setType (JSON_TYPE_URI)
+                .newColumn ()
+                  .setUsage (false, 1)
+                .newColumn ()
+                  .addString (description);
+          }
+      }
+
+    static class BasicCapabilitySupport implements JSONBaseHTML.Extender
+      {
+        String tag;
+        
+        BasicCapabilitySupport (String tag)
+          {
+            this.tag = tag;
+          }
+
+        @Override
+        public Column execute (Column column) throws IOException
+          {
+            return column
+              .newRow ()
+                .newColumn ()
+                  .addProperty (BasicCapabilities.tagName (tag, false))
+                  .addArrayList (URI_LIST)
+                .newColumn ()
+                  .setType (JSON_TYPE_URI)
+                .newColumn ()
+                  .setUsage (false, 1)
+                .newColumn ()
+                  .addString ("The result from <code>" + BasicCapabilities.tagName (tag, true) + "</code>.  If there are no matches, the property will not be created");
+          }
+      }
+
+    static class OptionalArrayList implements JSONBaseHTML.Extender
+      {
+        String name;
+        int min;
+        String description;
+        
+        OptionalArrayList (String name, String description)
+          {
+            this.name = name;
+            this.description = description;
+          }
+  
+        @Override
+        public Column execute (Column column) throws IOException
+          {
+            return column
+              .newRow ()
+                .newColumn ()
+                  .addProperty (name)
+                  .addArrayList (name)
+                .newColumn ()
+                .newColumn ()
+                  .setUsage (false, 1)
+                .newColumn ()
+                  .addString (description);
+          }
+      }
+
     static class ServerSessionID implements JSONBaseHTML.Extender
       {
         @Override
@@ -319,10 +401,11 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
     static String getKeyContainers () throws IOException
       {
         StringBuffer s = new StringBuffer ();
-        int count = 0;
+        boolean next = false;
         for (KeyContainerTypes kct : KeyContainerTypes.values ())
           {
-            s.append ((count++ != 0 && count != KeyContainerTypes.values ().length) ? "<li style=\"padding-bottom:4pt;padding-top:4pt\">" : "<li>");
+            s.append (next ? "<li style=\"padding-top:4pt\">" : "<li>");
+            next = true;
             String desc;
             switch (kct)
               {
@@ -423,11 +506,17 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false, 1)
             .newColumn ()
-              .addString ("List of client attribute types (expressed as URI strings) that the client <i>may</i> honor. See ")
+              .addString ("<i>Optional</i>: List of client attribute types (expressed as URI strings) that the client <i>may</i> honor. See ")
               .addLink (PROVISIONING_INITIALIZATION_RESPONSE_JSON)
           .newExtensionRow (new LinkedObject (VIRTUAL_MACHINE_JSON,
                                               false,
-                                              NOT_READY + " Note that the <code>" +
+                                              "The <code>" + VIRTUAL_MACHINE_JSON + "</code> option is intended to support BYOD " +
+                                              "use-cases where the provisioning process is also used to bootstrap an alternative " +
+                                              "environment and associated policies. " +
+                                              "The exact nature of this environment is platform-dependent which makes it nessesary " +
+                                              "using the <code>" + BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, true) + "</code> option to find out what is available. " +
+                                              "If&nbsp;the&nbsp;environment is already installed only the configuration should be updated. " +
+                                              "Note&nbsp;that&nbsp;the&nbsp;<code>" +
                                               VIRTUAL_MACHINE_JSON +
                                               "</code> option presumes that the <code>" +
                                               PROVISIONING_INITIALIZATION_REQUEST_JSON +
@@ -509,7 +598,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false, 0)
             .newColumn ()
-              .addString ("List of client attribute types and values. See ")
+              .addString ("<i>Optional</i>: List of client attribute types and values. See ")
               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
           .newExtensionRow (new LinkedObject (JSONSignatureEncoder.SIGNATURE_JSON,
                                               true,
@@ -620,28 +709,39 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                .addLink (KEY_CREATION_REQUEST_JSON)
                .addString ("</li>" +
                    "</ul>")
-          .newExtensionRow (new OptionalArrayObject (PREFERREDD_LANGUAGES_JSON,
-                                                     1,
-                                                     "List of preferred languages using ISO 639-1 two-character notation"))
-          .newExtensionRow (new OptionalArrayObject (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS,
-                                                     1,
-                                                     "List of target key container types.  The elements may be:<ul>" +
-                                                     getKeyContainers () +
-                                                     "</ul>" +
-                                                     "The key containers are listed in preference order. " +
-                                                     "If no matching container is available the client may prompt " +
-                                                     "the user for inserting a card or similar"))
-/*
- 
-        action = Action.getActionFromString (rd.getString (ACTION_JSON));
-
-        languages = rd.getStringArrayConditional (PREFERREDD_LANGUAGES_JSON);
-
-        key_container_list = KeyContainerTypes.getOptionalKeyContainerSet (rd.getStringArrayConditional (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS));
-
-        privacy_enabled = rd.getBooleanConditional (PRIVACY_ENABLED_JSON);
-
- */
+          .newRow ()
+            .newColumn ()
+              .addProperty (PRIVACY_ENABLED_JSON)
+              .addSymbolicValue (PRIVACY_ENABLED_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BOOLEAN)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("The <code>" + PRIVACY_ENABLED_JSON +
+                          "</code> flag serves two purposes:<ul>" +
+                          "<li>Give the user a chance to cancel the provisioning operation " +
+                          "if the privacy implications of the standard mode are unacceptable</li>" +
+                          "<li style=\"padding-top:4pt\">Activate the correct mode during ")
+               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
+               .addString ("</li></ul>Note: The default value is <code>false</code>")
+          .newExtensionRow (new OptionalArrayList (PREFERREDD_LANGUAGES_JSON,
+                                                   "<i>Optional</i>: List of preferred languages using ISO 639-1 two-character notation"))
+          .newExtensionRow (new OptionalArrayList (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS,
+                                                   "<i>Optional</i>: List of target key container types.  The elements may be:<ul>" +
+                                                   getKeyContainers () +
+                                                   "</ul>" +
+                                                   "The key containers are listed in preference order. " +
+                                                   "If no matching container is available the client may prompt " +
+                                                   "the user for inserting a card or similar. If&nbsp;<code>" +
+                                                   KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS + "</code> is undefined " +
+                                                   "the provisioning client is supposed to use the system's 'native' keystore"))
+          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_ALGORITHM, "Query the client for support for non-mandatory algorithms"))
+          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_EXTENSION, "Query the client for support for specific extension objects.  See <code>SKS:addExtension</code>"))
+          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_CLIENT_ATTRI, "Query the client for support for client attributes like IMEI number. " +
+                                                      "If the client has support for " +
+                                                      "such attributes it should request the user's permission to disclose them. " +
+                                                      "This property is not allowed in the <code>" + PRIVACY_ENABLED_JSON + "</code> mode"))
           .newRow ()
             .newColumn ()
               .addProperty (SERVER_SESSION_ID_JSON)
@@ -667,16 +767,32 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
         preAmble (PLATFORM_NEGOTIATION_RESPONSE_JSON)
           .newRow ()
             .newColumn ()
-              .addProperty (LOOKUP_RESULTS_JSON)
-              .addLink (LOOKUP_RESULTS_JSON)
+              .addProperty (SERVER_SESSION_ID_JSON)
+              .addSymbolicValue (SERVER_SESSION_ID_JSON)
             .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
             .newColumn ()
-              .setUsage (true, 1)
             .newColumn ()
-              .addString ("List of <code>" + LOOKUP_RESULTS_JSON + 
-                          "</code> which must match <code>" + LOOKUP_SPECIFIERS_JSON +
-                          "</code> in terms of <code>" + ID_JSON + "</code>");
+              .addString ("Copy of <code>" + SERVER_SESSION_ID_JSON +
+                          "</code> from ")
+              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (NONCE_JSON)
+              .addSymbolicValue (NONCE_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("<i>Optional</i> 1-32 byte nonce. See ")
+              .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
+          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_ALGORITHM))
+          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_EXTENSION))
+          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_CLIENT_ATTRI))
+          .newExtensionRow (new OptionalArrayObject (IMAGE_PREFERENCES_JSON,
+                                                     1,
+                                                     "List of client image preferences that the server may use for creating suitable "))
+            .addLink (LOGOTYPES_JSON);
 
         preAmble (CREDENTIAL_DISCOVERY_REQUEST_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
@@ -1331,6 +1447,43 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .addString ("Logotype image data")
           .newExtensionRow (new MAC ("addExtension"));
+
+        json.addSubItemTable (IMAGE_PREFERENCES_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (TYPE_JSON)
+              .addSymbolicValue (TYPE_JSON)
+            .newColumn ()
+               .setType (JSON_TYPE_URI)
+            .newColumn ()
+            .newColumn ()
+              .addString ("Logotype type URI")
+          .newRow ()
+            .newColumn ()
+              .addProperty (MIME_TYPE_JSON)
+              .addSymbolicValue (MIME_TYPE_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("Logotype MIME type")
+          .newRow ()
+            .newColumn ()
+              .addProperty (WIDTH_JSON)
+              .addSymbolicValue (WIDTH_JSON)
+            .newColumn ()
+               .setType (JSON_TYPE_INT)
+            .newColumn ()
+            .newColumn ()
+              .addString ("Logotype width")
+          .newRow ()
+            .newColumn ()
+              .addProperty (HEIGHT_JSON)
+              .addSymbolicValue (HEIGHT_JSON)
+            .newColumn ()
+               .setType (JSON_TYPE_INT)
+            .newColumn ()
+            .newColumn ()
+              .addString ("Logotype height");
 
         json.addSubItemTable (PROPERTY_BAGS_JSON)
           .newRow ()

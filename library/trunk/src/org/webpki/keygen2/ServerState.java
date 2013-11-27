@@ -1044,7 +1044,7 @@ public class ServerState implements Serializable
 
     ServerCryptoInterface server_crypto_interface;
 
-    BasicCapabilities basic_capabilities = new BasicCapabilities (false);
+    BasicCapabilities basic_capabilities = new BasicCapabilities ();
     
     HashMap<String,HashSet<String>> client_attribute_values;
 

@@ -42,11 +42,8 @@ public class BasicCapabilities implements Serializable
 
     LinkedHashSet<String> extensions = new LinkedHashSet<String> ();
     
-    private boolean read_only;
-    
-    BasicCapabilities (boolean read_only)
+    BasicCapabilities ()
       {
-        this.read_only = read_only;
       }
 
     static String[] getSortedAlgorithms (String[] algorithms) throws IOException
