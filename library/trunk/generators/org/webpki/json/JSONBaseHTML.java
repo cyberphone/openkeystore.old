@@ -32,6 +32,8 @@ public class JSONBaseHTML
     public static final String MANDATORY    = "m";
     public static final String OPTIONAL     = "o";
     
+    public static final String PAGE_WIDTH   = "80em";
+    
     public interface Types 
       {
         String JSON_TYPE_BOOLEAN = "bool";
@@ -141,11 +143,11 @@ public class JSONBaseHTML
                   {
                     code ();
                     quote ();
-                    addString ("<font color=\"");
+                    addString ("<span style=\"color:");
                     addString (color);
                     addString ("\">");
                     addString (string);
-                    addString ("</font>");
+                    addString ("</span>");
                     quote ();
                     if (property)
                       {
@@ -319,7 +321,7 @@ public class JSONBaseHTML
                     .append ("\">")
                     .append (main_object ? "" : "<i>")
                     .append (protocol)
-                    .append (main_object ? "" : "</i></span>");
+                    .append (main_object ? "</span>" : "</i></span>");
               }
             html.append ("</td></tr>\n<tr><th>Property</th><th>Type</th><th>Usage</th><th>Comment</th></tr>");
             int i = 0;
@@ -389,7 +391,7 @@ public class JSONBaseHTML
         html = new StringBuffer (
             "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">" +
             "<html><head><title>KeyGen2</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><style type=\"text/css\">\n" +
-            ".tftable {width:80em;border-collapse: collapse;}\n" +
+            ".tftable {width:" + PAGE_WIDTH + ";border-collapse: collapse;}\n" +
             ".tftable th {font-size:10pt;background-color:#e0e0e0;border-width:1px;padding:4pt 12pt 4pt 12pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
             ".tftable tr {background-color:#ffffff;}\n" +
             ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;;font-family:arial,verdana,helvetica}\n" +

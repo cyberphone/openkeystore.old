@@ -69,7 +69,6 @@ import org.webpki.ca.CA;
 import org.webpki.ca.CertSpec;
 
 import org.webpki.crypto.AsymKeySignerInterface;
-import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.CertificateUtil;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.HashAlgorithms;

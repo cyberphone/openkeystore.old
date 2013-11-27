@@ -772,6 +772,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
       {
         KeyObject rk;
         PresetPIN preset = null;
+        boolean save_user_defined = pin_policy.user_defined;
         if (rd.hasProperty (ENCRYPTED_PRESET_PIN_JSON))
           {
             preset = new PresetPIN (rd, ENCRYPTED_PRESET_PIN_JSON);
@@ -779,6 +780,10 @@ public class KeyCreationRequestDecoder extends ClientDecoder
         else
           {
             pin_policy.user_defined = true;
+          }
+        if (!start_of_pin_group && save_user_defined ^ pin_policy.user_defined)
+          {
+            bad ("Mixed use of user-defined and preset PINs within a PIN group is not allowed");
           }
         request_objects.add (rk = new KeyObject (rd, pin_policy, start_of_pin_group, preset, false));
         return rk;

@@ -449,6 +449,113 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
           }
         json = new JSONBaseHTML ();
 
+        preAmble (PLATFORM_NEGOTIATION_REQUEST_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (ACTION_JSON)
+              .addSymbolicValue (ACTION_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("The <code>" + ACTION_JSON +
+                          "</code> property gives (through a suitable GUI dialog) the user a hint of what the session in progess is about to perform. " +
+                          "The valid constants are:<ul>" +
+                          "<li><code>" + Action.MANAGE.getJSONName () + "</code> - Create, delete and/or update credentials</li>" +
+                          "<li style=\"padding-bottom:4pt;padding-top:4pt\"><code>" + Action.RESUME.getJSONName () + "</code> - Resume operation after an interrupted <code>" + KEY_CREATION_RESPONSE_JSON + 
+                            "</code>.  See <code>" + DEFERRED_CERTIFICATION_JSON + "</code> in ")
+               .addLink (KEY_CREATION_REQUEST_JSON)
+               .addString (". A confirming client should after this call only accept a ")
+               .addLink (PROVISIONING_FINALIZATION_REQUEST_JSON)
+               .addString ("</li>" +
+                   "<li><code>" + Action.UNLOCK.getJSONName () + "</code> - Unlock existing keys. A conforming client should disallow ")
+               .addLink (KEY_CREATION_REQUEST_JSON)
+               .addString ("</li>" +
+                   "</ul>")
+          .newRow ()
+            .newColumn ()
+              .addProperty (PRIVACY_ENABLED_JSON)
+              .addSymbolicValue (PRIVACY_ENABLED_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BOOLEAN)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("The <code>" + PRIVACY_ENABLED_JSON +
+                          "</code> flag serves two purposes:<ul>" +
+                          "<li>Give the user a chance to cancel the provisioning operation " +
+                          "if the privacy implications of the standard mode are unacceptable</li>" +
+                          "<li style=\"padding-top:4pt\">Activate the correct mode during ")
+               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
+               .addString ("</li></ul>Note: The default value is <code>false</code>")
+          .newExtensionRow (new OptionalArrayList (PREFERREDD_LANGUAGES_JSON,
+                                                   "<i>Optional</i>: List of preferred languages using ISO 639-1 two-character notation"))
+          .newExtensionRow (new OptionalArrayList (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS,
+                                                   "<i>Optional</i>: List of target key container types.  The elements may be:<ul>" +
+                                                   getKeyContainers () +
+                                                   "</ul>" +
+                                                   "The key containers are listed in preference order. " +
+                                                   "If no matching container is available the client may prompt " +
+                                                   "the user for inserting a card or similar. If&nbsp;<code>" +
+                                                   KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS + "</code> is undefined " +
+                                                   "the provisioning client is supposed to use the system's 'native' keystore"))
+          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_ALGORITHM, "Query the client for support for non-mandatory algorithms"))
+          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_EXTENSION, "Query the client for support for specific extension objects.  See <code>SKS:addExtension</code>"))
+          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_CLIENT_ATTRI, "Query the client for support for client attributes like IMEI number. " +
+                                                      "If the client has support for " +
+                                                      "such attributes it should request the user's permission to disclose them. " +
+                                                      "This property is not allowed in the <code>" + PRIVACY_ENABLED_JSON + "</code> mode"))
+          .newRow ()
+            .newColumn ()
+              .addProperty (SERVER_SESSION_ID_JSON)
+              .addSymbolicValue (SERVER_SESSION_ID_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("The <code>" + SERVER_SESSION_ID_JSON +
+                          "</code> must remain constant for the entire session")
+          .newExtensionRow (new SubmitURL ())
+          .newRow ()
+            .newColumn ()
+              .addProperty (ABORT_URL_JSON)
+              .addSymbolicValue (ABORT_URL_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_URI)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("Optional URL the provisioning client should launch the browser with if the user cancels the process")
+          .newExtensionRow (new OptionalSignature ());
+  
+        preAmble (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (SERVER_SESSION_ID_JSON)
+              .addSymbolicValue (SERVER_SESSION_ID_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("Copy of <code>" + SERVER_SESSION_ID_JSON +
+                          "</code> from ")
+              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (NONCE_JSON)
+              .addSymbolicValue (NONCE_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("<i>Optional</i> 1-32 byte nonce. See ")
+              .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
+          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_ALGORITHM))
+          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_EXTENSION))
+          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_CLIENT_ATTRI))
+          .newExtensionRow (new OptionalArrayObject (IMAGE_PREFERENCES_JSON,
+                                                     1,
+                                                     "List of client image preferences that the server may use for creating suitable "))
+            .addLink (LOGOTYPES_JSON);
+
         preAmble (PROVISIONING_INITIALIZATION_REQUEST_JSON)
           .newRow ()
             .newColumn ()
@@ -605,32 +712,35 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                                               "Signature covering the entire response. See <code>" +
                                               "SKS:createProvisioningSession</code>"));
 
-        preAmble (PROVISIONING_FINALIZATION_REQUEST_JSON)
+        preAmble (CREDENTIAL_DISCOVERY_REQUEST_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newExtensionRow (new SubmitURL ())
-          .newExtensionRow (new OptionalArrayObject (ISSUED_CREDENTIALS_JSON,
-                                                     1,
-                                                     "<i>Optional:</i> List of issued credentials. See <code>" +
-                                                     "SKS:setCertificatePath</code>"))
-          .newExtensionRow (new OptionalArrayObject (UNLOCK_KEYS_JSON,
-                                                     1,
-                                                     "<i>Optional:</i> List of keys to be unlocked. See <code>" +
-                                                     "SKS:postUnlockKey</code>"))
-          .newExtensionRow (new OptionalArrayObject (DELETE_KEYS_JSON,
-                                                     1,
-                                                     "<i>Optional:</i> List of keys to be deleted. See <code>" +
-                                                     "SKS:postDeleteKey</code>"))
+          .newRow ()
+             .newColumn ()
+              .addProperty (LOOKUP_SPECIFIERS_JSON)
+              .addArrayLink (LOOKUP_SPECIFIERS_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
+            .newColumn ()
+              .setUsage (true, 1)
+            .newColumn ()
+              .addString ("List of signed credential lookup specifiers. " +
+                          "See SKS appendix &quot;Remote Key Lookup&quot; for details")
+          .newExtensionRow (new OptionalSignature ());
+  
+        preAmble (CREDENTIAL_DISCOVERY_RESPONSE_JSON)
+          .newExtensionRow (new StandardServerClientSessionIDs ())
           .newRow ()
             .newColumn ()
-              .addProperty (CHALLENGE_JSON)
-              .addSymbolicValue (CHALLENGE_JSON)
+              .addProperty (LOOKUP_RESULTS_JSON)
+              .addArrayLink (LOOKUP_RESULTS_JSON)
             .newColumn ()
-              .setType (JSON_TYPE_BASE64)
+              .setType (JSON_TYPE_OBJECT)
             .newColumn ()
+              .setUsage (true, 1)
             .newColumn ()
-              .addString ("See <code>SKS:closeProvisioningSession</code>")
-          .newExtensionRow (new MAC ("closeProvisioningSession"))
-          .newExtensionRow (new OptionalSignature ());
+              .addString ("List of credential lookup results. " +
+                          "See SKS appendix &quot;Remote Key Lookup&quot; for details");
 
         preAmble (KEY_CREATION_REQUEST_JSON)
           .newRow ()
@@ -673,7 +783,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                                                      "List of key entries to be created. " +
                                                      "See <code>SKS:createKeyEntry</code>"))
           .newExtensionRow (new OptionalSignature ());
-
+  
         preAmble (KEY_CREATION_RESPONSE_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newRow ()
@@ -687,142 +797,33 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>");
 
-        preAmble (PLATFORM_NEGOTIATION_REQUEST_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (ACTION_JSON)
-              .addSymbolicValue (ACTION_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("The <code>" + ACTION_JSON +
-                          "</code> property gives (through a suitable GUI dialog) the user a hint of what the session in progess is about to perform. " +
-                          "The valid constants are:<ul>" +
-                          "<li><code>" + Action.MANAGE.getJSONName () + "</code> - Create, delete and/or update credentials</li>" +
-                          "<li style=\"padding-bottom:4pt;padding-top:4pt\"><code>" + Action.RESUME.getJSONName () + "</code> - Resume operation after an interrupted <code>" + KEY_CREATION_RESPONSE_JSON + 
-                            "</code>.  See <code>" + DEFERRED_CERTIFICATION_JSON + "</code> in ")
-               .addLink (KEY_CREATION_REQUEST_JSON)
-               .addString (". A confirming client should after this call only accept a ")
-               .addLink (PROVISIONING_FINALIZATION_REQUEST_JSON)
-               .addString ("</li>" +
-                   "<li><code>" + Action.UNLOCK.getJSONName () + "</code> - Unlock existing keys. A conforming client should disallow ")
-               .addLink (KEY_CREATION_REQUEST_JSON)
-               .addString ("</li>" +
-                   "</ul>")
-          .newRow ()
-            .newColumn ()
-              .addProperty (PRIVACY_ENABLED_JSON)
-              .addSymbolicValue (PRIVACY_ENABLED_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_BOOLEAN)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString ("The <code>" + PRIVACY_ENABLED_JSON +
-                          "</code> flag serves two purposes:<ul>" +
-                          "<li>Give the user a chance to cancel the provisioning operation " +
-                          "if the privacy implications of the standard mode are unacceptable</li>" +
-                          "<li style=\"padding-top:4pt\">Activate the correct mode during ")
-               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
-               .addString ("</li></ul>Note: The default value is <code>false</code>")
-          .newExtensionRow (new OptionalArrayList (PREFERREDD_LANGUAGES_JSON,
-                                                   "<i>Optional</i>: List of preferred languages using ISO 639-1 two-character notation"))
-          .newExtensionRow (new OptionalArrayList (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS,
-                                                   "<i>Optional</i>: List of target key container types.  The elements may be:<ul>" +
-                                                   getKeyContainers () +
-                                                   "</ul>" +
-                                                   "The key containers are listed in preference order. " +
-                                                   "If no matching container is available the client may prompt " +
-                                                   "the user for inserting a card or similar. If&nbsp;<code>" +
-                                                   KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS + "</code> is undefined " +
-                                                   "the provisioning client is supposed to use the system's 'native' keystore"))
-          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_ALGORITHM, "Query the client for support for non-mandatory algorithms"))
-          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_EXTENSION, "Query the client for support for specific extension objects.  See <code>SKS:addExtension</code>"))
-          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_CLIENT_ATTRI, "Query the client for support for client attributes like IMEI number. " +
-                                                      "If the client has support for " +
-                                                      "such attributes it should request the user's permission to disclose them. " +
-                                                      "This property is not allowed in the <code>" + PRIVACY_ENABLED_JSON + "</code> mode"))
-          .newRow ()
-            .newColumn ()
-              .addProperty (SERVER_SESSION_ID_JSON)
-              .addSymbolicValue (SERVER_SESSION_ID_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("The <code>" + SERVER_SESSION_ID_JSON +
-                          "</code> must remain constant for the entire session")
-          .newExtensionRow (new SubmitURL ())
-          .newRow ()
-            .newColumn ()
-              .addProperty (ABORT_URL_JSON)
-              .addSymbolicValue (ABORT_URL_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_URI)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString ("Optional URL the provisioning client should launch the browser with if the user cancels the process")
-          .newExtensionRow (new OptionalSignature ());
 
-        preAmble (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+        preAmble (PROVISIONING_FINALIZATION_REQUEST_JSON)
+          .newExtensionRow (new StandardServerClientSessionIDs ())
+          .newExtensionRow (new SubmitURL ())
+          .newExtensionRow (new OptionalArrayObject (ISSUED_CREDENTIALS_JSON,
+                                                     1,
+                                                     "<i>Optional:</i> List of issued credentials. See <code>" +
+                                                     "SKS:setCertificatePath</code>"))
+          .newExtensionRow (new OptionalArrayObject (UNLOCK_KEYS_JSON,
+                                                     1,
+                                                     "<i>Optional:</i> List of keys to be unlocked. See <code>" +
+                                                     "SKS:postUnlockKey</code>"))
+          .newExtensionRow (new OptionalArrayObject (DELETE_KEYS_JSON,
+                                                     1,
+                                                     "<i>Optional:</i> List of keys to be deleted. See <code>" +
+                                                     "SKS:postDeleteKey</code>"))
           .newRow ()
             .newColumn ()
-              .addProperty (SERVER_SESSION_ID_JSON)
-              .addSymbolicValue (SERVER_SESSION_ID_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("Copy of <code>" + SERVER_SESSION_ID_JSON +
-                          "</code> from ")
-              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (NONCE_JSON)
-              .addSymbolicValue (NONCE_JSON)
+              .addProperty (CHALLENGE_JSON)
+              .addSymbolicValue (CHALLENGE_JSON)
             .newColumn ()
               .setType (JSON_TYPE_BASE64)
             .newColumn ()
-              .setUsage (false)
             .newColumn ()
-              .addString ("<i>Optional</i> 1-32 byte nonce. See ")
-              .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
-          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_ALGORITHM))
-          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_EXTENSION))
-          .newExtensionRow (new BasicCapabilitySupport (BasicCapabilities.BASIC_CAP_CLIENT_ATTRI))
-          .newExtensionRow (new OptionalArrayObject (IMAGE_PREFERENCES_JSON,
-                                                     1,
-                                                     "List of client image preferences that the server may use for creating suitable "))
-            .addLink (LOGOTYPES_JSON);
-
-        preAmble (CREDENTIAL_DISCOVERY_REQUEST_JSON)
-          .newExtensionRow (new StandardServerClientSessionIDs ())
-          .newExtensionRow (new SubmitURL ())
-          .newRow ()
-             .newColumn ()
-              .addProperty (LOOKUP_SPECIFIERS_JSON)
-              .addArrayLink (LOOKUP_SPECIFIERS_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-              .setUsage (true, 1)
-            .newColumn ()
-              .addString ("List of signed credential lookup specifiers. " +
-                          "See SKS appendix &quot;Remote Key Lookup&quot; for details")
+              .addString ("See <code>SKS:closeProvisioningSession</code>")
+          .newExtensionRow (new MAC ("closeProvisioningSession"))
           .newExtensionRow (new OptionalSignature ());
-
-        preAmble (CREDENTIAL_DISCOVERY_RESPONSE_JSON)
-          .newExtensionRow (new StandardServerClientSessionIDs ())
-          .newRow ()
-            .newColumn ()
-              .addProperty (LOOKUP_RESULTS_JSON)
-              .addArrayLink (LOOKUP_RESULTS_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-              .setUsage (true, 1)
-            .newColumn ()
-              .addString ("List of credential lookup results. " +
-                          "See SKS appendix &quot;Remote Key Lookup&quot; for details");
 
         preAmble (PROVISIONING_FINALIZATION_RESPONSE_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
@@ -1152,7 +1153,10 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addString ("See <code>SKS:createKeyEntry.PINValue</code>. " + "" +
               		      "Note that if this property is defined, the " +
               		      "<code>SKS:createPINPolicy.UserDefined</code> " +
-              		      "flag of the required embedding PIN policy is set to <code>false</code> else it is set to <code>true</code>")
+              		      "flag of the required embedding PIN policy is set to <code>false</code> " +
+              		      "else it is set to <code>true</code>. " +
+              		      "Keys associated with a specific PIN policy " +
+              		      "must not mix user-defined and preset PINs")
           .newRow ()
             .newColumn ()
               .addProperty (ENABLE_PIN_CACHING_JSON)
@@ -1233,7 +1237,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("See <code>SKS:createKeyEntry." + BIOMETRIC_PROTECTION_JSON + "</code>. " +
-                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>none</none>")
+                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>none</code>")
           .newRow ()
             .newColumn ()
               .addProperty (DELETE_PROTECTION_JSON)
@@ -1243,7 +1247,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("See <code>SKS:createKeyEntry." + DELETE_PROTECTION_JSON + "</code>. " +
-                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>none</none>")
+                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>none</code>")
           .newRow ()
             .newColumn ()
               .addProperty (EXPORT_PROTECTION_JSON)
@@ -1253,7 +1257,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("See <code>SKS:createKeyEntry." + EXPORT_PROTECTION_JSON + "</code>. " +
-                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>non-exportable</none>")
+                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>non-exportable</code>")
           .newRow ()
             .newColumn ()
               .addProperty (FRIENDLY_NAME_JSON)
