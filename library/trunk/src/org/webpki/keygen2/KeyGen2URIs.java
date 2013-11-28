@@ -31,15 +31,15 @@ public interface KeyGen2URIs
 
     public interface CLIENT_ATTRIBUTES
       {
-        String IMEI_NUMBER                 = "http://xmlns.webpki.org/keygen2/clientattribute#imei-number";
+        String IMEI_NUMBER                 = "http://xmlns.webpki.org/keygen2/clientattr#imei-number";
   
-        String MAC_ADDRESS                 = "http://xmlns.webpki.org/keygen2/clientattribute#mac-address";
+        String MAC_ADDRESS                 = "http://xmlns.webpki.org/keygen2/clientattr#mac-address";
   
-        String IP_ADDRESS                  = "http://xmlns.webpki.org/keygen2/clientattribute#ip-address";
+        String IP_ADDRESS                  = "http://xmlns.webpki.org/keygen2/clientattr#ip-address";
 
-        String OS_VENDOR                   = "http://xmlns.webpki.org/keygen2/clientattribute#os-vendor";
+        String OS_VENDOR                   = "http://xmlns.webpki.org/keygen2/clientattr#os-vendor";
 
-        String OS_VERSION                  = "http://xmlns.webpki.org/keygen2/clientattribute#os-version";
+        String OS_VERSION                  = "http://xmlns.webpki.org/keygen2/clientattr#os-version";
       }
 
     public interface FEATURE

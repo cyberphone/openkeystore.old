@@ -460,6 +460,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
          .append ("</li>");
       }
 
+
     static String getLogotypes ()
       {
         StringBuffer s = new StringBuffer ();
@@ -471,6 +472,25 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                     "where multiple credentials are featured as a map of small icons.");
         getLogotype (s, KeyGen2URIs.LOGOTYPES.APPLICATION, true, "Could be used in applications where a " +
                     "logotype is useful for branding/recognition purposes like in OTP systems.");
+        return s.toString ();
+      }
+
+
+    static void getClientAttribute (StringBuffer s, String uri)
+      {
+        s.append ("<li><code>")
+         .append (uri)
+         .append ("</code></li>");
+      }
+
+    static String clientAttributes ()
+      {
+        StringBuffer s = new StringBuffer ();
+        getClientAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER);
+        getClientAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS);
+        getClientAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
+        getClientAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.OS_VENDOR);
+        getClientAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.OS_VERSION);
         return s.toString ();
       }
 
@@ -523,22 +543,24 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
           .newExtensionRow (new OptionalArrayList (PREFERREDD_LANGUAGES_JSON,
                                                    "<i>Optional</i>: List of preferred languages using ISO 639-1 two-character notation."))
           .newExtensionRow (new OptionalArrayList (KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS,
-                                                   "<i>Optional</i>: List of target key container types.  The elements may be:<ul>" +
-                                                   getKeyContainers () +
-                                                   "</ul>" +
-                                                   "The key containers are listed in preference order. " +
-                                                   "If no matching container is available the client may prompt " +
-                                                   "the user for inserting a card or similar." + LINE_SEPARATOR + 
-                                                   "If <code>" +
-                                                   KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS + "</code> is undefined " +
-                                                   "the provisioning client is supposed to use the system's 'native' keystore."))
-          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_ALGORITHM, "Query the client for support for non-mandatory algorithms."))
+                         "<i>Optional</i>: List of target key container types.  The elements may be:<ul>" +
+                         getKeyContainers () +
+                         "</ul>" +
+                         "The key containers are listed in preference order. " +
+                         "If no matching container is available the client may prompt " +
+                         "the user for inserting a card or similar." + LINE_SEPARATOR + 
+                         "If <code>" +
+                         KeyContainerTypes.KCT_TARGET_KEY_CONTAINERS + "</code> is undefined " +
+                         "the provisioning client is supposed to use the system's 'native' keystore."))
+          .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_ALGORITHM, "Query the client for support for non-mandatory algorithms.  See SKS &quot;Algorithm Support&quot;."))
           .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_EXTENSION, "Query the client for support for specific extension objects." + LINE_SEPARATOR))
             .addString ("Note that extensions may refer to <code>SKS:addExtension</code> as well as to non-SKS items such as <code>" + VIRTUAL_MACHINE_JSON + "</code>.")
           .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_CLIENT_ATTRI, "Query the client for support for client attributes like IMEI number. " +
-                                                      "If the client has support for " +
-                                                      "such attributes it should request the user's permission to disclose them." + LINE_SEPARATOR +
-                                                      "This property is not allowed in the <code>" + PRIVACY_ENABLED_JSON + "</code> mode."))
+                         "If the client has support for " +
+                         "such attributes it should request the user's permission to disclose them." + LINE_SEPARATOR +
+                         "This property is not allowed in the <code>" + PRIVACY_ENABLED_JSON + "</code> mode." + LINE_SEPARATOR +
+                         "The following client attribute URIs are pre-defined:<ul>" + clientAttributes () +
+                         "</ul>"))
           .newRow ()
             .newColumn ()
               .addProperty (SERVER_SESSION_ID_JSON)
@@ -667,7 +689,9 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                           "use-cases where the provisioning process bootstraps an alternative " +
                           "environment and associated policies." + LINE_SEPARATOR +
                           "Since the exact nature of such an environment is platform-dependent, it is nessesary " +
-                          "to find out what is actually available. The recommended method is adding the following to "))
+                          "to find out what is actually available using the pre-defined extension URI <code>&quot;"))
+              .addString (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
+              .addString ("&quot;</code>. The recommended method is adding the following to ")
               .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
               .addString (LINE_SEPARATOR + "<code>&nbsp;&nbsp;</code>")
               .addProperty (BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, true))
