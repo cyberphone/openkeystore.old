@@ -49,6 +49,7 @@ public class JSONBaseHTML
         
         String SORTED_CERT_PATH  = "Sorted Certificate Path";
         String URI_LIST          = "List of URIs";
+        String LINE_SEPARATOR    = "<div style=\"height:6pt;padding:0px\"></div>";
       }
     
     public interface Extender
@@ -145,6 +146,13 @@ public class JSONBaseHTML
                     quote ();
                     addString ("<span style=\"color:");
                     addString (color);
+                    if (property)
+                      {
+                        addString ("\" id=\"");
+                        addString (protocols[0]);
+                        addString (".");
+                        addString (string);
+                      }
                     addString ("\">");
                     addString (string);
                     addString ("</span>");
@@ -438,7 +446,7 @@ public class JSONBaseHTML
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("JCS: <i>Optional</i> version identifier")
+              .addString ("JCS: <i>Optional</i> signature object version identifier.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.ALGORITHM_JSON)
@@ -447,7 +455,7 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_URI)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS: Signature algorithm URI")
+              .addString ("JCS: Signature algorithm URI.  See SKS &quot;Algorithm Support&quot;.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.KEY_INFO_JSON)
@@ -456,7 +464,7 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS: Signature key info placeholder")
+              .addString ("JCS: Signature key info placeholder.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.SIGNATURE_VALUE_JSON)
@@ -465,7 +473,7 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS: Signature value");
+              .addString ("JCS: Signature value.");
 
         addSubItemTable (JSONSignatureEncoder.KEY_INFO_JSON)
           .newRow ()
@@ -477,7 +485,7 @@ public class JSONBaseHTML
             .newColumn ()
               .setChoice (true, 3)
             .newColumn ()
-              .addString ("JCS option: Public key")
+              .addString ("JCS option: Public key.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON)
@@ -486,7 +494,7 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS option: Sorted X.509 certificate path")
+              .addString ("JCS option: Sorted X.509 certificate path where the first element must hold  the end-entity certificate.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.KEY_ID_JSON)
@@ -495,7 +503,7 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_STRING)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS option: Symmetric key ID")
+              .addString ("JCS option: Symmetric key ID.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
@@ -506,7 +514,7 @@ public class JSONBaseHTML
               .setUsage (false)
             .newColumn ()
               .addString ("JCS: Signature certificate data. Note: only valid for the <code>" +
-                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON + "</code> option");
+                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON + "</code> option.");
 
         addSubItemTable (JSONSignatureEncoder.PUBLIC_KEY_JSON)
           .newRow ()
@@ -518,7 +526,7 @@ public class JSONBaseHTML
             .newColumn ()
               .setChoice (true, 2)
             .newColumn ()
-              .addString ("JCS option: EC public key")
+              .addString ("JCS option: EC public key.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.RSA_JSON)
@@ -527,7 +535,7 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS option: RSA public key");
+              .addString ("JCS option: RSA public key.");
 
         addSubItemTable (JSONSignatureEncoder.RSA_JSON)
           .newRow ()
@@ -538,7 +546,7 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS: RSA modulus")
+              .addString ("JCS: RSA modulus.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.EXPONENT_JSON)
@@ -547,7 +555,7 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS: RSA exponent");
+              .addString ("JCS: RSA exponent.");
 
       addSubItemTable (JSONSignatureEncoder.EC_JSON)
         .newRow ()
@@ -558,7 +566,7 @@ public class JSONBaseHTML
             .setType (Types.JSON_TYPE_URI)
           .newColumn ()
           .newColumn ()
-            .addString ("JCS: EC named curve")
+            .addString ("JCS: EC named curve.  See SKS &quot;Algorithm Support&quot;.")
         .newRow ()
           .newColumn ()
             .addProperty (JSONSignatureEncoder.X_JSON)
@@ -567,7 +575,7 @@ public class JSONBaseHTML
             .setType (Types.JSON_TYPE_BASE64)
           .newColumn ()
           .newColumn ()
-            .addString ("JCS: EC curve point X")
+            .addString ("JCS: EC curve point X.")
         .newRow ()
           .newColumn ()
             .addProperty (JSONSignatureEncoder.Y_JSON)
@@ -576,7 +584,7 @@ public class JSONBaseHTML
             .setType (Types.JSON_TYPE_BASE64)
           .newColumn ()
           .newColumn ()
-            .addString ("JCS: EC curve point Y");        
+            .addString ("JCS: EC curve point Y.");        
 
       addSubItemTable (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
         .newRow ()
@@ -587,7 +595,7 @@ public class JSONBaseHTML
             .setType (Types.JSON_TYPE_STRING)
           .newColumn ()
           .newColumn ()
-            .addString ("JCS: X.500 issuer distinguished name")
+            .addString ("JCS: X.500 issuer distinguished name in RFC 4514 notation.")
         .newRow ()
           .newColumn ()
             .addProperty (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
@@ -596,7 +604,7 @@ public class JSONBaseHTML
             .setType (Types.JSON_TYPE_BIGINT)
           .newColumn ()
           .newColumn ()
-            .addString ("JCS: Certificate serial number")
+            .addString ("JCS: Certificate serial number.")
         .newRow ()
           .newColumn ()
             .addProperty (JSONSignatureEncoder.SUBJECT_JSON)
@@ -605,6 +613,6 @@ public class JSONBaseHTML
             .setType (Types.JSON_TYPE_STRING)
           .newColumn ()
           .newColumn ()
-            .addString ("JCS: X.500 subject distinguished name");        
+            .addString ("JCS: X.500 subject distinguished name in RFC 4514 notation.");        
       }
   }
