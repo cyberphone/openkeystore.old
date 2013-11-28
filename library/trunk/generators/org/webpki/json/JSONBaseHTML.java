@@ -151,7 +151,7 @@ public class JSONBaseHTML
                         addString ("\" id=\"");
                         addString (protocols[0]);
                         addString (".");
-                        addString (string);
+                        addString (string.charAt (0) == '@' ? string.substring (1) : string);
                       }
                     addString ("\">");
                     addString (string);
@@ -494,7 +494,7 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS option: Sorted X.509 certificate path where the first element must hold  the <nobr>end-entity</nobr> certificate.")
+              .addString ("JCS option: Sorted X.509 certificate path where the first element must hold  the <i style=\"white-space:nowrap\">end-entity</i> certificate.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.KEY_ID_JSON)

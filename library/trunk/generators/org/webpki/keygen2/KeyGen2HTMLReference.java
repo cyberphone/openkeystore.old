@@ -382,17 +382,17 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
         createOption (CertificateFilter.CF_EMAIL_REG_EX, JSON_TYPE_STRING, false, "Regular expression matching any of the e-mail addresses in the <i>end-entity certificate</i>." + LINE_SEPARATOR +
                             "Note that both RFC822 subject attributes and <code>subjectAltName</code> fields are in scope.");
         createOption (CertificateFilter.CF_POLICY_RULES, JSON_TYPE_STRING, true,
-                            "List of X.509 policy extension OIDs using the notation <nobr><code>&quot;1.4.3&quot;</code></nobr> and <nobr><code>&quot;-1.4.7&quot;</code></nobr> " +
+                            "List of X.509 policy extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
                             "for a required and forbidden policy OID respectively." + LINE_SEPARATOR +
                             "Policy OIDs encountered in <i>end-entity certificates</i> that " +
                             "are not specified in <code>" + CertificateFilter.CF_POLICY_RULES + "</code> must be <i>ignored</i>.");
         createOption (CertificateFilter.CF_KEY_USAGE_RULES, JSON_TYPE_STRING, true,
-                            "List of X.509 key usage flags using the notation <code>&quot;digitalSignature&quot;</code> and <nobr><code>&quot;-dataEncipherment&quot;</code></nobr> " +
+                            "List of X.509 key usage flags using the notation <code>&quot;digitalSignature&quot;</code> and <code style=\"white-space:nowrap\">&quot;-dataEncipherment&quot;</code> " +
                             "for a required and forbidden key usage respectively." + LINE_SEPARATOR +
                             "Key usage flags encountered in <i>end-entity certificates</i> that " +
                             "are not specified in <code>" + CertificateFilter.CF_KEY_USAGE_RULES + "</code> must be <i>ignored</i>.");
         createOption (CertificateFilter.CF_EXT_KEY_USAGE_RULES, JSON_TYPE_STRING, true,
-                            "List of X.509 extended key usage extension OIDs using the notation <nobr><code>&quot;1.4.3&quot;</code></nobr> and <nobr><code>&quot;-1.4.7&quot;</code></nobr> " +
+                            "List of X.509 extended key usage extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
                             "for a required and forbidden extended key usage respectively." + LINE_SEPARATOR +
                             "Extended key usage OIDs encountered in <i>end-entity certificates</i> that " +
                             "are not specified in <code>" + CertificateFilter.CF_EXT_KEY_USAGE_RULES + "</code> must be <i>ignored</i>.");
@@ -663,18 +663,39 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addString (".")
           .newExtensionRow (new LinkedObject (VIRTUAL_MACHINE_JSON,
                                               false,
-                                              "The <code>" + VIRTUAL_MACHINE_JSON + "</code> option is intended to support BYOD " +
-                                              "use-cases where the provisioning process bootstraps an alternative " +
-                                              "environment and associated policies." + LINE_SEPARATOR +
-                                              "Since the exact nature of such an environment is platform-dependent, it is nessesary " +
-                                              "using the <code>" + BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, true) +
-                                              "</code> option to find out what is actually available. " + LINE_SEPARATOR +
-                                              "If the environment is already installed only the configuration should be updated. " + LINE_SEPARATOR +
-                                              "Note that the <code>" +
-                                              VIRTUAL_MACHINE_JSON +
-                                              "</code> option presumes that the <code>" +
-                                              PROVISIONING_INITIALIZATION_REQUEST_JSON +
-                                              "</code> is <i>signed</i>."))
+                          "The <code>" + VIRTUAL_MACHINE_JSON + "</code> option is intended to support BYOD " +
+                          "use-cases where the provisioning process bootstraps an alternative " +
+                          "environment and associated policies." + LINE_SEPARATOR +
+                          "Since the exact nature of such an environment is platform-dependent, it is nessesary " +
+                          "to find out what is actually available. The recommended method is adding the following to "))
+              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
+              .addString (LINE_SEPARATOR + "<code>&nbsp;&nbsp;</code>")
+              .addProperty (BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, true))
+              .addString ("<br><code>&nbsp;&nbsp;&nbsp;&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
+              .addValue (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
+              .addString ("<code>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
+              .addValue ("http://platforms.extreme-vm.com/type.3")
+              .addString ("<code>,<br>" +
+                          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
+              .addValue ("http://cool-but-obscure-vm.com/x")
+              .addString ("<code><br>&nbsp;&nbsp;&nbsp;&nbsp;]</code>" + LINE_SEPARATOR +
+                          "where the two latter URIs represent different, potentially supported environment types." + LINE_SEPARATOR +
+                          "A possible ")
+              .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+              .addString (" could be:" + LINE_SEPARATOR +
+                          "<code>&nbsp;&nbsp;</code>")
+              .addProperty (BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, false))
+              .addString ("<br><code>&nbsp;&nbsp;&nbsp;&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
+              .addValue (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
+              .addString ("<code>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
+              .addValue ("http://platforms.extreme-vm.com/type.3")
+              .addString ("<code><br>&nbsp;&nbsp;&nbsp;&nbsp;]</code>" + LINE_SEPARATOR + 
+                          "If an environment is already installed only the configuration should be updated. " + LINE_SEPARATOR +
+                          "Note that the <code>" +
+                          VIRTUAL_MACHINE_JSON +
+                          "</code> option presumes that the <code>" +
+                          PROVISIONING_INITIALIZATION_REQUEST_JSON +
+                          "</code> is <i>signed</i>.")
           .newRow ()
             .newColumn ()
               .addProperty (NONCE_JSON)
@@ -937,7 +958,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setType (JSON_TYPE_URI)
             .newColumn ()
             .newColumn ()
-              .addString ("Virtual machine type URI.")
+              .addString ("Virtual machine type URI like <code>&quot;http://platforms.extreme-vm.com/type.3&quot;</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (CONFIGURATION_JSON)
