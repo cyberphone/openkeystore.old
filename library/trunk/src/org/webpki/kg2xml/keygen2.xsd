@@ -26,9 +26,8 @@
 
      - Mandatory: PlatformNegotiation
 
-     - Action="create": ProvisioningInitialization KeyCreation   
+     - Action="manage": ProvisioningInitialization [CredentialDiscovery] [KeyCreation] 
      - Action="unlock": ProvisioningInitialization [CredentialDiscovery] 
-     - Action="update": ProvisioningInitialization [CredentialDiscovery] [KeyCreation] 
      - Action="resume": *
 
      - Mandatory: ProvisioningFinalization *
