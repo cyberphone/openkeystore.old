@@ -748,10 +748,10 @@
                     Logotypes MAY be ignored by the client software.  Currently
                     KeyGen2 supports the following predefined type URIs:
 
-                    - "http://xmlns.webpki.org/keygen2#logotype.icon" 
-                    - "http://xmlns.webpki.org/keygen2#logotype.card" 
-                    - "http://xmlns.webpki.org/keygen2#logotype.list" 
-                    - "http://xmlns.webpki.org/keygen2#logotype.application"
+                    - "http://xmlns.webpki.org/keygen2/logotype#icon" 
+                    - "http://xmlns.webpki.org/keygen2/logotype#card" 
+                    - "http://xmlns.webpki.org/keygen2/logotype#list" 
+                    - "http://xmlns.webpki.org/keygen2/logotype#application"
 
                     "Icon" is intended to be useful in a selection window
                     where multiple credentials are featured as a map of

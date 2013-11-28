@@ -494,7 +494,7 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS option: Sorted X.509 certificate path where the first element must hold  the end-entity certificate.")
+              .addString ("JCS option: Sorted X.509 certificate path where the first element must hold  the <nobr>end-entity</nobr> certificate.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.KEY_ID_JSON)

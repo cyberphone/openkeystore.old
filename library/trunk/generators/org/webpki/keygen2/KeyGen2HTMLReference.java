@@ -448,6 +448,32 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
         return s.toString ();
       }
 
+
+    static void getLogotype (StringBuffer s, String type, boolean li_add, String comment)
+      {
+        s.append ("<li")
+         .append (li_add ? " style=\"padding-top:4pt\"" : "")
+         .append ("><code>")
+         .append (type)
+         .append ("</code><br>")
+         .append (comment)
+         .append ("</li>");
+      }
+
+    static String getLogotypes ()
+      {
+        StringBuffer s = new StringBuffer ();
+        getLogotype (s, KeyGen2URIs.LOGOTYPES.LIST, false, "This type is meant to be " +
+                    "used in credential lists and management dialogs where you could use a " +
+                    "logotype together with a &quot;friendly name&quot; string or similar.");
+        getLogotype (s, KeyGen2URIs.LOGOTYPES.CARD, true, "A shape designed for wallet-like applications where logotypes usually are personalized.");
+        getLogotype (s, KeyGen2URIs.LOGOTYPES.ICON, true, "Intended for selection windows " +
+                    "where multiple credentials are featured as a map of small icons.");
+        getLogotype (s, KeyGen2URIs.LOGOTYPES.APPLICATION, true, "Could be used in applications where a " +
+                    "logotype is useful for branding/recognition purposes like in OTP systems.");
+        return s.toString ();
+      }
+
     public static void main (String args[]) throws IOException
       {
         if (args.length != 1)
@@ -566,7 +592,12 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                                                      1,
                                                      "List of client image preferences that the server may use for creating suitable "))
             .addLink (LOGOTYPES_JSON)
-            .addString (".");
+            .addString (".  Known logotypes include:<ul>" + getLogotypes () + "</ul>" +
+                        "Logotypes should not have framing borders or extra margins " +
+                        "unless these are integral parts of the actual logotype image. " + 
+                        "Logotypes should render nicely on light backgrounds. " +
+                        "Shadows should be avoided since the icon viewer itself may add such. " +
+                        "Support for PNG files is <i>mandatory</i>.");
 
         preAmble (PROVISIONING_INITIALIZATION_REQUEST_JSON)
           .newRow ()
