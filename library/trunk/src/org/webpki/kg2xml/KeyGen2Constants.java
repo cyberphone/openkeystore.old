@@ -48,10 +48,6 @@ public interface KeyGen2Constants
 
     String ENDORSED_ALGORITHMS_ATTR                  = "EndorsedAlgorithms";
 
-    String ERROR_URL_ATTR                            = "ErrorURL";
-
-    String EXPIRES_ATTR                              = "Expires";
-
     String EXPORT_PROTECTION_ATTR                    = "ExportProtection";
 
     String EXTENSIONS_ATTR                           = "Extensions";
@@ -87,10 +83,6 @@ public interface KeyGen2Constants
     String KEY_ENTRY_ALGORITHM_ATTR                  = "KeyEntryAlgorithm";
 
     String KEY_PARAMETERS_ATTR                       = "KeyParameters";
-
-    String KEY_SIZE_ATTR                             = "KeySize";
-
-    String KEY_SIZES_ATTR                            = "KeySizes";
 
     String PREFERRED_LANGUAGES_ATTR                  = "PreferredLanguages";
 
@@ -134,11 +126,7 @@ public interface KeyGen2Constants
 
     String SESSION_LIFE_TIME_ATTR                    = "SessionLifeTime";
 
-    String SETTABLE_EXPONENT_ATTR                    = "SettableExponent";
-
     String SUBMIT_URL_ATTR                           = "SubmitURL";
-
-    String SUCCESS_URL_ATTR                          = "SuccessURL";
 
     String TRUST_ANCHOR_ATTR                         = "TrustAnchor";
 
@@ -155,8 +143,6 @@ public interface KeyGen2Constants
 
     // XML elements
     
-    String CERTIFICATE_PATH_ELEM                     = "CertificatePath";
-
     String CLIENT_ATTRIBUTE_ELEM                     = "ClientAttribute";
 
     String CLIENT_EPHEMERAL_KEY_ELEM                 = "ClientEphemeralKey";

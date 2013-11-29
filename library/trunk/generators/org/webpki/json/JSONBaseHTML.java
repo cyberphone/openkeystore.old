@@ -234,7 +234,7 @@ public class JSONBaseHTML
                 public Column addArrayLink (String link) throws IOException
                   {
                     leftArray ();
-                    link (link, " style=\"margin-left:2pt;margin-right:2pt;\"");
+                    link (link, link, " style=\"margin-left:2pt;margin-right:2pt;\"");
                     rightArray ();
                     return this;
                   }
@@ -249,10 +249,10 @@ public class JSONBaseHTML
                     addString ("[");
                   }
 
-                private void link (String name, String style) throws IOException
+                private void link (String href, String name, String style) throws IOException
                   {
                     addString ("<a href=\"#")
-                      .addString (name)
+                      .addString (href)
                       .addString ("\"")
                       .addString (style)
                       .addString (">")
@@ -262,7 +262,13 @@ public class JSONBaseHTML
 
                 public Column addLink (String name) throws IOException
                   {
-                    link (name, "");
+                    link (name, name, "");
+                    return this;
+                  }
+
+                public Column addPropertyLink (String property, String holding_object) throws IOException
+                  {
+                    link (holding_object + "." + property, property, "");
                     return this;
                   }
 
@@ -494,7 +500,7 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS option: Sorted X.509 certificate path where the first element in the array must hold the <i style=\"white-space:nowrap\">end-entity</i> certificate.")
+              .addString ("JCS option: Sorted X.509 certificate path where the first element in the array holds the <i style=\"white-space:nowrap\">end-entity</i> certificate.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.KEY_ID_JSON)

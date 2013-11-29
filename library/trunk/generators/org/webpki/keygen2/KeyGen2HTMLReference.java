@@ -376,11 +376,11 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
       {
         row = json.addSubItemTable (SEARCH_FILTER_JSON);       
         createOption (CertificateFilter.CF_FINGER_PRINT, JSON_TYPE_BASE64, false, "SHA256 fingerprint matching any certificate in the <i>certificate path</i>.");
-        createOption (CertificateFilter.CF_ISSUER_REG_EX, JSON_TYPE_STRING, false, "Regular expression matching any issuer in the <i>certificate path</i>. Issuer names are assumed to be expressed in RFC 4514 notation.");
+        createOption (CertificateFilter.CF_ISSUER_REG_EX, JSON_TYPE_STRING, false, "Regular expression matching any issuer in the <i>certificate path</i>. Issuer names are assumed to be expressed in RFC&nbsp;4514 notation.");
         createOption (CertificateFilter.CF_SERIAL_NUMBER, JSON_TYPE_BIGINT, false, "Serial number matching that of the <i>end-entity certificate</i>.");
-        createOption (CertificateFilter.CF_SUBJECT_REG_EX, JSON_TYPE_STRING, false, "Regular expression matching the subject in the <i>end-entity certificate</i>. Subject names are assumed to be expressed in RFC 4514 notation.");
+        createOption (CertificateFilter.CF_SUBJECT_REG_EX, JSON_TYPE_STRING, false, "Regular expression matching the subject in the <i>end-entity certificate</i>. Subject names are assumed to be expressed in RFC&nbsp;4514 notation.");
         createOption (CertificateFilter.CF_EMAIL_REG_EX, JSON_TYPE_STRING, false, "Regular expression matching any of the e-mail addresses in the <i>end-entity certificate</i>." + LINE_SEPARATOR +
-                            "Note that both RFC822 subject attributes and <code>subjectAltName</code> fields are in scope.");
+                            "Note that both RFC&nbsp;822 subject attributes and <code>subjectAltName</code> fields are in scope.");
         createOption (CertificateFilter.CF_POLICY_RULES, JSON_TYPE_STRING, true,
                             "List of X.509 policy extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
                             "for a required and forbidden policy OID respectively." + LINE_SEPARATOR +
@@ -514,16 +514,37 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                           "</code> property gives (through a suitable GUI dialog) the user a hint of what the session in progess is about to perform. " +
                           "The valid constants are:<ul>" +
                           "<li><code>" + Action.MANAGE.getJSONName () + "</code> - Create, delete and/or update credentials</li>" +
-                          "<li style=\"padding-bottom:4pt;padding-top:4pt\"><code>" + Action.RESUME.getJSONName () + "</code> - Resume operation after an interrupted <code>" + KEY_CREATION_RESPONSE_JSON + 
-                            "</code>.  See <code>" + DEFERRED_CERTIFICATION_JSON + "</code> in ")
-               .addLink (KEY_CREATION_REQUEST_JSON)
+                          "<li style=\"padding-bottom:4pt;padding-top:4pt\"><code>" + Action.RESUME.getJSONName () + "</code> - Resume operation after an interrupted ")
+               .addLink (KEY_CREATION_RESPONSE_JSON)
+               .addString (".  See ")
+               .addPropertyLink (DEFERRED_CERTIFICATION_JSON, KEY_CREATION_REQUEST_JSON)
                .addString (". A confirming client should after this call only accept a ")
                .addLink (PROVISIONING_FINALIZATION_REQUEST_JSON)
                .addString ("</li>" +
-                   "<li><code>" + Action.UNLOCK.getJSONName () + "</code> - Unlock existing keys. A conforming client should disallow ")
+                           "<li><code>" + Action.UNLOCK.getJSONName () +
+                           "</code> - Unlock existing keys. A conforming client should disallow ")
                .addLink (KEY_CREATION_REQUEST_JSON)
-               .addString ("</li>" +
-                   "</ul>")
+               .addString ("</li></ul>")
+          .newRow ()
+            .newColumn ()
+              .addProperty (SERVER_SESSION_ID_JSON)
+              .addSymbolicValue (SERVER_SESSION_ID_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("The <code>" + SERVER_SESSION_ID_JSON +
+                          "</code> must remain constant for the entire session.")
+          .newExtensionRow (new SubmitURL ())
+          .newRow ()
+            .newColumn ()
+              .addProperty (ABORT_URL_JSON)
+              .addSymbolicValue (ABORT_URL_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_URI)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("Optional URL the provisioning client should launch the browser with if the user cancels the process.")
           .newRow ()
             .newColumn ()
               .addProperty (PRIVACY_ENABLED_JSON)
@@ -554,33 +575,16 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                          "the provisioning client is supposed to use the system's 'native' keystore."))
           .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_ALGORITHM, "Query the client for support for non-mandatory algorithms.  See SKS &quot;Algorithm Support&quot;."))
           .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_EXTENSION, "Query the client for support for specific extension objects." + LINE_SEPARATOR))
-            .addString ("Note that extensions may refer to <code>SKS:addExtension</code> as well as to non-SKS items such as <code>" + VIRTUAL_MACHINE_JSON + "</code>.")
+            .addString ("Note that extensions may refer to <code>SKS:addExtension</code> as well as to non-SKS items such as ")
+            .addPropertyLink (VIRTUAL_MACHINE_JSON, PROVISIONING_INITIALIZATION_REQUEST_JSON)
+            .addString ("." + LINE_SEPARATOR +
+                        "Another possible use of this feature, is for signaling support for extensions in the protocol itself while keeping the name-space etc. intact.")
           .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_CLIENT_ATTRI, "Query the client for support for client attributes like IMEI number. " +
                          "If the client has support for " +
                          "such attributes it should request the user's permission to disclose them." + LINE_SEPARATOR +
                          "This property is not allowed in the <code>" + PRIVACY_ENABLED_JSON + "</code> mode." + LINE_SEPARATOR +
                          "The following client attribute URIs are pre-defined:<ul>" + clientAttributes () +
                          "</ul>"))
-          .newRow ()
-            .newColumn ()
-              .addProperty (SERVER_SESSION_ID_JSON)
-              .addSymbolicValue (SERVER_SESSION_ID_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("The <code>" + SERVER_SESSION_ID_JSON +
-                          "</code> must remain constant for the entire session.")
-          .newExtensionRow (new SubmitURL ())
-          .newRow ()
-            .newColumn ()
-              .addProperty (ABORT_URL_JSON)
-              .addSymbolicValue (ABORT_URL_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_URI)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString ("Optional URL the provisioning client should launch the browser with if the user cancels the process.")
           .newExtensionRow (new OptionalSignature ());
   
         preAmble (PLATFORM_NEGOTIATION_RESPONSE_JSON)
@@ -698,7 +702,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addString ("<br><code>&nbsp;&nbsp;&nbsp;&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
               .addValue (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
               .addString ("<code>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
-              .addValue ("http://platforms.extreme-vm.com/type.3")
+              .addValue ("http://extreme-vm.com/type.3")
               .addString ("<code>,<br>" +
                           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
               .addValue ("http://cool-but-obscure-vm.com/x")
@@ -712,7 +716,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addString ("<br><code>&nbsp;&nbsp;&nbsp;&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
               .addValue (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
               .addString ("<code>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
-              .addValue ("http://platforms.extreme-vm.com/type.3")
+              .addValue ("http://extreme-vm.com/type.3")
               .addString ("<code><br>&nbsp;&nbsp;&nbsp;&nbsp;]</code>" + LINE_SEPARATOR + 
                           "If an environment is already installed only the configuration should be updated. " + LINE_SEPARATOR +
                           "Note that the <code>" +
@@ -982,7 +986,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setType (JSON_TYPE_URI)
             .newColumn ()
             .newColumn ()
-              .addString ("Virtual machine type URI like <code>&quot;http://platforms.extreme-vm.com/type.3&quot;</code>.")
+              .addString ("Virtual machine specific type URI like <code>&quot;http://extreme-vm.com/type.3&quot;</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (CONFIGURATION_JSON)
@@ -991,7 +995,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setType (JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("Virtual machine configuration (setup) data.")
+              .addString ("Virtual machine specific configuration (setup) data.")
           .newRow ()
             .newColumn ()
               .addProperty (FRIENDLY_NAME_JSON)
@@ -1018,7 +1022,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setType (JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("<code>" + NONCE_JSON + "</code>. " +
+              .addString ("<code>" + NONCE_JSON + "</code> data. " +
                           "See SKS appendix &quot;Remote Key Lookup&quot; for details.")
           .newRow ()
             .newColumn ()
@@ -1087,6 +1091,20 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                           JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
                           "</code> in ")
               .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
+              .addString (".")
+          .newRow ()
+            .newColumn ()
+              .addProperty (LOCKED_JSON)
+              .addUnquotedValue (LOCKED_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BOOLEAN)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString ("If this property is <code>true</code> the key associated " +
+                          "with the credential is locked due to multiple PIN errors. " +
+                          "The default value is <code>false</code>.  See ")
+              .addPropertyLink (UNLOCK_KEYS_JSON, PROVISIONING_FINALIZATION_REQUEST_JSON)
               .addString (".");
 
         json.addSubItemTable (PUK_POLICY_SPECIFIERS_JSON)

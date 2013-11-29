@@ -32,8 +32,6 @@ public interface KeyGen2Constants
 
     String BIOMETRIC_PROTECTION_JSON                 = "BiometricProtection";
 
-    String CERTIFICATE_PATH_JSON                     = "CertificatePath";
-
     String CHALLENGE_JSON                            = "Challenge";
 
     String CLIENT_ATTRIBUTES_JSON                    = "ClientAttributes";
@@ -76,10 +74,6 @@ public interface KeyGen2Constants
     
     String ENCRYPTED_PUK_JSON                        = "EncryptedPUK";
 
-    String ERROR_URL_JSON                            = "ErrorURL";
-
-    String EXPIRES_JSON                              = "Expires";
-
     String EXPORT_PROTECTION_JSON                    = "ExportProtection";
 
     String EXTENSIONS_JSON                           = "Extensions";
@@ -121,10 +115,6 @@ public interface KeyGen2Constants
     String KEY_MANAGEMENT_KEY_JSON                   = "KeyManagementKey";
 
     String KEY_PARAMETERS_JSON                       = "KeyParameters";
-
-    String KEY_SIZE_JSON                             = "KeySize";
-
-    String KEY_SIZES_JSON                            = "KeySizes";
 
     String LOCKED_JSON                               = "Locked";
 
@@ -202,11 +192,7 @@ public interface KeyGen2Constants
 
     String SESSION_LIFE_TIME_JSON                    = "SessionLifeTime";
 
-    String SETTABLE_EXPONENT_JSON                    = "SettableExponent";
-
     String SUBMIT_URL_JSON                           = "SubmitURL";
-
-    String SUCCESS_URL_JSON                          = "SuccessURL";
 
     String SYMMETRIC_KEY_JSON                        = "SymmetricKey";
 
