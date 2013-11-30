@@ -130,28 +130,31 @@ public class ProvisioningInitializationResponseEncoder extends JSONEncoder
 
         wr.setString (CLIENT_SESSION_ID_JSON, client_session_id);
 
-        wr.setBinary (SESSION_ATTESTATION_JSON, attestation);
-        
         wr.setString (SERVER_TIME_JSON, server_time_verbatim);
 
         wr.setDateTime (CLIENT_TIME_JSON, client_time);
         
-        if (server_certificate_fingerprint != null)
-          {
-            wr.setBinary (SERVER_CERT_FP_JSON, server_certificate_fingerprint);
-          }
-
+        wr.setBinary (SESSION_ATTESTATION_JSON, attestation);
+        
         ////////////////////////////////////////////////////////////////////////
         // Server ephemeral key
         ////////////////////////////////////////////////////////////////////////
         wr.setObject (CLIENT_EPHEMERAL_KEY_JSON).setPublicKey (client_ephemeral_key);
 
         ////////////////////////////////////////////////////////////////////////
-        // Device certificate path
+        // Optional device certificate path
         ////////////////////////////////////////////////////////////////////////
         if (device_certificate_path != null)
           {
             wr.setObject (DEVICE_CERTIFICATE_JSON).setX509CertificatePath (device_certificate_path);
+          }
+
+        ////////////////////////////////////////////////////////////////////////
+        // Optional server certificate fingerprint
+        ////////////////////////////////////////////////////////////////////////
+        if (server_certificate_fingerprint != null)
+          {
+            wr.setBinary (SERVER_CERT_FP_JSON, server_certificate_fingerprint);
           }
 
         ////////////////////////////////////////////////////////////////////////

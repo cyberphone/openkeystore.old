@@ -205,19 +205,18 @@ public class ProvisioningInitializationRequestEncoder extends ServerEncoder
         //////////////////////////////////////////////////////////////////////////
         // Set top-level attributes
         //////////////////////////////////////////////////////////////////////////
-        wr.setString (SESSION_KEY_ALGORITHM_JSON, server_state.provisioning_session_algorithm);
-
         wr.setString (SERVER_SESSION_ID_JSON, server_session_id);
+        
+        wr.setString (SUBMIT_URL_JSON, submit_url);
         
         if (server_time == null)
           {
             server_time = new Date ();
           }
-
         wr.setDateTime (SERVER_TIME_JSON, server_time);
 
-        wr.setString (SUBMIT_URL_JSON, submit_url);
-        
+        wr.setString (SESSION_KEY_ALGORITHM_JSON, server_state.provisioning_session_algorithm);
+
         wr.setInt (SESSION_KEY_LIMIT_JSON, session_key_limit);
 
         wr.setInt (SESSION_LIFE_TIME_JSON, session_life_time);
