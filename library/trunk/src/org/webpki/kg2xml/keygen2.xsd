@@ -40,7 +40,7 @@
     there is nothing left to take away" [Antoine de Saint-Exupery]
 
     Version: BETA 
-    Revised: 26-Nov-2013 
+    Revised: 01-Dec-2013 
     Author: Anders Rundgren
 
     Copyright 2006-2013 WebPKI.org (http://webpki.org).
@@ -58,11 +58,11 @@
     limitations under the License.
 -->
 
-<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20131126#"
+<xs:schema targetNamespace="http://xmlns.webpki.org/keygen2/beta/20131201#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
            xmlns:ds11="http://www.w3.org/2009/xmldsig11#"
-           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20131126#"
+           xmlns:kg2="http://xmlns.webpki.org/keygen2/beta/20131201#"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
 
    <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"/>
@@ -1230,7 +1230,7 @@
    <xs:complexType name="imageType">
       <xs:simpleContent>
          <xs:extension base="xs:base64Binary">
-            <xs:attribute name="MIMEType" type="kg2:mimeType" use="required"/>
+            <xs:attribute name="MimeType" type="kg2:mimeType" use="required"/>
          </xs:extension>
       </xs:simpleContent>
    </xs:complexType>
@@ -1238,7 +1238,7 @@
    <xs:complexType name="imageData">
 
       <!-- MIME type. -->
-      <xs:attribute name="MIMEType" type="kg2:mimeType" use="required"/>
+      <xs:attribute name="MimeType" type="kg2:mimeType" use="required"/>
 
       <!-- Logotype usage type -->
       <xs:attribute name="Type" type="xs:anyURI" use="required"/>

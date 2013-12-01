@@ -18,7 +18,7 @@ package org.webpki.keygen2;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131126#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131201";
 
     // JSON properties
 
@@ -130,7 +130,7 @@ public interface KeyGen2Constants
 
     String MAX_LENGTH_JSON                           = "MaxLength";
 
-    String MIME_TYPE_JSON                            = "MIMEType";
+    String MIME_TYPE_JSON                            = "MimeType";
 
     String MIN_LENGTH_JSON                           = "MinLength";
 

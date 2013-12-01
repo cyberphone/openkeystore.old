@@ -18,7 +18,7 @@ package org.webpki.kg2xml;
 
 public interface KeyGen2Constants
   {
-    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131126#";
+    String KEYGEN2_NS                                = "http://xmlns.webpki.org/keygen2/beta/20131201#";
 
     String KEYGEN2_SCHEMA_FILE                       = "keygen2.xsd";
 
@@ -92,7 +92,7 @@ public interface KeyGen2Constants
 
     String MAX_LENGTH_ATTR                           = "MaxLength";
 
-    String MIME_TYPE_ATTR                            = "MIMEType";
+    String MIME_TYPE_ATTR                            = "MimeType";
 
     String MIN_LENGTH_ATTR                           = "MinLength";
 
