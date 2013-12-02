@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.KeyContainerTypes;
+import org.webpki.crypto.KeyUsageBits;
 
 import org.webpki.json.JSONBaseHTML;
 import org.webpki.json.JSONBaseHTML.RowInterface;
@@ -387,10 +388,13 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                             "Policy OIDs encountered in <i>end-entity certificates</i> that " +
                             "are not specified in <code>" + CertificateFilter.CF_POLICY_RULES + "</code> must be <i>ignored</i>.");
         createOption (CertificateFilter.CF_KEY_USAGE_RULES, JSON_TYPE_STRING, true,
-                            "List of X.509 key usage flags using the notation <code>&quot;digitalSignature&quot;</code> and <code style=\"white-space:nowrap\">&quot;-dataEncipherment&quot;</code> " +
+                            "List of X.509 key usage flags using the notation <code>&quot;" +
+                            KeyUsageBits.DIGITAL_SIGNATURE.getX509Name () + "&quot;</code> and <code style=\"white-space:nowrap\">&quot;-" +
+                            KeyUsageBits.DATA_ENCIPHERMENT.getX509Name () + "&quot;</code> " +
                             "for a required and forbidden key usage respectively." + LINE_SEPARATOR +
                             "Key usage flags encountered in <i>end-entity certificates</i> that " +
-                            "are not specified in <code>" + CertificateFilter.CF_KEY_USAGE_RULES + "</code> must be <i>ignored</i>.");
+                            "are not specified in <code>" + CertificateFilter.CF_KEY_USAGE_RULES + "</code> must be <i>ignored</i>. " + LINE_SEPARATOR +
+                            "The set of permitted flags include:" + getKeyUsageBits ());
         createOption (CertificateFilter.CF_EXT_KEY_USAGE_RULES, JSON_TYPE_STRING, true,
                             "List of X.509 extended key usage extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
                             "for a required and forbidden extended key usage respectively." + LINE_SEPARATOR +
@@ -476,22 +480,32 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
       }
 
 
-    static void getClientAttribute (StringBuffer s, String uri)
+    static void getListAttribute (StringBuffer s, String attribute)
       {
         s.append ("<li><code>")
-         .append (uri)
+         .append (attribute)
          .append ("</code></li>");
       }
 
     static String clientAttributes ()
       {
         StringBuffer s = new StringBuffer ();
-        getClientAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER);
-        getClientAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS);
-        getClientAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
-        getClientAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.OS_VENDOR);
-        getClientAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.OS_VERSION);
+        getListAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.IMEI_NUMBER);
+        getListAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.IP_ADDRESS);
+        getListAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.MAC_ADDRESS);
+        getListAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.OS_VENDOR);
+        getListAttribute (s, KeyGen2URIs.CLIENT_ATTRIBUTES.OS_VERSION);
         return s.toString ();
+      }
+
+    static String getKeyUsageBits ()
+      {
+        StringBuffer s = new StringBuffer ("<ul>");
+        for (KeyUsageBits kub : KeyUsageBits.values ())
+          {
+            getListAttribute (s, kub.getX509Name ());
+          }
+        return s.append ("</ul>").toString ();
       }
 
     public static void main (String args[]) throws IOException
@@ -739,7 +753,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
                .addString (". Also see <code>" + JSONSignatureEncoder.SIGNATURE_JSON + "</code>.")
           .newExtensionRow (new OptionalSignature ())
-              .addString (". Note that <code>" + NONCE_JSON +
+              .addString (" Note that <code>" + NONCE_JSON +
                           "</code> <i>must</i> be specified for a signed <code>" +
                           PROVISIONING_INITIALIZATION_REQUEST_JSON + "</code>.");
 
@@ -807,8 +821,11 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addString (".")
           .newExtensionRow (new LinkedObject (JSONSignatureEncoder.SIGNATURE_JSON,
                                               true,
-                                              "Signature covering the entire response. See <code>" +
-                                              "SKS:createProvisioningSession</code>."));
+                                              "Symmetric key signature covering the entire response. See <code>" +
+                                              "SKS:createProvisioningSession</code>." + LINE_SEPARATOR +
+                                              "Note that the value of "))
+          .addPropertyLink (JSONSignatureEncoder.KEY_ID_JSON, JSONSignatureEncoder.KEY_INFO_JSON)
+          .addString (" property is <i>ignored</i>. ");
 
         preAmble (CREDENTIAL_DISCOVERY_REQUEST_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())

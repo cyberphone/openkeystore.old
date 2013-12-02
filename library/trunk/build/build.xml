@@ -276,7 +276,9 @@
       <packageset dir="${temp_dir}">
         <include name="org/**"/>
         <exclude name="org/**/test/**"/>
-      </packageset>
+        <exclude name="org/**/kg2xml/**"/>
+        <exclude name="org/**/wasp/**"/>
+        </packageset>
       <link offline="true" href="http://download.oracle.com/javase/${javadoc-version}/docs/api/" packagelistLoc="${env.JAVA_HOME}\jsedocs\api"/>
       <link offline="true" href="http://download.oracle.com/javaee/6/api/" packagelistLoc="${env.JAVA_HOME}\jeedocs\api"/>
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
@@ -293,6 +295,7 @@
     	<redirector output="${doc_dir}/keygen2schema.html"/>
         <arg value="${src_dir}/org/webpki/kg2xml/keygen2.xsd"/>
     </java>
+    <antcall target="dockeygen2"/>
   </target>
 
   <target name="dist" depends="clean,compile">    

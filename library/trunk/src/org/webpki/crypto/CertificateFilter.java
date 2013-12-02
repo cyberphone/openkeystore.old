@@ -152,7 +152,7 @@ public class CertificateFilter
         @Override
         String parse (String argument) throws IOException
           {
-            return KeyUsageBits.getKeyUsageBit (argument).getPKIXName ();
+            return KeyUsageBits.getKeyUsageBit (argument).getX509Name ();
           }
       }
     
@@ -333,11 +333,11 @@ public class CertificateFilter
         Vector<String> list = new Vector<String> ();
         for (KeyUsageBits kub : required)
           {
-            list.add (kub.getPKIXName ());
+            list.add (kub.getX509Name ());
           }
         for (KeyUsageBits kub : disallowed)
           {
-            list.add (DISALLOWED + kub.getPKIXName ());
+            list.add (DISALLOWED + kub.getX509Name ());
           }
         this.key_usage_rules = new KeyUsageRuleParser (list.toArray (new String[0])).normalized ();
         return this;
@@ -383,7 +383,7 @@ public class CertificateFilter
               {
                 if (key_usage[kub.ordinal()])
                   {
-                    if (!rule_parser.checkRule (kub.getPKIXName ()))
+                    if (!rule_parser.checkRule (kub.getX509Name ()))
                       {
                         return false;
                       }

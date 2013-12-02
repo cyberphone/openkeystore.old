@@ -149,7 +149,7 @@ public class CertificateUtil
               {
                 if (key_usage[i++])
                   {
-                    key_usage_set.add (kub.getPKIXName ());
+                    key_usage_set.add (kub.getX509Name ());
                   }
               }
           }
