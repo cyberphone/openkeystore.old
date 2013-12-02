@@ -671,13 +671,39 @@ public class ServerState implements Serializable
             this.encrypted_symmetric_key = encrypt (symmetric_key);
             return this;
           }
-        
+
+        String[] getSortedAlgorithms (String[] algorithms) throws IOException
+          {
+            int i = 0;
+            while (true)
+              {
+                if (i < (algorithms.length - 1))
+                  {
+                    if (algorithms[i].compareTo (algorithms[i + 1]) > 0)
+                      {
+                        String s = algorithms[i];
+                        algorithms[i] = algorithms[i + 1];
+                        algorithms[i + 1] = s;
+                        i = 0;
+                      }
+                    else
+                      {
+                        i++;
+                      }
+                  }
+                else
+                  {
+                    break;
+                  }
+              }
+            return algorithms;
+          }
 
         String[] endorsed_algorithms;
 
         public Key setEndorsedAlgorithms (String[] endorsed_algorithms) throws IOException
           {
-            this.endorsed_algorithms = BasicCapabilities.getSortedAlgorithms (endorsed_algorithms);
+            this.endorsed_algorithms = getSortedAlgorithms (endorsed_algorithms);
             return this;
           }
 
@@ -1021,7 +1047,7 @@ public class ServerState implements Serializable
                 wr.setBinary (KEY_PARAMETERS_JSON, key_specifier.getParameters ());
               }
 
-            if (endorsed_algorithms != null)
+            if (endorsed_algorithms != null && endorsed_algorithms.length > 0)
               {
                 wr.setStringArray (ENDORSED_ALGORITHMS_JSON, endorsed_algorithms);
               }

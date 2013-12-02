@@ -20,9 +20,14 @@ import static org.webpki.keygen2.KeyGen2Constants.*;
 
 import java.io.IOException;
 
+import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.AsymEncryptionAlgorithms;
+import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.CertificateFilter;
 import org.webpki.crypto.KeyContainerTypes;
 import org.webpki.crypto.KeyUsageBits;
+import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.MACAlgorithms;
 
 import org.webpki.json.JSONBaseHTML;
 import org.webpki.json.JSONBaseHTML.RowInterface;
@@ -1330,7 +1335,10 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setType (JSON_TYPE_URI)
             .newColumn ()
             .newColumn ()
-              .addString ("See <code>SKS:createKeyEntry." + KEY_ALGORITHM_JSON + "</code>.")
+              .addString ("See <code>SKS:createKeyEntry." + KEY_ALGORITHM_JSON + "</code>. " +
+                          "Also se &quot;Key Algorithm Support&quot;." + LINE_SEPARATOR +
+                          "Currently recognized key algorithms include:" +
+                          JSONBaseHTML.enumerateAlgorithms (KeyAlgorithms.values (), false, false))
           .newRow ()
             .newColumn ()
               .addProperty (KEY_PARAMETERS_JSON)
@@ -1344,13 +1352,21 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (ENDORSED_ALGORITHMS_JSON)
-              .addArrayList (ENDORSED_ALGORITHMS_JSON)
+              .addArrayList (URI_LIST)
             .newColumn ()
               .setType (JSON_TYPE_URI)
             .newColumn ()
-              .setUsage (false, 0)
+              .setUsage (false, 1)
             .newColumn ()
-              .addString ("See <code>SKS:createKeyEntry.EndorsedAlgorithm</code>.")
+              .addString ("See <code>SKS:createKeyEntry.EndorsedAlgorithm</code>." + LINE_SEPARATOR +
+                          "Note that <i>endorsed algorithm URIs must be sorted in descending alphabetical order</i>." + LINE_SEPARATOR +
+                          "The currently recognized algorithms include:" +
+                          JSONBaseHTML.enumerateAlgorithms (MACAlgorithms.values (), true, false) +
+                          JSONBaseHTML.enumerateAlgorithms (AsymSignatureAlgorithms.values (), false, false) +
+                          JSONBaseHTML.enumerateAlgorithms (AsymEncryptionAlgorithms.values (), false, false) +
+                          JSONBaseHTML.enumerateAlgorithms (SymEncryptionAlgorithms.values (), true, false) +
+                          "<ul><li><code>" + SecureKeyStore.ALGORITHM_ECDH_RAW + "</code></li></ul>" +
+                          "<ul><li><code>" + SecureKeyStore.ALGORITHM_NONE + "</code></li></ul>")
           .newRow ()
             .newColumn ()
               .addProperty (SERVER_SEED_JSON)
@@ -1753,7 +1769,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .addString ("Must be an EC key matching the capabilities of the SKS.");
 
-        json.addJSONSignatureDefinitions ();
+        json.addJSONSignatureDefinitions (false);
 
         json.writeHTML (args[0]);
       }

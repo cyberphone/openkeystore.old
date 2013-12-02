@@ -20,6 +20,11 @@ import java.io.IOException;
 
 import java.util.Vector;
 
+import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.SKSAlgorithms;
+import org.webpki.crypto.MACAlgorithms;
+import org.webpki.crypto.AsymSignatureAlgorithms;
+
 import org.webpki.util.ArrayUtil;
 
 /**
@@ -440,7 +445,29 @@ public class JSONBaseHTML
         return new ProtocolTable (sub_items, false);
       }
 
-    public void addJSONSignatureDefinitions () throws IOException
+    public static String enumerateAlgorithms (SKSAlgorithms[] algorithms, boolean symmetric, boolean filter)
+      {
+        StringBuffer s = new StringBuffer ("<ul>");
+        for (SKSAlgorithms algorithm : algorithms)
+          {
+            if (filter && algorithm instanceof KeyAlgorithms && !((KeyAlgorithms)algorithm).isECKey ())
+              {
+                continue;
+              }
+            if (symmetric ^ algorithm.isSymmetric ())
+              {
+                continue;
+              }
+            if (algorithm instanceof AsymSignatureAlgorithms && ((AsymSignatureAlgorithms)algorithm).getDigestAlgorithm () == null && filter)
+              {
+                continue;
+              }
+            s.append ("<li><code>").append (algorithm.getURI ()).append ("</code></li>");
+          }
+        return s.append ("</ul>").toString ();
+      }
+
+    public void addJSONSignatureDefinitions (boolean reference) throws IOException
       {
         addSubItemTable (JSONSignatureEncoder.SIGNATURE_JSON)
           .newRow ()
@@ -461,7 +488,11 @@ public class JSONBaseHTML
               .setType (Types.JSON_TYPE_URI)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS: Signature algorithm URI.  See SKS &quot;Algorithm Support&quot;.")
+              .addString ("JCS: Signature algorithm URI.  See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR +
+                          "Currently recognized symmetric key algorithms include:" +
+                          enumerateAlgorithms (MACAlgorithms.values (), true, false) +
+                          "Currently recognized asymmetric key algorithms include:" +
+                          enumerateAlgorithms (AsymSignatureAlgorithms.values (), false, true))
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.KEY_INFO_JSON)
@@ -563,7 +594,7 @@ public class JSONBaseHTML
             .newColumn ()
               .addString ("JCS: RSA exponent.");
 
-      addSubItemTable (JSONSignatureEncoder.EC_JSON)
+       addSubItemTable (JSONSignatureEncoder.EC_JSON)
         .newRow ()
           .newColumn ()
             .addProperty (JSONSignatureEncoder.NAMED_CURVE_JSON)
@@ -572,7 +603,9 @@ public class JSONBaseHTML
             .setType (Types.JSON_TYPE_URI)
           .newColumn ()
           .newColumn ()
-            .addString ("JCS: EC named curve.  See SKS &quot;Algorithm Support&quot;.")
+            .addString ("JCS: EC named curve.  See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR +
+                        "Currently recognized EC curves include:" +
+                        enumerateAlgorithms (KeyAlgorithms.values (), false, true))
         .newRow ()
           .newColumn ()
             .addProperty (JSONSignatureEncoder.X_JSON)

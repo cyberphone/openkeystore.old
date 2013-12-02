@@ -25,7 +25,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 public enum MACAlgorithms implements SignatureAlgorithms
   {
-    HMAC_MD5    ("http://www.w3.org/2001/04/xmldsig-more#hmac-md5",    "HmacMD5",    false),
     HMAC_SHA1   ("http://www.w3.org/2000/09/xmldsig#hmac-sha1",        "HmacSHA1",   true),
     HMAC_SHA256 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", "HmacSHA256", true),
     HMAC_SHA384 ("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", "HmacSHA384", false),

@@ -46,34 +46,6 @@ public class BasicCapabilities implements Serializable
       {
       }
 
-    static String[] getSortedAlgorithms (String[] algorithms) throws IOException
-      {
-        int i = 0;
-        while (true)
-          {
-            if (i < (algorithms.length - 1))
-              {
-                if (algorithms[i].compareTo (algorithms[i + 1]) > 0)
-                  {
-                    String s = algorithms[i];
-                    algorithms[i] = algorithms[i + 1];
-                    algorithms[i + 1] = s;
-                    i = 0;
-                  }
-                else
-                  {
-                    i++;
-                  }
-              }
-            else
-              {
-                break;
-              }
-          }
-        return algorithms;
-      }
-
-
     private static void conditionalURIInput (JSONObjectReader rd, LinkedHashSet<String> args, String tag, boolean query) throws IOException
       {
         String[] opt_uri_list = KeyGen2Validator.getURIListConditional (rd, tagName (tag, query));

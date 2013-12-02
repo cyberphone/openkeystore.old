@@ -41,7 +41,7 @@ public enum SymEncryptionAlgorithms implements EncryptionAlgorithms
     AES_ECB_P5      ("http://xmlns.webpki.org/sks/algorithm#aes.ecb.pkcs5",
                         "AES/ECB/PKCS5Padding", 0,  false, false, false, false),
                         
-    AES_CBC_NP      ("internal:AES/CBC/NoPadding",
+    AES_CBC_NP      ("http://xmlns.webpki.org/sks/algorithm#aes.cbc.nopad",
                         "AES/CBC/NoPadding",    0,  true,  false, false,  true),
                         
     AES_CBC_P5      ("http://xmlns.webpki.org/sks/algorithm#aes.cbc.pkcs5",

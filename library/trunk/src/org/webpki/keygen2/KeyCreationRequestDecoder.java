@@ -325,7 +325,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
             if (rd.hasProperty (ENDORSED_ALGORITHMS_JSON))
               {
-                endorsed_algorithms = BasicCapabilities.getSortedAlgorithms (getURIList (rd, ENDORSED_ALGORITHMS_JSON));
+                endorsed_algorithms = getURIList (rd, ENDORSED_ALGORITHMS_JSON);
               }
             else
               {
