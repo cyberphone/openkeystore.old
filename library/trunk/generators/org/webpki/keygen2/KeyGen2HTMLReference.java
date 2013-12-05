@@ -480,7 +480,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                     "logotype together with a &quot;friendly name&quot; string or similar.");
         getLogotype (s, KeyGen2URIs.LOGOTYPES.CARD, true, "A shape designed for wallet-like applications where logotypes usually are personalized.");
         getLogotype (s, KeyGen2URIs.LOGOTYPES.ICON, true, "Intended for selection windows " +
-                    "where multiple credentials are featured as a map of small icons.");
+                    "holding large collections of credentials featured as maps or lists of <i>small</i> icons.");
         getLogotype (s, KeyGen2URIs.LOGOTYPES.APPLICATION, true, "Could be used in applications where a " +
                     "logotype is useful for branding/recognition purposes like in OTP systems.");
         return s.toString ();
@@ -1669,7 +1669,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                .setType (JSON_TYPE_URI)
             .newColumn ()
             .newColumn ()
-              .addString ("Property bag type URI.")
+              .addString ("Property bag type URI. See <code>SKS:addExtension</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (PROPERTIES_JSON)
@@ -1679,7 +1679,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
                .setUsage (true, 1)
             .newColumn ()
-              .addString ("List of property values.")
+              .addString ("List of property values. See <code>SKS:addExtension</code>.")
           .newExtensionRow (new MAC ("addExtension"));
 
         json.addSubItemTable (PROPERTIES_JSON)
@@ -1708,7 +1708,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
                .setUsage (false)
             .newColumn ()
-              .addString ("Writable flag. Default is <code>false</code>.");
+              .addString ("Writable flag. Default is <code>false</code>.  See <code>SKS:setProperty</code>.");
 
         json.addSubItemTable (IMPORT_KEY_JSON)
           .newRow ()
@@ -1720,7 +1720,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
                .setChoice (true, 2)
             .newColumn ()
-              .addString ("Encrypted symmetric key.")
+              .addString ("Encrypted symmetric key. See <code>SKS:importSymmetricKey</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (PRIVATE_KEY_JSON)
@@ -1729,7 +1729,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                .setType (JSON_TYPE_BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("Encrypted PKCS #8 object.")
+              .addString ("Encrypted PKCS #8 object. See <code>SKS:importPrivateKey</code>.")
           .newExtensionRow (new MAC ("import* </code> methods<code>"));
 
         json.addSubItemTable (CLIENT_ATTRIBUTES_JSON)

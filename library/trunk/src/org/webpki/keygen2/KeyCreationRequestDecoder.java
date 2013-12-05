@@ -183,13 +183,12 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
             input_method = InputMethod.getInputMethodFromString (rd.getStringConditional (INPUT_METHOD_JSON, InputMethod.ANY.getProtocolName ()));
             
-            String pr[] = rd.getStringArrayConditional (PATTERN_RESTRICTIONS_JSON);
-            if (pr != null)
+            for (String pattern : rd.hasProperty (PATTERN_RESTRICTIONS_JSON) ?
+                   KeyGen2Validator.getNonEmptyList (rd, PATTERN_RESTRICTIONS_JSON)
+                                                                             :
+                   new String[0])
               {
-                for (String pattern : pr)
-                  {
-                    pattern_restrictions.add (PatternRestriction.getPatternRestrictionFromString (pattern));
-                  }
+                pattern_restrictions.add (PatternRestriction.getPatternRestrictionFromString (pattern));
               }
 
             mac = KeyGen2Validator.getMAC (rd);

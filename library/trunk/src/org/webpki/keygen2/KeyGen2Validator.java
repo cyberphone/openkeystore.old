@@ -94,7 +94,7 @@ abstract class KeyGen2Validator extends JSONDecoder
         int l = rd.getInt (name);
         if (l < 0 || l > SecureKeyStore.MAX_LENGTH_PIN_PUK)
           {
-            bad ("Value out of range: " + l);
+            bad ("\"" + name + "\" value out of range: " + l);
           }
         return (short) l;
       }
@@ -120,7 +120,7 @@ abstract class KeyGen2Validator extends JSONDecoder
         if (encrypted_value.length < SecureKeyStore.AES_CBC_PKCS5_PADDING ||
             encrypted_value.length > SecureKeyStore.MAX_LENGTH_PIN_PUK + SecureKeyStore.AES_CBC_PKCS5_PADDING)
           {
-            bad ("Encrypted protection value length error:" + encrypted_value.length);
+            bad ("Encrypted protection for \"" + name_of_key + "\" length error: " + encrypted_value.length);
           }
         return encrypted_value;
       }
@@ -128,9 +128,9 @@ abstract class KeyGen2Validator extends JSONDecoder
     static short getAuthorizationRetryLimit (JSONObjectReader rd, int lower_limit) throws IOException
       {
         int retry_limit = rd.getInt (KeyGen2Constants.RETRY_LIMIT_JSON);
-        if (retry_limit < lower_limit || retry_limit > 10000)
+        if (retry_limit < lower_limit || retry_limit > SecureKeyStore.MAX_RETRY_LIMIT)
           {
-            bad ("Retry limit range error: " + retry_limit);
+            bad ("\"" + KeyGen2Constants.RETRY_LIMIT_JSON + "\" limit range error: " + retry_limit);
           }
         return (short) retry_limit;
       }
@@ -140,7 +140,7 @@ abstract class KeyGen2Validator extends JSONDecoder
         String[] list = rd.getStringArray (name);
         if (list.length == 0)
           {
-            bad ("Empty list not allowed: " + name);
+            bad ("Empty list not allowed for: " + name);
           }
         return list;
       }
