@@ -132,7 +132,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         Extension (JSONObjectReader rd, IssuedCredential cpk) throws IOException
           {
             type = rd.getString (TYPE_JSON);
-            mac = rd.getBinary (MAC_JSON);
+            mac = KeyGen2Validator.getMAC (rd);
             cpk.extensions.add (this);
           }
       }
@@ -312,7 +312,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
           {
             id = rd.getString (ID_JSON);
             certificate_path = rd.getX509CertificatePath ();            
-            mac = rd.getBinary (MAC_JSON);
+            mac = KeyGen2Validator.getMAC (rd);
 
             trust_anchor = rd.getBooleanConditional (TRUST_ANCHOR_JSON);
             if (trust_anchor)
@@ -329,12 +329,12 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
                 if (import_key.hasProperty (PRIVATE_KEY_JSON))
                   {
                     encrypted_private_key = import_key.getBinary (PRIVATE_KEY_JSON);
-                    private_key_mac = import_key.getBinary (MAC_JSON);
+                    private_key_mac = KeyGen2Validator.getMAC (import_key);
                   }
                 else
                   {
                     encrypted_symmetric_key = import_key.getBinary (SYMMETRIC_KEY_JSON);
-                    symmetric_key_mac = import_key.getBinary (MAC_JSON);
+                    symmetric_key_mac = KeyGen2Validator.getMAC (import_key);
                   }
               }
 
@@ -433,7 +433,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
                                   KeyGen2Validator.getID (rd, SERVER_SESSION_ID_JSON),
                                   rd.getBinary (CertificateFilter.CF_FINGER_PRINT),
                                   rd.getBinary (AUTHORIZATION_JSON),
-                                  rd.getBinary (MAC_JSON),
+                                  KeyGen2Validator.getMAC (rd),
                                   post_op);
       }
 
@@ -516,7 +516,7 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
         
         close_session_challenge = rd.getBinary (CHALLENGE_JSON);
 
-        close_session_mac = rd.getBinary (MAC_JSON);
+        close_session_mac = KeyGen2Validator.getMAC (rd);
         
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the issued_keys [0..n]

@@ -34,10 +34,11 @@ import org.webpki.util.ArrayUtil;
  */
 public class JSONBaseHTML
   {
-    public static final String MANDATORY    = "m";
-    public static final String OPTIONAL     = "o";
+    public static final String MANDATORY               = "m";
+    public static final String OPTIONAL                = "o";
     
-    public static final String PAGE_WIDTH   = "80em";
+    public static final String PAGE_WIDTH              = "80em";
+    public static final String NON_SKS_ALGORITHM_COLOR = "#A0A0A0"; 
     
     public interface Types 
       {
@@ -51,6 +52,7 @@ public class JSONBaseHTML
         String JSON_TYPE_URI     = "uri";
         String JSON_TYPE_DATE    = "date";
         String JSON_TYPE_BIGINT  = "bigint";
+        String JSON_TYPE_ID      = "id";
         
         String SORTED_CERT_PATH  = "Sorted Certificate Path";
         String URI_LIST          = "List of URIs";
@@ -462,7 +464,10 @@ public class JSONBaseHTML
               {
                 continue;
               }
-            s.append ("<li><code>").append (algorithm.getURI ()).append ("</code></li>");
+            s.append ("<li><code")
+             .append (algorithm.isMandatorySKSAlgorithm () ? ">" : " style=\"color:" + NON_SKS_ALGORITHM_COLOR + "\">")
+             .append (algorithm.getURI ())
+             .append ("</code></li>");
           }
         return s.append ("</ul>").toString ();
       }
@@ -489,9 +494,9 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString ("JCS: Signature algorithm URI.  See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR +
-                          "Currently recognized symmetric key algorithms include:" +
+                          "The currently recognized symmetric key algorithms include:" +
                           enumerateAlgorithms (MACAlgorithms.values (), true, false) +
-                          "Currently recognized asymmetric key algorithms include:" +
+                          "The currently recognized asymmetric key algorithms include:" +
                           enumerateAlgorithms (AsymSignatureAlgorithms.values (), false, true))
           .newRow ()
             .newColumn ()
@@ -604,7 +609,7 @@ public class JSONBaseHTML
           .newColumn ()
           .newColumn ()
             .addString ("JCS: EC named curve.  See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR +
-                        "Currently recognized EC curves include:" +
+                        "The currently recognized EC curves include:" +
                         enumerateAlgorithms (KeyAlgorithms.values (), false, true))
         .newRow ()
           .newColumn ()

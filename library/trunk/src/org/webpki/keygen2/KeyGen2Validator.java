@@ -39,7 +39,21 @@ abstract class KeyGen2Validator extends JSONDecoder
 
     static String getID (JSONObjectReader rd, String name) throws IOException
       {
-        return rd.getString (name);
+        String value = rd.getString (name);
+        int l = value.length ();
+        if (l == 0 || l > SecureKeyStore.MAX_LENGTH_ID_TYPE)
+          {
+            bad ("\"" + name + "\" length error: " + l);
+          }
+        while (l-- > 0)
+          {
+            char c = value.charAt (l);
+            if (c < '!' || c > '~')
+              {
+                bad ("\"" + name + "\" syntax error: '" + value + "'");
+              }
+          }
+        return value;
       }
     
     static String getURL (JSONObjectReader rd, String name) throws IOException
@@ -95,7 +109,7 @@ abstract class KeyGen2Validator extends JSONDecoder
         byte[] mac = rd.getBinary (KeyGen2Constants.MAC_JSON);
         if (mac.length != 32)
           {
-            bad ("MAC length error: " + mac.length);
+            bad ("\"" + KeyGen2Constants.MAC_JSON + "\" length error: " + mac.length);
           }
         return mac;
       }
@@ -129,11 +143,6 @@ abstract class KeyGen2Validator extends JSONDecoder
             bad ("Empty list not allowed: " + name);
           }
         return list;
-      }
-
-    static String[] getListConditional (JSONObjectReader rd, String name) throws IOException
-      {
-        return rd.hasProperty (name) ? getNonEmptyList (rd, name) : null;
       }
 
     static String[] getURIList (JSONObjectReader rd, String name) throws IOException

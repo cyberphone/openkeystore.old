@@ -267,6 +267,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                   .addProperty (SERVER_SESSION_ID_JSON)
                   .addSymbolicValue (SERVER_SESSION_ID_JSON)
                 .newColumn ()
+                  .setType (JSON_TYPE_ID)
                 .newColumn ()
                 .newColumn ()
                   .addString ("See <code>SKS:createProvisioningSession." +
@@ -328,6 +329,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                   .addProperty (CLIENT_SESSION_ID_JSON)
                   .addSymbolicValue (CLIENT_SESSION_ID_JSON)
                 .newColumn ()
+                  .setType (JSON_TYPE_ID)
                 .newColumn ()
                 .newColumn ()
                   .addString ("See <code>SKS:createProvisioningSession." +
@@ -527,6 +529,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addProperty (SERVER_SESSION_ID_JSON)
               .addSymbolicValue (SERVER_SESSION_ID_JSON)
             .newColumn ()
+              .setType (JSON_TYPE_ID)
             .newColumn ()
             .newColumn ()
               .addString ("The <code>" + SERVER_SESSION_ID_JSON +
@@ -716,27 +719,26 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addString (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
               .addString ("&quot;</code>. The recommended method is adding the following to ")
               .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
-              .addString (LINE_SEPARATOR + "<code>&nbsp;&nbsp;</code>")
-              .addProperty (BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, true))
-              .addString ("<br><code>&nbsp;&nbsp;&nbsp;&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
-              .addValue (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
-              .addString ("<code>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
-              .addValue ("http://extreme-vm.com/type.3")
-              .addString ("<code>,<br>" +
-                          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
-              .addValue ("http://cool-but-obscure-vm.com/x")
-              .addString ("<code><br>&nbsp;&nbsp;&nbsp;&nbsp;]</code>" + LINE_SEPARATOR +
+              .addString (LINE_SEPARATOR + "<code>&nbsp;&nbsp;&quot;")
+              .addString (BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, true))
+              .addString ("&quot;:<br>&nbsp;&nbsp;&nbsp;&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" +
+                          KeyGen2URIs.FEATURE.VIRTUAL_MACHINE +
+                          "&quot;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" +
+                          "http://extreme-vm.com/type.3&quot;,<br>" +
+                          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" +
+                          "http://cool-but-obscure-vm.com/x" +
+                          "&quot;<br>&nbsp;&nbsp;&nbsp;&nbsp;]</code>" + LINE_SEPARATOR +
                           "where the two latter URIs represent different, potentially supported environment types." + LINE_SEPARATOR +
                           "A possible ")
               .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
               .addString (" could be:" + LINE_SEPARATOR +
-                          "<code>&nbsp;&nbsp;</code>")
-              .addProperty (BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, false))
-              .addString ("<br><code>&nbsp;&nbsp;&nbsp;&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
-              .addValue (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
-              .addString ("<code>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>")
-              .addValue ("http://extreme-vm.com/type.3")
-              .addString ("<code><br>&nbsp;&nbsp;&nbsp;&nbsp;]</code>" + LINE_SEPARATOR + 
+                          "<code>&nbsp;&nbsp;&quot;")
+              .addString (BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, false))
+              .addString ("&quot;:<br>&nbsp;&nbsp;&nbsp;&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" +
+                          KeyGen2URIs.FEATURE.VIRTUAL_MACHINE +
+                          "&quot;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" +
+                          "http://extreme-vm.com/type.3" +
+                          "&quot;<br>&nbsp;&nbsp;&nbsp;&nbsp;]</code>" + LINE_SEPARATOR + 
                           "If an environment is already installed only the configuration should be updated. " + LINE_SEPARATOR +
                           "Note that the <code>" +
                           VIRTUAL_MACHINE_JSON +
@@ -799,7 +801,11 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                                               "See <code>SKS:createProvisioningSession." + CLIENT_EPHEMERAL_KEY_JSON + "</code>."))
           .newExtensionRow (new LinkedObject (DEVICE_CERTIFICATE_JSON,
                                               false,
-                                              "See <code>SKS:createProvisioningSession</code>."))
+                          "See <code>SKS:createProvisioningSession</code>. " +
+                          "Note that this property is either required or forbidden " +
+                          "depending on the value of "))
+            .addPropertyLink (PRIVACY_ENABLED_JSON, PLATFORM_NEGOTIATION_REQUEST_JSON)
+            .addString (".")
           .newRow ()
             .newColumn ()
               .addProperty (SERVER_CERT_FP_JSON)
@@ -811,7 +817,8 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .addString ("SHA256 fingerprint of the server's certificate during receival of the ")
               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
-              .addString (" object. Mandatory for HTTPS connections.")
+              .addString (" object. " + LINE_SEPARATOR + 
+                          "This property is mandatory for HTTPS connections.")
           .newRow ()
             .newColumn ()
               .addProperty (CLIENT_ATTRIBUTES_JSON)
@@ -819,7 +826,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setType (JSON_TYPE_OBJECT)
             .newColumn ()
-              .setUsage (false, 0)
+              .setUsage (false, 1)
             .newColumn ()
               .addString ("<i>Optional</i>: List of client attribute types and values. See ")
               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
@@ -1033,6 +1040,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addProperty (ID_JSON)
               .addSymbolicValue (ID_JSON)
             .newColumn ()
+              .setType (JSON_TYPE_ID)
             .newColumn ()
             .newColumn ()
               .addString ("Each specifier must have a unique ID.")
@@ -1070,6 +1078,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addProperty (ID_JSON)
               .addSymbolicValue (ID_JSON)
             .newColumn ()
+              .setType (JSON_TYPE_ID)
             .newColumn ()
             .newColumn ()
               .addString ("Each result must have a unique ID matching the request.")
@@ -1135,6 +1144,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addProperty (ID_JSON)
               .addSymbolicValue (ID_JSON)
             .newColumn ()
+              .setType (JSON_TYPE_ID)
             .newColumn ()
             .newColumn ()
               .addString ("See <code>SKS:createPUKPolicy.ID</code>.")
@@ -1183,6 +1193,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addProperty (ID_JSON)
               .addSymbolicValue (ID_JSON)
             .newColumn ()
+              .setType (JSON_TYPE_ID)
             .newColumn ()
             .newColumn ()
               .addString ("See <code>SKS:createPINPolicy.ID</code>.")
@@ -1230,7 +1241,8 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("Flag with the default value <code>true</code>.  See <code>SKS:createPINPolicy.UserModifiable</code>.")
+              .addString ("Flag with the default value <code>true</code>." +
+                          "<br>See <code>SKS:createPINPolicy.UserModifiable</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (GROUPING_JSON)
@@ -1239,7 +1251,8 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("Grouping specifier with the default value <code>none</code>.  See <code>SKS:createPINPolicy.Grouping</code>.")
+              .addString ("Grouping specifier with the default value <code>none</code>." +
+                          "<br>See <code>SKS:createPINPolicy.Grouping</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (INPUT_METHOD_JSON)
@@ -1248,16 +1261,18 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("Input method specifier with the default value <code>any</code>.  See <code>SKS:createPINPolicy.InputMethod</code>.")
+              .addString ("Input method specifier with the default value <code>any</code>." +
+                          "<br>See <code>SKS:createPINPolicy.InputMethod</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (PATTERN_RESTRICTIONS_JSON)
               .addArrayList (PATTERN_RESTRICTIONS_JSON)
             .newColumn ()
             .newColumn ()
-              .setUsage (false, 0)
+              .setUsage (false, 1)
             .newColumn ()
-              .addString ("List of pattern restrictions.  See <code>SKS:createPINPolicy.PatternRestrictions</code>.")
+              .addString ("List of pattern restrictions.  See <code>SKS:createPINPolicy.PatternRestrictions</code>." +
+                          "<br>If this property is undefined, there are no PIN pattern restrictions.")
           .newExtensionRow (new MAC ("createPINPolicy"))
           .newRow ()
             .newColumn ()
@@ -1268,8 +1283,8 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (true, 1)
             .newColumn ()
-              .addString ("List of key entries to be created and controlled by this PIN policy. " +
-                          "See <code>SKS:createKeyEntry</code>.");
+              .addString ("List of key entries to be created and controlled by this PIN policy." +
+                          "<br>See <code>SKS:createKeyEntry</code>.");
 
         json.addSubItemTable (KEY_ENTRY_SPECIFIERS_JSON)
           .newRow ()
@@ -1277,6 +1292,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addProperty (ID_JSON)
               .addSymbolicValue (ID_JSON)
             .newColumn ()
+              .setType (JSON_TYPE_ID)
             .newColumn ()
             .newColumn ()
               .addString ("See <code>SKS:createKeyEntry.ID</code>.")
@@ -1289,7 +1305,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("See <code>SKS:createKeyEntry.PINValue</code>. " + "" +
+              .addString ("See <code>SKS:createKeyEntry.PINValue</code>.<br>" + "" +
               		      "Note that if this property is defined, the " +
               		      "<code>SKS:createPINPolicy.UserDefined</code> " +
               		      "flag of the required embedding PIN policy is set to <code>false</code> " +
@@ -1305,7 +1321,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("Flag with the default value <code>false</code>. " +
+              .addString ("Flag with the default value <code>false</code>.<br>" +
                           "See <code>SKS:createKeyEntry." + ENABLE_PIN_CACHING_JSON + "</code>.")
           .newRow ()
             .newColumn ()
@@ -1316,9 +1332,9 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("Flag with the default value <code>false</code>. " +
-                          "See <code>SKS:createKeyEntry." + DEVICE_PIN_PROTECTION_JSON + "</code>. " +
-                          "This flag (if true) cannot be combined with PIN policy settings.")
+              .addString ("Flag with the default value <code>false</code>.<br>" +
+                          "See <code>SKS:createKeyEntry." + DEVICE_PIN_PROTECTION_JSON + "</code>. " + LINE_SEPARATOR +
+                          "Note that this flag (if true) cannot be combined with PIN policy settings.")
           .newRow ()
             .newColumn ()
               .addProperty (APP_USAGE_JSON)
@@ -1336,8 +1352,8 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("See <code>SKS:createKeyEntry." + KEY_ALGORITHM_JSON + "</code>. " +
-                          "Also se &quot;Key Algorithm Support&quot;." + LINE_SEPARATOR +
-                          "Currently recognized key algorithms include:" +
+                          "Also see SKS &quot;Algorithm Support&quot;." + LINE_SEPARATOR +
+                          "The currently recognized key algorithms include:" +
                           JSONBaseHTML.enumerateAlgorithms (KeyAlgorithms.values (), false, false))
           .newRow ()
             .newColumn ()
@@ -1358,8 +1374,9 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false, 1)
             .newColumn ()
-              .addString ("See <code>SKS:createKeyEntry.EndorsedAlgorithm</code>." + LINE_SEPARATOR +
-                          "Note that <i>endorsed algorithm URIs must be sorted in descending alphabetical order</i>." + LINE_SEPARATOR +
+              .addString ("See <code>SKS:createKeyEntry.EndorsedAlgorithm</code>. " +
+                          "Also see SKS &quot;Algorithm Support&quot;." + LINE_SEPARATOR +
+                          "Note that <i>endorsed algorithm URIs must be specified in strict lexical order</i>." + LINE_SEPARATOR +
                           "The currently recognized algorithms include:" +
                           JSONBaseHTML.enumerateAlgorithms (MACAlgorithms.values (), true, false) +
                           JSONBaseHTML.enumerateAlgorithms (AsymSignatureAlgorithms.values (), false, false) +
@@ -1376,8 +1393,8 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("See <code>SKS:createKeyEntry." + SERVER_SEED_JSON + "</code>.  " +
-                          "If this property is undefined, it is assumed (by KeyGen2) to be a zero-length array.")
+              .addString ("See <code>SKS:createKeyEntry." + SERVER_SEED_JSON + "</code>. " +
+                          "If this property is undefined, it is assumed to be a zero-length array.")
           .newRow ()
             .newColumn ()
               .addProperty (BIOMETRIC_PROTECTION_JSON)
@@ -1387,7 +1404,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("See <code>SKS:createKeyEntry." + BIOMETRIC_PROTECTION_JSON + "</code>. " +
-                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>none</code>.")
+                          "The default value is <code>none</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (DELETE_PROTECTION_JSON)
@@ -1397,7 +1414,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("See <code>SKS:createKeyEntry." + DELETE_PROTECTION_JSON + "</code>. " +
-                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>none</code>.")
+                          "The default value is <code>none</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (EXPORT_PROTECTION_JSON)
@@ -1407,7 +1424,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("See <code>SKS:createKeyEntry." + EXPORT_PROTECTION_JSON + "</code>. " +
-                          "If this property is undefined, it is assumed (by KeyGen2) to be <code>non-exportable</code>.")
+                          "The default value is <code style=\"white-space:nowrap\">non-exportable</code>.")
           .newRow ()
             .newColumn ()
               .addProperty (FRIENDLY_NAME_JSON)
@@ -1416,8 +1433,40 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("See <code>SKS:createKeyEntry." + FRIENDLY_NAME_JSON + "</code>.")
+              .addString ("See <code>SKS:createKeyEntry." + FRIENDLY_NAME_JSON + "</code>." +
+                          "If this property is undefined, it is assumed to be a zero-length array.")
           .newExtensionRow (new MAC ("createKeyEntry"));
+
+        json.addSubItemTable (GENERATED_KEYS_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (ID_JSON)
+              .addSymbolicValue (ID_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_ID)
+            .newColumn ()
+            .newColumn ()
+              .addString ("Must match the identifier used in ")
+              .addLink (KEY_CREATION_REQUEST_JSON)
+              .addString (" for a specific key.")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+              .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_OBJECT)
+            .newColumn ()
+            .newColumn ()
+              .addString ("See <code>SKS:createKeyEntry.PublicKey</code>.")
+          .newRow ()
+            .newColumn ()
+              .addProperty (KEY_ATTESTATION_JSON)
+              .addSymbolicValue (KEY_ATTESTATION_JSON)
+            .newColumn ()
+              .setType (JSON_TYPE_BASE64)
+            .newColumn ()
+            .newColumn ()
+              .addString ("See <code>SKS:createKeyEntry.KeyAttestation</code>.");
 
         json.addSubItemTable (ISSUED_CREDENTIALS_JSON)
           .newRow ()
@@ -1425,10 +1474,11 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addProperty (ID_JSON)
               .addSymbolicValue (ID_JSON)
             .newColumn ()
+              .setType (JSON_TYPE_ID)
             .newColumn ()
             .newColumn ()
               .addString ("See <code>SKS:setCertificatePath.ID</code>")
-              .addString (". Must match the identifier used in ")
+              .addString (".<br>Must match the identifier used in ")
               .addLink (KEY_CREATION_REQUEST_JSON)
               .addString (" for a specific key.")
           .newRow ()
@@ -1440,7 +1490,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("See <code>SKS:setCertificatePath.X509Certificate</code>")
-              .addString (". Identical representation as the <code>" +
+              .addString (".<br>Identical representation as the <code>" +
                           JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
                           "</code> in ")
               .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
@@ -1481,36 +1531,6 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               1,
               "<i>Optional:</i> List of logotype objects. See <code>" +
               "SKS:addExtension</code>."));
-
-        json.addSubItemTable (GENERATED_KEYS_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (ID_JSON)
-              .addSymbolicValue (ID_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("Must match the identifier used in ")
-              .addLink (KEY_CREATION_REQUEST_JSON)
-              .addString (" for a specific key.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
-              .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_OBJECT)
-            .newColumn ()
-            .newColumn ()
-              .addString ("See <code>SKS:createKeyEntry.PublicKey</code>.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (KEY_ATTESTATION_JSON)
-              .addSymbolicValue (KEY_ATTESTATION_JSON)
-            .newColumn ()
-              .setType (JSON_TYPE_BASE64)
-            .newColumn ()
-            .newColumn ()
-              .addString ("See <code>SKS:createKeyEntry.KeyAttestation</code>.");
 
         json.addSubItemTable (new String[]{UPDATE_KEY_JSON,
                                            CLONE_KEY_PROTECTION_JSON,
@@ -1728,7 +1748,7 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addArrayList (VALUES_JSON)
             .newColumn ()
             .newColumn ()
-              .setUsage (true, 1)
+              .setUsage (true, 0)
             .newColumn ()
               .addString ("List of attributes associated with <code>" + TYPE_JSON + "</code>.");
 

@@ -95,7 +95,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
             retry_limit = getAuthorizationRetryLimit (rd, 0);
             id = KeyGen2Validator.getID (rd, ID_JSON);
             format = getPassphraseFormat (rd);
-            mac = rd.getBinary (MAC_JSON);
+            mac = KeyGen2Validator.getMAC (rd);
           }
 
 
@@ -192,7 +192,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
                   }
               }
 
-            mac = rd.getBinary (MAC_JSON);
+            mac = KeyGen2Validator.getMAC (rd);
           }
 
 
@@ -349,7 +349,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
             friendly_name = rd.getStringConditional (FRIENDLY_NAME_JSON);
 
-            mac = rd.getBinary (MAC_JSON);
+            mac = KeyGen2Validator.getMAC (rd);
           }
 
 
