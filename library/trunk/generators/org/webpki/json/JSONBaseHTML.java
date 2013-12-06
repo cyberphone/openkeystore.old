@@ -52,6 +52,7 @@ public class JSONBaseHTML
         String JSON_TYPE_URI     = "uri";
         String JSON_TYPE_DATE    = "date";
         String JSON_TYPE_BIGINT  = "bigint";
+        String JSON_TYPE_CRYPTO  = "crypto";
         String JSON_TYPE_ID      = "id";
         
         String SORTED_CERT_PATH  = "Sorted Certificate Path";
@@ -419,7 +420,8 @@ public class JSONBaseHTML
             "a:link {color:blue}" +
             "a:visited {color:blue}" +
             "a:active {color:blue}" +
-            "</style></head><body><table class=\"tftable\">");
+            "</style></head><body>");
+        html.append ("<table class=\"tftable\">");
         for (Content content : contents)
           {
             content.write ();
@@ -585,7 +587,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.MODULUS_JSON)
               .addSymbolicValue (JSONSignatureEncoder.MODULUS_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_BASE64)
+              .setType (Types.JSON_TYPE_CRYPTO)
             .newColumn ()
             .newColumn ()
               .addString ("JCS: RSA modulus.")
@@ -594,7 +596,7 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.EXPONENT_JSON)
               .addSymbolicValue (JSONSignatureEncoder.EXPONENT_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_BASE64)
+              .setType (Types.JSON_TYPE_CRYPTO)
             .newColumn ()
             .newColumn ()
               .addString ("JCS: RSA exponent.");
@@ -616,7 +618,7 @@ public class JSONBaseHTML
             .addProperty (JSONSignatureEncoder.X_JSON)
             .addSymbolicValue (JSONSignatureEncoder.X_JSON)
           .newColumn ()
-            .setType (Types.JSON_TYPE_BASE64)
+            .setType (Types.JSON_TYPE_CRYPTO)
           .newColumn ()
           .newColumn ()
             .addString ("JCS: EC curve point X.")
@@ -625,7 +627,7 @@ public class JSONBaseHTML
             .addProperty (JSONSignatureEncoder.Y_JSON)
             .addSymbolicValue (JSONSignatureEncoder.Y_JSON)
           .newColumn ()
-            .setType (Types.JSON_TYPE_BASE64)
+            .setType (Types.JSON_TYPE_CRYPTO)
           .newColumn ()
           .newColumn ()
             .addString ("JCS: EC curve point Y.");        

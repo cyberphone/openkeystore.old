@@ -29,8 +29,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Vector;
@@ -1072,7 +1071,7 @@ public class ServerState implements Serializable
 
     BasicCapabilities basic_capabilities = new BasicCapabilities ();
     
-    HashMap<String,HashSet<String>> client_attribute_values;
+    LinkedHashMap<String,LinkedHashSet<String>> client_attribute_values;
 
     ProtocolPhase current_phase = ProtocolPhase.PLATFORM_NEGOTIATION;
     
@@ -1415,7 +1414,7 @@ public class ServerState implements Serializable
       }
 
 
-    public HashMap<String,HashSet<String>> getClientAttributeValues ()
+    public LinkedHashMap<String,LinkedHashSet<String>> getClientAttributeValues ()
       {
         return client_attribute_values;
       }

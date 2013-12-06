@@ -922,16 +922,34 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .setUsage (true, 1)
             .newColumn ()
-              .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>.");
-
+              .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>." +
+              		      LINE_SEPARATOR +
+                          "Due to the stateful MAC-scheme featured in SKS, " +
+                          "<code>" + GENERATED_KEYS_JSON + "</code> <i>must " +
+                          "be generated (encoding) and executed (decoding) in strict " +
+                          "array order as well as honoring the array order in the associated  ")
+              .addLink (KEY_CREATION_REQUEST_JSON)
+              .addString (".");
 
         preAmble (PROVISIONING_FINALIZATION_REQUEST_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
           .newExtensionRow (new SubmitURL ())
           .newExtensionRow (new OptionalArrayObject (ISSUED_CREDENTIALS_JSON,
                                                      1,
-                                                     "<i>Optional:</i> List of issued credentials. See <code>" +
-                                                     "SKS:setCertificatePath</code>."))
+                 "<i>Optional:</i> List of issued credentials. See <code>" +
+                 "SKS:setCertificatePath</code>." + LINE_SEPARATOR +
+                 "Due to the stateful MAC-scheme featured in SKS, " +
+                 "the properties beginning with <code>" + ISSUED_CREDENTIALS_JSON + "</code> " +
+                 "and ending with <code>" + DELETE_KEYS_JSON + "</code>, <i>must " +
+                 "be generated (encoding) and executed (decoding) in exactly " +
+                 "the order they are declared in this table as well " +
+                 "as in associated object arrays</i>." +
+                  LINE_SEPARATOR +
+                  "Note that that <code>" + ISSUED_CREDENTIALS_JSON +
+                  "</code> are not guaranteed to be " +
+                  "supplied in the same order as during the associated "))
+              .addLink (KEY_CREATION_REQUEST_JSON)
+              .addString (".")
           .newExtensionRow (new OptionalArrayObject (UNLOCK_KEYS_JSON,
                                                      1,
                                                      "<i>Optional:</i> List of keys to be unlocked. See <code>" +
@@ -950,6 +968,10 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .addString ("See <code>SKS:closeProvisioningSession</code>.")
           .newExtensionRow (new MAC ("closeProvisioningSession"))
+            .addString (LINE_SEPARATOR +
+                 "Due to the stateful MAC-scheme featured in SKS, this " +
+                 "<code>" + MAC_JSON + "</code> " +
+                 "must be the final of a provisioning session both during encoding and decoding.")
           .newExtensionRow (new OptionalSignature ());
 
         preAmble (PROVISIONING_FINALIZATION_RESPONSE_JSON)
@@ -1512,7 +1534,13 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
                           "Trust anchor installation is indepdenent of SKS provisioning.")
           .newExtensionRow (new LinkedObject (IMPORT_KEY_JSON,
                                               false,
-                                              "<i>Optional</i> key import operation."))
+                                              "<i>Optional</i> key import operation." + LINE_SEPARATOR +
+                                              "Due to the stateful MAC-scheme featured in SKS, " +
+                                              "the properties beginning with <code>" + IMPORT_KEY_JSON + "</code> " +
+                                              "and ending with <code>" + LOGOTYPES_JSON + "</code>, <i>must " +
+                                              "be generated (encoding) and executed (decoding) in " +
+                                              "exactly the order they are declared in this table as well " +
+                                              "as in associated object arrays</i>."))
           .newExtensionRow (new TargetKeyReference (UPDATE_KEY_JSON, false, "postUpdateKey", true))
           .newExtensionRow (new TargetKeyReference (CLONE_KEY_PROTECTION_JSON, false, "postCloneKeyProtection", false))
           .newExtensionRow (new OptionalArrayObject (EXTENSIONS_JSON,
@@ -1532,10 +1560,10 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               "<i>Optional:</i> List of logotype objects. See <code>" +
               "SKS:addExtension</code>."));
 
-        json.addSubItemTable (new String[]{UPDATE_KEY_JSON,
-                                           CLONE_KEY_PROTECTION_JSON,
+        json.addSubItemTable (new String[]{CLONE_KEY_PROTECTION_JSON,
+                                           DELETE_KEYS_JSON,
                                            UNLOCK_KEYS_JSON,
-                                           DELETE_KEYS_JSON})
+                                           UPDATE_KEY_JSON})
           .newRow ()
             .newColumn ()
               .addProperty (CertificateFilter.CF_FINGER_PRINT)
@@ -1572,8 +1600,8 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .addString ("See &quot;Target Key Reference&quot; in the SKS reference.")
           .newExtensionRow (new MAC ("post* </code> methods<code>"));
         
-        json.addSubItemTable (new String[]{EXTENSIONS_JSON,
-                                           ENCRYPTED_EXTENSIONS_JSON})
+        json.addSubItemTable (new String[]{ENCRYPTED_EXTENSIONS_JSON,
+                                           EXTENSIONS_JSON})
           .newRow ()
             .newColumn ()
               .addProperty (TYPE_JSON)
@@ -1622,43 +1650,6 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
             .newColumn ()
               .addString ("Logotype image data.")
           .newExtensionRow (new MAC ("addExtension"));
-
-        json.addSubItemTable (IMAGE_PREFERENCES_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (TYPE_JSON)
-              .addSymbolicValue (TYPE_JSON)
-            .newColumn ()
-               .setType (JSON_TYPE_URI)
-            .newColumn ()
-            .newColumn ()
-              .addString ("Logotype type URI.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (MIME_TYPE_JSON)
-              .addSymbolicValue (MIME_TYPE_JSON)
-            .newColumn ()
-            .newColumn ()
-            .newColumn ()
-              .addString ("Logotype MIME type.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (WIDTH_JSON)
-              .addSymbolicValue (WIDTH_JSON)
-            .newColumn ()
-               .setType (JSON_TYPE_INT)
-            .newColumn ()
-            .newColumn ()
-              .addString ("Logotype width.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (HEIGHT_JSON)
-              .addSymbolicValue (HEIGHT_JSON)
-            .newColumn ()
-               .setType (JSON_TYPE_INT)
-            .newColumn ()
-            .newColumn ()
-              .addString ("Logotype height.");
 
         json.addSubItemTable (PROPERTY_BAGS_JSON)
           .newRow ()
@@ -1751,6 +1742,51 @@ public class KeyGen2HTMLReference implements JSONBaseHTML.Types
               .setUsage (true, 0)
             .newColumn ()
               .addString ("List of attributes associated with <code>" + TYPE_JSON + "</code>.");
+
+        json.addSubItemTable (IMAGE_PREFERENCES_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (TYPE_JSON)
+              .addSymbolicValue (TYPE_JSON)
+            .newColumn ()
+               .setType (JSON_TYPE_URI)
+            .newColumn ()
+            .newColumn ()
+              .addString ("Image type URI. See ")
+              .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+              .addString (".")
+          .newRow ()
+            .newColumn ()
+              .addProperty (MIME_TYPE_JSON)
+              .addSymbolicValue (MIME_TYPE_JSON)
+            .newColumn ()
+            .newColumn ()
+            .newColumn ()
+              .addString ("Image MIME type. See ")
+              .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+              .addString (".")
+          .newRow ()
+            .newColumn ()
+              .addProperty (WIDTH_JSON)
+              .addSymbolicValue (WIDTH_JSON)
+            .newColumn ()
+               .setType (JSON_TYPE_INT)
+            .newColumn ()
+            .newColumn ()
+              .addString ("Image width. See ")
+              .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+              .addString (".")
+          .newRow ()
+            .newColumn ()
+              .addProperty (HEIGHT_JSON)
+              .addSymbolicValue (HEIGHT_JSON)
+            .newColumn ()
+               .setType (JSON_TYPE_INT)
+            .newColumn ()
+            .newColumn ()
+              .addString ("Image height. See ")
+              .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+              .addString (".");
 
         json.addSubItemTable (DEVICE_CERTIFICATE_JSON)
           .newRow ()

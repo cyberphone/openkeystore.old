@@ -845,6 +845,7 @@ public class KeyGen2Test
             
             //////////////////////////////////////////////////////////////////////////
             // Final check, do these keys match the request?
+            // Missing credentials will be found by SKS during session termination
             //////////////////////////////////////////////////////////////////////////
             for (ProvisioningFinalizationRequestDecoder.IssuedCredential key : prov_final_request.getIssuedCredentials ())
               {
@@ -885,7 +886,7 @@ public class KeyGen2Test
                   }
 
                 //////////////////////////////////////////////////////////////////////////
-                // There may be an postUpdateKey or postCloneKeyProtection
+                // There may be a postUpdateKey or postCloneKeyProtection
                 //////////////////////////////////////////////////////////////////////////
                 ProvisioningFinalizationRequestDecoder.PostOperation post_operation = key.getPostOperation ();
                 if (post_operation != null)

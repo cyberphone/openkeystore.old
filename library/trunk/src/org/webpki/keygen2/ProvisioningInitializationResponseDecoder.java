@@ -19,8 +19,8 @@ package org.webpki.keygen2;
 import java.io.IOException;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 
 import java.security.cert.X509Certificate;
 
@@ -47,7 +47,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
     
     ECPublicKey client_ephemeral_key;
     
-    HashMap<String,HashSet<String>> client_attribute_values = new HashMap<String,HashSet<String>> ();
+    LinkedHashMap<String,LinkedHashSet<String>> client_attribute_values = new LinkedHashMap<String,LinkedHashSet<String>> ();
 
     byte[] attestation;
     
@@ -106,7 +106,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
       }
 
 
-    public HashMap<String,HashSet<String>> getClientAttributeValues ()
+    public LinkedHashMap<String,LinkedHashSet<String>> getClientAttributeValues ()
       {
         return client_attribute_values;
       }
@@ -149,7 +149,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
         for (JSONObjectReader type_rd : getObjectArrayConditional (rd, CLIENT_ATTRIBUTES_JSON))
           {
             String type = type_rd.getString (TYPE_JSON);
-            HashSet<String> set = new HashSet<String> ();
+            LinkedHashSet<String> set = new LinkedHashSet<String> ();
             JSONArrayReader values = type_rd.getArray (VALUES_JSON);
             while (values.hasMore ())
               {
