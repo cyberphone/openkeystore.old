@@ -37,52 +37,175 @@ public class JSONBaseHTML
     public static final String MANDATORY               = "m";
     public static final String OPTIONAL                = "o";
     
-    public static final String PAGE_WIDTH              = "80em";
-    public static final String NON_SKS_ALGORITHM_COLOR = "#A0A0A0"; 
+    public static final String PAGE_WIDTH              = "1000pt";
+    public static final String NON_SKS_ALGORITHM_COLOR = "#A0A0A0";
     
-    public interface Types 
+    public static final String SECTION_FONT_SIZE       = "14pt";
+    
+    String file_name;
+    String subsystem_name;
+    
+    public JSONBaseHTML (String[] args, String subsystem_name) throws IOException
       {
-        String JSON_TYPE_BOOLEAN = "bool";
-        String JSON_TYPE_SHORT   = "short";
-        String JSON_TYPE_BASE64  = "base64";
-        String JSON_TYPE_BYTE    = "byte";
-        String JSON_TYPE_INT     = "int";
-        String JSON_TYPE_OBJECT  = "object";
-        String JSON_TYPE_STRING  = "string";
-        String JSON_TYPE_URI     = "uri";
-        String JSON_TYPE_DATE    = "date";
-        String JSON_TYPE_BIGINT  = "bigint";
-        String JSON_TYPE_CRYPTO  = "crypto";
-        String JSON_TYPE_ID      = "id";
-        
-        String SORTED_CERT_PATH  = "Sorted Certificate Path";
-        String URI_LIST          = "List of URIs";
-        String LINE_SEPARATOR    = "<div style=\"height:6pt;padding:0px\"></div>";
+        if (args.length != 1)
+          {
+            throw new IOException ("One argument expeced, got: " + args.length);
+          }
+        file_name = args[0];
+        this.subsystem_name = subsystem_name;
+      }
+
+    JSONBaseHTML () {}
+    
+    public static class Types 
+      {
+        public enum WEBPKI_DATA_TYPES 
+          {
+            BOOLEAN ("bool",   "Boolean <code>true</code> or <code>false</code>"),
+            BYTE    ("byte",   "Unsigned byte"),
+            SHORT   ("short",  "Unsigned two-byte integer"), 
+            INT     ("int",    "Unsigned four-byte integer"),
+            BIGINT  ("bigint", "Big integer"),
+            STRING  ("string", "Arbitrary quoted string"),
+            URI     ("uri",    "URI in a quoted string"),
+            ID      ("id",     "Identifier in a quoted string.  The identifier must consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
+            BASE64  ("base64", "Base64-encoded binary data in a quoted string"),
+            CRYPTO  ("crypto", "Base64-encoded large postive integer in a quoted string.  Equivalent to XML DSig's <code>ds:CryptoBinary</code>"),
+            DATE    ("date",   "ISO date-time <code>YYYY-MM-DDThh:mm:ss{timezone}</code> in a quoted string"),
+            OBJECT  ("object", "JSON object <code>{}</code>");
+
+            String string;
+            String description;
+            boolean used;
+            WEBPKI_DATA_TYPES (String string, String description)
+              {
+                this.string = string;
+                this.description = description;
+                used = false;
+              }
+
+            public String getString ()
+              {
+                return string;
+              }
+
+            public String getDescription ()
+              {
+                return description;
+              }
+
+            public void setUsed ()
+              {
+                used = true;
+              }
+
+            public boolean isUsed ()
+              {
+                return used;
+              }
+          }
+
+        public static final String SORTED_CERT_PATH  = "Sorted Certificate Path";
+        public static final String URI_LIST          = "List of URIs";
+        public static final String LINE_SEPARATOR    = "<div style=\"height:6pt;padding:0px\"></div>";
       }
     
+    abstract class Content
+      {
+        abstract String getHTML () throws IOException;
+        
+        Content ()
+          {
+            division_objects.add (this);
+          }
+      }
+  
+    class DataTypesTable extends Content
+      {
+        static final String DATA_TYPES = "Data Types";
+
+        DataTypesTable ()
+          {
+            super ();
+          }
+
+        @Override
+        String getHTML () throws IOException
+          {
+            StringBuffer s = new StringBuffer ()
+             .append ("<table class=\"tftable\">" +
+                      "<tr><td colspan=\"2\" id=\"")
+             .append (DATA_TYPES)
+             .append ("\" style=\"border-width:0px;font-size:" + SECTION_FONT_SIZE + ";padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica\">" +
+                      DATA_TYPES + "</td></tr>" +
+                      "<tr><th>Type</th><th>Description</th></tr>");
+            for (Types.WEBPKI_DATA_TYPES type : Types.WEBPKI_DATA_TYPES.values ())
+              {
+                if (type.isUsed ())
+                  {
+                    s.append ("<tr><td style=\"text-align:center\">")
+                     .append (type.getString ())
+                     .append ("</td><td>")
+                     .append (type.getDescription ())
+                     .append ("</td></tr>");
+                  }
+              }
+            return s.append ("</table>").toString ();
+          }
+      }
+
+    class Paragraph extends Content
+      {
+        StringBuffer local_html;
+       
+        Paragraph ()
+          {
+            super ();
+          }
+        
+        @Override
+        String getHTML () throws IOException
+          {
+            return local_html.append ("</div>").toString ();
+          }
+      }
+
+    class ProtocolTable extends Content
+      {
+        ProtocolTable ()
+          {
+            super ();
+          }
+
+        @Override
+        String getHTML () throws IOException
+          {
+            StringBuffer s = new StringBuffer ("<table class=\"tftable\" style=\"width:" + PAGE_WIDTH + "\">");
+            for (ProtocolObject protocol_object : protocol_objects)
+              {
+                s.append (protocol_object.getObjectHTML ());
+              }
+            return s.append ("</table>").toString ();
+          }
+      }
+
     public interface Extender
       {
-        ProtocolTable.Row.Column execute (ProtocolTable.Row.Column column) throws IOException;
+        ProtocolObject.Row.Column execute (ProtocolObject.Row.Column column) throws IOException;
       }
 
     public interface RowInterface
       {
-        ProtocolTable.Row newRow ();
-      }
-    
-    public abstract class Content
-      {
-        Content ()
-          {
-            contents.add (this);
-          }
-        abstract void write () throws IOException;
+        ProtocolObject.Row newRow ();
+        
+        void setNotes (String notes) throws IOException;
       }
 
-    public class ProtocolTable extends Content implements RowInterface 
+    public class ProtocolObject implements RowInterface 
       {
         String protocols[];
         boolean main_object;
+        String notes;
         
         Vector<Row> rows = new Vector<Row> ();
         
@@ -229,13 +352,14 @@ public class JSONBaseHTML
                     return this;
                   }
 
-                public Column setType (String type) throws IOException
+                public Column setType (Types.WEBPKI_DATA_TYPES type) throws IOException
                   {
                     if (columns.size () != 2)
                       {
                         throw new IOException ("This method only applies to column #2");
                       }
-                    column.append (type);
+                    type.setUsed ();
+                    column.append (type.getString ());
                     return this;
                   }
 
@@ -303,6 +427,12 @@ public class JSONBaseHTML
                   {
                     return extender.execute (this);
                   }
+
+                @Override
+                public void setNotes (String notes) throws IOException
+                  {
+                    protocol_objects.lastElement ().setNotes (notes);
+                  }
               }
             
             Row ()
@@ -316,36 +446,35 @@ public class JSONBaseHTML
               }
           }
 
-        ProtocolTable (String[] protocols, boolean main_object)
+        ProtocolObject (String[] protocols, boolean main_object)
           {
-            super ();
+            protocol_objects.add (this);
             this.protocols = protocols;
             this.main_object = main_object;
           }
 
-        @Override
-        void write () throws IOException
+        String getObjectHTML () throws IOException
           {
-            html.append ("<tr><td colspan=\"4\" style=\"border-width:0px;font-size:12pt;padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica\">");
+            StringBuffer s = new StringBuffer ("<tr><td colspan=\"4\" style=\"border-width:0px;font-size:" + SECTION_FONT_SIZE + ";padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica\">");
             boolean next = false;
             for (String protocol : protocols)
               {
                 if (next)
                   {
-                    html.append (", &nbsp;");
+                    s.append (", &nbsp;");
                   }
                 else
                   {
                     next = true;
                   }
-                html.append ("<span id=\"")
+                s.append ("<span id=\"")
                     .append (protocol)
                     .append ("\">")
                     .append (main_object ? "" : "<i>")
                     .append (protocol)
                     .append (main_object ? "</span>" : "</i></span>");
               }
-            html.append ("</td></tr>\n<tr><th>Property</th><th>Type</th><th>Usage</th><th>Comment</th></tr>");
+            s.append ("</td></tr>\n<tr><th>Property</th><th>Type</th><th>Usage</th><th>Comment</th></tr>");
             int i = 0;
             int supress = 0;
             for (Row row : rows)
@@ -355,7 +484,7 @@ public class JSONBaseHTML
                     supress = row.depth;
                   }
                 i++;
-                html.append ("<tr>");
+                s.append ("<tr>");
                 if (row.columns.size () != 4)
                   {
                     throw new IOException ("Wrong number of colums for row: " + i);
@@ -373,9 +502,9 @@ public class JSONBaseHTML
                             if (row.set_group)
                               {
                                 standard = false;
-                                html.append ("<td align=\"center\" rowspan=\"")
-                                    .append (supress)
-                                    .append ("\">");
+                                s.append ("<td align=\"center\" rowspan=\"")
+                                 .append (supress)
+                                 .append ("\">");
                               }
                             else
                               {
@@ -386,15 +515,22 @@ public class JSONBaseHTML
                       }
                     if (output == standard)
                       {
-                        html.append (q == 1 ? "<td style=\"white-space: nowrap\">" : (q < 4 ? "<td align=\"center\">" : "<td>"));
+                        s.append (q == 1 ? "<td style=\"white-space: nowrap\">" : (q < 4 ? "<td align=\"center\">" : "<td>"));
                       }
                     if (output)
                       {
-                        html.append (column.column).append ("</td>");
+                        s.append (column.column).append ("</td>");
                       }
                   }
-                html.append ("</tr>");
+                s.append ("</tr>");
               }
+            if (notes != null)
+              {
+                s.append ("<tr><td colspan=\"4\" style=\"border-width:0px;padding:10pt 0pt 10pt 0pt\">")
+                 .append (notes)
+                 .append ("</td></tr>");
+              }
+            return s.toString ();
           }
 
         @Override
@@ -402,9 +538,24 @@ public class JSONBaseHTML
           {
             return new Row ();
           }
-      }    
 
-    Vector<Content> contents = new Vector<Content> ();
+        @Override
+        public void setNotes (String notes) throws IOException
+          {
+            if (this.notes == null)
+              {
+                this.notes = notes;
+              }
+            else
+              {
+                throw new IOException ("Notes already defined:" + protocols[0]);
+              }
+          }
+      }
+
+    Vector<ProtocolObject> protocol_objects = new Vector<ProtocolObject> ();
+    
+    Vector<Content> division_objects = new Vector<Content> ();
     
     StringBuffer html;
 
@@ -412,44 +563,69 @@ public class JSONBaseHTML
       {
         html = new StringBuffer (
             "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">" +
-            "<html><head><title>KeyGen2</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><style type=\"text/css\">\n" +
-            ".tftable {width:" + PAGE_WIDTH + ";border-collapse: collapse;}\n" +
+            "<html><head><title>")
+        .append (subsystem_name)
+        .append ("</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><style type=\"text/css\">\n" +
+            ".tftable {border-collapse: collapse;}\n" +
             ".tftable th {font-size:10pt;background-color:#e0e0e0;border-width:1px;padding:4pt 12pt 4pt 12pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
             ".tftable tr {background-color:#ffffff;}\n" +
             ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;;font-family:arial,verdana,helvetica}\n" +
+            "div {font-size:10pt;padding:10pt 0pt 0pt 0pt;font-family:arial,verdana,helvetica}\n" +
             "a:link {color:blue}" +
             "a:visited {color:blue}" +
             "a:active {color:blue}" +
             "</style></head><body>");
-        html.append ("<table class=\"tftable\">");
-        for (Content content : contents)
+        for (Content division_object : division_objects)
           {
-            content.write ();
+            html.append (division_object.getHTML ());
           }
-        return html.append ("</table></body></html>").toString ();
+        return html.append ("</body></html>").toString ();
       }
     
-    public void writeHTML (String filename) throws IOException
+    public void writeHTML () throws IOException
       {
-        ArrayUtil.writeFile (filename, getHTML ().getBytes ("UTF-8"));
+        ArrayUtil.writeFile (file_name, getHTML ().getBytes ("UTF-8"));
       }
 
-    public ProtocolTable addProtocolTable (String protocol)
+    public ProtocolObject addProtocolTable (String protocol)
       {
-        return new ProtocolTable (new String[]{protocol}, true);
+        return new ProtocolObject (new String[]{protocol}, true);
       }
 
-    public ProtocolTable addSubItemTable (String sub_item)
+    public ProtocolObject addSubItemTable (String sub_item)
       {
-        return new ProtocolTable (new String[]{sub_item}, false);
+        return new ProtocolObject (new String[]{sub_item}, false);
       }
     
-    public ProtocolTable addSubItemTable (String[] sub_items)
+    public ProtocolObject addSubItemTable (String[] sub_items)
       {
-        return new ProtocolTable (sub_items, false);
+        return new ProtocolObject (sub_items, false);
       }
 
-    public static String enumerateAlgorithms (SKSAlgorithms[] algorithms, boolean symmetric, boolean filter)
+    public StringBuffer addParagraphObject ()
+      {
+        return addParagraphObject (null);
+      }
+
+    public StringBuffer addParagraphObject (String header)
+      {
+        Paragraph p = new Paragraph ();
+        StringBuffer s = new StringBuffer ("<div style=\"width:" + PAGE_WIDTH + "\">");
+        if (header != null)
+          {
+            s.append ("<div style=\"padding:10pt 0pt 10pt 0pt\"><span style=\"font-size:" + SECTION_FONT_SIZE + "\">")
+             .append (header)
+             .append ("</span></div>");
+          }
+        return p.local_html = s;
+      }
+
+    public void addDataTypesDescription ()
+      {
+        new DataTypesTable ();
+      }
+
+    public static String enumerateAlgorithms (SKSAlgorithms[] algorithms, boolean symmetric, boolean filter, boolean reference)
       {
         StringBuffer s = new StringBuffer ("<ul>");
         for (SKSAlgorithms algorithm : algorithms)
@@ -467,7 +643,7 @@ public class JSONBaseHTML
                 continue;
               }
             s.append ("<li><code")
-             .append (algorithm.isMandatorySKSAlgorithm () ? ">" : " style=\"color:" + NON_SKS_ALGORITHM_COLOR + "\">")
+             .append ((algorithm.isMandatorySKSAlgorithm () || reference) ? ">" : " style=\"color:" + NON_SKS_ALGORITHM_COLOR + "\">")
              .append (algorithm.getURI ())
              .append ("</code></li>");
           }
@@ -476,48 +652,61 @@ public class JSONBaseHTML
 
     public void addJSONSignatureDefinitions (boolean reference) throws IOException
       {
+        String jcs = reference ? "" : "JCS: ";
+        String option = reference ? "Option: " : "JCS option: ";
+        String sks_alg_ref = reference ? " " : " See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR;
+        
         addSubItemTable (JSONSignatureEncoder.SIGNATURE_JSON)
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.VERSION_JSON)
               .addValue (JSONSignatureEncoder.SIGNATURE_VERSION_ID)
             .newColumn ()
-              .setType (Types.JSON_TYPE_URI)
+              .setType (Types.WEBPKI_DATA_TYPES.URI)
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("JCS: <i>Optional</i> signature object version identifier.")
+              .addString (jcs)
+              .addString ("<i>Optional</i> signature object version identifier.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.ALGORITHM_JSON)
               .addSymbolicValue (JSONSignatureEncoder.ALGORITHM_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_URI)
+              .setType (Types.WEBPKI_DATA_TYPES.URI)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS: Signature algorithm URI.  See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR +
-                          "The currently recognized symmetric key algorithms include:" +
-                          enumerateAlgorithms (MACAlgorithms.values (), true, false) +
+              .addString (jcs)
+              .addString ("Signature algorithm URI.")
+              .addString (sks_alg_ref)
+              .addString ("The currently recognized symmetric key algorithms include:" +
+                          enumerateAlgorithms (MACAlgorithms.values (), true, false, reference) +
                           "The currently recognized asymmetric key algorithms include:" +
-                          enumerateAlgorithms (AsymSignatureAlgorithms.values (), false, true))
+                          enumerateAlgorithms (AsymSignatureAlgorithms.values (), false, true, reference))
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.KEY_INFO_JSON)
               .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_OBJECT)
+              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS: Signature key info placeholder.")
+              .addString (jcs)
+              .addString ("Signature key info placeholder.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.SIGNATURE_VALUE_JSON)
               .addSymbolicValue (JSONSignatureEncoder.SIGNATURE_VALUE_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_BASE64)
+              .setType (Types.WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS: Signature value.");
+              .addString (jcs)
+              .addString ("Signature value. " + 
+                  "This value is calculated by applying the algorithm specified in <code>" +
+                  JSONSignatureEncoder.ALGORITHM_JSON + "</code> using the key specified in <code>" +
+                  JSONSignatureEncoder.KEY_INFO_JSON + "</code> on the <span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
+                  "canonicalized JSON object.");
 
         addSubItemTable (JSONSignatureEncoder.KEY_INFO_JSON)
           .newRow ()
@@ -525,39 +714,47 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
               .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_OBJECT)
+              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
               .setChoice (true, 3)
             .newColumn ()
-              .addString ("JCS option: Public key.")
+              .addString (option)
+              .addString ("Public key.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON)
               .addArrayList (Types.SORTED_CERT_PATH)
             .newColumn ()
-              .setType (Types.JSON_TYPE_BASE64)
+              .setType (Types.WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS option: Sorted X.509 certificate path where the first element in the array holds the <i style=\"white-space:nowrap\">end-entity</i> certificate.")
+              .addString (option)
+              .addString ("Sorted X.509 certificate path where the first element in the array holds the <i style=\"white-space:nowrap\">end-entity</i> certificate. " +
+                          "Note that EC support is (implementation-wise) limited to the algorithms listed in ")
+              .addPropertyLink (JSONSignatureEncoder.NAMED_CURVE_JSON, JSONSignatureEncoder.EC_JSON)
+              .addString ("." + Types.LINE_SEPARATOR +
+                          "The certificate path <i>must be contiguous</i> but is not required to be complete.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.KEY_ID_JSON)
               .addSymbolicValue (JSONSignatureEncoder.KEY_ID_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_STRING)
+              .setType (Types.WEBPKI_DATA_TYPES.STRING)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS option: Symmetric key ID.")
+              .addString (option)
+              .addString ("Symmetric key ID.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
               .addLink (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_OBJECT)
+              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("JCS: Signature certificate data. Note: only valid for the <code>" +
+              .addString (jcs)
+              .addString ("Signature certificate data. Note: only valid for the <code>" +
                           JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON + "</code> option.");
 
         addSubItemTable (JSONSignatureEncoder.PUBLIC_KEY_JSON)
@@ -566,20 +763,22 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.EC_JSON)
               .addLink (JSONSignatureEncoder.EC_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_OBJECT)
+              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
               .setChoice (true, 2)
             .newColumn ()
-              .addString ("JCS option: EC public key.")
+              .addString (option)
+              .addString ("EC public key.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.RSA_JSON)
               .addLink (JSONSignatureEncoder.RSA_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_OBJECT)
+              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS option: RSA public key.");
+              .addString (option)
+              .addString ("RSA public key.");
 
         addSubItemTable (JSONSignatureEncoder.RSA_JSON)
           .newRow ()
@@ -587,78 +786,93 @@ public class JSONBaseHTML
               .addProperty (JSONSignatureEncoder.MODULUS_JSON)
               .addSymbolicValue (JSONSignatureEncoder.MODULUS_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_CRYPTO)
+              .setType (Types.WEBPKI_DATA_TYPES.CRYPTO)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS: RSA modulus.")
+              .addString (jcs)
+              .addString ("RSA modulus.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.EXPONENT_JSON)
               .addSymbolicValue (JSONSignatureEncoder.EXPONENT_JSON)
             .newColumn ()
-              .setType (Types.JSON_TYPE_CRYPTO)
+              .setType (Types.WEBPKI_DATA_TYPES.CRYPTO)
             .newColumn ()
             .newColumn ()
-              .addString ("JCS: RSA exponent.");
+              .addString (jcs)
+              .addString ("RSA exponent.");
 
-       addSubItemTable (JSONSignatureEncoder.EC_JSON)
-        .newRow ()
-          .newColumn ()
-            .addProperty (JSONSignatureEncoder.NAMED_CURVE_JSON)
-            .addSymbolicValue (JSONSignatureEncoder.NAMED_CURVE_JSON)
-          .newColumn ()
-            .setType (Types.JSON_TYPE_URI)
-          .newColumn ()
-          .newColumn ()
-            .addString ("JCS: EC named curve.  See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR +
-                        "The currently recognized EC curves include:" +
-                        enumerateAlgorithms (KeyAlgorithms.values (), false, true))
-        .newRow ()
-          .newColumn ()
-            .addProperty (JSONSignatureEncoder.X_JSON)
-            .addSymbolicValue (JSONSignatureEncoder.X_JSON)
-          .newColumn ()
-            .setType (Types.JSON_TYPE_CRYPTO)
-          .newColumn ()
-          .newColumn ()
-            .addString ("JCS: EC curve point X.")
-        .newRow ()
-          .newColumn ()
-            .addProperty (JSONSignatureEncoder.Y_JSON)
-            .addSymbolicValue (JSONSignatureEncoder.Y_JSON)
-          .newColumn ()
-            .setType (Types.JSON_TYPE_CRYPTO)
-          .newColumn ()
-          .newColumn ()
-            .addString ("JCS: EC curve point Y.");        
+        addSubItemTable (JSONSignatureEncoder.EC_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.NAMED_CURVE_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.NAMED_CURVE_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.URI)
+            .newColumn ()
+            .newColumn ()
+              .addString (jcs)
+              .addString ("EC named curve.")
+              .addString (sks_alg_ref)
+              .addString ("The currently recognized EC curves include:" +
+                      enumerateAlgorithms (KeyAlgorithms.values (), false, true,  reference))
+              .addString (reference ? "The NIST algorithms are described in SP800-56A, while Brainpool algorithms are covered by RFC&nbsp;5639." : "")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.X_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.X_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.CRYPTO)
+            .newColumn ()
+            .newColumn ()
+              .addString (jcs)
+              .addString ("EC curve point X.")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.Y_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.Y_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.CRYPTO)
+            .newColumn ()
+            .newColumn ()
+              .addString (jcs)
+              .addString ("EC curve point Y.");        
 
-      addSubItemTable (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
-        .newRow ()
-          .newColumn ()
-            .addProperty (JSONSignatureEncoder.ISSUER_JSON)
-            .addSymbolicValue (JSONSignatureEncoder.ISSUER_JSON)
-          .newColumn ()
-            .setType (Types.JSON_TYPE_STRING)
-          .newColumn ()
-          .newColumn ()
-            .addString ("JCS: X.500 issuer distinguished name in RFC 4514 notation.")
-        .newRow ()
-          .newColumn ()
-            .addProperty (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
-            .addUnquotedValue (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
-          .newColumn ()
-            .setType (Types.JSON_TYPE_BIGINT)
-          .newColumn ()
-          .newColumn ()
-            .addString ("JCS: Certificate serial number.")
-        .newRow ()
-          .newColumn ()
-            .addProperty (JSONSignatureEncoder.SUBJECT_JSON)
-            .addSymbolicValue (JSONSignatureEncoder.SUBJECT_JSON)
-          .newColumn ()
-            .setType (Types.JSON_TYPE_STRING)
-          .newColumn ()
-          .newColumn ()
-            .addString ("JCS: X.500 subject distinguished name in RFC 4514 notation.");        
+        addSubItemTable (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.ISSUER_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.ISSUER_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.STRING)
+            .newColumn ()
+            .newColumn ()
+              .addString (jcs)
+              .addString ("X.500 issuer distinguished name in RFC 4514 notation.")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
+              .addUnquotedValue (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.BIGINT)
+            .newColumn ()
+            .newColumn ()
+              .addString (jcs)
+              .addString ("Certificate serial number.")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.SUBJECT_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.SUBJECT_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.STRING)
+            .newColumn ()
+            .newColumn ()
+              .addString (jcs)
+              .addString ("X.500 subject distinguished name in RFC 4514 notation.");
+      }
+
+    public void addProtocolTableEntry ()
+      {
+        new ProtocolTable ();
       }
   }

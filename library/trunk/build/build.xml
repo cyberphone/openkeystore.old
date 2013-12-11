@@ -296,7 +296,8 @@
         <arg value="${src_dir}/org/webpki/kg2xml/keygen2.xsd"/>
     </java>
     <antcall target="dockeygen2"/>
-  </target>
+    <antcall target="docjcs"/>
+    </target>
 
   <target name="dist" depends="clean,compile">    
     <!-- Create the distribution directory -->
@@ -493,6 +494,14 @@
      </antcall>
   </target>
 
+  <!-- HTML Doc task for JCS -->
+  <target name="docjcs">
+    <antcall target="_java2html">
+       <param name="doc.class" value="org.webpki.json.JSONSignatureHTMLReference"/>
+       <param name="doc.file" value="${doc_dir}/jcs.html"/>
+     </antcall>
+  </target>
+  
   <!-- A web service that accepts SKS WS calls from applications and in turn
        calls the designated SKS implementation -->
   <target name="sks-service">
