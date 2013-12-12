@@ -32,7 +32,7 @@ import org.webpki.crypto.MACAlgorithms;
 import org.webpki.json.JSONBaseHTML;
 import org.webpki.json.JSONBaseHTML.RowInterface;
 import org.webpki.json.JSONBaseHTML.ProtocolObject.Row.Column;
-import org.webpki.json.JSONSignatureEncoder;
+import org.webpki.json.JSONSignatureDecoder;
 
 import org.webpki.sks.SecureKeyStore;
 
@@ -285,15 +285,15 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             return column
               .newRow ()
                 .newColumn ()
-                  .addProperty (JSONSignatureEncoder.SIGNATURE_JSON)
-                  .addLink (JSONSignatureEncoder.SIGNATURE_JSON)
+                  .addProperty (JSONSignatureDecoder.SIGNATURE_JSON)
+                  .addLink (JSONSignatureDecoder.SIGNATURE_JSON)
                 .newColumn ()
                   .setType (WEBPKI_DATA_TYPES.OBJECT)
                 .newColumn ()
                   .setUsage (false)
                 .newColumn ()
                   .addString ("<i>Optional</i> X509-based signature covering the request. See ")
-                  .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
+                  .addLink (JSONSignatureDecoder.KEY_INFO_JSON)
                   .addString (".");
           }
       }
@@ -528,7 +528,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addParagraphObject ("Introduction").append ("KeyGen2 is a web-based protocol for enrolling and managing credentials like X.509 certificates.  " +
             "The protocol is a part of a security architecture which at the core consists of SKS (Secure Key Store)." + LINE_SEPARATOR +
             "The KeyGen2 protocol is expressed as a set of fairly complex JSON objects. " +
-            "This document contains a decription of how these object are to be used and how they interact, " +
+            "This document contains a description of these objects and how they interact, " +
             "while the integration with the SKS API is dealt with in the SKS architecture document.");
 
         json.addDataTypesDescription ();
@@ -557,7 +557,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("The <code>" + ACTION_JSON +
-                          "</code> property gives (through a suitable GUI dialog) the user a hint of what the session in progess is about to perform. " +
+                          "</code> property gives (through a suitable GUI dialog) the user a hint of what the session in progress is about to perform. " +
                           "The valid constants are:<ul>" +
                           "<li><code>" + Action.MANAGE.getJSONName () + "</code> - Create, delete and/or update credentials</li>" +
                           "<li style=\"padding-bottom:4pt;padding-top:4pt\"><code>" + Action.RESUME.getJSONName () + "</code> - Resume operation after an interrupted ")
@@ -730,7 +730,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "The <code>" + VIRTUAL_MACHINE_JSON + "</code> option is intended to support BYOD " +
                           "use-cases where the provisioning process bootstraps an alternative " +
                           "environment and associated policies." + LINE_SEPARATOR +
-                          "Since the exact nature of such an environment is platform-dependent, it is nessesary " +
+                          "Since the exact nature of such an environment is platform-dependent, it is necesary " +
                           "to find out what is actually available using the pre-defined extension URI <code>&quot;"))
               .addString (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
               .addString ("&quot;</code>. The recommended method is adding the following to ")
@@ -774,7 +774,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                            NONCE_JSON + "</code> value <i>must</i> be identical to the <code>" +
                            NONCE_JSON + "</code> specified in ")
                .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
-               .addString (". Also see <code>" + JSONSignatureEncoder.SIGNATURE_JSON + "</code>.")
+               .addString (". Also see <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code>.")
           .newExtensionRow (new OptionalSignature ())
               .addString (" Note that <code>" + NONCE_JSON +
                           "</code> <i>must</i> be specified for a signed <code>" +
@@ -847,12 +847,12 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("<i>Optional</i>: List of client attribute types and values. See ")
               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
               .addString (".")
-          .newExtensionRow (new LinkedObject (JSONSignatureEncoder.SIGNATURE_JSON,
+          .newExtensionRow (new LinkedObject (JSONSignatureDecoder.SIGNATURE_JSON,
                                               true,
                                               "Symmetric key signature covering the entire response. See <code>" +
                                               "SKS:createProvisioningSession</code>." + LINE_SEPARATOR +
                                               "Note that the value of "))
-          .addPropertyLink (JSONSignatureEncoder.KEY_ID_JSON, JSONSignatureEncoder.KEY_INFO_JSON)
+          .addPropertyLink (JSONSignatureDecoder.KEY_ID_JSON, JSONSignatureDecoder.KEY_INFO_JSON)
           .addString (" property is <i>ignored</i>. ");
 
         preAmble (CREDENTIAL_DISCOVERY_REQUEST_JSON)
@@ -1005,8 +1005,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addSubItemTable (KEY_MANAGEMENT_KEY_JSON)
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
-              .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+              .addProperty (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+              .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
@@ -1020,8 +1020,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addSubItemTable (UPDATABLE_KEY_MANAGEMENT_KEYS_JSON)
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
-              .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+              .addProperty (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+              .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
@@ -1103,7 +1103,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("<i>Optional</i> additional search criterions." + LINE_SEPARATOR +
                           "Note that at least one search criterion must be specified if this option is used.")
-          .newExtensionRow (new LinkedObject (JSONSignatureEncoder.SIGNATURE_JSON,
+          .newExtensionRow (new LinkedObject (JSONSignatureDecoder.SIGNATURE_JSON,
                             true,
                             "Signature using a key management key signature covering the lookup specifier. " +
                             "See SKS appendix &quot;Remote Key Lookup&quot; for details."));
@@ -1150,16 +1150,16 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("<code>" + CLIENT_SESSION_ID_JSON + "</code> of matching credential.")
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON)
+              .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)
               .addArrayList (SORTED_CERT_PATH)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
               .addString ("Identical representation as the <code>" +
-                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
                           "</code> in ")
-              .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
+              .addLink (JSONSignatureDecoder.KEY_INFO_JSON)
               .addString (".")
           .newRow ()
             .newColumn ()
@@ -1489,8 +1489,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString (" for a specific key.")
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
-              .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+              .addProperty (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+              .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
@@ -1521,7 +1521,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString (" for a specific key.")
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON)
+              .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)
               .addArrayList (SORTED_CERT_PATH)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.BASE64)
@@ -1529,9 +1529,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("See <code>SKS:setCertificatePath.X509Certificate</code>")
               .addString (".<br>Identical representation as the <code>" +
-                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
                           "</code> in ")
-              .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
+              .addLink (JSONSignatureDecoder.KEY_INFO_JSON)
               .addString (".")
           .newExtensionRow (new MAC ("setCertificatePath"))
           .newRow ()
@@ -1545,18 +1545,18 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("<i>Optional</i> flag (with the default value <code>false</code>), " +
                           "which tells if <code>" +
-                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
                           "</code> contains a user-installable trust anchor as well." + LINE_SEPARATOR +
-                          "Trust anchor installation is indepdenent of SKS provisioning.")
+                          "Trust anchor installation is mean to be independent of SKS provisioning.")
           .newExtensionRow (new LinkedObject (IMPORT_KEY_JSON,
                                               false,
-                                              "<i>Optional</i> key import operation." + LINE_SEPARATOR +
-                                              "Due to the stateful MAC-scheme featured in SKS, " +
-                                              "the properties beginning with <code>" + IMPORT_KEY_JSON + "</code> " +
-                                              "and ending with <code>" + LOGOTYPES_JSON + "</code>, <i>must " +
-                                              "be generated (encoding) and executed (decoding) in " +
-                                              "exactly the order they are declared in this table as well " +
-                                              "as in associated object arrays</i>."))
+                          "<i>Optional</i> key import operation." + LINE_SEPARATOR +
+                          "Due to the stateful MAC-scheme featured in SKS, " +
+                          "the properties beginning with <code>" + IMPORT_KEY_JSON + "</code> " +
+                          "and ending with <code>" + LOGOTYPES_JSON + "</code>, <i>must " +
+                          "be generated (encoding) and executed (decoding) in " +
+                          "exactly the order they are declared in this table as well " +
+                          "as in associated object arrays</i>."))
           .newExtensionRow (new TargetKeyReference (UPDATE_KEY_JSON, false, "postUpdateKey", true))
           .newExtensionRow (new TargetKeyReference (CLONE_KEY_PROTECTION_JSON, false, "postCloneKeyProtection", false))
           .newExtensionRow (new OptionalArrayObject (EXTENSIONS_JSON,
@@ -1807,23 +1807,23 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addSubItemTable (DEVICE_CERTIFICATE_JSON)
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON)
+              .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)
               .addArrayList (SORTED_CERT_PATH)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
               .addString ("Identical representation as the <code>" +
-                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
+                          JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
                           "</code> in ")
-              .addLink (JSONSignatureEncoder.KEY_INFO_JSON)
+              .addLink (JSONSignatureDecoder.KEY_INFO_JSON)
               .addString (".");
         
         json.addSubItemTable (SERVER_EPHEMERAL_KEY_JSON)
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
-              .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+              .addProperty (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+              .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
@@ -1833,8 +1833,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addSubItemTable (CLIENT_EPHEMERAL_KEY_JSON)
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
-              .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+              .addProperty (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+              .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()

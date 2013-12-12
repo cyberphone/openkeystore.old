@@ -39,7 +39,7 @@ import org.webpki.crypto.KeyAlgorithms;
  * Only used internally.
  * 
  */
-public class JSONSignatureEncoder extends JSONSignature
+class JSONSignatureEncoder extends JSONSignature
   {
     private static final long serialVersionUID = 1L;
 

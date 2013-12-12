@@ -70,7 +70,7 @@ public class JSONBaseHTML
             URI     ("uri",    "URI in a quoted string"),
             ID      ("id",     "Identifier in a quoted string.  The identifier must consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
             BASE64  ("base64", "Base64-encoded binary data in a quoted string"),
-            CRYPTO  ("crypto", "Base64-encoded large postive integer in a quoted string.  Equivalent to XML DSig's <code>ds:CryptoBinary</code>"),
+            CRYPTO  ("crypto", "Base64-encoded large positive integer in a quoted string.  Equivalent to XML DSig's <code>ds:CryptoBinary</code>"),
             DATE    ("date",   "ISO date-time <code>YYYY-MM-DDThh:mm:ss{timezone}</code> in a quoted string"),
             OBJECT  ("object", "JSON object <code>{}</code>");
 
@@ -571,9 +571,9 @@ public class JSONBaseHTML
             ".tftable tr {background-color:#ffffff;}\n" +
             ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;;font-family:arial,verdana,helvetica}\n" +
             "div {font-size:10pt;padding:10pt 0pt 0pt 0pt;font-family:arial,verdana,helvetica}\n" +
-            "a:link {color:blue}" +
-            "a:visited {color:blue}" +
-            "a:active {color:blue}" +
+            "a:link {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
+            "a:visited {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
+            "a:active {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
             "</style></head><body>");
         for (Content division_object : division_objects)
           {
@@ -683,6 +683,7 @@ public class JSONBaseHTML
                           enumerateAlgorithms (MACAlgorithms.values (), true, false, reference) +
                           "The currently recognized asymmetric key algorithms include:" +
                           enumerateAlgorithms (AsymSignatureAlgorithms.values (), false, true, reference))
+              .addString ("For detailed descriptions of these algorithms, see XML DSig.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.KEY_INFO_JSON)
@@ -755,7 +756,10 @@ public class JSONBaseHTML
             .newColumn ()
               .addString (jcs)
               .addString ("Signature certificate data. Note: only valid for the <code>" +
-                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON + "</code> option.");
+                          JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON + "</code> option." + Types.LINE_SEPARATOR +
+                          "A compliant JCS implementation must verify that the <code>" + JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON +
+                          "</code> object matches the first certificate in the <code>" + JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
+                          "</code>.");
 
         addSubItemTable (JSONSignatureEncoder.PUBLIC_KEY_JSON)
           .newRow ()
@@ -779,28 +783,6 @@ public class JSONBaseHTML
             .newColumn ()
               .addString (option)
               .addString ("RSA public key.");
-
-        addSubItemTable (JSONSignatureEncoder.RSA_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureEncoder.MODULUS_JSON)
-              .addSymbolicValue (JSONSignatureEncoder.MODULUS_JSON)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.CRYPTO)
-            .newColumn ()
-            .newColumn ()
-              .addString (jcs)
-              .addString ("RSA modulus.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureEncoder.EXPONENT_JSON)
-              .addSymbolicValue (JSONSignatureEncoder.EXPONENT_JSON)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.CRYPTO)
-            .newColumn ()
-            .newColumn ()
-              .addString (jcs)
-              .addString ("RSA exponent.");
 
         addSubItemTable (JSONSignatureEncoder.EC_JSON)
           .newRow ()
@@ -837,6 +819,28 @@ public class JSONBaseHTML
             .newColumn ()
               .addString (jcs)
               .addString ("EC curve point Y.");        
+
+        addSubItemTable (JSONSignatureEncoder.RSA_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.MODULUS_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.MODULUS_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.CRYPTO)
+            .newColumn ()
+            .newColumn ()
+              .addString (jcs)
+              .addString ("RSA modulus.")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.EXPONENT_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.EXPONENT_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.CRYPTO)
+            .newColumn ()
+            .newColumn ()
+              .addString (jcs)
+              .addString ("RSA exponent.");
 
         addSubItemTable (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
           .newRow ()

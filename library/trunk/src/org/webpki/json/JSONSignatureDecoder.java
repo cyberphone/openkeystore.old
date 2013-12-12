@@ -104,9 +104,13 @@ public class JSONSignatureDecoder extends JSONSignature
           {
             key_id = rd.getString (KEY_ID_JSON);
           }
-        else
+        else if (rd.hasProperty (URL_JSON))
           {
             throw new IOException ("\"" + URL_JSON + "\" not yet implemented");
+          }
+        else
+          {
+            throw new IOException ("Undecodable \"" + KEY_INFO_JSON + "\" object");
           }
       }
 
@@ -132,11 +136,9 @@ public class JSONSignatureDecoder extends JSONSignature
                                                                                             readCryptoBinary (rd, EXPONENT_JSON)));
               }
             rd = rd.getObject (EC_JSON);
-              {
-                KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromURI (rd.getString (NAMED_CURVE_JSON));
-                ECPoint w = new ECPoint (readCryptoBinary (rd, X_JSON), readCryptoBinary (rd, Y_JSON));
-                return KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
-              }
+            KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromURI (rd.getString (NAMED_CURVE_JSON));
+            ECPoint w = new ECPoint (readCryptoBinary (rd, X_JSON), readCryptoBinary (rd, Y_JSON));
+            return KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
           }
         catch (GeneralSecurityException e)
           {
