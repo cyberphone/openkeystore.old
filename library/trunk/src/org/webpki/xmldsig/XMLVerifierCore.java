@@ -105,7 +105,8 @@ abstract class XMLVerifierCore
             success = ((XMLSymKeyVerifier) this).
                               sym_verifier.verifyData (sign_cn,
                                                        signature.signedinfo_object.signature_val,
-                                                       signature.signedinfo_object.sym_signature_alg);
+                                                       signature.signedinfo_object.sym_signature_alg,
+                                                       signature.symmetric_key_name);
           }
         else
           {

@@ -269,7 +269,7 @@ public class xmlobject extends XMLObjectWrapper implements XMLEnvelopedInput
               {
                 XMLSymKeyVerifier verifier = new XMLSymKeyVerifier (new SymKeyVerifierInterface ()
                   {
-                    public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException
+                    public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm, String key_id) throws IOException
                       {
                         if (algorithm != MACAlgorithms.HMAC_SHA256)
                           {

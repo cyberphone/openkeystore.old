@@ -47,7 +47,8 @@ public class JSONSymKeyVerifier extends JSONVerifier
       {
         signature_decoder.checkVerification (verifier.verifyData (signature_decoder.canonicalized_data,
                                                                   signature_decoder.signature_value,
-                                                                  (MACAlgorithms)signature_decoder.algorithm));
+                                                                  (MACAlgorithms)signature_decoder.algorithm,
+                                                                  signature_decoder.key_id));
       }
 
     @Override

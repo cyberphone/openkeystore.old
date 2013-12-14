@@ -57,6 +57,8 @@ public class Sign
     
     static final String ID = "ID";
     
+    public static final String SYMMETRIC_KEY_NAME = "mykey";
+    
     public static final byte[] SYMMETRIC_KEY = {(byte)0xF4, (byte)0xC7, (byte)0x4F, (byte)0x33, (byte)0x98, (byte)0xC4, (byte)0x9C, (byte)0xF4,
                                                 (byte)0x6D, (byte)0x93, (byte)0xEC, (byte)0x98, (byte)0x18, (byte)0x83, (byte)0x26, (byte)0x61,
                                                 (byte)0xA4, (byte)0x0B, (byte)0xAE, (byte)0x4D, (byte)0x20, (byte)0x4D, (byte)0x75, (byte)0x50,
@@ -77,9 +79,13 @@ public class Sign
           }
 
         @Override
-        public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException
+        public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm, String key_id) throws IOException
           {
-            return ArrayUtil.compare (digest, getMACAlgorithm ().digest (SYMMETRIC_KEY, data));
+            if (key_id.equals (SYMMETRIC_KEY_NAME))
+              {
+                return ArrayUtil.compare (digest, getMACAlgorithm ().digest (SYMMETRIC_KEY, data));
+              }
+            throw new IOException ("Unknown key id: " + key_id);
           }
       }
     
@@ -172,7 +178,7 @@ public class Sign
     
     public static void createSymmetricKeySignature (JSONObjectWriter wr) throws IOException
       {
-        wr.setSignature (new JSONSymKeySigner (new SymmetricOperations ()));
+        wr.setSignature (new JSONSymKeySigner (new SymmetricOperations ()).setKeyID (SYMMETRIC_KEY_NAME));
       }
     
     

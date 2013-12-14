@@ -1248,7 +1248,7 @@ public class ServerState implements Serializable
             new XMLSymKeyVerifier (new SymKeyVerifierInterface()
               {
                 @Override
-                public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm) throws IOException
+                public boolean verifyData (byte[] data, byte[] digest, MACAlgorithms algorithm, String key_id) throws IOException
                   {
                     return ArrayUtil.compare (server_crypto_interface.mac (data, SecureKeyStore.KDF_EXTERNAL_SIGNATURE), digest);
                   }
