@@ -275,6 +275,12 @@ public class JSONObjectReader implements Serializable
         return array.firstElement ().type;
       }
 
+    /**
+     * Read and decode JCS signature object from the current JSON object.
+     * @return An object which can be used to verify keys etc.
+     * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)
+     * @throws IOException In case there is something wrong with the signature 
+     */
     public JSONSignatureDecoder getSignature () throws IOException
       {
         return new JSONSignatureDecoder (this);

@@ -210,6 +210,89 @@ public class JSONObjectWriter implements Serializable
         return base64_encoder.getBase64StringFromBinary (value);
       }
 
+    /**
+     * Set signature property in JSON object.
+     * This is the JCS signature creation method.
+     * @param signer The interface to the signing key and type
+     * @return Current instance of {@link org.webpki.json.JSONObjectWriter}
+     * @throws IOException In case there a problem with keys etc.
+     * <br>&nbsp;<br><b>Sample Code:</b>
+ <pre>
+import java.io.IOException;
+
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+
+import org.webpki.crypto.AsymKeySignerInterface;
+import org.webpki.crypto.AsymSignatureAlgorithms;
+
+import org.webpki.json.JSONAsymKeySigner;
+import org.webpki.json.JSONAsymKeyVerifier;
+import org.webpki.json.JSONObjectReader;
+import org.webpki.json.JSONObjectWriter;
+import org.webpki.json.JSONOutputFormats;
+import org.webpki.json.JSONParser;
+import org.webpki.json.JSONSignatureDecoder;
+
+       .
+       .
+       .
+
+    public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException
+      {
+        // Create an empty JSON document
+        JSONObjectWriter ow = new JSONObjectWriter ();
+    
+        // Fill it with some data
+        ow.setString ("MyProperty", "Some data");
+         
+        // Sign document
+        ow.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()
+          {
+            {@literal @}Override
+            public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
+              {
+                try
+                  {
+                    Signature signature = Signature.getInstance (algorithm.getJCEName ()) ;
+                    signature.initSign (private_key);
+                    signature.update (data);
+                    return signature.sign ();
+                  }
+                catch (Exception e)
+                  {
+                    throw new IOException (e);
+                  }
+              }
+    
+            {@literal @}Override
+            public PublicKey getPublicKey () throws IOException
+              {
+                return public_key;
+              }
+          }));
+          
+        // Serialize document
+        byte[] json = ow.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
+    
+        // Print document on the console
+        System.out.println ("Signed doc:\n" + new String (json, "UTF-8"));
+          
+        // Parse document
+        JSONObjectReader or = JSONParser.parse (json);
+         
+        // Get and verify signature
+        JSONSignatureDecoder json_signature = or.getSignature ();
+        json_signature.verify (new JSONAsymKeyVerifier (public_key));
+         
+        // Get document payload
+        System.out.println ("Returned data: " + or.getString ("MyProperty"));
+      }
+ </pre>
+     */
+
     public JSONObjectWriter setSignature (JSONSigner signer) throws IOException
       {
         new JSONSignatureEncoder (signer, this);
