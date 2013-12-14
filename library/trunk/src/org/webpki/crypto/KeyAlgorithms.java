@@ -285,6 +285,7 @@ public enum KeyAlgorithms implements SKSAlgorithms
     private final String ec_domain_oid;              // EC domain as expressed in ASN.1 messages, null for RSA
     private final ECParameterSpec ec_parm_spec;      // EC for creating a BC/JDK compatible method
 
+    public static final String XML_DSIG_CURVE_PREFIX = "urn:oid:";
 
     private KeyAlgorithms (String uri,
                            String jcename,

@@ -26,6 +26,7 @@ import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 
 import org.webpki.util.ArrayUtil;
+import org.webpki.util.Base64;
 
 /**
  * Supports HTML descriptions JSON protocols.
@@ -41,6 +42,8 @@ public class JSONBaseHTML
     public static final String NON_SKS_ALGORITHM_COLOR = "#A0A0A0";
     
     public static final String SECTION_FONT_SIZE       = "14pt";
+    
+    public static final String HEADER_STYLE            = "font-size:28pt;font-family:'Times New Roman',Times,Serif";
     
     String file_name;
     String subsystem_name;
@@ -68,7 +71,7 @@ public class JSONBaseHTML
             BIGINT  ("bigint", "Big integer"),
             STRING  ("string", "Arbitrary quoted string"),
             URI     ("uri",    "URI in a quoted string"),
-            ID      ("id",     "Identifier in a quoted string.  The identifier must consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
+            ID      ("id",     "Identifier in a quoted string.  The identifier <b>must</b> consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
             BASE64  ("base64", "Base64-encoded binary data in a quoted string"),
             CRYPTO  ("crypto", "Base64-encoded large positive integer in a quoted string.  Equivalent to XML DSig's <code>ds:CryptoBinary</code>"),
             DATE    ("date",   "ISO date-time <code>YYYY-MM-DDThh:mm:ss{timezone}</code> in a quoted string"),
@@ -566,15 +569,19 @@ public class JSONBaseHTML
             "<html><head><title>")
         .append (subsystem_name)
         .append ("</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><style type=\"text/css\">\n" +
-            ".tftable {border-collapse: collapse;}\n" +
-            ".tftable th {font-size:10pt;background-color:#e0e0e0;border-width:1px;padding:4pt 12pt 4pt 12pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
-            ".tftable tr {background-color:#ffffff;}\n" +
-            ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;;font-family:arial,verdana,helvetica}\n" +
-            "div {font-size:10pt;padding:10pt 0pt 0pt 0pt;font-family:arial,verdana,helvetica}\n" +
-            "a:link {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
-            "a:visited {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
-            "a:active {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
-            "</style></head><body>");
+                 ".tftable {border-collapse: collapse;}\n" +
+                 ".tftable th {font-size:10pt;background-color:#e0e0e0;border-width:1px;padding:4pt 12pt 4pt 12pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
+                 ".tftable tr {background-color:#ffffff;}\n" +
+                 ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;;font-family:arial,verdana,helvetica}\n" +
+                 "div {font-size:10pt;padding:10pt 0pt 0pt 0pt;font-family:arial,verdana,helvetica}\n" +
+                 "a:link {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
+                 "a:visited {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
+                 "a:active {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
+                 "</style></head><body>" +
+                 "<a href=\"http://webpki.org\" title=\"WebPKI.org\" style=\"position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible\">" +
+                 "<img src=\"data:image/gif;base64,")
+          .append (new Base64 (false).getBase64StringFromBinary (ArrayUtil.getByteArrayFromInputStream (getClass().getResourceAsStream ("webpki-logo.gif"))))
+          .append ("\" border=\"1\"></a>");
         for (Content division_object : division_objects)
           {
             html.append (division_object.getHTML ());
@@ -712,15 +719,38 @@ public class JSONBaseHTML
         addSubItemTable (JSONSignatureEncoder.KEY_INFO_JSON)
           .newRow ()
             .newColumn ()
+              .addProperty (JSONSignatureEncoder.KEY_ID_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.KEY_ID_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.STRING)
+            .newColumn ()
+              .setChoice (true, 4)
+            .newColumn ()
+              .addString (option)
+              .addString ("Symmetric key ID.")
+          .newRow ()
+            .newColumn ()
               .addProperty (JSONSignatureEncoder.PUBLIC_KEY_JSON)
               .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
-              .setChoice (true, 3)
             .newColumn ()
               .addString (option)
               .addString ("Public key.")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureEncoder.URL_JSON)
+              .addSymbolicValue (JSONSignatureEncoder.URL_JSON)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.URI)
+            .newColumn ()
+            .newColumn ()
+              .addString (option)
+              .addString ("A single public key or X.509 certificate path stored in a PEM file accesible via an HTTP URL." + Types.LINE_SEPARATOR +
+                          "Key algorithms <b>must</b> be compatible with those specified for ")
+              .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+              .addString (".")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON)
@@ -730,22 +760,11 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (option)
-              .addString ("Sorted X.509 certificate path where the first element in the array holds the <i style=\"white-space:nowrap\">end-entity</i> certificate. " +
-                          "Note that EC support is (implementation-wise) limited to the algorithms listed in ")
-              .addPropertyLink (JSONSignatureEncoder.NAMED_CURVE_JSON, JSONSignatureEncoder.EC_JSON)
-              .addString ("." + Types.LINE_SEPARATOR +
-                          "The certificate path <i>must be contiguous</i> but is not required to be complete.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureEncoder.KEY_ID_JSON)
-              .addSymbolicValue (JSONSignatureEncoder.KEY_ID_JSON)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.STRING)
-            .newColumn ()
-            .newColumn ()
-              .addString (option)
-              .addString ("Symmetric key ID.")
-          .newRow ()
+              .addString ("Sorted X.509 certificate path where the <i>first</i> element in the array <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
+                          "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete." + Types.LINE_SEPARATOR +
+                          "Key algorithms <b>must</b> be compatible with those specified for ")
+              .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
+              .addString (".")   .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
               .addLink (JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON)
@@ -755,9 +774,9 @@ public class JSONBaseHTML
               .setUsage (false)
             .newColumn ()
               .addString (jcs)
-              .addString ("Signature certificate data. Note: only valid for the <code>" +
+              .addString ("<i>Optional</i> signature certificate attribute data for usage with the <code>" +
                           JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON + "</code> option." + Types.LINE_SEPARATOR +
-                          "A compliant JCS implementation must verify that the <code>" + JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON +
+                          "A compliant JCS implementation <b>must</b> verify that the <code>" + JSONSignatureEncoder.SIGNATURE_CERTIFICATE_JSON +
                           "</code> object matches the first certificate in the <code>" + JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON +
                           "</code>.");
 
@@ -798,7 +817,9 @@ public class JSONBaseHTML
               .addString (sks_alg_ref)
               .addString ("The currently recognized EC curves include:" +
                       enumerateAlgorithms (KeyAlgorithms.values (), false, true,  reference))
-              .addString (reference ? "The NIST algorithms are described in SP800-56A, while Brainpool algorithms are covered by RFC&nbsp;5639." : "")
+              .addString (reference ?
+  "The NIST algorithms are described in FIPS 186-4, while Brainpool algorithms are covered by RFC&nbsp;5639. " + Types.LINE_SEPARATOR +
+  "Compatible EC curves may also be expressed in the XML&nbsp;DSig notation (<code>urn:oid:1.2.840.10045.3.1.7</code>).": "")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.X_JSON)

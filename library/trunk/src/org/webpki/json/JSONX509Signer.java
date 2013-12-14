@@ -37,9 +37,18 @@ public class JSONX509Signer extends JSONSigner
     
     X509Certificate[] certificate_path;
     
-    public void setSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
+    boolean output_signature_certificate_attributes;
+    
+    public JSONX509Signer setSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
       {
         this.algorithm = algorithm;
+        return this;
+      }
+
+    public JSONX509Signer setSignatureCertificateAttributes (boolean flag)
+      {
+        output_signature_certificate_attributes = flag;
+        return this;
       }
 
     public JSONX509Signer (SignerInterface signer) throws IOException
@@ -64,11 +73,14 @@ public class JSONX509Signer extends JSONSigner
     @Override
     void writeKeyInfoData (JSONObjectWriter wr) throws IOException
       {
-        JSONObjectWriter signature_certificate_info_writer = wr.setObject (JSONSignature.SIGNATURE_CERTIFICATE_JSON);
-        X509Certificate signer_cert = certificate_path[0];
-        signature_certificate_info_writer.setString (JSONSignature.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
-        signature_certificate_info_writer.setBigInteger (JSONSignature.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
-        signature_certificate_info_writer.setString (JSONSignature.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
+        if (output_signature_certificate_attributes)
+          {
+            X509Certificate signer_cert = certificate_path[0];
+            JSONObjectWriter signature_certificate_info_writer = wr.setObject (JSONSignature.SIGNATURE_CERTIFICATE_JSON);
+            signature_certificate_info_writer.setString (JSONSignature.ISSUER_JSON, signer_cert.getIssuerX500Principal ().getName ());
+            signature_certificate_info_writer.setBigInteger (JSONSignature.SERIAL_NUMBER_JSON, signer_cert.getSerialNumber ());
+            signature_certificate_info_writer.setString (JSONSignature.SUBJECT_JSON, signer_cert.getSubjectX500Principal ().getName ());
+          }
         JSONSignatureEncoder.setX509CertificatePath (wr, certificate_path);
       }
   }

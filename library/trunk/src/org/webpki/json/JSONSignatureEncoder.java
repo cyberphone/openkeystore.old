@@ -69,7 +69,8 @@ class JSONSignatureEncoder extends JSONSignature
         else
           {
             JSONObjectWriter ec_key_writer = public_key_writer.setObject (EC_JSON);
-            ec_key_writer.setString (NAMED_CURVE_JSON, key_alg.getURI ());
+            ec_key_writer.setString (NAMED_CURVE_JSON, wr.xml_dsig_named_curve ?
+               KeyAlgorithms.XML_DSIG_CURVE_PREFIX + key_alg.getECDomainOID () : key_alg.getURI ());
             ECPoint ec_point = ((ECPublicKey)public_key).getW ();
             writeCryptoBinary (ec_key_writer, ec_point.getAffineX (), X_JSON);
             writeCryptoBinary (ec_key_writer, ec_point.getAffineY (), Y_JSON);
@@ -98,7 +99,7 @@ class JSONSignatureEncoder extends JSONSignature
       {
         JSONObjectWriter signature_writer = wr.setObject (SIGNATURE_JSON);
         signature_writer.setString (ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
-        signer.writeKeyInfoData (signature_writer.setObject (KEY_INFO_JSON));
+        signer.writeKeyInfoData (signature_writer.setObject (KEY_INFO_JSON).setXMLDSigECCurveOption (wr.xml_dsig_named_curve));
         signature_writer.setBinary (SIGNATURE_VALUE_JSON, signer.signData (JSONObjectWriter.getCanonicalizedSubset (wr.root)));
       }
   }

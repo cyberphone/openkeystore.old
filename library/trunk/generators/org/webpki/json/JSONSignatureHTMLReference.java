@@ -36,7 +36,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
       {
         json = new JSONBaseHTML (args, "JCS - JSON Clear Text Signature");
         
-        json.addParagraphObject ().append ("<p style=\"text-align:center\"><span style=\"font-size:20pt\">JCS</span><br><span style=\"font-size:15pt\">&nbsp;<br>JSON Clear Text Signature</span></p>");
+        json.addParagraphObject ().append ("<p style=\"text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">JCS</span>" +
+            "<br><span style=\"font-size:" + JSONBaseHTML.SECTION_FONT_SIZE + "\">&nbsp;<br>JSON Clear Text Signature</span></p>");
         
         json.addParagraphObject ("Introduction").append ("JCS is a scheme for signing data expressed as JSON objects. " +
             "It is loosely modeled after XML&nbsp;DSig's &quot;enveloped&quot; signatures. " +
@@ -46,8 +47,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "Unlike for example IETF-JOSE's JWS, " +
             "<i>JCS was designed to be an integral part of a JSON object</i> " +
             "rather than embedding the signed data.  There are (of course) pros and cons to both " +
-            "approaches, but for dealing with information-rich data, " +
-            "clear-text schemes at least have an advantage for documentation and debugging. " +
+            "approaches, but for information-rich messaging, " +
+            "clear-text data at least have an advantage for documentation and debugging. " +
             "To cope with the primary disadvantage (the dependency on " +
             "canonicalization), this part has been extremely simplified compared to XML&nbsp;DSig.");
 
@@ -102,31 +103,30 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "object holding the <code>Signature</code> property except for the actual <code>" + JSONSignature.SIGNATURE_VALUE_JSON + "</code> property.");
 
         json.addParagraphObject ("Canonicalization").append (
-            "Precondition: Valid JSON data as described on <code>http://www.json.org</code> has been received." + LINE_SEPARATOR +
-            "Restrictions:<ul>" +
-            "<li>The original property order must be preserved.</li>" +
-            "<li style=\"padding-top:4pt\">Property names must not be empty (<code>&quot;&quot;</code>)." +
-            "<li style=\"padding-top:4pt\">Property names within an object must not be duplicated.</li>" +
+            "Prerequisite: A JSON object in accordance with the rules outlined at <a href=\"http://www.json.org\">http://www.json.org</a>." + LINE_SEPARATOR +
+            "Parsing Restrictions:<ul>" +
+            "<li>The original property order <b>must</b> be preserved.</li>" +
+            "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
+            "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
             "</ul>The canonicalization steps are as follows:<ul>" +
-            "<li>Whitespace is removed which in practical terms means removal of all characters outside of quoted strings having a value <= ASCII space (0x32).</li>" +
-            "<li style=\"padding-top:4pt\">The <code>\\/</code> escape sequence is honored on input within quoted strings but is treated as a degenerate equivalent to <code>/</code>.</li>" +
-            "<li style=\"padding-top:4pt\">Unicode escape sequences (<code>\\uhhhh</code>) within quoted strings are normalized. " +
+            "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings having a value <= ASCII space (0x32).</li>" +
+            "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences <b>must</b> be honored on <i>input</i> within quoted strings but be treated as a degenerate equivalents to <code>'/'</code> by rewriting them.</li>" +
+            "<li style=\"padding-top:4pt\">Unicode escape sequences (<code>'\\uhhhh'</code>) within quoted strings <b>must</b> be normalized. " +
             "If the Unicode value falls within the traditional ASCII control character range (0x00 - 0x1f), " +
-            "it must be rewritten in lower-case hexadecimal notation unless it is one of the pre-defined " +
-            "JSON escapes (<code>\\n</code> etc.) because the latter have precedence. If the Unicode value is " +
-            "outside of the ASCII control character range, it must be replaced by the corresponding Unicode character.</li>" +
-            "<li style=\"padding-top:4pt\">The JSON object associated with the <code>Signature</code> is " +
-            "recreated using the actual textual data. <i>Rationale</i>: Numbers are ambiguously defined in " +
-            "JSON which means that encoding and decoding most likely will differ among JSON implementations. " +
-            "For monetary data numbers like <code>4.50</code> are more or less standard, in spite of the " +
-            "trailing zero being redundant. There is another, more subtle issue as well. " +
-            "If a sender for example assigns a large number such as <code style=\"white-space:nowrap\">0.99999999999999999999</code> to a " +
-            "JSON property there is a possibility that a receiver due to limitations in arithmetic precision " +
-            "(like using 32-bit floating point variables), rather interprets it as <code style=\"white-space:nowrap\">1.0</code>. To cope with these " +
-            "potential problems, a compliant parser must preserve the original textual representation of " +
-            "properties internally in order to support canonicalization of numeric data." + LINE_SEPARATOR +
+            "it <b>must</b> be rewritten in lower-case hexadecimal notation unless it is one of the pre-defined " +
+            "JSON escapes (<code>'\\n'</code> etc.) because the latter have precedence. If the Unicode value is " +
+            "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character.</li>" +
+            "<li style=\"padding-top:4pt\">The JSON object associated with the <code>Signature</code> <b>must</b> now be " +
+            "<i>recreated</i> using the actual text left after applying the previous measures. <i>Rationale</i>: Numbers are ambiguously defined (&quot;unnormalized&quot;) in " +
+            "JSON which means that a decoding/encoding sequence may produce a different representation compared to the original. " +
+            "As an example, monetary data is often expressed like <code>4.50</code> in spite of the " +
+            "trailing zero being redundant. Similar quirks are also likely to show-up in non-native JSON types " +
+            "(stored in quoted strings), such as dates due to time-zone or resolution differences. To cope with these " +
+            "potential problems, compliant parsers need to preserve the original textual representation of " +
+            "properties internally in order to support JCS canonicalization." + LINE_SEPARATOR +
             "Note that the <code>" + JSONSignature.SIGNATURE_VALUE_JSON + "</code> " +
-            "property (including the leading or trailing comma) <i>must be excluded</i> from the canonicalization process.</li></ul>" +
+            "property including the comma (leading or trailing depending on the position of <code>" +
+             JSONSignature.SIGNATURE_VALUE_JSON + "</code> " + " in the <code>Signature</code> object), <b>must</b> be <i>excluded</i> from the canonicalization process.</li></ul>" +
             "Applied on the sample signature, a proper canonicalization implementation should return the following JSON object:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
 "{&quot;Now&quot;:&quot;2013-12-10T19:54:13+01:00&quot;,&quot;PaymentRequest&quot;:{&quot;Currency&quot;:&quot;USD&quot;,&quot;VAT&quot;:1.45,&quot;Specification&quot;:[{&quot;Units&quot;:3,&quot;Descr<br>" +
@@ -182,7 +182,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
                                  "Douglas&nbsp;Crockford, Arne&nbsp;Riiber, Brian&nbsp;Campbell and others.");
 
         json.addParagraphObject ("Author").append ("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
-                                                   "of the SKS/KeyGen2 project.");
+                                                   "of the SKS/KeyGen2 project " +
+                                                   "(<a href=\"https://code.google.com/p/openkeystore\">https://code.google.com/p/openkeystore</a>).");
 
         json.addProtocolTable ("JCS Top-level Property")
         .newRow ()

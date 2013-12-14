@@ -152,7 +152,7 @@ public class Sign
         KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
         signer.setExtendedCertPath (true);
         signer.setKey (null, DemoKeyStore.getSignerPassword ());
-        wr.setSignature (new JSONX509Signer (signer));
+        wr.setSignature (new JSONX509Signer (signer).setSignatureCertificateAttributes (true));
       }
     
     public static void createAsymmetricKeySignature (JSONObjectWriter wr, boolean rsa) throws IOException

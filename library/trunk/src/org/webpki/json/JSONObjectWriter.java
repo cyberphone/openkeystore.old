@@ -60,6 +60,8 @@ public class JSONObjectWriter implements Serializable
     boolean html_mode;
     
     int indent_factor;
+
+    boolean xml_dsig_named_curve;
     
     static String html_variable_color = "#008000";
     static String html_string_color   = "#0000C0";
@@ -217,6 +219,12 @@ public class JSONObjectWriter implements Serializable
     public JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
       {
         JSONSignatureEncoder.setPublicKey (this, public_key);
+        return this;
+      }
+
+    public JSONObjectWriter setXMLDSigECCurveOption (boolean flag)
+      {
+        xml_dsig_named_curve = flag;
         return this;
       }
 

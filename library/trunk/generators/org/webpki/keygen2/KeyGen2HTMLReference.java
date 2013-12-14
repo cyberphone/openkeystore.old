@@ -523,11 +523,12 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           }
         json = new JSONBaseHTML (args, "KeyGen2 - Credential Enrollment and Management Protocol");
         
-        json.addParagraphObject ().append ("<div style=\"text-align:center\"><span style=\"font-size:20pt\">KeyGen2</span><br><span style=\"font-size:15pt\">&nbsp;<br>Credential Enrollment and Management Protocol</span></div>");
+        json.addParagraphObject ().append ("<div style=\"text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">KeyGen2</span>" +
+             "<br><span style=\"font-size:" + JSONBaseHTML.SECTION_FONT_SIZE + "\">&nbsp;<br>Credential Enrollment and Management Protocol</span></div>");
         
         json.addParagraphObject ("Introduction").append ("KeyGen2 is a web-based protocol for enrolling and managing credentials like X.509 certificates.  " +
             "The protocol is a part of a security architecture which at the core consists of SKS (Secure Key Store)." + LINE_SEPARATOR +
-            "The KeyGen2 protocol is expressed as a set of fairly complex JSON objects. " +
+            "The KeyGen2 protocol is expressed as a set of JSON objects. " +
             "This document contains a description of these objects and how they interact, " +
             "while the integration with the SKS API is dealt with in the SKS architecture document.");
 
@@ -535,7 +536,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addProtocolTableEntry ();
 
-        json.addParagraphObject ().append ("hej<div>yes</div>");
+        json.addParagraphObject ("Aknowledgements").append ("The design of the KeyGen2 protocol was &quot;inspired&quot; by several predecessors, most notably IETF's DSKPP (RFC&nbsp;6063)." + LINE_SEPARATOR +
+                                                            "Funding has been provided by <i>PrimeKey Solutions AB</i> and the <i>Swedish Innovation Board (VINNOVA)</i>.");
+
+        json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 
         preAmble (PLATFORM_NEGOTIATION_REQUEST_JSON)
           .newRow ()

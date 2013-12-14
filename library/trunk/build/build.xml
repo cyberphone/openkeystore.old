@@ -278,7 +278,9 @@
         <exclude name="org/**/test/**"/>
         <exclude name="org/**/kg2xml/**"/>
         <exclude name="org/**/wasp/**"/>
-        </packageset>
+        <exclude name="org/**/sks/ws/**"/>
+        <exclude name="org/**/sks/twolayer/**"/>
+      </packageset>
       <link offline="true" href="http://download.oracle.com/javase/${javadoc-version}/docs/api/" packagelistLoc="${env.JAVA_HOME}\jsedocs\api"/>
       <link offline="true" href="http://download.oracle.com/javaee/6/api/" packagelistLoc="${env.JAVA_HOME}\jeedocs\api"/>
       <doctitle><![CDATA[<h1>WebPKI.org Support</h1>]]></doctitle>
@@ -470,6 +472,11 @@
     <delete dir="${temp_dir}"/>
     <mkdir dir="${temp_dir}" />
 
+    <!-- Copy all files  -->
+    <copy todir="${temp_dir}">
+      <fileset dir="${src_generators}"/>
+    </copy>
+    
     <!-- Compile all -->
     <javac debug="${debug}"
            srcdir="${src_dir}:${src_generators}"

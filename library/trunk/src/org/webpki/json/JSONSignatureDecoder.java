@@ -136,7 +136,9 @@ public class JSONSignatureDecoder extends JSONSignature
                                                                                             readCryptoBinary (rd, EXPONENT_JSON)));
               }
             rd = rd.getObject (EC_JSON);
-            KeyAlgorithms ec = KeyAlgorithms.getKeyAlgorithmFromURI (rd.getString (NAMED_CURVE_JSON));
+            String curve_name = rd.getString (NAMED_CURVE_JSON);
+            KeyAlgorithms ec = curve_name.startsWith (KeyAlgorithms.XML_DSIG_CURVE_PREFIX) ?
+                                           getXMLDSigNamedCurve (curve_name) : KeyAlgorithms.getKeyAlgorithmFromURI (curve_name);
             ECPoint w = new ECPoint (readCryptoBinary (rd, X_JSON), readCryptoBinary (rd, Y_JSON));
             return KeyFactory.getInstance ("EC").generatePublic (new ECPublicKeySpec (w, ec.getECParameterSpec ()));
           }
@@ -144,6 +146,19 @@ public class JSONSignatureDecoder extends JSONSignature
           {
             throw new IOException (e);
           }
+      }
+
+    static KeyAlgorithms getXMLDSigNamedCurve (String xml_dsig_curve_name) throws IOException
+      {
+        String oid = xml_dsig_curve_name.substring (KeyAlgorithms.XML_DSIG_CURVE_PREFIX.length ());
+        for (KeyAlgorithms key_alg : KeyAlgorithms.values ())
+          {
+            if (oid.equals (key_alg.getECDomainOID ()))
+              {
+                return key_alg;
+              }
+          }
+        throw new IOException ("Unknown \"" + NAMED_CURVE_JSON + "\": " + xml_dsig_curve_name);
       }
 
     static X509Certificate[] getX509CertificatePath (JSONObjectReader rd) throws IOException

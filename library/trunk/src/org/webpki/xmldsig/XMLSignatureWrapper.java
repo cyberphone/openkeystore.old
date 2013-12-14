@@ -248,6 +248,11 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
                 rd.getNext (EC_KEY_VALUE_ELEM);
                 rd.getChild ();
                 rd.getNext (NAMED_CURVE_ELEM);
+                final String named_curve = rd.getAttributeHelper ().getString (URI_ATTR);
+                if (!named_curve.startsWith (KeyAlgorithms.XML_DSIG_CURVE_PREFIX))
+                  {
+                    throw new IOException ("Syntax error: " + named_curve);
+                  }
                 public_key = KeyFactory.getInstance ("EC").generatePublic (
                     new X509EncodedKeySpec (
                       new ASN1Sequence (new BaseASN1Object[]
@@ -255,7 +260,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
                           new ASN1Sequence (new BaseASN1Object[]
                             {
                               new ASN1ObjectID (EC_NAMED_CURVES_OID),
-                              new ASN1ObjectID (rd.getAttributeHelper ().getString (URI_ATTR).substring (8))
+                              new ASN1ObjectID (named_curve.substring (KeyAlgorithms.XML_DSIG_CURVE_PREFIX.length ()))
                             }),
                           new ASN1BitString (rd.getBinary (PUBLIC_KEY_ELEM))
                         }).encode ()));
@@ -541,7 +546,7 @@ public class XMLSignatureWrapper extends XMLObjectWrapper implements Serializabl
             wr.pushPrefix (XML_DSIG11_NS_PREFIX);
             wr.addChildElementNS (XML_DSIG11_NS, EC_KEY_VALUE_ELEM);
             wr.addEmptyElement (NAMED_CURVE_ELEM);
-            wr.setStringAttribute (URI_ATTR, "urn:oid:" + key_alg.getECDomainOID ());
+            wr.setStringAttribute (URI_ATTR, KeyAlgorithms.XML_DSIG_CURVE_PREFIX + key_alg.getECDomainOID ());
             wr.addBinary (PUBLIC_KEY_ELEM, ParseUtil.bitstring (ParseUtil.sequence (DerDecoder.decode (public_key.getEncoded ()), 2).get (1)));
           }
         wr.getParent ();
