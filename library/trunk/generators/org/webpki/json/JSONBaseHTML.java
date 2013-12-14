@@ -45,6 +45,11 @@ public class JSONBaseHTML
     
     public static final String HEADER_STYLE            = "font-size:28pt;font-family:'Times New Roman',Times,Serif";
     
+    public static final String OPTION_TABLE            = "<table class=\"tftable\" style=\"font-style:italic;margin-top:10pt\">" +
+                                                          "<tr><td>Property selection 1</td><td>Type selection 1</td><td rowspan=\"2\">Usage</td><td>Comment selection 1</td></tr>" +
+                                                          "<tr><td>Property selection 2</td><td>Type selection 2</td><td>Comment selection 2</td></tr>" +
+                                                          "</table>";
+ 
     String file_name;
     String subsystem_name;
     
@@ -331,17 +336,11 @@ public class JSONBaseHTML
                     return this;
                   }
 
-                public Column addArrayList (String symbol_value) throws IOException
+                public Column addArrayList (String symbol_value, int array_min) throws IOException
                   {
-                    addString ("[");
+                    leftArray ();
                     addSymbolicValue (symbol_value);
-                    return addString ("]");
-                  }
-
-                public Column setUsage (boolean mandatory, int array_min) throws IOException
-                  {
-                    setUsage (mandatory);
-                    column.append (": [").append (array_min).append ("..n]");
+                    rightArray (array_min);
                     return this;
                   }
 
@@ -366,21 +365,26 @@ public class JSONBaseHTML
                     return this;
                   }
 
-                public Column addArrayLink (String link) throws IOException
+                public Column addArrayLink (String link, int array_min) throws IOException
                   {
                     leftArray ();
                     link (link, link, " style=\"margin-left:2pt;margin-right:2pt;\"");
-                    rightArray ();
+                    rightArray (array_min);
                     return this;
                   }
 
-                private void rightArray () throws IOException
+                private void rightArray (int array_min) throws IOException
                   {
-                    addString ("]");
+                    addString ("]<span style=\"position:relative;bottom:-0.5em;font-size:.9em\">&thinsp;" + array_min +
+                               "-n</span>");
                   }
 
                 private void leftArray () throws IOException
                   {
+                    if (columns.size () != 1)
+                      {
+                        throw new IOException ("This method only applies to column #2");
+                      }
                     addString ("[");
                   }
 
@@ -754,7 +758,7 @@ public class JSONBaseHTML
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.X509_CERTIFICATE_PATH_JSON)
-              .addArrayList (Types.SORTED_CERT_PATH)
+              .addArrayList (Types.SORTED_CERT_PATH, 1)
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()

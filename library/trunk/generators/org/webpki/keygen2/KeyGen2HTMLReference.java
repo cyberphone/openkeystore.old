@@ -97,7 +97,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .newRow ()
                 .newColumn ()
                   .addProperty (json_tag);
-            column = (array_flag ? column.addArrayLink (json_tag) : column.addLink (json_tag))
+            column = (array_flag ? column.addArrayLink (json_tag, 1) : column.addLink (json_tag))
                 .newColumn ()
                   .setType (WEBPKI_DATA_TYPES.OBJECT)
                 .newColumn ();
@@ -163,11 +163,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .newRow ()
                 .newColumn ()
                   .addProperty (name)
-                  .addArrayLink (name)
+                  .addArrayLink (name, min)
                 .newColumn ()
                   .setType (WEBPKI_DATA_TYPES.OBJECT)
                 .newColumn ()
-                  .setUsage (false, min)
+                  .setUsage (false)
                 .newColumn ()
                   .addString (description);
           }
@@ -191,11 +191,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .newRow ()
                 .newColumn ()
                   .addProperty (BasicCapabilities.tagName (tag, true))
-                  .addArrayList (URI_LIST)
+                  .addArrayList (URI_LIST, 1)
                 .newColumn ()
                   .setType (WEBPKI_DATA_TYPES.URI)
                 .newColumn ()
-                  .setUsage (false, 1)
+                  .setUsage (false)
                 .newColumn ()
                   .addString (description);
           }
@@ -217,11 +217,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .newRow ()
                 .newColumn ()
                   .addProperty (BasicCapabilities.tagName (tag, false))
-                  .addArrayList (URI_LIST)
+                  .addArrayList (URI_LIST, 1)
                 .newColumn ()
                   .setType (WEBPKI_DATA_TYPES.URI)
                 .newColumn ()
-                  .setUsage (false, 1)
+                  .setUsage (false)
                 .newColumn ()
                   .addString ("The result from <code>" + BasicCapabilities.tagName (tag, true) + 
                               "</code>.  If there are no matches, this property must not be present.");
@@ -247,10 +247,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .newRow ()
                 .newColumn ()
                   .addProperty (name)
-                  .addArrayList (name)
+                  .addArrayList (name, 1)
                 .newColumn ()
                 .newColumn ()
-                  .setUsage (false, 1)
+                  .setUsage (false)
                 .newColumn ()
                   .addString (description);
           }
@@ -362,21 +362,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .addProperty (property);
         if (array_flag)
           {
-            column.addArrayList (property);
+            column.addArrayList (property, 1);
           }
         else
           {
             column.addSymbolicValue (property);
           }
         column = column.newColumn ().setType (type).newColumn ();
-        if (array_flag)
-          {
-            column.setUsage (false, 1);
-          }
-        else
-          {
-            column.setUsage (false);
-          }
+        column.setUsage (false);
         row = column.newColumn ().addString (descrption);
       }
     
@@ -718,11 +711,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (REQUESTED_CLIENT_ATTRIBUTES_JSON)
-              .addArrayList (URI_LIST)
+              .addArrayList (URI_LIST, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.URI)
             .newColumn ()
-              .setUsage (false, 1)
+              .setUsage (false)
             .newColumn ()
               .addString ("<i>Optional</i>: List of client attribute types (expressed as URI strings) that the client <i>may</i> honor. See ")
               .addLink (PROVISIONING_INITIALIZATION_RESPONSE_JSON)
@@ -842,11 +835,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (CLIENT_ATTRIBUTES_JSON)
-              .addLink (CLIENT_ATTRIBUTES_JSON)
+              .addArrayLink (CLIENT_ATTRIBUTES_JSON, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
-              .setUsage (false, 1)
+              .setUsage (false)
             .newColumn ()
               .addString ("<i>Optional</i>: List of client attribute types and values. See ")
               .addLink (PROVISIONING_INITIALIZATION_REQUEST_JSON)
@@ -865,11 +858,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
              .newColumn ()
               .addProperty (LOOKUP_SPECIFIERS_JSON)
-              .addArrayLink (LOOKUP_SPECIFIERS_JSON)
+              .addArrayLink (LOOKUP_SPECIFIERS_JSON, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
-              .setUsage (true, 1)
             .newColumn ()
               .addString ("List of signed credential lookup specifiers. " +
                           "See SKS appendix &quot;Remote Key Lookup&quot; for details.")
@@ -880,11 +872,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (LOOKUP_RESULTS_JSON)
-              .addArrayLink (LOOKUP_RESULTS_JSON)
+              .addArrayLink (LOOKUP_RESULTS_JSON, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
-              .setUsage (true, 1)
             .newColumn ()
               .addString ("List of credential lookup results. " +
                           "See SKS appendix &quot;Remote Key Lookup&quot; for details.");
@@ -936,11 +927,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (GENERATED_KEYS_JSON)
-              .addArrayLink (GENERATED_KEYS_JSON)
+              .addArrayLink (GENERATED_KEYS_JSON, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
-              .setUsage (true, 1)
             .newColumn ()
               .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>." +
               		      LINE_SEPARATOR +
@@ -1127,11 +1117,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (MATCHING_CREDENTIALS_JSON)
-              .addArrayLink (MATCHING_CREDENTIALS_JSON)
+              .addArrayLink (MATCHING_CREDENTIALS_JSON, 0)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
-              .setUsage (true, 0)
             .newColumn ()
               .addString ("List of matching credentials.");
         
@@ -1155,7 +1144,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)
-              .addArrayList (SORTED_CERT_PATH)
+              .addArrayList (SORTED_CERT_PATH, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
@@ -1220,11 +1209,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (PIN_POLICY_SPECIFIERS_JSON)
-              .addArrayLink (PIN_POLICY_SPECIFIERS_JSON)
+              .addArrayLink (PIN_POLICY_SPECIFIERS_JSON, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
-              .setUsage (true, 1)
             .newColumn ()
               .addString ("List of PIN policy objects to be created and controlled by this PUK policy. " +
                           "See <code>SKS:createPINPolicy</code>.");
@@ -1308,10 +1296,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (PATTERN_RESTRICTIONS_JSON)
-              .addArrayList (PATTERN_RESTRICTIONS_JSON)
+              .addArrayList (PATTERN_RESTRICTIONS_JSON, 1)
             .newColumn ()
             .newColumn ()
-              .setUsage (false, 1)
+              .setUsage (false)
             .newColumn ()
               .addString ("List of pattern restrictions.  See <code>SKS:createPINPolicy.PatternRestrictions</code>." +
                           "<br>If this property is undefined, there are no PIN pattern restrictions.")
@@ -1319,11 +1307,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (KEY_ENTRY_SPECIFIERS_JSON)
-              .addArrayLink (KEY_ENTRY_SPECIFIERS_JSON)
+              .addArrayLink (KEY_ENTRY_SPECIFIERS_JSON, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
-              .setUsage (true, 1)
             .newColumn ()
               .addString ("List of key entries to be created and controlled by this PIN policy." +
                           "<br>See <code>SKS:createKeyEntry</code>.");
@@ -1410,11 +1397,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (ENDORSED_ALGORITHMS_JSON)
-              .addArrayList (URI_LIST)
+              .addArrayList (URI_LIST, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.URI)
             .newColumn ()
-              .setUsage (false, 1)
+              .setUsage (false)
             .newColumn ()
               .addString ("See <code>SKS:createKeyEntry.EndorsedAlgorithm</code>. " +
                           "Also see SKS &quot;Algorithm Support&quot;." + LINE_SEPARATOR +
@@ -1526,7 +1513,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)
-              .addArrayList (SORTED_CERT_PATH)
+              .addArrayList (SORTED_CERT_PATH, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
@@ -1684,11 +1671,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (PROPERTIES_JSON)
-              .addArrayLink (PROPERTIES_JSON)
+              .addArrayLink (PROPERTIES_JSON, 1)
             .newColumn ()
                .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
-               .setUsage (true, 1)
             .newColumn ()
               .addString ("List of property values. See <code>SKS:addExtension</code>.")
           .newExtensionRow (new MAC ("addExtension"));
@@ -1756,10 +1742,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (VALUES_JSON)
-              .addArrayList (VALUES_JSON)
+              .addArrayList (VALUES_JSON, 0)
             .newColumn ()
             .newColumn ()
-              .setUsage (true, 0)
             .newColumn ()
               .addString ("List of attributes associated with <code>" + TYPE_JSON + "</code>.");
 
@@ -1812,7 +1797,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)
-              .addArrayList (SORTED_CERT_PATH)
+              .addArrayList (SORTED_CERT_PATH, 1)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()

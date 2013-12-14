@@ -170,7 +170,15 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><i>Wrapping signature...</i><code><br>" +
 "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
 "}</code></div>" +
-        "That is, JCS makes no distinction between multiple signatures and counter-signatures.");
+        "That is, using JCS there is no distinction between multiple signatures and counter-signatures.");
+
+        json.addParagraphObject ("Notation").append (
+            "JCS consists of a top-level <code>" + JSONSignature.SIGNATURE_JSON + "</code> property holding a composite JSON object. " +
+            "JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a link to the actual definition. " + Types.LINE_SEPARATOR +
+            "Array elements are identified with [&thinsp;]<sub>&thinsp;x-y</sub> where the range expression represents the valid number of array elements. " + Types.LINE_SEPARATOR +
+            "In some JSON objects there is a choice " +
+            "from a set of <i>mutually exclusive</i> alternatives.<br>This is manifested in object tables like the following:" +
+            JSONBaseHTML.OPTION_TABLE);
 
         json.addDataTypesDescription ();
 
