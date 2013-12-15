@@ -35,8 +35,8 @@ import org.webpki.util.Base64;
  */
 public class JSONBaseHTML
   {
-    public static final String MANDATORY               = "m";
-    public static final String OPTIONAL                = "o";
+    public static final String MANDATORY               = "Y";
+    public static final String OPTIONAL                = "O";
     
     public static final String PAGE_WIDTH              = "1000pt";
     public static final String NON_SKS_ALGORITHM_COLOR = "#A0A0A0";
@@ -45,11 +45,10 @@ public class JSONBaseHTML
     
     public static final String HEADER_STYLE            = "font-size:28pt;font-family:'Times New Roman',Times,Serif";
     
-    public static final String OPTION_TABLE            = "<table class=\"tftable\" style=\"font-style:italic;margin-top:10pt\">" +
-                                                          "<tr><td>Property selection 1</td><td>Type selection 1</td><td rowspan=\"2\">Usage</td><td>Comment selection 1</td></tr>" +
-                                                          "<tr><td>Property selection 2</td><td>Type selection 2</td><td>Comment selection 2</td></tr>" +
-                                                          "</table>";
- 
+    public static final String ARRAY_SUBSCRIPT         = "<span style=\"position:relative;bottom:-0.5em;font-size:.9em\">&thinsp;";
+    
+    public static final String REQUIRED_COLUMN         = "Req";
+
     String file_name;
     String subsystem_name;
     
@@ -69,32 +68,39 @@ public class JSONBaseHTML
       {
         public enum WEBPKI_DATA_TYPES 
           {
-            BOOLEAN ("bool",   "Boolean <code>true</code> or <code>false</code>"),
-            BYTE    ("byte",   "Unsigned byte"),
-            SHORT   ("short",  "Unsigned two-byte integer"), 
-            INT     ("int",    "Unsigned four-byte integer"),
-            BIGINT  ("bigint", "Big integer"),
-            STRING  ("string", "Arbitrary quoted string"),
-            URI     ("uri",    "URI in a quoted string"),
-            ID      ("id",     "Identifier in a quoted string.  The identifier <b>must</b> consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
-            BASE64  ("base64", "Base64-encoded binary data in a quoted string"),
-            CRYPTO  ("crypto", "Base64-encoded large positive integer in a quoted string.  Equivalent to XML DSig's <code>ds:CryptoBinary</code>"),
-            DATE    ("date",   "ISO date-time <code>YYYY-MM-DDThh:mm:ss{timezone}</code> in a quoted string"),
-            OBJECT  ("object", "JSON object <code>{}</code>");
+            BOOLEAN ("bool",   "<code>true</code> or <code>false</code>", "Boolean"),
+            BYTE    ("byte",   "<i>number</i>", "Unsigned byte"),
+            SHORT   ("short",  "<i>number</i>", "Unsigned two-byte integer"), 
+            INT     ("int",    "<i>number</i>", "Unsigned four-byte integer"),
+            BIGINT  ("bigint", "<i>number</i>", "Big integer"),
+            STRING  ("string", "<i>string</i>", "Arbitrary string"),
+            URI     ("uri",    "<i>string</i>", "URI"),
+            ID      ("id",     "<i>string</i>", "Identifier which <b>must</b> consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
+            BASE64  ("base64", "<i>string</i>", "Base64-encoded binary data"),
+            CRYPTO  ("crypto", "<i>string</i>", "Base64-encoded large positive integer.  Equivalent to XML DSig's <code>ds:CryptoBinary</code>"),
+            DATE    ("date",   "<i>string</i>", "ISO date-time <code>YYYY-MM-DDThh:mm:ss{timezone}</code>."),
+            OBJECT  ("object", "<code>{}</code>", "JSON object");
 
-            String string;
+            String data_type;
+            String json;
             String description;
             boolean used;
-            WEBPKI_DATA_TYPES (String string, String description)
+            WEBPKI_DATA_TYPES (String data_type, String json, String description)
               {
-                this.string = string;
+                this.data_type = data_type;
+                this.json = json;
                 this.description = description;
                 used = false;
               }
 
-            public String getString ()
+            public String getDataType ()
               {
-                return string;
+                return data_type;
+              }
+
+            public String getJSON ()
+              {
+                return json;
               }
 
             public String getDescription ()
@@ -140,25 +146,22 @@ public class JSONBaseHTML
         @Override
         String getHTML () throws IOException
           {
-            StringBuffer s = new StringBuffer ()
-             .append ("<table class=\"tftable\">" +
-                      "<tr><td colspan=\"2\" id=\"")
-             .append (DATA_TYPES)
-             .append ("\" style=\"border-width:0px;font-size:" + SECTION_FONT_SIZE + ";padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica\">" +
-                      DATA_TYPES + "</td></tr>" +
-                      "<tr><th>Type</th><th>Description</th></tr>");
+            StringBuffer s = new StringBuffer ("<table class=\"tftable\" style=\"margin-top:10pt\">" +
+                      "<tr><th>Type</th><th>Mapping</th><th>Description</th></tr>");
             for (Types.WEBPKI_DATA_TYPES type : Types.WEBPKI_DATA_TYPES.values ())
               {
                 if (type.isUsed ())
                   {
                     s.append ("<tr><td style=\"text-align:center\">")
-                     .append (type.getString ())
+                     .append (type.getDataType ())
+                     .append ("</td><td style=\"text-align:center\">")
+                     .append (type.getJSON ())
                      .append ("</td><td>")
                      .append (type.getDescription ())
                      .append ("</td></tr>");
                   }
               }
-            return s.append ("</table>").toString ();
+            return s.append ("</table><div>Note that &quot;Type&quot; refers to the element type for arrays." + Types.LINE_SEPARATOR + "</div>").toString ();
           }
       }
 
@@ -361,7 +364,7 @@ public class JSONBaseHTML
                         throw new IOException ("This method only applies to column #2");
                       }
                     type.setUsed ();
-                    column.append (type.getString ());
+                    column.append (type.getDataType ());
                     return this;
                   }
 
@@ -481,7 +484,7 @@ public class JSONBaseHTML
                     .append (protocol)
                     .append (main_object ? "</span>" : "</i></span>");
               }
-            s.append ("</td></tr>\n<tr><th>Property</th><th>Type</th><th>Usage</th><th>Comment</th></tr>");
+            s.append ("</td></tr>\n<tr><th>Property</th><th>Type</th><th>" + REQUIRED_COLUMN + "</th><th>Comment</th></tr>");
             int i = 0;
             int supress = 0;
             for (Row row : rows)
@@ -573,8 +576,8 @@ public class JSONBaseHTML
             "<html><head><title>")
         .append (subsystem_name)
         .append ("</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><style type=\"text/css\">\n" +
-                 ".tftable {border-collapse: collapse;}\n" +
-                 ".tftable th {font-size:10pt;background-color:#e0e0e0;border-width:1px;padding:4pt 12pt 4pt 12pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
+                 ".tftable {border-collapse: collapse}\n" +
+                 ".tftable th {font-size:10pt;background-color:#e0e0e0;border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
                  ".tftable tr {background-color:#ffffff;}\n" +
                  ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;;font-family:arial,verdana,helvetica}\n" +
                  "div {font-size:10pt;padding:10pt 0pt 0pt 0pt;font-family:arial,verdana,helvetica}\n" +
@@ -631,8 +634,19 @@ public class JSONBaseHTML
         return p.local_html = s;
       }
 
-    public void addDataTypesDescription ()
+    public void addDataTypesDescription (String intro)
       {
+        addParagraphObject ("Notation").append (intro).append (
+            "JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a link to the actual definition. " + Types.LINE_SEPARATOR +
+            "Properties may either be <i>required</i> (" + MANDATORY + ") or <i>optional</i> (" + OPTIONAL + ") as defined in the &quot;" + REQUIRED_COLUMN + "&quot; column." + Types.LINE_SEPARATOR +
+            "Array properties are identified by [&thinsp;]" + JSONBaseHTML.ARRAY_SUBSCRIPT  + "x-y</span> where the range expression represents the valid number of array elements. " + Types.LINE_SEPARATOR +
+            "In some JSON objects there is a choice " +
+            "from a set of <i>mutually exclusive</i> alternatives.<br>This is manifested in object tables like the following:" +
+            "<table class=\"tftable\" style=\"font-style:italic;margin-top:10pt;margin-bottom:5pt\">" +
+            "<tr><td>Property selection 1</td><td>Type selection 1</td><td rowspan=\"2\">Req</td><td>Comment selection 1</td></tr>" +
+            "<tr><td>Property selection 2</td><td>Type selection 2</td><td>Comment selection 2</td></tr>" +
+            "</table>");
+        addParagraphObject ("Data Types").append ("The following table shows how the data types used by this specification are mapped into native JSON types:");
         new DataTypesTable ();
       }
 
@@ -903,5 +917,31 @@ public class JSONBaseHTML
     public void addProtocolTableEntry ()
       {
         new ProtocolTable ();
+      }
+
+    public void sampleRun (Class parent, String header, String[] files) throws IOException
+      {
+        StringBuffer s = addParagraphObject ("Sample Run").append (header);
+        JSONObjectWriter.html_indent = 2;
+        s.append ("<table class=\"tftable\" style=\"margin-top:10pt\">");
+        boolean next = false;
+        for (String file : files)
+          {
+            JSONObjectReader or = JSONParser.parse (ArrayUtil.getByteArrayFromInputStream (parent.getResourceAsStream (file)));
+            if (next)
+              {
+                s.append ("<tr><td style=\"border-width:0px;height:5px\"></td></tr>");
+              }
+            else
+              {
+                next = true;
+              }
+            s.append ("<tr><th>")
+             .append (or.getString (JSONDecoderCache.QUALIFIER_JSON))
+             .append ("</th></tr><tr><td><code>")
+             .append (new String (new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8"))
+             .append ("</code></td></tr>");
+          }
+        s.append ("</table>");
       }
   }

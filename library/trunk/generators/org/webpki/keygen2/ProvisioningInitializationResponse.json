@@ -1,0 +1,38 @@
+{
+    "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",
+    "@qualifier": "ProvisioningInitializationResponse",
+    "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
+    "ClientSessionID": "39NMWamKtHumJFfdIGkDrLP-NMB-5Lwo",
+    "ServerTime": "2013-12-14T16:33:30+01:00",
+    "ClientTime": "2013-12-14T16:33:30+01:00",
+    "SessionAttestation": "KMUpOesC8nDTLpu8PppsSGg1j . . . WiwvUcVpbNudbY14lLks8RQuwoiU=",
+    "ClientEphemeralKey": 
+        {
+            "PublicKey": 
+                {
+                    "EC": 
+                        {
+                            "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
+                            "X": "tQXczn7qxGgcLpOVBuw5i+tMHxbJTUF6k3RZGsjdauc=",
+                            "Y": "jIlm8sXwknZeQQDTxkfwXKUdhubt6JcqQYA6S8Dm3AE="
+                        }
+                }
+        },
+    "DeviceCertificate": 
+        {
+            "X509CertificatePath": 
+                [
+                    "MIIC2DCCAcCgAwIBAgIGARTWcc7VMCSq . . . awCV4OfAGXLIwJBCp85AN7KNdcJfL"
+                ]
+        },
+    "ServerCertificateFingerPrint": "HwKCofkqkTFXRmyyb/CnWhAcTbQF7w8rl1OqCwyM4TM=",
+    "Signature": 
+        {
+            "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256",
+            "KeyInfo": 
+                {
+                    "KeyID": "derived-session-key"
+                },
+            "SignatureValue": "nnzNSZUZw1qlGVydZZ3ssCVIZTznyHwDXlOpLMpI3Lo="
+        }
+}

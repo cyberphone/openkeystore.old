@@ -134,7 +134,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "&quot;UnitPrice&quot;:39.99}]},&quot;EscapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A<b style=\"color:red;background:Yellow\">B</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;Signature&quot;:{&quot;Algorithm&quot;:&quot;http://www.w3.org/2001/04/xmldsig-more#<br>" +
 "ecdsa-sha256&quot;,&quot;KeyInfo&quot;:{&quot;PublicKey&quot;:{&quot;EC&quot;:{&quot;NamedCurve&quot;:&quot;http://xmlns.webpki.org/sks/algorithm#ec.nist.p256&quot;,&quot;X&quot;:&quot;<br>" +
 "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=&quot;,&quot;Y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA=&quot;}}}}}</code></div>" +
-"The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the effect of the canonicalization process. " +
+"The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the canonicalization process. " +
 "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
 "For a description on how the canonicalized data is to be used, see <a href=\"#Signature." + JSONSignature.SIGNATURE_VALUE_JSON + "\">" + 
  JSONSignature.SIGNATURE_VALUE_JSON + "</a>.");
@@ -172,15 +172,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "}</code></div>" +
         "That is, using JCS there is no distinction between multiple signatures and counter-signatures.");
 
-        json.addParagraphObject ("Notation").append (
-            "JCS consists of a top-level <code>" + JSONSignature.SIGNATURE_JSON + "</code> property holding a composite JSON object. " +
-            "JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a link to the actual definition. " + Types.LINE_SEPARATOR +
-            "Array elements are identified with [&thinsp;]<sub>&thinsp;x-y</sub> where the range expression represents the valid number of array elements. " + Types.LINE_SEPARATOR +
-            "In some JSON objects there is a choice " +
-            "from a set of <i>mutually exclusive</i> alternatives.<br>This is manifested in object tables like the following:" +
-            JSONBaseHTML.OPTION_TABLE);
-
-        json.addDataTypesDescription ();
+        json.addDataTypesDescription ("JCS consists of a top-level <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> property holding a composite JSON object. " + LINE_SEPARATOR);
 
         json.addProtocolTableEntry ();
 

@@ -1,0 +1,22 @@
+{
+    "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",
+    "@qualifier": "ProvisioningInitializationRequest",
+    "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
+    "SubmitURL": "http://issuer.example.com/provsess",
+    "ServerTime": "2013-12-14T16:33:30+01:00",
+    "SessionKeyAlgorithm": "http://xmlns.webpki.org/sks/algorithm#session.1",
+    "SessionKeyLimit": 50,
+    "SessionLifeTime": 10000,
+    "ServerEphemeralKey": 
+        {
+            "PublicKey": 
+                {
+                    "EC": 
+                        {
+                            "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
+                            "X": "cpxUxJVt+is8bgWRFm6RuvUkxyv7xJ7PbeT1BCQNNws=",
+                            "Y": "De7jXYsdL46ikHOWeC+V+AcNM/RURpu6ZgcVAxLUwns="
+                        }
+                }
+        }
+}

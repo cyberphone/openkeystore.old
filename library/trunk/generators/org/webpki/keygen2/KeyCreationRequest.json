@@ -1,0 +1,27 @@
+{
+    "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",
+    "@qualifier": "KeyCreationRequest",
+    "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
+    "ClientSessionID": "39NMWamKtHumJFfdIGkDrLP-NMB-5Lwo",
+    "SubmitURL": "http://issuer.example.com/keyinit",
+    "KeyEntryAlgorithm": "http://xmlns.webpki.org/sks/algorithm#key.1",
+    "PINPolicySpecifiers": 
+        [{
+             "ID": "PIN.1",
+             "MinLength": 4,
+             "MaxLength": 8,
+             "RetryLimit": 3,
+             "Format": "numeric",
+             "PatternRestrictions": ["three-in-a-row","sequence"],
+             "MAC": "2aUMRubbEk8Xs62QXlPiFJbYlJ68Sw4Fhu48j4uGKXk=",
+             "KeyEntrySpecifiers": 
+                 [{
+                      "ID": "Key.1",
+                      "AppUsage": "authentication",
+             "KeyAlgorithm": "http://xmlns.webpki.org/sks/algorithm#rsa2048",
+                      "MAC": "BQpWMwSz4EsYgliHH6RY3UNWuLsR3eJVapY0CYOUTtI="
+                  }]
+         }]
+}
+
+ 

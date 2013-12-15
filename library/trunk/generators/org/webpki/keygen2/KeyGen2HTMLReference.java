@@ -525,9 +525,25 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             "This document contains a description of these objects and how they interact, " +
             "while the integration with the SKS API is dealt with in the SKS architecture document.");
 
-        json.addDataTypesDescription ();
+        json.addDataTypesDescription ("");
         
         json.addProtocolTableEntry ();
+        
+        json.sampleRun (KeyGen2HTMLReference.class,
+                        "In the following KeyGen2 sample run the client (platform) " +
+                        "suggests a suitable image size for logotypes associated with keys." + LINE_SEPARATOR +
+                        "Then the issuer requests that the client (SKS) creates an RSA 2048-bit key " +
+                        "protected by a user-set PIN governed by a number of issuer-defined policies." + LINE_SEPARATOR +
+                        "Finally, the issuer provides a certificate and and a logotype to go with it." + LINE_SEPARATOR +
+                        "For information regarding the cryptographic constructs, consult the SKS architecture manual.",
+                        new String[]{"PlatformNegotiationRequest.json",
+                                     "PlatformNegotiationResponse.json",
+                                     "ProvisioningInitializationRequest.json",
+                                     "ProvisioningInitializationResponse.json",
+                                     "KeyCreationRequest.json",
+                                     "KeyCreationResponse.json",
+                                     "ProvisioningFinalizationRequest.json",
+                                     "ProvisioningFinalizationResponse.json"});
 
         json.addParagraphObject ("Aknowledgements").append ("The design of the KeyGen2 protocol was &quot;inspired&quot; by several predecessors, most notably IETF's DSKPP (RFC&nbsp;6063)." + LINE_SEPARATOR +
                                                             "Funding has been provided by <i>PrimeKey Solutions AB</i> and the <i>Swedish Innovation Board (VINNOVA)</i>.");

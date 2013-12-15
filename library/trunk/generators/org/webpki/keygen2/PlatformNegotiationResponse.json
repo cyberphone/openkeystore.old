@@ -1,0 +1,11 @@
+{
+    "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",
+    "@qualifier": "PlatformNegotiationResponse",
+    "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
+    "ImagePreferences": 
+        [{
+             "Type": "http://xmlns.webpki.org/keygen2/logotype#list",
+             "MimeType": "image/png",
+             "Width": 94,
+             "Height": 74
+         }]}

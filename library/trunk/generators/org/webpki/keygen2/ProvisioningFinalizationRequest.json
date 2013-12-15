@@ -1,0 +1,25 @@
+{
+    "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",
+    "@qualifier": "ProvisioningFinalizationRequest",
+    "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
+    "ClientSessionID": "39NMWamKtHumJFfdIGkDrLP-NMB-5Lwo",
+    "SubmitURL": "http://issuer.example.com/finalize",
+    "IssuedCredentials": 
+        [{
+             "ID": "Key.1",
+             "X509CertificatePath": 
+                 [
+                     "MIICmDCCAYCgAwIBAgIGAULxF0G . . . UimDl7Dt7733M0TT8qSpXeYvV0NLX5kM="
+                 ],
+             "MAC": "FkwauPbrrfJZxuEsMkwOFWIIutzdYbEt3P9kr0CG4dc=",
+             "Logotypes": 
+                 [{
+                      "Type": "http://xmlns.webpki.org/keygen2/logotype#list",
+                      "MimeType": "image/png",
+                      "ExtensionData": "RBgoJkiaJk/IsZAEZUBsZAEZFg . . . NVBAMTC0RlbW8gU3ViIENBMBTEzMM1oDTM4==",
+                      "MAC": "uQ5IuLRDpbSkpfU9FHe1grrQ/FXUBfsxsk6HqspjuCU="
+                  }]
+         }],
+    "Challenge": "/U9YmqyULox2Q53F4l9pQaxjbzlOu2wMo6/FgGAmooQ=",
+    "MAC": "/e0T/svX9vXQTuyIxDUmmteM2IwvXbSOEREuqbe7fS4="
+}
