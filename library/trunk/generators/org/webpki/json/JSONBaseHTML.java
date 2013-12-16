@@ -465,7 +465,7 @@ public class JSONBaseHTML
 
         String getObjectHTML () throws IOException
           {
-            StringBuffer s = new StringBuffer ("<tr><td colspan=\"4\" style=\"border-width:0px;font-size:" + SECTION_FONT_SIZE + ";padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica\">");
+            StringBuffer s = new StringBuffer ("<tr><td colspan=\"4\" style=\"border-width:0px;font-size:" + SECTION_FONT_SIZE + ";padding:20pt 0pt 10pt 0pt;font-family:arial,verdana,helvetica;background-color:white\">");
             boolean next = false;
             for (String protocol : protocols)
               {
@@ -577,8 +577,8 @@ public class JSONBaseHTML
         .append (subsystem_name)
         .append ("</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><style type=\"text/css\">\n" +
                  ".tftable {border-collapse: collapse}\n" +
-                 ".tftable th {font-size:10pt;background-color:#e0e0e0;border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
-                 ".tftable tr {background-color:#ffffff;}\n" +
+                 ".tftable th {font-size:10pt;background: linear-gradient(to bottom, #eaeaea 14%,#fcfcfc 52%,#e5e5e5 89%);border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color: #a9a9a9;text-align:center;font-family:arial,verdana,helvetica}\n" +
+                 ".tftable tr {background-color:#FFFFE0}\n" +
                  ".tftable td {font-size:10pt;border-width:1px;padding:4pt 8pt 4pt 8pt;border-style:solid;border-color:#a9a9a9;;font-family:arial,verdana,helvetica}\n" +
                  "div {font-size:10pt;padding:10pt 0pt 0pt 0pt;font-family:arial,verdana,helvetica}\n" +
                  "a:link {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
@@ -718,7 +718,7 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("Signature key info placeholder.")
+              .addString ("Signature key information placeholder.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.SIGNATURE_VALUE_JSON)
@@ -930,7 +930,7 @@ public class JSONBaseHTML
             JSONObjectReader or = JSONParser.parse (ArrayUtil.getByteArrayFromInputStream (parent.getResourceAsStream (file)));
             if (next)
               {
-                s.append ("<tr><td style=\"border-width:0px;height:5px\"></td></tr>");
+                s.append ("<tr><td style=\"border-width:0px;height:10px;background-color:white\"></td></tr>");
               }
             else
               {
