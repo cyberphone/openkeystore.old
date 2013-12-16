@@ -386,26 +386,26 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                             "List of X.509 policy extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
                             "for a required and forbidden policy OID respectively." + LINE_SEPARATOR +
                             "Policy OIDs encountered in <i>end-entity certificates</i> that " +
-                            "are not specified in <code>" + CertificateFilter.CF_POLICY_RULES + "</code> must be <i>ignored</i>.");
+                            "are not specified in <code>" + CertificateFilter.CF_POLICY_RULES + "</code> <b>must</b> be <i>ignored</i>.");
         createOption (CertificateFilter.CF_KEY_USAGE_RULES, WEBPKI_DATA_TYPES.STRING, true,
                             "List of X.509 key usage flags using the notation <code>&quot;" +
                             KeyUsageBits.DIGITAL_SIGNATURE.getX509Name () + "&quot;</code> and <code style=\"white-space:nowrap\">&quot;-" +
                             KeyUsageBits.DATA_ENCIPHERMENT.getX509Name () + "&quot;</code> " +
                             "for a required and forbidden key usage respectively." + LINE_SEPARATOR +
                             "Key usage flags encountered in <i>end-entity certificates</i> that " +
-                            "are not specified in <code>" + CertificateFilter.CF_KEY_USAGE_RULES + "</code> must be <i>ignored</i>. " + LINE_SEPARATOR +
+                            "are not specified in <code>" + CertificateFilter.CF_KEY_USAGE_RULES + "</code> <b>must</b> be <i>ignored</i>. " + LINE_SEPARATOR +
                             "The set of permitted flags include:" + getKeyUsageBits ());
         createOption (CertificateFilter.CF_EXT_KEY_USAGE_RULES, WEBPKI_DATA_TYPES.STRING, true,
                             "List of X.509 extended key usage extension OIDs using the notation <code style=\"white-space:nowrap\">&quot;1.4.3&quot;</code> and <code style=\"white-space:nowrap\">&quot;-1.4.7&quot;</code> " +
                             "for a required and forbidden extended key usage respectively." + LINE_SEPARATOR +
                             "Extended key usage OIDs encountered in <i>end-entity certificates</i> that " +
-                            "are not specified in <code>" + CertificateFilter.CF_EXT_KEY_USAGE_RULES + "</code> must be <i>ignored</i>.");
+                            "are not specified in <code>" + CertificateFilter.CF_EXT_KEY_USAGE_RULES + "</code> <b>must</b> be <i>ignored</i>.");
         createOption (ISSUED_BEFORE_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end-entity certificates</i> issued before this date." + LINE_SEPARATOR +
                             "Note that you can combine this criterion with an <code>" + 
                             ISSUED_AFTER_JSON + "</code> criterion using an earlier date, effectively creating a time window.");
         createOption (ISSUED_AFTER_JSON, WEBPKI_DATA_TYPES.DATE, false, "Matching <i>end-entity certificates</i> issued after this date.");
         createOption (GROUPING_JSON, WEBPKI_DATA_TYPES.STRING, false, "Matching keys based on the <code>SKS:createPINPolicy." + GROUPING_JSON + "</code> attribute." + LINE_SEPARATOR +
-                            "Note that keys that are not PIN-protected must always fail to match.");
+                            "Note that keys that are not PIN-protected <b>must</b> always fail to match.");
         createOption (APP_USAGE_JSON, WEBPKI_DATA_TYPES.STRING, false, "Matching keys based on the <code>SKS:createKeyEntry." + APP_USAGE_JSON + "</code> attribute.");
       }
 
@@ -560,7 +560,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("The <code>" + SERVER_SESSION_ID_JSON +
-                          "</code> must remain constant for the entire session.")
+                          "</code> <b>must</b> remain constant for the entire session.")
           .newExtensionRow (new SubmitURL ())
           .newRow ()
             .newColumn ()
@@ -784,13 +784,13 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("<i>Optional</i> 1-32 byte nonce. The <code>" +
-                           NONCE_JSON + "</code> value <i>must</i> be identical to the <code>" +
+                           NONCE_JSON + "</code> value <b>must</b> be identical to the <code>" +
                            NONCE_JSON + "</code> specified in ")
                .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
                .addString (". Also see <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code>.")
           .newExtensionRow (new OptionalSignature ())
               .addString (" Note that <code>" + NONCE_JSON +
-                          "</code> <i>must</i> be specified for a signed <code>" +
+                          "</code> <b>must</b> be specified for a signed <code>" +
                           PROVISIONING_INITIALIZATION_REQUEST_JSON + "</code>.");
 
         preAmble (PROVISIONING_INITIALIZATION_RESPONSE_JSON)
@@ -951,9 +951,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>." +
               		      LINE_SEPARATOR +
                           "Due to the stateful MAC-scheme featured in SKS, " +
-                          "<code>" + GENERATED_KEYS_JSON + "</code> <i>must " +
-                          "be generated (encoding) and executed (decoding) in strict " +
-                          "array order as well as honoring the array order in the associated  ")
+                          "<code>" + GENERATED_KEYS_JSON + "</code> <b>must</b> " +
+                          "<i>be generated (encoding) and executed (decoding) in strict " +
+                          "array order</i> as well as honoring the array order in the associated  ")
               .addLink (KEY_CREATION_REQUEST_JSON)
               .addString (".");
 
@@ -966,10 +966,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                  "SKS:setCertificatePath</code>." + LINE_SEPARATOR +
                  "Due to the stateful MAC-scheme featured in SKS, " +
                  "the properties beginning with <code>" + ISSUED_CREDENTIALS_JSON + "</code> " +
-                 "and ending with <code>" + DELETE_KEYS_JSON + "</code>, <i>must " +
-                 "be generated (encoding) and executed (decoding) in exactly " +
-                 "the order they are declared in this table as well " +
-                 "as in associated object arrays</i>." +
+                 "and ending with <code>" + DELETE_KEYS_JSON + "</code>, <b>must</b> " +
+                 "<i>be generated (encoding) and executed (decoding) in exactly " +
+                 "the order they are declared in this table</i> as well " +
+                 "as in associated object arrays." +
                   LINE_SEPARATOR +
                   "Note that that <code>" + ISSUED_CREDENTIALS_JSON +
                   "</code> are not guaranteed to be " +
@@ -997,7 +997,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .addString (LINE_SEPARATOR +
                  "Due to the stateful MAC-scheme featured in SKS, this " +
                  "<code>" + MAC_JSON + "</code> " +
-                 "must be the final of a provisioning session both during encoding and decoding.")
+                 "<b>must</b> be the final of a provisioning session both during encoding and decoding.")
           .newExtensionRow (new OptionalSignature ());
 
         preAmble (PROVISIONING_FINALIZATION_RESPONSE_JSON)
@@ -1091,7 +1091,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.ID)
             .newColumn ()
             .newColumn ()
-              .addString ("Each specifier must have a unique ID.")
+              .addString ("Each specifier <b>must</b> have a unique ID.")
           .newRow ()
             .newColumn ()
               .addProperty (NONCE_JSON)
@@ -1112,7 +1112,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setUsage (false)
             .newColumn ()
               .addString ("<i>Optional</i> additional search criterions." + LINE_SEPARATOR +
-                          "Note that at least one search criterion must be specified if this option is used.")
+                          "Note that at least one search criterion <b>must</b> be specified if this option is used.")
           .newExtensionRow (new LinkedObject (JSONSignatureDecoder.SIGNATURE_JSON,
                             true,
                             "Signature using a key management key signature covering the lookup specifier. " +
@@ -1129,7 +1129,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.ID)
             .newColumn ()
             .newColumn ()
-              .addString ("Each result must have a unique ID matching the request.")
+              .addString ("Each result <b>must</b> have a unique ID matching the request.")
           .newRow ()
             .newColumn ()
               .addProperty (MATCHING_CREDENTIALS_JSON)
@@ -1356,7 +1356,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               		      "flag of the required embedding PIN policy is set to <code>false</code> " +
               		      "else it is set to <code>true</code>." + LINE_SEPARATOR +
               		      "Keys associated with a specific PIN policy " +
-              		      "must not mix user-defined and preset PINs.")
+              		      "<b>must not</b> mix user-defined and preset PINs.")
           .newRow ()
             .newColumn ()
               .addProperty (ENABLE_PIN_CACHING_JSON)
@@ -1421,7 +1421,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("See <code>SKS:createKeyEntry.EndorsedAlgorithm</code>. " +
                           "Also see SKS &quot;Algorithm Support&quot;." + LINE_SEPARATOR +
-                          "Note that <i>endorsed algorithm URIs must be specified in strict lexical order</i>." + LINE_SEPARATOR +
+                          "Note that <i>endorsed algorithm URIs <b>must</b> be specified in strict lexical order</i>." + LINE_SEPARATOR +
                           "The currently recognized algorithms include:" +
                           JSONBaseHTML.enumerateAlgorithms (MACAlgorithms.values (), true, false, false) +
                           JSONBaseHTML.enumerateAlgorithms (AsymSignatureAlgorithms.values (), false, false, false) +
@@ -1491,7 +1491,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.ID)
             .newColumn ()
             .newColumn ()
-              .addString ("Must match the identifier used in ")
+              .addString ("<code>" + ID_JSON + "</code> <b>must</b> match the identifier used in ")
               .addLink (KEY_CREATION_REQUEST_JSON)
               .addString (" for a specific key.")
           .newRow ()
@@ -1523,7 +1523,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("See <code>SKS:setCertificatePath.ID</code>")
-              .addString (".<br>Must match the identifier used in ")
+              .addString (".<br><code>" + ID_JSON + "</code> <b>must</b> match the identifier used in ")
               .addLink (KEY_CREATION_REQUEST_JSON)
               .addString (" for a specific key.")
           .newRow ()
@@ -1560,10 +1560,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "<i>Optional</i> key import operation." + LINE_SEPARATOR +
                           "Due to the stateful MAC-scheme featured in SKS, " +
                           "the properties beginning with <code>" + IMPORT_KEY_JSON + "</code> " +
-                          "and ending with <code>" + LOGOTYPES_JSON + "</code>, <i>must " +
-                          "be generated (encoding) and executed (decoding) in " +
-                          "exactly the order they are declared in this table as well " +
-                          "as in associated object arrays</i>."))
+                          "and ending with <code>" + LOGOTYPES_JSON + "</code>, <b>must</b> " +
+                          "<i>be generated (encoding) and executed (decoding) in " +
+                          "exactly the order they are declared in this table</i> as well " +
+                          "as in associated object arrays."))
           .newExtensionRow (new TargetKeyReference (UPDATE_KEY_JSON, false, "postUpdateKey", true))
           .newExtensionRow (new TargetKeyReference (CLONE_KEY_PROTECTION_JSON, false, "postCloneKeyProtection", false))
           .newExtensionRow (new OptionalArrayObject (EXTENSIONS_JSON,
@@ -1833,7 +1833,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("Must be an EC key matching the capabilities of the SKS.");
+              .addString ("<code>" + SERVER_EPHEMERAL_KEY_JSON + "</code> <b>must</b> be an EC key matching the capabilities of the SKS.");
       
         json.addSubItemTable (CLIENT_EPHEMERAL_KEY_JSON)
           .newRow ()
@@ -1844,7 +1844,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("Must be an EC key matching the capabilities of the SKS.");
+              .addString ("<code>" + CLIENT_EPHEMERAL_KEY_JSON + "</code> <b>must</b> be an EC key matching the capabilities of the SKS.");
 
         json.addJSONSignatureDefinitions (false);
         

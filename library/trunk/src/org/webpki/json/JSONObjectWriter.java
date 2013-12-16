@@ -561,20 +561,20 @@ import org.webpki.json.JSONSignatureDecoder;
           {
             if (html_mode)
               {
-                buffer.append ("<font color=\"")
+                buffer.append ("<span style=\"color:")
                       .append (html_variable_color)
                       .append ("\">");
               }
             buffer.append (string);
             if (html_mode)
               {
-                buffer.append ("</font>");
+                buffer.append ("</span>");
               }
             return;
           }
         if (html_mode)
           {
-            buffer.append ("&quot;<font color=\"")
+            buffer.append ("&quot;<span style=\"color:")
                   .append (property ? string.startsWith ("@") ? html_keyword_color : html_property_color : html_string_color)
                   .append ("\">");
           }
@@ -667,7 +667,7 @@ import org.webpki.json.JSONSignatureDecoder;
           }
         if (html_mode)
           {
-            buffer.append ("</font>&quot;");
+            buffer.append ("</span>&quot;");
           }
         else
           {

@@ -585,10 +585,10 @@ public class JSONBaseHTML
                  "a:visited {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
                  "a:active {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
                  "</style></head><body>" +
-                 "<a href=\"http://webpki.org\" title=\"WebPKI.org\" style=\"position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible\">" +
+                 "<div style=\"position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible\"><a href=\"http://webpki.org\" title=\"WebPKI.org\">" +
                  "<img src=\"data:image/gif;base64,")
           .append (new Base64 (false).getBase64StringFromBinary (ArrayUtil.getByteArrayFromInputStream (getClass().getResourceAsStream ("webpki-logo.gif"))))
-          .append ("\" border=\"1\"></a>");
+          .append ("\" style=\"border-width:1px;border-style:solid;border-color:blue\" alt=\"WebPKI.org logo...\"></a></div>");
         for (Content division_object : division_objects)
           {
             html.append (division_object.getHTML ());
