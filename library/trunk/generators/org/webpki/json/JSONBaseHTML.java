@@ -637,7 +637,7 @@ public class JSONBaseHTML
     public void addDataTypesDescription (String intro)
       {
         addParagraphObject ("Notation").append (intro).append (
-            "JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a link to the actual definition. " + Types.LINE_SEPARATOR +
+            "JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a <a href=\"#\">link</a> to the actual definition. " + Types.LINE_SEPARATOR +
             "Properties may either be <i>required</i> (" + MANDATORY + ") or <i>optional</i> (" + OPTIONAL + ") as defined in the &quot;" + REQUIRED_COLUMN + "&quot; column." + Types.LINE_SEPARATOR +
             "Array properties are identified by [&thinsp;]" + JSONBaseHTML.ARRAY_SUBSCRIPT  + "x-y</span> where the range expression represents the valid number of array elements. " + Types.LINE_SEPARATOR +
             "In some JSON objects there is a choice " +

@@ -34,10 +34,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 
     public static void main (String args[]) throws IOException
       {
-        json = new JSONBaseHTML (args, "JCS - JSON Clear Text Signature");
+        json = new JSONBaseHTML (args, "JCS - JSON Cleartext Signature");
         
         json.addParagraphObject ().append ("<p style=\"text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">JCS</span>" +
-            "<br><span style=\"font-size:" + JSONBaseHTML.SECTION_FONT_SIZE + "\">&nbsp;<br>JSON Clear Text Signature</span></p>");
+            "<br><span style=\"font-size:" + JSONBaseHTML.SECTION_FONT_SIZE + "\">&nbsp;<br>JSON Cleartext Signature</span></p>");
         
         json.addParagraphObject ("Introduction").append ("JCS is a scheme for signing data expressed as JSON objects. " +
             "It is loosely modeled after XML&nbsp;DSig's &quot;enveloped&quot; signatures. " +
@@ -48,7 +48,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "<i>JCS was designed to be an integral part of a JSON object</i> " +
             "rather than embedding the signed data.  There are (of course) pros and cons to both " +
             "approaches, but for information-rich messaging, " +
-            "clear-text data at least have an advantage for documentation and debugging. " +
+            "cleartext data at least have an advantage for documentation and debugging. " +
             "To cope with the primary disadvantage (the dependency on " +
             "canonicalization), this part has been extremely simplified compared to XML&nbsp;DSig.");
 
