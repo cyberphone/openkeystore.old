@@ -39,13 +39,19 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addParagraphObject ().append ("<p style=\"text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">JCS</span>" +
             "<br><span style=\"font-size:" + JSONBaseHTML.SECTION_FONT_SIZE + "\">&nbsp;<br>JSON Cleartext Signature</span></p>");
         
-        json.addParagraphObject ("Introduction").append ("JCS is a scheme for signing data expressed as JSON objects. " +
-            "It is loosely modeled after XML&nbsp;DSig's &quot;enveloped&quot; signatures. " +
+        json.addParagraphObject ("Introduction").append ("JCS is a scheme for signing data expressed as JSON ")
+          .append (json.createReference (JSONBaseHTML.REF_JSON))
+          .append (" objects. " +
+            "It is loosely modeled after XML&nbsp;DSig's ")
+          .append (json.createReference (JSONBaseHTML.REF_XMLDSIG))
+          .append (" &quot;enveloped&quot; signatures. " +
             "Compared to its XML counterpart JCS is quite primitive but on the other hand it has proved to be " +
             "simple to implement and use.  That is, JCS follows the &quot;spirit&quot; of JSON." +
             Types.LINE_SEPARATOR +
-            "Unlike for example IETF-JOSE's JWS, " +
-            "<i>JCS was designed to be an integral part of a JSON object</i> " +
+            "Unlike for example IETF's JWS ")
+          .append (json.createReference (JSONBaseHTML.REF_JOSE))
+          .append (
+            ", <i>JCS was designed to be an integral part of a JSON object</i> " +
             "rather than embedding the signed data.  There are (of course) pros and cons to both " +
             "approaches, but for information-rich messaging, " +
             "cleartext data at least have an advantage for documentation and debugging. " +
@@ -103,7 +109,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "object holding the <code>Signature</code> property except for the actual <code>" + JSONSignature.SIGNATURE_VALUE_JSON + "</code> property.");
 
         json.addParagraphObject ("Canonicalization").append (
-            "Prerequisite: A JSON object in accordance with the rules outlined at <a href=\"http://www.json.org\">http://www.json.org</a>." + LINE_SEPARATOR +
+            "Prerequisite: A JSON object in accordance with the rules outlined in ")
+          .append (json.createReference (JSONBaseHTML.REF_JSON))
+          .append ("." + LINE_SEPARATOR +
             "Parsing Restrictions:<ul>" +
             "<li>The original property order <b>must</b> be preserved.</li>" +
             "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
@@ -117,8 +125,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "JSON escapes (<code>'\\n'</code> etc.) because the latter have precedence. If the Unicode value is " +
             "outside of the ASCII control character range, it <b>must</b> be replaced by the corresponding Unicode character.</li>" +
             "<li style=\"padding-top:4pt\">The JSON object associated with the <code>Signature</code> <b>must</b> now be " +
-            "<i>recreated</i> using the actual text left after applying the previous measures. <i>Rationale</i>: Numbers are ambiguously defined (&quot;unnormalized&quot;) in " +
-            "JSON which means that a decoding/encoding sequence may produce a different representation compared to the original. " +
+            "<i>recreated</i> using the actual text left after applying the previous measures. <i>Rationale</i>: JSON numbers are ambiguously defined (&quot;unnormalized&quot;) " +
+            "which means that a decoding/encoding sequence may produce a different representation compared to the original. " +
             "As an example, monetary data is often expressed like <code>4.50</code> in spite of the " +
             "trailing zero being redundant. Similar quirks are also likely to show-up in non-native JSON types " +
             "(stored in quoted strings), such as dates due to time-zone or resolution differences. To cope with these " +
@@ -180,6 +188,10 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
                                  "feedback were provided by Manu&nbsp;Sporny, Jim&nbsp;Klo, James&nbsp;Manger, " +
                                  "Jeffrey&nbsp;Walton, David&nbsp;Chadwick, Jim&nbsp;Schaad, David&nbsp;Waite, " +
                                  "Douglas&nbsp;Crockford, Arne&nbsp;Riiber, Brian&nbsp;Campbell and others.");
+        
+        json.addReferenceTable ();
+        
+        json.addDocumentHistoryLine ("2013-12-17", "0.3", "Initial publication in HTML");
 
         json.addParagraphObject ("Author").append ("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                    "of the SKS/KeyGen2 project " +

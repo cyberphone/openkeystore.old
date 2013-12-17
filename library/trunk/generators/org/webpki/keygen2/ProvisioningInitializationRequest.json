@@ -5,8 +5,8 @@
     "SubmitURL": "http://issuer.example.com/provsess",
     "ServerTime": "2013-12-14T16:33:30+01:00",
     "SessionKeyAlgorithm": "http://xmlns.webpki.org/sks/algorithm#session.1",
-    "SessionKeyLimit": 50,
-    "SessionLifeTime": 10000,
+    "SessionKeyLimit": 20,
+    "SessionLifeTime": 300,
     "ServerEphemeralKey": 
         {
             "PublicKey": 

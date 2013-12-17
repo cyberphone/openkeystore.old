@@ -18,6 +18,8 @@ package org.webpki.json;
 
 import java.io.IOException;
 
+import java.util.LinkedHashMap;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import org.webpki.crypto.KeyAlgorithms;
@@ -46,11 +48,45 @@ public class JSONBaseHTML
     public static final String HEADER_STYLE            = "font-size:28pt;font-family:'Times New Roman',Times,Serif";
     
     public static final String ARRAY_SUBSCRIPT         = "<span style=\"position:relative;bottom:-0.5em;font-size:.9em\">&thinsp;";
-    
+
     public static final String REQUIRED_COLUMN         = "Req";
+    
+    public static final String REF_JSON                = "RFC4627";
+    
+    public static final String REF_X509                = "RFC5280";
+
+    public static final String REF_XMLDSIG             = "XMLDSIG";
+    
+    public static final String REF_XMLENC              = "XMLENC";
+    
+    public static final String REF_JCS                 = "JCS";
+    
+    public static final String REF_JOSE                = "JOSE";
+    
+    public static final String REF_BASE64              = "RFC4648";
+    
+    public static final String REF_URI                 = "RFC3986";
+
+    public static final String REF_DSKPP               = "RFC6063";
+
+    public static final String REF_SKS                 = "SKS";
+
+    public static final String REF_CMP                 = "RFC4210";
+
+    public static final String REF_LDAP_NAME           = "RFC4514";
+    
+    public static final String REF_FIPS186             = "FIPS-186-4";
 
     String file_name;
     String subsystem_name;
+    
+    class Reference
+    {
+      String html_description;
+      boolean referenced;
+    }
+    
+    LinkedHashMap<String,Reference> references = new LinkedHashMap<String,Reference> ();
     
     public JSONBaseHTML (String[] args, String subsystem_name) throws IOException
       {
@@ -60,6 +96,66 @@ public class JSONBaseHTML
           }
         file_name = args[0];
         this.subsystem_name = subsystem_name;
+
+        addReferenceEntry (REF_JSON,
+            "Crockford, D., \"The application/json Media Type for " +
+            "JavaScript Object Notation (JSON)\", RFC&nbsp;4627, July&nbsp;2006.");
+
+        addReferenceEntry (REF_URI,
+            "Berners-Lee, T., Fielding, R., and L. Masinter, \"Uniform " +
+            "Resource Identifier (URI): Generic Syntax\", STD&nbsp;66, RFC&nbsp;3986, January&nbsp;2005.");
+
+        addReferenceEntry (REF_XMLDSIG,
+            "\"XML-Signature Syntax and Processing\", D. Eastlake " +
+            "3rd, J. Reagle, & D. Solo, June&nbsp;2008. " +
+            "<a href=\"http://www.w3.org/TR/xmldsig-core/\">http://www.w3.org/TR/xmldsig-core/</a>");
+
+        addReferenceEntry (REF_XMLENC,
+            "\"XML Encryption Syntax and Processing\", J. Reagle, " +
+            "D. Eastlake, April&nbsp;2013. " +
+            "<a href=\"http://www.w3.org/TR/xmlenc-core1/\">http://www.w3.org/TR/xmlenc-core1/</a>");
+
+        addReferenceEntry (REF_JCS,
+            "Rundgren, A., \"JCS - JSON Cleartext Signature\", Work in progress, " +
+            "<a href=\"http://webpki.org/papers/keygen2/doc/jcs.html\">" +
+            "http://webpki.org/papers/keygen2/doc/jcs.html</a>, " + 
+            "<span style=\"white-space: nowrap\">December&nbsp;2013.</span>");
+
+        addReferenceEntry (REF_SKS, "Rundgren, A., \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
+            "<a href=\"https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf\">" +
+            "https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf</a>, " +
+            "<span style=\"white-space: nowrap\">V0.96, December 2013.</span>");
+
+        addReferenceEntry (REF_JOSE,
+            "Jones, M. et al, Work in progress, " +
+            "<a href=\"https://ietf.org/wg/jose/\">" +
+            "https://ietf.org/wg/jose/</a>, <span style=\"white-space: nowrap\">December&nbsp;2013.</span>");
+
+        addReferenceEntry (REF_X509,
+            "Cooper, D., Santesson, S., Farrell, S., Boeyen, S., " +
+            "Housley, R., and W. Polk, \"Internet X.509 Public Key " +
+            "Infrastructure Certificate and Certificate Revocation List " +
+            "(CRL) Profile\", RFC&nbsp;5280, May&nbsp;2008.");
+
+        addReferenceEntry (REF_BASE64,
+            "Josefsson, S., \"The Base16, Base32, and Base64 Data " +
+            "Encodings\", RFC&nbsp;4648, October&nbsp;2006.");
+
+        addReferenceEntry (REF_DSKPP,
+            "Doherty, A., Pei, M., Machani, S., Nystrom, M., " +
+            "\"Dynamic Symmetric Key Provisioning Protocol (DSKPP)\", RFC&nbsp;6063, December&nbsp;2010.");
+
+        addReferenceEntry (REF_CMP, "Adams, C., Farrell, S., Kause, T., and T. Mononen, " +
+             "\"Internet X.509 Public Key Infrastructure Certificate Management Protocol (CMP)\", " +
+             "RFC&nbsp;4210, September&nbsp;2005.");
+
+        addReferenceEntry (REF_LDAP_NAME, "Zeilenga, K., " +
+            "\"Lightweight Directory Access Protocol (LDAP): String Representation of Distinguished Names\", " +
+            "RFC&nbsp;4514, June&nbsp;2006.");
+
+        addReferenceEntry (REF_FIPS186,
+            "FIPS PUB 186-4: Digital Signature Standard (DSS). " +
+            "June 2013. U.S. Department of Commerce/National Institute of Standards and Technology.");
       }
 
     JSONBaseHTML () {}
@@ -68,27 +164,52 @@ public class JSONBaseHTML
       {
         public enum WEBPKI_DATA_TYPES 
           {
-            BOOLEAN ("bool",   "<code>true</code> or <code>false</code>", "Boolean"),
-            BYTE    ("byte",   "<i>number</i>", "Unsigned byte"),
-            SHORT   ("short",  "<i>number</i>", "Unsigned two-byte integer"), 
-            INT     ("int",    "<i>number</i>", "Unsigned four-byte integer"),
-            BIGINT  ("bigint", "<i>number</i>", "Big integer"),
-            STRING  ("string", "<i>string</i>", "Arbitrary string"),
-            URI     ("uri",    "<i>string</i>", "URI"),
-            ID      ("id",     "<i>string</i>", "Identifier which <b>must</b> consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
-            BASE64  ("base64", "<i>string</i>", "Base64-encoded binary data"),
-            CRYPTO  ("crypto", "<i>string</i>", "Base64-encoded large positive integer.  Equivalent to XML DSig's <code>ds:CryptoBinary</code>"),
-            DATE    ("date",   "<i>string</i>", "ISO date-time <code>YYYY-MM-DDThh:mm:ss{timezone}</code>."),
-            OBJECT  ("object", "<code>{}</code>", "JSON object");
+            BOOLEAN ("bool",   "<code>true</code> or <code>false</code>", null,
+                     "Boolean"),
+                     
+            BYTE    ("byte",   "<i>number</i>",                           null,
+                     "Unsigned byte"),
+                     
+            SHORT   ("short",  "<i>number</i>",                           null,
+                     "Unsigned two-byte integer"),
+                     
+            INT     ("int",    "<i>number</i>",                           null,
+                     "Unsigned four-byte integer"),
+                     
+            BIGINT  ("bigint", "<i>number</i>",                           null,
+                     "Big integer"),
+                     
+            STRING  ("string", "<i>string</i>",                           null,
+                     "Arbitrary string"),
+                     
+            URI     ("uri",    "<i>string</i>",                           REF_URI,
+                     "URI <a href=\"#Reference." + REF_URI + "\">[" + REF_URI + "]</a>"),
+
+            ID      ("id",     "<i>string</i>",                           null,
+                     "Identifier which <b>must</b> consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
+                     
+            BASE64  ("base64", "<i>string</i>",                           REF_BASE64,
+                     "Base64-encoded <a href=\"#Reference." + REF_BASE64 + "\">[" + REF_BASE64 + "]</a> binary data"),
+                     
+            CRYPTO  ("crypto", "<i>string</i>",                           REF_XMLDSIG,
+                     "Base64-encoded large positive integer.  Equivalent to XML DSig's <a href=\"#Reference." + REF_XMLDSIG + "\">[" + REF_XMLDSIG + "]</a> <code>ds:CryptoBinary</code>"),
+                     
+            DATE    ("date",   "<i>string</i>",                           null,
+                     "ISO date-time <code>YYYY-MM-DDThh:mm:ss{timezone}</code>."),
+                     
+            OBJECT  ("object", "<code>{}</code>",                         null,
+                     "JSON object");
 
             String data_type;
             String json;
+            String ref;
             String description;
             boolean used;
-            WEBPKI_DATA_TYPES (String data_type, String json, String description)
+            WEBPKI_DATA_TYPES (String data_type, String json, String ref, String description)
               {
                 this.data_type = data_type;
                 this.json = json;
+                this.ref = ref;
                 this.description = description;
                 used = false;
               }
@@ -101,6 +222,11 @@ public class JSONBaseHTML
             public String getJSON ()
               {
                 return json;
+              }
+
+            public String getRef ()
+              {
+                return ref;
               }
 
             public String getDescription ()
@@ -195,6 +321,36 @@ public class JSONBaseHTML
             for (ProtocolObject protocol_object : protocol_objects)
               {
                 s.append (protocol_object.getObjectHTML ());
+              }
+            return s.append ("</table>").toString ();
+          }
+      }
+
+    class References extends Content
+      {
+        References ()
+          {
+            super ();
+          }
+
+        @Override
+        String getHTML () throws IOException
+          {
+            StringBuffer s = new StringBuffer ("<table class=\"tftable\" style=\"width:600pt\"><tr><th>Reference</th><th>Description</th></tr>");
+            for (String reference : new TreeSet<String>(references.keySet()).toArray (new String[0]))
+              {
+                Reference r = references.get (reference);
+                if (r.referenced)
+                  {
+                    s.append ("<tr><td id=\"")
+                     .append ("Reference.")
+                     .append (reference)
+                     .append ("\" style=\"white-space:nowrap\">")
+                     .append (brackit (reference))
+                     .append ("</td><td>")
+                     .append (r.html_description)
+                     .append ("</td></tr>");
+                  }
               }
             return s.append ("</table>").toString ();
           }
@@ -363,6 +519,10 @@ public class JSONBaseHTML
                       {
                         throw new IOException ("This method only applies to column #2");
                       }
+                    if (type.getRef () != null)
+                      {
+                        createReference (type.getRef ());
+                      }
                     type.setUsed ();
                     column.append (type.getDataType ());
                     return this;
@@ -512,7 +672,7 @@ public class JSONBaseHTML
                             if (row.set_group)
                               {
                                 standard = false;
-                                s.append ("<td align=\"center\" rowspan=\"")
+                                s.append ("<td style=\"text-align:center\" rowspan=\"")
                                  .append (supress)
                                  .append ("\">");
                               }
@@ -525,7 +685,7 @@ public class JSONBaseHTML
                       }
                     if (output == standard)
                       {
-                        s.append (q == 1 ? "<td style=\"white-space: nowrap\">" : (q < 4 ? "<td align=\"center\">" : "<td>"));
+                        s.append (q == 1 ? "<td style=\"white-space: nowrap\">" : (q < 4 ? "<td style=\"text-align:center\">" : "<td>"));
                       }
                     if (output)
                       {
@@ -572,7 +732,7 @@ public class JSONBaseHTML
     public String getHTML () throws IOException
       {
         html = new StringBuffer (
-            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">" +
+            "<!DOCTYPE html>" +
             "<html><head><title>")
         .append (subsystem_name)
         .append ("</title><meta http-equiv=Content-Type content=\"text/html; charset=utf-8\"><style type=\"text/css\">\n" +
@@ -675,10 +835,97 @@ public class JSONBaseHTML
         return s.append ("</ul>").toString ();
       }
 
+
+    public void addProtocolTableEntry ()
+      {
+        new ProtocolTable ();
+      }
+
+    public void addReferenceTable ()
+      {
+        addParagraphObject ("References");
+        new References ();
+      }
+
+    public void sampleRun (Class parent, String header, String[] files) throws IOException
+      {
+        StringBuffer s = addParagraphObject ("Sample Run").append (header);
+        JSONObjectWriter.html_indent = 2;
+        s.append ("<table class=\"tftable\" style=\"margin-top:10pt\">");
+        boolean next = false;
+        for (String file : files)
+          {
+            JSONObjectReader or = JSONParser.parse (ArrayUtil.getByteArrayFromInputStream (parent.getResourceAsStream (file)));
+            if (next)
+              {
+                s.append ("<tr><td style=\"border-width:0px;height:10px;background-color:white\"></td></tr>");
+              }
+            else
+              {
+                next = true;
+              }
+            s.append ("<tr><th>")
+             .append (or.getString (JSONDecoderCache.QUALIFIER_JSON))
+             .append ("</th></tr><tr><td><code>")
+             .append (new String (new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8"))
+             .append ("</code></td></tr>");
+          }
+        s.append ("</table>");
+      }
+
+    public String globalLinkRef (String name)
+      {
+        return "<a href=\"#" + name + "\">" + name +"</a>"; 
+      }
+
+    public String globalLinkRef (String parent, String name)
+      {
+        return "<a href=\"#" + parent + "." + name + "\">" + name +"</a>"; 
+      }
+
+    String brackit (String string)
+      {
+        return "[" + string + "]";
+      }
+
+    public void addReferenceEntry (String reference, String html_description) throws IOException
+      {
+        Reference r = new Reference ();
+        r.html_description = html_description;
+        Reference old = references.put (reference, r);
+        if (old != null && !old.html_description.equals (html_description))
+          {
+            throw new IOException ("Reference ambigiously defined: " + reference);
+          }
+      }
+    
+    public String createReference (String reference) throws IOException
+      {
+        Reference r = references.get (reference);
+        if (r == null)
+          {
+            throw new IOException ("No such reference: " + reference);
+          }
+        r.referenced = true;
+        return "<a href=\"#Reference." + reference + "\">" + brackit (reference) +"</a>"; 
+      }
+
+    StringBuffer doc_history;
+    
+    public void addDocumentHistoryLine (String date, String version, String comment)
+      {
+        if (doc_history == null)
+          {
+            doc_history = addParagraphObject ("Document History")
+                       .append ("<table class=\"tftable\"><tr><th>Date</th><th>Ver</th><th>Comment</th></tr></table>");
+          }
+        doc_history.insert (doc_history.lastIndexOf ("</table>"), "<tr><td>" + date + "</td><td style=\"text-align:center\">" + version + "</td><td>" + comment + "</td></tr>");
+      }
+
     public void addJSONSignatureDefinitions (boolean reference) throws IOException
       {
-        String jcs = reference ? "" : "JCS: ";
-        String option = reference ? "Option: " : "JCS option: ";
+        String jcs = reference ? "" : createReference (REF_JCS) + ": ";
+        String option = reference ? "Option: " : createReference (REF_JCS) + " option: ";
         String sks_alg_ref = reference ? " " : " See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR;
         
         addSubItemTable (JSONSignatureEncoder.SIGNATURE_JSON)
@@ -836,8 +1083,10 @@ public class JSONBaseHTML
               .addString ("The currently recognized EC curves include:" +
                       enumerateAlgorithms (KeyAlgorithms.values (), false, true,  reference))
               .addString (reference ?
-  "The NIST algorithms are described in FIPS 186-4, while Brainpool algorithms are covered by RFC&nbsp;5639. " + Types.LINE_SEPARATOR +
-  "Compatible EC curves may also be expressed in the XML&nbsp;DSig notation (<code>urn:oid:1.2.840.10045.3.1.7</code>).": "")
+  "The NIST algorithms are described in FIPS 186-4 " + createReference (REF_FIPS186) +
+  ", while Brainpool algorithms are covered by RFC&nbsp;5639. " + Types.LINE_SEPARATOR +
+  "Compatible EC curves may also be expressed in the XML&nbsp;DSig " +  createReference (REF_XMLDSIG) +
+  " notation (<code>urn:oid:1.2.840.10045.3.1.7</code>).": "")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.X_JSON)
@@ -891,7 +1140,9 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("X.500 issuer distinguished name in RFC 4514 notation.")
+              .addString ("Issuer distinguished name in LDAP ")
+              .addString (createReference (REF_LDAP_NAME))
+              .addString (" notation.")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.SERIAL_NUMBER_JSON)
@@ -911,37 +1162,8 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("X.500 subject distinguished name in RFC 4514 notation.");
-      }
-
-    public void addProtocolTableEntry ()
-      {
-        new ProtocolTable ();
-      }
-
-    public void sampleRun (Class parent, String header, String[] files) throws IOException
-      {
-        StringBuffer s = addParagraphObject ("Sample Run").append (header);
-        JSONObjectWriter.html_indent = 2;
-        s.append ("<table class=\"tftable\" style=\"margin-top:10pt\">");
-        boolean next = false;
-        for (String file : files)
-          {
-            JSONObjectReader or = JSONParser.parse (ArrayUtil.getByteArrayFromInputStream (parent.getResourceAsStream (file)));
-            if (next)
-              {
-                s.append ("<tr><td style=\"border-width:0px;height:10px;background-color:white\"></td></tr>");
-              }
-            else
-              {
-                next = true;
-              }
-            s.append ("<tr><th>")
-             .append (or.getString (JSONDecoderCache.QUALIFIER_JSON))
-             .append ("</th></tr><tr><td><code>")
-             .append (new String (new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8"))
-             .append ("</code></td></tr>");
-          }
-        s.append ("</table>");
+              .addString ("Subject distinguished name in LDAP ")
+              .addString (createReference (REF_LDAP_NAME))
+              .addString (" notation.");
       }
   }

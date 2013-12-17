@@ -45,9 +45,70 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
   {
     static final String KEYGEN2_NAME_SPACE            = "KeyGen2 name space/version indicator.";
     static final String OBJECT_ID                     = "Actual KeyGen2 message type.";
-    
+
     static JSONBaseHTML json;
     static RowInterface row;
+    
+    static class ProtocolDescription
+      {
+        static final String BAR_COLOR = "#909090";
+        
+        StringBuffer s;
+        ProtocolDescription (StringBuffer s)
+          {
+            this.s = s;
+          }
+        void execute ()
+          {
+            s.append ("To facilitate a straightforward implementation as well as robust operation, KeyGen2 builds on a concept where each major process " +
+                "step is handled by a specific request/response pair as outlined below:" + 
+                      "<table style=\"width:600pt;margin-top:10pt;margin-left:auto;margin-right:auto;border-collapse:collapse\">");
+            bar (10);
+            sign ("PlatformNegotiation", "Protocol invocation. During this step the user should be alerted by a browser-defined dialog " +
+                  "telling what is supposed to happen giving as well as providing an option aborting the process. "+
+                  "In addition, the issuer <i>may</i> perform an SKS capability query.");
+            bar (14);
+            sign ("ProvisioningInitialization", "Creation of a <i>shared session key</i> securing the rest of the interactions between the issuer and the SKS. " +
+                  "To support future updates of provisioned credentials, the issuer <i>may</i> also provide a " + json.globalLinkRef (PROVISIONING_INITIALIZATION_REQUEST_JSON, KEY_MANAGEMENT_KEY_JSON) + ".");
+            bar (14);
+            sign ("CredentialDiscovery", "<i>Optional</i>: Issuer lookup of already provisioned SKS credentials. " +
+                  "This is primarily used when keys need to be updated or unlocked.");
+            bar (14);
+            sign ("KeyCreation", "Creation of asymmetric key-pairs in the SKS. " +
+                  "If user-defined PINs are to be set, this is carried out during " + json.globalLinkRef (KEY_CREATION_REQUEST_JSON) + ". " +
+                  "After key-pairs have been created the public keys are sent to the issuer for certification.");
+            bar (14);
+            sign ("ProvisioningFinalization", "Deployment of credentials and associated attributes. " +
+                  "Key&nbsp;management operations are also performed in this step. " +
+                  "After that the session is terminated. " +
+                  "Due to the &quot;transactional&quot; nature of SKS, <i>successful</i> session termination returns a cryptographic proof to the " +
+                  "issuer.");
+            bar (6);
+            s.append ("<tr><td style=\"padding:0px\"><div style=\"margin-left:auto;margin-right:auto;width:0pt;height:0px;border-style: solid;border-width: 8pt 4pt 0pt 4pt" +
+                      ";border-color:" + BAR_COLOR + " transparent transparent transparent\"></div></td><td></td></tr></table>");
+          }
+
+        private void sign (String protcol_step, String description)
+          {
+            s.append ("<tr><td style=\"padding:0px\"><div style=\"padding:20pt;font-size:14pt;text-align:center;" +
+//                      "background: radial-gradient(ellipse at center, rgba(252,246,239,1) 12%,rgba(252,217,174,1) 100%)" +
+//                      "background: radial-gradient(ellipse at center, rgba(249,246,229,1) 9%,rgba(247,221,170,1) 100%)" +
+//                      "background: radial-gradient(ellipse at center, rgba(242,243,252,1) 0%,rgba(196,210,242,1) 100%)" +
+                      "background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(242,243,252,1) 38%,rgba(196,210,242,1) 100%)" +
+                      ";border-radius:8pt;border-width:1px;border-style:solid;border-color:#B0B0B0;box-shadow:3pt 3pt 3pt #D0D0D0\">")
+            .append (protcol_step)
+            .append ("</div></td><td style=\"padding-left:20pt\">")
+            .append (description)
+            .append ("</td></tr>");
+          }
+
+        private void bar (int height)
+          {
+            s.append ("<tr><td style=\"padding:0px\"><div style=\"margin-left:auto;margin-right:auto;height:")
+             .append (height)
+             .append ("pt;width:2pt;background-color:" + BAR_COLOR + "\"></div></td><td></td></tr>");
+          }
+      }
     
     static class MAC implements JSONBaseHTML.Extender
       {
@@ -377,9 +438,13 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
       {
         row = json.addSubItemTable (SEARCH_FILTER_JSON);       
         createOption (CertificateFilter.CF_FINGER_PRINT, WEBPKI_DATA_TYPES.BASE64, false, "SHA256 fingerprint matching any certificate in the <i>certificate path</i>.");
-        createOption (CertificateFilter.CF_ISSUER_REG_EX, WEBPKI_DATA_TYPES.STRING, false, "Regular expression matching any issuer in the <i>certificate path</i>. Issuer names are assumed to be expressed in RFC&nbsp;4514 notation.");
+        createOption (CertificateFilter.CF_ISSUER_REG_EX, WEBPKI_DATA_TYPES.STRING, false, 
+            "Regular expression matching any issuer in the <i>certificate path</i>. " +
+            "Issuer names are assumed to be expressed in LDAP " + json.createReference (JSONBaseHTML.REF_LDAP_NAME) + " notation.");
         createOption (CertificateFilter.CF_SERIAL_NUMBER, WEBPKI_DATA_TYPES.BIGINT, false, "Serial number matching that of the <i>end-entity certificate</i>.");
-        createOption (CertificateFilter.CF_SUBJECT_REG_EX, WEBPKI_DATA_TYPES.STRING, false, "Regular expression matching the subject in the <i>end-entity certificate</i>. Subject names are assumed to be expressed in RFC&nbsp;4514 notation.");
+        createOption (CertificateFilter.CF_SUBJECT_REG_EX, WEBPKI_DATA_TYPES.STRING, false, 
+            "Regular expression matching the subject in the <i>end-entity certificate</i>. " + 
+            "Subject names are assumed to be expressed in LDAP " + json.createReference (JSONBaseHTML.REF_LDAP_NAME) + " notation.");
         createOption (CertificateFilter.CF_EMAIL_REG_EX, WEBPKI_DATA_TYPES.STRING, false, "Regular expression matching any of the e-mail addresses in the <i>end-entity certificate</i>." + LINE_SEPARATOR +
                             "Note that both RFC&nbsp;822 subject attributes and <code>subjectAltName</code> fields are in scope.");
         createOption (CertificateFilter.CF_POLICY_RULES, WEBPKI_DATA_TYPES.STRING, true,
@@ -519,12 +584,42 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addParagraphObject ().append ("<div style=\"text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">KeyGen2</span>" +
              "<br><span style=\"font-size:" + JSONBaseHTML.SECTION_FONT_SIZE + "\">&nbsp;<br>Credential Enrollment and Management Protocol</span></div>");
         
-        json.addParagraphObject ("Introduction").append ("KeyGen2 is a web-based protocol for enrolling and managing credentials like X.509 certificates.  " +
-            "The protocol is a part of a security architecture which at the core consists of SKS (Secure Key Store)." + LINE_SEPARATOR +
-            "The KeyGen2 protocol is expressed as a set of JSON objects. " +
-            "This document contains a description of these objects and how they interact, " +
-            "while the integration with the SKS API is dealt with in the SKS architecture document.");
+        json.addParagraphObject ("Introduction").append ("KeyGen2 is a web-based protocol for enrolling and managing credentials like X.509 certificates ")
+            .append (json.createReference (JSONBaseHTML.REF_X509))
+            .append (". " +
+                     "The protocol is a part of a security architecture which at the core " +
+                     "consists of SKS (Secure Key Store)." + LINE_SEPARATOR +
+                     "The KeyGen2 protocol is expressed as a set of JSON ")
+            .append (json.createReference (JSONBaseHTML.REF_JSON))
+            .append (" objects. " +
+                     "This document contains a description of these objects and how they interact, " +
+                     "while the integration with the SKS API is dealt with in the SKS architecture document ")
+            .append (json.createReference (JSONBaseHTML.REF_SKS))
+            .append ("." + LINE_SEPARATOR +
+                     "Parts of the protocol rely on cryptographic constructs using JSON which " +
+                     "were created as a part of the KeyGen2 project, but recently have become a project "+
+                     "of its own: JSON Cleartext Signature ")
+             .append (json.createReference (JSONBaseHTML.REF_JCS))
+             .append (".");
 
+        json.addParagraphObject ("KeyGen2 Proxy").append ("Unlike certificate management protocols like CMP ")
+            .append (json.createReference (JSONBaseHTML.REF_CMP))
+            .append (", <i>KeyGen2 " +
+                     "mandates a two-layer client architecture</i> where the " +
+                     "outermost part is talking to the outside world (user and issuer), " +
+                     "while an inner part does the communication with the SKS. " +
+                     "That is, the client implementation acts as &quot;proxy&quot; enabling the use of a JSON-based, " +
+                     "fairly high-level protocol with issuer, in spite of the fact that SKS only deals with " +
+                     "low-level binary objects." + LINE_SEPARATOR +
+                     "Another core proxy task is minimizing network roundtrips through SKS command aggregation." + LINE_SEPARATOR +
+                     "Although KeyGen2 depends on a proxy for doing the &quot;Heavy Lifting&quot;, " +
+                     "E2ES (End To End Security) is still maintained. " +LINE_SEPARATOR +
+                     "For a detailed description of the proxy scheme, consult the SKS architecture document ")
+            .append (json.createReference (JSONBaseHTML.REF_SKS))
+            .append (".");
+
+        new ProtocolDescription (json.addParagraphObject ("Protocol Description")).execute ();
+        
         json.addDataTypesDescription ("");
         
         json.addProtocolTableEntry ();
@@ -545,8 +640,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                      "ProvisioningFinalizationRequest.json",
                                      "ProvisioningFinalizationResponse.json"});
 
-        json.addParagraphObject ("Aknowledgements").append ("The design of the KeyGen2 protocol was &quot;inspired&quot; by several predecessors, most notably IETF's DSKPP (RFC&nbsp;6063)." + LINE_SEPARATOR +
-                                                            "Funding has been provided by <i>PrimeKey Solutions AB</i> and the <i>Swedish Innovation Board (VINNOVA)</i>.");
+        json.addParagraphObject ("Aknowledgements").append ("The design of the KeyGen2 protocol was &quot;inspired&quot; by several predecessors, most notably IETF's DSKPP ")
+                          .append (json.createReference (JSONBaseHTML.REF_DSKPP))
+                          .append ("." + LINE_SEPARATOR +
+                          "Funding has been provided by <i>PrimeKey Solutions AB</i> and the <i>Swedish Innovation Board (VINNOVA)</i>.");
+        
+        json.addReferenceTable ();
+        
+        json.addDocumentHistoryLine ("2013-12-17", "0.2", "Not yet released document :-)");
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 
@@ -1844,7 +1945,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("<code>" + CLIENT_EPHEMERAL_KEY_JSON + "</code> <b>must</b> be an EC key matching the capabilities of the SKS.");
+              .addString ("<code>" + CLIENT_EPHEMERAL_KEY_JSON + "</code> <b>must</b> be an EC key using the same curve as <code>" + 
+                          SERVER_EPHEMERAL_KEY_JSON + "</code>.");
 
         json.addJSONSignatureDefinitions (false);
         
