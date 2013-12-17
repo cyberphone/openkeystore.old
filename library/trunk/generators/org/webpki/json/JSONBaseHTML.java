@@ -74,6 +74,8 @@ public class JSONBaseHTML
     public static final String REF_CMP                 = "RFC4210";
 
     public static final String REF_LDAP_NAME           = "RFC4514";
+
+    public static final String REF_BRAINPOOL           = "RFC5639";
     
     public static final String REF_FIPS186             = "FIPS-186-4";
 
@@ -103,7 +105,7 @@ public class JSONBaseHTML
 
         addReferenceEntry (REF_URI,
             "Berners-Lee, T., Fielding, R., and L. Masinter, \"Uniform " +
-            "Resource Identifier (URI): Generic Syntax\", STD&nbsp;66, RFC&nbsp;3986, January&nbsp;2005.");
+            "Resource Identifier (URI): Generic Syntax\", RFC&nbsp;3986, January&nbsp;2005.");
 
         addReferenceEntry (REF_XMLDSIG,
             "\"XML-Signature Syntax and Processing\", D. Eastlake " +
@@ -142,7 +144,7 @@ public class JSONBaseHTML
             "Encodings\", RFC&nbsp;4648, October&nbsp;2006.");
 
         addReferenceEntry (REF_DSKPP,
-            "Doherty, A., Pei, M., Machani, S., Nystrom, M., " +
+            "Doherty, A., Pei, M., Machani, S., and M. Nystrom, " +
             "\"Dynamic Symmetric Key Provisioning Protocol (DSKPP)\", RFC&nbsp;6063, December&nbsp;2010.");
 
         addReferenceEntry (REF_CMP, "Adams, C., Farrell, S., Kause, T., and T. Mononen, " +
@@ -153,9 +155,13 @@ public class JSONBaseHTML
             "\"Lightweight Directory Access Protocol (LDAP): String Representation of Distinguished Names\", " +
             "RFC&nbsp;4514, June&nbsp;2006.");
 
+        addReferenceEntry (REF_BRAINPOOL, "Lochter, M., and J. Merkle, " +
+            "\"Elliptic Curve Cryptography (ECC) Brainpool Standard Curves and Curve Generation\", " +
+            "RFC&nbsp;5639, March&nbsp;2010.");
+
         addReferenceEntry (REF_FIPS186,
-            "FIPS PUB 186-4: Digital Signature Standard (DSS). " +
-            "June 2013. U.S. Department of Commerce/National Institute of Standards and Technology.");
+            "\"FIPS PUB 186-4: Digital Signature Standard (DSS)\", " +
+            "U.S. Department of Commerce/National Institute of Standards and Technology, June&nbsp;2013.");
       }
 
     JSONBaseHTML () {}
@@ -955,7 +961,7 @@ public class JSONBaseHTML
                           enumerateAlgorithms (MACAlgorithms.values (), true, false, reference) +
                           "The currently recognized asymmetric key algorithms include:" +
                           enumerateAlgorithms (AsymSignatureAlgorithms.values (), false, true, reference))
-              .addString ("For detailed descriptions of these algorithms, see XML DSig.")
+              .addString ("For detailed descriptions of these algorithms, see XML&nbsp;DSig " + createReference (REF_XMLDSIG) + ".")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureEncoder.KEY_INFO_JSON)
@@ -975,10 +981,10 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("Signature value. " + 
-                  "This value is calculated by applying the algorithm specified in <code>" +
+              .addString ("The signature value is calculated by applying the algorithm specified in <code>" +
                   JSONSignatureEncoder.ALGORITHM_JSON + "</code> using the key specified in <code>" +
-                  JSONSignatureEncoder.KEY_INFO_JSON + "</code> on the <span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
+                  JSONSignatureEncoder.KEY_INFO_JSON +
+                  "</code> on the <span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
                   "canonicalized JSON object.");
 
         addSubItemTable (JSONSignatureEncoder.KEY_INFO_JSON)
@@ -1012,7 +1018,7 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (option)
-              .addString ("A single public key or X.509 certificate path stored in a PEM file accesible via an HTTP URL." + Types.LINE_SEPARATOR +
+              .addString ("A single public key or X.509 certificate path stored in a PEM file accesible via an HTTP&nbsp;URL." + Types.LINE_SEPARATOR +
                           "Key algorithms <b>must</b> be compatible with those specified for ")
               .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
               .addString (".")
@@ -1084,7 +1090,7 @@ public class JSONBaseHTML
                       enumerateAlgorithms (KeyAlgorithms.values (), false, true,  reference))
               .addString (reference ?
   "The NIST algorithms are described in FIPS 186-4 " + createReference (REF_FIPS186) +
-  ", while Brainpool algorithms are covered by RFC&nbsp;5639. " + Types.LINE_SEPARATOR +
+  ", while Brainpool algorithms are covered by RFC&nbsp;5639 " + createReference (REF_BRAINPOOL) + ". " + Types.LINE_SEPARATOR +
   "Compatible EC curves may also be expressed in the XML&nbsp;DSig " +  createReference (REF_XMLDSIG) +
   " notation (<code>urn:oid:1.2.840.10045.3.1.7</code>).": "")
           .newRow ()
