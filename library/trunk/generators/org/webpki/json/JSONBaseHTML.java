@@ -102,11 +102,22 @@ public class JSONBaseHTML
         boolean indented;
         boolean appendix;
         int sequence;
+
+        public String getPrefix ()
+          {
+            if (appendix)
+              {
+                return "Appendix " + (char) ('A' + sequence) + ":&nbsp;";
+              }
+            return String.valueOf (sequence) + ".&nbsp;";
+          }
       }
 
     LinkedHashMap<String,TOCEntry> toc = new LinkedHashMap<String,TOCEntry> ();
     
     int curr_toc_seq = 1;
+    
+    boolean appendix_mode;
     
     public JSONBaseHTML (String[] args, String subsystem_name) throws IOException
       {
@@ -407,9 +418,15 @@ public class JSONBaseHTML
                 SECTION_FONT_SIZE + ";font-family:arial,verdana,helvetica\">" +
                 "Table of Contents</span>" +
              "<table style=\"margin-left:20pt;margin-top:5pt\">");
+            boolean new_tab = true;
             for (String toc_entry : toc.keySet ())
               {
-                String prefix = toc.get (toc_entry).indented ? "" : String.valueOf (toc.get (toc_entry).sequence) + ".&nbsp;";
+                String prefix = toc.get (toc_entry).indented ? "" : toc.get (toc_entry).getPrefix ();
+                if (toc.get (toc_entry).appendix && new_tab)
+                  {
+                    new_tab = false;
+                    s.append ("</table><table style=\"margin-left:20pt;margin-top:5pt\">");
+                  }
                 s.append ("<tr><td style=\"text-align:right\"><a href=\"#")
                  .append (toc.get (toc_entry).link)
                  .append ("\">")
@@ -880,6 +897,7 @@ public class JSONBaseHTML
             TOCEntry te = new TOCEntry ();
             te.link = makeLink (header);
             te.sequence = curr_toc_seq++;
+            te.appendix = appendix_mode;
             if (toc.put (header, te) != null)
               {
                 throw new IOException ("Duplicate TOC: " + header);
@@ -887,8 +905,7 @@ public class JSONBaseHTML
             s.append ("<div style=\"padding:10pt 0pt 10pt 0pt\" id=\"")
              .append (te.link)
              .append ("\"><span style=\"font-size:" + SECTION_FONT_SIZE + "\">")
-             .append (te.sequence)
-             .append (".&nbsp;")
+             .append (te.getPrefix ())
              .append (header)
              .append ("</span></div>");
           }
@@ -1210,6 +1227,7 @@ public class JSONBaseHTML
               .addString (reference ?
   "The NIST algorithms are described in FIPS 186-4 " + createReference (REF_FIPS186) +
   ", while Brainpool algorithms are covered by RFC&nbsp;5639 " + createReference (REF_BRAINPOOL) + ". " + Types.LINE_SEPARATOR +
+  "The algorithm names were derived from the SKS " + createReference (REF_SKS) + " specification. " + Types.LINE_SEPARATOR +
   "Compatible EC curves may also be expressed in the XML&nbsp;DSig " +  createReference (REF_XMLDSIG) +
   " notation (<code>urn:oid:1.2.840.10045.3.1.7</code>).": "")
           .newRow ()
@@ -1295,5 +1313,11 @@ public class JSONBaseHTML
     public void addTOC ()
       {
         new TOC ();
+      }
+
+    public void setAppendixMode ()
+      {
+        curr_toc_seq = 0;
+        appendix_mode = true;
       }
   }

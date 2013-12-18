@@ -628,6 +628,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addProtocolTableEntry ("KeyGen2 Objects").append ("The following tables describe the KeyGen2 JSON structures in detail.");
         
+        json.setAppendixMode ();
+        
         json.sampleRun (KeyGen2HTMLReference.class,
                         "In the following KeyGen2 sample run the client (platform) " +
                         "suggests a suitable image size for logotypes associated with keys." + LINE_SEPARATOR +

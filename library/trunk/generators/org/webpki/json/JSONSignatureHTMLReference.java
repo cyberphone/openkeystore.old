@@ -150,45 +150,48 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             JSONSignature.SIGNATURE_VALUE_JSON + "</a>. " + LINE_SEPARATOR +
             "Path validation (when applicable), is out of scope for JCS, but is <i>preferably</i> carried out as described in X.509 " +
             json.createReference (JSONBaseHTML.REF_X509) +
-            ".");
+            "." + LINE_SEPARATOR +
+            "The next sections cover the JCS format.");
         
-        json.addParagraphObject ("Multiple Signatures").append (
-        "Since JSON properties are single-valued, JCS does not intrinsically support multiple signings of the same object. " +
-        "Although it would be technically feasible using an array of signature objects, this would greatly complicate canonicalization. " +
-        "However, there is a &quot;workaround&quot; which fits most real-world scenarios needing multiple signatures and that is using wrapping signatures. " + LINE_SEPARATOR +
-        "Original signed JSON object:" +
-"<div style=\"padding:10pt 0pt 10pt 20pt\"><code>{<br>" +
-"&nbsp;&nbsp;&quot;TimeStamp&quot;: &quot;2013-08-30T07:56:08+02:00&quot;,<br>" +
-"&nbsp;&nbsp;&quot;ID&quot;: &quot;lADU_sO067Wlgoo52-9L&quot;,<br>" +
-"&nbsp;&nbsp;&quot;Data&quot;: [&quot;One&quot;,&quot;Two&quot;,&quot;Three&quot;],<br>" +
-"&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><i>Original signature...</i><code><br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
-"}</code></div>" +
-"Dual-signed JSON object:" +
-"<div style=\"padding:10pt 0pt 10pt 20pt\"><code>{<br>" +
-"&nbsp;&nbsp;&quot;Container&quot;:<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;TimeStamp&quot;: &quot;2013-08-30T07:56:08+02:00&quot;,<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;ID&quot;: &quot;lADU_sO067Wlgoo52-9L&quot;,<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Data&quot;: [&quot;One&quot;,&quot;Two&quot;,&quot;Three&quot;],<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><i>Original signature...</i><code><br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;},<br>" +
-"&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><i>Wrapping signature...</i><code><br>" +
-"&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
-"}</code></div>" +
-        "That is, using JCS there is no distinction between multiple signatures and counter-signatures.");
-
         json.addDataTypesDescription ("JCS consists of a top-level <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> property holding a composite JSON object. " + LINE_SEPARATOR);
 
         json.addProtocolTableEntry ("JCS Objects")
           .append ("The following tables describe the JCS JSON structures in detail.");
+        
+        json.setAppendixMode ();
+
+        json.addParagraphObject ("Multiple Signatures").append (
+            "Since JSON properties are single-valued, JCS does not intrinsically support multiple signings of the same object. " +
+            "Although it would be technically feasible using an array of signature objects, this would greatly complicate canonicalization. " +
+            "However, there is a &quot;workaround&quot; which fits most real-world scenarios needing multiple signatures and that is using wrapping signatures. " + LINE_SEPARATOR +
+            "Original signed JSON object:" +
+    "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>{<br>" +
+    "&nbsp;&nbsp;&quot;TimeStamp&quot;: &quot;2013-08-30T07:56:08+02:00&quot;,<br>" +
+    "&nbsp;&nbsp;&quot;ID&quot;: &quot;lADU_sO067Wlgoo52-9L&quot;,<br>" +
+    "&nbsp;&nbsp;&quot;Data&quot;: [&quot;One&quot;,&quot;Two&quot;,&quot;Three&quot;],<br>" +
+    "&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><i>Original signature...</i><code><br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
+    "}</code></div>" +
+    "Dual-signed JSON object:" +
+    "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>{<br>" +
+    "&nbsp;&nbsp;&quot;Container&quot;:<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;TimeStamp&quot;: &quot;2013-08-30T07:56:08+02:00&quot;,<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;ID&quot;: &quot;lADU_sO067Wlgoo52-9L&quot;,<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Data&quot;: [&quot;One&quot;,&quot;Two&quot;,&quot;Three&quot;],<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><i>Original signature...</i><code><br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;},<br>" +
+    "&nbsp;&nbsp;&quot;Signature&quot;:<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><i>Wrapping signature...</i><code><br>" +
+    "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
+    "}</code></div>" +
+            "That is, using JCS there is no distinction between multiple signatures and counter-signatures.");
 
         json.addParagraphObject ("Usage in Applications").append ("JCS as well as the freestanding sub-objects <a href=\"#" + 
             JSONSignatureDecoder.KEY_INFO_JSON + "." + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
