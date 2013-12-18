@@ -581,15 +581,18 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           }
         json = new JSONBaseHTML (args, "KeyGen2 - Credential Enrollment and Management Protocol");
         
-        json.addParagraphObject ().append ("<div style=\"text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">KeyGen2</span>" +
+        json.addParagraphObject ().append ("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">KeyGen2</span>" +
              "<br><span style=\"font-size:" + JSONBaseHTML.SECTION_FONT_SIZE + "\">&nbsp;<br>Credential Enrollment and Management Protocol</span></div>");
+        
+        json.addTOC ();
         
         json.addParagraphObject ("Introduction").append ("KeyGen2 is a web-based protocol for enrolling and managing credentials like X.509 certificates ")
             .append (json.createReference (JSONBaseHTML.REF_X509))
             .append (". " +
                      "The protocol is a part of a security architecture which at the core " +
-                     "consists of SKS (Secure Key Store)." + LINE_SEPARATOR +
-                     "The KeyGen2 protocol is expressed as a set of JSON ")
+                     "consists of SKS (Secure Key Store) ")
+            .append (json.createReference (JSONBaseHTML.REF_SKS))
+            .append ("." + LINE_SEPARATOR + " The KeyGen2 protocol is expressed as a set of JSON ")
             .append (json.createReference (JSONBaseHTML.REF_JSON))
             .append (" objects. " +
                      "This document contains a description of these objects and how they interact, " +
@@ -597,7 +600,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .append (json.createReference (JSONBaseHTML.REF_SKS))
             .append ("." + LINE_SEPARATOR +
                      "Parts of the protocol rely on cryptographic constructs using JSON which " +
-                     "were created as a part of the KeyGen2 project, but recently have become a project "+
+                     "initially were created for the KeyGen2 project, but later became a project "+
                      "of its own: JSON Cleartext Signature ")
              .append (json.createReference (JSONBaseHTML.REF_JCS))
              .append (".");
@@ -608,13 +611,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                      "mandates a two-layer client architecture</i> where the " +
                      "outermost part is talking to the outside world (user and issuer), " +
                      "while an inner part does the communication with the SKS. " +
-                     "That is, the client implementation acts as &quot;proxy&quot; enabling the use of a JSON-based, " +
+                     "That is, the client implementation acts as &quot;proxy&quot; enabling the use of a cleartext, JSON-based, " +
                      "fairly high-level protocol with issuer, in spite of the fact that SKS only deals with " +
-                     "low-level binary objects." + LINE_SEPARATOR +
+                     "low-level binary data." + LINE_SEPARATOR +
                      "Another core proxy task is minimizing network roundtrips through SKS command aggregation." + LINE_SEPARATOR +
                      "Although KeyGen2 depends on a proxy for doing the &quot;Heavy Lifting&quot;, " +
-                     "E2ES (End To End Security) is still maintained. " +LINE_SEPARATOR +
-                     "For a detailed description of the proxy scheme, consult the SKS architecture document ")
+                     "E2ES (End To End Security) is achieved through the use of a <i>dynamically created shared secret</i>, " +
+                     "which is only known by the SKS and the issuer. " +LINE_SEPARATOR +
+                     "For a detailed description of the proxy scheme and the E2ES solution, consult the SKS architecture document ")
             .append (json.createReference (JSONBaseHTML.REF_SKS))
             .append (".");
 
@@ -622,7 +626,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addDataTypesDescription ("");
         
-        json.addProtocolTableEntry ();
+        json.addProtocolTableEntry ("JSON Objects").append ("The following tables represent the KeyGen2 protocol.");
         
         json.sampleRun (KeyGen2HTMLReference.class,
                         "In the following KeyGen2 sample run the client (platform) " +
@@ -1843,7 +1847,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                .setType (WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("Encrypted PKCS #8 object. See <code>SKS:importPrivateKey</code>.")
+              .addString ("Encrypted PKCS #8 ")
+              .addString (json.createReference (JSONBaseHTML.REF_PKCS8))
+              .addString (" object. See <code>SKS:importPrivateKey</code>.")
           .newExtensionRow (new MAC ("import* </code> methods<code>"));
 
         json.addSubItemTable (CLIENT_ATTRIBUTES_JSON)
@@ -1934,7 +1940,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("<code>" + SERVER_EPHEMERAL_KEY_JSON + "</code> <b>must</b> be an EC key matching the capabilities of the SKS.");
+              .addString ("<code>" + SERVER_EPHEMERAL_KEY_JSON + 
+                          "</code> <b>must</b> be an EC key matching the capabilities of the SKS.");
       
         json.addSubItemTable (CLIENT_EPHEMERAL_KEY_JSON)
           .newRow ()
@@ -1945,7 +1952,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("<code>" + CLIENT_EPHEMERAL_KEY_JSON + "</code> <b>must</b> be an EC key using the same curve as <code>" + 
+              .addString ("<code>" + CLIENT_EPHEMERAL_KEY_JSON + 
+                          "</code> <b>must</b> be an EC key using the same curve as <code>" + 
                           SERVER_EPHEMERAL_KEY_JSON + "</code>.");
 
         json.addJSONSignatureDefinitions (false);

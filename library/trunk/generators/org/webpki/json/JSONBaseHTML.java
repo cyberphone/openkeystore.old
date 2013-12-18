@@ -65,6 +65,8 @@ public class JSONBaseHTML
     
     public static final String REF_BASE64              = "RFC4648";
     
+    public static final String REF_PEM                 = "PEM";
+    
     public static final String REF_URI                 = "RFC3986";
 
     public static final String REF_DSKPP               = "RFC6063";
@@ -75,20 +77,32 @@ public class JSONBaseHTML
 
     public static final String REF_LDAP_NAME           = "RFC4514";
 
+    public static final String REF_PKCS8               = "RFC5208";
+
     public static final String REF_BRAINPOOL           = "RFC5639";
     
     public static final String REF_FIPS186             = "FIPS-186-4";
+
+    public static final String REF_WEBPKI_FOR_ANDROID  = "W4A";
 
     String file_name;
     String subsystem_name;
     
     class Reference
-    {
-      String html_description;
-      boolean referenced;
-    }
+      {
+        String html_description;
+        boolean referenced;
+      }
     
     LinkedHashMap<String,Reference> references = new LinkedHashMap<String,Reference> ();
+
+    class TOCEntry
+      {
+        String link;
+        boolean indented;
+      }
+
+    LinkedHashMap<String,TOCEntry> toc = new LinkedHashMap<String,TOCEntry> ();
     
     public JSONBaseHTML (String[] args, String subsystem_name) throws IOException
       {
@@ -109,7 +123,7 @@ public class JSONBaseHTML
 
         addReferenceEntry (REF_XMLDSIG,
             "\"XML-Signature Syntax and Processing\", D. Eastlake " +
-            "3rd, J. Reagle, & D. Solo, June&nbsp;2008. " +
+            "3rd, J. Reagle, D. Solo, June&nbsp;2008. " +
             "<a href=\"http://www.w3.org/TR/xmldsig-core/\">http://www.w3.org/TR/xmldsig-core/</a>");
 
         addReferenceEntry (REF_XMLENC,
@@ -128,7 +142,11 @@ public class JSONBaseHTML
             "https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf</a>, " +
             "<span style=\"white-space: nowrap\">V0.96, December 2013.</span>");
 
-        addReferenceEntry (REF_JOSE,
+        addReferenceEntry (REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
+            "<a href=\"https://play.google.com/store/apps/details?id=org.webpki.mobile.android\">" +
+            "https://play.google.com/store/apps/details?id=org.webpki.mobile.android</a>");
+
+       addReferenceEntry (REF_JOSE,
             "Jones, M. et al, Work in progress, " +
             "<a href=\"https://ietf.org/wg/jose/\">" +
             "https://ietf.org/wg/jose/</a>, <span style=\"white-space: nowrap\">December&nbsp;2013.</span>");
@@ -143,6 +161,10 @@ public class JSONBaseHTML
             "Josefsson, S., \"The Base16, Base32, and Base64 Data " +
             "Encodings\", RFC&nbsp;4648, October&nbsp;2006.");
 
+        addReferenceEntry (REF_PEM,
+            "Josefsson, S., \"Text Encodings of PKIX and CMS Structures\", " +
+            "I-D, draft-josefsson-pkix-textual-02, October&nbsp;2013.");
+
         addReferenceEntry (REF_DSKPP,
             "Doherty, A., Pei, M., Machani, S., and M. Nystrom, " +
             "\"Dynamic Symmetric Key Provisioning Protocol (DSKPP)\", RFC&nbsp;6063, December&nbsp;2010.");
@@ -154,6 +176,11 @@ public class JSONBaseHTML
         addReferenceEntry (REF_LDAP_NAME, "Zeilenga, K., " +
             "\"Lightweight Directory Access Protocol (LDAP): String Representation of Distinguished Names\", " +
             "RFC&nbsp;4514, June&nbsp;2006.");
+
+        addReferenceEntry (REF_PKCS8,
+            "Kaliski, B., \"Public-Key Cryptography Standards (PKCS) #8: " +
+            "Private-Key Information Syntax Specification Version 1.2\", " +
+            "RFC&nbsp;5208, May&nbsp;2008.");
 
         addReferenceEntry (REF_BRAINPOOL, "Lochter, M., and J. Merkle, " +
             "\"Elliptic Curve Cryptography (ECC) Brainpool Standard Curves and Curve Generation\", " +
@@ -362,6 +389,34 @@ public class JSONBaseHTML
           }
       }
 
+    class TOC extends Content
+      {
+        TOC ()
+          {
+            super ();
+          }
+
+        @Override
+        String getHTML () throws IOException
+          {
+            StringBuffer s = new StringBuffer ("<div><span style=\"font-size:" + 
+                SECTION_FONT_SIZE + ";font-family:arial,verdana,helvetica\">" +
+                "Table of Contents</span>" +
+             "<table style=\"margin-left:20pt;margin-top:5pt\">");
+            for (String toc_entry : toc.keySet ())
+              {
+                s.append ("<tr><td style=\"padding-left:")
+                 .append (toc.get (toc_entry).indented ? 20 : 0)
+                 .append ("pt\"><a href=\"#")
+                 .append (toc.get (toc_entry).link)
+                 .append ("\">")
+                 .append (toc_entry)
+                 .append ("</a></td></tr>");
+              }
+            return s.append ("</table></div>").toString ();
+          }
+      }
+
     public interface Extender
       {
         ProtocolObject.Row.Column execute (ProtocolObject.Row.Column column) throws IOException;
@@ -453,7 +508,7 @@ public class JSONBaseHTML
                     if (property)
                       {
                         addString ("\" id=\"");
-                        addString (protocols[0]);
+                        addString (makeLink (protocols[0]));
                         addString (".");
                         addString (string.charAt (0) == '@' ? string.substring (1) : string);
                       }
@@ -644,7 +699,7 @@ public class JSONBaseHTML
                     next = true;
                   }
                 s.append ("<span id=\"")
-                    .append (protocol)
+                    .append (makeLink (protocol))
                     .append ("\">")
                     .append (main_object ? "" : "<i>")
                     .append (protocol)
@@ -737,6 +792,26 @@ public class JSONBaseHTML
 
     public String getHTML () throws IOException
       {
+        LinkedHashMap<String,TOCEntry> save = toc;
+        toc = new LinkedHashMap<String,TOCEntry> ();
+        for (String toc_entry : save.keySet ())
+          {
+            toc.put (toc_entry, save.get (toc_entry));
+            if (toc_entry.equals (protocol_table_header))
+              {
+                for (ProtocolObject protocol_object : protocol_objects)
+                  {
+                    for (String prot : protocol_object.protocols)
+                      {
+                        TOCEntry te = new TOCEntry ();
+                        te.link = makeLink (prot);
+                        te.indented = true;
+                        toc.put (prot, te);
+                      }
+                  }
+              }
+          }
+        
         html = new StringBuffer (
             "<!DOCTYPE html>" +
             "<html><head><title>")
@@ -750,11 +825,11 @@ public class JSONBaseHTML
                  "a:link {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
                  "a:visited {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
                  "a:active {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
-                 "</style></head><body>" +
+                 "</style></head><body style=\"margin:15pt\">" +
                  "<div style=\"position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible\"><a href=\"http://webpki.org\" title=\"WebPKI.org\">" +
                  "<img src=\"data:image/gif;base64,")
           .append (new Base64 (false).getBase64StringFromBinary (ArrayUtil.getByteArrayFromInputStream (getClass().getResourceAsStream ("webpki-logo.gif"))))
-          .append ("\" style=\"border-width:1px;border-style:solid;border-color:blue\" alt=\"WebPKI.org logo...\"></a></div>");
+          .append ("\" style=\"border-width:1px;border-style:solid;border-color:blue;box-shadow:3pt 3pt 3pt #D0D0D0\" alt=\"WebPKI.org logo...\"></a></div>");
         for (Content division_object : division_objects)
           {
             html.append (division_object.getHTML ());
@@ -782,25 +857,47 @@ public class JSONBaseHTML
         return new ProtocolObject (sub_items, false);
       }
 
-    public StringBuffer addParagraphObject ()
+    public StringBuffer addParagraphObject () throws IOException
       {
         return addParagraphObject (null);
       }
 
-    public StringBuffer addParagraphObject (String header)
+    public StringBuffer addParagraphObject (String header) throws IOException
       {
         Paragraph p = new Paragraph ();
         StringBuffer s = new StringBuffer ("<div style=\"width:" + PAGE_WIDTH + "\">");
         if (header != null)
           {
-            s.append ("<div style=\"padding:10pt 0pt 10pt 0pt\"><span style=\"font-size:" + SECTION_FONT_SIZE + "\">")
+            TOCEntry te = new TOCEntry ();
+            te.link = makeLink (header);
+            if (toc.put (header, te) != null)
+              {
+                throw new IOException ("Duplicate TOC: " + header);
+              }
+            s.append ("<div style=\"padding:10pt 0pt 10pt 0pt\" id=\"")
+             .append (te.link)
+             .append ("\"><span style=\"font-size:" + SECTION_FONT_SIZE + "\">")
              .append (header)
              .append ("</span></div>");
           }
         return p.local_html = s;
       }
 
-    public void addDataTypesDescription (String intro)
+    String makeLink (String header)
+      {
+        StringBuffer s = new StringBuffer ();
+        for (char c : header.toCharArray ())
+          {
+            if (c == ' ')
+              {
+                c = '_';
+              }
+            s.append (c);
+          }
+        return s.toString ();
+      }
+
+    public void addDataTypesDescription (String intro) throws IOException
       {
         addParagraphObject ("Notation").append (intro).append (
             "JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a <a href=\"#\">link</a> to the actual definition. " + Types.LINE_SEPARATOR +
@@ -841,13 +938,16 @@ public class JSONBaseHTML
         return s.append ("</ul>").toString ();
       }
 
-
-    public void addProtocolTableEntry ()
+    String protocol_table_header;
+    
+    public StringBuffer addProtocolTableEntry (String header) throws IOException
       {
+        StringBuffer s = addParagraphObject (protocol_table_header = header);
         new ProtocolTable ();
+        return s;
       }
 
-    public void addReferenceTable ()
+    public void addReferenceTable () throws IOException
       {
         addParagraphObject ("References");
         new References ();
@@ -918,7 +1018,7 @@ public class JSONBaseHTML
 
     StringBuffer doc_history;
     
-    public void addDocumentHistoryLine (String date, String version, String comment)
+    public void addDocumentHistoryLine (String date, String version, String comment) throws IOException
       {
         if (doc_history == null)
           {
@@ -1018,8 +1118,13 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (option)
-              .addString ("A single public key or X.509 certificate path stored in a PEM file accesible via an HTTP&nbsp;URL." + Types.LINE_SEPARATOR +
-                          "Key algorithms <b>must</b> be compatible with those specified for ")
+              .addString ("A single public key or X.509 ")
+              .addString (createReference (REF_X509))
+              .addString (" certificate path stored in a PEM ")
+              .addString (createReference (REF_PEM))
+              .addString (" file accesible via an HTTP&nbsp;URL." + 
+                          Types.LINE_SEPARATOR +
+                          "The <i>signing key's</i> algorithm <b>must</b> be compatible with those specified for ")
               .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
               .addString (".")
           .newRow ()
@@ -1031,9 +1136,11 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (option)
-              .addString ("Sorted X.509 certificate path where the <i>first</i> element in the array <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
+              .addString ("Sorted X.509 ")
+              .addString (createReference (REF_X509))
+              .addString (" certificate path where the <i>first</i> element in the array <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
                           "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete." + Types.LINE_SEPARATOR +
-                          "Key algorithms <b>must</b> be compatible with those specified for ")
+                          "The <i>signing key's</i> algorithm <b>must</b> be compatible with those specified for ")
               .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
               .addString (".")   .newRow ()
             .newColumn ()
@@ -1171,5 +1278,10 @@ public class JSONBaseHTML
               .addString ("Subject distinguished name in LDAP ")
               .addString (createReference (REF_LDAP_NAME))
               .addString (" notation.");
+      }
+
+    public void addTOC ()
+      {
+        new TOC ();
       }
   }

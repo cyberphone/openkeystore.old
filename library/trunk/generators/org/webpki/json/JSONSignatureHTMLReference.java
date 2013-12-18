@@ -36,9 +36,11 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
       {
         json = new JSONBaseHTML (args, "JCS - JSON Cleartext Signature");
         
-        json.addParagraphObject ().append ("<p style=\"text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">JCS</span>" +
-            "<br><span style=\"font-size:" + JSONBaseHTML.SECTION_FONT_SIZE + "\">&nbsp;<br>JSON Cleartext Signature</span></p>");
+        json.addParagraphObject ().append ("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">JCS</span>" +
+            "<br><span style=\"font-size:" + JSONBaseHTML.SECTION_FONT_SIZE + "\">&nbsp;<br>JSON Cleartext Signature</span></div>");
         
+        json.addTOC ();
+
         json.addParagraphObject ("Introduction").append ("JCS is a scheme for signing data expressed as JSON ")
           .append (json.createReference (JSONBaseHTML.REF_JSON))
           .append (" objects. " +
@@ -108,17 +110,17 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "properties including possible child objects of the JSON " +
             "object holding the <code>Signature</code> property except for the actual <code>" + JSONSignature.SIGNATURE_VALUE_JSON + "</code> property.");
 
-        json.addParagraphObject ("Canonicalization").append (
-            "Prerequisite: A JSON object in accordance with the rules outlined in ")
+        json.addParagraphObject ("Canonicalization and Signature Validation").append (
+            "Prerequisite: A JSON object in accordance with ")
           .append (json.createReference (JSONBaseHTML.REF_JSON))
-          .append ("." + LINE_SEPARATOR +
+          .append (" containing a <code>Signature</code> property." + LINE_SEPARATOR +
             "Parsing Restrictions:<ul>" +
             "<li>The original property order <b>must</b> be preserved.</li>" +
             "<li style=\"padding-top:4pt\">Property names <b>must not</b> be empty (<code>&quot;&quot;</code>)." +
             "<li style=\"padding-top:4pt\">Property names within an object <b>must</b> be <i>unique</i>.</li>" +
             "</ul>The canonicalization steps are as follows:<ul>" +
-            "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings having a value <= ASCII space (0x32).</li>" +
-            "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences <b>must</b> be honored on <i>input</i> within quoted strings but be treated as a degenerate equivalents to <code>'/'</code> by rewriting them.</li>" +
+            "<li>Whitespace <b>must</b> be removed which in practical terms means removal of all characters outside of quoted strings having a value &lt;= ASCII space (0x32).</li>" +
+            "<li style=\"padding-top:4pt\">JSON <code>'\\/'</code> escape sequences <b>must</b> be honored on <i>input</i> within quoted strings but be treated as a &quot;degenerate&quot; equivalents to <code>'/'</code> by rewriting them.</li>" +
             "<li style=\"padding-top:4pt\">Unicode escape sequences (<code>'\\uhhhh'</code>) within quoted strings <b>must</b> be normalized. " +
             "If the Unicode value falls within the traditional ASCII control character range (0x00 - 0x1f), " +
             "it <b>must</b> be rewritten in lower-case hexadecimal notation unless it is one of the pre-defined " +
@@ -137,15 +139,18 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
              JSONSignature.SIGNATURE_VALUE_JSON + "</code> " + " in the <code>Signature</code> object), <b>must</b> be <i>excluded</i> from the canonicalization process.</li></ul>" +
             "Applied on the sample signature, a proper canonicalization implementation should return the following JSON object:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
-"{&quot;Now&quot;:&quot;2013-12-10T19:54:13+01:00&quot;,&quot;PaymentRequest&quot;:{&quot;Currency&quot;:&quot;USD&quot;,&quot;VAT&quot;:1.45,&quot;Specification&quot;:[{&quot;Units&quot;:3,&quot;Descr<br>" +
-"iption&quot;:&quot;USB cable&quot;,&quot;SKU&quot;:&quot;TR-46565666&quot;,&quot;UnitPrice&quot;:<b style=\"color:red;background:Yellow\">4.50</b>},{&quot;Units&quot;:1,&quot;Description&quot;:&quot;4G Router&quot;,&quot;SKU&quot;:&quot;JK-56566655&quot;,<br>" +
-"&quot;UnitPrice&quot;:39.99}]},&quot;EscapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A<b style=\"color:red;background:Yellow\">B</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;Signature&quot;:{&quot;Algorithm&quot;:&quot;http://www.w3.org/2001/04/xmldsig-more#<br>" +
-"ecdsa-sha256&quot;,&quot;KeyInfo&quot;:{&quot;PublicKey&quot;:{&quot;EC&quot;:{&quot;NamedCurve&quot;:&quot;http://xmlns.webpki.org/sks/algorithm#ec.nist.p256&quot;,&quot;X&quot;:&quot;<br>" +
-"lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=&quot;,&quot;Y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA=&quot;}}}}}</code></div>" +
-"The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the canonicalization process. " +
-"<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
-"For a description on how the canonicalized data is to be used, see <a href=\"#Signature." + JSONSignature.SIGNATURE_VALUE_JSON + "\">" + 
- JSONSignature.SIGNATURE_VALUE_JSON + "</a>.");
+            "{&quot;Now&quot;:&quot;2013-12-10T19:54:13+01:00&quot;,&quot;PaymentRequest&quot;:{&quot;Currency&quot;:&quot;USD&quot;,&quot;VAT&quot;:1.45,&quot;Specification&quot;:[{&quot;Units&quot;:3,&quot;Descr<br>" +
+            "iption&quot;:&quot;USB cable&quot;,&quot;SKU&quot;:&quot;TR-46565666&quot;,&quot;UnitPrice&quot;:<b style=\"color:red;background:Yellow\">4.50</b>},{&quot;Units&quot;:1,&quot;Description&quot;:&quot;4G Router&quot;,&quot;SKU&quot;:&quot;JK-56566655&quot;,<br>" +
+            "&quot;UnitPrice&quot;:39.99}]},&quot;EscapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A<b style=\"color:red;background:Yellow\">B</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;Signature&quot;:{&quot;Algorithm&quot;:&quot;http://www.w3.org/2001/04/xmldsig-more#<br>" +
+            "ecdsa-sha256&quot;,&quot;KeyInfo&quot;:{&quot;PublicKey&quot;:{&quot;EC&quot;:{&quot;NamedCurve&quot;:&quot;http://xmlns.webpki.org/sks/algorithm#ec.nist.p256&quot;,&quot;X&quot;:&quot;<br>" +
+            "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=&quot;,&quot;Y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA=&quot;}}}}}</code></div>" +
+            "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the canonicalization process. " +
+            "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
+            "The signature can now be validated using the method specified in <a href=\"#Signature." + JSONSignature.SIGNATURE_VALUE_JSON + "\">" + 
+            JSONSignature.SIGNATURE_VALUE_JSON + "</a>. " + LINE_SEPARATOR +
+            "Path validation (when applicable), is out of scope for JCS, but is <i>preferably</i> carried out as described in X.509 " +
+            json.createReference (JSONBaseHTML.REF_X509) +
+            ".");
         
         json.addParagraphObject ("Multiple Signatures").append (
         "Since JSON properties are single-valued, JCS does not intrinsically support multiple signings of the same object. " +
@@ -182,7 +187,16 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 
         json.addDataTypesDescription ("JCS consists of a top-level <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> property holding a composite JSON object. " + LINE_SEPARATOR);
 
-        json.addProtocolTableEntry ();
+        json.addProtocolTableEntry ("JSON Objects");
+
+        json.addParagraphObject ("Usage in Applications").append ("JCS as well as the freestanding sub-objects <a href=\"#" + 
+            JSONSignatureDecoder.KEY_INFO_JSON + "." + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
+            JSONSignatureDecoder.PUBLIC_KEY_JSON + "</a> and <a href=\"#" +
+            JSONSignatureDecoder.KEY_INFO_JSON + "." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + "\">" +
+            JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
+            "</a>, have been succesfully integrated in a proof-of-concept application running on Android ")
+         .append (json.createReference (JSONBaseHTML.REF_WEBPKI_FOR_ANDROID))
+         .append (".");
 
         json.addParagraphObject ("Aknowledgements").append ("During the initial phases of the design process, highly appreciated " +
                                  "feedback were provided by Manu&nbsp;Sporny, Jim&nbsp;Klo, James&nbsp;Manger, " +
@@ -198,15 +212,15 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
                                                    "(<a href=\"https://code.google.com/p/openkeystore\">https://code.google.com/p/openkeystore</a>).");
 
         json.addProtocolTable ("JCS Top-level Property")
-        .newRow ()
-          .newColumn ()
-            .addProperty (JSONSignature.SIGNATURE_JSON)
-            .addLink (JSONSignature.SIGNATURE_JSON)
-          .newColumn ()
-            .setType (WEBPKI_DATA_TYPES.OBJECT)
-          .newColumn ()
-          .newColumn ()
-            .addString ("The mandatory top-level property");
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignature.SIGNATURE_JSON)
+              .addLink (JSONSignature.SIGNATURE_JSON)
+            .newColumn ()
+              .setType (WEBPKI_DATA_TYPES.OBJECT)
+            .newColumn ()
+            .newColumn ()
+              .addString ("The mandatory top-level property");
             
         json.addJSONSignatureDefinitions (true);
 
