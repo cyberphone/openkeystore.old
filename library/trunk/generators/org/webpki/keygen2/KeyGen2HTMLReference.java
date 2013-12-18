@@ -626,7 +626,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addDataTypesDescription ("");
         
-        json.addProtocolTableEntry ("JSON Objects").append ("The following tables represent the KeyGen2 protocol.");
+        json.addProtocolTableEntry ("KeyGen2 Objects").append ("The following tables describe the KeyGen2 JSON structures in detail.");
         
         json.sampleRun (KeyGen2HTMLReference.class,
                         "In the following KeyGen2 sample run the client (platform) " +

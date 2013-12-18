@@ -187,31 +187,34 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 
         json.addDataTypesDescription ("JCS consists of a top-level <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code> property holding a composite JSON object. " + LINE_SEPARATOR);
 
-        json.addProtocolTableEntry ("JSON Objects");
+        json.addProtocolTableEntry ("JCS Objects")
+          .append ("The following tables describe the JCS JSON structures in detail.");
 
         json.addParagraphObject ("Usage in Applications").append ("JCS as well as the freestanding sub-objects <a href=\"#" + 
             JSONSignatureDecoder.KEY_INFO_JSON + "." + JSONSignatureDecoder.PUBLIC_KEY_JSON + "\">" +
             JSONSignatureDecoder.PUBLIC_KEY_JSON + "</a> and <a href=\"#" +
             JSONSignatureDecoder.KEY_INFO_JSON + "." + JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON + "\">" +
             JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
-            "</a>, have been succesfully integrated in a proof-of-concept application running on Android ")
+            "</a>, have been successfully integrated in a proof-of-concept application running on Android ")
          .append (json.createReference (JSONBaseHTML.REF_WEBPKI_FOR_ANDROID))
          .append (".");
 
         json.addParagraphObject ("Aknowledgements").append ("During the initial phases of the design process, highly appreciated " +
                                  "feedback were provided by Manu&nbsp;Sporny, Jim&nbsp;Klo, James&nbsp;Manger, " +
                                  "Jeffrey&nbsp;Walton, David&nbsp;Chadwick, Jim&nbsp;Schaad, David&nbsp;Waite, " +
-                                 "Douglas&nbsp;Crockford, Arne&nbsp;Riiber, Brian&nbsp;Campbell and others.");
+                                 "Douglas&nbsp;Crockford, Arne&nbsp;Riiber, Brian&nbsp;Campbell and others."
+                                 + LINE_SEPARATOR +
+        "Funding has been provided by <i>PrimeKey Solutions AB</i> and the <i>Swedish Innovation Board (VINNOVA)</i>.");
         
         json.addReferenceTable ();
         
-        json.addDocumentHistoryLine ("2013-12-17", "0.3", "Initial publication in HTML");
+        json.addDocumentHistoryLine ("2013-12-17", "0.3", "Initial publication in HTML5");
 
         json.addParagraphObject ("Author").append ("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                    "of the SKS/KeyGen2 project " +
                                                    "(<a href=\"https://code.google.com/p/openkeystore\">https://code.google.com/p/openkeystore</a>).");
 
-        json.addProtocolTable ("JCS Top-level Property")
+        json.addProtocolTable ("Top-level Property")
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignature.SIGNATURE_JSON)

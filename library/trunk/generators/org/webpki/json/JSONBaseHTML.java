@@ -95,14 +95,18 @@ public class JSONBaseHTML
       }
     
     LinkedHashMap<String,Reference> references = new LinkedHashMap<String,Reference> ();
-
+    
     class TOCEntry
       {
         String link;
         boolean indented;
+        boolean appendix;
+        int sequence;
       }
 
     LinkedHashMap<String,TOCEntry> toc = new LinkedHashMap<String,TOCEntry> ();
+    
+    int curr_toc_seq = 1;
     
     public JSONBaseHTML (String[] args, String subsystem_name) throws IOException
       {
@@ -405,7 +409,12 @@ public class JSONBaseHTML
              "<table style=\"margin-left:20pt;margin-top:5pt\">");
             for (String toc_entry : toc.keySet ())
               {
-                s.append ("<tr><td style=\"padding-left:")
+                String prefix = toc.get (toc_entry).indented ? "" : String.valueOf (toc.get (toc_entry).sequence) + ".&nbsp;";
+                s.append ("<tr><td style=\"text-align:right\"><a href=\"#")
+                 .append (toc.get (toc_entry).link)
+                 .append ("\">")
+                 .append (prefix)
+                 .append ("</a></td><td style=\"padding-left:")
                  .append (toc.get (toc_entry).indented ? 20 : 0)
                  .append ("pt\"><a href=\"#")
                  .append (toc.get (toc_entry).link)
@@ -870,6 +879,7 @@ public class JSONBaseHTML
           {
             TOCEntry te = new TOCEntry ();
             te.link = makeLink (header);
+            te.sequence = curr_toc_seq++;
             if (toc.put (header, te) != null)
               {
                 throw new IOException ("Duplicate TOC: " + header);
@@ -877,6 +887,8 @@ public class JSONBaseHTML
             s.append ("<div style=\"padding:10pt 0pt 10pt 0pt\" id=\"")
              .append (te.link)
              .append ("\"><span style=\"font-size:" + SECTION_FONT_SIZE + "\">")
+             .append (te.sequence)
+             .append (".&nbsp;")
              .append (header)
              .append ("</span></div>");
           }
@@ -900,7 +912,7 @@ public class JSONBaseHTML
     public void addDataTypesDescription (String intro) throws IOException
       {
         addParagraphObject ("Notation").append (intro).append (
-            "JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a <a href=\"#\">link</a> to the actual definition. " + Types.LINE_SEPARATOR +
+            "JSON objects are described as tables with associated properties. When a property holds a JSON object this is denoted by a <a href=\"#Notation\">link</a> to the actual definition. " + Types.LINE_SEPARATOR +
             "Properties may either be <i>required</i> (" + MANDATORY + ") or <i>optional</i> (" + OPTIONAL + ") as defined in the &quot;" + REQUIRED_COLUMN + "&quot; column." + Types.LINE_SEPARATOR +
             "Array properties are identified by [&thinsp;]" + JSONBaseHTML.ARRAY_SUBSCRIPT  + "x-y</span> where the range expression represents the valid number of array elements. " + Types.LINE_SEPARATOR +
             "In some JSON objects there is a choice " +
@@ -909,7 +921,7 @@ public class JSONBaseHTML
             "<tr><td>Property selection 1</td><td>Type selection 1</td><td rowspan=\"2\">Req</td><td>Comment selection 1</td></tr>" +
             "<tr><td>Property selection 2</td><td>Type selection 2</td><td>Comment selection 2</td></tr>" +
             "</table>");
-        addParagraphObject ("Data Types").append ("The following table shows how the data types used by this specification are mapped into native JSON types:");
+        addParagraphObject ("Data Types").append ("The table below shows how the data types used by this specification are mapped into native JSON types:");
         new DataTypesTable ();
       }
 
@@ -1122,7 +1134,7 @@ public class JSONBaseHTML
               .addString (createReference (REF_X509))
               .addString (" certificate path stored in a PEM ")
               .addString (createReference (REF_PEM))
-              .addString (" file accesible via an HTTP&nbsp;URL." + 
+              .addString (" file accessible via an HTTP&nbsp;URL." + 
                           Types.LINE_SEPARATOR +
                           "The <i>signing key's</i> algorithm <b>must</b> be compatible with those specified for ")
               .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
@@ -1138,7 +1150,7 @@ public class JSONBaseHTML
               .addString (option)
               .addString ("Sorted X.509 ")
               .addString (createReference (REF_X509))
-              .addString (" certificate path where the <i>first</i> element in the array <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
+              .addString (" certificate path where the <i>first</i> array element <b>must</b> contain the <i style=\"white-space:nowrap\">signature certificate</i>. " +
                           "The certificate path <b>must</b> be <i>contiguous</i> but is not required to be complete." + Types.LINE_SEPARATOR +
                           "The <i>signing key's</i> algorithm <b>must</b> be compatible with those specified for ")
               .addLink (JSONSignatureEncoder.PUBLIC_KEY_JSON)
@@ -1179,7 +1191,7 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (option)
-              .addString ("RSA public key.");
+              .addString ("RSA public key. <i>Algorithm restrictions</i>: 1024-4096 bit keys appear to work just about &quot;everywhere&quot;.");
 
         addSubItemTable (JSONSignatureEncoder.EC_JSON)
           .newRow ()
