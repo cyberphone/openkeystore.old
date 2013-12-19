@@ -29,7 +29,7 @@ import java.security.cert.X509Certificate;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
-import org.webpki.util.Base64;
+import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
@@ -61,11 +61,6 @@ public class JSONObjectReader implements Serializable
           }
         json.read_flag.add (name);
         return value;
-      }
-
-    static byte[] getBinaryFromBase64 (String base64) throws IOException
-      {
-        return new Base64().getBinaryFromBase64String (base64);
       }
 
     String getString (String name, JSONTypes expected) throws IOException
@@ -101,7 +96,7 @@ public class JSONObjectReader implements Serializable
 
     public byte[] getBinary (String name) throws IOException
       {
-        return getBinaryFromBase64 (getString (name));
+        return Base64URL.getBinaryFromBase64URL (getString (name));
       }
 
     public BigInteger getBigInteger (String name) throws IOException
@@ -234,7 +229,7 @@ public class JSONObjectReader implements Serializable
         Vector<byte[]> blobs = new Vector<byte[]> ();
         for (String blob : getStringArray (name))
           {
-            blobs.add (getBinaryFromBase64 (blob));
+            blobs.add (Base64URL.getBinaryFromBase64URL (blob));
           }
         return blobs;
       }

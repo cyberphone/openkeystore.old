@@ -155,7 +155,7 @@ public class JSONBaseHTML
         addReferenceEntry (REF_SKS, "Rundgren, A., \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
             "<a href=\"https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf\">" +
             "https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf</a>, " +
-            "<span style=\"white-space: nowrap\">V0.96, December 2013.</span>");
+            "<span style=\"white-space: nowrap\">V0.97, December 2013.</span>");
 
         addReferenceEntry (REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
             "<a href=\"https://play.google.com/store/apps/details?id=org.webpki.mobile.android\">" +
@@ -237,10 +237,10 @@ public class JSONBaseHTML
                      "Identifier which <b>must</b> consist of 1-32 characters, where each character is in the range <code>'!'</code> - <code>'~'</code> (0x21 - 0x7e)."),
                      
             BASE64  ("base64", "<i>string</i>",                           REF_BASE64,
-                     "Base64-encoded <a href=\"#Reference." + REF_BASE64 + "\">[" + REF_BASE64 + "]</a> binary data"),
+                     "Base64URL-encoded <a href=\"#Reference." + REF_BASE64 + "\">[" + REF_BASE64 + "]</a> binary data"),
                      
             CRYPTO  ("crypto", "<i>string</i>",                           REF_XMLDSIG,
-                     "Base64-encoded large positive integer.  Equivalent to XML DSig's <a href=\"#Reference." + REF_XMLDSIG + "\">[" + REF_XMLDSIG + "]</a> <code>ds:CryptoBinary</code>"),
+                     "Base64URL-encoded large positive integer. Functionally equivalent to XML DSig's <a href=\"#Reference." + REF_XMLDSIG + "\">[" + REF_XMLDSIG + "]</a> <code>ds:CryptoBinary</code>"),
                      
             DATE    ("date",   "<i>string</i>",                           null,
                      "ISO date-time <code>YYYY-MM-DDThh:mm:ss{timezone}</code>."),

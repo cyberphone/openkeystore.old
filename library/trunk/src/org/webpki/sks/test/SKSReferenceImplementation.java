@@ -3336,7 +3336,6 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
         boolean pin_protection = true;
         if (device_pin_protection)
           {
-            pin_policy_id = CRYPTO_STRING_DEVICE_PIN;
             if (pin_policy_handle != 0)
               {
                 provisioning.abort ("Device PIN mixed with PIN policy ojbect");
@@ -3403,6 +3402,7 @@ public class SKSReferenceImplementation implements SKSError, SecureKeyStore, Ser
               }
             verifier.addString (CRYPTO_STRING_NOT_AVAILABLE);
           }
+        verifier.addBool (device_pin_protection);
         verifier.addBool (enable_pin_caching);
         verifier.addByte (biometric_protection);
         verifier.addByte (export_protection);

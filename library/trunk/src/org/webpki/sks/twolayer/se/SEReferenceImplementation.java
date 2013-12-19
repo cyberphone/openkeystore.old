@@ -2224,6 +2224,7 @@ public class SEReferenceImplementation
                 verifier.addArray (encrypted_pin_value);
                 decrypted_pin_value = decrypt (unwrapped_session_key, encrypted_pin_value);
               }
+            verifier.addBool (device_pin_protection);
             verifier.addBool (enable_pin_caching);
             verifier.addByte (biometric_protection);
             verifier.addByte (export_protection);

@@ -701,6 +701,7 @@ public class ProvSess
           {
             key_entry_mac.addArray (encrypted_pin_value);
           }
+        key_entry_mac.addBool (device_pin_protected);
         key_entry_mac.addBool (enable_pin_caching);
         key_entry_mac.addByte (biometric_protection.getSKSValue ());
         key_entry_mac.addByte (actual_export_policy);

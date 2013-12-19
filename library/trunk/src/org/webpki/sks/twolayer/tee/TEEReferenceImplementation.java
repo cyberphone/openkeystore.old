@@ -2473,7 +2473,6 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         boolean pin_protection = true;
         if (device_pin_protection)
           {
-            pin_policy_id = CRYPTO_STRING_DEVICE_PIN;
             if (pin_policy_handle != 0)
               {
                 provisioning.abort ("Device PIN mixed with PIN policy ojbect");

@@ -962,10 +962,7 @@ public class ServerState implements Serializable
             key_pair_mac.addString (key_attestation_algorithm);
             key_pair_mac.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
             key_pair_mac.addString (pin_policy == null ? 
-                                      device_pin_protection ?
-                                          SecureKeyStore.CRYPTO_STRING_DEVICE_PIN
-                                                           : 
-                                          SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE 
+                                      SecureKeyStore.CRYPTO_STRING_NOT_AVAILABLE 
                                                        :
                                       pin_policy.id);
             if (getEncryptedPIN () == null)
@@ -976,6 +973,7 @@ public class ServerState implements Serializable
               {
                 key_pair_mac.addArray (getEncryptedPIN ());
               }
+            key_pair_mac.addBool (device_pin_protection);
             key_pair_mac.addBool (enable_pin_caching);
             key_pair_mac.addByte (biometric_protection == null ?
                        BiometricProtection.NONE.getSKSValue () : biometric_protection.getSKSValue ());

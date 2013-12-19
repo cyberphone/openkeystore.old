@@ -14,8 +14,8 @@
                     "EC": 
                         {
                             "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",
-                            "X": "cpxUxJVt+is8bgWRFm6RuvUkxyv7xJ7PbeT1BCQNNws=",
-                            "Y": "De7jXYsdL46ikHOWeC+V+AcNM/RURpu6ZgcVAxLUwns="
+                            "X": "cpxUxJVt-is8bgWRFm6RuvUkxyv7xJ7PbeT1BCQNNws",
+                            "Y": "De7jXYsdL46ikHOWeC-V-AcNM/RURpu6ZgcVAxLUwns"
                         }
                 }
         }

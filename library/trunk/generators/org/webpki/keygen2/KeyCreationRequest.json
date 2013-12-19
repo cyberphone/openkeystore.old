@@ -13,13 +13,13 @@
              "RetryLimit": 3,
              "Format": "numeric",
              "PatternRestrictions": ["three-in-a-row","sequence"],
-             "MAC": "2aUMRubbEk8Xs62QXlPiFJbYlJ68Sw4Fhu48j4uGKXk=",
+             "MAC": "2aUMRubbEk8Xs62QXlPiFJbYlJ68Sw4Fhu48j4uGKXk",
              "KeyEntrySpecifiers": 
                  [{
                       "ID": "Key.1",
                       "AppUsage": "authentication",
              "KeyAlgorithm": "http://xmlns.webpki.org/sks/algorithm#rsa2048",
-                      "MAC": "BQpWMwSz4EsYgliHH6RY3UNWuLsR3eJVapY0CYOUTtI="
+                      "MAC": "BQpWMwSz4EsYgliHH6RY3UNWuLsR3eJVapY0CYOUTtI"
                   }]
          }]
 }

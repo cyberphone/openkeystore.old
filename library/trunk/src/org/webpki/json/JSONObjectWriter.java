@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.Vector;
 
 import org.webpki.util.ArrayUtil;
-import org.webpki.util.Base64;
+import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
 
 /**
@@ -154,7 +154,7 @@ public class JSONObjectWriter implements Serializable
 
     public JSONObjectWriter setBinary (String name, byte[] value) throws IOException 
       {
-        return setString (name, getBase64 (value));
+        return setString (name, Base64URL.getBase64URLFromBinary (value));
       }
 
     public JSONObjectWriter setObject (String name) throws IOException
@@ -193,7 +193,7 @@ public class JSONObjectWriter implements Serializable
         Vector<String> array = new Vector<String> ();
         for (byte[] value : values)
           {
-            array.add (getBase64 (value));
+            array.add (Base64URL.getBase64URLFromBinary (value));
           }
         return setStringArray (name, array.toArray (new String[0]));
       }
@@ -201,13 +201,6 @@ public class JSONObjectWriter implements Serializable
     public JSONObjectWriter setStringArray (String name, String[] values) throws IOException
       {
         return setStringArray (name, values, JSONTypes.STRING);
-      }
-
-    static String getBase64 (byte[] value) throws IOException
-      {
-        Base64 base64_encoder = new Base64 ();
-        base64_encoder.setLineBreakOn (false);
-        return base64_encoder.getBase64StringFromBinary (value);
       }
 
     /**

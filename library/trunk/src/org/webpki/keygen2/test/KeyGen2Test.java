@@ -381,7 +381,7 @@ public class KeyGen2Test
                   }
                 json.append ("],");
               }
-            json.append (" \"MAC\": \"3dGegeDJ1enpEzCgwdbXJirNZ95wooM6ordOGW/AJ+0=\", \"MaxLength\":8, \"MinLength\":4, \"RetryLimit\":3,");
+            json.append (" \"MAC\": \"3dGegeDJ1enpEzCgwdbXJirNZ95wooM6ordOGW_AJ-0\", \"MaxLength\":8, \"MinLength\":4, \"RetryLimit\":3,");
             return this;
           }
         
@@ -396,7 +396,7 @@ public class KeyGen2Test
                .append (app_usage.getProtocolName ())
                .append ("\", \"ID\":\"Key.")
                .append (++key_id)
-               .append ("\", \"KeyAlgorithm\":\"http://xmlns.webpki.org/sks/algorithm#rsa2048\", \"MAC\":\"Jrqigi79Yw6SoLobsBA5S8b74gTKrIJPh3tQRKci33Y=\"}");
+               .append ("\", \"KeyAlgorithm\":\"http://xmlns.webpki.org/sks/algorithm#rsa2048\", \"MAC\":\"Jrqigi79Yw6SoLobsBA5S8b74gTKrIJPh3tQRKci33Y\"}");
             key_spec = false;
             return this;
           }

@@ -10,10 +10,10 @@
                  {
                      "RSA": 
                          {
-                             "Modulus": "uSW5wpfano32Q6oU3xMkFig0r145DN....jkjy1ENPdBQaafvJnuh4x58WPTsVCvjimw==",
+                             "Modulus": "uSW5wpfano32Q6oU3xMkFig0r145DN....jkjy1ENPdBQaafvJnuh4x58WPTsVCvjimw",
                              "Exponent": "AQAB"
                          }
                  },
-             "KeyAttestation": "gyRmTPdW4UdGdXlLkHf40PPRL9xac31eJnyyBtf7+Io="
+             "KeyAttestation": "gyRmTPdW4UdGdXlLkHf40PPRL9xac31eJnyyBtf7-Io"
          }]
 }
