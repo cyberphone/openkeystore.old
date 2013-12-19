@@ -5,7 +5,7 @@
     "ClientSessionID": "39NMWamKtHumJFfdIGkDrLP-NMB-5Lwo",
     "ServerTime": "2013-12-14T16:33:30+01:00",
     "ClientTime": "2013-12-14T16:33:30+01:00",
-    "SessionAttestation": "KMUpOesC8nDTLpu8PppsSGg1j . . . WiwvUcVpbNudbY14lLks8RQuwoiU=",
+    "SessionAttestation": "KMUpOesC8nDTLpu8PppsSGg1j....WiwvUcVpbNudbY14lLks8RQuwoiU=",
     "ClientEphemeralKey": 
         {
             "PublicKey": 
@@ -22,7 +22,7 @@
         {
             "X509CertificatePath": 
                 [
-                    "MIIC2DCCAcCgAwIBAgIGARTWcc7VMCSq . . . awCV4OfAGXLIwJBCp85AN7KNdcJfL"
+                    "MIIC2DCCAcCgAwIBAgIGARTWcc7VMCSq....awCV4OfAGXLIwJBCp85AN7KNdcJfL"
                 ]
         },
     "ServerCertificateFingerPrint": "HwKCofkqkTFXRmyyb/CnWhAcTbQF7w8rl1OqCwyM4TM=",

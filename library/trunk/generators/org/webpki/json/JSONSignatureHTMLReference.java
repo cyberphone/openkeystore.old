@@ -201,8 +201,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "</a>, have been successfully integrated in a proof-of-concept application running on Android ")
          .append (json.createReference (JSONBaseHTML.REF_WEBPKI_FOR_ANDROID))
          .append ("." + LINE_SEPARATOR +
-         "The API used in this application is based on an integrated " +
-         "JSON encoder, decoder and signature solution making it comparatively easy to use:" +
+         "This application is based on an integrated " +
+         "JSON encoder, decoder and signature solution which is comparatively simple to use:" +
          "<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
         "public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException<br>" +
         "&nbsp;&nbsp;{<br>" +

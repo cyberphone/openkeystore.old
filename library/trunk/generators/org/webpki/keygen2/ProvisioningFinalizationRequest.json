@@ -9,14 +9,14 @@
              "ID": "Key.1",
              "X509CertificatePath": 
                  [
-                     "MIICmDCCAYCgAwIBAgIGAULxF0G . . . UimDl7Dt7733M0TT8qSpXeYvV0NLX5kM="
+                     "MIICmDCCAYCgAwIBAgIGAULxF0G....UimDl7Dt7733M0TT8qSpXeYvV0NLX5kM="
                  ],
              "MAC": "FkwauPbrrfJZxuEsMkwOFWIIutzdYbEt3P9kr0CG4dc=",
              "Logotypes": 
                  [{
                       "Type": "http://xmlns.webpki.org/keygen2/logotype#list",
                       "MimeType": "image/png",
-                      "ExtensionData": "RBgoJkiaJk/IsZAEZUBsZAEZFg . . . NVBAMTC0RlbW8gU3ViIENBMBTEzMM1oDTM4==",
+                      "ExtensionData": "RBgoJkiaJk/IsZAEZUBsZAEZFg....NVBAMTC0RlbW8gU3ViIENBMBTEzMM1oDTM4==",
                       "MAC": "uQ5IuLRDpbSkpfU9FHe1grrQ/FXUBfsxsk6HqspjuCU="
                   }]
          }],
