@@ -468,6 +468,7 @@ public class JSONBaseHTML
             Vector<Column> columns = new Vector<Column> ();
             boolean set_group;
             int depth;
+            String property_link;
             
             public class Column implements RowInterface 
               {
@@ -533,10 +534,7 @@ public class JSONBaseHTML
                     addString (color);
                     if (property)
                       {
-                        addString ("\" id=\"");
-                        addString (makeLink (protocols[0]));
-                        addString (".");
-                        addString (string.charAt (0) == '@' ? string.substring (1) : string);
+                        parent.property_link = makeLink (protocols[0]) + "." + (string.charAt (0) == '@' ? string.substring (1) : string);
                       }
                     addString ("\">");
                     addString (string);
@@ -772,7 +770,7 @@ public class JSONBaseHTML
                       }
                     if (output == standard)
                       {
-                        s.append (q == 1 ? "<td style=\"white-space: nowrap\">" : (q < 4 ? "<td style=\"text-align:center\">" : "<td>"));
+                        s.append (q == 1 ? "<td style=\"white-space:nowrap\" id=\"" + row.property_link + "\">" : (q < 4 ? "<td style=\"text-align:center\">" : "<td>"));
                       }
                     if (output)
                       {

@@ -52,13 +52,13 @@ public class DemoCode
     public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException
       {
         // Create an empty JSON document
-        JSONObjectWriter ow = new JSONObjectWriter ();
+        JSONObjectWriter writer = new JSONObjectWriter ();
 
         // Fill it with some data
-        ow.setString ("MyProperty", "Some data");
+        writer.setString ("MyProperty", "Some data");
         
         // Sign document
-        ow.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()
+        writer.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()
           {
             @Override
             public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException
@@ -84,20 +84,20 @@ public class DemoCode
           }));
         
         // Serialize document
-        byte[] json = ow.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
+        byte[] json = writer.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
 
         // Print document on the console
         System.out.println ("Signed doc:\n" + new String (json, "UTF-8"));
         
         // Parse document
-        JSONObjectReader or = JSONParser.parse (json);
+        JSONObjectReader reader = JSONParser.parse (json);
         
         // Get and verify signature
-        JSONSignatureDecoder json_signature = or.getSignature ();
+        JSONSignatureDecoder json_signature = reader.getSignature ();
         json_signature.verify (new JSONAsymKeyVerifier (public_key));
         
-        // Get document payload
-        System.out.println ("Returned data: " + or.getString ("MyProperty"));
+        // Print document payload on the console
+        System.out.println ("Returned data: " + reader.getString ("MyProperty"));
       }
 
     public static void main (String[] argc)

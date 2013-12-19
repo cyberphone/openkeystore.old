@@ -37,9 +37,10 @@ public class JSONAsymKeySigner extends JSONSigner
     
     PublicKey public_key;
     
-    public void setSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
+    public JSONAsymKeySigner setSignatureAlgorithm (AsymSignatureAlgorithms algorithm)
       {
         this.algorithm = algorithm;
+        return this;
       }
 
     public JSONAsymKeySigner (AsymKeySignerInterface signer) throws IOException

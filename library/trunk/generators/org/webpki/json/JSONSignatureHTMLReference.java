@@ -200,7 +200,61 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
             "</a>, have been successfully integrated in a proof-of-concept application running on Android ")
          .append (json.createReference (JSONBaseHTML.REF_WEBPKI_FOR_ANDROID))
-         .append (".");
+         .append ("." + LINE_SEPARATOR +
+         "The API used in this application is based on an integrated " +
+         "JSON encoder, decoder and signature solution making it comparatively easy to use:" +
+         "<div style=\"padding:10pt 0pt 0pt 20pt\"><code>" +
+        "public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException<br>" +
+        "&nbsp;&nbsp;{<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;// Create an empty JSON document<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;JSONObjectWriter writer = new JSONObjectWriter ();<br>" +
+        "&nbsp;<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;// Fill it with some data<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;writer.setString (&quot;MyProperty&quot;, &quot;Some data&quot;);<br>" +
+        "&nbsp;<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;// Sign document<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;writer.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Override<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public byte[] signData (byte[] data, AsymSignatureAlgorithms algorithm) throws IOException<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Signature signature = Signature.getInstance (algorithm.getJCEName ()) ;<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;signature.initSign (private_key);<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;signature.update (data);<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return signature.sign ();<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;catch (Exception e)<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;throw new IOException (e);<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
+        "&nbsp;<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Override<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public PublicKey getPublicKey () throws IOException<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return public_key;<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}));<br>" +
+        "&nbsp;<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;// Serialize document<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;byte[] json = writer.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);<br>" +
+        "&nbsp;<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;// Print document on the console<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;System.out.println (&quot;Signed doc:\\n&quot; + new String (json, &quot;UTF-8&quot;));<br>" +
+        "&nbsp;<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;// Parse document<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;JSONObjectReader reader = JSONParser.parse (json);<br>" +
+        "&nbsp;<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;// Get and verify signature<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;JSONSignatureDecoder json_signature = reader.getSignature ();<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;json_signature.verify (new JSONAsymKeyVerifier (public_key));<br>" +
+        "&nbsp;<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;// Print document payload on the console<br>" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;System.out.println (&quot;Returned data: &quot; + reader.getString (&quot;MyProperty&quot;));<br>" +
+        "&nbsp;&nbsp;}" +
+        "</code></div>");
 
         json.addParagraphObject ("Aknowledgements").append ("During the initial phases of the design process, highly appreciated " +
                                  "feedback were provided by Manu&nbsp;Sporny, Jim&nbsp;Klo, James&nbsp;Manger, " +
