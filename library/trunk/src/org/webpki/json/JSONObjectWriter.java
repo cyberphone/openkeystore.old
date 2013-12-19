@@ -248,7 +248,7 @@ import org.webpki.json.JSONSignatureDecoder;
         // Fill it with some data
         writer.setString ("MyProperty", "Some data");
          
-        // Sign document
+        // Sign the document
         writer.setSignature (new JSONAsymKeySigner (new AsymKeySignerInterface ()
           {
             {@literal @}Override
@@ -274,20 +274,20 @@ import org.webpki.json.JSONSignatureDecoder;
               }
           }));
           
-        // Serialize document
+        // Serialize the document
         byte[] json = writer.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT);
     
-        // Print document on the console
+        // Print the signed document on the console
         System.out.println ("Signed doc:\n" + new String (json, "UTF-8"));
           
-        // Parse document
+        // Parse the document
         JSONObjectReader reader = JSONParser.parse (json);
          
-        // Get and verify signature
+        // Get and verify the signature
         JSONSignatureDecoder json_signature = reader.getSignature ();
         json_signature.verify (new JSONAsymKeyVerifier (public_key));
          
-        // Print document payload on the console
+        // Print the document payload on the console
         System.out.println ("Returned data: " + reader.getString ("MyProperty"));
       }
  </pre>

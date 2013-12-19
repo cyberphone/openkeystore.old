@@ -421,17 +421,21 @@ public class JSONBaseHTML
             boolean new_tab = true;
             for (String toc_entry : toc.keySet ())
               {
-                String prefix = toc.get (toc_entry).indented ? "" : toc.get (toc_entry).getPrefix ();
                 if (toc.get (toc_entry).appendix && new_tab)
                   {
                     new_tab = false;
                     s.append ("</table><table style=\"margin-left:20pt;margin-top:5pt\">");
                   }
-                s.append ("<tr><td style=\"text-align:right\"><a href=\"#")
-                 .append (toc.get (toc_entry).link)
-                 .append ("\">")
-                 .append (prefix)
-                 .append ("</a></td><td style=\"padding-left:")
+                s.append ("<tr><td style=\"text-align:right\">");
+                if (!toc.get (toc_entry).indented)
+                  {
+                    s.append ("<a href=\"#")
+                     .append (toc.get (toc_entry).link)
+                     .append ("\">")
+                     .append (toc.get (toc_entry).getPrefix ())
+                     .append ("</a>");
+                  }
+                s.append ("</td><td style=\"padding-left:")
                  .append (toc.get (toc_entry).indented ? 20 : 0)
                  .append ("pt\"><a href=\"#")
                  .append (toc.get (toc_entry).link)
@@ -850,7 +854,7 @@ public class JSONBaseHTML
                  "a:visited {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
                  "a:active {color:blue;font-family:verdana,helvetica;text-decoration:none}" +
                  "</style></head><body style=\"margin:15pt\">" +
-                 "<div style=\"position:absolute;top:15pt;left:15pt;z-index:5;visibility:visible\"><a href=\"http://webpki.org\" title=\"WebPKI.org\">" +
+                 "<div style=\"position:absolute;top:5pt;left:15pt;z-index:5;visibility:visible\"><a href=\"http://webpki.org\" title=\"WebPKI.org\">" +
                  "<img src=\"data:image/gif;base64,")
           .append (new Base64 (false).getBase64StringFromBinary (ArrayUtil.getByteArrayFromInputStream (getClass().getResourceAsStream ("webpki-logo.gif"))))
           .append ("\" style=\"border-width:1px;border-style:solid;border-color:blue;box-shadow:3pt 3pt 3pt #D0D0D0\" alt=\"WebPKI.org logo...\"></a></div>");
@@ -997,7 +1001,9 @@ public class JSONBaseHTML
               {
                 next = true;
               }
-            s.append ("<tr><th>")
+            s.append ("<tr><th id=\"Sample.")
+             .append (or.getString (JSONDecoderCache.QUALIFIER_JSON))
+             .append ("\">")
              .append (or.getString (JSONDecoderCache.QUALIFIER_JSON))
              .append ("</th></tr><tr><td><code>")
              .append (new String (new JSONObjectWriter (or).serializeJSONObject (JSONOutputFormats.PRETTY_HTML), "UTF-8"))
