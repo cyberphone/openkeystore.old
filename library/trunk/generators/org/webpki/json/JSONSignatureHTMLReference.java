@@ -64,7 +64,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "The following <i>cryptographically verifiable</i> sample signature is used to visualize the JCS specification:" +
 "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
 "{<br>" +
-"&nbsp;&nbsp;&quot;Now&quot;:&nbsp;&quot;2013-12-10T19:54:13+01:00&quot;,<br>"+
+"&nbsp;&nbsp;&quot;Now&quot;:&nbsp;&quot;2013-12-20T06:49:45+01:00&quot;,<br>"+
 "&nbsp;&nbsp;&quot;PaymentRequest&quot;:&nbsp;<br>"+
 "&nbsp;&nbsp;&nbsp;&nbsp;{<br>"+
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Currency&quot;:&nbsp;&quot;USD&quot;,<br>"+
@@ -94,12 +94,12 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;EC&quot;:&nbsp;<br>"+
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>"+
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;NamedCurve&quot;:&nbsp;&quot;http://xmlns.webpki.org/sks/algorithm#ec.nist.p256&quot;,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;X&quot;:&nbsp;&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=&quot;,<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Y&quot;:&nbsp;&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA=&quot;<br>"+
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;X&quot;:&nbsp;&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,<br>"+
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;Y&quot;:&nbsp;&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;<br>"+
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>"+
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>"+
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>"+
-"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;SignatureValue&quot;:&nbsp;&quot;MEYCIQD8i2bwhYFogxRIMcawEfjqImuajyEIAUTIsHPPMgT/BgIhALmbeKL+Nyz9SftY3PkYYJCiqu+53LMTqiiOH3SwMvJs&quot;<br>"+
+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;SignatureValue&quot;:&nbsp;&quot;MEYCIQDG_blO3esIy57M1K3i2nQjt60xC2PqASnab491Sj-u3QIhAP3LZBYJuyoBMtwrQzdqzLXx7h8MhqqrJch_tMvSusLm&quot;<br>"+
 "&nbsp;&nbsp;&nbsp;&nbsp;}<br>"+
 "}</code></div>" +
 "The sample signature’s payload consists of the properties above <code>Signature</code>. " +
@@ -139,11 +139,11 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
              JSONSignature.SIGNATURE_VALUE_JSON + "</code> " + " in the <code>Signature</code> object), <b>must</b> be <i>excluded</i> from the canonicalization process.</li></ul>" +
             "Applied on the sample signature, a proper canonicalization implementation should return the following JSON object:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
-            "{&quot;Now&quot;:&quot;2013-12-10T19:54:13+01:00&quot;,&quot;PaymentRequest&quot;:{&quot;Currency&quot;:&quot;USD&quot;,&quot;VAT&quot;:1.45,&quot;Specification&quot;:[{&quot;Units&quot;:3,&quot;Descr<br>" +
+            "{&quot;Now&quot;:&quot;2013-12-20T06:49:45+01:00&quot;,&quot;PaymentRequest&quot;:{&quot;Currency&quot;:&quot;USD&quot;,&quot;VAT&quot;:1.45,&quot;Specification&quot;:[{&quot;Units&quot;:3,&quot;Descr<br>" +
             "iption&quot;:&quot;USB cable&quot;,&quot;SKU&quot;:&quot;TR-46565666&quot;,&quot;UnitPrice&quot;:<b style=\"color:red;background:Yellow\">4.50</b>},{&quot;Units&quot;:1,&quot;Description&quot;:&quot;4G Router&quot;,&quot;SKU&quot;:&quot;JK-56566655&quot;,<br>" +
             "&quot;UnitPrice&quot;:39.99}]},&quot;EscapeMe&quot;:&quot;<b style=\"color:red;background:Yellow\">\\u000f\\n</b>A<b style=\"color:red;background:Yellow\">B</b>\\\\\\&quot;<b style=\"color:red;background:Yellow\">/</b>&quot;,&quot;Signature&quot;:{&quot;Algorithm&quot;:&quot;http://www.w3.org/2001/04/xmldsig-more#<br>" +
             "ecdsa-sha256&quot;,&quot;KeyInfo&quot;:{&quot;PublicKey&quot;:{&quot;EC&quot;:{&quot;NamedCurve&quot;:&quot;http://xmlns.webpki.org/sks/algorithm#ec.nist.p256&quot;,&quot;X&quot;:&quot;<br>" +
-            "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk=&quot;,&quot;Y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC/RfQ6Kx8iNwfFA=&quot;}}}}}</code></div>" +
+            "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,&quot;Y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}}}</code></div>" +
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the canonicalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
             "The signature can now be validated using the method specified in <a href=\"#Signature." + JSONSignature.SIGNATURE_VALUE_JSON + "\">" + 
@@ -266,6 +266,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addReferenceTable ();
         
         json.addDocumentHistoryLine ("2013-12-17", "0.3", "Initial publication in HTML5");
+        json.addDocumentHistoryLine ("2013-12-20", "0.4", "Changed from Base64 to Base64URL everywhere");
 
         json.addParagraphObject ("Author").append ("JCS was developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>) as a part " +
                                                    "of the SKS/KeyGen2 project " +
