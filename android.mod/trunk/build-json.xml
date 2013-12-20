@@ -27,7 +27,7 @@
         <include name="**/json/*"/>
         <include name="**/util/ISODateTime.java"/>
         <include name="**/util/ArrayUtil.java"/>
-        <include name="**/util/Base64.java"/>
+        <include name="**/util/Base64URL.java"/>
         <include name="**/crypto/VerifierInterface.java"/>
         <include name="**/crypto/SymKeyVerifierInterface.java"/>
         <include name="**/crypto/SignerInterface.java"/>
