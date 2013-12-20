@@ -1,16 +1,3 @@
-/*************************************************************************
- *                                                                       *
- *  EJBCA: The OpenSource Certificate Authority                          *
- *                                                                       *
- *  This software is free software; you can redistribute it and/or       *
- *  modify it under the terms of the GNU Lesser General Public           *
- *  License as published by the Free Software Foundation; either         *
- *  version 2.1 of the License, or any later version.                    *
- *                                                                       *
- *  See terms of license at gnu.org.                                     *
- *                                                                       *
- *************************************************************************/
-
 package org.webpki.webapps.json.jcs;
 
 import java.io.IOException;
@@ -160,7 +147,7 @@ public class HTML
                    "<tr><td>&nbsp;</td></tr>" +
                    "<tr><td align=\"left\">URL for testing with a client device: <a href=\"" + request_url + "\">" + request_url + "</a></td></tr>" +
                    "<tr><td>&nbsp;</td></tr>" +
-                   "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://openkeystore.googlecode.com/svn/resources/trunk/docs/JSON-Clear-Text-Signature-Scheme.pdf\">JCS Documentation</a></td></tr>" +
+                   "<tr><td align=\"left\"><a target=\"_blank\" href=\"https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html\">JCS Documentation</a></td></tr>" +
                  "</table></td></td>"));
       }
 
