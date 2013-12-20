@@ -166,7 +166,7 @@ public class Base64URL
      */
     public static byte[] getBinaryFromBase64URL (String base64url) throws IOException
       {
-        return decode (Base64.stringToByteArray (base64url));
+        return decode (base64url.getBytes ("UTF-8"));
       }
     
       ////////////////////
@@ -220,7 +220,14 @@ public class Base64URL
      */
     public static String getBase64URLFromBinary (byte[] binary_blob)
       {
-        return Base64.byteArrayToString (encode (binary_blob));
+        try
+          {
+            return new String (encode (binary_blob), "UTF-8");
+          }
+        catch (IOException e)
+          {
+            throw new RuntimeException (e);
+          }
       }
 
     public static String generateURLFriendlyRandom (int length_in_characters)

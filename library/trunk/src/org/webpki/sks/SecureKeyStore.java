@@ -156,7 +156,7 @@ public interface SecureKeyStore
     // Miscellaneous
     ///////////////////////////////////////////////////////////////////////////////////
     byte[] ZERO_LENGTH_ARRAY                  = new byte[0];
-    short SKS_API_LEVEL                       = 96;
+    short SKS_API_LEVEL                       = 97;
     int AES_CBC_PKCS5_PADDING                 = 32;
 
 
