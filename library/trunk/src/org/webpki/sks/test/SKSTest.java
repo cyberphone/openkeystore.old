@@ -25,7 +25,6 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.Signature;
 
 import java.security.interfaces.ECPublicKey;
@@ -36,6 +35,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -53,13 +53,12 @@ import org.junit.rules.TestName;
 
 import static org.junit.Assert.*;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
+import org.webpki.crypto.ProviderLoader;
 
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
@@ -100,11 +99,13 @@ public class SKSTest
     
     static Device device;
     
+    static boolean bc_loaded;
+    
     @BeforeClass
     public static void openFile () throws Exception
       {
         standalone_testing = new Boolean (System.getProperty ("sks.standalone"));
-        Security.insertProviderAt (new BouncyCastleProvider(), 1);
+        bc_loaded = ProviderLoader.isBCLoaded ();
         sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
         if (sks instanceof WSSpecific)
           {
@@ -900,15 +901,25 @@ public class SKSTest
                                      pin_policy /* pin_policy */,
                                      AppUsage.ENCRYPTION).setCertificate (cn ());
         sess.closeSession ();
-        
-        Cipher cipher = Cipher.getInstance (encryption_algorithm.getJCEName ());
+        Cipher cipher = null;
+        try
+          {
+            cipher = Cipher.getInstance (encryption_algorithm.getJCEName ());
+          }
+        catch (Exception e)
+          {
+            assertFalse (bc_loaded || encryption_algorithm != AsymEncryptionAlgorithms.RSA_OAEP_SHA256_MGF1P);
+            return;
+          }
         cipher.init (Cipher.ENCRYPT_MODE, key.getPublicKey ());
         byte[] enc = cipher.doFinal (TEST_STRING);
-        assertTrue ("Encryption error", ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
-                                                                                            encryption_algorithm.getURI (), 
-                                                                                            null,
-                                                                                            good_pin.getBytes ("UTF-8"), 
-                                                                                            enc), TEST_STRING));
+        assertTrue ("Encryption error" + encryption_algorithm,
+            ArrayUtil.compare (device.sks.asymmetricKeyDecrypt (key.key_handle,
+                                                                encryption_algorithm.getURI (), 
+                                                                null,
+                                                                good_pin.getBytes ("UTF-8"), 
+                                                                enc), TEST_STRING) ||
+                                                                (!bc_loaded && encryption_algorithm != AsymEncryptionAlgorithms.RSA_PKCS_1_5));
         try
           {
             device.sks.asymmetricKeyDecrypt (key.key_handle, 
@@ -1040,8 +1051,15 @@ public class SKSTest
     public void test1 () throws Exception
       {
         new ProvSess (device).closeSession ();
-        ProvSess.override_server_ephemeral_key_algorithm = KeyAlgorithms.BRAINPOOL_P_256;
-        new ProvSess (device).closeSession ();
+        try 
+          {
+            ProvSess.override_server_ephemeral_key_algorithm = KeyAlgorithms.BRAINPOOL_P_256;
+            new ProvSess (device).closeSession ();
+          }
+        catch (Exception e)
+          {
+            assertFalse ("BC", bc_loaded);
+          }
         ProvSess.override_server_ephemeral_key_algorithm = null;
       }
 
@@ -1175,11 +1193,19 @@ public class SKSTest
               {
                 sess.setKeyParameters ((key_algorithm.isRSAKey () && key_algorithm.hasParameters ()) ?
                                                                                 new byte[]{0,0,0,3} : null);
-                sess.createKey ("Key." + i++,
-                                key_algorithm,
-                                null /* pin_value */,
-                                null /* pin_policy */,
-                                AppUsage.AUTHENTICATION).setCertificate (cn ());
+                try
+                  {
+                    sess.createKey ("Key." + i++,
+                                    key_algorithm,
+                                    null /* pin_value */,
+                                    null /* pin_policy */,
+                                    AppUsage.AUTHENTICATION).setCertificate (cn ());
+                  }
+                catch (SKSException e)
+                  {
+                    assertFalse ("BC", bc_loaded || key_algorithm != KeyAlgorithms.BRAINPOOL_P_256); 
+                    return;
+                  }
               }
           }
         sess.closeSession ();
