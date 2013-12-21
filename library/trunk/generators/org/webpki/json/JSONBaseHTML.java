@@ -148,8 +148,8 @@ public class JSONBaseHTML
 
         addReferenceEntry (REF_JCS,
             "Rundgren, A., \"JCS - JSON Cleartext Signature\", Work in progress, " +
-            "<a href=\"http://webpki.org/papers/keygen2/doc/jcs.html\">" +
-            "http://webpki.org/papers/keygen2/doc/jcs.html</a>, " + 
+            "<a href=\"https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html\">" +
+            "https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html</a>, " + 
             "<span style=\"white-space: nowrap\">December&nbsp;2013.</span>");
 
         addReferenceEntry (REF_SKS, "Rundgren, A., \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +

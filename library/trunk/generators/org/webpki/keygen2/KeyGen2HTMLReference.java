@@ -603,7 +603,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                      "initially were created for the KeyGen2 project, but later became a project "+
                      "of its own: JSON Cleartext Signature ")
              .append (json.createReference (JSONBaseHTML.REF_JCS))
-             .append (".");
+             .append (".<div style=\"margin-top:20pt;margin-bottom:20pt;margin-left:auto;margin-right:auto;text-align:center\">" +
+                      "&quot;Perfection is achieved, not when there is " +
+                      "nothing more to add,<br>but when there is nothing left to take away&quot;" +
+                      "<span style=\"position:relative;top:5pt\"><i>Antoine de Saint-Exup\u00e9ry</i></span></div>");
 
         json.addParagraphObject ("KeyGen2 Proxy").append ("Unlike certificate management protocols like CMP ")
             .append (json.createReference (JSONBaseHTML.REF_CMP))
