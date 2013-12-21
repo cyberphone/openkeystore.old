@@ -35,7 +35,6 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.Vector;
-import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -58,7 +57,7 @@ import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.SymEncryptionAlgorithms;
-import org.webpki.crypto.ProviderLoader;
+import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
@@ -105,7 +104,7 @@ public class SKSTest
     public static void openFile () throws Exception
       {
         standalone_testing = new Boolean (System.getProperty ("sks.standalone"));
-        bc_loaded = ProviderLoader.isBCLoaded ();
+        bc_loaded = CustomCryptoProvider.conditionalLoad ();
         sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
         if (sks instanceof WSSpecific)
           {

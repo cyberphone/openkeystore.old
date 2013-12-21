@@ -32,11 +32,10 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import org.webpki.crypto.AsymEncryptionAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.sks.AppUsage;
 import org.webpki.sks.BiometricProtection;
@@ -78,7 +77,7 @@ public class PKCS12Import
             pin_caching = new Boolean (argc[7]);
           }
         char[] password = argc[1].toCharArray ();
-        Security.insertProviderAt (new BouncyCastleProvider(), 1);
+        CustomCryptoProvider.forcedLoad ();
         KeyStore ks = KeyStore.getInstance ("PKCS12");
         ks.load (new FileInputStream (argc[0]), password);
         Vector<X509Certificate> cert_path = new Vector<X509Certificate> ();

@@ -21,13 +21,11 @@ import java.io.FileOutputStream;
 import java.util.Enumeration;
 
 import java.security.KeyStore;
-import java.security.Security;
 
 import java.security.cert.Certificate;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import org.webpki.crypto.KeyStoreReader;
+import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.util.Base64;
 
 
@@ -72,7 +70,7 @@ public class KeyStore2PEMConverter
           {
             fail ();
           }
-        Security.insertProviderAt (new BouncyCastleProvider(), 1);
+        CustomCryptoProvider.forcedLoad ();
         KeyStore ks = KeyStoreReader.loadKeyStore (argv[0], argv[1]);
         FileOutputStream fis = new FileOutputStream (argv[2]);
         Enumeration<String> aliases = ks.aliases ();

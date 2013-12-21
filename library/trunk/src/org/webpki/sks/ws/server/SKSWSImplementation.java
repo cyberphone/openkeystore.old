@@ -26,7 +26,6 @@ import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.PublicKey;
-import java.security.Security;
 
 import java.security.cert.X509Certificate;
 
@@ -48,9 +47,8 @@ import javax.xml.ws.Holder;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import org.webpki.crypto.CertificateUtil;
+import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.sks.DeviceInfo;
 import org.webpki.sks.EnumeratedKey;
@@ -100,7 +98,7 @@ public class SKSWSImplementation
       {
         try
           {
-            Security.insertProviderAt (new BouncyCastleProvider(), 1);
+            CustomCryptoProvider.forcedLoad ();
             tga = (TrustedGUIAuthorization) Class.forName (System.getProperty ("sks.auth.gui")).newInstance ();
             String implementations = System.getProperty ("sks.implementation");
             debug = new Boolean (System.getProperty ("sks.debug"));

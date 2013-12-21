@@ -25,6 +25,7 @@ import java.security.PublicKey;
 import org.webpki.crypto.CertificateInfo;
 import org.webpki.crypto.KeyStoreVerifier;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.crypto.test.DemoKeyStore;
 
@@ -47,7 +48,7 @@ public class Verify
   {
     static
       {
-        Sign.installOptionalBCProvider ();
+        CustomCryptoProvider.conditionalLoad ();
       }
 
     static int count;

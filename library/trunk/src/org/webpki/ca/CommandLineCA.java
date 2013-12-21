@@ -29,7 +29,6 @@ import java.util.TimeZone;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.security.Security;
 import java.security.Signature;
 import java.security.PublicKey;
 import java.security.KeyPair;
@@ -42,14 +41,13 @@ import java.security.spec.ECGenParameterSpec;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import org.webpki.asn1.cert.DistinguishedName;
 
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.KeyUsageBits;
+import org.webpki.crypto.CustomCryptoProvider;
 
 
 public class CommandLineCA
@@ -1025,7 +1023,7 @@ public class CommandLineCA
       {
         try
           {
-            Security.insertProviderAt (new BouncyCastleProvider(), 1);
+            CustomCryptoProvider.forcedLoad ();
             CommandLineCA clca = new CommandLineCA ();
             clca.decodeCommandLine (argv);
             clca.certify ();

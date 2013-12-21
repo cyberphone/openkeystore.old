@@ -31,6 +31,7 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Vector;
 
 import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONOutputFormats;
@@ -56,7 +57,7 @@ public class Keys
 
     static
       {
-        Sign.installOptionalBCProvider ();
+        CustomCryptoProvider.conditionalLoad ();
       }
 
     @SuppressWarnings("serial")

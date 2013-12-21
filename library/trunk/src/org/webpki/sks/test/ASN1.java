@@ -4,8 +4,9 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.spec.ECGenParameterSpec;
+
+import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.util.ArrayUtil;
 
@@ -68,7 +69,7 @@ public class ASN1
               }
             else if (args[0].equals ("we"))
               {
-                fixProvider ();
+                CustomCryptoProvider.forcedLoad ();
                 KeyPairGenerator generator = KeyPairGenerator.getInstance ("EC");
                 ECGenParameterSpec eccgen = new ECGenParameterSpec ("secp256r1");
                 generator.initialize (eccgen, new SecureRandom ());
@@ -77,7 +78,7 @@ public class ASN1
               }
             else if (args[0].equals ("wrs"))
               {
-                fixProvider ();
+                CustomCryptoProvider.forcedLoad ();
                 KeyPairGenerator kpg = KeyPairGenerator.getInstance ("RSA");
                 kpg.initialize (2048);
                 KeyPair key_pair = kpg.generateKeyPair ();
@@ -136,11 +137,6 @@ public class ASN1
         getObject (ASN1_SEQUENCE);
         getObject (ASN1_INTEGER);
         if (length != 1 || version != buffer[index++]) throw new GeneralSecurityException ("Unsupported private key version");
-      }
-
-    private static void fixProvider ()
-      {
-        Security.insertProviderAt (new org.bouncycastle.jce.provider.BouncyCastleProvider(), 1);
       }
 
     static byte[] getPublicKeyFromCertificate (byte[] data) throws GeneralSecurityException
@@ -269,6 +265,4 @@ public class ASN1
         if (length < 0 || index + length > max_buflen) throw new GeneralSecurityException ("Length range error: " + length);
         System.out.println ("TAG=" + tag + " I=" + index + " L=" + length);
       }
-
-
   }

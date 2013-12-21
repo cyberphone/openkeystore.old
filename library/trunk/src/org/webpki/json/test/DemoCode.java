@@ -30,6 +30,7 @@ import java.security.spec.ECGenParameterSpec;
 import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.json.JSONAsymKeySigner;
 import org.webpki.json.JSONAsymKeyVerifier;
@@ -46,7 +47,7 @@ public class DemoCode
   {
     static
       {
-        Sign.installOptionalBCProvider ();
+        CustomCryptoProvider.forcedLoad ();
       }
 
     public void signAndVerifyJCS (final PublicKey public_key, final PrivateKey private_key) throws IOException

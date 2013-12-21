@@ -32,7 +32,6 @@ import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.Signature;
 
 import java.security.cert.Certificate;
@@ -61,8 +60,6 @@ import org.junit.rules.TestName;
 
 import static org.junit.Assert.*;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 import org.webpki.asn1.cert.DistinguishedName;
 
 import org.webpki.ca.CA;
@@ -77,6 +74,7 @@ import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.KeyUsageBits;
 import org.webpki.crypto.MACAlgorithms;
 import org.webpki.crypto.AsymSignatureAlgorithms;
+import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.SymEncryptionAlgorithms;
 import org.webpki.crypto.SymKeySignerInterface;
 
@@ -272,7 +270,7 @@ public class KeyGen2Test
             fos = new FileOutputStream (dir + "/keygen2.junit.run.html");
             fos.write (HTMLHeader.createHTMLHeader (false, true,"KeyGen2 JUinit test output", null).append ("<body><h3>KeyGen2 JUnit Test</h3><p>").toString ().getBytes ("UTF-8"));
           }
-        Security.insertProviderAt (new BouncyCastleProvider(), 1);
+        CustomCryptoProvider.forcedLoad ();
         server_certificate = (X509Certificate) CertificateFactory.getInstance ("X.509").generateCertificate (KeyGen2Test.class.getResourceAsStream ("server-certificate.der"));
         sks = (SecureKeyStore) Class.forName (System.getProperty ("sks.implementation")).newInstance ();
         if (fos != null)

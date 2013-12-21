@@ -29,6 +29,7 @@ import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 
 import org.webpki.crypto.KeyAlgorithms;
+import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.json.JSONDecoderCache;
 import org.webpki.json.JSONOutputFormats;
@@ -133,7 +134,7 @@ public class Key2
           }
         try
           {
-            Sign.installOptionalBCProvider ();
+            CustomCryptoProvider.conditionalLoad ();
             for (KeyAlgorithms ka : KeyAlgorithms.values ())
               {
                 if (ka.isECKey ())

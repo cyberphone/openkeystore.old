@@ -23,9 +23,7 @@ import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.security.Provider;
 import java.security.PublicKey;
-import java.security.Security;
 import java.security.Signature;
 
 import java.util.Date;
@@ -34,6 +32,7 @@ import org.webpki.crypto.AsymKeySignerInterface;
 import org.webpki.crypto.AsymSignatureAlgorithms;
 import org.webpki.crypto.KeyStoreSigner;
 import org.webpki.crypto.MACAlgorithms;
+import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.crypto.SymKeySignerInterface;
 import org.webpki.crypto.SymKeyVerifierInterface;
 
@@ -241,30 +240,6 @@ public class Sign
         System.out.println (info_string.toString ());
       }
 
-    static void installOptionalBCProvider ()
-      {
-        @SuppressWarnings("rawtypes")
-        Class bc = null;
-        try
-          {
-            bc = Class.forName ("org.bouncycastle.jce.provider.BouncyCastleProvider");
-          }
-        catch (ClassNotFoundException e)
-          {
-            printInfo ("BouncyCastle provider not in path - Using the platform provider");
-            return;
-          }
-        try
-          {
-            Security.insertProviderAt ((Provider) bc.newInstance (), 1);
-            printInfo ("Installed BouncyCastle as first provider");
-          }
-        catch (Exception e)
-          {
-            printInfo ("Failed to install BouncyCastle!");
-          }
-      }
-
     public static void main (String[] argc)
       {
         if (argc.length != 3)
@@ -277,7 +252,7 @@ public class Sign
               {
                 try
                   {
-                    installOptionalBCProvider ();
+                    CustomCryptoProvider.conditionalLoad ();
                     JSONObjectWriter wr = new JSONObjectWriter ();
                     new Sign (action, new Boolean (argc[1])).writeJSONData (wr);
                     ArrayUtil.writeFile (argc[2], wr.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT));

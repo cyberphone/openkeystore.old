@@ -24,9 +24,11 @@ import java.util.logging.Logger;
 /**
  * Bouncycastle loader
  */
-public class ProviderLoader
+public class CustomCryptoProvider
   {
-    private static Logger logger = Logger.getLogger (ProviderLoader.class.getCanonicalName ());
+    private static Logger logger = Logger.getLogger (CustomCryptoProvider.class.getCanonicalName ());
+    
+    private CustomCryptoProvider () {};
 
     static boolean bc_flag;
     static
@@ -52,8 +54,16 @@ public class ProviderLoader
           }
       }
 
-    public static boolean isBCLoaded ()
+    public static boolean conditionalLoad ()
       {
         return bc_flag;
+      }
+
+    public static void forcedLoad ()
+      {
+        if (!bc_flag)
+          {
+            throw new RuntimeException ("BC missing!");
+          }
       }
   }

@@ -25,13 +25,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import java.security.Security;
 import java.util.Date;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import org.webpki.crypto.CustomCryptoProvider;
 
 import org.webpki.json.JSONArrayReader;
 import org.webpki.json.JSONArrayWriter;
@@ -79,7 +78,7 @@ public class JSONTest
     @BeforeClass
     public static void openFile () throws Exception
       {
-        Security.insertProviderAt (new BouncyCastleProvider(), 1);
+        CustomCryptoProvider.forcedLoad ();
       }
 
     @SuppressWarnings("serial")

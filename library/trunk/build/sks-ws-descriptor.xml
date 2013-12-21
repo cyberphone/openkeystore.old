@@ -32,19 +32,24 @@
    <JavaServer ClassName="org.webpki.sks.ws.server.SKSWSImplementation"
                Imports="java.util.ArrayList
                         java.util.LinkedHashMap
+
                         java.security.GeneralSecurityException
-                        java.security.Security
                         java.security.MessageDigest
                         java.security.spec.X509EncodedKeySpec
                         java.security.KeyFactory
                         java.security.PublicKey
                         java.security.cert.X509Certificate
                         java.security.interfaces.ECPublicKey
+
                         java.io.IOException
-                        org.bouncycastle.jce.provider.BouncyCastleProvider
+
                         org.webpki.crypto.CertificateUtil
+                        org.webpki.crypto.CustomCryptoProvider
+
                         org.webpki.util.DebugFormatter
+
                         org.webpki.sks.ws.TrustedGUIAuthorization
+
                         org.webpki.sks.SKSException
                         org.webpki.sks.EnumeratedKey
                         org.webpki.sks.ProvisioningSession
@@ -81,7 +86,7 @@
       {
         try
           {
-            Security.insertProviderAt (new BouncyCastleProvider(), 1);
+            CustomCryptoProvider.forcedLoad ();
             tga = (TrustedGUIAuthorization) Class.forName (System.getProperty ("sks.auth.gui")).newInstance ();
             String implementations = System.getProperty ("sks.implementation");
             debug = new Boolean (System.getProperty ("sks.debug"));

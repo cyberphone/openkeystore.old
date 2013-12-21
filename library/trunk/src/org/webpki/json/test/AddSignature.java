@@ -18,6 +18,7 @@ package org.webpki.json.test;
 
 import java.io.IOException;
 
+import org.webpki.crypto.CustomCryptoProvider;
 import org.webpki.json.JSONOutputFormats;
 import org.webpki.json.JSONParser;
 import org.webpki.json.JSONObjectWriter;
@@ -31,7 +32,7 @@ public class AddSignature
   {
     static
       {
-        Sign.installOptionalBCProvider ();
+        CustomCryptoProvider.conditionalLoad ();
       }
 
     static enum ACTION {SYM, EC, RSA, X509};

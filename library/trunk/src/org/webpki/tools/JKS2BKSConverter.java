@@ -23,11 +23,10 @@ import java.util.Enumeration;
 
 import java.security.KeyStore;
 import java.security.Key;
-import java.security.Security;
 
 import java.security.cert.Certificate;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.webpki.crypto.CustomCryptoProvider;
 
 
 public class JKS2BKSConverter
@@ -40,7 +39,7 @@ public class JKS2BKSConverter
             System.out.println (JKS2BKSConverter.class.getName () + "  jksfile  bksfile/-same  storepass  keypass");
             System.exit (3);
           }
-        Security.addProvider (new BouncyCastleProvider());
+        CustomCryptoProvider.forcedLoad ();
         KeyStore jks = KeyStore.getInstance ("JKS");
         jks.load (new FileInputStream (argv[0]), argv[2].toCharArray ());
         KeyStore bks = KeyStore.getInstance ("BKS");
