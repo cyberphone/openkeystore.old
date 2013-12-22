@@ -43,6 +43,8 @@ public class JSONBaseHTML
     public static final String PAGE_WIDTH              = "1000pt";
     public static final String NON_SKS_ALGORITHM_COLOR = "#A0A0A0";
     
+    public static final String CHAPTER_FONT_SIZE       = "14pt";
+
     public static final String SECTION_FONT_SIZE       = "14pt";
     
     public static final String HEADER_STYLE            = "font-size:28pt;font-family:'Times New Roman',Times,Serif";
@@ -133,6 +135,28 @@ public class JSONBaseHTML
         String PrefixPlusLink ()
           {
             return prefix_on ? "<td style=\"text-align:right\"><a href=\"#" + link + "\">" + getPrefix () + "</a></td>" : "";
+          }
+
+        public int remainingColums ()
+          {
+            boolean prefix_on_flag = false;
+            boolean indent_flag = false;
+            for (String toc_entry : toc.keySet ())
+              {
+                TOCEntry te = toc.get (toc_entry);
+                if (te.appendix == appendix)
+                  {
+                    if (te.indented)
+                      {
+                        indent_flag = true;
+                        if (te.prefix_on)
+                          {
+                            prefix_on_flag = true;
+                          }
+                      }
+                  }
+              }
+            return (indented || ! indent_flag)? (prefix_on || !prefix_on_flag) ? 1 : 2 : prefix_on_flag ? 3 : 2;
           }
       }
 
@@ -438,9 +462,9 @@ public class JSONBaseHTML
         String getHTML () throws IOException
           {
             StringBuffer s = new StringBuffer ("<div><span style=\"font-size:" + 
-                SECTION_FONT_SIZE + ";font-family:arial,verdana,helvetica\">" +
+                CHAPTER_FONT_SIZE + ";font-family:arial,verdana,helvetica\">" +
                 "Table of Contents</span>" +
-             "<table style=\"margin-left:20pt;margin-top:5pt\">");
+                "<table style=\"margin-left:20pt;margin-top:5pt\">");
             boolean new_tab = true;
             for (String toc_entry : toc.keySet ())
               {
@@ -450,11 +474,11 @@ public class JSONBaseHTML
                     s.append ("</table><table style=\"margin-left:20pt;margin-top:5pt\">");
                   }
                 TOCEntry te = toc.get (toc_entry);
-                s.append ("<tr>")
+                s.append ("<tr style=\"white-space: nowrap\">")
                  .append (te.indented ? "<td></td><td style=\"width:15pt\"></td>" : te.PrefixPlusLink ())
                  .append (te.indented ? te.PrefixPlusLink () : "")
                  .append ("<td colspan=\"")
-                 .append (te.appendix ? 1 : te.indented ? te.prefix_on ? 1 : 2 : te.prefix_on ? 3 : 4)
+                 .append (te.remainingColums ())
                  .append ("\"><a href=\"#")
                  .append (te.link)
                  .append ("\">")
@@ -947,7 +971,7 @@ public class JSONBaseHTML
               }
             s.append ("<div style=\"padding:10pt 0pt 10pt 0pt\" id=\"")
              .append (te.link)
-             .append ("\"><span style=\"font-size:" + SECTION_FONT_SIZE + "\">")
+             .append ("\"><span style=\"font-size:" + (top_level ? CHAPTER_FONT_SIZE : SECTION_FONT_SIZE) + "\">")
              .append (te.getPrefix ())
              .append (header)
              .append ("</span></div>");

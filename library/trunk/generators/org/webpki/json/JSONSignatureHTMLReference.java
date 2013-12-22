@@ -37,7 +37,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json = new JSONBaseHTML (args, "JCS - JSON Cleartext Signature");
         
         json.addParagraphObject ().append ("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">JCS</span>" +
-            "<br><span style=\"font-size:" + JSONBaseHTML.SECTION_FONT_SIZE + "\">&nbsp;<br>JSON Cleartext Signature</span></div>");
+            "<br><span style=\"font-size:" + JSONBaseHTML.CHAPTER_FONT_SIZE + "\">&nbsp;<br>JSON Cleartext Signature</span></div>");
         
         json.addTOC ();
 

@@ -87,7 +87,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                   "issuer.");
             bar (6);
             s.append ("<tr><td style=\"padding:0px\"><div style=\"margin-left:auto;margin-right:auto;width:0pt;height:0px;border-style: solid;border-width: 8pt 4pt 0pt 4pt" +
-                      ";border-color:" + BAR_COLOR + " transparent transparent transparent\"></div></td><td></td></tr></table>");
+                      ";border-color:" + BAR_COLOR + " transparent transparent transparent\"></div></td><td></td></tr></table>" +
+                      "Not elaborated on here is the result of the " + json.globalLinkRef (PROVISIONING_FINALIZATION_RESPONSE_JSON) +
+                      " because it is anticipated to be a custom HTML page, typically telling the user that the operation succeeded.");
           }
 
         private void sign (String protcol_step, String description)
@@ -584,7 +586,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json = new JSONBaseHTML (args, "KeyGen2 - Credential Enrollment and Management Protocol");
         
         json.addParagraphObject ().append ("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">KeyGen2</span>" +
-             "<br><span style=\"font-size:" + JSONBaseHTML.SECTION_FONT_SIZE + "\">&nbsp;<br>Credential Enrollment and Management Protocol</span></div>");
+             "<br><span style=\"font-size:" + JSONBaseHTML.CHAPTER_FONT_SIZE + "\">&nbsp;<br>Credential Enrollment and Management Protocol</span></div>");
         
         json.addTOC ();
         
