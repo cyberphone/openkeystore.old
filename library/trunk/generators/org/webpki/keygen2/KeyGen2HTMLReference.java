@@ -60,7 +60,9 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           }
         void execute ()
           {
-            s.append ("To facilitate a straightforward implementation as well as robust operation, KeyGen2 builds on a concept where each major process " +
+            s.append ("This chapter contains a high-level description of the KeyGen2 protocol "+
+                "while the succeding chapters cover the actual format. " + LINE_SEPARATOR +
+                "To facilitate a straightforward implementation as well as robust operation, KeyGen2 builds on a concept where each major process " +
                 "step is handled by a specific request/response pair as outlined below:" + 
                       "<table style=\"width:600pt;margin-top:10pt;margin-left:auto;margin-right:auto;border-collapse:collapse\">");
             bar (10);
@@ -600,10 +602,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .append (json.createReference (JSONBaseHTML.REF_SKS))
             .append ("." + LINE_SEPARATOR +
                      "Parts of the protocol rely on cryptographic constructs using JSON which " +
-                     "initially were created for the KeyGen2 project, but later became a project "+
+                     "initially were created for the KeyGen2 project, but later became an activity "+
                      "of its own: JSON Cleartext Signature ")
              .append (json.createReference (JSONBaseHTML.REF_JCS))
-             .append (".<table style=\"margin-top:20pt;margin-bottom:20pt;margin-left:auto;margin-right:auto;text-align:center\">" +
+             .append ("." + LINE_SEPARATOR +
+                      "Finding the proper balance in a complex scheme like KeyGen2 is a combination of &quot;gut feeling&quot;, " +
+                      "political considerations, available technology, foresight and market research. " +
+                      "If this particular specification hit the right level only time can tell." +
+                      "<table style=\"margin-top:20pt;margin-bottom:20pt;margin-left:auto;margin-right:auto;text-align:center\">" +
                       "<tr><td>&quot;<i>Perfection&nbsp;is&nbsp;achieved,&nbsp;not&nbsp;when&nbsp;there&nbsp;is&nbsp;" +
                       "nothing&nbsp;more<br>to&nbsp;add,&nbsp;but&nbsp;when&nbsp;there&nbsp;is&nbsp;nothing&nbsp;left&nbsp;to&nbsp;take&nbsp;away</i>&quot;</td></tr>" +
                       "<tr><td style=\"padding-top:4pt;font-size:8pt;text-align:right\">Antoine de Saint-Exup\u00e9ry</td></tr></table>");
@@ -627,6 +633,14 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 
         new ProtocolDescription (json.addParagraphObject ("Protocol Description")).execute ();
         
+        json.addParagraphSubObject ("Invocation").append ("TBD");
+
+        json.addParagraphSubObject ("Error Handling").append ("TBD");
+        
+        json.addParagraphSubObject ("Key Management Operations").append ("TBD");
+
+        json.addParagraphSubObject ("Deferred Certification").append ("TBD");
+
         json.addDataTypesDescription ("");
         
         json.addProtocolTableEntry ("KeyGen2 Objects").append ("The following tables describe the KeyGen2 JSON structures in detail.");

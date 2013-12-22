@@ -102,20 +102,43 @@ public class JSONBaseHTML
         boolean indented;
         boolean appendix;
         int sequence;
+        boolean prefix_on;
+        int sub_seq;
 
         public String getPrefix ()
           {
-            if (appendix)
+            StringBuffer s = new StringBuffer ();
+            if (prefix_on)
               {
-                return "Appendix " + (char) ('A' + sequence) + ":&nbsp;";
+                if (appendix)
+                  {
+                    s.append ("Appendix ")
+                     .append ((char) (('A' - 1) + sequence));
+                  }
+                else
+                  {
+                    s.append (String.valueOf (sequence));
+                  }
+                if (indented)
+                  {
+                    s.append (".")
+                     .append (String.valueOf (sub_seq));
+                  }
+                s.append (appendix ? ':' : '.')
+                 .append ("&nbsp;");
               }
-            return String.valueOf (sequence) + ".&nbsp;";
+            return s.toString ();
+          }
+
+        String PrefixPlusLink ()
+          {
+            return prefix_on ? "<td style=\"text-align:right\"><a href=\"#" + link + "\">" + getPrefix () + "</a></td>" : "";
           }
       }
 
     LinkedHashMap<String,TOCEntry> toc = new LinkedHashMap<String,TOCEntry> ();
     
-    int curr_toc_seq = 1;
+    int curr_toc_seq = 0;
     
     boolean appendix_mode;
     
@@ -426,19 +449,14 @@ public class JSONBaseHTML
                     new_tab = false;
                     s.append ("</table><table style=\"margin-left:20pt;margin-top:5pt\">");
                   }
-                s.append ("<tr><td style=\"text-align:right\">");
-                if (!toc.get (toc_entry).indented)
-                  {
-                    s.append ("<a href=\"#")
-                     .append (toc.get (toc_entry).link)
-                     .append ("\">")
-                     .append (toc.get (toc_entry).getPrefix ())
-                     .append ("</a>");
-                  }
-                s.append ("</td><td style=\"padding-left:")
-                 .append (toc.get (toc_entry).indented ? 20 : 0)
-                 .append ("pt\"><a href=\"#")
-                 .append (toc.get (toc_entry).link)
+                TOCEntry te = toc.get (toc_entry);
+                s.append ("<tr>")
+                 .append (te.indented ? "<td></td><td style=\"width:15pt\"></td>" : te.PrefixPlusLink ())
+                 .append (te.indented ? te.PrefixPlusLink () : "")
+                 .append ("<td colspan=\"")
+                 .append (te.appendix ? 1 : te.indented ? te.prefix_on ? 1 : 2 : te.prefix_on ? 3 : 4)
+                 .append ("\"><a href=\"#")
+                 .append (te.link)
                  .append ("\">")
                  .append (toc_entry)
                  .append ("</a></td></tr>");
@@ -817,6 +835,7 @@ public class JSONBaseHTML
     Vector<Content> division_objects = new Vector<Content> ();
     
     StringBuffer html;
+    int local_toc_sec;
 
     public String getHTML () throws IOException
       {
@@ -892,14 +911,36 @@ public class JSONBaseHTML
 
     public StringBuffer addParagraphObject (String header) throws IOException
       {
+        return addParagraphObject (header, true);
+      }
+    
+    public StringBuffer addParagraphSubObject (String header) throws IOException
+      {
+        return addParagraphObject (header, false);
+      }
+
+    StringBuffer addParagraphObject (String header, boolean top_level) throws IOException
+      {
         Paragraph p = new Paragraph ();
         StringBuffer s = new StringBuffer ("<div style=\"width:" + PAGE_WIDTH + "\">");
         if (header != null)
           {
+            if (top_level)
+              {
+                curr_toc_seq++;
+                local_toc_sec = 0;
+              }
+            else
+              {
+                local_toc_sec++;
+              }
             TOCEntry te = new TOCEntry ();
             te.link = makeLink (header);
-            te.sequence = curr_toc_seq++;
+            te.sequence = curr_toc_seq;
+            te.sub_seq = local_toc_sec;
             te.appendix = appendix_mode;
+            te.indented = !top_level;
+            te.prefix_on = true;
             if (toc.put (header, te) != null)
               {
                 throw new IOException ("Duplicate TOC: " + header);
