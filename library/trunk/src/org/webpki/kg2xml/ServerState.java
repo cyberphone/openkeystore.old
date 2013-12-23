@@ -716,9 +716,9 @@ public class ServerState implements Serializable
         
         public Key setServerSeed (byte[] server_seed) throws IOException
           {
-            if (server_seed.length > SecureKeyStore.MAX_LENGTH_SERVER_SEED || server_seed.length == 0)
+            if (server_seed != null && server_seed.length > SecureKeyStore.MAX_LENGTH_SERVER_SEED)
               {
-                bad ("Server seed must be 1-" + SecureKeyStore.MAX_LENGTH_SERVER_SEED + " bytes");
+                bad ("Server seed > " + SecureKeyStore.MAX_LENGTH_SERVER_SEED + " bytes");
               }
             this.server_seed = server_seed;
             return this;
