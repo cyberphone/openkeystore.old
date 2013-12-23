@@ -102,7 +102,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;SignatureValue&quot;:&nbsp;&quot;MEYCIQDG_blO3esIy57M1K3i2nQjt60xC2PqASnab491Sj-u3QIhAP3LZBYJuyoBMtwrQzdqzLXx7h8MhqqrJch_tMvSusLm&quot;<br>"+
 "&nbsp;&nbsp;&nbsp;&nbsp;}<br>"+
 "}</code></div>" +
-"The sample signature’s payload consists of the properties above <code>Signature</code>. " +
+"The sample signature's payload consists of the properties above <code>Signature</code>. " +
 "Note: JCS does <i>not</i> mandate any specific ordering of properties like in the sample.");
 
         json.addParagraphObject ("Signature Scope").append (
