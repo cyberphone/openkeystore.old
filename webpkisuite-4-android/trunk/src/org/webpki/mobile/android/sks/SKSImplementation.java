@@ -3322,7 +3322,11 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
           {
             provisioning.abort ((key_parameters == null ? "Missing" : "Unexpected") + " \"KeyParameters\"");
           }
-        if (server_seed != null && (server_seed.length == 0 || server_seed.length > MAX_LENGTH_SERVER_SEED))
+        if (server_seed == null)
+          {
+            server_seed = ZERO_LENGTH_ARRAY;
+          }
+        else if (server_seed.length > MAX_LENGTH_SERVER_SEED)
           {
             provisioning.abort ("\"ServerSeed\" length error: " + server_seed.length);
           }
@@ -3340,7 +3344,6 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         boolean pin_protection = true;
         if (device_pin_protection)
           {
-            pin_policy_id = CRYPTO_STRING_DEVICE_PIN;
             if (pin_policy_handle != 0)
               {
                 provisioning.abort ("Device PIN mixed with PIN policy ojbect");
@@ -3392,7 +3395,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         MacBuilder verifier = provisioning.getMacBuilderForMethodCall (METHOD_CREATE_KEY_ENTRY);
         verifier.addString (id);
         verifier.addString (key_entry_algorithm);
-        verifier.addArray (server_seed == null ? ZERO_LENGTH_ARRAY : server_seed);
+        verifier.addArray (server_seed);
         verifier.addString (pin_policy_id);
         if (decrypt_pin)
           {
@@ -3407,6 +3410,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
               }
             verifier.addString (CRYPTO_STRING_NOT_AVAILABLE);
           }
+        verifier.addBool (device_pin_protection);
         verifier.addBool (enable_pin_caching);
         verifier.addByte (biometric_protection);
         verifier.addByte (export_protection);
@@ -3480,7 +3484,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
             ///////////////////////////////////////////////////////////////////////////////////
             // At last, generate the desired key-pair
             ///////////////////////////////////////////////////////////////////////////////////
-            SecureRandom secure_random = server_seed == null ? new SecureRandom () : new SecureRandom (server_seed);
+            SecureRandom secure_random = server_seed.length == 0 ? new SecureRandom () : new SecureRandom (server_seed);
             KeyPairGenerator kpg = KeyPairGenerator.getInstance (alg_par_spec instanceof RSAKeyGenParameterSpec ? "RSA" : "EC");
             kpg.initialize (alg_par_spec, secure_random);
             KeyPair key_pair = kpg.generateKeyPair ();

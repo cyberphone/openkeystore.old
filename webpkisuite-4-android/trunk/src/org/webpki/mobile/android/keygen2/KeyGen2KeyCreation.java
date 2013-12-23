@@ -169,7 +169,7 @@ public class KeyGen2KeyCreation extends AsyncTask<Void, String, String>
                   }
                 KeyData key_data = keygen2_activity.sks.createKeyEntry (keygen2_activity.provisioning_handle,
                                                                         key.getID (),
-                                                                        keygen2_activity.key_creation_request.getAlgorithm (),
+                                                                        keygen2_activity.key_creation_request.getKeyEntryAlgorithm (),
                                                                         key.getServerSeed (),
                                                                         key.isDevicePINProtected (),
                                                                         pin_policy_handle,
