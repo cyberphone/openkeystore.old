@@ -166,6 +166,11 @@ public class JSONBaseHTML
     
     boolean appendix_mode;
     
+    String externalWebReference (String url)
+      {
+        return "<a target=\"_blank\" title=\"External link opened in a new windows\" href=\"" + url + "\">" + url + "</a>";
+      }
+    
     public JSONBaseHTML (String[] args, String subsystem_name) throws IOException
       {
         if (args.length != 1)
@@ -186,32 +191,29 @@ public class JSONBaseHTML
         addReferenceEntry (REF_XMLDSIG,
             "\"XML-Signature Syntax and Processing\", D. Eastlake " +
             "3rd, J. Reagle, D. Solo, June&nbsp;2008. " +
-            "<a href=\"http://www.w3.org/TR/xmldsig-core/\">http://www.w3.org/TR/xmldsig-core/</a>");
+            externalWebReference ("http://www.w3.org/TR/xmldsig-core/"));
 
         addReferenceEntry (REF_XMLENC,
             "\"XML Encryption Syntax and Processing\", J. Reagle, " +
             "D. Eastlake, April&nbsp;2013. " +
-            "<a href=\"http://www.w3.org/TR/xmlenc-core1/\">http://www.w3.org/TR/xmlenc-core1/</a>");
+            externalWebReference ("http://www.w3.org/TR/xmlenc-core1/"));
 
         addReferenceEntry (REF_JCS,
             "Rundgren, A., \"JCS - JSON Cleartext Signature\", Work in progress, " +
-            "<a href=\"https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html\">" +
-            "https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html</a>, " + 
-            "<span style=\"white-space: nowrap\">December&nbsp;2013.</span>");
+            externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/jcs.html") +
+            ", <span style=\"white-space: nowrap\">December&nbsp;2013.</span>");
 
         addReferenceEntry (REF_SKS, "Rundgren, A., \"Secure Key Store (SKS) - API and Architecture\", Work in progress, " +
-            "<a href=\"https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf\">" +
-            "https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf</a>, " +
-            "<span style=\"white-space: nowrap\">V0.97, December 2013.</span>");
+            externalWebReference ("https://openkeystore.googlecode.com/svn/resources/trunk/docs/sks-api-arch.pdf") +
+            ", <span style=\"white-space: nowrap\">V0.97, December 2013.</span>");
 
         addReferenceEntry (REF_WEBPKI_FOR_ANDROID, "\"WebPKI Suite\", " +
-            "<a href=\"https://play.google.com/store/apps/details?id=org.webpki.mobile.android\">" +
-            "https://play.google.com/store/apps/details?id=org.webpki.mobile.android</a>");
+            externalWebReference ("https://play.google.com/store/apps/details?id=org.webpki.mobile.android"));
 
        addReferenceEntry (REF_JOSE,
             "Jones, M. et al, Work in progress, " +
-            "<a href=\"https://ietf.org/wg/jose/\">" +
-            "https://ietf.org/wg/jose/</a>, <span style=\"white-space: nowrap\">December&nbsp;2013.</span>");
+            externalWebReference ("https://ietf.org/wg/jose/") +
+            ", <span style=\"white-space: nowrap\">December&nbsp;2013.</span>");
 
         addReferenceEntry (REF_X509,
             "Cooper, D., Santesson, S., Farrell, S., Boeyen, S., " +

@@ -2182,7 +2182,11 @@ public class SEReferenceImplementation
               {
                 abort ("Unknown \"KeyEntryAlgorithm\" : " + key_entry_algorithm, SKSException.ERROR_ALGORITHM);
               }
-            if (server_seed != null && (server_seed.length == 0 || server_seed.length > SecureKeyStore.MAX_LENGTH_SERVER_SEED))
+            if (server_seed == null)
+              {
+                server_seed = SecureKeyStore.ZERO_LENGTH_ARRAY;
+              }
+            else if (server_seed.length > SecureKeyStore.MAX_LENGTH_SERVER_SEED)
               {
                 abort ("\"ServerSeed\" length error: " + server_seed.length);
               }
@@ -2212,7 +2216,7 @@ public class SEReferenceImplementation
             MacBuilder verifier = getMacBuilderForMethodCall (unwrapped_session_key, SecureKeyStore.METHOD_CREATE_KEY_ENTRY);
             verifier.addString (id);
             verifier.addString (key_entry_algorithm);
-            verifier.addArray (server_seed == null ? SecureKeyStore.ZERO_LENGTH_ARRAY : server_seed);
+            verifier.addArray (server_seed);
             verifier.addString (pin_policy_id);
             byte[] decrypted_pin_value = null;
             if (encrypted_pin_value == null)
@@ -2281,7 +2285,7 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // At last, generate the desired key-pair
             ///////////////////////////////////////////////////////////////////////////////////
-            SecureRandom secure_random = server_seed == null ? new SecureRandom () : new SecureRandom (server_seed);
+            SecureRandom secure_random = server_seed.length == 0 ? new SecureRandom () : new SecureRandom (server_seed);
             KeyPairGenerator kpg = KeyPairGenerator.getInstance (alg_par_spec instanceof RSAKeyGenParameterSpec ? "RSA" : "EC");
             kpg.initialize (alg_par_spec, secure_random);
             KeyPair key_pair = kpg.generateKeyPair ();
