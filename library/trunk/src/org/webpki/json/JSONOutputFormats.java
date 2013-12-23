@@ -24,7 +24,7 @@ import java.io.IOException;
  */
 public enum JSONOutputFormats 
   {
-    CANONICALIZED, PRETTY_JAVASCRIPT, PRETTY_PRINT, PRETTY_HTML;
+    CANONICALIZED, JAVASCRIPT_STRING, PRETTY_PRINT, PRETTY_HTML;
     
     public static String getOptions ()
       {

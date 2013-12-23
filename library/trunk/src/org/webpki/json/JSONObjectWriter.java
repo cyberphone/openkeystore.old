@@ -53,9 +53,9 @@ public class JSONObjectWriter implements Serializable
     
     int indent;
     
-    boolean pretty;
+    boolean pretty_print;
 
-    boolean java_script_eol;
+    boolean java_script_string;
 
     boolean html_mode;
     
@@ -325,17 +325,16 @@ import org.webpki.json.JSONSignatureDecoder;
 
     void newLine ()
       {
-        if (pretty)
+        if (pretty_print)
           {
-            if (java_script_eol)
-              {
-                buffer.append ('\\');
-              }
             if (html_mode)
               {
                 buffer.append ("<br>");
               }
-            buffer.append ('\n');
+            else
+              {
+                buffer.append ('\n');
+              }
           }
       }
 
@@ -614,8 +613,13 @@ import org.webpki.json.JSONSignatureDecoder;
       while JSON data as a part of a protocol needs only needs to be parsable,
       Protocol JSON only requires the following two escape sequences.
 */
-                case '"':
                 case '\\':
+                  if (java_script_string)
+                    {
+                      buffer.append ("\\\\");
+                    }
+
+                case '"':
                   escapeCharacter (c);
                   break;
 
@@ -642,6 +646,12 @@ import org.webpki.json.JSONSignatureDecoder;
                 case '\t':
                   escapeCharacter ('t');
                   break;
+                  
+                case '\'':
+                  if (java_script_string)
+                    {
+                      buffer.append ('\\');
+                    }
 
                 default:
                   if (c < 0x20)
@@ -670,12 +680,16 @@ import org.webpki.json.JSONSignatureDecoder;
 
     void escapeCharacter (char c)
       {
+        if (java_script_string)
+          {
+            buffer.append ('\\');
+          }
         buffer.append ('\\').append (c);
       }
 
     void singleSpace ()
       {
-        if (pretty)
+        if (pretty_print)
           {
             if (html_mode)
               {
@@ -724,9 +738,13 @@ import org.webpki.json.JSONSignatureDecoder;
         buffer = new StringBuffer ();
         indent_factor = output_format == JSONOutputFormats.PRETTY_HTML ? html_indent : STANDARD_INDENT;
         indent = -indent_factor;
-        pretty = output_format != JSONOutputFormats.CANONICALIZED;
-        java_script_eol = output_format == JSONOutputFormats.PRETTY_JAVASCRIPT;
+        pretty_print = output_format == JSONOutputFormats.PRETTY_HTML || output_format == JSONOutputFormats.PRETTY_PRINT;
+        java_script_string = output_format == JSONOutputFormats.JAVASCRIPT_STRING;
         html_mode = output_format == JSONOutputFormats.PRETTY_HTML;
+        if (java_script_string)
+          {
+            buffer.append ('\'');
+          }
         if (root.properties.containsKey (null))
           {
             printArray ((Vector<JSONValue>)root.properties.get (null).value, false);
@@ -738,6 +756,10 @@ import org.webpki.json.JSONSignatureDecoder;
         if (output_format == JSONOutputFormats.PRETTY_PRINT)
           {
             newLine ();
+          }
+        else if (java_script_string)
+          {
+            buffer.append ('\'');
           }
         return buffer.toString ().getBytes ("UTF-8");
       }

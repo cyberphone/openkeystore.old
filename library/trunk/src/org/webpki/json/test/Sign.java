@@ -196,7 +196,7 @@ public class Sign
             new SO (35, "this", array_writer);
             new SO (-90, "that", array_writer);
           }
-        wr.setString ("EscapeMe", "\u000F\nA\u0042\\\"/" );
+        wr.setString ("EscapeMe", "\u000F\nA'\u0042\\\"/" );
         if (action == ACTION.X509)
           {
             createX509Signature (wr);
