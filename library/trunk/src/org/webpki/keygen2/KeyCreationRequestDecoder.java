@@ -805,7 +805,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
       
     private String submit_url;
 
-    private boolean deferred_certification;
+    private boolean deferred_issuance;
 
     private String server_session_id;
 
@@ -838,9 +838,9 @@ public class KeyCreationRequestDecoder extends ClientDecoder
       }
 
 
-    public boolean getDeferredCertificationFlag ()
+    public boolean getDeferredIssuanceFlag ()
       {
-        return deferred_certification;
+        return deferred_issuance;
       }
 
     @Override
@@ -858,7 +858,7 @@ public class KeyCreationRequestDecoder extends ClientDecoder
 
         submit_url = getURL (rd, SUBMIT_URL_JSON);
 
-        deferred_certification = rd.getBooleanConditional (DEFERRED_CERTIFICATION_JSON);
+        deferred_issuance = rd.getBooleanConditional (DEFERRED_ISSUANCE_JSON);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Get the key requests and protection elements [1..n]
