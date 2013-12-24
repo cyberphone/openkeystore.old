@@ -54,7 +54,7 @@ public interface KeyGen2Constants
     
     String EXTENSION_DATA_JSON                       = "ExtensionData";
     
-    String DEFERRED_CERTIFICATION_JSON               = "DeferredCertification";
+    String DEFERRED_ISSUANCE_JSON                    = "DeferredIssuance";
 
     String DELETE_KEYS_JSON                          = "DeleteKeys";
     
