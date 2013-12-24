@@ -37,7 +37,7 @@ public class KeyCreationRequestEncoder extends ServerEncoder
 
     String submit_url;
 
-    boolean deferred_certification;
+    boolean deferred_issuance;
 
     ServerState server_state;
     
@@ -55,9 +55,9 @@ public class KeyCreationRequestEncoder extends ServerEncoder
       }
 
 
-    public void setDeferredCertification (boolean flag)
+    public void setDeferredIssuance (boolean flag)
       {
-        deferred_certification = flag;
+        deferred_issuance = flag;
       }
 
 
@@ -97,9 +97,9 @@ public class KeyCreationRequestEncoder extends ServerEncoder
 
         wr.setString (KEY_ENTRY_ALGORITHM_JSON, algorithm);
 
-        if (deferred_certification)
+        if (deferred_issuance)
           {
-            wr.setBoolean (DEFERRED_CERTIFICATION_JSON, deferred_certification);
+            wr.setBoolean (DEFERRED_ISSUANCE_JSON, deferred_issuance);
           }
 
         server_state.key_attestation_algorithm = algorithm;
