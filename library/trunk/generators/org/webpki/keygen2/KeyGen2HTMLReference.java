@@ -641,7 +641,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addParagraphSubObject ("Key Management Operations").append ("TBD");
 
-        json.addParagraphSubObject ("Deferred Certification").append ("TBD");
+        json.addParagraphSubObject ("Deferred Issuance").append ("TBD");
 
         json.addDataTypesDescription ("");
         
