@@ -239,22 +239,11 @@ public class JSONParser
               {
                 switch (c = nextChar ())
                   {
-/* 
-      Since JSON supplied as a part of web-page may need additional escaping
-      while JSON data as a part of a protocol needs only needs to be parsable,
-      Protocol JSON only requires the following two escape sequences.
-*/
                     case '"':
                     case '\\':
-                      break;
-
-/*
-      But we are nice and support the rest as well...
-
-*/
                     case '/':
                       break;
-                      
+
                     case 'b':
                       c = '\b';
                       break;

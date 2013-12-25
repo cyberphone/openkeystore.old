@@ -327,14 +327,7 @@ import org.webpki.json.JSONSignatureDecoder;
       {
         if (pretty_print)
           {
-            if (html_mode)
-              {
-                buffer.append ("<br>");
-              }
-            else
-              {
-                buffer.append ('\n');
-              }
+            buffer.append (html_mode ? "<br>" : "\n");
           }
       }
 
@@ -581,7 +574,7 @@ import org.webpki.json.JSONSignatureDecoder;
                 switch (c)
                   {
 /* 
-      HTML needs specific escapes as well...
+      HTML needs specific escapes...
 */
                     case '<':
                       buffer.append ("&lt;");
@@ -601,32 +594,19 @@ import org.webpki.json.JSONSignatureDecoder;
                   }
               }
 
-/* 
-      Since JSON supplied as a part of web-page may need additional escaping
-      while JSON data as a part of a protocol needs only needs to be parsable,
-      Protocol JSON only requires the following two escape sequences.
-*/
             switch (c)
               {
-/* 
-      Since JSON supplied as a part of web-page may need additional escaping
-      while JSON data as a part of a protocol needs only needs to be parsable,
-      Protocol JSON only requires the following two escape sequences.
-*/
                 case '\\':
                   if (java_script_string)
                     {
-                      buffer.append ("\\\\");
+                      // JS escaping need \\\\ in order to produce a JSON \\
+                      buffer.append ('\\');
                     }
 
                 case '"':
                   escapeCharacter (c);
                   break;
 
-/*
-      But we are nice and support all the traditional ASCII control characters 
-
-*/
                 case '\b':
                   escapeCharacter ('b');
                   break;
@@ -650,6 +630,7 @@ import org.webpki.json.JSONSignatureDecoder;
                 case '\'':
                   if (java_script_string)
                     {
+                      // Since we assumed that the JSON object was enclosed between '' we need to escape ' as well
                       buffer.append ('\\');
                     }
 
