@@ -42,9 +42,51 @@ import org.webpki.crypto.KeyAlgorithms;
 /**
  * Decoder for JSON signatures.
  */
-public class JSONSignatureDecoder extends JSONSignature
+public class JSONSignatureDecoder
   {
     private static final long serialVersionUID = 1L;
+
+    public static final String SIGNATURE_VERSION_ID       = "http://xmlns.webpki.org/jcs/v1";
+    
+    public static final String SIGNATURE_JSON             = "Signature";
+  
+    public static final String VERSION_JSON               = "Version";
+  
+    public static final String ALGORITHM_JSON             = "Algorithm";
+  
+    public static final String SIGNATURE_VALUE_JSON       = "SignatureValue";
+  
+    public static final String KEY_INFO_JSON              = "KeyInfo";
+  
+    public static final String URL_JSON                   = "URL";
+  
+    public static final String X509_CERTIFICATE_PATH_JSON = "X509CertificatePath";
+  
+    public static final String SIGNATURE_CERTIFICATE_JSON = "SignatureCertificate";
+  
+    public static final String ISSUER_JSON                = "Issuer";
+  
+    public static final String SERIAL_NUMBER_JSON         = "SerialNumber";
+  
+    public static final String SUBJECT_JSON               = "Subject";
+  
+    public static final String PUBLIC_KEY_JSON            = "PublicKey";
+  
+    public static final String RSA_JSON                   = "RSA";
+  
+    public static final String MODULUS_JSON               = "Modulus";
+  
+    public static final String EXPONENT_JSON              = "Exponent";
+  
+    public static final String EC_JSON                    = "EC";
+  
+    public static final String NAMED_CURVE_JSON           = "NamedCurve";
+  
+    public static final String X_JSON                     = "X";
+  
+    public static final String Y_JSON                     = "Y";
+  
+    public static final String KEY_ID_JSON                = "KeyID";
 
     SignatureAlgorithms algorithm;
     
@@ -165,7 +207,7 @@ public class JSONSignatureDecoder extends JSONSignature
       {
         X509Certificate last_certificate = null;
         Vector<X509Certificate> certificates = new Vector<X509Certificate> ();
-        for (byte[] certificate_blob : rd.getBinaryArray (JSONSignature.X509_CERTIFICATE_PATH_JSON))
+        for (byte[] certificate_blob : rd.getBinaryArray (X509_CERTIFICATE_PATH_JSON))
           {
             try
               {
@@ -290,5 +332,27 @@ public class JSONSignatureDecoder extends JSONSignature
             throw new IOException ("Verifier type doesn't match the received signature");
           }
         verifier.verify (this);
+      }
+
+    static X509Certificate pathCheck (X509Certificate child, X509Certificate parent) throws IOException
+      {
+        if (child != null)
+          {
+            String issuer = child.getIssuerX500Principal ().getName ();
+            String subject = parent.getSubjectX500Principal ().getName ();
+            if (!issuer.equals (subject))
+              {
+                throw new IOException ("Path issuer order error, '" + issuer + "' versus '" + subject + "'");
+              }
+            try
+              {
+                child.verify (parent.getPublicKey ());
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+          }
+        return parent;
       }
   }

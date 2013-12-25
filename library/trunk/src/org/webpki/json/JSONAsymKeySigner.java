@@ -65,6 +65,6 @@ public class JSONAsymKeySigner extends JSONSigner
     @Override
     void writeKeyInfoData (JSONObjectWriter wr) throws IOException
       {
-        JSONSignatureEncoder.setPublicKey (wr, public_key);
+        wr.setPublicKey (public_key);
       }
   }

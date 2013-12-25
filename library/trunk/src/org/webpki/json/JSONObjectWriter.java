@@ -22,13 +22,18 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.ECPoint;
 
 import java.util.Date;
 import java.util.Vector;
 
+import org.webpki.crypto.KeyAlgorithms;
 import org.webpki.util.ArrayUtil;
 import org.webpki.util.Base64URL;
 import org.webpki.util.ISODateTime;
@@ -286,15 +291,47 @@ import org.webpki.json.JSONSignatureDecoder;
  </pre>
      */
 
+    void writeCryptoBinary (BigInteger value, String name) throws IOException
+      {
+        byte[] crypto_binary = value.toByteArray ();
+        if (crypto_binary[0] == 0x00)
+          {
+            byte[] wo_zero = new byte[crypto_binary.length - 1];
+            System.arraycopy (crypto_binary, 1, wo_zero, 0, wo_zero.length);
+            crypto_binary = wo_zero;
+          }
+        setBinary (name, crypto_binary);
+      }
+
     public JSONObjectWriter setSignature (JSONSigner signer) throws IOException
       {
-        new JSONSignatureEncoder (signer, this);
+        JSONObjectWriter signature_writer = setObject (JSONSignatureDecoder.SIGNATURE_JSON);
+        signature_writer.setString (JSONSignatureDecoder.ALGORITHM_JSON, signer.getAlgorithm ().getURI ());
+        signer.writeKeyInfoData (signature_writer.setObject (JSONSignatureDecoder.KEY_INFO_JSON).setXMLDSigECCurveOption (xml_dsig_named_curve));
+        signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (JSONObjectWriter.getCanonicalizedSubset (root)));
         return this;
       }
     
     public JSONObjectWriter setPublicKey (PublicKey public_key) throws IOException
       {
-        JSONSignatureEncoder.setPublicKey (this, public_key);
+        JSONObjectWriter public_key_writer = setObject (JSONSignatureDecoder.PUBLIC_KEY_JSON);
+        KeyAlgorithms key_alg = KeyAlgorithms.getKeyAlgorithm (public_key);
+        if (key_alg.isRSAKey ())
+          {
+            JSONObjectWriter rsa_key_writer = public_key_writer.setObject (JSONSignatureDecoder.RSA_JSON);
+            RSAPublicKey rsa_public = (RSAPublicKey)public_key;
+            rsa_key_writer.writeCryptoBinary (rsa_public.getModulus (), JSONSignatureDecoder.MODULUS_JSON);
+            rsa_key_writer.writeCryptoBinary (rsa_public.getPublicExponent (), JSONSignatureDecoder.EXPONENT_JSON);
+          }
+        else
+          {
+            JSONObjectWriter ec_key_writer = public_key_writer.setObject (JSONSignatureDecoder.EC_JSON);
+            ec_key_writer.setString (JSONSignatureDecoder.NAMED_CURVE_JSON, xml_dsig_named_curve ?
+               KeyAlgorithms.XML_DSIG_CURVE_PREFIX + key_alg.getECDomainOID () : key_alg.getURI ());
+            ECPoint ec_point = ((ECPublicKey)public_key).getW ();
+            ec_key_writer.writeCryptoBinary (ec_point.getAffineX (), JSONSignatureDecoder.X_JSON);
+            ec_key_writer.writeCryptoBinary (ec_point.getAffineY (), JSONSignatureDecoder.Y_JSON);
+          }
         return this;
       }
 
@@ -306,7 +343,20 @@ import org.webpki.json.JSONSignatureDecoder;
 
     public JSONObjectWriter setX509CertificatePath (X509Certificate[] certificate_path) throws IOException
       {
-        JSONSignatureEncoder.setX509CertificatePath (this, certificate_path);
+        X509Certificate last_certificate = null;
+        Vector<byte[]> certificates = new Vector<byte[]> ();
+        for (X509Certificate certificate : certificate_path)
+          {
+            try
+              {
+                certificates.add (JSONSignatureDecoder.pathCheck (last_certificate, last_certificate = certificate).getEncoded ());
+              }
+            catch (GeneralSecurityException e)
+              {
+                throw new IOException (e);
+              }
+          }
+        setBinaryArray (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON, certificates);
         return this;
       }
 

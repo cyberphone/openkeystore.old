@@ -108,7 +108,7 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addParagraphObject ("Signature Scope").append (
             "The scope of a signature (=what is actually signed) comprises all " +
             "properties including possible child objects of the JSON " +
-            "object holding the <code>Signature</code> property except for the actual <code>" + JSONSignature.SIGNATURE_VALUE_JSON + "</code> property.");
+            "object holding the <code>Signature</code> property except for the actual <code>" + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> property.");
 
         json.addParagraphObject ("Canonicalization and Signature Validation").append (
             "Prerequisite: A JSON object in accordance with ")
@@ -134,9 +134,9 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "(stored in quoted strings), such as dates due to time-zone or resolution differences. To cope with these " +
             "potential problems, compliant parsers need to preserve the original textual representation of " +
             "properties internally in order to support JCS canonicalization." + LINE_SEPARATOR +
-            "Note that the <code>" + JSONSignature.SIGNATURE_VALUE_JSON + "</code> " +
+            "Note that the <code>" + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> " +
             "property including the comma (leading or trailing depending on the position of <code>" +
-             JSONSignature.SIGNATURE_VALUE_JSON + "</code> " + " in the <code>Signature</code> object), <b>must</b> be <i>excluded</i> from the canonicalization process.</li></ul>" +
+             JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</code> " + " in the <code>Signature</code> object), <b>must</b> be <i>excluded</i> from the canonicalization process.</li></ul>" +
             "Applied on the sample signature, a proper canonicalization implementation should return the following JSON object:" +
             "<div style=\"padding:10pt 0pt 10pt 20pt\"><code>" +
             "{&quot;Now&quot;:&quot;2013-12-23T23:25:10+01:00&quot;,&quot;PaymentRequest&quot;:{&quot;Currency&quot;:&quot;USD&quot;,&quot;VAT&quot;:1.45,&quot;Specification&quot;:[{&quot;Units&quot;:3,&quot;Descr<br>" +
@@ -146,8 +146,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
             "&quot;lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk&quot;,&quot;Y&quot;:&quot;LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA&quot;}}}}}</code></div>" +
             "The text in <code><b style=\"color:red;background:Yellow\">red</b></code> highlights the core of the canonicalization process. " +
             "<i>Note that the output string was folded for improving readability</i>. " + LINE_SEPARATOR +
-            "The signature can now be validated using the method specified in <a href=\"#Signature." + JSONSignature.SIGNATURE_VALUE_JSON + "\">" + 
-            JSONSignature.SIGNATURE_VALUE_JSON + "</a>. " + LINE_SEPARATOR +
+            "The signature can now be validated using the method specified in <a href=\"#Signature." + JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "\">" + 
+            JSONSignatureDecoder.SIGNATURE_VALUE_JSON + "</a>. " + LINE_SEPARATOR +
             "Path validation (when applicable), is out of scope for JCS, but is <i>preferably</i> carried out as described in X.509 " +
             json.createReference (JSONBaseHTML.REF_X509) +
             "." + LINE_SEPARATOR +
@@ -275,8 +275,8 @@ public class JSONSignatureHTMLReference extends JSONBaseHTML.Types
         json.addProtocolTable ("Top-level Property")
           .newRow ()
             .newColumn ()
-              .addProperty (JSONSignature.SIGNATURE_JSON)
-              .addLink (JSONSignature.SIGNATURE_JSON)
+              .addProperty (JSONSignatureDecoder.SIGNATURE_JSON)
+              .addLink (JSONSignatureDecoder.SIGNATURE_JSON)
             .newColumn ()
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
