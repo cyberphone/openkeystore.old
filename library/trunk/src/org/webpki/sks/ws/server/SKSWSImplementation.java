@@ -772,8 +772,8 @@ public class SKSWSImplementation
                                     String device_id,
                                     @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                     int key_handle,
-                                    @WebParam(name="SymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                    byte[] symmetric_key,
+                                    @WebParam(name="EncryptedKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                    byte[] encrypted_key,
                                     @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                     byte[] mac)
     throws SKSException
@@ -781,7 +781,7 @@ public class SKSWSImplementation
         String log_result = "";
         try
           {
-            getDevice (device_id).importSymmetricKey (key_handle, symmetric_key, mac);
+            getDevice (device_id).importSymmetricKey (key_handle, encrypted_key, mac);
           }
         catch (SKSException e)
           {
@@ -801,8 +801,8 @@ public class SKSWSImplementation
                                   String device_id,
                                   @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                   int key_handle,
-                                  @WebParam(name="PrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                  byte[] private_key,
+                                  @WebParam(name="EncryptedKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  byte[] encrypted_key,
                                   @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                   byte[] mac)
     throws SKSException
@@ -810,7 +810,7 @@ public class SKSWSImplementation
         String log_result = "";
         try
           {
-            getDevice (device_id).importPrivateKey (key_handle, private_key, mac);
+            getDevice (device_id).importPrivateKey (key_handle, encrypted_key, mac);
           }
         catch (SKSException e)
           {

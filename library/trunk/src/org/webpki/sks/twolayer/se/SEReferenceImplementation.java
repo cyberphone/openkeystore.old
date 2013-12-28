@@ -1844,7 +1844,7 @@ public class SEReferenceImplementation
                                                               byte[] sealed_key,
                                                               String id,
                                                               X509Certificate ee_certificate,
-                                                              byte[] private_key,
+                                                              byte[] encrypted_key,
                                                               byte[] mac) throws SKSException
       {
         SEPrivateKeyData se_private_key_data = new SEPrivateKeyData ();
@@ -1868,7 +1868,7 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Check for key length errors
             ///////////////////////////////////////////////////////////////////////////////////
-            if (private_key.length > (SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING))
+            if (encrypted_key.length > (SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING))
               {
                 abort ("Private key: " + id + " exceeds " + SecureKeyStore.MAX_LENGTH_CRYPTO_DATA + " bytes");
               }
@@ -1880,13 +1880,13 @@ public class SEReferenceImplementation
                                                        unwrapped_key,
                                                        ee_certificate,
                                                        SecureKeyStore.METHOD_IMPORT_PRIVATE_KEY);
-            verifier.addArray (private_key);
+            verifier.addArray (encrypted_key);
             verifier.verify (mac);
     
             ///////////////////////////////////////////////////////////////////////////////////
             // Decrypt and store private key
             ///////////////////////////////////////////////////////////////////////////////////
-            byte[] decrypted_private_key = decrypt (unwrapped_session_key, private_key);
+            byte[] decrypted_private_key = decrypt (unwrapped_session_key, encrypted_key);
             PrivateKey decoded_private_key = raw2PrivateKey (decrypted_private_key);
             se_private_key_data.provisioning_state = unwrapped_session_key.writeKey ();
             se_private_key_data.sealed_key = wrapKey (os_instance_key, unwrapped_key, decrypted_private_key);
@@ -1922,7 +1922,7 @@ public class SEReferenceImplementation
                                                                   byte[] sealed_key,
                                                                   String id,
                                                                   X509Certificate ee_certificate,
-                                                                  byte[] symmetric_key,
+                                                                  byte[] encrypted_key,
                                                                   byte[] mac) throws SKSException
       {
         SESymmetricKeyData se_symmetric_key_data = new SESymmetricKeyData ();
@@ -1946,7 +1946,7 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Check for key length errors
             ///////////////////////////////////////////////////////////////////////////////////
-            if (symmetric_key.length > (SecureKeyStore.MAX_LENGTH_SYMMETRIC_KEY + SecureKeyStore.AES_CBC_PKCS5_PADDING))
+            if (encrypted_key.length > (SecureKeyStore.MAX_LENGTH_SYMMETRIC_KEY + SecureKeyStore.AES_CBC_PKCS5_PADDING))
               {
                 abort ("Symmetric key: " + id + " exceeds " + SecureKeyStore.MAX_LENGTH_SYMMETRIC_KEY + " bytes");
               }
@@ -1958,7 +1958,7 @@ public class SEReferenceImplementation
                                                        unwrapped_key,
                                                        ee_certificate,
                                                        SecureKeyStore.METHOD_IMPORT_SYMMETRIC_KEY);
-            verifier.addArray (symmetric_key);
+            verifier.addArray (encrypted_key);
             verifier.verify (mac);
     
             ///////////////////////////////////////////////////////////////////////////////////
@@ -1971,7 +1971,7 @@ public class SEReferenceImplementation
             ///////////////////////////////////////////////////////////////////////////////////
             // Decrypt and store symmetric key
             ///////////////////////////////////////////////////////////////////////////////////
-            byte[] raw_key = decrypt (unwrapped_session_key, symmetric_key);
+            byte[] raw_key = decrypt (unwrapped_session_key, encrypted_key);
             unwrapped_key.is_symmetric = true;
             se_symmetric_key_data.provisioning_state = unwrapped_session_key.writeKey ();
             se_symmetric_key_data.sealed_key = wrapKey (os_instance_key, unwrapped_key, raw_key);

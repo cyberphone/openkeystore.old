@@ -172,7 +172,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               }
             return column
                 .newColumn ()
-                  .addString ("See <code>SKS:")
+                  .addString ("<i>Optional</i>: See <code>SKS:")
                   .addString (sks_method)
                   .addString ("</code>.");
           }
@@ -183,26 +183,41 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         String name;
         boolean mandatory;
         String description;
+        int choice_length;
         
-        LinkedObject (String name, boolean mandatory, String description)
+        LinkedObject (String name, boolean mandatory, String description, int choice_length)
           {
             this.name = name;
             this.mandatory = mandatory;
             this.description = description;
+            this.choice_length = choice_length;
+          }
+
+        LinkedObject (String name, boolean mandatory, String description)
+          {
+            this (name, mandatory,description, 0);
           }
 
         @Override
         public Column execute (Column column) throws IOException
           {
-            return column
+            column = column
               .newRow ()
                 .newColumn ()
                   .addProperty (name)
                   .addLink (name)
                 .newColumn ()
                   .setType (WEBPKI_DATA_TYPES.OBJECT)
-                .newColumn ()
-                  .setUsage (mandatory)
+                .newColumn ();
+            if (choice_length  == 0)
+              {
+                column.setUsage (mandatory);
+              }
+            else
+              {
+                column.setChoice (mandatory, choice_length);
+              }
+            return column
                 .newColumn ()
                   .addString (description);
           }
@@ -588,6 +603,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json.addParagraphObject ().append ("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">KeyGen2</span>" +
              "<br><span style=\"font-size:" + JSONBaseHTML.CHAPTER_FONT_SIZE + "\">&nbsp;<br>Credential Enrollment and Management Protocol</span></div>");
         
+        json.niceSquare ("<i>Disclaimer</i>: This is a system in development. That is, the specification may change without notice.", 20);
+        
         json.addTOC ();
         
         json.addParagraphObject ("Introduction").append ("KeyGen2 is a web-based protocol for enrolling and managing credentials like X.509 certificates ")
@@ -672,7 +689,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addReferenceTable ();
         
-        json.addDocumentHistoryLine ("2013-12-17", "0.2", "Not yet released document :-)");
+        json.addDocumentHistoryLine ("2013-12-28", "0.2", "Not yet released document :-)");
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 
@@ -1062,7 +1079,13 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                                                      1,
                                                      "List of key entries to be created. " +
                                                      "See <code>SKS:createKeyEntry</code>."))
-          .newExtensionRow (new OptionalSignature ());
+          .newExtensionRow (new OptionalSignature ()).setNotes (
+              "Due to the stateful MAC-scheme featured in SKS, " +
+              "the properties beginning with <code>" + PUK_POLICY_SPECIFIERS_JSON + "</code> " +
+              "and ending with <code>" + KEY_ENTRY_SPECIFIERS_JSON + "</code>, <b>must</b> " +
+              "<i>be generated (by the issuer) and executed (by the SKS) in " +
+              "exactly the order they are declared in this table as well " +
+              "as in associated object arrays</i>.");
   
         preAmble (KEY_CREATION_RESPONSE_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
@@ -1074,14 +1097,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .setType (WEBPKI_DATA_TYPES.OBJECT)
             .newColumn ()
             .newColumn ()
-              .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>." +
-              		      LINE_SEPARATOR +
-                          "Due to the stateful MAC-scheme featured in SKS, " +
+              .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>.").setNotes ("Due to the stateful MAC-scheme featured in SKS, " +
                           "<code>" + GENERATED_KEYS_JSON + "</code> <b>must</b> " +
-                          "<i>be generated (encoding) and executed (decoding) in strict " +
-                          "array order</i> as well as honoring the array order in the associated  ")
-              .addLink (KEY_CREATION_REQUEST_JSON)
-              .addString (".");
+                          "<i>be generated (by the SKS) and decoded (by the issuer) in exactly the same " +
+                          "array order as in the associated</i>  <a href=\"#" +
+                           KEY_CREATION_REQUEST_JSON + "." + KEY_ENTRY_SPECIFIERS_JSON + "\">" + KEY_ENTRY_SPECIFIERS_JSON + "</a>.");
 
         preAmble (PROVISIONING_FINALIZATION_REQUEST_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
@@ -1089,19 +1109,13 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newExtensionRow (new OptionalArrayObject (ISSUED_CREDENTIALS_JSON,
                                                      1,
                  "<i>Optional:</i> List of issued credentials. See <code>" +
-                 "SKS:setCertificatePath</code>." + LINE_SEPARATOR +
-                 "Due to the stateful MAC-scheme featured in SKS, " +
-                 "the properties beginning with <code>" + ISSUED_CREDENTIALS_JSON + "</code> " +
-                 "and ending with <code>" + DELETE_KEYS_JSON + "</code>, <b>must</b> " +
-                 "<i>be generated (encoding) and executed (decoding) in exactly " +
-                 "the order they are declared in this table</i> as well " +
-                 "as in associated object arrays." +
-                  LINE_SEPARATOR +
-                  "Note that that <code>" + ISSUED_CREDENTIALS_JSON +
-                  "</code> are not guaranteed to be " +
-                  "supplied in the same order as during the associated "))
-              .addLink (KEY_CREATION_REQUEST_JSON)
-              .addString (".")
+                 "SKS:setCertificatePath</code>.")).setNotes (
+                     "Due to the stateful MAC-scheme featured in SKS, " +
+                     "the properties beginning with <code>" + ISSUED_CREDENTIALS_JSON + "</code> " +
+                     "and ending with <code>" + DELETE_KEYS_JSON + "</code>, <b>must</b> " +
+                     "<i>be generated (by the issuer) and executed (by the SKS) in exactly " +
+                     "the order they are declared in this table as well " +
+                     "as in associated object arrays</i>.")
           .newExtensionRow (new OptionalArrayObject (UNLOCK_KEYS_JSON,
                                                      1,
                                                      "<i>Optional:</i> List of keys to be unlocked. See <code>" +
@@ -1676,20 +1690,19 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .setUsage (false)
             .newColumn ()
-              .addString ("<i>Optional</i> flag (with the default value <code>false</code>), " +
+              .addString ("<i>Optional:</i> Flag (with the default value <code>false</code>), " +
                           "which tells if <code>" +
                           JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON +
                           "</code> contains a user-installable trust anchor as well." + LINE_SEPARATOR +
-                          "Trust anchor installation is mean to be independent of SKS provisioning.")
-          .newExtensionRow (new LinkedObject (IMPORT_KEY_JSON,
+                          "Trust anchor installation is meant to be <i>independent</i> of SKS provisioning.")
+          .newExtensionRow (new LinkedObject (IMPORT_SYMMETRIC_KEY_JSON,
                                               false,
-                          "<i>Optional</i> key import operation." + LINE_SEPARATOR +
-                          "Due to the stateful MAC-scheme featured in SKS, " +
-                          "the properties beginning with <code>" + IMPORT_KEY_JSON + "</code> " +
-                          "and ending with <code>" + LOGOTYPES_JSON + "</code>, <b>must</b> " +
-                          "<i>be generated (encoding) and executed (decoding) in " +
-                          "exactly the order they are declared in this table</i> as well " +
-                          "as in associated object arrays."))
+                          "<i>Optional:</i> Import of raw symmetric key. See <code>SKS:importSymmetricKey</code>.", 2))
+          .newExtensionRow (new LinkedObject (IMPORT_PRIVATE_KEY_JSON,
+                                              false,
+                          "<i>Optional:</i> Import of private key in PKCS #8 " +
+                          json.createReference (JSONBaseHTML.REF_PKCS8) +
+                          " format. See <code>SKS:importPrivateKey</code>."))
           .newExtensionRow (new TargetKeyReference (UPDATE_KEY_JSON, false, "postUpdateKey", true))
           .newExtensionRow (new TargetKeyReference (CLONE_KEY_PROTECTION_JSON, false, "postCloneKeyProtection", false))
           .newExtensionRow (new OptionalArrayObject (EXTENSIONS_JSON,
@@ -1707,7 +1720,17 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
           .newExtensionRow (new OptionalArrayObject (LOGOTYPES_JSON,
               1,
               "<i>Optional:</i> List of logotype objects. See <code>" +
-              "SKS:addExtension</code>."));
+              "SKS:addExtension</code>.")).setNotes (
+                  "Due to the stateful MAC-scheme featured in SKS, " +
+                  "the properties beginning with <code>" + IMPORT_SYMMETRIC_KEY_JSON + "</code> " +
+                  "and ending with <code>" + LOGOTYPES_JSON + "</code>, <b>must</b> " +
+                  "<i>be generated (by the issuer) and executed (by the SKS) in " +
+                  "exactly the order they are declared in this table as well " +
+                  "as in associated object arrays</i>." + LINE_SEPARATOR +
+                  "Note that that credential <code>" + ID_JSON +
+                  "</code>s are not guaranteed to be " +
+                  "supplied in the same order as during the associated " +
+                  "<a href=\"#" + KEY_CREATION_REQUEST_JSON + "\">" + KEY_CREATION_REQUEST_JSON + "</a>.");
 
         json.addSubItemTable (new String[]{CLONE_KEY_PROTECTION_JSON,
                                            DELETE_KEYS_JSON,
@@ -1849,29 +1872,17 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("Writable flag. Default is <code>false</code>.  See <code>SKS:setProperty</code>.");
 
-        json.addSubItemTable (IMPORT_KEY_JSON)
+        json.addSubItemTable (new String[]{IMPORT_PRIVATE_KEY_JSON, IMPORT_SYMMETRIC_KEY_JSON})
           .newRow ()
             .newColumn ()
-              .addProperty (SYMMETRIC_KEY_JSON)
-              .addSymbolicValue (SYMMETRIC_KEY_JSON)
-            .newColumn ()
-               .setType (WEBPKI_DATA_TYPES.BASE64)
-            .newColumn ()
-               .setChoice (true, 2)
-            .newColumn ()
-              .addString ("Encrypted symmetric key. See <code>SKS:importSymmetricKey</code>.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (PRIVATE_KEY_JSON)
-              .addSymbolicValue (PRIVATE_KEY_JSON)
+              .addProperty (ENCRYPTED_KEY_JSON)
+              .addSymbolicValue (ENCRYPTED_KEY_JSON)
             .newColumn ()
                .setType (WEBPKI_DATA_TYPES.BASE64)
             .newColumn ()
             .newColumn ()
-              .addString ("Encrypted PKCS #8 ")
-              .addString (json.createReference (JSONBaseHTML.REF_PKCS8))
-              .addString (" object. See <code>SKS:importPrivateKey</code>.")
-          .newExtensionRow (new MAC ("import* </code> methods<code>"));
+              .addString ("Encrypted key material.  See <code>SKS:import* </code> methods<code>." + ENCRYPTED_KEY_JSON + "</code>.")
+          .newExtensionRow (new MAC ("import* </code>methods<code>"));
 
         json.addSubItemTable (CLIENT_ATTRIBUTES_JSON)
           .newRow ()
@@ -1977,7 +1988,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "</code> <b>must</b> be an EC key using the same curve as <code>" + 
                           SERVER_EPHEMERAL_KEY_JSON + "</code>.");
 
-        json.addJSONSignatureDefinitions (false);
+        json.addJSONSignatureDefinitions (false, LINE_SEPARATOR + "Note that the <code>" +
+              JSONSignatureDecoder.URL_JSON + "</code> option is <i>not</i> used by KeyGen2.");
         
         json.writeHTML ();
       }

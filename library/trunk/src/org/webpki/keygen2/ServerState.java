@@ -29,6 +29,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -1353,12 +1354,13 @@ public class ServerState implements Serializable
           {
             ServerState.bad ("Different number of requested and received keys");
           }
+        Iterator<ServerState.Key> req_key_iterator = requested_keys.values ().iterator ();
         for (KeyCreationResponseDecoder.GeneratedPublicKey gpk : key_create_response.generated_keys.values ())
           {
-            ServerState.Key kp = requested_keys.get (gpk.id);
-            if (kp == null)
+            ServerState.Key kp = req_key_iterator.next ();
+            if (!kp.id.equals (gpk.id))
               {
-                ServerState.bad ("Missing key id:" + gpk.id);
+                ServerState.bad ("Wrong ID order:" + gpk.id + " / " + kp.id);
               }
             if (kp.key_specifier.key_algorithm != KeyAlgorithms.getKeyAlgorithm (kp.public_key = gpk.public_key, kp.key_specifier.parameters != null))
               {

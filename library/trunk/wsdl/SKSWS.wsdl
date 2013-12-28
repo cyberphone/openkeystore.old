@@ -341,7 +341,7 @@
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
-            <xs:element name="SymmetricKey" type="xs:base64Binary"/>
+            <xs:element name="EncryptedKey" type="xs:base64Binary"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>
@@ -358,7 +358,7 @@
           <xs:sequence>
             <xs:element name="DeviceID" type="xs:string" nillable="true" minOccurs="0"/>
             <xs:element name="KeyHandle" type="xs:int"/>
-            <xs:element name="PrivateKey" type="xs:base64Binary"/>
+            <xs:element name="EncryptedKey" type="xs:base64Binary"/>
             <xs:element name="MAC" type="xs:base64Binary"/>
           </xs:sequence>
         </xs:complexType>

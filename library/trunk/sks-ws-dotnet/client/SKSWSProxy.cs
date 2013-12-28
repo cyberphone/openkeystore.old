@@ -1293,8 +1293,8 @@ namespace org.webpki.sks.ws.client
         internal int _key_handle;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="SymmetricKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _symmetric_key;
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="EncryptedKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _encrypted_key;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -1302,12 +1302,12 @@ namespace org.webpki.sks.ws.client
 
         public importSymmetricKey_Request(string DeviceID,
                                           int KeyHandle,
-                                          byte[] SymmetricKey,
+                                          byte[] EncryptedKey,
                                           byte[] MAC)
         {
             _device_id = DeviceID;
             _key_handle = KeyHandle;
-            _symmetric_key = SymmetricKey;
+            _encrypted_key = EncryptedKey;
             _mac = MAC;
         }
     }
@@ -1331,8 +1331,8 @@ namespace org.webpki.sks.ws.client
         internal int _key_handle;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=2)]
-        [System.Xml.Serialization.XmlElementAttribute(ElementName="PrivateKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
-        internal byte[] _private_key;
+        [System.Xml.Serialization.XmlElementAttribute(ElementName="EncryptedKey", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
+        internal byte[] _encrypted_key;
 
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://xmlns.webpki.org/sks/v1.00", Order=3)]
         [System.Xml.Serialization.XmlElementAttribute(ElementName="MAC", Form=System.Xml.Schema.XmlSchemaForm.Qualified)]
@@ -1340,12 +1340,12 @@ namespace org.webpki.sks.ws.client
 
         public importPrivateKey_Request(string DeviceID,
                                         int KeyHandle,
-                                        byte[] PrivateKey,
+                                        byte[] EncryptedKey,
                                         byte[] MAC)
         {
             _device_id = DeviceID;
             _key_handle = KeyHandle;
-            _private_key = PrivateKey;
+            _encrypted_key = EncryptedKey;
             _mac = MAC;
         }
     }
@@ -2969,14 +2969,14 @@ namespace org.webpki.sks.ws.client
         }
 
         public void importSymmetricKey(int KeyHandle,
-                                       byte[] SymmetricKey,
+                                       byte[] EncryptedKey,
                                        byte[] MAC)
         {
             try
             {
                 base.Channel.importSymmetricKey(new importSymmetricKey_Request(device_id,
                                                                                KeyHandle,
-                                                                               SymmetricKey,
+                                                                               EncryptedKey,
                                                                                MAC));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)
@@ -2986,14 +2986,14 @@ namespace org.webpki.sks.ws.client
         }
 
         public void importPrivateKey(int KeyHandle,
-                                     byte[] PrivateKey,
+                                     byte[] EncryptedKey,
                                      byte[] MAC)
         {
             try
             {
                 base.Channel.importPrivateKey(new importPrivateKey_Request(device_id,
                                                                            KeyHandle,
-                                                                           PrivateKey,
+                                                                           EncryptedKey,
                                                                            MAC));
             }
             catch (System.ServiceModel.FaultException<_SKSException> e)

@@ -545,14 +545,14 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
 
     @Override
     public void importSymmetricKey (int key_handle,
-                                 byte[] symmetric_key,
+                                 byte[] encrypted_key,
                                  byte[] mac) throws SKSException
       {
         try
           {
             getSKSWS ().importSymmetricKey (device_id,
                                          key_handle,
-                                         symmetric_key,
+                                         encrypted_key,
                                          mac);
           }
         catch (SKSException_Exception e)
@@ -587,14 +587,14 @@ public class SKSWSClient implements SecureKeyStore, WSSpecific
 
     @Override
     public void importPrivateKey (int key_handle,
-                                   byte[] private_key,
+                                   byte[] encrypted_key,
                                    byte[] mac) throws SKSException
       {
         try
           {
             getSKSWS ().importPrivateKey (device_id,
                                           key_handle,
-                                          private_key,
+                                          encrypted_key,
                                           mac);
           }
         catch (SKSException_Exception e)

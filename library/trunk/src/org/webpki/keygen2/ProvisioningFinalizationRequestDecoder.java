@@ -323,19 +323,17 @@ public class ProvisioningFinalizationRequestDecoder extends ClientDecoder
                   }
               }
 
-            if (rd.hasProperty (IMPORT_KEY_JSON))
+            if (rd.hasProperty (IMPORT_SYMMETRIC_KEY_JSON))
               {
-                JSONObjectReader import_key = rd.getObject(IMPORT_KEY_JSON);
-                if (import_key.hasProperty (PRIVATE_KEY_JSON))
-                  {
-                    encrypted_private_key = import_key.getBinary (PRIVATE_KEY_JSON);
-                    private_key_mac = KeyGen2Validator.getMAC (import_key);
-                  }
-                else
-                  {
-                    encrypted_symmetric_key = import_key.getBinary (SYMMETRIC_KEY_JSON);
-                    symmetric_key_mac = KeyGen2Validator.getMAC (import_key);
-                  }
+                JSONObjectReader import_key = rd.getObject(IMPORT_SYMMETRIC_KEY_JSON);
+                encrypted_symmetric_key = import_key.getBinary (ENCRYPTED_KEY_JSON);
+                symmetric_key_mac = KeyGen2Validator.getMAC (import_key);
+              }
+            else if (rd.hasProperty (IMPORT_PRIVATE_KEY_JSON))
+              {
+                JSONObjectReader import_key = rd.getObject(IMPORT_PRIVATE_KEY_JSON);
+                encrypted_private_key = import_key.getBinary (ENCRYPTED_KEY_JSON);
+                private_key_mac = KeyGen2Validator.getMAC (import_key);
               }
 
             for (JSONObjectReader extension : getObjectArrayConditional (rd, EXTENSIONS_JSON))

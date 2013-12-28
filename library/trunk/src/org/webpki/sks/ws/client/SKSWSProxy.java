@@ -296,8 +296,8 @@ public interface SKSWSProxy
                                     String device_id,
                                     @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                     int key_handle,
-                                    @WebParam(name="SymmetricKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                    byte[] symmetric_key,
+                                    @WebParam(name="EncryptedKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                    byte[] encrypted_key,
                                     @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                     byte[] mac)
     throws SKSException_Exception;
@@ -309,8 +309,8 @@ public interface SKSWSProxy
                                   String device_id,
                                   @WebParam(name="KeyHandle", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                   int key_handle,
-                                  @WebParam(name="PrivateKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
-                                  byte[] private_key,
+                                  @WebParam(name="EncryptedKey", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
+                                  byte[] encrypted_key,
                                   @WebParam(name="MAC", targetNamespace="http://xmlns.webpki.org/sks/v1.00")
                                   byte[] mac)
     throws SKSException_Exception;

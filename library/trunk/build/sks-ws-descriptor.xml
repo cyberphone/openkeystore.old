@@ -855,13 +855,13 @@
    <Method Name="importSymmetricKey" Throws="SKSException">
      <Parameter Name="device_id"     Type="string" XMLName="DeviceID"      Null="true" SuppressRule="DEV"/>
      <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
-     <Parameter Name="symmetric_key" Type="binary" XMLName="SymmetricKey"/>
+     <Parameter Name="encrypted_key" Type="binary" XMLName="EncryptedKey"/>
      <Parameter Name="mac"           Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
         String log_result = "";
         try
           {
-            getDevice (device_id).importSymmetricKey (key_handle, symmetric_key, mac);
+            getDevice (device_id).importSymmetricKey (key_handle, encrypted_key, mac);
           }
         catch (SKSException e)
           {
@@ -874,16 +874,16 @@
           }
 ]]></Code></Method>
 
-   <Method Name="importPrivateKey" Throws="SKSException">
-     <Parameter Name="device_id"   Type="string" XMLName="DeviceID"       Null="true" SuppressRule="DEV"/>
-     <Parameter Name="key_handle"  Type="int"    XMLName="KeyHandle"/>
-     <Parameter Name="private_key" Type="binary" XMLName="PrivateKey"/>
-     <Parameter Name="mac"         Type="binary" XMLName="MAC"/>
+   <Method Name="importPrivateKey"   Throws="SKSException">
+     <Parameter Name="device_id"     Type="string" XMLName="DeviceID"       Null="true" SuppressRule="DEV"/>
+     <Parameter Name="key_handle"    Type="int"    XMLName="KeyHandle"/>
+     <Parameter Name="encrypted_key" Type="binary" XMLName="EncryptedKey"/>
+     <Parameter Name="mac"           Type="binary" XMLName="MAC"/>
      <Code><![CDATA[
         String log_result = "";
         try
           {
-            getDevice (device_id).importPrivateKey (key_handle, private_key, mac);
+            getDevice (device_id).importPrivateKey (key_handle, encrypted_key, mac);
           }
         catch (SKSException e)
           {

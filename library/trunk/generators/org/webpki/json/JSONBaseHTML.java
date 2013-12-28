@@ -499,8 +499,6 @@ public class JSONBaseHTML
     public interface RowInterface
       {
         ProtocolObject.Row newRow ();
-        
-        void setNotes (String notes) throws IOException;
       }
 
     public class ProtocolObject implements RowInterface 
@@ -731,10 +729,10 @@ public class JSONBaseHTML
                     return extender.execute (this);
                   }
 
-                @Override
-                public void setNotes (String notes) throws IOException
+                public Column setNotes (String notes) throws IOException
                   {
                     protocol_objects.lastElement ().setNotes (notes);
+                    return this;
                   }
               }
             
@@ -829,7 +827,7 @@ public class JSONBaseHTML
               }
             if (notes != null)
               {
-                s.append ("<tr><td colspan=\"4\" style=\"border-width:0px;padding:10pt 0pt 10pt 0pt\">")
+                s.append ("<tr><td colspan=\"4\" style=\"background-color:white;border-width:0px;padding:10pt 0pt 10pt 0pt\">")
                  .append (notes)
                  .append ("</td></tr>");
               }
@@ -842,8 +840,7 @@ public class JSONBaseHTML
             return new Row ();
           }
 
-        @Override
-        public void setNotes (String notes) throws IOException
+        void setNotes (String notes) throws IOException
           {
             if (this.notes == null)
               {
@@ -979,6 +976,15 @@ public class JSONBaseHTML
              .append ("</span></div>");
           }
         return p.local_html = s;
+      }
+
+    public void niceSquare (String html_in_div, int bottom_margin) throws IOException
+      {
+        addParagraphObject (null).append ("<table style=\"border-width:1px;padding:4pt 10pt 4pt 10pt;border-style:solid;border-color: #808080;margin-left:auto;margin-right:auto;box-shadow:3pt 3pt 3pt #D0D0D0;margin-bottom:")
+                                 .append (bottom_margin)
+                                 .append ("pt\"><tr><td>")
+                                 .append (html_in_div)
+                                 .append ("</td></tr></table>");
       }
 
     String makeLink (String header)
@@ -1128,12 +1134,12 @@ public class JSONBaseHTML
         doc_history.insert (doc_history.lastIndexOf ("</table>"), "<tr><td>" + date + "</td><td style=\"text-align:center\">" + version + "</td><td>" + comment + "</td></tr>");
       }
 
-    public void addJSONSignatureDefinitions (boolean reference) throws IOException
+    public void addJSONSignatureDefinitions (boolean reference, String url_option) throws IOException
       {
         String jcs = reference ? "" : createReference (REF_JCS) + ": ";
         String option = reference ? "Option: " : createReference (REF_JCS) + " option: ";
         String sks_alg_ref = reference ? " " : " See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR;
-        
+       
         addSubItemTable (JSONSignatureDecoder.SIGNATURE_JSON)
           .newRow ()
             .newColumn ()
@@ -1227,6 +1233,7 @@ public class JSONBaseHTML
                           "The <i>signing key's</i> algorithm <b>must</b> be compatible with those specified for ")
               .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
               .addString (".")
+              .addString (url_option)
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)

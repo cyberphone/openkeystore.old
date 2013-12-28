@@ -70,6 +70,8 @@ public interface KeyGen2Constants
 
     String ENCRYPTED_EXTENSIONS_JSON                 = "EncryptedExtensions";
 
+    String ENCRYPTED_KEY_JSON                        = "EncryptedKey";
+
     String ENCRYPTED_PRESET_PIN_JSON                 = "EncryptedPresetPIN";
     
     String ENCRYPTED_PUK_JSON                        = "EncryptedPUK";
@@ -90,7 +92,9 @@ public interface KeyGen2Constants
 
     String IMAGE_PREFERENCES_JSON                    = "ImagePreferences";
     
-    String IMPORT_KEY_JSON                           = "ImportKey";
+    String IMPORT_PRIVATE_KEY_JSON                   = "ImportPrivateKey";
+
+    String IMPORT_SYMMETRIC_KEY_JSON                 = "ImportSymmetricKey";
 
     String INPUT_METHOD_JSON                         = "InputMethod";
 
@@ -150,8 +154,6 @@ public interface KeyGen2Constants
 
     String PRIVACY_ENABLED_JSON                      = "PrivacyEnabled";
 
-    String PRIVATE_KEY_JSON                          = "PrivateKey";
-
     String PROPERTIES_JSON                           = "Properties";       
 
     String PROPERTY_BAGS_JSON                        = "PropertyBags";       
@@ -193,8 +195,6 @@ public interface KeyGen2Constants
     String SESSION_LIFE_TIME_JSON                    = "SessionLifeTime";
 
     String SUBMIT_URL_JSON                           = "SubmitURL";
-
-    String SYMMETRIC_KEY_JSON                        = "SymmetricKey";
 
     String TRUST_ANCHOR_JSON                         = "TrustAnchor";
 

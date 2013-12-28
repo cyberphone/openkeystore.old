@@ -2272,7 +2272,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public synchronized void importPrivateKey (int key_handle,
-                                               byte[] private_key,
+                                               byte[] encrypted_key,
                                                byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2283,7 +2283,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for key length errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if (private_key.length > (MAX_LENGTH_CRYPTO_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING))
+        if (encrypted_key.length > (MAX_LENGTH_CRYPTO_DATA + SecureKeyStore.AES_CBC_PKCS5_PADDING))
           {
             key_entry.owner.abort ("Private key: " + key_entry.id + " exceeds " + MAX_LENGTH_CRYPTO_DATA + " bytes");
           }
@@ -2304,7 +2304,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                                                                                         key_entry.sealed_key,
                                                                                                         key_entry.id,
                                                                                                         ee_certificate,
-                                                                                                        private_key,
+                                                                                                        encrypted_key,
                                                                                                         mac);
             key_entry.owner.provisioning_state = se_private_key_data.provisioning_state;
             key_entry.sealed_key = se_private_key_data.sealed_key;
@@ -2323,7 +2323,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public synchronized void importSymmetricKey (int key_handle,
-                                                 byte[] symmetric_key,
+                                                 byte[] encrypted_key,
                                                  byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -2334,7 +2334,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for various input errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if (symmetric_key.length > (MAX_LENGTH_SYMMETRIC_KEY + SecureKeyStore.AES_CBC_PKCS5_PADDING))
+        if (encrypted_key.length > (MAX_LENGTH_SYMMETRIC_KEY + SecureKeyStore.AES_CBC_PKCS5_PADDING))
           {
             key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
           }
@@ -2355,7 +2355,7 @@ public class TEEReferenceImplementation implements TEEError, SecureKeyStore, Ser
                                                                                                               key_entry.sealed_key,
                                                                                                               key_entry.id,
                                                                                                               ee_certificate,
-                                                                                                              symmetric_key,
+                                                                                                              encrypted_key,
                                                                                                               mac);
             key_entry.owner.provisioning_state = se_symmetric_key_data.provisioning_state;
             key_entry.symmetric_key_length = se_symmetric_key_data.symmetric_key_length;

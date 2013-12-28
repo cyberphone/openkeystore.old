@@ -219,11 +219,11 @@ public interface SecureKeyStore
                        byte[] mac) throws SKSException;
     
     void importSymmetricKey (int key_handle,
-                             byte[] symmetric_key,
+                             byte[] encrypted_key,
                              byte[] mac) throws SKSException;
     
     void importPrivateKey (int key_handle,
-                           byte[] private_key,
+                           byte[] encrypted_key,
                            byte[] mac) throws SKSException;
 
     int createPINPolicy (int provisioning_handle,
