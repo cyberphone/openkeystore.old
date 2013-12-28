@@ -61,7 +61,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         void execute ()
           {
             s.append ("This chapter contains a high-level description of the KeyGen2 protocol "+
-                "while the succeding chapters cover the actual format. " + LINE_SEPARATOR +
+                "while the subsequent chapters cover the actual format. " + LINE_SEPARATOR +
                 "To facilitate a straightforward implementation as well as robust operation, KeyGen2 builds on a concept where each major process " +
                 "step is handled by a specific request/response pair as outlined below:" + 
                       "<table style=\"width:600pt;margin-top:10pt;margin-left:auto;margin-right:auto;border-collapse:collapse\">");
@@ -772,7 +772,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .addString ("Note that extensions may refer to <code>SKS:addExtension</code> as well as to non-SKS items such as ")
             .addPropertyLink (VIRTUAL_MACHINE_JSON, PROVISIONING_INITIALIZATION_REQUEST_JSON)
             .addString ("." + LINE_SEPARATOR +
-                        "Another possible use of this feature, is for signaling support for extensions in the protocol itself while keeping the name-space etc. intact.")
+                        "Another possible use of this feature is for signaling support for extensions in the protocol itself while keeping the name-space etc. intact.")
           .newExtensionRow (new BasicCapabilityQuery (BasicCapabilities.BASIC_CAP_CLIENT_ATTRI, "Query the client for support for client attributes like IMEI number. " +
                          "If the client has support for " +
                          "such attributes it should request the user's permission to disclose them." + LINE_SEPARATOR +
@@ -886,7 +886,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "The <code>" + VIRTUAL_MACHINE_JSON + "</code> option is intended to support BYOD " +
                           "use-cases where the provisioning process bootstraps an alternative " +
                           "environment and associated policies." + LINE_SEPARATOR +
-                          "Since the exact nature of such an environment is platform-dependent, it is necesary " +
+                          "Since the exact nature of such an environment is platform-dependent, it is necessary " +
                           "to find out what is actually available using the pre-defined extension URI <code>&quot;"))
               .addString (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
               .addString ("&quot;</code>. The recommended method is adding the following to ")
@@ -1100,8 +1100,10 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>.").setNotes ("Due to the stateful MAC-scheme featured in SKS, " +
                           "<code>" + GENERATED_KEYS_JSON + "</code> <b>must</b> " +
                           "<i>be generated (by the SKS) and decoded (by the issuer) in exactly the same " +
-                          "array order as in the associated</i>  <a href=\"#" +
-                           KEY_CREATION_REQUEST_JSON + "." + KEY_ENTRY_SPECIFIERS_JSON + "\">" + KEY_ENTRY_SPECIFIERS_JSON + "</a>.");
+                          "order (message-wise) as they are encountered in the associated</i>  <a href=\"#" +
+                           KEY_CREATION_REQUEST_JSON + "." + KEY_ENTRY_SPECIFIERS_JSON + "\">" + KEY_ENTRY_SPECIFIERS_JSON + "</a> "+
+                           "(including those embedded by <a href=\"#" +
+                           KEY_CREATION_REQUEST_JSON + "." + PIN_POLICY_SPECIFIERS_JSON + "\">" + PIN_POLICY_SPECIFIERS_JSON + "</a>).");
 
         preAmble (PROVISIONING_FINALIZATION_REQUEST_JSON)
           .newExtensionRow (new StandardServerClientSessionIDs ())
