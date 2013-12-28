@@ -106,6 +106,7 @@ public class JSONBaseHTML
         int sequence;
         boolean prefix_on;
         int sub_seq;
+        boolean italic;
 
         public String getPrefix ()
           {
@@ -134,7 +135,17 @@ public class JSONBaseHTML
 
         String PrefixPlusLink ()
           {
-            return prefix_on ? "<td style=\"text-align:right\"><a href=\"#" + link + "\">" + getPrefix () + "</a></td>" : "";
+            return prefix_on ? "<td style=\"text-align:right\"><a href=\"#" + link + "\">" + getBeginItalic () + getPrefix () + getEndItalic () + "</a></td>" : "";
+          }
+
+        private String getEndItalic ()
+          {
+            return italic ? "</i>" : "";
+          }
+
+        private String getBeginItalic ()
+          {
+            return italic ? "<i>" : "";
           }
 
         public int remainingColums ()
@@ -484,7 +495,9 @@ public class JSONBaseHTML
                  .append ("\"><a href=\"#")
                  .append (te.link)
                  .append ("\">")
+                 .append (te.getBeginItalic ())
                  .append (toc_entry)
+                 .append (te.getEndItalic ())
                  .append ("</a></td></tr>");
               }
             return s.append ("</table></div>").toString ();
@@ -876,6 +889,7 @@ public class JSONBaseHTML
                         TOCEntry te = new TOCEntry ();
                         te.link = makeLink (prot);
                         te.indented = true;
+                        te.italic = !protocol_object.main_object;
                         toc.put (prot, te);
                       }
                   }
