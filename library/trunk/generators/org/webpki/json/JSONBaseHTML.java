@@ -827,7 +827,7 @@ public class JSONBaseHTML
               }
             if (notes != null)
               {
-                s.append ("<tr><td colspan=\"4\" style=\"background-color:white;border-width:0px;padding:10pt 0pt 10pt 0pt\">")
+                s.append ("<tr><td colspan=\"4\" style=\"background-color:white;border-width:0px;padding:10pt 0pt 0pt 0pt\">")
                  .append (notes)
                  .append ("</td></tr>");
               }
