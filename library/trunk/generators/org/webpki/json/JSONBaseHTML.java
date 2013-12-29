@@ -1157,7 +1157,7 @@ public class JSONBaseHTML
         String option = reference ? "Option: " : createReference (REF_JCS) + " option: ";
         String sks_alg_ref = reference ? " " : " See SKS &quot;Algorithm Support&quot;." + Types.LINE_SEPARATOR;
        
-        addSubItemTable (JSONSignatureDecoder.SIGNATURE_JSON)
+        RowInterface row_interface = addSubItemTable (JSONSignatureDecoder.SIGNATURE_JSON)
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.VERSION_JSON)
@@ -1194,19 +1194,24 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (jcs)
-              .addString ("Signature key information placeholder.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureDecoder.EXTENSIONS_JSON)
-              .addArrayLink (JSONSignatureDecoder.EXTENSIONS_JSON, 1)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString (jcs)
-              .addString ("Optional array holding custom extensions like time-stamps, CRLs, and OCSP responses.")
-              .addString (extension_option)
+              .addString ("Signature key information placeholder.");
+        if (extension_option != null)
+          {
+            row_interface = row_interface
+              .newRow ()
+                .newColumn ()
+                  .addProperty (JSONSignatureDecoder.EXTENSIONS_JSON)
+                  .addArrayLink (JSONSignatureDecoder.EXTENSIONS_JSON, 1)
+                .newColumn ()
+                  .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
+                .newColumn ()
+                  .setUsage (false)
+                .newColumn ()
+                  .addString (jcs)
+                  .addString ("<i>Optional</i> array holding custom extension objects like time-stamps, CRLs, and OCSP responses.")
+                  .addString (extension_option);
+          }
+        row_interface
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.SIGNATURE_VALUE_JSON)
@@ -1222,7 +1227,7 @@ public class JSONBaseHTML
                   "</code> on the <span style=\"white-space:nowrap\">UTF-8</span> representation of the " +
                   "canonicalized JSON object.");
 
-        addSubItemTable (JSONSignatureDecoder.KEY_INFO_JSON)
+        row_interface = addSubItemTable (JSONSignatureDecoder.KEY_INFO_JSON)
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.KEY_ID_JSON)
@@ -1230,7 +1235,7 @@ public class JSONBaseHTML
             .newColumn ()
               .setType (Types.WEBPKI_DATA_TYPES.STRING)
             .newColumn ()
-              .setChoice (true, 4)
+              .setChoice (true, url_option == null ? 3 : 4)
             .newColumn ()
               .addString (option)
               .addString ("Symmetric key ID.")
@@ -1243,26 +1248,31 @@ public class JSONBaseHTML
             .newColumn ()
             .newColumn ()
               .addString (option)
-              .addString ("Public key.")
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureDecoder.URL_JSON)
-              .addSymbolicValue (JSONSignatureDecoder.URL_JSON)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.URI)
-            .newColumn ()
-            .newColumn ()
-              .addString (option)
-              .addString ("A single public key or X.509 ")
-              .addString (createReference (REF_X509))
-              .addString (" certificate path stored in a PEM ")
-              .addString (createReference (REF_PEM))
-              .addString (" file accessible via an HTTP&nbsp;URL." + 
-                          Types.LINE_SEPARATOR +
-                          "The <i>signing key's</i> algorithm <b>must</b> be compatible with those specified for ")
-              .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
-              .addString (".")
-              .addString (url_option)
+              .addString ("Public key.");
+        if (url_option!= null)
+          {
+            row_interface = row_interface
+              .newRow ()
+                .newColumn ()
+                  .addProperty (JSONSignatureDecoder.URL_JSON)
+                  .addSymbolicValue (JSONSignatureDecoder.URL_JSON)
+                .newColumn ()
+                  .setType (Types.WEBPKI_DATA_TYPES.URI)
+                .newColumn ()
+                .newColumn ()
+                  .addString (option)
+                  .addString ("A single public key or X.509 ")
+                  .addString (createReference (REF_X509))
+                  .addString (" certificate path stored in a PEM ")
+                  .addString (createReference (REF_PEM))
+                  .addString (" file accessible via an HTTP&nbsp;URL." + 
+                              Types.LINE_SEPARATOR +
+                              "The <i>signing key's</i> algorithm <b>must</b> be compatible with those specified for ")
+                  .addLink (JSONSignatureDecoder.PUBLIC_KEY_JSON)
+                  .addString (".")
+                  .addString (url_option);
+              }
+        row_interface
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON)
@@ -1416,28 +1426,31 @@ public class JSONBaseHTML
               .addString (createReference (REF_LDAP_NAME))
               .addString (" notation.");
 
-        addSubItemTable (JSONSignatureDecoder.EXTENSIONS_JSON)
-          .newRow ()
-            .newColumn ()
-              .addProperty (JSONSignatureDecoder.TYPE_JSON)
-              .addSymbolicValue (JSONSignatureDecoder.TYPE_JSON)
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.URI)
-            .newColumn ()
-            .newColumn ()
-              .addString (jcs)
-              .addString ("Extension type.")
-          .newRow ()
-            .newColumn ()
-              .addProperty ("...")
-              .addSymbolicValue ("...")
-            .newColumn ()
-              .setType (Types.WEBPKI_DATA_TYPES.ANY)
-            .newColumn ()
-              .setUsage (false)
-            .newColumn ()
-              .addString (jcs)
-              .addString ("Extension-specfic properties.");
+        if (extension_option != null)
+          {
+            addSubItemTable (JSONSignatureDecoder.EXTENSIONS_JSON)
+              .newRow ()
+                .newColumn ()
+                  .addProperty (JSONSignatureDecoder.TYPE_JSON)
+                  .addSymbolicValue (JSONSignatureDecoder.TYPE_JSON)
+                .newColumn ()
+                  .setType (Types.WEBPKI_DATA_TYPES.URI)
+                .newColumn ()
+                .newColumn ()
+                  .addString (jcs)
+                  .addString ("Mandatory unique extension type.")
+              .newRow ()
+                .newColumn ()
+                  .addProperty ("...")
+                  .addUnquotedValue ("<code>...</code>")
+                .newColumn ()
+                  .setType (Types.WEBPKI_DATA_TYPES.ANY)
+                .newColumn ()
+                  .setUsage (false)
+                .newColumn ()
+                  .addString (jcs)
+                  .addString ("Extension-specfic properties.");
+          }
       }
 
     public void addTOC ()
