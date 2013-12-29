@@ -80,7 +80,7 @@ public class JSONSignatureDecoder
     
     public static final String SUBJECT_JSON               = "Subject";
     
-    public static final String TYPE                       = "Type";
+    public static final String TYPE_JSON                  = "Type";
 
     public static final String URL_JSON                   = "URL";
     
