@@ -272,6 +272,9 @@ public class JSONBaseHTML
       {
         public enum WEBPKI_DATA_TYPES 
           {
+            ANY     ("any", "&quot;any&quot;",                            null,
+                     "Arbitrary JSON type or object"),
+
             BOOLEAN ("bool",   "<code>true</code> or <code>false</code>", null,
                      "Boolean"),
                      
@@ -1148,7 +1151,7 @@ public class JSONBaseHTML
         doc_history.insert (doc_history.lastIndexOf ("</table>"), "<tr><td>" + date + "</td><td style=\"text-align:center\">" + version + "</td><td>" + comment + "</td></tr>");
       }
 
-    public void addJSONSignatureDefinitions (boolean reference, String url_option) throws IOException
+    public void addJSONSignatureDefinitions (boolean reference, String url_option, String extension_option) throws IOException
       {
         String jcs = reference ? "" : createReference (REF_JCS) + ": ";
         String option = reference ? "Option: " : createReference (REF_JCS) + " option: ";
@@ -1192,6 +1195,18 @@ public class JSONBaseHTML
             .newColumn ()
               .addString (jcs)
               .addString ("Signature key information placeholder.")
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureDecoder.EXTENSIONS_JSON)
+              .addArrayLink (JSONSignatureDecoder.EXTENSIONS_JSON, 1)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.OBJECT)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString (jcs)
+              .addString ("Optional array holding custom extensions like time-stamps, CRLs, and OCSP responses.")
+              .addString (extension_option)
           .newRow ()
             .newColumn ()
               .addProperty (JSONSignatureDecoder.SIGNATURE_VALUE_JSON)
@@ -1400,6 +1415,29 @@ public class JSONBaseHTML
               .addString ("Subject distinguished name in LDAP ")
               .addString (createReference (REF_LDAP_NAME))
               .addString (" notation.");
+
+        addSubItemTable (JSONSignatureDecoder.EXTENSIONS_JSON)
+          .newRow ()
+            .newColumn ()
+              .addProperty (JSONSignatureDecoder.TYPE)
+              .addSymbolicValue (JSONSignatureDecoder.TYPE)
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.URI)
+            .newColumn ()
+            .newColumn ()
+              .addString (jcs)
+              .addString ("Extension type.")
+          .newRow ()
+            .newColumn ()
+              .addProperty ("...")
+              .addSymbolicValue ("...")
+            .newColumn ()
+              .setType (Types.WEBPKI_DATA_TYPES.ANY)
+            .newColumn ()
+              .setUsage (false)
+            .newColumn ()
+              .addString (jcs)
+              .addString ("Extension-specfic properties.");
       }
 
     public void addTOC ()

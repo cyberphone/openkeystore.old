@@ -310,7 +310,12 @@ import org.webpki.json.JSONSignatureDecoder;
         signer.writeKeyInfoData (signature_writer.setObject (JSONSignatureDecoder.KEY_INFO_JSON).setXMLDSigECCurveOption (xml_dsig_named_curve));
         if (signer.extensions != null)
           {
-            signature_writer.addProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, signer.extensions.array));
+            Vector<JSONValue> array = new Vector<JSONValue> ();
+            for (JSONObjectWriter jor : signer.extensions)
+              {
+                array.add (new JSONValue (JSONTypes.OBJECT, jor.root));
+              }
+            signature_writer.addProperty (JSONSignatureDecoder.EXTENSIONS_JSON, new JSONValue (JSONTypes.ARRAY, array));
           }
         signature_writer.setBinary (JSONSignatureDecoder.SIGNATURE_VALUE_JSON, signer.signData (JSONObjectWriter.getCanonicalizedSubset (root)));
         return this;

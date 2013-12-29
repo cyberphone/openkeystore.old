@@ -1990,8 +1990,11 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "</code> <b>must</b> be an EC key using the same curve as <code>" + 
                           SERVER_EPHEMERAL_KEY_JSON + "</code>.");
 
-        json.addJSONSignatureDefinitions (false, LINE_SEPARATOR + "Note that the <code>" +
-              JSONSignatureDecoder.URL_JSON + "</code> option is <i>not</i> used by KeyGen2.");
+        json.addJSONSignatureDefinitions (false,
+              LINE_SEPARATOR + "Note that the <code>" +
+              JSONSignatureDecoder.URL_JSON + "</code> option is <i>not</i> used by KeyGen2.",
+              LINE_SEPARATOR + "Note that the <code>" +
+              JSONSignatureDecoder.EXTENSIONS_JSON + "</code> option is <i>not</i> used by KeyGen2.");
         
         json.writeHTML ();
       }
