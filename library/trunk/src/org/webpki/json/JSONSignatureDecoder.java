@@ -106,7 +106,7 @@ public class JSONSignatureDecoder
 
     String key_id;
 
-    JSONArrayReader extensions;
+    Vector<JSONObjectReader> extensions;
     
     JSONSignatureDecoder (JSONObjectReader rd) throws IOException
       {
@@ -120,7 +120,17 @@ public class JSONSignatureDecoder
         getKeyInfo (signature.getObject (KEY_INFO_JSON));
         if (signature.hasProperty (EXTENSIONS_JSON))
           {
-            extensions = signature.getArray (EXTENSIONS_JSON);
+            extensions = new Vector<JSONObjectReader> ();
+            JSONArrayReader ar = signature.getArray (EXTENSIONS_JSON);
+            do
+              {
+                extensions.add (ar.getObject ());
+                if (!extensions.lastElement ().hasProperty (TYPE_JSON))
+                  {
+                    throw new IOException ("An \"" + EXTENSIONS_JSON + "\" object lack a \"" + TYPE_JSON + "\" property");
+                  }
+              }
+            while (ar.hasMore ());
           }
         signature_value = signature.getBinary (SIGNATURE_VALUE_JSON);
         JSONValue save = signature.json.properties.get (SIGNATURE_VALUE_JSON);
@@ -300,9 +310,9 @@ public class JSONSignatureDecoder
         return algorithm;
       }
 
-    public JSONArrayReader getExtensions ()
+    public JSONObjectReader[] getExtensions ()
       {
-        return extensions;
+        return extensions == null ? null : extensions.toArray (new JSONObjectReader[0]);
       }
 
     void checkRequest (JSONSignatureTypes signature_type) throws IOException
