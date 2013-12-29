@@ -633,7 +633,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                       "nothing&nbsp;more<br>to&nbsp;add,&nbsp;but&nbsp;when&nbsp;there&nbsp;is&nbsp;nothing&nbsp;left&nbsp;to&nbsp;take&nbsp;away</i>&quot;</td></tr>" +
                       "<tr><td style=\"padding-top:4pt;font-size:8pt;text-align:right\">Antoine de Saint-Exup\u00e9ry</td></tr></table>");
 
-        json.addParagraphObject ("KeyGen2 Proxy").append ("Unlike certificate management protocols like CMP ")
+        json.addParagraphObject ("Proxy Scheme").append ("Unlike certificate management protocols like CMP ")
             .append (json.createReference (JSONBaseHTML.REF_CMP))
             .append (", <i>KeyGen2 " +
                      "mandates a two-layer client architecture</i> where the " +
@@ -662,7 +662,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 
         json.addDataTypesDescription ("");
         
-        json.addProtocolTableEntry ("KeyGen2 Objects").append ("The following tables describe the KeyGen2 JSON structures in detail.");
+        json.addProtocolTableEntry ("Objects").append ("The following tables describe the KeyGen2 JSON structures in detail.");
         
         json.setAppendixMode ();
         
