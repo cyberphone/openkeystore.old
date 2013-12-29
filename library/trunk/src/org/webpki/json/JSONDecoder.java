@@ -33,7 +33,7 @@ public abstract class JSONDecoder implements Serializable
     /**
      * INTERNAL USE ONLY.    
      */
-    protected abstract void unmarshallJSONData (JSONObjectReader rd) throws IOException;
+    protected abstract void deserializeJSONData (JSONObjectReader rd) throws IOException;
     
     /**
      * Emulation of XML namespace     

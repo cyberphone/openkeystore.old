@@ -28,6 +28,8 @@ import org.webpki.crypto.SignatureAlgorithms;
 public abstract class JSONSigner implements Serializable
   {
     private static final long serialVersionUID = 1L;
+    
+    JSONArrayWriter extensions;
 
     JSONSigner () {}
 
@@ -36,4 +38,10 @@ public abstract class JSONSigner implements Serializable
     abstract byte[] signData (byte[] data) throws IOException;
 
     abstract void writeKeyInfoData (JSONObjectWriter wr) throws IOException;
+    
+    public JSONSigner setExtensions (JSONArrayWriter extensions)
+      {
+        this.extensions = extensions;
+        return this;
+      }
   }

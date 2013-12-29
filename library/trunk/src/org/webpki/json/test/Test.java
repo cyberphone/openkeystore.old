@@ -67,7 +67,7 @@ public class Test
           }
 
         @Override
-        protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
+        protected void deserializeJSONData (JSONObjectReader rd) throws IOException
           {
             test (rd.getBoolean (BOOL_TRUE));
             test (!rd.getBoolean (BOOL_FALSE));
@@ -126,7 +126,7 @@ public class Test
     public static class ESC extends JSONDecoder
       {
         @Override
-        protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
+        protected void deserializeJSONData (JSONObjectReader rd) throws IOException
           {
             String escape = rd.getString ("Esca\npe");
             if (escape.equals ("A\n\tTAB\nNL /\\\""))

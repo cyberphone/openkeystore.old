@@ -90,7 +90,7 @@ public class JSONTest
           }
 
         @Override
-        protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
+        protected void deserializeJSONData (JSONObjectReader rd) throws IOException
           {
             test (rd.getBoolean (BOOL_TRUE));
             test (!rd.getBoolean (BOOL_FALSE));
@@ -151,7 +151,7 @@ public class JSONTest
         String escape;
         
         @Override
-        protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
+        protected void deserializeJSONData (JSONObjectReader rd) throws IOException
           {
             escape = rd.getString ("Esca\npe");
           }

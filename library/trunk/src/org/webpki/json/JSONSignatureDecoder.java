@@ -78,6 +78,8 @@ public class JSONSignatureDecoder
   
     public static final String EXPONENT_JSON              = "Exponent";
   
+    public static final String EXTENSIONS_JSON            = "Extensions";
+
     public static final String EC_JSON                    = "EC";
   
     public static final String NAMED_CURVE_JSON           = "NamedCurve";
@@ -101,6 +103,8 @@ public class JSONSignatureDecoder
     PublicKey public_key;
 
     String key_id;
+
+    JSONArrayReader extensions;
     
     JSONSignatureDecoder (JSONObjectReader rd) throws IOException
       {
@@ -112,6 +116,10 @@ public class JSONSignatureDecoder
           }
         algorithm_string = signature.getString (ALGORITHM_JSON);
         getKeyInfo (signature.getObject (KEY_INFO_JSON));
+        if (signature.hasProperty (EXTENSIONS_JSON))
+          {
+            extensions = signature.getArray (EXTENSIONS_JSON);
+          }
         signature_value = signature.getBinary (SIGNATURE_VALUE_JSON);
         JSONValue save = signature.json.properties.get (SIGNATURE_VALUE_JSON);
         signature.json.properties.remove (SIGNATURE_VALUE_JSON);
@@ -288,6 +296,11 @@ public class JSONSignatureDecoder
     public SignatureAlgorithms getSignatureAlgorithm ()
       {
         return algorithm;
+      }
+
+    public JSONArrayReader getExtensions ()
+      {
+        return extensions;
       }
 
     void checkRequest (JSONSignatureTypes signature_type) throws IOException

@@ -54,7 +54,7 @@ public class PlatformNegotiationResponseDecoder extends KeyGen2Validator
 
     
     @Override
-    protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
+    protected void deserializeJSONData (JSONObjectReader rd) throws IOException
       {
         //////////////////////////////////////////////////////////////////////////
         // Get the top-level properties

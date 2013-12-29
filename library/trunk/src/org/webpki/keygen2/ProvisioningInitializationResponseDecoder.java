@@ -113,7 +113,7 @@ public class ProvisioningInitializationResponseDecoder extends KeyGen2Validator
 
 
     @Override
-    protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
+    protected void deserializeJSONData (JSONObjectReader rd) throws IOException
       {
         /////////////////////////////////////////////////////////////////////////////////////////
         // Read the top level properties

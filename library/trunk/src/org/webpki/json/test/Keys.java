@@ -71,7 +71,7 @@ public class Keys
           }
 
         @Override
-        protected void unmarshallJSONData (JSONObjectReader rd) throws IOException
+        protected void deserializeJSONData (JSONObjectReader rd) throws IOException
           {
             public_key = rd.getPublicKey ();
           }
