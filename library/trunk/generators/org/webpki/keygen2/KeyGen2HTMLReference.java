@@ -304,7 +304,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                   .setUsage (false)
                 .newColumn ()
                   .addString ("The result from <code>" + BasicCapabilities.tagName (tag, true) + 
-                              "</code>.  If there are no matches, this property must not be present.");
+                              "</code>.  If there are no matches, this property <b>must not</b> be present.");
           }
       }
 
@@ -662,7 +662,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 
         json.addDataTypesDescription ("");
         
-        json.addProtocolTableEntry ("Objects").append ("The following tables describe the KeyGen2 JSON structures in detail.");
+        json.addProtocolTableEntry ("Objects").append ("The following tables describe the KeyGen2 JSON structures in detail." + LINE_SEPARATOR +
+                           "The entries written in <i>italics</i> represent sub objects, while the other entries consitute of the actual messages.");
         
         json.setAppendixMode ();
         
@@ -689,7 +690,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addReferenceTable ();
         
-        json.addDocumentHistoryLine ("2013-12-28", "0.2", "Not yet released document :-)");
+        json.addDocumentHistoryLine ("2013-12-29", "0.2", "Not yet released document :-)");
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 
@@ -1099,7 +1100,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("List of generated keys. See <code>SKS:createKeyEntry</code>.").setNotes ("Due to the stateful MAC-scheme featured in SKS, " +
                           "<code>" + GENERATED_KEYS_JSON + "</code> <b>must</b> " +
-                          "<i>be generated (by the SKS) and decoded (by the issuer) in exactly the same " +
+                          "<i>be encoded (by the SKS) and decoded (by the issuer) in exactly the same " +
                           "order (message-wise) as they are encountered in the associated</i>  <a href=\"#" +
                            KEY_CREATION_REQUEST_JSON + "." + KEY_ENTRY_SPECIFIERS_JSON + "\">" + KEY_ENTRY_SPECIFIERS_JSON + "</a> "+
                            "(including those embedded by <a href=\"#" +
