@@ -43,7 +43,7 @@ abstract class ClientDecoder extends KeyGen2Validator
       }
 
     @Override
-    final protected void deserializeJSONData (JSONObjectReader rd) throws IOException
+    final protected void readJSONData (JSONObjectReader rd) throws IOException
       {
         readServerRequest (rd);
 

@@ -78,7 +78,7 @@ public class JSONDecoderCache implements Serializable
           {
             JSONDecoder decoder = decoder_class.newInstance ();
             decoder.root = reader.json;
-            decoder.deserializeJSONData (reader);
+            decoder.readJSONData (reader);
             if (test_unread)
               {
                 checkForUnread (reader.json);

@@ -63,7 +63,7 @@ public class Key2
           }
 
         @Override
-        protected void deserializeJSONData (JSONObjectReader rd) throws IOException
+        protected void readJSONData (JSONObjectReader rd) throws IOException
           {
             public_key = rd.getPublicKey ();
           }

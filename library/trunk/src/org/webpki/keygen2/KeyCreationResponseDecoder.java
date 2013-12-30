@@ -48,7 +48,7 @@ public class KeyCreationResponseDecoder extends KeyGen2Validator
       }
 
     @Override
-    protected void deserializeJSONData (JSONObjectReader rd) throws IOException
+    protected void readJSONData (JSONObjectReader rd) throws IOException
       {
         //////////////////////////////////////////////////////////////////////////
         // Get the top-level properties
