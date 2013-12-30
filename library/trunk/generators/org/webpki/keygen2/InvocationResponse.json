@@ -1,6 +1,6 @@
 {
     "@context": "http://xmlns.webpki.org/keygen2/beta/20131201",
-    "@qualifier": "PlatformNegotiationResponse",
+    "@qualifier": "InvocationResponse",
     "ServerSessionID": "142f1bdb286XVQnqmIRc1bSzm-QN-ZJk",
     "ImagePreferences": 
         [{

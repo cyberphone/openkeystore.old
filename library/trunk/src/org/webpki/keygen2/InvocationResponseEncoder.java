@@ -41,7 +41,7 @@ import org.webpki.json.JSONObjectWriter;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class PlatformNegotiationResponseEncoder extends JSONEncoder
+public class InvocationResponseEncoder extends JSONEncoder
   {
     private static final long serialVersionUID = 1L;
 
@@ -52,7 +52,7 @@ public class PlatformNegotiationResponseEncoder extends JSONEncoder
     Vector<ImagePreference> image_preferences = new Vector<ImagePreference> ();
 
 
-    public PlatformNegotiationResponseEncoder addImagePreference (String type_url,
+    public InvocationResponseEncoder addImagePreference (String type_url,
                                                                   String mime_type,
                                                                   int width,
                                                                   int height)
@@ -73,7 +73,7 @@ public class PlatformNegotiationResponseEncoder extends JSONEncoder
         return basic_capabilities;
       }
 
-    public PlatformNegotiationResponseEncoder (PlatformNegotiationRequestDecoder decoder)
+    public InvocationResponseEncoder (InvocationRequestDecoder decoder)
       {
         this.server_session_id = decoder.server_session_id;
       }
@@ -121,7 +121,7 @@ public class PlatformNegotiationResponseEncoder extends JSONEncoder
     @Override
     public String getQualifier ()
       {
-        return PLATFORM_NEGOTIATION_RESPONSE_JSON;
+        return INVOCATION_RESPONSE_JSON;
       }
 
     @Override

@@ -26,7 +26,7 @@ import org.webpki.json.JSONObjectReader;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class PlatformNegotiationRequestDecoder extends ClientDecoder
+public class InvocationRequestDecoder extends ClientDecoder
   {
     private static final long serialVersionUID = 1L;
 
@@ -123,6 +123,6 @@ public class PlatformNegotiationRequestDecoder extends ClientDecoder
     @Override
     public String getQualifier ()
       {
-        return PLATFORM_NEGOTIATION_REQUEST_JSON;
+        return INVOCATION_REQUEST_JSON;
       }
   }

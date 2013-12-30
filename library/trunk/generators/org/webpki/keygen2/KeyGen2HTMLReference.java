@@ -66,7 +66,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                 "step is handled by a specific request/response pair as outlined below:" + 
                       "<table style=\"width:600pt;margin-top:10pt;margin-left:auto;margin-right:auto;border-collapse:collapse\">");
             bar (10);
-            sign ("PlatformNegotiation", "Protocol invocation. During this step the user should be alerted by a browser-defined dialog " +
+            sign ("Invocation", "Protocol invocation. During this step the user should be alerted by a browser-defined dialog " +
                   "telling what is supposed to happen giving as well as providing an option aborting the process. "+
                   "In addition, the issuer <i>may</i> perform an SKS capability query.");
             bar (14);
@@ -352,7 +352,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                 .newColumn ()
                   .addString ("See <code>SKS:createProvisioningSession." +
                               SERVER_SESSION_ID_JSON + "</code> and ")
-                  .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
+                  .addLink (INVOCATION_REQUEST_JSON)
                   .addString (".");
           }
       }
@@ -674,8 +674,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                         "protected by a user-set PIN governed by a number of issuer-defined policies." + LINE_SEPARATOR +
                         "Finally, the issuer provides a certificate and and a logotype to go with it." + LINE_SEPARATOR +
                         "For information regarding the cryptographic constructs, consult the SKS architecture manual.",
-                        new String[]{"PlatformNegotiationRequest.json",
-                                     "PlatformNegotiationResponse.json",
+                        new String[]{"InvocationRequest.json",
+                                     "InvocationResponse.json",
                                      "ProvisioningInitializationRequest.json",
                                      "ProvisioningInitializationResponse.json",
                                      "KeyCreationRequest.json",
@@ -694,7 +694,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 
-        preAmble (PLATFORM_NEGOTIATION_REQUEST_JSON)
+        preAmble (INVOCATION_REQUEST_JSON)
           .newRow ()
             .newColumn ()
               .addProperty (SERVER_SESSION_ID_JSON)
@@ -782,7 +782,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                          "</ul>"))
           .newExtensionRow (new OptionalSignature ());
   
-        preAmble (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+        preAmble (INVOCATION_RESPONSE_JSON)
           .newRow ()
             .newColumn ()
               .addProperty (SERVER_SESSION_ID_JSON)
@@ -792,7 +792,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
               .addString ("Copy of <code>" + SERVER_SESSION_ID_JSON +
                           "</code> from ")
-              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
+              .addLink (INVOCATION_REQUEST_JSON)
               .addString (".")
           .newRow ()
             .newColumn ()
@@ -880,7 +880,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("<i>Optional</i>: List of client attribute types (expressed as URI strings) that the client <i>may</i> honor. See ")
               .addLink (PROVISIONING_INITIALIZATION_RESPONSE_JSON)
               .addString ("." + LINE_SEPARATOR + "Note that it is an <i>error</i> requesting an attribute not specified during ")
-              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
+              .addLink (INVOCATION_REQUEST_JSON)
               .addString (".")
           .newExtensionRow (new LinkedObject (VIRTUAL_MACHINE_JSON,
                                               false,
@@ -891,7 +891,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "to find out what is actually available using the pre-defined extension URI <code>&quot;"))
               .addString (KeyGen2URIs.FEATURE.VIRTUAL_MACHINE)
               .addString ("&quot;</code>. The recommended method is adding the following to ")
-              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
+              .addLink (INVOCATION_REQUEST_JSON)
               .addString (LINE_SEPARATOR + "<code>&nbsp;&nbsp;&quot;")
               .addString (BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, true))
               .addString ("&quot;:<br>&nbsp;&nbsp;&nbsp;&nbsp;[<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;" +
@@ -903,7 +903,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "&quot;<br>&nbsp;&nbsp;&nbsp;&nbsp;]</code>" + LINE_SEPARATOR +
                           "where the two latter URIs represent different, potentially supported environment types." + LINE_SEPARATOR +
                           "A possible ")
-              .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+              .addLink (INVOCATION_RESPONSE_JSON)
               .addString (" could be:" + LINE_SEPARATOR +
                           "<code>&nbsp;&nbsp;&quot;")
               .addString (BasicCapabilities.tagName (BasicCapabilities.BASIC_CAP_EXTENSION, false))
@@ -930,7 +930,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addString ("<i>Optional</i> 1-32 byte nonce. The <code>" +
                            NONCE_JSON + "</code> value <b>must</b> be identical to the <code>" +
                            NONCE_JSON + "</code> specified in ")
-               .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+               .addLink (INVOCATION_RESPONSE_JSON)
                .addString (". Also see <code>" + JSONSignatureDecoder.SIGNATURE_JSON + "</code>.")
           .newExtensionRow (new OptionalSignature ())
               .addString (" Note that <code>" + NONCE_JSON +
@@ -977,7 +977,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                           "See <code>SKS:createProvisioningSession</code>. " +
                           "Note that this property is either required or forbidden " +
                           "depending on the value of "))
-            .addPropertyLink (PRIVACY_ENABLED_JSON, PLATFORM_NEGOTIATION_REQUEST_JSON)
+            .addPropertyLink (PRIVACY_ENABLED_JSON, INVOCATION_REQUEST_JSON)
             .addString (".")
           .newRow ()
             .newColumn ()
@@ -1066,7 +1066,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
               .addLink (KEY_CREATION_RESPONSE_JSON)
               .addString (".  Default value: <code>false</code>. " +
                           "See the <code>" + ACTION_JSON + "</code> property in ")
-              .addLink (PLATFORM_NEGOTIATION_REQUEST_JSON)
+              .addLink (INVOCATION_REQUEST_JSON)
               .addString (".")
           .newExtensionRow (new OptionalArrayObject (PUK_POLICY_SPECIFIERS_JSON,
                                                      1,
@@ -1916,7 +1916,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("Image type URI. See ")
-              .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+              .addLink (INVOCATION_RESPONSE_JSON)
               .addString (".")
           .newRow ()
             .newColumn ()
@@ -1926,7 +1926,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("Image MIME type. See ")
-              .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+              .addLink (INVOCATION_RESPONSE_JSON)
               .addString (".")
           .newRow ()
             .newColumn ()
@@ -1937,7 +1937,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("Image width. See ")
-              .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+              .addLink (INVOCATION_RESPONSE_JSON)
               .addString (".")
           .newRow ()
             .newColumn ()
@@ -1948,7 +1948,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             .newColumn ()
             .newColumn ()
               .addString ("Image height. See ")
-              .addLink (PLATFORM_NEGOTIATION_RESPONSE_JSON)
+              .addLink (INVOCATION_RESPONSE_JSON)
               .addString (".");
 
         json.addSubItemTable (DEVICE_CERTIFICATE_JSON)

@@ -32,7 +32,7 @@ import org.webpki.keygen2.ServerState.ProtocolPhase;
 
 import static org.webpki.keygen2.KeyGen2Constants.*;
 
-public class PlatformNegotiationRequestEncoder extends ServerEncoder
+public class InvocationRequestEncoder extends ServerEncoder
   {
     private static final long serialVersionUID = 1L;
 
@@ -48,11 +48,11 @@ public class PlatformNegotiationRequestEncoder extends ServerEncoder
 
     // Constructors
 
-    public PlatformNegotiationRequestEncoder (ServerState server_state,
+    public InvocationRequestEncoder (ServerState server_state,
                                               String submit_url,
                                               String server_session_id) throws IOException
       {
-        server_state.checkState (true, ProtocolPhase.PLATFORM_NEGOTIATION);
+        server_state.checkState (true, ProtocolPhase.INVOCATION);
         this.server_state = server_state;
         this.submit_url = submit_url;
         if (server_session_id == null)
@@ -108,6 +108,6 @@ public class PlatformNegotiationRequestEncoder extends ServerEncoder
     @Override
     public String getQualifier ()
       {
-        return PLATFORM_NEGOTIATION_REQUEST_JSON;
+        return INVOCATION_REQUEST_JSON;
       }
   }

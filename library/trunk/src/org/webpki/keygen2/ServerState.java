@@ -63,7 +63,7 @@ public class ServerState implements Serializable
   {
     private static final long serialVersionUID = 1L;
     
-    public enum ProtocolPhase {PLATFORM_NEGOTIATION,
+    public enum ProtocolPhase {INVOCATION,
                                PROVISIONING_INITIALIZATION,
                                CREDENTIAL_DISCOVERY,
                                KEY_CREATION,
@@ -1072,7 +1072,7 @@ public class ServerState implements Serializable
     
     LinkedHashMap<String,LinkedHashSet<String>> client_attribute_values;
 
-    ProtocolPhase current_phase = ProtocolPhase.PLATFORM_NEGOTIATION;
+    ProtocolPhase current_phase = ProtocolPhase.INVOCATION;
     
     boolean request_phase = true;
     
@@ -1210,7 +1210,7 @@ public class ServerState implements Serializable
     
     public void setPrivacyEnabled (boolean flag) throws IOException
       {
-        if (!request_phase || current_phase != ProtocolPhase.PLATFORM_NEGOTIATION)
+        if (!request_phase || current_phase != ProtocolPhase.INVOCATION)
           {
             throw new IOException ("Must be specified before any requests");
           }
@@ -1264,14 +1264,14 @@ public class ServerState implements Serializable
       }
 
 
-    public void update (PlatformNegotiationResponseDecoder platform_response) throws IOException
+    public void update (InvocationResponseDecoder invocation_response) throws IOException
       {
-        checkState (false, ProtocolPhase.PLATFORM_NEGOTIATION);
+        checkState (false, ProtocolPhase.INVOCATION);
         current_phase = ProtocolPhase.PROVISIONING_INITIALIZATION;
-        basic_capabilities.checkCapabilities (platform_response.basic_capabilities);
-        basic_capabilities = platform_response.basic_capabilities;
-        image_preferences = platform_response.image_preferences;
-        vm_nonce = platform_response.nonce;
+        basic_capabilities.checkCapabilities (invocation_response.basic_capabilities);
+        basic_capabilities = invocation_response.basic_capabilities;
+        image_preferences = invocation_response.image_preferences;
+        vm_nonce = invocation_response.nonce;
       }
 
 

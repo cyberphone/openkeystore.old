@@ -97,10 +97,10 @@ import org.webpki.keygen2.KeyCreationResponseDecoder;
 import org.webpki.keygen2.KeyCreationResponseEncoder;
 import org.webpki.keygen2.KeyCreationRequestDecoder;
 import org.webpki.keygen2.KeyCreationRequestEncoder;
-import org.webpki.keygen2.PlatformNegotiationRequestDecoder;
-import org.webpki.keygen2.PlatformNegotiationRequestEncoder;
-import org.webpki.keygen2.PlatformNegotiationResponseDecoder;
-import org.webpki.keygen2.PlatformNegotiationResponseEncoder;
+import org.webpki.keygen2.InvocationRequestDecoder;
+import org.webpki.keygen2.InvocationRequestEncoder;
+import org.webpki.keygen2.InvocationResponseDecoder;
+import org.webpki.keygen2.InvocationResponseEncoder;
 import org.webpki.keygen2.ProvisioningInitializationRequestDecoder;
 import org.webpki.keygen2.ProvisioningInitializationRequestEncoder;
 import org.webpki.keygen2.ProvisioningInitializationResponseDecoder;
@@ -241,7 +241,7 @@ public class KeyGen2Test
 
     static final String ABORT_URL = "http://issuer.example.com/abort";
 
-    static final String PLATFORM_URL = "http://issuer.example.com/platform";
+    static final String INVOCATION_URL = "http://issuer.example.com/invocation";
 
     static final String ISSUER_URL = "http://issuer.example.com/provsess";
     
@@ -479,7 +479,7 @@ public class KeyGen2Test
         
         ProvisioningInitializationRequestDecoder prov_sess_req;
         
-        PlatformNegotiationRequestDecoder platform_req;
+        InvocationRequestDecoder platform_req;
 
         CredentialDiscoveryRequestDecoder cre_disc_req;
         
@@ -488,7 +488,7 @@ public class KeyGen2Test
         Client () throws IOException
           {
             client_xml_cache = new JSONDecoderCache ();
-            client_xml_cache.addToCache (PlatformNegotiationRequestDecoder.class);
+            client_xml_cache.addToCache (InvocationRequestDecoder.class);
             client_xml_cache.addToCache (ProvisioningInitializationRequestDecoder.class);
             client_xml_cache.addToCache (CredentialDiscoveryRequestDecoder.class);
             client_xml_cache.addToCache (KeyCreationRequestDecoder.class);
@@ -574,9 +574,9 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         // Get platform request and respond with SKS compatible data
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] platformResponse (byte[] json_data) throws IOException
+        byte[] invocationResponse (byte[] json_data) throws IOException
           {
-            platform_req = (PlatformNegotiationRequestDecoder) client_xml_cache.parse (json_data);
+            platform_req = (InvocationRequestDecoder) client_xml_cache.parse (json_data);
             assertTrue ("Languages", platform_req.getOptionalLanguageList () == null ^ languages);
             assertTrue ("Key containers", platform_req.getOptionalKeyContainerList () == null ^ key_container_list);
             if (set_abort_url)
@@ -588,7 +588,7 @@ public class KeyGen2Test
                 assertTrue ("Abort URL", platform_req.getOptionalAbortURL () == null);
               }
             device_info = sks.getDeviceInfo ();
-            PlatformNegotiationResponseEncoder platform_response = new PlatformNegotiationResponseEncoder (platform_req);
+            InvocationResponseEncoder platform_response = new InvocationResponseEncoder (platform_req);
             BasicCapabilities basic_capabilties_response = platform_response.getBasicCapabilities ();
             BasicCapabilities basic_capabilties_request = platform_req.getBasicCapabilities ();
             Vector<String> matches = new Vector<String> ();
@@ -944,7 +944,7 @@ public class KeyGen2Test
         Server () throws Exception
           {
             server_xml_cache = new JSONDecoderCache ();
-            server_xml_cache.addToCache (PlatformNegotiationResponseDecoder.class);
+            server_xml_cache.addToCache (InvocationResponseDecoder.class);
             server_xml_cache.addToCache (ProvisioningInitializationResponseDecoder.class);
             server_xml_cache.addToCache (CredentialDiscoveryResponseDecoder.class);
             server_xml_cache.addToCache (KeyCreationResponseDecoder.class);
@@ -972,7 +972,7 @@ public class KeyGen2Test
         //////////////////////////////////////////////////////////////////////////////////
         // Create platform negotiation request for the client
         ///////////////////////////////////////////////////////////////////////////////////
-        byte[] platformRequest () throws IOException, GeneralSecurityException
+        byte[] invocationRequest () throws IOException, GeneralSecurityException
           {
             ////////////////////////////////////////////////////////////////////////////////////
             // Create the state container
@@ -999,12 +999,12 @@ public class KeyGen2Test
             // First keygen2 request
             ////////////////////////////////////////////////////////////////////////////////////
 //            String server_session_id = "S-" + Long.toHexString (new Date().getTime()) + Long.toHexString(new SecureRandom().nextLong());
-            PlatformNegotiationRequestEncoder platform_request =  new PlatformNegotiationRequestEncoder (server_state, PLATFORM_URL, null);
+            InvocationRequestEncoder invocation_request =  new InvocationRequestEncoder (server_state, INVOCATION_URL, null);
             if (set_abort_url)
               {
-                platform_request.setAbortURL (ABORT_URL);
+                invocation_request.setAbortURL (ABORT_URL);
               }
-            BasicCapabilities basic_capabilities = platform_request.getBasicCapabilities ();
+            BasicCapabilities basic_capabilities = invocation_request.getBasicCapabilities ();
             if (ask_for_4096)
               {
                 basic_capabilities.addAlgorithm (KeyAlgorithms.RSA4096.getURI ())
@@ -1022,7 +1022,7 @@ public class KeyGen2Test
               }
             if (plain_unlock_key != null)
               {
-                platform_request.setAction (Action.UNLOCK);
+                invocation_request.setAction (Action.UNLOCK);
               }
             if (virtual_machine)
               {
@@ -1031,9 +1031,9 @@ public class KeyGen2Test
                 basic_capabilities.addExtension (FOR_THE_CLIENT_UNKNOWN_VM);
                 KeyStoreSigner signer = new KeyStoreSigner (DemoKeyStore.getExampleDotComKeyStore (), null);
                 signer.setKey (null, DemoKeyStore.getSignerPassword ());
-                platform_request.setRequestSigner (signer);
+                invocation_request.setRequestSigner (signer);
               }
-            return platform_request.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
+            return invocation_request.serializeJSONDocument (JSONOutputFormats.PRETTY_PRINT);
           }
 
         //////////////////////////////////////////////////////////////////////////////////
@@ -1041,7 +1041,7 @@ public class KeyGen2Test
         ///////////////////////////////////////////////////////////////////////////////////
         byte[] provSessRequest (byte[] json_data) throws IOException, GeneralSecurityException
           {
-            PlatformNegotiationResponseDecoder platform_response = (PlatformNegotiationResponseDecoder) server_xml_cache.parse (json_data);
+            InvocationResponseDecoder platform_response = (InvocationResponseDecoder) server_xml_cache.parse (json_data);
             server_state.update (platform_response);
             BasicCapabilities basic_capabilties = platform_response.getBasicCapabilities ();
             if (ask_for_exponent)
@@ -1496,8 +1496,8 @@ public class KeyGen2Test
         
         Doer () throws Exception
           {
-            xmlschemas.addToCache (PlatformNegotiationRequestDecoder.class);
-            xmlschemas.addToCache (PlatformNegotiationResponseDecoder.class);
+            xmlschemas.addToCache (InvocationRequestDecoder.class);
+            xmlschemas.addToCache (InvocationResponseDecoder.class);
             xmlschemas.addToCache (ProvisioningInitializationRequestDecoder.class);
             xmlschemas.addToCache (ProvisioningInitializationResponseDecoder.class);
             xmlschemas.addToCache (CredentialDiscoveryRequestDecoder.class);
@@ -1553,8 +1553,8 @@ public class KeyGen2Test
             server = new Server ();
             client = new Client ();
             byte[] json;
-            json = fileLogger (server.platformRequest ());
-            json = fileLogger (client.platformResponse (json));
+            json = fileLogger (server.invocationRequest ());
+            json = fileLogger (client.invocationResponse (json));
             json = fileLogger (server.provSessRequest (json));
             json = fileLogger (client.provSessResponse (json));
             if (delete_key != null || clone_key_protection != null || update_key != null || plain_unlock_key != null)

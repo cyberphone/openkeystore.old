@@ -98,6 +98,10 @@ public interface KeyGen2Constants
 
     String INPUT_METHOD_JSON                         = "InputMethod";
 
+    String INVOCATION_REQUEST_JSON                   = "InvocationRequest";
+    
+    String INVOCATION_RESPONSE_JSON                  = "InvocationResponse";
+    
     String ISSUED_AFTER_JSON                         = "IssuedAfter";
 
     String ISSUED_BEFORE_JSON                        = "IssuedBefore";
@@ -146,10 +150,6 @@ public interface KeyGen2Constants
 
     String PIN_POLICY_SPECIFIERS_JSON                = "PINPolicySpecifiers";       
 
-    String PLATFORM_NEGOTIATION_REQUEST_JSON         = "PlatformNegotiationRequest";
-    
-    String PLATFORM_NEGOTIATION_RESPONSE_JSON        = "PlatformNegotiationResponse";
-    
     String PREFERREDD_LANGUAGES_JSON                 = "PreferredLanguages";
 
     String PRIVACY_ENABLED_JSON                      = "PrivacyEnabled";
