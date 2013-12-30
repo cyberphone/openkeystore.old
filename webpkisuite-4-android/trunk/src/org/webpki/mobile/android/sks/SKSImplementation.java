@@ -3093,7 +3093,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public synchronized void importPrivateKey (int key_handle,
-                                               byte[] private_key,
+                                               byte[] encrypted_key,
                                                byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -3104,7 +3104,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for key length errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if (private_key.length > (MAX_LENGTH_CRYPTO_DATA + AES_CBC_PKCS5_PADDING))
+        if (encrypted_key.length > (MAX_LENGTH_CRYPTO_DATA + AES_CBC_PKCS5_PADDING))
           {
             key_entry.owner.abort ("Private key: " + key_entry.id + " exceeds " + MAX_LENGTH_CRYPTO_DATA + " bytes");
           }
@@ -3113,7 +3113,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_IMPORT_PRIVATE_KEY);
-        verifier.addArray (private_key);
+        verifier.addArray (encrypted_key);
         key_entry.owner.verifyMac (verifier, mac);
 
 
@@ -3127,7 +3127,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         try
           {
-            byte[] pkcs8_private_key = key_entry.owner.decrypt (private_key);
+            byte[] pkcs8_private_key = key_entry.owner.decrypt (encrypted_key);
             PKCS8EncodedKeySpec key_spec = new PKCS8EncodedKeySpec (pkcs8_private_key);
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -3172,7 +3172,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
     ////////////////////////////////////////////////////////////////////////////////
     @Override
     public synchronized void importSymmetricKey (int key_handle,
-                                                 byte[] symmetric_key,
+                                                 byte[] encrypted_key,
                                                  byte[] mac) throws SKSException
       {
         ///////////////////////////////////////////////////////////////////////////////////
@@ -3183,7 +3183,7 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         ///////////////////////////////////////////////////////////////////////////////////
         // Check for various input errors
         ///////////////////////////////////////////////////////////////////////////////////
-        if (symmetric_key.length > (MAX_LENGTH_SYMMETRIC_KEY + AES_CBC_PKCS5_PADDING))
+        if (encrypted_key.length > (MAX_LENGTH_SYMMETRIC_KEY + AES_CBC_PKCS5_PADDING))
           {
             key_entry.owner.abort ("Symmetric key: " + key_entry.id + " exceeds " + MAX_LENGTH_SYMMETRIC_KEY + " bytes");
           }
@@ -3197,13 +3197,13 @@ public class SKSImplementation implements SKSError, SecureKeyStore, Serializable
         // Verify incoming MAC
         ///////////////////////////////////////////////////////////////////////////////////
         MacBuilder verifier = key_entry.getEECertMacBuilder (METHOD_IMPORT_SYMMETRIC_KEY);
-        verifier.addArray (symmetric_key);
+        verifier.addArray (encrypted_key);
         key_entry.owner.verifyMac (verifier, mac);
 
         ///////////////////////////////////////////////////////////////////////////////////
         // Decrypt and store symmetric key
         ///////////////////////////////////////////////////////////////////////////////////
-        key_entry.symmetric_key = key_entry.owner.decrypt (symmetric_key);
+        key_entry.symmetric_key = key_entry.owner.decrypt (encrypted_key);
       }
 
 

@@ -54,7 +54,7 @@ import org.webpki.android.keygen2.CredentialDiscoveryRequestDecoder;
 import org.webpki.android.keygen2.CredentialDiscoveryResponseEncoder;
 import org.webpki.android.keygen2.KeyCreationRequestDecoder;
 import org.webpki.android.keygen2.KeyGen2URIs;
-import org.webpki.android.keygen2.PlatformNegotiationResponseEncoder;
+import org.webpki.android.keygen2.InvocationResponseEncoder;
 import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
 import org.webpki.android.keygen2.ProvisioningInitializationResponseEncoder;
 
@@ -300,25 +300,24 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
             publishProgress (BaseProxyActivity.PROGRESS_SESSION);
 
             DeviceInfo device_info = keygen2_activity.sks.getDeviceInfo ();
-            PlatformNegotiationResponseEncoder platform_response = 
-                new PlatformNegotiationResponseEncoder (keygen2_activity.platform_request);
+            InvocationResponseEncoder invocation_response =  new InvocationResponseEncoder (keygen2_activity.invocation_request);
 
             BitmapFactory.Options bmo = new BitmapFactory.Options ();
             bmo.inScaled = false;
             Bitmap default_icon = BitmapFactory.decodeResource (keygen2_activity.getResources (), R.drawable.certview_logo_na, bmo);
             default_icon.setDensity (Bitmap.DENSITY_NONE);
-            platform_response.addImagePreference (KeyGen2URIs.LOGOTYPES.LIST, "image/png", default_icon.getWidth () , default_icon.getHeight ());
+            invocation_response.addImagePreference (KeyGen2URIs.LOGOTYPES.LIST, "image/png", default_icon.getWidth () , default_icon.getHeight ());
 
-            keygen2_activity.postJSONData (keygen2_activity.platform_request.getSubmitURL (), platform_response, false);
+            keygen2_activity.postJSONData (keygen2_activity.invocation_request.getSubmitURL (), invocation_response, false);
 
             keygen2_activity.prov_init_request = (ProvisioningInitializationRequestDecoder) keygen2_activity.parseJSONResponse ();
             Date client_time = new Date ();
             ProvisioningSession session = 
                 keygen2_activity.sks.createProvisioningSession (keygen2_activity.prov_init_request.getSessionKeyAlgorithm (),
-                                                                keygen2_activity.platform_request.getPrivacyEnabledFlag (),
+                                                                keygen2_activity.invocation_request.getPrivacyEnabledFlag (),
                                                                 keygen2_activity.prov_init_request.getServerSessionID (),
                                                                 keygen2_activity.prov_init_request.getServerEphemeralKey (),
-                                                                keygen2_activity.platform_request.getSubmitURL (), // IssuerURI
+                                                                keygen2_activity.invocation_request.getSubmitURL (), // IssuerURI
                                                                 keygen2_activity.prov_init_request.getKeyManagementKey (),
                                                                 (int) (client_time.getTime () / 1000),
                                                                 keygen2_activity.prov_init_request.getSessionLifeTime (),
@@ -332,7 +331,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                                                                session.getClientSessionID (),
                                                                client_time,
                                                                session.getSessionAttestation (),
-                                                               keygen2_activity.platform_request.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
+                                                               keygen2_activity.invocation_request.getPrivacyEnabledFlag () ? null : device_info.getCertificatePath ());
 
             if (keygen2_activity.getServerCertificate () != null)
               {
@@ -369,7 +368,7 @@ public class KeyGen2SessionCreation extends AsyncTask<Void, String, String>
                     while ((eps = keygen2_activity.sks.enumerateProvisioningSessions (eps.getProvisioningHandle (), false)) != null)
                       {
                         if (ls.getKeyManagementKey ().equals (eps.getKeyManagementKey ()) &&
-                            keygen2_activity.platform_request.getPrivacyEnabledFlag () == eps.getPrivacyEnabled ())
+                            keygen2_activity.invocation_request.getPrivacyEnabledFlag () == eps.getPrivacyEnabled ())
                           {
                             EnumeratedKey ek = new EnumeratedKey ();
                             while ((ek = keygen2_activity.sks.enumerateKeys (ek.getKeyHandle ())) != null)

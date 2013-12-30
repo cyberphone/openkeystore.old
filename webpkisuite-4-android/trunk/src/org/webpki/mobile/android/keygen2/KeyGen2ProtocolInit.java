@@ -27,7 +27,7 @@ import org.webpki.mobile.android.R;
 
 import org.webpki.android.keygen2.CredentialDiscoveryRequestDecoder;
 import org.webpki.android.keygen2.KeyCreationRequestDecoder;
-import org.webpki.android.keygen2.PlatformNegotiationRequestDecoder;
+import org.webpki.android.keygen2.InvocationRequestDecoder;
 import org.webpki.android.keygen2.ProvisioningFinalizationRequestDecoder;
 import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
 
@@ -46,13 +46,13 @@ public class KeyGen2ProtocolInit extends AsyncTask<Void, String, Boolean>
         try
           {
             keygen2_activity.getProtocolInvocationData ();
-            keygen2_activity.addDecoder (PlatformNegotiationRequestDecoder.class);
+            keygen2_activity.addDecoder (InvocationRequestDecoder.class);
             keygen2_activity.addDecoder (ProvisioningInitializationRequestDecoder.class);
             keygen2_activity.addDecoder (KeyCreationRequestDecoder.class);
             keygen2_activity.addDecoder (CredentialDiscoveryRequestDecoder.class);
             keygen2_activity.addDecoder (ProvisioningFinalizationRequestDecoder.class);
-            keygen2_activity.platform_request = (PlatformNegotiationRequestDecoder) keygen2_activity.getInitialReguest ();
-            keygen2_activity.setAbortURL (keygen2_activity.platform_request.getOptionalAbortURL ());
+            keygen2_activity.invocation_request = (InvocationRequestDecoder) keygen2_activity.getInitialReguest ();
+            keygen2_activity.setAbortURL (keygen2_activity.invocation_request.getOptionalAbortURL ());
             return true;
           }
         catch (Exception e)

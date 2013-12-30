@@ -25,14 +25,14 @@ import org.webpki.mobile.android.R;
 import org.webpki.mobile.android.proxy.BaseProxyActivity;
 
 import org.webpki.android.keygen2.KeyCreationRequestDecoder;
-import org.webpki.android.keygen2.PlatformNegotiationRequestDecoder;
+import org.webpki.android.keygen2.InvocationRequestDecoder;
 import org.webpki.android.keygen2.ProvisioningInitializationRequestDecoder;
 
 public class KeyGen2Activity extends BaseProxyActivity
   {
     public static final String KEYGEN2 = "KeyGen2";
 
-    PlatformNegotiationRequestDecoder platform_request;
+    InvocationRequestDecoder invocation_request;
 
     ProvisioningInitializationRequestDecoder prov_init_request;
 
