@@ -80,8 +80,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
                   "If user-defined PINs are to be set, this is carried out during " + json.globalLinkRef (KEY_CREATION_REQUEST_JSON) + ". " +
                   "After key-pairs have been created the public keys are sent to the issuer for certification.");
             bar (14);
-            sign ("ProvisioningFinalization", "Deployment of credentials and associated attributes. " +
-                  "Key&nbsp;management operations are also performed in this step. " +
+            sign ("ProvisioningFinalization", "Deployment of credentials and associated attributes as well as " +
+                  "key management operations are performed in this step. " +
                   "Finally the session is terminated. " +
                   "If the operation is <i>successful</i>, a cryptographic proof is returned to the issuer.");
             bar (6);
