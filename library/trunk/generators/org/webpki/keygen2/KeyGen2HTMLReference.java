@@ -82,9 +82,8 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
             bar (14);
             sign ("ProvisioningFinalization", "Deployment of credentials and associated attributes. " +
                   "Key&nbsp;management operations are also performed in this step. " +
-                  "After that the session is terminated. " +
-                  "Due to the &quot;transactional&quot; nature of SKS, <i>successful</i> session termination returns a cryptographic proof to the " +
-                  "issuer.");
+                  "Finally the session is terminated. " +
+                  "If the operation is <i>successful</i>, a cryptographic proof is returned to the issuer.");
             bar (6);
             s.append ("<tr><td style=\"padding:0px\"><div style=\"margin-left:auto;margin-right:auto;width:0pt;height:0px;border-style: solid;border-width: 8pt 4pt 0pt 4pt" +
                       ";border-color:" + BAR_COLOR + " transparent transparent transparent\"></div></td><td></td></tr></table>" +
