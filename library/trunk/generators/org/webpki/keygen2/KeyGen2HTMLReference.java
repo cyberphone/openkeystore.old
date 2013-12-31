@@ -601,7 +601,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         json = new JSONBaseHTML (args, "KeyGen2 - Credential Enrollment and Management Protocol");
         
         json.addParagraphObject ().append ("<div style=\"margin-top:200pt;margin-bottom:200pt;text-align:center\"><span style=\"" + JSONBaseHTML.HEADER_STYLE + "\">KeyGen2</span>" +
-             "<br><span style=\"font-size:" + JSONBaseHTML.CHAPTER_FONT_SIZE + "\">&nbsp;<br>Credential Enrollment and Management Protocol</span></div>");
+             "<br><span style=\"font-size:" + JSONBaseHTML.CHAPTER_FONT_SIZE + "\">&nbsp;<br>Credential Provisioning and Management Protocol</span></div>");
         
         json.niceSquare ("<i>Disclaimer</i>: This is a system in development. That is, the specification may change without notice.", 20);
         
@@ -690,7 +690,7 @@ public class KeyGen2HTMLReference extends JSONBaseHTML.Types
         
         json.addReferenceTable ();
         
-        json.addDocumentHistoryLine ("2013-12-29", "0.2", "Not yet released document :-)");
+        json.addDocumentHistoryLine ("2013-12-31", "0.2", "Not yet released document :-)");
 
         json.addParagraphObject ("Author").append ("KeyGen2 was primarily developed by Anders Rundgren (<code>anders.rundgren.net@gmail.com</code>).");
 
