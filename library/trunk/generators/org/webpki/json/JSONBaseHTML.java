@@ -200,9 +200,10 @@ public class JSONBaseHTML
             "Resource Identifier (URI): Generic Syntax\", RFC&nbsp;3986, January&nbsp;2005.");
 
         addReferenceEntry (REF_XMLDSIG,
-            "\"XML-Signature Syntax and Processing\", D. Eastlake " +
-            "3rd, J. Reagle, D. Solo, June&nbsp;2008. " +
-            externalWebReference ("http://www.w3.org/TR/xmldsig-core/"));
+            "D. Eastlake, J. Reagle, D. Solo, F. Hirsch, M. Nystrom, T. Roessler, K. Yiu, " +
+            "\"XML Signature Syntax and Processing Version 1.1.\", W3C Recommendation, " +
+            "April&nbsp;2013. <br>" +
+            externalWebReference ("http://www.w3.org/TR/2013/REC-xmldsig-core1-20130411/"));
 
         addReferenceEntry (REF_XMLENC,
             "\"XML Encryption Syntax and Processing\", J. Reagle, " +
