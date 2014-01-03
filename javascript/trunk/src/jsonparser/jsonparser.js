@@ -136,7 +136,15 @@ JSONObject.prototype.getLength = function ()
 
 function JSONParser ()
 {
-	this.LEFT_BRACKET = '[';
+    this.LEFT_CURLY_BRACKET  = '{';
+    this.RIGHT_CURLY_BRACKET = '}';
+    this.BLANK_CHARACTER     = ' ';
+    this.DOUBLE_QUOTE        = '"';
+    this.COLON_CHARACTER     = ':';
+	this.LEFT_BRACKET        = '[';
+    this.RIGHT_BRACKET       = ']';
+    this.COMMA_CHARACTER     = ',';
+    this.BACK_SLASH          = '\\';
 }
 
 /* JSONObjectReader */ JSONParser.prototype.parse = function (json_string)
@@ -144,22 +152,22 @@ function JSONParser ()
 	this.json_data = json_string;
 	this.max_length = json_string.length;
 	this.index = 0;
-    this.root = new JSONObject ();
-    if (testNextNonWhiteSpaceChar () == LEFT_BRACKET)
+    var root = new JSONObject ();
+    if (this.testNextNonWhiteSpaceChar () == this.LEFT_BRACKET)
       {
-        scan ();
-        root.properties.put (null, scanArray ("outer array"));
+        this.scan ();
+ //       root.properties.put (null, scanArray ("outer array"));
       }
     else
       {
-        scanFor (LEFT_CURLY_BRACKET);
-        scanObject (root);
+        this.scanFor (this.LEFT_CURLY_BRACKET);
+        this.scanObject (root);
       }
-    while (index < max_length)
+    while (this.index < this.max_length)
       {
-        if (!isWhiteSpace (json_data.charAt (index++)))
+        if (!this.isWhiteSpace (this.json_data.charAt (this.index++)))
           {
-            throw new IOException ("Improperly terminated JSON object");
+            JSONObject.prototype.bad ("Improperly terminated JSON object");
           }
       }
 //    return new JSONObjectReader (root);
@@ -168,86 +176,87 @@ function JSONParser ()
 
 /* String */ JSONParser.prototype.scanProperty = function ()
 {
-  scanFor (DOUBLE_QUOTE);
-  var property = scanQuotedString ().value;
+  this.scanFor (this.DOUBLE_QUOTE);
+  var property = this.scanQuotedString ().value;
   if (property.length == 0)
     {
-      throw new IOException ("Empty property");
+	  JSONObject.prototype.bad ("Empty property");
     }
-  scanFor (COLON_CHARACTER);
+  this.scanFor (this.COLON_CHARACTER);
   return property;
 };
 
 /* JSONValue */ JSONParser.prototype.scanObject = function (/* JSONObject */ holder)
 {
   /* boolean*/ var next = false;
-  while (testNextNonWhiteSpaceChar () != RIGHT_CURLY_BRACKET)
+  while (this.testNextNonWhiteSpaceChar () != this.RIGHT_CURLY_BRACKET)
     {
       if (next)
         {
-          scanFor(COMMA_CHARACTER);
+          this.scanFor (this.COMMA_CHARACTER);
         }
       next = true;
-      /* String */ var name = scanProperty ();
+      /* String */ var name = this.scanProperty ();
       /* JSONValue */ var value;
-      switch (scan ())
+      switch (this.scan ())
         {
-          case LEFT_CURLY_BRACKET:
-            value = scanObject (new JSONObject ());
+          case this.LEFT_CURLY_BRACKET:
+            value = this.scanObject (new JSONObject ());
             break;
 
-          case DOUBLE_QUOTE:
-            value = scanQuotedString ();
+          case this.DOUBLE_QUOTE:
+            value = this.scanQuotedString ();
             break;
 
-          case LEFT_BRACKET:
-            value = scanArray (name);
+          case this.LEFT_BRACKET:
+            value = this.scanArray (name);
             break;
 
           default:
-            value = scanSimpleType ();
+            value = this.scanSimpleType ();
         }
       holder.addProperty (name, value);
     }
-  scan ();
+  this.scan ();
   return new JSONValue (JSONTypes.OBJECT, holder);
 };
 
 /* JSONValue */ JSONParser.prototype.scanArray = function (/* String */ name)
 {
+  var arr_index = 0;
   /* Vector<JSONValue> */ var array = [] /* new Vector<JSONValue> () */;
   /* JSONValue */ var value = null;
   /* boolean */ var next = false;
-  while (testNextNonWhiteSpaceChar () != RIGHT_BRACKET)
+  while (this.testNextNonWhiteSpaceChar () != this.RIGHT_BRACKET)
     {
       if (next)
         {
-          scanFor (COMMA_CHARACTER);
+          this.scanFor (this.COMMA_CHARACTER);
         }
       else
         {
           next = true;
         }
-      switch (scan ())
+      switch (this.scan ())
         {
-          case LEFT_BRACKET:
-            value = scanArray (name);
+          case this.LEFT_BRACKET:
+            value = this.scanArray (name);
             break;
 
-          case LEFT_CURLY_BRACKET:
-            value = scanObject (new JSONObject ());
+          case this.LEFT_CURLY_BRACKET:
+            value = this.scanObject (new JSONObject ());
             break;
 
-          case DOUBLE_QUOTE:
-            value = scanQuotedString ();
+          case this.DOUBLE_QUOTE:
+            value = this.scanQuotedString ();
             break;
 
           default:
-            value = scanSimpleType ();
+            value = this.scanSimpleType ();
         }
-      array.add (value);
+      array[arr_index++] = value;
     }
-  scan ();
+  this.scan ();
   return new JSONValue (JSONTypes.ARRAY, array);
 };
 
@@ -256,9 +265,9 @@ function JSONParser ()
   this.index--;
   /* StringBuffer */ temp_buffer = new String () /* StringBuffer () */;
   /* char */ var c;
-  while ((c = testNextNonWhiteSpaceChar ()) != COMMA_CHARACTER && c != RIGHT_BRACKET && c != RIGHT_CURLY_BRACKET)
+  while ((c = this.testNextNonWhiteSpaceChar ()) != this.COMMA_CHARACTER && c != this.RIGHT_BRACKET && c != this.RIGHT_CURLY_BRACKET)
     {
-      if (isWhiteSpace (c = nextChar ()))
+      if (this.isWhiteSpace (c = this.nextChar ()))
         {
           break;
         }
@@ -308,18 +317,18 @@ function JSONParser ()
   /* StringBuffer */ var result = new String () /* StringBuffer () */;
   while (true)
     {
-      /* char */ var c = nextChar ();
+      /* char */ var c = this.nextChar ();
       if (c < ' ')
         {
           JSONObject.prototype.bad ("Unescaped control character: " + c);
         }
-      if (c == DOUBLE_QUOTE)
+      if (c == this.DOUBLE_QUOTE)
         {
           break;
         }
-      if (c == BACK_SLASH)
+      if (c == this.BACK_SLASH)
         {
-          switch (c = nextChar ())
+          switch (c = this.nextChar ())
             {
               case '"':
               case '\\':
@@ -350,7 +359,7 @@ function JSONParser ()
                 c = 0;
                 for (var i = 0; i < 4; i++)
                   {
-                    c = ((c << 4) + getHexChar ());
+                    c = ((c << 4) + this.getHexChar ());
                   }
                 break;
 
@@ -365,7 +374,7 @@ function JSONParser ()
 
 /* char */ JSONParser.prototype.getHexChar = function ()
 {
-  /* char */ var c = nextChar ();
+  /* char */ var c = this.nextChar ();
   switch (c)
     {
       case '0':
@@ -399,7 +408,7 @@ function JSONParser ()
   JSONObject.prototype.bad ("Bad hex in \\u escape: " + c);
 };
 
-/* boolean */ JSONParser.prototype.isNumber  = function (/ *char */ c)
+/* boolean */ JSONParser.prototype.isNumber  = function (/* char */ c)
 {
   return c >= '0' && c <= '9';
 };
@@ -407,14 +416,14 @@ function JSONParser ()
 /* char */ JSONParser.prototype.testNextNonWhiteSpaceChar = function ()
 {
   /* int */ var save = this.index;
-  /* char */ var c = scan ();
+  /* char */ var c = this.scan ();
   this.index = save;
   return c;
 };
 
 /* void */ JSONParser.prototype.scanFor = function (/* char */ expected)
 {
-  /* char */ var c = scan ();
+  /* char */ var c = this.scan ();
   if (c != expected)
     {
       JSONObject.prototype.bad ("Expected '" + expected + "' but got '" + c + "'");
@@ -430,17 +439,17 @@ function JSONParser ()
   JSONParser.prototype.bad ("Unexpected EOF reached");
 };
 
-/* boolean */ JSONParser.prototype.sWhiteSpace = function (/* char */ c)
+/* boolean */ JSONParser.prototype.isWhiteSpace = function (/* char */ c)
 {
-  return c <= BLANK_CHARACTER;
+  return c <= this.BLANK_CHARACTER;
 };
 
 /* char */ JSONParser.prototype.scan = function ()
 {
   while (true)
     {
-      /* char */ var c = nextChar ();
-      if (isWhiteSpace (c))
+      /* char */ var c = this.nextChar ();
+      if (this.isWhiteSpace (c))
         {
           continue;
         }
@@ -500,4 +509,4 @@ function loopa (o)
 loopa (jo1);
 console.debug (JSONTypes.DOUBLE.compatible(JSONTypes.OBJECT));
 
-new JSONParser ().parse ('{"hello": "world!"}');
+loopa (new JSONParser ().parse ('{"hello": "wor\\nld!", "bello": {}}'));
