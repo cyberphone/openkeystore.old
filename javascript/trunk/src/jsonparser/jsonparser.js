@@ -92,7 +92,7 @@ JSONObject.prototype.addProperty = function (name, value)
 	{
 		JSONObject.prototype.bad ("Wrong value type: " + value);
 	}
-	console.debug("V=" + value.type);
+//	console.debug("V=" + value.type);
 	var o = new Object;
 	o.name = name;
 	o.value = value;
@@ -156,7 +156,10 @@ function JSONParser ()
     if (this.testNextNonWhiteSpaceChar () == this.LEFT_BRACKET)
       {
         this.scan ();
- //       root.properties.put (null, scanArray ("outer array"));
+    	var o = new Object;
+    	o.name = null;
+    	o.value = this.scanArray ("outer array");
+        root.property_list[root.index++] = o;
       }
     else
       {
@@ -361,6 +364,7 @@ function JSONParser ()
                   {
                     c = ((c << 4) + this.getHexChar ());
                   }
+                c = String.fromCharCode (c);
                 break;
 
               default:
@@ -387,7 +391,7 @@ function JSONParser ()
       case '7':
       case '8':
       case '9':
-        return c -'0';
+        return c.charCodeAt (0) - 48;
         
       case 'a':
       case 'b':
@@ -395,7 +399,7 @@ function JSONParser ()
       case 'd':
       case 'e':
       case 'f':
-        return c - 'a' + 10;
+        return c.charCodeAt (0) - 87;
         
       case 'A':
       case 'B':
@@ -403,7 +407,7 @@ function JSONParser ()
       case 'D':
       case 'E':
       case 'F':
-        return c - 'A' + 10;
+        return c.charCodeAt (0) - 55;
     }
   JSONObject.prototype.bad ("Bad hex in \\u escape: " + c);
 };
@@ -490,6 +494,10 @@ function loopa (o)
 			indent -= 4;
 			console.debug (space + '  }');
 		}
+		else if (elem.value.type == JSONTypes.ARRAY)
+		{
+			console.debug (string + ' [' + elem.value.value.length + ']');
+		}
 		else
 		{
 			string += ' ';
@@ -509,4 +517,5 @@ function loopa (o)
 loopa (jo1);
 console.debug (JSONTypes.DOUBLE.compatible(JSONTypes.OBJECT));
 
-loopa (new JSONParser ().parse ('{"hello": "wor\\nld!", "bello": {}}'));
+loopa (new JSONParser ().parse ('{"hello": "wor\\n\\u0042ld!"  , "bello"   : {   "kul":\
+		67, "arr":[5,7]}}'));
