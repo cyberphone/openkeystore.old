@@ -21,46 +21,46 @@
 
 var JSONTypes = 
   {
-	NULL:
-	  {
-		"enumvalue" : function () { return 0;},
-		"compatible" : function (o) { return o == JSONTypes.NULL;}
-	  },
-	BOOLEAN:
-	  {
-		"enumvalue" : function () { return 1;},
-		"compatible" : function (o) { return o == JSONTypes.BOOLEAN;}
-	  },
-	INTEGER:
-	  {
-		"enumvalue" : function () { return 2;},
-		"compatible" : function (o) { return o == JSONTypes.INTEGER;}
-	  },
-	DECIMAL:
-	  {
-		"enumvalue" : function () { return 3;},
-		"compatible" : function (o) { return o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
-	  },
-	DOUBLE:
-	  {
-		"enumvalue" : function () { return 4;},
-		"compatible" : function (o) { return o == JSONTypes.DOUBLE || o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
-	  },
+    NULL:
+      {
+        "enumvalue" : function () { return 0;},
+        "compatible" : function (o) { return o == JSONTypes.NULL;}
+      },
+    BOOLEAN:
+      {
+        "enumvalue" : function () { return 1;},
+        "compatible" : function (o) { return o == JSONTypes.BOOLEAN;}
+      },
+    INTEGER:
+      {
+        "enumvalue" : function () { return 2;},
+        "compatible" : function (o) { return o == JSONTypes.INTEGER;}
+      },
+    DECIMAL:
+      {
+        "enumvalue" : function () { return 3;},
+        "compatible" : function (o) { return o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
+      },
+    DOUBLE:
+      {
+        "enumvalue" : function () { return 4;},
+        "compatible" : function (o) { return o == JSONTypes.DOUBLE || o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
+      },
     STRING:
-	  {
-		"enumvalue" : function () { return 5;},
-		"compatible" : function (o) { return o == JSONTypes.STRING;}
-	  },
+      {
+        "enumvalue" : function () { return 5;},
+        "compatible" : function (o) { return o == JSONTypes.STRING;}
+      },
     ARRAY:
-	  {
-		"enumvalue" : function () { return 10;},
-		"compatible" : function (o) { return o == JSONTypes.ARRAY;}
-	  },
+      {
+        "enumvalue" : function () { return 10;},
+        "compatible" : function (o) { return o == JSONTypes.ARRAY;}
+      },
     OBJECT:
-	  {
-		"enumvalue" : function () { return 11;},
-		"compatible" : function (o) { return o == JSONTypes.OBJECT;}
-	  }
+      {
+        "enumvalue" : function () { return 11;},
+        "compatible" : function (o) { return o == JSONTypes.OBJECT;}
+      }
   };
 
 
@@ -70,8 +70,8 @@ var JSONTypes =
 
 function JSONValue (type, value)
 {
-	this.type = type;
-	this.value = value;
+    this.type = type;
+    this.value = value;
 }
 
 
@@ -81,52 +81,52 @@ function JSONValue (type, value)
 
 function JSONObject ()
 {
-	this.property_list = [];
-	this.read_flag = new Object ();
+    this.property_list = [];
+    this.read_flag = new Object ();
 }
 
 JSONObject.prototype.addProperty = function (name, value)
 {
-	if (!(value instanceof JSONValue))
-	{
-		JSONObject.prototype.bad ("Wrong value type: " + value);
-	}
-	var length = this.property_list.length;
-	var new_property = new Object;
-	new_property.name = name;
-	new_property.value = value;
-	for (i = 0; i < length; i++)
-	{
-		if (this.property_list[i].name == name)
-		{
-			JSONObject.prototype.bad ("Property already defined: " + name);
-		}
-	}
-	this.property_list[length] = new_property;
-	this.read_flag.name = null;
+    if (!(value instanceof JSONValue))
+    {
+        JSONObject.prototype.bad ("Wrong value type: " + value);
+    }
+    var length = this.property_list.length;
+    var new_property = new Object;
+    new_property.name = name;
+    new_property.value = value;
+    for (i = 0; i < length; i++)
+    {
+        if (this.property_list[i].name == name)
+        {
+            JSONObject.prototype.bad ("Property already defined: " + name);
+        }
+    }
+    this.property_list[length] = new_property;
+    this.read_flag.name = null;
 };
 
 JSONObject.prototype.bad = function (message)
 {
-	throw "JSONException: " + message;
+    throw "JSONException: " + message;
 };
 
 JSONObject.prototype.getProperty = function (name)
 {
-	var length = this.property_list.length;
-	for (i = 0; i < length; i++)
-	{
-		if (this.property_list[i].name == name)
-		{
-			return this.property_list[i].value;
-		}
-	}
-	this.bad ("Property undefined: " + name);
+    var length = this.property_list.length;
+    for (i = 0; i < length; i++)
+    {
+        if (this.property_list[i].name == name)
+        {
+            return this.property_list[i].value;
+        }
+    }
+    this.bad ("Property undefined: " + name);
 };
 
 JSONObject.prototype.getLength = function ()
 {
-	return this.property_list.length;
+    return this.property_list.length;
 };
 
 
@@ -141,7 +141,7 @@ function JSONParser ()
     this.BLANK_CHARACTER     = ' ';
     this.DOUBLE_QUOTE        = '"';
     this.COLON_CHARACTER     = ':';
-	this.LEFT_BRACKET        = '[';
+    this.LEFT_BRACKET        = '[';
     this.RIGHT_BRACKET       = ']';
     this.COMMA_CHARACTER     = ',';
     this.BACK_SLASH          = '\\';
@@ -155,17 +155,17 @@ function JSONParser ()
 
 /* JSONObjectReader */ JSONParser.prototype.parse = function (json_string)
 {
-	this.json_data = json_string;
-	this.max_length = json_string.length;
-	this.index = 0;
+    this.json_data = json_string;
+    this.max_length = json_string.length;
+    this.index = 0;
     var root = new JSONObject ();
     if (this.testNextNonWhiteSpaceChar () == this.LEFT_BRACKET)
       {
         this.scan ();
-    	var new_property = new Object;
-    	new_property.name = null;
-    	new_property.value = this.scanArray ("outer array");
-        root.property_list[root.index++] = new_property;
+        var new_property = new Object;
+        new_property.name = null;
+        new_property.value = this.scanArray ("outer array");
+        root.property_list[0] = new_property;
       }
     else
       {
@@ -189,7 +189,7 @@ function JSONParser ()
   var property = this.scanQuotedString ().value;
   if (property.length == 0)
     {
-	  JSONObject.prototype.bad ("Empty property");
+      JSONObject.prototype.bad ("Empty property");
     }
   this.scanFor (this.COLON_CHARACTER);
   return property;
@@ -309,7 +309,7 @@ function JSONParser ()
       else
         {
           type = JSONTypes.DOUBLE;
-    	  if (!this.DOUBLE_PATTERN.test (result))
+          if (!this.DOUBLE_PATTERN.test (result))
             {
               JSONObject.prototype.bad ("Undecodable argument: " + result);
             }
@@ -465,61 +465,3 @@ function JSONParser ()
     }
 };
 
-var jo = new JSONObject ();
-jo.addProperty("one", new JSONValue (JSONTypes.INTEGER, 3));
-jo.addProperty("two", new JSONValue (JSONTypes.STRING, "hi"));
-console.debug ("T=" + jo.getProperty ("two").type + " V="+ jo.getProperty ("two").value)
-//jo.addProperty("two", new JSONValue (JSONTypes.INTEGER, 3));
-var jo1 = new JSONObject ();
-jo1.addProperty("one1", new JSONValue (JSONTypes.INTEGER, 4));
-jo1.addProperty("two2", new JSONValue (JSONTypes.OBJECT, jo));
-jo1.addProperty("tree", new JSONValue (JSONTypes.STRING, "ghghg"));
-console.debug ("l1=" + jo1.getLength());
-console.debug ("l=" + jo.getLength());
-
-var indent = 0;
-function loopa (o)
-{
-	var space = "";
-	for (var i = 0; i < indent; i++)
-	{
-		space += ' ';
-	}
-	for (var i = 0; i < o.property_list.length; i++)
-	{
-		var elem = o.property_list[i];
-		var string = space + '"' + elem.name + '":';
-		if (elem.value.type == JSONTypes.OBJECT)
-		{
-			console.debug (string);
-			console.debug (space + '  {');
-			indent += 4;
-			loopa (elem.value.value);
-			indent -= 4;
-			console.debug (space + '  }');
-		}
-		else if (elem.value.type == JSONTypes.ARRAY)
-		{
-			console.debug (string + ' [' + elem.value.value.length + ']');
-		}
-		else
-		{
-			string += ' ';
-			if (elem.value.type != JSONTypes.STRING)
-			{
-				string += elem.value.value; 
-			}
-			else
-			{
-				string += '"' + elem.value.value + '"'; 
-			}
-			console.debug (string);
-		}
-	}
-}
-
-loopa (jo1);
-console.debug (JSONTypes.DOUBLE.compatible(JSONTypes.OBJECT));
-
-loopa (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
-		0.00e4 , "bool": true, "arr":[5,7]}}'));

@@ -23,6 +23,12 @@
   </target>
 
   <target name="test" depends="clean">
+    <fixcrlf srcdir="${src_dir}"
+       tab="remove"
+       tablength="4"
+       eol="lf"
+       eof="remove"
+       includes="**/*.js"/>
     <mkdir dir="${temp_dir}" />
     <copy tofile="${runfile}" file="${src_dir}/antsupport/antsupport.js"/>
     <script language="javascript"> <![CDATA[
@@ -53,7 +59,7 @@
   <!-- HTML Doc task for JCS -->
   <target name="jsonparser">
     <antcall target="test">
-       <param name="files" value="jsonparser/*,base64url/*"/>
+       <param name="files" value="jsonparser/*,base64url/*,jsonparser/test/*"/>
     </antcall>
   </target>
   
