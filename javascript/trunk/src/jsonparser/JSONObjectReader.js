@@ -33,7 +33,9 @@ function JSONObjectReader (/* JSONObject */ json)
     }
   if (!expected_type.isCompatible (value.type))
     {
-      JSONObject.prototype.bad ("Type mismatch for \"" + name + "\": Read=" + value.type.enumvalue () + ", Expected=" + expected_type.enumvalue ());
+      JSONObject.prototype.bad ("Type mismatch for \"" + name +
+                                "\": Read=" + JSONValue.prototype.getJSONTypeName (value.type) + 
+                                ", Expected=" + JSONValue.prototype.getJSONTypeName (expected_type));
     }
   this.json.read_flag.name = true;
   return value;

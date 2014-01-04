@@ -195,7 +195,6 @@ function JSONParser ()
             }
         }
     }
-  console.debug ("Type=" + type.enumvalue() + " Value=" + result);
   return new JSONValue (type, result);
 };
 

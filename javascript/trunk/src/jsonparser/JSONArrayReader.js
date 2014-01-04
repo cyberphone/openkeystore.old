@@ -44,7 +44,9 @@ function JSONArrayReader (/* Vector<JSONValue> */ array)
   /* JSONValue */ var value = this.array[this.index++];
   if (!expected_type.isCompatible (value.type))
     {
-      JSONObject.prototype.bad ("Incompatible request: " + expected_type.enumvalue () + " versus " + value.type.enumvalue ());
+      JSONObject.prototype.bad ("Incompatible request: " +
+          "Read=" + JSONValue.prototype.getJSONTypeName (value.type) + 
+          ", Expected=" + JSONValue.prototype.getJSONTypeName (expected_type));
     }
   return value.value;
 };

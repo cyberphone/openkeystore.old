@@ -24,3 +24,15 @@ function JSONValue (type, value)
     this.type = type;
     this.value = value;
 }
+
+JSONValue.prototype.getJSONTypeName = function (json_type)
+{
+    for (var obj in JSONTypes)
+    {
+        if (JSONTypes[obj].enumvalue == json_type.enumvalue)
+        {
+            return obj;
+        }
+    }
+    return "UNKNOWN!";
+};

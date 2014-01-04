@@ -23,42 +23,42 @@ var JSONTypes =
   {
     NULL:
       {
-        "enumvalue" : function () { return 0;},
+        "enumvalue" : 0,
         "isCompatible" : function (o) { return o == JSONTypes.NULL;}
       },
     BOOLEAN:
       {
-        "enumvalue" : function () { return 1;},
+        "enumvalue" : 1,
         "isCompatible" : function (o) { return o == JSONTypes.BOOLEAN;}
       },
     INTEGER:
       {
-        "enumvalue" : function () { return 2;},
+        "enumvalue" : 2,
         "isCompatible" : function (o) { return o == JSONTypes.INTEGER;}
       },
     DECIMAL:
       {
-        "enumvalue" : function () { return 3;},
+        "enumvalue" : 3,
         "isCompatible" : function (o) { return o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
       },
     DOUBLE:
       {
-        "enumvalue" : function () { return 4;},
+        "enumvalue" : 4,
         "isCompatible" : function (o) { return o == JSONTypes.DOUBLE || o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
       },
     STRING:
       {
-        "enumvalue" : function () { return 5;},
+        "enumvalue" : 5,
         "isCompatible" : function (o) { return o == JSONTypes.STRING;}
       },
     ARRAY:
       {
-        "enumvalue" : function () { return 10;},
+        "enumvalue" : 10,
         "isCompatible" : function (o) { return o == JSONTypes.ARRAY;}
       },
     OBJECT:
       {
-        "enumvalue" : function () { return 11;},
+        "enumvalue" : 11,
         "isCompatible" : function (o) { return o == JSONTypes.OBJECT;}
       }
   };
