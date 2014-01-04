@@ -42,6 +42,7 @@ public class JSONParser
     static final Pattern BOOLEAN_PATTERN          = Pattern.compile ("true|false");
     static final Pattern DECIMAL_INITIAL_PATTERN  = Pattern.compile ("(\\+|-)?[0-9]+[\\.][0-9]+");
     static final Pattern DECIMAL_2DOUBLE_PATTERN  = Pattern.compile ("(\\+.*)|([-][0]*[\\.][0]*)");
+    static final Pattern DOUBLE_PATTERN           = Pattern.compile ("[-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?");
     
     int index;
     
@@ -207,14 +208,10 @@ public class JSONParser
               }
             else
               {
-                try
+                type = JSONTypes.DOUBLE;
+                if (!DOUBLE_PATTERN.matcher (result).matches ())
                   {
-                    Double.parseDouble (result);
-                    type = JSONTypes.DOUBLE;
-                  }
-                catch (NumberFormatException e)
-                  {
-                    throw new IOException ("Undecodable argument: " + result + " msg=" + e.getMessage ());
+                    throw new IOException ("Undecodable argument: " + result);
                   }
               }
           }
