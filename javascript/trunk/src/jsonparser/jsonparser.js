@@ -23,42 +23,42 @@ var JSONTypes =
   {
 	NULL:
 	  {
-		"complex" : function () { return false;},
+		"enumvalue" : function () { return 0;},
 		"compatible" : function (o) { return o == JSONTypes.NULL;}
 	  },
 	BOOLEAN:
 	  {
-		"complex" : function () { return false;},
+		"enumvalue" : function () { return 1;},
 		"compatible" : function (o) { return o == JSONTypes.BOOLEAN;}
 	  },
 	INTEGER:
 	  {
-		"complex" : function () { return false;},
+		"enumvalue" : function () { return 2;},
 		"compatible" : function (o) { return o == JSONTypes.INTEGER;}
 	  },
 	DECIMAL:
 	  {
-		"complex" : function () { return false;},
+		"enumvalue" : function () { return 3;},
 		"compatible" : function (o) { return o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
 	  },
 	DOUBLE:
 	  {
-		"complex" : function () { return false;},
+		"enumvalue" : function () { return 4;},
 		"compatible" : function (o) { return o == JSONTypes.DOUBLE || o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
 	  },
     STRING:
 	  {
-		"complex" : function () { return false;},
+		"enumvalue" : function () { return 5;},
 		"compatible" : function (o) { return o == JSONTypes.STRING;}
 	  },
     ARRAY:
 	  {
-		"complex" : function () { return true;},
+		"enumvalue" : function () { return 10;},
 		"compatible" : function (o) { return o == JSONTypes.ARRAY;}
 	  },
     OBJECT:
 	  {
-		"complex" : function () { return true;},
+		"enumvalue" : function () { return 11;},
 		"compatible" : function (o) { return o == JSONTypes.OBJECT;}
 	  }
   };
@@ -145,6 +145,12 @@ function JSONParser ()
     this.RIGHT_BRACKET       = ']';
     this.COMMA_CHARACTER     = ',';
     this.BACK_SLASH          = '\\';
+
+    this.INTEGER_PATTERN          = new RegExp ("^((0)|(-?[1-9][0-9]*))$");
+    this.BOOLEAN_PATTERN          = new RegExp ("^(true|false)$");
+    this.DECIMAL_INITIAL_PATTERN  = new RegExp ("^((\\+|-)?[0-9]+[\\.][0-9]+)$");
+    this.DECIMAL_2DOUBLE_PATTERN  = new RegExp ("^((\\+.*)|([-][0]*[\\.][0]*))$");
+    this.DOUBLE_PATTERN           = new RegExp ("^([-+]?[0-9]*\\.?[0-9]+[eE][-+]?[0-9]+)$");
 }
 
 /* JSONObjectReader */ JSONParser.prototype.parse = function (json_string)
@@ -279,13 +285,15 @@ function JSONParser ()
   /* String */ var result = temp_buffer.toString ();
   if (result.length == 0)
     {
-      JSONParser.prototype.bad ("Missing argument");
+      JSONObject.prototype.bad ("Missing argument");
     }
+  console.debug (this.INTEGER_PATTERN.test ("j"));
+  console.debug (this.INTEGER_PATTERN.test ("3"));
+  console.debug (this.INTEGER_PATTERN.test ("3.6"));
   /* JSONTypes */ var type = JSONTypes.INTEGER;
-/*
-  if (!INTEGER_PATTERN.matcher (result).matches ())
+  if (!this.INTEGER_PATTERN.test (result))
     {
-      if (BOOLEAN_PATTERN.matcher (result).matches ())
+      if (this.BOOLEAN_PATTERN.test (result))
         {
           type = JSONTypes.BOOLEAN;
         }
@@ -293,25 +301,21 @@ function JSONParser ()
         {
           type = JSONTypes.NULL;
         }
-      else if (DECIMAL_INITIAL_PATTERN.matcher (result).matches ())
+      else if (this.DECIMAL_INITIAL_PATTERN.test (result))
         {
-          type = DECIMAL_2DOUBLE_PATTERN.matcher (result).matches () ?
-                                                    JSONTypes.DOUBLE : JSONTypes.DECIMAL;
+          type = this.DECIMAL_2DOUBLE_PATTERN.test (result) ?
+                                           JSONTypes.DOUBLE : JSONTypes.DECIMAL;
         }
       else
         {
-          try
+          type = JSONTypes.DOUBLE;
+    	  if (!this.DOUBLE_PATTERN.test (result))
             {
-              Double.parseDouble (result);
-              type = JSONTypes.DOUBLE;
-            }
-          catch (NumberFormatException e)
-            {
-              throw new IOException ("Undecodable argument: " + result + " msg=" + e.getMessage ());
+              JSONObject.prototype.bad ("Undecodable argument: " + result);
             }
         }
     }
-*/
+  console.debug ("Type=" + type.enumvalue() + " Value=" + result);
   return new JSONValue (type, result);
 };
 
@@ -501,11 +505,11 @@ function loopa (o)
 		else
 		{
 			string += ' ';
-			if (elem.value.type == JSONTypes.INTEGER)
+			if (elem.value.type != JSONTypes.STRING)
 			{
 				string += elem.value.value; 
 			}
-			else if (elem.value.type == JSONTypes.STRING)
+			else
 			{
 				string += '"' + elem.value.value + '"'; 
 			}
@@ -517,5 +521,5 @@ function loopa (o)
 loopa (jo1);
 console.debug (JSONTypes.DOUBLE.compatible(JSONTypes.OBJECT));
 
-loopa (new JSONParser ().parse ('{"hello": "wor\\n\\u0042ld!"  , "bello"   : {   "kul":\
-		67, "arr":[5,7]}}'));
+loopa (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+		+6.0E-64 , "arr":[5,7]}}'));
