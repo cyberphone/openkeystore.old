@@ -83,7 +83,6 @@ function JSONObject ()
 {
 	this.property_list = [];
 	this.read_flag = new Object ();
-	this.index = 0;
 }
 
 JSONObject.prototype.addProperty = function (name, value)
@@ -92,18 +91,18 @@ JSONObject.prototype.addProperty = function (name, value)
 	{
 		JSONObject.prototype.bad ("Wrong value type: " + value);
 	}
-//	console.debug("V=" + value.type);
-	var o = new Object;
-	o.name = name;
-	o.value = value;
-	for (i = 0; i < this.index; i++)
+	var length = this.property_list.length;
+	var new_property = new Object;
+	new_property.name = name;
+	new_property.value = value;
+	for (i = 0; i < length; i++)
 	{
 		if (this.property_list[i].name == name)
 		{
 			JSONObject.prototype.bad ("Property already defined: " + name);
 		}
 	}
-	this.property_list[this.index++] = o;
+	this.property_list[length] = new_property;
 	this.read_flag.name = null;
 };
 
@@ -114,7 +113,8 @@ JSONObject.prototype.bad = function (message)
 
 JSONObject.prototype.getProperty = function (name)
 {
-	for (i = 0; i < this.index; i++)
+	var length = this.property_list.length;
+	for (i = 0; i < length; i++)
 	{
 		if (this.property_list[i].name == name)
 		{
@@ -150,7 +150,7 @@ function JSONParser ()
     this.BOOLEAN_PATTERN          = new RegExp ("^(true|false)$");
     this.DECIMAL_INITIAL_PATTERN  = new RegExp ("^((\\+|-)?[0-9]+[\\.][0-9]+)$");
     this.DECIMAL_2DOUBLE_PATTERN  = new RegExp ("^((\\+.*)|([-][0]*[\\.][0]*))$");
-    this.DOUBLE_PATTERN           = new RegExp ("^([-+]?[0-9]*\\.?[0-9]+[eE][-+]?[0-9]+)$");
+    this.DOUBLE_PATTERN           = new RegExp ("^([-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?)$");
 }
 
 /* JSONObjectReader */ JSONParser.prototype.parse = function (json_string)
@@ -162,10 +162,10 @@ function JSONParser ()
     if (this.testNextNonWhiteSpaceChar () == this.LEFT_BRACKET)
       {
         this.scan ();
-    	var o = new Object;
-    	o.name = null;
-    	o.value = this.scanArray ("outer array");
-        root.property_list[root.index++] = o;
+    	var new_property = new Object;
+    	new_property.name = null;
+    	new_property.value = this.scanArray ("outer array");
+        root.property_list[root.index++] = new_property;
       }
     else
       {
@@ -474,7 +474,7 @@ var jo1 = new JSONObject ();
 jo1.addProperty("one1", new JSONValue (JSONTypes.INTEGER, 4));
 jo1.addProperty("two2", new JSONValue (JSONTypes.OBJECT, jo));
 jo1.addProperty("tree", new JSONValue (JSONTypes.STRING, "ghghg"));
-console.debug ("l=" + jo1.getLength());
+console.debug ("l1=" + jo1.getLength());
 console.debug ("l=" + jo.getLength());
 
 var indent = 0;
@@ -485,7 +485,7 @@ function loopa (o)
 	{
 		space += ' ';
 	}
-	for (var i = 0; i < o.index; i++)
+	for (var i = 0; i < o.property_list.length; i++)
 	{
 		var elem = o.property_list[i];
 		var string = space + '"' + elem.name + '":';
@@ -522,4 +522,4 @@ loopa (jo1);
 console.debug (JSONTypes.DOUBLE.compatible(JSONTypes.OBJECT));
 
 loopa (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
-		+6.0E-64 , "arr":[5,7]}}'));
+		0.00e4 , "bool": true, "arr":[5,7]}}'));
