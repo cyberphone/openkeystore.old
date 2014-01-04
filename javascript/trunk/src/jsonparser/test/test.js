@@ -18,7 +18,7 @@
 var jo = new JSONObject ();
 jo.addProperty("one", new JSONValue (JSONTypes.INTEGER, 3));
 jo.addProperty("two", new JSONValue (JSONTypes.STRING, "hi"));
-console.debug ("T=" + jo.getProperty ("two").type + " V="+ jo.getProperty ("two").value)
+console.debug ("T=" + jo._getProperty ("two").type + " V="+ jo._getProperty ("two").value)
 //jo.addProperty("two", new JSONValue (JSONTypes.INTEGER, 3));
 var jo1 = new JSONObject ();
 jo1.addProperty("one1", new JSONValue (JSONTypes.INTEGER, 4));
@@ -69,7 +69,13 @@ function loopa (o)
 }
 
 loopa (jo1);
-console.debug (JSONTypes.DOUBLE.compatible(JSONTypes.OBJECT));
+console.debug (JSONTypes.DOUBLE.isCompatible(JSONTypes.OBJECT));
 
 loopa (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
-        0.00e4 , "bool": true, "arr":[5,7]}}'));
+        0.00e4 , "bool": true, "arr":[5,7]}}').json);
+
+loopa (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+0.00e4 , "bool": true, "arr":[5,7]}}').getObject ("bello").json);
+
+console.debug (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+7 , "bool": false, "arr":["3"]}}').getObject ("bello").getArray ("arr").getString ());

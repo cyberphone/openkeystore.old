@@ -64,8 +64,7 @@ function JSONParser ()
             JSONObject.prototype.bad ("Improperly terminated JSON object");
           }
       }
-//    return new JSONObjectReader (root);
-    return root;
+    return new JSONObjectReader (root);
 };
 
 /* String */ JSONParser.prototype.scanProperty = function ()

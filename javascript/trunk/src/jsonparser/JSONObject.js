@@ -51,7 +51,7 @@ JSONObject.prototype.bad = function (message)
     throw "JSONException: " + message;
 };
 
-JSONObject.prototype.getProperty = function (name)
+JSONObject.prototype._getProperty = function (name)
 {
     var length = this.property_list.length;
     for (i = 0; i < length; i++)
@@ -61,7 +61,7 @@ JSONObject.prototype.getProperty = function (name)
             return this.property_list[i].value;
         }
     }
-    this.bad ("Property undefined: " + name);
+    return null;
 };
 
 JSONObject.prototype.getLength = function ()

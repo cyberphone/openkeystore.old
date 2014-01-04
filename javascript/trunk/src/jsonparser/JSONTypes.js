@@ -24,41 +24,41 @@ var JSONTypes =
     NULL:
       {
         "enumvalue" : function () { return 0;},
-        "compatible" : function (o) { return o == JSONTypes.NULL;}
+        "isCompatible" : function (o) { return o == JSONTypes.NULL;}
       },
     BOOLEAN:
       {
         "enumvalue" : function () { return 1;},
-        "compatible" : function (o) { return o == JSONTypes.BOOLEAN;}
+        "isCompatible" : function (o) { return o == JSONTypes.BOOLEAN;}
       },
     INTEGER:
       {
         "enumvalue" : function () { return 2;},
-        "compatible" : function (o) { return o == JSONTypes.INTEGER;}
+        "isCompatible" : function (o) { return o == JSONTypes.INTEGER;}
       },
     DECIMAL:
       {
         "enumvalue" : function () { return 3;},
-        "compatible" : function (o) { return o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
+        "isCompatible" : function (o) { return o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
       },
     DOUBLE:
       {
         "enumvalue" : function () { return 4;},
-        "compatible" : function (o) { return o == JSONTypes.DOUBLE || o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
+        "isCompatible" : function (o) { return o == JSONTypes.DOUBLE || o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER;}
       },
     STRING:
       {
         "enumvalue" : function () { return 5;},
-        "compatible" : function (o) { return o == JSONTypes.STRING;}
+        "isCompatible" : function (o) { return o == JSONTypes.STRING;}
       },
     ARRAY:
       {
         "enumvalue" : function () { return 10;},
-        "compatible" : function (o) { return o == JSONTypes.ARRAY;}
+        "isCompatible" : function (o) { return o == JSONTypes.ARRAY;}
       },
     OBJECT:
       {
         "enumvalue" : function () { return 11;},
-        "compatible" : function (o) { return o == JSONTypes.OBJECT;}
+        "isCompatible" : function (o) { return o == JSONTypes.OBJECT;}
       }
   };
