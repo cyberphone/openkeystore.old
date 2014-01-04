@@ -178,7 +178,7 @@ function JSONParser ()
         {
           type = JSONTypes.BOOLEAN;
         }
-      else if (result.equals ("null"))
+      else if (result == "null")
         {
           type = JSONTypes.NULL;
         }
