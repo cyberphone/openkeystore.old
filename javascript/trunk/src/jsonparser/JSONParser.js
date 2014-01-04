@@ -157,7 +157,7 @@ function JSONParser ()
 /* JSONValue */ JSONParser.prototype.scanSimpleType = function ()
 {
   this.index--;
-  /* StringBuffer */ temp_buffer = new String () /* StringBuffer () */;
+  /* StringBuffer */ var result = new String () /* StringBuffer () */;
   /* char */ var c;
   while ((c = this.testNextNonWhiteSpaceChar ()) != this.COMMA_CHARACTER && c != this.RIGHT_BRACKET && c != this.RIGHT_CURLY_BRACKET)
     {
@@ -165,16 +165,12 @@ function JSONParser ()
         {
           break;
         }
-      temp_buffer += c;
+      result += c;
     }
-  /* String */ var result = temp_buffer.toString ();
-  if (result.length == 0)
+   if (result.length == 0)
     {
       JSONObject.prototype.bad ("Missing argument");
     }
-  console.debug (this.INTEGER_PATTERN.test ("j"));
-  console.debug (this.INTEGER_PATTERN.test ("3"));
-  console.debug (this.INTEGER_PATTERN.test ("3.6"));
   /* JSONTypes */ var type = JSONTypes.INTEGER;
   if (!this.INTEGER_PATTERN.test (result))
     {
@@ -329,7 +325,7 @@ function JSONParser ()
     {
       return this.json_data.charAt (this.index++);
     }
-  JSONParser.prototype.bad ("Unexpected EOF reached");
+  JSONObject.prototype.bad ("Unexpected EOF reached");
 };
 
 /* boolean */ JSONParser.prototype.isWhiteSpace = function (/* char */ c)
