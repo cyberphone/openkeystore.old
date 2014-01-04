@@ -250,26 +250,6 @@ public class JSONObjectReader implements Serializable
         return value == null ? null : value.type;
       }
 
-    public JSONTypes getArrayType (String name) throws IOException
-      {
-        JSONValue value = json.properties.get (name);
-        if (value == null)
-          {
-            throw new IOException ("Property \"" + name + "\" does not exist in this object");
-          }
-        if (value.type != JSONTypes.ARRAY)
-          {
-            throw new IOException ("Property \"" + name + "\" is not an array");
-          }
-        @SuppressWarnings("unchecked")
-        Vector<JSONValue> array = ((Vector<JSONValue>) value.value);
-        if (array.isEmpty ())
-          {
-            return null;
-          }
-        return array.firstElement ().type;
-      }
-
     /**
      * Read and decode JCS signature object from the current JSON object.
      * @return An object which can be used to verify keys etc.
