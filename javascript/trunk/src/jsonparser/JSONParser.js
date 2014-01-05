@@ -38,8 +38,7 @@ function JSONParser ()
     this.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?)$");
 }
 
-/* JSONObjectReader */
-JSONParser.prototype.parse = function (json_string)
+/* JSONObjectReader */JSONParser.prototype.parse = function (json_string)
 {
     this.json_data = json_string;
     this.max_length = json_string.length;

@@ -1,6 +1,6 @@
-#Sun Jan 05 15:01:04 CET 2014
+#Sun Jan 05 15:29:01 CET 2014
 eclipse.preferences.version=1
-org.eclipse.wst.jsdt.core.formatter.align_type_members_on_columns=false
+org.eclipse.wst.jsdt.core.formatter.align_type_members_on_columns=true
 org.eclipse.wst.jsdt.core.formatter.alignment_for_arguments_in_allocation_expression=16
 org.eclipse.wst.jsdt.core.formatter.alignment_for_arguments_in_enum_constant=16
 org.eclipse.wst.jsdt.core.formatter.alignment_for_arguments_in_explicit_constructor_call=16
@@ -254,7 +254,7 @@ org.eclipse.wst.jsdt.core.formatter.never_indent_line_comments_on_first_column=f
 org.eclipse.wst.jsdt.core.formatter.number_of_blank_lines_at_beginning_of_method_body=0
 org.eclipse.wst.jsdt.core.formatter.number_of_empty_lines_to_preserve=1
 org.eclipse.wst.jsdt.core.formatter.put_empty_statement_on_new_line=true
-org.eclipse.wst.jsdt.core.formatter.tabulation.char=tab
+org.eclipse.wst.jsdt.core.formatter.tabulation.char=space
 org.eclipse.wst.jsdt.core.formatter.tabulation.size=4
 org.eclipse.wst.jsdt.core.formatter.use_tabs_only_for_leading_indentations=false
 org.eclipse.wst.jsdt.core.formatter.wrap_before_binary_operator=true
