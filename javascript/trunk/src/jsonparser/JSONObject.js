@@ -25,7 +25,7 @@ function JSONObject ()
     this.read_flag = new Object ();
 }
 
-JSONObject.prototype.addProperty = function (name, value)
+JSONObject.prototype._addProperty = function (name, value)
 {
     if (!(value instanceof JSONValue))
     {

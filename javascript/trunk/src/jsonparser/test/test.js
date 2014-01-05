@@ -16,14 +16,14 @@
  */
 
 var jo = new JSONObject ();
-jo.addProperty("one", new JSONValue (JSONTypes.INTEGER, 3));
-jo.addProperty("two", new JSONValue (JSONTypes.STRING, "hi"));
+jo._addProperty("one", new JSONValue (JSONTypes.INTEGER, 3));
+jo._addProperty("two", new JSONValue (JSONTypes.STRING, "hi"));
 console.debug ("T=" + jo._getProperty ("two").type + " V="+ jo._getProperty ("two").value)
-//jo.addProperty("two", new JSONValue (JSONTypes.INTEGER, 3));
+//jo._addProperty("two", new JSONValue (JSONTypes.INTEGER, 3));
 var jo1 = new JSONObject ();
-jo1.addProperty("one1", new JSONValue (JSONTypes.INTEGER, 4));
-jo1.addProperty("two2", new JSONValue (JSONTypes.OBJECT, jo));
-jo1.addProperty("tree", new JSONValue (JSONTypes.STRING, "ghghg"));
+jo1._addProperty("one1", new JSONValue (JSONTypes.INTEGER, 4));
+jo1._addProperty("two2", new JSONValue (JSONTypes.OBJECT, jo));
+jo1._addProperty("tree", new JSONValue (JSONTypes.STRING, "ghghg"));
 console.debug ("l1=" + jo1.getLength());
 console.debug ("l=" + jo.getLength());
 
@@ -79,3 +79,11 @@ loopa (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello" 
 
 console.debug (new JSONParser ().parse ('[[{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 7 , "bool": false, "arr":[3]}}]]').getJSONArrayReader ().getArray ().getObject ().getObject ("bello").getArray ("arr").getInt ());
+
+new JSONObjectWriter (new JSONObject ());
+var newobjec = new JSONObjectWriter ();
+newobjec.setInt ("kirt", 4).setObject ("Obja");
+loopa (newobjec.root);
+new JSONObjectWriter (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+0.00e4 , "bool": true, "arr":[5,7]}}'));
+

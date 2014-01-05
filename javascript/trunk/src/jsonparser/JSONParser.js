@@ -108,7 +108,7 @@ function JSONParser ()
             default:
                 value = this.scanSimpleType ();
         }
-        holder.addProperty (name, value);
+        holder._addProperty (name, value);
     }
     this.scan ();
     return new JSONValue (JSONTypes.OBJECT, holder);
