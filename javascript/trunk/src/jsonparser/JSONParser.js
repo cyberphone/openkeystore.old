@@ -38,7 +38,8 @@ function JSONParser ()
     this.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?)$");
 }
 
-/* JSONObjectReader */JSONParser.prototype.parse = function (json_string)
+/* JSONObjectReader */
+JSONParser.prototype.parse = function (json_string)
 {
     this.json_data = json_string;
     this.max_length = json_string.length;
@@ -158,8 +159,7 @@ function JSONParser ()
     this.index--;
     /* StringBuffer */var result = new String () /* StringBuffer () */;
     /* char */var c;
-    while ((c = this.testNextNonWhiteSpaceChar ()) != this.COMMA_CHARACTER
-            && c != this.RIGHT_BRACKET && c != this.RIGHT_CURLY_BRACKET)
+    while ((c = this.testNextNonWhiteSpaceChar ()) != this.COMMA_CHARACTER && c != this.RIGHT_BRACKET && c != this.RIGHT_CURLY_BRACKET)
     {
         if (this.isWhiteSpace (c = this.nextChar ()))
         {
@@ -184,8 +184,7 @@ function JSONParser ()
         }
         else if (this.DECIMAL_INITIAL_PATTERN.test (result))
         {
-            type = this.DECIMAL_2DOUBLE_PATTERN.test (result) ? JSONTypes.DOUBLE
-                    : JSONTypes.DECIMAL;
+            type = this.DECIMAL_2DOUBLE_PATTERN.test (result) ? JSONTypes.DOUBLE : JSONTypes.DECIMAL;
         }
         else
         {
@@ -244,7 +243,7 @@ function JSONParser ()
 
                 case 'u':
                     c = 0;
-                    for ( var i = 0; i < 4; i++)
+                    for (var i = 0; i < 4; i++)
                     {
                         c = ((c << 4) + this.getHexChar ());
                     }

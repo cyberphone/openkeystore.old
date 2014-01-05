@@ -1,4 +1,4 @@
-#Sun Jan 05 14:30:37 CET 2014
+#Sun Jan 05 15:01:04 CET 2014
 eclipse.preferences.version=1
 org.eclipse.wst.jsdt.core.formatter.align_type_members_on_columns=false
 org.eclipse.wst.jsdt.core.formatter.alignment_for_arguments_in_allocation_expression=16
@@ -208,7 +208,7 @@ org.eclipse.wst.jsdt.core.formatter.insert_space_before_opening_brace_in_block=i
 org.eclipse.wst.jsdt.core.formatter.insert_space_before_opening_brace_in_constructor_declaration=insert
 org.eclipse.wst.jsdt.core.formatter.insert_space_before_opening_brace_in_enum_constant=insert
 org.eclipse.wst.jsdt.core.formatter.insert_space_before_opening_brace_in_enum_declaration=insert
-org.eclipse.wst.jsdt.core.formatter.insert_space_before_opening_brace_in_method_declaration=insert
+org.eclipse.wst.jsdt.core.formatter.insert_space_before_opening_brace_in_method_declaration=do not insert
 org.eclipse.wst.jsdt.core.formatter.insert_space_before_opening_brace_in_switch=insert
 org.eclipse.wst.jsdt.core.formatter.insert_space_before_opening_brace_in_type_declaration=insert
 org.eclipse.wst.jsdt.core.formatter.insert_space_before_opening_bracket_in_array_allocation_expression=do not insert

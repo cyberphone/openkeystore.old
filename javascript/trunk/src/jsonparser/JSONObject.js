@@ -35,7 +35,7 @@ JSONObject.prototype.addProperty = function (name, value)
     var new_property = new Object;
     new_property.name = name;
     new_property.value = value;
-    for (i = 0; i < length; i++)
+    for (var i = 0; i < length; i++)
     {
         if (this.property_list[i].name == name)
         {
@@ -54,7 +54,7 @@ JSONObject.prototype.bad = function (message)
 JSONObject.prototype._getProperty = function (name)
 {
     var length = this.property_list.length;
-    for (i = 0; i < length; i++)
+    for (var i = 0; i < length; i++)
     {
         if (this.property_list[i].name == name)
         {
