@@ -60,22 +60,22 @@ function JSONArrayReader (/* Vector<JSONValue> */ array)
 {
   return parseInt (/* (String) */ this._get (JSONTypes.INTEGER));
 };
+
+/* public long */ JSONArrayReader.prototype.getLong = function ()
+{
+  return this._get (JSONTypes.INTEGER);
+};
+
+/* public BigInteger */ JSONArrayReader.prototype.getBigInteger = function ()
+{
+  return this._get (JSONTypes.INTEGER);
+};
+
+/* public BigDecimal */ JSONArrayReader.prototype.getBigDecimal = function ()
+{
+  return new this,_get (JSONTypes.DECIMAL);
+};
 /*
-    public long getLong () throws NumberFormatException, IOException
-      {
-        return Long.parseLong ((String) get (JSONTypes.INTEGER));
-      }
-
-    public BigInteger getBigInteger () throws IOException
-      {
-        return new BigInteger ((String) get (JSONTypes.INTEGER));
-      }
-
-    public BigDecimal getBigDecimal () throws IOException
-      {
-        return new BigDecimal ((String) get (JSONTypes.DECIMAL));
-      }
-
     public GregorianCalendar getDateTime () throws IOException
       {
         return ISODateTime.parseDateTime (getString ());
@@ -100,24 +100,23 @@ function JSONArrayReader (/* Vector<JSONValue> */ array)
           }
         return false;
       }
-
-    @SuppressWarnings("unchecked")
-    public JSONArrayReader getArray () throws IOException
-      {
-        return new JSONArrayReader ((Vector<JSONValue>)get (JSONTypes.ARRAY));
-      }
-
+*/
+/* public JSONArrayReader */ JSONArrayReader.prototype.getArray = function ()
+{
+  return new JSONArrayReader (/* (Vector<JSONValue>) */ this._get (JSONTypes.ARRAY));
+};
+/*
     public JSONTypes getElementType () throws IOException
       {
         inRangeCheck ();
         return array.elementAt (index).type;
       }
-
-    public JSONObjectReader getObject () throws IOException
-      {
-        return new JSONObjectReader ((JSONObject) get (JSONTypes.OBJECT));
-      }
-
+*/
+/* public JSONObjectReader */ JSONArrayReader.prototype.getObject = function ()
+{
+  return new JSONObjectReader (/* (JSONObject) */ this._get (JSONTypes.OBJECT));
+};
+/*
     public void scanAway () throws IOException
       {
         get (getElementType ());

@@ -21,7 +21,7 @@
 
 function JSONObjectReader (/* JSONObject */ json)
 {
-    this.json = json;
+  this.json = json;
 }
 
 /* JSONValue */ JSONObjectReader.prototype._getProperty = function (/* String */ name, /* JSONTypes */ expected_type)
@@ -92,13 +92,12 @@ function JSONObjectReader (/* JSONObject */ json)
 {
     return parseFloat (this._getString (name, JSONTypes.DOUBLE));
 };
-/*
-    @SuppressWarnings("unchecked")
-    public JSONArrayReader JSONObjectReader.prototype.getJSONArrayReader ()
-      {
-        return json.properties.containsKey (null) ? new JSONArrayReader ((Vector<JSONValue>) json.properties.get (null).value) : null;
-      }
-*/
+
+/* public JSONArrayReader */ JSONObjectReader.prototype.getJSONArrayReader = function ()
+{
+    return this.json.property_list.length == 1 && !this.json.property_list[0].name ? new JSONArrayReader (/* (Vector<JSONValue>) */ this.json.property_list[0].value.value) : null;
+};
+
 /* public boolean */ JSONObjectReader.prototype.getIfNULL = function (/* String */ name)
 {
   if (this.getPropertyType (name) == JSONTypes.NULL)
@@ -229,28 +228,8 @@ function JSONObjectReader (/* JSONObject */ json)
     /* JSONValue */ var value = this.json._getProperty (name);
     return value == null ? null : value.type;
 };
-/*
-    public JSONTypes JSONObjectReader.prototype.getArrayType (String name) throws IOException
-      {
-        JSONValue value = json.properties.get (name);
-        if (value == null)
-          {
-            throw new IOException ("Property \"" + name + "\" does not exist in this object");
-          }
-        if (value.type != JSONTypes.ARRAY)
-          {
-            throw new IOException ("Property \"" + name + "\" is not an array");
-          }
-        @SuppressWarnings("unchecked")
-        Vector<JSONValue> array = ((Vector<JSONValue>) value.value);
-        if (array.isEmpty ())
-          {
-            return null;
-          }
-        return array.firstElement ().type;
-      }
-*/
-    /**
+
+/**
      * Read and decode JCS signature object from the current JSON object.
      * @return An object which can be used to verify keys etc.
      * @see org.webpki.json.JSONObjectWriter#setSignature(JSONSigner)

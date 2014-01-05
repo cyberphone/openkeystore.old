@@ -77,5 +77,5 @@ loopa (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello" 
 loopa (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 0.00e4 , "bool": true, "arr":[5,7]}}').getObject ("bello").json);
 
-console.debug (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
-7 , "bool": false, "arr":[3]}}').getObject ("bello").getArray ("arr").getString ());
+console.debug (new JSONParser ().parse ('[[{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+7 , "bool": false, "arr":[3]}}]]').getJSONArrayReader ().getArray ().getObject ().getObject ("bello").getArray ("arr").getInt ());
