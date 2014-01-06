@@ -44,6 +44,7 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
     /* static String */this.html_property_color = "#C00000";
     /* static String */this.html_keyword_color  = "#606060";
     /* static int */this.html_indent = 4;
+
     if (optional_object_or_reader === undefined)
     {
         this.root = new JSONObject ();
@@ -118,12 +119,14 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
       {
         return addProperty (name, new JSONValue (JSONTypes.DECIMAL, value.toString ()));
       }
+*/
 
-    public JSONObjectWriter setBoolean (String name, boolean value) throws IOException
-      {
-        return addProperty (name, new JSONValue (JSONTypes.BOOLEAN, Boolean.toString (value)));
-      }
+/* public JSONObjectWriter */JSONObjectWriter.prototype.setBoolean = function (/* String */name, /* boolean */value)
+{
+    return this._addProperty (name, new JSONValue (JSONTypes.BOOLEAN, value.toString ()));
+};
 
+/*
     public JSONObjectWriter setNULL (String name) throws IOException
       {
         return addProperty (name, new JSONValue (JSONTypes.NULL, "null"));
@@ -158,23 +161,24 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
 
 /* public JSONArrayWriter */JSONObjectWriter.prototype.setArray = function (/* String */name)
 {
-        /* Vector<JSONValue> */var array = [] /* new Vector<JSONValue> ()*/;
+    /* Vector<JSONValue> */var array = [] /* new Vector<JSONValue> ()*/;
     this._addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
     return new JSONArrayWriter (array);
 };
 
-/*
-    JSONObjectWriter setStringArray (String name, String[] values, JSONTypes json_type) throws IOException
-      {
-        Vector<JSONValue> array = new Vector<JSONValue> ();
-        for (String value : values)
-          {
-            array.add (new JSONValue (json_type, value));
-          }
-        return addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
-      }
+/* JSONObjectWriter */JSONObjectWriter.prototype._setStringArray = function (/* String */name, /* String[] */values, /* JSONTypes */json_type)
+{
+    /* Vector<JSONValue> */var array = [] /* new Vector<JSONValue> () */;
+    for (var i = 0; i < values.length; i++)
+    {
+        array[i] = new JSONValue (json_type, values[i]);
+    }
+    return this._addProperty (name, new JSONValue (JSONTypes.ARRAY, array));
+};
 
-    public JSONObjectWriter setBinaryArray (String name, Vector<byte[]> values) throws IOException
+/*
+
+JSONObjectWriter.prototype.setBinaryArray (String name, Vector<byte[]> values) throws IOException
       {
         Vector<String> array = new Vector<String> ();
         for (byte[] value : values)
@@ -183,12 +187,13 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
           }
         return setStringArray (name, array.toArray (new String[0]));
       }
-
-    public JSONObjectWriter setStringArray (String name, String[] values) throws IOException
-      {
-        return setStringArray (name, values, JSONTypes.STRING);
-      }
 */
+
+/* public JSONObjectWriter */JSONObjectWriter.prototype.setStringArray = function (/* String */name, /* String[] */values)
+{
+    return this._setStringArray (name, values, JSONTypes.STRING);
+};
+
 
     /**
      * Set signature property in JSON object.
@@ -586,10 +591,10 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
     {
         this.buffer += "&quot;<span style=\"color:" +
                             (property ?
-                                    string.startsWith ("@") ?
-                                            this.html_keyword_color : this.html_property_color
-                                            : this.html_string_color) +
-                                            "\">";
+                                    (string.indexOf ('@') == 0) ?
+                                        this.html_keyword_color : this.html_property_color
+                                      : this.html_string_color) +
+                        "\">";
     }
     else
     {
