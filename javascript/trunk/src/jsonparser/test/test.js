@@ -92,3 +92,47 @@ newobjec.setString ("dri", "dra").setInt ("numbah", 6).setArray ("arry").setStri
 console.debug (newobjec.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT));
 console.debug (newobjec.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
 
+var signature = new JSONParser ().parse (
+
+'{\
+"Now": "2013-12-23T23:25:10+01:00",\
+"PaymentRequest": \
+  {\
+    "Currency": "USD",\
+    "VAT": 1.45,\
+    "Specification": \
+      [{\
+         "Units": 3,\
+         "Description": "USB cable",\
+         "SKU": "TR-46565666",\
+         "UnitPrice": 4.50\
+       },\
+       {\
+         "Units": 1,\
+         "Description": "4G Router",\
+         "SKU": "JK-56566655",\
+         "UnitPrice": 39.99\
+       }]\
+  },\
+"EscapeMe": "\\u000F\\u000aA\'\\u0042\\\\\\"\\/",\
+"Signature": \
+  {\
+    "Algorithm": "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256",\
+    "KeyInfo": \
+      {\
+        "PublicKey": \
+          {\
+            "EC": \
+              {\
+                "NamedCurve": "http://xmlns.webpki.org/sks/algorithm#ec.nist.p256",\
+                "X": "lNxNvAUEE8t7DSQBft93LVSXxKCiVjhbWWfyg023FCk",\
+                "Y": "LmTlQxXB3LgZrNLmhOfMaCnDizczC_RfQ6Kx8iNwfFA"\
+              }\
+          }\
+      },\
+    "SignatureValue": "MEUCIA1__ClTpOMBTCCA3oD3lzuaS3WACYR8qFDHpej5ZdEsAiEA3N5pWl2TOzzQfdtoc35S9n31mf-oP3_XBss8R8qjnvg"\
+  }\
+}'
+
+);
+console.debug (new JSONObjectWriter (signature).serializeJSONObject (JSONOutputFormats.CANONICALIZED));

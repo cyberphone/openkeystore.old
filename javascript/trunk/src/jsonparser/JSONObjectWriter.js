@@ -55,7 +55,7 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
     else if (optional_object_or_reader instanceof JSONObjectReader)
     {
         this.root = optional_object_or_reader.json;
-        if (this.root.property_list.length = 1 && !this.root.property_list[0].name)
+        if (this.root._isArray ())
         {
             JSONObject._error ("You cannot update array objects");
         }
@@ -671,7 +671,7 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
                     for (var i = 0; i < 4; i++)
                     {
                         /*int */var hex = utf_value >>> 12;
-                        this.buffer += (char)(hex > 9 ? hex + 'a' - 10 : hex + '0');
+                        this.buffer += String.fromCharCode (hex > 9 ? hex + 87 : hex + 48);
                         utf_value <<= 4;
                     }
                     break;
@@ -757,7 +757,7 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
     {
         this.buffer += '\'';
     }
-    if (this.root.property_list.length == 0 && !this.root.property_list[0].name)
+    if (this.root._isArray ())
     {
         this.printArray (/* (Vector<JSONValue>) */this.root.property_list[0].value, false);
     }

@@ -15,28 +15,29 @@
  *
  */
 
-/**
- * For writing array elements.
- */
+/*================================================================*/
+/*                         JSONArrayWriter                        */
+/*================================================================*/
+
 function JSONArrayWriter (optional_array)
-  {
-        /* Vector<JSONValue> */this.array = optional_array === undefined ? [] : optional_array;
-  }
+{
+   /* Vector<JSONValue> */this.array = optional_array === undefined ? [] : optional_array;
+}
 
 /* JSONArrayWriter */JSONArrayWriter.prototype._add = function (/* JSONTypes */type, /* Object */value)
 {
-  this.array[this.array.length] = new JSONValue (type, value);
-  return this;
+    this.array[this.array.length] = new JSONValue (type, value);
+    return this;
 };
 
 /* public JSONArrayWriter */JSONArrayWriter.prototype.setString = function (/* String */value)
 {
-  return this._add (JSONTypes.STRING, value);
+    return this._add (JSONTypes.STRING, value);
 };
 
 /* public JSONArrayWriter */JSONArrayWriter.prototype.setInt = function (/* int */value)
 {
-  return this._add (JSONTypes.INTEGER, value);
+    return this._add (JSONTypes.INTEGER, value);
 };
 
 /*
@@ -75,24 +76,23 @@ function JSONArrayWriter (optional_array)
         return setString (ISODateTime.formatDateTime (date_time));
       }
 
-    public JSONArrayWriter setArray () throws IOException
-      {
-        Vector<JSONValue> new_array = new Vector<JSONValue> ();
-        add (JSONTypes.ARRAY, new_array);
-        return new JSONArrayWriter (new_array);
-      }
+/* public JSONArrayWriter */JSONArrayWriter.prototype.setArray = function ()
+{
+    /* Vector<JSONValue> */var new_array = [] /* new Vector<JSONValue> () */;
+    this._add (JSONTypes.ARRAY, new_array);
+    return new JSONArrayWriter (new_array);
+};
 
-    public JSONObjectWriter setObject () throws IOException
-      {
-        JSONObject holder = new JSONObject ();
-        add (JSONTypes.OBJECT, holder);
-        return new JSONObjectWriter (holder);
-      }
+/* public JSONObjectWriter */JSONArrayWriter.prototype.setObject = function ()
+{
+    /* JSONObject */var holder = new JSONObject ();
+    this._add (JSONTypes.OBJECT, holder);
+    return new JSONObjectWriter (holder);
+};
 
-    public byte[] serializeJSONArray (JSONOutputFormats output_format) throws IOException
-      {
-        JSONObject dummy = new JSONObject ();
-        dummy.properties.put (null, new JSONValue (JSONTypes.ARRAY, array));
-        return new JSONObjectWriter (dummy).serializeJSONObject (output_format);
-      }
-*/
+/* public String */JSONArrayWriter.prototype.serializeJSONArray = function (/* JSONOutputFormats */output_format)
+{
+    /* JSONObject */var dummy = new JSONObject ();
+    dummy._setArray (new JSONValue (JSONTypes.ARRAY, this.array));
+    return new JSONObjectWriter (dummy).serializeJSONObject (output_format);
+};

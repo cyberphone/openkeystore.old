@@ -47,10 +47,7 @@ function JSONParser ()
     if (this.testNextNonWhiteSpaceChar () == this.LEFT_BRACKET)
     {
         this.scan ();
-        var new_property = new Object;
-        new_property.name = null;
-        new_property.value = this.scanArray ("outer array");
-        root.property_list[0] = new_property;
+        root._setArray (this.scanArray ("outer array"));
     }
     else
     {

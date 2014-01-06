@@ -64,3 +64,16 @@ JSONObject.prototype._getProperty = function (name)
     return null;
 };
 
+JSONObject.prototype._isArray = function ()
+{
+    return this.property_list.length == 1 && !this.property_list[0].name;
+};
+
+JSONObject.prototype._setArray = function (/* JSONValue */array)
+{
+    this.property_list = [];
+    var unnamed_property = new Object;
+    unnamed_property.name = null;
+    unnamed_property.value = array;
+    this.property_list[0] = unnamed_property;
+};

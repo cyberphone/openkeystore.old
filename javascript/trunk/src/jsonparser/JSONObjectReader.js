@@ -34,8 +34,8 @@ function JSONObjectReader (/* JSONObject */json)
     if (!expected_type.isCompatible (value.type))
     {
         JSONObject._error ("Type mismatch for \"" + name +
-                                  "\": Read=" + JSONValue.prototype.getJSONTypeName (value.type) +
-                                  ", Expected=" + JSONValue.prototype.getJSONTypeName (expected_type));
+                           "\": Read=" + JSONValue.prototype.getJSONTypeName (value.type) +
+                           ", Expected=" + JSONValue.prototype.getJSONTypeName (expected_type));
     }
     this.json.read_flag.name = true;
     return value;
@@ -96,8 +96,7 @@ function JSONObjectReader (/* JSONObject */json)
 
 /* public JSONArrayReader */JSONObjectReader.prototype.getJSONArrayReader = function ()
 {
-    return this.json.property_list.length == 1 && !this.json.property_list[0].name ?
-            new JSONArrayReader (/* (Vector<JSONValue>) */this.json.property_list[0].value.value) : null;
+    return this.json._isArray () ?  new JSONArrayReader (/* (Vector<JSONValue>) */this.json.property_list[0].value.value) : null;
 };
 
 /* public boolean */JSONObjectReader.prototype.getIfNULL = function (/* String */name)
