@@ -87,3 +87,8 @@ loopa (newobjec.root);
 new JSONObjectWriter (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 0.00e4 , "bool": true, "arr":[5,7]}}'));
 
+newobjec = new JSONObjectWriter ();
+newobjec.setString ("dri", "dra").setInt ("numbah", 6).setObject ("obj").setString ("dri","abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija");
+console.debug (newobjec.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT));
+console.debug (newobjec.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
+

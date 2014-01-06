@@ -79,7 +79,7 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
       }
 */
 
-/* public JSONObjectWriter */ JSONObjectWriter.prototype.setString = function (/* String */name, /* String */value)
+/* public JSONObjectWriter */JSONObjectWriter.prototype.setString = function (/* String */name, /* String */value)
 {
     if (typeof value != "string")
     {
@@ -328,400 +328,412 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
         setBinaryArray (JSONSignatureDecoder.X509_CERTIFICATE_PATH_JSON, certificates);
         return this;
       }
+*/
+/* void */JSONObjectWriter.prototype.beginObject = function (/* boolean */array_flag)
+{
+    this.indentLine ();
+    this.spaceOut ();
+    if (array_flag)
+    {
+        this.indent++;
+        this.buffer += '[';
+    }
+    this.buffer += '{';
+    this.indentLine ();
+};
 
-    void beginObject (boolean array_flag)
-      {
-        indentLine ();
-        spaceOut ();
-        if (array_flag)
-          {
-            indent++;
-            buffer.append ('[');
-          }
-        buffer.append ('{');
-        indentLine ();
-      }
+/* void */JSONObjectWriter.prototype.newLine = function ()
+{
+    if (this.pretty_print)
+    {
+        this.buffer += this.html_mode ? "<br>" : "\n";
+    }
+};
 
-    void newLine ()
-      {
-        if (pretty_print)
-          {
-            buffer.append (html_mode ? "<br>" : "\n");
-          }
-      }
+/* void */JSONObjectWriter.prototype.indentLine = function ()
+{
+    this.indent += this.indent_factor;
+};
 
-    void indentLine ()
-      {
-        indent += indent_factor;
-      }
+/* void */JSONObjectWriter.prototype.undentLine = function ()
+{
+    this.indent -= this.indent_factor;
+};
 
-    void undentLine ()
-      {
-        indent -= indent_factor;
-      }
+/* void */JSONObjectWriter.prototype.endObject = function ()
+{
+    this.newLine ();
+    this.undentLine ();
+    this.spaceOut ();
+    this.undentLine ();
+    this.buffer += '}';
+};
 
-    void endObject ()
-      {
-        newLine ();
-        undentLine ();
-        spaceOut ();
-        undentLine ();
-        buffer.append ('}');
-      }
+/* void */JSONObjectWriter.prototype.printOneElement = function (/* JSONValue */json_value)
+{
+    switch (json_value.type)
+    {
+        case JSONTypes.ARRAY:
+            this.printArray (/* (Vector<JSONValue>) */json_value.value, false);
+            break;
+    
+        case JSONTypes.OBJECT:
+            this.newLine ();
+            this.printObject (/*(JSONObject) */json_value.value, false);
+            break;
+    
+        default:
+            this.printSimpleValue (json_value, false);
+    }
+};
 
-    @SuppressWarnings("unchecked")
-    void printOneElement (JSONValue json_value)
-      {
-        switch (json_value.type)
-          {
-            case ARRAY:
-              printArray ((Vector<JSONValue>) json_value.value, false);
-              break;
+/* void */JSONObjectWriter.prototype.printObject = function (/* JSONObject */object, /* boolean */array_flag)
+{
+    this.beginObject (array_flag);
+    /* boolean */var next = false;
+    var length = object.property_list.length;
+    for (var i = 0; i < length; i++)
+    {
+        /* JSONValue */var json_value = object.property_list[i].value;
+        /* String */var property = object.property_list[i].name;
+        if (next)
+        {
+            this.buffer += ',';
+        }
+        this.newLine ();
+        next = true;
+        this.printProperty (property);
+        this.printOneElement (json_value);
+    }
+    this.endObject ();
+};
   
-            case OBJECT:
-              newLine ();
-              printObject ((JSONObject) json_value.value, false);
-              break;
-  
-            default:
-              printSimpleValue (json_value, false);
-          }
-      }
+/* boolean */JSONObjectWriter.prototype.complex = function (/* JSONTypes */json_type)
+{
+    return json_type.enumvalue >= 10;
+};
 
-    void printObject (JSONObject object, boolean array_flag)
-      {
-        beginObject (array_flag);
-        boolean next = false;
-        for (String property : object.properties.keySet ())
-          {
-            JSONValue json_value = object.properties.get (property);
-            if (next)
-              {
-                buffer.append (',');
-              }
-            newLine ();
-            next = true;
-            printProperty (property);
-            printOneElement (json_value);
-          }
-        endObject ();
-      }
+/* void */JSONObjectWriter.prototype.printArray = function (/* Vector<JSONValue> */array, /* boolean */array_flag)
+{
+    if (array.length == 0)
+    {
+        this.buffer += '[';
+    }
+    else
+    {
+        /* boolean */var mixed = false;
+        /* JSONTypes */var first_type = array[0].type;
+        for (var i = 0; i < array.length; i++)
+        {
+            var json_value = array[i];
+            if (this.complex (first_type) != this.complex (json_value.type) ||
+                    (this.complex (first_type) && first_type != json_value.type))
 
-    @SuppressWarnings("unchecked")
-    void printArray (Vector<JSONValue> array, boolean array_flag)
-      {
-         if (array.isEmpty ())
-          {
-            buffer.append ('[');
-          }
+            {
+                mixed = true;
+                break;
+            }
+        }
+        if (mixed)
+        {
+            this.buffer += '[';
+            /* boolean */var next = false;
+            for (var i = 0; i < array.length; i++)
+            {
+                var json_value = array[i];
+                if (next)
+                {
+                    this.buffer += ',';
+                }
+                else
+                {
+                    next = true;
+                }
+                this.printOneElement (json_value);
+            }
+        }
+        else if (first_type == JSONTypes.OBJECT)
+        {
+            this.printArrayObjects (array);
+        }
+        else if (first_type == JSONTypes.ARRAY)
+        {
+            this.newLine ();
+            this.indentLine ();
+            this.spaceOut ();
+            this.buffer += '[';
+            /* boolean */var next = false;
+            for (var i = 0; i < array.length; i++)
+            {
+                var json_value = array[i];
+                /* Vector<JSONValue> */var sub_array = /* (Vector<JSONValue>) */json_value.value;
+                /* boolean */var extra_pretty = sub_array.length == 0 || !complex (sub_array[0].type);
+                if (next)
+                {
+                    this.buffer += ',';
+                }
+                else
+                {
+                    next = true;
+                }
+                if (extra_pretty)
+                {
+                    this.newLine ();
+                    this.indentLine ();
+                    this.spaceOut ();
+                }
+                this.printArray (sub_array, true);
+                if (extra_pretty)
+                {
+                    this.undentLine ();
+                }
+            }
+            this.newLine ();
+            this.spaceOut ();
+            this.undentLine ();
+        }
         else
-          {
-            boolean mixed = false;
-            JSONTypes first_type = array.firstElement ().type;
-            for (JSONValue json_value : array)
-              {
-                if (first_type.complex != json_value.type.complex ||
-                    (first_type.complex && first_type != json_value.type))
-                    
-                  {
-                    mixed = true;
-                    break;
-                  }
-              }
-            if (mixed)
-              {
-                buffer.append ('[');
-                boolean next = false;
-                for (JSONValue value : array)
-                  {
-                    if (next)
-                      {
-                        buffer.append (',');
-                      }
-                    else
-                      {
-                        next = true;
-                      }
-                    printOneElement (value);
-                  }
-              }
-            else if (first_type == JSONTypes.OBJECT)
-              {
-                printArrayObjects (array);
-              }
-            else if (first_type == JSONTypes.ARRAY)
-              {
-                newLine ();
-                indentLine ();
-                spaceOut ();
-                buffer.append ('[');
-                boolean next = false;
-                for (JSONValue value : array)
-                  {
-                    Vector<JSONValue> sub_array = (Vector<JSONValue>) value.value;
-                    boolean extra_pretty = sub_array.isEmpty () || !sub_array.firstElement ().type.complex;
-                    if (next)
-                      {
-                        buffer.append (',');
-                      }
-                    else
-                      {
-                        next = true;
-                      }
-                    if (extra_pretty)
-                      {
-                        newLine ();
-                        indentLine ();
-                        spaceOut ();
-                      }
-                    printArray (sub_array, true);
-                    if (extra_pretty)
-                      {
-                        undentLine ();
-                      }
-                  }
-                newLine ();
-                spaceOut ();
-                undentLine ();
-              }
-            else
-              {
-                printArraySimple (array, array_flag);
-              }
-          }
-        buffer.append (']');
-      }
+        {
+            this.printArraySimple (array, array_flag);
+        }
+    }
+    this.buffer += ']';
+};
 
-    void printArraySimple (Vector<JSONValue> array, boolean array_flag)
-      {
-        int i = 0;
-        for (JSONValue value : array)
-          {
-            i += ((String)value.value).length ();
-          }
-        boolean broken_lines = i > 100;
-        boolean next = false;
-        if (broken_lines && !array_flag)
-          {
-            indentLine ();
-            newLine ();
-            spaceOut ();
-          }
-        buffer.append ('[');
-        if (broken_lines)
-          {
-            indentLine ();
-            newLine ();
-          }
-        for (JSONValue value : array)
-          {
-            if (next)
-              {
-                buffer.append (',');
-                if (broken_lines)
-                  {
-                    newLine ();
-                  }
-              }
+/* void */JSONObjectWriter.prototype.printArraySimple = function (/* Vector<JSONValue> */array, /* boolean */array_flag)
+{
+    /* int */var i = 0;
+    for (var j = 0; j < array.length; j++)
+    {
+        i += array[j].value.length;
+    }
+    /* boolean */var broken_lines = i > 100;
+    /* boolean */var next = false;
+    if (broken_lines && !array_flag)
+    {
+        this.indentLine ();
+        this.newLine ();
+        this.spaceOut ();
+    }
+    this.buffer += '[';
+    if (broken_lines)
+    {
+        this.indentLine ();
+        this.newLine ();
+    }
+    for (var j = 0; j < array.length; j++)
+    {
+        if (next)
+        {
+            this.buffer += ',';
             if (broken_lines)
-              {
-                spaceOut ();
-              }
-            printSimpleValue (value, false);
-            next = true;
-          }
+            {
+                this.newLine ();
+            }
+        }
         if (broken_lines)
-          {
-            undentLine ();
-            newLine ();
-            spaceOut ();
-            if (!array_flag)
-              {
-                undentLine ();
-              }
-          }
-      }
+        {
+            this.spaceOut ();
+        }
+        this.printSimpleValue (array[i], false);
+        next = true;
+    }
+    if (broken_lines)
+    {
+        this.undentLine ();
+        this.newLine ();
+        this.spaceOut ();
+        if (!array_flag)
+        {
+            this.undentLine ();
+        }
+    }
+};
 
-    void printArrayObjects (Vector<JSONValue> array)
-      {
-        boolean next = false;
-        for (JSONValue value : array)
-          {
-            if (next)
-              {
-                buffer.append (',');
-              }
-            newLine ();
-            printObject ((JSONObject)value.value, !next);
-            next = true;
-          }
-        indent--;
-      }
+/* void */JSONObjectWriter.prototype.printArrayObjects = function (/* Vector<JSONValue> */array)
+{
+    /* boolean */var next = false;
+    for (var i = 0; i < array.length; i++)
+    {
+        if (next)
+        {
+            this.buffer += ',';
+        }
+        this.newLine ();
+        this.printObject (array[i].value, !next);
+        next = true;
+    }
+    this.indent--;
+};
 
-    void printSimpleValue (JSONValue value, boolean property)
-      {
-        String string = (String) value.value;
-        if (value.type != JSONTypes.STRING)
-          {
-            if (html_mode)
-              {
-                buffer.append ("<span style=\"color:")
-                      .append (html_variable_color)
-                      .append ("\">");
-              }
-            buffer.append (string);
-            if (html_mode)
-              {
-                buffer.append ("</span>");
-              }
-            return;
-          }
-        if (html_mode)
-          {
-            buffer.append ("&quot;<span style=\"color:")
-                  .append (property ? string.startsWith ("@") ? html_keyword_color : html_property_color : html_string_color)
-                  .append ("\">");
-          }
-        else
-          {
-            buffer.append ('"');
-          }
-        for (char c : string.toCharArray ())
-          {
-            if (html_mode)
-              {
-                switch (c)
-                  {
-//
-//      HTML needs specific escapes...
-//
-                    case '<':
-                      buffer.append ("&lt;");
-                      continue;
-    
-                    case '>':
-                      buffer.append ("&gt;");
-                      continue;
-    
-                    case '&':
-                      buffer.append ("&amp;");
-                      continue;
-
-                    case '"':
-                      buffer.append ("\\&quot;");
-                      continue;
-                  }
-              }
-
+/* void */JSONObjectWriter.prototype.printSimpleValue = function (/* JSONValue */value, /* boolean */property)
+{
+    /* String */var string = /* (String) */value.value;
+    if (value.type != JSONTypes.STRING)
+    {
+        if (this.html_mode)
+        {
+            this.buffer += "<span style=\"color:" + html_variable_color + "\">";
+        }
+        this.buffer += string;
+        if (this.html_mode)
+        {
+            this.buffer += "</span>";
+        }
+        return;
+    }
+    if (this.html_mode)
+    {
+        this.buffer += "&quot;<span style=\"color:" +
+                            (property ?
+                                    string.startsWith ("@") ?
+                                            this.html_keyword_color : this.html_property_color
+                                            : this.html_string_color) +
+                                            "\">";
+    }
+    else
+    {
+        this.buffer += '"';
+    }
+    for (var i = 0; i < string.length; i++)
+    {
+        var c = string.charAt (i);
+        if (this.html_mode)
+        {
             switch (c)
-              {
-                case '\\':
-                  if (java_script_string)
-                    {
-                      // JS escaping need \\\\ in order to produce a JSON \\
-                      buffer.append ('\\');
-                    }
-
+            {
+                //
+                //      HTML needs specific escapes...
+                //
+                case '<':
+                    this.buffer += "&lt;";
+                    continue;
+    
+                case '>':
+                    this.buffer += "&gt;";
+                    continue;
+    
+                case '&':
+                    this.buffer += "&amp;";
+                    continue;
+    
                 case '"':
-                  escapeCharacter (c);
-                  break;
+                    this.buffer += "\\&quot;";
+                    continue;
+            }
+        }
 
-                case '\b':
-                  escapeCharacter ('b');
-                  break;
-
-                case '\f':
-                  escapeCharacter ('f');
-                  break;
-
-                case '\n':
-                  escapeCharacter ('n');
-                  break;
-
-                case '\r':
-                  escapeCharacter ('r');
-                  break;
-
-                case '\t':
-                  escapeCharacter ('t');
-                  break;
-                  
-                case '\'':
-                  if (java_script_string)
+        switch (c)
+        {
+            case '\\':
+                if (this.java_script_string)
+                {
+                    // JS escaping need \\\\ in order to produce a JSON \\
+                    this.buffer += '\\';
+                }
+    
+            case '"':
+                this.escapeCharacter (c);
+                break;
+    
+            case '\b':
+                this.escapeCharacter ('b');
+                break;
+    
+            case '\f':
+                this.escapeCharacter ('f');
+                break;
+    
+            case '\n':
+                this.escapeCharacter ('n');
+                break;
+    
+            case '\r':
+                this.escapeCharacter ('r');
+                break;
+    
+            case '\t':
+                this.escapeCharacter ('t');
+                break;
+    
+            case '\'':
+                if (this.java_script_string)
+                {
+                    // Since we assumed that the JSON object was enclosed between '' we need to escape ' as well
+                    this.buffer += '\\';
+                }
+    
+            default:
+                var utf_value = c.charCodeAt (0);
+                if (utf_value < 0x20)
+                {
+                    this.escapeCharacter ('u');
+                    for (var i = 0; i < 4; i++)
                     {
-                      // Since we assumed that the JSON object was enclosed between '' we need to escape ' as well
-                      buffer.append ('\\');
+                        /*int */var hex = utf_value >>> 12;
+                        this.buffer += (char)(hex > 9 ? hex + 'a' - 10 : hex + '0');
+                        utf_value <<= 4;
                     }
+                    break;
+                }
+                this.buffer += c;
+        }
+    }
+    if (this.html_mode)
+    {
+        this.buffer += "</span>&quot;";
+    }
+    else
+    {
+        this.buffer += '"';
+    }
+};
 
-                default:
-                  if (c < 0x20)
-                    {
-                      escapeCharacter ('u');
-                      for (int i = 0; i < 4; i++)
-                        {
-                          int hex = c >>> 12;
-                          buffer.append ((char)(hex > 9 ? hex + 'a' - 10 : hex + '0'));
-                          c <<= 4;
-                        }
-                      break;
-                    }
-                  buffer.append (c);
-              }
-          }
-        if (html_mode)
-          {
-            buffer.append ("</span>&quot;");
-          }
+/* void */JSONObjectWriter.prototype.escapeCharacter = function (/* char */c)
+{
+    if (this.java_script_string)
+    {
+        this.buffer += '\\';
+    }
+    this.buffer += '\\' + c;
+};
+
+/* void */JSONObjectWriter.prototype.singleSpace = function ()
+{
+    if (this.pretty_print)
+    {
+        if (this.html_mode)
+        {
+            this.buffer += "&nbsp;";
+        }
         else
-          {
-            buffer.append ('"');
-          }
-      }
+        {
+            this.buffer += ' ';
+        }
+    }
+};
 
-    void escapeCharacter (char c)
-      {
-        if (java_script_string)
-          {
-            buffer.append ('\\');
-          }
-        buffer.append ('\\').append (c);
-      }
+/* void */JSONObjectWriter.prototype.printProperty = function (/* String */name)
+{
+    this.spaceOut ();
+    this.printSimpleValue (new JSONValue (JSONTypes.STRING, name), true);
+    this.buffer += ':';
+    this.singleSpace ();
+};
 
-    void singleSpace ()
-      {
-        if (pretty_print)
-          {
-            if (html_mode)
-              {
-                buffer.append ("&nbsp;");
-              }
-            else
-              {
-                buffer.append (' ');
-              }
-          }
-      }
+/* void */JSONObjectWriter.prototype.spaceOut = function ()
+{
+    for (var i = 0; i < this.indent; i++)
+    {
+        this.singleSpace ();
+    }
+};
 
-    void printProperty (String name)
-      {
-        spaceOut ();
-        printSimpleValue (new JSONValue (JSONTypes.STRING, name), true);
-        buffer.append (':');
-        singleSpace ();
-      }
-
-    void spaceOut ()
-      {
-        for (int i = 0; i < indent; i++)
-          {
-            singleSpace ();
-          }
-      }
-
-    static byte[] getCanonicalizedSubset (JSONObject signature_object_in) throws IOException
-      {
-        JSONObjectWriter writer = new JSONObjectWriter (signature_object_in);
-        byte[] result = writer.serializeJSONObject (JSONOutputFormats.CANONICALIZED);
+/* String */JSONObjectWriter.getCanonicalizedSubset = function (/*JSONObject */signature_object_in)
+{
+    /* JSONObjectWriter */var writer = new JSONObjectWriter (signature_object_in);
+    /* String*/var result = writer.serializeJSONObject (JSONOutputFormats.CANONICALIZED);
+    /*
         if (canonicalization_debug_file != null)
           {
             byte[] other = ArrayUtil.readFile (canonicalization_debug_file);
@@ -729,41 +741,41 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
                                  ArrayUtil.add (other, 
                                                 new StringBuffer ("\n\n").append (writer.buffer).toString ().getBytes ("UTF-8")));
           }
-        return result;
-      }
+     */
+    return result;
+};
 
-    @SuppressWarnings("unchecked")
-    public byte[] serializeJSONObject (JSONOutputFormats output_format) throws IOException
-      {
-        buffer = new StringBuffer ();
-        indent_factor = output_format == JSONOutputFormats.PRETTY_HTML ? html_indent : STANDARD_INDENT;
-        indent = -indent_factor;
-        pretty_print = output_format == JSONOutputFormats.PRETTY_HTML || output_format == JSONOutputFormats.PRETTY_PRINT;
-        java_script_string = output_format == JSONOutputFormats.JAVASCRIPT_STRING;
-        html_mode = output_format == JSONOutputFormats.PRETTY_HTML;
-        if (java_script_string)
-          {
-            buffer.append ('\'');
-          }
-        if (root.properties.containsKey (null))
-          {
-            printArray ((Vector<JSONValue>)root.properties.get (null).value, false);
-          }
-        else
-          {
-            printObject (root, false);
-          }
-        if (output_format == JSONOutputFormats.PRETTY_PRINT)
-          {
-            newLine ();
-          }
-        else if (java_script_string)
-          {
-            buffer.append ('\'');
-          }
-        return buffer.toString ().getBytes ("UTF-8");
-      }
-
+/* String */JSONObjectWriter.prototype.serializeJSONObject = function (/* JSONOutputFormats */output_format)
+{
+    this.buffer = new String ();
+    this.indent_factor = output_format == JSONOutputFormats.PRETTY_HTML ? this.html_indent : this.STANDARD_INDENT;
+    this.indent = -this.indent_factor;
+    this.pretty_print = output_format == JSONOutputFormats.PRETTY_HTML || output_format == JSONOutputFormats.PRETTY_PRINT;
+    this.java_script_string = output_format == JSONOutputFormats.JAVASCRIPT_STRING;
+    this.html_mode = output_format == JSONOutputFormats.PRETTY_HTML;
+    if (this.java_script_string)
+    {
+        this.buffer += '\'';
+    }
+    if (this.root.property_list.length == 0 && !this.root.property_list[0].name)
+    {
+        this.printArray (/* (Vector<JSONValue>) */this.root.property_list[0].value, false);
+    }
+    else
+    {
+        this.printObject (this.root, false);
+    }
+    if (output_format == JSONOutputFormats.PRETTY_PRINT)
+    {
+        this.newLine ();
+    }
+    else if (this.java_script_string)
+    {
+        this.buffer += '\'';
+    }
+    return this.buffer;
+};
+/*
     public static byte[] serializeParsedJSONDocument (JSONDecoder document, JSONOutputFormats output_format) throws IOException
       {
         return new JSONObjectWriter (document.root).serializeJSONObject (output_format);
