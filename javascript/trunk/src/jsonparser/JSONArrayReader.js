@@ -30,7 +30,7 @@ function JSONArrayReader (/* Vector<JSONValue> */array)
     return this.index < this.array.length;
 };
 
-/* void */JSONArrayReader.prototype.inRangeCheck = function ()
+/* void */JSONArrayReader.prototype._inRangeCheck = function ()
 {
     if (!this.hasMore ())
     {
@@ -40,7 +40,7 @@ function JSONArrayReader (/* Vector<JSONValue> */array)
 
 /* Object */JSONArrayReader.prototype._get = function (/* JSONTypes */expected_type)
 {
-    this.inRangeCheck ();
+    this._inRangeCheck ();
     /* JSONValue */var value = this.array[this.index++];
     if (!expected_type.isCompatible (value.type))
     {
@@ -108,7 +108,7 @@ function JSONArrayReader (/* Vector<JSONValue> */array)
 /*
  public JSONTypes getElementType () throws IOException
  {
- inRangeCheck ();
+ _inRangeCheck ();
  return array.elementAt (index).type;
  }
  */

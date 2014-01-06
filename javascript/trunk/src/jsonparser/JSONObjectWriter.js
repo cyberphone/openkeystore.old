@@ -502,12 +502,12 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
 
 /* void */JSONObjectWriter.prototype.printArraySimple = function (/* Vector<JSONValue> */array, /* boolean */array_flag)
 {
-    /* int */var i = 0;
-    for (var j = 0; j < array.length; j++)
+    /* int */var length = 0;
+    for (var i = 0; i < array.length; i++)
     {
-        i += array[j].value.length;
+        length += array[i].value.length;
     }
-    /* boolean */var broken_lines = i > 100;
+    /* boolean */var broken_lines = length > 100;
     /* boolean */var next = false;
     if (broken_lines && !array_flag)
     {
@@ -521,7 +521,7 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
         this.indentLine ();
         this.newLine ();
     }
-    for (var j = 0; j < array.length; j++)
+    for (var i = 0; i < array.length; i++)
     {
         if (next)
         {

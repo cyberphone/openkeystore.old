@@ -88,7 +88,7 @@ new JSONObjectWriter (new JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Al
 0.00e4 , "bool": true, "arr":[5,7]}}'));
 
 newobjec = new JSONObjectWriter ();
-newobjec.setString ("dri", "dra").setInt ("numbah", 6).setObject ("obj").setString ("dri","abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija");
+newobjec.setString ("dri", "dra").setInt ("numbah", 6).setArray ("arry").setString ("abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija");
 console.debug (newobjec.serializeJSONObject (JSONOutputFormats.PRETTY_PRINT));
 console.debug (newobjec.serializeJSONObject (JSONOutputFormats.CANONICALIZED));
 
