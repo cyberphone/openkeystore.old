@@ -668,7 +668,7 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
                 if (utf_value < 0x20)
                 {
                     this.escapeCharacter ('u');
-                    for (var i = 0; i < 4; i++)
+                    for (var j = 0; j < 4; j++)
                     {
                         /*int */var hex = utf_value >>> 12;
                         this.buffer += String.fromCharCode (hex > 9 ? hex + 87 : hex + 48);

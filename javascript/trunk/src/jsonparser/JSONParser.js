@@ -252,7 +252,7 @@ function JSONParser ()
         }
         result += c;
     }
-    return new JSONValue (JSONTypes.STRING, result.toString ());
+    return new JSONValue (JSONTypes.STRING, result);
 };
 
 /* int */JSONParser.prototype.getHexChar = function ()
