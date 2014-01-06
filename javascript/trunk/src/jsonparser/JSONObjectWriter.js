@@ -57,12 +57,12 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
         this.root = optional_object_or_reader.json;
         if (this.root.property_list.length = 1 && !this.root.property_list[0].name)
         {
-            JSONObject.prototype.bad ("You cannot update array objects");
+            JSONObject._error ("You cannot update array objects");
         }
     }
     else
     {
-        JSONObject.prototype.bad ("Wrong init of JSONObjectWriter");
+        JSONObject._error ("Wrong init of JSONObjectWriter");
     }
 }
     
@@ -83,7 +83,7 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
 {
     if (typeof value != "string")
     {
-        JSONObject.prototype.bad ("Bad string: " + name);
+        JSONObject._error ("Bad string: " + name);
     }
     return this._addProperty (name, new JSONValue (JSONTypes.STRING, value));
 };
@@ -93,7 +93,7 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
     var int_string = value.toString ();
     if (typeof value != "number" || int_string.indexOf ('.') >= 0)
     {
-        JSONObject.prototype.bad ("Bad integer: " + name);
+        JSONObject._error ("Bad integer: " + name);
     }
     return this._addProperty (name, new JSONValue (JSONTypes.INTEGER, int_string));
 };
@@ -780,30 +780,4 @@ function JSONObjectWriter (/* optional argument */optional_object_or_reader)
         return new JSONObjectWriter (JSONParser.parse (json_utf8)).serializeJSONObject (output_format);
       }
 
-    public static void main (String[] argc)
-      {
-        if (argc.length != 2)
-          {
-            System.out.println ("\nJSON-input-document format(" + JSONOutputFormats.getOptions () + ")");
-            System.exit (0);
-          }
-        try
-          {
-            JSONOutputFormats format = JSONOutputFormats.getFormatFromString (argc[1]);
-            String pre = "";
-            String post = "";
-            if (format == JSONOutputFormats.PRETTY_HTML)
-              {
-                pre = "<html><body>";
-                post = "</body></html>";
-              }
-            System.out.print (pre + new String (parseAndFormat (ArrayUtil.readFile (argc[0]), format), "UTF-8") + post);
-          }
-        catch (Exception e)
-          {
-            System.out.println ("Error: " + e.getMessage ());
-            e.printStackTrace ();
-          }
-      }
-  }
 */

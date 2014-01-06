@@ -61,7 +61,7 @@ function JSONParser ()
     {
         if (!this.isWhiteSpace (this.json_data.charAt (this.index++)))
         {
-            JSONObject.prototype.bad ("Improperly terminated JSON object");
+            JSONObject._error ("Improperly terminated JSON object");
         }
     }
     return new JSONObjectReader (root);
@@ -73,7 +73,7 @@ function JSONParser ()
     var property = this.scanQuotedString ().value;
     if (property.length == 0)
     {
-        JSONObject.prototype.bad ("Empty property");
+        JSONObject._error ("Empty property");
     }
     this.scanFor (this.COLON_CHARACTER);
     return property;
@@ -168,7 +168,7 @@ function JSONParser ()
     }
     if (result.length == 0)
     {
-        JSONObject.prototype.bad ("Missing argument");
+        JSONObject._error ("Missing argument");
     }
     /* JSONTypes */var type = JSONTypes.INTEGER;
     if (!this.INTEGER_PATTERN.test (result))
@@ -190,7 +190,7 @@ function JSONParser ()
             type = JSONTypes.DOUBLE;
             if (!this.DOUBLE_PATTERN.test (result))
             {
-                JSONObject.prototype.bad ("Undecodable argument: " + result);
+                JSONObject._error ("Undecodable argument: " + result);
             }
         }
     }
@@ -205,7 +205,7 @@ function JSONParser ()
         /* char */var c = this.nextChar ();
         if (c < ' ')
         {
-            JSONObject.prototype.bad ("Unescaped control character: " + c);
+            JSONObject._error ("Unescaped control character: " + c);
         }
         if (c == this.DOUBLE_QUOTE)
         {
@@ -250,7 +250,7 @@ function JSONParser ()
                     break;
 
                 default:
-                    JSONObject.prototype.bad ("Unsupported escape:" + c);
+                    JSONObject._error ("Unsupported escape:" + c);
             }
         }
         result += c;
@@ -291,7 +291,7 @@ function JSONParser ()
         case 'F':
             return c.charCodeAt (0) - 55;
     }
-    JSONObject.prototype.bad ("Bad hex in \\u escape: " + c);
+    JSONObject._error ("Bad hex in \\u escape: " + c);
 };
 
 /* boolean */JSONParser.prototype.isNumber = function (/* char */c)
@@ -312,7 +312,7 @@ function JSONParser ()
     /* char */var c = this.scan ();
     if (c != expected)
     {
-        JSONObject.prototype.bad ("Expected '" + expected + "' but got '" + c + "'");
+        JSONObject._error ("Expected '" + expected + "' but got '" + c + "'");
     }
 };
 
@@ -322,7 +322,7 @@ function JSONParser ()
     {
         return this.json_data.charAt (this.index++);
     }
-    JSONObject.prototype.bad ("Unexpected EOF reached");
+    JSONObject._error ("Unexpected EOF reached");
 };
 
 /* boolean */JSONParser.prototype.isWhiteSpace = function (/* char */c)

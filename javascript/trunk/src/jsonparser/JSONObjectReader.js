@@ -29,11 +29,11 @@ function JSONObjectReader (/* JSONObject */json)
     /* JSONValue */var value = this.json._getProperty (name);
     if (value == null)
     {
-        JSONObject.prototype.bad ("Property \"" + name + "\" is missing");
+        JSONObject._error ("Property \"" + name + "\" is missing");
     }
     if (!expected_type.isCompatible (value.type))
     {
-        JSONObject.prototype.bad ("Type mismatch for \"" + name +
+        JSONObject._error ("Type mismatch for \"" + name +
                                   "\": Read=" + JSONValue.prototype.getJSONTypeName (value.type) +
                                   ", Expected=" + JSONValue.prototype.getJSONTypeName (expected_type));
     }

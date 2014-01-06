@@ -34,7 +34,7 @@ function JSONArrayReader (/* Vector<JSONValue> */array)
 {
     if (!this.hasMore ())
     {
-        JSONObject.prototype.bad ("Trying to read past of array limit: " + this.index);
+        JSONObject._error ("Trying to read past of array limit: " + this.index);
     }
 };
 
@@ -44,7 +44,7 @@ function JSONArrayReader (/* Vector<JSONValue> */array)
     /* JSONValue */var value = this.array[this.index++];
     if (!expected_type.isCompatible (value.type))
     {
-        JSONObject.prototype.bad ("Incompatible request: " +
+        JSONObject._error ("Incompatible request: " +
                 "Read=" + JSONValue.prototype.getJSONTypeName (value.type) +
                 ", Expected=" + JSONValue.prototype.getJSONTypeName (expected_type));
     }

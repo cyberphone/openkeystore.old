@@ -25,11 +25,11 @@ function JSONObject ()
     this.read_flag = new Object ();
 }
 
-JSONObject.prototype._addProperty = function (name, value)
+/* void */JSONObject.prototype._addProperty = function (/* String */name, /* JSONValue */value)
 {
     if (!(value instanceof JSONValue))
     {
-        JSONObject.prototype.bad ("Wrong value type: " + value);
+        JSONObject._error ("Wrong value type: " + value);
     }
     var length = this.property_list.length;
     var new_property = new Object;
@@ -39,14 +39,14 @@ JSONObject.prototype._addProperty = function (name, value)
     {
         if (this.property_list[i].name == name)
         {
-            JSONObject.prototype.bad ("Property already defined: " + name);
+            JSONObject._error ("Property already defined: " + name);
         }
     }
     this.property_list[length] = new_property;
     this.read_flag.name = null;
 };
 
-JSONObject.prototype.bad = function (message)
+JSONObject._error = function (message)
 {
     throw "JSONException: " + message;
 };
@@ -64,7 +64,3 @@ JSONObject.prototype._getProperty = function (name)
     return null;
 };
 
-JSONObject.prototype.getLength = function ()
-{
-    return this.property_list.length;
-};

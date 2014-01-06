@@ -18,14 +18,14 @@
 var jo = new JSONObject ();
 jo._addProperty("one", new JSONValue (JSONTypes.INTEGER, 3));
 jo._addProperty("two", new JSONValue (JSONTypes.STRING, "hi"));
-console.debug ("T=" + jo._getProperty ("two").type + " V="+ jo._getProperty ("two").value)
+console.debug ("T=" + jo._getProperty ("two").type.enumvalue + " V="+ jo._getProperty ("two").value)
 //jo._addProperty("two", new JSONValue (JSONTypes.INTEGER, 3));
 var jo1 = new JSONObject ();
 jo1._addProperty("one1", new JSONValue (JSONTypes.INTEGER, 4));
 jo1._addProperty("two2", new JSONValue (JSONTypes.OBJECT, jo));
 jo1._addProperty("tree", new JSONValue (JSONTypes.STRING, "ghghg"));
-console.debug ("l1=" + jo1.getLength());
-console.debug ("l=" + jo.getLength());
+console.debug ("l1=" + jo1.property_list.length);
+console.debug ("l=" + jo.property_list.length);
 
 var indent = 0;
 function loopa (o)
