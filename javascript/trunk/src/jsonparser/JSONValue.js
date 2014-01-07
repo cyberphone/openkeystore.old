@@ -16,20 +16,24 @@
  */
 
 /*================================================================*/
+/*                            webpki.org.json.JSONValue                           */
+/*================================================================*/
+
+/*================================================================*/
 /*                            JSONValue                           */
 /*================================================================*/
 
-function JSONValue (type, value)
+ webpki.org.json.JSONValue = function (type, value)
 {
     this.type = type;
     this.value = value;
-}
+};
 
-JSONValue.prototype.getJSONTypeName = function (json_type)
+webpki.org.json.JSONValue.prototype.getJSONTypeName = function (json_type)
 {
-    for (var obj in JSONTypes)
+    for (var obj in webpki.org.json.JSONTypes)
     {
-        if (JSONTypes[obj].enumvalue == json_type.enumvalue)
+        if (webpki.org.json.JSONTypes[obj].enumvalue == json_type.enumvalue)
         {
             return obj;
         }

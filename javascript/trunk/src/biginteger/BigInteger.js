@@ -16,34 +16,17 @@
  */
 
 /*================================================================*/
-/*                           JSONObject                           */
+/*                           BigInteger                           */
 /*================================================================*/
 
-webpki.org.json.JSONObject = function ()
+function BigInteger ()
 {
     this.property_list = [];
     this.read_flag = new Object ();
-};
+}
 
-/* void */webpki.org.json.JSONObject.prototype._addProperty = function (/* String */name, /* webpki.org.json.JSONValue */value)
+/* BigInteger */BigInteger.parse = function (/* String */base10)
 {
-    if (!(value instanceof webpki.org.json.JSONValue))
-    {
-        webpki.org.json.JSONObject._error ("Wrong value type: " + value);
-    }
-    var length = this.property_list.length;
-    var new_property = new Object;
-    new_property.name = name;
-    new_property.value = value;
-    for (var i = 0; i < length; i++)
-    {
-        if (this.property_list[i].name == name)
-        {
-            webpki.org.json.JSONObject._error ("Property already defined: " + name);
-        }
-    }
-    this.property_list[length] = new_property;
-    this.read_flag.name = null;
 };
 
 webpki.org.json.JSONObject._error = function (message)

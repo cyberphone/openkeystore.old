@@ -19,46 +19,46 @@
 /*                            JSONTypes                           */
 /*================================================================*/
 
-var JSONTypes = 
+webpki.org.json.JSONTypes = 
 {
     NULL:
     {
         "enumvalue" : 0,
-        "isCompatible" : function (o) { return o == JSONTypes.NULL; }
+        "isCompatible" : function (o) { return o == webpki.org.json.JSONTypes.NULL; }
     },
     BOOLEAN:
     {
         "enumvalue" : 1,
-        "isCompatible" : function (o) { return o == JSONTypes.BOOLEAN; }
+        "isCompatible" : function (o) { return o == webpki.org.json.JSONTypes.BOOLEAN; }
     },
     INTEGER:
     {
         "enumvalue" : 2,
-        "isCompatible" : function (o) { return o == JSONTypes.INTEGER; }
+        "isCompatible" : function (o) { return o == webpki.org.json.JSONTypes.INTEGER; }
     },
     DECIMAL:
     {
         "enumvalue" : 3,
-        "isCompatible" : function (o) { return o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER; }
+        "isCompatible" : function (o) { return o == webpki.org.json.JSONTypes.DECIMAL || o == webpki.org.json.JSONTypes.INTEGER; }
     },
     DOUBLE:
     {
         "enumvalue" : 4,
-        "isCompatible" : function (o) { return o == JSONTypes.DOUBLE || o == JSONTypes.DECIMAL || o == JSONTypes.INTEGER; }
+        "isCompatible" : function (o) { return o == webpki.org.json.JSONTypes.DOUBLE || o == webpki.org.json.JSONTypes.DECIMAL || o == webpki.org.json.JSONTypes.INTEGER; }
     },
     STRING:
     {
         "enumvalue" : 5,
-        "isCompatible" : function (o) { return o == JSONTypes.STRING; }
+        "isCompatible" : function (o) { return o == webpki.org.json.JSONTypes.STRING; }
     },
     ARRAY:
     {
         "enumvalue" : 10,
-        "isCompatible" : function (o) { return o == JSONTypes.ARRAY; }
+        "isCompatible" : function (o) { return o == webpki.org.json.JSONTypes.ARRAY; }
     },
     OBJECT:
     {
         "enumvalue" : 11,
-        "isCompatible" : function (o) { return o == JSONTypes.OBJECT; }
+        "isCompatible" : function (o) { return o == webpki.org.json.JSONTypes.OBJECT; }
     }
 };

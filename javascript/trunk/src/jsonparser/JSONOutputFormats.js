@@ -19,7 +19,7 @@
 /*                        JSONOutputFormats                       */
 /*================================================================*/
 
-var JSONOutputFormats = 
+webpki.org.json.JSONOutputFormats = 
 {
     CANONICALIZED:
     {

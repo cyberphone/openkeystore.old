@@ -4,6 +4,7 @@
 
   <property name="temp_dir" location=".tmp" />
   <property name="src_dir" value="src/" />
+  <property name="namespace" value="namespace.js" />
   <property name="runfile" value="${temp_dir}/runthis.js/" />
   
 
@@ -17,7 +18,13 @@
   </target>
   
   <target name="add-files">
-     <concat destfile="${runfile}" append="true">
+    <pathconvert property="ejbca.plugin.collection" setonempty="false">
+        <path>
+        <fileset dir="${src_dir}" includes="${jsfileset}"/>
+        </path>
+    </pathconvert>
+    <echo message="${ejbca.plugin.collection}"/>
+      <concat destfile="${runfile}" append="true">
         <fileset dir="${src_dir}" includes="${jsfileset}"/>
      </concat>
   </target>
