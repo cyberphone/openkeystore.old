@@ -314,11 +314,6 @@ public class JSONParser
         throw new IOException ("Bad hex in \\u escape: " + c);
       }
 
-    boolean isNumber (char c)
-      {
-        return c >= '0' && c <= '9';
-      }
-
     char testNextNonWhiteSpaceChar () throws IOException
       {
         int save = index;
