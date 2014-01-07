@@ -18,14 +18,10 @@
   </target>
   
   <target name="add-files">
-    <pathconvert property="ejbca.plugin.collection" setonempty="false">
-        <path>
-        <fileset dir="${src_dir}" includes="${jsfileset}"/>
-        </path>
-    </pathconvert>
-    <echo message="${ejbca.plugin.collection}"/>
-      <concat destfile="${runfile}" append="true">
-        <fileset dir="${src_dir}" includes="${jsfileset}"/>
+     <concat destfile="${runfile}" append="true">
+       <sort>
+          <fileset dir="${src_dir}" includes="${jsfileset}"/>
+        </sort>
      </concat>
   </target>
 

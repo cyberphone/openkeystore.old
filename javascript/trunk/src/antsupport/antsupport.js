@@ -12,9 +12,6 @@ AntConsole.prototype.debug = function (message)
 
 var console = new AntConsole ();
 
-var webpki = webpki || {};
-webpki.org = webpki.org || {};
-webpki.org.json = webpki.org.json || {};
 
 
 
