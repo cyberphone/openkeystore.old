@@ -291,11 +291,6 @@ org.webpki.json.JSONParser = function ()
     org.webpki.json.JSONError._error ("Bad hex in \\u escape: " + c);
 };
 
-/* boolean */org.webpki.json.JSONParser.prototype._isNumber = function (/* char */c)
-{
-    return c >= '0' && c <= '9';
-};
-
 /* char */org.webpki.json.JSONParser.prototype._testNextNonWhiteSpaceChar = function ()
 {
     /* int */var save = this.index;
