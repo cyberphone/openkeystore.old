@@ -21,7 +21,7 @@
 
 "use strict";
 
-var webpki = webpki || {};
-webpki.org = webpki.org || {};
-webpki.org.json = webpki.org.json || {};
+var org = org || {};
+org.webpki = org.webpki || {};
+org.webpki.json = org.webpki.json || {};
 

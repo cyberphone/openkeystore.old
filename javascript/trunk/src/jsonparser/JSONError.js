@@ -19,11 +19,11 @@
 /*                           JSONError                            */
 /*================================================================*/
 
-webpki.org.json.JSONError = function ()
+org.webpki.json.JSONError = function ()
 {
 };
 
-webpki.org.json.JSONError._error = function (message)
+org.webpki.json.JSONError._error = function (message)
 {
     throw "JSONException: " + message;
 };

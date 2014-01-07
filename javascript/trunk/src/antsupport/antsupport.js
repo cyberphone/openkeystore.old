@@ -12,6 +12,4 @@ AntConsole.prototype.debug = function (message)
 
 var console = new AntConsole ();
 
-
-
-
+var org = {};

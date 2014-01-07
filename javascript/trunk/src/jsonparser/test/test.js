@@ -15,15 +15,15 @@
  *
  */
 
-var jo = new webpki.org.json.JSONObject ();
-jo._addProperty("one", new webpki.org.json.JSONValue (webpki.org.json.JSONTypes.INTEGER, 3));
-jo._addProperty("two", new webpki.org.json.JSONValue (webpki.org.json.JSONTypes.STRING, "hi"));
+var jo = new org.webpki.json.JSONObject ();
+jo._addProperty("one", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, 3));
+jo._addProperty("two", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, "hi"));
 console.debug ("T=" + jo._getProperty ("two").type.enumvalue + " V="+ jo._getProperty ("two").value)
-//jo._addProperty("two", new webpki.org.json.JSONValue (webpki.org.json.JSONTypes.INTEGER, 3));
-var jo1 = new webpki.org.json.JSONObject ();
-jo1._addProperty("one1", new webpki.org.json.JSONValue (webpki.org.json.JSONTypes.INTEGER, 4));
-jo1._addProperty("two2", new webpki.org.json.JSONValue (webpki.org.json.JSONTypes.OBJECT, jo));
-jo1._addProperty("tree", new webpki.org.json.JSONValue (webpki.org.json.JSONTypes.STRING, "ghghg"));
+//jo._addProperty("two", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, 3));
+var jo1 = new org.webpki.json.JSONObject ();
+jo1._addProperty("one1", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.INTEGER, 4));
+jo1._addProperty("two2", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.OBJECT, jo));
+jo1._addProperty("tree", new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.STRING, "ghghg"));
 console.debug ("l1=" + jo1.property_list.length);
 console.debug ("l=" + jo.property_list.length);
 
@@ -39,7 +39,7 @@ function loopa (o)
     {
         var elem = o.property_list[i];
         var string = space + '"' + elem.name + '":';
-        if (elem.value.type == webpki.org.json.JSONTypes.OBJECT)
+        if (elem.value.type == org.webpki.json.JSONTypes.OBJECT)
         {
             console.debug (string);
             console.debug (space + '  {');
@@ -48,14 +48,14 @@ function loopa (o)
             indent -= 4;
             console.debug (space + '  }');
         }
-        else if (elem.value.type == webpki.org.json.JSONTypes.ARRAY)
+        else if (elem.value.type == org.webpki.json.JSONTypes.ARRAY)
         {
             console.debug (string + ' [' + elem.value.value.length + ']');
         }
         else
         {
             string += ' ';
-            if (elem.value.type != webpki.org.json.JSONTypes.STRING)
+            if (elem.value.type != org.webpki.json.JSONTypes.STRING)
             {
                 string += elem.value.value; 
             }
@@ -69,30 +69,30 @@ function loopa (o)
 }
 
 loopa (jo1);
-console.debug (webpki.org.json.JSONTypes.DOUBLE.isCompatible(webpki.org.json.JSONTypes.OBJECT));
+console.debug (org.webpki.json.JSONTypes.DOUBLE.isCompatible(org.webpki.json.JSONTypes.OBJECT));
 
-loopa (new webpki.org.json.JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+loopa (new org.webpki.json.JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
         0.00e4 , "bool": true, "arr":[5,7]}}').json);
 
-loopa (new webpki.org.json.JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+loopa (new org.webpki.json.JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 0.00e4 , "bool": true, "arr":[5,7]}}').getObject ("bello").json);
 
-console.debug (new webpki.org.json.JSONParser ().parse ('[[{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+console.debug (new org.webpki.json.JSONParser ().parse ('[[{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 7 , "bool": false, "arr":[3]}}]]').getJSONArrayReader ().getArray ().getObject ().getObject ("bello").getArray ("arr").getInt ());
 
-new webpki.org.json.JSONObjectWriter (new webpki.org.json.JSONObject ());
-var newobjec = new webpki.org.json.JSONObjectWriter ();
+new org.webpki.json.JSONObjectWriter (new org.webpki.json.JSONObject ());
+var newobjec = new org.webpki.json.JSONObjectWriter ();
 newobjec.setInt ("kirt", 4).setObject ("Obja");
 loopa (newobjec.root);
-new webpki.org.json.JSONObjectWriter (new webpki.org.json.JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+new org.webpki.json.JSONObjectWriter (new org.webpki.json.JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 0.00e4 , "bool": true, "arr":[5,7]}}'));
 
-newobjec = new webpki.org.json.JSONObjectWriter ();
+newobjec = new org.webpki.json.JSONObjectWriter ();
 newobjec.setString ("dri", "dra").setInt ("numbah", 6).setArray ("arry").setString ("abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija");
-console.debug (newobjec.serializeJSONObject (webpki.org.json.JSONOutputFormats.PRETTY_PRINT));
-console.debug (newobjec.serializeJSONObject (webpki.org.json.JSONOutputFormats.CANONICALIZED));
+console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
+console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
 
-var signature = new webpki.org.json.JSONParser ().parse (
+var signature = new org.webpki.json.JSONParser ().parse (
 
 '{\
 "Now": "2013-12-23T23:25:10+01:00",\
@@ -135,4 +135,4 @@ var signature = new webpki.org.json.JSONParser ().parse (
 }'
 
 );
-console.debug (new webpki.org.json.JSONObjectWriter (signature).serializeJSONObject (webpki.org.json.JSONOutputFormats.CANONICALIZED));
+console.debug (new org.webpki.json.JSONObjectWriter (signature).serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));

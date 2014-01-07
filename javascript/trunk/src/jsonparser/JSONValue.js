@@ -19,17 +19,17 @@
 /*                            JSONValue                           */
 /*================================================================*/
 
- webpki.org.json.JSONValue = function (type, value)
+ org.webpki.json.JSONValue = function (type, value)
 {
     this.type = type;
     this.value = value;
 };
 
-webpki.org.json.JSONValue.prototype.getJSONTypeName = function (json_type)
+org.webpki.json.JSONValue.prototype.getJSONTypeName = function (json_type)
 {
-    for (var obj in webpki.org.json.JSONTypes)
+    for (var obj in org.webpki.json.JSONTypes)
     {
-        if (webpki.org.json.JSONTypes[obj].enumvalue == json_type.enumvalue)
+        if (org.webpki.json.JSONTypes[obj].enumvalue == json_type.enumvalue)
         {
             return obj;
         }

@@ -19,80 +19,80 @@
 /*                         JSONArrayWriter                        */
 /*================================================================*/
 
- webpki.org.json.JSONArrayWriter = function (optional_array)
+ org.webpki.json.JSONArrayWriter = function (optional_array)
 {
-   /* Vector<webpki.org.json.JSONValue> */this.array = optional_array === undefined ? [] : optional_array;
+   /* Vector<org.webpki.json.JSONValue> */this.array = optional_array === undefined ? [] : optional_array;
 };
 
-/* webpki.org.json.JSONArrayWriter */webpki.org.json.JSONArrayWriter.prototype._add = function (/* webpki.org.json.JSONTypes */type, /* Object */value)
+/* org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype._add = function (/* org.webpki.json.JSONTypes */type, /* Object */value)
 {
-    this.array[this.array.length] = new webpki.org.json.JSONValue (type, value);
+    this.array[this.array.length] = new org.webpki.json.JSONValue (type, value);
     return this;
 };
 
-/* public webpki.org.json.JSONArrayWriter */webpki.org.json.JSONArrayWriter.prototype.setString = function (/* String */value)
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setString = function (/* String */value)
 {
-    return this._add (webpki.org.json.JSONTypes.STRING, value);
+    return this._add (org.webpki.json.JSONTypes.STRING, value);
 };
 
-/* public webpki.org.json.JSONArrayWriter */webpki.org.json.JSONArrayWriter.prototype.setInt = function (/* int */value)
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setInt = function (/* int */value)
 {
-    return this._add (webpki.org.json.JSONTypes.INTEGER, value);
+    return this._add (org.webpki.json.JSONTypes.INTEGER, value);
 };
 
 /*
-    public webpki.org.json.JSONArrayWriter setLong (long value) throws IOException
+    public org.webpki.json.JSONArrayWriter setLong (long value) throws IOException
       {
-        return add (webpki.org.json.JSONTypes.INTEGER, Long.toString (value));
+        return add (org.webpki.json.JSONTypes.INTEGER, Long.toString (value));
       }
 
-    public webpki.org.json.JSONArrayWriter setBigDecimal (BigDecimal value) throws IOException
+    public org.webpki.json.JSONArrayWriter setBigDecimal (BigDecimal value) throws IOException
       {
-        return add (webpki.org.json.JSONTypes.INTEGER, value.toString ());
+        return add (org.webpki.json.JSONTypes.INTEGER, value.toString ());
       }
 
-    public webpki.org.json.JSONArrayWriter setBigInteger (BigInteger value) throws IOException
+    public org.webpki.json.JSONArrayWriter setBigInteger (BigInteger value) throws IOException
       {
-        return add (webpki.org.json.JSONTypes.INTEGER, value.toString ());
+        return add (org.webpki.json.JSONTypes.INTEGER, value.toString ());
       }
 
-    public webpki.org.json.JSONArrayWriter setDouble (double value) throws IOException
+    public org.webpki.json.JSONArrayWriter setDouble (double value) throws IOException
       {
-        return add (webpki.org.json.JSONTypes.DOUBLE, Double.toString (value));
+        return add (org.webpki.json.JSONTypes.DOUBLE, Double.toString (value));
       }
 
-    public webpki.org.json.JSONArrayWriter setBoolean (boolean value) throws IOException
+    public org.webpki.json.JSONArrayWriter setBoolean (boolean value) throws IOException
       {
-        return add (webpki.org.json.JSONTypes.BOOLEAN, Boolean.toString (value));
+        return add (org.webpki.json.JSONTypes.BOOLEAN, Boolean.toString (value));
       }
 
-    public webpki.org.json.JSONArrayWriter setNULL () throws IOException
+    public org.webpki.json.JSONArrayWriter setNULL () throws IOException
       {
-        return add (webpki.org.json.JSONTypes.NULL, "null");
+        return add (org.webpki.json.JSONTypes.NULL, "null");
       }
 
-    public webpki.org.json.JSONArrayWriter setDateTime (Date date_time) throws IOException
+    public org.webpki.json.JSONArrayWriter setDateTime (Date date_time) throws IOException
       {
         return setString (ISODateTime.formatDateTime (date_time));
       }
 
-/* public webpki.org.json.JSONArrayWriter */webpki.org.json.JSONArrayWriter.prototype.setArray = function ()
+/* public org.webpki.json.JSONArrayWriter */org.webpki.json.JSONArrayWriter.prototype.setArray = function ()
 {
-    /* Vector<webpki.org.json.JSONValue> */var new_array = [] /* new Vector<webpki.org.json.JSONValue> () */;
-    this._add (webpki.org.json.JSONTypes.ARRAY, new_array);
-    return new webpki.org.json.JSONArrayWriter (new_array);
+    /* Vector<org.webpki.json.JSONValue> */var new_array = [] /* new Vector<org.webpki.json.JSONValue> () */;
+    this._add (org.webpki.json.JSONTypes.ARRAY, new_array);
+    return new org.webpki.json.JSONArrayWriter (new_array);
 };
 
-/* public webpki.org.json.JSONObjectWriter */webpki.org.json.JSONArrayWriter.prototype.setObject = function ()
+/* public org.webpki.json.JSONObjectWriter */org.webpki.json.JSONArrayWriter.prototype.setObject = function ()
 {
-    /* webpki.org.json.JSONObject */var holder = new webpki.org.json.JSONObject ();
-    this._add (webpki.org.json.JSONTypes.OBJECT, holder);
-    return new webpki.org.json.JSONObjectWriter (holder);
+    /* org.webpki.json.JSONObject */var holder = new org.webpki.json.JSONObject ();
+    this._add (org.webpki.json.JSONTypes.OBJECT, holder);
+    return new org.webpki.json.JSONObjectWriter (holder);
 };
 
-/* public String */webpki.org.json.JSONArrayWriter.prototype.serializeJSONArray = function (/* webpki.org.json.JSONOutputFormats */output_format)
+/* public String */org.webpki.json.JSONArrayWriter.prototype.serializeJSONArray = function (/* org.webpki.json.JSONOutputFormats */output_format)
 {
-    /* webpki.org.json.JSONObject */var dummy = new webpki.org.json.JSONObject ();
-    dummy._setArray (new webpki.org.json.JSONValue (webpki.org.json.JSONTypes.ARRAY, this.array));
-    return new webpki.org.json.JSONObjectWriter (dummy).serializeJSONObject (output_format);
+    /* org.webpki.json.JSONObject */var dummy = new org.webpki.json.JSONObject ();
+    dummy._setArray (new org.webpki.json.JSONValue (org.webpki.json.JSONTypes.ARRAY, this.array));
+    return new org.webpki.json.JSONObjectWriter (dummy).serializeJSONObject (output_format);
 };

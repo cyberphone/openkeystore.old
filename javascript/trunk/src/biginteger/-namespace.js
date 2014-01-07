@@ -16,15 +16,12 @@
  */
 
 /*================================================================*/
-/*                           BigInteger                           */
+/*                    Namespace for JSON library                  */
 /*================================================================*/
 
+"use strict";
 
-/* BigInteger */org.webpki.math.BigInteger.parse = function ( /* String */value_to_parse, /* int */optional_base)
-{
-};
+var org = org || {};
+org.webpki = org.webpki || {};
+org.webpki.math = org.webpki.math || {};
 
-org.webpki.math.BigInteger.parse._error = function (message)
-{
-    throw "MATHException: " + message;
-};

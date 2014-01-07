@@ -19,17 +19,17 @@
 /*                           JSONObject                           */
 /*================================================================*/
 
-webpki.org.json.JSONObject = function ()
+org.webpki.json.JSONObject = function ()
 {
     this.property_list = [];
     this.read_flag = new Object ();
 };
 
-/* void */webpki.org.json.JSONObject.prototype._addProperty = function (/* String */name, /* webpki.org.json.JSONValue */value)
+/* void */org.webpki.json.JSONObject.prototype._addProperty = function (/* String */name, /* org.webpki.json.JSONValue */value)
 {
-    if (!(value instanceof webpki.org.json.JSONValue))
+    if (!(value instanceof org.webpki.json.JSONValue))
     {
-        webpki.org.json.JSONError._error ("Wrong value type: " + value);
+        org.webpki.json.JSONError._error ("Wrong value type: " + value);
     }
     var length = this.property_list.length;
     var new_property = new Object;
@@ -39,19 +39,19 @@ webpki.org.json.JSONObject = function ()
     {
         if (this.property_list[i].name == name)
         {
-            webpki.org.json.JSONError._error ("Property already defined: " + name);
+            org.webpki.json.JSONError._error ("Property already defined: " + name);
         }
     }
     this.property_list[length] = new_property;
     this.read_flag.name = null;
 };
 
-webpki.org.json.JSONError._error = function (message)
+org.webpki.json.JSONError._error = function (message)
 {
     throw "JSONException: " + message;
 };
 
-webpki.org.json.JSONObject.prototype._getProperty = function (name)
+org.webpki.json.JSONObject.prototype._getProperty = function (name)
 {
     var length = this.property_list.length;
     for (var i = 0; i < length; i++)
@@ -64,12 +64,12 @@ webpki.org.json.JSONObject.prototype._getProperty = function (name)
     return null;
 };
 
-webpki.org.json.JSONObject.prototype._isArray = function ()
+org.webpki.json.JSONObject.prototype._isArray = function ()
 {
     return this.property_list.length == 1 && !this.property_list[0].name;
 };
 
-webpki.org.json.JSONObject.prototype._setArray = function (/* webpki.org.json.JSONValue */array)
+org.webpki.json.JSONObject.prototype._setArray = function (/* org.webpki.json.JSONValue */array)
 {
     this.property_list = [];
     var unnamed_property = new Object;
