@@ -58,12 +58,12 @@
         this.root = optional_object_or_reader.json;
         if (this.root._isArray ())
         {
-            webpki.org.json.JSONObject._error ("You cannot update array objects");
+            webpki.org.json.JSONError._error ("You cannot update array objects");
         }
     }
     else
     {
-        webpki.org.json.JSONObject._error ("Wrong init of webpki.org.json.JSONObjectWriter");
+        webpki.org.json.JSONError._error ("Wrong init of webpki.org.json.JSONObjectWriter");
     }
 };
     
@@ -84,7 +84,7 @@
 {
     if (typeof value != "string")
     {
-        webpki.org.json.JSONObject._error ("Bad string: " + name);
+        webpki.org.json.JSONError._error ("Bad string: " + name);
     }
     return this._addProperty (name, new webpki.org.json.JSONValue (webpki.org.json.JSONTypes.STRING, value));
 };
@@ -94,7 +94,7 @@
     var int_string = value.toString ();
     if (typeof value != "number" || int_string.indexOf ('.') >= 0)
     {
-        webpki.org.json.JSONObject._error ("Bad integer: " + name);
+        webpki.org.json.JSONError._error ("Bad integer: " + name);
     }
     return this._addProperty (name, new webpki.org.json.JSONValue (webpki.org.json.JSONTypes.INTEGER, int_string));
 };

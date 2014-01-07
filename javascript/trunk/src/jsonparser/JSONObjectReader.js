@@ -29,11 +29,11 @@
     /* webpki.org.json.JSONValue */var value = this.json._getProperty (name);
     if (value == null)
     {
-        webpki.org.json.JSONObject._error ("Property \"" + name + "\" is missing");
+        webpki.org.json.JSONError._error ("Property \"" + name + "\" is missing");
     }
     if (!expected_type.isCompatible (value.type))
     {
-        webpki.org.json.JSONObject._error ("Type mismatch for \"" + name +
+        webpki.org.json.JSONError._error ("Type mismatch for \"" + name +
                            "\": Read=" + webpki.org.json.JSONValue.prototype.getJSONTypeName (value.type) +
                            ", Expected=" + webpki.org.json.JSONValue.prototype.getJSONTypeName (expected_type));
     }

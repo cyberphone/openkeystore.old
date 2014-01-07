@@ -34,7 +34,7 @@ webpki.org.json.JSONArrayReader = function (/* Vector<webpki.org.json.JSONValue>
 {
     if (!this.hasMore ())
     {
-        webpki.org.json.JSONObject._error ("Trying to read past of array limit: " + this.index);
+        webpki.org.json.JSONError._error ("Trying to read past of array limit: " + this.index);
     }
 };
 
@@ -44,7 +44,7 @@ webpki.org.json.JSONArrayReader = function (/* Vector<webpki.org.json.JSONValue>
     /* webpki.org.json.JSONValue */var value = this.array[this.index++];
     if (!expected_type.isCompatible (value.type))
     {
-        webpki.org.json.JSONObject._error ("Incompatible request: " +
+        webpki.org.json.JSONError._error ("Incompatible request: " +
                 "Read=" + webpki.org.json.JSONValue.prototype.getJSONTypeName (value.type) +
                 ", Expected=" + webpki.org.json.JSONValue.prototype.getJSONTypeName (expected_type));
     }

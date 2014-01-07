@@ -29,7 +29,7 @@ webpki.org.json.JSONObject = function ()
 {
     if (!(value instanceof webpki.org.json.JSONValue))
     {
-        webpki.org.json.JSONObject._error ("Wrong value type: " + value);
+        webpki.org.json.JSONError._error ("Wrong value type: " + value);
     }
     var length = this.property_list.length;
     var new_property = new Object;
@@ -39,14 +39,14 @@ webpki.org.json.JSONObject = function ()
     {
         if (this.property_list[i].name == name)
         {
-            webpki.org.json.JSONObject._error ("Property already defined: " + name);
+            webpki.org.json.JSONError._error ("Property already defined: " + name);
         }
     }
     this.property_list[length] = new_property;
     this.read_flag.name = null;
 };
 
-webpki.org.json.JSONObject._error = function (message)
+webpki.org.json.JSONError._error = function (message)
 {
     throw "JSONException: " + message;
 };

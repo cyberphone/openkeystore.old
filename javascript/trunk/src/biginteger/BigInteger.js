@@ -29,7 +29,7 @@ function BigInteger ()
 {
 };
 
-webpki.org.json.JSONObject._error = function (message)
+webpki.org.json.JSONError._error = function (message)
 {
     throw "JSONException: " + message;
 };

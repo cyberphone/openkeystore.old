@@ -58,7 +58,7 @@ webpki.org.json.JSONParser = function ()
     {
         if (!this._isWhiteSpace (this.json_data.charAt (this.index++)))
         {
-            webpki.org.json.JSONObject._error ("Improperly terminated JSON object");
+            webpki.org.json.JSONError._error ("Improperly terminated JSON object");
         }
     }
     return new webpki.org.json.JSONObjectReader (root);
@@ -70,7 +70,7 @@ webpki.org.json.JSONParser = function ()
     var property = this._scanQuotedString ().value;
     if (property.length == 0)
     {
-        webpki.org.json.JSONObject._error ("Empty property");
+        webpki.org.json.JSONError._error ("Empty property");
     }
     this._scanFor (this.COLON_CHARACTER);
     return property;
@@ -165,7 +165,7 @@ webpki.org.json.JSONParser = function ()
     }
     if (result.length == 0)
     {
-        webpki.org.json.JSONObject._error ("Missing argument");
+        webpki.org.json.JSONError._error ("Missing argument");
     }
     /* webpki.org.json.JSONTypes */var type = webpki.org.json.JSONTypes.INTEGER;
     if (!this.INTEGER_PATTERN.test (result))
@@ -187,7 +187,7 @@ webpki.org.json.JSONParser = function ()
             type = webpki.org.json.JSONTypes.DOUBLE;
             if (!this.DOUBLE_PATTERN.test (result))
             {
-                webpki.org.json.JSONObject._error ("Undecodable argument: " + result);
+                webpki.org.json.JSONError._error ("Undecodable argument: " + result);
             }
         }
     }
@@ -202,7 +202,7 @@ webpki.org.json.JSONParser = function ()
         /* char */var c = this._nextChar ();
         if (c < ' ')
         {
-            webpki.org.json.JSONObject._error ("Unescaped control character: " + c);
+            webpki.org.json.JSONError._error ("Unescaped control character: " + c);
         }
         if (c == this.DOUBLE_QUOTE)
         {
@@ -247,7 +247,7 @@ webpki.org.json.JSONParser = function ()
                     break;
 
                 default:
-                    webpki.org.json.JSONObject._error ("Unsupported escape:" + c);
+                    webpki.org.json.JSONError._error ("Unsupported escape:" + c);
             }
         }
         result += c;
@@ -288,7 +288,7 @@ webpki.org.json.JSONParser = function ()
         case 'F':
             return c.charCodeAt (0) - 55;
     }
-    webpki.org.json.JSONObject._error ("Bad hex in \\u escape: " + c);
+    webpki.org.json.JSONError._error ("Bad hex in \\u escape: " + c);
 };
 
 /* boolean */webpki.org.json.JSONParser.prototype._isNumber = function (/* char */c)
@@ -309,7 +309,7 @@ webpki.org.json.JSONParser = function ()
     /* char */var c = this._scan ();
     if (c != expected)
     {
-        webpki.org.json.JSONObject._error ("Expected '" + expected + "' but got '" + c + "'");
+        webpki.org.json.JSONError._error ("Expected '" + expected + "' but got '" + c + "'");
     }
 };
 
@@ -319,7 +319,7 @@ webpki.org.json.JSONParser = function ()
     {
         return this.json_data.charAt (this.index++);
     }
-    webpki.org.json.JSONObject._error ("Unexpected EOF reached");
+    webpki.org.json.JSONError._error ("Unexpected EOF reached");
 };
 
 /* boolean */webpki.org.json.JSONParser.prototype._isWhiteSpace = function (/* char */c)
