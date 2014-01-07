@@ -238,12 +238,12 @@ webpki.org.json.JSONParser = function ()
                     break;
 
                 case 'u':
-                    c = 0;
+                    var unicode_char = 0;
                     for (var i = 0; i < 4; i++)
                     {
-                        c = ((c << 4) + this._getHexChar ());
+                        unicode_char = ((unicode_char << 4) + this._getHexChar ());
                     }
-                    c = String.fromCharCode (c);
+                    c = String.fromCharCode (unicode_char);
                     break;
 
                 default:
