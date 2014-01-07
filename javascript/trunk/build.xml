@@ -63,12 +63,19 @@
     </script>
   </target>
 
-    <!-- HTML Doc task for JCS -->
+    <!-- JSON parser testing -->
   <target name="jsonparser">
     <antcall target="test">
        <param name="files" value="jsonparser/*,base64url/*,jsonparser/test/*"/>
     </antcall>
   </target>
   
+    <!-- BigInteger testing -->
+  <target name="biginteger">
+    <antcall target="test">
+       <param name="files" value="biginteger/*,biginteger/test/*"/>
+    </antcall>
+  </target>
+
 </project>
 

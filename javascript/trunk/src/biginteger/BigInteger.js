@@ -20,11 +20,29 @@
 /*================================================================*/
 
 
-/* BigInteger */org.webpki.math.BigInteger.parse = function ( /* String */value_to_parse, /* int */optional_base)
+/* BigInteger */org.webpki.math.BigInteger = function ()
 {
+    this.value = new Uint8Array ();
+    console.debug ("yes");
 };
 
-org.webpki.math.BigInteger.parse._error = function (message)
+org.webpki.math.BigInteger._error = function (message)
 {
     throw "MATHException: " + message;
+};
+
+/* BigInteger */org.webpki.math.BigInteger.fromString = function (/* String */string, /* int */optional_10_or_16)
+{
+    var bi = new org.webpki.math.BigInteger ();
+    bi.value = string;
+    return bi;
+};
+
+/* ByteArray */org.webpki.math.BigInteger.prototype.getByteArray = function ()
+{
+    if (!this.value)
+    {
+        org.webpki.math.BigInteger._error ("BigInteger not initialized");
+    }
+    return this.value;
 };
