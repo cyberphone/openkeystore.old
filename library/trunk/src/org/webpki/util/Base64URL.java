@@ -26,7 +26,6 @@ import java.security.SecureRandom;
  */
 public class Base64URL
   {
-
     
   ///////////////////////////////
  ////       ATTRIBUTES      ////
@@ -49,13 +48,11 @@ public class Base64URL
       {
       }
     
-    
- 
       ////////////////////
-     ////   DECODE   //// Throws IOException on error (if argument isn't base64)
+     ////   DECODE   //// Throws IOException if argument isn't base64URL
     ////////////////////
 
-    private static byte[] decode(byte[] encoded) throws IOException
+    private static byte[] decode (byte[] encoded) throws IOException
       {
         byte[] semidecoded = new byte[encoded.length];
         for (int i = 0; i < encoded.length; i++)
@@ -130,24 +127,24 @@ public class Base64URL
               }
           }
         byte[] decoded;
-        if (encoded.length%4 != 0) decoded = new byte[(encoded.length/4)*3+(encoded.length%4)-1];
-        else decoded = new byte[(encoded.length/4)*3];
+        if (encoded.length % 4 != 0) decoded = new byte[(encoded.length / 4) * 3 + (encoded.length % 4) - 1];
+        else decoded = new byte[(encoded.length / 4) * 3];
         
         // -----:  D E C O D E :-----
         int i = 0, j = 0;
         //decode in groups of four bytes
-        while(j < decoded.length - (decoded.length%3))
+        while(j < decoded.length - (decoded.length % 3))
           {
             decoded[j++] = (byte)((semidecoded[i++] << 2) | (semidecoded[i] >>> 4));
             decoded[j++] = (byte)((semidecoded[i++] << 4) | (semidecoded[i] >>> 2));
             decoded[j++] = (byte)((semidecoded[i++] << 6) | semidecoded[i++]);
           }
         //decode "odd" bytes
-        if(decoded.length%3 == 1)
+        if(decoded.length % 3 == 1)
           {
             decoded[j] = (byte)((semidecoded[i++] << 2) | (semidecoded[i] >>> 4));
           }
-        else if (decoded.length%3 == 2)
+        else if (decoded.length % 3 == 2)
           {
             decoded[j++] = (byte)((semidecoded[i++] << 2) | (semidecoded[i] >>> 4));
             decoded[j] = (byte)((semidecoded[i++] << 4) | (semidecoded[i] >>> 2));
@@ -170,26 +167,27 @@ public class Base64URL
       }
     
       ////////////////////
-     ////   ENCODE   //// Should not cause errors
+     ////   ENCODE   //// Does not throw exceptions
     ////////////////////
 
-    private static byte[] encode(byte[] uncoded)
+    private static byte[] encode (byte[] uncoded)
       {
         //determine length of output
         int i;
+        int modulo3 = uncoded.length % 3;
         //(1)
-        i = (uncoded.length/3)*4;
+        i = (uncoded.length / 3) * 4;
         //(2)
-        if (uncoded.length%3 != 0)
+        if (modulo3 != 0)
           {
-            i += uncoded.length%3 + 1;
+            i += modulo3 + 1;
           }
         //(3)
         byte[] encoded = new byte[i];
         i = 0;
         int j = 0;
         //encode by threes
-        while (j < uncoded.length - uncoded.length%3)
+        while (j < uncoded.length - modulo3)
           {
             encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] >>> 2) & 0x3F]);
             encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0xf)]);
@@ -197,12 +195,12 @@ public class Base64URL
             encoded[i++] = (byte)(MODIFIED_BASE64[uncoded[j++] & 0x3F]);
           }
         //encode  "odd" bytes
-        if (uncoded.length%3 == 1)
+        if (modulo3 == 1)
           {
             encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] >>> 2) & 0x3F]);
             encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] << 4) & 0x30]);
           }
-        else if (uncoded.length%3 == 2)
+        else if (modulo3 == 2)
           {
             encoded[i++] = (byte)(MODIFIED_BASE64[(uncoded[j] >>> 2) & 0x3F]);
             encoded[i++] = (byte)(MODIFIED_BASE64[((uncoded[j++] << 4) & 0x30) | ((uncoded[j] >>> 4) & 0xf)]);
