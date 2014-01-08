@@ -4,6 +4,7 @@
 
   <property name="temp_dir" location=".tmp" />
   <property name="src_dir" value="src/" />
+  <property name="ant_dir" value="src/antsupport/" />
   <property name="namespace" value="namespace.js" />
   <property name="runfile" value="${temp_dir}/runthis.js/" />
   
@@ -33,9 +34,8 @@
        eof="remove"
        includes="**/*.js"/>
     <mkdir dir="${temp_dir}" />
-    <copy tofile="${runfile}" file="${src_dir}/antsupport/antsupport.js"/>
     <concat destfile="${runfile}" append="true">
-       <fileset dir="${src_dir}" excludes="${src_dir}/antsupport/antsupport.js"/>
+       <fileset dir="${ant_dir}"/>
     </concat>
     <script language="javascript"> <![CDATA[
         var path = project.getProperty ("files");
@@ -69,7 +69,7 @@
     <!-- JSON parser testing -->
   <target name="jsonparser">
     <antcall target="test">
-       <param name="files" value="jsonparser/*,base64url/*,jsonparser/test/*"/>
+       <param name="files" value="jsonparser/*,jsonparser/test/*"/>
     </antcall>
   </target>
   
@@ -80,5 +80,12 @@
     </antcall>
   </target>
 
+     <!-- BigInteger testing -->
+  <target name="base64url">
+    <antcall target="test">
+       <param name="files" value="biginteger/*,base64url/*,base64url/test/*"/>
+    </antcall>
+  </target>
+  
 </project>
 

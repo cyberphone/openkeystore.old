@@ -1,0 +1,8 @@
+var iarr = new Uint8Array([2,3,6,80,255,34,7,88,99,100,54,3,253,255,254,0,0,1]);
+for (var i = 0; i < iarr.length; i++)
+console.debug (iarr[i]);
+var b64 = org.webpki.util.Base64URL.encode (iarr);
+console.debug (b64);
+var arr = org.webpki.util.Base64URL.decode (b64);
+for (var i = 0; i < arr.length; i++)
+console.debug (arr[i]);
