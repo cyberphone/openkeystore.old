@@ -71,20 +71,20 @@ function loopa (o)
 loopa (jo1);
 console.debug (org.webpki.json.JSONTypes.DOUBLE.isCompatible(org.webpki.json.JSONTypes.OBJECT));
 
-loopa (new org.webpki.json.JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+loopa (org.webpki.json.JSONParser.parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
         0.00e4 , "bool": true, "arr":[5,7]}}').json);
 
-loopa (new org.webpki.json.JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+loopa (org.webpki.json.JSONParser.parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 0.00e4 , "bool": true, "arr":[5,7]}}').getObject ("bello").json);
 
-console.debug (new org.webpki.json.JSONParser ().parse ('[[{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+console.debug (org.webpki.json.JSONParser.parse ('[[{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 7 , "bool": false, "arr":[3]}}]]').getJSONArrayReader ().getArray ().getObject ().getObject ("bello").getArray ("arr").getInt ());
 
 new org.webpki.json.JSONObjectWriter (new org.webpki.json.JSONObject ());
 var newobjec = new org.webpki.json.JSONObjectWriter ();
 newobjec.setInt ("kirt", 4).setObject ("Obja");
 loopa (newobjec.root);
-new org.webpki.json.JSONObjectWriter (new org.webpki.json.JSONParser ().parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
+new org.webpki.json.JSONObjectWriter (org.webpki.json.JSONParser.parse ('{"hello": "wor\\n\\u0042\\u000Ald!"  , "bello"   : {   "kul":\
 0.00e4 , "bool": true, "arr":[5,7]}}'));
 
 newobjec = new org.webpki.json.JSONObjectWriter ();
@@ -92,7 +92,7 @@ newobjec.setString ("dri", "dra").setInt ("numbah", 6).setArray ("arry").setStri
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.PRETTY_PRINT));
 console.debug (newobjec.serializeJSONObject (org.webpki.json.JSONOutputFormats.CANONICALIZED));
 
-var signature = new org.webpki.json.JSONParser ().parse (
+var signature = org.webpki.json.JSONParser.parse (
 
 '{\
 "Now": "2013-12-23T23:25:10+01:00",\

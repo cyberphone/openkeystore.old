@@ -34,6 +34,9 @@
        includes="**/*.js"/>
     <mkdir dir="${temp_dir}" />
     <copy tofile="${runfile}" file="${src_dir}/antsupport/antsupport.js"/>
+    <concat destfile="${runfile}" append="true">
+       <fileset dir="${src_dir}" excludes="${src_dir}/antsupport/antsupport.js"/>
+    </concat>
     <script language="javascript"> <![CDATA[
         var path = project.getProperty ("files");
 

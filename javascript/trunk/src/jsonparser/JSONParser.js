@@ -38,25 +38,26 @@ org.webpki.json.JSONParser = function ()
     this.DOUBLE_PATTERN          = new RegExp ("^([-+]?(([0-9]*\\.?[0-9]+)|([0-9]+\\.?[0-9]*))([eE][-+]?[0-9]+)?)$");
 };
 
-/* org.webpki.json.JSONObjectReader */org.webpki.json.JSONParser.prototype.parse = function (/* String */json_string)
+/* org.webpki.json.JSONObjectReader */org.webpki.json.JSONParser.parse = function (/* String */json_string)
 {
-    this.json_data = json_string;
-    this.max_length = json_string.length;
-    this.index = 0;
+    var parser = new org.webpki.json.JSONParser ();
+    parser.json_data = json_string;
+    parser.max_length = json_string.length;
+    parser.index = 0;
     var root = new org.webpki.json.JSONObject ();
-    if (this._testNextNonWhiteSpaceChar () == this.LEFT_BRACKET)
+    if (parser._testNextNonWhiteSpaceChar () == parser.LEFT_BRACKET)
     {
-        this._scan ();
-        root._setArray (this._scanArray ("outer array"));
+        parser._scan ();
+        root._setArray (parser._scanArray ("outer array"));
     }
     else
     {
-        this._scanFor (this.LEFT_CURLY_BRACKET);
-        this._scanObject (root);
+        parser._scanFor (parser.LEFT_CURLY_BRACKET);
+        parser._scanObject (root);
     }
-    while (this.index < this.max_length)
+    while (parser.index < parser.max_length)
     {
-        if (!this._isWhiteSpace (this.json_data.charAt (this.index++)))
+        if (!parser._isWhiteSpace (parser.json_data.charAt (parser.index++)))
         {
             org.webpki.json.JSONError._error ("Improperly terminated JSON object");
         }
