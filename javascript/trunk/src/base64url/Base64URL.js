@@ -116,30 +116,34 @@ org.webpki.util.Base64URL =
         }
     }
     
-    var enc_len_mod_4 = Math.floor (encoded.length % 4);
+    var encoded_length_modulo_4 = Math.floor (encoded.length % 4);
     var decoded_length = Math.floor (encoded.length / 4) * 3;
-    if (enc_len_mod_4 != 0)
+    if (encoded_length_modulo_4 != 0)
     {
-        decoded_length += enc_len_mod_4 - 1;
+        decoded_length += encoded_length_modulo_4 - 1;
     }
     var decoded = new Uint8Array (decoded_length);
-    var decoded_length_mod_3 = Math.floor (decoded_length % 3);
+    var decoded_length_modulo_3 = Math.floor (decoded_length % 3);
+    if (decoded_length_modulo_3 == 0 && encoded_length_modulo_4 != 0)
+    {
+        throw "Base64Exception: wrong number of characters";
+    }
 
     // -----:  D E C O D E :-----
     var i = 0, j = 0;
     //decode in groups of four bytes
-    while (j < decoded.length - decoded_length_mod_3)
+    while (j < decoded.length - decoded_length_modulo_3)
     {
         decoded[j++] = (semidecoded[i++] << 2) | (semidecoded[i] >>> 4);
         decoded[j++] = (semidecoded[i++] << 4) | (semidecoded[i] >>> 2);
         decoded[j++] = (semidecoded[i++] << 6) | semidecoded[i++];
     }
     //decode "odd" bytes
-    if (decoded_length_mod_3 == 1)
+    if (decoded_length_modulo_3 == 1)
     {
         decoded[j] = (semidecoded[i++] << 2) | (semidecoded[i] >>> 4);
     }
-    else if (decoded_length_mod_3 == 2)
+    else if (decoded_length_modulo_3 == 2)
     {
         decoded[j++] = (semidecoded[i++] << 2) | (semidecoded[i] >>> 4);
         decoded[j] = (semidecoded[i++] << 4) | (semidecoded[i] >>> 2);

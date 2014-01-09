@@ -21,3 +21,29 @@ for (var times = 0; times < 1000; times++)
 		}
 	}
 }
+var should_fail = true;
+try
+  {
+	var h = org.webpki.util.Base64URL.decode ("a");
+	should_fail = false;
+  }
+catch (err)
+  {
+  }
+if (!should_fail)
+    {
+		throw "Bad";
+	}
+should_fail = true;
+try
+  {
+	var h = org.webpki.util.Base64URL.decode ("i+");
+	should_fail = false;
+  }
+catch (err)
+  {
+  }
+if (!should_fail)
+    {
+		throw "Bad";
+	}
